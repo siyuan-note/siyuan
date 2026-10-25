@@ -24,6 +24,7 @@ const cases = (source, helpers, languages) => {
     const messages = [];
     let sheets = 0;
     let disposed = 0;
+    const treeUpdates = [];
     class Dialog {
         constructor(options) {
             this.options = options;
@@ -52,6 +53,8 @@ const cases = (source, helpers, languages) => {
         setPosition() {}, updateHotkeyTip: value => value, setStorageVal() {}, activeBlur() {},
         bindBottomSheetDialog: () => {sheets++; return () => disposed++;},
         reloadEmoji() {}, addEmoji: value => recent.push(value), showMessage: message => messages.push(message),
+        getRandomEmoji: () => "1f600",
+        updateFileTreeEmoji: (...args) => treeUpdates.push(args), updateOutlineEmoji() {},
         fetchPost: (url, data, callback) => {
             requests.push({url, data});
             callback(failure ? {code: 1} : {code: 0, data: {path: "custom-icon.png"}});
@@ -101,8 +104,33 @@ const cases = (source, helpers, languages) => {
         requests.length = 0;
         selected.length = 0;
     }
-    check.equal(sheets, 2, "both mobile openings use the shared sheet");
-    check.equal(disposed, sheets, "mobile sheet handlers are disposed on cancel and save");
+    for (mobile of [false, true]) {
+        window.siyuan.storage.emojis.currentTab = "emoji";
+        openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
+        dialog = dialogs.at(-1);
+        check.equal(requests.length, 0, "opening document selection does not write an icon");
+        dialog.destroy();
+        check.equal(requests.length, 0, "canceling document selection leaves its icon unset");
+        openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
+        dialog = dialogs.at(-1);
+        dialog.element.querySelector('[data-action="random"]').click();
+        check.equal(requests.length, 1, "an explicit random choice writes once");
+        check.equal(requests[0].url, "/api/attr/setBlockAttrs");
+        check.deepEqual(requests[0].data, {id: "document", attrs: {icon: "1f600"}});
+        check.deepEqual(treeUpdates.at(-1), ["1f600", "document"]);
+        dialog.destroy();
+        requests.length = 0;
+        openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
+        dialog = dialogs.at(-1);
+        dialog.element.querySelector(".emojis__panel").innerHTML = '<button class="emojis__item" data-unicode="1f680">Icon</button>';
+        dialog.element.querySelector(".emojis__item").click();
+        check.equal(requests.length, 1, "a selected emoji writes once");
+        check.deepEqual(requests[0].data, {id: "document", attrs: {icon: "1f680"}});
+        check.equal(dialog.element.isConnected, false, "selecting an emoji closes the picker");
+        requests.length = 0;
+    }
+    check.equal(sheets, 5, "mobile document and database openings use the shared sheet");
+    check.equal(disposed, sheets, "mobile sheet handlers are disposed with each closed panel");
     return "Emoji panel uploads passed";
 };
 
@@ -131,7 +159,7 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(0);
     })().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("database icons offer uploads and apply them only after successful selection on desktop and mobile", {
+    require("node:test").test("icon selection defers document writes and supports database uploads on desktop and mobile", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {

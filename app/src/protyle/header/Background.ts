@@ -4,7 +4,7 @@ import {getRandom} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";
-import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../search/util";
@@ -380,26 +380,13 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "icon" && !protyle.disabled) {
-                    const emoji = getRandomEmoji();
-                    if (emoji) {
-                        updateFileTreeEmoji(emoji, protyle.block.rootID);
-                        updateOutlineEmoji(emoji, protyle.block.rootID);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {"icon": emoji}
-                        });
-                        if (protyle.model) {
-                            protyle.model.parent.setDocIcon(emoji);
-                        }
-                        this.iconElement.classList.remove("fn__none");
-                        const rect = this.iconElement.getBoundingClientRect();
-                        openEmojiPanel(protyle.block.rootID, "doc", {
-                            x: rect.left,
-                            y: rect.bottom,
-                            h: rect.height,
-                            w: rect.width
-                        }, undefined, undefined, {ownerElement: protyle.element});
-                    }
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel(protyle.block.rootID, "doc", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width
+                    }, undefined, undefined, {ownerElement: protyle.element});
                     event.preventDefault();
                     event.stopPropagation();
                     break;

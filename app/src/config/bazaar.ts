@@ -1701,6 +1701,12 @@ type="checkbox">
         }
 
         const dropTarget = mount.element.firstElementChild as HTMLElement;
+        dropTarget.addEventListener("dragstart", (event: DragEvent) => {
+            // Internal images can expose Files too; they are not local package uploads.
+            if (event.target instanceof HTMLImageElement) {
+                event.preventDefault();
+            }
+        });
         const dropElement = dropTarget.querySelector(".config-bazaar__drop");
         let dragDepth = 0;
         const isFileDrag = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes("Files");

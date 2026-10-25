@@ -122,6 +122,23 @@ func TestCheckBoxPreservesSourcesAndNeverLowersFloor(t *testing.T) {
 	}
 }
 
+func TestCheckBoxRejectsRemovedNotebookWithConfirmedFloor(t *testing.T) {
+	readerModeForTest(t, 2)
+	root := t.TempDir()
+	dataDir, confDir := filepath.Join(root, "data"), filepath.Join(root, "conf")
+	writeTestFile(t, confDir, "document-addressing.json", `{"version":1,"notebooks":{"`+testBox+`":2}}`)
+	if err := CheckBox(dataDir, confDir, testBox); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("removed notebook passed the addressing preflight on the local floor alone: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dataDir, testBox)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("preflight recreated removed notebook: %v", err)
+	}
+	writeTestFile(t, dataDir, testBox+"/existing.txt", "x")
+	if err := CheckBox(dataDir, confDir, testBox); err != nil {
+		t.Fatalf("existing notebook with a missing config must retain the confirmed floor: %v", err)
+	}
+}
+
 func TestLegacyReaderDoesNotMigrateData(t *testing.T) {
 	readerModeForTest(t, 1)
 	root := t.TempDir()

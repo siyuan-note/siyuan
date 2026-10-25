@@ -278,10 +278,20 @@ func RemoveBox(boxID string) (err error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
 	}
-	addressingErr := filesys.CheckDocumentAddressing(boxID)
-	unsupportedAddressing := errors.Is(addressingErr, documentaddressing.ErrUnsupported)
-	if addressingErr != nil && !unsupportedAddressing {
-		return addressingErr
+	localPath := filepath.Join(util.DataDir, boxID)
+	_, statErr := os.Lstat(localPath)
+	localExists := !os.IsNotExist(statErr)
+	if statErr != nil && localExists {
+		return statErr
+	}
+	unsupportedAddressing := false
+	// 目录已删除时只清理运行时状态，不用本机下界记录重新创建笔记本。
+	if localExists {
+		addressingErr := filesys.CheckDocumentAddressing(boxID)
+		unsupportedAddressing = errors.Is(addressingErr, documentaddressing.ErrUnsupported)
+		if addressingErr != nil && !unsupportedAddressing {
+			return addressingErr
+		}
 	}
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
@@ -301,8 +311,7 @@ func RemoveBox(boxID string) (err error) {
 		return fmt.Errorf("query database-bound blocks in notebook [%s] failed: %w", boxID, err)
 	}
 	isUserGuide := IsUserGuide(boxID)
-	localPath := filepath.Join(util.DataDir, boxID)
-	if !filelock.IsExist(localPath) {
+	if !localExists {
 		removeHPathRefreshBox(boxID)
 		forgetRuntimeNormalBox(boxID)
 		removeMasterPasswordMigrationBox(boxID)
@@ -525,7 +534,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 }
 
 func mountBox(boxID string) (alreadyMount bool, err error) {
-	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+	if err = checkMountDocumentAddressing(boxID); err != nil {
 		return
 	}
 	confFileTreeSnapshot := Conf.LoadFileTree()
@@ -563,6 +572,9 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
+			return
+		}
+		if err = filesys.CheckDocumentAddressing(boxID); err != nil {
 			return
 		}
 
@@ -644,6 +656,22 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 }
 
 var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"}
+
+func checkMountDocumentAddressing(boxID string) error {
+	if !IsUserGuide(boxID) {
+		return filesys.CheckDocumentAddressing(boxID)
+	}
+	// 用户显式重开已删除的指南时，先校验内置副本及本机能力下界，复制后再迁移。
+	// 已存在的指南仍须先通过源数据检查，不能借恢复流程覆盖不兼容或损坏的数据。
+	if _, err := os.Lstat(filepath.Join(util.DataDir, boxID)); err == nil {
+		if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+			return err
+		}
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	return documentaddressing.CheckImport(util.DataDir, util.ConfDir, boxID, filepath.Join(util.WorkingDir, "guide", boxID))
+}
 
 func IsUserGuide(boxID string) bool {
 	return slices.Contains(userGuideIDs, boxID)

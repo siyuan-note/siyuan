@@ -379,7 +379,7 @@ Administrator responses also include the optional read-only `documentCapabilitie
 
 ### Create a document with Markdown
 
-This legacy name-path endpoint is available only in compatibility mode. In ordinary builds, notebooks migrate automatically to structured-title mode by default and this endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook, even with ordinary titles or `parentID`. Use `/api/filetree/createDocByParent` with a separate parent identity and title. The examples below describe compatibility-mode behavior.
+Legacy string creation checks every parent prefix before writing. Slash or empty-title ancestors return `code: -1` with `data.reason: "pathAmbiguous"`. Multiple clean parents require a valid matching `parentID`; otherwise they also return `pathAmbiguous`. Unready metadata returns `indexUnavailable`. Prefer `/api/filetree/createDocByParent` with a separate parent identity and title.
 
 * `/api/filetree/createDocWithMd`
 * Parameters
@@ -763,7 +763,7 @@ Move documents by `id`:
 
 ### Get IDs based on human-readable path
 
-In ordinary builds, notebooks migrate automatically to structured-title mode by default and this legacy endpoint returns `code: -1`, `data: {reason: "legacyPathUnsupported"}` for the entire notebook. Use known document IDs directly, or `/api/filetree/resolveDocPath` with explicit title segments. Displayed paths cannot distinguish a single title `A/B` from two levels `A`, `B`. The example below applies to compatibility mode.
+Legacy lookup checks each candidate ancestor chain. It returns all clean matches, `pathAmbiguous` for mixed clean and slash/empty-title candidates, `legacyPathUnsupported` for unsupported candidates only, and an empty array for no matches. Unready or inconsistent metadata returns `indexUnavailable`. Error candidate lists are `cleanIDs` and `unsupportedIDs` and retain access filtering. Prefer `/api/filetree/resolveDocPath` with explicit title segments.
 
 * `/api/filetree/getIDsByHPath`
 * Parameters

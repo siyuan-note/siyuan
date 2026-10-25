@@ -199,7 +199,7 @@ type ResolvedDocumentPathData struct {
 }
 
 type DocumentAddressingFailure struct {
-	Reason string `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|legacyPathUnsupported|indexUnavailable|unsupportedTitleFormat|targetModeUnsupported|modeConflict|writeFailed"`
+	Reason string `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|legacyPathUnsupported|pathAmbiguous|indexUnavailable|unsupportedTitleFormat|targetModeUnsupported|modeConflict|writeFailed"`
 }
 
 type DocumentPathsResult struct {

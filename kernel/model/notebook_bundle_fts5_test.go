@@ -70,7 +70,7 @@ func TestImportNotebooksSYWithAddressingFloor(t *testing.T) {
 			t.Fatal("import reused a source notebook identity")
 		}
 		root := filepath.Join(util.DataDir, boxID)
-		if err = documentaddressing.CheckSource(boxID, root); err != nil {
+		if err = checkImportedDocumentAddressing(root); err != nil {
 			t.Fatal("imported addressing floor does not match the new notebook", err)
 		}
 		entries, readErr := os.ReadDir(root)

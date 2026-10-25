@@ -78,33 +78,8 @@ func documentAddressingDataPaths(absPath string) ([]string, error) {
 	return ret, nil
 }
 
-// 本机能力下界只能通过专用合并写入，原始文件接口不能覆盖、移动或删除它及其父目录。
-func checkDocumentAddressingLocalFile(absPath string, ancestors bool) error {
-	confDir := util.ConfDir
-	if confDir == "" && filepath.IsAbs(util.DataDir) {
-		confDir = filepath.Join(filepath.Dir(util.DataDir), "conf")
-	}
-	if !filepath.IsAbs(confDir) {
-		return nil
-	}
-	name := util.NormalizeAndResolve(util.ResolveLongestExistingParent(absPath))
-	for _, relative := range []string{"document-addressing.json", "document-addressing-recovery"} {
-		record := util.NormalizeAndResolve(util.ResolveLongestExistingParent(filepath.Join(confDir, relative)))
-		if _, inside := dataRelativePath(record, name); inside {
-			return documentaddressing.ErrInvalid
-		}
-		if _, ancestor := dataRelativePath(name, record); ancestors && ancestor {
-			return documentaddressing.ErrInvalid
-		}
-	}
-	return nil
-}
-
 // CheckDocumentAddressingFileWrite 在创建目录、覆盖配置或调整时间之前检查待写内容。
 func CheckDocumentAddressingFileWrite(absPath string, data []byte, directory bool) error {
-	if err := checkDocumentAddressingLocalFile(absPath, false); err != nil {
-		return err
-	}
 	if err := CheckDocumentAddressingPath(absPath); err != nil {
 		return err
 	}
@@ -115,8 +90,7 @@ func CheckDocumentAddressingFileWrite(absPath string, data []byte, directory boo
 	if err != nil || len(paths) == 0 {
 		return err
 	}
-	if err = documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
-		func(string) ([]byte, error) { return data, nil }); err != nil {
+	if err = documentaddressing.CheckPaths(paths, nil); err != nil {
 		return err
 	}
 	if isDocumentAddressingSource(paths) {
@@ -157,9 +131,6 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 				return relErr
 			}
 			dest := filepath.Join(destinations[i], rel)
-			if err := checkDocumentAddressingLocalFile(dest, false); err != nil {
-				return err
-			}
 			if entry.IsDir() {
 				return CheckDocumentAddressingPath(dest)
 			}
@@ -190,8 +161,7 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 	for path := range upserts {
 		paths = append(paths, path)
 	}
-	if err := documentaddressing.CheckBatch(util.DataDir, util.ConfDir, paths, nil,
-		func(name string) ([]byte, error) { return filelock.ReadFile(upserts[name]) }); err != nil {
+	if err := documentaddressing.CheckPaths(paths, nil); err != nil {
 		return err
 	}
 	for _, document := range documents {
@@ -206,11 +176,8 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 	return nil
 }
 
-// CheckDocumentAddressingFileRemoval 保留整本删除语义；部分删除不能抹去能力记录。
+// CheckDocumentAddressingFileRemoval 保留整本删除语义及规范路径校验。
 func CheckDocumentAddressingFileRemoval(absPath string) error {
-	if err := checkDocumentAddressingLocalFile(absPath, true); err != nil {
-		return err
-	}
 	var removes []string
 	err := filepath.WalkDir(absPath, func(name string, entry os.DirEntry, err error) error {
 		if errors.Is(err, os.ErrNotExist) {
@@ -229,5 +196,5 @@ func CheckDocumentAddressingFileRemoval(absPath string) error {
 		}
 		return CheckDocumentAddressingPath(absPath)
 	}
-	return documentaddressing.CheckBatch(util.DataDir, util.ConfDir, nil, removes, nil)
+	return documentaddressing.CheckPaths(nil, removes)
 }

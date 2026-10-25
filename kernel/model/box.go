@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -40,7 +41,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -190,9 +190,9 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
 				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-				// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
+				// 检查备份及加密身份，保留损坏配置中的恢复材料，不能按普通配置删除。
 				backup, backupErr := readNotebookCryptBackup(id)
-				if backupErr != nil || backup != nil {
+				if backupErr != nil || backup != nil || IsEncryptedBox(id) {
 					markRuntimeEncryptedBox(id)
 					continue
 				}
@@ -359,12 +359,14 @@ func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
 	if err != nil {
 		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
 	}
-	mode, err := filesys.DocumentAddressingMode(box.ID)
-	if err != nil {
-		return err
-	}
-	persisted.DocumentAddressingVersion = max(mode, documentaddressing.DefaultMode())
 	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
+	if err == nil {
+		var fields map[string]json.RawMessage
+		if err = json.Unmarshal(newData, &fields); err == nil {
+			fields["documentAddressingVersion"] = json.RawMessage("2")
+			newData, err = json.MarshalIndent(fields, "", "  ")
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
 	}

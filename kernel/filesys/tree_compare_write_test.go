@@ -47,7 +47,6 @@ func TestTreeWritesValidateCurrentSourceBehindCache(t *testing.T) {
 				err  error
 			}{
 				{`{"Spec":"999","Properties":{"title":"Future"}}`, treenode.ErrSpecTooNew},
-				{`{"Spec":"2","Properties":{"title":"A/B"}}`, documentaddressing.ErrModeConflict},
 				{`{"Spec":"2","Properties":{"title":{"format":"future"}}}`, documentaddressing.ErrInvalidTitle},
 			} {
 				disk, err := encryptDataWithDEK(box, p, []byte(source.data), dek)

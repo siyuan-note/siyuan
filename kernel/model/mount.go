@@ -284,15 +284,6 @@ func RemoveBox(boxID string) (err error) {
 	if statErr != nil && localExists {
 		return statErr
 	}
-	unsupportedAddressing := false
-	// 目录已删除时只清理运行时状态，不用本机下界记录重新创建笔记本。
-	if localExists {
-		addressingErr := filesys.CheckDocumentAddressing(boxID)
-		unsupportedAddressing = errors.Is(addressingErr, documentaddressing.ErrUnsupported)
-		if addressingErr != nil && !unsupportedAddressing {
-			return addressingErr
-		}
-	}
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
@@ -347,10 +338,8 @@ func RemoveBox(boxID string) (err error) {
 	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
-	if !unsupportedAddressing {
-		if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
-			return
-		}
+	if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+		return
 	}
 	if !isEncrypted {
 		unmount0(boxID)
@@ -374,12 +363,7 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
-		if !isEncrypted && unsupportedAddressing {
-			if err = backupUnsupportedNotebookAttributeViews(historyDir); err != nil {
-				return
-			}
-		}
-		if !isEncrypted && !unsupportedAddressing {
+		if !isEncrypted {
 			pages, walkErr := pagedPathsWithError(localPath, 32)
 			if walkErr != nil {
 				return walkErr
@@ -387,6 +371,12 @@ func RemoveBox(boxID string) (err error) {
 			for _, paths := range pages {
 				for _, filename := range paths {
 					tree, loadErr := loadTree(filename, util.NewLute())
+					if errors.Is(loadErr, treenode.ErrSpecTooNew) || errors.Is(loadErr, documentaddressing.ErrInvalidTitle) {
+						if err = backupUnsupportedNotebookAttributeViews(historyDir); err != nil {
+							return err
+						}
+						continue
+					}
 					if loadErr != nil {
 						return loadErr
 					}
@@ -658,19 +648,18 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"}
 
 func checkMountDocumentAddressing(boxID string) error {
-	if !IsUserGuide(boxID) {
-		return filesys.CheckDocumentAddressing(boxID)
-	}
-	// 用户显式重开已删除的指南时，先校验内置副本及本机能力下界，复制后再迁移。
-	// 已存在的指南仍须先通过源数据检查，不能借恢复流程覆盖不兼容或损坏的数据。
-	if _, err := os.Lstat(filepath.Join(util.DataDir, boxID)); err == nil {
-		if err = filesys.CheckDocumentAddressing(boxID); err != nil {
-			return err
-		}
-	} else if !os.IsNotExist(err) {
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
 		return err
 	}
-	return documentaddressing.CheckImport(util.DataDir, util.ConfDir, boxID, filepath.Join(util.WorkingDir, "guide", boxID))
+	if IsUserGuide(boxID) {
+		source := filepath.Join(util.WorkingDir, "guide", boxID)
+		if _, err := os.Stat(source); err == nil {
+			return checkDocumentAddressingCopy(source, boxID)
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
 }
 
 func IsUserGuide(boxID string) bool {

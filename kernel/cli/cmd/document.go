@@ -297,18 +297,19 @@ var documentInfoCmd = &cobra.Command{
 }
 
 func resolvePath(boxID, userPath, hpath string) (string, error) {
-	if userPath == "" && hpath != "" {
-		if err := model.CheckLegacyDocumentPath(boxID); err != nil {
-			return "", err
-		}
-	}
-	return resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
-		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
-		if nil == bt {
+	var lookupErr error
+	result, err := resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
+		var bt *treenode.BlockTree
+		bt, lookupErr = model.ResolveLegacyDocumentPath(boxID, targetHPath, false)
+		if lookupErr != nil || bt == nil {
 			return "", false
 		}
 		return bt.Path, true
 	})
+	if lookupErr != nil {
+		return "", lookupErr
+	}
+	return result, err
 }
 
 func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, bool)) (string, error) {
@@ -330,18 +331,19 @@ func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, 
 }
 
 func resolveDocumentMovePath(boxID, userPath, hpath, sourceTitle string) (string, error) {
-	if userPath == "" && hpath != "" {
-		if err := model.CheckLegacyDocumentPath(boxID); err != nil {
-			return "", err
-		}
-	}
-	return resolveDocumentMovePathWithLookup(userPath, hpath, sourceTitle, func(targetHPath string) (string, bool) {
-		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
-		if nil == bt {
+	var lookupErr error
+	result, err := resolveDocumentMovePathWithLookup(userPath, hpath, sourceTitle, func(targetHPath string) (string, bool) {
+		var bt *treenode.BlockTree
+		bt, lookupErr = model.ResolveLegacyDocumentPath(boxID, targetHPath, true)
+		if lookupErr != nil || bt == nil {
 			return "", false
 		}
 		return bt.Path, true
 	})
+	if lookupErr != nil {
+		return "", lookupErr
+	}
+	return result, err
 }
 
 func resolveDocumentMovePathWithLookup(

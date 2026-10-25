@@ -17,10 +17,8 @@ import (
 func TestAPIContractNotebookConfConversion(t *testing.T) {
 	for _, bytes := range [][]byte{nil, {}, {0, 1, 254, 255}} {
 		value := conf.NewBoxConf()
-		value.DocumentAddressingVersion = 2
 		value.BoxCrypt = &conf.BoxEncryption{Spec: 2, WrappedDEK: bytes, WrapNonce: bytes, Metadata: bytes, CreatedAt: 1234567890}
 		publicFields := *value
-		publicFields.DocumentAddressingVersion = 0 // 内部格式标记仅通过只读能力声明，不作为可写配置返回。
 		before, err := json.Marshal(&publicFields)
 		if err != nil {
 			t.Fatal(err)
@@ -32,7 +30,6 @@ func TestAPIContractNotebookConfConversion(t *testing.T) {
 	}
 	value := conf.NewBoxConf()
 	publicFields := *value
-	publicFields.DocumentAddressingVersion = 0
 	before, _ := json.Marshal(&publicFields)
 	after, err := json.Marshal(notebookConfContract(value))
 	if err != nil || string(before) != string(after) {

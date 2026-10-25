@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -58,7 +57,7 @@ func documentParentLocation(boxID string, id *string) (*string, error) {
 
 // renderDocumentTarget 只对旧模板拆分渲染结果；版本 2 的每一段在同一时间快照独立求值。
 func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanRequest) (ret renderedDocumentTarget, err error) {
-	ret.missing, ret.legacy = "create", target.Structured == nil && documentaddressing.DefaultMode() == 1
+	ret.missing, ret.legacy = "create", false
 	if request.Now.IsZero() {
 		request.Now = time.Now()
 	}

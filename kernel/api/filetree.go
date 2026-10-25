@@ -32,7 +32,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -460,16 +459,19 @@ func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalP
 		return contractFailure[apicontract.LegacyPathIDsResult](ret)
 	}
 
-	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
-		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
-			return apicontract.GetIDsByHPath.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathIDs())
-		}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		return apicontract.Failure[apicontract.LegacyPathIDsResult](-1, err.Error())
 	}
 
 	p := *request.Path
 	ids, err := model.GetIDsByHPath(p, notebook)
 	if err != nil {
+		if failure, ok := model.LegacyPathFailure(err); ok {
+			data := apicontract.LegacyPathUnsupported{Reason: failure.Reason,
+				CleanIDs:       filterFileTreeBlockIDsByPublishDiscoverability(c, failure.CleanIDs, notebook),
+				UnsupportedIDs: filterFileTreeBlockIDsByPublishDiscoverability(c, failure.UnsupportedIDs, notebook)}
+			return apicontract.GetIDsByHPath.FailureWithData(-1, err.Error(), apicontract.NewLegacyPathIDsFailure(data))
+		}
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.LegacyPathIDsResult](ret)
@@ -837,10 +839,7 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
 	}
 
-	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
-		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
-			return apicontract.CreateDocWithMd.FailureWithData(-1, err.Error(), apicontract.UnsupportedLegacyPathDocument())
-		}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		return apicontract.Failure[apicontract.LegacyPathDocumentResult](-1, err.Error())
 	}
 
@@ -868,6 +867,12 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 	context["titleEmpty"] = request.TitleEmpty
 	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath, clippingHref, context)
 	if err != nil {
+		if failure, ok := model.LegacyPathFailure(err); ok {
+			data := apicontract.LegacyPathUnsupported{Reason: failure.Reason,
+				CleanIDs:       filterFileTreeBlockIDsByPublishDiscoverability(c, failure.CleanIDs, notebook),
+				UnsupportedIDs: filterFileTreeBlockIDsByPublishDiscoverability(c, failure.UnsupportedIDs, notebook)}
+			return apicontract.CreateDocWithMd.FailureWithData(-1, err.Error(), apicontract.NewLegacyPathDocumentFailure(data))
+		}
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.LegacyPathDocumentResult](ret)

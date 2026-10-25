@@ -379,7 +379,7 @@ if (response.code === 0 && response.data) {
 
 ### 通过 Markdown 创建文档
 
-这是仅在兼容模式可用的旧名称路径接口。普通构建默认自动迁移笔记本到结构化标题模式，该接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`，即使标题普通或提供了 `parentID`。请改用 `/api/filetree/createDocByParent`，分别传入父身份和标题。下面的示例描述兼容模式行为。
+旧字符串创建接口在写入前检查全部父路径前缀。祖先含斜杠或空标题时返回 `code: -1`、`data.reason: "pathAmbiguous"`；多个干净父级需要有效且匹配的 `parentID`，否则同样报歧义。元数据未就绪返回 `indexUnavailable`。建议使用 `/api/filetree/createDocByParent`，分别传递父身份和标题。
 
 * `/api/filetree/createDocWithMd`
 * 参数
@@ -763,7 +763,7 @@ if (response.code === 0 && response.data) {
 
 ### 根据人类可读路径获取 IDs
 
-普通构建默认自动迁移笔记本到结构化标题模式，该旧接口对整个笔记本返回 `code: -1`、`data: {reason: "legacyPathUnsupported"}`。已知文档 ID 时直接使用；未知位置请通过 `/api/filetree/resolveDocPath` 传入明确的标题段。显示路径无法区分单标题 `A/B` 与两级 `A`、`B`。下面的示例适用于兼容模式。
+旧查询接口按每个候选的真实祖先链判断。仅有干净候选时返回全部 ID；干净与斜杠或空标题候选并存时返回 `pathAmbiguous`；仅有不兼容候选时返回 `legacyPathUnsupported`；无候选时返回空数组。元数据未就绪或不一致返回 `indexUnavailable`。错误候选字段为 `cleanIDs` 和 `unsupportedIDs`，仍受访问过滤保护。建议使用 `/api/filetree/resolveDocPath`，传入独立标题段。
 
 * `/api/filetree/getIDsByHPath`
 * 参数

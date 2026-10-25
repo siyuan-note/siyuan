@@ -2866,10 +2866,6 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 			logging.LogErrorf("write export notebook conf failed: %s", writeErr)
 			return
 		}
-		if copyErr := copyExportedDocumentAddressing(boxID, exportDir); copyErr != nil {
-			logging.LogErrorf("copy export notebook addressing metadata failed: %s", copyErr)
-			return
-		}
 		sourceBoxDocMetaPath := boxDocMetaPath(boxID)
 		if filelock.IsExist(sourceBoxDocMetaPath) {
 			if copyErr := filelock.Copy(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {

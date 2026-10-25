@@ -1373,9 +1373,10 @@ func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 }
 
 func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool, clippingHref string, arg map[string]any) (retID string, err error) {
-	if err = CheckLegacyDocumentPath(boxID); err != nil {
+	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
 		return
 	}
+	defer ReleaseEncryptedBoxOperation(boxID)
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1413,14 +1414,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	if id == "" {
 		id = ast.NewNodeID()
 	}
-	retID, err = createDocsByHPath0(box.ID, hPath, dom, parentID, id, titleEmpty,
-		func(boxID, p, title, content string, empty bool) (*parse.Tree, error) {
-			var attrs map[string]string
-			if tags != "" && strings.TrimSuffix(path.Base(p), ".sy") == id {
-				attrs = map[string]string{"tags": tags}
-			}
-			return createDoc0(boxID, p, title, content, empty, true, attrs)
-		})
+	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, map[string]string{"tags": tags})
 	if err != nil {
 		return
 	}
@@ -1627,29 +1621,38 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	return
 }
 
-func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
-	if err = CheckLegacyDocumentPath(boxID); err != nil {
-		return
+// GetIDsByHPath returns every clean exact match and rejects slash/empty-title collisions.
+func GetIDsByHPath(hpath, boxID string) ([]string, error) {
+	if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+		return nil, err
 	}
-	ret = []string{}
-	if IsBoxDocEnabled() && "/" == hpath {
-		if box := Conf.Box(boxID); nil != box {
-			return []string{box.ID}, nil
+	defer ReleaseEncryptedBoxOperation(boxID)
+	hpathRefresh.Lock()
+	defer hpathRefresh.Unlock()
+	hpaths := []string{hpath}
+	if IsBoxDocEnabled() && hpath == "/" {
+		hpaths = nil
+	}
+	groups, err := legacyDocumentCandidates(boxID, hpaths)
+	if err != nil {
+		return nil, err
+	}
+	if IsBoxDocEnabled() && hpath == "/" {
+		return []string{boxID}, nil
+	}
+	candidates := groups[hpath]
+	if len(candidates.Unsupported) > 0 {
+		reason := "legacyPathUnsupported"
+		if len(candidates.Clean) > 0 {
+			reason = "pathAmbiguous"
 		}
+		return nil, legacyDocumentPathError(reason, candidates)
 	}
-	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)
-	if 1 > len(roots) {
-		return
+	ret := []string{}
+	for _, candidate := range candidates.Clean {
+		ret = append(ret, candidate.ID)
 	}
-
-	for _, root := range roots {
-		ret = append(ret, root.ID)
-	}
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	if 1 > len(ret) {
-		ret = []string{}
-	}
-	return
+	return ret, nil
 }
 
 type moveDocsRefreshKey struct {

@@ -40,16 +40,13 @@ type documentTitleSpecProperties struct {
 }
 
 func (properties *documentTitleSpecProperties) UnmarshalJSON(data []byte) error {
-	err := documentaddressing.CheckTitleProperties(data, 1)
-	if errors.Is(err, documentaddressing.ErrModeConflict) {
-		properties.requiresStructured = true
-		return nil
-	}
+	requiresSpec, err := documentaddressing.CheckTitleProperties(data)
+	properties.requiresStructured = properties.requiresStructured || requiresSpec
 	return err
 }
 
 // checkDocumentSourceJSON 保留重复字段中遇到的兼容错误，在容错解析前确定标题和源版本能否处理。
-func checkDocumentSourceJSON(data []byte, mode int) (string, error) {
+func checkDocumentSourceJSON(data []byte) (string, error) {
 	if !bytes.HasPrefix(bytes.TrimSpace(data), []byte("{")) {
 		return "", errors.New("invalid document source")
 	}
@@ -57,12 +54,8 @@ func checkDocumentSourceJSON(data []byte, mode int) (string, error) {
 		Spec       documentSourceSpec
 		Properties documentSourceProperties
 	}
-	root.Properties.mode = mode
 	if err := json.Unmarshal(data, &root); err != nil {
 		return "", err
-	}
-	if errors.Is(root.Properties.err, documentaddressing.ErrModeConflict) {
-		return "", root.Properties.err
 	}
 	if root.Spec.err != nil {
 		return "", root.Spec.err
@@ -91,13 +84,12 @@ func (spec *documentSourceSpec) UnmarshalJSON(data []byte) error {
 }
 
 type documentSourceProperties struct {
-	err  error
-	mode int
+	err error
 }
 
 func (properties *documentSourceProperties) UnmarshalJSON(data []byte) error {
-	if err := documentaddressing.CheckTitleProperties(data, properties.mode); err != nil {
-		if properties.err == nil || errors.Is(err, documentaddressing.ErrModeConflict) {
+	if _, err := documentaddressing.CheckTitleProperties(data); err != nil {
+		if properties.err == nil {
 			properties.err = err
 		}
 	}

@@ -23956,6 +23956,7 @@
             "planChanged",
             "documentIDConflict",
             "legacyPathUnsupported",
+            "pathAmbiguous",
             "indexUnavailable",
             "unsupportedTitleFormat",
             "targetModeUnsupported",
@@ -32208,11 +32209,25 @@
     "LegacyPathUnsupported": {
       "type": "object",
       "properties": {
+        "cleanIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "reason": {
           "type": "string",
           "enum": [
-            "legacyPathUnsupported"
+            "legacyPathUnsupported",
+            "pathAmbiguous",
+            "indexUnavailable"
           ]
+        },
+        "unsupportedIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

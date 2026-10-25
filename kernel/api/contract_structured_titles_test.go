@@ -19,12 +19,12 @@ func TestStructuredTitlesAPIContracts(t *testing.T) {
 	}
 	for _, path := range []string{"/", "/Plain", "/A/B"} {
 		data := documentPathAPIRequest(t, "/api/filetree/getIDsByHPath", getIDsByHPath, map[string]string{"notebook": box, "path": path})
-		if !bytes.Contains(data, []byte(`"reason":"legacyPathUnsupported"`)) {
+		if !bytes.Contains(data, []byte(`"reason":"indexUnavailable"`)) {
 			t.Fatal(string(data))
 		}
 		data = documentPathAPIRequest(t, "/api/filetree/createDocWithMd", createDocWithMd,
 			map[string]string{"notebook": box, "path": path, "markdown": "", "parentID": box})
-		if !bytes.Contains(data, []byte(`"reason":"legacyPathUnsupported"`)) {
+		if !bytes.Contains(data, []byte(`"reason":"indexUnavailable"`)) {
 			t.Fatal(string(data))
 		}
 	}

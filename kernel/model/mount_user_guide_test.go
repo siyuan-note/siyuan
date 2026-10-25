@@ -15,6 +15,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -73,8 +74,8 @@ func TestMountUserGuideAfterDeletion(t *testing.T) {
 			}
 			data, err = os.ReadFile(filepath.Join(util.DataDir, boxID, documentaddressing.ConfigPath))
 			var fields map[string]any
-			if err != nil || json.Unmarshal(data, &fields) != nil || fields["documentAddressingVersion"] != float64(2) {
-				t.Fatalf("restored guide was not migrated: %s, %v", data, err)
+			if err != nil || json.Unmarshal(data, &fields) != nil || fields["documentAddressingVersion"] != nil && fields["documentAddressingVersion"] != float64(2) {
+				t.Fatalf("restored guide configuration is invalid: %s, %v", data, err)
 			}
 			if Conf.Box(boxID) == nil {
 				t.Fatal("restored guide was not mounted")
@@ -83,10 +84,10 @@ func TestMountUserGuideAfterDeletion(t *testing.T) {
 				task.ExecTaskJob()
 			}
 			// 来源不兼容时，无论本地副本是否存在，都不能覆盖或创建副本。
-			if err := os.WriteFile(config, []byte(`{"documentAddressingVersion":99}`), 0644); err != nil {
+			if err := os.WriteFile(filepath.Join(source, "20261026000000-future1.sy"), []byte(`{"Spec":"999","Properties":{"title":"Future"}}`), 0644); err != nil {
 				t.Fatal(err)
 			}
-			if _, err := Mount(boxID); !errors.Is(err, documentaddressing.ErrUnsupported) {
+			if _, err := Mount(boxID); !errors.Is(err, treenode.ErrSpecTooNew) {
 				t.Fatalf("incompatible bundled guide was accepted: %v", err)
 			}
 			if actual, err := os.ReadFile(filepath.Join(util.DataDir, boxID, documentaddressing.ConfigPath)); err != nil || string(actual) != string(data) {
@@ -95,7 +96,7 @@ func TestMountUserGuideAfterDeletion(t *testing.T) {
 			if err := RemoveBox(boxID); err != nil {
 				t.Fatal(err)
 			}
-			if _, err := Mount(boxID); !errors.Is(err, documentaddressing.ErrUnsupported) {
+			if _, err := Mount(boxID); !errors.Is(err, treenode.ErrSpecTooNew) {
 				t.Fatalf("missing guide bypassed source check: %v", err)
 			}
 			if _, err := os.Stat(filepath.Join(util.DataDir, boxID)); !errors.Is(err, os.ErrNotExist) {
@@ -118,7 +119,7 @@ func TestMountUserGuideAfterDeletion(t *testing.T) {
 	if err := removeBoxDir(ordinaryDir); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := Mount(ordinaryBox); !errors.Is(err, os.ErrNotExist) {
+	if _, err := Mount(ordinaryBox); err == nil {
 		t.Fatalf("ordinary notebook bypassed missing-source check: %v", err)
 	}
 	if err := RemoveBox(ordinaryBox); err != nil {

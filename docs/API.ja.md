@@ -374,7 +374,7 @@ if (response.code === 0 && response.data) {
 
 ### Markdownでドキュメントを作成
 
-この旧名称パス API は互換モードでのみ利用できます。通常のビルドでは既定でノートブックが構造化タイトルモードに自動移行され、通常のタイトルや `parentID` を指定した場合も、ノートブック全体で `code: -1`、`data: {reason: "legacyPathUnsupported"}` を返します。`/api/filetree/createDocByParent` に親の識別情報とタイトルを別々に渡してください。以下の例は互換モードの動作を示します。
+この旧文字列作成 API は書き込み前にすべての親パスを検証します。祖先のタイトルにスラッシュや空のタイトルがある場合、`code: -1` と `data.reason: "pathAmbiguous"` を返します。同名の有効な親が複数ある場合は、一致する有効な `parentID` が必要です。メタデータが未準備の場合は `indexUnavailable` を返します。親 ID とタイトルを分けて渡す `/api/filetree/createDocByParent` を推奨します。
 
 * `/api/filetree/createDocWithMd`
 * パラメータ
@@ -758,7 +758,7 @@ if (response.code === 0 && response.data) {
 
 ### 人間が読めるパスからIDを取得
 
-通常のビルドでは既定でノートブックが構造化タイトルモードに自動移行され、この旧 API はノートブック全体で `code: -1`、`data: {reason: "legacyPathUnsupported"}` を返します。既知のドキュメント ID はそのまま使用し、不明な場所は `/api/filetree/resolveDocPath` にタイトルの配列を渡して解決してください。表示パスだけでは、単一のタイトル `A/B` と 2 階層の `A`、`B` を区別できません。以下の例は互換モード用です。
+この旧検索 API は各候補の実際の祖先を検証します。有効な候補だけならすべての ID を返し、有効な候補とスラッシュや空タイトルを含む候補が混在すると `pathAmbiguous`、後者だけなら `legacyPathUnsupported`、候補がなければ空配列を返します。メタデータが未準備または不整合の場合は `indexUnavailable` です。エラーの候補フィールド `cleanIDs` と `unsupportedIDs` にもアクセス制限を適用します。タイトルを独立した配列で指定する `/api/filetree/resolveDocPath` を推奨します。
 
 * `/api/filetree/getIDsByHPath`
 * パラメータ

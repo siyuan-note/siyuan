@@ -29,7 +29,6 @@ import (
 	"image/png"
 	"io/fs"
 	"maps"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -53,7 +52,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -576,9 +574,6 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		}
 	} else {
 		createdBoxID = boxID
-	}
-	if err = prepareImportedDocumentAddressing(unzipRootPath, boxID, createNotebook); err != nil {
-		return
 	}
 	encryptedTarget := IsEncryptedBox(boxID)
 	toPath = normalizeBoxDocTarget(boxID, toPath)
@@ -1637,11 +1632,6 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
-			if documentaddressing.DefaultMode() == 1 {
-				if unescapedTitle, unescapeErr := url.PathUnescape(title); unescapeErr == nil {
-					title = unescapedTitle
-				}
-			}
 			parentDisplay := baseHPath
 			if curRelPath != "/" {
 				parentDisplay = appendDocumentHPath(baseHPath, strings.TrimPrefix(path.Dir(externalPath), "/"))
@@ -1794,11 +1784,6 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		}
 		if "" != yfmTitle {
 			title = yfmTitle
-		}
-		if documentaddressing.DefaultMode() == 1 {
-			if unescapedTitle, unescapeErr := url.PathUnescape(title); unescapeErr == nil {
-				title = unescapedTitle
-			}
 		}
 		updated := yfmUpdated
 		fname := path.Base(targetPath)

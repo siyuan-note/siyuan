@@ -1006,7 +1006,7 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
-export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
 
 export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
 
@@ -1490,7 +1490,7 @@ export type LegacyPathDocumentResult = string | LegacyPathUnsupported;
 
 export type LegacyPathIDsResult = Array<string> | null | LegacyPathUnsupported;
 
-export type LegacyPathUnsupported = { "reason": "legacyPathUnsupported"; };
+export type LegacyPathUnsupported = { "cleanIDs"?: Array<string>; "reason": "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable"; "unsupportedIDs"?: Array<string>; };
 
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
@@ -5297,7 +5297,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在写入前检查笔记本寻址模式，不兼容或试图覆盖本机能力下界记录时返回 -1。
+     * 在写入前检查文档源格式及规范路径，预检失败返回 -1。
      * 目标为文档 ID 路径时，未知格式和标题冲突均返回 -1；实际写入在文件锁内重新校验现有源，不规范化内容。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有源的读取和恢复不受此写入检查影响。
      * 工作空间外的加密资源解密导出仍要求既有授权和操作租约。
@@ -5325,10 +5325,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
      * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
-     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     * 原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/globalCopyFiles": {
         request: CopyFilesRequestInput;
@@ -5338,7 +5338,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目录、写入内容及更新时间前校验笔记本寻址模式和待写配置；不兼容时返回 -1。
+     * 在创建目录、写入内容及更新时间前校验文档源格式与规范路径；不兼容时返回 -1。
      * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
      * 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
      * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
@@ -5359,8 +5359,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 对不支持寻址模式的笔记本拒绝部分删除，返回 -1；整本删除保留已确认的本机能力下界。
-     * 不能删除本机 conf/document-addressing.json 或其父目录，既有加密笔记本删除限制不变。
+     * 保留既有敏感路径和加密边界检查；整本删除不读取已撤销的寻址模式记录。
      */
     "/api/file/removeFile": {
         request: RemoveFileRequestInput;
@@ -5370,10 +5369,9 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目标父目录或移动源文件前预检笔记本寻址能力，不支持的模式返回 -1。
+     * 在创建目标父目录或移动源文件前预检文档源格式与规范路径，失败返回 -1。
      * 移入由笔记本及文档 ID 组成的 .sy 路径时检查全部源文档；未知格式或标题冲突返回 -1，保留来源。
      * 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
-     * 不能借重命名覆盖、移动或删除本机 conf/document-addressing.json；既有加密边界不变。
      */
     "/api/file/renameFile": {
         request: RenameFileRequestInput;
@@ -5383,10 +5381,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
      * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
-     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     * 原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/workspaceCopyFiles": {
         request: CopyFilesRequestInput;
@@ -5430,8 +5428,8 @@ export interface APIPOSTRoutes {
      * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
      * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
      * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
-     * 普通构建默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，内部兼容模式 1 仍拒绝 /。
-     * 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
+     * 保留标题中的 /，新写入含斜杠标题使用 Spec 6；普通文档不统一升级规格。
+     * 加密笔记本使用原有认证写入与响应租约；寻址规则不改变密文格式或密钥材料。
      */
     "/api/filetree/createDocByParent": {
         request: CreateDocByParentRequestInput;
@@ -5443,7 +5441,10 @@ export interface APIPOSTRoutes {
     /**
      * 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
      * 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
-     * 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
+     * Every parent prefix is checked before writing; slash/empty-title candidates return pathAmbiguous.
+     * Multiple clean parents also return pathAmbiguous unless a valid matching parentID selects their
+     * real ancestor chain. An ID cannot bypass unsupported candidates. Unready or inconsistent metadata
+     * returns indexUnavailable. Prefer createDocByParent with a separate parent identity and title.
      */
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
@@ -5551,7 +5552,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
     };
     /**
-     * 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+     * queries exact legacy display paths and verifies each candidate's real ancestor chain.
+     * Clean candidates have nonempty titles without ASCII / and no empty-title flag at every level.
+     * Returns every clean ID, an empty array for no matches, pathAmbiguous for mixed candidates,
+     * or legacyPathUnsupported for unsupported candidates only. Error data may include cleanIDs and
+     * unsupportedIDs, filtered by existing access restrictions. Missing, pending, inconsistent or failed
+     * metadata returns indexUnavailable. Prefer resolveDocPath with independent title segments.
      */
     "/api/filetree/getIDsByHPath": {
         request: FileTreeOptionalPathRequestInput;
@@ -5716,7 +5722,7 @@ export interface APIPOSTRoutes {
      * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
      * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
      * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
-     * 索引未就绪返回 indexUnavailable；普通构建默认保留段内 /，内部兼容模式 1 仍遵守原有标题限制。
+     * 索引未就绪返回 indexUnavailable；标题段保留字面 /，不按笔记本选择不同的寻址模式。
      */
     "/api/filetree/resolveDocPath": {
         request: ResolveDocPathRequestInput;
@@ -6234,7 +6240,7 @@ export interface APIPOSTRoutes {
         proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
     /**
-     * 在改密恢复、密钥切换及迁移记录写入前预检全部现存加密笔记本，不支持的寻址模式返回 -1。
+     * 改密恢复和密钥切换保留现存加密笔记本的认证、信封格式及中断恢复检查。
      */
     "/api/notebook/changeMasterPassword": {
         request: ChangeMasterPasswordRequestInput;
@@ -6260,7 +6266,7 @@ export interface APIPOSTRoutes {
     /**
      * 移出已导出的加密笔记本，要求管理员权限并禁止只读模式；saved: true 表示用户确认已保存归档。
      * 提交前重新检查源文件，内容变化需重新导出；重复提交同一归档不会重复移出，未选择的笔记本不受影响。
-     * 移出前重新检查笔记本寻址能力，不支持的模式返回 -1，保留原归档及源目录。
+     * 移出前保留归档及源目录检查，失败时保留原归档和密钥材料。
      */
     "/api/notebook/commitNotebookArchive": {
         request: CommitNotebookArchiveRequestInput;
@@ -6321,12 +6327,11 @@ export interface APIPOSTRoutes {
     /**
      * preserves existing configuration and permission filtering. Administrator
      * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
-     * automatically without a user setting or special build flags. literalSlash requires consistent
-     * mode records and ready indexes. minimumReaderVersion stays null until the minimum compatible
+     * not permission to open a closed or locked notebook. All notebooks use addressing version 2
+     * without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
      * feature release is verified; it neither controls activation nor permits mixing with older clients.
-     * Revision covers configuration, confirmed capability and recovery records, not a document path.
-     * Malformed capability records fail the request; authentication, locking and network failures must
+     * Revision identifies the fixed capability declaration, not a document path or retired record.
+     * Authentication, locking and network failures must
      * never be interpreted as an absent capability object or as permission to retry a legacy write.
      */
     "/api/notebook/getNotebookConf": {
@@ -6393,7 +6398,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
      * 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
-     * 不支持笔记本寻址模式时返回 -1，保留源目录及密钥材料。
+     * 源格式或认证检查失败时返回 -1，保留源目录及密钥材料。
      */
     "/api/notebook/prepareNotebookArchive": {
         request: PrepareNotebookArchiveRequestInput;
@@ -6465,7 +6470,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 解锁及挂载均检查笔记本寻址能力；不支持的模式不会发布解锁状态或修复源数据。
+     * 解锁及挂载均保留源格式与认证检查；失败时不发布解锁状态或修复源数据。
      */
     "/api/notebook/unlockAndOpenNotebook": {
         request: UnlockNotebookRequestInput;
@@ -6475,7 +6480,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在密钥恢复和解锁转换前拒绝不支持的笔记本寻址模式，保留原密文和恢复材料。
+     * 密钥恢复和解锁保持既有认证及源格式检查，保留原密文和恢复材料。
      */
     "/api/notebook/unlockNotebook": {
         request: UnlockNotebookRequestInput;
@@ -8102,8 +8107,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 保持单个 JSON 文件的设置压缩包，存在本机寻址能力下界时附加 documentAddressing 记录。
-     * 记录仅含版本及笔记本身份的最低模式，不导出标题、正文或密钥；无能力记录的旧设置格式不变。
+     * 保持单个 JSON 文件的设置压缩包，不再附加已撤销的 documentAddressing 下界记录。
      */
     "/api/system/exportConf": {
         request: EmptyRequestInput;

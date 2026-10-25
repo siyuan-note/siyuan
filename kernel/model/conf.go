@@ -307,6 +307,9 @@ func InitConf() {
 	if err := CleanupRetiredInstallResources(); err != nil {
 		logging.LogWarnf("clean up retired install resources failed: %s", err)
 	}
+	if err := cleanupRetiredDocumentAddressing(); err != nil {
+		logging.LogWarnf("clean up retired document addressing records failed: %s", err)
+	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
 	var confData []byte

@@ -65,6 +65,15 @@ func RefreshDocHPaths(tree *parse.Tree) (err error) {
 		return err
 	}
 	defer tx.Rollback()
+	if err = refreshDocumentHPathsInTx(tx, tree, docs); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// refreshDocumentHPathsInTx publishes document display paths with source metadata.
+// Content-block copies remain on the existing background refresh queue.
+func refreshDocumentHPathsInTx(tx *sql.Tx, tree *parse.Tree, docs []*BlockTree) (err error) {
 	if err = upsertDocumentMetadata(tx, tree); err != nil {
 		return err
 	}
@@ -111,7 +120,7 @@ func RefreshDocHPaths(tree *parse.Tree) (err error) {
 	if _, err = tx.Exec("UPDATE blocktrees SET updated = ? WHERE id = ? AND box_id = ? AND type = 'd'", tree.Root.IALAttr("updated"), tree.ID, tree.Box); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 // CurrentTreeHPath 使排队期间加载的树使用最新文档路径，避免旧索引操作写回重命名前的路径。

@@ -28,7 +28,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -368,12 +367,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 
 	box := Conf.Box(targetBoxID)
 	headingText := getNodeRefText0(headingNode, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen, true)
-	if documentaddressing.DefaultMode() == 2 {
-		headingText = normalizeDocumentTitle(headingText)
-	} else if strings.Contains(headingText, "/") {
-		headingText = strings.ReplaceAll(headingText, "/", "_")
-		util.PushMsg(Conf.language(246), 7000)
-	}
+	headingText = normalizeDocumentTitle(headingText)
 
 	moveToRoot := "/" == targetPath
 	toHP := "/" + headingText

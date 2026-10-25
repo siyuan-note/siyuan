@@ -16,23 +16,23 @@ func CheckDocumentAddressing(boxID string) error {
 
 func DocumentAddressingMode(boxID string) (int, error) {
 	if boxID == "" {
-		return 1, nil
+		return documentaddressing.DefaultMode(), nil
 	}
 	return documentaddressing.BoxMode(util.DataDir, util.ConfDir, boxID)
 }
 
 func CheckDocumentSpecJSON(boxID string, data []byte) error {
-	mode, err := DocumentAddressingMode(boxID)
+	_, err := DocumentAddressingMode(boxID)
 	if err != nil {
 		return err
 	}
-	return treenode.CheckSpecJSONForMode(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")), mode)
+	return treenode.CheckSpecJSON(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")))
 }
 
 func checkDocumentTreeSpec(tree *parse.Tree) error {
-	mode, err := DocumentAddressingMode(tree.Box)
+	_, err := DocumentAddressingMode(tree.Box)
 	if err != nil {
 		return err
 	}
-	return treenode.CheckSpecForMode(tree, mode)
+	return treenode.CheckSpec(tree)
 }

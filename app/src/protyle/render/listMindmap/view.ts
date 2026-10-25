@@ -961,7 +961,8 @@ export class ListMindmapView {
                                     last.remove();
                                 }
                                 item.classList.add("mindmap-view__text");
-                                item.classList.toggle("mindmap-view__text--trailing-newline", item.textContent.endsWith("\n"));
+                                item.classList.toggle("mindmap-view__text--trailing-newline",
+                                    item.textContent.endsWith("\n") && !item.closest(".hljs"));
                             }
                             item.removeAttribute("contenteditable");
                             item.removeAttribute("data-node-id");

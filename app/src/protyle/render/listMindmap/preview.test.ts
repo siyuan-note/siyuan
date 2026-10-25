@@ -251,6 +251,36 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         view.update(model);
         check.equal(map.querySelector(".mindmap-view__text").innerHTML, html, "real line breaks survive the preview");
     }
+    // 高亮代码末尾保留换行，切换到编辑器后不应增加或减少一行。
+    const code = document.createElement("div");
+    code.className = "code-block";
+    code.dataset.type = "NodeCodeBlock";
+    code.dataset.nodeId = "code";
+    node.contentBlocks = [code];
+    for (const mobile of [false, true]) {
+        document.body.className = mobile ? "body--android" : "body--windows";
+        for (const fontSize of [16, 32]) {
+            map.style.fontSize = `${fontSize}px`;
+            for (const text of ["line\n", "line\nsecond\n", "line\n\n"]) {
+                code.innerHTML = '<div class="protyle-action"><span>text</span></div>' +
+                    '<div class="hljs" style="display:block"><div class="fn__none"></div>' +
+                    `<div contenteditable="true" spellcheck="false" style="white-space:pre">${text}</div></div>`;
+                const original = code.outerHTML;
+                view.update(model);
+                const content = view.getContentHost(node.id);
+                const preview = content.innerHTML;
+                const previewHeight = nodeElement.getBoundingClientRect().height;
+                content.classList.add("mindmap-view__editor", "protyle");
+                content.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg" spellcheck="false">' +
+                    code.outerHTML + "</div></div>";
+                check.ok(Math.abs(nodeElement.getBoundingClientRect().height - previewHeight) < 0.1,
+                    `code preview and editor keep equal heights: ${JSON.stringify({mobile, fontSize, text})}`);
+                content.classList.remove("mindmap-view__editor", "protyle");
+                content.innerHTML = preview;
+                check.equal(code.outerHTML, original, "code sizing never rewrites source content");
+            }
+        }
+    }
     style.remove();
 
     // 脑图预览保留复杂块，数据库和表格单元格仍按原有规则拒绝这些块。

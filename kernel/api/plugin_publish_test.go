@@ -27,10 +27,11 @@ func TestAPIContractPluginPublish(t *testing.T) {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, model.Conf = oldWorkspace, oldData, oldConfDir, oldConf
 	})
 	files := map[string]string{
-		"data/plugins/example/plugin.json":        `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt"],"data":["theme"]}}`,
+		"data/plugins/example/plugin.json":        `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json"],"data":["theme"]}}`,
 		"data/plugins/example/index.js":           "frontend",
 		"data/plugins/example/kernel.js":          "kernel secret",
 		"data/plugins/example/logo.txt":           "logo",
+		"data/plugins/example/credentials.json":   "API_TOKEN=secret",
 		"data/plugins/example/private.json":       "secret",
 		"data/storage/petal/example/private.json": "private token",
 		"data/public/file.txt":                    "public",
@@ -109,7 +110,7 @@ func TestAPIContractPluginPublish(t *testing.T) {
 			t.Fatalf("allowed %s: %d %s", path, response.Code, response.Body)
 		}
 	}
-	for _, path := range []string{"data/plugins/example/kernel.js", "data/plugins/example/private.json", "data/storage/petal/example/private.json", "data/private.json", "conf/private.json", "temp/private.json", "repo/private.json", "history/private.json", "conf/plugin-publish/example.json", "data/public/../storage/petal/example/private.json", "data/plugins/example/%2e%2e/private.json"} {
+	for _, path := range []string{"data/plugins/example/kernel.js", "data/plugins/example/private.json", "data/plugins/example/credentials.json", "data/storage/petal/example/private.json", "data/private.json", "conf/private.json", "temp/private.json", "repo/private.json", "history/private.json", "conf/plugin-publish/example.json", "data/public/../storage/petal/example/private.json", "data/plugins/example/%2e%2e/private.json"} {
 		body, _ := json.Marshal(map[string]string{"path": path})
 		response := request(model.RoleReader, "/api/file/getFile", string(body))
 		if response.Code != 202 || code(response) != 403 {

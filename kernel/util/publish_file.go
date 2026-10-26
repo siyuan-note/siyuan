@@ -3,6 +3,7 @@ package util
 import (
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -69,4 +70,16 @@ func OpenPublishFile(rootPath, name string) (*os.File, error) {
 		return nil, fs.ErrPermission
 	}
 	return file, nil
+}
+
+// OpenPublishReaderFile 打开读者可见的包资源：先执行敏感文件名策略，再进入包内约束读取。
+// data/public 按设计公开，仍直接使用 OpenPublishFile，不经过本函数。
+func OpenPublishReaderFile(rootPath, name string) (*os.File, error) {
+	if !IsPublishRelativePath(name) {
+		return nil, fs.ErrPermission
+	}
+	if IsSensitivePath(filepath.Join(rootPath, filepath.FromSlash(name))) {
+		return nil, fs.ErrPermission
+	}
+	return OpenPublishFile(rootPath, name)
 }

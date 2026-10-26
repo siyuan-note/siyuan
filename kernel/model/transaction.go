@@ -96,6 +96,26 @@ func PerformTxSync(tx *Transaction) (err error) {
 	return performTxSyncLocked(tx)
 }
 
+// WithTransactionHistory drains already queued edits before selecting a history entry.
+// Selection, replay, stack finalization and its broadcast share the transaction execution lock.
+// The callback must use execute instead of re-entering PerformTxSync.
+func WithTransactionHistory[T any](action func(execute func(*Transaction) error) T) T {
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+	for _, queued := range takeQueuedTransactions() {
+		flushTx(queued)
+	}
+	return action(func(tx *Transaction) error {
+		completion := tx.prepareCommitWait()
+		defer close(completion.done)
+		return performTxSyncLocked(tx)
+	})
+}
+
 func performTxSyncLocked(tx *Transaction) (err error) {
 	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
 	if nil == tx.m {

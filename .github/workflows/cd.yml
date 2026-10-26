@@ -38,7 +38,7 @@ jobs:
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: pip install PyGithub
@@ -131,7 +131,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.x'
       - name: Test language validation

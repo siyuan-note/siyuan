@@ -780,9 +780,15 @@ func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInsta
 	}()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
+	pluginsStopped, shutdownStarted := false, false
 	defer func() {
-		diagnostic.Stage("stop LAN sync manager")
-		stopLANSyncManager()
+		if shutdownStarted {
+			diagnostic.Stage("stop LAN sync manager")
+			stopLANSyncManager()
+		} else if pluginsStopped && OnKernelPluginsStart != nil {
+			diagnostic.Stage("resume kernel plugins after abandoned exit")
+			OnKernelPluginsStart()
+		}
 	}()
 
 	diagnostic.Stage("flush editing transactions")
@@ -796,6 +802,7 @@ func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInsta
 		if OnKernelPluginsStop != nil {
 			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
+			pluginsStopped = true
 		}
 	}
 
@@ -838,7 +845,6 @@ func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInsta
 	diagnostic.Stage("flush database index")
 	sql.FlushQueue()
 
-	util.IsExiting.Store(true)
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
 	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
@@ -861,6 +867,8 @@ func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInsta
 		}
 	}
 
+	shutdownStarted = true
+	util.IsExiting.Store(true)
 	diagnostic.Stage("save configuration")
 	Conf.Close()
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。

@@ -1370,8 +1370,10 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 		publishAccess := model.GetPublishAccess()
 		newContent, publishAccessStatus := model.FilterContentByPublishAccessWithStatus(c, publishAccess, boxID, docPath, content, false)
 		publishAccessRequired = publishAccessStatus == model.PublishAccessPasswordRequired
-		if newContent != content {
+		if model.PublishAccessAllowed != publishAccessStatus {
 			content = newContent
+			// 发布受限时不能回传正文检索片段，避免密码保护或禁止发布的文档正文经 keywords 泄露
+			keywords = nil
 			headingNumbers = nil
 			scroll = false // 避免长页面可通过滚动无限刷出多个锁
 		}

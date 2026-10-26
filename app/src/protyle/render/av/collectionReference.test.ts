@@ -48,7 +48,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         "../../../block/Panel": {BlockPanel: class {}},
     })[name] || {});
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-    for (const width of [1000, 320]) {
+    for (const [width, key] of [[1000, ""], [320, "Enter"], [320, " "]] as const) {
         const host = document.createElement("div");
         host.style.width = `${width}px`;
         document.body.append(host);
@@ -82,7 +82,9 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         check.equal(host.querySelector("[data-preview-reference]").children.length, 0);
         host.querySelector<HTMLButtonElement>("[data-reference]").click();
         const pending = inputOptions.onConfirm("20261026000000-pending", dialog);
-        host.querySelector<HTMLButtonElement>("[data-clear-reference]").click();
+        const clear = host.querySelector<SVGSVGElement>("[data-clear-reference]");
+        clear.dispatchEvent(key ? new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true}) :
+            new MouseEvent("click", {bubbles: true}));
         pendingSelection({code: 0});
         await pending;
         check.equal(source.referenceID, undefined);
@@ -94,7 +96,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
     return "Reference collection DOM cases passed";
 };
 
-test("reference selection, current document, clearing and stale labels work on desktop and narrow layouts", {
+test("reference selection, current document, mouse and keyboard clearing, and stale labels work on desktop and narrow layouts", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

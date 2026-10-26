@@ -19,7 +19,7 @@ export const mountCollectionReference = (host: HTMLElement, source: AVAutomation
         const id = source.referenceID;
         host.className = "av__automation-control";
         host.innerHTML = `<span class="av__automation-control-label">${lang.automationCollectionReference}</span>
-<div class="av__automation-row">${id ? `<button type="button" class="b3-button b3-button--cancel b3-button--wrap fn__flex-1 av__automation-source-action" data-preview-reference data-id="${escapeAttr(id)}">${escapeHtml(id)}</button><button type="button" class="block__icon" data-clear-reference aria-label="${escapeAttr(lang.delete)}"><svg><use xlink:href="#iconClose"></use></svg></button>` : ""}</div>
+<div class="av__automation-row">${id ? `<button type="button" class="b3-button b3-button--cancel b3-button--wrap fn__flex-1 av__automation-source-action" data-preview-reference data-id="${escapeAttr(id)}">${escapeHtml(id)}</button><svg class="b3-menu__action b3-menu__action--show b3-menu__action--warning fn__pointer ariaLabel" data-clear-reference role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(lang.delete)}"><use xlink:href="#iconClose"></use></svg>` : ""}</div>
 <div class="av__automation-row"><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-reference>${lang.select}</button><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-reference-document>${lang.filterCurrentDocument}</button></div>
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationCollectionReferenceTip}</div>`;
         resize();
@@ -41,14 +41,14 @@ export const mountCollectionReference = (host: HTMLElement, source: AVAutomation
         return true;
     };
     host.addEventListener("click", event => {
-        const target = (event.target as Element).closest<HTMLElement>("button");
+        const target = (event.target as Element).closest("button, [data-clear-reference]");
         if (!target) { return; }
         if (target.hasAttribute("data-clear-reference")) {
             selectionRevision++;
             delete source.referenceID;
             save();
             void render();
-        } else if (target.hasAttribute("data-preview-reference")) {
+        } else if (target instanceof HTMLButtonElement && target.hasAttribute("data-preview-reference")) {
             window.siyuan.blockPanels.push(new BlockPanel({app: protyle.app, targetElement: target,
                 isBacklink: false, refDefs: [{refID: source.referenceID}]}));
         } else if (target.hasAttribute("data-reference-document")) {
@@ -68,6 +68,13 @@ export const mountCollectionReference = (host: HTMLElement, source: AVAutomation
                     if (await setReference(id)) { dialog.destroy(); }
                 }});
         }
+    });
+    host.addEventListener("keydown", event => {
+        const target = (event.target as Element).closest("[data-clear-reference]");
+        if (!target || event.isComposing || event.repeat || !["Enter", " "].includes(event.key)) { return; }
+        event.preventDefault();
+        event.stopPropagation();
+        target.dispatchEvent(new MouseEvent("click", {bubbles: true}));
     });
     void render();
 };

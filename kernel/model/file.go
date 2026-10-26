@@ -192,8 +192,22 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 }
 
 func (box *Box) moveCorruptedData(filePath string) {
+	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
+		return
+	}
+	backupRoot := filepath.Join(util.WorkspaceDir, "corrupted")
+	if err := os.MkdirAll(backupRoot, 0755); err != nil {
+		logging.LogErrorf("create corrupted data directory failed: %s", err)
+		return
+	}
+	// Reserve a distinct directory atomically, including for repeated quarantines of the same path.
+	backupDir, err := os.MkdirTemp(backupRoot, time.Now().Format("2006-01-02-150405")+"-doc-")
+	if err != nil {
+		logging.LogErrorf("reserve corrupted data backup failed: %s", err)
+		return
+	}
 	base := filepath.Base(filePath)
-	to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), box.ID, base)
+	to := filepath.Join(backupDir, box.ID, base)
 	if copyErr := filelock.Copy(filePath, to); nil != copyErr {
 		// 属性读取与备份之间发生删除时，无需再备份源文件。
 		if _, statErr := os.Stat(filePath); errors.Is(copyErr, os.ErrNotExist) && errors.Is(statErr, os.ErrNotExist) {

@@ -72,26 +72,47 @@ func (batch assetWatchBatch) addFSNotifyEvent(event fsnotify.Event) {
 
 func watchAssetEvents(watcher *fsnotify.Watcher) {
 	defer logging.Recover()
+	processAssetWatchEvents(watcher.Events, watcher.Errors, assetWatchBatch.flush)
+}
+
+func processAssetWatchEvents(events <-chan fsnotify.Event, errors <-chan error, flush func(assetWatchBatch)) {
 	timer := time.NewTimer(100 * time.Millisecond)
 	timer.Stop()
 	defer timer.Stop()
+	deadline := time.NewTimer(time.Second)
+	deadline.Stop()
+	defer deadline.Stop()
 	batch := assetWatchBatch{}
+	flushBatch := func() {
+		timer.Stop()
+		deadline.Stop()
+		flush(batch)
+		batch = assetWatchBatch{}
+	}
 	for {
 		select {
-		case event, ok := <-watcher.Events:
+		case event, ok := <-events:
 			if !ok {
 				return
 			}
+			empty := len(batch) == 0
 			batch.addFSNotifyEvent(event)
-			timer.Reset(100 * time.Millisecond)
-		case err, ok := <-watcher.Errors:
+			if len(batch) > 0 {
+				if empty {
+					// Bound batch latency even when another path never becomes idle.
+					deadline.Reset(time.Second)
+				}
+				timer.Reset(100 * time.Millisecond)
+			}
+		case err, ok := <-errors:
 			if !ok {
 				return
 			}
 			logging.LogErrorf("watch assets failed: %s", err)
 		case <-timer.C:
-			batch.flush()
-			batch = assetWatchBatch{}
+			flushBatch()
+		case <-deadline.C:
+			flushBatch()
 		}
 	}
 }

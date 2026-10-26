@@ -83,6 +83,12 @@ const browserCases = async (sources, css, template) => {
     const leftBar = document.getElementById("dockLeft");
     const rightBar = document.getElementById("dockRight");
     check.ok(hidden(leftBar) && hidden(rightBar));
+    const rightDockSpace = () => document.documentElement.style.getPropertyValue("--b3-dock-right-width");
+    const checkRightDockSpace = (message) => {
+        const reserved = !hidden(rightBar) && !rightBar.classList.contains("dock--float");
+        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "0px", message);
+    };
+    checkRightDockSpace("a hidden right bar reserves no space for fixed overlays");
     const {windowMouseMove} = load("mousemove", dependencies);
     const move = event => windowMouseMove(event);
     document.addEventListener("mousemove", move);
@@ -221,6 +227,7 @@ const browserCases = async (sources, css, template) => {
     open("Bottom");
     await settle();
     check.ok(!hidden(leftBar) && !hidden(rightBar));
+    checkRightDockSpace("a temporary right bar overlays the editor instead of reserving space");
     docks.Left.hideDock();
     check.ok(hidden(leftBar) && !hidden(rightBar), "each side closes independently");
     check.equal(bottom.element.style.left, "0px");
@@ -270,6 +277,8 @@ const browserCases = async (sources, css, template) => {
     bar.syncDockBarVisibility();
     docks.Right.showDock(true);
     check.ok(!hidden(leftBar) && !hidden(rightBar));
+    check.equal(rightDockSpace(), "var(--b3-ui-dock-width, 42px)",
+        "a fixed right bar publishes its width so notifications keep a gap from it");
     check.equal(rightBar.style.top, "");
     check.equal(rightBar.style.zIndex, "");
     docks.Right.hideDock();
@@ -277,6 +286,7 @@ const browserCases = async (sources, css, template) => {
     window.siyuan.config.uiLayout.hideDock = true;
     bar.syncDockBarVisibility();
     check.ok(hidden(leftBar) && hidden(rightBar));
+    check.equal(rightDockSpace(), "0px", "hiding the right bar restores the window edge offset");
     check.equal(window.siyuan.config.uiLayout.hideDock, true);
     return "Floating dock bar cases passed";
 };

@@ -327,7 +327,8 @@ test("entry profile saves in settings windows send requests and flush pending ch
     const context = {
         window,
         document: {querySelectorAll: (): HTMLElement[] => [], querySelector: (): Element => null,
-            getElementById: (): HTMLElement => null},
+            getElementById: (): HTMLElement => null,
+            documentElement: {style: {setProperty: () => {}}}},
         CustomEvent: class {constructor(public type: string) {}},
     };
     const bar = {} as typeof import("../../layout/dock/barVisibility");

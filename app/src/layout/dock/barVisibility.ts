@@ -35,6 +35,8 @@ export const adjustDockPadding = () => {
 export const syncDockBarVisibility = () => {
     let changed = false;
     let hasFloatingBar = false;
+    // 右侧停靠栏占用布局空间时记录宽度，供通知等固定定位元素避让
+    let rightDockWidth = "0px";
     document.querySelectorAll<HTMLElement>(".dock").forEach((item) => {
         const sections = Array.from(item.querySelectorAll<HTMLElement>(":scope > .dock__items"));
         const sectionVisibility = sections.map((section) =>
@@ -62,6 +64,9 @@ export const syncDockBarVisibility = () => {
         );
         changed = item.classList.contains("fn__none") !== hidden || wasFloating !== floating || changed;
         item.classList.toggle("fn__none", hidden);
+        if (item.id === "dockRight" && !hidden && !floating) {
+            rightDockWidth = "var(--b3-ui-dock-width, 42px)";
+        }
         if (floating) {
             hasFloatingBar = true;
             // 保留停靠栏原有的顶栏避让和高度范围，临时显示时脱离编辑区布局。
@@ -75,6 +80,7 @@ export const syncDockBarVisibility = () => {
             item.style.zIndex = "";
         }
     });
+    document.documentElement.style.setProperty("--b3-dock-right-width", rightDockWidth);
     adjustDockPadding();
     if (hasFloatingBar && !floatingBarResizeObserver) {
         floatingBarResizeObserver = new ResizeObserver(() => {

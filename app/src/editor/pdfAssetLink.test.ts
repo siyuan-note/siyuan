@@ -84,6 +84,16 @@ describe("PDF asset link resolution", () => {
         });
     });
 
+    it("drops fragments from box-scoped PDFs and keeps media fragments of other assets", () => {
+        assert.deepEqual(resolvePdfAssetLink("assets/document.pdf?box=20260101000000-abcdefg#page=3"), {
+            linkAddress: "assets/document.pdf?box=20260101000000-abcdefg",
+            pdfParams: undefined,
+        });
+        assert.deepEqual(resolvePdfAssetLink("assets/video.mp4#t=10"), {
+            linkAddress: "assets/video.mp4#t=10",
+        });
+    });
+
     it("leaves non-PDF and non-asset links unchanged", () => {
         assert.deepEqual(resolvePdfAssetLink("assets/document.txt?page=2"), {
             linkAddress: "assets/document.txt?page=2",

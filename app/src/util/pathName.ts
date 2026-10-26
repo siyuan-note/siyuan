@@ -173,6 +173,11 @@ export const getAssetPathWithoutQuery = (assetPath: string) => {
     return assetPath.split(/[?#]/, 1)[0];
 };
 
+// 只去掉片段，保留查询：内核依赖 box 等查询参数定位资源，但不处理片段。
+export const getAssetPathWithoutFragment = (assetPath: string) => {
+    return assetPath.split("#", 1)[0];
+};
+
 export const getAssetExtension = (assetPath: string) => {
     return pathPosix().extname(getAssetPathWithoutQuery(assetPath));
 };

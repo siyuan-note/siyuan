@@ -1,6 +1,7 @@
 package av
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -27,28 +28,29 @@ func relationsPath(boxID string) string {
 }
 
 // readRelations 读取 relations 索引（boxID 非空时自动解密）。
-func readRelations(boxID string) (avRels map[string][]string) {
+func readRelations(boxID string) (avRels map[string][]string, err error) {
 	avRels = map[string][]string{}
 	p := relationsPath(boxID)
-	if !filelock.IsExist(p) {
+	if _, err = os.Stat(p); os.IsNotExist(err) {
+		return avRels, nil
+	} else if err != nil {
 		return
 	}
 	data, err := filelock.ReadFile(p)
 	if err != nil {
-		logging.LogErrorf("read attribute view relations failed: %s", err)
 		return
 	}
 	if boxID != "" {
-		dec, decErr := decryptAVData(boxID, "relation", data)
-		if decErr != nil {
-			logging.LogErrorf("decrypt attribute view relations failed: %s", decErr)
+		data, err = decryptAVData(boxID, "relation", data)
+		if err != nil {
 			return
 		}
-		data = dec
 	}
 	if err = msgpack.Unmarshal(data, &avRels); err != nil {
-		logging.LogErrorf("unmarshal attribute view relations failed: %s", err)
 		return
+	}
+	if avRels == nil {
+		err = fmt.Errorf("invalid database relation index")
 	}
 	return
 }
@@ -87,16 +89,25 @@ func relationsBoxIDByAvID(avID string) string {
 }
 
 func GetSrcAvIDs(destAvID string) []string {
+	srcAvIDs, err := GetSrcAvIDsWithErr(destAvID)
+	if err != nil {
+		logging.LogErrorf("read attribute view relations failed: %s", err)
+		return nil
+	}
+	return srcAvIDs
+}
+
+// GetSrcAvIDsWithErr preserves read/authentication errors for destructive callers.
+func GetSrcAvIDsWithErr(destAvID string) ([]string, error) {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
 	boxID := relationsBoxIDByAvID(destAvID)
-	avRels := readRelations(boxID)
-	srcAvIDs := avRels[destAvID]
-	if nil == srcAvIDs {
-		return nil
+	avRels, err := readRelations(boxID)
+	if err != nil {
+		return nil, err
 	}
-	return srcAvIDs
+	return avRels[destAvID], nil
 }
 
 // GetSrcAvIDsForRefresh 按广度优先顺序收集需要刷新的直接和间接关联源，不包含起始数据库。
@@ -133,7 +144,11 @@ func RemoveAvRel(srcAvID, destAvID string) {
 	defer attributeViewRelationsLock.Unlock()
 
 	boxID := relationsBoxIDByAvID(destAvID)
-	avRels := readRelations(boxID)
+	avRels, err := readRelations(boxID)
+	if err != nil {
+		logging.LogErrorf("read attribute view relations failed: %s", err)
+		return
+	}
 
 	srcAvIDs := avRels[destAvID]
 	if nil == srcAvIDs {
@@ -168,7 +183,11 @@ func UpsertAvBackRel(srcAvID, destAvID string) {
 	}
 
 	boxID := destBox
-	avRels := readRelations(boxID)
+	avRels, err := readRelations(boxID)
+	if err != nil {
+		logging.LogErrorf("read attribute view relations failed: %s", err)
+		return
+	}
 
 	srcAvIDs := avRels[destAvID]
 	srcAvIDs = append(srcAvIDs, srcAvID)

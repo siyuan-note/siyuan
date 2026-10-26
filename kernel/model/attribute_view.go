@@ -223,7 +223,14 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 
 	checkedAvIDs := map[string]bool{}
 	for _, id := range allAvIDs {
-		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
+		if docReferencedAvIDs[id] {
+			continue
+		}
+		referenced, scanErr := isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		if !referenced {
 			name, _ := av.GetAttributeViewName(id)
 
 			var modTime time.Time
@@ -249,34 +256,38 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 	return
 }
 
-func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) bool {
+func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) (bool, error) {
 	if checkedAvIDs[destAvID] {
 		if docReferencedAvIDs[destAvID] {
-			return true
+			return true, nil
 		}
-		return false
+		return false, nil
 	}
 	checkedAvIDs[destAvID] = true
 
-	srcAvIDs := av.GetSrcAvIDs(destAvID)
+	srcAvIDs, err := av.GetSrcAvIDsWithErr(destAvID)
+	if err != nil {
+		return false, fmt.Errorf("read database relations [%s] failed: %w", destAvID, err)
+	}
 	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID) // 忽略自身关联
 	if 1 > len(srcAvIDs) {
-		return false
+		return false, nil
 	}
 
 	for _, srcAvID := range srcAvIDs {
 		if docReferencedAvIDs[srcAvID] {
-			return true
+			return true, nil
 		}
 	}
 
 	// 递归检查间接关联的 av
 	for _, srcAvID := range srcAvIDs {
-		if isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs) {
-			return true
+		referenced, err := isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs)
+		if err != nil || referenced {
+			return referenced, err
 		}
 	}
-	return false
+	return false, nil
 }
 
 func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {

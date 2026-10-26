@@ -10,6 +10,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -321,6 +322,14 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 	if !observesBlocks {
 		return nil
 	}
+	return tx.captureDocumentCollectionTree(tree)
+}
+
+// Non-editor document replacements use the same before/after collection capture.
+func (tx *Transaction) captureDocumentCollectionTree(tree *parse.Tree) (captureErr error) {
+	if !tx.fromAPI || tx.isReplay || tree == nil {
+		return nil
+	}
 	defer func() {
 		if captureErr != nil {
 			tx.collectionState().err = captureErr
@@ -413,6 +422,36 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 		tx.attributeViewRollback.trees[tree.ID] = original
 	}
 	return nil
+}
+
+// Caller holds flushLock and has checked the replacement's source bytes.
+func writeDocumentWithCollections(tree *parse.Tree, write func(*parse.Tree) error) (handled bool, err error) {
+	tx := &Transaction{fromAPI: true, m: &sync.Mutex{}}
+	if err = tx.begin(); err != nil {
+		return false, err
+	}
+	defer func() {
+		if tx.state.Load() == 1 {
+			tx.rollback()
+		}
+	}()
+	if err = tx.captureDocumentCollectionTree(tree); err != nil {
+		return true, err
+	}
+	if tx.attributeViewCollections == nil || tx.attributeViewCollections.before[tree.ID] == nil {
+		return false, nil
+	}
+	tx.trees[tree.ID] = tree
+	if err = tx.runAttributeViewCollections(); err != nil {
+		return true, err
+	}
+	tx.writeTransactionTree = func(changed *parse.Tree) error {
+		if changed.ID == tree.ID {
+			return write(changed)
+		}
+		return writeTreeUpsertQueue(changed)
+	}
+	return true, tx.commit()
 }
 
 func collectionNodes(tree *parse.Tree) map[string]*ast.Node {

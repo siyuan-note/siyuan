@@ -43,6 +43,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/jinzhu/copier"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -1106,8 +1107,14 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
+	current, err := filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path))
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(current, original) {
+		return fmt.Errorf("%w: %s", util.ErrFileChanged, tree.Path)
+	}
 	var size uint64
-	var err error
 	var titleChanged, emptyAttrUpdated bool
 	if rename {
 		if IsBoxDocPath(tree.Box, tree.Path) {
@@ -1117,16 +1124,29 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 			return err
 		}
 	}
-	if titleChanged || emptyAttrUpdated {
-		size, err = writeRenameDocIfUnchanged(tree, original)
-	} else {
-		size, err = filesys.WriteTreeIfUnchanged(tree, original)
+	write := func(changed *parse.Tree) error {
+		if titleChanged || emptyAttrUpdated {
+			size, err = writeRenameDocIfUnchanged(changed, original)
+		} else {
+			size, err = filesys.WriteTreeIfUnchanged(changed, original)
+		}
+		if err != nil {
+			return err
+		}
+		sql.UpsertTreeQueue(changed)
+		refreshDocInfoWithSize(changed, size)
+		return nil
 	}
+	handled, err := writeDocumentWithCollections(tree, write)
 	if err != nil {
 		return err
 	}
-	sql.UpsertTreeQueue(tree)
-	refreshDocInfoWithSize(tree, size)
+	if !handled {
+		if err = write(tree); err != nil {
+			return err
+		}
+		IncSync()
+	}
 	invalidateDocumentHistory(tree.ID)
 	publishDocRename(tree, titleChanged, emptyAttrUpdated)
 	if rename && IsBoxDocPath(tree.Box, tree.Path) {
@@ -1140,7 +1160,6 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 		event := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
 		event.Data = map[string]any{"box": box.ID, "name": box.Name}
 		util.PushEvent(event)
-		IncSync()
 	}
 	return nil
 }

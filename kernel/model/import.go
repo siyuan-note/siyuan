@@ -886,7 +886,6 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		updateBoundBlockAvsAttribute(attrViewIDs, avBoxID)
 
 		// 插入关联关系 https://github.com/siyuan-note/siyuan/issues/11628
-		relationAvs := map[string]string{}
 		for _, avID := range avIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil == attrView {
@@ -894,14 +893,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			}
 
 			for _, keyValues := range attrView.KeyValues {
-				if nil != keyValues.Key && av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation {
-					relationAvs[avID] = keyValues.Key.Relation.AvID
+				if nil != keyValues.Key && av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.AvID != "" {
+					av.UpsertAvBackRel(avID, keyValues.Key.Relation.AvID)
 				}
 			}
-		}
-
-		for srcAvID, destAvID := range relationAvs {
-			av.UpsertAvBackRel(srcAvID, destAvID)
 		}
 	}
 

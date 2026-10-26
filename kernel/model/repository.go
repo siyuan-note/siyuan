@@ -1428,7 +1428,12 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 	FlushTxQueue()
-	release := lockAssetSourceChange()
+	// Keep synchronization serialized until the write guard and UI state are released.
+	lockSync()
+	defer unlockSync()
+	assetDownloadSourceMu.Lock()
+	var releaseSource sync.Once
+	release := func() { releaseSource.Do(assetDownloadSourceMu.Unlock) }
 	defer release()
 
 	repo, err := newRepositoryWithAssetSourceLocked()
@@ -1444,6 +1449,12 @@ func checkoutRepo(id string) (err error) {
 		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
+	checkoutTask, err := prepareRepoCheckout(repo)
+	if err != nil {
+		util.PushErrMsg(err.Error(), 7000)
+		return err
+	}
+	defer checkoutTask.finish(repo, &err)
 
 	util.PushEndlessProgress(Conf.Language(63))
 
@@ -1471,14 +1482,13 @@ func checkoutRepo(id string) (err error) {
 	}
 	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
 		release()
-		FullReindexDirect()
+		fullReindexWithTxFlush(false)
 		if checkoutErr != nil {
 			util.ReloadUI()
 			return
 		}
 		appendAgentRollbackEntries()
 		time.Sleep(time.Second)
-		FlushTxQueue()
 		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	})
 	if err != nil {
@@ -1489,6 +1499,26 @@ func checkoutRepo(id string) (err error) {
 	}
 
 	return
+}
+
+// prepareRepoCheckout saves every window before the backup and retains both write
+// admission and transaction exclusion until the caller finishes its full reindex.
+func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
+	checkout := startSyncCheckout(repo)
+	if checkout == nil {
+		return nil, checkoutPrepareRetry()
+	}
+	// A full restore refreshes all indexes as one operation. Do not release the
+	// guard through incremental sync Applied callbacks or repeat a partial refresh.
+	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
+		Context: checkout.ctx, Apply: checkout.prepareApply, Before: checkCheckoutSpace,
+		Preflight: documentAddressingPreflight(repo),
+	})
+	if err := checkout.prepareApply(); err != nil {
+		checkout.finish(repo, &err)
+		return nil, err
+	}
+	return checkout, nil
 }
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。

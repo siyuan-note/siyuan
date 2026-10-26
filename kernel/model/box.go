@@ -1067,6 +1067,11 @@ func ReindexFTS() {
 }
 
 func fullReindex() {
+	fullReindexWithTxFlush(true)
+}
+
+// Snapshot checkout already drained transactions while holding flushLock.
+func fullReindexWithTxFlush(flushTransactions bool) {
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1078,7 +1083,9 @@ func fullReindex() {
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
-	FlushTxQueue()
+	if flushTransactions {
+		FlushTxQueue()
+	}
 
 	sql.InitDatabase(true)
 

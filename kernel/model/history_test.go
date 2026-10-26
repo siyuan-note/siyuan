@@ -45,6 +45,56 @@ func TestCreateAssetsHistorySkipsRemovedSource(t *testing.T) {
 	}
 }
 
+func TestRollbackAssetsHistoryPreservesRelativePaths(t *testing.T) {
+	_, boxID := setupNotebookHistoryRollbackTest(t)
+	boxDir := filepath.Join(util.DataDir, boxID, ".siyuan")
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(boxDir, "conf.json"), []byte(`{"name":"Assets"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{"assets/report.pdf", "assets/projects/2026/report.pdf",
+		boxID + "/assets/report.pdf", boxID + "/20261026000000-parent1/assets/sub/report.pdf"} {
+		t.Run(rel, func(t *testing.T) {
+			rootAsset := filepath.Join(util.DataDir, "assets", "report.pdf")
+			if err := os.MkdirAll(filepath.Dir(rootAsset), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(rootAsset, []byte("unrelated global asset"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			historyRel := filepath.Join("history", "2026-10-26-120000-clean", filepath.FromSlash(rel))
+			historyFile := filepath.Join(util.WorkspaceDir, historyRel)
+			if err := os.MkdirAll(filepath.Dir(historyFile), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(historyFile, []byte("restored version"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if err := RollbackAssetsHistory(filepath.ToSlash(historyRel)); err != nil {
+				t.Fatal(err)
+			}
+			destination := filepath.Join(util.DataDir, filepath.FromSlash(rel))
+			if data, err := os.ReadFile(destination); err != nil || string(data) != "restored version" {
+				t.Fatalf("asset restored to wrong location: %q, %v", data, err)
+			}
+			if destination != rootAsset {
+				if data, err := os.ReadFile(rootAsset); err != nil || string(data) != "unrelated global asset" {
+					t.Fatalf("unrelated asset overwritten: %q, %v", data, err)
+				}
+			}
+		})
+	}
+	for _, parts := range [][]string{{"snapshot", "storage", "av/view.json"},
+		{"snapshot", "assets", "../outside"}, {"snapshot", boxID, "file.sy"},
+		{"snapshot", "20261026000000-absent1", "assets/file.pdf"}} {
+		if _, err := ordinaryAssetHistoryDestination(parts); err == nil {
+			t.Fatalf("accepted invalid or unavailable asset location: %v", parts)
+		}
+	}
+}
+
 func TestGenerateDocHistorySkipsRemovedSource(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	sourceFile := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)

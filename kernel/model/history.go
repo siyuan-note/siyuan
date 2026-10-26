@@ -591,7 +591,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	if encrypted && (len(pathParts) < 3 || !ast.IsNodeIDPattern(pathParts[1]) || !IsEncryptedBox(pathParts[1])) {
 		return errors.New("encrypted asset history is missing valid notebook context")
 	}
-	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
+	var to string
 	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
 		if !encrypted {
 			return fmt.Errorf("encrypted notebook asset history is plaintext [%s]", pathParts[1])
@@ -619,6 +619,14 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
 			return
 		}
+	} else {
+		to, err = ordinaryAssetHistoryDestination(pathParts)
+		if err != nil {
+			return
+		}
+		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+			return
+		}
 	}
 
 	if encrypted {
@@ -633,6 +641,31 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	IncSync()
 	util.PushMsg(Conf.Language(102), 3000)
 	return nil
+}
+
+// Ordinary history stores the original data-relative path after the snapshot
+// directory, both for global assets and notebook/document-local cleanup history.
+func ordinaryAssetHistoryDestination(parts []string) (string, error) {
+	if len(parts) != 3 {
+		return "", errors.New("invalid asset history path")
+	}
+	rel := parts[1] + "/" + parts[2]
+	if path.Clean(rel) != rel || strings.Contains(rel, "\\") || path.IsAbs(rel) {
+		return "", errors.New("invalid asset history path")
+	}
+	if parts[1] != "assets" {
+		if !ast.IsNodeIDPattern(parts[1]) || !strings.Contains("/"+parts[2], "/assets/") {
+			return "", errors.New("history path does not identify an asset")
+		}
+		if !filelock.IsExist(filepath.Join(util.DataDir, parts[1], ".siyuan", "conf.json")) {
+			return "", errors.New("asset history notebook is unavailable")
+		}
+	}
+	to := filepath.Join(util.DataDir, filepath.FromSlash(rel))
+	if err := validateEncryptedCleanupPath(util.DataDir, to); err != nil {
+		return "", err
+	}
+	return to, nil
 }
 
 // validateHistoryPath 校验历史路径是否位于工作区内且属于历史目录。

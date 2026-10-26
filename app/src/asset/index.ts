@@ -16,7 +16,7 @@ import {fetchPost} from "../util/fetch";
 import {bindPdfTheme} from "./pdfViewer";
 import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
-import {getDisplayName} from "../util/pathName";
+import {getAssetExtension, getAssetPathWithoutQuery, getDisplayName} from "../util/pathName";
 import {PdfLoadState} from "./pdfLoadState";
 import {getPdfViewerHTML} from "./pdf/viewerTemplate";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
@@ -57,7 +57,7 @@ export class Asset extends Model {
 
     public update(path: string) {
         this.path = path;
-        this.parent.updateTitle(getDisplayName(path));
+        this.parent.updateTitle(getDisplayName(getAssetPathWithoutQuery(path)));
         this.render(false);
     }
 
@@ -109,7 +109,8 @@ export class Asset extends Model {
             void this.pdfObject.destroy();
             this.pdfObject = undefined;
         }
-        const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
+        // 类型按去掉查询和片段后的文件名判断，src 仍使用原始路径，以保留 box 参数和 #t= 等媒体片段
+        const type = getAssetExtension(this.path).toLowerCase();
         // 对资源路径进行 HTML 转义后再拼入 src 属性，避免路径中包含 " 等字符导致属性逃逸引发 XSS
         const src = escapeHtmlTextAndAttr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {

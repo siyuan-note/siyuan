@@ -410,7 +410,7 @@ func (tx *Transaction) captureDocumentCollectionTree(tree *parse.Tree) (captureE
 	if tx.attributeViewRollback == nil {
 		tx.attributeViewRollback = &attributeViewRollback{views: map[string]*av.AttributeView{}, trees: map[string]*parse.Tree{}, leases: map[string]bool{}}
 	}
-	original, err := filesys.LoadTree(tree.Box, tree.Path, tx.luteEngine)
+	original, _, err := filesys.LoadTreeSnapshot(tree.Box, tree.Path, tx.luteEngine)
 	if err != nil {
 		if _, statErr := os.Stat(filepath.Join(util.DataDir, tree.Box, tree.Path)); !os.IsNotExist(statErr) {
 			return err
@@ -426,6 +426,31 @@ func (tx *Transaction) captureDocumentCollectionTree(tree *parse.Tree) (captureE
 
 // Caller holds flushLock and has checked the replacement's source bytes.
 func writeDocumentWithCollections(tree *parse.Tree, write func(*parse.Tree) error) (handled bool, err error) {
+	return writeDocumentsWithCollections([]*parse.Tree{tree}, nil, write)
+}
+
+// collectDocumentChanges observes committed user-created or moved documents. An explicit
+// nil before snapshot represents creation; import, sync and recovery never call this entry.
+// Rollback snapshots come from the committed after locations, not the old matching scope.
+// Caller holds flushLock until collection and its document writes finish.
+func collectDocumentChanges(before map[string]*parse.Tree, after []*parse.Tree) error {
+	_, err := writeDocumentsWithCollections(after, before, nil)
+	return err
+}
+
+func documentCollectionIndex(boxID string) (*av.BlockCollectionIndex, error) {
+	boundary := ""
+	if IsEncryptedBox(boxID) {
+		boundary = boxID
+	}
+	if av.BlockCollectionIndexKnownEmpty(boundary) {
+		return nil, nil
+	}
+	return av.BlockCollectionIndexInBox(boundary)
+}
+
+func writeDocumentsWithCollections(after []*parse.Tree, before map[string]*parse.Tree,
+	write func(*parse.Tree) error) (handled bool, err error) {
 	tx := &Transaction{fromAPI: true, m: &sync.Mutex{}}
 	if err = tx.begin(); err != nil {
 		return false, err
@@ -435,18 +460,42 @@ func writeDocumentWithCollections(tree *parse.Tree, write func(*parse.Tree) erro
 			tx.rollback()
 		}
 	}()
-	if err = tx.captureDocumentCollectionTree(tree); err != nil {
-		return true, err
+	for _, tree := range after {
+		if err = tx.captureDocumentCollectionTree(tree); err != nil {
+			return true, err
+		}
 	}
-	if tx.attributeViewCollections == nil || tx.attributeViewCollections.before[tree.ID] == nil {
+	if tx.attributeViewCollections == nil || len(tx.attributeViewCollections.before) == 0 {
 		return false, nil
 	}
-	tx.trees[tree.ID] = tree
+	sources := map[string]bool{}
+	for _, tree := range after {
+		if _, captured := tx.attributeViewCollections.before[tree.ID]; !captured {
+			continue
+		}
+		if before != nil {
+			tx.attributeViewCollections.before[tree.ID] = before[tree.ID]
+		}
+		sources[tree.ID] = true
+		tx.trees[tree.ID] = tree
+		if write != nil {
+			// Content templates may introduce blocks that collection must resolve before commit.
+			treenode.UpsertBlockTreePending(tree)
+		}
+	}
 	if err = tx.runAttributeViewCollections(); err != nil {
 		return true, err
 	}
+	if write == nil {
+		// The file operation already committed its sources; persist only new binding changes.
+		for id := range tx.trees {
+			if tx.indexChanges[id] == nil {
+				delete(tx.trees, id)
+			}
+		}
+	}
 	tx.writeTransactionTree = func(changed *parse.Tree) error {
-		if changed.ID == tree.ID {
+		if write != nil && sources[changed.ID] {
 			return write(changed)
 		}
 		return writeTreeUpsertQueue(changed)
@@ -763,6 +812,10 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 	}
 	for id, before := range state.before {
 		if before != nil {
+			continue
+		}
+		if tx.attributeViewRollback != nil && tx.attributeViewRollback.trees[id] != nil {
+			// A committed copy has a rollback baseline even though its matching "before" is empty.
 			continue
 		}
 		tree := tx.trees[id]

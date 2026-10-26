@@ -5464,6 +5464,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * evaluates block collection rules for the new document and its blocks, initializing only new rows.
+     */
     "/api/filetree/duplicateDoc": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5471,6 +5474,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * evaluates block collection rules for every copied document and block, initializing only new rows.
+     */
     "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5637,6 +5643,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * evaluates block collection rules for moved documents and descendants entering a watched scope.
+     * Existing database rows and their field values are preserved. A collection failure is returned after the
+     * physical move; successfully moved documents remain at their new locations.
+     */
     "/api/filetree/moveDocs": {
         request: FileTreeMoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5644,6 +5655,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * has the same collection and partial-failure behavior as MoveDocs.
+     */
     "/api/filetree/moveDocsByID": {
         request: FileTreeMoveIDsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

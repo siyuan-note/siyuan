@@ -307,7 +307,9 @@ func documentDuplicate(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	model.DuplicateDoc(tree)
+	if err = model.DuplicateDoc(tree); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("duplicate doc failed: %s", err)}}, IsError: true}, nil
+	}
 	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }

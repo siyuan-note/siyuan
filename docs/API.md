@@ -509,6 +509,8 @@ Remove a document by `id`:
 
 ### Move documents
 
+Both move endpoints evaluate block collection rules for moved documents and descendants entering a watched scope. Existing database rows and field values are preserved. If collection fails after a document has moved, the endpoint returns an error and that document remains at its new location.
+
 * `/api/filetree/moveDocs`
 * Parameters
 

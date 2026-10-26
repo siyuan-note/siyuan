@@ -1283,7 +1283,7 @@ func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func DuplicateDoc(tree *parse.Tree) {
+func DuplicateDoc(tree *parse.Tree) error {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
@@ -1310,7 +1310,9 @@ func DuplicateDoc(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
-	createTreeTx(tree)
+	if err := performCreateDocTransaction(tree, true); err != nil {
+		return err
+	}
 	box := Conf.Box(tree.Box)
 	if nil != box {
 		box.addSort(previousPath, tree.ID)
@@ -1320,8 +1322,10 @@ func DuplicateDoc(tree *parse.Tree) {
 	arg := map[string]any{}
 	arg["listDocTree"] = true
 	PushCreate(box, tree.Path, arg)
+	return nil
 }
 
+// Repository recovery rebuilds existing data and must not trigger user automations.
 func createTreeTx(tree *parse.Tree) {
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
@@ -1843,10 +1847,22 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 	for _, queued := range takeQueuedTransactions() {
 		flushTx(queued)
 	}
+	collectionIndex, err := documentCollectionIndex(toBoxID)
+	if err != nil {
+		return err
+	}
+	collectionBefore := map[string]map[string]*parse.Tree{}
 	for _, fromPath := range fromPaths {
-		if _, err = preflightDocumentMove(pathsBoxes[fromPath].ID, fromPath, toBoxID, toPath); err != nil {
+		before := map[string]*parse.Tree{}
+		if _, err = preflightDocumentMoveSnapshots(pathsBoxes[fromPath].ID, fromPath, toBoxID, toPath,
+			func(tree *parse.Tree, destination string) {
+				if collectionIndex != nil && collectionIndex.MatchesDocument(toBoxID, tree.ID, destination) {
+					before[tree.ID] = tree
+				}
+			}); err != nil {
 			return
 		}
+		collectionBefore[fromPath] = before
 	}
 	luteEngine := util.NewLute()
 	refresh := newMoveDocsRefresh()
@@ -1855,6 +1871,8 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 		confFileTreeSnapshot := Conf.LoadFileTree()
 
 		if 0 < len(movedDocs) {
+			cache.ClearDocsIAL()
+			IncSync()
 			// 部分移动失败时也保存已完成文档的整组顺序，再通知前端刷新。
 			if placeByConf {
 				ids := make([]string, 0, len(movedDocs))
@@ -1896,9 +1914,25 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 			ToPath:       toPath,
 			NewPath:      newPath,
 		})
+		before := collectionBefore[fromPath]
+		var after []*parse.Tree
+		for id := range before {
+			bt := treenode.GetBlockTreeInExactBox(id, toBoxID)
+			if bt == nil {
+				return ErrBlockNotFound
+			}
+			tree, _, readErr := filesys.ReadTreeSnapshot(toBoxID, bt.Path)
+			if readErr != nil {
+				return readErr
+			}
+			after = append(after, tree)
+		}
+		if len(after) > 0 {
+			if err = collectDocumentChanges(before, after); err != nil {
+				return
+			}
+		}
 	}
-	cache.ClearDocsIAL()
-	IncSync()
 	return
 }
 

@@ -180,6 +180,7 @@ func indexBox(boxID string) {
 	}()
 	// 全量索引使用纯 INSERT，开始前必须清理该笔记本的旧数据，避免重复任务叠加相同行。
 	sql.DeleteBoxQueue(boxID)
+	recoveringSources := hasDocumentSourceRecovery(boxID)
 
 	util.SetBootDetails(Conf.Language(303))
 	files, scanErr := box.listFilesForIndex("/")
@@ -241,7 +242,20 @@ func indexBox(boxID string) {
 		lock.Unlock()
 
 		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
-		treenode.IndexBlockTree(tree)
+		if recoveringSources {
+			for _, block := range treenode.GetBlockTreesByRootIDInBox(tree.ID, tree.Box) {
+				cache.RemoveBlockIALInBox(block.ID, tree.Box)
+			}
+			if err := treenode.ReplaceBlockTree(tree); err != nil {
+				lock.Lock()
+				sourceFailed = true
+				lock.Unlock()
+				logging.LogErrorf("rebuild recovered block identities [%s]: %s", tree.ID, err)
+				return
+			}
+		} else {
+			treenode.IndexBlockTree(tree)
+		}
 		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		if 1 < i && 0 == i%64 {
@@ -290,6 +304,13 @@ func indexBox(boxID string) {
 	}
 	flushBatch()
 	if !sourceFailed {
+		if recoveringSources {
+			paths := make([]string, 0, len(files))
+			for _, file := range files {
+				paths = append(paths, file.path)
+			}
+			treenode.ClearRedundantBlockTrees(boxID, paths)
+		}
 		pending, pendingErr := treenode.PendingDocumentMetadata(boxID)
 		for _, doc := range pending {
 			if pendingErr = filesys.RecoverDocumentMetadataWrite(doc); pendingErr != nil {

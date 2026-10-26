@@ -814,6 +814,9 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 		if before != nil {
 			continue
 		}
+		if tree := tx.trees[id]; tree != nil && tx.documentSource(tree) != nil {
+			continue
+		}
 		if tx.attributeViewRollback != nil && tx.attributeViewRollback.trees[id] != nil {
 			// A committed copy has a rollback baseline even though its matching "before" is empty.
 			continue

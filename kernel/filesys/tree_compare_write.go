@@ -43,6 +43,11 @@ func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err e
 	if err != nil {
 		return 0, err
 	}
+	if recorder := treeRecorder(tree); recorder != nil {
+		if err = recorder.record(diskData); err != nil {
+			return 0, err
+		}
+	}
 	pending, err := treenode.BeginDocumentMetadataWrite(tree)
 	if err != nil {
 		return 0, err

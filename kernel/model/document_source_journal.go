@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -21,10 +22,25 @@ import (
 // Recovery records retain exact persisted bytes, including ciphertext. They live
 // beside the durable SQL queue, outside synchronized notebook sources.
 type documentSourceFile struct {
+	Kind   string `json:"kind,omitempty"`
 	Box    string `json:"box"`
 	Path   string `json:"path"`
 	Before []byte `json:"before"`
 	After  []byte `json:"after"`
+}
+
+func (file *documentSourceFile) filename() (string, error) {
+	if file.Kind == "database" {
+		id := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/storage/av/"), ".json")
+		if (file.Box != "" && !ast.IsNodeIDPattern(file.Box)) || !ast.IsNodeIDPattern(id) || file.Path != "/storage/av/"+id+".json" {
+			return "", errors.New("invalid database recovery path")
+		}
+		return filepath.Join(util.DataDir, file.Box, filepath.FromSlash(file.Path)), nil
+	}
+	if file.Kind != "" {
+		return "", errors.New("unknown document recovery source kind")
+	}
+	return documentSourcePath(file.Box, file.Path, false)
 }
 
 type documentSourceMove struct {
@@ -35,6 +51,7 @@ type documentSourceMove struct {
 
 type documentSourceJournal struct {
 	Version   int                   `json:"version"`
+	Forward   bool                  `json:"forward,omitempty"`
 	ID        string                `json:"id"`
 	State     string                `json:"state"`
 	Files     []*documentSourceFile `json:"files"`
@@ -72,12 +89,18 @@ func (j *documentSourceJournal) valid() bool {
 		(j.State != "pending" && j.State != "committed" && j.State != "recovered") {
 		return false
 	}
+	if j.Forward && j.Move != nil {
+		return false
+	}
 	seen := map[string]bool{}
 	for _, file := range j.Files {
 		if file == nil {
 			return false
 		}
-		name, err := documentSourcePath(file.Box, file.Path, false)
+		if j.Forward && file.Kind != "" {
+			return false
+		}
+		name, err := file.filename()
 		if err != nil || seen[name] {
 			return false
 		}
@@ -97,7 +120,18 @@ func (j *documentSourceJournal) save() error {
 	if util.QueueDir == "" || !j.valid() {
 		return errors.New("invalid document source recovery record")
 	}
-	data, err := json.Marshal(j)
+	persisted := *j
+	if j.Forward {
+		// One atomic document replacement needs only authenticated index recovery on
+		// restart. Promote to before-images before any multi-source or database write.
+		persisted.Files = make([]*documentSourceFile, 0, len(j.Files))
+		for _, file := range j.Files {
+			identity := *file
+			identity.Before, identity.After = nil, nil
+			persisted.Files = append(persisted.Files, &identity)
+		}
+	}
+	data, err := json.Marshal(&persisted)
 	if err != nil {
 		return err
 	}
@@ -171,7 +205,7 @@ func readDocumentSourceJournals() ([]*documentSourceJournal, error) {
 // each source. Unexpected edits and conflicting directories preserve the record and data.
 func (j *documentSourceJournal) rollback() error {
 	for _, file := range j.Files {
-		name, _ := documentSourcePath(file.Box, file.Path, false)
+		name, _ := file.filename()
 		current, err := os.ReadFile(name)
 		if os.IsNotExist(err) {
 			current, err = nil, nil
@@ -197,7 +231,7 @@ func (j *documentSourceJournal) rollback() error {
 		}
 	}
 	for _, file := range j.Files {
-		name, _ := documentSourcePath(file.Box, file.Path, false)
+		name, _ := file.filename()
 		current, err := os.ReadFile(name)
 		if os.IsNotExist(err) {
 			current, err = nil, nil
@@ -215,8 +249,14 @@ func (j *documentSourceJournal) rollback() error {
 		} else if err = util.WriteFileIfUnchanged(name, current, file.Before); err != nil {
 			return err
 		}
-		cache.RemoveTreeDataInBox(util.GetTreeID(file.Path), file.Box)
-		cache.RemoveDocIALInBox(file.Path, file.Box)
+		if file.Kind == "database" {
+			id := strings.TrimSuffix(path.Base(file.Path), ".json")
+			cache.RemoveAVDataInBox(id, file.Box)
+			av.ClearBlockCollectionIndex(file.Box)
+		} else {
+			cache.RemoveTreeDataInBox(util.GetTreeID(file.Path), file.Box)
+			cache.RemoveDocIALInBox(file.Path, file.Box)
+		}
 	}
 	j.State = "recovered"
 	return j.save()
@@ -228,7 +268,7 @@ func recoverDocumentSources() error {
 		return err
 	}
 	for _, entry := range entries {
-		if entry.State == "pending" {
+		if entry.State == "pending" && !entry.Forward {
 			if err = entry.rollback(); err != nil {
 				return err
 			}
@@ -249,7 +289,7 @@ func hasDocumentSourceRecovery(box string) bool {
 	}
 	for _, j := range entries {
 		for _, file := range j.Files {
-			if file.Box == box && !slices.Contains(j.Recovered, box) {
+			if file.Kind == "" && file.Box == box && !slices.Contains(j.Recovered, box) {
 				return true
 			}
 		}
@@ -271,7 +311,9 @@ func finishDocumentSourceRecovery(box string) error {
 		}
 		complete := true
 		for _, file := range j.Files {
-			complete = complete && slices.Contains(j.Recovered, file.Box)
+			if file.Kind == "" {
+				complete = complete && slices.Contains(j.Recovered, file.Box)
+			}
 		}
 		if complete {
 			err = os.Remove(j.filename())

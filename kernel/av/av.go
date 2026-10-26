@@ -1101,6 +1101,53 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
 		avJSONPath = GetAttributeViewDataPath(av.ID)
 	}
+	if value, recorded := sourceWriteRecorders.Load(avBoxID + "/" + av.ID); recorded && value.(*sourceWriteRecord).active() {
+		before, readErr := filelock.ReadFile(avJSONPath)
+		if os.IsNotExist(readErr) {
+			before, readErr = nil, nil
+		}
+		if readErr != nil {
+			return readErr
+		}
+		if original != nil {
+			if avBoxID != "" {
+				return errors.New("conditional replacement of encrypted attribute views is not supported")
+			}
+			if !bytes.Equal(before, original) {
+				return util.ErrFileChanged
+			}
+		}
+		if before != nil {
+			plain := before
+			if avBoxID != "" {
+				plain, readErr = decryptAVDataLocked(avBoxID, av.ID, before)
+			}
+			if readErr != nil {
+				return readErr
+			}
+			if _, readErr = ParseAttributeViewData(av.ID, plain); readErr != nil {
+				return readErr
+			}
+		}
+		writeData := data
+		if avBoxID != "" {
+			if writeData, err = encryptAVDataLocked(avBoxID, av.ID, data); err != nil {
+				return err
+			}
+		}
+		if err = value.(*sourceWriteRecord).record(avBoxID, before, writeData); err != nil {
+			return err
+		}
+		if err = os.MkdirAll(filepath.Dir(avJSONPath), 0755); err != nil {
+			return err
+		}
+		if err = util.WriteFileIfUnchanged(avJSONPath, before, writeData); err != nil {
+			return err
+		}
+		cacheAttributeViewData(av, avBoxID, data)
+		NotifyAttributeViewSaved(av.ID, avBoxID)
+		return nil
+	}
 	if original != nil {
 		if avBoxID != "" {
 			return errors.New("conditional replacement of encrypted attribute views is not supported")

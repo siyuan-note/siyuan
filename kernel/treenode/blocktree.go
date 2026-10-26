@@ -673,16 +673,21 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 }
 
 func RemoveBlockTreesByIDs(boxID string, ids []string) {
+	RemoveBlockTreesByIDsWithError(boxID, ids)
+}
+
+func RemoveBlockTreesByIDsWithError(boxID string, ids []string) error {
 	if 1 > len(ids) {
-		return
+		return nil
 	}
 
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
 	_, err := execForBox(boxID, sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-		return
+		return err
 	}
+	return nil
 }
 
 func RemoveBlockTree(boxID, id string) {
@@ -762,7 +767,11 @@ func UpsertBlockTreePending(tree *parse.Tree) {
 	upsertBlockTree(tree, false)
 }
 
-func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
+func UpsertBlockTreePendingWithError(tree *parse.Tree) error {
+	return upsertBlockTree(tree, false)
+}
+
+func upsertBlockTree(tree *parse.Tree, publishMetadata bool) error {
 	tree.HPath = CurrentParentHPath(tree)
 	metadata, metadataErr := GetDocumentMetadata(tree.Box, tree.ID)
 	metadataChanged := metadataErr != nil || metadata.Revision != documentMetadataFromTree(tree).Revision
@@ -797,7 +806,7 @@ func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
 	})
 
 	if 1 > len(changedNodes) {
-		return
+		return nil
 	}
 
 	ids := bytes.Buffer{}
@@ -815,13 +824,13 @@ func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
 
 	if nil == db && getEncryptedBlockTreeDB(tree.Box) == nil {
 		logging.LogErrorf("database is nil")
-		return
+		return errors.New("block-tree database is unavailable")
 	}
 
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
 		logging.LogErrorf("begin transaction failed: %s", err)
-		return
+		return err
 	}
 
 	// 文档行原地更新，避免未提交事务触发摘要删除。
@@ -830,7 +839,7 @@ func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
 	if err != nil {
 		tx.Rollback()
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-		return
+		return err
 	}
 
 	execInsertBlocktreesWithMetadata(tx, tree, changedNodes, publishMetadata)
@@ -838,6 +847,7 @@ func upsertBlockTree(tree *parse.Tree, publishMetadata bool) {
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit transaction failed: %s", err)
 	}
+	return err
 }
 
 func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {

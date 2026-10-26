@@ -151,6 +151,9 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 }
 
 func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID string) error {
+	if tx != nil {
+		tx.watchSourceDatabase(view)
+	}
 	if tx == nil || (tx.attributeViewAutomations == nil && !tx.attributeViewItemCreation) {
 		return nil
 	}

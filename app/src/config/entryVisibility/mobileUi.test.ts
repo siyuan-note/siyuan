@@ -182,7 +182,21 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.dispatchEvent(new Event("change", {bubbles: true}));
         check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
         check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
-        check(select.options.length === 3, "Mobile must offer toolbar, slash, and image categories");
+        check(select.options.length === 4, "Mobile must offer toolbar, embed, slash, and image categories");
+        select.value = "editor.blockEmbed";
+        select.dispatchEvent(new Event("change", {bubbles: true}));
+        const embedToolbar = view.querySelector<HTMLInputElement>("[data-entry-path='editor.blockEmbed.toolbar']");
+        check(embedToolbar?.checked, "Mobile exposes the default-visible embed toolbar");
+        const saved = JSON.stringify(config());
+        const readonly = embedToolbar.hasAttribute("data-entry-readonly");
+        embedToolbar.click();
+        check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.blockEmbed.toolbar']").checked === readonly,
+            "Custom profiles can hide embed toolbars while built-in profiles remain read-only");
+        check(JSON.stringify(config()) === saved,
+            "Draft toolbar changes do not mutate saved profiles");
+        if (!readonly) {
+            view.querySelector<HTMLInputElement>("[data-entry-path='editor.blockEmbed.toolbar']").click();
+        }
         select.value = "editor.slash";
         select.dispatchEvent(new Event("change", {bubbles: true}));
     };

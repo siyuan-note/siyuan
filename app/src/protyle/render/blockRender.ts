@@ -14,6 +14,7 @@ import {isDirectHeadingEmbed} from "./embedHeading";
 import {isFoldedRenderContent} from "./foldedContent";
 import {getEmbedBreadcrumbPaths, resolveEmbedBreadcrumbPreference} from "./embedBreadcrumb";
 import {Constants} from "../../constants";
+import {renderEmbedToolbarVisibility} from "../wysiwyg/embedToolbarVisibility";
 
 /**
  * 渲染嵌入块
@@ -151,6 +152,7 @@ ${popover}${breadcrumbHTML}${blocksItem.block.content}
     }
 
     processRender(item);
+    renderEmbedToolbarVisibility(item);
     highlightRender(item);
     avRender(item, protyle);
     if (protyle.disabled) {

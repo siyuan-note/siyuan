@@ -47,6 +47,7 @@ import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisib
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {embedBreadcrumbMenu} from "./embedBreadcrumbMenu";
+import {embedOpenMenu} from "./embedOpenMenu";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -2499,14 +2500,14 @@ export class Gutter {
                     protyle.toolbar.showRender(protyle, nodeElement);
                 }
             }).element);
-        } else if (type === "NodeBlockQueryEmbed" && !protyle.disabled) {
+        } else if (type === "NodeBlockQueryEmbed") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_blockEmbed", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "blockEmbed",
                 type: "submenu",
                 icon: "iconSQL",
                 label: window.siyuan.languages.blockEmbed,
-                submenu: [{
+                submenu: protyle.disabled ? [embedOpenMenu(protyle, nodeElement)] : [{
                     id: "refresh",
                     icon: "iconRefresh",
                     label: `${window.siyuan.languages.refresh} SQL`,
@@ -2521,7 +2522,7 @@ export class Gutter {
                     click() {
                         protyle.toolbar.showRender(protyle, nodeElement);
                     }
-                }, {
+                }, embedOpenMenu(protyle, nodeElement), {
                     id: "separator_breadcrumb",
                     type: "separator"
                 }, ...embedBreadcrumbMenu(protyle, nodeElement), {

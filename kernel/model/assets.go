@@ -1624,6 +1624,11 @@ func uploadAssets2CloudWithApp(assetPaths []string, bizType string, ignorePushMs
 
 func RemoveUnusedAssets() (ret []string, err error) {
 	ret = []string{}
+	verify, release, err := beginOrdinaryAssetCleanup()
+	if err != nil {
+		return
+	}
+	defer release()
 	unusedAssets, err := UnusedAssets(false)
 	if err != nil {
 		return
@@ -1667,39 +1672,20 @@ func RemoveUnusedAssets() (ret []string, err error) {
 
 			hash, _ := util.GetEtag(p)
 			hashes = append(hashes, hash)
-			cache.RemoveAssetHashByPath(unusedAsset.Item)
 		}
 	}
 
+	ret, size, err = removeOrdinaryUnusedAssets(unusedAssets, historyDir, verify, filelock.RemoveWithoutFatal)
+	if err != nil {
+		return
+	}
 	sql.BatchRemoveAssetsQueue(hashes)
-
-	for _, unusedAsset := range unusedAssets {
-		p := unusedAsset.Item
-		absPath := filepath.Join(util.DataDir, p)
-		if filelock.IsExist(absPath) {
-			info, statErr := os.Stat(absPath)
-			if statErr == nil {
-				if info.IsDir() {
-					dirSize, _ := util.SizeOfDirectory(absPath)
-					size += dirSize
-				} else {
-					size += info.Size()
-				}
-			}
-
-			if util.IsMobileContainer() {
-				HandleAssetsRemoveEvent(absPath)
-			}
-
-			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
-				err = removeErr
-				return
-			}
-
-			util.RemoveAssetText(p)
+	for _, item := range unusedAssets {
+		cache.RemoveAssetHashByPath(item.Item)
+		util.RemoveAssetText(item.Item)
+		if util.IsMobileContainer() {
+			HandleAssetsRemoveEvent(filepath.Join(util.DataDir, item.Item))
 		}
-		ret = append(ret, absPath)
 	}
 	if 0 < len(ret) {
 		IncSync()
@@ -1711,6 +1697,11 @@ func RemoveUnusedAssets() (ret []string, err error) {
 }
 
 func RemoveUnusedAsset(p string) (ret string, err error) {
+	verify, release, err := beginOrdinaryAssetCleanup()
+	if err != nil {
+		return
+	}
+	defer release()
 	relativePath, absPath, err := ResolveUnusedDataAssetPath(p)
 	if err != nil {
 		return
@@ -1731,20 +1722,18 @@ func RemoveUnusedAsset(p string) (ret string, err error) {
 	}
 
 	hash, _ := util.GetEtag(absPath)
-	sql.BatchRemoveAssetsQueue([]string{hash})
-	cache.RemoveAssetHashByPath(relativePath)
-
-	if util.IsMobileContainer() {
-		HandleAssetsRemoveEvent(absPath)
-	}
-
-	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
+	if _, _, err = removeOrdinaryUnusedAssets([]*UnusedItem{{Item: relativePath}}, historyDir, verify, filelock.RemoveWithoutFatal); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
 		err = fmt.Errorf("remove unused asset [%s] failed: %w", absPath, err)
 		return
 	}
 	ret = absPath
+	sql.BatchRemoveAssetsQueue([]string{hash})
+	cache.RemoveAssetHashByPath(relativePath)
+	if util.IsMobileContainer() {
+		HandleAssetsRemoveEvent(absPath)
+	}
 
 	util.RemoveAssetText(relativePath)
 

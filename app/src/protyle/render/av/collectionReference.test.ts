@@ -48,6 +48,23 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         "../../../block/Panel": {BlockPanel: class {}},
     })[name] || {});
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+    for (const attachBeforeResponse of [false, true]) {
+        const reopened = document.createElement("div");
+        const saved: AVAutomationBlockSourceInput = {referenceID: target};
+        let resizes = 0;
+        api.mountCollectionReference(reopened, saved, {block: {rootID}} as IProtyle,
+            () => check.fail("loading the saved reference changed the configuration"), () => { resizes++; });
+        if (attachBeforeResponse) { document.body.append(reopened); }
+        const beforeResponse = resizes;
+        pendingNames.shift()({code: 0, data: "Saved document name"});
+        await tick();
+        check.equal(reopened.querySelector("[data-preview-reference]").textContent, "Saved document name");
+        check.equal(resizes, beforeResponse + (attachBeforeResponse ? 1 : 0));
+        if (!attachBeforeResponse) { document.body.append(reopened); }
+        check.equal(reopened.querySelector("[data-preview-reference]").textContent, "Saved document name");
+        check.equal(saved.referenceID, target);
+        reopened.remove();
+    }
     for (const [width, key] of [[1000, ""], [320, "Enter"], [320, " "]] as const) {
         const host = document.createElement("div");
         host.style.width = `${width}px`;
@@ -96,7 +113,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
     return "Reference collection DOM cases passed";
 };
 
-test("reference selection, current document, mouse and keyboard clearing, and stale labels work on desktop and narrow layouts", {
+test("reference reopening, selection, mouse and keyboard clearing, and stale labels work on desktop and narrow layouts", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

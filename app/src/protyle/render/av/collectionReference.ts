@@ -25,9 +25,9 @@ export const mountCollectionReference = (host: HTMLElement, source: AVAutomation
         resize();
         if (id) {
             const result = await fetchSyncPost("/api/block/getRefText", {id});
-            if (version === revision && host.isConnected && result.code === 0) {
+            if (version === revision && result.code === 0) {
                 host.querySelector("[data-preview-reference]").textContent = result.data || id;
-                resize();
+                if (host.isConnected) { resize(); }
             }
         }
     };

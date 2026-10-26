@@ -81,7 +81,7 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     if (!messagesElement) {
         let tempMessages = document.getElementById("tempMessage");
         if (!tempMessages) {
-            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: max(22px, calc(var(--b3-window-controls-height, 0px) + 16px));position: fixed;z-index: 100;right: 30px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;"
+            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: var(--b3-snackbar-top, 48px);position: fixed;z-index: 100;right: var(--b3-snackbar-right, 16px);line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;"
 id="tempMessage"></div>`);
             tempMessages = document.getElementById("tempMessage");
         }

@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
 	"skipExitSyncConfirm": "La sincronizzazione non è terminata. Saltarla e uscire? Le modifiche non sincronizzate rimarranno salvate su questo dispositivo",
 	"automationCollectionReference": "Destinazione del riferimento",

@@ -19,6 +19,8 @@ package sql
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -278,6 +280,67 @@ func TestIndexQueueCoalescedLocationsArePersisted(t *testing.T) {
 				t.Fatal("restart did not retain latest coalesced location")
 			}
 		})
+	}
+}
+
+type indexQueueFailingWriter struct {
+	bytes.Buffer
+	writeErr, closeErr error
+	short, closed      bool
+}
+
+func (w *indexQueueFailingWriter) Write(data []byte) (int, error) {
+	if w.short {
+		return len(data) - 1, w.writeErr
+	}
+	if w.writeErr != nil {
+		return 0, w.writeErr
+	}
+	return w.Buffer.Write(data)
+}
+
+func (w *indexQueueFailingWriter) Close() error {
+	w.closed = true
+	return w.closeErr
+}
+
+func TestIndexQueueRecordReportsWriteAndCloseFailures(t *testing.T) {
+	writeErr, closeErr := errors.New("write failed"), errors.New("close failed")
+	for _, writer := range []*indexQueueFailingWriter{{writeErr: writeErr}, {closeErr: closeErr},
+		{writeErr: writeErr, closeErr: closeErr}, {short: true}, {}} {
+		err := writeIndexQueueRecord(writer, []byte("record\n"))
+		if !writer.closed || !errors.Is(err, writer.writeErr) && writer.writeErr != nil ||
+			!errors.Is(err, writer.closeErr) && writer.closeErr != nil || writer.short && !errors.Is(err, io.ErrShortWrite) {
+			t.Fatalf("write/close failure was lost: %+v, %v", writer, err)
+		}
+		if writer.writeErr == nil && writer.closeErr == nil && !writer.short && err != nil {
+			t.Fatalf("successful append failed: %v", err)
+		}
+	}
+}
+
+func TestIndexQueueAppendFailureKeepsLiveOperation(t *testing.T) {
+	prepareIndexQueueTest(t)
+	previousFailure := indexQueueWriteFailed.Load()
+	t.Cleanup(func() { indexQueueWriteFailed.Store(previousFailure) })
+	queuePath := filepath.Join(util.QueueDir, "index.queue")
+	if err := os.Mkdir(queuePath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	op := &dbQueueOperation{action: "delete_box", box: "retained"}
+	if err := appendToIndexQueue(op); err == nil {
+		t.Fatal("journal open failure was not returned")
+	}
+	appendOperation(op)
+	if len(operationQueue) != 1 || operationQueue[0] != op || !indexQueueWriteFailed.Load() {
+		t.Fatal("journal failure lost live operation or warning state")
+	}
+	if err := os.Remove(queuePath); err != nil {
+		t.Fatal(err)
+	}
+	appendOperation(&dbQueueOperation{action: "delete_box", box: "next"})
+	if indexQueueWriteFailed.Load() || len(loadIndexQueue()) != 1 || len(operationQueue) != 2 {
+		t.Fatal("journal recovery did not reset warning or preserve memory work")
 	}
 }
 

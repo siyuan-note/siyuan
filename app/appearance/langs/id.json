@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori",
 	"skipExitSync": "Lewati sinkronisasi dan keluar",
 	"skipExitSyncConfirm": "Sinkronisasi belum selesai. Lewati dan keluar? Perubahan yang belum disinkronkan akan tetap tersimpan di perangkat ini",
 	"automationCollectionReference": "Tujuan referensi",

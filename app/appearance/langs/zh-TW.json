@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "索引復原日誌寫入失敗，請保持思源執行並檢查磁碟空間和目錄權限",
 	"skipExitSync": "略過同步並結束",
 	"skipExitSyncConfirm": "同步尚未完成，是否略過本次同步並結束？未同步的變更會保留在本機",
 	"automationCollectionReference": "引用目標",

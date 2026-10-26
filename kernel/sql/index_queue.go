@@ -19,6 +19,7 @@ package sql
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -39,9 +40,10 @@ import (
 )
 
 var (
-	indexMu        sync.Mutex
-	indexQueueSize atomic.Int64
-	indexFlock     *flock.Flock
+	indexMu               sync.Mutex
+	indexQueueSize        atomic.Int64
+	indexFlock            *flock.Flock
+	indexQueueWriteFailed atomic.Bool
 
 	// HPathRefreshLock 在重建索引前阻止路径任务写回；锁顺序为路径任务锁、数据库初始化锁、索引队列锁。
 	HPathRefreshLock sync.Mutex
@@ -76,20 +78,21 @@ func closeIndexQueue() {
 	os.Remove(filepath.Join(util.QueueDir, "index.queue.lock"))
 }
 
-func appendToIndexQueue(op *dbQueueOperation) {
+func appendToIndexQueue(op *dbQueueOperation) error {
 	entry := dbOpToIndexEntry(op)
 	if nil == entry {
-		return
+		return nil
 	}
 
 	data, err := json.Marshal(entry)
 	if err != nil {
-		logging.LogErrorf("marshal index queue entry failed: %s", err)
-		return
+		return fmt.Errorf("marshal index queue entry: %w", err)
 	}
 	data = append(data, '\n')
 
-	_ = indexFlock.Lock()
+	if err = indexFlock.Lock(); err != nil {
+		return fmt.Errorf("lock index queue: %w", err)
+	}
 	defer func() { _ = indexFlock.Unlock() }()
 
 	indexMu.Lock()
@@ -98,16 +101,45 @@ func appendToIndexQueue(op *dbQueueOperation) {
 	indexQueuePath := filepath.Join(util.QueueDir, "index.queue")
 	f, err := os.OpenFile(indexQueuePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logging.LogErrorf("open index queue for append failed: %s", err)
-		return
+		return fmt.Errorf("open index queue for append: %w", err)
 	}
-	n, err := f.Write(data)
-	f.Close()
+	info, err := f.Stat()
 	if err != nil {
-		logging.LogErrorf("write index queue failed: %s", err)
+		f.Close()
+		return fmt.Errorf("stat index queue: %w", err)
+	}
+	if err = writeIndexQueueRecord(f, data); err != nil {
+		// A partial append must not merge into the next JSON record. Preserve
+		// the previous records; the in-memory operation remains executable.
+		truncateErr := os.Truncate(indexQueuePath, info.Size())
+		if truncateErr == nil {
+			indexQueueSize.Store(info.Size())
+		} else if current, statErr := os.Stat(indexQueuePath); statErr == nil {
+			indexQueueSize.Store(current.Size())
+		}
+		return fmt.Errorf("write index queue: %w", errors.Join(err, truncateErr))
+	}
+	indexQueueSize.Store(info.Size() + int64(len(data)))
+	return nil
+}
+
+func writeIndexQueueRecord(file io.WriteCloser, data []byte) error {
+	n, writeErr := file.Write(data)
+	if writeErr == nil && n != len(data) {
+		writeErr = io.ErrShortWrite
+	}
+	return errors.Join(writeErr, file.Close())
+}
+
+func recordIndexOperation(op *dbQueueOperation) {
+	if err := appendToIndexQueue(op); err != nil {
+		logging.LogErrorf("persist index recovery operation failed: %s", err)
+		if !indexQueueWriteFailed.Swap(true) {
+			util.PushErrMsg(util.I18nTerm(util.Lang, "indexRecoveryJournalWriteFailed"), 0)
+		}
 		return
 	}
-	indexQueueSize.Add(int64(n))
+	indexQueueWriteFailed.Store(false)
 }
 
 func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {

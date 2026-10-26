@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Das Protokoll zur Indexwiederherstellung konnte nicht gespeichert werden; lassen Sie SiYuan geöffnet und prüfen Sie den Speicherplatz und die Verzeichnisberechtigungen",
 	"skipExitSync": "Synchronisierung überspringen und beenden",
 	"skipExitSyncConfirm": "Die Synchronisierung ist noch nicht abgeschlossen. Überspringen und beenden? Nicht synchronisierte Änderungen bleiben auf diesem Gerät gespeichert",
 	"automationCollectionReference": "Referenzziel",

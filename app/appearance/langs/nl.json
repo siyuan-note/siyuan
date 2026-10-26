@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen",
 	"skipExitSync": "Synchronisatie overslaan en afsluiten",
 	"skipExitSyncConfirm": "De synchronisatie is nog niet voltooid. Overslaan en afsluiten? Niet-gesynchroniseerde wijzigingen blijven op dit apparaat opgeslagen",
 	"automationCollectionReference": "Verwijzingsdoel",

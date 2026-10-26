@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire",
 	"skipExitSync": "Ignorer la synchronisation et quitter",
 	"skipExitSyncConfirm": "La synchronisation n’est pas terminée. L’ignorer et quitter ? Les modifications non synchronisées resteront enregistrées sur cet appareil",
 	"automationCollectionReference": "Cible de référence",

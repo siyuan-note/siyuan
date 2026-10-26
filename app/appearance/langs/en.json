@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions",
 	"skipExitSync": "Skip sync and exit",
 	"skipExitSyncConfirm": "Synchronization has not finished. Skip it and exit? Unsynced changes will remain saved on this device",
 	"automationCollectionReference": "Reference target",

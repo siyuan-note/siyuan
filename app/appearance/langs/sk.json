@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka",
 	"skipExitSync": "Preskočiť synchronizáciu a skončiť",
 	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",

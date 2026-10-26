@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "تعذر حفظ سجل استرداد الفهرس؛ أبقِ SiYuan مفتوحًا وتحقق من مساحة القرص وأذونات المجلد",
 	"skipExitSync": "تخطي المزامنة والخروج",
 	"skipExitSyncConfirm": "لم تكتمل المزامنة. هل تريد تخطيها والخروج؟ ستبقى التغييرات غير المتزامنة محفوظة على هذا الجهاز",
 	"automationCollectionReference": "هدف المرجع",

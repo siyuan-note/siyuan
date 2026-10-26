@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin",
 	"skipExitSync": "Eşitlemeyi atla ve çık",
 	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",
 	"automationCollectionReference": "Başvuru hedefi",

@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "インデックス復旧ログを保存できませんでした。SiYuan を開いたまま、ディスクの空き容量とディレクトリの権限を確認してください",
 	"skipExitSync": "同期をスキップして終了",
 	"skipExitSyncConfirm": "同期が完了していません。スキップして終了しますか？未同期の変更はこの端末に保存されたままになります",
 	"automationCollectionReference": "参照先",

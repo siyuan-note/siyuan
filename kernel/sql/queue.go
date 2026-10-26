@@ -726,7 +726,7 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
-	appendToIndexQueue(op)
+	recordIndexOperation(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 }
 
@@ -737,6 +737,6 @@ func replaceOperation(index int, op *dbQueueOperation) {
 	previous := dbOpToIndexEntry(operationQueue[index])
 	operationQueue[index] = op
 	if !reflect.DeepEqual(previous, dbOpToIndexEntry(op)) {
-		appendToIndexQueue(op)
+		recordIndexOperation(op)
 	}
 }

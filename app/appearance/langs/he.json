@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "לא ניתן לשמור את יומן שחזור האינדקס; יש להשאיר את SiYuan פתוח ולבדוק את שטח הדיסק ואת הרשאות התיקייה",
 	"skipExitSync": "דלג על הסנכרון וצא",
 	"skipExitSyncConfirm": "הסנכרון עדיין לא הושלם. לדלג עליו ולצאת? השינויים שלא סונכרנו יישארו שמורים במכשיר זה",
 	"automationCollectionReference": "יעד ההפניה",

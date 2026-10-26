@@ -1,4 +1,5 @@
 {
+	"indexRecoveryJournalWriteFailed": "Nie udało się zapisać dziennika odzyskiwania indeksu; pozostaw SiYuan otwarty i sprawdź miejsce na dysku oraz uprawnienia do katalogu",
 	"skipExitSync": "Pomiń synchronizację i wyjdź",
 	"skipExitSyncConfirm": "Synchronizacja nie została zakończona. Pominąć ją i wyjść? Niezsynchronizowane zmiany pozostaną zapisane na tym urządzeniu",
 	"automationCollectionReference": "Cel odwołania",

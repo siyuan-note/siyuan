@@ -4720,8 +4720,6 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 				}
 			}
-
-			av.RemoveAvRel(srcAv.ID, srcRel.AvID)
 		}
 
 		var candidateFilters []*av.ViewFilter
@@ -4829,9 +4827,24 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	if !isSameAv {
 		regenAttrViewGroups(destAv)
 		err = av.SaveAttributeView(destAv)
+		if err != nil {
+			return
+		}
 		ReloadAttrView(destAv.ID)
 	}
 
+	if oldDestAvID != "" && oldDestAvID != destAv.ID {
+		stillRelated := false
+		for _, kv := range srcAv.KeyValues {
+			if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID == oldDestAvID {
+				stillRelated = true
+				break
+			}
+		}
+		if !stillRelated {
+			av.RemoveAvRel(srcAv.ID, oldDestAvID)
+		}
+	}
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
 	if operation.IsTwoWay && !isSameAv {
 		av.UpsertAvBackRel(destAv.ID, srcAv.ID)

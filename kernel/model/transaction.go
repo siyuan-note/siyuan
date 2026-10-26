@@ -2796,7 +2796,7 @@ type Transaction struct {
 	attributeViewItemCreation     bool
 	invalidatedAvHistory          map[string]bool
 
-	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
+	fromAPI  bool // 用户主动修改（HTTP、CLI、MCP 等）；允许自动化，撤销日志仍需具备 UndoOperations
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
 
 	listItemFoldCandidates    []listItemFoldCandidate

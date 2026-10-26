@@ -5448,7 +5448,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Collection is evaluated after block creation, content or attribute edits, and block moves. Moving an entire document in the document tree, imports, sync, and history restoration do not backfill matches; use the preview to collect existing content."
+					"Data": "Collection is evaluated after user creation, copying, content or attribute edits, content template application, global find and replace, and block or document moves into a watched scope. Document tree copies and moves include descendant documents. Existing rows keep their field values. Markdown and .sy imports, sync, history restoration, undo, and redo do not trigger new collection; use the preview to collect existing content explicitly."
 				}
 			]
 		},

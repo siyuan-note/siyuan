@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -229,7 +230,10 @@ func removeDuplicateDatabaseIndex() {
 
 // resetDuplicateBlocksOnFileSys 重置重复 ID 的块。 https://github.com/siyuan-note/siyuan/issues/7357
 func resetDuplicateBlocksOnFileSys() error {
+	return resetDuplicateBlocksOnFileSysBeforeWrite(nil)
+}
 
+func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) error {
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 2, 5))
 	boxes := Conf.GetBoxes()
 	luteEngine := lute.New()
@@ -255,7 +259,11 @@ func resetDuplicateBlocksOnFileSys() error {
 		}
 
 		boxPath := filepath.Join(util.DataDir, box.ID)
-		var duplicatedTrees []*parse.Tree
+		type repairSnapshot struct {
+			tree     *parse.Tree
+			original []byte
+		}
+		var duplicatedTrees []repairSnapshot
 		if walkErr := filelock.Walk(boxPath, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -295,13 +303,16 @@ func resetDuplicateBlocksOnFileSys() error {
 
 			p := path[len(boxPath):]
 			p = filepath.ToSlash(p)
-			tree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
+			FlushTxQueue()
+			flushLock.Lock()
+			defer flushLock.Unlock()
+			tree, original, needOverwrite, loadErr := filesys.LoadTreeSnapshotWithFix(box.ID, p, luteEngine)
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", p, loadErr)
 				return loadErr
 			}
+			duplicateRoot := false
 
-			needOverwrite := false
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || !n.IsBlock() {
 					return ast.WalkContinue
@@ -323,7 +334,8 @@ func resetDuplicateBlocksOnFileSys() error {
 				if ast.NodeDocument == n.Type {
 					// 如果是文档根节点，则重置这颗树
 					// 这里不能在迭代中重置，因为如果这个文档存在子文档的话，重置时会重命名子文档文件夹，后续迭代可能会导致子文档 ID 重复
-					duplicatedTrees = append(duplicatedTrees, tree)
+					duplicatedTrees = append(duplicatedTrees, repairSnapshot{tree, original})
+					duplicateRoot = true
 					return ast.WalkStop
 				}
 
@@ -334,9 +346,12 @@ func resetDuplicateBlocksOnFileSys() error {
 				return ast.WalkContinue
 			})
 
-			if needOverwrite {
+			if needOverwrite && !duplicateRoot {
+				if beforeWrite != nil {
+					beforeWrite(tree)
+				}
 				logging.LogWarnf("exist more than one node with the same id in tree [%s], reset it", box.ID+p)
-				if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
+				if _, writeErr := filesys.WriteTreeIfUnchanged(tree, original); nil != writeErr {
 					logging.LogErrorf("write tree [%s] failed: %s", p, writeErr)
 					return writeErr
 				}
@@ -346,10 +361,11 @@ func resetDuplicateBlocksOnFileSys() error {
 			return walkErr
 		}
 
-		for _, tree := range duplicatedTrees {
+		for _, snapshot := range duplicatedTrees {
+			tree := snapshot.tree
 			absPath := filepath.Join(boxPath, tree.Path)
 			logging.LogWarnf("exist more than one tree with the same id [%s], reset it", absPath)
-			if err := recreateTree(tree, absPath); err != nil {
+			if err := recreateTree(tree, absPath, snapshot.original); err != nil {
 				return err
 			}
 			needRefreshUI = true
@@ -363,7 +379,17 @@ func resetDuplicateBlocksOnFileSys() error {
 	return nil
 }
 
-func recreateTree(tree *parse.Tree, absPath string) error {
+func recreateTree(tree *parse.Tree, absPath string, original []byte) error {
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	current, err := filelock.ReadFile(absPath)
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(current, original) {
+		return fmt.Errorf("%w: %s", util.ErrFileChanged, absPath)
+	}
 	// 删除关于该树的所有块树数据，后面会调用 fixBlockTreeByFileSys() 进行订正补全
 	treenode.RemoveBlockTreesByPathPrefix(tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
 	treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
@@ -384,11 +410,24 @@ func recreateTree(tree *parse.Tree, absPath string) error {
 		}
 	}
 
-	if err := filelock.Remove(absPath); err != nil {
+	if err := removeIndexRepairSourceIfUnchanged(absPath, original); err != nil {
 		logging.LogWarnf("remove [%s] failed: %s", absPath, err)
 		return err
 	}
 	return nil
+}
+
+func removeIndexRepairSourceIfUnchanged(absPath string, original []byte) error {
+	filelock.Lock(absPath)
+	defer filelock.Unlock(absPath)
+	current, err := os.ReadFile(absPath)
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(current, original) {
+		return fmt.Errorf("%w: %s", util.ErrFileChanged, absPath)
+	}
+	return os.Remove(absPath)
 }
 
 // fixBlockTreeByFileSys 通过文件系统订正块树。

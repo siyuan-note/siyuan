@@ -406,12 +406,12 @@ class ListMindmapController {
             onClipboardMenu: (anchor, ids) => {
                 toggleMenu({target: anchor, build: (_menu, session) => {
                     const menu = new Menu();
-                    menu.addItem({label: window.siyuan.languages.copy, icon: "iconCopy",
-                        click: () => void this.copyNodes(ids, false)});
                     if (canEdit(owner, list) && canCutMindmapBranches(readListMindmap(list), ids)) {
                         menu.addItem({label: window.siyuan.languages.cut, icon: "iconCut",
                             click: () => void this.copyNodes(ids, true)});
                     }
+                    menu.addItem({label: window.siyuan.languages.copy, icon: "iconCopy",
+                        click: () => void this.copyNodes(ids, false)});
                     if (ids.length === 1 && canEdit(owner, list)) {
                         menu.addItem({label: window.siyuan.languages.mindmapPasteChild, icon: "iconPaste",
                             click: () => void this.pasteNodes(ids[0], "child")});
@@ -420,8 +420,17 @@ class ListMindmapController {
                                 click: () => void this.pasteNodes(ids[0], "sibling")});
                         }
                     }
+                    const marker = ids.length === 1 ? this.model.nodes.get(ids[0])?.taskMarker : undefined;
+                    if (marker !== undefined && canEdit(owner, list)) {
+                        menu.addItem({label: window.siyuan.languages.checkToggle, icon: "iconCheck",
+                            submenu: getTaskStatusItems(marker, next => this.setTask(ids[0], () => next))});
+                    }
                     const rect = anchor.getBoundingClientRect();
-                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                    if (isMobile()) {
+                        session.show(() => menu.fullscreen("bottom"));
+                    } else {
+                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                    }
                 }});
             },
             isAddSiblingShortcut: event => {

@@ -26,7 +26,7 @@ test("default node and line palettes have thirteen colors and retain existing se
     assert.equal(JSON.stringify(data), before, "reading palettes does not migrate or overwrite workspace colors");
 });
 
-test("workspace custom colors, hidden entries, ordering and light/dark values remain effective", () => {
+test("six built-in pairs precede scrolling colors while preserving hidden entries, custom ordering and mode values", () => {
     const combinedID = "20260821120000-abcdefg";
     const hiddenID = "20260821120000-bcdefgh";
     const lineID = "20260821120000-cdefghi";
@@ -47,16 +47,17 @@ test("workspace custom colors, hidden entries, ordering and light/dark values re
     const before = JSON.stringify(data);
     for (const mode of ["light", "dark"] as const) {
         const nodes = getListMindmapNodeColors(data, labels, mode);
-        assert.deepEqual(nodes.slice(0, 4).map(item => item.label), ["Custom pair", "Success", "Info", "Error"]);
+        assert.deepEqual(nodes.slice(0, 5).map(item => item.label), ["Error", "Info", "Success", "Color 5", "Custom pair"]);
         assert.equal(nodes.some(item => item.label === "Hidden pair" || item.label === "Warning"), false);
-        assert.deepEqual(nodes.slice(4, 6).map(item => item.label), ["Color 13", "Color 5"]);
+        assert.equal(nodes[5].label, "Color 13", "remaining built-in colors retain their configured relative order");
         assert.equal(nodes.some(item => item.backgroundColor === "var(--b3-font-background6)"), false);
-        assert.deepEqual(nodes[2].preview, mode === "light" ?
+        assert.deepEqual(nodes[1].preview, mode === "light" ?
             {color: "#112233", backgroundColor: "#ddeeff"} : {color: "#abcdef", backgroundColor: "#223344"});
-        assert.match(nodes[0].color, new RegExp(mode === "light" ? "#112233" : "#abcdef"));
+        assert.match(nodes[4].color, new RegExp(mode === "light" ? "#112233" : "#abcdef"));
         const lines = getListMindmapLineColors(data, labels, mode);
-        assert.deepEqual(lines.slice(0, 3).map(item => item.label), ["Custom line", "Color 13", "Color 1"]);
-        assert.match(lines[0].value, new RegExp(mode === "light" ? "#123456" : "#fedcba"));
+        assert.deepEqual(lines.slice(0, 7).map(item => item.label),
+            ["Color 1", "Color 3", "Color 4", "Color 5", "Color 6", "Custom line", "Color 13"]);
+        assert.match(lines[5].value, new RegExp(mode === "light" ? "#123456" : "#fedcba"));
         assert.equal(lines.some(item => item.value === "var(--b3-font-color2)"), false);
     }
     assert.equal(JSON.stringify(data), before);

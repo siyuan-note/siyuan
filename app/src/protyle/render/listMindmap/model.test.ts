@@ -2230,6 +2230,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const popup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
         const palettes = popup.querySelectorAll<HTMLElement>(".mindmap-view__palette");
         check.equal(palettes.length, 2);
+        check.equal(popup.getBoundingClientRect().width, inspector.getBoundingClientRect().width,
+            "the palette popup matches the eight-action toolbar at every canvas width");
+        check.equal(popup.getBoundingClientRect().left, inspector.getBoundingClientRect().left);
         check.equal(palettes[0].getAttribute("aria-label"), "listMindmapNodeColor");
         check.equal(palettes[1].getAttribute("aria-label"), "listMindmapLineColor");
         check.equal(popup.children.length, 2, "the popup has only two compact rows without visible headings");
@@ -2248,13 +2251,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             const buttons = Array.from(palette.children) as HTMLElement[];
             check.equal(new Set(buttons.map(button => button.offsetTop)).size, 1, "each palette keeps one row");
             check.ok(palette.getBoundingClientRect().right <= palette.nextElementSibling.getBoundingClientRect().left);
-            if (width < 760) {
-                check.ok(palette.scrollWidth > palette.clientWidth, "narrow palettes scroll horizontally");
-            }
-        }
-        if (width === 760) {
-            check.equal(palettes[1].scrollWidth, palettes[1].clientWidth,
-                "the normal line palette fits one row on a wide canvas");
+            check.ok(palette.scrollWidth > palette.clientWidth, "additional colors scroll even on wide canvases");
+            check.ok(buttons[6].getBoundingClientRect().right <= palette.getBoundingClientRect().right + 1,
+                "default and six colors fit before the fixed settings column");
+            check.ok(buttons[7].getBoundingClientRect().left >= palette.getBoundingClientRect().right - 1,
+                "the next color stays outside the first page");
         }
         const beforeSettings = nodeStyles.length;
         managers[0].focus();
@@ -2296,6 +2297,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(host.querySelector<HTMLElement>(".mindmap-view__inspector-popover").hidden, false,
         "a native touch tap opens the same compact two-row palette");
     check.deepEqual(view.getSelectedIds(), paletteSelection, "opening the palette by touch preserves the selected nodes");
+    const touchPalette = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover .mindmap-view__palette");
+    const touchBounds = touchPalette.getBoundingClientRect();
+    const touchManager = touchPalette.nextElementSibling;
+    const managerPosition = touchManager.getBoundingClientRect().left;
+    const beforeColorSwipe = nodeStyles.length;
+    const swipeStart = {x: Math.round(touchBounds.right - 12), y: Math.round(touchBounds.top + touchBounds.height / 2)};
+    await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+        {type: "touchStart", touchPoints: [{id: 1, ...swipeStart}]},
+        ...[20, 40, 60, 80, 100, 120].map(delta => ({type: "touchMove",
+            touchPoints: [{id: 1, x: swipeStart.x - delta, y: swipeStart.y}]})),
+        {type: "touchEnd", touchPoints: []},
+    ]);
+    await settle();
+    check.ok(touchPalette.scrollLeft > 0, "a native horizontal swipe reaches colors beyond the first six groups");
+    check.equal(touchManager.getBoundingClientRect().left, managerPosition, "swiping the palette keeps color settings fixed");
+    check.equal(nodeStyles.length, beforeColorSwipe, "swiping colors does not apply a color or alter document styles");
     options.colors = originalLineColors;
     view.focusNode(beta);
     host.style.cssText = originalHostStyle;
@@ -2311,6 +2328,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     inspector.querySelector<HTMLButtonElement>('[aria-label="width"]').click();
     const nodePopup = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
     const widthInput = () => nodePopup.querySelector<HTMLInputElement>('input[type="number"]');
+    check.equal(nodePopup.getBoundingClientRect().width, inspector.getBoundingClientRect().width);
+    const widthControls = nodePopup.querySelector(".mindmap-view__node-width");
+    check.deepEqual(Array.from(widthControls.children).map(control => control.tagName === "INPUT" ?
+        control.getAttribute("type") : control.getAttribute("aria-label")),
+    ["number", "range", "listMindmapRestoreWidth", "default"], "the width input precedes the centered slider and reset controls");
+    check.ok(Math.abs(widthInput().getBoundingClientRect().width - inspector.getBoundingClientRect().width / 4 + 2) < 2,
+        "the numeric input occupies two of the eight columns");
     widthInput().value = "640";
     widthInput().dispatchEvent(new Event("change", {bubbles: true}));
     await settle();
@@ -4892,6 +4916,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     let summaryView: any;
     summaryView = new api.ListMindmapView({host: summaryHost, model: summaryModel, onExit: () => {},
         labels: new Proxy({}, {get: (_target, key) => String(key)}),
+        colors: () => Array.from({length: 13}, (_, i) => ({label: `Summary color ${i}`, value: `rgb(${i}, 0, 0)`})),
+        onManageLineColors: () => {},
         onSummaryBatchAdd: async (ranges: any[], expected: string) => {
             const model = api.readListMindmap(summaryList);
             check.equal(api.getListMindmapSummarySnapshot(model), expected);
@@ -5050,6 +5076,30 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(summaryView.pointer, undefined, "selecting a summary does not start canvas or node dragging");
     summaryLabel.click();
     check.equal(summaryView.selectedSummary, "summary", "touching the summary selects it");
+    const summaryInspector = summaryHost.querySelector<HTMLElement>(".mindmap-view__inspector");
+    let summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
+    check.ok(summaryEdit, "summary editing retains its explicit toolbar entry");
+    for (const width of [240, 320, 700]) {
+        summaryHost.style.width = `${width}px`;
+        summaryView.renderInspector();
+        await settle();
+        const summaryPalette = summaryInspector.querySelector<HTMLElement>(".mindmap-view__palette");
+        const fixed = ["edit", "delete", "listMindmapManageLineColors"]
+            .map(key => summaryInspector.querySelector<HTMLElement>(`[aria-label="${key}"]`));
+        const positions = fixed.map(control => control.getBoundingClientRect().left);
+        summaryPalette.scrollLeft = summaryPalette.scrollWidth;
+        check.deepEqual(fixed.map(control => control.getBoundingClientRect().left), positions,
+            "summary edit, delete and color settings stay fixed while colors scroll");
+        const bounds = summaryInspector.getBoundingClientRect();
+        fixed.forEach(control => check.ok(control.getBoundingClientRect().right <= bounds.right));
+        check.equal(summaryPalette.children.length, 14, "all existing summary colors remain accessible");
+    }
+    summaryHost.style.width = "700px";
+    summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
+    summaryEdit.click();
+    check.ok(summaryHost.querySelector(".mindmap-view__summary-editor"), "the retained edit button opens summary text editing");
+    summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor")
+        .dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     summaryLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const reopenedSummary = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
     check.ok(reopenedSummary);

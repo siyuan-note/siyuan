@@ -18,7 +18,8 @@ const runRendererCase = async (sources, expected) => {
         menus: {menu: {element: document.createElement("div")}},
     };
     const assets = load(sources.assets);
-    const appearance = load(sources.appearance, {"../util/assets": assets});
+    const appearance = load(sources.appearance, {"../util/assets": assets,
+        "../config/tabs/compactMode": {isCompactModeEnabled: () => false}});
     const {waitForWindowPaint} = load(sources.paint);
     const {initWindowWithLoading} = load(sources.loading, {"../util/windowPaint": {waitForWindowPaint},
         "../constants": {Constants: {TIMEOUT_TRANSITION: 300}}});
@@ -38,7 +39,8 @@ const runRendererCase = async (sources, expected) => {
         webFrame: {setZoomFactor() {}}};
     const functions = {isWindow: () => true, setToolbarLeftMac() {}};
     const compatibility = {isMac: () => false, applyPlatformClasses() {}};
-    const overlay = load(sources.overlay, {electron, "../constants": {Constants: constants}});
+    const overlay = load(sources.overlay, {electron, "../constants": {Constants: constants},
+        "../util/color": load(sources.color)});
     const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "./windowControlsOverlay": overlay});
     const {initWindow} = load(sources.host, {
@@ -179,7 +181,7 @@ if (process.versions.electron && process.type === "browser") {
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
             paint: "util/windowPaint.ts", loading: "boot/loading.ts", init: "window/init.ts",
             host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", overlay: "boot/windowControlsOverlay.ts",
-            tabs: "layout/tabUtil.ts"})) {
+            tabs: "layout/tabUtil.ts", color: "util/color.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);
             sources[key] = ts.transpileModule(source, {

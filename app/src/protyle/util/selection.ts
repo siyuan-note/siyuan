@@ -20,6 +20,7 @@ import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationSta
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
+import {genEmbedRenderFrame} from "../wysiwyg/embedToolbarVisibility";
 import {Constants} from "../../constants";
 import {getUndoFocusElement} from "./selectionFocus";
 import {getBlockRangeSelectElements as getBlockRangeSelectElementsByDOM} from "./blockRangeSelect";
@@ -924,7 +925,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.selectNodeContents(element.firstElementChild);
             setRange = true;
         } else if (type === "NodeBlockQueryEmbed") {
-            genRenderFrame(element);
+            genEmbedRenderFrame(element);
             range.setStart(element.querySelector(".protyle-cursor").firstChild, 0);
             range.collapse(true);
             setRange = true;

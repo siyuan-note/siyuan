@@ -39,7 +39,7 @@ const browserCases = async (sources: Record<string, string>, css: string, luteSo
         return exports;
     };
     const api = load("visibility") as typeof import("./embedToolbarVisibility");
-    const frame = load("frame") as typeof import("../render/util");
+    load("frame");
     const render = load("render") as typeof import("../render/blockRender");
     window.siyuan = {languages: {}, config: {editor: {}, system: {safeMode: false}}} as unknown as typeof window.siyuan;
     const root = document.createElement("div");
@@ -84,7 +84,7 @@ const browserCases = async (sources: Record<string, string>, css: string, luteSo
     root.appendChild(other);
     const nested = create();
     embed.querySelector(".protyle-wysiwyg__embed").appendChild(nested);
-    frame.genRenderFrame(nested);
+    api.genEmbedRenderFrame(nested);
     visible = true;
     window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
     check.ok(icons().every(icon => getComputedStyle(icon).display !== "none"));
@@ -92,7 +92,7 @@ const browserCases = async (sources: Record<string, string>, css: string, luteSo
     check.equal(other.firstElementChild.hasAttribute("data-entry-hidden"), false);
     const newEmbed = create();
     visible = false;
-    frame.genRenderFrame(newEmbed);
+    api.genEmbedRenderFrame(newEmbed);
     check.equal(getComputedStyle(newEmbed.querySelector(".protyle-icons")).display, "none", "new embeds start hidden without another settings event");
     visible = true;
     window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));

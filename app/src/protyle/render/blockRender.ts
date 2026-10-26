@@ -4,7 +4,6 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {genBreadcrumb, improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {avRender} from "./av/render";
-import {genRenderFrame} from "./util";
 import {isEncryptedBox} from "../../util/pathName";
 import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
@@ -14,7 +13,7 @@ import {isDirectHeadingEmbed} from "./embedHeading";
 import {isFoldedRenderContent} from "./foldedContent";
 import {getEmbedBreadcrumbPaths, resolveEmbedBreadcrumbPreference} from "./embedBreadcrumb";
 import {Constants} from "../../constants";
-import {renderEmbedToolbarVisibility} from "../wysiwyg/embedToolbarVisibility";
+import {genEmbedRenderFrame, renderEmbedToolbarVisibility} from "../wysiwyg/embedToolbarVisibility";
 
 /**
  * 渲染嵌入块
@@ -36,13 +35,13 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         }
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         if (!content.trim()) {
-            genRenderFrame(item);
+            genEmbedRenderFrame(item);
             finishEmptyEmbedRender(item, onEmbedRender);
             return;
         }
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
         item.setAttribute("data-render", "true");
-        genRenderFrame(item);
+        genEmbedRenderFrame(item);
         const loadingState: IEmbedRenderLoadingState = {
             rotateElement: item.querySelector(":scope > .protyle-icons .protyle-action__reload .fn__rotate"),
         };

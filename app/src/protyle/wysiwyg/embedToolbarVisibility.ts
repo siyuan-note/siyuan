@@ -1,8 +1,14 @@
 import {isEntryVisible} from "../../config/entryVisibility/runtime";
+import {genRenderFrame} from "../render/util";
 
 const EMBED_SELECTOR = '[data-type="NodeBlockQueryEmbed"]';
 const HIDDEN_CLASS = "protyle-icons--editing-obscured";
 const PROXIMITY = 12;
+
+export const genEmbedRenderFrame = (element: Element) => {
+    genRenderFrame(element);
+    renderEmbedToolbarVisibility(element);
+};
 
 export const renderEmbedToolbarVisibility = (root: Element) => {
     const visible = window.siyuan.isPublish || isEntryVisible("editor.blockEmbed.toolbar");

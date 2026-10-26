@@ -49,6 +49,7 @@ const runCase = async (sources, options) => {
         return data.cmd === "isFullScreen" ? state.promise : false;
     }}, webFrame: require("electron").webFrame};
     const overlay = load(sources.overlay, {electron, "../constants": {Constants: constants},
+        "../util/color": load(sources.color),
         "../layout/util": {resizeTopBar() {}}});
     const controls = load(sources.controls, {electron, "../constants": {Constants: constants},
         "../util/functions": functions, "./windowControlsOverlay": overlay});
@@ -174,7 +175,7 @@ if (process.versions.electron && process.type === "browser") {
         const ts = require("typescript");
         for (const [key, file] of Object.entries({host: "boot/onGetConfig.ts", browserHost: "boot/onGetConfig.ts",
             loading: "boot/loading.ts", paint: "util/windowPaint.ts", controls: "boot/windowControls.ts",
-            overlay: "boot/windowControlsOverlay.ts", tabs: "layout/tabUtil.ts"})) {
+            overlay: "boot/windowControlsOverlay.ts", tabs: "layout/tabUtil.ts", color: "util/color.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"),
                 {BROWSER: key === "browserHost", MOBILE: false}, false, true);
             sources[key] = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS,

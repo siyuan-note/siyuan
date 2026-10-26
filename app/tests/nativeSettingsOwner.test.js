@@ -59,6 +59,7 @@ const setup = () => {
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => nativeTask},
         "../bazaar/openPath": {openBazaarPath: record("openBazaarPath")},
+        "../tabs/compactMode": {isCompactModeEnabled: () => false},
         "./interface": {watchSettingInterface() {}, acceptSettingInterfaceRevision: () => true},
     };
     const context = {exports: {}, window, console: {error: record("error")}, require: name => {

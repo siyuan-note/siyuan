@@ -212,7 +212,7 @@ class EditorWorkflowTests(unittest.TestCase):
             self.assertNotRegex(check, r"(?m)^    continue-on-error:")
         for name in ["kernel-tests-linux", "kernel-tests-windows"]:
             check = job(name)
-            self.assertIn("uses: actions/setup-go@v6", check)
+            self.assertIn("uses: actions/setup-go@v7", check)
             self.assertIn("go-version-file: kernel/go.mod", check)
             self.assertIn("cache: false", check)
             self.assertIn("uses: actions/cache/restore@v6", check)
@@ -252,7 +252,7 @@ class EditorWorkflowTests(unittest.TestCase):
             header, steps = build.split("    steps:\n", 1)
             self.assertIn("      GOPATH: ${{ github.workspace }}/go", header)
             self.assertNotIn("GOPATH:", steps)
-            setup = steps.split("uses: actions/setup-go@v6", 1)[1].split("      - ", 1)[0]
+            setup = steps.split("uses: actions/setup-go@v7", 1)[1].split("      - ", 1)[0]
             self.assertIn("cache: false", setup)
             self.assertNotIn("cache-dependency-path:", setup)
             self.assertIn("run: node scripts/go-cache.mjs", steps)

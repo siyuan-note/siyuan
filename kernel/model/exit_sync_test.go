@@ -200,3 +200,109 @@ func TestExitSyncRejectsQueuedWorkAfterCleanup(t *testing.T) {
 		t.Fatal("queued sync acquired closed workspace")
 	}
 }
+
+func TestExitSyncCancelsUploadOnlyBeforeCleanup(t *testing.T) {
+	for _, mode := range []string{"exit", "manual"} {
+		t.Run(mode, func(t *testing.T) {
+			prepareSyncDirectoryTest(t)
+			previousStatus := util.StatusBarCfg.Load()
+			util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+			t.Cleanup(func() { util.StatusBarCfg.Store(previousStatus) })
+			Conf.Sync.Load().Enabled, Conf.Sync.Load().Perception = true, false
+			Conf.Sync.Load().CloudName = "main"
+			Conf.SetUser(&conf.User{UserId: "upload-exit-test", UserSiYuanOneTimePayStatus: 1})
+			previousResult, previousErrors := BootSyncSucc.Load(), autoSyncErrCount.Load()
+			BootSyncSucc.Store(-1)
+			t.Cleanup(func() {
+				BootSyncSucc.Store(previousResult)
+				autoSyncErrCount.Store(previousErrors)
+			})
+			if err := os.MkdirAll(util.DataDir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			filename := filepath.Join(util.DataDir, "offline-upload.txt")
+			if err := os.WriteFile(filename, []byte("unsynced upload"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			started, canceled := make(chan struct{}, 1), make(chan struct{}, 1)
+			release := make(chan struct{})
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				select {
+				case started <- struct{}{}:
+				default:
+				}
+				select {
+				case <-r.Context().Done():
+					select {
+					case canceled <- struct{}{}:
+					default:
+					}
+				case <-release:
+					w.WriteHeader(http.StatusForbidden)
+				}
+			}))
+			defer server.Close()
+			defer server.CloseClientConnections()
+			Conf.Sync.Load().S3.Endpoint = server.URL
+			done, finished := make(chan error, 1), make(chan struct{})
+			go func() {
+				defer close(finished)
+				done <- SyncDataUpload()
+			}()
+			defer func() {
+				close(release)
+				if task := GetSyncCheckout("", "").Task; task != nil {
+					CancelSyncCheckout(task.TaskID)
+				}
+				select {
+				case <-finished:
+				case <-time.After(5 * time.Second):
+					t.Error("upload task did not finish during test cleanup")
+				}
+			}()
+			select {
+			case <-started:
+			case err := <-done:
+				t.Fatalf("upload did not reach the cloud: %v", err)
+			case <-time.After(5 * time.Second):
+				t.Fatal("upload did not start")
+			}
+			snapshot := GetSyncCheckout("", "")
+			if snapshot.Task == nil || snapshot.Task.Blocking {
+				t.Fatal("upload-only did not register a cancellable background task")
+			}
+			if mode == "manual" {
+				if !CancelSyncCheckout(snapshot.Task.TaskID) {
+					t.Fatal("upload cancellation was rejected")
+				}
+			} else {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				if err := lockSyncForExit(ctx, true); err != nil {
+					t.Fatalf("force exit could not cancel upload: %v", err)
+				}
+				defer unlockSync()
+			}
+			select {
+			case err := <-done:
+				if !errors.Is(err, context.Canceled) {
+					t.Fatalf("upload cancellation was lost: %v", err)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatal("canceled upload did not finish")
+			}
+			select {
+			case <-canceled:
+			case <-time.After(time.Second):
+				t.Fatal("cloud request outlived the canceled upload task")
+			}
+			if GetSyncCheckout("", "").Task != nil || BootSyncSucc.Load() != -1 {
+				t.Fatal("canceled upload retained its task or reported successful synchronization")
+			}
+			data, err := os.ReadFile(filename)
+			if err != nil || string(data) != "unsynced upload" {
+				t.Fatalf("local changes were not preserved: %q (%v)", data, err)
+			}
+		})
+	}
+}

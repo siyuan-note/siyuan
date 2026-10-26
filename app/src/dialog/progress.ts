@@ -50,7 +50,7 @@ export const progressLoading = (data: IWebSocketData, id = "progress", action?: 
         const footer = document.createElement("div");
         footer.className = "b3-dialog__action";
         const button = document.createElement("button");
-        button.className = "b3-button b3-button--text";
+        button.className = "b3-button b3-button--text b3-button--wrap";
         button.textContent = action.label;
         button.addEventListener("click", action.callback);
         footer.appendChild(button);

@@ -2130,6 +2130,8 @@ func syncRepoUpload() (err error) {
 	}
 
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "u", true)
+	checkoutTask := startSyncCheckout(repo)
+	defer checkoutTask.finish(repo, &err)
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
@@ -2142,7 +2144,9 @@ func syncRepoUpload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		if !errors.Is(err, context.Canceled) {
+			util.PushErrMsg(msg, 0)
+		}
 		return
 	}
 
@@ -2158,7 +2162,9 @@ func syncRepoUpload() (err error) {
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		if !errors.Is(err, context.Canceled) {
+			util.PushErrMsg(msg, 0)
+		}
 		return
 	}
 

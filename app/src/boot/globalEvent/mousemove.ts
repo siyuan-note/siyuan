@@ -3,6 +3,7 @@ import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
 import {isContainerGutterBridge} from "../../protyle/gutter/container";
+import {renderGutterOnHover} from "../../protyle/gutter/hover";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -163,7 +164,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 // 鼠标经过编辑器留白移向子块块标时，使用实际坐标保留当前块标。
                 if (!isContainerGutterBridge(protyle.gutter.element, targetBlockElement, eventPath0,
                     event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
-                    protyle.gutter.render(protyle, targetBlockElement, mouseElement);
+                    renderGutterOnHover(protyle, targetBlockElement, mouseElement);
                 }
             };
             const allModels = getAllModels();
@@ -221,7 +222,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             // 经过列表序标或留白移向块标时，保留当前子块的操作入口。
             if (!listElement || !isContainerGutterBridge(protyle.gutter.element, listElement, eventPath0,
                 event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
-                protyle.gutter.render(protyle, targetBlockElement);
+                renderGutterOnHover(protyle, targetBlockElement);
             }
         };
         const allModels = getAllModels();

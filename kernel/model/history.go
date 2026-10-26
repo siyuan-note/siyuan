@@ -44,7 +44,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -278,6 +277,10 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 }
 
 func RollbackDocHistory(historyPath string) (err error) {
+	return rollbackDocHistory(historyPath, removeIndexRepairSourceIfUnchanged)
+}
+
+func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) error) (err error) {
 	historyPath, err = validateHistoryPath(historyPath)
 	if err != nil {
 		return
@@ -470,7 +473,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 			return
 		}
 	}
-	if _, err = filesys.WriteTree(tree); err != nil {
+	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc); err != nil {
 		return
 	}
 	invalidateDocumentHistory(tree.ID)
@@ -478,11 +481,6 @@ func RollbackDocHistory(historyPath string) (err error) {
 		invalidateDocumentHistory(workingDoc.RootID)
 	}
 	if workingDoc != nil {
-		if workingDoc.Type == "d" && workingDoc.Path != tree.Path {
-			if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
-				return
-			}
-		}
 		treenode.RemoveBlockTreesByRootID(boxID, rootID)
 	}
 	sql.RemoveTreeQueue(boxID, rootID)

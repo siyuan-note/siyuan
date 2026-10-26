@@ -19,6 +19,28 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
         return;
     }
     if (focusTitle && !bindPrimary && request.boundBlockID && request.boundBlockID === protyle.block?.rootID) {
+        const title = protyle.title;
+        const sourceAware = window.siyuan.documentAddressingVersion === 2 &&
+            protyle.block.rootID !== protyle.notebookId;
+        let isTitleVisible: () => boolean;
+        /// #if MOBILE
+        if (sourceAware && window.siyuan.mobile.editor?.protyle !== protyle) {
+            return;
+        }
+        isTitleVisible = () => {
+            const input = document.getElementById("toolbarName") as HTMLInputElement;
+            return Boolean(input && !input.disabled && input.getClientRects().length &&
+                window.siyuan.mobile.editor?.protyle === protyle);
+        };
+        /// #else
+        isTitleVisible = () => Boolean(title?.editElement?.getClientRects().length);
+        /// #endif
+        if (sourceAware && title && isTitleVisible()) {
+            // 移动端顶栏只是只读摘要，桌面标题也可能仍在加载完整源。
+            return title.openEditor(() => root.isConnected && protyle.title === title &&
+                protyle.block.rootID === request.boundBlockID && isTitleVisible())
+                .catch(error => console.error(error));
+        }
         /// #if MOBILE
         const titleInput = document.getElementById("toolbarName") as HTMLInputElement;
         if (titleInput && !titleInput.disabled && !titleInput.readOnly && titleInput.getClientRects().length) {
@@ -27,10 +49,10 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
             return;
         }
         /// #else
-        const title = protyle.title?.editElement;
-        if (title?.isContentEditable && title.getClientRects().length) {
-            title.focus({preventScroll: true});
-            focusByOffset(title, title.textContent.length, title.textContent.length);
+        const titleElement = title?.editElement;
+        if (titleElement?.isContentEditable && titleElement.getClientRects().length) {
+            titleElement.focus({preventScroll: true});
+            focusByOffset(titleElement, titleElement.textContent.length, titleElement.textContent.length);
             return;
         }
         /// #endif

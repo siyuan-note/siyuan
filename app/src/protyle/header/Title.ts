@@ -543,18 +543,31 @@ export class Title {
             !!this.protyle.block?.rootID && this.protyle.block.rootID !== this.protyle.notebookId;
     }
 
-    public async openEditor() {
-        if (this.protyle.disabled) {
+    public async openEditor(isValid?: () => boolean) {
+        const id = this.protyle.block.rootID;
+        const notebook = this.protyle.notebookId;
+        let sourceRequest = this.sourceRequest;
+        const canOpen = () => !this.destroyed && !this.protyle.disabled && !window.siyuan.isPublish &&
+            !window.siyuan.config.readonly && !this.protyle.options.history?.created &&
+            !this.protyle.options.history?.snapshot && this.protyle.element.isConnected &&
+            this.protyle.block.rootID === id && this.protyle.notebookId === notebook &&
+            this.sourceRequest === sourceRequest && (!isValid || isValid());
+        if (!canOpen()) {
             return;
         }
         if (!this.editElement) {
             const {openDocumentTitleDialog} = await import("./documentTitleDialog");
-            openDocumentTitleDialog({id: this.protyle.block.rootID, notebook: this.protyle.notebookId,
-                app: this.protyle.app});
+            if (canOpen()) {
+                openDocumentTitleDialog({id, notebook, app: this.protyle.app});
+            }
             return;
         }
-        await this.loadSource();
-        this.richEditor?.focus();
+        const loading = this.loadSource();
+        sourceRequest = this.sourceRequest;
+        await loading;
+        if (canOpen()) {
+            this.richEditor?.focus();
+        }
     }
 
     public destroy() {

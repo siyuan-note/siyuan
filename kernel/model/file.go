@@ -1414,7 +1414,11 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	if id == "" {
 		id = ast.NewNodeID()
 	}
-	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, map[string]string{"tags": tags})
+	var attributes map[string]string
+	if tags != "" {
+		attributes = map[string]string{"tags": tags}
+	}
+	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, attributes)
 	if err != nil {
 		return
 	}

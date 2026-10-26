@@ -3,7 +3,7 @@ const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
-const runCases = (sources, mobile) => {
+const runCases = async (sources, mobile) => {
     const assert = require("node:assert/strict");
     const load = (source, imports) => {
         const exports = {};
@@ -168,6 +168,102 @@ const runCases = (sources, mobile) => {
     }
     root.remove();
     block.remove();
+
+    // Compose the real title-loading and readonly paths with template focus. The source and mobile
+    // editor chunk deliberately remain pending while the attribute panel finishes rendering.
+    window.siyuan.documentAddressingVersion = 2;
+    window.siyuan.isPublish = false;
+    for (const invalidation of ["none", "disabled", "readonly", "publish", "history", "root", "notebook",
+        "destroyed", "detached", "replaced", "source-replaced", "hidden", ...(mobile ? ["mobile-editor"] : [])]) {
+        window.siyuan.config.readonly = false;
+        window.siyuan.isPublish = false;
+        const host = document.createElement("div");
+        host.innerHTML = '<input id="toolbarName" value="Template title"><span id="toolbarNameReadonly"></span>' +
+            '<div contenteditable="true">Template title</div>' +
+            '<div data-av-id="database"><div data-primary="true"><div data-row-id="created"><input value="Template title"></div></div></div>';
+        document.body.append(host);
+        const toolbar = host.querySelector("#toolbarName");
+        const plain = host.querySelector("[contenteditable]");
+        const field = host.querySelector("[data-row-id] input");
+        const owner = {app: {}, element: host, options: {}, block: {rootID: "document"}, notebookId: "notebook",
+            preview: {element: document.createElement("div")}};
+        owner.preview.element.className = "fn__none";
+        window.siyuan.mobile = {editor: {protyle: owner}};
+        let resolveSource;
+        let resolveDialog;
+        let sourceRequests = 0;
+        let focused = 0;
+        const dialogs = [];
+        const {Title} = load(sources.title, {
+            "../../util/fetch": {fetchSyncPost: (url, data) => {
+                assert.equal(url, "/api/block/getDocTitle");
+                assert.deepEqual(data, {id: "document", notebook: "notebook"});
+                sourceRequests++;
+                return new Promise(resolve => { resolveSource = resolve; });
+            }},
+            "../render/autoDirection": {setTitleAutoDirection() {}},
+            "./documentTitleEditor": {DocumentTitleEditor: class {
+                constructor(_owner, element, initial, onEditable) {
+                    this.element = document.createElement("div");
+                    this.element.contentEditable = "true";
+                    this.element.textContent = initial.text;
+                    element.append(this.element);
+                    onEditable(this.element);
+                }
+                focus() { focused++; this.element.focus(); }
+                destroy() { this.element.remove(); }
+            }},
+            "./documentTitleDialog": Object.assign(new Promise(resolve => { resolveDialog = resolve; }), {__esModule: true}),
+        });
+        const title = Object.assign(Object.create(Title.prototype), {
+            protyle: owner, editElement: mobile ? undefined : plain, sourceRequest: 0,
+        });
+        owner.title = title;
+        if (mobile) {
+            load(sources.editMode, {}).updateMobileTitleReadonly(owner);
+            assert.equal(toolbar.readOnly, true, "the live mobile toolbar is a readonly rich-title summary");
+        }
+        const loading = mobile ? undefined : title.refresh();
+        if (!mobile) assert.equal(plain.isContentEditable, false, "source loading locks the plain title");
+        const request = focusRequest();
+        const opening = primary.focusDatabasePrimary(host, owner, request);
+        assert.ok(opening instanceof Promise);
+        assert.notEqual(document.activeElement, field, "pending source focus must not fall back to the primary field");
+        assert.equal(primary.focusDatabasePrimary(host, owner, request), undefined, "refresh cannot duplicate pending focus");
+        if (invalidation === "disabled") owner.disabled = true;
+        if (invalidation === "readonly") window.siyuan.config.readonly = true;
+        if (invalidation === "publish") window.siyuan.isPublish = true;
+        if (invalidation === "history") owner.options.history = {created: "archive"};
+        if (invalidation === "root") owner.block.rootID = "another-document";
+        if (invalidation === "notebook") owner.notebookId = "another-notebook";
+        if (invalidation === "destroyed") title.destroy();
+        if (invalidation === "detached") host.remove();
+        if (invalidation === "replaced") owner.title = {};
+        if (invalidation === "source-replaced") title.sourceRequest++;
+        if (invalidation === "hidden") host.style.display = "none";
+        if (invalidation === "mobile-editor") window.siyuan.mobile.editor = {protyle: {}};
+        if (mobile) {
+            assert.equal(dialogs.length, 0);
+            resolveDialog({openDocumentTitleDialog: options => dialogs.push(options)});
+        } else {
+            assert.equal(sourceRequests, 1, "automatic focus shares the already pending title source");
+            resolveSource({code: 0, data: {text: "Template title", blockDOM: "Template title", revision: "r0"}});
+        }
+        await loading;
+        await opening;
+        const expected = invalidation === "none" ? 1 : 0;
+        assert.equal(mobile ? dialogs.length : focused, expected, `${mobile ? "mobile" : "desktop"}: ${invalidation}`);
+        if (mobile && expected) assert.deepEqual(dialogs[0], {id: "document", notebook: "notebook", app: owner.app});
+        if (!mobile && expected) assert.equal(document.activeElement, title.editElement);
+        primary.focusDatabasePrimary(host, owner, request);
+        assert.equal(mobile ? dialogs.length : focused, expected, "source completion must not repeat focus on refresh");
+        assert.notEqual(document.activeElement, field);
+        if (expected) {
+            await title.openEditor();
+            assert.equal(mobile ? dialogs.length : focused, 2, "explicit title clicks still open without a caller guard");
+        }
+        host.remove();
+    }
     return "Template opening cases passed";
 };
 
@@ -182,10 +278,11 @@ const runElectron = async () => {
         const ts = require("typescript");
         const ifdef = require("ifdef-loader");
         for (const mobile of [false, true]) {
-            const sources = Object.fromEntries(Object.entries({template: "newItemTemplate", primary: "primaryFocus"}).map(([key, file]) => {
-                const source = readFileSync(path.join(__dirname, `../src/protyle/render/av/${file}.ts`), "utf8");
+            const sources = Object.fromEntries(Object.entries({template: "render/av/newItemTemplate", primary: "render/av/primaryFocus",
+                title: "header/Title", editMode: "util/setEditMode"}).map(([key, file]) => {
+                const source = readFileSync(path.join(__dirname, `../src/protyle/${file}.ts`), "utf8");
                 let processed;
-                ifdef.call({query: {MOBILE: mobile, "ifdef-triple-slash": true}, callback(error, result) {
+                ifdef.call({query: {MOBILE: mobile, BROWSER: false, "ifdef-triple-slash": true}, callback(error, result) {
                     if (error) throw error;
                     processed = result;
                 }}, source);
@@ -194,8 +291,8 @@ const runElectron = async () => {
                 }).outputText];
             }));
             await win.loadURL("data:text/html,<html><body></body></html>");
-            const result = await win.webContents.executeJavaScript(`(() => {
-                try { return {message: (${runCases.toString()})(${JSON.stringify(sources)}, ${mobile})}; }
+            const result = await win.webContents.executeJavaScript(`(async () => {
+                try { return {message: await (${runCases.toString()})(${JSON.stringify(sources)}, ${mobile})}; }
                 catch (error) { return {error: error.stack}; }
             })()`);
             assert.equal(result.error, undefined);

@@ -481,7 +481,7 @@ if (process.versions.electron && process.type === "browser") {
             overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",
             settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
-            mount: "config/setting/mount.ts", collapse: "config/setting/collapse.ts",
+            mount: "config/setting/mount.ts",
             save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");

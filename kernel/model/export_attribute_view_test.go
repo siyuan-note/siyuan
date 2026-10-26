@@ -287,12 +287,16 @@ func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
 	}
 
 	directIDs := hashset.New()
-	walkRelationAvs(directAvID, "", directIDs)
+	if err := walkRelationAvs(directAvID, "", directIDs); err != nil {
+		t.Fatal(err)
+	}
 	if !directIDs.Contains(directAvID) || directIDs.Contains(encryptedAvID) {
 		t.Fatalf("direct relation export crossed the encrypted boundary: %v", directIDs.Values())
 	}
 	recursiveIDs := hashset.New()
-	walkRelationAvs(recursiveAvID, "", recursiveIDs)
+	if err := walkRelationAvs(recursiveAvID, "", recursiveIDs); err != nil {
+		t.Fatal(err)
+	}
 	if !recursiveIDs.Contains(recursiveAvID) || !recursiveIDs.Contains(middleAvID) ||
 		recursiveIDs.Contains(encryptedAvID) {
 		t.Fatalf("recursive relation export crossed the encrypted boundary: %v", recursiveIDs.Values())

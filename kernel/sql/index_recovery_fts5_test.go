@@ -5,6 +5,7 @@ package sql
 import (
 	"bytes"
 	"context"
+	stdsql "database/sql"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -148,25 +149,98 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		assertRows(tree)
 	})
 
-	t.Run("failed transaction is retried in order", func(t *testing.T) {
+	for _, recovered := range []bool{false, true} {
+		name := "live"
+		if recovered {
+			name = "recovered"
+		}
+		t.Run(name+" failed transaction is retried in order", func(t *testing.T) {
+			ClearQueue()
+			first, second := newTree(), newTree()
+			IndexTreeQueue(first)
+			IndexTreeQueue(second)
+			if recovered {
+				restartQueue()
+			}
+			if _, err := db.Exec("CREATE TRIGGER reject_index BEFORE INSERT ON blocks BEGIN SELECT RAISE(ABORT, 'reject index'); END"); err != nil {
+				t.Fatal(err)
+			}
+			FlushQueue()
+			if len(operationQueue) != 2 || len(loadIndexQueue()) != 2 {
+				t.Fatal("failed transaction discarded pending recovery")
+			}
+			if _, err := db.Exec("DROP TRIGGER reject_index"); err != nil {
+				t.Fatal(err)
+			}
+			FlushQueue()
+			assertRows(first)
+			assertRows(second)
+		})
+	}
+
+	t.Run("live begin failure retains ordered work beyond three retries", func(t *testing.T) {
 		ClearQueue()
 		first, second := newTree(), newTree()
 		IndexTreeQueue(first)
 		IndexTreeQueue(second)
-		restartQueue()
-		if _, err := db.Exec("CREATE TRIGGER reject_index BEFORE INSERT ON blocks BEGIN SELECT RAISE(ABORT, 'reject index'); END"); err != nil {
+		workingDB := db
+		closedDB, err := stdsql.Open("sqlite3", ":memory:")
+		if err != nil {
 			t.Fatal(err)
 		}
-		FlushQueue()
-		if len(operationQueue) != 2 || len(loadIndexQueue()) != 2 {
-			t.Fatal("failed transaction discarded pending recovery")
+		closedDB.Close()
+		db = closedDB
+		defer func() { db = workingDB }()
+		for range 5 {
+			FlushQueue()
+			if len(operationQueue) != 2 || operationQueue[0].indexTree != first || operationQueue[1].indexTree != second || len(loadIndexQueue()) != 2 {
+				t.Fatal("begin failure lost, reordered or duplicated pending work")
+			}
 		}
-		if _, err := db.Exec("DROP TRIGGER reject_index"); err != nil {
-			t.Fatal(err)
-		}
+		db = workingDB
 		FlushQueue()
 		assertRows(first)
 		assertRows(second)
+		if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+			t.Fatal("successful retry left pending work")
+		}
+	})
+
+	t.Run("live commit failure preserves journal until retry", func(t *testing.T) {
+		ClearQueue()
+		tree := newTree()
+		// A deferred foreign key fails at COMMIT after all indexing statements
+		// succeeded, exercising a different path from statement failure.
+		db.SetMaxOpenConns(1)
+		defer db.SetMaxOpenConns(20)
+		for _, stmt := range []string{
+			"PRAGMA foreign_keys = ON",
+			"CREATE TABLE index_test_parent (id TEXT PRIMARY KEY)",
+			"CREATE TABLE index_test_child (id TEXT REFERENCES index_test_parent(id) DEFERRABLE INITIALLY DEFERRED)",
+			"CREATE TRIGGER fail_index_commit AFTER INSERT ON blocks BEGIN INSERT INTO index_test_child VALUES (NEW.id); END",
+		} {
+			if _, err := db.Exec(stmt); err != nil {
+				t.Fatal(err)
+			}
+		}
+		defer db.Exec("PRAGMA foreign_keys = OFF")
+		IndexTreeQueue(tree)
+		FlushQueue()
+		if len(operationQueue) != 1 || len(loadIndexQueue()) != 1 {
+			t.Fatal("commit failure discarded live operation or journal")
+		}
+		var rows int
+		if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id = ?", tree.ID).Scan(&rows); err != nil || rows != 0 {
+			t.Fatalf("failed commit retained partial data: %d, %v", rows, err)
+		}
+		if _, err := db.Exec("DROP TRIGGER fail_index_commit"); err != nil {
+			t.Fatal(err)
+		}
+		FlushQueue()
+		assertRows(tree)
+		if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+			t.Fatal("successful commit did not checkpoint journal")
+		}
 	})
 
 	t.Run("embed content is recalculated and searchable after restart", func(t *testing.T) {
@@ -229,20 +303,28 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		}
 	})
 
-	t.Run("locked notebook recovery does not block ordinary documents", func(t *testing.T) {
-		ClearQueue()
-		isEncrypted := IsEncryptedBoxFn
-		defer func() { IsEncryptedBoxFn = isEncrypted }()
-		lockedBox := "20260922000000-locked1"
-		IsEncryptedBoxFn = func(id string) bool { return id == lockedBox }
-		DeleteBoxQueue(lockedBox)
-		tree := newTree()
-		IndexTreeQueue(tree)
-		restartQueue()
-		FlushQueue()
-		assertRows(tree)
-		if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
-			t.Fatal("obsolete locked notebook index blocked recovery")
+	for _, recovered := range []bool{false, true} {
+		name := "live"
+		if recovered {
+			name = "recovered"
 		}
-	})
+		t.Run(name+" locked notebook does not block ordinary documents", func(t *testing.T) {
+			ClearQueue()
+			isEncrypted := IsEncryptedBoxFn
+			defer func() { IsEncryptedBoxFn = isEncrypted }()
+			lockedBox := "20260922000000-locked1"
+			IsEncryptedBoxFn = func(id string) bool { return id == lockedBox }
+			DeleteBoxQueue(lockedBox)
+			tree := newTree()
+			IndexTreeQueue(tree)
+			if recovered {
+				restartQueue()
+			}
+			FlushQueue()
+			assertRows(tree)
+			if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+				t.Fatal("obsolete locked notebook index blocked recovery")
+			}
+		})
+	}
 }

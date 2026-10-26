@@ -42,8 +42,6 @@ var (
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
 )
 
-const maxBeginTxRetries = 3
-
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
@@ -57,7 +55,6 @@ type dbQueueOperation struct {
 	block                         *Block   // update_block_content
 	id                            string   // index_node
 	removeAssetHashes             []string // delete_assets
-	beginTxRetries                uint8
 	recoveryEntry                 *indexEntry
 	recoveredIndex                bool
 }
@@ -286,13 +283,14 @@ func FlushQueue() {
 			return
 		}
 		recovered := op.recoveryEntry != nil
+		boxID := op.boxID()
+		if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) && GetEncryptedDB(boxID) == nil {
+			// Locked notebooks rebuild derived indexes on mount. Obsolete live or
+			// recovered work must not block indexing ordinary notebooks.
+			ops[i] = nil
+			continue
+		}
 		if recovered {
-			boxID := op.boxID()
-			if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) && GetEncryptedDB(boxID) == nil {
-				// 锁定笔记本的派生索引由下次解锁挂载后重新建立，旧会话任务不应阻塞普通笔记本。
-				ops[i] = nil
-				continue
-			}
 			if recoveryLute == nil {
 				recoveryLute = lute.New()
 			}
@@ -313,18 +311,8 @@ func FlushQueue() {
 		timing.Stage("begin")
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
-			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
-			if recovered {
-				return
-			}
-			if op.beginTxRetries < maxBeginTxRetries {
-				op.beginTxRetries++
-				requeueOperation(op)
-			} else {
-				logging.LogErrorf("drop queue operation [%s] for box [%s] after %d retries: %s", op.action, op.boxID(), maxBeginTxRetries, err)
-			}
-			ops[i] = nil
-			continue
+			logging.LogWarnf("retain queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
+			return
 		}
 
 		groupOpsCurrent[op.action]++
@@ -337,11 +325,7 @@ func FlushQueue() {
 			closeTxPreparedStmts(tx)
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
-			if recovered {
-				return
-			}
-			ops[i] = nil
-			continue
+			return
 		}
 
 		diagnostic.Stage("commit " + op.action)
@@ -349,11 +333,7 @@ func FlushQueue() {
 		if err = commitTx(tx); err != nil {
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
-			if recovered {
-				return
-			}
-			ops[i] = nil
-			continue
+			return
 		}
 		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
@@ -733,14 +713,6 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 }
 
 func appendOperation(op *dbQueueOperation) {
-	operationQueue = append(operationQueue, op)
-	appendToIndexQueue(op)
-	eventbus.Publish(eventbus.EvtSQLIndexChanged)
-}
-
-func requeueOperation(op *dbQueueOperation) {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
 	operationQueue = append(operationQueue, op)
 	appendToIndexQueue(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)

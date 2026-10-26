@@ -1006,11 +1006,11 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
-export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "writeFailed"; };
 
-export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
+export type DocumentCapabilities = { "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
 
-export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "modeConflict" | "writeFailed"; "stage": string; };
+export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "writeFailed"; "stage": string; };
 
 export type DocumentCreatePlan = { "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
 
@@ -1028,7 +1028,7 @@ export type DocumentNameCondition = { "expectedID": string | null; "parentID": s
 
 export type DocumentNameConditionInput = { "expectedID": string | null; "parentID": string | null; "title": string; };
 
-export type DocumentPath = { "addressingVersion": number; "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
+export type DocumentPath = { "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
 
 export type DocumentPathSegment = { "empty": boolean; "id": string; "text": string; };
 
@@ -2400,7 +2400,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "documentAddressingVersion": number; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -5342,7 +5342,6 @@ export interface APIPOSTRoutes {
      * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
      * 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
      * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
-     * 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
      */
     "/api/file/putFile": {
         request: PutFileRequestInput;
@@ -6325,14 +6324,11 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * preserves existing configuration and permission filtering. Administrator
-     * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. All notebooks use addressing version 2
-     * without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
-     * feature release is verified; it neither controls activation nor permits mixing with older clients.
-     * Revision identifies the fixed capability declaration, not a document path or retired record.
-     * Authentication, locking and network failures must
-     * never be interpreted as an absent capability object or as permission to retry a legacy write.
+     * 保留配置与权限过滤；管理员响应包含 documentCapabilities。
+     * structuredPaths 声明 ID 与标题段接口支持，literalSlash 仅在 indexState=ready 时为 true。
+     * titleFormats 列出支持的标题格式；revision 标识能力声明，不是文档路径或配置版本。
+     * 能力声明不授予关闭或锁定笔记本的访问权，也不表示允许与旧客户端混用。
+     * 认证、锁定和网络失败不能解释为缺少能力对象，失败后不得回退到旧接口继续写入。
      */
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
@@ -8237,7 +8233,7 @@ export interface APIPOSTRoutes {
      * 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
      * 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
      * ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
-     * documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
+     * 忽略设置备份中的寻址模式记录，不改变笔记本源格式或加密恢复材料。
      */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;

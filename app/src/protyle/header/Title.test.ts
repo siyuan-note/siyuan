@@ -9,10 +9,8 @@ const compile = (file: string) => transpileModule(readFileSync(resolve(__dirname
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const setup = (mode = 2) => {
-    const runtime = {siyuan: {documentAddressingVersion: 2,
-        languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
-    runtime.siyuan.documentAddressingVersion = mode;
+const setup = () => {
+    const runtime = {siyuan: {languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
     const timers = new Map<number, () => void>();
     const requests: Array<{url: string, data: any}> = [];
     let timerID = 0;
@@ -96,14 +94,4 @@ test("invalid structured titles cancel saving when truncation cannot make them v
         assert.equal(timers.size, 0);
         assert.equal(requests.length, 0);
     }
-});
-
-test("legacy title truncation preserves its existing validation behavior", () => {
-    const {title, timers, requests} = setup(1);
-    title.editElement.textContent = "😀".repeat(513);
-    assert.equal(title.rename(title.protyle), false);
-    assert.equal(title.editElement.textContent, "😀".repeat(256));
-    title.flushPendingInput();
-    assert.equal(timers.size, 0);
-    assert.equal(requests.length, 0);
 });

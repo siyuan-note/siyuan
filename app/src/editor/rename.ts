@@ -22,7 +22,7 @@ export const validateName = (name: string, targetElement?: HTMLElement, document
         }
         return false;
     }
-    const length = documentTitle && window.siyuan.documentAddressingVersion === 2 ? Array.from(name).length : name.length;
+    const length = documentTitle ? Array.from(name).length : name.length;
     if (length > Constants.SIZE_TITLE) {
         if (targetElement) {
             showTooltip(window.siyuan.languages["_kernel"]["106"], targetElement, "error");
@@ -43,15 +43,11 @@ export const replaceFileName = (name: string) => {
 };
 
 export const truncateDocumentTitle = (name: string) => {
-    return window.siyuan.documentAddressingVersion === 2 ?
-        Array.from(name).slice(0, Constants.SIZE_TITLE).join("") : name.substring(0, Constants.SIZE_TITLE);
+    return Array.from(name).slice(0, Constants.SIZE_TITLE).join("");
 };
 
-// 文档标题与文件名分开处理；旧内核保留既有输入规则。
+// 文档标题按 Unicode 字符计数，保留字面斜杠。
 export const normalizeDocumentTitle = (name: string) => {
-    if (window.siyuan.documentAddressingVersion !== 2) {
-        return replaceFileName(name);
-    }
     return truncateDocumentTitle(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, ""));
 };
 

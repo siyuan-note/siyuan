@@ -461,7 +461,7 @@ const initEditorName = () => {
         if (!validateName(inputElement.value, undefined, true)) {
             const original = inputElement.value;
             inputElement.value = truncateDocumentTitle(inputElement.value);
-            if (window.siyuan.documentAddressingVersion !== 2 || inputElement.value === original ||
+            if (inputElement.value === original ||
                 !validateName(inputElement.value, undefined, true)) {
                 return titleSavePromise;
             }

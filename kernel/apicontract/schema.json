@@ -23966,7 +23966,6 @@
             "indexUnavailable",
             "unsupportedTitleFormat",
             "targetModeUnsupported",
-            "modeConflict",
             "writeFailed"
           ]
         }
@@ -23979,9 +23978,6 @@
     "DocumentCapabilities": {
       "type": "object",
       "properties": {
-        "addressingVersion": {
-          "type": "integer"
-        },
         "indexState": {
           "type": "string",
           "enum": [
@@ -23993,25 +23989,6 @@
         },
         "literalSlash": {
           "type": "boolean"
-        },
-        "minimumReaderVersion": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "modeState": {
-          "type": "string",
-          "enum": [
-            "legacy",
-            "structured",
-            "conflict",
-            "recovering"
-          ]
         },
         "revision": {
           "type": "string"
@@ -24034,11 +24011,8 @@
         }
       },
       "required": [
-        "addressingVersion",
         "indexState",
         "literalSlash",
-        "minimumReaderVersion",
-        "modeState",
         "revision",
         "structuredPaths",
         "titleFormats"
@@ -24081,7 +24055,6 @@
             "documentIDConflict",
             "indexUnavailable",
             "unsupportedTitleFormat",
-            "modeConflict",
             "writeFailed"
           ]
         },
@@ -24283,9 +24256,6 @@
     "DocumentPath": {
       "type": "object",
       "properties": {
-        "addressingVersion": {
-          "type": "integer"
-        },
         "depth": {
           "type": "integer"
         },
@@ -24332,7 +24302,6 @@
         }
       },
       "required": [
-        "addressingVersion",
         "depth",
         "displayPath",
         "id",
@@ -53765,9 +53734,6 @@
             }
           ]
         },
-        "documentAddressingVersion": {
-          "type": "integer"
-        },
         "isPublish": {
           "type": "boolean"
         },
@@ -53783,7 +53749,6 @@
       },
       "required": [
         "conf",
-        "documentAddressingVersion",
         "isPublish",
         "revision",
         "start"

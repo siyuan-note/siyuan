@@ -1,10 +1,12 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -34,16 +36,46 @@ func TestRetiredDocumentAddressingCleanupRespectsReadOnly(t *testing.T) {
 	}
 }
 
-func TestFixedDocumentAddressingMarkerPersists(t *testing.T) {
+func TestRetiredDocumentAddressingMarkerIsNotPersisted(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	name := filepath.Join(util.DataDir, fixture.box.ID, documentaddressing.ConfigPath)
 	configuration := fixture.box.GetConf()
-	if err := fixture.box.SaveConf(configuration); err != nil {
+	data, err := os.ReadFile(name)
+	if err != nil {
 		t.Fatal(err)
 	}
 	var fields map[string]json.RawMessage
-	data, err := os.ReadFile(name)
-	if err != nil || json.Unmarshal(data, &fields) != nil || string(fields["documentAddressingVersion"]) != "2" {
-		t.Fatal("configuration lost fixed addressing marker", err)
+	if err = json.Unmarshal(data, &fields); err != nil {
+		t.Fatal(err)
+	}
+	fields["documentAddressingVersion"] = json.RawMessage("999")
+	data, err = json.Marshal(fields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(name, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := fixture.box.SaveConf(configuration); err != nil {
+		t.Fatal(err)
+	}
+	data, err = os.ReadFile(name)
+	fields = nil
+	if err != nil || json.Unmarshal(data, &fields) != nil || fields["documentAddressingVersion"] != nil {
+		t.Fatal("configuration retained retired addressing marker", err)
+	}
+	modified := time.Unix(1700000000, 0)
+	if err = os.Chtimes(name, modified, modified); err != nil {
+		t.Fatal(err)
+	}
+	if err = fixture.box.SaveConf(configuration); err != nil {
+		t.Fatal(err)
+	}
+	after, err := os.ReadFile(name)
+	if err != nil || !bytes.Equal(data, after) {
+		t.Fatal("unchanged save changed configuration bytes", err)
+	}
+	if info, err := os.Stat(name); err != nil || !info.ModTime().Equal(modified) {
+		t.Fatal("unchanged save rewrote configuration", err)
 	}
 }

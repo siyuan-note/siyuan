@@ -10,8 +10,8 @@ type ModeSnapshot struct {
 
 // InspectBox reports the fixed capability without source reads or migration writes.
 // The API combines this with the independently tracked metadata index state.
-func InspectBox(dataDir, confDir, boxID string) (*ModeSnapshot, error) {
-	mode, err := BoxMode(dataDir, confDir, boxID)
+func InspectBox(boxID string) (*ModeSnapshot, error) {
+	mode, err := BoxMode(boxID)
 	if err != nil {
 		return nil, err
 	}

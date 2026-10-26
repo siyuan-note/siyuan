@@ -303,7 +303,7 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
-Administrator responses may also include the read-only `documentCapabilities` object. It reports addressing mode, structured API support, title capabilities, index state, and the verified minimum compatible feature release. Ordinary builds migrate notebooks automatically by default, without a user setting or extra build flags; `literalSlash` requires mode `2`, consistent records, and ready indexes. `minimumReaderVersion` remains `null` until the minimum compatible feature release is verified; this informational field neither controls activation nor permits mixing with older clients. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
+Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
 
 * `/api/notebook/getNotebookConf`
 * Parameters
@@ -336,7 +336,7 @@ Administrator responses may also include the read-only `documentCapabilities` ob
   }
   ```
 
-Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `literalSlash` is `true` in mode `2` with consistent mode records and ready indexes. `minimumReaderVersion` remains `null` until the minimum compatible feature release is verified; this informational field neither controls activation nor permits mixing with older clients. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 
@@ -1495,9 +1495,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 
 * `/api/file/putFile`
 
-Unsupported notebook addressing modes return `code: -1` before creating directories, writing content, or changing timestamps. This endpoint cannot overwrite the local `conf/document-addressing.json` capability record.
-
-For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or titles conflicting with compatibility mode return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
+For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or slash-containing titles without the required Spec 6 declaration return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
 
 An incoming title containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"` without rewriting the input. Existing lower-spec sources remain readable and can be replaced with valid versioned content.
 
@@ -1521,7 +1519,7 @@ An incoming title containing ASCII `/` must declare `Spec` at least `6`; otherwi
 
 * `/api/file/removeFile`
 
-Partial deletion in a notebook with an unsupported addressing mode returns `code: -1`. Whole-notebook deletion retains its locally confirmed capability requirement. Deleting `conf/document-addressing.json` or its parent directory is rejected; existing encrypted-notebook restrictions still apply.
+Deletion retains canonical-path, sensitive-file and encrypted-notebook restrictions; validation failures return `code: -1`. Retired addressing-mode records do not control deletion.
 * Parameters
 
   ```json
@@ -1544,7 +1542,7 @@ Partial deletion in a notebook with an unsupported addressing mode returns `code
 
 * `/api/file/renameFile`
 
-The complete move is checked for notebook addressing compatibility before creating the destination directory or moving files. Unsupported modes and attempts to move or overwrite `conf/document-addressing.json` return `code: -1`.
+The complete move is checked for canonical paths and destination document-source compatibility before creating the destination directory or moving files. Validation failures return `code: -1`; existing sensitive-path and encrypted-notebook restrictions still apply.
 
 When the destination includes `.sy` document paths composed of notebook and document IDs, all incoming documents are also checked. Unknown formats, invalid document sources, or conflicting titles return `code: -1` without creating the destination directory or moving the sources.
 

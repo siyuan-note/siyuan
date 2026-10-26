@@ -132,14 +132,11 @@ var ReorderNotebooks = define[ReorderNotebooksRequest, *ReorderData]("reorderNot
 
 var (
 	OpenNotebook = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	// GetNotebookConf preserves existing configuration and permission filtering. Administrator
-	// responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-	// not permission to open a closed or locked notebook. All notebooks use addressing version 2
-	// without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
-	// feature release is verified; it neither controls activation nor permits mixing with older clients.
-	// Revision identifies the fixed capability declaration, not a document path or retired record.
-	// Authentication, locking and network failures must
-	// never be interpreted as an absent capability object or as permission to retry a legacy write.
+	// GetNotebookConf 保留配置与权限过滤；管理员响应包含 documentCapabilities。
+	// structuredPaths 声明 ID 与标题段接口支持，literalSlash 仅在 indexState=ready 时为 true。
+	// titleFormats 列出支持的标题格式；revision 标识能力声明，不是文档路径或配置版本。
+	// 能力声明不授予关闭或锁定笔记本的访问权，也不表示允许与旧客户端混用。
+	// 认证、锁定和网络失败不能解释为缺少能力对象，失败后不得回退到旧接口继续写入。
 	GetNotebookConf = define[CloseNotebookRequest, NotebookConfData]("getNotebookConf", "/api/notebook/getNotebookConf", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
@@ -671,7 +668,6 @@ var CopyFile = define[CopyFileRequest, Null]("copyFile", "/api/file/copyFile", A
 // 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
 // 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
 // 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
-// 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
 var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", AuthenticatedAccess|AdminAccess|WritableAccess, FormBody, ResponseOptions{AdditionalCodes: []int{-3, 400, 403, 500}}, "POST")
 
 var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", AuthenticatedAccess, JSONBody,
@@ -1693,7 +1689,7 @@ var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspace
 // 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
 // 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
 // ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
-// documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
+// 忽略设置备份中的寻址模式记录，不改变笔记本源格式或加密恢复材料。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{Setting: SettingWrite{Namespace: "*"}}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")

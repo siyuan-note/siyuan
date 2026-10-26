@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -360,13 +359,6 @@ func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
 		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
 	}
 	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
-	if err == nil {
-		var fields map[string]json.RawMessage
-		if err = json.Unmarshal(newData, &fields); err == nil {
-			fields["documentAddressingVersion"] = json.RawMessage("2")
-			newData, err = json.MarshalIndent(fields, "", "  ")
-		}
-	}
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
 	}

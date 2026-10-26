@@ -42,13 +42,13 @@ func TestStructuredTitlesAPIContracts(t *testing.T) {
 		}
 		return response.Data.DocumentCapabilities
 	}
-	if current := read(); current.AddressingVersion != 2 || current.ModeState != "recovering" || current.LiteralSlash {
+	if current := read(); current.IndexState != "missing" || current.LiteralSlash {
 		t.Fatal("missing index was advertised as ready", current)
 	}
 	if err := treenode.SetDocumentMetadataState(box, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	if current := read(); current.ModeState != "structured" || !current.LiteralSlash || current.MinimumReaderVersion != nil {
-		t.Fatal("automatic mode was not available", current)
+	if current := read(); current.IndexState != "ready" || !current.LiteralSlash {
+		t.Fatal("ready index did not enable slash titles", current)
 	}
 }

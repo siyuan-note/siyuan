@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -207,23 +208,27 @@ func loadIndexQueue() (entries []indexEntry) {
 	}
 	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Bytes()
-		if 0 == len(line) {
-			continue
+	reader := bufio.NewReader(f)
+	for {
+		// Batch operations have no fixed record-size limit. Read one complete line
+		// instead of stopping recovery at Scanner's default 64 KiB token limit.
+		line, readErr := reader.ReadBytes('\n')
+		if readErr != nil && readErr != io.EOF {
+			logging.LogErrorf("read index queue failed: %s", readErr)
+			return
 		}
-		var entry indexEntry
-		if err = json.Unmarshal(line, &entry); err != nil {
-			logging.LogWarnf("skip corrupted index queue line: %s", err)
-			continue
+		if len(line) > 0 && string(line) != "\n" && string(line) != "\r\n" {
+			var entry indexEntry
+			if err = json.Unmarshal(line, &entry); err != nil {
+				logging.LogWarnf("skip corrupted index queue line: %s", err)
+			} else {
+				entries = append(entries, entry)
+			}
 		}
-		entries = append(entries, entry)
+		if readErr == io.EOF {
+			return
+		}
 	}
-	if err = scanner.Err(); err != nil {
-		logging.LogErrorf("scan index queue failed: %s", err)
-	}
-	return
 }
 
 func recoverIndexQueue() {

@@ -204,6 +204,58 @@ func TestClearIndexQueuePreservesRawTail(t *testing.T) {
 	}
 }
 
+func TestIndexQueueRecoversLargeAndMalformedRecords(t *testing.T) {
+	prepareIndexQueueTest(t)
+	ids := make([]string, 5000)
+	for i := range ids {
+		ids[i] = "20261026000000-large01"
+	}
+	BatchRemoveTreeQueue(ids)
+	queuePath := filepath.Join(util.QueueDir, "index.queue")
+	f, err := os.OpenFile(queuePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A malformed record must not hide the valid records following it, and an
+	// interrupted final append must not prevent recovery of earlier records.
+	if _, err = f.WriteString("{invalid}\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err = f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	BatchRemoveAssetsQueue([]string{strings.Repeat("a", 70000)})
+	DeleteBoxQueue("last-valid-box")
+	f, err = os.OpenFile(queuePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = f.WriteString(`{"action":`); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	before, err := os.ReadFile(queuePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	operationQueue = nil
+	initIndexQueue()
+	recoverIndexQueue()
+	if len(operationQueue) != 3 {
+		t.Fatalf("large or malformed record stopped recovery: %d operations", len(operationQueue))
+	}
+	first, second, last := operationQueue[0].recoveryEntry, operationQueue[1].recoveryEntry, operationQueue[2].recoveryEntry
+	if first == nil || first.Action != "delete_ids" || len(first.IDs) != len(ids) ||
+		second == nil || second.Action != "delete_assets" || len(second.Hashes[0]) != 70000 ||
+		last == nil || last.Box != "last-valid-box" {
+		t.Fatalf("recovery changed record contents: %#v", operationQueue)
+	}
+	after, err := os.ReadFile(queuePath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("loading changed original recovery bytes: %v", err)
+	}
+}
+
 func prepareIndexQueueTest(t *testing.T) {
 	t.Helper()
 

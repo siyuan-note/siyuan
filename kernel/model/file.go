@@ -2107,15 +2107,24 @@ func RemoveDocs(paths []string) error {
 	defer hpathRefresh.Unlock()
 	luteEngine := util.NewLute()
 
+	return removeDocs(pathsBoxes, luteEngine, removeDoc, refreshRemovedDocInfo)
+}
+
+func removeDocs(pathsBoxes map[string]*Box, luteEngine *lute.Lute,
+	remove func(*Box, string, *lute.Lute) (*parse.Tree, error), refresh func([]*parse.Tree)) error {
 	var trees []*parse.Tree
+	defer func() { refresh(trees) }()
 	for p, box := range pathsBoxes {
-		tree, removeErr := removeDoc(box, p, luteEngine)
+		tree, removeErr := remove(box, p, luteEngine)
 		if removeErr != nil {
-			return removeErr
+			return fmt.Errorf("batch document removal failed after removing %d of %d documents: %w", len(trees), len(pathsBoxes), removeErr)
 		}
 		trees = append(trees, tree)
 	}
+	return nil
+}
 
+func refreshRemovedDocInfo(trees []*parse.Tree) {
 	parentTrees := map[string]*parse.Tree{}
 	boxDocBoxes := map[string]struct{}{}
 	for _, tree := range trees {
@@ -2133,7 +2142,6 @@ func RemoveDocs(paths []string) error {
 	for boxID := range boxDocBoxes {
 		refreshBoxDocInfoByBoxID(boxID)
 	}
-	return nil
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {

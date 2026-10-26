@@ -109,7 +109,9 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
     const panel = document.querySelector(remote ? "main" : "#authPanel");
     if (!remote) {
         check.equal(panel.querySelector(".ft__on-surface"), null, "the credits row is removed from authentication pages");
-        check.ok(panel.lastElementChild.classList.contains("auth-actions"), "the login card ends with its actions");
+        check.equal(panel.lastElementChild.id, "authForm", "the login card ends with its sign-in form");
+        check.ok(panel.lastElementChild.lastElementChild.classList.contains("auth-actions"),
+            "the sign-in form ends with its actions");
     }
     const cover = document.getElementById("lockScreenCover");
     if (wallpaperPresent) {
@@ -229,9 +231,17 @@ const prepareKeyboardCase = async () => {
     wallpaper.src = canvas.toDataURL();
     await loaded;
     window.testSubmits = 0;
-    document.getElementById("authCode").addEventListener("keydown", event => {
-        if (event.key === "Enter") window.testSubmits++;
-    });
+    const form = document.getElementById("authForm");
+    if (form) {
+        form.addEventListener("submit", event => {
+            event.preventDefault();
+            window.testSubmits++;
+        });
+    } else {
+        document.getElementById("authCode").addEventListener("keydown", event => {
+            if (event.key === "Enter") window.testSubmits++;
+        });
+    }
 };
 
 const assertKeyboardState = async (value, submits) => {
@@ -395,9 +405,11 @@ if (process.versions.electron && process.type === "browser") {
                 }`);
                 await start();
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 0)`);
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 1)`);
                 await start();

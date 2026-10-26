@@ -392,22 +392,25 @@
 <div data-auth-drag style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;z-index: 3;"></div>
 <div id="authPanel" style="position: relative;z-index: 2;text-align: center">
     <h1 style="color:var(--auth-panel-text, var(--b3-theme-on-background))">{{.workspace}}</h1>
-    <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
-        <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
-        <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
-            <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
-            <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
+    <form id="authForm" method="post" action="/check-auth">
+        <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
+            <input class="b3-text-field" id="authCode" name="password" type="password"
+                   autocomplete="current-password" aria-label="{{.l0}}" placeholder="{{.l0}}"/><br>
+            <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
+                <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
+                <input id="captcha" class="b3-text-field" autocomplete="off" placeholder="{{.l3}}">
+            </div>
         </div>
-    </div>
-    <div class="auth-actions">
-        {{if .accessAuthCodeEnabled}}<button class="b3-button" onclick="submitAuth()">{{.l1}}</button>{{end}}
-        {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" onclick="startOIDC()">{{.l12}}</button>{{end}}
-        <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
-            <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
-            <label for="rememberMe" style="color: var(--auth-panel-secondary, var(--b3-theme-on-surface)); font-size: 14px;">{{.l10}}</label>
+        <div class="auth-actions">
+            {{if .accessAuthCodeEnabled}}<button class="b3-button" id="authSubmit" type="submit">{{.l1}}</button>{{end}}
+            {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" type="button" onclick="startOIDC()">{{.l12}}</button>{{end}}
+            <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
+                <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
+                <label for="rememberMe" style="color: var(--auth-panel-secondary, var(--b3-theme-on-surface)); font-size: 14px;">{{.l10}}</label>
+            </div>
+            <button class="b3-button b3-button--white" type="button" onclick="exitSiYuan()">{{.l5}}</button>
         </div>
-        <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
-    </div>
+    </form>
 </div>
 <div id="authDefaultBackground" style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
     <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;"
@@ -1007,6 +1010,13 @@
         })
     }
 
+    // 认证走前端 fetch，须阻止表单默认提交（内核不接收 POST /check-auth）；监听在同步阶段挂载，
+    // 让回车与提交按钮统一走 submit 事件，密码管理器也依赖标准表单结构识别登录表单
+    document.getElementById('authForm').addEventListener('submit', (event) => {
+        event.preventDefault()
+        submitAuth()
+    })
+
     const init = async () => {
         const isDark = document.documentElement.classList.contains('dark')
         // 同步外观到原生壳：让 iOS 顶/底条与认证页背景一致
@@ -1050,14 +1060,8 @@
             }
         }
 
-        const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
         lockScreenWallpaperState.focus();
-        inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.isComposing) {
-                submitAuth()
-            }
-        })
 
         captchaElement.previousElementSibling.addEventListener('click', function () {
             this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`

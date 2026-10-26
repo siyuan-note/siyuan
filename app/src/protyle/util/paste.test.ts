@@ -164,6 +164,35 @@ describe("strip pasted IAL data attributes", () => {
     });
 });
 
+describe("shouldPasteClipboardImage", () => {
+    const harness = createHarness();
+    const excelTableWithImage = "<table border=0 cellpadding=0 cellspacing=0 width=120 style='border-collapse:collapse'>" +
+        "<tr height=18><td>Cell A</td><td><img src=\"file:///C:/Temp/msohtmlclip1/01/clip_image002.png\" width=48 height=18></td></tr></table>";
+
+    it("keeps table data for database grid pastes when a bitmap preview coexists", () => {
+        assert.equal(harness.api.shouldPasteClipboardImage(excelTableWithImage, true), false);
+    });
+
+    it("keeps table data for database grid pastes without embedded images", () => {
+        assert.equal(harness.api.shouldPasteClipboardImage("<table><tr><td>a\tb</td></tr></table>", true), false);
+    });
+
+    it("still prefers the image outside database targets", () => {
+        assert.equal(harness.api.shouldPasteClipboardImage(excelTableWithImage, false), true);
+    });
+
+    it("uploads single clipboard images even for database targets", () => {
+        assert.equal(harness.api.shouldPasteClipboardImage("<img src=\"data:image/png;base64,xxx\">", true), true);
+        assert.equal(harness.api.shouldPasteClipboardImage("<img src=\"data:image/png;base64,xxx\">", false), true);
+    });
+
+    it("does not treat non-image tables as clipboard images", () => {
+        assert.equal(harness.api.shouldPasteClipboardImage("<table><tr><td>plain</td></tr></table>", false), false);
+        assert.equal(harness.api.shouldPasteClipboardImage("<div><p>text</p></div>", false), false);
+        assert.equal(harness.api.shouldPasteClipboardImage("", true), false);
+    });
+});
+
 describe("restricted cell selected text paste", () => {
     if (typeof Lute === "undefined") {
         require("../../../stage/protyle/js/lute/lute.min.js");

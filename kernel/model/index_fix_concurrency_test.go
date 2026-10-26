@@ -14,6 +14,9 @@ import (
 
 func TestIndexFixPreservesNewerDocumentEdit(t *testing.T) {
 	fixture := setupFileOperationTest(t)
+	previousHistory := util.HistoryDir
+	util.HistoryDir = t.TempDir()
+	t.Cleanup(func() { util.HistoryDir = previousHistory })
 	target, err := LoadTreeByBlockID(fixture.targetID)
 	if err != nil {
 		t.Fatal(err)
@@ -74,5 +77,29 @@ func TestIndexFixRootRecreationRejectsStaleSnapshot(t *testing.T) {
 	retained, err := os.ReadFile(abs)
 	if err != nil || !bytes.Equal(retained, latest) {
 		t.Fatalf("root recreation changed newer source: %v", err)
+	}
+}
+
+func TestIndexFixHistoryDoesNotOverwriteEarlierRepair(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	previousHistory := util.HistoryDir
+	util.HistoryDir = t.TempDir()
+	t.Cleanup(func() { util.HistoryDir = previousHistory })
+	tree, original, err := filesys.LoadTreeSnapshot(fixture.box.ID, fixture.sourcePath, util.NewLute())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, snapshot := range [][]byte{original, append(append([]byte{}, original...), '\n')} {
+		if err = saveIndexRepairHistory(tree, snapshot); err != nil {
+			t.Fatal(err)
+		}
+	}
+	histories, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-format", tree.Box, filepath.Base(tree.Path)))
+	if err != nil || len(histories) != 2 {
+		t.Fatalf("repair history was overwritten: %v %v", histories, err)
+	}
+	first, err := os.ReadFile(histories[0])
+	if err != nil || !bytes.Equal(first, original) {
+		t.Fatal("the earlier repair snapshot changed", err)
 	}
 }

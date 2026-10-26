@@ -36,6 +36,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -247,6 +248,10 @@ func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) err
 		if IsEncryptedBox(box.ID) && !IsBoxUnlocked(box.ID) {
 			continue
 		}
+		boundary := ""
+		if IsEncryptedBox(box.ID) {
+			boundary = box.ID
+		}
 		// 校验索引阶段自动删除历史遗留的笔记本 history 文件夹
 		legacyHistory := filepath.Join(util.DataDir, box.ID, ".siyuan", "history")
 		if gulu.File.IsDir(legacyHistory) {
@@ -321,11 +326,12 @@ func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) err
 				if "" == n.ID {
 					needOverwrite = true
 					treenode.ResetNodeID(n)
+					blockIDs[boundary+"/"+n.ID] = true
 					return ast.WalkContinue
 				}
 
-				if !blockIDs[n.ID] {
-					blockIDs[n.ID] = true
+				if !blockIDs[boundary+"/"+n.ID] {
+					blockIDs[boundary+"/"+n.ID] = true
 					return ast.WalkContinue
 				}
 
@@ -341,7 +347,22 @@ func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) err
 
 				// 其他情况，重置节点 ID
 				needOverwrite = true
+				oldID := n.ID
 				treenode.ResetNodeID(n)
+				blockIDs[boundary+"/"+n.ID] = true
+				// A tab's selected child has an explicit structural owner, unlike global block references.
+				if n.Type == ast.NodeTabItem && n.Parent != nil && n.Parent.IALAttr(treenode.TabsActiveIDAttr) == oldID {
+					count := 0
+					for child := n.Parent.FirstChild; child != nil; child = child.Next {
+						if child == n || child.ID == oldID {
+							count++
+						}
+					}
+					if count == 1 {
+						n.Parent.SetIALAttr(treenode.TabsActiveIDAttr, n.ID)
+					}
+				}
+				logging.LogWarnf("duplicate block ID repaired [%s%s]: [%s] -> [%s]; ambiguous references, database bindings and flashcard records retain their original IDs for manual review", tree.Box, tree.Path, oldID, n.ID)
 				needRefreshUI = true
 				return ast.WalkContinue
 			})
@@ -351,9 +372,30 @@ func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) err
 					beforeWrite(tree)
 				}
 				logging.LogWarnf("exist more than one node with the same id in tree [%s], reset it", box.ID+p)
+				if err := saveIndexRepairHistory(tree, original); err != nil {
+					return err
+				}
 				if _, writeErr := filesys.WriteTreeIfUnchanged(tree, original); nil != writeErr {
 					logging.LogErrorf("write tree [%s] failed: %s", p, writeErr)
 					return writeErr
+				}
+			}
+			if !duplicateRoot && (needOverwrite || !indexRepairIdentitiesMatch(tree)) {
+				var mirrors []*ast.Node
+				ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+					if entering && node.Type == ast.NodeAttributeView {
+						mirrors = append(mirrors, node)
+					}
+					return ast.WalkContinue
+				})
+				if err := av.AddCopiedBlockRels(boundary, mirrors); err != nil {
+					return err
+				}
+				// Queue recovery before publishing the new block identities. If interrupted before
+				// this point, the next scan still sees the source/index mismatch, even at equal timestamps.
+				sql.UpsertTreeQueue(tree)
+				if err := treenode.ReplaceBlockTree(tree); err != nil {
+					return err
 				}
 			}
 			return nil
@@ -377,6 +419,65 @@ func resetDuplicateBlocksOnFileSysBeforeWrite(beforeWrite func(*parse.Tree)) err
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, Conf.Language(190), 5000)
 	}
 	return nil
+}
+
+func indexRepairIdentitiesMatch(tree *parse.Tree) bool {
+	indexed := treenode.GetBlockTreesByRootIDInBox(tree.ID, tree.Box)
+	nodes := map[string]*ast.Node{}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.IsBlock() && node.ID != "" {
+			nodes[node.ID] = node
+		}
+		return ast.WalkContinue
+	})
+	if len(indexed) != len(nodes) {
+		return false
+	}
+	for _, block := range indexed {
+		node := nodes[block.ID]
+		if node == nil || block.BoxID != tree.Box || block.Path != tree.Path || block.Type != treenode.TypeAbbr(node.Type.String()) {
+			return false
+		}
+		if node.Parent != nil && block.ParentID != node.Parent.ID {
+			return false
+		}
+	}
+	return true
+}
+
+// Keep the exact source bytes, including existing encryption, before changing identities.
+func saveIndexRepairHistory(tree *parse.Tree, original []byte) error {
+	if util.HistoryDir == "" {
+		return errors.New("document repair history directory is unavailable")
+	}
+	if err := os.MkdirAll(util.HistoryDir, 0700); err != nil {
+		return err
+	}
+	stamp := time.Now()
+	for attempt := 0; attempt < 1000; attempt++ {
+		dir := filepath.Join(util.HistoryDir, stamp.Add(time.Duration(attempt)*time.Second).Format("2006-01-02-150405")+"-"+HistoryOpFormat)
+		filename := filepath.Join(dir, tree.Box, tree.Path)
+		if err := os.MkdirAll(filepath.Dir(filename), 0700); err != nil {
+			return err
+		}
+		file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+		if os.IsExist(err) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		_, writeErr := file.Write(original)
+		if writeErr == nil {
+			writeErr = file.Sync()
+		}
+		err = errors.Join(writeErr, file.Close())
+		if err == nil {
+			generateAvHistoryInTree(tree, dir)
+		}
+		return err
+	}
+	return errors.New("document repair history names exhausted")
 }
 
 func recreateTree(tree *parse.Tree, absPath string, original []byte) error {

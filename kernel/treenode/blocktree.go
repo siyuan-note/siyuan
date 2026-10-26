@@ -700,7 +700,13 @@ func IndexBlockTree(tree *parse.Tree) {
 	indexBlockTree(tree, false)
 }
 
-func indexBlockTree(tree *parse.Tree, replace bool) {
+// ReplaceBlockTree replaces all derived block identities for an authenticated source.
+// Repair and rollback callers must observe failures instead of publishing partial success.
+func ReplaceBlockTree(tree *parse.Tree) error {
+	return indexBlockTree(tree, true)
+}
+
+func indexBlockTree(tree *parse.Tree, replace bool) error {
 	tree.HPath = CurrentParentHPath(tree)
 	var changedNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -713,7 +719,7 @@ func indexBlockTree(tree *parse.Tree, replace bool) {
 	})
 
 	if 1 > len(changedNodes) {
-		return
+		return nil
 	}
 
 	indexBlockTreeLock.Lock()
@@ -722,13 +728,13 @@ func indexBlockTree(tree *parse.Tree, replace bool) {
 	// 加密笔记本用独立 blocktree db；非加密笔记本用全局 db（两者都可能为 nil——重建过程中）
 	if nil == db && getEncryptedBlockTreeDB(tree.Box) == nil {
 		logging.LogErrorf("database is nil")
-		return
+		return fmt.Errorf("block-tree database is unavailable")
 	}
 
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
 		logging.LogErrorf("begin transaction failed: %s", err)
-		return
+		return err
 	}
 
 	if replace {
@@ -736,7 +742,7 @@ func indexBlockTree(tree *parse.Tree, replace bool) {
 		if _, err = tx.Exec("DELETE FROM blocktrees WHERE root_id = ?", tree.ID); err != nil {
 			tx.Rollback()
 			logging.LogErrorf("replace document block tree failed: %s", err)
-			return
+			return err
 		}
 	}
 	execInsertBlocktrees(tx, tree, changedNodes)
@@ -744,6 +750,7 @@ func indexBlockTree(tree *parse.Tree, replace bool) {
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit transaction failed: %s", err)
 	}
+	return err
 }
 
 func UpsertBlockTree(tree *parse.Tree) {

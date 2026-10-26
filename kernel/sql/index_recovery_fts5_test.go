@@ -185,6 +185,59 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		}
 	})
 
+	t.Run("moved definition refs recover without reading reference documents", func(t *testing.T) {
+		ClearQueue()
+		source, target, reference := newTree(), newTree(), newTree()
+		moved := source.Root.LastChild
+		reference.Root.LastChild.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref",
+			TextMarkBlockRefID: moved.ID, TextMarkBlockRefSubtype: "s", TextMarkTextContent: "reference"})
+		if _, err := filesys.WriteTree(reference); err != nil {
+			t.Fatal(err)
+		}
+		for _, tree := range []*parse.Tree{source, target, reference} {
+			treenode.IndexBlockTree(tree)
+			IndexTreeQueue(tree)
+		}
+		FlushQueue()
+		if refs := GetRefsCacheByDefIDInBox(moved.ID, box); len(refs) != 1 || refs[0].DefBlockRootID != source.ID {
+			t.Fatalf("missing initial reference: %+v", refs)
+		}
+		moved.Unlink()
+		target.Root.AppendChild(moved)
+		for _, tree := range []*parse.Tree{source, target} {
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			UpsertTreeQueue(tree)
+		}
+		RefreshDefinitionRefsQueue(box, []string{moved.ID})
+		// The queued metadata repair must not depend on loading this source.
+		if err := os.WriteFile(filepath.Join(util.DataDir, box, reference.Path), []byte("unreadable reference document"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		restartQueue()
+		if _, err := db.Exec("CREATE TRIGGER reject_ref_location BEFORE UPDATE ON refs BEGIN SELECT RAISE(ABORT, 'reject ref location'); END"); err != nil {
+			t.Fatal(err)
+		}
+		FlushQueue()
+		if len(operationQueue) != 1 || len(loadIndexQueue()) != 3 {
+			t.Fatal("failed reference repair lost its recovery record")
+		}
+		if _, err := db.Exec("DROP TRIGGER reject_ref_location"); err != nil {
+			t.Fatal(err)
+		}
+		restartQueue()
+		FlushQueue()
+		refs := GetRefsCacheByDefIDInBox(moved.ID, box)
+		if len(refs) != 1 || refs[0].DefBlockRootID != target.ID || refs[0].DefBlockPath != target.Path || refs[0].DefBlockParentID != target.ID {
+			t.Fatalf("recovery did not repair moved definition metadata: %+v", refs)
+		}
+		if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+			t.Fatal("successful reference recovery left pending work")
+		}
+	})
+
 	for _, recovered := range []bool{false, true} {
 		name := "live"
 		if recovered {

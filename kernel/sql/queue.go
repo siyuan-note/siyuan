@@ -56,6 +56,7 @@ type dbQueueOperation struct {
 	block                         *Block   // update_block_content
 	id                            string   // index_node
 	removeAssetHashes             []string // delete_assets
+	refreshDefIDs                 []string // refresh_def_refs
 	recoveryEntry                 *indexEntry
 	recoveredIndex                bool
 }
@@ -116,7 +117,7 @@ func (change *backlinkIndexChange) addOperation(op *dbQueueOperation) {
 		} else {
 			change.full = true
 		}
-	case "delete", "delete_box", "delete_box_refs":
+	case "delete", "delete_box", "delete_box_refs", "refresh_def_refs":
 		change.changed = true
 		change.full = true
 	}
@@ -152,7 +153,7 @@ func (op *dbQueueOperation) boxID() string {
 		}
 	case "delete", "delete_id":
 		return op.removeTreeBox
-	case "delete_box", "delete_box_refs", "index_node":
+	case "delete_box", "delete_box_refs", "index_node", "refresh_def_refs":
 		return op.box
 	case "update_block_content":
 		if op.block != nil {
@@ -381,6 +382,11 @@ func FlushQueue() {
 }
 
 func invalidateRefsCacheForOperation(op *dbQueueOperation) {
+	if op != nil && op.action == "refresh_def_refs" {
+		for _, id := range op.refreshDefIDs {
+			removeRefCacheByDefID(id)
+		}
+	}
 	if nil != op && ("update_refs" == op.action || "delete_refs" == op.action) && nil != op.upsertTree {
 		removeRefCacheByPath(op.upsertTree.Box, op.upsertTree.Path)
 	}
@@ -478,6 +484,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = upsertRefs(tx, op.upsertTree)
 	case "delete_refs":
 		err = deleteRefs(tx, op.upsertTree)
+	case "refresh_def_refs":
+		err = refreshDefinitionRefLocations(tx, op.box, op.refreshDefIDs)
 	case "update_block_content":
 		err = updateBlockContent(tx, op.block)
 	case "delete_assets":
@@ -508,6 +516,35 @@ func IndexNodeQueue(id string) {
 		}
 	}
 	appendOperation(newOp)
+}
+
+// RefreshDefinitionRefsQueue follows the committed source/target indexing
+// operations. Recovery needs only stable IDs, never the reference source files.
+func RefreshDefinitionRefsQueue(boxID string, ids []string) {
+	if len(ids) == 0 {
+		return
+	}
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	appendOperation(&dbQueueOperation{action: "refresh_def_refs", box: boxID,
+		refreshDefIDs: append([]string(nil), ids...), inQueueTime: time.Now()})
+}
+
+func refreshDefinitionRefLocations(tx *sql.Tx, boxID string, ids []string) error {
+	for _, id := range ids {
+		var parent, root, path string
+		err := tx.QueryRow("SELECT parent_id, root_id, path FROM blocks WHERE id = ? AND box = ? LIMIT 1", id, boxID).Scan(&parent, &root, &path)
+		if errors.Is(err, sql.ErrNoRows) {
+			continue // A later deletion superseded the move.
+		}
+		if err != nil {
+			return err
+		}
+		if err = execStmtTx(tx, "UPDATE refs SET def_block_parent_id = ?, def_block_root_id = ?, def_block_path = ? WHERE def_block_id = ?", parent, root, path, id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {

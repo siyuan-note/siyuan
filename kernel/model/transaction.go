@@ -3150,6 +3150,9 @@ func (tx *Transaction) commit() (err error) {
 	if err = tx.commitDocumentSources(); err != nil {
 		return err
 	}
+	for _, refresh := range crossTreeMoveRefRefreshes {
+		sql.RefreshDefinitionRefsQueue(refresh.BoxID, refresh.MovedBlockIDs)
+	}
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
 	tx.appendAutomationBlockAttrs()

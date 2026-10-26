@@ -171,6 +171,8 @@ func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
 		return &indexEntry{Action: "delete_box_refs", Box: op.box}
 	case "delete_assets":
 		return &indexEntry{Action: "delete_assets", Hashes: op.removeAssetHashes}
+	case "refresh_def_refs":
+		return &indexEntry{Action: op.action, Box: op.box, IDs: op.refreshDefIDs}
 	case "index_node":
 		return &indexEntry{Action: "index_node", ID: op.id, Box: op.box}
 	case "update_block_content":
@@ -341,6 +343,8 @@ func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) (*dbQueu
 		return &dbQueueOperation{box: e.Box, inQueueTime: time.Now(), action: "delete_box_refs"}, nil
 	case "delete_assets":
 		return &dbQueueOperation{removeAssetHashes: e.Hashes, inQueueTime: time.Now(), action: "delete_assets"}, nil
+	case "refresh_def_refs":
+		return &dbQueueOperation{box: e.Box, refreshDefIDs: e.IDs, inQueueTime: time.Now(), action: e.Action}, nil
 	case "index_node":
 		return &dbQueueOperation{id: e.ID, box: e.Box, inQueueTime: time.Now(), action: "index_node"}, nil
 	case "update_block_content":

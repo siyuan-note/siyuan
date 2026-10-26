@@ -38,6 +38,7 @@ type FileTree struct {
 	ShorthandSaveBox           string `json:"shorthandSaveBox"`           // 闪念速记存储笔记本
 	ShorthandSavePath          string `json:"shorthandSavePath"`          // 闪念速记存储路径
 	MaxListCount               int    `json:"maxListCount"`               // 最大列出数量
+	DocTreeBatchSize           *int   `json:"docTreeBatchSize"`           // 文档树单次加载数量
 	MaxOpenTabCount            int    `json:"maxOpenTabCount"`            // 最大打开页签数量
 	AllowCreateDeeper          bool   `json:"allowCreateDeeper"`          // 允许创建超过 7 层深度的子文档
 	RemoveDocWithoutConfirm    bool   `json:"removeDocWithoutConfirm"`    // 删除文档时是否不需要确认
@@ -64,6 +65,7 @@ func NewFileTree() *FileTree {
 		UseSVGDefaultIcon:          true,
 		Sort:                       util.SortModeCustom,
 		MaxListCount:               512,
+		DocTreeBatchSize:           new(512),
 		MaxOpenTabCount:            8,
 		AllowCreateDeeper:          false,
 		CloseTabsOnStart:           false,

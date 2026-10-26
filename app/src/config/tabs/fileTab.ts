@@ -299,6 +299,12 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
         }],
     });
 
+    group.number("fileTree.docTreeBatchSize", {
+        title: window.siyuan.languages.docTreeBatchSize,
+        desc: window.siyuan.languages.docTreeBatchSizeTip,
+        min: 1,
+        max: 10240,
+    });
     group.number("fileTree.maxListCount", {
         title: window.siyuan.languages.fileTree16,
         desc: window.siyuan.languages.fileTree17,

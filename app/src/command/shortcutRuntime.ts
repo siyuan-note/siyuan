@@ -14,7 +14,7 @@ export const captureShortcutContext = (app: App, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     const fileTree = target.closest(".sy__file");
     const context = captureCommandContext({app, source: "shortcut",
-        fileLiElements: fileTree ? Array.from(fileTree.querySelectorAll(".b3-list-item--focus")) : undefined});
+        fileLiElements: fileTree ? [] : undefined});
     const textInput = Boolean(target.closest("input, textarea"));
     const editorFocused = !textInput && Boolean(context.protyle?.wysiwyg?.element?.contains(target));
     const dockFocused = !textInput && Boolean(context.dock?.element.contains(target));

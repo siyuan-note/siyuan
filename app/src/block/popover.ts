@@ -371,8 +371,8 @@ export const initBlockPopover = (app: App) => {
                 tooltipAbortController = new AbortController();
                 const signal = tooltipAbortController.signal;
                 const capturedController = tooltipAbortController;
-                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
-                    if (signal.aborted) {
+                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.closest("[data-url]")?.getAttribute("data-url")}, (response) => {
+                    if (signal.aborted || !notebookItemElement.isConnected) {
                         return;
                     }
                     const boxData = response.data.boxInfo;

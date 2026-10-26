@@ -523,6 +523,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 	result.ShorthandSaveBox = value.ShorthandSaveBox
 	result.ShorthandSavePath = value.ShorthandSavePath
 	result.MaxListCount = value.MaxListCount
+	result.DocTreeBatchSize = value.DocTreeBatchSize
 	result.MaxOpenTabCount = value.MaxOpenTabCount
 	result.AllowCreateDeeper = value.AllowCreateDeeper
 	result.RemoveDocWithoutConfirm = value.RemoveDocWithoutConfirm

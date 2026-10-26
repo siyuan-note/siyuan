@@ -392,7 +392,10 @@ interface IRefDefs {
 
 interface IFilesPath {
     notebookId: string,
-    openPaths: string[]
+    openPaths: string[],
+    version?: 2,
+    expandedIDs?: {id: string, kind: "document" | "notebook"}[],
+    scrollAnchor?: {id: string, offset: number},
 }
 
 interface IPosition {
@@ -779,6 +782,7 @@ interface ICommand {
     execute?: (context: ICommandContext) => void | Promise<void>
     callback?: (context?: ICommandContext) => void   // 其余回调存在时将不会触发
     globalCallback?: (context?: ICommandContext) => void // 焦点不在应用内时执行的回调
+    /** 文档树命令接收 Files 实例；通过 getSelectedItems() 获取完整选择，避免通过可视区 DOM 枚举。 */
     fileTreeCallback?: (
         file: import("../layout/dock/Files").Files,
         context?: ICommandContext

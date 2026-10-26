@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261026142807"
 	},
 	"Children": [
 		{
@@ -3605,12 +3605,76 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Document"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-7llb7wr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-7llb7wr",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The document tree loads documents as needed. Keep scrolling to browse all accessible documents. Adjust the amount loaded at a time in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "File Management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document tree batch size"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; this does not limit the total number of documents you can browse. Maximum number to list still limits tag lists and subdocuments included in merged exports."
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-48relka",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-48relka",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the desktop document tree, Home and End select the first or last row in the expanded tree. Hold Shift while pressing Up, Down, Home or End to extend the selection, including rows outside the viewport. Locating a document automatically loads its position."
 				}
 			]
 		},

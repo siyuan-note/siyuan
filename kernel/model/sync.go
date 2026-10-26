@@ -500,6 +500,8 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 }
 
 func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	bootProgressPart := int32(10 / float64(len(removeFilePaths)))
 	for _, removeFile := range removeFilePaths {
 		if !strings.HasSuffix(removeFile, ".sy") {
@@ -535,6 +537,8 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 }
 
 func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	luteEngine := util.NewLute()
 	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
 	for _, upsertFile := range upsertFilePaths {

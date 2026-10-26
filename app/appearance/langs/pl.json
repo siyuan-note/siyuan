@@ -1,4 +1,6 @@
 {
+	"docTreeBatchSize": "Liczba dokumentów ładowanych jednorazowo",
+	"docTreeBatchSizeTip": "Liczba dokumentów ładowanych naraz; przewijaj dalej, aby przejrzeć wszystkie dokumenty",
 	"skipExitSync": "Pomiń synchronizację i wyjdź",
 	"skipExitSyncConfirm": "Synchronizacja nie została zakończona. Pominąć ją i wyjść? Niezsynchronizowane zmiany pozostaną zapisane na tym urządzeniu",
 	"automationCollectionReference": "Cel odwołania",
@@ -2727,7 +2729,7 @@
 	"fileTree14": "Ścieżka zapisu (obsługuje zmienne formatu daty, takie jak <code class='fn__code'>/Codzienne notatki/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
 	"fileTree15": "Ścieżka szablonu dziennika (na przykład <code class='fn__code'>dailynote.md</code>; pozostaw puste, aby nie stosować szablonu; plik musi znajdować się w workspace/data/templates/)",
 	"fileTree16": "Maksymalna liczba do wyświetlenia",
-	"fileTree17": "Jeśli jest zbyt dużo poddokumentów/tagów, ten ograniczenie może być użyte do poprawienia wydajności",
+	"fileTree17": "Ogranicza listy tagów i liczbę poddokumentów uwzględnianych w scalonym eksporcie",
 	"fileTree18": "Zezwól na tworzenie poddokumentów głębiej niż 7 poziomów",
 	"fileTree19": "Niektóre systemy operacyjne mają ograniczenia techniczne, które mogą uniemożliwić ręczne kopiowanie danych obszaru roboczego po utworzeniu poddokumentów głębszych niż 7 poziomów",
 	"fileTree20": "Zapisz w pojedynczej linii",

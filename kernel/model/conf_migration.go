@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -102,6 +103,21 @@ var confMigrations = []confMigration{
 	}},
 	{6, "exportBlockRefMode", func(c *AppConf, raw []byte) (bool, error) {
 		return conf.MigrateExportBlockRefMode(c.Export.Load()), nil
+	}},
+	{7, "docTreeBatchSize", func(c *AppConf, raw []byte) (bool, error) {
+		var saved struct {
+			FileTree map[string]json.RawMessage `json:"fileTree"`
+		}
+		if err := json.Unmarshal(raw, &saved); err != nil {
+			return false, err
+		}
+		if _, exists := saved.FileTree["docTreeBatchSize"]; exists {
+			return false, nil
+		}
+		fileTree := conf.NormalizeFileTree(c.FileTree.Load())
+		fileTree.DocTreeBatchSize = new(fileTree.MaxListCount)
+		c.FileTree.Store(fileTree)
+		return true, nil
 	}},
 }
 

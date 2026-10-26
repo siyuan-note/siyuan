@@ -1,4 +1,4 @@
-import {toggleMenu} from "../../menus/menuToggle";
+import {toggleMenu, type IToggleMenuOptions} from "../../menus/menuToggle";
 import {escapeAttr} from "../../util/escape";
 
 interface IMultiSelectToolbarAction {
@@ -22,7 +22,7 @@ export const updateMultiSelectToolbar = (element: HTMLElement, count: number) =>
     (element.querySelector('[data-type="menu"]') as HTMLButtonElement).disabled = count === 0;
 };
 
-export const renderMultiSelectToolbar = (element: HTMLElement, count: number, onMenu: () => void, onExit: () => void,
+export const renderMultiSelectToolbar = (element: HTMLElement, count: number, onMenu: IToggleMenuOptions["build"], onExit: () => void,
                                         onSelectAll?: () => void, actions: IMultiSelectToolbarAction[] = []) => {
     element.style.padding = "0";
     element.innerHTML = `<div class="block__icons">

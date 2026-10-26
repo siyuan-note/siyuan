@@ -1,4 +1,6 @@
 {
+	"docTreeBatchSize": "文件樹單次載入數量",
+	"docTreeBatchSizeTip": "文件樹每次按需載入的數量，繼續捲動可瀏覽全部文件",
 	"skipExitSync": "略過同步並結束",
 	"skipExitSyncConfirm": "同步尚未完成，是否略過本次同步並結束？未同步的變更會保留在本機",
 	"automationCollectionReference": "引用目標",
@@ -2727,7 +2729,7 @@
 	"fileTree14": "存放路徑（可使用日期格式範本變數，例如 <code class='fn__code'>/日記/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>）",
 	"fileTree15": "日記範本路徑（例如 <code class='fn__code'>dailynote.md</code>，留空時不套用範本，需要將該檔放置於工作空間/data/templates/ 下）",
 	"fileTree16": "最大列出數量",
-	"fileTree17": "如果子文件/標籤非常多，可通過該項限制以提升性能",
+	"fileTree17": "限制標籤清單和包含子文件的合併匯出數量",
 	"fileTree18": "允許建立深度大於 7 層的子文件",
 	"fileTree19": "一些操作系統存在技術限制導致建立大於 7 層的子文件後可能無法正常手動複製工作空間資料",
 	"fileTree20": "使用單行保存",

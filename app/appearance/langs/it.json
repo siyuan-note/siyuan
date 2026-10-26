@@ -1,4 +1,6 @@
 {
+	"docTreeBatchSize": "Dimensione del lotto nell'albero dei documenti",
+	"docTreeBatchSizeTip": "Numero di documenti caricati alla volta; continua a scorrere per visualizzare tutti i documenti",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
 	"skipExitSyncConfirm": "La sincronizzazione non è terminata. Saltarla e uscire? Le modifiche non sincronizzate rimarranno salvate su questo dispositivo",
 	"automationCollectionReference": "Destinazione del riferimento",
@@ -2727,7 +2729,7 @@
 	"fileTree14": "Percorso di salvataggio (supporta variabili di modello di formato data, come <code class='fn__code'>/Note Giornaliere/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
 	"fileTree15": "Percorso del modello per il diario (ad esempio, <code class='fn__code'>dailynote.md</code>; lascia vuoto per non applicare alcun modello; il file deve trovarsi in workspace/data/templates/)",
 	"fileTree16": "Numero massimo da elencare",
-	"fileTree17": "Se ci sono troppi sotto-documenti/tag, questa limitazione può essere utilizzata per migliorare le prestazioni",
+	"fileTree17": "Limita gli elenchi di tag e il numero di sottodocumenti inclusi nelle esportazioni unite",
 	"fileTree18": "Permetti la creazione di sotto-documenti più profondi di 7 livelli",
 	"fileTree19": "Alcuni sistemi operativi hanno limitazioni tecniche che possono impedire la copia manuale dei dati dell'area di lavoro dopo la creazione di sotto-documenti superiori a 7 livelli",
 	"fileTree20": "Salva con una singola riga",

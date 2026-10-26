@@ -1,4 +1,6 @@
 {
+	"docTreeBatchSize": "문서 트리 일괄 로드 수",
+	"docTreeBatchSizeTip": "한 번에 로드할 문서 수이며, 계속 스크롤하면 모든 문서를 볼 수 있습니다",
 	"skipExitSync": "동기화를 건너뛰고 종료",
 	"skipExitSyncConfirm": "동기화가 완료되지 않았습니다. 건너뛰고 종료할까요? 동기화되지 않은 변경 사항은 이 기기에 저장된 상태로 유지됩니다",
 	"automationCollectionReference": "참조 대상",
@@ -2727,7 +2729,7 @@
 	"fileTree14": "저장 경로 (날짜 형식 템플릿 변수 지원, 예: <code class='fn__code'>/Daily Notes/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
 	"fileTree15": "데일리 노트 템플릿 경로(예: <code class='fn__code'>dailynote.md</code>, 템플릿을 적용하지 않으려면 비워 두세요. 파일은 workspace/data/templates/ 아래에 있어야 합니다)",
 	"fileTree16": "목록 최대 수",
-	"fileTree17": "하위 문서/태그가 너무 많은 경우 이 제한을 사용하여 성능을 향상시킬 수 있습니다",
+	"fileTree17": "태그 목록과 병합 내보내기에 포함되는 하위 문서 수를 제한합니다",
 	"fileTree18": "7단계보다 깊은 하위 문서 생성 허용",
 	"fileTree19": "일부 운영 체제에는 기술적 제한이 있어 7단계보다 큰 하위 문서를 생성한 후 작업 공간 데이터를 수동으로 복사하지 못할 수 있습니다",
 	"fileTree20": "한 줄로 저장",

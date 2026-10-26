@@ -11,14 +11,6 @@
     "count": 1,
     "reason": "键盘或命令打开，保留仅打开和焦点行为"
   },
-  "app/src/boot/globalEvent/keydown.ts | fileTreeKeydown | initFileMenu(app, notebookId, pathString, liElements[0]) | popup": {
-    "count": 1,
-    "reason": "键盘或命令打开，保留仅打开和焦点行为"
-  },
-  "app/src/boot/globalEvent/keydown.ts | fileTreeKeydown | initNavigationMenu(app, liElements[0] as HTMLElement) | popup": {
-    "count": 1,
-    "reason": "键盘或命令打开，保留仅打开和焦点行为"
-  },
   "app/src/boot/globalEvent/searchKeydown.ts | searchKeydown | initSearchMenu(id) | popup": {
     "count": 1,
     "reason": "键盘或命令打开，保留仅打开和焦点行为"
@@ -131,9 +123,9 @@
     "count": 1,
     "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
   },
-  "app/src/mobile/dock/MobileFiles.ts | MobileFiles | window.siyuan.menus.menu | fullscreen": {
+  "app/src/mobile/dock/MobileFiles.ts | MobileFiles/showMultiSelectMenu | window.siyuan.menus.menu | fullscreen": {
     "count": 1,
-    "reason": "由 renderMultiSelectToolbar 的具体菜单按钮 toggleMenu 回调打开"
+    "reason": "复用 renderMultiSelectToolbar 按钮传入的 toggleMenu 会话，异步定位后校验会话与选择版本并通过 session.show 发布"
   },
   "app/src/mobile/util/nativeSelect.ts | openSelect | menu | open": {
     "count": 1,

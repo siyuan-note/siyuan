@@ -113,6 +113,14 @@ func TestContractGetDocNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractDocTreeRangeNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractDocTreeLocateNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractTreeStatNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, false)
 }
@@ -231,7 +239,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		model.Conf.Export.Store(confSectionValue1)
 		model.Conf.Search.Store(confSectionValue2)
 	}
-	addressingTest := t.Name() == "TestContractDocumentPathsNotebookResponseLease" ||
+	docTreeTest := t.Name() == "TestContractDocTreeRangeNotebookResponseLease" || t.Name() == "TestContractDocTreeLocateNotebookResponseLease"
+	addressingTest := docTreeTest || t.Name() == "TestContractDocumentPathsNotebookResponseLease" ||
 		t.Name() == "TestContractResolveDocumentPathNotebookResponseLease" ||
 		t.Name() == "TestContractDocumentCreateTargetNotebookResponseLease" ||
 		t.Name() == "TestContractDocumentCreatePlanNotebookResponseLease" ||
@@ -263,6 +272,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		count = 2
 	}
 	var boxIDs []string
+	const docTreeID = "20261026000000-lease01"
 	for range count {
 		boxID, err := model.CreateEncryptedBox("Response lease", "review-password")
 		if err != nil {
@@ -284,6 +294,13 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			t.Fatal(err)
 		}
 		treenode.UpsertBlockTree(tree)
+		if docTreeTest {
+			document := treenode.NewTree(boxID, "/"+docTreeID+".sy", "/Lease", "REVIEW-SECRET-CONTENT")
+			if _, err := filesys.WriteTree(document); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(document)
+		}
 		if addressingTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 			if _, err := model.Mount(boxID); err != nil {
 				t.Fatal(err)
@@ -311,6 +328,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/filetree/getDocCreateTarget", getDocCreateTarget)
 	engine.POST("/api/filetree/planDocCreate", planDocCreate)
 	engine.POST("/api/filetree/getDoc", getDoc)
+	engine.POST("/api/filetree/listDocTreeRange", listDocTreeRange)
+	engine.POST("/api/filetree/locateDocTreeItem", locateDocTreeItem)
 	engine.POST("/api/block/getTreeStat", getTreeStat)
 	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
 	engine.POST("/api/block/getBlockBreadcrumbChildren", getBlockBreadcrumbChildren)
@@ -352,6 +371,12 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	typedQuery := false
 	switch t.Name() {
+	case "TestContractDocTreeRangeNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/listDocTreeRange", true
+		args = map[string]any{"notebook": boxIDs[0], "parentID": "", "offset": 0, "limit": 1}
+	case "TestContractDocTreeLocateNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/locateDocTreeItem", true
+		args = map[string]any{"notebook": boxIDs[0], "id": docTreeID}
 	case "TestContractDocumentCreateTargetNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/getDocCreateTarget", true
 		args = map[string]any{"notebook": boxIDs[0], "purpose": "document"}
@@ -499,7 +524,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	if lockedBeforeResponse {
 		t.Fatalf("lock completed before plaintext response was sent: %s", writer.Body.String())
 	}
-	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
+	if docTreeTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(string(requestBody))))
 		requireAPIContract(t, http.MethodPost, endpoint, recorder)

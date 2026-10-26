@@ -38,6 +38,35 @@ const createContext = (
 });
 
 describe("plugin command adapter", () => {
+    for (const source of ["commandPanel", "fileTreeShortcut"] as const) {
+        it(`keeps virtual ${source} targets across recycling and rejects changed selection before execution`, () => {
+            let valid = true;
+            let calls = 0;
+            const items = [{id: "doc", notebookId: "box", path: "/doc.sy", occurrenceKey: "box/doc"}];
+            const files = {} as import("../layout/dock/Files").Files;
+            const context = createContext({source, focus: "fileTree", fileTree: {
+                model: files, elements: [], ids: ["doc"], paths: ["/doc.sy"], selectionVersion: 4,
+                items: items as import("../layout/dock/docTree/types").IDocTreeItem[],
+                controller: {validateSelection: (version: number, selected: unknown) => {
+                    assert.equal(version, 4);
+                    assert.equal(selected, items);
+                    return valid;
+                }} as unknown as import("../layout/dock/docTree/DocTreeController").DocTreeController,
+            }});
+            const command: ICommand = {langKey: "tree", fileTreeCallback: value => {
+                assert.equal(value, files);
+                calls++;
+            }};
+            const callback = resolvePluginCommandCallback(command, context);
+            callback();
+            assert.equal(calls, 1);
+            valid = false;
+            callback();
+            assert.equal(calls, 1);
+            assert.equal(resolvePluginCommandCallback(command, context), undefined);
+        });
+    }
+
     it("creates collision-safe IDs and live metadata", () => {
         const plugin = {name: "sample/plugin", displayName: "Sample", i18n: {open: "Open"}};
         const command = {langKey: "open:item", customHotkey: "Ctrl+A"} as ICommand;

@@ -31,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -332,6 +333,7 @@ func FlushQueue() {
 		context["total"] = groupOpsTotal[op.action]
 		diagnostic.Stage("execute " + op.action)
 		timing.Stage("execute")
+		context["docTreeRefsChanged"] = true
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
@@ -346,7 +348,12 @@ func FlushQueue() {
 
 		diagnostic.Stage("commit " + op.action)
 		timing.Stage("commit")
+		finishDocTreeRefs := func() {}
+		if changed, _ := context["docTreeRefsChanged"].(bool); changed {
+			finishDocTreeRefs = cache.BeginDocTreeRefMutation()
+		}
 		if err = commitTx(tx); err != nil {
+			finishDocTreeRefs()
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
 			if recovered {
@@ -357,6 +364,7 @@ func FlushQueue() {
 		}
 		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
+		finishDocTreeRefs()
 
 		switch op.action {
 		case "index":

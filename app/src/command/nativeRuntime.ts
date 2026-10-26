@@ -1,7 +1,7 @@
 import type {App} from "../index";
 import {Constants} from "../constants";
 import {isMobile} from "../util/functions";
-import {addEditorToDatabase, addFilesToDatabase} from "../protyle/render/av/addToDatabase";
+import {addBlocksToDatabase, addEditorToDatabase, addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 import {hasClosestBlock, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {hintMoveBlock} from "../protyle/hint/extend";
@@ -11,6 +11,8 @@ import {onlyProtyleCommand} from "../boot/globalEvent/command/protyle";
 import type {ICommandContextSnapshot} from "./types";
 import {DATABASE_ROW_COMMANDS, getDatabaseRowNavigationButton} from "./databaseRowNavigation";
 import {isInIOS} from "../protyle/util/compatibility";
+import {hasCommandFileTreeTarget} from "./contextTargets";
+import {getDocTreeActionItems, getDocTreeTopPaths} from "../menus/navigationSelection";
 /// #if MOBILE
 import {popSearch} from "../mobile/menu/search";
 /// #else
@@ -33,6 +35,9 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
     const protyle = context.protyle;
     const range = context.range;
     const fileLiElements = context.fileTree?.elements;
+    if (isFileFocus && context.fileTree?.controller && !hasCommandFileTreeTarget(context)) {
+        return false;
+    }
 
     /// #if MOBILE
     if (!isFileFocus && protyle && isInIOS() && openOnly && ["search", "replace"].includes(command)) {
@@ -56,7 +61,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
 
     // 全局命令，在没有编辑器上下文或文档树没有选中项时执行。
     if ((!protyle && !isFileFocus) ||
-        (isFileFocus && (!fileLiElements || fileLiElements.length === 0)) ||
+        (isFileFocus && !context.fileTree?.items?.length && (!fileLiElements || fileLiElements.length === 0)) ||
         (isMobile() && !document.getElementById("empty")?.classList.contains("fn__none"))) {
         if (command === "replace") {
             /// #if MOBILE
@@ -113,13 +118,15 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 /// #endif
             } else {
                 /// #if !MOBILE
-                const topULElement = hasTopClosestByTag(fileLiElements[0], "UL");
-                if (!topULElement) {
+                const notebookId = context.fileTree.items?.[0]?.notebookId ||
+                    fileLiElements[0].getAttribute("data-notebook-id") ||
+                    (hasTopClosestByTag(fileLiElements[0], "UL") || undefined)?.getAttribute("data-url");
+                if (!notebookId) {
                     return false;
                 }
-                const notebookId = topULElement.getAttribute("data-url");
-                const pathString = fileLiElements[0].getAttribute("data-path");
-                const isFile = fileLiElements[0].getAttribute("data-type") === "navigation-file";
+                const pathString = context.fileTree.items?.[0]?.path || fileLiElements[0].getAttribute("data-path");
+                const isFile = context.fileTree.items?.[0]?.kind === "document" ||
+                    (!context.fileTree.items && fileLiElements[0].getAttribute("data-type") === "navigation-file");
                 if (isFile) {
                     openSearch({
                         focusInput: openOnly,
@@ -167,13 +174,15 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 /// #endif
             } else {
                 /// #if !MOBILE
-                const topULElement = hasTopClosestByTag(fileLiElements[0], "UL");
-                if (!topULElement) {
+                const notebookId = context.fileTree.items?.[0]?.notebookId ||
+                    fileLiElements[0].getAttribute("data-notebook-id") ||
+                    (hasTopClosestByTag(fileLiElements[0], "UL") || undefined)?.getAttribute("data-url");
+                if (!notebookId) {
                     return false;
                 }
-                const notebookId = topULElement.getAttribute("data-url");
-                const pathString = fileLiElements[0].getAttribute("data-path");
-                const isFile = fileLiElements[0].getAttribute("data-type") === "navigation-file";
+                const pathString = context.fileTree.items?.[0]?.path || fileLiElements[0].getAttribute("data-path");
+                const isFile = context.fileTree.items?.[0]?.kind === "document" ||
+                    (!context.fileTree.items && fileLiElements[0].getAttribute("data-type") === "navigation-file");
                 if (isFile) {
                     openSearch({
                         focusInput: openOnly,
@@ -196,6 +205,12 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
         case "addToDatabase":
             if (!isFileFocus && range) {
                 addEditorToDatabase(protyle, range);
+            } else if (context.fileTree?.controller && context.fileTree.items.length) {
+                const {controller, items} = context.fileTree;
+                const target = await controller.ensureRendered(items[0].occurrenceKey);
+                if (target && hasCommandFileTreeTarget(context)) {
+                    addBlocksToDatabase(Array.from(new Set(items.map(item => item.id))), target);
+                }
             } else if (fileLiElements) {
                 addFilesToDatabase(fileLiElements);
             }
@@ -232,12 +247,13 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                         sourceNotebookIds: [protyle.notebookId],
                     });
                 }
-            } else if (fileLiElements) {
-                const paths = getTopPaths(fileLiElements);
-                const sourceNotebookIds = fileLiElements.map(item =>
+            } else if (fileLiElements || context.fileTree?.items) {
+                const items = context.fileTree.items && getDocTreeActionItems(context.fileTree.items);
+                const paths = items ? getDocTreeTopPaths(items) : getTopPaths(fileLiElements);
+                const sourceNotebookIds = items ? items.map(item => item.notebookId) : fileLiElements.map(item =>
                     item.getAttribute("data-notebook-id") ||
                     item.closest("ul[data-url]")?.getAttribute("data-url") || "");
-                const rootIDs = fileLiElements.map(item => item.getAttribute("data-node-id"));
+                const rootIDs = items ? items.map(item => item.id) : fileLiElements.map(item => item.getAttribute("data-node-id"));
                 movePathTo({
                     cb: (toPath, toNotebook) => {
                         moveToPath(paths, toNotebook[0], toPath[0]);

@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -112,6 +113,8 @@ func GetPublishAccess() (ret PublishAccess) {
 }
 
 func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	now := time.Now().UnixMilli()
 	publishAccessLock.Lock()
 	defer publishAccessLock.Unlock()

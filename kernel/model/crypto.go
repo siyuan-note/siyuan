@@ -1581,6 +1581,8 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	cache.InvalidateDocTree(boxID)
+	cache.InvalidateDocTreeRefs()
 	av.ClearBlockCollectionIndex(boxID)
 	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
 	heif.ClearMemoryCache(boxID)

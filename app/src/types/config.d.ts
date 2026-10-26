@@ -1016,10 +1016,15 @@ declare namespace Config {
          */
         docCreateTemplatePath: string;
         /**
-         * The maximum number of documents listed
+         * 标签列表、包含子文档的导出及旧版列表接口的数量上限，不限制文档树浏览。
          * 有效范围为 1–10240；小于 1 回退 512，大于 10240 截断至 10240
          */
         maxListCount: number;
+        /**
+         * 文档树单次按需加载数量，默认 512，有效范围为 1–10240。
+         * 首次升级继承原最大列出数量；设置为 null 时恢复默认值，不重新继承。
+         */
+        docTreeBatchSize: number;
         /**
          * The maximum number of open tabs
          */

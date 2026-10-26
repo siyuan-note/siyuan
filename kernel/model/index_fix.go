@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -481,6 +482,10 @@ func saveIndexRepairHistory(tree *parse.Tree, original []byte) error {
 }
 
 func recreateTree(tree *parse.Tree, absPath string, original []byte) error {
+	return recreateTreeWithSteps(tree, absPath, original, nil)
+}
+
+func recreateTreeWithSteps(tree *parse.Tree, absPath string, original []byte, step func(string) error) (err error) {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
@@ -491,31 +496,114 @@ func recreateTree(tree *parse.Tree, absPath string, original []byte) error {
 	if !bytes.Equal(current, original) {
 		return fmt.Errorf("%w: %s", util.ErrFileChanged, absPath)
 	}
-	// 删除关于该树的所有块树数据，后面会调用 fixBlockTreeByFileSys() 进行订正补全
-	treenode.RemoveBlockTreesByPathPrefix(tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
-	treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
-
-	resetTree(tree, "", true)
-	if _, err := filesys.WriteTree(tree); err != nil {
-		logging.LogWarnf("write tree [%s] failed: %s", tree.Path, err)
+	prepared, snapshot, err := filesys.LoadTreeSnapshot(tree.Box, tree.Path, util.NewLute())
+	if err != nil {
 		return err
 	}
-
-	if gulu.File.IsDir(strings.TrimSuffix(absPath, ".sy")) {
-		// 重命名子文档文件夹
-		from := strings.TrimSuffix(absPath, ".sy")
-		to := filepath.Join(filepath.Dir(absPath), tree.ID)
-		if renameErr := os.Rename(from, to); nil != renameErr {
-			logging.LogWarnf("rename [%s] failed: %s", from, renameErr)
-			return renameErr
+	if !bytes.Equal(snapshot, original) {
+		return util.ErrFileChanged
+	}
+	if err = saveIndexRepairHistory(tree, original); err != nil {
+		return err
+	}
+	oldPath := tree.Path
+	resetTreeData(prepared, "", true)
+	j := &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending", Files: []*documentSourceFile{
+		{Box: tree.Box, Path: oldPath, Before: original},
+		{Box: tree.Box, Path: prepared.Path},
+	}}
+	from := strings.TrimSuffix(absPath, ".sy")
+	to := filepath.Join(filepath.Dir(absPath), prepared.ID)
+	if info, statErr := os.Lstat(from); statErr == nil {
+		if !info.IsDir() {
+			return errors.New("invalid document child directory")
+		}
+		j.Move = &documentSourceMove{Box: tree.Box, From: strings.TrimSuffix(oldPath, ".sy"), To: strings.TrimSuffix(prepared.Path, ".sy")}
+	} else if !os.IsNotExist(statErr) {
+		return statErr
+	}
+	if _, statErr := os.Lstat(to); !os.IsNotExist(statErr) {
+		return errors.New("document repair destination directory already exists or is inaccessible")
+	}
+	committed, recorded := false, false
+	defer func() {
+		if !committed && recorded {
+			if rollbackErr := j.rollback(); rollbackErr != nil {
+				err = errors.Join(err, rollbackErr)
+				return
+			}
+			cache.RemoveTreeDataInBox(prepared.ID, prepared.Box)
+			cache.RemoveDocIALInBox(prepared.Path, prepared.Box)
+			treenode.RemoveBlockTreesByRootID(prepared.Box, prepared.ID)
+			if removeErr := os.Remove(j.filename()); removeErr != nil {
+				err = errors.Join(err, removeErr)
+			}
+		}
+	}()
+	checkpoint := func(stage string) error {
+		if step != nil {
+			return step(stage)
+		}
+		return nil
+	}
+	err = filesys.CreateTreeWithJournal(prepared, func(data []byte) error {
+		j.Files[1].After = data
+		if saveErr := j.save(); saveErr != nil {
+			return saveErr
+		}
+		recorded = true
+		return checkpoint("prepared")
+	})
+	if err != nil {
+		return err
+	}
+	if err = checkpoint("created"); err != nil {
+		return err
+	}
+	if j.Move != nil {
+		if err = os.Rename(from, to); err != nil {
+			return err
 		}
 	}
-
-	if err := removeIndexRepairSourceIfUnchanged(absPath, original); err != nil {
-		logging.LogWarnf("remove [%s] failed: %s", absPath, err)
+	if err = checkpoint("children-moved"); err != nil {
 		return err
 	}
-	return nil
+	if err = removeIndexRepairSourceIfUnchanged(absPath, original); err != nil {
+		return err
+	}
+	if err = checkpoint("source-removed"); err != nil {
+		return err
+	}
+	j.State = "committed"
+	if err = j.save(); err != nil {
+		j.State = "pending"
+		return err
+	}
+	committed = true
+	*tree = *prepared
+	// Publish derived state only after the complete filesystem operation commits.
+	// A surviving committed record forces authenticated reindexing on the next mount.
+	sql.RemoveTreePathQueue(tree.Box, strings.TrimSuffix(oldPath, ".sy"))
+	treenode.RemoveBlockTreesByPathPrefix(tree.Box, strings.TrimSuffix(oldPath, ".sy"))
+	paths, err := duplicateDocTreePaths(tree.Box, tree.Path)
+	if err != nil {
+		return err
+	}
+	err = filesys.WalkTreeSnapshots(tree.Box, paths, func(current *parse.Tree) error {
+		boundary := ""
+		if IsEncryptedBox(current.Box) {
+			boundary = current.Box
+		}
+		if err := av.AddCopiedBlockRels(boundary, current.Root.ChildrenByType(ast.NodeAttributeView)); err != nil {
+			return err
+		}
+		sql.UpsertTreeQueue(current)
+		return treenode.ReplaceBlockTree(current)
+	})
+	if err == nil {
+		err = os.Remove(j.filename())
+	}
+	return err
 }
 
 func removeIndexRepairSourceIfUnchanged(absPath string, original []byte) error {

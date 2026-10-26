@@ -44,6 +44,17 @@ import (
 )
 
 func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
+	resetTreeData(tree, titleSuffix, removeAvBinding)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.Type == ast.NodeAttributeView {
+			av.UpsertBlockRel(n.AttributeViewID, n.ID)
+		}
+		return ast.WalkContinue
+	})
+}
+
+// resetTreeData prepares identities without publishing database mirror side effects.
+func resetTreeData(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	oldRootID := tree.Root.ID
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
@@ -83,20 +94,6 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	})
 
 	remapDuplicateDocTreeReferences(tree.Root, blockIDs)
-
-	var attrViewIDs []string
-	// 绑定镜像数据库
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeAttributeView == n.Type {
-			av.UpsertBlockRel(n.AttributeViewID, n.ID)
-			attrViewIDs = append(attrViewIDs, n.AttributeViewID)
-		}
-		return ast.WalkContinue
-	})
 
 	if removeAvBinding {
 		// 清空文档绑定的数据库

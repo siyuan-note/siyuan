@@ -307,6 +307,11 @@ func indexBox(boxID string) {
 
 	// 关联数据库和块
 	av.BatchUpsertBlockRel(avNodes)
+	if metadataReady {
+		if err := finishDocumentSourceRecovery(box.ID); err != nil {
+			logging.LogErrorf("complete document source recovery [%s] failed: %s", box.ID, err)
+		}
+	}
 
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()

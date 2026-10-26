@@ -302,6 +302,10 @@ func InitConf() {
 		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover incremental sort conf failed: %s", err)
 		return
 	}
+	if err := recoverDocumentSources(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover document sources failed: %s", err)
+		return
+	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
 	if err := CleanupRetiredInstallResources(); err != nil {
@@ -1184,7 +1188,7 @@ func InitBoxes() {
 		}
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
-		if !initialized {
+		if !initialized || hasDocumentSourceRecovery(box.ID) {
 			indexBox(box.ID)
 		}
 	}

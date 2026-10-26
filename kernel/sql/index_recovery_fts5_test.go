@@ -279,6 +279,57 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		}
 	})
 
+	for _, action := range []string{"delete", "delete_id", "delete_ids", "rename", "rename_doc", "move", "delete_box"} {
+		t.Run(action+" auxiliary failure rolls back and retries", func(t *testing.T) {
+			ClearQueue()
+			tree := newTree()
+			IndexTreeQueue(tree)
+			FlushQueue()
+			if _, err := db.Exec("INSERT INTO block_embeddings (id, root_id, box, path) VALUES (?, ?, ?, ?)", tree.ID, tree.ID, box, tree.Path); err != nil {
+				t.Fatal(err)
+			}
+			verb := "DELETE"
+			if action == "rename" || action == "rename_doc" || action == "move" {
+				verb = "UPDATE"
+			}
+			if _, err := db.Exec("CREATE TRIGGER reject_embedding BEFORE " + verb + " ON block_embeddings BEGIN SELECT RAISE(ABORT, 'reject embedding'); END"); err != nil {
+				t.Fatal(err)
+			}
+			latest := *tree
+			latest.HPath = "/Updated"
+			if action == "move" {
+				latest.Path = "/20261026000000-parent1/" + tree.ID + ".sy"
+			}
+			treenode.IndexBlockTree(&latest)
+			op := &dbQueueOperation{action: action, indexTree: &latest, box: box,
+				removeTreeBox: box, removeTreePath: tree.Path, removeTreeID: tree.ID, removeTreeIDs: []string{tree.ID}}
+			appendOperation(op)
+			FlushQueue()
+			if len(operationQueue) != 1 || len(loadIndexQueue()) != 1 {
+				t.Fatal("auxiliary SQL failure was acknowledged as success")
+			}
+			assertRows(tree)
+			var hpath string
+			if err := db.QueryRow("SELECT hpath FROM blocks WHERE id = ?", tree.ID).Scan(&hpath); err != nil || hpath != tree.HPath {
+				t.Fatalf("failed auxiliary SQL committed primary changes: %q, %v", hpath, err)
+			}
+			if _, err := db.Exec("DROP TRIGGER reject_embedding"); err != nil {
+				t.Fatal(err)
+			}
+			FlushQueue()
+			if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+				t.Fatal("successful auxiliary retry left pending work")
+			}
+			var rows int
+			if err := db.QueryRow("SELECT COUNT(*) FROM block_embeddings WHERE root_id = ?", tree.ID).Scan(&rows); err != nil {
+				t.Fatal(err)
+			}
+			if verb == "DELETE" && rows != 0 || verb == "UPDATE" && rows != 1 {
+				t.Fatalf("incorrect auxiliary state after retry: %d rows", rows)
+			}
+		})
+	}
+
 	t.Run("embed content is recalculated and searchable after restart", func(t *testing.T) {
 		ClearQueue()
 		tree := newTree()

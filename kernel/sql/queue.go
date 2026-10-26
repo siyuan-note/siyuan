@@ -418,18 +418,20 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		if nil == err {
 			condition, args := documentPathPrefixCondition("path", op.removeTreeBox, op.removeTreePath)
-			tx.Exec("DELETE FROM block_embeddings WHERE "+condition, args...)
+			_, err = tx.Exec("DELETE FROM block_embeddings WHERE "+condition, args...)
 		}
 	case "delete_id":
 		err = deleteByRootID(tx, op.removeTreeID, context)
 		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", op.removeTreeID)
+			_, err = tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", op.removeTreeID)
 		}
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 		if nil == err {
 			for _, rootID := range op.removeTreeIDs {
-				tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", rootID)
+				if _, err = tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", rootID); err != nil {
+					return
+				}
 			}
 		}
 	case "rename", "rename_doc":
@@ -445,12 +447,12 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 
 		err = updateRootContent(tx, treenode.ReadDocumentTitle(op.indexTree.Root).Text, op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
 		if nil == err {
-			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+			_, err = tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "move":
 		err = batchUpdatePath(tx, op.indexTree, context)
 		if nil == err {
-			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+			_, err = tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "delete_box":
 		// 清理 box 的内容索引。事务由 beginTxForBox(op.boxID()) 按所属库路由：
@@ -459,7 +461,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		// 会用纯 INSERT 在无主键的 blocks 表上叠加重复行，导致搜索结果翻倍。
 		err = deleteByBoxTx(tx, op.box)
 		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
+			_, err = tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
 		}
 	case "delete_box_refs":
 		err = deleteRefsByBoxTx(tx, op.box)

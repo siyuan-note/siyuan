@@ -320,6 +320,11 @@ func RollbackDocHistory(historyPath string) (err error) {
 		return
 	}
 	boxID = box.ID
+	// Serialize replacement and history invalidation with edit commits and undo/redo selection.
+	// Rollback notebook creation/mounting above may itself wait for transactions.
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
 	srcPath := historyPath
 	var destPath, parentHPath string

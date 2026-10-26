@@ -9,7 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -74,7 +76,55 @@ func TestRestoreDocumentHistoryInvalidatesUndoRedoOnlyAfterWrite(t *testing.T) {
 			if relErr != nil {
 				t.Fatal(relErr)
 			}
-			err = RollbackDocHistory(relative)
+			if fail {
+				err = RollbackDocHistory(relative)
+			} else {
+				provider := filesys.DEKProvider
+				defer func() { filesys.DEKProvider = provider }()
+				started, allowWrite := make(chan struct{}), make(chan struct{})
+				var once, release sync.Once
+				defer release.Do(func() { close(allowWrite) })
+				filesys.DEKProvider = func(id string) ([]byte, error) {
+					once.Do(func() {
+						close(started)
+						<-allowWrite
+					})
+					return provider(id)
+				}
+				restored := make(chan error, 1)
+				go func() { restored <- RollbackDocHistory(relative) }()
+				select {
+				case <-started:
+				case <-time.After(5 * time.Second):
+					t.Fatal("restore did not reach its write boundary")
+				}
+				history := make(chan bool, 1)
+				go func() {
+					history <- WithTransactionHistory(func(_ func(*Transaction) error) bool {
+						undo, redo, _ := GlobalUndoLog.State(fixture.sourceID)
+						return undo || redo
+					})
+				}()
+				select {
+				case <-history:
+					t.Fatal("history selection entered before restoration finished")
+				case <-time.After(20 * time.Millisecond):
+				}
+				release.Do(func() { close(allowWrite) })
+				select {
+				case err = <-restored:
+				case <-time.After(5 * time.Second):
+					t.Fatal("restore did not finish")
+				}
+				select {
+				case stale := <-history:
+					if stale {
+						t.Fatal("history selection retained pre-restoration operations")
+					}
+				case <-time.After(5 * time.Second):
+					t.Fatal("history selection did not resume after restore")
+				}
+			}
 			if fail {
 				if err == nil || strings.Contains(err.Error(), "history path") {
 					t.Fatal("expected restore write failure")

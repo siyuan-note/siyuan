@@ -465,6 +465,10 @@ func RollbackDocHistory(historyPath string) (err error) {
 	if _, err = filesys.WriteTree(tree); err != nil {
 		return
 	}
+	invalidateDocumentHistory(tree.ID)
+	if workingDoc != nil && workingDoc.Type == "d" && workingDoc.BoxID == boxID && workingDoc.RootID != tree.ID {
+		invalidateDocumentHistory(workingDoc.RootID)
+	}
 	if workingDoc != nil {
 		if workingDoc.Type == "d" && workingDoc.Path != tree.Path {
 			if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {

@@ -231,8 +231,8 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0(webpack@5.106.2)
       filesize:
-        specifier: ^11.0.13
-        version: 11.0.17
+        specifier: ^11.0.28
+        version: 11.0.28
       globals:
         specifier: ^15.12.0
         version: 15.12.0
@@ -1900,8 +1900,8 @@ packages:
   filelist@1.0.6:
     resolution: {integrity: sha512-5giy2PkLYY1cP39p17Ech+2xlpTRL9HLspOfEgm0L6CwBXBTgsK5ou0JtzYuepxkaQ/tvhCFIJ5uXo0OrM2DxA==}
 
-  filesize@11.0.17:
-    resolution: {integrity: sha512-oHLTvMLw6imZUl1se/RBQrFlyy50nXce4sU7yGR6Qc0JgCwqnfiFsAnEwotdGmfKLD7SArGUk2/5STU0k8LOBQ==}
+  filesize@11.0.28:
+    resolution: {integrity: sha512-tsZcwUmhL0WQpsxe9Oua6FBjb0aBTRkXobZBhQdkoII0pYgy9h+cXm5tp13Fsr8dSwp1+UVDxNwAFULDpxkXaw==}
     engines: {node: '>= 10.8.0'}
 
   fill-range@7.1.1:
@@ -4875,7 +4875,7 @@ snapshots:
     dependencies:
       minimatch: 5.1.9
 
-  filesize@11.0.17: {}
+  filesize@11.0.28: {}
 
   fill-range@7.1.1:
     dependencies:

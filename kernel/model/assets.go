@@ -1809,30 +1809,24 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
-	filelock.Lock(oldAbsPath)
-	if err = os.Rename(oldAbsPath, newAbsPath); err != nil {
-		if err = gulu.File.Copy(oldAbsPath, newAbsPath); err != nil {
-			filelock.Unlock(oldAbsPath)
-			logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
-			return
-		}
+	// Keep both paths readable until all references have been rewritten. On a
+	// partial failure or restart, each committed reference still has its file.
+	if err = copyPromotedAsset(oldAbsPath, newAbsPath); err != nil {
+		return
 	}
-	filelock.Unlock(oldAbsPath)
 
 	oldSya := oldAbsPath + ".sya"
-	filelock.Lock(oldSya)
-	if gulu.File.IsExist(oldSya) {
+	hasSya := false
+	if _, statErr := os.Stat(oldSya); statErr == nil {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		newSya := newAbsPath + ".sya"
-		if err = os.Rename(oldSya, newSya); err != nil {
-			if err = gulu.File.Copy(oldSya, newSya); err != nil {
-				filelock.Unlock(oldSya)
-				logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
-				return
-			}
+		if err = copyPromotedAsset(oldSya, newAbsPath+".sya"); err != nil {
+			return
 		}
+		hasSya = true
+	} else if !os.IsNotExist(statErr) {
+		err = statErr
+		return
 	}
-	filelock.Unlock(oldSya)
 
 	oldName := path.Base(oldCleanPath)
 	oldNameBytes := []byte(oldName)
@@ -1924,6 +1918,15 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	if ocrText := util.GetAssetText(oldCleanPath); "" != ocrText {
 		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
 		util.SetAssetText(newPath, ocrText)
+	}
+
+	if hasSya {
+		if err = filelock.RemoveWithoutFatal(oldSya); err != nil {
+			return
+		}
+	}
+	if err = filelock.RemoveWithoutFatal(oldAbsPath); err != nil {
+		return
 	}
 
 	IncSync()

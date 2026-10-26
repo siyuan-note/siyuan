@@ -771,7 +771,6 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 	if !strings.HasSuffix(historyPath, ".json") || !strings.Contains(filepath.ToSlash(historyPath), "/storage/av/") {
 		return fmt.Errorf("invalid AV history path [%s]", historyPath)
 	}
-
 	from := historyPath
 	// 从路径提取 boxID 判断是否加密笔记本的 AV
 	relPath := strings.TrimPrefix(filepath.ToSlash(historyPath), filepath.ToSlash(util.HistoryDir))
@@ -785,29 +784,29 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 	if ciphertext && (len(pathParts) < 3 || !ast.IsNodeIDPattern(pathParts[1]) || !IsEncryptedBox(pathParts[1])) {
 		return errors.New("encrypted attribute view history is missing valid notebook context")
 	}
-	to := filepath.Join(util.DataDir, "storage", "av", filepath.Base(historyPath))
+	avID := strings.TrimSuffix(filepath.Base(historyPath), ".json")
+	avBoxID := ""
 	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
 		if !ciphertext {
 			return fmt.Errorf("encrypted notebook attribute view history is plaintext [%s]", pathParts[1])
 		}
-		// 加密笔记本的 AV 定义回滚到笔记本级目录
-		to = filepath.Join(util.DataDir, pathParts[1], "storage", "av", filepath.Base(historyPath))
-		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+		avBoxID = pathParts[1]
+		if err = AcquireEncryptedBoxOperation(avBoxID); err != nil {
 			return
 		}
+		defer ReleaseEncryptedBoxOperation(avBoxID)
 	}
 
-	if err = filelock.CopyNewtimes(from, to); err != nil {
-		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	recovery := &Transaction{trees: map[string]*parse.Tree{}}
+	defer func() { recovery.finishAttributeViewMutation(err != nil) }()
+	if err = recovery.restoreEmbeddedAttributeViewHistory(from, avBoxID, avID); err != nil {
 		return
 	}
-	avID := strings.TrimSuffix(filepath.Base(historyPath), ".json")
-	cache.RemoveAVData(avID)
-	avBoxID := ""
-	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
-		avBoxID = pathParts[1]
-	}
 	queueExternalAttributeViewRefIndex(avID, avBoxID)
+	ReloadAttrView(avID)
 	IncSync()
 	util.PushMsg(Conf.Language(102), 3000)
 	return nil

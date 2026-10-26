@@ -17,6 +17,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -48,8 +49,19 @@ func TestDocumentCreateInNewNotebook(t *testing.T) {
 			if _, err = Mount(boxID); err != nil {
 				t.Fatal(err)
 			}
+			if state := treenode.DocumentMetadataState(boxID); state != "building" {
+				t.Fatalf("queued notebook index state = %q, want building", state)
+			}
 			request := DocumentCreateRequest{Notebook: boxID, ID: ast.NewNodeID(), TitleFormat: "plain",
 				Title: "Docker smoke", Markdown: "Docker OCR smoke 123"}
+			_, err = CreateDocByParent(request)
+			var failure *DocumentCreateFailure
+			if !errors.As(err, &failure) || failure.Reason != "indexUnavailable" || failure.CommitState != "none" {
+				t.Fatalf("queued index allowed document creation: %#v, %v", failure, err)
+			}
+			for task.ContainIndexTask() {
+				task.ExecTaskJob()
+			}
 			document, err := CreateDocByParent(request)
 			if err != nil {
 				t.Fatalf("create document immediately after notebook creation: %v", err)

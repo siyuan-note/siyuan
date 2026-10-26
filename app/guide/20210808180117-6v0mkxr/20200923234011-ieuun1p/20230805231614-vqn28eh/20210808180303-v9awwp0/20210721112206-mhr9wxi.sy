@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261026115057"
 	},
 	"Children": [
 		{
@@ -951,6 +951,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261026111206-481cuuh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026111206-481cuuh",
+				"updated": "20261026115057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
 				}
 			]
 		},

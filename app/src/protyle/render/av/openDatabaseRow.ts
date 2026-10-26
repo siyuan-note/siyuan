@@ -36,6 +36,7 @@ export interface IDatabaseRowOpenData {
     matchedKeyID?: string;
     keywords?: string[];
     focusPrimary?: boolean;
+    focusTitle?: boolean;
     bindPrimary?: boolean;
     navigation?: IDatabaseRowNavigation;
 }

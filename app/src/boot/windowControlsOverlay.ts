@@ -1,6 +1,7 @@
 import {ipcRenderer, webFrame} from "electron";
 import {Constants} from "../constants";
 import {resizeTopBar} from "../layout/util";
+import {parseCanvasColor} from "../util/color";
 
 export interface IWindowControlsOverlay extends EventTarget {
     readonly visible: boolean;
@@ -9,12 +10,27 @@ export interface IWindowControlsOverlay extends EventTarget {
 
 let initialized = false;
 let scheduled = false;
-let minimumHeight = 31;
-let lastStyle = "";
 let lastLayout = "";
 let sizeObserver: ResizeObserver;
+let lastComputedColor = "";
+let lastSymbolColor: string | undefined;
 
 const getOverlay = () => (navigator as Navigator & {windowControlsOverlay?: IWindowControlsOverlay}).windowControlsOverlay;
+
+// 用浏览器解析主题颜色并转成 sRGB，避免把原生解析器不支持的颜色格式直接传入 Electron。
+const getSymbolColor = (color: string) => {
+    if (lastComputedColor === color) {
+        return lastSymbolColor;
+    }
+    const value = parseCanvasColor(color);
+    if (!value) {
+        return;
+    }
+    lastComputedColor = color;
+    // 原生层按 sRGB 接收，alpha 需要换算成 0-1。
+    lastSymbolColor = `rgba(${value[0]}, ${value[1]}, ${value[2]}, ${value[3] / 255})`;
+    return lastSymbolColor;
+};
 
 export const updateWindowControlsOverlay = () => {
     scheduled = false;
@@ -30,14 +46,12 @@ export const updateWindowControlsOverlay = () => {
     const height = parseFloat(rootStyle.getPropertyValue(standalone || fused ?
         "--b3-ui-panel-height" : "--b3-ui-toolbar-height")) || (standalone || fused ? 42 : 32);
     const icon = toolbar.querySelector<HTMLElement>(".toolbar__item");
-    const symbolColor = getComputedStyle(icon || toolbar).color;
+    const symbolColor = getSymbolColor(getComputedStyle(icon || toolbar).color);
+    // 原生按钮随顶栏的设计高度和缩放变化，只收敛到主进程接受的正整数范围。
     const style = {cmd: "setTitleBarOverlay", symbolColor,
-        height: Math.max(minimumHeight, Math.round(height * webFrame.getZoomFactor()))};
-    const styleKey = JSON.stringify(style);
-    if (lastStyle !== styleKey) {
-        lastStyle = styleKey;
-        ipcRenderer.send(Constants.SIYUAN_CMD, style);
-    }
+        height: Math.max(1, Math.round(height * webFrame.getZoomFactor()))};
+    // 主进程按实际应用成功的状态去重，同一请求在失败后仍可重试。
+    ipcRenderer.send(Constants.SIYUAN_CMD, style);
 
     const topRows = new Set<Element>();
     if (standalone || fused) {
@@ -82,7 +96,6 @@ export const initWindowControlsOverlay = (container: HTMLElement) => {
     }
     if (!initialized) {
         initialized = true;
-        minimumHeight = Math.ceil(overlay.getTitlebarAreaRect().height * webFrame.getZoomFactor()) || 31;
         document.documentElement.classList.add("window-controls-overlay");
         new MutationObserver(schedule).observe(document.body, {attributes: true, attributeFilter: ["class"]});
         new MutationObserver(schedule).observe(document.documentElement, {

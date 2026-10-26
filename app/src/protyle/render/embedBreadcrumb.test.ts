@@ -52,7 +52,7 @@ test("SQL and JS embed rendering use global preferences and per-result document 
         ...constants, getEmbedBreadcrumbPaths, resolveEmbedBreadcrumbPreference,
         genBreadcrumb: (items: IBreadcrumb[]) => { breadcrumbs.push(items.map(item => item.name)); return "breadcrumbs"; },
         normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
-        improveBreadcrumbAppearance: noop, processRender: noop, highlightRender: noop, avRender: noop,
+        improveBreadcrumbAppearance: noop, processRender: noop, renderEmbedToolbarVisibility: noop, highlightRender: noop, avRender: noop,
         hasClosestByAttribute: () => false, isDirectHeadingEmbed: () => false, isFoldedRenderContent: () => false,
         isEncryptedBox: () => false, genRenderFrame: noop, getHostCapabilities: () => ({}),
         fetchPost: (_url: string, data: typeof requests[number], callback: (data: unknown) => void) => {

@@ -568,10 +568,6 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		return
 	}
 
-	data, err = documentaddressing.ExportBackup(util.ConfDir, data)
-	if err != nil {
-		return apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
-	}
 	tmp := filepath.Join(tmpDir, name)
 	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
@@ -721,9 +717,6 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 
 	model.NormalizeAppConf(importedConf)
 	if err = model.LoadChatGPTAccountBindings(importedConf.AI.Load()); err != nil {
-		return apicontract.Failure[apicontract.Null](-1, err.Error())
-	}
-	if err = documentaddressing.RestoreBackup(util.ConfDir, data); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	// 旧版包缺失的新增配置段保持不变；外观资源列表仍以目标工作空间为准。
@@ -1396,7 +1389,7 @@ var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.C
 
 var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
-var closeSystem = model.Close
+var closeSystem = model.CloseWithContext
 var recoverSystemExit = model.RecoverWorkspaceExit
 var finishSystemExit = model.ExitKernel
 
@@ -1410,7 +1403,7 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	if request.RecoverExit != nil {
 		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt, request.RecoverExit.Force)
 	} else {
-		exitCode, installPkgPath = closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+		exitCode, installPkgPath = closeSystem(c.Request.Context(), request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
 	}
 	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {

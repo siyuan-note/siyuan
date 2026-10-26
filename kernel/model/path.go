@@ -40,7 +40,7 @@ func createDocsByHPathSync(boxID, hPath, content, parentID, id string, titleEmpt
 }
 
 func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty bool,
-	createDocFn func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error)) (retID string, err error) {
+	createDocFn func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error), checkedParents ...map[string]*treenode.BlockTree) (retID string, err error) {
 	if "" == id {
 		id = ast.NewNodeID()
 	}
@@ -52,7 +52,7 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 		// 笔记本顶层文档是用户可见的逻辑根，完整路径应从笔记本根目录解析。
 		parentID = ""
 	}
-	if "" != parentID {
+	if "" != parentID && len(checkedParents) == 0 {
 		// 存在同名文档时通过父文档 ID 精确定位 https://github.com/siyuan-note/siyuan/issues/8138
 		parentHPath, name := path.Split(hPath)
 		parentHPath = strings.TrimSuffix(parentHPath, "/")
@@ -72,20 +72,24 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 	parts := strings.Split(hPath, "/")[1:]
 	// The subdoc creation path is unstable when a parent doc with the same name exists https://github.com/siyuan-note/siyuan/issues/9322
 	// 存在同名父文档时子文档创建路径不稳定，这里需要按照完整的 hpath 映射，不能在下面的循环中边构建 hpath 边构建 path，否则虽然 hpath 相同，但是会导致 path 组装错位
-	for i, part := range parts {
-		if i == len(parts)-1 {
-			break
-		}
+	if len(checkedParents) > 0 {
+		hpathBtMap = checkedParents[0]
+	} else {
+		for i, part := range parts {
+			if i == len(parts)-1 {
+				break
+			}
 
-		hPathBuilder.WriteString("/")
-		hPathBuilder.WriteString(part)
-		hp := hPathBuilder.String()
-		root := treenode.GetBlockTreeRootByHPath(boxID, hp)
-		if nil == root {
-			break
-		}
+			hPathBuilder.WriteString("/")
+			hPathBuilder.WriteString(part)
+			hp := hPathBuilder.String()
+			root := treenode.GetBlockTreeRootByHPath(boxID, hp)
+			if nil == root {
+				break
+			}
 
-		hpathBtMap[hp] = root
+			hpathBtMap[hp] = root
+		}
 	}
 
 	pathBuilder := bytes.Buffer{}

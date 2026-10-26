@@ -6776,6 +6776,9 @@
             "type": "string"
           }
         },
+        "referenceID": {
+          "type": "string"
+        },
         "tagMatch": {
           "type": "string",
           "enum": [
@@ -6862,6 +6865,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "referenceID": {
+          "type": "string"
         },
         "tagMatch": {
           "type": "string",
@@ -8132,6 +8138,9 @@
         },
         "itemID": {
           "type": "string"
+        },
+        "openAfterCreate": {
+          "type": "boolean"
         },
         "warnings": {
           "type": "array",
@@ -10420,6 +10429,9 @@
         "name": {
           "type": "string"
         },
+        "openAfterCreate": {
+          "type": "boolean"
+        },
         "primaryKeyTemplate": {
           "type": "string"
         },
@@ -10508,6 +10520,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "openAfterCreate": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -23940,6 +23962,7 @@
             "planChanged",
             "documentIDConflict",
             "legacyPathUnsupported",
+            "pathAmbiguous",
             "indexUnavailable",
             "unsupportedTitleFormat",
             "targetModeUnsupported",
@@ -32311,11 +32334,25 @@
     "LegacyPathUnsupported": {
       "type": "object",
       "properties": {
+        "cleanIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "reason": {
           "type": "string",
           "enum": [
-            "legacyPathUnsupported"
+            "legacyPathUnsupported",
+            "pathAmbiguous",
+            "indexUnavailable"
           ]
+        },
+        "unsupportedIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -118281,6 +118318,32 @@
       ],
       "additionalProperties": false
     },
+    "UnusedAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "UnzipRequestInput": {
       "type": "object",
       "properties": {
@@ -129320,9 +129383,9 @@
         "authenticated",
         "admin"
       ],
-      "body": "none",
+      "body": "legacyOptional",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/UnusedAssetsRequestInput"
       },
       "response": {
         "anyOf": [

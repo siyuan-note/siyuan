@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {readFileSync, mkdtempSync, rmSync, mkdirSync, writeFileSync} = require("node:fs");
+const {readFileSync, readdirSync, mkdtempSync, rmSync, mkdirSync, writeFileSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
@@ -16,11 +16,14 @@ const run = async () => {
     const source = compile("sync/checkoutProgress.ts");
     const escape = compile("util/escape.ts");
     const progressContent = compile("dialog/progress.ts");
+    const languageDirectory = path.join(__dirname, "../appearance/langs");
+    const exitLabels = readdirSync(languageDirectory).filter(name => name.endsWith(".json"))
+        .map(name => [name, JSON.parse(readFileSync(path.join(languageDirectory, name), "utf8")).skipExitSync]);
     const sass = require("sass");
     const css = ["component/_dialog.scss", "component/_button.scss", "component/_sync-checkout.scss", "util/_function.scss"]
         .map(file => sass.compile(path.join(__dirname, "../src/assets/scss", file)).css).join("\n");
     try {
-        for (const [width, height, font, dark] of [[1100, 720, 16, false], [1100, 720, 24, true], [360, 640, 24, false], [640, 360, 24, true]]) {
+        for (const [width, height, font, dark] of [[1100, 720, 16, false], [1100, 720, 24, true], [360, 640, 14, false], [360, 640, 24, false], [640, 360, 24, true]]) {
             win.setContentSize(width, height);
             await win.loadURL("data:text/html,<html><body><input id='editor' value='original'></body></html>");
             await win.webContents.insertCSS(css + `
@@ -52,12 +55,37 @@ const run = async () => {
                 assert.equal(standard.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
                 assert.ok(standard.querySelector(".b3-dialog__progress--indeterminate"));
                 progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress");
+                let skipped = 0;
+                progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress", {
+                    label:"Skip sync and exit", callback:() => skipped++,
+                });
+                const skipButton = document.querySelector("#other-progress button");
+                assert.ok(skipButton.classList.contains("b3-button"));
+                assert.equal(document.activeElement,skipButton,"exit action did not receive keyboard focus");
+                assert.equal(getComputedStyle(skipButton).backgroundColor,"rgb(90, 100, 110)");
+                skipButton.click();
+                assert.equal(skipped,1);
                 progressExports.progressLoading({code:1,msg:"<img src=y>"},"other-progress");
                 assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
+                assert.equal(document.querySelector("#other-progress button"),skipButton,"progress update replaced the exit action");
+                const skipBounds = skipButton.getBoundingClientRect();
+                assert.ok(skipBounds.left >= 0 && skipBounds.right <= innerWidth && skipBounds.bottom <= innerHeight,
+                    "exit action overflowed the progress panel");
                 assert.equal(document.querySelector("#other-progress img"),null);
                 progressExports.progressLoading({code:2},"standard-progress");
                 assert.ok(document.getElementById("other-progress"),"closing sync progress removed another task");
                 progressExports.progressLoading({code:2},"other-progress");
+                for (const [language, label] of ${JSON.stringify(exitLabels)}) {
+                    progressExports.progressLoading({code:1,msg:"Waiting"},"localized-exit", {label,callback() {}});
+                    const panel = document.querySelector("#localized-exit .b3-dialog__loading").getBoundingClientRect();
+                    const button = document.querySelector("#localized-exit button");
+                    const bounds = button.getBoundingClientRect();
+                    assert.ok(button.classList.contains("b3-button--wrap"),language+": missing shared wrapping modifier");
+                    assert.ok(bounds.left >= panel.left && bounds.right <= panel.right && bounds.left >= 0 &&
+                        bounds.right <= innerWidth && bounds.bottom <= innerHeight,language+": exit action overflowed");
+                    assert.ok(button.scrollWidth <= button.clientWidth + 1,language+": exit action text overflowed");
+                    progressExports.progressLoading({code:2},"localized-exit");
+                }
                 const calls = [];
                 const flushes = [];
                 const titles = [];

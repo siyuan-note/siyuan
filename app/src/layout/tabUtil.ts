@@ -112,10 +112,13 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
                 }
             }
             dragElement.parentElement.parentElement.style.minWidth = "56px";
-            dragElement.style.height = dragElement.parentElement.clientHeight + "px";
+            // 用 flex 拉伸撑满行高，跟随界面密度和覆盖层高度变化，避免写死像素后无法回缩。
+            dragElement.style.alignSelf = "stretch";
+            dragElement.style.height = "";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
         } else {
             dragElement.parentElement.parentElement.style.minWidth = "";
+            dragElement.style.alignSelf = "";
             dragElement.style.height = "";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "";
         }

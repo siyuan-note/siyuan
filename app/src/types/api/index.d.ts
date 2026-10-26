@@ -260,9 +260,9 @@ export type AVAutomationBlockAttribute = { "name": string; "nameOperator"?: "" |
 
 export type AVAutomationBlockAttributeInput = { "name": string; "nameOperator"?: "" | "equals" | "contains" | "regex"; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean; "notebookIDs"?: Array<string>; "referenceID"?: string; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean | null; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean | null; "notebookIDs"?: Array<string>; "referenceID"?: string; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -328,11 +328,11 @@ export type AVContextFilterData = { "contextFilter": AVAttributeViewContextFilte
 
 export type AVCreateAttributeViewItemDocsResult = { "blockIDs": Array<string> | null; "itemIDs": Array<string> | null; "skippedItemIDs"?: Array<string>; "warnings"?: Array<string>; };
 
-export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "warnings"?: Array<string>; };
+export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "openAfterCreate"?: boolean; "warnings"?: Array<string>; };
 
 export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "warnings"?: never; });
 
-export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "warnings"?: never; });
+export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "warnings"?: never; });
 
 export type AVCreated = { "includeTime": boolean; };
 
@@ -400,9 +400,9 @@ export type AVNewItemSaveLocation = { "boxID"?: string; "pathTemplate": string; 
 
 export type AVNewItemSaveLocationInput = { "boxID"?: string | null; "pathTemplate"?: string | null; };
 
-export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
+export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "openAfterCreate"?: boolean; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
 
-export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
+export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "openAfterCreate"?: boolean | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
 
 export type AVPasteRowsData = { "inferableKeyIDs": Array<string> | null; "view": AVTable | null; };
 
@@ -1006,7 +1006,7 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
-export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
 
 export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
 
@@ -1498,7 +1498,7 @@ export type LegacyPathDocumentResult = string | LegacyPathUnsupported;
 
 export type LegacyPathIDsResult = Array<string> | null | LegacyPathUnsupported;
 
-export type LegacyPathUnsupported = { "reason": "legacyPathUnsupported"; };
+export type LegacyPathUnsupported = { "cleanIDs"?: Array<string>; "reason": "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable"; "unsupportedIDs"?: Array<string>; };
 
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
@@ -2648,6 +2648,8 @@ export type UnknownTransactionAction = string & { readonly __unknownTransactionA
 
 export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
 
+export type UnusedAssetsRequestInput = { "all"?: boolean | null; "keyword"?: string | null; };
+
 export type UnzipRequestInput = { "path": string; "zipPath": string; };
 
 export type UpdateBazaarPackageRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "packageType": string; };
@@ -3548,12 +3550,15 @@ export interface APIPOSTRoutes {
     };
     /**
      * 扫描失败返回标准错误，不将失败表示为成功的空列表。
+     * keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
+     * 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+     * all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
      * 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
      */
     "/api/asset/getUnusedAssets": {
-        request: EmptyRequestInput;
+        request: UnusedAssetsRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
-        body: "none";
+        body: "legacyOptional";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
@@ -3817,6 +3822,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
+     * true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
+     */
     "/api/av/createAttributeViewItem": {
         request: CreateAttributeViewItemRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
@@ -5309,7 +5318,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在写入前检查笔记本寻址模式，不兼容或试图覆盖本机能力下界记录时返回 -1。
+     * 在写入前检查文档源格式及规范路径，预检失败返回 -1。
      * 目标为文档 ID 路径时，未知格式和标题冲突均返回 -1；实际写入在文件锁内重新校验现有源，不规范化内容。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有源的读取和恢复不受此写入检查影响。
      * 工作空间外的加密资源解密导出仍要求既有授权和操作租约。
@@ -5337,10 +5346,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
      * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
-     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     * 原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/globalCopyFiles": {
         request: CopyFilesRequestInput;
@@ -5350,7 +5359,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目录、写入内容及更新时间前校验笔记本寻址模式和待写配置；不兼容时返回 -1。
+     * 在创建目录、写入内容及更新时间前校验文档源格式与规范路径；不兼容时返回 -1。
      * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
      * 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
      * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
@@ -5371,8 +5380,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 对不支持寻址模式的笔记本拒绝部分删除，返回 -1；整本删除保留已确认的本机能力下界。
-     * 不能删除本机 conf/document-addressing.json 或其父目录，既有加密笔记本删除限制不变。
+     * 保留既有敏感路径和加密边界检查；整本删除不读取已撤销的寻址模式记录。
      */
     "/api/file/removeFile": {
         request: RemoveFileRequestInput;
@@ -5382,10 +5390,9 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目标父目录或移动源文件前预检笔记本寻址能力，不支持的模式返回 -1。
+     * 在创建目标父目录或移动源文件前预检文档源格式与规范路径，失败返回 -1。
      * 移入由笔记本及文档 ID 组成的 .sy 路径时检查全部源文档；未知格式或标题冲突返回 -1，保留来源。
      * 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
-     * 不能借重命名覆盖、移动或删除本机 conf/document-addressing.json；既有加密边界不变。
      */
     "/api/file/renameFile": {
         request: RenameFileRequestInput;
@@ -5395,10 +5402,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在创建目标目录及复制前预检整批笔记本寻址模式和文档源；预检不兼容时返回 -1，不写入目标。
+     * 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
      * 新复制的文档标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
      * 文档 ID 路径同时检查传入内容及现有源，实际写入前再次校验；后续并发变化或 I/O 失败不回滚已完成的复制。
-     * 不允许覆盖本机能力下界记录；原有敏感路径、加密笔记本和符号链接限制继续生效。
+     * 原有敏感路径、加密笔记本和符号链接限制继续生效。
      */
     "/api/file/workspaceCopyFiles": {
         request: CopyFilesRequestInput;
@@ -5442,8 +5449,8 @@ export interface APIPOSTRoutes {
      * 可选父路径 revision 与至多 128 项名称条件在源提交前分别校验；条件只能涉及目标祖先和最终父级。
      * ID 冲突不覆盖、不自动更换；错误 data 包含稳定 reason、commitState、阶段及已完成步骤。
      * 已落盘但排序或正文模板失败时保留源文档并返回其 ID，调用方不得把该错误当作未创建而重复提交。
-     * 普通构建默认保留标题中的 /，该文档写入 Spec 6；普通文档不因迁移统一升级，内部兼容模式 1 仍拒绝 /。
-     * 加密笔记本使用原有认证写入与响应租约；自动模式迁移不改变密文格式或密钥材料。
+     * 保留标题中的 /，新写入含斜杠标题使用 Spec 6；普通文档不统一升级规格。
+     * 加密笔记本使用原有认证写入与响应租约；寻址规则不改变密文格式或密钥材料。
      */
     "/api/filetree/createDocByParent": {
         request: CreateDocByParentRequestInput;
@@ -5455,7 +5462,10 @@ export interface APIPOSTRoutes {
     /**
      * 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
      * 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
-     * 模式 2 对整个笔记本返回 legacyPathUnsupported，即使提供 parentID；改用 createDocByParent。
+     * Every parent prefix is checked before writing; slash/empty-title candidates return pathAmbiguous.
+     * Multiple clean parents also return pathAmbiguous unless a valid matching parentID selects their
+     * real ancestor chain. An ID cannot bypass unsupported candidates. Unready or inconsistent metadata
+     * returns indexUnavailable. Prefer createDocByParent with a separate parent identity and title.
      */
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
@@ -5563,7 +5573,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
     };
     /**
-     * 在兼容模式保留旧名称路径查询；模式 2 整本返回 legacyPathUnsupported，改用 resolveDocPath。
+     * queries exact legacy display paths and verifies each candidate's real ancestor chain.
+     * Clean candidates have nonempty titles without ASCII / and no empty-title flag at every level.
+     * Returns every clean ID, an empty array for no matches, pathAmbiguous for mixed candidates,
+     * or legacyPathUnsupported for unsupported candidates only. Error data may include cleanIDs and
+     * unsupportedIDs, filtered by existing access restrictions. Missing, pending, inconsistent or failed
+     * metadata returns indexUnavailable. Prefer resolveDocPath with independent title segments.
      */
     "/api/filetree/getIDsByHPath": {
         request: FileTreeOptionalPathRequestInput;
@@ -5734,7 +5749,7 @@ export interface APIPOSTRoutes {
      * 标题不作 Unicode 归一化、宽窄转换或百分号解码；同父同名返回 ambiguous，不任取候选。
      * candidates 按 ID 排序且最多 128 项，candidatesTruncated 标记截断；nameConditions 保留唯一及缺失条件。
      * 空段数组返回起点，根位置的 resolved 为 null，start.id 为 null；笔记本文档 ID 规范化为逻辑根。
-     * 索引未就绪返回 indexUnavailable；普通构建默认保留段内 /，内部兼容模式 1 仍遵守原有标题限制。
+     * 索引未就绪返回 indexUnavailable；标题段保留字面 /，不按笔记本选择不同的寻址模式。
      */
     "/api/filetree/resolveDocPath": {
         request: ResolveDocPathRequestInput;
@@ -6252,7 +6267,7 @@ export interface APIPOSTRoutes {
         proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
     /**
-     * 在改密恢复、密钥切换及迁移记录写入前预检全部现存加密笔记本，不支持的寻址模式返回 -1。
+     * 改密恢复和密钥切换保留现存加密笔记本的认证、信封格式及中断恢复检查。
      */
     "/api/notebook/changeMasterPassword": {
         request: ChangeMasterPasswordRequestInput;
@@ -6278,7 +6293,7 @@ export interface APIPOSTRoutes {
     /**
      * 移出已导出的加密笔记本，要求管理员权限并禁止只读模式；saved: true 表示用户确认已保存归档。
      * 提交前重新检查源文件，内容变化需重新导出；重复提交同一归档不会重复移出，未选择的笔记本不受影响。
-     * 移出前重新检查笔记本寻址能力，不支持的模式返回 -1，保留原归档及源目录。
+     * 移出前保留归档及源目录检查，失败时保留原归档和密钥材料。
      */
     "/api/notebook/commitNotebookArchive": {
         request: CommitNotebookArchiveRequestInput;
@@ -6339,12 +6354,11 @@ export interface APIPOSTRoutes {
     /**
      * preserves existing configuration and permission filtering. Administrator
      * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. Ordinary builds migrate to mode 2
-     * automatically without a user setting or special build flags. literalSlash requires consistent
-     * mode records and ready indexes. minimumReaderVersion stays null until the minimum compatible
+     * not permission to open a closed or locked notebook. All notebooks use addressing version 2
+     * without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
      * feature release is verified; it neither controls activation nor permits mixing with older clients.
-     * Revision covers configuration, confirmed capability and recovery records, not a document path.
-     * Malformed capability records fail the request; authentication, locking and network failures must
+     * Revision identifies the fixed capability declaration, not a document path or retired record.
+     * Authentication, locking and network failures must
      * never be interpreted as an absent capability object or as permission to retry a legacy write.
      */
     "/api/notebook/getNotebookConf": {
@@ -6411,7 +6425,7 @@ export interface APIPOSTRoutes {
     /**
      * 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
      * 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
-     * 不支持笔记本寻址模式时返回 -1，保留源目录及密钥材料。
+     * 源格式或认证检查失败时返回 -1，保留源目录及密钥材料。
      */
     "/api/notebook/prepareNotebookArchive": {
         request: PrepareNotebookArchiveRequestInput;
@@ -6483,7 +6497,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 解锁及挂载均检查笔记本寻址能力；不支持的模式不会发布解锁状态或修复源数据。
+     * 解锁及挂载均保留源格式与认证检查；失败时不发布解锁状态或修复源数据。
      */
     "/api/notebook/unlockAndOpenNotebook": {
         request: UnlockNotebookRequestInput;
@@ -6493,7 +6507,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 在密钥恢复和解锁转换前拒绝不支持的笔记本寻址模式，保留原密文和恢复材料。
+     * 密钥恢复和解锁保持既有认证及源格式检查，保留原密文和恢复材料。
      */
     "/api/notebook/unlockNotebook": {
         request: UnlockNotebookRequestInput;
@@ -8107,6 +8121,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+     * 普通退出请求断开时取消其同步或同步锁等待，不将取消报告为同步成功；已开始的数据清理仍完整执行。
+     * force 跳过本次同步，并等待活动同步取消及收尾后再关闭数据库；本地未上传数据保留。
      * 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
      * 接管默认正常同步，recoverExit.force 为 true 时跳过同步但仍执行数据清理；跳过安装提示且不修改工作空间顺序。
      * 顶层 force、execInstallPkg、setCurrentWorkspace 在接管时忽略；省略 recoverExit.force 保持正常同步。
@@ -8120,8 +8136,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 保持单个 JSON 文件的设置压缩包，存在本机寻址能力下界时附加 documentAddressing 记录。
-     * 记录仅含版本及笔记本身份的最低模式，不导出标题、正文或密钥；无能力记录的旧设置格式不变。
+     * 保持单个 JSON 文件的设置压缩包，不再附加已撤销的 documentAddressing 下界记录。
      */
     "/api/system/exportConf": {
         request: EmptyRequestInput;
@@ -8577,13 +8592,15 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 7，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 8，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
      * spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
      * spec 5 的 blockSource.documentDepth 限制各文档范围的子文档深度，0 仅自身，1 包含自身及一级子文档。
      * spec 6 的属性 nameOperator 支持 contains 和 Go regex；缺省或 equals 保持精确名称匹配，值条件独立。
      * spec 7 支持 blockSource.includeSelectedDocuments=false，排除所选文档及其内部块，子文档仍按深度匹配；缺省、null 或 true 保持包含自身。
+     * spec 8 的 blockSource.referenceID 匹配正文块引用；文档目标包含内部内容块，不含子文档、嵌入或数据库字段引用。
+     * 引用来源按反链规则归并后匹配类型和属性，标签条件约束同一来源块，tagTarget 不参与选择；目标须在同一加密边界。
      * 排除自身不影响其他范围的并集；与 documentDepth=0 组合时对应文档范围为空。配置变更保留条目和字段，不自动补收或清理。
      * 深度缺省或 null 不限，不影响笔记本范围，各范围仍取并集；修改不自动清理或补收已有内容。
      * 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。

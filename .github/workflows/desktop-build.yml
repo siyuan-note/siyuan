@@ -35,7 +35,7 @@ jobs:
           install: p7zip mingw-w64-ucrt-x86_64-lua
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
           cache: false

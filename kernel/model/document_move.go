@@ -27,7 +27,7 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 	if err != nil {
 		return nil, err
 	}
-	mode, err := filesys.DocumentAddressingMode(toBox)
+	_, err = filesys.DocumentAddressingMode(toBox)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 	var documents []*treenode.BlockTree
 	err = filesys.WalkTreeSnapshots(fromBox, paths, func(tree *parse.Tree) error {
 		sourcePath := tree.Path
-		if err := treenode.CheckSpecForMode(tree, mode); err != nil {
+		if err := treenode.CheckSpec(tree); err != nil {
 			return documentAddressingError("targetModeUnsupported", err)
 		}
 		relative := strings.TrimPrefix(sourcePath, path.Dir(fromPath)+"/")

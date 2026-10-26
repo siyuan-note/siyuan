@@ -495,6 +495,32 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.equal(clicked, Number(nativeHit.textContent.trim().replace("Mouse item ", "")), "Native click selects the visible item");
     dispose(following);
 
+    const abovePointer = createMenu();
+    addItems(abovePointer, 80);
+    abovePointer.popup({x: 60, y: innerHeight - 30, h: 20});
+    await settle();
+    const aboveItems = abovePointer.element.lastElementChild as HTMLElement;
+    check.ok(aboveItems.getBoundingClientRect().bottom <= innerHeight - 30);
+    for (const entry of [.99, .7, .4]) {
+        aboveItems.scrollTop = 0;
+        abovePointer.resetMouseScroll();
+        pointer(aboveItems, entry);
+        check.equal(aboveItems.scrollTop, 0, "Opening above the pointer still starts at the first item");
+        pointer(aboveItems, entry - .05);
+        check.ok(aboveItems.scrollTop > 0, "Moving upward after entry follows the pointer without a wheel event");
+        pointer(aboveItems, .99);
+        check.equal(aboveItems.scrollTop, aboveItems.scrollHeight - aboveItems.clientHeight);
+        pointer(aboveItems, .01);
+        check.equal(aboveItems.scrollTop, 0);
+    }
+    aboveItems.scrollTop = aboveItems.scrollHeight - aboveItems.clientHeight;
+    abovePointer.resetMouseScroll();
+    pointer(aboveItems, .01);
+    pointer(aboveItems, .06);
+    check.ok(aboveItems.scrollTop < aboveItems.scrollHeight - aboveItems.clientHeight,
+        "Moving downward after entry at the last item also follows the pointer");
+    dispose(abovePointer);
+
     window.siyuan.config.appearance.menuMouseScroll = true;
     const mouseSubmenus = createMenu();
     mouseSubmenus.addItem({label: "Scrollable children", submenu: Array.from({length: 80}, (_, i) => ({label: `Child ${i}`}))});

@@ -50,6 +50,16 @@ test("slash visibility shares profile settings and only platform defaults differ
                 assert.equal(api.isEntryVisible("editor.image.ocrText"), visible);
             }
             delete custom.entries["editor.image.ocrText"];
+            for (const active of ["simple", "full", "custom"]) {
+                config.active = active;
+                assert.equal(api.isEntryVisible("editor.blockEmbed.toolbar"), true);
+            }
+            config.active = "custom";
+            for (const visible of [false, true]) {
+                custom.entries["editor.blockEmbed.toolbar"] = visible;
+                assert.equal(api.isEntryVisible("editor.blockEmbed.toolbar"), visible);
+            }
+            delete custom.entries["editor.blockEmbed.toolbar"];
             assert.equal(catalog.getEntryCatalogDefaultVisibility(root), !mobile);
             assert.equal(catalog.getEntryCatalogCustomDefaultVisibility(root), !mobile);
             for (const active of ["simple", "full", "custom"]) {

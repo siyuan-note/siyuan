@@ -229,7 +229,8 @@ const browserCases = async (source: string, css: string) => {
     check.equal(styleChanges.length, 2);
     check.equal(model.metadata.nodes[a.id].lineColor, "#15803d");
     check.equal(model.metadata.nodes[b.id].lineColor, "#15803d");
-    const nodePalette = host.querySelector<HTMLElement>('.mindmap-view__palette[aria-label="color"]');
+    const nodePalette = host.querySelector<HTMLElement>('.mindmap-view__palette[aria-label="listMindmapNodeColor"]');
+    check.ok(nodePalette, "the node color palette uses its dedicated accessible label");
     nodePalette.querySelector<HTMLButtonElement>('[aria-label="default"]').click();
     check.equal(view.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
         "resetting manual node colors restores the branch theme");

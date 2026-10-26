@@ -91,6 +91,9 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 	for _, attr := range source.Attributes {
 		attributes = append(attributes, collectionAttributeMatcher(attr))
 	}
+	if source.ReferenceID != "" {
+		return collectionReferenceMatches(source, tree, attributes)
+	}
 	var containers []*ast.Node
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -243,6 +246,15 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		bt := attributeViewBindingBlockTree(id, boxID)
 		if bt == nil || bt.Type != "d" {
 			return fmt.Errorf("invalid block collection document [%s]", id)
+		}
+	}
+	if source.ReferenceID != "" {
+		if !ast.IsNodeIDPattern(source.ReferenceID) {
+			return fmt.Errorf("invalid block collection reference [%s]", source.ReferenceID)
+		}
+		if attributeViewBindingBlockTree(source.ReferenceID, boxID) == nil {
+			return unavailableAutomationReference("automationCollectionReference", source.ReferenceID,
+				fmt.Sprintf("unavailable block collection reference [%s]", source.ReferenceID))
 		}
 	}
 	for _, typ := range source.Types {

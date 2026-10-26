@@ -486,6 +486,9 @@ func cloneNewItemTemplate(itemTemplate *NewItemTemplate) *NewItemTemplate {
 		ContentTemplatePath: itemTemplate.ContentTemplatePath,
 		HideInFileTree:      itemTemplate.HideInFileTree,
 	}
+	if nil != itemTemplate.OpenAfterCreate {
+		ret.OpenAfterCreate = new(*itemTemplate.OpenAfterCreate)
+	}
 	if nil != itemTemplate.SaveLocation {
 		ret.SaveLocation = &NewItemSaveLocation{
 			BoxID:        itemTemplate.SaveLocation.BoxID,

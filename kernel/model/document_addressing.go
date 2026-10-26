@@ -14,17 +14,16 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func checkDocumentAddressingConf(boxID string, data []byte) error {
-	return documentaddressing.CheckBatch(util.DataDir, util.ConfDir,
-		[]string{boxID + "/" + documentaddressing.ConfigPath}, nil,
-		func(string) ([]byte, error) { return data, nil })
+	return filesys.CheckDocumentAddressing(boxID)
 }
 
-// documentAddressingPreflight 读取待恢复快照中的记录，在整批写入和删除前检查能力。
+// documentAddressingPreflight 在整批写入和删除前检查快照的规范路径及源规格。
 func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) error {
 	return func(plan *dejavu.CheckoutPlan) error {
 		upserts := make([]string, 0, len(plan.Upserts))
@@ -69,8 +68,7 @@ func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) e
 			removes = append(removes, file.Path)
 			removedPaths[strings.TrimPrefix(file.Path, "/")] = true
 		}
-		if err := documentaddressing.CheckBatch(repo.DataPath, util.ConfDir, upserts, removes,
-			func(name string) ([]byte, error) { return plan.ReadFile(paths[name]) }); err != nil {
+		if err := documentaddressing.CheckPaths(upserts, removes); err != nil {
 			return err
 		}
 		for _, file := range plan.Upserts {
@@ -127,7 +125,7 @@ func checkDocumentAddressingCheckoutCurrent(dataDir, name string) error {
 	}
 	// 已识别的不支持版本或标题不能被覆盖或部分删除；普通损坏源仍可用合法历史恢复。
 	if err = checkDocumentAddressingCheckoutSource(data); errors.Is(err, treenode.ErrSpecTooNew) ||
-		errors.Is(err, documentaddressing.ErrModeConflict) || errors.Is(err, documentaddressing.ErrInvalidTitle) {
+		errors.Is(err, documentaddressing.ErrInvalidTitle) {
 		return fmt.Errorf("document [%s]: %w", name, err)
 	}
 	return nil
@@ -162,19 +160,15 @@ func checkDocumentAddressingCheckoutSource(data []byte) error {
 	if util.IsCiphertext(data) {
 		return nil
 	}
-	return treenode.CheckSpecJSONForMode(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")), documentaddressing.DefaultMode())
+	return treenode.CheckSpecJSON(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")))
 }
 
 func documentAddressingCheckoutHooks(repo *dejavu.Repo) dejavu.CheckoutHooks {
 	return dejavu.CheckoutHooks{Preflight: documentAddressingPreflight(repo)}
 }
 
-// checkImportedDocumentAddressing 在重新生成 ID 或删除档案配置前校验原始笔记本身份和模式。
+// checkImportedDocumentAddressing 在重新生成 ID 或删除档案配置前校验原始笔记本文档身份。
 func checkImportedDocumentAddressing(directory string) error {
-	boxID := filepath.Base(directory)
-	if !ast.IsNodeIDPattern(boxID) {
-		boxID = ""
-	}
 	data, err := filelock.ReadFile(filepath.Join(directory, ".siyuan", boxDocMetaName))
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
@@ -184,57 +178,11 @@ func checkImportedDocumentAddressing(directory string) error {
 		if json.Unmarshal(data, &meta) != nil || meta.Spec != boxDocMetaSpec || !ast.IsNodeIDPattern(meta.BoxDocID) {
 			return documentaddressing.ErrInvalid
 		}
-		boxID = meta.BoxDocID
 	}
-	if boxID == "" {
-		// 按名称导出的笔记本可能没有笔记本文档；从寻址记录取得身份后仍校验完整源记录。
-		data, err = filelock.ReadFile(filepath.Join(directory, documentaddressing.FloorPath))
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return err
-		}
-		if err == nil {
-			var record struct {
-				Notebook string `json:"notebook"`
-			}
-			if json.Unmarshal(data, &record) != nil || !ast.IsNodeIDPattern(record.Notebook) {
-				return documentaddressing.ErrInvalid
-			}
-			boxID = record.Notebook
-		}
-	}
-	return documentaddressing.CheckImport(util.DataDir, util.ConfDir, boxID, directory)
+	return nil
 }
 
-// prepareImportedDocumentAddressing 仅处理已经通过源身份和模式检查的临时档案。
-func prepareImportedDocumentAddressing(directory, newBoxID string, wholeNotebook bool) error {
-	name := filepath.Join(directory, documentaddressing.FloorPath)
-	data, err := filelock.ReadFile(name)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	if !wholeNotebook {
-		// 文档级导入沿用目标能力，不复制源笔记本的模式记录。
-		return filelock.Remove(name)
-	}
-	var record map[string]json.RawMessage
-	if err = json.Unmarshal(data, &record); err != nil {
-		return err
-	}
-	record["notebook"], err = json.Marshal(newBoxID)
-	if err != nil {
-		return err
-	}
-	data, err = json.Marshal(record)
-	if err != nil {
-		return err
-	}
-	return filelock.WriteFile(name, data)
-}
-
-// checkDocumentAddressingCopy 在整批导入或历史恢复开始复制前检查源配置及目标已确认的下界。
+// checkDocumentAddressingCopy 在整批导入或历史恢复开始复制前检查规范路径及文档源规格。
 func checkDocumentAddressingCopy(sourceRoot, boxID string) error {
 	var upserts []string
 	err := filepath.WalkDir(sourceRoot, func(name string, entry os.DirEntry, err error) error {
@@ -257,23 +205,26 @@ func checkDocumentAddressingCopy(sourceRoot, boxID string) error {
 	if err != nil {
 		return err
 	}
-	return documentaddressing.CheckBatch(util.DataDir, util.ConfDir, upserts, nil, func(name string) ([]byte, error) {
-		if boxID != "" {
-			name = strings.TrimPrefix(name, boxID+"/")
-		}
-		return filelock.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(name)))
-	})
-}
-
-func copyExportedDocumentAddressing(boxID, directory string) error {
-	data, err := filelock.ReadFile(filepath.Join(util.DataDir, boxID, documentaddressing.FloorPath))
-	if errors.Is(err, os.ErrNotExist) {
-		return nil
-	}
-	if err != nil {
+	if err := documentaddressing.CheckPaths(upserts, nil); err != nil {
 		return err
 	}
-	return filelock.WriteFile(filepath.Join(directory, documentaddressing.FloorPath), data)
+	for _, name := range upserts {
+		if !isDocumentAddressingSource([]string{name}) {
+			continue
+		}
+		relative := name
+		if boxID != "" {
+			relative = strings.TrimPrefix(name, boxID+"/")
+		}
+		data, err := filelock.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(relative)))
+		if err != nil {
+			return err
+		}
+		if err = checkDocumentAddressingCheckoutSource(data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // backupUnsupportedNotebookAttributeViews 无法解析源文档时保留共享数据库的原始快照，避免丢失恢复材料。

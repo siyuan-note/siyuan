@@ -12,6 +12,11 @@ type AssetPathRequest struct {
 	Path string `json:"path"`
 }
 
+type UnusedAssetsRequest struct {
+	Keyword string `json:"keyword" api:"optional,nullable"`
+	All     bool   `json:"all" api:"optional,nullable"`
+}
+
 // EncryptedBoxAssetsRequest 只接受当前已解锁的加密笔记本，不回退到全局资源。
 type EncryptedBoxAssetsRequest struct {
 	Notebook string `json:"notebook"`

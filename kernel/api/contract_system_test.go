@@ -160,7 +160,7 @@ func TestAPIContractSystemExitCompatibility(t *testing.T) {
 			called := false
 			finished := false
 			finishSystemExit = func() { finished = true }
-			closeSystem = func(force, current bool, install int) (int, string) {
+			closeSystem = func(ctx context.Context, force, current bool, install int) (int, string) {
 				called = true
 				defaults := body == `{}` || body == `{"recoverExit":null}`
 				if defaults && (force || !current || install != 0) || !defaults && (!force || current || install != 2) {
@@ -189,7 +189,10 @@ func TestAPIContractSystemExitRecovery(t *testing.T) {
 		closeSystem, recoverSystemExit, finishSystemExit, model.Conf = previousClose, previousRecover, previousFinish, previousConf
 	})
 	model.Conf = model.NewAppConf()
-	closeSystem = func(bool, bool, int) (int, string) { t.Fatal("recovery bypassed guards"); return 0, "" }
+	closeSystem = func(context.Context, bool, bool, int) (int, string) {
+		t.Fatal("recovery bypassed guards")
+		return 0, ""
+	}
 	for _, forced := range []bool{false, true} {
 		for _, code := range []int{-1, 0, 1, 3} {
 			called := false
@@ -225,7 +228,7 @@ func TestAPIContractSystemExitAfterCleanupAndWrite(t *testing.T) {
 	previousClose, previousFinish := closeSystem, finishSystemExit
 	t.Cleanup(func() { closeSystem, finishSystemExit = previousClose, previousFinish })
 	cleanupFinished := false
-	closeSystem = func(bool, bool, int) (int, string) {
+	closeSystem = func(context.Context, bool, bool, int) (int, string) {
 		defer func() {
 			// 覆盖退出末尾清理超过 500 毫秒的情况。
 			time.Sleep(650 * time.Millisecond)
@@ -255,6 +258,107 @@ func TestAPIContractSystemExitAfterCleanupAndWrite(t *testing.T) {
 		t.Fatalf("expected one server shutdown after response, got %d", finishCalls)
 	}
 	requireAPIContract(t, "POST", "/api/system/exit", recorder)
+}
+
+func TestAPIContractSystemExitCancellationContext(t *testing.T) {
+	previousClose, previousFinish, previousConf := closeSystem, finishSystemExit, model.Conf
+	t.Cleanup(func() { closeSystem, finishSystemExit, model.Conf = previousClose, previousFinish, previousConf })
+	model.Conf = model.NewAppConf()
+	ctx, cancel := context.WithCancel(context.Background())
+	closeSystem = func(actual context.Context, force, current bool, install int) (int, string) {
+		if actual != ctx {
+			t.Fatal("exit sync did not receive the request context")
+		}
+		cancel()
+		if actual.Err() != context.Canceled {
+			t.Fatal("request cancellation did not reach exit sync")
+		}
+		return 1, ""
+	}
+	finishSystemExit = func() { t.Fatal("canceled sync shut down the kernel") }
+	router := gin.New()
+	router.Use(model.ControlConcurrency)
+	router.POST("/api/system/exit", exit)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/exit", strings.NewReader(`{}`)).WithContext(ctx))
+	requireAPIContract(t, "POST", "/api/system/exit", recorder)
+	var response struct {
+		Code int `json:"code"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 1 {
+		t.Fatalf("cancellation reported successful sync: %s (%v)", recorder.Body.String(), err)
+	}
+}
+
+func TestAPIContractSystemExitCancelThenForce(t *testing.T) {
+	previousClose, previousFinish, previousConf := closeSystem, finishSystemExit, model.Conf
+	t.Cleanup(func() { closeSystem, finishSystemExit, model.Conf = previousClose, previousFinish, previousConf })
+	model.Conf = model.NewAppConf()
+	started, canceled := make(chan struct{}), make(chan struct{})
+	closeSystem = func(ctx context.Context, force, current bool, install int) (int, string) {
+		if !force {
+			close(started)
+			<-ctx.Done()
+			close(canceled)
+			return 1, ""
+		}
+		select {
+		case <-canceled:
+		default:
+			t.Error("force cleanup overtook the canceled synchronization")
+		}
+		return 0, ""
+	}
+	finished := make(chan struct{}, 1)
+	finishSystemExit = func() { finished <- struct{}{} }
+	router := gin.New()
+	router.Use(model.ControlConcurrency)
+	router.POST("/api/system/exit", exit)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() {
+		request, err := http.NewRequestWithContext(ctx, "POST", server.URL+"/api/system/exit", strings.NewReader(`{}`))
+		if err != nil {
+			done <- err
+			return
+		}
+		response, err := http.DefaultClient.Do(request)
+		if response != nil {
+			response.Body.Close()
+		}
+		done <- err
+	}()
+	select {
+	case <-started:
+	case <-time.After(3 * time.Second):
+		t.Fatal("normal exit did not start")
+	}
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(3 * time.Second):
+		t.Fatal("canceled request did not finish")
+	}
+	client := &http.Client{Timeout: 3 * time.Second}
+	response, err := client.Post(server.URL+"/api/system/exit", "application/json", strings.NewReader(`{"force":true,"execInstallPkg":1}`))
+	if err != nil {
+		t.Fatalf("force exit remained blocked by the canceled request: %v", err)
+	}
+	defer response.Body.Close()
+	var result struct {
+		Code int `json:"code"`
+	}
+	if err = json.NewDecoder(response.Body).Decode(&result); err != nil || result.Code != 0 {
+		t.Fatalf("unexpected force cleanup response: %+v (%v)", result, err)
+	}
+	select {
+	case <-finished:
+	case <-time.After(3 * time.Second):
+		t.Fatal("force cleanup did not complete shutdown")
+	}
 }
 
 func TestAPIContractSystemAuthenticationAdmission(t *testing.T) {

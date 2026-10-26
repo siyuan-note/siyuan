@@ -40,12 +40,8 @@ func buildBacklinkParentMappings(refBlocks []*Block, boxID string) (ret []*backl
 
 func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID string, groupDocuments bool) (ret []*backlinkParentMapping) {
 	parentRefParagraphs := map[string][]*Block{}
-	titleRefIDs := map[string]bool{}
 	var paragraphParentIDs []string
 	for _, refBlock := range refBlocks {
-		if refBlock != nil && refBlock.Type == "NodeDocument" {
-			titleRefIDs[refBlock.ID] = true
-		}
 		if nil == refBlock || "NodeParagraph" != refBlock.Type {
 			continue
 		}
@@ -59,6 +55,24 @@ func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID s
 
 	luteEngine := util.NewLute()
 	treeCache := map[string]*parse.Tree{}
+	return buildBacklinkParentMappingsForSources(refBlocks, parentRefParagraphs, paragraphParents, groupDocuments,
+		func(parent *Block, refs []*Block) *Block {
+			return selectBacklinkParentRef(parent, refs, boxID, luteEngine, treeCache)
+		}, func(parent *Block) map[string]bool {
+			return backlinkHeadingCoveredIDs(parent, boxID, treeCache)
+		})
+}
+
+// 查询反链与事务内收集共享归并过程，调用方提供同一快照中的父块和标题覆盖范围。
+func buildBacklinkParentMappingsForSources(refBlocks []*Block, parentRefParagraphs map[string][]*Block,
+	paragraphParents []*Block, groupDocuments bool, selectRef func(*Block, []*Block) *Block,
+	headingCoveredIDsFor func(*Block) map[string]bool) (ret []*backlinkParentMapping) {
+	titleRefIDs := map[string]bool{}
+	for _, refBlock := range refBlocks {
+		if refBlock != nil && refBlock.Type == "NodeDocument" {
+			titleRefIDs[refBlock.ID] = true
+		}
+	}
 	var mappings []*backlinkParentMapping
 	for _, parent := range paragraphParents {
 		if nil == parent || !groupDocuments && "NodeDocument" == parent.Type {
@@ -69,7 +83,7 @@ func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID s
 			continue
 		}
 
-		refBlock := selectBacklinkParentRef(parent, parentRefParagraphs[parent.ID], boxID, luteEngine, treeCache)
+		refBlock := selectRef(parent, parentRefParagraphs[parent.ID])
 		if nil == refBlock {
 			continue
 		}
@@ -101,7 +115,7 @@ func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID s
 			continue
 		}
 
-		mapping.coveredIDs = backlinkHeadingCoveredIDs(mapping.parent, boxID, treeCache)
+		mapping.coveredIDs = headingCoveredIDsFor(mapping.parent)
 		for _, refBlock := range refBlocks {
 			if nil != refBlock && mapping.coveredIDs[refBlock.ID] {
 				mapping.coveredRefIDs[refBlock.ID] = true

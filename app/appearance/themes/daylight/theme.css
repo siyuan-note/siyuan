@@ -267,6 +267,6 @@
     --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
 }
 
-.b3-typography .code-block, .protyle-wysiwyg .code-block {
+.b3-typography .code-block, .protyle-wysiwyg .code-block, .mindmap-view__content .code-block {
     background-color: rgba(27, 31, 35, .05);
 }

@@ -117,6 +117,8 @@ type NewItemTemplate struct {
 	SaveLocation        *NewItemSaveLocation          `json:"saveLocation,omitempty"`
 	ContentTemplatePath string                        `json:"contentTemplatePath,omitempty"`
 	HideInFileTree      bool                          `json:"hideInFileTree,omitempty"`
+	// nil 保留旧客户端行为；false 不自动打开，true 创建后由交互客户端分屏打开。
+	OpenAfterCreate *bool `json:"openAfterCreate,omitempty"`
 }
 
 // NewItemTemplatesConfig 描述一次完整的新增条目模板配置修改。

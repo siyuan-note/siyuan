@@ -343,17 +343,26 @@ var removeUnusedAssets = contractHandler(apicontract.RemoveUnusedAssets, func(c 
 	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
 })
 
-var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
+var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.UnusedAssetsRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
 	unusedAssets, err := model.UnusedAssets(true)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
 	}
+	if keyword := strings.ToLower(strings.TrimSpace(request.Keyword)); keyword != "" {
+		filtered := make([]*model.UnusedItem, 0, len(unusedAssets))
+		for _, item := range unusedAssets {
+			if strings.Contains(strings.ToLower(item.Name), keyword) {
+				filtered = append(filtered, item)
+			}
+		}
+		unusedAssets = filtered
+	}
 	total := len(unusedAssets)
 
-	// 最多返回 512 个未引用资源。
+	// 默认最多返回 512 个未引用资源，完整清单由调用方分批展示。
 	const maxUnusedAssets = 512
-	if total > maxUnusedAssets {
+	if !request.All && total > maxUnusedAssets {
 		unusedAssets = unusedAssets[:maxUnusedAssets]
 		// 提示仅发送给发起查询的前端；未提供应用标识的调用保留广播行为。
 		util.PushMsgWithApp(resolveRequestAppID(c, ""), fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)

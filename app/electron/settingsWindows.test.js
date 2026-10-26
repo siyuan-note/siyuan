@@ -121,8 +121,16 @@ test("plugin settings do not save built-in settings geometry", t => {
     assert.equal(saved().length, 0);
 });
 
-test("settings popup authorization requires the registered top-level page and exact URL and frame", () => {
-    const {policy, owner, event, open} = setup();
+test("settings windows reserve the caption height of the current interface density", () => {
+    for (const [compactMode, height] of [[undefined, 32], [false, 32], [true, 28], ["true", 32]]) {
+        const {policy, owner, open} = setup();
+        const allowed = policy(owner, open({compactMode}));
+        assert.equal(allowed.overrideBrowserWindowOptions.titleBarOverlay.height, height,
+            `compactMode=${JSON.stringify(compactMode)}`);
+    }
+});
+
+test("settings popup authorization requires the registered top-level page and exact URL and frame", () => {    const {policy, owner, event, open} = setup();
     const prepared = open();
     assert.equal(prepared.create, true);
     assert.equal(new URL(prepared.url).pathname, "/stage/build/app/settings.html");
@@ -136,7 +144,8 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(allowed.overrideBrowserWindowOptions.show, false);
     assert.equal(allowed.overrideBrowserWindowOptions.frame, false);
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
-    assert.deepEqual(allowed.overrideBrowserWindowOptions.titleBarOverlay, {color: "#00000000", symbolColor: "#808080"});
+    assert.deepEqual(allowed.overrideBrowserWindowOptions.titleBarOverlay,
+        {color: "#00000000", symbolColor: "#808080", height: 32});
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
     assert.equal(allowed.overrideBrowserWindowOptions.parent, undefined);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webSecurity, true);

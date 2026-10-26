@@ -307,6 +307,7 @@
     }
 
     .av__celltext--ref {
+      pointer-events: auto;
       border-bottom: 0;
       text-decoration: underline .5px var(--b3-border-color);
     }

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -109,6 +111,12 @@ func TestStructuredTitlesEncryptedLockAndHistory(t *testing.T) {
 	if literal.DisplayPath != child.DisplayPath || literal.Depth != 1 || child.Depth != 2 {
 		t.Fatal("encrypted display path collision changed document identity")
 	}
+	if ids, err := GetIDsByHPath("/A", box); err != nil || len(ids) != 1 || ids[0] != parent.ID {
+		t.Fatal("clean encrypted legacy path failed", ids, err)
+	}
+	if ids, err := GetIDsByHPath("/A/B", box); !errors.Is(err, documentaddressing.ErrPathAmbiguous) || len(ids) != 0 {
+		t.Fatal("encrypted collision accepted", ids, err)
+	}
 	literalSource := structuredTitlesCiphertext(t, literal)
 	childSource := structuredTitlesCiphertext(t, child)
 	keys, err := json.Marshal(currentNotebookCrypto())
@@ -125,6 +133,9 @@ func TestStructuredTitlesEncryptedLockAndHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 	LockBox(box)
+	if ids, err := GetIDsByHPath("/A/B", box); err == nil || len(ids) != 0 {
+		t.Fatal("locked notebook exposed legacy candidates", ids, err)
+	}
 	if _, _, err = GetDocPaths(box, []string{literal.ID, child.ID}); err == nil {
 		t.Fatal("locked notebook exposed structured titles")
 	}

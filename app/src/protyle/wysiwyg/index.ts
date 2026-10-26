@@ -4,6 +4,7 @@ import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
+import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
@@ -199,7 +200,6 @@ import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold, toggleListFold} from "../util/blockFold";
 import {bindHeadingFoldIndicators} from "../util/headingFoldIndicator";
-import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
@@ -5300,16 +5300,7 @@ export class WYSIWYG {
             const openFloatElement = hasClosestByAttribute(event.target, "data-action", "openFloat");
             if (openFloatElement) {
                 const id = openFloatElement.getAttribute("data-id");
-                /// #if MOBILE
-                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
-                /// #else
-                window.siyuan.blockPanels.push(new BlockPanel({
-                    app: protyle.app,
-                    isBacklink: false,
-                    targetElement: openFloatElement,
-                    refDefs: [{refID: id}]
-                }));
-                /// #endif
+                openEmbedBlock(protyle, openFloatElement, id);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

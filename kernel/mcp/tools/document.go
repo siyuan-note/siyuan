@@ -23,9 +23,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -152,10 +150,13 @@ type documentTarget struct {
 }
 
 func documentTargetFailure(err error) CallToolResult {
+	if failure, ok := model.LegacyPathFailure(err); ok {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: failure.Reason + ": " + err.Error()}}, IsError: true}
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}
 }
 
-// resolveDocumentTarget 在任何旧 hPath 查询前检查整本模式，父身份只通过结构化模型解析。
+// resolveDocumentTarget uses the shared ancestor-chain check for legacy paths and identity resolution for parentID.
 func resolveDocumentTarget(notebook string, args map[string]any, create, defaultRoot bool) (*documentTarget, error) {
 	parent, hasParent := args["parentID"]
 	legacy, hasPath := args["path"]
@@ -189,22 +190,19 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 	if !hasPath || !ok || hPath == "" {
 		return nil, errors.New("parentID or path is required")
 	}
-	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
-		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
-			return nil, fmt.Errorf("legacyPathUnsupported: %w; use parentID (empty string for the notebook root), or resolveDocPath/createDocByParent via the HTTP API", err)
-		}
-		return nil, err
-	}
 	if create {
 		hPath = parentDir(hPath)
 	}
-	target := &documentTarget{path: "/", hPath: hPath}
-	if hPath != "/" {
-		bt := treenode.GetBlockTreeRootByHPath(notebook, hPath)
-		if bt == nil {
-			return nil, fmt.Errorf("target path not found: %s", hPath)
-		}
-		target.path, target.id = bt.Path, &bt.ID
+	bt, err := model.ResolveLegacyDocumentPath(notebook, hPath, create)
+	if err != nil {
+		return nil, err
+	}
+	if bt == nil {
+		return nil, fmt.Errorf("target path not found: %s", hPath)
+	}
+	target := &documentTarget{path: bt.Path, hPath: hPath}
+	if bt.Path != "/" {
+		target.id = &bt.ID
 	}
 	return target, nil
 }

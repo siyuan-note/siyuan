@@ -16,7 +16,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -90,11 +89,6 @@ func ImportNotebookArchive(archivePath, password string, keyData []byte) error {
 		return err
 	}
 	defer zeroAndClear(kek)
-	for _, root := range notebookArchiveBoxRoots(manifest) {
-		if err = documentaddressing.CheckImport(util.DataDir, util.ConfDir, path.Base(root), filepath.Join(payload, filepath.FromSlash(root))); err != nil {
-			return err
-		}
-	}
 	install := filepath.Join(directory, "install")
 	roots, err := stageNotebookArchiveImport(payload, install, manifest)
 	if err != nil {

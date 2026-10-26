@@ -124,6 +124,11 @@ func unindex(boxID string) {
 }
 
 func (box *Box) Index() {
+	// 排队时即撤销就绪状态，避免创建请求在后台重建开始前通过检查。
+	if err := treenode.SetDocumentMetadataState(box.ID, "building"); err != nil {
+		logging.LogErrorf("prepare queued document metadata [%s] failed: %s", box.ID, err)
+		return
+	}
 	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
 	task.AppendTask(task.DatabaseIndex, indexBox, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)

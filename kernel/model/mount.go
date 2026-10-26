@@ -107,7 +107,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	if initializeBoxDoc {
 		_, err = ensureBoxDoc0(id)
 		if err == nil {
-			// 新笔记本已处于打开状态，Mount 会直接返回，须在创建时完成元数据初始化。
+			// 新笔记本的源摘要已补齐，后续挂载重建会在排队时撤销就绪状态。
 			err = treenode.SetDocumentMetadataState(id, "ready")
 		}
 		if err != nil {
@@ -278,10 +278,11 @@ func RemoveBox(boxID string) (err error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
 	}
-	addressingErr := filesys.CheckDocumentAddressing(boxID)
-	unsupportedAddressing := errors.Is(addressingErr, documentaddressing.ErrUnsupported)
-	if addressingErr != nil && !unsupportedAddressing {
-		return addressingErr
+	localPath := filepath.Join(util.DataDir, boxID)
+	_, statErr := os.Lstat(localPath)
+	localExists := !os.IsNotExist(statErr)
+	if statErr != nil && localExists {
+		return statErr
 	}
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
@@ -301,8 +302,7 @@ func RemoveBox(boxID string) (err error) {
 		return fmt.Errorf("query database-bound blocks in notebook [%s] failed: %w", boxID, err)
 	}
 	isUserGuide := IsUserGuide(boxID)
-	localPath := filepath.Join(util.DataDir, boxID)
-	if !filelock.IsExist(localPath) {
+	if !localExists {
 		removeHPathRefreshBox(boxID)
 		forgetRuntimeNormalBox(boxID)
 		removeMasterPasswordMigrationBox(boxID)
@@ -338,10 +338,8 @@ func RemoveBox(boxID string) (err error) {
 	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
-	if !unsupportedAddressing {
-		if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
-			return
-		}
+	if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+		return
 	}
 	if !isEncrypted {
 		unmount0(boxID)
@@ -365,12 +363,7 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
-		if !isEncrypted && unsupportedAddressing {
-			if err = backupUnsupportedNotebookAttributeViews(historyDir); err != nil {
-				return
-			}
-		}
-		if !isEncrypted && !unsupportedAddressing {
+		if !isEncrypted {
 			pages, walkErr := pagedPathsWithError(localPath, 32)
 			if walkErr != nil {
 				return walkErr
@@ -378,6 +371,12 @@ func RemoveBox(boxID string) (err error) {
 			for _, paths := range pages {
 				for _, filename := range paths {
 					tree, loadErr := loadTree(filename, util.NewLute())
+					if errors.Is(loadErr, treenode.ErrSpecTooNew) || errors.Is(loadErr, documentaddressing.ErrInvalidTitle) {
+						if err = backupUnsupportedNotebookAttributeViews(historyDir); err != nil {
+							return err
+						}
+						continue
+					}
 					if loadErr != nil {
 						return loadErr
 					}
@@ -525,7 +524,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 }
 
 func mountBox(boxID string) (alreadyMount bool, err error) {
-	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+	if err = checkMountDocumentAddressing(boxID); err != nil {
 		return
 	}
 	confFileTreeSnapshot := Conf.LoadFileTree()
@@ -563,6 +562,9 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
+			return
+		}
+		if err = filesys.CheckDocumentAddressing(boxID); err != nil {
 			return
 		}
 
@@ -644,6 +646,21 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 }
 
 var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"}
+
+func checkMountDocumentAddressing(boxID string) error {
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
+	}
+	if IsUserGuide(boxID) {
+		source := filepath.Join(util.WorkingDir, "guide", boxID)
+		if _, err := os.Stat(source); err == nil {
+			return checkDocumentAddressingCopy(source, boxID)
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
+}
 
 func IsUserGuide(boxID string) bool {
 	return slices.Contains(userGuideIDs, boxID)

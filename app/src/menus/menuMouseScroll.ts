@@ -47,7 +47,11 @@ export const bindMenuMouseScroll = (menu: HTMLElement, enabled: () => boolean, r
         if (!anchor || anchor.items !== items || anchor.top !== rect.top || anchor.height !== rect.height ||
             anchor.scrollHeight !== items.scrollHeight || Math.abs(anchor.currentScrollTop - items.scrollTop) > 1) {
             // 进入菜单或其他操作改变滚动位置后建立基准，首次移动不跳转。
-            anchor = {items, y: event.clientY, lastY: event.clientY, scrollTop: items.scrollTop,
+            // 位于首尾时将基准放在对应边缘，避免从另一端进入后朝菜单内部移动没有可滚动内容。
+            const inset = Math.min(24, rect.height / 4);
+            const y = items.scrollTop <= 1 ? rect.top + inset :
+                maxScroll - items.scrollTop <= 1 ? rect.bottom - inset : event.clientY;
+            anchor = {items, y, lastY: event.clientY, scrollTop: items.scrollTop,
                 currentScrollTop: items.scrollTop, top: rect.top, height: rect.height, scrollHeight: items.scrollHeight};
             return;
         }

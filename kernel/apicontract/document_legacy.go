@@ -10,7 +10,10 @@ type StructuredTemplateRequired struct {
 }
 
 type LegacyPathUnsupported struct {
-	Reason string `json:"reason" api:"enum=legacyPathUnsupported"`
+	// The historical type name is retained for plugin source compatibility.
+	Reason         string   `json:"reason" api:"enum=legacyPathUnsupported|pathAmbiguous|indexUnavailable"`
+	CleanIDs       []string `json:"cleanIDs,omitempty"`
+	UnsupportedIDs []string `json:"unsupportedIDs,omitempty"`
 }
 
 type LegacyPathIDsResult struct {
@@ -18,6 +21,9 @@ type LegacyPathIDsResult struct {
 	failure *LegacyPathUnsupported
 }
 
+func NewLegacyPathIDsFailure(value LegacyPathUnsupported) LegacyPathIDsResult {
+	return LegacyPathIDsResult{failure: &value}
+}
 func NewLegacyPathIDs(value []string) LegacyPathIDsResult { return LegacyPathIDsResult{value: value} }
 func UnsupportedLegacyPathIDs() LegacyPathIDsResult {
 	return LegacyPathIDsResult{failure: &LegacyPathUnsupported{Reason: "legacyPathUnsupported"}}
@@ -34,6 +40,9 @@ type LegacyPathDocumentResult struct {
 	failure *LegacyPathUnsupported
 }
 
+func NewLegacyPathDocumentFailure(value LegacyPathUnsupported) LegacyPathDocumentResult {
+	return LegacyPathDocumentResult{failure: &value}
+}
 func NewLegacyPathDocument(value string) LegacyPathDocumentResult {
 	return LegacyPathDocumentResult{value: value}
 }

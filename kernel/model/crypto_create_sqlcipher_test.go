@@ -31,6 +31,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -157,6 +158,12 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 		}
 		if _, err = Mount(boxID); err != nil {
 			t.Fatalf("mount new encrypted notebook: %v", err)
+		}
+		if state := treenode.DocumentMetadataState(boxID); state != "building" {
+			t.Fatalf("queued encrypted notebook index state = %q, want building", state)
+		}
+		for task.ContainIndexTask() {
+			task.ExecTaskJob()
 		}
 		documentID := ast.NewNodeID()
 		if _, err = CreateDocByParent(DocumentCreateRequest{Notebook: boxID, ID: documentID,

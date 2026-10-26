@@ -42,7 +42,6 @@ func TestAPIContractDocumentAddressingArchives(t *testing.T) {
 	name := addressingAPIBox + "/" + document
 	for _, entries := range [][][2]string{
 		{{"first.txt", "first"}, {name, future}},
-		{{"first.txt", "first"}, {addressingAPIBox + "/.siyuan/conf.json", `{"documentAddressingVersion":3}`}},
 		{{"first.txt", "first"}, {name, future}, {name, ordinary}},
 	} {
 		write(entries)
@@ -54,7 +53,7 @@ func TestAPIContractDocumentAddressingArchives(t *testing.T) {
 			t.Fatal("unzip wrote an earlier entry before checking the full batch", err)
 		}
 	}
-	// 采用过更高模式的身份不能复用；兼容成功使用独立笔记本身份。
+	// A compatible archive is admitted based on source formats, without remembered modes.
 	name = "20261023000001-rawbox2/" + document
 	write([][2]string{{name, ordinary}, {"assets/" + document, "arbitrary attachment"}, {"empty/", ""}})
 	if result := callArchiveAPI(t, unzip, `{"zipPath":"source.zip","path":"data"}`); result.Code != 0 {

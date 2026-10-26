@@ -113,7 +113,7 @@ func TestCachedTreeSourceRetainsFallbackAndAuthorization(t *testing.T) {
 	}
 }
 
-func TestCachedTreeSourceCapturesModeWithoutReusingItForNewAccess(t *testing.T) {
+func TestCachedTreeSourceIgnoresRetiredModeAndValidatesSpec(t *testing.T) {
 	boxID, id, _, _ := setupStalePathTest(t)
 	previousConfDir := util.ConfDir
 	util.ConfDir = t.TempDir()
@@ -135,7 +135,7 @@ func TestCachedTreeSourceCapturesModeWithoutReusingItForNewAccess(t *testing.T) 
 		t.Fatal(err)
 	}
 
-	// 已捕获的来源只按捕获时的能力解析，下一次来源访问仍检查当前能力。
+	// Retired diagnostic markers do not change supported source reads.
 	writeStalePathFixture(t, boxID, documentaddressing.ConfigPath, []byte(`{"documentAddressingVersion":3}`))
 	luteEngine := util.NewLute()
 	captured, err := source.Parse(luteEngine)
@@ -154,8 +154,8 @@ func TestCachedTreeSourceCapturesModeWithoutReusingItForNewAccess(t *testing.T) 
 		{"write", func() error { _, err := WriteTree(captured); return err }},
 	} {
 		t.Run(access.name, func(t *testing.T) {
-			if err := access.run(); !errors.Is(err, documentaddressing.ErrUnsupported) {
-				t.Fatalf("new access reused an earlier addressing check: %v", err)
+			if err := access.run(); err != nil {
+				t.Fatalf("retired mode blocked source access: %v", err)
 			}
 		})
 	}

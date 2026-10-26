@@ -72,14 +72,14 @@ func TestDocumentAddressingRawSourceChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeDocumentAddressingSource(t, source, conflict)
-	if err := copyDocumentAddressingFile(source, destination); !errors.Is(err, documentaddressing.ErrModeConflict) {
+	if err := copyDocumentAddressingFile(source, destination); !errors.Is(err, treenode.ErrDocumentTitleSpec) {
 		t.Fatal("copy used a source changed after batch preflight", err)
 	}
 	if actual, _ := os.ReadFile(destination); !bytes.Equal(actual, ordinary) {
 		t.Fatal("changed incoming source replaced the destination")
 	}
 	missing := filepath.Join(box, "20261022130000-parent1", "20261022130000-child01.sy")
-	if err := CheckDocumentAddressingFileWrite(missing, conflict, false); !errors.Is(err, documentaddressing.ErrModeConflict) {
+	if err := CheckDocumentAddressingFileWrite(missing, conflict, false); !errors.Is(err, treenode.ErrDocumentTitleSpec) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Dir(missing)); !os.IsNotExist(err) {

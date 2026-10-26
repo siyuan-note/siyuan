@@ -248,12 +248,28 @@ func BeginDocumentMetadataRecovery(doc *BlockTree) (bool, error) {
 func CommitDocumentMetadataWrite(tree *parse.Tree) error {
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
+	docs, err := DocHPaths(tree.Box, tree.Path)
+	if err != nil {
+		return err
+	}
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 	execInsertBlocktrees(tx, tree, []*ast.Node{tree.Root})
+	var state string
+	if stateErr := tx.QueryRow("SELECT state FROM document_metadata_state WHERE box_id=? AND version=1", tree.Box).Scan(&state); stateErr != nil && !errors.Is(stateErr, sql.ErrNoRows) {
+		return stateErr
+	}
+	// Rebuilds may not yet have descendant summaries. They cannot serve legacy
+	// queries until the existing full rebuild publishes ready.
+	if state == "ready" {
+		if err = refreshDocumentHPathsInTx(tx, tree, docs); err != nil {
+			return err
+		}
+	}
+
 	if _, err = tx.Exec("DELETE FROM document_metadata_pending WHERE box_id=? AND id=? AND revision=?",
 		tree.Box, tree.ID, documentMetadataFromTree(tree).Revision); err != nil {
 		return err

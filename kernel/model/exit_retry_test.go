@@ -40,6 +40,9 @@ func TestWorkspaceExitRetryPreservesBatch(t *testing.T) {
 
 func TestExitSyncSkippedAndFailed(t *testing.T) {
 	prepareSyncDirectoryTest(t)
+	previousStatus := util.StatusBarCfg.Load()
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	t.Cleanup(func() { util.StatusBarCfg.Store(previousStatus) })
 	previousErrors := autoSyncErrCount.Load()
 	t.Cleanup(func() { autoSyncErrCount.Store(previousErrors) })
 	for _, mode := range []int{0, 3} {

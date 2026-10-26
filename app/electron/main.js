@@ -88,7 +88,7 @@ const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const {createSettingsWindows} = require("./settingsWindows");
-const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
+const {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
 const {createWebPageFetcher, installWebPageFetchIPC} = require("./webPageFetch");
@@ -2252,6 +2252,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         },
         frame: "darwin" === process.platform,
         titleBarStyle: "hidden",
+        // 首帧按默认主题的工具栏高度预留，融合页签与自定义主题由渲染进程校正。
         titleBarOverlay: getTitleBarOverlayOptions(),
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
@@ -4230,7 +4231,8 @@ app.whenReady().then(() => {
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
-            titleBarOverlay: getTitleBarOverlayOptions(),
+            // 独立文档窗口的顶栏使用面板高度，并跟随当前界面密度预留。
+            titleBarOverlay: getTitleBarOverlayOptions(process.platform, getCaptionHeight(data.compactMode, true)),
             webPreferences: {
                 contextIsolation: false,
                 nodeIntegration: true,

@@ -31,11 +31,14 @@ import {
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel} from "./model";
+import {applyListMindmapListInput, getListMindmapListInputTarget} from "./listInput";
+import type {ListMindmapListInput} from "./listInput";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
 import {syncListMindmapHeight} from "./height";
 import {bindListMindmapResize} from "./resize";
 import {setBlockHeight} from "../../gutter/height";
 import {ListMindmapView} from "./view";
+import {flushListMindmapViewports, getListMindmapViewport, saveListMindmapViewport} from "./viewport";
 import {getListMindmapLineColors, getListMindmapNodeColors, getListMindmapNodeColorMenu} from "./colors";
 import {openListMindmapEditor} from "./editor";
 import {focusListMindmap} from "./create";
@@ -238,6 +241,8 @@ class ListMindmapController {
         list.appendChild(this.host);
         let restoreFullscreenChrome: () => void;
         this.view = new ListMindmapView({
+            viewport: getListMindmapViewport(owner, list),
+            onViewportChange: state => saveListMindmapViewport(owner, list, state),
             host: this.host, model: this.model, labels: window.siyuan.languages,
             onOpenLink: (href, event) => openLink(owner.app, href, event, event.ctrlKey || event.metaKey),
             onPreviewImage: (src, video) => previewDocImage(src, owner.block.rootID, video),
@@ -869,6 +874,47 @@ class ListMindmapController {
         }
     }
 
+    private async listInput(id: string, input: ListMindmapListInput, selection?: Record<string, string>) {
+        const request = this.editRequest;
+        const rootID = this.owner.block.rootID;
+        if (input.kind !== "split" && input.kind !== "before" &&
+            !getListMindmapListInputTarget(this.model.nodes.get(id), input.kind)) {
+            return;
+        }
+        if (!canEdit(this.owner, this.list) || this.activeEditor && !await this.activeEditor.finish() ||
+            request !== this.editRequest || rootID !== this.owner.block.rootID || this.disposed || !canEdit(this.owner, this.list)) {
+            return;
+        }
+        const source = this.list.cloneNode(true) as HTMLElement;
+        const node = readListMindmap(source).nodes.get(id);
+        if (!node?.element) {
+            return;
+        }
+        let item: HTMLElement;
+        if (input.kind === "split" || input.kind === "before") {
+            item = genListItemElement(node.element, 0, false);
+            if (source.dataset.type === "NodeMindmap") {
+                item.dataset.type = "NodeMindmapItem";
+                item.classList.replace("li", "mindmap-item");
+            }
+        }
+        const result = applyListMindmapListInput(source, id, input, item);
+        const before = cleanListMindmapHTML(this.list.outerHTML);
+        if (!result || !await this.change(() => {
+            if (cleanListMindmapHTML(this.list.outerHTML) !== before) {
+                return false;
+            }
+            this.replaceClipboardSource(source);
+        }, false, result.id, {undo: selection, redo: result.selection || selection})) {
+            return;
+        }
+        this.view.focusNode(result.id);
+        const host = this.view.getContentHost(result.id);
+        if (host) {
+            await this.edit(result.id, host, undefined, undefined, result.selection || selection);
+        }
+    }
+
     private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string, clipboard?: IClipboardData,
                        selection?: Record<string, string>, guard?: () => boolean) {
         if (guard && !guard()) {
@@ -894,6 +940,7 @@ class ListMindmapController {
             onSave: (html, undo, redo) => this.change(() => replaceListMindmapContent(this.list, id, html), true, id, {undo, redo}),
             onResize: () => this.view.refreshLayout(),
             onAdd: kind => this.add(id, kind),
+            onListInput: (input, selection) => this.listInput(id, input, selection),
             isPanTarget: event => this.view.isPanTarget(event),
             onFinish: () => {
                 if (this.activeEditor !== editor) {
@@ -1055,6 +1102,7 @@ class ListMindmapController {
         this.resize.destroy();
         this.unregisterVisible?.();
         this.view.destroy();
+        flushListMindmapViewports();
         this.host.remove();
         this.list.removeAttribute("data-mindmap-view-rendered");
         if (restoreFocus) {

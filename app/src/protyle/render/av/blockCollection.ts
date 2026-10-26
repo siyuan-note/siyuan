@@ -6,9 +6,11 @@ import {mountCollectionConditions} from "./collectionConditions";
 import {BlockPanel} from "../../../block/Panel";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
+import {mountCollectionReference} from "./collectionReference";
 
 export const collectionSourceIncomplete = (source: AVAutomationBlockSourceInput) => !source ||
     !(source.notebookIDs?.length || source.documentIDs?.length) ||
+    (!!source.referenceID && !/^\d{14}-[a-z0-9]{7}$/.test(source.referenceID)) ||
     (source.documentDepth != null && (!Number.isSafeInteger(source.documentDepth) || source.documentDepth < 0)) ||
     (source.attributes || []).some(attr => !attr || !attr.name || attr.name.length > 256 ||
         (attr.nameOperator === "regex" ? false :
@@ -19,6 +21,10 @@ export const mountBlockCollectionSource = (host: HTMLElement, source: AVAutomati
     const lang = window.siyuan.languages;
     const conditions = document.createElement("div");
     mountCollectionConditions(conditions, source, save, onResize);
+    const reference = document.createElement("div");
+    const updateTarget = () => conditions.querySelector("[data-tag-target-control]")?.classList.toggle("fn__none", !!source.referenceID);
+    mountCollectionReference(reference, source, protyle, () => { updateTarget(); save(); }, onResize);
+    updateTarget();
     const names = new Map<string, string>();
     let revision = 0;
     const depthMode = () => source.documentDepth == null ? "unlimited" : source.documentDepth === 0 ? "current" : "limited";
@@ -44,7 +50,7 @@ ${notebooks.length || documents.length ? `<div class="av__automation-source-list
 ${documents.length ? `<div class="av__automation-control"><label class="av__automation-row"><span class="fn__flex-1">${lang.automationCollectionIncludeSelf}</span><input type="checkbox" class="b3-switch" data-include-selected-documents${source.includeSelectedDocuments !== false ? " checked" : ""}></label><div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationCollectionIncludeSelfTip}</div></div>
 <div class="av__automation-control"><div class="av__automation-row"><span class="av__automation-control-label fn__flex-1">${lang.automationCollectionDepth}</span><button type="button" class="b3-button b3-button--cancel b3-button--wrap av__automation-source-action" data-depth-mode aria-label="${escapeAttr(lang.automationCollectionDepth)}"><span>${depthLabels[depthMode()]}</span><svg><use xlink:href="#iconDown"></use></svg></button></div>${depthMode() === "limited" ? `<input type="number" class="b3-text-field fn__block" min="1" step="1" required data-document-depth value="${source.documentDepth}" aria-label="${escapeAttr(lang.automationCollectionDepth)}">` : ""}<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationCollectionDepthTip}</div></div>` : ""}
 </div>`;
-        host.firstElementChild.append(conditions);
+        host.firstElementChild.append(reference, conditions);
         onResize();
     };
     host.addEventListener("click", event => {

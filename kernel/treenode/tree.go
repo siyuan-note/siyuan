@@ -158,14 +158,10 @@ var CurrentSpec = RichDocumentTitleSpec
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
-// CheckSpecJSON 按当前发行版能力校验独立源（如导入和历史），不能代替笔记本模式与授权预检。
+// CheckSpecJSON 按当前发行版能力校验独立源（如导入和历史），不能代替授权与认证预检。
 // 在解析节点之前检查，避免未知节点被容错解析后覆盖原始内容。
 func CheckSpecJSON(data []byte) error {
-	return CheckSpecJSONForMode(data, documentaddressing.DefaultMode())
-}
-
-func CheckSpecJSONForMode(data []byte, mode int) error {
-	spec, err := checkDocumentSourceJSON(data, mode)
+	spec, err := checkDocumentSourceJSON(data)
 	if err != nil {
 		return err
 	}
@@ -173,13 +169,6 @@ func CheckSpecJSONForMode(data []byte, mode int) error {
 }
 
 func CheckSpec(tree *parse.Tree) (err error) {
-	return CheckSpecForMode(tree, documentaddressing.DefaultMode())
-}
-
-func CheckSpecForMode(tree *parse.Tree, mode int) (err error) {
-	if err = documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")); mode < 2 && err != nil {
-		return
-	}
 	err = nil
 	if err = ValidateDocumentTitle(tree.Root); err != nil {
 		return
@@ -240,7 +229,7 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 		})
 	}
 	if documentTitleSpecUpgradeRequired(tree.Root.Spec) &&
-		documentaddressing.CheckLegacyTitle(tree.Root.IALAttr("title")) != nil {
+		documentaddressing.TitleRequiresSpec(tree.Root.IALAttr("title")) {
 		tree.Root.Spec = DocumentTitleSpec
 	}
 	if tree.Root.DocumentTitle != nil {

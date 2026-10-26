@@ -36,7 +36,7 @@ test("entry settings show exit only on native tablets without changing the persi
     assert.equal(hasExit(exports.catalog()), true);
     mobile = true;
     const catalog = exports.catalog();
-    assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, "editor.image", "editor.slash"]);
+    assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, "editor.blockEmbed", "editor.image", "editor.slash"]);
     assert.equal(catalog.find(item => item.key === "editor.slash"), entryCatalog.find(item => item.key === "editor.slash"));
     assert.deepEqual(Array.from(catalog[0].children, item => item.key), MOBILE_TOOLBAR_CONTEXT_KEYS);
     for (const name of ["undo", "indent", "heading1", "table", "template"]) {

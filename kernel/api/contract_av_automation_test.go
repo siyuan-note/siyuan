@@ -465,4 +465,31 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if _, err = model.LoadTreeByBlockID(quoteID); err != nil {
 		t.Fatal("cleanup removed original quote", err)
 	}
+	t.Run("reference collection contract", func(t *testing.T) {
+		collection.BlockSource.ReferenceID = tree.ID
+		collection.BlockSource.Tags = nil
+		collection.BlockSource.TagTarget = "block"
+		config := &av.AutomationConfig{Spec: 7, Rules: []*av.AutomationRule{collection}}
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, Data: config}}); err == nil {
+			t.Fatal("reference matching accepted an old automation format")
+		}
+		config.Spec = 8
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, Data: config}}); err != nil {
+			t.Fatal(err)
+		}
+		response := callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		if err := json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		if readBack.Data.AV.Automations.Spec != 8 || readBack.Data.AV.Automations.Rules[0].BlockSource.ReferenceID != tree.ID {
+			t.Fatal("reference target did not survive the API contract round trip")
+		}
+		call("/api/block/updateBlock", map[string]any{"id": paragraphs[0], "dataType": "markdown", "data": "Source ((" + tree.ID + " 'Target'))"}, updateBlock)
+		call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID}, previewAttributeViewCollection)
+		stored, err := av.ParseAttributeView(database.ID)
+		if err != nil || stored.GetBlockValueByBoundID(quoteID) == nil {
+			t.Fatal("API reference edit did not collect the backlink parent", err)
+		}
+	})
 }

@@ -1199,6 +1199,8 @@ interface IAVNewItemTemplate {
     saveLocation?: IAVNewItemSaveLocation;
     contentTemplatePath?: string;
     hideInFileTree?: boolean;
+    /** 创建后分屏打开条目；省略时保留旧行为（仅日历自动打开），false 表示不打开。 */
+    openAfterCreate?: boolean;
 }
 
 /** 单字段条件颜色规则按顺序匹配，默认背景同样占据优先级。 */

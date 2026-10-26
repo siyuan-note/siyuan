@@ -32,8 +32,10 @@ func documentParentDisplayPath(boxID, documentPath string) (string, error) {
 }
 
 type DocumentAddressingError struct {
-	Reason string
-	Cause  error
+	Reason         string
+	Cause          error
+	CleanIDs       []string
+	UnsupportedIDs []string
 }
 
 func (err *DocumentAddressingError) Error() string { return err.Cause.Error() }
@@ -121,9 +123,6 @@ func resolveDocumentPath(boxID string, parentID *string, segments []string) (*tr
 }
 
 func normalizeDocumentTitle(title string) string {
-	if documentaddressing.DefaultMode() == 1 {
-		return normalizeDocTitle(title)
-	}
 	return normalizeTitleText(title)
 }
 
@@ -136,18 +135,6 @@ func appendDocumentHPath(parent, title string) string {
 		return parent
 	}
 	return parent + "/" + title
-}
-
-// CheckLegacyDocumentPath 按整本模式拒绝旧名称寻址，不根据某个请求是否包含斜杠放行。
-func CheckLegacyDocumentPath(boxID string) error {
-	mode, err := filesys.DocumentAddressingMode(boxID)
-	if err != nil {
-		return err
-	}
-	if mode > 1 {
-		return documentaddressing.ErrLegacyPathUnsupported
-	}
-	return nil
 }
 
 // ValidateDocumentTitle 校验新协议的完整输入，不通过截断、修剪或字符替换悄悄改变标题。

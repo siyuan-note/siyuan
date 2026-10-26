@@ -2400,11 +2400,14 @@ func convertMdHyperlinks2WikiLinks(tree *parse.Tree) {
 		if strings.HasPrefix(linkDest, "assets/") {
 			return ast.WalkContinue
 		}
-		if !strings.HasSuffix(linkDest, ".md") && !strings.HasSuffix(linkDest, ".markdown") {
+		linkPath, fragment, hasFragment := strings.Cut(linkDest, "#")
+		if !strings.HasSuffix(linkPath, ".md") && !strings.HasSuffix(linkPath, ".markdown") {
 			return ast.WalkContinue
 		}
-		linkDest = strings.TrimSuffix(linkDest, ".md")
-		linkDest = strings.TrimSuffix(linkDest, ".markdown")
+		linkDest = strings.TrimSuffix(strings.TrimSuffix(linkPath, ".md"), ".markdown")
+		if hasFragment {
+			linkDest += "#" + fragment
+		}
 
 		buf := bytes.Buffer{}
 		buf.WriteString("[[")

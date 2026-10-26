@@ -57,6 +57,7 @@ const runCases = async source => {
     });
     const pdfTheme = load(source.pdfTheme, {
         "../constants": {Constants},
+        "../protyle/util/browserCompat": {ensureBrowserCompatibility: async () => {}},
         "../config/tabs/appearancePreferences": {patchAppearancePreference: async (key, value) => {
             themePatches.push([key, value]);
         }},

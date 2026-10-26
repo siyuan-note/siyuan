@@ -163,7 +163,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 newHeight = y - newTop;
             }
             rectResizeElement.setAttribute("style",
-                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
+                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;opacity:${moveEvent.altKey && !CSS.supports("background-color", "color-mix(in srgb, red, transparent)") ? ".35" : "1"};background-color:${moveEvent.altKey ? "var(--b3-pdf-background1)" : ""};background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
         };
         const stopRectCreation = () => {
             setRectCreationMode(false);

@@ -242,7 +242,7 @@ function getViewerConfiguration(element) {
 function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
   // SiYuan 通过 AppOptions.set 显式配置 viewer,禁用从 localStorage 读取的 Preferences,
   AppOptions.set("disablePreferences", true);
-  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.1`);
+  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.2`);
   AppOptions.set("defaultUrl", file);
   AppOptions.set("cMapUrl", `${Constants.PROTYLE_CDN}/js/pdf/cmaps/`);
   AppOptions.set("iccUrl", `${Constants.PROTYLE_CDN}/js/pdf/iccs/`);

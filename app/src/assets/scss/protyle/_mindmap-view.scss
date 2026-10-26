@@ -258,6 +258,7 @@
     border: 1px solid currentColor;
     border-radius: var(--b3-border-radius);
     overflow: hidden;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
     background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) 1px, transparent 1px);
     background-size: 24px 24px;
     background-position: center;

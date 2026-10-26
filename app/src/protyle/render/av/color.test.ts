@@ -64,6 +64,17 @@ describe("AV color indexes", () => {
 });
 
 describe("AV resolved colors", () => {
+    it("uses theme-controlled CSS variables when light-dark is unavailable", () => {
+        const previous = globalThis.CSS;
+        Object.defineProperty(globalThis, "CSS", {configurable: true, writable: true, value: {supports: () => false}});
+        try {
+            assert.equal(getAVBackgroundColor({color: "15", resolvedColor: customColor}),
+                "var(--b3-legacy-light-color, #ddeeff) var(--b3-legacy-dark-color, #223344)");
+        } finally {
+            if (previous === undefined) delete globalThis.CSS;
+            else globalThis.CSS = previous;
+        }
+    });
     it("renders local light and dark chip colors", () => {
         assert.equal(getAVColorStyle({color: "15", resolvedColor: customColor}),
             "background-color:light-dark(#ddeeff, #223344);color:light-dark(#112233, #fefefe)");

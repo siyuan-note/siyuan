@@ -8,6 +8,7 @@ import {MERMAID_SANITIZE_OPTIONS} from "./mermaidSanitize";
 import {isZenumlDiagram} from "./mermaidZenuml";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {escapeHtml} from "../../util/escape";
+import {ensureBrowserCompatibility} from "../util/browserCompat";
 
 let mermaidTidyTreePromise: Promise<void>;
 let mermaidZenumlPromise: Promise<void>;
@@ -53,7 +54,8 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.2.0`, "protyleMermaidScript").then(async () => {
+    ensureBrowserCompatibility(cdn).then(() =>
+        addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.2.0`, "protyleMermaidScript")).then(async () => {
         await registerMermaidExternalDiagrams(mermaidElements, cdn);
         await registerMermaidLayouts(mermaidElements, cdn);
         window.mermaid.registerIconPacks([

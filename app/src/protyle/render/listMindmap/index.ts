@@ -885,7 +885,10 @@ class ListMindmapController {
             request !== this.editRequest || rootID !== this.owner.block.rootID || this.disposed || !canEdit(this.owner, this.list)) {
             return;
         }
-        const source = this.list.cloneNode(true) as HTMLElement;
+        // 结构编辑只克隆源内容，画布实例和全屏返回标记由当前控制器保留。
+        const template = this.list.ownerDocument.createElement("template");
+        template.innerHTML = cleanListMindmapHTML(this.list.outerHTML);
+        const source = template.content.firstElementChild as HTMLElement;
         const node = readListMindmap(source).nodes.get(id);
         if (!node?.element) {
             return;

@@ -1749,6 +1749,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if len(newPassword) == 0 {
 		return errors.New("new password must not be empty")
 	}
+	// Serialize the complete multi-file change with snapshot readers and all sync modes.
+	// Acquire these locks before notebookCryptoMu, as sync refresh also uses that mutex.
+	release := lockAssetSourceChange()
+	defer release()
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()

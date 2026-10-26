@@ -1934,6 +1934,9 @@ func CreateRepoSnapshotWithFullCheck(memo string, fullCheck bool) (id string, cr
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 
+	if err = checkRepositoryPasswordMigration(); err != nil {
+		return
+	}
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
@@ -2088,12 +2091,16 @@ func syncRepoDownload() (err error) {
 	}
 
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "d", true)
+	passwordRecovery, err := preparePasswordRecoveryDownload(repo)
+	if err != nil {
+		return err
+	}
 	checkoutTask := startSyncCheckout(repo)
 	defer checkoutTask.finish(repo, &err)
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync0(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2135,6 +2142,13 @@ func syncRepoDownload() (err error) {
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
 	err = processAssetSyncMergeResult(repo, false, true, mergeResult, trafficStat, "d", elapsed)
+	if passwordRecovery {
+		// Reapply the retained envelopes to notebooks brought back by download.
+		// Final backup authentication still requires the user's new password.
+		notebookCryptoMu.Lock()
+		recoverMasterPasswordMigration()
+		notebookCryptoMu.Unlock()
+	}
 	logging.LogInfof("download data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
@@ -3068,6 +3082,14 @@ func needFullReindex(upsertTrees int) bool {
 var promotedPurgeDataRepo bool
 
 func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+	if err = checkRepositoryPasswordMigration(); err != nil {
+		return
+	}
+	return indexRepoBeforeCloudSync0(repo)
+}
+
+// Download-only recovery keeps the existing local safety index, without publishing it.
+func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
 
 	beforeIndex, _ = repo.Latest()

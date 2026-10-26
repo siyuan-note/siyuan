@@ -149,6 +149,42 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		assertRows(tree)
 	})
 
+	t.Run("coalesced moves recover the final document location", func(t *testing.T) {
+		ClearQueue()
+		tree := newTree()
+		IndexTreeQueue(tree)
+		FlushQueue()
+		for _, parent := range []string{"20261026000000-parent1", "20261026000000-parent2"} {
+			previous := filepath.Join(util.DataDir, box, tree.Path)
+			latest := *tree
+			latest.Path = "/" + parent + "/" + tree.ID + ".sy"
+			latest.HPath = "/" + parent + "/Recovery"
+			cache.RemoveTreeDataInBox(tree.ID, box)
+			if _, err := filesys.WriteTree(&latest); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Remove(previous); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(&latest)
+			MoveTreeQueue(&latest)
+			tree = &latest
+		}
+		if len(operationQueue) != 1 || len(loadIndexQueue()) != 2 {
+			t.Fatal("coalesced move did not persist both recovery locations")
+		}
+		restartQueue()
+		FlushQueue()
+		assertRows(tree)
+		var mismatches int
+		if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id = ? AND (path != ? OR hpath != ?)", tree.ID, tree.Path, tree.HPath).Scan(&mismatches); err != nil || mismatches != 0 {
+			t.Fatalf("recovery retained an obsolete path: %d, %v", mismatches, err)
+		}
+		if len(operationQueue) != 0 || len(loadIndexQueue()) != 0 {
+			t.Fatal("move recovery did not checkpoint journal")
+		}
+	})
+
 	for _, recovered := range []bool{false, true} {
 		name := "live"
 		if recovered {

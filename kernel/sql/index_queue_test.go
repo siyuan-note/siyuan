@@ -256,6 +256,31 @@ func TestIndexQueueRecoversLargeAndMalformedRecords(t *testing.T) {
 	}
 }
 
+func TestIndexQueueCoalescedLocationsArePersisted(t *testing.T) {
+	for name, enqueue := range map[string]func(*parse.Tree){
+		"index": IndexTreeQueue, "move": MoveTreeQueue, "rename": RenameDocQueue,
+		"update_refs": UpdateRefsTreeQueue, "delete_refs": DeleteRefsTreeQueue,
+	} {
+		t.Run(name, func(t *testing.T) {
+			prepareIndexQueueTest(t)
+			first := &parse.Tree{ID: "20261026000000-move001", Box: "20261026000000-box0001", Path: "/first.sy"}
+			latest := *first
+			latest.Path = "/latest.sy"
+			enqueue(first)
+			enqueue(&latest)
+			enqueue(&latest)
+			if len(operationQueue) != 1 || len(loadIndexQueue()) != 2 {
+				t.Fatal("coalescing lost a new location or duplicated an unchanged descriptor")
+			}
+			operationQueue = nil
+			recoverIndexQueue()
+			if len(operationQueue) != 2 || operationQueue[1].recoveryEntry.Path != latest.Path {
+				t.Fatal("restart did not retain latest coalesced location")
+			}
+		})
+	}
+}
+
 func prepareIndexQueueTest(t *testing.T) {
 	t.Helper()
 

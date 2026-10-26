@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime/debug"
 	"sort"
 	"sync"
@@ -491,7 +492,7 @@ func IndexNodeQueue(id string) {
 	newOp := &dbQueueOperation{id: id, box: boxID, inQueueTime: time.Now(), action: "index_node"}
 	for i, op := range operationQueue {
 		if "index_node" == op.action && op.recoveryEntry == nil && op.id == id {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -517,7 +518,7 @@ func UpdateBlockContentQueue(block *Block) {
 	newOp := &dbQueueOperation{block: block, inQueueTime: time.Now(), action: "update_block_content"}
 	for i, op := range operationQueue {
 		if "update_block_content" == op.action && op.recoveryEntry == nil && op.block.ID == block.ID && op.block.Box == block.Box {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -531,7 +532,7 @@ func DeleteRefsTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}
 	for i, op := range operationQueue {
 		if "delete_refs" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -545,7 +546,7 @@ func UpdateRefsTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "update_refs"}
 	for i, op := range operationQueue {
 		if "update_refs" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -559,7 +560,7 @@ func DeleteBoxRefsQueue(boxID string) {
 	newOp := &dbQueueOperation{box: boxID, inQueueTime: time.Now(), action: "delete_box_refs"}
 	for i, op := range operationQueue {
 		if "delete_box_refs" == op.action && op.recoveryEntry == nil && op.box == boxID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -573,7 +574,7 @@ func DeleteBoxQueue(boxID string) {
 	newOp := &dbQueueOperation{box: boxID, inQueueTime: time.Now(), action: "delete_box"}
 	for i, op := range operationQueue {
 		if "delete_box" == op.action && op.recoveryEntry == nil && op.box == boxID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -587,7 +588,7 @@ func IndexTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
 	for i, op := range operationQueue {
 		if "index" == op.action && op.indexTree != nil && op.indexTree.ID == tree.ID { // 相同树则覆盖
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -609,7 +610,7 @@ func UpsertTreeQueueWithChanges(tree *parse.Tree, changes *TreeIndexChanges) {
 		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID && op.upsertTree.Path == tree.Path {
 			newOp.indexChanges = mergeTreeIndexChanges(op.indexChanges, newOp.indexChanges)
 			newOp.inQueueTime = op.inQueueTime
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 		// 删除、移动、重命名及其他索引操作不参与快照覆盖，保留原始执行顺序。
@@ -637,7 +638,7 @@ func renameTreeQueue(tree *parse.Tree, action string) {
 	}
 	for i, op := range operationQueue {
 		if action == op.action && op.indexTree != nil && op.indexTree.Box == tree.Box && op.indexTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -655,7 +656,7 @@ func MoveTreeQueue(tree *parse.Tree) {
 	}
 	for i, op := range operationQueue {
 		if "move" == op.action && op.indexTree != nil && op.indexTree.ID == tree.ID { // 相同树则覆盖
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -669,7 +670,7 @@ func RemoveTreeQueue(boxID, rootID string) {
 	newOp := &dbQueueOperation{removeTreeBox: boxID, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
 	for i, op := range operationQueue {
 		if "delete_id" == op.action && op.removeTreeID == rootID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -695,7 +696,7 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 	newOp := &dbQueueOperation{removeTreeBox: treeBox, removeTreePath: treePathPrefix, inQueueTime: time.Now(), action: "delete"}
 	for i, op := range operationQueue {
 		if "delete" == op.action && (op.removeTreeBox == treeBox && op.removeTreePath == treePathPrefix) {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -716,4 +717,15 @@ func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
 	appendToIndexQueue(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
+}
+
+// Caller holds dbQueueLock. Preserve the latest recovery location when an
+// in-memory operation is coalesced. Unchanged descriptors already reload the
+// latest document from disk and do not need another journal entry.
+func replaceOperation(index int, op *dbQueueOperation) {
+	previous := dbOpToIndexEntry(operationQueue[index])
+	operationQueue[index] = op
+	if !reflect.DeepEqual(previous, dbOpToIndexEntry(op)) {
+		appendToIndexQueue(op)
+	}
 }

@@ -125,6 +125,7 @@ func (registration *capabilityRegistration) browserEffectsFor(action string) (to
 }
 
 type capabilitySet struct {
+	mcpServices           []mcpService
 	definitions           []openai.Tool
 	registrations         map[string]*capabilityRegistration
 	ids                   map[string]*capabilityRegistration

@@ -553,7 +553,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			NotebookID: editorCtx.NotebookID,
 			DocumentID: editorCtx.ActiveDocID,
 		}
-		capabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+		mcpState := newMCPToolState(capabilityContext)
+		ctx = mcptools.ContextWithMCPDiscovery(ctx, mcpState.discover)
+		capabilities, capabilityErr := mcpState.build(frontendCapabilities)
 		if capabilityErr != nil {
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
@@ -933,7 +935,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			modelRound++
 
-			roundCapabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+			roundCapabilities, capabilityErr := mcpState.build(frontendCapabilities)
 			if capabilityErr != nil {
 				if !saveTurn("interrupted") {
 					return
@@ -2174,6 +2176,7 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	sb.WriteString(availableMCPSegment(capabilities))
 	if capabilities != nil && capabilities.toolRoundLimitReached {
 		sb.WriteString(toolRoundLimitPrompt)
 	}

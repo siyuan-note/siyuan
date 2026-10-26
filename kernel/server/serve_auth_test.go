@@ -54,8 +54,13 @@ func TestAuthPageActionLayout(t *testing.T) {
 		t.Fatal("OIDC-only authentication page renders remember me before the login action")
 	}
 	lockScreenPage := render(true)
+	if !strings.Contains(lockScreenPage, `<form id="authForm"`) ||
+		!strings.Contains(lockScreenPage, `autocomplete="current-password"`) ||
+		!strings.Contains(lockScreenPage, `id="authSubmit" type="submit"`) {
+		t.Fatal("authentication page omits the sign-in form markup required by password managers")
+	}
 	rememberMeIndex := strings.Index(lockScreenPage, `id="rememberMe"`)
-	if rememberMeIndex < strings.Index(lockScreenPage, `onclick="submitAuth()"`) ||
+	if rememberMeIndex < strings.Index(lockScreenPage, `id="authSubmit"`) ||
 		rememberMeIndex < strings.Index(lockScreenPage, `id="oidcLogin"`) {
 		t.Fatal("combined authentication page renders remember me before a login action")
 	}

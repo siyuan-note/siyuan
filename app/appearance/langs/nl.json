@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen",
 	"skipExitSync": "Synchronisatie overslaan en afsluiten",
 	"skipExitSyncConfirm": "De synchronisatie is nog niet voltooid. Overslaan en afsluiten? Niet-gesynchroniseerde wijzigingen blijven op dit apparaat opgeslagen",
 	"automationCollectionReference": "Verwijzingsdoel",
@@ -3470,6 +3469,7 @@
 		"440": "De limiet voor rondes met toolaanroepen is bereikt. De resterende toolaanroepen zijn niet uitgevoerd; stuur nog een bericht om door te gaan",
 		"441": "Taak voor het opnieuw opbouwen van de index van resource-inhoud ingediend; volg de voortgang bij de achtergrondtaken",
 		"442": "Index van resource-inhoud opnieuw opgebouwd",
-		"443": "Opnieuw opbouwen van de index van resource-inhoud mislukt; controleer het kernellogboek"
+		"443": "Opnieuw opbouwen van de index van resource-inhoud mislukt; controleer het kernellogboek",
+		"444": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen"
 	}
 }

@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka",
 	"skipExitSync": "Preskočiť synchronizáciu a skončiť",
 	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",
@@ -3470,6 +3469,7 @@
 		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu",
 		"441": "Úloha obnovy indexu obsahu zdrojov bola odoslaná; priebeh sledujte v úlohách na pozadí",
 		"442": "Obnova indexu obsahu zdrojov bola dokončená",
-		"443": "Obnova indexu obsahu zdrojov zlyhala; skontrolujte denník jadra"
+		"443": "Obnova indexu obsahu zdrojov zlyhala; skontrolujte denník jadra",
+		"444": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka"
 	}
 }

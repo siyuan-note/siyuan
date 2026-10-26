@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "No se pudo guardar el registro de recuperación del índice; mantén SiYuan abierto y comprueba el espacio en disco y los permisos del directorio",
 	"skipExitSync": "Omitir sincronización y salir",
 	"skipExitSyncConfirm": "La sincronización no ha terminado. ¿Omitirla y salir? Los cambios sin sincronizar permanecerán guardados en este dispositivo",
 	"automationCollectionReference": "Destino de la referencia",
@@ -3470,6 +3469,7 @@
 		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar",
 		"441": "Tarea de reconstrucción del índice de contenido de recursos enviada; consulta el progreso en las tareas en segundo plano",
 		"442": "Reconstrucción del índice de contenido de recursos completada",
-		"443": "Error al reconstruir el índice de contenido de recursos; consulta el registro del núcleo"
+		"443": "Error al reconstruir el índice de contenido de recursos; consulta el registro del núcleo",
+		"444": "No se pudo guardar el registro de recuperación del índice; mantén SiYuan abierto y comprueba el espacio en disco y los permisos del directorio"
 	}
 }

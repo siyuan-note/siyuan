@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions",
 	"skipExitSync": "Skip sync and exit",
 	"skipExitSyncConfirm": "Synchronization has not finished. Skip it and exit? Unsynced changes will remain saved on this device",
 	"automationCollectionReference": "Reference target",
@@ -3470,6 +3469,7 @@
 		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue",
 		"441": "Asset content index rebuild task submitted; follow progress in background tasks",
 		"442": "Asset content index rebuild completed",
-		"443": "Asset content index rebuild failed; check the kernel log"
+		"443": "Asset content index rebuild failed; check the kernel log",
+		"444": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions"
 	}
 }

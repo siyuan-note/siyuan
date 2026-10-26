@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório",
 	"skipExitSync": "Ignorar sincronização e sair",
 	"skipExitSyncConfirm": "A sincronização não terminou. Ignorar e sair? As alterações não sincronizadas permanecerão salvas neste dispositivo",
 	"automationCollectionReference": "Destino da referência",
@@ -3470,6 +3469,7 @@
 		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar",
 		"441": "Tarefa de reconstrução do índice de conteúdo dos recursos enviada; acompanhe o progresso nas tarefas em segundo plano",
 		"442": "Reconstrução do índice de conteúdo dos recursos concluída",
-		"443": "Falha ao reconstruir o índice de conteúdo dos recursos; verifique o log do kernel"
+		"443": "Falha ao reconstruir o índice de conteúdo dos recursos; verifique o log do kernel",
+		"444": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório"
 	}
 }

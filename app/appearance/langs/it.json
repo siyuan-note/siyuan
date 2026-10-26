@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
 	"skipExitSyncConfirm": "La sincronizzazione non è terminata. Saltarla e uscire? Le modifiche non sincronizzate rimarranno salvate su questo dispositivo",
 	"automationCollectionReference": "Destinazione del riferimento",
@@ -3470,6 +3469,7 @@
 		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare",
 		"441": "Attività di ricostruzione dell’indice del contenuto delle risorse inviata; segui l’avanzamento nelle attività in background",
 		"442": "Ricostruzione dell’indice del contenuto delle risorse completata",
-		"443": "Ricostruzione dell’indice del contenuto delle risorse non riuscita; controlla il registro del kernel"
+		"443": "Ricostruzione dell’indice del contenuto delle risorse non riuscita; controlla il registro del kernel",
+		"444": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella"
 	}
 }

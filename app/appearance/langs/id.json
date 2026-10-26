@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori",
 	"skipExitSync": "Lewati sinkronisasi dan keluar",
 	"skipExitSyncConfirm": "Sinkronisasi belum selesai. Lewati dan keluar? Perubahan yang belum disinkronkan akan tetap tersimpan di perangkat ini",
 	"automationCollectionReference": "Tujuan referensi",
@@ -3470,6 +3469,7 @@
 		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan",
 		"441": "Tugas pembangunan ulang indeks konten aset telah dikirim; pantau kemajuan di tugas latar belakang",
 		"442": "Pembangunan ulang indeks konten aset selesai",
-		"443": "Pembangunan ulang indeks konten aset gagal; periksa log kernel"
+		"443": "Pembangunan ulang indeks konten aset gagal; periksa log kernel",
+		"444": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori"
 	}
 }

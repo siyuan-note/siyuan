@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin",
 	"skipExitSync": "Eşitlemeyi atla ve çık",
 	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",
 	"automationCollectionReference": "Başvuru hedefi",
@@ -3470,6 +3469,7 @@
 		"440": "Araç çağrısı tur sınırına ulaşıldı. Kalan araç çağrıları yürütülmedi; devam etmek için başka bir mesaj gönderin",
 		"441": "Kaynak içeriği dizinini yeniden oluşturma görevi gönderildi; ilerlemeyi arka plan görevlerinden izleyin",
 		"442": "Kaynak içeriği dizininin yeniden oluşturulması tamamlandı",
-		"443": "Kaynak içeriği dizini yeniden oluşturulamadı; çekirdek günlüğünü kontrol edin"
+		"443": "Kaynak içeriği dizini yeniden oluşturulamadı; çekirdek günlüğünü kontrol edin",
+		"444": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin"
 	}
 }

@@ -1,5 +1,4 @@
 {
-	"indexRecoveryJournalWriteFailed": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire",
 	"skipExitSync": "Ignorer la synchronisation et quitter",
 	"skipExitSyncConfirm": "La synchronisation n’est pas terminée. L’ignorer et quitter ? Les modifications non synchronisées resteront enregistrées sur cet appareil",
 	"automationCollectionReference": "Cible de référence",
@@ -3470,6 +3469,7 @@
 		"440": "La limite de tours d’appels d’outils est atteinte. Les appels restants n’ont pas été exécutés ; envoyez un autre message pour continuer",
 		"441": "Tâche de reconstruction de l’index du contenu des ressources soumise ; suivez la progression dans les tâches en arrière-plan",
 		"442": "Reconstruction de l’index du contenu des ressources terminée",
-		"443": "Échec de la reconstruction de l’index du contenu des ressources ; consultez le journal du noyau"
+		"443": "Échec de la reconstruction de l’index du contenu des ressources ; consultez le journal du noyau",
+		"444": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire"
 	}
 }

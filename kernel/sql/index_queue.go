@@ -135,7 +135,7 @@ func recordIndexOperation(op *dbQueueOperation) {
 	if err := appendToIndexQueue(op); err != nil {
 		logging.LogErrorf("persist index recovery operation failed: %s", err)
 		if !indexQueueWriteFailed.Swap(true) {
-			util.PushErrMsg(util.I18nTerm(util.Lang, "indexRecoveryJournalWriteFailed"), 0)
+			util.PushErrMsg(util.Langs[util.Lang][444], 0)
 		}
 		return
 	}

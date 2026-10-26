@@ -860,7 +860,12 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 						continue
 					}
 
-					for _, tag := range attrV.([]any) {
+					values, ok := attrV.([]any)
+					if !ok {
+						logging.LogWarnf("unsupported YAML tags type [%T] in [%s]", attrV, n.ID)
+						continue
+					}
+					for _, tag := range values {
 						tagStr := fmt.Sprintf("%v", tag)
 						if "" == tag {
 							continue

@@ -19,7 +19,7 @@ export const updateProgressContent = (element: Element, message: string, current
     element.querySelector('[data-type="message"]').textContent = message;
 };
 
-export const progressLoading = (data: IWebSocketData, id = "progress") => {
+export const progressLoading = (data: IWebSocketData, id = "progress", action?: {label: string, callback: () => void}) => {
     let progressElement = document.getElementById(id);
     // 关闭时只移除对应任务的遮罩。
     if (data.code === 2) {
@@ -39,11 +39,22 @@ export const progressLoading = (data: IWebSocketData, id = "progress") => {
         updateProgressContent(progressElement.lastElementChild, data.msg, data.data.current, data.data.total);
     } else if (data.code === 1) {
         if (progressElement.lastElementChild) {
-            progressElement.lastElementChild.lastElementChild.textContent = data.msg;
+            progressElement.querySelector('[data-type="message"]').textContent = data.msg;
         } else {
             progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
 <div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
             updateProgressContent(progressElement.lastElementChild, data.msg);
         }
+    }
+    if (action && !progressElement.querySelector("button")) {
+        const footer = document.createElement("div");
+        footer.className = "b3-dialog__action";
+        const button = document.createElement("button");
+        button.className = "b3-button b3-button--text";
+        button.textContent = action.label;
+        button.addEventListener("click", action.callback);
+        footer.appendChild(button);
+        progressElement.lastElementChild.appendChild(footer);
+        button.focus({preventScroll: true});
     }
 };

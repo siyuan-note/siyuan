@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "Omitir sincronización y salir",
+	"skipExitSyncConfirm": "La sincronización no ha terminado. ¿Omitirla y salir? Los cambios sin sincronizar permanecerán guardados en este dispositivo",
 	"automationCollectionReference": "Destino de la referencia",
 	"automationCollectionReferenceTip": "Pegue un ID de bloque o enlace de bloque; las referencias del cuerpo se agrupan según las reglas de los enlaces inversos; un documento incluye sus bloques de contenido, sin los subdocumentos",
 	"newItemTemplateOpenAfterCreate": "Abrir el elemento en vista dividida después de crearlo",

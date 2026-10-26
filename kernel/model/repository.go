@@ -2321,6 +2321,13 @@ func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 }
 
 func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
+	return syncRepoWithContext(context.Background(), exit, byHand)
+}
+
+func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished bool, err error) {
+	if err = ctx.Err(); err != nil {
+		return
+	}
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2353,6 +2360,10 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	if !exit {
 		checkoutTask := startSyncCheckout(repo)
 		defer checkoutTask.finish(repo, &err)
+	} else {
+		hooks, finish := exitSyncHooks(repo, ctx)
+		repo.SetCheckoutHooks(hooks)
+		defer finish(&err)
 	}
 	start := time.Now()
 	indexStart := time.Now()

@@ -722,12 +722,17 @@ var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑�
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
-	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
+	return CloseWithContext(context.Background(), force, setCurrentWorkspace, execInstallPkg)
+}
+
+// CloseWithContext 允许请求取消退出同步，数据清理仍等待仓库操作收尾后完整执行。
+func CloseWithContext(ctx context.Context, force, setCurrentWorkspace bool, execInstallPkg int) (int, string) {
+	return closeKernel(ctx, force, setCurrentWorkspace, execInstallPkg, nil)
 }
 
 // RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，允许用户确认后跳过同步，不触发安装更新。
 func RecoverWorkspaceExit(pid int, startedAt int64, force bool) (int, string) {
-	return closeKernel(force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+	return closeKernel(context.Background(), force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
 }
 
 func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
@@ -749,7 +754,7 @@ func markPendingWorkspaceExit() {
 	}
 }
 
-func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
+func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
 	diagnostic := util.WatchOperation("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
@@ -788,16 +793,26 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
 		}
+	}
 
+	diagnostic.Stage("wait for sync operations")
+	if err := lockSyncForExit(ctx, force); err != nil {
+		exitCode = 1
+		return
+	}
+	defer unlockSync()
+	if !force {
 		if confSyncSnapshot.Enabled && 3 != confSyncSnapshot.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == confSyncSnapshot.Provider) || conf.ProviderSiYuan != confSyncSnapshot.Provider) {
 			diagnostic.Stage("exit sync")
-			if err := syncData(true, false); err != nil {
-				exitCode = 1
-				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
-					installPkgPath = getNewVerInstallPkgPath(false)
+			if checkSync(false, true, false) {
+				if err := syncDataLockedContext(ctx, true, false); err != nil {
+					exitCode = 1
+					if 1 != execInstallPkg && !skipNewVerInstallPkg() {
+						installPkgPath = getNewVerInstallPkgPath(false)
+					}
+					return
 				}
-				return
 			}
 		}
 	}
@@ -806,6 +821,10 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	if recovery != nil && util.CountSessions() > 0 {
 		return 3, ""
 	}
+
+	// 等待同步期间可能有其他窗口提交编辑，关闭数据前再次排空事务。
+	diagnostic.Stage("flush editing transactions after sync")
+	FlushTxQueue()
 
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
 	diagnostic.Stage("close user guide")

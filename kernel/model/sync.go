@@ -198,6 +198,9 @@ func bootSyncData() {
 
 	lockSync()
 	defer unlockSync()
+	if !checkSync(true, false, false) {
+		return
+	}
 
 	afterBoot := util.IsBooted()
 	if !afterBoot {
@@ -308,6 +311,10 @@ type syncRequestState struct {
 func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
 	request := state.requested.Add(1)
 	lockSync()
+	if util.IsExiting.Load() {
+		unlockSync()
+		return nil, false
+	}
 	if state.completed.Load() >= request {
 		unlockSync()
 		return nil, false
@@ -344,6 +351,15 @@ func syncData(exit, byHand bool) (err error) {
 }
 
 func syncDataLocked(exit, byHand bool) error {
+	return syncDataLockedContext(context.Background(), exit, byHand)
+}
+
+func syncDataLockedContext(ctx context.Context, exit, byHand bool) (err error) {
+	err = errors.New("sync did not complete")
+	defer logging.Recover()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if err := checkDataImportRecovery(); err != nil {
 		return err
 	}
@@ -360,7 +376,7 @@ func syncDataLocked(exit, byHand bool) error {
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
-	cloudPublished, err := syncRepoWithDNSRetry(exit, byHand)
+	cloudPublished, err := syncRepoWithDNSRetryContext(ctx, exit, byHand)
 	code := 1
 	if err != nil {
 		code = 2
@@ -374,32 +390,48 @@ func syncDataLocked(exit, byHand bool) error {
 		consumeShorthands()
 	}
 
-	completeSyncPerception(cloudPublished, err)
+	finishSyncPerception(cloudPublished, err, !exit)
 	return err
 }
 
 // completeSyncPerception 恢复感知连接，并在自动同步成功发布新版本后通知其他设备。
 func completeSyncPerception(cloudPublished bool, err error) {
+	finishSyncPerception(cloudPublished, err, true)
+}
+
+func finishSyncPerception(cloudPublished bool, err error, reconnect bool) {
+	if errors.Is(err, context.Canceled) || util.IsExiting.Load() {
+		return
+	}
 	confSyncSnapshot := Conf.LoadSync()
 
-	if nil == webSocketConn && confSyncSnapshot.Perception {
+	if reconnect && nil == webSocketConn && confSyncSnapshot.Perception {
 		// 如果 websocket 连接已经断开，则重新连接
 		connectSyncWebSocket()
 	}
 
 	if nil == err && cloudPublished && 1 == confSyncSnapshot.Mode && nil != webSocketConn && confSyncSnapshot.Perception {
+		connection := webSocketConn
+		if !reconnect {
+			// 退出只使用现有连接通知其他设备，限制写入等待，不重新连接云服务。
+			connection.SetWriteDeadline(time.Now().Add(3 * time.Second))
+			defer connection.SetWriteDeadline(time.Time{})
+		}
 		// 自动同步成功发布新云端版本后通知其他设备，纯下载不发送同步信号。
 		request := map[string]any{
 			"cmd":    "synced",
 			"synced": confSyncSnapshot.Synced,
 		}
-		if writeErr := webSocketConn.WriteJSON(request); nil != writeErr {
+		if writeErr := connection.WriteJSON(request); nil != writeErr {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
 		}
 	}
 }
 
 func checkSync(boot, exit, byHand bool) bool {
+	if util.IsExiting.Load() {
+		return false
+	}
 	if !boot && !exit && !byHand && bootSyncScheduled.Load() {
 		return false
 	}
@@ -988,7 +1020,6 @@ func formatRepoErrorMsg(err error) string {
 // dejavu/cloud 层用 fmt.Errorf 原样透传底层网络错误，因此这里用字符串匹配兜底。
 func isDNSError(msg string) bool {
 	return strings.Contains(msg, "no such host") ||
-		strings.Contains(msg, "connection failed") ||
 		strings.Contains(msg, "hostname resolution") ||
 		strings.Contains(msg, "no address associated with hostname")
 }
@@ -1003,6 +1034,9 @@ var (
 // flushAndRetryOnDNSError 在确认是 DNS 类错误且距上次刷新超过 5 分钟时，刷新系统 DNS 缓存并返回 true
 // 以触发上层重试一次同步；否则返回 false。节流是为了避免高频自动同步反复 fork 系统命令。
 func flushAndRetryOnDNSError(err error) bool {
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
 	if !isDNSError(strings.ToLower(err.Error())) {
 		return false
 	}
@@ -1023,9 +1057,13 @@ func flushAndRetryOnDNSError(err error) bool {
 // syncRepoWithDNSRetry 执行一次同步，若失败且判定为 DNS 类错误，则刷新系统 DNS 缓存后重试一次。
 // 统一封装 DNS 重试逻辑，供主同步流程（syncData）与启动后台同步复用。
 func syncRepoWithDNSRetry(exit, byHand bool) (cloudPublished bool, err error) {
-	cloudPublished, err = syncRepo(exit, byHand)
-	if nil != err && flushAndRetryOnDNSError(err) {
-		cloudPublished, err = syncRepo(exit, byHand)
+	return syncRepoWithDNSRetryContext(context.Background(), exit, byHand)
+}
+
+func syncRepoWithDNSRetryContext(ctx context.Context, exit, byHand bool) (cloudPublished bool, err error) {
+	cloudPublished, err = syncRepoWithContext(ctx, exit, byHand)
+	if nil != err && ctx.Err() == nil && flushAndRetryOnDNSError(err) {
+		cloudPublished, err = syncRepoWithContext(ctx, exit, byHand)
 	}
 	return
 }

@@ -52,8 +52,22 @@ const run = async () => {
                 assert.equal(standard.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
                 assert.ok(standard.querySelector(".b3-dialog__progress--indeterminate"));
                 progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress");
+                let skipped = 0;
+                progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress", {
+                    label:"Skip sync and exit", callback:() => skipped++,
+                });
+                const skipButton = document.querySelector("#other-progress button");
+                assert.ok(skipButton.classList.contains("b3-button"));
+                assert.equal(document.activeElement,skipButton,"exit action did not receive keyboard focus");
+                assert.equal(getComputedStyle(skipButton).backgroundColor,"rgb(90, 100, 110)");
+                skipButton.click();
+                assert.equal(skipped,1);
                 progressExports.progressLoading({code:1,msg:"<img src=y>"},"other-progress");
                 assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
+                assert.equal(document.querySelector("#other-progress button"),skipButton,"progress update replaced the exit action");
+                const skipBounds = skipButton.getBoundingClientRect();
+                assert.ok(skipBounds.left >= 0 && skipBounds.right <= innerWidth && skipBounds.bottom <= innerHeight,
+                    "exit action overflowed the progress panel");
                 assert.equal(document.querySelector("#other-progress img"),null);
                 progressExports.progressLoading({code:2},"standard-progress");
                 assert.ok(document.getElementById("other-progress"),"closing sync progress removed another task");

@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "Synchronisierung überspringen und beenden",
+	"skipExitSyncConfirm": "Die Synchronisierung ist noch nicht abgeschlossen. Überspringen und beenden? Nicht synchronisierte Änderungen bleiben auf diesem Gerät gespeichert",
 	"automationCollectionReference": "Referenzziel",
 	"automationCollectionReferenceTip": "Block-ID oder Blocklink einfügen; Blockreferenzen im Text werden nach den Rückverweisregeln gruppiert; ein Dokumentziel umfasst seine Inhaltsblöcke, aber keine Unterdokumente",
 	"newItemTemplateOpenAfterCreate": "Eintrag nach dem Erstellen automatisch in geteilter Ansicht öffnen",

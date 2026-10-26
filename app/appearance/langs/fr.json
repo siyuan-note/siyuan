@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "Ignorer la synchronisation et quitter",
+	"skipExitSyncConfirm": "La synchronisation n’est pas terminée. L’ignorer et quitter ? Les modifications non synchronisées resteront enregistrées sur cet appareil",
 	"automationCollectionReference": "Cible de référence",
 	"automationCollectionReferenceTip": "Collez un ID de bloc ou un lien de bloc ; les références du corps sont regroupées selon les règles des liens retour ; un document inclut ses blocs de contenu, sans les sous-documents",
 	"newItemTemplateOpenAfterCreate": "Ouvrir l’élément en vue scindée après sa création",

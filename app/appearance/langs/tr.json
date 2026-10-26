@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "Eşitlemeyi atla ve çık",
+	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",
 	"automationCollectionReference": "Başvuru hedefi",
 	"automationCollectionReferenceTip": "Bir blok kimliği veya blok bağlantısı yapıştırın; gövde içindeki blok başvuruları geri bağlantı kurallarına göre gruplanır; belge hedefi içerik bloklarını kapsar, alt belgeleri kapsamaz",
 	"newItemTemplateOpenAfterCreate": "Öğeyi oluşturduktan sonra bölünmüş görünümde aç",

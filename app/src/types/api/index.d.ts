@@ -8094,6 +8094,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+     * 普通退出请求断开时取消其同步或同步锁等待，不将取消报告为同步成功；已开始的数据清理仍完整执行。
+     * force 跳过本次同步，并等待活动同步取消及收尾后再关闭数据库；本地未上传数据保留。
      * 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
      * 接管默认正常同步，recoverExit.force 为 true 时跳过同步但仍执行数据清理；跳过安装提示且不修改工作空间顺序。
      * 顶层 force、execInstallPkg、setCurrentWorkspace 在接管时忽略；省略 recoverExit.force 保持正常同步。

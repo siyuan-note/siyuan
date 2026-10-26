@@ -1389,7 +1389,7 @@ var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.C
 
 var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
-var closeSystem = model.Close
+var closeSystem = model.CloseWithContext
 var recoverSystemExit = model.RecoverWorkspaceExit
 var finishSystemExit = model.ExitKernel
 
@@ -1403,7 +1403,7 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	if request.RecoverExit != nil {
 		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt, request.RecoverExit.Force)
 	} else {
-		exitCode, installPkgPath = closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+		exitCode, installPkgPath = closeSystem(c.Request.Context(), request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
 	}
 	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {

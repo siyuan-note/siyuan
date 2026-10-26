@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "Preskočiť synchronizáciu a skončiť",
+	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",
 	"automationCollectionReferenceTip": "Vložte ID bloku alebo odkaz na blok; odkazy v texte sa zoskupujú podľa pravidiel spätných odkazov; dokument zahŕňa svoje bloky obsahu, nie však podriadené dokumenty",
 	"newItemTemplateOpenAfterCreate": "Po vytvorení otvoriť položku v rozdelenom zobrazení",

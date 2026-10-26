@@ -1,4 +1,6 @@
 {
+	"skipExitSync": "略過同步並結束",
+	"skipExitSyncConfirm": "同步尚未完成，是否略過本次同步並結束？未同步的變更會保留在本機",
 	"automationCollectionReference": "引用目標",
 	"automationCollectionReferenceTip": "貼上區塊 ID 或區塊連結；僅收集正文區塊引用，依反鏈規則合併；文件目標包含內部內容區塊，不含子文件",
 	"newItemTemplateOpenAfterCreate": "建立後分割畫面開啟條目",

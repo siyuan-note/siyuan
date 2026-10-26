@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Destino de la referencia",
+	"automationCollectionReferenceTip": "Pegue un ID de bloque o enlace de bloque; las referencias del cuerpo se agrupan según las reglas de los enlaces inversos; un documento incluye sus bloques de contenido, sin los subdocumentos",
 	"newItemTemplateOpenAfterCreate": "Abrir el elemento en vista dividida después de crearlo",
 	"deleteAll": "Eliminar todo",
 	"listMindmapManageNodeColors": "Gestionar colores de nodos",

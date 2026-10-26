@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Destinazione del riferimento",
+	"automationCollectionReferenceTip": "Incolla un ID di blocco o un collegamento al blocco; i riferimenti nel corpo vengono raggruppati secondo le regole dei collegamenti inversi; un documento include i suoi blocchi di contenuto, esclusi i documenti secondari",
 	"newItemTemplateOpenAfterCreate": "Apri l’elemento in vista divisa dopo la creazione",
 	"deleteAll": "Elimina tutto",
 	"listMindmapManageNodeColors": "Gestisci i colori dei nodi",

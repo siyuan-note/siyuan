@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Verwijzingsdoel",
+	"automationCollectionReferenceTip": "Plak een blok-ID of bloklink; blokverwijzingen in de tekst worden gegroepeerd volgens de teruglinkregels; een documentdoel omvat zijn inhoudsblokken, maar geen subdocumenten",
 	"newItemTemplateOpenAfterCreate": "Item na aanmaken in gesplitste weergave openen",
 	"deleteAll": "Alles verwijderen",
 	"listMindmapManageNodeColors": "Knoopkleuren beheren",

@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Cieľ odkazu",
+	"automationCollectionReferenceTip": "Vložte ID bloku alebo odkaz na blok; odkazy v texte sa zoskupujú podľa pravidiel spätných odkazov; dokument zahŕňa svoje bloky obsahu, nie však podriadené dokumenty",
 	"newItemTemplateOpenAfterCreate": "Po vytvorení otvoriť položku v rozdelenom zobrazení",
 	"deleteAll": "Odstrániť všetko",
 	"listMindmapManageNodeColors": "Spravovať farby uzlov",

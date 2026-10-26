@@ -34,6 +34,7 @@ func TestBlockCollectionEncryptedSourceAndRecovery(t *testing.T) {
 		t.Run(mode, func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "", nil, mode, false) })
 	}
 	t.Run("exclude selected document", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "", new(1), "", true) })
+	t.Run("reference", func(t *testing.T) { testBlockCollectionEncryptedSourceAndRecovery(t, "reference", nil, "", false) })
 }
 
 func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, depth *int, nameOperator string, excludeSelf bool) {
@@ -87,6 +88,13 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, 
 		view.Automations.Rules[0].BlockSource.TagTarget = target
 		paragraph := treenode.NewParagraph("")
 		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: "todo"})
+		if target == "reference" {
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: tree.ID,
+				TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Target"})
+			view.Automations.Spec = 8
+			view.Automations.Rules[0].BlockSource.ReferenceID = tree.ID
+			view.Automations.Rules[0].BlockSource.TagTarget = ""
+		}
 		if target == "container" {
 			quote := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockquote}
 			quote.SetIALAttr("id", quote.ID)
@@ -131,6 +139,14 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, 
 	if excludeSelf {
 		view.Automations.Spec = 7
 		view.Automations.Rules[0].BlockSource.IncludeSelectedDocuments = new(false)
+	}
+	if target == "reference" {
+		source := view.Automations.Rules[0].BlockSource
+		source.ReferenceID = fixture.targetID
+		if err := (&Transaction{}).validateBlockCollectionRule(view, view.Automations.Rules[0], boxID); err == nil {
+			t.Fatal("encrypted collection accepted a target from the normal index")
+		}
+		source.ReferenceID = tree.ID
 	}
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)

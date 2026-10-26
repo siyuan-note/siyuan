@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "参照先",
+	"automationCollectionReferenceTip": "ブロック ID またはブロックリンクを貼り付けてください。本文中のブロック参照をバックリンクと同じ規則でまとめます。文書を指定すると内部のブロックも対象になり、子文書は含まれません",
 	"newItemTemplateOpenAfterCreate": "作成後に項目を分割表示で開く",
 	"deleteAll": "すべて削除",
 	"listMindmapManageNodeColors": "ノードの色を管理",

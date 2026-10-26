@@ -36,6 +36,7 @@ type AutomationBlockSource struct {
 	IncludeSelectedDocuments *bool                       `json:"includeSelectedDocuments,omitempty"`
 	Types                    []string                    `json:"types,omitempty"`
 	Tags                     []string                    `json:"tags,omitempty"`
+	ReferenceID              string                      `json:"referenceID,omitempty"`
 	Attributes               []*AutomationBlockAttribute `json:"attributes,omitempty"`
 	TagMatch                 string                      `json:"tagMatch,omitempty"`
 	TagTarget                string                      `json:"tagTarget,omitempty"`
@@ -94,6 +95,9 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.ReferenceID != "" {
+			return 8
+		}
 		if rule.BlockSource.IncludeSelectedDocuments != nil && !*rule.BlockSource.IncludeSelectedDocuments {
 			return 7
 		}
@@ -134,7 +138,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 7 {
+	if config.Spec < 1 || config.Spec > 8 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

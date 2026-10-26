@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Цель ссылки",
+	"automationCollectionReferenceTip": "Вставьте ID блока или ссылку на блок; ссылки в основном тексте группируются по правилам обратных ссылок; документ включает свои блоки содержимого, но не дочерние документы",
 	"newItemTemplateOpenAfterCreate": "Открывать элемент в разделённом представлении после создания",
 	"deleteAll": "Удалить всё",
 	"listMindmapManageNodeColors": "Управление цветами узлов",

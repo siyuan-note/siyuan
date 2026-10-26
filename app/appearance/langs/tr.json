@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Başvuru hedefi",
+	"automationCollectionReferenceTip": "Bir blok kimliği veya blok bağlantısı yapıştırın; gövde içindeki blok başvuruları geri bağlantı kurallarına göre gruplanır; belge hedefi içerik bloklarını kapsar, alt belgeleri kapsamaz",
 	"newItemTemplateOpenAfterCreate": "Öğeyi oluşturduktan sonra bölünmüş görünümde aç",
 	"deleteAll": "Tümünü sil",
 	"listMindmapManageNodeColors": "Düğüm renklerini yönet",

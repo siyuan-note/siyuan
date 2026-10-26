@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "יעד ההפניה",
+	"automationCollectionReferenceTip": "יש להדביק מזהה בלוק או קישור לבלוק; הפניות לבלוקים בגוף התוכן נאספות לפי כללי הקישורים החוזרים; יעד מסוג מסמך כולל את בלוקי התוכן שלו, ללא מסמכי משנה",
 	"newItemTemplateOpenAfterCreate": "פתיחת הפריט בתצוגה מפוצלת לאחר יצירתו",
 	"deleteAll": "מחיקת הכול",
 	"listMindmapManageNodeColors": "ניהול צבעי צמתים",

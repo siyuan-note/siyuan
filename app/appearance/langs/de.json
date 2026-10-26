@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Referenzziel",
+	"automationCollectionReferenceTip": "Block-ID oder Blocklink einfügen; Blockreferenzen im Text werden nach den Rückverweisregeln gruppiert; ein Dokumentziel umfasst seine Inhaltsblöcke, aber keine Unterdokumente",
 	"newItemTemplateOpenAfterCreate": "Eintrag nach dem Erstellen automatisch in geteilter Ansicht öffnen",
 	"deleteAll": "Alle löschen",
 	"listMindmapManageNodeColors": "Knotenfarben verwalten",

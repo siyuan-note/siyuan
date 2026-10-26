@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Tujuan referensi",
+	"automationCollectionReferenceTip": "Tempel ID blok atau tautan blok; referensi blok dalam isi dikumpulkan menurut aturan tautan balik; tujuan dokumen mencakup blok isinya tanpa subdokumen",
 	"newItemTemplateOpenAfterCreate": "Buka item dalam tampilan terbagi setelah dibuat",
 	"deleteAll": "Hapus semua",
 	"listMindmapManageNodeColors": "Kelola warna simpul",

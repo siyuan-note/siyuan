@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "เป้าหมายการอ้างอิง",
+	"automationCollectionReferenceTip": "วาง ID บล็อกหรือลิงก์บล็อก การอ้างอิงบล็อกในเนื้อหาจะจัดกลุ่มตามกฎลิงก์ย้อนกลับ หากเลือกเอกสารจะรวมบล็อกเนื้อหาภายใน แต่ไม่รวมเอกสารย่อย",
 	"newItemTemplateOpenAfterCreate": "เปิดรายการในมุมมองแบบแบ่งหลังจากสร้าง",
 	"deleteAll": "ลบทั้งหมด",
 	"listMindmapManageNodeColors": "จัดการสีโหนด",

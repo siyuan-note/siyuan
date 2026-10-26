@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "هدف المرجع",
+	"automationCollectionReferenceTip": "الصق معرّف كتلة أو رابط كتلة؛ تُجمع مراجع الكتل في المتن وفق قواعد الروابط الخلفية؛ يشمل هدف المستند كتل محتواه دون المستندات الفرعية",
 	"newItemTemplateOpenAfterCreate": "فتح العنصر في عرض مقسّم بعد إنشائه",
 	"deleteAll": "حذف الكل",
 	"listMindmapManageNodeColors": "إدارة ألوان العقد",

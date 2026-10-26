@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261025205717"
+		"updated": "20261026103001"
 	},
 	"Children": [
 		{
@@ -4125,7 +4125,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261024164212"
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
@@ -4956,7 +4956,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261024164212"
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
@@ -4970,7 +4970,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-6bomil1",
-				"updated": "20261024164212"
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
@@ -5117,6 +5117,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "Excluding selected documents requires automation format 7; existing formats 1–6 remain readable, and older clients reject format 7 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261026103001-3cdya4m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026103001-3cdya4m",
+				"updated": "20261026103001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To collect block references, select a reference target and paste its block ID or block link, or choose Current document. The target is saved as a fixed block ID shared by all database mirrors. A document target includes references to its internal content blocks, but not its child documents. Only body block references are included; ordinary links, embeds and references in database rich-text fields are excluded."
+				}
+			]
+		},
+		{
+			"ID": "20261026103001-47dxurt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026103001-47dxurt",
+				"updated": "20261026103001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Removing a reference preserves existing entries and fields; preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
 				}
 			]
 		},

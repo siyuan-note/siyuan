@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "참조 대상",
+	"automationCollectionReferenceTip": "블록 ID 또는 블록 링크를 붙여넣으세요. 본문의 블록 참조는 백링크 규칙에 따라 묶이며, 문서를 대상으로 지정하면 내부 콘텐츠 블록도 포함하지만 하위 문서는 제외합니다",
 	"newItemTemplateOpenAfterCreate": "생성 후 항목을 분할 화면으로 열기",
 	"deleteAll": "모두 삭제",
 	"listMindmapManageNodeColors": "노드 색상 관리",

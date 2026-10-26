@@ -260,9 +260,9 @@ export type AVAutomationBlockAttribute = { "name": string; "nameOperator"?: "" |
 
 export type AVAutomationBlockAttributeInput = { "name": string; "nameOperator"?: "" | "equals" | "contains" | "regex"; "operator": "equals" | "contains" | "exists" | "notExists"; "value"?: string; };
 
-export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSource = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttribute | null>; "documentDepth"?: number; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean; "notebookIDs"?: Array<string>; "referenceID"?: string; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
-export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean | null; "notebookIDs"?: Array<string>; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
+export type AVAutomationBlockSourceInput = { "attributeMatch"?: "" | "and" | "or"; "attributes"?: Array<AVAutomationBlockAttributeInput | null>; "documentDepth"?: number | null; "documentIDs"?: Array<string>; "includeSelectedDocuments"?: boolean | null; "notebookIDs"?: Array<string>; "referenceID"?: string; "tagMatch"?: "" | "and" | "or"; "tagTarget"?: "" | "block" | "container"; "tags"?: Array<string>; "types"?: Array<string>; };
 
 export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": number; };
 
@@ -8563,13 +8563,15 @@ export interface APIPOSTRoutes {
     /**
      * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
      * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
-     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 7，所有视图共享数据库级规则。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1 至 8，所有视图共享数据库级规则。
      * blockSource.types 主类型包含全部子类型；spec 3 可指定 h:h1 至 h:h6、l:u/o/t、i:u/o/t、callout:类型名。
      * blockSource 的 tagMatch、attributeMatch 缺省为 and；spec 3 支持各组独立设置 or，空组不限制，组间仍为 and。
      * spec 4 的 blockSource.tagTarget 支持 block（标签所在块）和 container（最近合格容器），缺省保持原行为。
      * spec 5 的 blockSource.documentDepth 限制各文档范围的子文档深度，0 仅自身，1 包含自身及一级子文档。
      * spec 6 的属性 nameOperator 支持 contains 和 Go regex；缺省或 equals 保持精确名称匹配，值条件独立。
      * spec 7 支持 blockSource.includeSelectedDocuments=false，排除所选文档及其内部块，子文档仍按深度匹配；缺省、null 或 true 保持包含自身。
+     * spec 8 的 blockSource.referenceID 匹配正文块引用；文档目标包含内部内容块，不含子文档、嵌入或数据库字段引用。
+     * 引用来源按反链规则归并后匹配类型和属性，标签条件约束同一来源块，tagTarget 不参与选择；目标须在同一加密边界。
      * 排除自身不影响其他范围的并集；与 documentDepth=0 组合时对应文档范围为空。配置变更保留条目和字段，不自动补收或清理。
      * 深度缺省或 null 不限，不影响笔记本范围，各范围仍取并集；修改不自动清理或补收已有内容。
      * 容器按类型及属性条件选择并去重；全部标签须在同一个来源块中，文档容器须显式选择 d。

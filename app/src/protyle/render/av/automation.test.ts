@@ -11,7 +11,7 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/automation.
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
 }).outputText;
 
-test("collection autosave versions document depth, attribute names and self exclusion with independent undo snapshots", async () => {
+test("collection autosave versions document depth, attribute names, self exclusion and references with independent undo snapshots", async () => {
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     let source: AVAutomationBlockSourceInput;
     let save: () => void;
@@ -83,6 +83,17 @@ test("collection autosave versions document depth, attribute names and self excl
     assert.equal(included.perform[0].data.spec, 7);
     assert.equal(included.perform[0].data.rules[0].blockSource.includeSelectedDocuments, undefined);
     assert.deepEqual(included.undo, excluded.perform);
+    source.referenceID = "20261026000000-target1";
+    save();
+    const referenced = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(referenced.perform[0].data.spec, 8);
+    assert.equal(referenced.perform[0].data.rules[0].blockSource.referenceID, source.referenceID);
+    assert.deepEqual(referenced.undo, included.perform);
+    delete source.referenceID;
+    save();
+    const cleared = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(cleared.perform[0].data.spec, 8);
+    assert.equal(cleared.perform[0].data.rules[0].blockSource.referenceID, undefined);
 });
 
 test("automation settings reject readonly, publishing and historical editors before fetching data", async () => {

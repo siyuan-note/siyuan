@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Cel odwołania",
+	"automationCollectionReferenceTip": "Wklej ID bloku lub łącze do bloku; odwołania w treści są grupowane według reguł linków zwrotnych; dokument obejmuje swoje bloki treści, bez dokumentów podrzędnych",
 	"newItemTemplateOpenAfterCreate": "Otwórz element w podzielonym widoku po utworzeniu",
 	"deleteAll": "Usuń wszystko",
 	"listMindmapManageNodeColors": "Zarządzaj kolorami węzłów",

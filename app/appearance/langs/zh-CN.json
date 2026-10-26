@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "引用目标",
+	"automationCollectionReferenceTip": "粘贴块 ID 或块链接；仅收集正文块引用，按反链规则归并；文档目标包含其内部内容块，不含子文档",
 	"newItemTemplateOpenAfterCreate": "创建后分屏打开条目",
 	"deleteAll": "全部删除",
 	"listMindmapManageNodeColors": "管理节点配色",

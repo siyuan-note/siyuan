@@ -1,4 +1,6 @@
 {
+	"automationCollectionReference": "Reference target",
+	"automationCollectionReferenceTip": "Paste a block ID or block link; body block references are collected using backlink grouping; a document target includes its content blocks, excluding child documents",
 	"newItemTemplateOpenAfterCreate": "Open item in split view after creation",
 	"deleteAll": "Delete all",
 	"listMindmapManageNodeColors": "Manage node colors",

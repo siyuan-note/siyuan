@@ -6776,6 +6776,9 @@
             "type": "string"
           }
         },
+        "referenceID": {
+          "type": "string"
+        },
         "tagMatch": {
           "type": "string",
           "enum": [
@@ -6862,6 +6865,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "referenceID": {
+          "type": "string"
         },
         "tagMatch": {
           "type": "string",

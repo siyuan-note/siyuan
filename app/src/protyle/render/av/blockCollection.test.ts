@@ -44,6 +44,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         "../../../util/escape": {escapeAttr: String, escapeHtml: String},
         "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: "/Selected document"})},
         "./collectionConditions": {mountCollectionConditions() {}},
+        "./collectionReference": {mountCollectionReference() {}},
         "../../../util/pathName": {movePathTo: (options: {cb: typeof addScope}) => { addScope = options.cb; }},
         "../../../menus/menuToggle": {toggleMenu: (options: {build: () => void, show: () => void}) => { options.build(); options.show(); }},
         "../../../plugin/Menu": {Menu: class {

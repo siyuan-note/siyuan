@@ -1,7 +1,7 @@
 package apicontract
 
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1 至 7；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// spec 为 1 至 8；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
 // 属性名包含或正则匹配至少使用 6；缺省或 equals 保持既有的精确匹配。
 // 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
@@ -51,6 +51,11 @@ type AVAutomationRule struct {
 // 仅从不匹配变为匹配时收集，原条目不会重置；原文失配、修改条件、停用或删除规则均保留已有条目和字段。
 // 既有条目再次匹配时仍保留其字段；主动移出条目后再次匹配才新建并初始化，撤销重做恢复原事务快照。
 // 配置变更、启用规则、导入、同步和历史恢复不补收存量内容，也不串联触发其他自动化。
+// referenceID 非空时要求 spec 8，匹配正文中指向该块的块引用；目标为文档时也匹配其内部块，不含子文档。
+// 不包含嵌入块、普通超链接和数据库富文本字段引用；标签条件约束同一引用来源块。
+// 引用来源按反链的父块归并规则选择并去重，再用类型和属性约束最终对象；此时 tagTarget 不参与选择。
+// 引用目标须位于数据库的同一加密边界；移除引用或更改目标保留已有条目和字段，存量内容通过预览显式补收。
+// 引用目标失效时，后续来源修改会停用规则并保留条目和字段，不阻止原文编辑；修复后须手动启用。
 type AVAutomationBlockSource struct {
 	NotebookIDs              []string                      `json:"notebookIDs,omitempty" api:"optional"`
 	DocumentIDs              []string                      `json:"documentIDs,omitempty" api:"optional"`
@@ -58,6 +63,7 @@ type AVAutomationBlockSource struct {
 	IncludeSelectedDocuments *bool                         `json:"includeSelectedDocuments,omitempty" api:"optional"`
 	Types                    []string                      `json:"types,omitempty" api:"optional"`
 	Tags                     []string                      `json:"tags,omitempty" api:"optional"`
+	ReferenceID              string                        `json:"referenceID,omitempty" api:"optional"`
 	Attributes               []*AVAutomationBlockAttribute `json:"attributes,omitempty" api:"optional"`
 	TagMatch                 string                        `json:"tagMatch,omitempty" api:"optional,enum=|and|or"`
 	TagTarget                string                        `json:"tagTarget,omitempty" api:"optional,enum=|block|container"`

@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -82,6 +83,13 @@ func TestWidgetPublishReaderRefusesSensitiveFile(t *testing.T) {
 		return recorder
 	}
 
+	t.Run("reader short filename", func(t *testing.T) {
+		short := filepath.Base(testutil.ShortPath(t, filepath.Join(widgetDir, "credentials.json")))
+		recorder := request(model.RoleReader, "/widgets/example/"+short)
+		if recorder.Code != http.StatusForbidden || recorder.Body.Len() != 0 {
+			t.Fatalf("sensitive widget alias %s: status = %d, body = %q", short, recorder.Code, recorder.Body.String())
+		}
+	})
 	for _, role := range []model.Role{model.RoleReader, model.RoleAdministrator} {
 		for _, requestPath := range []string{"/widgets/example/credentials.json", "/widgets/example/id_token"} {
 			recorder := request(role, requestPath)
@@ -98,23 +106,25 @@ func TestWidgetPublishReaderRefusesSensitiveFile(t *testing.T) {
 // TestPluginPublishReaderRefusesSensitiveFile 验证发布读者不能经静态路由读取插件包中的敏感文件。
 func TestPluginPublishReaderRefusesSensitiveFile(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	previousData, previousConf := util.DataDir, model.Conf
-	util.DataDir = t.TempDir()
+	previousWorkspace, previousData, previousConf := util.WorkspaceDir, util.DataDir, model.Conf
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	model.Conf.Lang = "en"
-	t.Cleanup(func() { util.DataDir, model.Conf = previousData, previousConf })
+	t.Cleanup(func() { util.WorkspaceDir, util.DataDir, model.Conf = previousWorkspace, previousData, previousConf })
 
 	pluginDir := filepath.Join(util.DataDir, "plugins", "example")
-	if err := os.MkdirAll(pluginDir, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(pluginDir, "resources"), 0755); err != nil {
 		t.Fatal(err)
 	}
 	files := map[string]string{
-		"plugin.json":      `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json"]}}`,
-		"index.js":         "frontend",
-		"logo.txt":         "logo",
-		"credentials.json": "API_TOKEN=secret",
+		"plugin.json":                `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json","resources/"]}}`,
+		"index.js":                   "frontend",
+		"logo.txt":                   "logo",
+		"credentials.json":           "API_TOKEN=secret",
+		"resources/credentials.json": "API_TOKEN=nested-secret",
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(pluginDir, name), []byte(content), 0644); err != nil {
@@ -137,6 +147,13 @@ func TestPluginPublishReaderRefusesSensitiveFile(t *testing.T) {
 		return recorder
 	}
 
+	t.Run("reader short filename in declared directory", func(t *testing.T) {
+		short := filepath.Base(testutil.ShortPath(t, filepath.Join(pluginDir, "resources", "credentials.json")))
+		recorder := request(model.RoleReader, "/plugins/example/resources/"+short)
+		if recorder.Code != http.StatusForbidden || recorder.Body.Len() != 0 {
+			t.Fatalf("sensitive plugin alias %s: status = %d, body = %q", short, recorder.Code, recorder.Body.String())
+		}
+	})
 	for _, role := range []model.Role{model.RoleReader, model.RoleAdministrator} {
 		if recorder := request(role, "/plugins/example/credentials.json"); recorder.Code != http.StatusForbidden || recorder.Body.Len() != 0 {
 			t.Fatalf("%v sensitive plugin resource: status = %d, body = %q", role, recorder.Code, recorder.Body.String())

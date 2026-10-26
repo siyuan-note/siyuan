@@ -14,6 +14,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -77,6 +78,16 @@ func TestOpenPublishPackageFileRejectsSensitiveWidgetResource(t *testing.T) {
 			t.Fatalf("sensitive %s: handled = %v, err = %v, want permission denied", requestPath, handled, err)
 		}
 	}
+	t.Run("short filename", func(t *testing.T) {
+		short := filepath.Base(testutil.ShortPath(t, filepath.Join(widgetDir, "credentials.json")))
+		file, handled, err := OpenPublishPackageFile(c, "/data/widgets/example/"+short)
+		if file != nil {
+			file.Close()
+		}
+		if !handled || !errors.Is(err, fs.ErrPermission) {
+			t.Fatalf("sensitive widget alias %s: handled = %v, err = %v", short, handled, err)
+		}
+	})
 
 	file, handled, err := OpenPublishPackageFile(c, "/data/widgets/example/index.html")
 	if err != nil || !handled {
@@ -91,23 +102,25 @@ func TestOpenPublishPackageFileRejectsSensitiveWidgetResource(t *testing.T) {
 
 // TestOpenPublishPackageFileRejectsSensitivePluginResource 验证发布读者经文件接口读取插件包时先拒绝敏感文件名。
 func TestOpenPublishPackageFileRejectsSensitivePluginResource(t *testing.T) {
-	originalDataDir, originalConf := util.DataDir, Conf
-	util.DataDir = t.TempDir()
+	originalWorkspace, originalDataDir, originalConf := util.WorkspaceDir, util.DataDir, Conf
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	Conf = NewAppConf()
 	Conf.Sync.Store(conf.NewSync())
 	Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	Conf.Lang = "en"
-	t.Cleanup(func() { util.DataDir, Conf = originalDataDir, originalConf })
+	t.Cleanup(func() { util.WorkspaceDir, util.DataDir, Conf = originalWorkspace, originalDataDir, originalConf })
 
 	pluginDir := filepath.Join(util.DataDir, "plugins", "example")
-	if err := os.MkdirAll(pluginDir, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(pluginDir, "resources"), 0755); err != nil {
 		t.Fatal(err)
 	}
 	files := map[string]string{
-		"plugin.json":      `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json"]}}`,
-		"index.js":         "frontend",
-		"logo.txt":         "logo",
-		"credentials.json": "API_TOKEN=secret",
+		"plugin.json":                `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json","resources/"]}}`,
+		"index.js":                   "frontend",
+		"logo.txt":                   "logo",
+		"credentials.json":           "API_TOKEN=secret",
+		"resources/credentials.json": "API_TOKEN=nested-secret",
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(pluginDir, name), []byte(content), 0644); err != nil {
@@ -127,6 +140,16 @@ func TestOpenPublishPackageFileRejectsSensitivePluginResource(t *testing.T) {
 	if !handled || !errors.Is(err, fs.ErrPermission) {
 		t.Fatalf("sensitive plugin resource: handled = %v, err = %v, want permission denied", handled, err)
 	}
+	t.Run("short filename in declared directory", func(t *testing.T) {
+		short := filepath.Base(testutil.ShortPath(t, filepath.Join(pluginDir, "resources", "credentials.json")))
+		file, handled, err := OpenPublishPackageFile(c, "/data/plugins/example/resources/"+short)
+		if file != nil {
+			file.Close()
+		}
+		if !handled || !errors.Is(err, fs.ErrPermission) {
+			t.Fatalf("sensitive plugin alias %s: handled = %v, err = %v", short, handled, err)
+		}
+	})
 
 	file, handled, err = OpenPublishPackageFile(c, "/data/plugins/example/logo.txt")
 	if err != nil || !handled {

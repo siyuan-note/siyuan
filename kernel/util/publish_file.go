@@ -72,7 +72,7 @@ func OpenPublishFile(rootPath, name string) (*os.File, error) {
 	return file, nil
 }
 
-// OpenPublishReaderFile 打开读者可见的包资源：先执行敏感文件名策略，再进入包内约束读取。
+// OpenPublishReaderFile 打开读者可见的包资源，并在读取前检查请求路径和已打开文件的敏感性。
 // data/public 按设计公开，仍直接使用 OpenPublishFile，不经过本函数。
 func OpenPublishReaderFile(rootPath, name string) (*os.File, error) {
 	if !IsPublishRelativePath(name) {
@@ -81,5 +81,13 @@ func OpenPublishReaderFile(rootPath, name string) (*os.File, error) {
 	if IsSensitivePath(filepath.Join(rootPath, filepath.FromSlash(name))) {
 		return nil, fs.ErrPermission
 	}
-	return OpenPublishFile(rootPath, name)
+	file, err := OpenPublishFile(rootPath, name)
+	if err != nil {
+		return nil, err
+	}
+	if err = checkPublishReaderFile(file); err != nil {
+		file.Close()
+		return nil, err
+	}
+	return file, nil
 }

@@ -66,7 +66,11 @@ func ResolveRealPath(path string) (string, error) {
 	defer func() {
 		_ = windows.CloseHandle(handle)
 	}()
+	return resolveHandlePath(handle)
+}
 
+// resolveHandlePath 从现有句柄获取规范化长路径，避免重新按请求路径打开文件。
+func resolveHandlePath(handle windows.Handle) (string, error) {
 	buffer := make([]uint16, 512)
 	for {
 		length, callErr := windows.GetFinalPathNameByHandle(handle, &buffer[0], uint32(len(buffer)), 0)

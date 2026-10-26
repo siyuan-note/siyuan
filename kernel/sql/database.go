@@ -561,6 +561,13 @@ func SetIndexAssetPath(b bool) {
 	indexAssetPath.Store(b)
 }
 
+// TreeHasRefs uses the same extraction as normal indexing, including rich
+// inline titles, attribute views and embedded references.
+func TreeHasRefs(tree *parse.Tree) bool {
+	refs, annotations := refsFromTree(tree)
+	return len(refs) > 0 || len(annotations) > 0
+}
+
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
 	treenode.WalkWithInlineTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {

@@ -74,6 +74,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             finished: 0,
             saves: [] as string[],
             additions: [] as string[],
+            listInputs: [] as import("./listInput").ListMindmapListInput[],
             messages: [] as string[],
             accept: true,
             flush: async (): Promise<void> => undefined,
@@ -190,6 +191,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             canEdit: () => element.isConnected,
             onResize: noop,
             onAdd: async (kind: string) => { state.additions.push(kind); },
+            onListInput: async (input: import("./listInput").ListMindmapListInput) => { state.listInputs.push(input); },
             isPanTarget: (event: PointerEvent) => event.target === state.panTarget,
             onFinish: () => state.finished++,
             onUndo: noop,
@@ -219,7 +221,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     };
     window.siyuan = {
         languages: {listMindmapStale: "Content changed", listMindmapUnsupported: "Unsupported"},
-        config: {keymap: {editor: {
+        config: {editor: {markdown: {codeBlockMiddleDot: true}}, keymap: {editor: {
             general: {
                 undo: "undo", redo: "redo",
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
@@ -231,6 +233,108 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             },
         }}},
     } as unknown as typeof window.siyuan;
+
+    // 普通段落与软键盘回车走同一节点拆分路径；保留富文本、后续块和原生编辑边界。
+    const listParagraph = '<div data-type="NodeParagraph" data-node-id="paragraph"><div contenteditable="true"><span data-type="strong">AlphaBeta</span></div></div>';
+    for (const softKeyboard of [false, true]) {
+        const current = create(listParagraph + '<div data-type="NodeParagraph" data-node-id="second"><div contenteditable="true">Second</div></div>');
+        const editable = current.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+        const range = document.createRange();
+        range.setStart(editable.firstChild.firstChild, 5);
+        range.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        const event = softKeyboard ? new InputEvent("beforeinput", {inputType: "insertParagraph", bubbles: true, cancelable: true}) :
+            new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+        editable.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+        check.equal(current.state.listInputs.length, 1);
+        check.equal(current.state.listInputs[0].kind, "split");
+        check.match(current.state.listInputs[0].before, /<span data-type="strong">Alpha<\/span>/);
+        check.match(current.state.listInputs[0].after, /<span data-type="strong">Beta<\/span>/);
+        check.match(current.state.listInputs[0].after, /data-node-id="second"/);
+        check.equal(editable.textContent, "AlphaBeta", "planning does not mutate unsaved text");
+        await current.remove();
+    }
+    for (const [key, shift, offset, expected] of [
+        ["Enter", false, 0, "before"], ["Enter", false, 9, "split"],
+        ["Tab", false, 3, "indent"], ["Tab", true, 3, "outdent"],
+        ["Backspace", false, 0, "mergePrevious"], ["Delete", false, 9, "mergeNext"],
+        ["Enter", true, 5, undefined], ["Backspace", false, 5, undefined], ["Delete", true, 9, undefined],
+    ] as const) {
+        const current = create(listParagraph);
+        const editable = current.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+        const range = document.createRange();
+        range.setStart(editable.firstChild.firstChild, offset);
+        range.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        const event = new KeyboardEvent("keydown", {key, shiftKey: shift, bubbles: true, cancelable: true});
+        editable.dispatchEvent(event);
+        check.equal(current.state.listInputs[0]?.kind, expected, `${key} shift=${shift} offset=${offset}`);
+        check.equal(event.defaultPrevented, !!expected);
+        await current.remove();
+    }
+    for (const boundary of ["code-block", "table", "av", "protyle-wysiwyg__embed", "hint", "composition"]) {
+        const current = create(listParagraph);
+        const editable = current.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        range.collapse(false);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        if (boundary === "hint") current.hintElement.classList.remove("fn__none");
+        else if (boundary !== "composition") editable.classList.add(boundary);
+        const event = new KeyboardEvent("keydown", {key: "Enter", isComposing: boundary === "composition", bubbles: true, cancelable: true});
+        editable.dispatchEvent(event);
+        check.equal(event.defaultPrevented, false, boundary);
+        check.equal(current.state.listInputs.length, 0, boundary);
+        await current.remove();
+    }
+    for (const [inputType, offset, expected] of [
+        ["deleteContentBackward", 0, "mergePrevious"], ["deleteContentForward", 9, "mergeNext"],
+    ] as const) {
+        const current = create(listParagraph);
+        const editable = current.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+        const range = document.createRange();
+        range.setStart(editable.firstChild.firstChild, offset);
+        range.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        editable.dispatchEvent(new InputEvent("beforeinput", {inputType, bubbles: true, cancelable: true}));
+        check.equal(current.state.listInputs[0].kind, expected);
+        await current.remove();
+    }
+    const customized = create(listParagraph);
+    const originalChildShortcut = window.siyuan.config.keymap.editor.list.mindmapAddChild.custom;
+    window.siyuan.config.keymap.editor.list.mindmapAddChild.custom = "↩";
+    const customizedEditable = customized.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+    const customizedRange = document.createRange();
+    customizedRange.selectNodeContents(customizedEditable);
+    customizedRange.collapse(false);
+    getSelection().removeAllRanges();
+    getSelection().addRange(customizedRange);
+    customizedEditable.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    await until(() => customized.state.additions.length === 1);
+    check.deepEqual(customized.state.additions, ["child"], "a configured plain Enter shortcut takes precedence over node splitting");
+    check.equal(customized.state.listInputs.length, 0);
+    window.siyuan.config.keymap.editor.list.mindmapAddChild.custom = originalChildShortcut;
+    await customized.remove();
+    for (const marker of ["```js", "~~~go", "···"]) {
+        const current = create('<div data-type="NodeParagraph" data-node-id="paragraph"><div contenteditable="true"></div></div>');
+        const editable = current.wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+        editable.textContent = marker;
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        range.collapse(false);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        const event = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+        editable.dispatchEvent(event);
+        check.equal(event.defaultPrevented, false, "code fences reach the existing Markdown conversion");
+        check.equal(current.state.listInputs.length, 0);
+        await current.remove();
+    }
 
     // 节点编辑器透传未处理的组合快捷键，已消费的编辑操作和组合输入仍保持隔离。
     const shortcutEditor = create();
@@ -854,7 +958,8 @@ test("list mindmap editor flushes pending input and preserves text across finish
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-editor-test-"));
     const script = path.join(temporary, "run.cjs");
-    const source = transpileModule(readFileSync(path.join(__dirname, "editor.ts"), "utf8")
+    const source = transpileModule(["../../wysiwyg/codeBlockEnter.ts", "editor.ts"]
+        .map(file => readFileSync(path.join(__dirname, file), "utf8")).join("\n")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;

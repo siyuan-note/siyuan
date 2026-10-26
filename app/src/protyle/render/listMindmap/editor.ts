@@ -20,8 +20,10 @@ import {blockRender} from "../blockRender";
 import {highlightRender} from "../highlightRender";
 import {cleanListMindmapHTML} from "./model";
 import type {ListMindmapNode} from "./model";
+import type {ListMindmapListInput} from "./listInput";
 import {finishListMindmaps} from "./index";
 import {getUndoFocusContext, restoreFocusContext} from "../../util/selection";
+import {canEnterCodeBlock} from "../../wysiwyg/codeBlockEnter";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
@@ -32,6 +34,7 @@ interface ListMindmapEditorOptions {
     onSave: (html: string, undoSelection?: Record<string, string>, redoSelection?: Record<string, string>) => Promise<boolean>;
     onResize: () => void;
     onAdd: (kind: "child" | "sibling") => Promise<void>;
+    onListInput: (input: ListMindmapListInput, selection?: Record<string, string>) => Promise<void>;
     onFinish: () => void;
     onUndo: (redo: boolean, selection?: Record<string, string>) => void;
     isPanTarget?: (event: PointerEvent) => boolean;
@@ -101,6 +104,53 @@ const matchesCustomizedEditorShortcut = (event: KeyboardEvent) => {
         matched = getKeymapBindings(item).some(key => !defaults.includes(key) && matchHotKey(key, event));
     });
     return matched;
+};
+
+const getListMindmapListInput = (wysiwyg: HTMLElement, range: Range, key: string, shift = false): ListMindmapListInput => {
+    const anchor = range?.startContainer;
+    const element = anchor instanceof Element ? anchor : anchor?.parentElement;
+    const editable = element?.closest<HTMLElement>('[contenteditable="true"]');
+    const block = editable?.parentElement;
+    if (!block || block.parentElement !== wysiwyg || !editable.contains(range.endContainer) ||
+        !["NodeParagraph", "NodeHeading"].includes(block.dataset.type)) {
+        return;
+    }
+    const html = cleanListMindmapHTML(wysiwyg.innerHTML);
+    if (key === "Tab") {
+        return {kind: shift ? "outdent" : "indent", html};
+    }
+    const before = range.cloneRange();
+    before.selectNodeContents(editable);
+    before.setEnd(range.startContainer, range.startOffset);
+    const after = range.cloneRange();
+    after.selectNodeContents(editable);
+    after.setStart(range.endContainer, range.endOffset);
+    const empty = (range: Range) => {
+        const fragment = range.cloneContents();
+        return !fragment.textContent.replace(/\u200b/g, "") && !fragment.querySelector("img, br, [data-type='inline-math']");
+    };
+    if (key === "Backspace" && range.collapsed && block === wysiwyg.firstElementChild && empty(before)) {
+        return {kind: "mergePrevious", html};
+    }
+    if (key === "Delete" && range.collapsed && block === wysiwyg.lastElementChild && empty(after)) {
+        return {kind: "mergeNext", html};
+    }
+    if (key !== "Enter" || shift || block !== wysiwyg.firstElementChild || block.dataset.type !== "NodeParagraph") {
+        return;
+    }
+    if (canEnterCodeBlock(editable, before.toString().length, window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false)) {
+        return;
+    }
+    if (range.collapsed && empty(before) && !empty(after)) {
+        return {kind: "before", html};
+    }
+    const prefix = block.cloneNode(true) as HTMLElement;
+    prefix.querySelector('[contenteditable="true"]').replaceChildren(before.cloneContents());
+    const suffix = genEmptyElement(false, false);
+    suffix.querySelector('[contenteditable="true"]').replaceChildren(after.cloneContents());
+    const following = Array.from(wysiwyg.children).slice(1).map(block => block.outerHTML).join("");
+    return {kind: "split", html, before: cleanListMindmapHTML(prefix.outerHTML),
+        after: cleanListMindmapHTML(suffix.outerHTML + following)};
 };
 
 // 编辑器挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
@@ -383,6 +433,44 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     };
     setMobileToolbarUndo(fragment.protyle, owner, undo);
     const signal = events.signal;
+    const listInput = (event: KeyboardEvent | InputEvent, key: string, shift = false) => {
+        if (event.defaultPrevented || event.isComposing || composing || finished || closing || !options.canEdit() ||
+            !fragment.hintElement.classList.contains("fn__none") ||
+            !fragment.protyle.toolbar.element.classList.contains("fn__none") ||
+            !fragment.protyle.toolbar.subElement.classList.contains("fn__none") ||
+            !(event.target instanceof Element) || event.target.closest(
+                "input, textarea, select, button, .protyle-wysiwyg__embed, .av, .code-block, .table") ||
+            event.target.closest(".protyle-wysiwyg") !== fragment.wysiwyg) {
+            return;
+        }
+        const selection = getSelection();
+        const input = selection?.rangeCount && getListMindmapListInput(fragment.wysiwyg, selection.getRangeAt(0), key, shift);
+        if (!input) {
+            return;
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (addingNode || event instanceof KeyboardEvent && event.repeat) {
+            return;
+        }
+        addingNode = true;
+        input.html = retainIndependentBlocks(input.html, node);
+        if (input.after) {
+            input.after = retainIndependentBlocks(input.after, node);
+        }
+        void options.onListInput(input, captureSelection()).catch(error => console.error(error)).finally(() => {
+            addingNode = false;
+        });
+    };
+    host.addEventListener("beforeinput", event => {
+        if (event.inputType === "insertParagraph") {
+            listInput(event, "Enter");
+        } else if (event.inputType === "deleteContentBackward") {
+            listInput(event, "Backspace");
+        } else if (event.inputType === "deleteContentForward") {
+            listInput(event, "Delete");
+        }
+    }, {capture: true, signal});
     host.addEventListener("beforeinput", captureBeforeChange, {capture: true, signal});
     host.addEventListener("compositionstart", captureBeforeChange, {capture: true, signal});
     host.addEventListener("pointerdown", captureBeforeChange, {capture: true, signal});
@@ -426,6 +514,13 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         const listKeymap = window.siyuan.config.keymap.editor.list;
         const kind = listKeymap?.mindmapAddSibling && matchHotKey(listKeymap.mindmapAddSibling, event) ? "sibling" :
             listKeymap?.mindmapAddChild && matchHotKey(listKeymap.mindmapAddChild, event) ? "child" : undefined;
+        if (!event.ctrlKey && !event.metaKey && !event.altKey && (!event.shiftKey || event.key === "Tab") &&
+            !kind && ["Enter", "Tab", "Backspace", "Delete"].includes(event.key) && !matchesCustomizedEditorShortcut(event)) {
+            listInput(event, event.key, event.shiftKey);
+            if (event.defaultPrevented) {
+                return;
+            }
+        }
         if (matchHotKey(keymap.undo, event) || matchHotKey(keymap.redo, event)) {
             event.preventDefault();
             event.stopImmediatePropagation();

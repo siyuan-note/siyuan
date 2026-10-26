@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261026090134"
 	},
 	"Children": [
 		{
@@ -13180,7 +13180,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261024124323"
+				"updated": "20261026090134"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13241,7 +13241,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20261020162345",
+				"updated": "20261026090134",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13344,7 +13344,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Create a child node"
+									"Data": "Create a child node when selected"
 								}
 							]
 						},
@@ -13371,7 +13371,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Create a sibling node"
+									"Data": "Create a sibling node when selected"
 								}
 							]
 						},
@@ -13383,6 +13383,168 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Split the first paragraph at the caret into a sibling node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Indent the edited branch under its previous sibling"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Outdent the edited branch"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Insert a soft line break while editing"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "At the start of the first paragraph, merge the body into the previous sibling"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Backspace"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "At the end of the last paragraph, merge the next sibling body into this node"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete"
 								}
 							]
 						}
@@ -13908,6 +14070,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261026090134-16w12i9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026090134-16w12i9",
+				"updated": "20261026090134"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing a node, Enter in its first paragraph creates a sibling and continues editing there; text after the caret and subsequent content blocks move to the new node. At the start of a nonempty first paragraph, it inserts an empty node before the current node. Tab and Shift+Tab move the whole branch while preserving its child nodes. Merge adjacent nodes with Backspace at the start or Delete at the end to keep multiple paragraphs in one node. Other content blocks retain their normal Enter behavior, and code blocks, tables, input methods and suggestion menus retain their editing controls. Existing customized editor shortcuts take precedence."
 				}
 			]
 		},

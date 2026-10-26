@@ -159,7 +159,7 @@ type WorkspaceSession struct {
 	AccessAuthCode     string
 	OIDCSessionVersion string
 	OIDCBinding        string
-	Captcha            string
+	CaptchaID          string // 服务端验证码挑战 ID，验证码答案不写入会话
 }
 
 func (sd *SessionData) Clear(c *gin.Context) {

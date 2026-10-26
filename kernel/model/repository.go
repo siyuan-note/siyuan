@@ -59,6 +59,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -290,6 +291,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 	if strings.HasSuffix(file.Path, ".sy") {
 		boxID := strings.TrimPrefix(file.Path, "/")
+		flushLock.Lock()
+		defer flushLock.Unlock()
 		boxID = strings.Split(boxID, "/")[0]
 		origBoxID := boxID // 保留原始 boxID 用于加密边界校验
 
@@ -338,7 +341,13 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 			resetTree(tree, "", true)
 		}
 
-		if nil != workingDoc && "d" == workingDoc.Type {
+		// Publish the restored source before removing the working document or
+		// its derived indexes. A failed write must leave the current version intact.
+		if _, err = filesys.WriteTree(tree); err != nil {
+			return
+		}
+		invalidateDocumentHistory(tree.ID)
+		if nil != workingDoc && "d" == workingDoc.Type && workingDoc.Path != tree.Path {
 			workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
 			if err = filelock.Remove(workingDocPath); err != nil {
 				return
@@ -350,9 +359,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		}
 
 		sql.RemoveTreeQueue(boxID, rootID)
-		if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
-			return
-		}
+		treenode.IndexBlockTree(tree)
+		sql.IndexTreeQueue(tree)
 		ReloadFiletree()
 		ReloadProtyle(rootID)
 

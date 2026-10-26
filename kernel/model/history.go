@@ -330,7 +330,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(rootID)
-	if needResetTree {
+	if needResetTree || workingDoc != nil && (workingDoc.Type != "d" || workingDoc.BoxID != boxID) {
 		workingDoc = nil
 	}
 
@@ -450,14 +450,17 @@ func RollbackDocHistory(historyPath string) (err error) {
 			duplicatedIDs = append(duplicatedIDs, nodeID)
 		}
 	}
+	remappedIDs := map[string]string{}
 	for _, nodeID := range duplicatedIDs {
 		node := nodes[nodeID]
 		treenode.ResetNodeID(node)
+		remappedIDs[nodeID] = node.ID
 		if ast.NodeDocument == node.Type {
 			tree.ID = node.ID
 			tree.Path = tree.Path[:strings.LastIndex(tree.Path, "/")] + "/" + node.ID + ".sy"
 		}
 	}
+	remapDuplicateDocTreeReferences(tree.Root, remappedIDs)
 
 	// 仅重新索引该文档，不进行全量索引
 	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
@@ -486,7 +489,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 	treenode.IndexBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	ReloadFiletree()
-	ReloadProtyle(rootID)
+	ReloadProtyle(tree.ID)
 
 	msg := fmt.Sprintf(Conf.Language(286), box.Name+tree.HPath)
 	util.PushMsg(msg, 7000)
@@ -497,15 +500,16 @@ func RollbackDocHistory(historyPath string) (err error) {
 		ReloadAttrView(avID)
 	}
 
+	restoredID := tree.ID
 	go func() {
 		sql.FlushQueue()
 
-		tree, _ = LoadTreeByBlockID(rootID)
+		tree, _ = LoadTreeByBlockID(restoredID)
 		if nil == tree {
 			return
 		}
 
-		ReloadProtyle(rootID)
+		ReloadProtyle(restoredID)
 
 		// 刷新页签名
 		refText := getNodeRefText(tree.Root)

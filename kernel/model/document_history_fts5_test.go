@@ -32,6 +32,152 @@ func seedDocumentHistory(t *testing.T, rootIDs ...string) {
 	}
 }
 
+func TestRestoreDocumentHistoryRemapsConflictingReferences(t *testing.T) {
+	for _, scenario := range []string{"existing", "deleted", "root-as-body", "foreign-root"} {
+		t.Run(scenario, func(t *testing.T) {
+			fixture := setupStructureTransactionTest(t)
+			setupFoldTransactionDatabase(t, fixture)
+			tree, err := LoadTreeByBlockID(fixture.sourceID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			child := tree.Root.FirstChild
+			oldChildID := child.ID
+			for _, id := range []string{oldChildID, tree.ID, fixture.targetID} {
+				child.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: id,
+					TextMarkBlockRefSubtype: "s", TextMarkTextContent: id})
+			}
+			child.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: "siyuan://blocks/" + oldChildID + "?focus=1#anchor", TextMarkTextContent: "link"})
+			child.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(oldChildID)})
+			embed := &ast.Node{Type: ast.NodeBlockQueryEmbed, ID: ast.NewNodeID()}
+			embed.SetIALAttr("id", embed.ID)
+			embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + oldChildID + "'")})
+			tree.Root.AppendChild(embed)
+			tabs := &ast.Node{Type: ast.NodeTabs, ID: ast.NewNodeID()}
+			tabs.SetIALAttr("id", tabs.ID)
+			for range 2 {
+				item := &ast.Node{Type: ast.NodeTabItem, ID: ast.NewNodeID(), TabItemTitle: "Tab"}
+				item.SetIALAttr("id", item.ID)
+				item.AppendChild(treenode.NewParagraph(ast.NewNodeID()))
+				tabs.AppendChild(item)
+			}
+			selectedID := tabs.LastChild.ID
+			tabs.SetIALAttr(treenode.TabsActiveIDAttr, selectedID)
+			tree.Root.AppendChild(tabs)
+			tableTree, _, _, _ := parseStdMd([]byte("| Header |\n| --- |\n| Cell |"), true)
+			table := tableTree.Root.FirstChild
+			cells := table.ChildrenByType(ast.NodeTableCell)
+			cell := cells[len(cells)-1]
+			cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "((" + oldChildID + " 'self')) `" + oldChildID + "`"}
+			tree.Root.AppendChild(table)
+			if err = treenode.RefreshTableCellRichProjection(tree.Root); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(tree)
+			originalWorkspace := util.WorkspaceDir
+			util.WorkspaceDir = filepath.Dir(util.HistoryDir)
+			t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+			docPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
+			snapshot, err := os.ReadFile(docPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			historyPath := filepath.Join(util.HistoryDir, "2026-10-26-120000-update", tree.Box, tree.ID+".sy")
+			if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(historyPath, snapshot, 0600); err != nil {
+				t.Fatal(err)
+			}
+			if scenario != "existing" {
+				if err = os.Remove(docPath); err != nil {
+					t.Fatal(err)
+				}
+				treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+			}
+			conflict, err := LoadTreeByBlockID(fixture.targetID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			conflict.Root.FirstChild.ID = oldChildID
+			conflict.Root.FirstChild.SetIALAttr("id", oldChildID)
+			if scenario == "root-as-body" {
+				conflict.Root.FirstChild.ID = tree.ID
+				conflict.Root.FirstChild.SetIALAttr("id", tree.ID)
+			} else if scenario == "foreign-root" {
+				box := &Box{ID: ast.NewNodeID()}
+				if err = box.SaveConf(conf.NewBoxConf()); err != nil {
+					t.Fatal(err)
+				}
+				conflict = treenode.NewTree(box.ID, "/"+tree.ID+".sy", "/Foreign", "Foreign")
+				conflict.Root.FirstChild.ID = oldChildID
+				conflict.Root.FirstChild.SetIALAttr("id", oldChildID)
+			}
+			conflict.Root.AppendChild(treenode.NewParagraph(selectedID))
+			if _, err = filesys.WriteTree(conflict); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(conflict)
+			conflictPath := filepath.Join(util.DataDir, conflict.Box, conflict.Path)
+			conflictBefore, err := os.ReadFile(conflictPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			relative, err := filepath.Rel(util.WorkspaceDir, historyPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = RollbackDocHistory(relative); err != nil {
+				t.Fatal(err)
+			}
+			restoredBT := treenode.GetBlockTreeRootByHPath(tree.Box, tree.HPath)
+			if restoredBT == nil {
+				t.Fatal("restored document is not indexed")
+			}
+			restored, err := filesys.LoadTree(tree.Box, restoredBT.Path, util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			paragraph := restored.Root.FirstChild
+			refs := paragraph.ChildrenByType(ast.NodeTextMark)
+			for i, want := range []string{paragraph.ID, restored.ID, fixture.targetID} {
+				if refs[i].TextMarkBlockRefID != want {
+					t.Errorf("reference %d targets %s, want %s", i, refs[i].TextMarkBlockRefID, want)
+				}
+			}
+			if refs[3].TextMarkAHref != "siyuan://blocks/"+paragraph.ID+"?focus=1#anchor" || paragraph.LastChild.TokensStr() != oldChildID {
+				t.Fatal("block link or literal text was changed incorrectly")
+			}
+			if restored.Root.ChildrenByType(ast.NodeBlockQueryEmbedScript)[0].TokensStr() != "select * from blocks where id='"+paragraph.ID+"'" {
+				t.Fatal("embedded query retained a conflicting ID")
+			}
+			var richRef string
+			ast.Walk(restored.Root.LastChild, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && treenode.IsBlockRef(n) {
+					richRef = n.TextMarkBlockRefID
+				}
+				return ast.WalkContinue
+			})
+			if richRef != paragraph.ID {
+				t.Fatal("rich table reference retained a conflicting ID")
+			}
+			restoredTabs := restored.Root.ChildrenByType(ast.NodeTabs)[0]
+			if active := restoredTabs.IALAttr(treenode.TabsActiveIDAttr); active != restoredTabs.LastChild.ID || active == selectedID {
+				t.Fatal("selected tab did not follow its remapped ID")
+			}
+			if data, err := os.ReadFile(conflictPath); err != nil || !bytes.Equal(data, conflictBefore) {
+				t.Fatal("restoration changed the document that owns the conflicting ID")
+			}
+			if data, err := os.ReadFile(historyPath); err != nil || !bytes.Equal(data, snapshot) {
+				t.Fatal("restoration changed source history")
+			}
+		})
+	}
+}
+
 func TestRestoreDocumentHistoryInvalidatesUndoRedoOnlyAfterWrite(t *testing.T) {
 	for _, fail := range []bool{false, true} {
 		t.Run(map[bool]string{false: "success", true: "write-failure"}[fail], func(t *testing.T) {

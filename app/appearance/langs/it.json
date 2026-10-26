@@ -3466,6 +3466,9 @@
 		"437": "Scarica questa versione",
 		"438": "Scegli un’immagine JPEG, PNG o WebP valida fino a 10 MiB e 16 megapixel",
 		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro",
-		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare"
+		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare",
+		"441": "Attività di ricostruzione dell’indice del contenuto delle risorse inviata; segui l’avanzamento nelle attività in background",
+		"442": "Ricostruzione dell’indice del contenuto delle risorse completata",
+		"443": "Ricostruzione dell’indice del contenuto delle risorse non riuscita; controlla il registro del kernel"
 	}
 }

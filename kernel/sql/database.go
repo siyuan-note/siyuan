@@ -446,14 +446,16 @@ func initHistoryDBTables() {
 
 var initAssetContentDatabaseLock = sync.Mutex{}
 
-func InitAssetContentDatabase(forceRebuild bool) {
+func InitAssetContentDatabase(forceRebuild bool) error {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 	initAssetContentDatabaseLock.Lock()
 	defer initAssetContentDatabaseLock.Unlock()
 
 	initAssetContentDBConnection()
 
 	if !forceRebuild && gulu.File.IsExist(util.AssetContentDBPath) {
-		return
+		return nil
 	}
 
 	assetContentDB.Close()
@@ -461,11 +463,12 @@ func InitAssetContentDatabase(forceRebuild bool) {
 	runtime.GC()
 	if err := os.RemoveAll(util.AssetContentDBPath); err != nil {
 		logging.LogErrorf("remove assets database file [%s] failed: %s", util.AssetContentDBPath, err)
-		return
+		return err
 	}
 
 	initAssetContentDBConnection()
 	initAssetContentDBTables()
+	return nil
 }
 
 func initAssetContentDBConnection() {

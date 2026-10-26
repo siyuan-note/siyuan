@@ -3466,6 +3466,9 @@
 		"437": "Download this version",
 		"438": "Choose a valid JPEG, PNG or WebP image up to 10 MiB and 16 megapixels",
 		"439": "Could not save the lock screen wallpaper; check workspace write permissions",
-		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue"
+		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue",
+		"441": "Asset content index rebuild task submitted; follow progress in background tasks",
+		"442": "Asset content index rebuild completed",
+		"443": "Asset content index rebuild failed; check the kernel log"
 	}
 }

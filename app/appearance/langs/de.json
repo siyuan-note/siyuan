@@ -3466,6 +3466,9 @@
 		"437": "Diese Version herunterladen",
 		"438": "Wähle ein gültiges JPEG-, PNG- oder WebP-Bild mit maximal 10 MiB und 16 Megapixeln",
 		"439": "Der Sperrbildschirm-Hintergrund konnte nicht gespeichert werden; prüfe die Schreibrechte des Arbeitsbereichs",
-		"440": "Das Rundenlimit für Werkzeugaufrufe wurde erreicht. Verbleibende Werkzeugaufrufe wurden nicht ausgeführt; sende eine weitere Nachricht, um fortzufahren"
+		"440": "Das Rundenlimit für Werkzeugaufrufe wurde erreicht. Verbleibende Werkzeugaufrufe wurden nicht ausgeführt; sende eine weitere Nachricht, um fortzufahren",
+		"441": "Neuaufbau des Ressourceninhaltsindex beauftragt; Fortschritt in den Hintergrundaufgaben verfolgen",
+		"442": "Neuaufbau des Ressourceninhaltsindex abgeschlossen",
+		"443": "Neuaufbau des Ressourceninhaltsindex fehlgeschlagen; Kernel-Protokoll prüfen"
 	}
 }

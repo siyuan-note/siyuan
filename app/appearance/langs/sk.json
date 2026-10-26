@@ -3466,6 +3466,9 @@
 		"437": "Stiahnuť túto verziu",
 		"438": "Vyberte platný obrázok JPEG, PNG alebo WebP s veľkosťou najviac 10 MiB a 16 megapixelov",
 		"439": "Tapetu zamknutej obrazovky sa nepodarilo uložiť; skontrolujte oprávnenia na zápis do pracovného priestoru",
-		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu"
+		"440": "Bol dosiahnutý limit kôl volaní nástrojov. Zostávajúce volania sa nevykonali; na pokračovanie odošlite ďalšiu správu",
+		"441": "Úloha obnovy indexu obsahu zdrojov bola odoslaná; priebeh sledujte v úlohách na pozadí",
+		"442": "Obnova indexu obsahu zdrojov bola dokončená",
+		"443": "Obnova indexu obsahu zdrojov zlyhala; skontrolujte denník jadra"
 	}
 }

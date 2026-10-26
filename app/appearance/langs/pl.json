@@ -3466,6 +3466,9 @@
 		"437": "Pobierz tę wersję",
 		"438": "Wybierz prawidłowy obraz JPEG, PNG lub WebP o rozmiarze do 10 MiB i 16 megapikseli",
 		"439": "Nie można zapisać tapety ekranu blokady; sprawdź uprawnienia do zapisu w przestrzeni roboczej",
-		"440": "Osiągnięto limit rund wywołań narzędzi. Pozostałe wywołania nie zostały wykonane; wyślij kolejną wiadomość, aby kontynuować"
+		"440": "Osiągnięto limit rund wywołań narzędzi. Pozostałe wywołania nie zostały wykonane; wyślij kolejną wiadomość, aby kontynuować",
+		"441": "Zlecono odbudowę indeksu treści zasobów; śledź postęp w zadaniach w tle",
+		"442": "Odbudowa indeksu treści zasobów zakończona",
+		"443": "Odbudowa indeksu treści zasobów nie powiodła się; sprawdź dziennik jądra"
 	}
 }

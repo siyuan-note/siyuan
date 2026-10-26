@@ -814,6 +814,9 @@ var SearchTemplate = define[SearchKeywordRequest, SearchTemplateData]("searchTem
 
 var RemoveSearchTemplate = define[SearchPathRequest, Null]("removeTemplate", "/api/search/removeTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// GetAssetContent 按索引记录 ID 获取完整预览；queryMethod 为 0（关键词）或 1（查询语法）时使用 FTS 高亮，
+// 为 3 时按搜索使用的 Go 正则语义高亮；为 2（SQL）时不将 SQL 用作 MATCH，返回不高亮的完整内容。
+// 正则无效或仅命中文件名时仍返回完整内容；内容中的 HTML 会转义，仅输出 mark/br 标记。
 var GetAssetContent = define[AssetContentRequest, AssetContentData]("getAssetContent", "/api/search/getAssetContent", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetAssetContentByPath = define[SearchPathRequest, AssetContentData]("getAssetContentByPath", "/api/search/getAssetContentByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -822,6 +825,9 @@ var ListInvalidBlockRefs = define[SearchPageRequest, SearchBlocksData]("listInva
 
 var UpdateEmbedBlock = define[UpdateEmbedBlockRequest, Null]("updateEmbedBlock", "/api/search/updateEmbedBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// FullTextSearchAssetContent 使用 method 选择 0（关键词）、1（查询语法）、2（管理员 SQL）或 3（正则表达式）。
+// orderBy 为 0 时优先返回相关度高的结果，为 1 时优先返回相关度低的结果；2/3 分别为更新时间升序/降序。
+// 相关度按 FTS5 的 BM25 分数解释（越小越相关）；正则无 FTS 相关度，相关度排序选项按路径排序；SQL 使用自身的排序。
 var FullTextSearchAssetContent = define[SearchAssetContentRequest, SearchAssetContentData]("fullTextSearchAssetContent", "/api/search/fullTextSearchAssetContent", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // GetEmbedBlock 返回的文档面包屑项可附带 documentTitle，name 保留完整路径；标题不受路径分隔符影响。
@@ -1222,6 +1228,10 @@ var ExportAsciiDoc = define[ExportIDRequest, ExportNamedZipData]("exportAsciiDoc
 var ExportReStructuredText = define[ExportIDRequest, ExportNamedZipData]("exportReStructuredText", "/api/export/exportReStructuredText", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset/statAsset", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// FullReindexAssetContent 提交异步重建任务，成功响应只代表任务已提交，不代表索引已经完成。
+// 重建遍历及最后一批索引写入成功后，通过主 WebSocket 发送 assetContentIndexCompleted 并提示完成；
+// 遍历或写入失败时提示失败，不发送完成事件。不支持或解析失败的文件会跳过，加密资源不进入全局索引。
 var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
 // GetImageOCRText 保留已有 text 字段；无文本、缺失 path 和加密资源返回空字符串。

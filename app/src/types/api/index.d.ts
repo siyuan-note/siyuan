@@ -3445,6 +3445,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 提交异步重建任务，成功响应只代表任务已提交，不代表索引已经完成。
+     * 重建遍历及最后一批索引写入成功后，通过主 WebSocket 发送 assetContentIndexCompleted 并提示完成；
+     * 遍历或写入失败时提示失败，不发送完成事件。不支持或解析失败的文件会跳过，加密资源不进入全局索引。
+     */
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7051,6 +7056,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用 method 选择 0（关键词）、1（查询语法）、2（管理员 SQL）或 3（正则表达式）。
+     * orderBy 为 0 时优先返回相关度高的结果，为 1 时优先返回相关度低的结果；2/3 分别为更新时间升序/降序。
+     * 相关度按 FTS5 的 BM25 分数解释（越小越相关）；正则无 FTS 相关度，相关度排序选项按路径排序；SQL 使用自身的排序。
+     */
     "/api/search/fullTextSearchAssetContent": {
         request: SearchAssetContentRequestInput;
         response: { "code": 0; "data": SearchAssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7068,6 +7078,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 按索引记录 ID 获取完整预览；queryMethod 为 0（关键词）或 1（查询语法）时使用 FTS 高亮，
+     * 为 3 时按搜索使用的 Go 正则语义高亮；为 2（SQL）时不将 SQL 用作 MATCH，返回不高亮的完整内容。
+     * 正则无效或仅命中文件名时仍返回完整内容；内容中的 HTML 会转义，仅输出 mark/br 标记。
+     */
     "/api/search/getAssetContent": {
         request: AssetContentRequestInput;
         response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

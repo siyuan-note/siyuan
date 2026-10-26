@@ -95,6 +95,7 @@ var statAsset = contractHandler(apicontract.StatAsset, func(c *gin.Context, requ
 
 var fullReindexAssetContent = contractHandler(apicontract.FullReindexAssetContent, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(441), 5000)
 	model.ReindexAssetContent()
 
 	return apicontract.Success(apicontract.Null{})

@@ -3466,6 +3466,9 @@
 		"437": "Baixar esta versão",
 		"438": "Selecione uma imagem JPEG, PNG ou WebP válida de até 10 MiB e 16 megapixels",
 		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho",
-		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar"
+		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar",
+		"441": "Tarefa de reconstrução do índice de conteúdo dos recursos enviada; acompanhe o progresso nas tarefas em segundo plano",
+		"442": "Reconstrução do índice de conteúdo dos recursos concluída",
+		"443": "Falha ao reconstruir o índice de conteúdo dos recursos; verifique o log do kernel"
 	}
 }

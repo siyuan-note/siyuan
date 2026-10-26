@@ -3466,6 +3466,9 @@
 		"437": "Deze versie downloaden",
 		"438": "Kies een geldige JPEG-, PNG- of WebP-afbeelding van maximaal 10 MiB en 16 megapixel",
 		"439": "De vergrendelachtergrond kon niet worden opgeslagen; controleer de schrijfrechten van de werkruimte",
-		"440": "De limiet voor rondes met toolaanroepen is bereikt. De resterende toolaanroepen zijn niet uitgevoerd; stuur nog een bericht om door te gaan"
+		"440": "De limiet voor rondes met toolaanroepen is bereikt. De resterende toolaanroepen zijn niet uitgevoerd; stuur nog een bericht om door te gaan",
+		"441": "Taak voor het opnieuw opbouwen van de index van resource-inhoud ingediend; volg de voortgang bij de achtergrondtaken",
+		"442": "Index van resource-inhoud opnieuw opgebouwd",
+		"443": "Opnieuw opbouwen van de index van resource-inhoud mislukt; controleer het kernellogboek"
 	}
 }

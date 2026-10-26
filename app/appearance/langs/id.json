@@ -3466,6 +3466,9 @@
 		"437": "Unduh versi ini",
 		"438": "Pilih gambar JPEG, PNG, atau WebP yang valid, maksimal 10 MiB dan 16 megapiksel",
 		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja",
-		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan"
+		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan",
+		"441": "Tugas pembangunan ulang indeks konten aset telah dikirim; pantau kemajuan di tugas latar belakang",
+		"442": "Pembangunan ulang indeks konten aset selesai",
+		"443": "Pembangunan ulang indeks konten aset gagal; periksa log kernel"
 	}
 }

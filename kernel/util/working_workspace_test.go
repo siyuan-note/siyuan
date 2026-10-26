@@ -56,3 +56,48 @@ func TestBootWorkspaceTempCleanup(t *testing.T) {
 		})
 	}
 }
+
+func TestUnlockWorkspacePreservesLockIdentity(t *testing.T) {
+	previousDir, previousLock := WorkspaceDir, WorkspaceLock
+	t.Cleanup(func() { WorkspaceDir, WorkspaceLock = previousDir, previousLock })
+	WorkspaceDir = t.TempDir()
+	filename := filepath.Join(WorkspaceDir, ".lock")
+	WorkspaceLock = flock.New(filename)
+	if ok, err := WorkspaceLock.TryLock(); err != nil || !ok {
+		t.Fatalf("first kernel failed to lock: %v, %v", ok, err)
+	}
+	t.Cleanup(func() { _ = WorkspaceLock.Unlock() })
+	original, err := os.Stat(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	UnlockWorkspace()
+	if IsWorkspaceLocked(WorkspaceDir) {
+		t.Fatal("released workspace is still reported as locked")
+	}
+	next := flock.New(filename)
+	if ok, err := next.TryLock(); err != nil || !ok {
+		t.Fatalf("next kernel failed to lock: %v, %v", ok, err)
+	}
+	defer next.Unlock()
+	// A repeated cleanup from the old owner must leave the new owner protected.
+	UnlockWorkspace()
+	current, err := os.Stat(filename)
+	if err != nil || !os.SameFile(original, current) {
+		t.Fatalf("unlock replaced or removed the lock file: %v", err)
+	}
+	if !IsWorkspaceLocked(WorkspaceDir) {
+		t.Fatal("next kernel's lock was bypassed")
+	}
+	third := flock.New(filename)
+	defer third.Unlock()
+	if ok, err := third.TryLock(); err != nil || ok {
+		t.Fatalf("third kernel bypassed the held lock: %v, %v", ok, err)
+	}
+	if err = next.Unlock(); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := third.TryLock(); err != nil || !ok {
+		t.Fatalf("lock cannot be reused after handoff: %v, %v", ok, err)
+	}
+}

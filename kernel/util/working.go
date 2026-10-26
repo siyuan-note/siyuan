@@ -667,10 +667,8 @@ func UnlockWorkspace() {
 		return
 	}
 
-	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); err != nil {
-		logging.LogErrorf("remove workspace lock failed: %s", err)
-		return
-	}
+	// Keep the lock file identity stable: a new kernel may already hold this file.
+	// Unlinking it would let another kernel create and lock a different file.
 }
 
 func LogDatabaseSize(dbPath string) {

@@ -1598,9 +1598,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				}
 
 				// 如果当前文件夹路径下包含同名的 Markdown 文件，则不创建空文档 https://github.com/siyuan-note/siyuan/issues/13149
-				if gulu.File.IsExist(currentPath+".md") || gulu.File.IsExist(currentPath+".markdown") {
-					targetPaths[curRelPath+".md"] = targetPath
-					return nil
+				for _, extension := range []string{".md", ".markdown"} {
+					if gulu.File.IsExist(currentPath + extension) {
+						targetPaths[curRelPath+extension] = targetPath
+						return nil
+					}
 				}
 
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)

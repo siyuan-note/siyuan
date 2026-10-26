@@ -3,6 +3,9 @@
 @use "../component/svg";
 
 body {
+  --b3-snackbar-gap: 16px;
+  --b3-snackbar-right: 30px;
+  --b3-snackbar-top: max(22px, calc(var(--b3-window-controls-height, 0px) + 16px));
   --mobile-top-safe-area: env(safe-area-inset-top);
   --mobile-topbar-height: 48px;
   --mobile-breadcrumb-height: 42px;
@@ -2038,6 +2041,12 @@ body.mobile-topbar--merged {
 
 .b3-snackbars {
   --b3-snackbar-top: calc(var(--mobile-top-safe-area) + 35px);
+}
+
+@media (max-width: 520px) {
+  .b3-snackbars {
+    --b3-snackbar-right: calc(10vw - 18px);
+  }
 }
 
 .b3-menu--fullscreen:not(.b3-menu--sheet) {

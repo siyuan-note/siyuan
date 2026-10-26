@@ -17,6 +17,11 @@ const cases = async (source, css, densityCSS, mobileCSS) => {
     const near = (actual, expected, message) =>
         check.ok(Math.abs(actual - expected) <= 1, `${message}: ${actual} vs ${expected}`);
     const root = document.documentElement;
+    const resize = async width => {
+        await require("electron").ipcRenderer.invoke("resize", width);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        check.equal(innerWidth, width, "the renderer has applied the window resize");
+    };
     for (const compact of [false, true]) {
         if (compact) {
             root.setAttribute("data-ui-density", "compact");
@@ -26,7 +31,7 @@ const cases = async (source, css, densityCSS, mobileCSS) => {
         for (const fused of [false, true]) {
             document.body.classList.toggle("body--toolbar-hide", fused);
             for (const width of [900, 420]) {
-                await require("electron").ipcRenderer.invoke("resize", width);
+                await resize(width);
                 const narrowRight = width <= 520 ? width * 0.1 - 18 : 0;
                 for (const dock of [0, 34, 42]) {
                     root.style.setProperty("--b3-dock-right-width", `${dock}px`);
@@ -70,12 +75,25 @@ const cases = async (source, css, densityCSS, mobileCSS) => {
     root.style.removeProperty("--b3-dock-right-width");
     style.textContent += mobileCSS;
     document.body.innerHTML = '<div id="message" class="b3-snackbars"></div>';
-    for (const safeTop of [0, 44]) {
-        document.body.style.setProperty("--mobile-top-safe-area", `${safeTop}px`);
-        const container = document.getElementById("message");
-        check.equal(container.getBoundingClientRect().top, safeTop + 35, "mobile notifications retain their safe-area offset");
-        check.ok(container.getBoundingClientRect().top + parseFloat(getComputedStyle(container).maxHeight) <=
-            innerHeight - gap + 1, "mobile notifications keep the bottom gap");
+    for (const width of [900, 420]) {
+        await resize(width);
+        for (const safeTop of [0, 44]) {
+            document.body.style.setProperty("--mobile-top-safe-area", `${safeTop}px`);
+            document.body.innerHTML = '<div id="message" class="b3-snackbars"></div>';
+            showMessage("Startup notification", 0);
+            const startupStyle = getComputedStyle(document.getElementById("tempMessage"));
+            near(parseFloat(startupStyle.top), 22, "mobile startup notifications retain their top offset");
+            near(parseFloat(startupStyle.right), 30, "mobile startup notifications retain their right offset");
+            initMessage();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const container = document.getElementById("message");
+            const rect = container.getBoundingClientRect();
+            near(rect.top, safeTop + 35, "mobile notifications retain their safe-area offset");
+            near(innerWidth - rect.right, width <= 520 ? width * 0.1 - 18 : 30,
+                "mobile notifications retain their wide and narrow window margins");
+            near(innerHeight - rect.top - parseFloat(getComputedStyle(container).maxHeight), 16,
+                "mobile notifications retain their bottom gap");
+        }
     }
     return "Snackbar positioning passed";
 };
@@ -85,7 +103,7 @@ if (process.versions.electron && process.type === "browser") {
         const {app, BrowserWindow, ipcMain} = require("electron");
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
-        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
         ipcMain.handle("resize", (_event, width) => win.setContentSize(width, 600));
         await win.loadURL("data:text/html,<html><body></body></html>");
         const ts = require("typescript");

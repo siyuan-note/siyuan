@@ -1730,7 +1730,6 @@ func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlock
 		return
 	}
 	excludeFilter, excludeArgs := buildPublishAccessExclusionFilter(excludeBoxIDs, excludeDocIDs)
-	excludeInline := buildPublishAccessExclusionInline(excludeBoxIDs, excludeDocIDs)
 	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
@@ -1756,7 +1755,7 @@ func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlock
 		boxArgs = append(boxArgs, excludeArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBoxContext(ctx, "SELECT * FROM `blocks` WHERE `id` = '"+query+"'"+excludeInline, beforeLen, page, pageSize, boxID)
+			blocks, matchedBlockCount, matchedRootCount = searchByIDInBoxContext(ctx, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, beforeLen, page, pageSize, boxID)
 		} else {
 			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(ctx, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 		}
@@ -1783,7 +1782,7 @@ func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlock
 		boxArgs = append(boxArgs, excludeArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBoxContext(ctx, "SELECT * FROM `blocks` WHERE `id` = '"+query+"'"+excludeInline, beforeLen, page, pageSize, boxID)
+			blocks, matchedBlockCount, matchedRootCount = searchByIDInBoxContext(ctx, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, beforeLen, page, pageSize, boxID)
 		} else {
 			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
 				ftsQuery, hPathQuery := buildKeywordSearchQueries(query)
@@ -2059,22 +2058,6 @@ func buildPublishAccessExclusionFilter(boxIDs, docIDs []string, alias ...string)
 	return
 }
 
-// buildPublishAccessExclusionInline 构造内联的发布访问排除子句，用于无绑定参数的原生 SQL 分支。
-// 排除 ID 均通过节点 ID 模式校验，可直接内联。
-func buildPublishAccessExclusionInline(boxIDs, docIDs []string) string {
-	conds := make([]string, 0, len(boxIDs)+len(docIDs))
-	for _, boxID := range boxIDs {
-		conds = append(conds, "box = '"+boxID+"'")
-	}
-	for _, docID := range docIDs {
-		conds = append(conds, "path LIKE '%"+docID+"%'")
-	}
-	if 0 == len(conds) {
-		return ""
-	}
-	return " AND NOT (" + strings.Join(conds, " OR ") + ")"
-}
-
 func buildOrderBy(query string, method, orderBy int) string {
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
 	switch orderBy {
@@ -2296,6 +2279,28 @@ func isTreeExcludedByPublishAccess(tree *parse.Tree, excludeDocIDs []string) boo
 		}
 	}
 	return false
+}
+
+func buildSearchByIDStatement(query, boxFilter, pathFilter, typeFilter, ignoreFilter string, boxArgs, pathArgs []any) (string, []any) {
+	statement := "SELECT * FROM blocks WHERE id = ? AND " + typeFilter + boxFilter + pathFilter + ignoreFilter
+	args := append([]any{query}, boxArgs...)
+	args = append(args, pathArgs...)
+	return statement, args
+}
+
+func searchByIDInBoxContext(ctx context.Context, query, boxFilter, pathFilter string, boxArgs, pathArgs []any,
+	typeFilter, ignoreFilter string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	statement, args := buildSearchByIDStatement(query, boxFilter, pathFilter, typeFilter, ignoreFilter, boxArgs, pathArgs)
+	statement += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	rows, err := sql.QueryNoLimitArgsInBoxContext(ctx, statement, boxID, args...)
+	if err != nil || ctx.Err() != nil {
+		return
+	}
+	blocks := sql.ToBlocks(rows)
+	ret = fromSQLBlocksContext(ctx, &blocks, "", beforeLen)
+	matchedBlockCount = len(ret)
+	matchedRootCount = matchedBlockCount // 精确块 ID 最多命中一个结果。
+	return
 }
 
 // searchBySQLInBox 按 boxID 选择加密或全局数据库，执行分页查询并统计匹配数量。
@@ -2999,15 +3004,20 @@ func buildDocumentSearchOrderBy(query string, orderBy int) string {
 	return ret + ", id ASC"
 }
 
+// 文档查询构造器接收的关键词已经转义 SQL 引号，还原后交由统一的字面量 LIKE 模式构造器处理。
+func documentKeywordLikePattern(keyword string) string {
+	return conf.SearchLikePattern(strings.ReplaceAll(keyword, "''", "'"))
+}
+
 func buildDocumentMatchScore(field string, keywords []string) string {
 	var ret strings.Builder
 	ret.WriteString("(")
 	for i, keyword := range keywords {
 		ret.WriteString("(")
 		ret.WriteString(field)
-		ret.WriteString(" LIKE '%")
-		ret.WriteString(keyword)
-		ret.WriteString("%')")
+		ret.WriteString(" LIKE ")
+		ret.WriteString(documentKeywordLikePattern(keyword))
+		ret.WriteString(")")
 		if i < len(keywords)-1 {
 			ret.WriteString(" + ")
 		}
@@ -3020,9 +3030,8 @@ func buildSearchDocumentLikeFilter(field string, keywords []string) string {
 	var ret strings.Builder
 	for i, keyword := range keywords {
 		ret.WriteString(field)
-		ret.WriteString(" LIKE '%")
-		ret.WriteString(keyword)
-		ret.WriteString("%'")
+		ret.WriteString(" LIKE ")
+		ret.WriteString(documentKeywordLikePattern(keyword))
 		if i < len(keywords)-1 {
 			ret.WriteString(" AND ")
 		}
@@ -3038,9 +3047,9 @@ func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, key
 		normalizedKeyword := search.NormalizeSearchText(keyword, confSearchSnapshot.CaseSensitive, confSearchSnapshot.HanSensitiveVal())
 		ret.WriteString("(")
 		ret.WriteString(contentField)
-		ret.WriteString(" LIKE '%")
-		ret.WriteString(keyword)
-		ret.WriteString("%' OR instr(")
+		ret.WriteString(" LIKE ")
+		ret.WriteString(documentKeywordLikePattern(keyword))
+		ret.WriteString(" OR instr(")
 		ret.WriteString(hPathField)
 		ret.WriteString(", '")
 		ret.WriteString(normalizedKeyword)

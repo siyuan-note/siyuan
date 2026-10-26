@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -210,6 +211,54 @@ func TestRollbackNotebookHistoryRejectsExistingNotebook(t *testing.T) {
 	}
 	if string(data) != "existing" {
 		t.Fatalf("existing notebook was modified: %q", data)
+	}
+}
+
+func TestRollbackNotebookHistoryCopyFailureAllowsRetry(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	destination := filepath.Join(util.DataDir, boxID)
+	failure := errors.New("injected partial notebook copy failure")
+	err := rollbackNotebookHistory(historyPath, func(from, staging string) error {
+		if err := os.WriteFile(filepath.Join(staging, "partial.sy"), []byte("partial copy"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		return failure
+	})
+	if !errors.Is(err, failure) {
+		t.Fatalf("copy failure was not returned: %v", err)
+	}
+	if _, err := os.Stat(destination); !os.IsNotExist(err) {
+		t.Fatalf("failed restore published an incomplete notebook: %v", err)
+	}
+	if paths, err := filepath.Glob(filepath.Join(util.DataDir, ".notebook-history-*")); err != nil || len(paths) != 0 {
+		t.Fatalf("failed restore left staging directories: %v, %v", paths, err)
+	}
+	if err := RollbackNotebookHistory(historyPath); err != nil {
+		t.Fatalf("restoration could not be retried: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(destination, "20260807000001-abcdefg.sy")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRollbackNotebookHistoryPreservesNewDestination(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	destination := filepath.Join(util.DataDir, boxID)
+	marker := filepath.Join(destination, "preserved.txt")
+	err := rollbackNotebookHistory(historyPath, func(from, staging string) error {
+		if err := filelock.CopyNewtimes(from, staging); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(destination, 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(marker, []byte("concurrent destination"), 0600)
+	})
+	if err == nil {
+		t.Fatal("restore replaced a destination created during copying")
+	}
+	if data, err := os.ReadFile(marker); err != nil || string(data) != "concurrent destination" {
+		t.Fatal("restore modified an existing destination")
 	}
 }
 

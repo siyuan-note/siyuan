@@ -711,6 +711,10 @@ func IsEncryptedHistoryPath(absPath string) bool {
 }
 
 func RollbackNotebookHistory(historyPath string) (err error) {
+	return rollbackNotebookHistory(historyPath, filelock.CopyNewtimes)
+}
+
+func rollbackNotebookHistory(historyPath string, copyHistory func(string, string) error) (err error) {
 	historyPath, err = validateHistoryPath(historyPath)
 	if err != nil {
 		return
@@ -732,14 +736,34 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	if err = checkDocumentAddressingCopy(from, boxID); err != nil {
 		return
 	}
+	if err = os.MkdirAll(util.DataDir, 0755); err != nil {
+		return
+	}
+	staging, err := os.MkdirTemp(util.DataDir, ".notebook-history-"+boxID+"-")
+	if err != nil {
+		return
+	}
+	defer func() { err = errors.Join(err, os.RemoveAll(staging)) }()
+	if err = copyHistory(from, staging); err != nil {
+		return
+	}
+
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
 	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
 	if err = boundRecovery.restoreNotebookAttributeViewHistory(from, boxID); err != nil {
 		return err
 	}
 
-	if err = filelock.CopyNewtimes(from, to); err != nil {
-		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+	if _, statErr := os.Lstat(to); !os.IsNotExist(statErr) {
+		if statErr != nil {
+			return statErr
+		}
+		return errors.New(Conf.Language(371))
+	}
+	if err = os.Rename(staging, to); err != nil {
 		return
 	}
 

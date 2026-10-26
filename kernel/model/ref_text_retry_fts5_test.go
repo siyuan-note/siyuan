@@ -223,7 +223,9 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	originalPath := definition.Path
 	definition.Path = "/../invalid.sy"
 	definition.Root.SetIALAttr("updated", "")
-	reindexTree0(definition, 0, 1)
+	if err := reindexTree0(definition, 0, 1); err == nil {
+		t.Fatal("failed timestamp repair did not report its error")
+	}
 	if got := treenode.GetBlockTreeInBox(definition.ID, box.ID); got == nil || got.Path != originalPath {
 		t.Fatalf("failed timestamp repair changed the block tree: %+v", got)
 	}

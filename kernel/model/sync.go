@@ -1147,6 +1147,7 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 }
 
 func IncSync() {
+	util.MarkIndexFixDirty()
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Load().Interval) * time.Second)
 	pendingSync.change(notifySyncPending)

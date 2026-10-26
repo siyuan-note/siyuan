@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -11,6 +14,16 @@ import (
 )
 
 func TestDatabaseItemWritesRunAutomations(t *testing.T) {
+	const child = "SIYUAN_TEST_CLI_DATABASE_AUTOMATION"
+	if os.Getenv(child) != "1" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestDatabaseItemWritesRunAutomations$", "-test.v")
+		cmd.Env = append(os.Environ(), child+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("database automation subprocess: %v\n%s", err, output)
+		}
+		return
+	}
+	util.QueueDir = filepath.Join(t.TempDir(), "queue")
 	previousLang, previousAVLangs := util.Lang, util.AttrViewLangs
 	util.Lang = "en"
 	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}

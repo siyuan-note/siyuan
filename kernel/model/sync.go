@@ -64,7 +64,6 @@ func SyncDataDownload() (err error) {
 }
 
 func syncDataDownloadLocked() (err error) {
-	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
@@ -76,7 +75,8 @@ func syncDataDownloadLocked() (err error) {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
-	pendingSync.finish(revision, err == nil, notifySyncPending)
+	// Download-only completion does not publish local changes, including an empty remote.
+	// Keep the pending hint until an upload or full sync actually publishes them.
 	if 1 == code {
 		consumeShorthands()
 	}

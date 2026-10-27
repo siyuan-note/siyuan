@@ -10,11 +10,40 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestBookmarkMutationsRefreshCachedAttributesAfterCommit(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := treenode.GetNodeInTree(tree, fixture.childID)
+	node.SetIALAttr("bookmark", "review")
+	if err = writeTreeUpsertQueue(tree); err != nil {
+		t.Fatal(err)
+	}
+	sql.FlushQueue()
+	cache.PutBlockIALInBox(node.ID, tree.Box, map[string]string{"bookmark": "review"})
+	if err = RenameBookmark("review", "done"); err != nil {
+		t.Fatal(err)
+	}
+	if got := sql.GetBlockAttrs(node.ID)["bookmark"]; got != "done" {
+		t.Fatalf("cached bookmark = %q", got)
+	}
+	if err = RemoveBookmark("done"); err != nil {
+		t.Fatal(err)
+	}
+	if got := sql.GetBlockAttrs(node.ID)["bookmark"]; got != "" {
+		t.Fatalf("removed bookmark remains cached: %q", got)
+	}
+}
 
 func TestTagAndBookmarkMutationsRejectConcurrentEdits(t *testing.T) {
 	for _, action := range []string{"renameTag", "removeTag", "renameBookmark", "removeBookmark"} {

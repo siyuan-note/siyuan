@@ -28,6 +28,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -86,6 +87,9 @@ func removeBookmark(bookmark string, beforeCommit func()) (err error) {
 			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
+			}
+			for _, blockID := range blocks {
+				cache.RemoveBlockIAL(blockID)
 			}
 		}
 
@@ -165,6 +169,9 @@ func renameBookmark(oldBookmark, newBookmark string, beforeCommit func()) (err e
 			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
+			}
+			for _, blockID := range blocks {
+				cache.RemoveBlockIAL(blockID)
 			}
 		}
 

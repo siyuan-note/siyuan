@@ -3879,6 +3879,66 @@ export class ListMindmapView {
     }
 
     private makePaletteRow(palette: HTMLElement, controls: HTMLElement[], columns = 8) {
+        // 触屏沿用原生横向滚动，鼠标支持拖动和滚轮浏览；拖动完成后不触发色卡点击。
+        let drag: {id: number, x: number, scroll: number, scale: number};
+        let moved = false;
+        palette.addEventListener("pointerdown", (event: PointerEvent) => {
+            moved = false;
+            if (event.pointerType !== "mouse" || event.button !== 0 ||
+                palette.scrollWidth <= palette.clientWidth) {
+                return;
+            }
+            drag = {id: event.pointerId, x: event.clientX, scroll: palette.scrollLeft,
+                scale: palette.getBoundingClientRect().width / palette.offsetWidth || 1};
+        });
+        palette.addEventListener("pointermove", (event: PointerEvent) => {
+            if (!drag || event.pointerId !== drag.id) {
+                return;
+            }
+            const delta = (event.clientX - drag.x) / drag.scale;
+            if (!moved && Math.abs(delta) < 4) {
+                return;
+            }
+            if (!moved) {
+                moved = true;
+                palette.setPointerCapture(event.pointerId);
+                this.tooltip.hidden = true;
+            }
+            palette.scrollLeft = drag.scroll - delta;
+            event.preventDefault();
+        });
+        const end = (event: PointerEvent) => {
+            if (drag?.id === event.pointerId) {
+                drag = undefined;
+            }
+        };
+        palette.addEventListener("pointerup", end);
+        palette.addEventListener("pointercancel", end);
+        palette.addEventListener("lostpointercapture", end);
+        palette.addEventListener("pointerleave", () => {
+            if (!moved) {
+                drag = undefined;
+            }
+        });
+        palette.addEventListener("click", event => {
+            if (moved && event.detail !== 0) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+            moved = false;
+        }, {capture: true});
+        palette.addEventListener("wheel", (event: WheelEvent) => {
+            if (event.ctrlKey || event.metaKey || palette.scrollWidth <= palette.clientWidth) {
+                return;
+            }
+            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+            if (delta) {
+                const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+                    event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
+                palette.scrollLeft += delta * unit;
+                event.preventDefault();
+            }
+        }, {passive: false});
         const row = createElement("div", "mindmap-view__palette-row");
         row.style.setProperty("--mindmap-palette-columns", String(columns - controls.length));
         row.style.setProperty("--mindmap-toolbar-columns", String(columns));
@@ -3965,7 +4025,7 @@ export class ListMindmapView {
             slider.value = String(panel.slider);
             slider.setAttribute("aria-label", this.label("width"));
             slider.dataset.widthControl = "slider";
-            const width = createElement("input", "b3-text-field b3-text-field--size");
+            const width = createElement("input", "b3-text-field b3-text-field--small");
             width.type = "number";
             width.min = "32";
             width.step = "1";

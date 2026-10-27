@@ -1052,7 +1052,9 @@
 
     .b3-text-field {
       grid-column: span 2;
-      width: 100%;
+      // 两侧控件按相同外边界排列，滑块左右留白随列宽保持一致。
+      width: calc(50% + 26px);
+      max-width: 100%;
       min-width: 0;
     }
 
@@ -1060,6 +1062,8 @@
       grid-column: span 4;
       width: 100%;
       min-width: 0;
+      margin: 0;
+      box-sizing: border-box;
     }
 
     .color__square {

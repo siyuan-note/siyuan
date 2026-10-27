@@ -78,7 +78,7 @@ func queryAssetContentRawStmt(stmt string, args []any, limit int) (ret []map[str
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -185,7 +185,7 @@ func selectAssetContentsRawStmt(stmt string, args []any, limit int) (ret []*Asse
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}

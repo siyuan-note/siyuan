@@ -445,7 +445,7 @@ func SelectBlocksRawStmtArgsInBoxContext(ctx context.Context, stmt string, args 
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}
@@ -768,7 +768,7 @@ func SelectBlocksRawStmtNoParseInBox(stmt string, limit int, boxID string) (ret 
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}
@@ -896,7 +896,7 @@ func queryRawStmtForBox(boxID, stmt string, limit int) (ret []map[string]any, er
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -942,7 +942,7 @@ func queryRawStmtArgsForBoxContext(ctx context.Context, boxID, stmt string, args
 		}
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -987,7 +987,7 @@ func queryRawStmtArgsForBox(boxID, stmt string, args []any, limit int) (ret []ma
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}

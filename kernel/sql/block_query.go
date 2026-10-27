@@ -658,7 +658,7 @@ func queryRawStmtArgs(stmt string, args []any, limit int) (ret []map[string]any,
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -712,7 +712,7 @@ func SelectBlocksRawStmtArgs(stmt string, args []any, limit int) (ret []*Block) 
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}
@@ -857,7 +857,7 @@ func selectBlocksRawStmtNoParseWithQuery(stmt string, limit int, boxID string, q
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}

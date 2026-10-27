@@ -10,7 +10,7 @@ const sources = () => {
     }).outputText;
     return {
         clipboard: compile("protyle/util/markdownClipboard.ts"),
-        mathPaste: compile("protyle/util/markdownMathPaste.ts"),
+        mathPaste: compile("protyle/util/mathPaste.ts"),
         paste: compile("protyle/util/paste.ts"),
         pictureImages: compile("protyle/util/pictureImages.ts"),
         localAssets: compile("protyle/upload/htmlLocalAssets.ts"),
@@ -113,7 +113,7 @@ const runCases = async source => {
         const mocks = {
             "../../constants": {Constants: {ZWSP: "\u200b"}},
             "./markdownClipboard": clipboard,
-            "./markdownMathPaste": load(source.mathPaste),
+            "./mathPaste": load(source.mathPaste),
             "./pictureImages": load(source.pictureImages),
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => restricted ? value => value : undefined,
@@ -222,6 +222,22 @@ const runCases = async source => {
             }
         }
         for (const enabled of [true, false]) {
+            for (const preserve of [true, false]) {
+                const restricted = await paste(mobile, preserve, true, undefined, false, {
+                    html: "<p><strong>\\(x+y\\)</strong></p><p>\\[z\\]</p><pre><code>\\(code\\)</code></pre>",
+                    text: "\\(x+y\\)\n\n\\[z\\]\n\n`\\(code\\)`", enabled,
+                });
+                const root = document.createElement("div");
+                let dom = restricted.checkedBlockDOM;
+                for (let round = 0; round < 3; round++) {
+                    root.innerHTML = dom;
+                    check.equal(root.querySelectorAll('[data-type~="inline-math"]').length, enabled ? 1 : 0);
+                    check.equal(root.querySelectorAll('[data-type="NodeMathBlock"]').length, enabled ? 1 : 0);
+                    check.ok(root.textContent.includes("code"));
+                    dom = lute.SpinBlockDOM(dom);
+                }
+                check.doesNotMatch(lute.Md2BlockDOM("\\(typed\\)"), /data-type="inline-math"/);
+            }
             for (const html of ["", "<p>\\(x+y\\)</p><p>\\[z\\]</p>"]) {
                 const externalMath = await paste(mobile, false, false, undefined, false,
                     {html, text: "\\(x+y\\)\n\n\\[z\\]", enabled});

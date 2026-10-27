@@ -264,6 +264,8 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 
 	// 中间格式已经对 HTML 文本编码，重解析时保留实体，避免将正文中的标签当作 DOM 渲染。
 	luteEngine.ParseOptions.KeepEscaped = true
+	// HTML 入口已完成公式归一化，避免再次解释链接等受保护区域中的替代分隔符。
+	luteEngine.SetLatexMath(false)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && ast.NodeIFrame == n.Type {

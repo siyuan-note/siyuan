@@ -448,6 +448,8 @@ github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490 h1:z8m0SaVN/9r
 github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490/go.mod h1:t3Tmt3DgQx0zqJmrckszJ+JBZ7iJrD1Ktp8FDBQ249E=
 github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754 h1:6QYpy7s5HlRSge09TyM/mT0vz1RDcWYZdkxEh7hmbH4=
 github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754/go.mod h1:/N7+N2CsZ0nleNPpP3b+06Bzqvuhy6GUmLY7Kug/zT0=
+github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f h1:XR9uI0hsYkunhrT9OxRB7X88iiWFUQlMzlxzGDQ08pU=
+github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f/go.mod h1:/N7+N2CsZ0nleNPpP3b+06Bzqvuhy6GUmLY7Kug/zT0=
 github.com/smallnest/chanx v1.2.0 h1:RLyldZBbQZ4O0dSvdkTMHo4+mDw20Bc1jXXTHf+ymZo=
 github.com/smallnest/chanx v1.2.0/go.mod h1:+4nWMF0+CqEcU74SnX2NxaGqZ8zX4pcQ8Jcs77DbX5A=
 github.com/soheilhy/cmux v0.1.5 h1:jjzc5WVemNEDTLwv9tlmemhC73tI08BNOIGwBOo10Js=

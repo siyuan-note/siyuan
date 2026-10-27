@@ -281,7 +281,7 @@ func (tx *Transaction) rollbackDocumentSources() {
 	// Rebuild from actual authenticated sources, including failure before the first save.
 	// Queue replacement after any already-enqueued partial saves so SQL converges to the rollback.
 	for _, file := range j.Files {
-		if file.Kind == "relations" {
+		if file.Kind == "relations" || file.Kind == "flashcard" {
 			continue
 		}
 		if file.Kind == "database" {

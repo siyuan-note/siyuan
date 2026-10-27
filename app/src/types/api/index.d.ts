@@ -6932,6 +6932,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * waits for the document and deck transaction; persistence or commit
+     * failures return code -1 with null data instead of reporting an unsaved deck.
+     */
     "/api/riff/addRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7012,6 +7016,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * waits for the document and deck transaction; persistence or
+     * commit failures return code -1 with null data. Empty deckID removes from all decks.
+     */
     "/api/riff/removeRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

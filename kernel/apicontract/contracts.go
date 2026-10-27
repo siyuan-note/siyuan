@@ -1029,7 +1029,13 @@ var SkipReviewRiffCard = define[RiffCardRequest, Null]("skipReviewRiffCard", "/a
 var GetNotebookRiffDueCards = define[RiffNotebookDueCardsRequest, RiffDueCardsData]("getNotebookRiffDueCards", "/api/riff/getNotebookRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetTreeRiffDueCards = define[RiffTreeDueCardsRequest, RiffDueCardsData]("getTreeRiffDueCards", "/api/riff/getTreeRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetRiffDueCards = define[RiffDueCardsRequest, RiffDueCardsData]("getRiffDueCards", "/api/riff/getRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveRiffCards waits for the document and deck transaction; persistence or
+// commit failures return code -1 with null data. Empty deckID removes from all decks.
 var RemoveRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("removeRiffCards", "/api/riff/removeRiffCards", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// AddRiffCards waits for the document and deck transaction; persistence or commit
+// failures return code -1 with null data instead of reporting an unsaved deck.
 var AddRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("addRiffCards", "/api/riff/addRiffCards", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenameRiffDeck = define[RenameRiffDeckRequest, Null]("renameRiffDeck", "/api/riff/renameRiffDeck", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveRiffDeck = define[RiffDeckRequest, Null]("removeRiffDeck", "/api/riff/removeRiffDeck", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

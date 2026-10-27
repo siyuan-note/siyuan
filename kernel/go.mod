@@ -81,7 +81,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9
 	github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de
 	github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490
-	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
+	github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f
 	github.com/smallnest/chanx v1.2.0
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cast v1.10.0

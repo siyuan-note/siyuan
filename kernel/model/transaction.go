@@ -2808,6 +2808,9 @@ type Transaction struct {
 	sourceWatchers                []func()
 	sourceDatabaseBefore          map[string]*documentSourceFile
 	sourceRelationBoundaries      map[string]bool
+	flashcardLocked               bool
+	flashcardBefore               map[string]*flashcardDeckBefore
+	writeFlashcardFile            func(string, []byte, []byte) error
 	attributeViewRollback         *attributeViewRollback
 	attributeViewAutomations      *attributeViewAutomationState
 	pushAutomationMessage         func(string, int) string
@@ -2975,6 +2978,14 @@ func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
 		if err = tx.rememberDocumentSource(tree); err != nil {
 			return err
+		}
+	}
+	// Persist each staged deck only once, with write-ahead recovery for both files.
+	for id := range tx.flashcardBefore {
+		if deck := Decks[id]; deck != nil {
+			if err = tx.saveFlashcardDeck(deck); err != nil {
+				return err
+			}
 		}
 	}
 	if tx.attributeViewDeletionErr != nil {
@@ -3175,6 +3186,7 @@ func (tx *Transaction) commit() (err error) {
 // releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
 func (tx *Transaction) releaseCommittedResources() {
 	tx.releaseDocumentSources(true)
+	tx.finishFlashcardMutation(false)
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.indexChanges = nil
 	tx.mindmapSummarySiblings = nil
@@ -3216,6 +3228,7 @@ func (tx *Transaction) rollback() {
 		treenode.SetBlockTreePath(tx.templateDocTreeRootSnapshot)
 	}
 	tx.rollbackDocumentSources()
+	tx.finishFlashcardMutation(true)
 	tx.releaseDocumentSources(false)
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil

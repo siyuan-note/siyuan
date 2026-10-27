@@ -157,6 +157,7 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	testAPIContractListConversion(t, engine, docID)
 	testAPIContractTransactionCompletion(t, engine, docID, paragraphID)
 	testAPIContractHistoryQueueOrder(t, engine, docID, paragraphID)
+	testAPIContractRiffMutations(t, paragraphID)
 	for _, entry := range []struct {
 		path, id, scope string
 		code            int

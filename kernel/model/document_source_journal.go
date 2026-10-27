@@ -30,6 +30,15 @@ type documentSourceFile struct {
 }
 
 func (file *documentSourceFile) filename() (string, error) {
+	if file.Kind == "flashcard" {
+		name := path.Base(file.Path)
+		extension := path.Ext(name)
+		id := strings.TrimSuffix(name, extension)
+		if file.Box != "" || !ast.IsNodeIDPattern(id) || (extension != ".deck" && extension != ".cards") || file.Path != "/storage/riff/"+name {
+			return "", errors.New("invalid flashcard recovery path")
+		}
+		return filepath.Join(util.DataDir, "storage", "riff", name), nil
+	}
 	if file.Kind == "relations" {
 		if (file.Box != "" && !ast.IsNodeIDPattern(file.Box)) || file.Path != "/storage/av/relations.msgpack" {
 			return "", errors.New("invalid database relation recovery path")

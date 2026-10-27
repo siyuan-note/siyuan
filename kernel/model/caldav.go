@@ -413,6 +413,11 @@ func (c *Calendars) ListCalendarObjects(calendarPath string, req *caldav.Calenda
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
+	return c.listCalendarObjects(calendarPath, req)
+}
+
+// listCalendarObjects requires c.lock to be held by the caller.
+func (c *Calendars) listCalendarObjects(calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
 	var calendar *Calendar
 	if value, ok := c.calendars.Load(calendarPath); ok {
 		calendar = value.(*Calendar)
@@ -448,7 +453,7 @@ func (c *Calendars) QueryCalendarObjects(calendarPath string, query *caldav.Cale
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	calendarObjects, err = c.ListCalendarObjects(calendarPath, &query.CompRequest)
+	calendarObjects, err = c.listCalendarObjects(calendarPath, &query.CompRequest)
 	if err != nil {
 		return
 	}

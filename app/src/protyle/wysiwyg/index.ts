@@ -4983,10 +4983,15 @@ export class WYSIWYG {
                 if (item.tagName !== "DIV") {
                     return;
                 }
-                if (!tableElement || item !== tableElement) {
-                    item.querySelector(".table__select").removeAttribute("style");
+                // 脑图等只读预览中的表格不携带选区控件。
+                const tableSelectElement = item.querySelector(".table__select");
+                if (!tableSelectElement) {
+                    return;
                 }
-                if (tableElement && tableElement === item && item.querySelector(".table__select").getAttribute("style")) {
+                if (!tableElement || item !== tableElement) {
+                    tableSelectElement.removeAttribute("style");
+                }
+                if (tableElement && tableElement === item && tableSelectElement.getAttribute("style")) {
                     // 防止合并单元格的菜单消失
                     event.stopPropagation();
                 }

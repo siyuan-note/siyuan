@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-vcard"
+	"github.com/emersion/go-webdav/caldav"
+	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -20,6 +23,8 @@ type davPersistenceFixture struct {
 	load    func() error
 	loaded  func() bool
 	setPath func(string)
+	handler http.Handler
+	urlPath string
 }
 
 func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
@@ -34,6 +39,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 			t.Fatal(err)
 		}
 		return davPersistenceFixture{
+			handler: &caldav.Handler{Prefix: CalDavPrincipalsPath, Backend: &caldavPutTestBackend{store: store}}, urlPath: objectPath,
 			file: DavPath2DirectoryPath(objectPath), load: store.Load,
 			loaded: func() bool { return store.loaded },
 			put: func(name string) error {
@@ -65,6 +71,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 		t.Fatal(err)
 	}
 	return davPersistenceFixture{
+		handler: &carddav.Handler{Prefix: CardDavPrincipalsPath, Backend: &carddavPutTestBackend{store: store}}, urlPath: objectPath,
 		file: DavPath2DirectoryPath(objectPath), load: store.Load,
 		loaded: func() bool { return store.loaded },
 		put: func(name string) error {

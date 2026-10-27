@@ -378,7 +378,15 @@ func (c *Calendars) PutCalendarObject(objectPath string, calendarData *ical.Cale
 		return
 	}
 
-	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
+	if opts != nil {
+		etag := ""
+		if value, ok := calendar.Objects.Load(objectID); ok {
+			etag = value.(*CalendarObject).Data.ETag
+		}
+		if err = checkDAVConditions(etag, opts.IfMatch, opts.IfNoneMatch); err != nil {
+			return
+		}
+	}
 
 	// Do not mutate a cached object until its replacement is persisted.
 	object := &CalendarObject{

@@ -18,13 +18,16 @@ package model
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/88250/gulu"
+	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/logging"
@@ -32,6 +35,29 @@ import (
 )
 
 var writeDAVFile = gulu.File.WriteFileSafer
+
+// Check preconditions while holding the collection lock, before any mutation.
+func checkDAVConditions(etag string, ifMatch, ifNoneMatch webdav.ConditionalMatch) error {
+	if ifMatch.IsSet() {
+		matched, err := ifMatch.MatchETag(etag)
+		if err != nil {
+			return webdav.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if !matched {
+			return webdav.NewHTTPError(http.StatusPreconditionFailed, errors.New("If-Match condition failed"))
+		}
+	}
+	if ifNoneMatch.IsSet() {
+		matched, err := ifNoneMatch.MatchETag(etag)
+		if err != nil {
+			return webdav.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if matched {
+			return webdav.NewHTTPError(http.StatusPreconditionFailed, errors.New("If-None-Match condition failed"))
+		}
+	}
+	return nil
+}
 
 // PathJoinWithSlash joins the elements to a path with slash ('/') character
 func PathJoinWithSlash(elems ...string) string {

@@ -497,7 +497,15 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 		return
 	}
 
-	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
+	if opts != nil {
+		etag := ""
+		if value, ok := addressBook.Addresses.Load(addressID); ok {
+			etag = value.(*AddressObject).Data.ETag
+		}
+		if err = checkDAVConditions(etag, opts.IfMatch, opts.IfNoneMatch); err != nil {
+			return
+		}
+	}
 
 	// Do not mutate a cached object until its replacement is persisted.
 	address := &AddressObject{

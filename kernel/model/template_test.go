@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -31,6 +32,58 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestRenderTemplateRichTableReferencesSurviveDOM(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	const rootID = "20260901000000-root001"
+	const blockID = "20260901000001-block01"
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	engine := NewLute()
+	tree := parse.Parse("", []byte(fmt.Sprintf("Internal target\n{: id=\"%s\"}\n\n| Header |\n| --- |\n| Cell |\n\n{: id=\"%s\" type=\"doc\"}", blockID, rootID)), engine.ParseOptions)
+	cell := tree.Root.ChildrenByType(ast.NodeTable)[0].LastChild.FirstChild
+	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: fmt.Sprintf(
+		"((%s 'root')) ((%s 'internal')) ((%s 'external')) [root link](siyuan://blocks/%s) [internal link](siyuan://blocks/%s)",
+		rootID, blockID, fixture.targetID, rootID, blockID)}
+	if err := treenode.RefreshTableCellRichProjection(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	markdown, _ := lute.FormatNodeSync(tree.Root, engine.ParseOptions, engine.RenderOptions)
+	templatePath := writeTemplateDocTreeTestFile(t, string(markdown))
+	for _, mode := range []TemplateRenderMode{TemplateRenderModePreview, TemplateRenderModeEditorInsert, TemplateRenderModeContent} {
+		t.Run(string(mode), func(t *testing.T) {
+			rendered, dom, _, err := RenderTemplateWithMode(templatePath, fixture.childID, mode)
+			if err != nil {
+				t.Fatal(err)
+			}
+			internalID := rendered.Root.FirstChild.ID
+			if internalID == "" || internalID == blockID {
+				t.Fatal("internal target ID was not regenerated")
+			}
+			restored := engine.BlockDOM2Tree(dom)
+			refs, links := map[string]string{}, map[string]string{}
+			ast.Walk(restored.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && node.IsTextMarkType("block-ref") {
+					refs[node.TextMarkTextContent] = node.TextMarkBlockRefID
+				}
+				if entering && treenode.IsBlockLink(node) {
+					links[node.TextMarkTextContent] = node.TextMarkAHref
+				}
+				return ast.WalkContinue
+			})
+			for text, want := range map[string]string{"root": fixture.sourceID, "internal": internalID, "external": fixture.targetID} {
+				if refs[text] != want {
+					t.Errorf("reference %q: got %q, want %q", text, refs[text], want)
+				}
+			}
+			for text, want := range map[string]string{"root link": fixture.sourceID, "internal link": internalID} {
+				if links[text] != "siyuan://blocks/"+want {
+					t.Errorf("link %q: got %q, want %q", text, links[text], want)
+				}
+			}
+		})
+	}
+}
 
 func TestRenderTemplateMapsDocumentReferenceToTargetRoot(t *testing.T) {
 	fixture := setupFileOperationTest(t)

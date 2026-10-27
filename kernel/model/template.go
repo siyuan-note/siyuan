@@ -1212,6 +1212,10 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 		}
 		return ast.WalkContinue
 	})
+	// 富文本单元格由源内容生成 DOM，先将引用投影中的改写同步回源。
+	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
+		return
+	}
 	for _, n := range nodesNeedAppendChild {
 		if ast.NodeBlockquote == n.Type {
 			n.FirstChild.InsertAfter(treenode.NewParagraph(""))

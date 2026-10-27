@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -200,7 +199,7 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 		return nil, errors.New("parentID or path is required")
 	}
 	if create {
-		hPath = parentDir(hPath)
+		hPath = util.ParentHPath(hPath)
 	}
 	bt, err := model.ResolveLegacyDocumentPath(notebook, hPath, create)
 	if err != nil {
@@ -214,14 +213,6 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 		target.id = &bt.ID
 	}
 	return target, nil
-}
-
-func parentDir(p string) string {
-	i := strings.LastIndex(p, "/")
-	if i <= 0 {
-		return "/"
-	}
-	return p[:i]
 }
 
 func documentList(args map[string]any) (CallToolResult, error) {
@@ -337,7 +328,7 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Search results matching '%s' (%d):\n\n", keyword, len(docs))
 	for _, d := range docs {
-		typ, id, name := documentSearchDisplayFields(d)
+		typ, id, name := model.SearchDocDisplayFields(d)
 		if typ == "NOTEBOOK" {
 			fmt.Fprintf(&sb, "- [%s] %s (id: %s, hPath: %s)\n", typ, name, id, d["hPath"])
 		} else {
@@ -345,13 +336,6 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
-}
-
-func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	if doc["path"] == "/" {
-		return "NOTEBOOK", doc["box"], doc["title"]
-	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), doc["title"]
 }
 
 func documentInfo(args map[string]any) (CallToolResult, error) {

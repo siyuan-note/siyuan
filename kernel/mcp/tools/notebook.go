@@ -248,7 +248,7 @@ func notebookRandomIcon(args map[string]any) (CallToolResult, error) {
 	fmt.Fprintf(&sb, "Randomized icons for %d notebook(s):\n", len(targets))
 	for _, nb := range targets {
 		oldIcon := nb.Icon
-		newIcon := randomEmoji()
+		newIcon := util.RandomBuiltinEmoji()
 		model.SetBoxIcon(nb.ID, newIcon)
 		fmt.Fprintf(&sb, "- %s (id: %s): %s -> %s\n", nb.Name, nb.ID, oldIcon, newIcon)
 	}

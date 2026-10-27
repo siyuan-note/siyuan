@@ -27,6 +27,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -54,7 +55,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	// siyuan.storage.watcher.remove(path) -> void
 	bindStorageWatcherRemove(p, rt, watcher, resolvePath)
 
-	lo.Must0(ObjectFreeze(rt, watcher))
+	lo.Must0(gojaext.Freeze(rt, watcher))
 
 	storage := rt.NewObject()
 
@@ -73,7 +74,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	// siyuan.storage.watcher
 	lo.Must0(storage.Set("watcher", watcher))
 
-	lo.Must0(ObjectFreeze(rt, storage))
+	lo.Must0(gojaext.Freeze(rt, storage))
 
 	lo.Must0(siyuan.Set("storage", storage))
 	return

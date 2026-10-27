@@ -25,6 +25,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // randomValuesMaxLength 是 getRandomValues 单次可填充的最大字节数，与浏览器一致。
@@ -66,7 +67,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	subtle := lo.Must(host.newSubtleObject(rt))
 	lo.Must0(cryptoObj.Set("subtle", subtle))
 
-	lo.Must0(ObjectFreeze(rt, cryptoObj))
+	lo.Must0(gojaext.Freeze(rt, cryptoObj))
 	lo.Must0(rt.GlobalObject().Set("crypto", cryptoObj))
 	return
 }
@@ -74,7 +75,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime) (err error) {
 // randomValuesTarget 校验 getRandomValues 的参数并返回可写入的字节视图。
 // 规范只接受整数类型的 TypedArray，浮点数组与 DataView 返回 TypeMismatchError。
 func randomValuesTarget(rt *goja.Runtime, value goja.Value) ([]byte, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, crypto.NewError(crypto.ErrNameTypeMismatch, "getRandomValues requires an integer TypedArray")
 	}
 
@@ -190,7 +191,7 @@ func (h *cryptoHost) newSubtleObject(rt *goja.Runtime) (*goja.Object, error) {
 		return nil, err
 	}
 
-	if err := ObjectFreeze(rt, subtle); err != nil {
+	if err := gojaext.Freeze(rt, subtle); err != nil {
 		return nil, err
 	}
 	return subtle, nil

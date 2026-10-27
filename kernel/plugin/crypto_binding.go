@@ -23,6 +23,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // cryptoHost 保存注入时捕获的运行时内建对象与 CryptoKey 原型，
@@ -173,7 +174,7 @@ func (h *cryptoHost) newCryptoKeyObject(rt *goja.Runtime, key *crypto.Key) (*goj
 		if err := hash.Set("name", rt.ToValue(key.Algorithm.Hash)); err != nil {
 			return nil, err
 		}
-		if err := ObjectFreeze(rt, hash); err != nil {
+		if err := gojaext.Freeze(rt, hash); err != nil {
 			return nil, err
 		}
 		if err := algorithm.Set("hash", hash); err != nil {
@@ -200,7 +201,7 @@ func (h *cryptoHost) newCryptoKeyObject(rt *goja.Runtime, key *crypto.Key) (*goj
 			return nil, err
 		}
 	}
-	if err := ObjectFreeze(rt, algorithm); err != nil {
+	if err := gojaext.Freeze(rt, algorithm); err != nil {
 		return nil, err
 	}
 
@@ -210,7 +211,7 @@ func (h *cryptoHost) newCryptoKeyObject(rt *goja.Runtime, key *crypto.Key) (*goj
 			return nil, err
 		}
 	}
-	if err := ObjectFreeze(rt, usages); err != nil {
+	if err := gojaext.Freeze(rt, usages); err != nil {
 		return nil, err
 	}
 
@@ -223,7 +224,7 @@ func (h *cryptoHost) newCryptoKeyObject(rt *goja.Runtime, key *crypto.Key) (*goj
 
 // cryptoKeyOf 从 JS 值中取出算法层密钥，只接受由内核创建的 CryptoKey 对象。
 func cryptoKeyOf(rt *goja.Runtime, value goja.Value, name string) (*crypto.Key, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, crypto.NewError(crypto.ErrNameType, "%s must be a CryptoKey", name)
 	}
 	object := value.ToObject(rt)
@@ -262,7 +263,7 @@ func (h *cryptoHost) cryptoBytesOf(rt *goja.Runtime, value goja.Value, name stri
 
 // isBufferSource 判断值是 ArrayBuffer 还是 ArrayBuffer 视图。
 func (h *cryptoHost) isBufferSource(_ *goja.Runtime, value goja.Value) (bool, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return false, nil
 	}
 	if _, ok := value.Export().(goja.ArrayBuffer); ok {

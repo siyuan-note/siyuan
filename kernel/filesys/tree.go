@@ -388,7 +388,7 @@ type documentHeader struct {
 }
 
 func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	mode, err := DocumentAddressingMode(boxID)
 	if err != nil {
 		return nil, err
@@ -397,7 +397,7 @@ func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
 }
 
 func readDocumentHeaderInMode(absPath string, strict bool, mode int) (*documentHeader, error) {
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err
@@ -440,7 +440,7 @@ var ErrInvalidDocIAL = errors.New("invalid document properties")
 func DocIAL(absPath string) (ret map[string]string, err error) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
 	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	mode, err := DocumentAddressingMode(boxID)
 	if err != nil {
 		return nil, err

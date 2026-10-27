@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
+
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
@@ -65,7 +67,7 @@ func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(logger.Set("warn", rt.ToValue(loggerWrapper(p, logging.LogWarnf))))
 	lo.Must0(logger.Set("error", rt.ToValue(loggerWrapper(p, logging.LogErrorf))))
 
-	lo.Must0(ObjectFreeze(rt, logger))
+	lo.Must0(gojaext.Freeze(rt, logger))
 
 	lo.Must0(siyuan.Set("logger", logger))
 	return

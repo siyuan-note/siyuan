@@ -399,7 +399,7 @@ var documentSearchCmd = &cobra.Command{
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "TYPE\tID\tNAME\tHPATH")
 			for _, d := range docs {
-				typ, id, name := documentSearchDisplayFields(d)
+				typ, id, name := model.SearchDocDisplayFields(d)
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", typ, id, name, d["hPath"])
 			}
 			w.Flush()
@@ -407,13 +407,6 @@ var documentSearchCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	if "/" == doc["path"] {
-		return "NOTEBOOK", doc["box"], doc["title"]
-	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), doc["title"]
 }
 
 func printDocumentTable(files []*model.File) {

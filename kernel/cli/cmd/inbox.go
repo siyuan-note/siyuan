@@ -144,11 +144,11 @@ var inboxConvertCmd = &cobra.Command{
 		// 解析目标父路径（hPath→fsPath）：hPath 指向新文档将要落入的父容器，
 		// 其父目录必须已存在；不传或传 "/" 时落到笔记本根目录。
 		parentPath := "/"
-		parentDir := parentDir(hPath)
-		if parentDir != "/" {
-			bt := treenode.GetBlockTreeRootByHPath(notebook, parentDir)
+		parentHPath := util.ParentHPath(hPath)
+		if parentHPath != "/" {
+			bt := treenode.GetBlockTreeRootByHPath(notebook, parentHPath)
 			if bt == nil {
-				return fmt.Errorf("parent path not found: %s", parentDir)
+				return fmt.Errorf("parent path not found: %s", parentHPath)
 			}
 			parentPath = strings.TrimSuffix(bt.Path, ".sy")
 		}
@@ -257,15 +257,6 @@ func parseShorthandIDs(s string) []string {
 		}
 	}
 	return out
-}
-
-// parentDir 返回路径的父目录：去掉最后一个 "/" 段，根路径及单段路径返回 "/"。
-func parentDir(p string) string {
-	i := strings.LastIndex(p, "/")
-	if i <= 0 {
-		return "/"
-	}
-	return p[:i]
 }
 
 func init() {

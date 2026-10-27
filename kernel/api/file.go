@@ -59,7 +59,7 @@ func copyDecryptedAsset(src, dest string) error {
 	if gulu.File.IsSubPath(util.WorkspaceDir, dest) {
 		return fmt.Errorf("refuse to write decrypted asset inside workspace")
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(src)
+	boxID := util.BoxIDFromDataPath(src)
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return fmt.Errorf("source is not an encrypted asset")
 	}
@@ -382,7 +382,7 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
 		if !rejectEncryptedBoxPath(dest) && !gulu.File.IsSubPath(util.WorkspaceDir, dest) {
 			// dest 在工作区外且非加密 box，允许解密后复制
-			boxID := model.ExtractBoxIDFromAssetsPath(src)
+			boxID := util.BoxIDFromDataPath(src)
 			if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 				ret.Code = -1
 				ret.Msg = model.Conf.Language(314)

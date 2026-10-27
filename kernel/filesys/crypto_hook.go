@@ -18,7 +18,6 @@ package filesys
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -126,25 +125,4 @@ func SyAAD(boxID, relativePath string) (string, error) {
 		return "", err
 	}
 	return "siyuan:file:" + boxID + ":" + base, nil
-}
-
-// docIALBoxID 从 .sy 绝对路径反推 boxID，供 DocIAL 判断是否需整体解密。
-// 路径形如 <DataDir>/<boxID>/...；若不在 DataDir 下或 boxID 非合法 ID 模式，返回空串。
-func docIALBoxID(absPath string) string {
-	absPath = filepath.ToSlash(absPath)
-	dataDir := filepath.ToSlash(util.DataDir)
-	rel, err := filepath.Rel(dataDir, absPath)
-	if err != nil {
-		return ""
-	}
-	rel = filepath.ToSlash(rel)
-	if strings.HasPrefix(rel, "..") || rel == "." || rel == "" {
-		return ""
-	}
-	parts := strings.SplitN(rel, "/", 2)
-	boxID := parts[0]
-	if !ast.IsNodeIDPattern(boxID) {
-		return ""
-	}
-	return boxID
 }

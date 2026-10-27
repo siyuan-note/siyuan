@@ -23,7 +23,7 @@ func checkLivePhotoAsset(c *gin.Context, absPath string) error {
 		!model.CheckAbsPathAccessableByPublishAccess(c, absPath, model.GetPublishAccess())) {
 		return errors.New("Live Photo asset access denied")
 	}
-	return holdEncryptedBoxRequest(c, model.ExtractBoxIDFromAssetsPath(absPath))
+	return holdEncryptedBoxRequest(c, util.BoxIDFromDataPath(absPath))
 }
 
 func checkLivePhotoSession(c *gin.Context, id string) error {

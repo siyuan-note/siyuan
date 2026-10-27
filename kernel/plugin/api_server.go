@@ -19,6 +19,8 @@ package plugin
 import (
 	"fmt"
 
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
+
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 )
@@ -49,13 +51,13 @@ func injectServer(_ *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(private.Set(string(RequestTypeWS), ws))
 	lo.Must0(private.Set(string(RequestTypeSSE), es))
 
-	lo.Must0(ObjectFreeze(rt, private))
+	lo.Must0(gojaext.Freeze(rt, private))
 
 	server := rt.NewObject()
 
 	lo.Must0(server.Set("private", private))
 
-	lo.Must0(ObjectFreeze(rt, server))
+	lo.Must0(gojaext.Freeze(rt, server))
 
 	lo.Must0(siyuan.Set("server", server))
 	return

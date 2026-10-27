@@ -98,7 +98,7 @@ func PrepareRichClipboardAssets(assets []RichClipboardAsset) (ret *RichClipboard
 
 		destPath, ok := copied[absPath]
 		if !ok {
-			group := ExtractBoxIDFromAssetsPath(absPath)
+			group := util.BoxIDFromDataPath(absPath)
 			if group == "" {
 				group = richClipboardGlobalGroup
 			}

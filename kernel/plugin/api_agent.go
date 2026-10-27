@@ -27,6 +27,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -59,7 +60,7 @@ func injectAgent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 	// siyuan.agent.unregisterCapability(name) 返回 Promise<void>。
 	bindAgentUnregisterCapability(p, rt, agentAPI)
 
-	lo.Must0(ObjectFreeze(rt, agentAPI))
+	lo.Must0(gojaext.Freeze(rt, agentAPI))
 	lo.Must0(siyuan.Set("agent", agentAPI))
 	return
 }
@@ -145,7 +146,7 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 					return
 				}
 
-				if c := call.Argument(1); isJsValueNotNull(c) {
+				if c := call.Argument(1); gojaext.IsValueNotNull(c) {
 					configObj := c.ToObject(rt)
 					if configObj != nil {
 						if titleValue := configObj.Get("title"); goja.IsString(titleValue) {
@@ -161,7 +162,7 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 							err = fmt.Errorf("config.description is required and must be a string")
 							return
 						}
-						if inputSchemaValue := configObj.Get("inputSchema"); isJsValueNotNull(inputSchemaValue) {
+						if inputSchemaValue := configObj.Get("inputSchema"); gojaext.IsValueNotNull(inputSchemaValue) {
 							if inputSchema, err = jsCapabilitySchemaToGoSchema(rt, inputSchemaValue); err != nil {
 								return
 							}
@@ -169,17 +170,17 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 							err = fmt.Errorf("config.inputSchema is required")
 							return
 						}
-						if outputSchemaValue := configObj.Get("outputSchema"); isJsValueNotNull(outputSchemaValue) {
+						if outputSchemaValue := configObj.Get("outputSchema"); gojaext.IsValueNotNull(outputSchemaValue) {
 							if outputSchema, err = jsCapabilitySchemaToGoSchema(rt, outputSchemaValue); err != nil {
 								return
 							}
 						}
-						if effectsValue := configObj.Get("effects"); isJsValueNotNull(effectsValue) {
+						if effectsValue := configObj.Get("effects"); gojaext.IsValueNotNull(effectsValue) {
 							if effects, err = jsCapabilityEffectsToGoEffects(rt, effectsValue); err != nil {
 								return
 							}
 						}
-						if actionEffectsValue := configObj.Get("actionEffects"); isJsValueNotNull(actionEffectsValue) {
+						if actionEffectsValue := configObj.Get("actionEffects"); gojaext.IsValueNotNull(actionEffectsValue) {
 							if actionEffects, err = jsCapabilityActionEffectsToGoEffects(rt, actionEffectsValue); err != nil {
 								return
 							}

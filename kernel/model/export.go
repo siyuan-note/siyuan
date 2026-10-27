@@ -981,7 +981,7 @@ func copyExportResource(source, destination string) error {
 
 // copyExportFile 复制单个导出文件，并从加密资源容器恢复用户可见名称。
 func copyExportFile(source, destination string) error {
-	boxID := ExtractBoxIDFromAssetsPath(source)
+	boxID := util.BoxIDFromDataPath(source)
 	if boxID != "" && IsEncryptedBox(boxID) {
 		diskName := filepath.Base(source)
 		if originalName := LookupAssetOriginalName(boxID, diskName); originalName != "" {
@@ -1017,7 +1017,7 @@ func exportResourcesEncryptedBox(resourcePaths []string) (encryptedBoxID string,
 		if !util.IsAbsPathInWorkspace(resourceFullPath) {
 			return "", errors.New("resource path [" + resourcePath + "] is not in workspace")
 		}
-		boxID := ExtractBoxIDFromAssetsPath(resourceFullPath)
+		boxID := util.BoxIDFromDataPath(resourceFullPath)
 		if boxID == "" || !IsEncryptedBox(boxID) {
 			hasNormalResource = true
 			continue
@@ -2111,7 +2111,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		}
 		embedPath := absPath
 		if IsEncryptedAssetPath(absPath) {
-			assetBoxID := ExtractBoxIDFromAssetsPath(absPath)
+			assetBoxID := util.BoxIDFromDataPath(absPath)
 			plain, readErr := readAssetBytesInBox(assetBoxID, sourceURI, false)
 			if nil != readErr {
 				logging.LogWarnf("read encrypted asset [%s] failed: %s", sourceURI, readErr)
@@ -4627,7 +4627,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	}
 	sya := absPath + ".sya"
 	// 以实际资源所属笔记本认证标注密文，读取已有标注失败时保留源文件并中止导出。
-	assetBoxID := ExtractBoxIDFromAssetsPath(absPath)
+	assetBoxID := util.BoxIDFromDataPath(absPath)
 	var dek []byte
 	if IsEncryptedBox(assetBoxID) {
 		HoldBoxReadLock(assetBoxID)

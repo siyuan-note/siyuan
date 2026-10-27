@@ -19,6 +19,7 @@ package plugin
 import (
 	"github.com/dop251/goja"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // setKeyMethods 在 subtle 上设置密钥管理相关的方法。
@@ -210,7 +211,7 @@ func (h *cryptoHost) setKeyMethods(rt *goja.Runtime, subtle *goja.Object) error 
 func (h *cryptoHost) keyDataOf(rt *goja.Runtime, format crypto.KeyFormat, value goja.Value) (
 	data crypto.KeyData, err error) {
 	if format == crypto.FormatJWK {
-		if !isJsValueNotNull(value) {
+		if !gojaext.IsValueNotNull(value) {
 			err = crypto.NewError(crypto.ErrNameType, "keyData must be a JsonWebKey object")
 			return
 		}
@@ -237,7 +238,7 @@ func (h *cryptoHost) keyDataOf(rt *goja.Runtime, format crypto.KeyFormat, value 
 
 // optionalLengthOf 解析 deriveBits 的 length 参数，null 与 undefined 表示未指定。
 func optionalLengthOf(value goja.Value) (*int, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, nil
 	}
 

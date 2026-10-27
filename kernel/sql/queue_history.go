@@ -99,7 +99,7 @@ func FlushHistoryQueue() {
 			return
 		}
 
-		if err = commitHistoryTx(tx); err != nil {
+		if err = commitTx(tx); err != nil {
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
 		}

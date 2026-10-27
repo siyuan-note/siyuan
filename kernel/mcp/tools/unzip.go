@@ -19,7 +19,6 @@ package tools
 import (
 	"archive/zip"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -132,7 +131,7 @@ func extractGuardedArchive(zipAbs, destAbs string) error {
 		if err = authorizeArchiveEntry(destAbs, members[i].path, members[i].name); err != nil {
 			return err
 		}
-		if err = extractArchiveEntry(entry, members[i].path); err != nil {
+		if err = util.ExtractArchiveEntry(entry, members[i].path); err != nil {
 			return err
 		}
 	}
@@ -155,31 +154,4 @@ func authorizeArchiveEntry(destAbs, entryAbs, display string) error {
 		return fmt.Errorf("archive entry resolves outside destination [%s]", display)
 	}
 	return authorizePath(entryAbs, display)
-}
-
-func extractArchiveEntry(entry *zip.File, destination string) error {
-	if entry.FileInfo().IsDir() {
-		return os.MkdirAll(destination, 0755)
-	}
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
-	}
-	source, err := entry.Open()
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-	target, err := os.Create(destination)
-	if err != nil {
-		return err
-	}
-	_, copyErr := io.Copy(target, source)
-	closeErr := target.Close()
-	if copyErr != nil {
-		return copyErr
-	}
-	if closeErr != nil {
-		return closeErr
-	}
-	return os.Chtimes(destination, entry.Modified, entry.Modified)
 }

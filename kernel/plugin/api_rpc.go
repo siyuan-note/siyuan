@@ -22,6 +22,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -197,7 +198,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		return rt.ToValue(promise)
 	})))
 
-	lo.Must0(ObjectFreeze(rt, rpc))
+	lo.Must0(gojaext.Freeze(rt, rpc))
 
 	lo.Must0(siyuan.Set("rpc", rpc))
 	return

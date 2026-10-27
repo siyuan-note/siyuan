@@ -28,12 +28,12 @@ func EncryptedRawPathBoxID(absPath string) string {
 	if normalized, err := filepath.Abs(absPath); err == nil {
 		absPath = normalized
 	}
-	if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
+	if boxID := util.BoxIDFromDataPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
 		return boxID
 	}
 	resolved := util.ResolveLongestExistingParent(absPath)
 	if resolved != absPath {
-		if boxID := ExtractBoxIDFromAssetsPath(resolved); boxID != "" && IsEncryptedBox(boxID) {
+		if boxID := util.BoxIDFromDataPath(resolved); boxID != "" && IsEncryptedBox(boxID) {
 			return boxID
 		}
 	}

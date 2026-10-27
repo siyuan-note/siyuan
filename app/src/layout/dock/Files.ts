@@ -20,6 +20,8 @@ import {
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {restoreFileTreePaths} from "../../util/fileTreeRestore";
+import {saveOpenFileTreePaths} from "../../util/fileTreePaths";
+import {removeFileTreeItems} from "../../util/fileTreeRemove";
 import {openEmojiPanel} from "../../emoji";
 import {
     getFileTreeDefaultIconAttr,
@@ -1571,65 +1573,12 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private onRemove(data: IWebSocketData) {
-        // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
-        if (data.cmd === "closeBox" || data.cmd === "removeBox") {
-            setNoteBook((notebooks) => {
-                const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${"/"}"]`);
-                if (targetElement) {
-                    targetElement.parentElement.remove();
-                    if (data.cmd === "closeBox") {
-                        let closeHTML = "";
-                        notebooks.find(item => {
-                            if (item.closed) {
-                                closeHTML += this.genNotebook(item);
-                            }
-                        });
-                        this.closeElement.lastElementChild.innerHTML = closeHTML;
-                        const counterElement = this.closeElement.querySelector(".counter");
-                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
-                        this.closeElement.classList.remove("fn__none");
-                    }
-                }
-            });
-            if (data.cmd === "removeBox") {
-                const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
-                if (removeElement) {
-                    removeElement.remove();
-                    const counterElement = this.closeElement.querySelector(".counter");
-                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0") {
-                        this.closeElement.classList.add("fn__none");
-                    }
-                }
-            }
-            return;
-        }
-        data.data.ids.forEach((item: string) => {
-            const targetElement = this.element.querySelector(`li.b3-list-item[data-node-id="${item}"]`);
-            if (targetElement) {
-                // 子节点展开则删除
-                if (targetElement.nextElementSibling?.tagName === "UL") {
-                    targetElement.nextElementSibling.remove();
-                }
-                // 移除当前节点
-                const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
-                if (targetElement.parentElement.childElementCount === 1) {
-                    if (parentElement) {
-                        const iconElement = parentElement.querySelector("svg");
-                        iconElement.classList.remove("b3-list-item__arrow--open");
-                        if (parentElement.dataset.type !== "navigation-root" || parentElement.dataset.nodeId) {
-                            iconElement.parentElement.classList.add("fn__hidden");
-                        }
-                        parentElement.setAttribute("data-count", "0");
-                        this.updateDocActionElement(parentElement);
-                        syncFileTreeItemDefaultIcon(parentElement);
-                    }
-                    targetElement.parentElement.remove();
-                } else {
-                    targetElement.remove();
-                }
-            }
-        });
+        removeFileTreeItems({
+            element: this.element,
+            closeElement: this.closeElement,
+            genNotebook: (notebook) => this.genNotebook(notebook),
+            updateDocActionElement: (element) => this.updateDocActionElement(element),
+        }, data);
     }
 
     private onMount(data: IWebSocketData) {
@@ -2105,38 +2054,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private getOpenPaths() {
-        const filesPaths: IFilesPath[] = [];
-        this.element.querySelectorAll(".b3-list[data-url]").forEach((item: HTMLElement) => {
-            const notebookPaths: IFilesPath = {
-                notebookId: item.getAttribute("data-url"),
-                openPaths: []
-            };
-            item.querySelectorAll(".b3-list-item__arrow--open").forEach((openItem) => {
-                const liElement = hasClosestByTag(openItem, "LI");
-                if (liElement) {
-                    notebookPaths.openPaths.push(liElement.getAttribute("data-path"));
-                }
-            });
-            if (notebookPaths.openPaths.length > 0) {
-                for (let i = 0; i < notebookPaths.openPaths.length; i++) {
-                    for (let j = i + 1; j < notebookPaths.openPaths.length; j++) {
-                        if (notebookPaths.openPaths[j].startsWith(notebookPaths.openPaths[i].replace(".sy", ""))) {
-                            notebookPaths.openPaths.splice(i, 1);
-                            j--;
-                        }
-                    }
-                }
-                notebookPaths.openPaths.forEach((openPath, index) => {
-                    const nextPath = this.element.querySelector(`[data-url="${notebookPaths.notebookId}"] li[data-path="${openPath}"]`)?.nextElementSibling?.firstElementChild?.getAttribute("data-path");
-                    if (nextPath) {
-                        notebookPaths.openPaths[index] = nextPath;
-                    }
-                });
-                filesPaths.push(notebookPaths);
-            }
-        });
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS] = filesPaths;
-        setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
+        saveOpenFileTreePaths(this.element);
     }
 
     private genFileHTML(item: IFile) {

@@ -1764,20 +1764,6 @@ func beginHistoryTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func commitHistoryTx(tx *sql.Tx) (err error) {
-	if nil == tx {
-		logging.LogErrorf("tx is nil")
-		return errors.New("tx is nil")
-	}
-
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
-	}
-
-	closeTxPreparedStmts(tx)
-	return
-}
-
 func beginAssetContentTx() (tx *sql.Tx, err error) {
 	if tx, err = assetContentDB.Begin(); err != nil {
 		logging.LogErrorf("begin asset content tx failed: %s\n  %s", err, logging.ShortStack())
@@ -1785,20 +1771,6 @@ func beginAssetContentTx() (tx *sql.Tx, err error) {
 			os.Exit(logging.ExitCodeUnavailableDatabase)
 		}
 	}
-	return
-}
-
-func commitAssetContentTx(tx *sql.Tx) (err error) {
-	if nil == tx {
-		logging.LogErrorf("tx is nil")
-		return errors.New("tx is nil")
-	}
-
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
-	}
-
-	closeTxPreparedStmts(tx)
 	return
 }
 

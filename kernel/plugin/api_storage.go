@@ -291,7 +291,12 @@ func bindStoragePut(p *KernelPlugin, rt *goja.Runtime, storage *goja.Object, res
 				return
 			}
 
+			done, admissionErr := p.beginStorageWrite()
+			if admissionErr != nil {
+				return nil, admissionErr
+			}
 			go func() (result any, err error) {
+				defer done()
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.put: %v", r)
@@ -375,7 +380,12 @@ func bindStorageRemove(p *KernelPlugin, rt *goja.Runtime, storage *goja.Object, 
 				return
 			}
 
+			done, admissionErr := p.beginStorageWrite()
+			if admissionErr != nil {
+				return nil, admissionErr
+			}
 			go func() (result any, err error) {
+				defer done()
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.remove: %v", r)

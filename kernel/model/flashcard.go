@@ -1185,6 +1185,10 @@ func LoadFlashcards() {
 	}
 
 	Decks = map[string]*riff.Deck{}
+	// Reloaded decks start a new scheduling generation; undo/skip state from the
+	// old generation must not overwrite schedules received through synchronization.
+	reviewCardCache = map[string]riff.Card{}
+	skipCardCache = map[string]riff.Card{}
 
 	entries, err := os.ReadDir(riffSavePath)
 	if err != nil {

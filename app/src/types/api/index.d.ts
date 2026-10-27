@@ -5418,6 +5418,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。
+     * 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
+     * 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
+     * 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
+     */
     "/api/filetree/createDailyNote": {
         request: FileTreeDailyNoteRequestInput;
         response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5490,6 +5496,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
+     * 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
+     */
     "/api/filetree/getDailyNoteInfo": {
         request: DailyNoteInfoRequestInput;
         response: { "code": 0; "data": DailyNoteInfo | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };

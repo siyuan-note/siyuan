@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261027135536"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20261024164212"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-njydei7",
-				"updated": "20260809232000"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-y24gzqt",
-				"updated": "20260809232000"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -173,7 +173,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-4cz2avf",
-						"updated": "20260613180619"
+						"updated": "20261027135536"
 					},
 					"Children": [
 						{
@@ -181,17 +181,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180619-byb9lcr",
-								"updated": "20260613180619"
+								"updated": "20261027135536"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "strong",
-									"TextMarkTextContent": "First Open"
+									"TextMarkTextContent": "Opening behavior"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": When opening the diary for today, if a document for that date does not yet exist, the system creates one based on the configured save path and template; if it already exists, it opens directly"
+									"Data": ": The button and shortcut open the document at the name and location resolved from today's save path template, or create it if missing. They do not search by the daily note date attribute, so renaming or moving the original can cause another daily note to be created"
 								}
 							]
 						}
@@ -205,7 +205,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261008101708-b7c9jyj",
-				"updated": "20261024164212"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -343,12 +343,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-ma3a2a1",
-				"updated": "20261024164212"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Selecting a candidate reuses the daily note for that date in the target notebook, including moved or renamed documents that retain their daily note date attribute."
+					"Data": "Selecting a candidate first searches the target notebook by the daily note date attribute, including moved or renamed documents that retain it. If several match, the document at the template name and location is preferred; otherwise, the one with the smallest ID is used. If the ordinary button creates another daily note at that location, date candidates will prefer it. Neither entry point reapplies the content template when reusing a document."
 				}
 			]
 		},
@@ -357,12 +357,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-m4mro3d",
-				"updated": "20261024161816"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If none exists, the daily note settings are used to create it and insert a reference. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
+					"Data": "If no date attribute matches, the document at the template name and location is reused or created, and a reference is inserted. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
 				}
 			]
 		},

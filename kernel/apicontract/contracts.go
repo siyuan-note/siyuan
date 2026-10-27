@@ -1161,8 +1161,15 @@ var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDo
 // DuplicateDocTree evaluates block collection rules for every copied document and block, initializing only new rows.
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// CreateDailyNote 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。
+// 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
+// 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// GetDailyNoteInfo 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
 var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。

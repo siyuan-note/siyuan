@@ -797,6 +797,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				}
 			}
 		} else {
+			finishTitles := treenode.MaterializeInlineTitles(node)
 			var unlinks []*ast.Node
 			skipReplaceNodes := map[*ast.Node]struct{}{}
 			if replaceTypes["text"] {
@@ -1074,6 +1075,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			for _, unlink := range unlinks {
 				unlink.Unlink()
 			}
+			finishTitles()
 		}
 
 		if !seenRoots[tree.ID] {

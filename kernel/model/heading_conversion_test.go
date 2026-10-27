@@ -159,6 +159,9 @@ func testHeadingDocumentConversionFailuresPreserveSources(t *testing.T, boxID st
 		if indexed := treenode.GetBlockTreeInBox(heading.ID, boxID); indexed == nil || indexed.RootID != source.ID || indexed.Path != source.Path {
 			t.Fatal("failed heading conversion changed original block ownership")
 		}
+		if journals, err := readDocumentSourceJournals(); err != nil || len(journals) != 0 {
+			t.Fatalf("heading conversion compensation retained recovery journals: %v, %v", journals, err)
+		}
 	}
 	for _, failure := range []string{"write before", "write after", "remove"} {
 		source := newHPathTestDoc(t, boxID, "/", "Title/body", 2)
@@ -187,6 +190,9 @@ func testHeadingDocumentConversionFailuresPreserveSources(t *testing.T, boxID st
 		targetAfter, _ := os.ReadFile(headingConversionPath(target))
 		if !bytes.Equal(sourceBefore, sourceAfter) || !bytes.Equal(targetBefore, targetAfter) {
 			t.Fatal("failed document conversion did not preserve both original source files")
+		}
+		if journals, err := readDocumentSourceJournals(); err != nil || len(journals) != 0 {
+			t.Fatalf("document conversion compensation retained recovery journals: %v, %v", journals, err)
 		}
 	}
 	// 补偿前目标被其他写入更新时保留该更新，不回滚与本次转换无关的内容。

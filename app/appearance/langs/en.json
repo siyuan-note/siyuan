@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "Recognize LaTeX math delimiters when pasting and importing",
+	"mathDelimiterCompatibilityTip": "When enabled, automatically recognize \\(...\\) and \\[...\\] in pasted and imported content as inline and block math, respectively",
 	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",
 	"pdfAnnotationSaveFailed": "Unable to save PDF annotations. Reopen the PDF to load the latest annotations before editing again",
 	"documentTitleKeepLocal": "Save my title",

@@ -807,6 +807,11 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				}
 			}
 		} else {
+			finishRich, richErr := treenode.MaterializeTableCellRich(node)
+			if richErr != nil {
+				return richErr
+			}
+			finishTitles := treenode.MaterializeInlineTitles(node)
 			var unlinks []*ast.Node
 			skipReplaceNodes := map[*ast.Node]struct{}{}
 			if replaceTypes["text"] {
@@ -1083,6 +1088,10 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 
 			for _, unlink := range unlinks {
 				unlink.Unlink()
+			}
+			finishTitles()
+			if err = finishRich(); err != nil {
+				return err
 			}
 		}
 

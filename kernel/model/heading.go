@@ -182,8 +182,13 @@ func doc2Heading(srcID, targetID string, after bool, io headingConversionIO) (sr
 	}
 
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -210,7 +215,10 @@ func doc2Heading(srcID, targetID string, after bool, io headingConversionIO) (sr
 		return
 	}
 
-	targetTree, _ := LoadTreeByBlockID(targetID)
+	targetTree, targetBefore, loadErr := loadBatchMutationTree(targetID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == targetTree {
 		// 目标块不存在时忽略处理
 		return
@@ -235,14 +243,6 @@ func doc2Heading(srcID, targetID string, after bool, io headingConversionIO) (sr
 	if titleErr != nil {
 		err = titleErr
 		return
-	}
-	sourceSnapshot, err := captureHeadingConversionSource(srcTree)
-	if err != nil {
-		return "", "", err
-	}
-	targetSnapshot, err := captureHeadingConversionSource(targetTree)
-	if err != nil {
-		return "", "", err
 	}
 
 	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
@@ -336,29 +336,11 @@ func doc2Heading(srcID, targetID string, after bool, io headingConversionIO) (sr
 		pivot.InsertAfter(heading)
 	}
 
-	box := Conf.Box(srcTree.Box)
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	writtenTarget, writeErr := io.write(targetTree, targetSnapshot.data)
-	if writeErr != nil {
-		if writtenTarget != nil {
-			writeErr = errors.Join(writeErr, targetSnapshot.restore(writtenTarget))
-		}
-		return "", "", writeErr
+	if err = commitHeadingConversion(srcTree, targetTree, sourceBefore, targetBefore, true, io); err != nil {
+		return "", "", err
 	}
-	if removeErr := io.remove(sourceSnapshot.tree, sourceSnapshot.data); removeErr != nil {
-		return "", "", errors.Join(removeErr, targetSnapshot.restore(writtenTarget))
-	}
-	// 两个源均完成后才发布引用和块位置，失败不会留下半套索引。
-	sql.DeleteRefsTreeQueue(sourceSnapshot.tree)
-	sql.DeleteRefsTreeQueue(targetSnapshot.tree)
-	cache.RemoveTreeDataInBox(srcTree.ID, srcTree.Box)
-	cache.RemoveDocIALInBox(srcTree.Path, srcTree.Box)
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	treenode.RemoveBlockTreesByRootID(targetTree.Box, targetTree.ID)
-	treenode.UpsertBlockTree(targetTree)
-	sql.RemoveTreeQueue(srcTree.Box, srcTree.ID)
-	sql.UpsertTreeQueue(targetTree)
-	refreshDocInfo(targetTree)
+	box := Conf.Box(srcTree.Box)
 	box.removeSort([]string{srcTree.ID})
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
@@ -384,8 +366,13 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 func heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool, io headingConversionIO) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcHeadingID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -421,10 +408,6 @@ func heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 		return
 	}
 	headingText := treenode.DocumentTitleText(titleParagraph)
-	sourceSnapshot, err := captureHeadingConversionSource(srcTree)
-	if err != nil {
-		return "", "", err
-	}
 
 	moveToRoot := "/" == targetPath
 	toHP := "/" + headingText
@@ -513,42 +496,9 @@ func heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = treenode.BaseSpec
-	writtenTarget, writeErr := io.write(newTree, nil)
-	if writeErr != nil {
-		if writtenTarget != nil {
-			cleanupErr := defaultHeadingConversionIO().remove(newTree, writtenTarget)
-			if cleanupErr == nil {
-				treenode.UpsertBlockTree(sourceSnapshot.tree)
-			}
-			writeErr = errors.Join(writeErr, cleanupErr)
-		}
-		return "", "", writeErr
+	if err = commitHeadingConversion(srcTree, newTree, sourceBefore, nil, false, io); err != nil {
+		return "", "", err
 	}
-	if writtenSource, sourceWriteErr := io.write(srcTree, sourceSnapshot.data); sourceWriteErr != nil {
-		err = sourceWriteErr
-		if writtenSource != nil {
-			if restoreErr := sourceSnapshot.restore(writtenSource); restoreErr != nil {
-				return "", "", errors.Join(err, restoreErr)
-			}
-		}
-		// 源写失败时只在源仍为原快照时撤销新文档；若发生并发变更，保留恢复副本。
-		if unchangedErr := sourceSnapshot.check(); unchangedErr != nil {
-			return "", "", errors.Join(err, unchangedErr)
-		}
-		cleanupErr := defaultHeadingConversionIO().remove(newTree, writtenTarget)
-		if cleanupErr == nil {
-			treenode.UpsertBlockTree(sourceSnapshot.tree)
-		}
-		return "", "", errors.Join(err, cleanupErr)
-	}
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	treenode.UpsertBlockTree(srcTree)
-	treenode.UpsertBlockTree(newTree)
-	sql.DeleteRefsTreeQueue(sourceSnapshot.tree)
-	sql.UpsertTreeQueue(srcTree)
-	sql.UpsertTreeQueue(newTree)
-	refreshDocInfo(srcTree)
-	refreshDocInfo(newTree)
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {

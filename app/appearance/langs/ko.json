@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "붙여넣기 및 가져오기 시 LaTeX 수식 구분자 인식",
+	"mathDelimiterCompatibilityTip": "활성화하면 붙여넣거나 가져온 내용의 \\(...\\)와 \\[...\\]를 각각 인라인 수식과 블록 수식으로 자동 인식합니다",
 	"automationCollectionScopeLimit": "모니터링 범위에는 노트북 또는 문서를 합계 32개까지 포함할 수 있습니다",
 	"pdfAnnotationSaveFailed": "PDF 주석을 저장할 수 없습니다. 다시 편집하기 전에 PDF를 다시 열어 최신 주석을 불러오세요",
 	"documentTitleKeepLocal": "내 제목 저장",

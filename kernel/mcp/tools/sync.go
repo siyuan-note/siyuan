@@ -58,17 +58,23 @@ func syncHandler(args map[string]any) (CallToolResult, error) {
 }
 
 func syncPerform(_ map[string]any) (CallToolResult, error) {
-	model.SyncData(true)
+	if err := model.SyncData(true); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync failed: " + err.Error()}}, IsError: true}, nil
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 
 func syncUpload(_ map[string]any) (CallToolResult, error) {
-	model.SyncDataUpload()
+	if err := model.SyncDataUpload(); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync upload failed: " + err.Error()}}, IsError: true}, nil
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync upload done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 
 func syncDownload(_ map[string]any) (CallToolResult, error) {
-	model.SyncDataDownload()
+	if err := model.SyncDataDownload(); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync download failed: " + err.Error()}}, IsError: true}, nil
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync download done: " + model.Conf.Sync.Load().Stat}}}, nil
 }
 

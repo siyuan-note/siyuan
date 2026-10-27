@@ -67,6 +67,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,
     });
+    group.switch("editor.mathDelimiterCompatibility", {
+        title: window.siyuan.languages.mathDelimiterCompatibility,
+        desc: window.siyuan.languages.mathDelimiterCompatibilityTip,
+    });
     group.switch("editor.keepLoadedContent", {
         title: window.siyuan.languages.keepLazyLoad,
         desc: window.siyuan.languages.keepLazyLoadTip,

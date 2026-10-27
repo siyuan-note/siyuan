@@ -17,6 +17,7 @@
 package model
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -407,4 +408,86 @@ func parseBlockUpdateDOMIDs(t *testing.T, name, data string) map[string]bool {
 		return ast.WalkContinue
 	})
 	return ids
+}
+
+func TestBuildBlockUpdateOperationsPreservesExplicitDOMIdentity(t *testing.T) {
+	for _, mode := range []string{"reorder", "insert", "insertWithoutID", "positionalFallback"} {
+		t.Run(mode, func(t *testing.T) {
+			engine := util.NewLute()
+			root := &ast.Node{Type: ast.NodeDocument, ID: updateTestRoot}
+			quote := &ast.Node{Type: ast.NodeBlockquote, ID: updateTestList}
+			quote.SetIALAttr("id", quote.ID)
+			paragraph := func(id, text string) *ast.Node {
+				n := &ast.Node{Type: ast.NodeParagraph, ID: id}
+				if id != "" {
+					n.SetIALAttr("id", id)
+				}
+				n.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(text)})
+				return n
+			}
+			quote.AppendChild(paragraph(updateTestPara1, "A"))
+			quote.AppendChild(paragraph(updateTestPara2, "B"))
+			root.AppendChild(quote)
+			updated := &ast.Node{Type: ast.NodeBlockquote, ID: quote.ID}
+			updated.SetIALAttr("id", quote.ID)
+			want := map[string]string{"A": updateTestPara1, "B": updateTestPara2}
+			switch mode {
+			case "reorder":
+				updated.AppendChild(paragraph(updateTestPara2, "B"))
+				updated.AppendChild(paragraph(updateTestPara1, "A"))
+			case "insert", "insertWithoutID":
+				id := ast.NewNodeID()
+				if mode == "insertWithoutID" {
+					id = ""
+				} else {
+					want["new"] = id
+				}
+				updated.AppendChild(paragraph(id, "new"))
+				updated.AppendChild(paragraph(updateTestPara1, "A"))
+				updated.AppendChild(paragraph(updateTestPara2, "B"))
+			case "positionalFallback":
+				updated.AppendChild(paragraph("", "A"))
+				updated.AppendChild(paragraph("", "B"))
+			}
+			tree := &parse.Tree{ID: root.ID, Box: updateTestBoxID, Root: root}
+			dom := engine.RenderNodeBlockDOM(updated)
+			if mode == "positionalFallback" || mode == "insertWithoutID" {
+				dom = regexp.MustCompile(`data-node-id="[^"]+"`).ReplaceAllStringFunc(dom, func(attr string) string {
+					if strings.Contains(attr, quote.ID) {
+						return attr
+					}
+					if mode == "insertWithoutID" && (strings.Contains(attr, updateTestPara1) || strings.Contains(attr, updateTestPara2)) {
+						return attr
+					}
+					return ""
+				})
+			}
+			ops, _, err := buildBlockUpdateOperations([]BlockUpdateInput{{ID: quote.ID, DataType: "dom", Data: dom}},
+				func(id string) *treenode.BlockTree {
+					return &treenode.BlockTree{ID: id, RootID: root.ID, BoxID: updateTestBoxID}
+				},
+				func(string) (*parse.Tree, error) { return tree, nil })
+			if err != nil {
+				t.Fatal(err)
+			}
+			actual := engine.BlockDOM2Tree(ops[0].Data.(string))
+			seen := map[string]bool{}
+			ast.Walk(actual.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.Type == ast.NodeParagraph {
+					if seen[n.ID] {
+						t.Fatalf("duplicate paragraph ID: %s", n.ID)
+					}
+					seen[n.ID] = true
+					text := string(n.FirstChild.Tokens)
+					if id := want[text]; id != "" && n.ID != id {
+						t.Fatalf("%s identity = %s, want %s", text, n.ID, id)
+					}
+					if text == "new" && (n.ID == updateTestPara1 || n.ID == updateTestPara2) {
+						t.Fatal("new content stole an existing identity")
+					}
+				}
+				return ast.WalkContinue
+			})
+		})
+	}
 }

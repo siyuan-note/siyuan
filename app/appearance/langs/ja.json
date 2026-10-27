@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "貼り付け・インポート時に LaTeX 数式の区切り文字を認識する",
+	"mathDelimiterCompatibilityTip": "有効にすると、貼り付け・インポートした内容の \\(...\\) と \\[...\\] を、それぞれインライン数式とブロック数式として自動的に認識します",
 	"automationCollectionScopeLimit": "監視範囲に含められるノートブックまたはドキュメントは合計32件までです",
 	"pdfAnnotationSaveFailed": "PDF の注釈を保存できませんでした。編集を続ける前に PDF を開き直して最新の注釈を読み込んでください",
 	"documentTitleKeepLocal": "自分のタイトルを保存",

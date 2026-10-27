@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261025114801"
+		"updated": "20261027172226"
 	},
 	"Children": [
 		{
@@ -5335,6 +5335,97 @@
 				{
 					"Type": "NodeText",
 					"Data": "Mathematical formula"
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-6hnjkr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-6hnjkr0",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When pasting or importing Markdown, SiYuan recognizes "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\(...\\)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as inline math and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\[...\\]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in a separate paragraph as block math by default. Pasted HTML supports the same delimiters. Code is preserved, and Markdown exports continue to use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-neji60s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-neji60s",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can disable this in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with “Recognize LaTeX math delimiters when pasting and importing”. Disabling it affects subsequent pastes and imports; formulas already converted remain unchanged."
 				}
 			]
 		},

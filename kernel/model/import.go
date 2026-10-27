@@ -1958,6 +1958,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 
 func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
+	setImportMathDelimiters(luteEngine)
 	luteEngine.SetFootnotes(footnotes)
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	luteEngine.ParseOptions.PreserveTableCellSource = true

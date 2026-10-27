@@ -87,6 +87,9 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.EmbedBlockBreadcrumbParentPath == nil {
 		editor.EmbedBlockBreadcrumbParentPath = defaults.EmbedBlockBreadcrumbParentPath
 	}
+	if editor.MathDelimiterCompatibility == nil {
+		editor.MathDelimiterCompatibility = defaults.MathDelimiterCompatibility
+	}
 	if editor.HashTagSearch == nil {
 		editor.HashTagSearch = defaults.HashTagSearch
 	}

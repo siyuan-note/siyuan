@@ -20,16 +20,44 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// 转换先保存目标，随后移除或改写源；索引仅在两个源操作成功后发布。
-// 原始字节快照也适用于加密文档，补偿保持原密文，不重新加密或重建密钥。
-type headingConversionSource struct {
-	tree *parse.Tree
-	data []byte
-}
-
 type headingConversionIO struct {
 	write  func(*parse.Tree, []byte) ([]byte, error)
 	remove func(*parse.Tree, []byte) error
+}
+
+// 转换完成后统一发布引用和索引；失败及进程中断由共用日志恢复原始认证源。
+func commitHeadingConversion(source, target *parse.Tree, sourceBefore, targetBefore []byte, removeSource bool, io headingConversionIO) error {
+	sourceSnapshot, _, err := filesys.LoadTreeSnapshot(source.Box, source.Path, util.NewLute())
+	if err != nil {
+		return err
+	}
+	var targetSnapshot *parse.Tree
+	if targetBefore != nil {
+		targetSnapshot, _, err = filesys.LoadTreeSnapshot(target.Box, target.Path, util.NewLute())
+		if err != nil {
+			return err
+		}
+	}
+	if err = commitDocumentConversionWithIO(source, target, sourceBefore, targetBefore, removeSource, true,
+		func(tree *parse.Tree, expected []byte) error {
+			_, writeErr := io.write(tree, expected)
+			return writeErr
+		}, io.remove); err != nil {
+		return err
+	}
+	sql.DeleteRefsTreeQueue(sourceSnapshot)
+	if targetSnapshot != nil {
+		sql.DeleteRefsTreeQueue(targetSnapshot)
+	}
+	if removeSource {
+		sql.RemoveTreeQueue(source.Box, source.ID)
+	} else {
+		sql.UpsertTreeQueue(source)
+		refreshDocInfo(source)
+	}
+	sql.UpsertTreeQueue(target)
+	refreshDocInfo(target)
+	return nil
 }
 
 func headingConversionPath(tree *parse.Tree) string {
@@ -54,17 +82,6 @@ func checkHeadingConversionBytes(tree *parse.Tree, expected []byte) error {
 	return nil
 }
 
-func captureHeadingConversionSource(tree *parse.Tree) (*headingConversionSource, error) {
-	snapshot, data, err := filesys.LoadTreeSnapshot(tree.Box, tree.Path, util.NewLute())
-	if err != nil {
-		return nil, err
-	}
-	if !sameHeadingConversionTree(snapshot, tree) {
-		return nil, errors.New("document changed before heading conversion")
-	}
-	return &headingConversionSource{tree: snapshot, data: data}, nil
-}
-
 func sameHeadingConversionTree(left, right *parse.Tree) bool {
 	engine := util.NewLute()
 	encode := func(tree *parse.Tree) []byte {
@@ -73,26 +90,6 @@ func sameHeadingConversionTree(left, right *parse.Tree) bool {
 		return render.NewJSONRenderer(&cloned, engine.RenderOptions, engine.ParseOptions).Render()
 	}
 	return bytes.Equal(encode(left), encode(right))
-}
-
-func (source *headingConversionSource) check() error {
-	return checkHeadingConversionBytes(source.tree, source.data)
-}
-
-func (source *headingConversionSource) restore(written []byte) error {
-	err := filesys.MutateDocumentSources(headingConversionDocument(source.tree), func() error {
-		return util.WriteFileWithPreflight(headingConversionPath(source.tree), source.data, false, func(current []byte) error {
-			if !bytes.Equal(current, written) {
-				return errors.New("document changed before heading conversion recovery")
-			}
-			return nil
-		})
-	})
-	if err == nil {
-		treenode.UpsertBlockTree(source.tree)
-		sql.UpsertTreeQueue(source.tree)
-	}
-	return err
 }
 
 func defaultHeadingConversionIO() headingConversionIO {

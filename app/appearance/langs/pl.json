@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "Rozpoznawaj delimitery formuł LaTeX podczas wklejania i importowania",
+	"mathDelimiterCompatibilityTip": "Po włączeniu \\(...\\) i \\[...\\] we wklejanej i importowanej treści są automatycznie rozpoznawane odpowiednio jako formuły w wierszu i blokowe",
 	"automationCollectionScopeLimit": "Zakres monitorowania może zawierać łącznie do 32 notatników lub dokumentów",
 	"pdfAnnotationSaveFailed": "Nie można zapisać adnotacji PDF. Otwórz ponownie plik PDF, aby wczytać najnowsze adnotacje przed dalszą edycją",
 	"documentTitleKeepLocal": "Zapisz mój tytuł",

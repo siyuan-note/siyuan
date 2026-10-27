@@ -61,9 +61,10 @@ test("canvas history follows embedded source documents, local stacks, busy state
     assert.equal(listeners.size, 0);
 });
 
-test("new mind map nodes become selected before editing", async () => {
+test("explicit mind map additions stay selected while clipboard additions still open the editor", async () => {
     const steps: string[] = [];
     const item = {dataset: {nodeId: "new"}, classList: {replace: () => {}}};
+    const clipboard = {textPlain: "Pasted content"};
     const context: any = {
         canEdit: () => true,
         genListItemElement: () => item,
@@ -78,10 +79,28 @@ test("new mind map nodes become selected before editing", async () => {
         view: {focusNode: (id: string) => steps.push(`focus:${id}`),
             getContentHost: () => ({}),
         },
-        edit: async (id: string) => { steps.push(`edit:${id}`); },
+        edit: async (id: string, _host: unknown, replace: unknown, data: unknown) => {
+            assert.equal(replace, undefined);
+            assert.equal(data, clipboard);
+            steps.push(`edit:${id}`);
+        },
     });
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        target.list.dataset.type = type;
+        for (const kind of ["child", "sibling"]) {
+            steps.length = 0;
+            await target.add("root", kind);
+            assert.deepEqual(steps, ["focus:new"], `${type} ${kind} keeps node selection without opening the editor`);
+            steps.length = 0;
+            await target.add("root", kind, clipboard);
+            assert.deepEqual(steps, ["focus:new", "edit:new"], `${type} ${kind} imports clipboard content through the editor`);
+        }
+    }
+    target.change = async () => false;
+    steps.length = 0;
     await target.add("root", "child");
-    assert.deepEqual(steps, ["focus:new", "edit:new"]);
+    await target.add("root", "sibling", clipboard);
+    assert.deepEqual(steps, [], "failed additions neither move focus nor open the editor");
 });
 
 test("canvas undo and redo preserve the viewport throughout replay and release it on errors", async () => {

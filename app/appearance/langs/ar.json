@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "التوافق مع محددات صيغ LaTeX عند اللصق والاستيراد",
+	"mathDelimiterCompatibilityTip": "عند التفعيل، يتم التعرف تلقائيًا على \\(...\\) و\\[...\\] في المحتوى الملصق والمستورد كصيغ مضمنة وصيغ كتلية على التوالي",
 	"automationCollectionScopeLimit": "يمكن تحديد ما يصل إلى 32 دفتر ملاحظات أو مستند في نطاق المراقبة",
 	"pdfAnnotationSaveFailed": "تعذر حفظ تعليقات PDF التوضيحية. أعد فتح ملف PDF لتحميل أحدث التعليقات قبل متابعة التحرير",
 	"documentTitleKeepLocal": "حفظ عنواني",

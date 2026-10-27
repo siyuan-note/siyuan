@@ -423,6 +423,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.HeadingNumberFormat = value.HeadingNumberFormat
 	result.HeadingEmbedMode = value.HeadingEmbedMode
 	result.PasteURLAutoConvert = value.PasteURLAutoConvert
+	result.MathDelimiterCompatibility = value.MathDelimiterCompatibility
 	result.DragHTMLFileToIframe = value.DragHTMLFileToIframe
 	result.Markdown = settingMarkdownPayload(value.Markdown)
 	return result

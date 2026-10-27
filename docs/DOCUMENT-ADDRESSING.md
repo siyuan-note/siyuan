@@ -212,14 +212,15 @@ Configuration-derived previews retain the source notebook, workflow purpose, eff
 | Entry point | Preserved behavior and migration focus |
 | --- | --- |
 | Ordinary creation and creation from block references | Create directly under known parent IDs; pass titles separately and retain document IDs in generated references |
-| Daily notes | Reuse by the daily-note date attribute first; retain template-target preference for multiple matches and ID ordering otherwise; do not reapply body templates to existing notes |
+| Daily-note button and shortcut | With no explicit date, reuse the target produced by today's naming and path template; renaming or moving the original note away from that target can result in another note being created |
+| Date references and explicit-date APIs | First reuse notes with the date attribute in the target notebook; prefer the template target among matching notes, otherwise select by ascending ID; without a date match, reuse or create the template target |
 | Shorthands | Distinguish appending to an explicit target from creating a new target; clear the source only after destination persistence succeeds |
 | New database items | Preserve attribute values, bindings, and sorting; retain the final document ID in the creation plan |
 | Template document trees | Preserve previews, ID remapping, insertion order, and grouped undo and redo; validate path, name, and configuration conditions on commit and expose partial completion |
 | MCP and built-in Agent | Document tools prefer notebook plus `parentID`, with an empty string for root; legacy paths share ancestor validation and reject ambiguous single targets |
 | Desktop, browser, and mobile | Inspect menus, shortcuts, dialogs, and handlers separately; shared utility migration does not replace platform verification |
 
-Daily-note reuse is an explicit existing business rule. The generic resolver's ambiguity policy must not turn every multiple-date match into an error; template-target preference compares structured identity chains instead.
+Daily notes retain two entry-point policies: omitting `date`, passing an empty string, or passing `null` to `createDailyNote` uses the ordinary button's template-target policy; an explicit date (including today) and `getDailyNoteInfo` use date attributes. The date entry can still reuse a renamed or moved note while the ordinary button may create a new template target; once that target also carries the day's date attribute, the date entry prefers it. Neither entry reapplies body templates when reusing an existing note. Multiple date matches follow this selection order rather than always returning ambiguity; template-target matching compares structured identity chains.
 
 ## Search and derived indexes
 

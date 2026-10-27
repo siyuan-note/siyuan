@@ -1,4 +1,4 @@
-// 输入框默认随内容增高；手动调节后保持所选高度，双击把手恢复自动尺寸。
+// 输入框默认随内容增高；手动调节后保持所选高度，发送或双击把手恢复自动尺寸。
 export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElement, handle: HTMLElement) => {
     const windowSelf = panel.ownerDocument.defaultView;
     let preferred: number | undefined;
@@ -16,7 +16,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         minimum = Math.max(40, Math.ceil(parseFloat(windowSelf.getComputedStyle(composer).minHeight)) || 0);
         // 给标题、操作栏和会话正文留出空间，软键盘弹出时也不能把发送按钮挤出面板。
         maximum = Math.max(minimum, Math.floor(height - 160));
-        const limit = Math.round(Math.max(minimum, Math.min(maximum, preferred ?? Math.min(240, height * .4))));
+        const limit = Math.round(Math.max(minimum, Math.min(maximum, preferred ?? maximum)));
         composer.style.maxHeight = `${limit}px`;
         composer.style.height = preferred === undefined ? "" : `${limit}px`;
         value = composer.clientHeight;
@@ -110,7 +110,7 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
     observer.observe(panel);
     observer.observe(composer);
     update();
-    return () => {
+    const destroy = () => {
         finish(true);
         observer.disconnect();
         handle.removeEventListener("pointerdown", down);
@@ -127,4 +127,5 @@ export const bindAgentComposerResize = (panel: HTMLElement, composer: HTMLElemen
         composer.style.maxHeight = "";
         composer.style.height = "";
     };
+    return {reset, destroy};
 };

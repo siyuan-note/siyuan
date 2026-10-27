@@ -42913,6 +42913,16 @@
             }
           ]
         },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "onlySearchForDoc": {
           "anyOf": [
             {
@@ -47013,6 +47023,16 @@
             }
           ]
         },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "onlySearchForDoc": {
           "type": "boolean"
         },
@@ -47117,6 +47137,7 @@
         "listItemDotNumberClickFocus",
         "listLogicalOutdent",
         "markdown",
+        "mathDelimiterCompatibility",
         "onlySearchForDoc",
         "pageScrollButtons",
         "pasteURLAutoConvert",
@@ -47797,6 +47818,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingMarkdownInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

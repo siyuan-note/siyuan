@@ -136,7 +136,7 @@ const browserCases = async (source: string, css: string) => {
             visible(inspector);
             view.selectedEdge = undefined;
             view.model.metadata.summaries = [{id: "summary", label: "Summary", parentId: model.root.id,
-                fromId: model.root.children[0].id, toId: model.root.children[1].id}];
+                nodeIds: model.root.children.map((node: {id: string}) => node.id)}];
             view.selectSummary("summary");
             stage = "summary";
             await settle();

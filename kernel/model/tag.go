@@ -33,6 +33,10 @@ import (
 )
 
 func RemoveTag(label string) (err error) {
+	return removeTag(label, nil)
+}
+
+func removeTag(label string, beforeCommit func()) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 
@@ -55,7 +59,7 @@ func RemoveTag(label string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -63,6 +67,11 @@ func RemoveTag(label string) (err error) {
 
 		generateTreeHistory(tree, historyDir)
 
+		finishRich, richErr := treenode.MaterializeTableCellRich(tree.Root)
+		if richErr != nil {
+			return richErr
+		}
+		finishTitles := treenode.MaterializeInlineTitles(tree.Root)
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
@@ -99,8 +108,15 @@ func RemoveTag(label string) (err error) {
 		for _, n := range unlinks {
 			n.Unlink()
 		}
+		finishTitles()
+		if err = finishRich(); err != nil {
+			return err
+		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -124,6 +140,10 @@ func RemoveTag(label string) (err error) {
 }
 
 func RenameTag(oldLabel, newLabel string) (err error) {
+	return renameTag(oldLabel, newLabel, nil)
+}
+
+func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 	if invalidChar := treenode.ContainsMarker(newLabel); "" != invalidChar {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
@@ -162,7 +182,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -193,6 +213,11 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				continue
 			}
 
+			finishRich, richErr := treenode.MaterializeTableCellRich(node)
+			if richErr != nil {
+				return richErr
+			}
+			finishTitles := treenode.MaterializeInlineTitles(node)
 			nodeTags := node.ChildrenByType(ast.NodeTextMark)
 			for _, nodeTag := range nodeTags {
 				if nodeTag.IsTextMarkType("tag") {
@@ -202,10 +227,17 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				}
 			}
 
+			finishTitles()
+			if err = finishRich(); err != nil {
+				return err
+			}
 			updateNodes[node.ID] = node
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}

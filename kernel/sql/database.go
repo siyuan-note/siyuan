@@ -311,7 +311,7 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [block_embeddings] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)")
+	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, space TEXT NOT NULL DEFAULT '', content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [block_embeddings] failed: %s", err)
 	}
@@ -1725,6 +1725,9 @@ func migrateBlockEmbeddingsSchema() {
 	addColumn("fail_count", addColumns[0])
 	addColumn("last_tried", addColumns[1])
 	addColumn("ignored_type", addColumns[2])
+	// Existing vectors have unknown provenance; preserve them without guessing
+	// a space or scheduling paid re-embedding. Users can rebuild explicitly.
+	addColumn("space", "ALTER TABLE block_embeddings ADD COLUMN space TEXT NOT NULL DEFAULT ''")
 }
 
 func beginTx() (tx *sql.Tx, err error) {

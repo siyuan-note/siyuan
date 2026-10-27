@@ -1540,7 +1540,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenToolbarTransform,
         "a hidden toolbar does not move a visible node");
 
-    // 高脑图实际点击适应画布后，整图在工具栏下方缩放居中，重复点击保持稳定。
+    // 实际点击适应画布时不为临时浮层预留空间，全屏仍避让常驻按钮组，重复点击保持稳定。
     const fittingSource = document.createElement("div");
     fittingSource.innerHTML = lute.Md2BlockDOM("* Root\n" +
         Array.from({length: 20}, (_value, index) => `  * Branch ${index}\n`).join(""));
@@ -1611,18 +1611,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(navigationView.scale < 1 && navigationView.scale > .15,
                 `the tall map needs an unconstrained fit, mode=${mode}, width=${width}, scale=${navigationView.scale}`);
             const viewportBounds = navigationViewport.getBoundingClientRect();
-            const toolbarBottom = Math.max(...navigationView.getToolbarBounds().filter((bounds: DOMRect) =>
+            const toolbarBottom = Math.max(...navigationView.getToolbarBounds(false).filter((bounds: DOMRect) =>
                 bounds.right > viewportBounds.left && bounds.left < viewportBounds.right).map((bounds: DOMRect) => bounds.bottom));
             const fittedContent = navigationView.contentBounds();
             const contentTop = viewportBounds.top + (fittedContent.top * navigationView.scale + navigationView.offsetY) * outerScale;
             const contentBottom = viewportBounds.top + (fittedContent.bottom * navigationView.scale + navigationView.offsetY) * outerScale;
-            check.ok(contentTop >= toolbarBottom + 15 * outerScale,
-                `fit leaves the whole map below the toolbar, mode=${mode}, width=${width}`);
-            check.ok(contentBottom <= viewportBounds.bottom - 65 * outerScale, "fit preserves the bottom panel clearance");
+            if (mode === "fullscreen") {
+                check.ok(contentTop >= toolbarBottom + 15 * outerScale,
+                    `fullscreen fit clears the persistent toolbar, width=${width}`);
+            } else {
+                check.ok(Math.abs(contentTop - viewportBounds.top - 16 * outerScale) < 1,
+                    `document fit ignores triggered toolbars and the zoom popup, mode=${mode}, width=${width}`);
+            }
+            check.ok(Math.abs(contentBottom - viewportBounds.bottom + 16 * outerScale) < 1,
+                "fit uses the bottom area without reserving space for the node menu");
             const fittedTransform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
             await activateNavigationFit(mode === "focus", mode === "touch");
             check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
                 "repeated fit activation preserves scale and centering");
+            navigationHost.focus();
+            await moveNavigationPointer(false);
+            check.equal(getComputedStyle(navigationToolbar.querySelector(".mindmap-view__zoom-actions")).display, "none",
+                "the transient zoom popup can close after fitting");
+            navigationView.fit();
+            check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
+                "closing the transient popup does not change the fitted view");
             navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="reset"]').click();
             check.equal(navigationView.scale, 1, "reset restores 100% independently of fit to canvas");
         }
@@ -1640,6 +1653,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const hiddenFitBounds = navigationView.contentBounds();
     check.ok(Math.abs(hiddenFitBounds.top * navigationView.scale + navigationView.offsetY - 16) < 1,
         "fitting with a hidden toolbar keeps the normal top margin");
+    const withoutInspector = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
+    navigationView.setReadOnly(false);
+    navigationView.setInteractionActive(true);
+    navigationView.selectNode(navigationView.model.root.children[0].id);
+    await settle();
+    check.equal(navigationInspector.hidden, false, "selecting a node opens the bottom menu");
+    check.ok(navigationInspector.getBoundingClientRect().height > 0, "the bottom menu occupies actual screen space");
+    navigationView.fit();
+    check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], withoutInspector,
+        "opening the bottom node menu does not shrink the fitted map");
+    navigationView.setInteractionActive(false);
+    await settle();
+    check.equal(navigationInspector.hidden, true, "leaving interaction mode hides the node menu");
+    navigationView.fit();
+    check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], withoutInspector,
+        "hiding the bottom node menu keeps the fitted view stable");
     for (const background of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
         for (const width of [760, 320, 220]) {
             for (const fullscreen of [false, true]) {
@@ -1673,7 +1702,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 lock.disabled = false;
                 check.ok(navigationView.getToolbarBounds().some((rect: DOMRect) =>
                     rect.left === groupBounds.left && rect.right === groupBounds.right && rect.bottom === groupBounds.bottom),
-                "fit and node reveal avoid the complete opaque toolbar group");
+                "node reveal measures the complete opaque toolbar group");
             }
         }
     }

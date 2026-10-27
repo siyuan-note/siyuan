@@ -1161,15 +1161,16 @@ export class ListMindmapView {
             this.options.host.querySelector<HTMLElement>(`[data-mindmap-source-id="${id}"]`);
     }
 
-    private getToolbarBounds() {
+    private getToolbarBounds(includePopup = true) {
         const bounds: DOMRect[] = [];
         const toolbarStyle = getComputedStyle(this.toolbar);
         if (this.toolbar.hidden || toolbarStyle.display === "none" || toolbarStyle.visibility === "hidden" ||
             Number(toolbarStyle.opacity) === 0) {
             return bounds;
         }
-        // 顶部遮挡范围只包含可见控件及展开的缩放面板，不包含左侧空白区域。
-        this.toolbar.querySelectorAll<HTMLElement>(".mindmap-view__toolbar-group, .mindmap-view__zoom-actions")
+        // 节点定位避让可见控件及缩放面板；整图适配只考虑常驻按钮组，不包含左侧空白。
+        this.toolbar.querySelectorAll<HTMLElement>(includePopup ?
+            ".mindmap-view__toolbar-group, .mindmap-view__zoom-actions" : ".mindmap-view__toolbar-group")
             .forEach(control => {
                 const rect = control.getBoundingClientRect();
                 const style = getComputedStyle(control);
@@ -3426,21 +3427,21 @@ export class ListMindmapView {
         const viewport = this.viewport.getBoundingClientRect();
         const scaleY = viewport.height / (this.viewport.offsetHeight || viewport.height) || 1;
         let insetTop = 16;
-        // 整图适配在顶部控件下方缩放居中，外层缩放的屏幕尺寸换算为画布局部尺寸。
-        this.getToolbarBounds().forEach(bounds => {
+        // 只为全屏常驻按钮组预留空间，文档内工具栏和临时浮层不缩小整图适配范围。
+        const toolbarBounds = this.options.host.classList.contains("fullscreen") ? this.getToolbarBounds(false) : [];
+        toolbarBounds.forEach(bounds => {
             if (bounds.right > viewport.left && bounds.left < viewport.right &&
                 bounds.bottom > viewport.top && bounds.top < viewport.bottom) {
                 insetTop = Math.max(insetTop, (bounds.bottom - viewport.top) / scaleY + 16);
             }
         });
-        // 底部为菜单、外侧间距和横向滚动条留出空间，避免选中节点时画布跳动。
-        const insetBottom = 66;
+        const insetBottom = 16;
         const availableWidth = Math.max(1, width - 48);
         const availableHeight = Math.max(1, height - insetTop - insetBottom);
         this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
             availableHeight / Math.max(1, bottom - top))));
         this.offsetX = width / 2 - (left + right) * this.scale / 2;
-        // 达到最小缩放仍无法容纳整图时，优先保证顶部正文避开工具栏。
+        // 达到最小缩放仍无法容纳整图时，优先保证顶部正文留在可用区域内。
         this.offsetY = (bottom - top) * this.scale > availableHeight ? insetTop - top * this.scale :
             insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();

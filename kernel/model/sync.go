@@ -966,7 +966,7 @@ func formatRepoErrorMsg(err error) string {
 	} else if errors.Is(err, dejavu.ErrLockCloudFailed) {
 		msg = Conf.Language(188)
 		if detail := cloudLockErrorDetail(err, Conf.Language); "" != detail {
-			msg += " " + detail
+			msg += ": " + detail
 		}
 	} else if errors.Is(err, dejavu.ErrCloudLocked) {
 		msg = Conf.Language(189)

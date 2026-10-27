@@ -501,16 +501,7 @@ var logoutCloudUser = contractHandler(apicontract.LogoutCloudUser, func(c *gin.C
 })
 
 var login2faCloudUser = contractHandler(apicontract.Login2faCloudUser, func(c *gin.Context, request apicontract.SettingLogin2faRequest) apicontract.Response[apicontract.Login2faEnvelope] {
-	result := model.Login2fa(request.Token, request.Code)
-	encoded, err := gulu.JSON.MarshalJSON(result)
-	if err != nil {
-		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
-	}
-	var envelope apicontract.Login2faEnvelope
-	if err = gulu.JSON.UnmarshalJSON(encoded, &envelope); err != nil {
-		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
-	}
-	return apicontract.SuccessDirectJSON(envelope)
+	return apicontract.SuccessDirectJSON(*model.Login2fa(request.Token, request.Code))
 })
 
 var setEmoji = contractHandler(apicontract.SetEmoji, func(c *gin.Context, request apicontract.SettingEmojiRequest) apicontract.Response[apicontract.Null] {

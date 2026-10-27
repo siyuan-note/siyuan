@@ -20,7 +20,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -29,7 +28,6 @@ import (
 )
 
 var getSnippet = contractHandler(apicontract.GetSnippet, func(c *gin.Context, request apicontract.GetSnippetRequest) apicontract.Response[apicontract.SnippetsData] {
-	ret := gulu.Ret.NewResult()
 
 	typ, enabledArg, keyword := request.Type, request.Enabled, request.Keyword
 
@@ -40,9 +38,7 @@ var getSnippet = contractHandler(apicontract.GetSnippet, func(c *gin.Context, re
 
 	confSnippets, err := model.LoadSnippets()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "load snippets failed: " + err.Error()
-		return contractFailure[apicontract.SnippetsData](ret)
+		return apicontract.Failure[apicontract.SnippetsData](-1, "load snippets failed: "+err.Error())
 	}
 
 	isPublish := model.IsReadOnlyRoleContext(c)
@@ -85,7 +81,6 @@ var getSnippet = contractHandler(apicontract.GetSnippet, func(c *gin.Context, re
 })
 
 var setSnippet = contractHandler(apicontract.SetSnippet, func(c *gin.Context, request apicontract.SetSnippetRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	var snippets []*conf.Snippet
 	for _, s := range request.Snippets {
@@ -95,9 +90,7 @@ var setSnippet = contractHandler(apicontract.SetSnippet, func(c *gin.Context, re
 		}
 		if "css" == snippet.Type {
 			if strings.Contains(strings.ToLower(snippet.Content), "</style") || strings.Contains(strings.ToLower(snippet.Content), "<script") {
-				ret.Code = -1
-				ret.Msg = "invalid css snippet content"
-				return contractFailure[apicontract.Null](ret)
+				return apicontract.Failure[apicontract.Null](-1, "invalid css snippet content")
 			}
 		}
 		snippets = append(snippets, snippet)
@@ -110,26 +103,22 @@ var setSnippet = contractHandler(apicontract.SetSnippet, func(c *gin.Context, re
 		err = model.SetSnippet(snippets, *request.Revision)
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "set snippet failed: " + err.Error()
+		msg := "set snippet failed: " + err.Error()
 		if errors.Is(err, model.ErrSnippetConflict) {
-			ret.Msg = model.ErrSnippetConflict.Error()
+			msg = model.ErrSnippetConflict.Error()
 		}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, msg)
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var removeSnippet = contractHandler(apicontract.RemoveSnippet, func(c *gin.Context, request apicontract.TrimmedIDRequest) apicontract.Response[*apicontract.Snippet] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
 	snippet, err := model.RemoveSnippet(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "remove snippet failed: " + err.Error()
-		return contractFailure[*apicontract.Snippet](ret)
+		return apicontract.Failure[*apicontract.Snippet](-1, "remove snippet failed: "+err.Error())
 	}
 	return apicontract.Success(snippetContract(snippet))
 })

@@ -43,18 +43,15 @@ var documentBaseNameReplacer = strings.NewReplacer("\r\n", "", "\r", "", "\n", "
 var moveLocalShorthands = contractHandler(apicontract.MoveLocalShorthands, moveLocalShorthandsContract)
 
 func moveLocalShorthandsContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[[]string] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[[]string](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[[]string](err)
 	}
 
 	ids, err := model.MoveLocalShorthands(notebook)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[[]string](ret)
+		return apicontract.Failure[[]string](-1, err.Error())
 	}
 
 	return apicontract.Success(ids)
@@ -65,18 +62,14 @@ var listDocTree = contractHandler(apicontract.ListDocTree, listDocTreeContract)
 func listDocTreeContract(c *gin.Context, request apicontract.FileTreePathRequest) apicontract.Response[apicontract.FileTreeDocTreeData] {
 	// Add kernel API `/api/filetree/listDocTree` https://github.com/siyuan-note/siyuan/issues/10482
 
-	ret := gulu.Ret.NewResult()
-
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.FileTreeDocTreeData](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.FileTreeDocTreeData](err)
 	}
 
 	// 加密笔记本锁定时拒绝直接列举磁盘目录，防止泄漏文档 ID、层级和数量
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.FileTreeDocTreeData](ret)
+		return apicontract.Failure[apicontract.FileTreeDocTreeData](-1, model.Conf.Language(314))
 	}
 
 	if err := request.PathError(); err != nil {
@@ -87,22 +80,16 @@ func listDocTreeContract(c *gin.Context, request apicontract.FileTreePathRequest
 	// 越界校验：拒绝 ..，确保路径位于 <data>/<notebook>/ 内。
 	// 无需 filepath.IsAbs —— notebook 路径全为 notebook 内相对路径，且跨 OS 对 "/" 判定不一致。
 	if found := strings.Contains(p, ".."); found {
-		ret.Code = -1
-		ret.Msg = "path must not contain '..'"
-		return contractFailure[apicontract.FileTreeDocTreeData](ret)
+		return apicontract.Failure[apicontract.FileTreeDocTreeData](-1, "path must not contain '..'")
 	}
 	var doctree []*DocFile
 	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
 	if !gulu.File.IsSubPath(filepath.Join(util.WorkspaceDir, "data", notebook), root) {
-		ret.Code = -1
-		ret.Msg = "path escapes notebook directory"
-		return contractFailure[apicontract.FileTreeDocTreeData](ret)
+		return apicontract.Failure[apicontract.FileTreeDocTreeData](-1, "path escapes notebook directory")
 	}
 	dir, err := os.ReadDir(root)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeDocTreeData](ret)
+		return apicontract.Failure[apicontract.FileTreeDocTreeData](-1, err.Error())
 	}
 
 	ids := map[string]bool{}
@@ -122,9 +109,7 @@ func listDocTreeContract(c *gin.Context, request apicontract.FileTreePathRequest
 
 			subPath := filepath.Join(root, entry.Name())
 			if err = walkDocTree(subPath, parent, ids); err != nil {
-				ret.Code = -1
-				ret.Msg = err.Error()
-				return contractFailure[apicontract.FileTreeDocTreeData](ret)
+				return apicontract.Failure[apicontract.FileTreeDocTreeData](-1, err.Error())
 			}
 		} else {
 			id := strings.TrimSuffix(entry.Name(), ".sy")
@@ -186,44 +171,37 @@ func walkDocTree(p string, docFile *DocFile, ids map[string]bool) (err error) {
 var upsertIndexes = contractHandler(apicontract.UpsertIndexes, upsertIndexesContract)
 
 func upsertIndexesContract(c *gin.Context, request apicontract.FileTreePathsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	pathsArg := request.Paths
 	var paths []string
 	for _, p := range pathsArg {
 		paths = append(paths, p)
 	}
 	model.UpsertIndexes(paths)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var removeIndexes = contractHandler(apicontract.RemoveIndexes, removeIndexesContract)
 
 func removeIndexesContract(c *gin.Context, request apicontract.FileTreePathsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	pathsArg := request.Paths
 	var paths []string
 	for _, p := range pathsArg {
 		paths = append(paths, p)
 	}
 	model.RemoveIndexes(paths)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var doc2Heading = contractHandler(apicontract.Doc2Heading, doc2HeadingContract)
 
 func doc2HeadingContract(c *gin.Context, request apicontract.FileTreeDocHeadingRequest) apicontract.Response[apicontract.FileTreeDocHeadingData] {
-	ret := gulu.Ret.NewResult()
 
 	srcID := request.SrcID
 	targetID := request.TargetID
 	after := request.After
 	srcTreeBox, srcTreePath, err := model.Doc2Heading(srcID, targetID, after)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.FileTreeDocHeadingData](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDocHeadingData](-1, err.Error(), 5000)
 	}
 
 	return apicontract.Success(apicontract.FileTreeDocHeadingData{SrcTreeBox: srcTreeBox, SrcTreePath: srcTreePath})
@@ -232,16 +210,13 @@ func doc2HeadingContract(c *gin.Context, request apicontract.FileTreeDocHeadingR
 var heading2Doc = contractHandler(apicontract.Heading2Doc, heading2DocContract)
 
 func heading2DocContract(c *gin.Context, request apicontract.FileTreeHeadingDocRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	srcHeadingID := request.SrcHeadingID
 	targetNotebook := request.TargetNotebook
 
 	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
 	if bt := treenode.GetBlockTree(srcHeadingID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(391)
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(391), 5000)
 	}
 	options, err := request.Options()
 	if err != nil {
@@ -250,9 +225,7 @@ func heading2DocContract(c *gin.Context, request apicontract.FileTreeHeadingDocR
 	targetPath, previousPath, toTop := options.TargetPath, options.PreviousPath, options.ToTop
 	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath, previousPath, toTop)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
 
 	model.FlushTxQueue()
@@ -265,22 +238,19 @@ func heading2DocContract(c *gin.Context, request apicontract.FileTreeHeadingDocR
 		"srcRootBlockID": srcRootBlockID,
 	}
 	util.PushEvent(evt)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var li2Doc = contractHandler(apicontract.Li2Doc, li2DocContract)
 
 func li2DocContract(c *gin.Context, request apicontract.FileTreeListItemDocRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	srcListItemID := request.SrcListItemID
 	targetNotebook := request.TargetNotebook
 
 	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
 	if bt := treenode.GetBlockTree(srcListItemID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(391)
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(391), 5000)
 	}
 
 	options, err := request.Options()
@@ -290,9 +260,7 @@ func li2DocContract(c *gin.Context, request apicontract.FileTreeListItemDocReque
 	targetPath, previousPath, toTop := options.TargetPath, options.PreviousPath, options.ToTop
 	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath, previousPath, toTop)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
 
 	model.FlushTxQueue()
@@ -305,34 +273,29 @@ func li2DocContract(c *gin.Context, request apicontract.FileTreeListItemDocReque
 		"srcRootBlockID": srcRootBlockID,
 	}
 	util.PushEvent(evt)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var getHPathByPath = contractHandler(apicontract.GetHPathByPath, getHPathByPathContract)
 
 func getHPathByPathContract(c *gin.Context, request apicontract.FileTreePathRequest) apicontract.Response[string] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[string](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[string](err)
 	}
 
 	p := request.Path
 
 	hPath, err := model.GetHPathByPath(notebook, p)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[string](ret)
+		return apicontract.Failure[string](-1, err.Error())
 	}
 	if p != "/" && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		id := util.GetTreeID(p)
 		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
-			ret.Code = -1
-			ret.Msg = model.ErrBlockNotFound.Error()
-			return contractFailure[string](ret)
+			return apicontract.Failure[string](-1, model.ErrBlockNotFound.Error())
 		}
 	}
 	return apicontract.Success(hPath)
@@ -341,7 +304,6 @@ func getHPathByPathContract(c *gin.Context, request apicontract.FileTreePathRequ
 var getHPathsByPaths = contractHandler(apicontract.GetHPathsByPaths, getHPathsByPathsContract)
 
 func getHPathsByPathsContract(c *gin.Context, request apicontract.FileTreePathsRequest) apicontract.Response[[]string] {
-	ret := gulu.Ret.NewResult()
 
 	pathsArg := request.Paths
 	var paths []string
@@ -351,9 +313,7 @@ func getHPathsByPathsContract(c *gin.Context, request apicontract.FileTreePathsR
 	paths = filterFileTreePathsByPublishMetadataAccess(c, paths)
 	hPath, err := model.GetHPathsByPaths(paths)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[[]string](ret)
+		return apicontract.Failure[[]string](-1, err.Error())
 	}
 	return apicontract.Success(hPath)
 }
@@ -361,25 +321,20 @@ func getHPathsByPathsContract(c *gin.Context, request apicontract.FileTreePathsR
 var getHPathByID = contractHandler(apicontract.GetHPathByID, getHPathByIDContract)
 
 func getHPathByIDContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[string] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[string](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[string](err)
 	}
 
 	hPath, err := model.GetHPathByID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[string](ret)
+		return apicontract.Failure[string](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
-			ret.Code = -1
-			ret.Msg = model.ErrTreeNotFound.Error()
-			return contractFailure[string](ret)
+			return apicontract.Failure[string](-1, model.ErrTreeNotFound.Error())
 		}
 	}
 	return apicontract.Success(hPath)
@@ -388,25 +343,20 @@ func getHPathByIDContract(c *gin.Context, request apicontract.FileTreeIDRequest)
 var getPathByID = contractHandler(apicontract.GetPathByID, getPathByIDContract)
 
 func getPathByIDContract(c *gin.Context, request apicontract.FileTreeTrimIDRequest) apicontract.Response[apicontract.FileTreeDocPathData] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.FileTreeDocPathData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.FileTreeDocPathData](err)
 	}
 
 	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeDocPathData](ret)
+		return apicontract.Failure[apicontract.FileTreeDocPathData](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
-			ret.Code = -1
-			ret.Msg = model.ErrTreeNotFound.Error()
-			return contractFailure[apicontract.FileTreeDocPathData](ret)
+			return apicontract.Failure[apicontract.FileTreeDocPathData](-1, model.ErrTreeNotFound.Error())
 		}
 	}
 	return apicontract.Success(apicontract.FileTreeDocPathData{Path: p, Notebook: notebook})
@@ -415,28 +365,22 @@ func getPathByIDContract(c *gin.Context, request apicontract.FileTreeTrimIDReque
 var getFullHPathByID = contractHandler(apicontract.GetFullHPathByID, getFullHPathByIDContract)
 
 func getFullHPathByIDContract(c *gin.Context, request apicontract.FileTreeOptionalIDRequest) apicontract.Response[*string] {
-	ret := gulu.Ret.NewResult()
-
 	if request.ID == nil {
-		return contractFailure[*string](ret)
+		return apicontract.SuccessWithoutData[*string]()
 	}
 
 	id := *request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[*string](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[*string](err)
 	}
 	hPath, err := model.GetFullHPathByID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[*string](ret)
+		return apicontract.Failure[*string](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
-			ret.Code = -1
-			ret.Msg = model.ErrTreeNotFound.Error()
-			return contractFailure[*string](ret)
+			return apicontract.Failure[*string](-1, model.ErrTreeNotFound.Error())
 		}
 	}
 	return apicontract.Success(&hPath)
@@ -445,18 +389,16 @@ func getFullHPathByIDContract(c *gin.Context, request apicontract.FileTreeOption
 var getIDsByHPath = contractHandler(apicontract.GetIDsByHPath, getIDsByHPathContract)
 
 func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalPathRequest) apicontract.Response[apicontract.LegacyPathIDsResult] {
-	ret := gulu.Ret.NewResult()
-
 	if request.Path == nil {
-		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+		return apicontract.SuccessWithoutData[apicontract.LegacyPathIDsResult]()
 	}
 	if request.Notebook == nil {
-		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+		return apicontract.SuccessWithoutData[apicontract.LegacyPathIDsResult]()
 	}
 
 	notebook := *request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.LegacyPathIDsResult](err)
 	}
 
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
@@ -472,9 +414,7 @@ func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalP
 				UnsupportedIDs: filterFileTreeBlockIDsByPublishDiscoverability(c, failure.UnsupportedIDs, notebook)}
 			return apicontract.GetIDsByHPath.FailureWithData(-1, err.Error(), apicontract.NewLegacyPathIDsFailure(data))
 		}
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.LegacyPathIDsResult](ret)
+		return apicontract.Failure[apicontract.LegacyPathIDsResult](-1, err.Error())
 	}
 	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
 	return apicontract.Success(apicontract.NewLegacyPathIDs(ids))
@@ -519,7 +459,6 @@ func filterFileTreeBlockIDsByPublishDiscoverability(c *gin.Context, ids []string
 var moveDocs = contractHandler(apicontract.MoveDocs, moveDocsContract)
 
 func moveDocsContract(c *gin.Context, request apicontract.FileTreeMoveRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	var fromPaths []string
 	fromPathsArg := request.FromPaths
@@ -528,45 +467,40 @@ func moveDocsContract(c *gin.Context, request apicontract.FileTreeMoveRequest) a
 	}
 	toPath := request.ToPath
 	toNotebook := request.ToNotebook
-	if util.InvalidIDPattern(toNotebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(toNotebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	callback := fileTreeCallback(request.Callback)
 	err := model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var moveDocsByID = contractHandler(apicontract.MoveDocsByID, moveDocsByIDContract)
 
 func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	fromIDsArg := request.FromIDs
 	var fromIDs []string
 	for _, fromIDArg := range fromIDsArg {
 		fromID := fromIDArg
-		if util.InvalidIDPattern(fromID, ret) {
-			return contractFailure[apicontract.Null](ret)
+		if err := util.ValidateID(fromID); err != nil {
+			return apicontract.FailureFrom[apicontract.Null](err)
 		}
 		fromIDs = append(fromIDs, fromID)
 	}
 	toID := request.ToID
-	if util.InvalidIDPattern(toID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(toID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	var fromPaths []string
 	for _, fromID := range fromIDs {
 		tree, err := model.LoadTreeByBlockID(fromID)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+			return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 		}
 		fromPaths = append(fromPaths, tree.Path)
 	}
@@ -577,9 +511,7 @@ func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsReq
 	if err != nil {
 		box = model.Conf.Box(toID)
 		if nil == box {
-			ret.Code = -1
-			ret.Msg = "can't found box or tree by id [" + toID + "]"
-			return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+			return apicontract.FailureWithTimeout[apicontract.Null](-1, "can't found box or tree by id ["+toID+"]", 7000)
 		}
 	}
 
@@ -594,59 +526,50 @@ func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsReq
 	callback := fileTreeCallback(request.Callback)
 	err = model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var removeDoc = contractHandler(apicontract.RemoveDoc, removeDocContract)
 
 func removeDocContract(c *gin.Context, request apicontract.FileTreePathRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	p := request.Path
 	if err := model.RemoveDoc(notebook, p); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.Success(apicontract.Null{})
 }
 
 var removeDocByID = contractHandler(apicontract.RemoveDocByID, removeDocByIDContract)
 
 func removeDocByIDContract(c *gin.Context, request apicontract.FileTreeTrimIDRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
 
 	if err = model.RemoveDoc(notebook, p); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.Success(apicontract.Null{})
 }
 
 var removeDocs = contractHandler(apicontract.RemoveDocs, removeDocsContract)
 
 func removeDocsContract(c *gin.Context, request apicontract.FileTreePathsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	pathsArg := request.Paths
 	var paths []string
@@ -654,20 +577,17 @@ func removeDocsContract(c *gin.Context, request apicontract.FileTreePathsRequest
 		paths = append(paths, path)
 	}
 	if err := model.RemoveDocs(paths); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.Success(apicontract.Null{})
 }
 
 var renameDoc = contractHandler(apicontract.RenameDoc, renameDocContract)
 
 func renameDocContract(c *gin.Context, request apicontract.FileTreeRenameRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	p := request.Path
@@ -675,25 +595,21 @@ func renameDocContract(c *gin.Context, request apicontract.FileTreeRenameRequest
 
 	err := model.RenameDoc(notebook, p, title)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var renameDocByID = contractHandler(apicontract.RenameDocByID, renameDocByIDContract)
 
 func renameDocByIDContract(c *gin.Context, request apicontract.FileTreeRenameIDRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	if request.ID == nil {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.SuccessWithoutData[apicontract.Null]()
 	}
 
 	id := *request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	title, decodeErr := request.DocTitle()
@@ -703,18 +619,14 @@ func renameDocByIDContract(c *gin.Context, request apicontract.FileTreeRenameIDR
 
 	tree, err := model.LoadTreeByBlockID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
 
 	err = model.RenameDoc(tree.Box, tree.Path, title)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var duplicateDoc = contractHandler(apicontract.DuplicateDoc, duplicateDocContract)
@@ -733,14 +645,11 @@ func duplicateDocTreeContract(c *gin.Context, request apicontract.FileTreeIDRequ
 }
 
 func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest) apicontract.Response[apicontract.FileTreeDuplicateData] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
 	tree, err := model.LoadTreeByBlockID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
 	}
 
 	notebook := tree.Box
@@ -754,7 +663,6 @@ func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest)
 var createDoc = contractHandler(apicontract.CreateDoc, createDocContract)
 
 func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest) apicontract.Response[apicontract.FileTreeCreateData] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	p := request.Path
@@ -763,9 +671,7 @@ func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest
 	sorts := append([]string(nil), request.Sorts...)
 	tree, err := model.CreateDocByMd(notebook, p, title, md, sorts, fileTreeCreateContext(request.FileTreeCreateOptions))
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.FileTreeCreateData](ret.Code, ret.Msg, 7000)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeCreateData](-1, err.Error(), 7000)
 	}
 
 	return apicontract.Success(apicontract.FileTreeCreateData{ID: tree.Root.ID})
@@ -774,7 +680,6 @@ func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest
 var createDailyNote = contractHandler(apicontract.CreateDailyNote, createDailyNoteContract)
 
 func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNoteRequest) apicontract.Response[apicontract.FileTreeCreateData] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
@@ -793,13 +698,11 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 		}
 	}
 	if err != nil {
+		code := -1
 		if errors.Is(err, model.ErrBoxNotFound) {
-			ret.Code = 1
-		} else {
-			ret.Code = -1
+			code = 1
 		}
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeCreateData](ret)
+		return apicontract.Failure[apicontract.FileTreeCreateData](code, err.Error())
 	}
 
 	model.FlushTxQueue()
@@ -807,9 +710,7 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeCreateData](ret)
+		return apicontract.Failure[apicontract.FileTreeCreateData](-1, err.Error())
 	}
 
 	if !existed {
@@ -834,11 +735,10 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 var createDocWithMd = contractHandler(apicontract.CreateDocWithMd, createDocWithMdContract)
 
 func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateMarkdownRequest) apicontract.Response[apicontract.LegacyPathDocumentResult] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.LegacyPathDocumentResult](err)
 	}
 
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
@@ -875,9 +775,7 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 				UnsupportedIDs: filterFileTreeBlockIDsByPublishDiscoverability(c, failure.UnsupportedIDs, notebook)}
 			return apicontract.CreateDocWithMd.FailureWithData(-1, err.Error(), apicontract.NewLegacyPathDocumentFailure(data))
 		}
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.LegacyPathDocumentResult](ret)
+		return apicontract.Failure[apicontract.LegacyPathDocumentResult](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.NewLegacyPathDocument(id))
 }
@@ -885,7 +783,6 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 var getDocCreateSavePath = contractHandler(apicontract.GetDocCreateSavePath, getDocCreateSavePathContract)
 
 func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeCreateSavePathResult] {
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	if model.Conf.Box(notebook) != nil {
@@ -922,9 +819,7 @@ func getDocCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 
 	docCreateSavePath, err := model.RenderGoTemplateInBox(docCreateSavePathTpl, docCreateSaveBox)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeCreateSavePathResult](ret)
+		return apicontract.Failure[apicontract.FileTreeCreateSavePathResult](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.NewFileTreeCreateSavePathResult(apicontract.FileTreeCreateSavePathData{FileTreeSavePathData: apicontract.FileTreeSavePathData{Box: docCreateSaveBox, Path: docCreateSavePath}, DocCreateTemplatePath: docCreateTemplatePath}))
@@ -934,8 +829,6 @@ var getRefCreateSavePath = contractHandler(apicontract.GetRefCreateSavePath, get
 
 func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathResult] {
 	confFileTreeSnapshot := model.Conf.LoadFileTree()
-
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 	if model.Conf.Box(notebook) != nil {
@@ -986,9 +879,7 @@ func getRefCreateSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 
 	refCreateSavePath, err := model.RenderGoTemplateInBox(refCreateSavePathTpl, refCreateSaveBox)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeSavePathResult](ret)
+		return apicontract.Failure[apicontract.FileTreeSavePathResult](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.NewFileTreeSavePathResult(apicontract.FileTreeSavePathData{Box: refCreateSaveBox, Path: refCreateSavePath}))
 }
@@ -997,8 +888,6 @@ var getShorthandSavePath = contractHandler(apicontract.GetShorthandSavePath, get
 
 func getShorthandSavePathContract(c *gin.Context, request apicontract.FileTreeNotebookRequest) apicontract.Response[apicontract.FileTreeSavePathData] {
 	confFileTreeSnapshot := model.Conf.LoadFileTree()
-
-	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
 
@@ -1009,9 +898,7 @@ func getShorthandSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 		shorthandSaveBox = notebook
 	}
 	if !model.IsShorthandSaveBoxAvailable(shorthandSaveBox) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(375)
-		return contractFailure[apicontract.FileTreeSavePathData](ret)
+		return apicontract.Failure[apicontract.FileTreeSavePathData](-1, model.Conf.Language(375))
 	}
 
 	if shorthandSaveBox != notebook {
@@ -1022,9 +909,7 @@ func getShorthandSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 
 	shorthandSavePath, err := model.RenderGoTemplateInBox(shorthandSavePathTpl, shorthandSaveBox)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeSavePathData](ret)
+		return apicontract.Failure[apicontract.FileTreeSavePathData](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.FileTreeSavePathData{Box: shorthandSaveBox, Path: shorthandSavePath})
 }
@@ -1032,8 +917,6 @@ func getShorthandSavePathContract(c *gin.Context, request apicontract.FileTreeNo
 var changeSort = contractHandler(apicontract.ChangeSort, changeSortContract)
 
 func changeSortContract(c *gin.Context, request apicontract.FileTreeChangeSortRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	notebook := request.Notebook
 	pathsArg := request.Paths
 	var paths []string
@@ -1041,16 +924,14 @@ func changeSortContract(c *gin.Context, request apicontract.FileTreeChangeSortRe
 		paths = append(paths, p)
 	}
 	model.ChangeFileTreeSort(notebook, paths)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var reorderDocs = contractHandler(apicontract.ReorderDocs, reorderDocsContract)
 
 func reorderDocsContract(c *gin.Context, request apicontract.FileTreeReorderRequest) apicontract.Response[*apicontract.FileTreeReorderData] {
-	ret := gulu.Ret.NewResult()
-
-	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
-		return contractFailure[*apicontract.FileTreeReorderData](ret)
+	if err := validateReorderRequest(request.SourceIDs, request.TargetID, request.Position); err != nil {
+		return apicontract.FailureFrom[*apicontract.FileTreeReorderData](err)
 	}
 
 	if request.RespectSort {
@@ -1070,38 +951,30 @@ func reorderDocsContract(c *gin.Context, request apicontract.FileTreeReorderRequ
 	return apicontract.Success(data)
 }
 
-func validateReorderRequest(sourceIDs []string, targetID, position string, ret *gulu.Result) bool {
+func validateReorderRequest(sourceIDs []string, targetID, position string) error {
 	if 1 > len(sourceIDs) {
-		ret.Code = -1
-		ret.Msg = "Field [sourceIDs] must not be empty"
-		return false
+		return apicontract.Reject("Field [sourceIDs] must not be empty")
 	}
-	if util.InvalidIDPattern(targetID, ret) {
-		return false
+	if err := util.ValidateID(targetID); err != nil {
+		return err
 	}
 	if "before" != position && "after" != position {
-		ret.Code = -1
-		ret.Msg = "Field [position] must be [before] or [after]"
-		return false
+		return apicontract.Reject("Field [position] must be [before] or [after]")
 	}
 	ids := map[string]struct{}{}
 	for i, sourceID := range sourceIDs {
-		if util.InvalidIDPattern(sourceID, ret) {
-			return false
+		if err := util.ValidateID(sourceID); err != nil {
+			return err
 		}
 		if sourceID == targetID {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [targetID] must not be included in [sourceIDs] at index [%d]", i)
-			return false
+			return apicontract.Reject(fmt.Sprintf("Field [targetID] must not be included in [sourceIDs] at index [%d]", i))
 		}
 		if _, exists := ids[sourceID]; exists {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [sourceIDs] contains duplicate ID [%s]", sourceID)
-			return false
+			return apicontract.Reject(fmt.Sprintf("Field [sourceIDs] contains duplicate ID [%s]", sourceID))
 		}
 		ids[sourceID] = struct{}{}
 	}
-	return true
+	return nil
 }
 
 type sortRequestItem = apicontract.FileTreeSortItem
@@ -1109,20 +982,17 @@ type sortRequestItem = apicontract.FileTreeSortItem
 var setSort = contractHandler(apicontract.SetSort, setSortContract)
 
 func setSortContract(c *gin.Context, request apicontract.FileTreeSetSortRequest) apicontract.Response[*apicontract.FileTreeSetSortData] {
-	ret := gulu.Ret.NewResult()
-
 	if 1 > len(request.NotebookSorts)+len(request.DocSorts) {
-		ret.Code = -1
-		ret.Msg = "Fields [notebookSorts] and [docSorts] must not both be empty"
-		return contractFailure[*apicontract.FileTreeSetSortData](ret)
+		return apicontract.Failure[*apicontract.FileTreeSetSortData](-1,
+			"Fields [notebookSorts] and [docSorts] must not both be empty")
 	}
-	notebookSorts, ok := parseSortItems("notebookSorts", request.NotebookSorts, ret)
-	if !ok {
-		return contractFailure[*apicontract.FileTreeSetSortData](ret)
+	notebookSorts, err := parseSortItems("notebookSorts", request.NotebookSorts)
+	if err != nil {
+		return apicontract.FailureFrom[*apicontract.FileTreeSetSortData](err)
 	}
-	docSorts, ok := parseSortItems("docSorts", request.DocSorts, ret)
-	if !ok {
-		return contractFailure[*apicontract.FileTreeSetSortData](ret)
+	docSorts, err := parseSortItems("docSorts", request.DocSorts)
+	if err != nil {
+		return apicontract.FailureFrom[*apicontract.FileTreeSetSortData](err)
 	}
 
 	result, err := model.SetFileTreeSort(notebookSorts, docSorts)
@@ -1136,10 +1006,9 @@ func setSortContract(c *gin.Context, request apicontract.FileTreeSetSortRequest)
 var setDocSortMode = contractHandler(apicontract.SetDocSortMode, setDocSortModeContract)
 
 func setDocSortModeContract(c *gin.Context, request apicontract.FileTreeSortModeRequest) apicontract.Response[*apicontract.FileTreeSortModeData] {
-	ret := gulu.Ret.NewResult()
 
-	if util.InvalidIDPattern(request.ID, ret) {
-		return contractFailure[*apicontract.FileTreeSortModeData](ret)
+	if err := util.ValidateID(request.ID); err != nil {
+		return apicontract.FailureFrom[*apicontract.FileTreeSortModeData](err)
 	}
 	sortMode, decodeErr := request.Mode()
 	if decodeErr != nil {
@@ -1153,31 +1022,25 @@ func setDocSortModeContract(c *gin.Context, request apicontract.FileTreeSortMode
 	return apicontract.Success(data)
 }
 
-func parseSortItems(field string, items []*sortRequestItem, ret *gulu.Result) (retItems []*model.SortItem, ok bool) {
+func parseSortItems(field string, items []*sortRequestItem) (retItems []*model.SortItem, err error) {
 	ids := map[string]struct{}{}
 	for i, item := range items {
 		if nil == item {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [%s][%d] must not be null", field, i)
-			return
+			return nil, apicontract.Reject(fmt.Sprintf("Field [%s][%d] must not be null", field, i))
 		}
-		if util.InvalidIDPattern(item.ID, ret) {
-			return
+		if err := util.ValidateID(item.ID); err != nil {
+			return nil, err
 		}
 		if nil == item.Sort {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [%s][%d].sort is required", field, i)
-			return
+			return nil, apicontract.Reject(fmt.Sprintf("Field [%s][%d].sort is required", field, i))
 		}
 		if _, ok := ids[item.ID]; ok {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [%s] contains duplicate ID [%s]", field, item.ID)
-			return nil, false
+			return nil, apicontract.Reject(fmt.Sprintf("Field [%s] contains duplicate ID [%s]", field, item.ID))
 		}
 		ids[item.ID] = struct{}{}
 		retItems = append(retItems, &model.SortItem{ID: item.ID, Sort: *item.Sort})
 	}
-	return retItems, true
+	return retItems, nil
 }
 
 var searchDocs = contractHandler(apicontract.SearchDocs, searchDocsContract)
@@ -1200,16 +1063,12 @@ var listDocsByPath = contractHandler(apicontract.ListDocsByPath, listDocsByPathC
 func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequest) apicontract.Response[apicontract.FileTreeListData] {
 	confFileTreeSnapshot := model.Conf.LoadFileTree()
 
-	ret := gulu.Ret.NewResult()
-
 	notebook := request.Notebook
 	p := request.Path
 
 	// 越界校验：拒绝 ..，确保路径位于 <data>/<notebook>/ 内
 	if strings.Contains(p, "..") {
-		ret.Code = -1
-		ret.Msg = "path must not contain '..' and must be relative"
-		return contractFailure[apicontract.FileTreeListData](ret)
+		return apicontract.Failure[apicontract.FileTreeListData](-1, "path must not contain '..' and must be relative")
 	}
 
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
@@ -1230,9 +1089,7 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 		var resolveErr error
 		effectiveSortMode, resolveErr = model.ResolveDocTreeSortMode(notebook, p)
 		if nil != resolveErr {
-			ret.Code = -1
-			ret.Msg = resolveErr.Error()
-			return contractFailure[apicontract.FileTreeListData](ret)
+			return apicontract.Failure[apicontract.FileTreeListData](-1, resolveErr.Error())
 		}
 	}
 	flashcard := options.Flashcard
@@ -1248,9 +1105,7 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 
 	files, totals, err := model.ListDocTree(notebook, p, effectiveSortMode, flashcard, showHidden, maxListCount)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeListData](ret)
+		return apicontract.Failure[apicontract.FileTreeListData](-1, err.Error())
 	}
 	// 过滤掉发布不可见的文件
 	if model.IsReadOnlyRoleContext(c) {
@@ -1289,23 +1144,19 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 var getDoc = contractHandler(apicontract.GetDoc, getDocContract)
 
 func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) apicontract.Response[apicontract.FileTreeGetDocData] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.FileTreeGetDocData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.FileTreeGetDocData](err)
 	}
 	requestedNotebook := request.Notebook
 	if model.IsReadOnlyRoleContext(c) &&
 		((requestedNotebook != "" && model.IsEncryptedBoxDeniedByPublishAccess(requestedNotebook)) ||
 			model.IsEncryptedPublishRuntimeTarget(id)) {
-		ret.Code = 3
-		return contractFailure[apicontract.FileTreeGetDocData](ret)
+		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
 	}
 	if err := holdEncryptedBoxRequest(c, requestedNotebook); err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeGetDocData](ret)
+		return apicontract.Failure[apicontract.FileTreeGetDocData](1, err.Error())
 	}
 	options, decodeErr := request.Options()
 	if decodeErr != nil {
@@ -1354,14 +1205,11 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo)
 	}
 	if errors.Is(err, model.ErrBlockNotFound) {
-		ret.Code = 3
-		return contractFailure[apicontract.FileTreeGetDocData](ret)
+		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
 	}
 
 	if err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.FileTreeGetDocData](ret)
+		return apicontract.Failure[apicontract.FileTreeGetDocData](1, err.Error())
 	}
 
 	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
@@ -1399,14 +1247,11 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 var setPublishAccess = contractHandler(apicontract.SetPublishAccess, setPublishAccessContract)
 
 func setPublishAccessContract(c *gin.Context, request apicontract.FileTreeSetPublishRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	publishAccess := model.GetPublishAccess()
 	ID := request.ID
 	if model.IsEncryptedPublishAccessTarget(ID) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(394)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(394))
 	}
 	options, err := request.Options()
 	if err != nil {
@@ -1446,28 +1291,23 @@ func setPublishAccessContract(c *gin.Context, request apicontract.FileTreeSetPub
 	if updated {
 		err := model.SetPublishAccess(publishAccess)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return contractFailure[apicontract.Null](ret)
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	}
 
 	model.PurgePublishAccess()
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.SuccessWithoutData[apicontract.Null]()
 }
 
 var getPublishAccess = contractHandler(apicontract.GetPublishAccess, getPublishAccessContract)
 
 func getPublishAccessContract(c *gin.Context, request apicontract.FileTreePublishIDsRequest) apicontract.Response[apicontract.FileTreePublishData] {
-	ret := gulu.Ret.NewResult()
 
 	var IDs []string
 	for _, ID := range request.IDs {
 		id := ID
 		if model.IsEncryptedPublishAccessTarget(id) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(394)
-			return contractFailure[apicontract.FileTreePublishData](ret)
+			return apicontract.Failure[apicontract.FileTreePublishData](-1, model.Conf.Language(394))
 		}
 		IDs = append(IDs, id)
 	}
@@ -1499,18 +1339,15 @@ func getPublishAccessContract(c *gin.Context, request apicontract.FileTreePublis
 var authFilePublishAccess = contractHandler(apicontract.AuthFilePublishAccess, authFilePublishAccessContract)
 
 func authFilePublishAccessContract(c *gin.Context, request apicontract.FileTreeAuthPublishRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	ID := request.ID
-	if util.InvalidIDPattern(ID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(ID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	password := request.Password
 
-	ret.Code = -1
-	ret.Msg = model.Conf.Language(285)
+	denied := apicontract.Reject(model.Conf.Language(285))
 	if model.IsEncryptedPublishRuntimeTarget(ID) {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureFrom[apicontract.Null](denied)
 	}
 
 	// 按来源 IP 对发布密码认证进行限流，防止无限次暴力破解密码 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v362-968x-gp2v
@@ -1519,8 +1356,8 @@ func authFilePublishAccessContract(c *gin.Context, request apicontract.FileTreeA
 		// 锁定期间持续记录失败，不断延长锁定时间
 		util.AuthThrottleFail(ip)
 		c.Header("Retry-After", strconv.Itoa(retryAfter))
-		ret.Msg = model.Conf.Language(354)
-		return apicontract.AuthFilePublishAccess.WithHTTPStatus(contractFailure[apicontract.Null](ret), http.StatusTooManyRequests)
+		return apicontract.AuthFilePublishAccess.WithHTTPStatus(
+			apicontract.Failure[apicontract.Null](-1, model.Conf.Language(354)), http.StatusTooManyRequests)
 	}
 
 	publishAccess := model.GetPublishAccess()
@@ -1531,16 +1368,14 @@ func authFilePublishAccessContract(c *gin.Context, request apicontract.FileTreeA
 		if item.Disable || item.Password == "" || !util.AuthCodeEquals(item.Password, password) {
 			// 恒定时间比较，避免通过响应时间差异猜测密码
 			util.AuthThrottleFail(ip)
-			return contractFailure[apicontract.Null](ret)
+			return apicontract.FailureFrom[apicontract.Null](denied)
 		}
 		util.AuthThrottleReset(ip)
 		model.SetPublishAuthCookie(c, ID, password)
-		ret.Code = 0
-		ret.Msg = ""
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](0, "")
 	}
 
 	// 目标 ID 不在发布配置中，同样记录失败以限制尝试次数
 	util.AuthThrottleFail(ip)
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.FailureFrom[apicontract.Null](denied)
 }

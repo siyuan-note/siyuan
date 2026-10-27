@@ -24,7 +24,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/88250/gulu"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
@@ -59,10 +58,9 @@ var setRetentionIndexesDaily = contractHandler(apicontract.SetRetentionIndexesDa
 })
 
 var getRepoFile = contractHandler(apicontract.GetRepoFile, func(c *gin.Context, request apicontract.GetRepoFileRequest) apicontract.Response[apicontract.BinaryContent] {
-	ret := gulu.Ret.NewResult()
 
-	if !holdRepoFileRequest(c, request.ID, ret) {
-		return contractFailure[apicontract.BinaryContent](ret)
+	if err := holdRepoFileRequest(c, request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.BinaryContent](err)
 	}
 	data, p, err := model.GetRepoFile(request.ID)
 	if err != nil {
@@ -73,10 +71,9 @@ var getRepoFile = contractHandler(apicontract.GetRepoFile, func(c *gin.Context, 
 })
 
 var rollbackRepoSnapshotFile = contractHandler(apicontract.RollbackRepoSnapshotFile, func(c *gin.Context, request apicontract.RollbackRepoSnapshotFileRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
-	if !holdRepoFileRequest(c, request.ID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := holdRepoFileRequest(c, request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	err := model.RollbackRepoSnapshotFile(request.ID)
@@ -88,10 +85,9 @@ var rollbackRepoSnapshotFile = contractHandler(apicontract.RollbackRepoSnapshotF
 })
 
 var openRepoSnapshotFile = contractHandler(apicontract.OpenRepoSnapshotFile, func(c *gin.Context, request apicontract.OpenRepoSnapshotFileRequest) apicontract.Response[apicontract.RepoOpenFileData] {
-	ret := gulu.Ret.NewResult()
 
-	if !holdRepoFileRequest(c, request.ID, ret) {
-		return contractFailure[apicontract.RepoOpenFileData](ret)
+	if err := holdRepoFileRequest(c, request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.RepoOpenFileData](err)
 	}
 
 	title, content, displayInText, updated, err := model.OpenRepoSnapshotFile(request.ID)
@@ -126,11 +122,10 @@ var getCloudSpace = contractHandler(apicontract.GetCloudSpace, func(c *gin.Conte
 })
 
 var checkoutRepo = contractHandler(apicontract.CheckoutRepo, func(c *gin.Context, request apicontract.CheckoutRepoRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	if request.SessionID != "" {
-		if util.InvalidIDPattern(request.SessionID, ret) {
-			return contractFailure[apicontract.Null](ret)
+		if err := util.ValidateID(request.SessionID); err != nil {
+			return apicontract.FailureFrom[apicontract.Null](err)
 		}
 		markerDir := filepath.Join(util.TempDir, "ai", "agent")
 		os.MkdirAll(markerDir, 0755)
@@ -204,9 +199,8 @@ var searchRepoFile = contractHandler(apicontract.SearchRepoFile, func(c *gin.Con
 })
 
 var getRepoDocHistory = contractHandler(apicontract.GetRepoDocHistory, func(c *gin.Context, request apicontract.GetRepoDocHistoryRequest) apicontract.Response[apicontract.RepoDocHistoryData] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.ID, ret) {
-		return contractFailure[apicontract.RepoDocHistoryData](ret)
+	if err := util.ValidateID(request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.RepoDocHistoryData](err)
 	}
 
 	if block := treenode.GetBlockTree(request.ID); block != nil {
@@ -224,10 +218,9 @@ var getRepoDocHistory = contractHandler(apicontract.GetRepoDocHistory, func(c *g
 })
 
 var exportRepoFile = contractHandler(apicontract.ExportRepoFile, func(c *gin.Context, request apicontract.ExportRepoFileRequest) apicontract.Response[apicontract.RepoExportData] {
-	ret := gulu.Ret.NewResult()
 
-	if !holdRepoFileRequest(c, request.ID, ret) {
-		return contractFailure[apicontract.RepoExportData](ret)
+	if err := holdRepoFileRequest(c, request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.RepoExportData](err)
 	}
 
 	exportPath, err := model.ExportRepoFile(request.ID)
@@ -238,19 +231,16 @@ var exportRepoFile = contractHandler(apicontract.ExportRepoFile, func(c *gin.Con
 	return apicontract.Success(apicontract.RepoExportData{Path: exportPath})
 })
 
-func holdRepoFileRequest(c *gin.Context, id string, ret *gulu.Result) bool {
+// holdRepoFileRequest 在读取仓库文件前取得所属笔记本的租约，返回 nil 表示可以继续。
+func holdRepoFileRequest(c *gin.Context, id string) error {
 	boxID, err := model.ResolveRepoFileBoxID(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return false
+		return apicontract.Reject(err.Error())
 	}
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return false
+		return apicontract.Reject(model.Conf.Language(314))
 	}
-	return true
+	return nil
 }
 
 var getCloudRepoSnapshots = contractHandler(apicontract.GetCloudRepoSnapshots, func(c *gin.Context, request apicontract.GetCloudRepoSnapshotsRequest) apicontract.Response[apicontract.RepoCloudSnapshotsData] {

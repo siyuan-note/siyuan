@@ -645,7 +645,7 @@ var ReadDirectory = define[ReadDirectoryRequest, []DirectoryEntry]("readDir", "/
 // 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
 var RenameFile = define[RenameFileRequest, Null]("renameFile", "/api/file/renameFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}}, "POST")
 
-// RemoveFile 保留既有敏感路径和加密边界检查；整本删除不读取已撤销的寻址模式记录。
+// RemoveFile 保留既有敏感路径和加密边界检查；整本删除时校验树内全部文档寻址记录。
 var RemoveFile = define[RemoveFileRequest, Null]("removeFile", "/api/file/removeFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 500}}, "POST")
 
 // GlobalCopyFiles 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
@@ -701,7 +701,7 @@ var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph
 
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "graph"}}, "POST")
 
-// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知。
 var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
 var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
@@ -1133,7 +1133,7 @@ var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetD
 // PlanDocCreate 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
 // contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
 // 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
-// reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+// reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
 // 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
 var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1345,7 +1345,7 @@ var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAsset
 
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
 // keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
-// 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+// 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体按截断返回。
 // all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[UnusedAssetsRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
@@ -1543,7 +1543,7 @@ var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPaste
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-// true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
+// true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
@@ -1716,7 +1716,7 @@ var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnbo
 // 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
 var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3}, DataOnError: true}, "POST")
 
-// SystemExportConf 保持单个 JSON 文件的设置压缩包，不再附加已撤销的 documentAddressing 下界记录。
+// SystemExportConf 导出单个 JSON 文件的设置压缩包。
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

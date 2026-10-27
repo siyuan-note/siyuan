@@ -663,7 +663,7 @@ func firstAttributeViewFilterContext(contexts []*av.FilterContext) *av.FilterCon
 
 // applyFilterDefaultValues 递归遍历过滤节点树，对叶子节点计算新增行的默认值。
 // AND 分组合并后验证所有子节点，OR 分组采用首个可满足的分支；无法满足时不生成默认值。
-// 返回 true 表示遇到 mAsset 过滤，调用方应立即结束全部默认值计算（保留原外层 return 语义）。
+// 返回 true 表示遇到 mAsset 过滤，调用方应立即终止全部默认值计算并丢弃已累积结果。
 func applyFilterDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeView, addingItemID string, nearItem av.Item,
 	templateRelevantKeys map[string][]*av.Key, rollupRelevantKeys map[string]*av.Key,
 	ret map[string]*av.Value, filterKeyIDs map[string]bool) (stop bool) {

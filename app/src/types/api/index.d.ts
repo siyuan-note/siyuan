@@ -3546,7 +3546,7 @@ export interface APIPOSTRoutes {
     /**
      * 扫描失败返回标准错误，不将失败表示为成功的空列表。
      * keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
-     * 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+     * 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体按截断返回。
      * all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
      * 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
      */
@@ -3825,7 +3825,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-     * true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
+     * true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
      */
     "/api/av/createAttributeViewItem": {
         request: CreateAttributeViewItemRequestInput;
@@ -5369,7 +5369,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 保留既有敏感路径和加密边界检查；整本删除不读取已撤销的寻址模式记录。
+     * 保留既有敏感路径和加密边界检查；整本删除时校验树内全部文档寻址记录。
      */
     "/api/file/removeFile": {
         request: RemoveFileRequestInput;
@@ -5692,7 +5692,7 @@ export interface APIPOSTRoutes {
      * 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
      * contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
      * 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
-     * reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+     * reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
      * 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
      */
     "/api/filetree/planDocCreate": {
@@ -5841,7 +5841,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+     * 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知。
      */
     "/api/graph/getGraph": {
         request: GlobalGraphRequestInput;
@@ -8169,7 +8169,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 保持单个 JSON 文件的设置压缩包，不再附加已撤销的 documentAddressing 下界记录。
+     * 导出单个 JSON 文件的设置压缩包。
      */
     "/api/system/exportConf": {
         request: EmptyRequestInput;

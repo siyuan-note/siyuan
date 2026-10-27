@@ -225,7 +225,7 @@ func batchSetBlockAttrs(blockAttrs []map[string]any, writeTree func(*parse.Tree)
 			}
 		}
 	}
-	// 不做锚文本刷新
+	// 批量属性写入路径不刷新动态锚文本；需要刷新的调用方按 attrsAffectRefText 白名单自行触发。
 	return
 }
 
@@ -337,8 +337,8 @@ func attrsAffectRefText(nameValues map[string]string) bool {
 // custom-sy-av-s-text-<avID> 属性派生，这些属性变更时需调用 updateAttributeViewBlockText
 // 同步到 AV JSON，否则数据库视图中显示的图标/内容不会更新。
 //
-// 该同步原本由 refreshDynamicRefText 顺带完成，但 #18058 的锚文本刷新优化用 attrsAffectRefText
-// 门槛拦截了非 name/title 属性的刷新，导致 icon 变更不再触发同步，故此处独立解耦触发
+// icon、name 与 custom-sy-av-s-text-<avID> 的变更必须由 attrsAffectAvBlock 独立触发；
+// 不要依赖 refreshDynamicRefText，它的 attrsAffectRefText 白名单只放行 name/title
 // （详见 https://github.com/siyuan-note/siyuan/issues/18204）。
 func attrsAffectAvBlock(nameValues map[string]string) bool {
 	for name := range nameValues {

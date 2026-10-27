@@ -1066,7 +1066,7 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 	}
 
 	templateKeys, _ := GetTemplateKeysByResolutionOrder(attrView)
-	// 按模板内容缓存已编译模板，避免逐行重复 Parse。坏内容缓存为 nil，保留原先「逐行设置 err 并继续」的语义。
+	// 按模板内容缓存已编译模板，避免逐行重复 Parse。坏内容缓存为 nil，逐行设置 err 并继续渲染其余行。
 	tplCache := map[string]*template.Template{}
 	compileErrCache := map[string]error{}
 	storedValueCache := map[*av.Value]*av.Value{}

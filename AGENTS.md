@@ -165,7 +165,9 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 
 ## 3. Coding conventions
 
-1. **Comments:** Write in Chinese, wrap at 120 characters, and describe what the code does without referencing the old implementation
+1. **Comments:** Write in Chinese, wrap at 120 characters, and state the behavior in effect now; do not narrate how the code got there or describe it relative to a previous implementation (`不再创建`、`保留旧行为`), and drop any comment that only restates the next line
+   - Keep an issue link only when it explains why the current rule exists
+   - Legacy **data** is the exception: deprecated fields and format migrations must still say which older shape they read
 2. **Punctuation:** Use language-appropriate punctuation in UI text, comments, user guides, and documentation (e.g. Chinese punctuation ，。：；！？「」 for Chinese). Keep UI text and its punctuation in i18n language files rather than hard-coding them in code
 3. **UI paths:** In all contexts, including code comments, UI text, i18n, user guides, documentation, issue/PR content, and responses, separate navigation levels with a hyphen surrounded by spaces (for example, `设置 - 快捷键 - 通用`); do not use arrow symbols such as `→`
 4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line

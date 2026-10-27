@@ -3063,6 +3063,14 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 使用严格字符串字段，通过管理员和只读检查管理工作空间技能文件。相对路径标识实际目录，
+     * 与文件头中的技能名称无关，允许普通的点开头名称。读写支持不超过 8 MiB 的 UTF-8 文本，
+     * 不依赖扩展名并保留原文字节。目录和资源读取保留基于内容的版本；不支持编辑的内容省略 content，
+     * 并增加可选的 readOnlyReason（binary、encoding 或 tooLarge）。
+     * 修改已有文件时重新校验内容并要求当前版本，与旧技能修改接口和安装共享临界区，成功后通知同步。
+     * 路径穿越、平台别名、链接、过期版本，以及单独修改不支持的内容或重命名、删除根 SKILL.md 均被拒绝。
+     */
     "/api/ai/agent/manageSkills": {
         request: AISkillFileRequestInput;
         response: { "code": 0; "data": AISkillFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3363,6 +3371,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 用固定的 TypeSafe System One 样例测试已保存的可选 ai.decision 配置，返回 {matched, msg?}。
+     * 遵循全局人工智能禁用标记和请求取消，配置错误与供应商错误不会被转换为判断结果。
+     * 省略决策配置时补齐默认关闭的配置，关闭后保留密钥，并沿用现有配置加密存储机制。
+     */
     "/api/ai/testDecisionModel": {
         request: AIDecisionTestRequestInput;
         response: { "code": 0; "data": AIDecisionTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3661,6 +3674,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
+     * 请求持有加密笔记本租约直至响应序列化完成，外部编辑不写回加密源数据。
      */
     "/api/asset/resolveAssetPath": {
         request: AssetPathRequestInput;
@@ -4835,6 +4849,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 要求管理员身份，保留只读保护及加密笔记本请求租约；请求必须提供文档 id 和 notebook。
+     * 保存历史后在一次可撤销事务中转换能够完整解析的旧 mindmap 列表，返回 converted 数量与文档脑图的
+     * 权威 blocks（id、dom）。重复请求返回当前块内容而不重复转换，不完整的原文保持不变。
+     */
     "/api/block/migrateLegacyMindmaps": {
         request: MigrateLegacyMindmapsRequestInput;
         response: { "code": 0; "data": MigrateLegacyMindmapsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4888,6 +4907,14 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 编辑器通过独立事务转换块引用：id 指定引用块，blockID 指定定义块，data 携带布尔选项 includeChildren
+     * 和 originalToEmbed。内核在 retData 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作；
+     * 快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖，
+     * originalToEmbed 省略或为 false 时在原定义位置保留引用，为 true 时替换为查询已移动定义 ID 的嵌入块；
+     * includeChildren 保留标题和列表行为。
+     * 提交失败时补偿已写入的文档。撤销与重放期间为所有受影响文档持有笔记本租约，直至响应序列化完成。
+     */
     "/api/block/swapBlockRef": {
         request: SwapBlockRefRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5487,7 +5514,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * evaluates block collection rules for every copied document and block, initializing only new rows.
+     * 将单篇文档及全部子文档复制到同一笔记本的原父目录，返回副本根文档的 id、notebook、path 和 hPath。
+     * 副本内部块引用、块链接和查询嵌入的显式块 ID 统一重映射，数据库定义与行绑定保持为共享镜像。
+     * 源快照经过认证读取且不执行修复写回；运行期失败时清理新建文档并恢复排序，属运行时补偿，
+     * 不保证进程崩溃时的事务原子性。
      */
     "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
@@ -6684,6 +6714,9 @@ export interface APIPOSTRoutes {
     /**
      * sourceFilter.database 在父块合并前按来源块的数据库字段筛选，不修改原数据库视图。
      * 无条件仅筛数据库成员，失效字段不放宽结果；原来源筛选、排序及加密笔记本租约保持不变。
+     * blockSort 为 0（默认）时保持正文顺序，1 按匹配引用的锚文本自然升序，2 为自然降序，其他值回退正文顺序。
+     * 条目取首个匹配引用的锚文本并去除首尾空白；排序键相同时保持正文顺序，无锚文本的条目在两个方向均置后。
+     * 来源文档内部把整篇文档条目展开为可独立排序的引用，恢复正文顺序时重新合并；排序模式参与上下文版本哈希。
      */
     "/api/ref/getBacklinkDoc": {
         request: BacklinkDocumentRequestInput;
@@ -6704,6 +6737,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 数据库条件与列表快照一致，不修改来源数据或原数据库视图。
+     * 必需的 snapshot 与最多 20 个属于该快照的块 ids 返回可独立编辑的块正文，保留面包屑和数据库引用信息。
+     * 返回前重新检查来源权限并持有加密笔记本请求租约；发布阅读者不能读取加密笔记本。
      */
     "/api/ref/getGlobalBacklinkContexts": {
         request: GlobalBacklinkContextRequestInput;
@@ -7978,6 +8013,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * completeAssets 为 true 时，在切换来源前从原提供商下载缺失的当前资源和历史快照内容；
+     * 省略、null 与 false 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。
+     * 确认后的操作通过全局进度遮罩显示检查与补齐阶段，成功或失败均关闭遮罩。
+     */
     "/api/sync/setSyncProvider": {
         request: SyncProviderRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8241,6 +8281,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 无需请求体，要求管理员权限并允许只读模式，返回 {text} 诊断摘要：内核版本、运行时、操作系统、
+     * 逻辑 CPU 数量、当前系统与进程内存，以及检测到的工作空间存储类型。
+     * 无法探测的内存或存储返回 unknown，不把移动端存储推断为 SSD；文本不含工作空间路径、主机名和账户标识。
+     */
     "/api/system/getRuntimeInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemRuntimeInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

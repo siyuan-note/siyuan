@@ -222,6 +222,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
+	readVersion := cache.TreeDataReadVersion()
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		if !os.IsNotExist(err) {
@@ -243,7 +244,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 
 	ret, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
 	if nil == err {
-		cache.SetTreeDataInBox(rootID, boxID, data)
+		cache.SetTreeDataFromReadInBox(rootID, boxID, data, readVersion)
 	}
 	return
 }

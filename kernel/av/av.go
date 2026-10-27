@@ -869,6 +869,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = version
 	} else {
 		var readErr error
+		readVersion := cache.AVDataReadVersion()
 		data, readErr = filelock.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
@@ -886,7 +887,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
 			return nil, nil
 		}
-		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
+		dataVersion = cache.SetAVDataFromReadInBox(avID, boxID, data, readVersion)
 	}
 
 	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {

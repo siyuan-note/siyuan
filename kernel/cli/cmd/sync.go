@@ -40,7 +40,9 @@ var syncCmd = &cobra.Command{
 			return nil
 		}
 
-		model.SyncData(true)
+		if err := model.SyncData(true); err != nil {
+			return err
+		}
 		fmt.Println("ok")
 		return nil
 	},

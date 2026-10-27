@@ -262,8 +262,8 @@ func finishBootSync(revision uint64, cloudPublished bool, err error) {
 	}
 }
 
-func SyncData(byHand bool) {
-	syncData(false, byHand)
+func SyncData(byHand bool) error {
+	return syncData(false, byHand)
 }
 
 // SyncDataBeforeEnableEncryptedNotebook 在启用加密笔记本前执行一次完整同步。
@@ -333,6 +333,9 @@ func syncData(exit, byHand bool) (err error) {
 	defer logging.Recover()
 
 	if !checkSync(false, exit, byHand) {
+		if byHand {
+			return err
+		}
 		return nil
 	}
 
@@ -344,6 +347,9 @@ func syncData(exit, byHand bool) (err error) {
 	}
 	unlock, ok := lockSyncRequest(requests)
 	if !ok {
+		if byHand {
+			return err
+		}
 		return nil
 	}
 	defer unlock()

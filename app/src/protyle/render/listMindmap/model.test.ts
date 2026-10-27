@@ -389,6 +389,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
+            getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
+            hasUndoStateMirror: () => true,
+            subscribeUndoState: (_rootID: string, listener: () => void) => { listener(); return () => {}; },
             isEncryptedBox: () => false,
             setStorageVal: () => check.fail("Embedded previews cannot persist viewport positions"),
             fetchSyncPost: async () => ({code: 0, data: {dom: full}}),
@@ -1822,8 +1825,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(view.getContentHost(alpha).firstElementChild, editorMarker);
     view.setEditing();
     view.update(api.readListMindmap(list));
-    check.equal(host.querySelector('[aria-label="undo"]'), null);
-    check.equal(host.querySelector('[aria-label="redo"]'), null);
+    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').disabled, true,
+        "the canvas exposes undo while an empty history keeps it disabled");
+    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').disabled, true);
     check.equal(undo, 0);
     check.equal(redo, 0);
     finishAllowed = false;

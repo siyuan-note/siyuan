@@ -25,10 +25,49 @@ interface IUndoStateMirror {
 const undoStateMirror = new Map<string, IUndoStateMirror>();
 const undoStateInitializers = new Map<string, Promise<boolean>>();
 let isUndoing = false; // 防重入：撤销/重做进行中忽略后续触发
+const undoStateListeners = new Map<string, Set<(state: ReturnType<typeof getUndoStateSnapshot>) => void>>();
+
+export const getUndoStateSnapshot = (rootID: string) => ({...getMirror(rootID), pending: isUndoing});
+
+const notifyUndoState = (rootID?: string) => {
+    const notify = (id: string) => {
+        const state = getUndoStateSnapshot(id);
+        undoStateListeners.get(id)?.forEach(listener => {
+            try {
+                listener(state);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    };
+    if (rootID) {
+        notify(rootID);
+    } else {
+        undoStateListeners.forEach((_listeners, id) => notify(id));
+    }
+};
+
+// 画布等不依赖文字选区的入口订阅同一份文档历史状态，销毁视图时解除订阅。
+export const subscribeUndoState = (rootID: string, listener: (state: ReturnType<typeof getUndoStateSnapshot>) => void) => {
+    let listeners = undoStateListeners.get(rootID);
+    if (!listeners) {
+        listeners = new Set();
+        undoStateListeners.set(rootID, listeners);
+    }
+    listeners.add(listener);
+    listener(getUndoStateSnapshot(rootID));
+    return () => {
+        listeners.delete(listener);
+        if (!listeners.size && undoStateListeners.get(rootID) === listeners) {
+            undoStateListeners.delete(rootID);
+        }
+    };
+};
 
 export const markMirror = (rootID: string, state: Partial<IUndoStateMirror>) => {
     const cur = undoStateMirror.get(rootID) || {canUndo: false, canRedo: false};
     undoStateMirror.set(rootID, {...cur, ...state});
+    notifyUndoState(rootID);
 };
 
 export const getMirror = (rootID: string): IUndoStateMirror => {
@@ -77,7 +116,7 @@ export const syncMirrorFromBroadcast = (undoState: { [rootID: string]: { canUndo
         return;
     }
     Object.entries(undoState).forEach(([rootID, state]) => {
-        undoStateMirror.set(rootID, {canUndo: !!state.canUndo, canRedo: !!state.canRedo});
+        markMirror(rootID, {canUndo: !!state.canUndo, canRedo: !!state.canRedo});
     });
 };
 
@@ -90,10 +129,12 @@ export const initMirror = (rootID: string): Promise<boolean> => {
     if (pending) {
         return pending;
     }
+    const before = undoStateMirror.get(rootID);
     const initializer = fetchPost("/api/transactions/undoState", {rootID}, (response) => {
         const data = response.data;
-        if (data) {
-            undoStateMirror.set(rootID, {canUndo: !!data.canUndo, canRedo: !!data.canRedo});
+        // 初始化返回前的本地事务或广播更新优先，避免旧快照覆盖刚产生的历史状态。
+        if (data && undoStateMirror.get(rootID) === before) {
+            markMirror(rootID, {canUndo: !!data.canUndo, canRedo: !!data.canRedo});
         }
     }).then(() => {
         return undoStateMirror.has(rootID);
@@ -251,6 +292,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
 
     // 尽早置锁，阻止确认对话框期间触发新的撤销/重做（含 peek 与确认阶段）
     isUndoing = true;
+    notifyUndoState();
     try {
         await waitForPendingTransactions(protyle);
 
@@ -330,6 +372,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
         }
     } finally {
         isUndoing = false;
+        notifyUndoState();
     }
 };
 
@@ -343,6 +386,7 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
     }
 
     isUndoing = true;
+    notifyUndoState();
     try {
         await waitForPendingTransactions(protyle);
         const state = await fetchUndoState(rootID);
@@ -388,5 +432,6 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
         }
     } finally {
         isUndoing = false;
+        notifyUndoState();
     }
 };

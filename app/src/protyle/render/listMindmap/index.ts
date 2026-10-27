@@ -58,7 +58,7 @@ import {getListMindmapConnectorMenuItem} from "./connectorMenu";
 import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
 import {assignListMindmapBranchColors, getListMindmapAppearanceMenu} from "./appearance";
 import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
-import {requestRedo, requestUndo} from "../../undo/globalUndo";
+import {getUndoStateSnapshot, hasUndoStateMirror, initMirror, requestRedo, requestUndo, subscribeUndoState} from "../../undo/globalUndo";
 import {buildBlockDOMClipboardData} from "../../util/blockDOMClipboard";
 import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "../../util/clipboardData";
 import {readClipboard, writeClipboardData} from "../../util/compatibility";
@@ -68,7 +68,7 @@ import {canCutMindmapBranches, copyMindmapBranches, pasteMindmapBranches, readMi
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
     restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
-    interactionRevision?: number, focusGuard?: () => boolean, undoPending?: boolean,
+    interactionRevision?: number, focusGuard?: () => boolean, undoPending?: boolean, refreshUndoState?: () => void,
     finish: () => Promise<boolean>, destroy: () => void}>();
 
 const hasMindmapFocusOverlay = () => {
@@ -181,6 +181,8 @@ class ListMindmapController {
     private taskChanges: Promise<void> = Promise.resolve();
     private unregisterVisible?: () => void;
     private resize: ReturnType<typeof bindListMindmapResize>;
+    private undoRootID?: string;
+    private unsubscribeUndoState?: () => void;
 
     constructor(owner: IProtyle, list: HTMLElement) {
         this.owner = owner;
@@ -582,6 +584,7 @@ class ListMindmapController {
                 metadata.summaries = metadata.summaries?.filter(item => item.id !== id) || [];
             }),
         });
+        this.bindUndoState();
         list.dataset.mindmapViewRendered = "true";
         this.resize = bindListMindmapResize({
             block: list, host: this.host,
@@ -996,6 +999,7 @@ class ListMindmapController {
         if (root) {
             root.undoPending = true;
             root.focusGuard = guard;
+            root.refreshUndoState?.();
         }
         try {
             if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish())) {
@@ -1038,6 +1042,7 @@ class ListMindmapController {
             if (root?.focusGuard === guard) {
                 root.focusGuard = undefined;
                 root.undoPending = false;
+                root.refreshUndoState?.();
             }
         }
     }
@@ -1090,8 +1095,37 @@ class ListMindmapController {
         return this.activeEditor ? this.activeEditor.finish() : true;
     }
 
+    public refreshUndoState() {
+        if (this.disposed) {
+            return;
+        }
+        const state = getUndoStateSnapshot(this.undoRootID);
+        const undo = this.owner.undo;
+        if (this.owner.lite && undo && "undoStack" in undo && "redoStack" in undo &&
+            Array.isArray(undo.undoStack) && Array.isArray(undo.redoStack)) {
+            state.canUndo = undo.undoStack.length > 0;
+            state.canRedo = undo.redoStack.length > 0;
+        }
+        this.view.setUndoState({...state, pending: state.pending || !!roots.get(this.owner)?.undoPending});
+    }
+
+    private bindUndoState() {
+        const rootID = canEdit(this.owner, this.list) ?
+            this.list.closest<HTMLElement>(".protyle-wysiwyg__embed")?.dataset.rootId || this.owner.block.rootID : undefined;
+        if (rootID !== this.undoRootID) {
+            this.unsubscribeUndoState?.();
+            this.undoRootID = rootID;
+            this.unsubscribeUndoState = rootID ? subscribeUndoState(rootID, () => this.refreshUndoState()) : undefined;
+            if (rootID && !this.owner.lite && !hasUndoStateMirror(rootID)) {
+                void initMirror(rootID).catch(error => console.error(error));
+            }
+        }
+        this.refreshUndoState();
+    }
+
     public refresh() {
         this.view.setReadOnly(!canEdit(this.owner, this.list));
+        this.bindUndoState();
         syncListMindmapHeight(this.list, this.host);
         this.resize.refresh();
         const snapshot = cleanListMindmapHTML(this.list.outerHTML);
@@ -1108,6 +1142,7 @@ class ListMindmapController {
             return;
         }
         this.disposed = true;
+        this.unsubscribeUndoState?.();
         const restoreFocus = this.host.contains(document.activeElement) && this.list.isConnected &&
             this.list.dataset.type !== "NodeMindmap" && this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1";
         this.activeEditor?.destroy();
@@ -1361,7 +1396,8 @@ export const initListMindmaps = (owner: IProtyle) => {
             newlyCreated.add(list);
             refresh();
         }
-    }, restoreFocus, focusRevision: 0, interactionRevision: 0, destroy: () => {
+    }, restoreFocus, refreshUndoState: () => instances.forEach(instance => instance.refreshUndoState()),
+    focusRevision: 0, interactionRevision: 0, destroy: () => {
         disposed = true;
         interactions.abort();
         unregister();

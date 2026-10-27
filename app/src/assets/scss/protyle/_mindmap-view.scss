@@ -130,6 +130,18 @@
     padding: 4px;
   }
 
+  &--history &__toolbar-group {
+    gap: 3px;
+  }
+
+  &--history &__toolbar {
+    box-sizing: border-box;
+  }
+
+  &--history &__spacer {
+    display: none;
+  }
+
   &__spacer {
     flex: 1;
   }

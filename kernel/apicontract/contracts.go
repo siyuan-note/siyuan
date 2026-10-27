@@ -580,6 +580,8 @@ var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/a
 var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
+// 根据编辑器 mathDelimiterCompatibility 设置识别正文中的 \(...\) 和独占段落的 \[...\]，默认开启。
+// 保留表格和文字格式，跳过代码及已有公式；未闭合分隔符保留为正文。输出使用既有公式节点。
 var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
@@ -735,6 +737,7 @@ var StartObsidianVaultAnalysis = define[ObsidianAnalysisRequest, *ObsidianVaultT
 
 var GetObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("getObsidianVaultTask", "/api/import/getObsidianVaultTask", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
+// Markdown 公式分隔符遵循编辑器 mathDelimiterCompatibility 设置，默认兼容 \(...\)、\[...\]。
 var StartObsidianVaultImport = define[ObsidianImportRequest, *ObsidianVaultTask]("startObsidianVaultImport", "/api/import/startObsidianVaultImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("cancelObsidianVaultTask", "/api/import/cancelObsidianVaultTask", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
@@ -742,6 +745,7 @@ var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("c
 // 标准脚注定义保存为独立列表项，正文引用转换为指向列表项的上标静态块引用。
 // 多段内容保留在同一列表项内；多次引用共享目标，标签匹配忽略大小写，重复定义引用第一个匹配项。
 // 未定义的脚注不生成块引用，代码和转义的脚注文本保持原样；反链复用块引用索引。
+// 根据编辑器 mathDelimiterCompatibility 设置兼容 \(...\)、\[...\]，默认开启；保存和导出仍使用既有公式格式。
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
@@ -764,6 +768,7 @@ var CommitDataImport = define[CommitDataImportRequest, DataImportResult]("commit
 var CancelDataImport = define[DataImportRequest, Null]("cancelDataImport", "/api/import/cancelDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。
+// 同样遵循编辑器 mathDelimiterCompatibility 设置，默认识别 \(...\)、\[...\]。
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 // `.sy.zip` 导入复用同名同内容的自定义表情。
@@ -1161,8 +1166,15 @@ var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDo
 // DuplicateDocTree evaluates block collection rules for every copied document and block, initializing only new rows.
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// CreateDailyNote 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。
+// 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
+// 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// GetDailyNoteInfo 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
 var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。

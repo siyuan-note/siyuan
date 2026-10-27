@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -107,5 +108,39 @@ func TestVerifyShorthandDocPersisted(t *testing.T) {
 	}
 	if err := verifyShorthandDocPersisted(bt, fixture.sourceID); nil == err {
 		t.Fatal("expected missing persisted shorthand document to fail verification")
+	}
+}
+
+func TestMoveLocalShorthandsKeepsSourceWhenAttachmentMoveFails(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	original := util.ShortcutsPath
+	util.ShortcutsPath = t.TempDir()
+	t.Cleanup(func() { util.ShortcutsPath = original })
+	assets := filepath.Join(util.ShortcutsPath, "shorthands", "assets")
+	if err := os.MkdirAll(assets, 0755); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(filepath.Dir(assets), "1788062238740.md")
+	content := []byte("![image](assets/image.png)")
+	if err := os.WriteFile(source, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+	attachment := filepath.Join(assets, "image.png")
+	if err := os.WriteFile(attachment, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// A directory at the destination makes rename fail on every supported platform.
+	if err := os.MkdirAll(filepath.Join(util.DataDir, "assets", "image.png"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	ids, err := MoveLocalShorthands(fixture.box.ID)
+	if err == nil || len(ids) != 0 {
+		t.Fatalf("attachment failure created documents: %v, %v", ids, err)
+	}
+	if got, err := os.ReadFile(source); err != nil || !bytes.Equal(got, content) {
+		t.Fatalf("source changed: %q, %v", got, err)
+	}
+	if _, err := os.Stat(attachment); err != nil {
+		t.Fatalf("attachment lost: %v", err)
 	}
 }

@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "LaTeX-Formelbegrenzer beim Einfügen und Importieren unterstützen",
+	"mathDelimiterCompatibilityTip": "Wenn aktiviert, werden \\(...\\) und \\[...\\] in eingefügten und importierten Inhalten automatisch als Inline- bzw. Blockformeln erkannt",
 	"automationCollectionScopeLimit": "Der Überwachungsbereich kann höchstens 32 Notizbücher oder Dokumente enthalten",
 	"pdfAnnotationSaveFailed": "PDF-Anmerkungen konnten nicht gespeichert werden. Öffne die PDF erneut, um vor weiteren Änderungen die aktuellen Anmerkungen zu laden",
 	"docTreeBatchSize": "Lademenge im Dokumentbaum",

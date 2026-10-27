@@ -1311,6 +1311,7 @@ func resolveObsidianMarkdownDestination(vault *obsidianVaultContext, current *ob
 
 func scanObsidianSource(data []byte) *obsidianScanResult {
 	ret := &obsidianScanResult{Duplicates: map[string]bool{}}
+	mathCompatible := MathDelimiterCompatibilityEnabled()
 	protected := make([]bool, len(data))
 	markProtected := func(start, end int) {
 		if start < 0 {
@@ -1392,6 +1393,14 @@ func scanObsidianSource(data []byte) *obsidianScanResult {
 			continue
 		}
 		if data[i] == '\\' {
+			if mathCompatible && i+1 < len(data) && (data[i+1] == '(' || data[i+1] == '[') {
+				if _, consumed := parse.MatchLatexMath(data[i:], data[i+1] == '['); consumed > 0 {
+					// 公式内容不参与双链、注释、脚注和块 ID 的转换。
+					markProtected(i, i+consumed)
+					i += consumed
+					continue
+				}
+			}
 			i += 2
 			continue
 		}
@@ -2196,6 +2205,7 @@ func maskObsidianProtected(data []byte, spans []obsidianSpan) []byte {
 
 func parseObsidianMd(markdown []byte, vault *obsidianVaultContext, doc *obsidianDocPlan, stats *obsidianTransformStats) (*parse.Tree, error) {
 	luteEngine := util.NewStdLute()
+	setImportMathDelimiters(luteEngine)
 	luteEngine.SetYamlFrontMatter(true)
 	luteEngine.SetBlockRef(true)
 	luteEngine.SetKramdownIAL(true)

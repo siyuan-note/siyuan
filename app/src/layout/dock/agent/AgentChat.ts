@@ -198,7 +198,7 @@ export class AgentChat extends Model {
     private panelElement: HTMLElement;
     private messagesContainer: HTMLElement;
     private composerHost: HTMLElement;
-    private destroyComposerResize?: () => void;
+    private composerResize?: ReturnType<typeof bindAgentComposerResize>;
     private composer: ReturnType<typeof mountComposer> | null = null;
     private sendBtn: HTMLElement;
     private stopBtn: HTMLElement;
@@ -345,7 +345,7 @@ export class AgentChat extends Model {
     }
 
     public destroy() {
-        this.destroyComposerResize?.();
+        this.composerResize?.destroy();
         this.welcomeObserver?.disconnect();
         super.destroy();
     }
@@ -471,8 +471,8 @@ export class AgentChat extends Model {
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;
         this.composerHost = panel.querySelector(".agent-chat__composer-host") as HTMLElement;
-        this.destroyComposerResize?.();
-        this.destroyComposerResize = bindAgentComposerResize(panel, this.composerHost,
+        this.composerResize?.destroy();
+        this.composerResize = bindAgentComposerResize(panel, this.composerHost,
             panel.querySelector(".agent-chat__input-resize .protyle-block-resize"));
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
@@ -2387,6 +2387,7 @@ export class AgentChat extends Model {
         this.hasInterveningCard = false;
         this.currentRoundID = "";
         this.composer.clear();
+        this.composerResize?.reset();
         const selectedModel = this.getSelectedModel();
         const reasoningEffort = this.selectedReasoningEffort;
 

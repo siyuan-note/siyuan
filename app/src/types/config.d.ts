@@ -822,6 +822,8 @@ declare namespace Config {
          * Whether to auto-convert pasted URLs to links
          */
         pasteURLAutoConvert: boolean;
+        /** Recognize alternate LaTeX math delimiters in pasted and imported content; defaults to true */
+        mathDelimiterCompatibility: boolean;
         /**
          * Whether to embed dragged HTML files as IFrame blocks
          */

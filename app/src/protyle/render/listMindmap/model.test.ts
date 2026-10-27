@@ -388,6 +388,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
+            matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
             getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
             hasUndoStateMirror: () => true,
@@ -403,7 +404,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             showMessage: () => check.fail("Embedded edit failed"), globalClickHideMenu: () => {},
             hideAllElements: () => {}, hideElements: () => {}, suspendBlockPopover: () => () => {},
             getInlineStylesCache: () => ({}), getVisibleOrderedStyleKeys: (): string[] => [],
-            openListMindmapEditor: (options: any) => { editorOptions = options; return {finish: async () => true, destroy() {}}; },
+            openListMindmapEditor: (options: any) => {
+                editorOptions = options;
+                return {finish: async () => { options.onFinish(); return true; }, destroy() {}};
+            },
             genListItemElement: () => {
                 const holder = document.createElement("div");
                 holder.innerHTML = lute.Md2BlockDOM("- Added\n");
@@ -442,15 +446,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
         check.match(operations[0].doOperations[0].data as string, /Folded child/);
         await target.view.options.onAdd(itemID, "child");
-        check.equal(editorOptions.rootID, "source-document");
+        const addedID = target.view.getSelectedId();
+        check.notEqual(addedID, itemID);
+        check.equal(target.activeEditor, undefined, "new nodes remain selected without mounting an editor");
+        check.equal(editorOptions, undefined);
+        check.equal(document.activeElement, target.host, "new nodes retain the canvas keyboard focus");
         check.match(copies[1].textContent, /Added/);
+        // Direct typing opens the new node's editor and preserves the embedded source identity.
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "typing opens the newly selected node editor");
+        check.equal(editorOptions.node.id, addedID);
+        check.equal(editorOptions.replaceFirstParagraph, "x");
+        check.equal(editorOptions.rootID, "source-document");
         await target.finish();
-        target.activeEditor = undefined;
+        check.equal(target.activeEditor, undefined, "finishing text input releases the node editor");
         await target.undo(false);
         check.doesNotMatch(copies[0].textContent, /Added/);
         await target.undo(true);
         check.match(copies[0].textContent, /Added/);
         check.deepEqual(historyRoots, ["source-document", "source-document"]);
+        // An explicitly created sibling can be deleted immediately, without Esc.
+        editorOptions = undefined;
+        await target.view.options.onAdd(itemID, "sibling");
+        const siblingID = target.view.getSelectedId();
+        check.equal(target.activeEditor, undefined);
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.model.nodes.has(siblingID), false);
+        check.equal(editorOptions, undefined, "deleting a newly selected node never opens an editor");
+        check.equal(target.model.nodes.has(addedID), true, "deleting the sibling preserves the previously added child");
+        // Double-click remains available on explicitly created children.
+        await target.view.options.onAdd(itemID, "child");
+        const childID = target.view.getSelectedId();
+        target.view.getContentHost(childID).dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "double-click opens the newly selected child editor");
+        check.equal(editorOptions.node.id, childID);
+        check.equal(editorOptions.replaceFirstParagraph, undefined);
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }
@@ -2230,6 +2263,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     }
     const originalLineColors = options.colors;
     options.colors = () => Array.from({length: 15}, (_, i) => ({label: `Line ${i}`, value: `rgb(${i}, 0, 0)`}));
+    host.style.setProperty("--b3-list-hover", "rgba(100, 100, 100, .4)");
+    host.style.setProperty("--b3-menu-background", "#fff");
+    host.style.setProperty("--b3-border-color", "#888");
     view.selectNode(alpha, true);
     for (const width of [240, 320, 760]) {
         host.style.width = `${width}px`;
@@ -2266,6 +2302,15 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(buttons[7].getBoundingClientRect().left >= palette.getBoundingClientRect().right - 1,
                 "the next color stays outside the first page");
         }
+        const selectedColor = palettes[0].querySelector<HTMLElement>(".color__square--current");
+        check.equal(getComputedStyle(selectedColor).boxShadow.match(/inset/g)?.length, 2,
+            "selected colors keep both feedback rings inside the clipped palette");
+        await moveMouse();
+        await moveMouse(palettes[0].children[6]);
+        check.equal(getComputedStyle(palettes[0].children[6]).boxShadow.match(/inset/g)?.length, 2,
+            "hover feedback also stays inside the last visible color: " + JSON.stringify({width,
+                hover: palettes[0].children[6].matches(":hover"), bounds: palettes[0].children[6].getBoundingClientRect().toJSON(),
+                shadow: getComputedStyle(palettes[0].children[6]).boxShadow}));
         const beforeSettings = nodeStyles.length;
         managers[0].focus();
         check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapManageNodeColors");
@@ -2322,6 +2367,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.ok(touchPalette.scrollLeft > 0, "a native horizontal swipe reaches colors beyond the first six groups");
     check.equal(touchManager.getBoundingClientRect().left, managerPosition, "swiping the palette keeps color settings fixed");
     check.equal(nodeStyles.length, beforeColorSwipe, "swiping colors does not apply a color or alter document styles");
+    for (const scale of [1, .75]) {
+        host.style.transformOrigin = "top left";
+        host.style.transform = `scale(${scale})`;
+        await settle();
+        touchPalette.scrollLeft = 0;
+        const bounds = touchPalette.getBoundingClientRect();
+        const start = {x: Math.round(bounds.right - 12), y: Math.round(bounds.top + bounds.height / 2)};
+        const canvasPosition = {x: view.offsetX, y: view.offsetY, scale: view.scale};
+        const settingsPosition = touchManager.getBoundingClientRect().left;
+        await nativeInput([
+            {type: "mouseMove", ...start},
+            {type: "mouseWheel", ...start, deltaX: 0, deltaY: -60},
+        ]);
+        await settle();
+        check.ok(touchPalette.scrollLeft > 0, "a native vertical mouse wheel browses the horizontal palette");
+        touchPalette.scrollLeft = 0;
+        await nativeInput([
+            {type: "mouseMove", ...start},
+            {type: "mouseDown", ...start, button: "left", clickCount: 1},
+            ...[20, 40, 60, 80].map(delta => ({type: "mouseMove", x: start.x - delta, y: start.y, button: "left"})),
+            {type: "mouseUp", x: start.x - 80, y: start.y, button: "left", clickCount: 1},
+        ]);
+        await settle();
+        check.ok(Math.abs(touchPalette.scrollLeft - 80 / scale) < 2, "mouse dragging accounts for an outer editor scale");
+        check.equal(nodeStyles.length, beforeColorSwipe, "drag release never applies the color underneath the pointer");
+        check.deepEqual(view.getSelectedIds(), paletteSelection);
+        check.deepEqual({x: view.offsetX, y: view.offsetY, scale: view.scale}, canvasPosition);
+        check.equal(touchManager.getBoundingClientRect().left, settingsPosition);
+    }
+    const visibleColor = touchPalette.children[Math.ceil(touchPalette.scrollLeft /
+        (touchPalette.scrollWidth / touchPalette.children.length)) + 1] as HTMLButtonElement;
+    await clickMouse(visibleColor);
+    check.equal(nodeStyles.length, beforeColorSwipe + 1, "a regular click after dragging still applies a color");
+    visibleColor.focus({preventScroll: true});
+    await nativeInput([{type: "keyDown", keyCode: "Return"}, {type: "char", keyCode: "\r"},
+        {type: "keyUp", keyCode: "Return"}]);
+    await settle();
+    check.equal(nodeStyles.length, beforeColorSwipe + 2, "keyboard activation remains available after palette dragging");
     options.colors = originalLineColors;
     view.focusNode(beta);
     host.style.cssText = originalHostStyle;
@@ -2342,12 +2425,37 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual(Array.from(widthControls.children).map(control => control.tagName === "INPUT" ?
         control.getAttribute("type") : control.getAttribute("aria-label")),
     ["number", "range", "listMindmapRestoreWidth", "default"], "the width input precedes the centered slider and reset controls");
-    check.ok(Math.abs(widthInput().getBoundingClientRect().width - inspector.getBoundingClientRect().width / 4 + 2) < 2,
-        "the numeric input occupies two of the eight columns");
+    for (const canvasWidth of [240, 320, 760]) {
+        host.style.width = `${canvasWidth}px`;
+        await settle();
+        const row = widthControls.getBoundingClientRect();
+        const numeric = widthInput().getBoundingClientRect();
+        const range = widthControls.querySelector(".b3-slider").getBoundingClientRect();
+        const restore = widthControls.querySelector('[aria-label="listMindmapRestoreWidth"]').getBoundingClientRect();
+        const automatic = widthControls.querySelector('[aria-label="default"]').getBoundingClientRect();
+        check.ok(Math.abs((range.left + range.right) / 2 - (row.left + row.right) / 2) < 1,
+            "the width slider stays centered within the panel");
+        check.ok(Math.abs(range.left - numeric.right - (restore.left - range.right)) < 1,
+            "the slider has equal space beside the number field and reset controls");
+        check.ok(Math.abs(numeric.width - (automatic.right - restore.left)) < 1,
+            "the numeric field matches the combined width of the two right-hand controls");
+        check.equal(getComputedStyle(widthInput()).paddingRight, "4px", "the compact number field retains a reachable native stepper");
+    }
+    host.style.cssText = originalHostStyle;
     widthInput().value = "640";
     widthInput().dispatchEvent(new Event("change", {bubbles: true}));
     await settle();
     check.deepEqual(nodeStyles.at(-1), [beta, {width: 640}]);
+    const stepper = widthInput().getBoundingClientRect();
+    const stepperPoint = {x: Math.round(stepper.right - 8), y: Math.round(stepper.top + 5)};
+    await nativeInput([
+        {type: "mouseMove", ...stepperPoint},
+        {type: "mouseDown", ...stepperPoint, button: "left", clickCount: 1},
+        {type: "mouseUp", ...stepperPoint, button: "left", clickCount: 1},
+    ]);
+    host.focus();
+    await settle();
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 641}], "the native number stepper stays reachable at the field's right edge");
     const styleCount = nodeStyles.length;
     widthInput().value = "12";
     widthInput().dispatchEvent(new Event("change", {bubbles: true}));

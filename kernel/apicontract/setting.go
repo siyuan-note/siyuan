@@ -269,23 +269,26 @@ type SettingEditor struct {
 	HashTagSearch       *bool    `json:"hashTagSearch" api:"optional,nullable"`
 	OnlySearchForDoc    bool     `json:"onlySearchForDoc" api:"optional,nullable"`
 	// AutoCloseRefBrackets 默认关闭；启用后输入 [[ 自动补全 ]]，输入 ]] 时引用同名文档、日记或新建文档。
-	AutoCloseRefBrackets    bool             `json:"autoCloseRefBrackets" api:"optional,nullable"`
-	BacklinkExpandCount     int              `json:"backlinkExpandCount" api:"optional,nullable"`
-	BackmentionExpandCount  int              `json:"backmentionExpandCount" api:"optional,nullable"`
-	BacklinkMentionExclude  string           `json:"backlinkMentionExclude" api:"optional,nullable"`
-	BacklinkContainChildren bool             `json:"backlinkContainChildren" api:"optional,nullable"`
-	BacklinkHideReference   bool             `json:"backlinkHideReference" api:"optional,nullable"`
-	BacklinkShowBottom      bool             `json:"backlinkShowBottom" api:"optional,nullable"`
-	BacklinkSort            *int             `json:"backlinkSort" api:"optional,nullable"`
-	BacklinkGlobalSort      int              `json:"backlinkGlobalSort" api:"optional,nullable"`
-	BacklinkBlockSort       int              `json:"backlinkBlockSort" api:"optional,nullable"`
-	BackmentionSort         *int             `json:"backmentionSort" api:"optional,nullable"`
-	HeadingNumber           bool             `json:"headingNumber" api:"optional,nullable"`
-	HeadingNumberFormat     string           `json:"headingNumberFormat" api:"optional,nullable"`
-	HeadingEmbedMode        int              `json:"headingEmbedMode" api:"optional,nullable"`
-	PasteURLAutoConvert     bool             `json:"pasteURLAutoConvert" api:"optional,nullable"`
-	DragHTMLFileToIframe    bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
-	Markdown                *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+	AutoCloseRefBrackets    bool   `json:"autoCloseRefBrackets" api:"optional,nullable"`
+	BacklinkExpandCount     int    `json:"backlinkExpandCount" api:"optional,nullable"`
+	BackmentionExpandCount  int    `json:"backmentionExpandCount" api:"optional,nullable"`
+	BacklinkMentionExclude  string `json:"backlinkMentionExclude" api:"optional,nullable"`
+	BacklinkContainChildren bool   `json:"backlinkContainChildren" api:"optional,nullable"`
+	BacklinkHideReference   bool   `json:"backlinkHideReference" api:"optional,nullable"`
+	BacklinkShowBottom      bool   `json:"backlinkShowBottom" api:"optional,nullable"`
+	BacklinkSort            *int   `json:"backlinkSort" api:"optional,nullable"`
+	BacklinkGlobalSort      int    `json:"backlinkGlobalSort" api:"optional,nullable"`
+	BacklinkBlockSort       int    `json:"backlinkBlockSort" api:"optional,nullable"`
+	BackmentionSort         *int   `json:"backmentionSort" api:"optional,nullable"`
+	HeadingNumber           bool   `json:"headingNumber" api:"optional,nullable"`
+	HeadingNumberFormat     string `json:"headingNumberFormat" api:"optional,nullable"`
+	HeadingEmbedMode        int    `json:"headingEmbedMode" api:"optional,nullable"`
+	PasteURLAutoConvert     bool   `json:"pasteURLAutoConvert" api:"optional,nullable"`
+	// MathDelimiterCompatibility defaults to true, including existing configurations without this field.
+	// Only pasted HTML/Markdown and imported Markdown recognize \(...\) and \[...\]; editing and exports retain the existing syntax.
+	MathDelimiterCompatibility *bool            `json:"mathDelimiterCompatibility" api:"optional,nullable"`
+	DragHTMLFileToIframe       bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
+	Markdown                   *SettingMarkdown `json:"markdown" api:"optional,nullable"`
 }
 
 type SettingEditorFont struct {

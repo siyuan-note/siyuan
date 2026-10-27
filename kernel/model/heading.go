@@ -177,8 +177,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	}
 
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -205,7 +210,10 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
-	targetTree, _ := LoadTreeByBlockID(targetID)
+	targetTree, targetBefore, loadErr := loadBatchMutationTree(targetID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == targetTree {
 		// 目标块不存在时忽略处理
 		return
@@ -314,10 +322,11 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		pivot.InsertAfter(heading)
 	}
 
-	box := Conf.Box(srcTree.Box)
-	if removeErr := box.Remove(srcTree.Path); nil != removeErr {
-		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)
+	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	if err = commitDocumentConversion(srcTree, targetTree, sourceBefore, targetBefore, true, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
 	}
+	box := Conf.Box(srcTree.Box)
 	box.removeSort([]string{srcTree.ID})
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
@@ -326,10 +335,6 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	util.PushEvent(evt)
 
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
-	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	treenode.RemoveBlockTreesByRootID(targetTree.Box, targetTree.ID)
-	err = indexWriteTreeUpsertQueue(targetTree)
 	IncSync()
 	go func() {
 		time.Sleep(util.SQLFlushInterval)
@@ -343,8 +348,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcHeadingID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -451,23 +461,18 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
-		return "", "", err
-	}
-
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = treenode.BaseSpec
+	if err = commitDocumentConversion(srcTree, newTree, sourceBefore, nil, false, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
+	}
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {
 		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	} else {
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
-	}
-	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
-		return "", "", err
 	}
 	IncSync()
 	go func() {

@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "Препознај LaTeX граничнике формула при лепљењу и увозу",
+	"mathDelimiterCompatibilityTip": "Када је омогућено, \\(...\\) и \\[...\\] у налепљеном и увезеном садржају аутоматски се препознају као формуле у реду и у блоку",
 	"automationCollectionScopeLimit": "Опсег праћења може да садржи највише 32 бележница или докумената",
 	"pdfAnnotationSaveFailed": "Није могуће сачувати PDF напомене. Поново отворите PDF да бисте учитали најновије напомене пре даљег уређивања",
 	"docTreeBatchSize": "Broj dokumenata koji se učitavaju odjednom",

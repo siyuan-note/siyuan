@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "LaTeX-formulescheidingstekens herkennen bij plakken en importeren",
+	"mathDelimiterCompatibilityTip": "Indien ingeschakeld worden \\(...\\) en \\[...\\] in geplakte en geïmporteerde inhoud automatisch herkend als respectievelijk inline- en blokformules",
 	"automationCollectionScopeLimit": "Het bewakingsbereik kan maximaal 32 notitieboeken of documenten bevatten",
 	"pdfAnnotationSaveFailed": "PDF-annotaties kunnen niet worden opgeslagen. Open de PDF opnieuw om de nieuwste annotaties te laden voordat je verder bewerkt",
 	"docTreeBatchSize": "Aantal documenten per laadbeurt",

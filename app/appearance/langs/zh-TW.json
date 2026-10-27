@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "貼上和匯入時相容 LaTeX 公式分隔符",
+	"mathDelimiterCompatibilityTip": "啟用後自動將貼上和匯入內容中的 \\(...\\)、\\[...\\] 分別識別為行內公式和區塊公式",
 	"automationCollectionScopeLimit": "監聽範圍最多可包含 32 個筆記本或文件",
 	"pdfAnnotationSaveFailed": "無法儲存 PDF 標註，請重新開啟 PDF 載入最新標註後再編輯",
 	"docTreeBatchSize": "文件樹單次載入數量",

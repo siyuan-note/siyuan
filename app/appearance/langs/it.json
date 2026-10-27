@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "Riconosci i delimitatori delle formule LaTeX durante incolla e importazione",
+	"mathDelimiterCompatibilityTip": "Se abilitato, riconosce automaticamente \\(...\\) e \\[...\\] nei contenuti incollati e importati come formule in linea e a blocchi, rispettivamente",
 	"automationCollectionScopeLimit": "L’ambito di monitoraggio può contenere fino a 32 taccuini o documenti",
 	"pdfAnnotationSaveFailed": "Impossibile salvare le annotazioni PDF. Riapri il PDF per caricare le annotazioni più recenti prima di continuare a modificare",
 	"docTreeBatchSize": "Dimensione del lotto nell'albero dei documenti",

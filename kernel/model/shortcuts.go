@@ -56,11 +56,6 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 		return
 	}
 	defer ReleaseEncryptedBoxOperation(boxID)
-	if recovered, recoveryErr := recoverLocalShorthandCreation(boxID); recoveryErr != nil {
-		return nil, recoveryErr
-	} else if recovered != "" {
-		retIDs = append(retIDs, recovered)
-	}
 	entries, err := os.ReadDir(shorthandsDir)
 	if err != nil {
 		return retIDs, err
@@ -72,7 +67,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 			assetsEntries, readErr := os.ReadDir(filepath.Join(shorthandsDir, entry.Name()))
 			if nil != readErr {
 				logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, readErr)
-				continue
+				return retIDs, readErr
 			}
 			for _, assetEntry := range assetsEntries {
 				if assetEntry.IsDir() {
@@ -83,10 +78,17 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				assetWritePath := filepath.Join(assetsDir, assetEntry.Name())
 				if renameErr := os.Rename(p, assetWritePath); nil != renameErr {
 					logging.LogErrorf("rename file [%s] to [%s] failed: %s", p, assetWritePath, renameErr)
-					continue
+					return retIDs, renameErr
 				}
 			}
 		}
+	}
+
+	// Complete attachment migration before creating content or consuming a recovered source.
+	if recovered, recoveryErr := recoverLocalShorthandCreation(boxID); recoveryErr != nil {
+		return nil, recoveryErr
+	} else if recovered != "" {
+		retIDs = append(retIDs, recovered)
 	}
 
 	hPath := Conf.FileTree.Load().ShorthandSavePath

@@ -30,8 +30,13 @@ import (
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcListItemID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcListItemID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -97,23 +102,18 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
-		return "", "", err
-	}
-
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = treenode.BaseSpec
+	if err = commitDocumentConversion(srcTree, newTree, sourceBefore, nil, false, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
+	}
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {
 		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	} else {
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
-	}
-	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
-		return "", "", err
 	}
 	IncSync()
 	go func() {

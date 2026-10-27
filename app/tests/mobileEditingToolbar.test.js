@@ -202,6 +202,57 @@ const runCases = async (sources, platform, topBarHTML) => {
     assert.equal(undoCalls, 1);
     action("heading1");
     assert.equal(inserts[0], "# ‸");
+    // 节点编辑使用画布顶部历史入口，切回正文后恢复共享工具栏的历史按钮和原有配置。
+    const nodeEditor = document.createElement("div");
+    nodeEditor.className = "mindmap-view__editor";
+    const nodeProtyle = document.createElement("div");
+    nodeProtyle.className = "protyle-wysiwyg";
+    nodeProtyle.setAttribute("contenteditable", "false");
+    nodeProtyle.setAttribute("data-readonly", "false");
+    const nodeBlock = document.createElement("div");
+    nodeBlock.dataset.nodeId = "node-paragraph";
+    nodeBlock.dataset.type = "NodeParagraph";
+    const nodeEditable = document.createElement("div");
+    nodeEditable.contentEditable = "true";
+    nodeEditable.textContent = "Node text";
+    nodeBlock.append(nodeEditable); nodeProtyle.append(nodeBlock); nodeEditor.append(nodeProtyle);
+    document.body.append(nodeEditor);
+    const documentEditor = current;
+    current = {...current, element: nodeEditor, editable: nodeEditable,
+        wysiwyg: {element: nodeProtyle}, lite: true};
+    nodeEditable.focus();
+    const nodeRange = document.createRange();
+    nodeRange.setStart(nodeEditable.firstChild, 0); nodeRange.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(nodeRange);
+    await settle();
+    assert.equal(hidden("undo"), true);
+    assert.equal(hidden("redo"), true);
+    assert.equal(toolbar.classList.contains("fn__none"), false, "other keyboard actions stay available");
+    assert.equal(hidden("block"), false);
+    const nodeActions = [...toolbar.querySelector(".keyboard__dynamic").children]
+        .filter(item => !item.classList.contains("fn__none"));
+    assert.equal(nodeActions[0].classList.contains("keyboard__split"), false);
+    assert.equal(nodeActions.at(-1).classList.contains("keyboard__split"), false);
+    assert.equal(nodeActions.some((item, index) => item.classList.contains("keyboard__split") &&
+        nodeActions[index + 1]?.classList.contains("keyboard__split")), false);
+    window.dispatchEvent(new Event("siyuan-entry-visibility"));
+    await settle();
+    assert.equal(hidden("undo"), true, "configuration refresh cannot restore duplicate history controls");
+    assert.equal(hidden("redo"), true);
+    nodeEditor.className = "table__cell-editor";
+    await settle();
+    assert.equal(hidden("undo"), false, "standalone cell editors retain their own history controls");
+    assert.equal(hidden("redo"), false);
+    visible.delete("mobile-redo");
+    current = documentEditor;
+    editable.focus(); select(0);
+    await settle();
+    assert.equal(hidden("undo"), false, "ordinary document history returns after node editing");
+    assert.equal(hidden("redo"), true, "returning to a document preserves explicitly hidden entries");
+    visible.add("mobile-redo");
+    await settle();
+    assert.equal(hidden("redo"), false);
+    nodeEditor.remove();
     // 显隐变化和编辑器切换不得恢复隐藏项，也不得向受限的字段编辑器插入文档块。
     visible.delete("mobile-undo");
     window.dispatchEvent(new Event("siyuan-entry-visibility"));

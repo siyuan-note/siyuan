@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "L’ambito di monitoraggio può contenere fino a 32 taccuini o documenti",
 	"pdfAnnotationSaveFailed": "Impossibile salvare le annotazioni PDF. Riapri il PDF per caricare le annotazioni più recenti prima di continuare a modificare",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
 	"skipExitSyncConfirm": "La sincronizzazione non è terminata. Saltarla e uscire? Le modifiche non sincronizzate rimarranno salvate su questo dispositivo",

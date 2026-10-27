@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "İzleme kapsamı toplamda en fazla 32 not defteri veya belge içerebilir",
 	"pdfAnnotationSaveFailed": "PDF açıklamaları kaydedilemedi. Düzenlemeye devam etmeden önce en son açıklamaları yüklemek için PDF dosyasını yeniden açın",
 	"skipExitSync": "Eşitlemeyi atla ve çık",
 	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",

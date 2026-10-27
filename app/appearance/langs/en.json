@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",
 	"pdfAnnotationSaveFailed": "Unable to save PDF annotations. Reopen the PDF to load the latest annotations before editing again",
 	"skipExitSync": "Skip sync and exit",
 	"skipExitSyncConfirm": "Synchronization has not finished. Skip it and exit? Unsynced changes will remain saved on this device",

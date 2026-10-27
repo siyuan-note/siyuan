@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "Der Überwachungsbereich kann höchstens 32 Notizbücher oder Dokumente enthalten",
 	"pdfAnnotationSaveFailed": "PDF-Anmerkungen konnten nicht gespeichert werden. Öffne die PDF erneut, um vor weiteren Änderungen die aktuellen Anmerkungen zu laden",
 	"skipExitSync": "Synchronisierung überspringen und beenden",
 	"skipExitSyncConfirm": "Die Synchronisierung ist noch nicht abgeschlossen. Überspringen und beenden? Nicht synchronisierte Änderungen bleiben auf diesem Gerät gespeichert",

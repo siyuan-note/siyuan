@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "O escopo de monitoramento pode conter até 32 cadernos ou documentos",
 	"pdfAnnotationSaveFailed": "Não foi possível salvar as anotações do PDF. Reabra o PDF para carregar as anotações mais recentes antes de continuar editando",
 	"skipExitSync": "Ignorar sincronização e sair",
 	"skipExitSyncConfirm": "A sincronização não terminou. Ignorar e sair? As alterações não sincronizadas permanecerão salvas neste dispositivo",

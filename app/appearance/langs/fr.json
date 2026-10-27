@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "Le périmètre de surveillance peut contenir jusqu’à 32 carnets ou documents",
 	"pdfAnnotationSaveFailed": "Impossible d’enregistrer les annotations du PDF. Rouvrez le PDF pour charger les dernières annotations avant de poursuivre les modifications",
 	"skipExitSync": "Ignorer la synchronisation et quitter",
 	"skipExitSyncConfirm": "La synchronisation n’est pas terminée. L’ignorer et quitter ? Les modifications non synchronisées resteront enregistrées sur cet appareil",

@@ -1,4 +1,5 @@
 {
+	"automationCollectionScopeLimit": "監聽範圍最多可包含 32 個筆記本或文件",
 	"pdfAnnotationSaveFailed": "無法儲存 PDF 標註，請重新開啟 PDF 載入最新標註後再編輯",
 	"skipExitSync": "略過同步並結束",
 	"skipExitSyncConfirm": "同步尚未完成，是否略過本次同步並結束？未同步的變更會保留在本機",

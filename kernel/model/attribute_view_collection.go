@@ -223,6 +223,33 @@ func validateCollectionAttribute(attr *av.AutomationBlockAttribute) (*regexp.Reg
 	return nil, nil
 }
 
+// 新增范围最多包含 32 项；既有超限规则可保留或删减，读取和事务重放继续使用原校验。
+func blockCollectionScopeCanSave(source, previous *av.AutomationBlockSource) bool {
+	keys := func(source *av.AutomationBlockSource) map[string]bool {
+		ret := map[string]bool{}
+		if source != nil {
+			for _, id := range source.NotebookIDs {
+				ret["notebook:"+id] = true
+			}
+			for _, id := range source.DocumentIDs {
+				ret["document:"+id] = true
+			}
+		}
+		return ret
+	}
+	current := keys(source)
+	if len(current) <= 32 {
+		return true
+	}
+	old := keys(previous)
+	for key := range current {
+		if !old[key] {
+			return false
+		}
+	}
+	return true
+}
+
 func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule *av.AutomationRule, boxID string) error {
 	source := rule.BlockSource
 	if source == nil || len(source.NotebookIDs)+len(source.DocumentIDs) == 0 ||

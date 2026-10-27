@@ -67,6 +67,10 @@ func removeTag(label string, beforeCommit func()) (err error) {
 
 		generateTreeHistory(tree, historyDir)
 
+		finishRich, richErr := treenode.MaterializeTableCellRich(tree.Root)
+		if richErr != nil {
+			return richErr
+		}
 		finishTitles := treenode.MaterializeInlineTitles(tree.Root)
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
@@ -105,6 +109,9 @@ func removeTag(label string, beforeCommit func()) (err error) {
 			n.Unlink()
 		}
 		finishTitles()
+		if err = finishRich(); err != nil {
+			return err
+		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
 		if beforeCommit != nil {
 			beforeCommit()
@@ -206,6 +213,10 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 				continue
 			}
 
+			finishRich, richErr := treenode.MaterializeTableCellRich(node)
+			if richErr != nil {
+				return richErr
+			}
 			finishTitles := treenode.MaterializeInlineTitles(node)
 			nodeTags := node.ChildrenByType(ast.NodeTextMark)
 			for _, nodeTag := range nodeTags {
@@ -217,6 +228,9 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 			}
 
 			finishTitles()
+			if err = finishRich(); err != nil {
+				return err
+			}
 			updateNodes[node.ID] = node
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))

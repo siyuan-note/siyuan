@@ -1759,7 +1759,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		}
 	}
 
-	logs, err := repo.GetCloudRepoTagLogs(map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	logs, err := repo.GetCloudRepoTagLogsCached(&cloudRepoSnapshotCache, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if err != nil {
 		return
 	}
@@ -1807,7 +1807,11 @@ func GetCloudRepoSnapshotsByTime(page int, startTime, endTime int64) (ret []*dej
 		page = 1
 	}
 
-	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, repo.GetCloudRepoLogs)
+	load, err := repo.NewCloudRepoLogLoader(&cloudRepoSnapshotCache)
+	if err != nil {
+		return
+	}
+	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, load)
 	if err != nil {
 		return
 	}

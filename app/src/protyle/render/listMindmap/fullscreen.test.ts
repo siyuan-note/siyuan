@@ -135,11 +135,13 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             const root = host.querySelector<HTMLElement>(".mindmap-view__node");
             const checkGrid = () => {
                 const style = getComputedStyle(preview);
-                check.match(style.backgroundImage, /radial-gradient/);
-                check.match(style.backgroundImage, /0\.75px/);
-                check.equal(style.backgroundSize, "48px 48px");
-                check.equal(style.backgroundPosition, "50% 50%");
-                check.equal(style.backgroundOrigin, "padding-box");
+                check.equal(style.backgroundImage.match(/radial-gradient/g)?.length, 2,
+                    "separate dot rows and columns form the grid lines");
+                check.match(style.backgroundImage, /1px/);
+                check.equal(style.backgroundSize, "12px 96px, 96px 12px");
+                check.ok(style.backgroundPosition.split(", ").every(position => position === "50% 50%"),
+                    "both dot layers share the center origin");
+                check.ok(style.backgroundOrigin.split(", ").every(origin => origin === "padding-box"));
                 check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
                 const vertical = getComputedStyle(preview, "::before");
                 const horizontal = getComputedStyle(preview, "::after");
@@ -214,6 +216,37 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 checkGrid();
             }
             preview.style.cssText = frameStyle;
+            checkFrame();
+            // 栅格采样确认大格边上有中间刻度，格内留白，避免仅检查 CSS 字符串却绘成孤立交点。
+            const gridSample = document.createElement("div");
+            gridSample.style.cssText = "position:fixed;left:16px;top:16px;width:322px;height:202px;z-index:9999;" +
+                `background:${getComputedStyle(host).backgroundColor}`;
+            const gridClone = preview.cloneNode(false) as HTMLElement;
+            gridClone.style.cssText = "left:0;top:0;width:321.25px;height:201.75px";
+            gridSample.append(gridClone);
+            document.body.append(gridSample);
+            try {
+                for (const dpr of [1, 2]) {
+                    const rect = gridClone.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    const dots = Array.from({length: 7}, (_, index) => index * 12 + 12).flatMap(offset => [
+                        {x: x + offset, y: y - 96}, {x: x + 96, y: y - offset},
+                    ]);
+                    const gaps = [{x: x + 6, y: y - 96}, {x: x + 96, y: y - 6}, {x: x + 12, y: y - 84}];
+                    const differences: number[] = await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid",
+                        {width: innerWidth, height: innerHeight, dpr, background: {x: x + 6, y: y + 6},
+                            points: [...dots, ...gaps]});
+                    check.ok(differences.slice(0, dots.length).every(value => value > 10),
+                        `every intermediate grid dot is visible, dpr=${dpr}, dark=${dark}: ${differences}`);
+                    check.ok(differences.slice(dots.length).every(value => value < 2),
+                        `dot gaps and grid interiors stay clear, dpr=${dpr}, dark=${dark}: ${differences}`);
+                }
+            } finally {
+                await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid-reset");
+                gridSample.remove();
+                await settle();
+            }
             checkFrame();
             const savedLayout = JSON.stringify(view.documentView);
             const fixedFrame = preview.getBoundingClientRect().toJSON();
@@ -639,6 +672,43 @@ app.whenReady().then(async () => {
         }
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
     });
+    require("electron").ipcMain.handle("mindmap-fullscreen-grid", async (_event, options) => {
+        if (!win.webContents.debugger.isAttached()) {
+            win.webContents.debugger.attach("1.3");
+        }
+        await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
+            width: options.width, height: options.height, deviceScaleFactor: options.dpr, mobile: false,
+        });
+        await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+        const {data} = await win.webContents.debugger.sendCommand("Page.captureScreenshot", {format: "png"});
+        const image = require("electron").nativeImage.createFromBuffer(Buffer.from(data, "base64"));
+        const size = image.getSize();
+        if (Math.abs(size.width - options.width * options.dpr) > 1) {
+            throw new Error("Grid raster did not use the requested pixel density");
+        }
+        const bitmap = image.toBitmap();
+        const pixel = (x, y) => {
+            const offset = (y * size.width + x) * 4;
+            return [bitmap[offset], bitmap[offset + 1], bitmap[offset + 2]];
+        };
+        const background = pixel(Math.floor(options.background.x * options.dpr), Math.floor(options.background.y * options.dpr));
+        const radius = Math.ceil(1.5 * options.dpr);
+        return options.points.map(point => {
+            let difference = 0;
+            const centerX = Math.floor(point.x * options.dpr);
+            const centerY = Math.floor(point.y * options.dpr);
+            for (let y = centerY - radius; y <= centerY + radius; y++) {
+                for (let x = centerX - radius; x <= centerX + radius; x++) {
+                    pixel(x, y).forEach((value, channel) => {
+                        difference = Math.max(difference, Math.abs(value - background[channel]));
+                    });
+                }
+            }
+            return difference;
+        });
+    });
+    require("electron").ipcMain.handle("mindmap-fullscreen-grid-reset", () =>
+        win.webContents.debugger.sendCommand("Emulation.clearDeviceMetricsOverride"));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));

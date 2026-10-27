@@ -270,10 +270,12 @@
     border: 1px solid currentColor;
     border-radius: var(--b3-border-radius);
     overflow: hidden;
-    background-image: radial-gradient(circle, currentColor .75px, transparent .75px);
-    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) .75px, transparent .75px);
-    // 默认单行节点最小高度 32px，加上 16px 纵向间隔；网格固定于取景框，不随导图缩放。
-    background-size: 48px 48px;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px),
+    radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px),
+    radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px);
+    // 横纵点线组成 96px 大格，每 12px 一点；网格固定于取景框，不随导图缩放。
+    background-size: 12px 96px, 96px 12px;
     background-position: center;
     box-sizing: border-box;
     z-index: 4;

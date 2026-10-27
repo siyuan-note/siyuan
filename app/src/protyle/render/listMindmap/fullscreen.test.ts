@@ -133,6 +133,34 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             const layoutCenter = center();
             const layoutScale = view.scale;
             const root = host.querySelector<HTMLElement>(".mindmap-view__node");
+            const checkGrid = () => {
+                const style = getComputedStyle(preview);
+                check.match(style.backgroundImage, /radial-gradient/);
+                check.match(style.backgroundImage, /0\.75px/);
+                check.equal(style.backgroundSize, "48px 48px");
+                check.equal(style.backgroundPosition, "50% 50%");
+                check.equal(style.backgroundOrigin, "padding-box");
+                check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
+                const vertical = getComputedStyle(preview, "::before");
+                const horizontal = getComputedStyle(preview, "::after");
+                check.equal(vertical.borderLeftStyle, "dashed");
+                check.equal(horizontal.borderTopStyle, "dashed");
+                check.equal(vertical.borderLeftColor, style.borderTopColor);
+                check.equal(horizontal.borderTopColor, style.borderTopColor);
+                const rect = preview.getBoundingClientRect();
+                const width = rect.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+                const height = rect.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth);
+                const x = parseFloat(vertical.left) + new DOMMatrixReadOnly(vertical.transform).m41 +
+                    parseFloat(vertical.borderLeftWidth) / 2;
+                const y = parseFloat(horizontal.top) + new DOMMatrixReadOnly(horizontal.transform).m42 +
+                    parseFloat(horizontal.borderTopWidth) / 2;
+                check.ok(Math.abs(x - width / 2) < .02, "the vertical stroke center meets the center grid dot");
+                check.ok(Math.abs(y - height / 2) < .02, "the horizontal stroke center meets the center grid dot");
+                for (const guide of [vertical, horizontal]) {
+                    check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
+                    check.equal(guide.pointerEvents, "none");
+                }
+            };
             const checkFrame = () => {
                 const rect = preview.getBoundingClientRect();
                 const viewportRect = viewport.getBoundingClientRect();
@@ -149,22 +177,7 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 check.equal(style.borderTopColor, canvasStyle.outlineColor, "the frame follows the active canvas color");
                 check.equal(style.borderTopWidth, canvasStyle.outlineWidth);
                 check.equal(style.borderTopLeftRadius, documentRadius, "the frame keeps the document canvas radius");
-                check.match(style.backgroundImage, /radial-gradient/);
-                check.equal(style.backgroundSize, "24px 24px");
-                check.equal(style.backgroundPosition, "50% 50%");
-                check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
-                const vertical = getComputedStyle(preview, "::before");
-                const horizontal = getComputedStyle(preview, "::after");
-                check.equal(vertical.borderLeftStyle, "dashed");
-                check.equal(horizontal.borderTopStyle, "dashed");
-                check.equal(vertical.borderLeftColor, style.borderTopColor);
-                check.equal(horizontal.borderTopColor, style.borderTopColor);
-                check.ok(Math.abs(parseFloat(vertical.left) - preview.clientWidth / 2) < .1);
-                check.ok(Math.abs(parseFloat(horizontal.top) - preview.clientHeight / 2) < .1);
-                for (const guide of [vertical, horizontal]) {
-                    check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
-                    check.equal(guide.pointerEvents, "none");
-                }
+                checkGrid();
                 check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
             };
             const captureLayout = () => {
@@ -192,6 +205,15 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "false");
             button("listMindmapDocumentLayout").click();
             check.equal(preview.hidden, false);
+            checkFrame();
+            // 奇数和小数尺寸下，验证笔画中心与网格原点，而非只验证线条边缘的百分比位置。
+            const frameStyle = preview.style.cssText;
+            for (const [width, height] of [[320, 200], [321, 201], [320.5, 200.5], [321.25, 201.75]]) {
+                preview.style.width = `${width}px`;
+                preview.style.height = `${height}px`;
+                checkGrid();
+            }
+            preview.style.cssText = frameStyle;
             checkFrame();
             const savedLayout = JSON.stringify(view.documentView);
             const fixedFrame = preview.getBoundingClientRect().toJSON();

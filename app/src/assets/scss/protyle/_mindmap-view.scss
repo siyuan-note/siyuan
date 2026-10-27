@@ -270,9 +270,10 @@
     border: 1px solid currentColor;
     border-radius: var(--b3-border-radius);
     overflow: hidden;
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(circle, currentColor .75px, transparent .75px);
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) .75px, transparent .75px);
+    // 默认单行节点最小高度 32px，加上 16px 纵向间隔；网格固定于取景框，不随导图缩放。
+    background-size: 48px 48px;
     background-position: center;
     box-sizing: border-box;
     z-index: 4;
@@ -289,6 +290,7 @@
       bottom: 0;
       left: 50%;
       border-left: 1px dashed currentColor;
+      transform: translateX(-50%);
     }
 
     &::after {
@@ -296,6 +298,7 @@
       right: 0;
       top: 50%;
       border-top: 1px dashed currentColor;
+      transform: translateY(-50%);
     }
   }
 

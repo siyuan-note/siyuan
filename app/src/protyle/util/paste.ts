@@ -65,6 +65,7 @@ import {shouldPasteMarkdownFromHTML} from "./markdownClipboard";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 import {convertOfficeLists} from "./officeList";
 import {extractOfficeMathHTML} from "./officeMath";
+import {markdownMathPaste} from "./markdownMathPaste";
 import {
     extractWPSPresentationClipboard,
     getWPSPresentationFallback,
@@ -1595,15 +1596,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (pastePlainTextLink(protyle, range, textPlain)) {
                 return;
             }
-            let textPlainDom: string;
             textPlain = stripPastedIALDataAttributes(textPlain);
 
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
-            if (window.siyuan.config.editor.pasteURLAutoConvert) {
-                textPlainDom = protyle.lute.Md2BlockDOMWithAutoLink(textPlain);
-            } else {
-                textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
-            }
+            let textPlainDom = markdownMathPaste(protyle.lute, textPlain,
+                window.siyuan.config.editor.mathDelimiterCompatibility !== false,
+                window.siyuan.config.editor.pasteURLAutoConvert);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = textPlainDom;

@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "粘贴和导入时兼容 LaTeX 公式分隔符",
+	"mathDelimiterCompatibilityTip": "启用后自动将粘贴和导入内容中的 \\(...\\)、\\[...\\] 分别识别为行级公式和块级公式",
 	"automationCollectionScopeLimit": "监听范围最多可包含 32 个笔记本或文档",
 	"pdfAnnotationSaveFailed": "无法保存 PDF 标注，请重新打开 PDF 加载最新标注后再编辑",
 	"skipExitSync": "跳过同步并退出",

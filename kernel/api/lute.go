@@ -103,6 +103,7 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
+	luteEngine.SetLatexMath(model.MathDelimiterCompatibilityEnabled())
 	dom, useHTML := prepareHTMLClipboardContent(luteEngine, dom, text, mathML, office, officeMathHTML, wps,
 		preserveSourceFormat, preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
 	if !useHTML {

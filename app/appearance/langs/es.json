@@ -1,4 +1,6 @@
 {
+	"mathDelimiterCompatibility": "Reconocer delimitadores de fórmulas LaTeX al pegar e importar",
+	"mathDelimiterCompatibilityTip": "Al activarlo, se reconocen automáticamente \\(...\\) y \\[...\\] en el contenido pegado e importado como fórmulas en línea y de bloque, respectivamente",
 	"automationCollectionScopeLimit": "El ámbito de supervisión puede contener hasta 32 cuadernos o documentos",
 	"pdfAnnotationSaveFailed": "No se pudieron guardar las anotaciones del PDF. Vuelve a abrir el PDF para cargar las anotaciones más recientes antes de seguir editando",
 	"skipExitSync": "Omitir sincronización y salir",

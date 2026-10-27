@@ -2196,6 +2196,7 @@ func maskObsidianProtected(data []byte, spans []obsidianSpan) []byte {
 
 func parseObsidianMd(markdown []byte, vault *obsidianVaultContext, doc *obsidianDocPlan, stats *obsidianTransformStats) (*parse.Tree, error) {
 	luteEngine := util.NewStdLute()
+	setImportMathDelimiters(luteEngine)
 	luteEngine.SetYamlFrontMatter(true)
 	luteEngine.SetBlockRef(true)
 	luteEngine.SetKramdownIAL(true)

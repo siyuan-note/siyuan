@@ -112,6 +112,7 @@ type Editor struct {
 	HeadingNumberFormat             string         `json:"headingNumberFormat"`             // 标题编号格式
 	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`             // 粘贴网址时自动转为链接
+	MathDelimiterCompatibility      *bool          `json:"mathDelimiterCompatibility"`      // 粘贴和导入时兼容 LaTeX 公式分隔符，默认开启
 	DragHTMLFileToIframe            bool           `json:"dragHTMLFileToIframe"`            // 是否将拖拽的 HTML 文件嵌入为 IFrame 块
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
@@ -252,6 +253,7 @@ func NewEditor() *Editor {
 		HeadingNumberFormat:             DefaultHeadingNumberFormat,
 		HeadingEmbedMode:                0,
 		PasteURLAutoConvert:             false,
+		MathDelimiterCompatibility:      new(true),
 		DragHTMLFileToIframe:            false,
 		Markdown:                        util.NewMarkdown(),
 	}

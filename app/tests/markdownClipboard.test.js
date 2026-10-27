@@ -10,6 +10,7 @@ const sources = () => {
     }).outputText;
     return {
         clipboard: compile("protyle/util/markdownClipboard.ts"),
+        mathPaste: compile("protyle/util/markdownMathPaste.ts"),
         paste: compile("protyle/util/paste.ts"),
         pictureImages: compile("protyle/util/pictureImages.ts"),
         localAssets: compile("protyle/upload/htmlLocalAssets.ts"),
@@ -93,13 +94,13 @@ const runCases = async source => {
     };
 
     // 执行共享入口，覆盖桌面剪贴板事件、移动端读取结果以及保留来源格式选项。
-    const paste = async (mobile, preserveSourceFormat = false, restricted = false, localAssetStatus, switched = false) => {
+    const paste = async (mobile, preserveSourceFormat = false, restricted = false, localAssetStatus, switched = false, clipboardOverride) => {
         let inserted;
         let htmlConversions = 0;
         let convertedSource;
-        const pasteHTML = localAssetStatus ? '<p>Before<img src="file:///tmp/missing.png"></p>' +
+        const pasteHTML = clipboardOverride ? clipboardOverride.html : localAssetStatus ? '<p>Before<img src="file:///tmp/missing.png"></p>' +
             '<table><tr><td>Table cell</td></tr></table><p><img src="file:///tmp/good.png"></p><p>After</p>' : html;
-        const pasteText = localAssetStatus ? "" : text;
+        const pasteText = clipboardOverride ? clipboardOverride.text : localAssetStatus ? "" : text;
         let checkedBlockDOM;
         const validated = new Error("validated restricted content");
         const block = document.createElement("div");
@@ -110,6 +111,7 @@ const runCases = async source => {
         const mocks = {
             "../../constants": {Constants: {ZWSP: "\u200b"}},
             "./markdownClipboard": clipboard,
+            "./markdownMathPaste": load(source.mathPaste),
             "./pictureImages": load(source.pictureImages),
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => restricted ? value => value : undefined,
@@ -159,7 +161,12 @@ const runCases = async source => {
                 }
                 htmlConversions++;
                 convertedSource = request.dom;
-                return {code: 0, data: lute.HTML2BlockDOM(request.dom)};
+                lute.SetLatexMath(window.siyuan.config.editor.mathDelimiterCompatibility !== false);
+                try {
+                    return {code: 0, data: lute.HTML2BlockDOM(request.dom)};
+                } finally {
+                    lute.SetLatexMath(false);
+                }
             }},
             "./insertHTML": {insertHTML: value => { inserted = value; }},
             "../ui/hideElements": {hideElements: noop},
@@ -169,7 +176,8 @@ const runCases = async source => {
             "../../util/highlightById": {scrollCenter: noop},
             "electron": {ipcRenderer: {invoke: async () => ""}},
         };
-        window.siyuan = {config: {editor: {pasteURLAutoConvert: false}}, languages: {uploadError: "upload failed"}};
+        window.siyuan = {config: {editor: {pasteURLAutoConvert: false,
+            mathDelimiterCompatibility: clipboardOverride?.enabled !== false}}, languages: {uploadError: "upload failed"}};
         const protyle = {lute, hint: {}, options: {upload: {max: 1024 * 1024}},
             wysiwyg: {element: block}, toolbar: {getCurrentType: () => []}};
         const event = mobile ? {textHTML: pasteHTML, textPlain: pasteText, siyuanHTML: "", target: block, preserveSourceFormat} : {
@@ -187,6 +195,17 @@ const runCases = async source => {
         return {inserted, htmlConversions, checkedBlockDOM, convertedSource};
     };
     for (const mobile of [false, true]) {
+        for (const enabled of [true, false]) {
+            for (const html of ["", "<p>\\(x+y\\)</p><p>\\[z\\]</p>"]) {
+                const externalMath = await paste(mobile, false, false, undefined, false,
+                    {html, text: "\\(x+y\\)\n\n\\[z\\]", enabled});
+                const root = document.createElement("div");
+                root.innerHTML = externalMath.inserted;
+                check.equal(root.querySelectorAll('[data-type="inline-math"]').length, enabled ? 1 : 0);
+                check.equal(root.querySelectorAll('[data-type="NodeMathBlock"]').length, enabled ? 1 : 0);
+                check.doesNotMatch(lute.Md2BlockDOM("\\(typed\\)"), /data-type="inline-math"/);
+            }
+        }
         const result = await paste(mobile);
         check.equal(result.htmlConversions, 0);
         validateResult(result.inserted);

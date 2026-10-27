@@ -16,15 +16,17 @@ import (
 )
 
 type davPersistenceFixture struct {
-	file    string
-	put     func(string) error
-	get     func() (string, error)
-	remove  func() error
-	load    func() error
-	loaded  func() bool
-	setPath func(string)
-	handler http.Handler
-	urlPath string
+	file      string
+	put       func(string) error
+	get       func() (string, error)
+	remove    func() error
+	load      func() error
+	loaded    func() bool
+	setPath   func(string)
+	handler   http.Handler
+	urlPath   string
+	calendars *Calendars
+	contacts  *Contacts
 }
 
 func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
@@ -39,6 +41,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 			t.Fatal(err)
 		}
 		return davPersistenceFixture{
+			calendars: store, contacts: &Contacts{},
 			handler: &caldav.Handler{Prefix: CalDavPrincipalsPath, Backend: &caldavPutTestBackend{store: store}}, urlPath: objectPath,
 			file: DavPath2DirectoryPath(objectPath), load: store.Load,
 			loaded: func() bool { return store.loaded },
@@ -71,6 +74,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 		t.Fatal(err)
 	}
 	return davPersistenceFixture{
+		calendars: &Calendars{}, contacts: store,
 		handler: &carddav.Handler{Prefix: CardDavPrincipalsPath, Backend: &carddavPutTestBackend{store: store}}, urlPath: objectPath,
 		file: DavPath2DirectoryPath(objectPath), load: store.Load,
 		loaded: func() bool { return store.loaded },

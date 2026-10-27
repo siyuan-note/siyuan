@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"net/http"
 	"os"
@@ -190,6 +191,7 @@ type Contacts struct {
 
 // load all contacts
 func (c *Contacts) load() error {
+	c.loaded = false
 	c.books.Clear()
 
 	// load address books meta data
@@ -211,7 +213,7 @@ func (c *Contacts) load() error {
 	}
 
 	// load vCard files (*.vcf)
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, addressBookMetaData := range c.booksMetaData {
 		addressBook := &AddressBook{
 			Changed:       false,
@@ -220,11 +222,13 @@ func (c *Contacts) load() error {
 			Addresses:     sync.Map{},
 		}
 		c.books.Store(addressBookMetaData.Path, addressBook)
-		wg.Go(func() {
-			addressBook.load()
+		wg.Go(func() error {
+			return addressBook.load()
 		})
 	}
-	wg.Wait()
+	if err := wg.Wait(); err != nil {
+		return err
+	}
 
 	c.loaded = true
 	c.changed = false
@@ -566,22 +570,23 @@ func (b *AddressBook) load() error {
 		return err
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == VCardFileExt {
-				wg.Go(func() {
+				wg.Go(func() error {
 					// load cards
 					addressFilePath := path.Join(b.DirectoryPath, filename)
 					vCards, err := LoadCards(addressFilePath)
 					if err != nil {
-						return
+						return err
 					}
 
 					switch len(vCards) {
 					case 0: // invalid file
+						return errors.New("CardDAV: no card in persisted file")
 					case 1: // file contain 1 card
 						address := &AddressObject{
 							FilePath: addressFilePath,
@@ -591,16 +596,16 @@ func (b *AddressBook) load() error {
 							},
 						}
 						if err := address.update(); err != nil {
-							return
+							return err
 						}
 
 						id := path.Base(filename)
 						b.Addresses.Store(id, address)
 					default: // file contain multiple cards
 						// Create a file for each card
-						addressesWaitGroup := &sync.WaitGroup{}
+						addressesWaitGroup := &errgroup.Group{}
 						for _, vCard := range vCards {
-							addressesWaitGroup.Go(func() {
+							addressesWaitGroup.Go(func() error {
 								filename_ := util.AssetName(filename, ast.NewNodeID())
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
@@ -610,30 +615,33 @@ func (b *AddressBook) load() error {
 									},
 								}
 								if err := address.save(true); err != nil {
-									return
+									return err
 								}
 								if err := address.update(); err != nil {
-									return
+									return err
 								}
 
 								id := path.Base(filename)
 								b.Addresses.Store(id, address)
+								return nil
 							})
 						}
 
-						addressesWaitGroup.Wait()
+						if err := addressesWaitGroup.Wait(); err != nil {
+							return err
+						}
 						// Delete original file with multiple cards
 						if err := os.Remove(addressFilePath); err != nil {
 							logging.LogErrorf("remove file [%s] failed: %s", addressFilePath, err)
-							return
+							return err
 						}
 					}
+					return nil
 				})
 			}
 		}
 	}
-	wg.Wait()
-	return nil
+	return wg.Wait()
 }
 
 type AddressObject struct {

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"golang.org/x/sync/errgroup"
 	"net/http"
 	"os"
 	"path"
@@ -139,6 +140,7 @@ type Calendars struct {
 }
 
 func (c *Calendars) load() error {
+	c.loaded = false
 	c.calendars.Clear()
 
 	// load calendars meta data file
@@ -160,7 +162,7 @@ func (c *Calendars) load() error {
 	}
 
 	// load iCalendar files (*.ics)
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, calendarMetaData := range c.calendarsMetaData {
 		calendar := &Calendar{
 			Changed:       false,
@@ -169,11 +171,13 @@ func (c *Calendars) load() error {
 			Objects:       sync.Map{},
 		}
 		c.calendars.Store(calendarMetaData.Path, calendar)
-		wg.Go(func() {
-			calendar.load()
+		wg.Go(func() error {
+			return calendar.load()
 		})
 	}
-	wg.Wait()
+	if err := wg.Wait(); err != nil {
+		return err
+	}
 
 	c.loaded = true
 	c.changed = false
@@ -316,7 +320,7 @@ func (c *Calendars) GetCalendar(calendarPath string) (calendar *caldav.Calendar,
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if value, ok := calendars.calendars.Load(calendarPath); ok {
+	if value, ok := c.calendars.Load(calendarPath); ok {
 		calendar = value.(*Calendar).MetaData
 		return
 	}
@@ -503,13 +507,13 @@ func (c *Calendar) load() error {
 		return err
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == ICalendarFileExt {
-				wg.Go(func() {
+				wg.Go(func() error {
 					// create & load calendar object
 					calendarObjectFilePath := path.Join(c.DirectoryPath, filename)
 					calendarObject := &CalendarObject{
@@ -517,19 +521,18 @@ func (c *Calendar) load() error {
 						FilePath:     calendarObjectFilePath,
 						CalendarPath: c.MetaData.Path,
 					}
-					err = calendarObject.load()
-					if err != nil {
-						return
+					if err := calendarObject.load(); err != nil {
+						return err
 					}
 
 					id := path.Base(filename)
 					c.Objects.Store(id, calendarObject)
+					return nil
 				})
 			}
 		}
 	}
-	wg.Wait()
-	return nil
+	return wg.Wait()
 }
 
 type CalendarObject struct {

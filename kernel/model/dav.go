@@ -25,16 +25,52 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
+	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var writeDAVFile = gulu.File.WriteFileSafer
+
+// Reload only caches that have been used, after synchronization has updated disk.
+// Holding the same locks as DAV operations prevents publishing an old loaded
+// cache after this refresh. Unused services remain lazy and do not create files.
+func reloadSyncedDAV(result *dejavu.MergeResult, calendarStore *Calendars, contactStore *Contacts) {
+	var reloadCalendar, reloadContacts bool
+	for _, files := range [][]*entity.File{result.Upserts, result.Removes} {
+		for _, file := range files {
+			reloadCalendar = reloadCalendar || strings.HasPrefix(file.Path, "/storage/caldav/")
+			reloadContacts = reloadContacts || strings.HasPrefix(file.Path, "/storage/carddav/")
+		}
+	}
+	if reloadCalendar {
+		calendarStore.lock.Lock()
+		if calendarStore.loaded {
+			calendarStore.loaded = false
+			if err := calendarStore.load(); err != nil {
+				logging.LogErrorf("reload synchronized calendars failed: %s", err)
+			}
+		}
+		calendarStore.lock.Unlock()
+	}
+	if reloadContacts {
+		contactStore.lock.Lock()
+		if contactStore.loaded {
+			contactStore.loaded = false
+			if err := contactStore.load(); err != nil {
+				logging.LogErrorf("reload synchronized contacts failed: %s", err)
+			}
+		}
+		contactStore.lock.Unlock()
+	}
+}
 
 // Check preconditions while holding the collection lock, before any mutation.
 func checkDAVConditions(etag string, ifMatch, ifNoneMatch webdav.ConditionalMatch) error {

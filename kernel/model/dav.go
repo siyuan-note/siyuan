@@ -31,6 +31,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var writeDAVFile = gulu.File.WriteFileSafer
+
 // PathJoinWithSlash joins the elements to a path with slash ('/') character
 func PathJoinWithSlash(elems ...string) string {
 	return filepath.ToSlash(filepath.Join(elems...))

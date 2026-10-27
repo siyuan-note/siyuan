@@ -233,7 +233,7 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 		return
 	}
 
-	if value, loaded := calendar.Objects.LoadAndDelete(objectID); loaded {
+	if value, loaded := calendar.Objects.Load(objectID); loaded {
 		calendarObject = value.(*CalendarObject)
 	} else {
 		err = ErrorCalDavCalendarObjectNotFound
@@ -241,9 +241,11 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 	}
 
 	if err = os.Remove(calendarObject.FilePath); err != nil {
+		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", calendarObject.FilePath, err)
 		return
 	}
+	calendar.Objects.Delete(objectID)
 
 	return
 }
@@ -378,29 +380,25 @@ func (c *Calendars) PutCalendarObject(objectPath string, calendarData *ical.Cale
 
 	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
 
-	var object *CalendarObject
-	if value, ok := calendar.Objects.Load(objectID); ok {
-		object = value.(*CalendarObject)
-		object.Data.Data = calendarData
-		object.Changed = true
-	} else {
-		object = &CalendarObject{
-			Changed:      true,
-			FilePath:     DavPath2DirectoryPath(objectPath),
-			CalendarPath: calendarPath,
-			Data: &caldav.CalendarObject{
-				Data: calendarData,
-			},
-		}
+	// Do not mutate a cached object until its replacement is persisted.
+	object := &CalendarObject{
+		Changed:      true,
+		FilePath:     DavPath2DirectoryPath(objectPath),
+		CalendarPath: calendarPath,
+		Data: &caldav.CalendarObject{
+			Data: calendarData,
+		},
 	}
 
 	err = object.save(true)
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
 	err = object.update()
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -575,7 +573,7 @@ func (o *CalendarObject) save(force bool) error {
 		}
 
 		// write file
-		if err := os.WriteFile(o.FilePath, objectData.Bytes(), 0755); err != nil {
+		if err := writeDAVFile(o.FilePath, objectData.Bytes(), 0755); err != nil {
 			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
 			return err
 		}

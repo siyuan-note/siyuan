@@ -112,6 +112,7 @@ func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
 // ParseAddressPath parses address path to address book path and address ID
 func ParseAddressPath(addressPath string) (addressBookPath string, addressID string, err error) {
 	addressBookPath, addressFileName := path.Split(addressPath)
+	addressBookPath = PathCleanWithSlash(addressBookPath)
 	addressID = path.Base(addressFileName)
 	addressFileExt := util.Ext(addressFileName)
 
@@ -283,7 +284,7 @@ func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, 
 		return
 	}
 
-	if value, loaded := addressBook.Addresses.LoadAndDelete(addressID); loaded {
+	if value, loaded := addressBook.Addresses.Load(addressID); loaded {
 		addressObject = value.(*AddressObject)
 	} else {
 		err = ErrorCardDavAddressNotFound
@@ -291,9 +292,11 @@ func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, 
 	}
 
 	if err = os.Remove(addressObject.FilePath); err != nil {
+		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", addressObject.FilePath, err)
 		return
 	}
+	addressBook.Addresses.Delete(addressID)
 
 	return
 }
@@ -496,29 +499,25 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 
 	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
 
-	var address *AddressObject
-	if value, ok := addressBook.Addresses.Load(addressID); ok {
-		address = value.(*AddressObject)
-		address.Data.Card = card
-		address.Changed = true
-	} else {
-		address = &AddressObject{
-			Changed:  true,
-			FilePath: DavPath2DirectoryPath(addressPath),
-			BookPath: bookPath,
-			Data: &carddav.AddressObject{
-				Card: card,
-			},
-		}
+	// Do not mutate a cached object until its replacement is persisted.
+	address := &AddressObject{
+		Changed:  true,
+		FilePath: DavPath2DirectoryPath(addressPath),
+		BookPath: bookPath,
+		Data: &carddav.AddressObject{
+			Card: card,
+		},
 	}
 
 	err = address.save(true)
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
 	err = address.update()
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -656,7 +655,7 @@ func (o *AddressObject) save(force bool) error {
 		}
 
 		// write file
-		if err := os.WriteFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
+		if err := writeDAVFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
 			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
 			return err
 		}

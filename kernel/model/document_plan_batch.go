@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 // coalesceDocumentPlanAncestors 在同一次批量业务计划中合并缺失祖先，保留每篇最终文档的身份。

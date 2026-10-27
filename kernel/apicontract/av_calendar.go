@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 // AVCalendarSettings 是 setAttrViewCalendar 事务的完整设置数据，也是日历布局的持久化字段和显示设置。

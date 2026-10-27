@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 // MCPOAuthConfig 控制内置 MCP 服务端授权，默认关闭。公开地址必须为不含路径的 HTTPS 源。

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 // WorkspaceStorageData 统计当前内核工作空间已落盘的普通文件字节数，不包含目录分配空间或链接目标。

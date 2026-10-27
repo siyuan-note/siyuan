@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // 包 apicontract 定义 HTTP 接口的线协议，不依赖内核启动或持久化模型。
 package apicontract
 

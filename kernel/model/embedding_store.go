@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 // 写入时在同一 SQL 中验证内容及更新时间，避免查询与写入之间发生编辑而产生过期索引。

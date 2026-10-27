@@ -59,7 +59,10 @@ func SetLocalStorageVals(keyVals map[string]any) (setKeyVals map[string]any, err
 	defer localStorageLock.Unlock()
 
 	setKeyVals = make(map[string]any, len(keyVals))
-	localStorage := getLocalStorage()
+	localStorage, err := readLocalStorage()
+	if err != nil {
+		return nil, err
+	}
 	for k, v := range keyVals {
 		if v == nil {
 			err = fmt.Errorf("local storage value for key [%s] must not be empty", k)
@@ -76,16 +79,14 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
-	localStorage := getLocalStorage()
+	localStorage, err := readLocalStorage()
+	if err != nil {
+		return err
+	}
 	for _, key := range keys {
 		delete(localStorage, key)
 	}
 	return setLocalStorage(localStorage)
-}
-
-func getLocalStorage() (ret map[string]any) {
-	ret, _ = readLocalStorage()
-	return
 }
 
 func readLocalStorage() (ret map[string]any, err error) {

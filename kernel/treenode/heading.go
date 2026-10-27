@@ -70,11 +70,15 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 
 	// 将原来所有折叠标题对应的下方节点移动到新节点下
 	var updateFoldHeadings []*ast.Node
+	updatedBlocks := map[string]*ast.Node{}
 	ast.Walk(updateNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
+		if n.IsBlock() && n.ID != "" {
+			updatedBlocks[n.ID] = n
+		}
 		if ast.NodeHeading == n.Type && IsSelfFolded(n) {
 			updateFoldHeadings = append(updateFoldHeadings, n)
 		}
@@ -82,8 +86,35 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 	})
 	for _, h := range updateFoldHeadings {
 		children := foldHeadings[h.ID]
-		for i := len(children) - 1; 0 <= i; i-- {
-			h.Next.InsertAfter(children[i]) // Next 是 Block IAL
+		anchor := h
+		if h.Next != nil && h.Next.Type == ast.NodeKramdownBlockIAL {
+			anchor = h.Next
+		}
+		skipIAL := false
+		for _, child := range children {
+			if child.Type == ast.NodeKramdownBlockIAL && skipIAL {
+				continue
+			}
+			skipIAL = false
+			if existing := updatedBlocks[child.ID]; child.ID != "" && existing != nil {
+				// Complete DOM already carries this block, including edits to hidden content.
+				skipIAL = true
+				if existing.Parent == h.Parent {
+					anchor = existing
+					if existing.Next != nil && existing.Next.Type == ast.NodeKramdownBlockIAL {
+						anchor = existing.Next
+					}
+				}
+				continue
+			}
+			anchor.InsertAfter(child)
+			anchor = child
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.IsBlock() && n.ID != "" {
+					updatedBlocks[n.ID] = n
+				}
+				return ast.WalkContinue
+			})
 		}
 	}
 }

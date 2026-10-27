@@ -177,6 +177,7 @@ class ListMindmapController {
     private model: ListMindmapModel;
     private snapshot = "";
     private activeEditor?: ReturnType<typeof openListMindmapEditor>;
+    private newNodeOrigins?: WeakMap<HTMLElement, {id: string; html: string}>;
     private editRequest = 0;
     private disposed = false;
     private taskChanges: Promise<void> = Promise.resolve();
@@ -489,7 +490,7 @@ class ListMindmapController {
             }),
             onMove: (id, target, placement) => this.change(() => moveListMindmapNode(list, id, target, placement)),
             onAdd: (id, kind) => this.add(id, kind),
-            onDelete: id => this.change(() => deleteListMindmapNode(list, id)),
+            onDelete: id => this.deleteNode(id),
             onFold: id => this.change(() => {
                 const node = this.model.nodes.get(id);
                 if (node?.element && !node.virtual) {
@@ -886,7 +887,29 @@ class ListMindmapController {
             if (content) {
                 await this.edit(item.dataset.nodeId, content, undefined, clipboard);
             }
+        } else {
+            // 仅在当前源节点未编辑、未被回放替换时，记住取消新建应返回的位置。
+            this.newNodeOrigins ||= new WeakMap();
+            this.newNodeOrigins.set(item, {id, html: cleanListMindmapHTML(item.outerHTML)});
         }
+    }
+
+    private async deleteNode(id: string) {
+        const element = this.model.nodes.get(id)?.element;
+        const origin = element && this.list.contains(element) && this.newNodeOrigins?.get(element);
+        const sourceID = origin && this.view.getSelectedId() === id && this.model.nodes.has(origin.id) &&
+            cleanListMindmapHTML(element.outerHTML) === origin.html ? origin.id : undefined;
+        const deleted = await this.change(() => deleteListMindmapNode(this.list, id), false, sourceID);
+        if (deleted) {
+            if (element) {
+                this.newNodeOrigins?.delete(element);
+            }
+            if (sourceID && this.model.nodes.has(sourceID) && !this.model.nodes.has(id) &&
+                (!this.view.getSelectedId() || this.view.getSelectedId() === id)) {
+                this.view.focusNode(sourceID);
+            }
+        }
+        return deleted;
     }
 
     private async listInput(id: string, input: ListMindmapListInput, selection?: Record<string, string>) {
@@ -950,6 +973,7 @@ class ListMindmapController {
         if (!node || node.virtual) {
             return;
         }
+        this.newNodeOrigins?.delete(node.element);
         this.view.setEditing(id);
         const editor = openListMindmapEditor({
             owner: this.owner, node, host, replaceFirstParagraph, selection,

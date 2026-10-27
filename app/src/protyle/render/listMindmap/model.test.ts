@@ -361,7 +361,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     for (const mobile of [false, true]) {
         const root = document.createElement("div");
         root.className = "protyle-wysiwyg";
-        root.innerHTML = lute.Md2BlockDOM("- Original\n  - Folded child\n");
+        root.innerHTML = lute.Md2BlockDOM("- Original\n  - Folded child\n- Following\n");
         const original = root.firstElementChild as HTMLElement;
         api.retagMindmapBranch(original, true);
         original.firstElementChild.setAttribute("fold", "1");
@@ -440,6 +440,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         copies.forEach(copy => controllers.push(new embedded.ListMindmapController(owner, copy)));
         const target = controllers[0];
         const itemID = copies[0].firstElementChild.getAttribute("data-node-id");
+        const followingID = target.model.root.children[1].id;
         await target.view.options.onNodeStyle(itemID, {backgroundColor: "#ff0000"});
         check.equal(api.readListMindmap(copies[1]).metadata.nodes[itemID].backgroundColor, "#ff0000");
         check.equal(operations[0].undoOperations[0].context.undoFocusEmbedId, "first");
@@ -474,16 +475,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
         await new Promise(resolve => setTimeout(resolve, 0));
         check.equal(target.model.nodes.has(siblingID), false);
+        check.equal(target.view.getSelectedId(), itemID, "canceling a new sibling returns to its creation source instead of the following sibling");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, itemID,
+            "redo of the deletion also returns to the creation source");
         check.equal(editorOptions, undefined, "deleting a newly selected node never opens an editor");
         check.equal(target.model.nodes.has(addedID), true, "deleting the sibling preserves the previously added child");
-        // Double-click remains available on explicitly created children.
         await target.view.options.onAdd(itemID, "child");
-        const childID = target.view.getSelectedId();
-        target.view.getContentHost(childID).dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        const canceledChildID = target.view.getSelectedId();
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true}));
         await new Promise(resolve => setTimeout(resolve, 0));
-        check.ok(editorOptions, "double-click opens the newly selected child editor");
-        check.equal(editorOptions.node.id, childID);
+        check.equal(target.model.nodes.has(canceledChildID), false);
+        check.equal(target.view.getSelectedId(), itemID, "canceling a new child returns to the parent even when sibling children remain");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, itemID);
+        // Entering editing ends the cancellation shortcut, even without changing the text.
+        await target.view.options.onAdd(itemID, "sibling");
+        const editedID = target.view.getSelectedId();
+        target.view.getContentHost(editedID).dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "double-click opens the newly selected sibling editor");
+        check.equal(editorOptions.node.id, editedID);
         check.equal(editorOptions.replaceFirstParagraph, undefined);
+        await target.finish();
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.view.getSelectedId(), followingID, "after entering editing, deletion keeps the normal next-sibling policy");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, followingID);
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }

@@ -41846,6 +41846,16 @@
     "SetAssetAnnotationRequestInput": {
       "type": "object",
       "properties": {
+        "baseData": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "data": {
           "type": "string"
         },

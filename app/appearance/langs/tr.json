@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "PDF açıklamaları kaydedilemedi. Düzenlemeye devam etmeden önce en son açıklamaları yüklemek için PDF dosyasını yeniden açın",
 	"skipExitSync": "Eşitlemeyi atla ve çık",
 	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",
 	"automationCollectionReference": "Başvuru hedefi",

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "PDF-annotaties kunnen niet worden opgeslagen. Open de PDF opnieuw om de nieuwste annotaties te laden voordat je verder bewerkt",
 	"skipExitSync": "Synchronisatie overslaan en afsluiten",
 	"skipExitSyncConfirm": "De synchronisatie is nog niet voltooid. Overslaan en afsluiten? Niet-gesynchroniseerde wijzigingen blijven op dit apparaat opgeslagen",
 	"automationCollectionReference": "Verwijzingsdoel",

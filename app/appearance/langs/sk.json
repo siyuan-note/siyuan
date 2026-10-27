@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "Anotácie PDF sa nepodarilo uložiť. Pred ďalšími úpravami znova otvorte PDF a načítajte najnovšie anotácie",
 	"skipExitSync": "Preskočiť synchronizáciu a skončiť",
 	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",

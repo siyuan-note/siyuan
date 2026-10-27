@@ -231,8 +231,21 @@ var setFileAnnotation = contractHandler(apicontract.SetFileAnnotation, func(c *g
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	fileAnnotationMu.Lock()
+	defer fileAnnotationMu.Unlock()
+	if request.BaseData != nil {
+		merged, mergeErr := mergeFileAnnotations(writePath, boxID, *request.BaseData, data)
+		if mergeErr != nil {
+			return apicontract.Failure[apicontract.Null](-1, mergeErr.Error())
+		}
+		normalized, marshalErr := json.Marshal(merged)
+		if marshalErr != nil {
+			return apicontract.Failure[apicontract.Null](-1, marshalErr.Error())
+		}
+		data = string(normalized)
+	}
 	if "{}" == data {
-		if err = filelock.Remove(writePath); err != nil {
+		if err = filelock.Remove(writePath); err != nil && !(request.BaseData != nil && os.IsNotExist(err)) {
 			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	} else {
@@ -285,12 +298,14 @@ var getFileAnnotation = contractHandler(apicontract.GetFileAnnotation, func(c *g
 			return apicontract.Failure[apicontract.AssetAnnotationData](http.StatusForbidden, http.StatusText(http.StatusForbidden))
 		}
 	}
-	if !filelock.IsExist(readPath) {
-		return apicontract.Failure[apicontract.AssetAnnotationData](1, "")
-	}
 	boxID := model.ExtractBoxIDFromAssetsPath(readPath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AssetAnnotationData](-1, err.Error())
+	}
+	fileAnnotationMu.Lock()
+	defer fileAnnotationMu.Unlock()
+	if !filelock.IsExist(readPath) {
+		return apicontract.Failure[apicontract.AssetAnnotationData](1, "")
 	}
 
 	data, err := filelock.ReadFile(readPath)

@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "Nie można zapisać adnotacji PDF. Otwórz ponownie plik PDF, aby wczytać najnowsze adnotacje przed dalszą edycją",
 	"skipExitSync": "Pomiń synchronizację i wyjdź",
 	"skipExitSyncConfirm": "Synchronizacja nie została zakończona. Pominąć ją i wyjść? Niezsynchronizowane zmiany pozostaną zapisane na tym urządzeniu",
 	"automationCollectionReference": "Cel odwołania",

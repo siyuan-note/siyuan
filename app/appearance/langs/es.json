@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "No se pudieron guardar las anotaciones del PDF. Vuelve a abrir el PDF para cargar las anotaciones más recientes antes de seguir editando",
 	"skipExitSync": "Omitir sincronización y salir",
 	"skipExitSyncConfirm": "La sincronización no ha terminado. ¿Omitirla y salir? Los cambios sin sincronizar permanecerán guardados en este dispositivo",
 	"automationCollectionReference": "Destino de la referencia",

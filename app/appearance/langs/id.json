@@ -1,4 +1,5 @@
 {
+	"pdfAnnotationSaveFailed": "Anotasi PDF tidak dapat disimpan. Buka kembali PDF untuk memuat anotasi terbaru sebelum melanjutkan penyuntingan",
 	"skipExitSync": "Lewati sinkronisasi dan keluar",
 	"skipExitSyncConfirm": "Sinkronisasi belum selesai. Lewati dan keluar? Perubahan yang belum disinkronkan akan tetap tersimpan di perangkat ini",
 	"automationCollectionReference": "Tujuan referensi",

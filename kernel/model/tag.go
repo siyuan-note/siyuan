@@ -33,6 +33,10 @@ import (
 )
 
 func RemoveTag(label string) (err error) {
+	return removeTag(label, nil)
+}
+
+func removeTag(label string, beforeCommit func()) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 
@@ -55,7 +59,7 @@ func RemoveTag(label string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -102,7 +106,10 @@ func RemoveTag(label string) (err error) {
 		}
 		finishTitles()
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -126,6 +133,10 @@ func RemoveTag(label string) (err error) {
 }
 
 func RenameTag(oldLabel, newLabel string) (err error) {
+	return renameTag(oldLabel, newLabel, nil)
+}
+
+func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 	if invalidChar := treenode.ContainsMarker(newLabel); "" != invalidChar {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
@@ -164,7 +175,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -209,7 +220,10 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			updateNodes[node.ID] = node
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}

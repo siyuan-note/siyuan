@@ -25,17 +25,19 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func RemoveBookmark(bookmark string) (err error) {
+	return removeBookmark(bookmark, nil)
+}
+
+func removeBookmark(bookmark string, beforeCommit func()) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 
@@ -56,7 +58,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			return e
 		}
@@ -71,7 +73,6 @@ func RemoveBookmark(bookmark string) (err error) {
 			// 前端按纯文本回传标签，存储态为转义形态，比较前统一还原
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(bookmark) {
 				node.RemoveIALAttr("bookmark")
-				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
@@ -79,7 +80,10 @@ func RemoveBookmark(bookmark string) (err error) {
 		if changed {
 			generateTreeHistory(tree, historyDir)
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-			if err = writeTreeUpsertQueue(tree); err != nil {
+			if beforeCommit != nil {
+				beforeCommit()
+			}
+			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
 			}
@@ -96,6 +100,10 @@ func RemoveBookmark(bookmark string) (err error) {
 }
 
 func RenameBookmark(oldBookmark, newBookmark string) (err error) {
+	return renameBookmark(oldBookmark, newBookmark, nil)
+}
+
+func renameBookmark(oldBookmark, newBookmark string, beforeCommit func()) (err error) {
 	if invalidChar := treenode.ContainsMarker(newBookmark); "" != invalidChar {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
@@ -129,7 +137,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			return e
 		}
@@ -144,7 +152,6 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 			// 前端按纯文本回传旧标签，存储态为转义形态，比较前统一还原
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(oldBookmark) {
 				node.SetIALAttr("bookmark", newBookmark)
-				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
@@ -152,7 +159,10 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 		if changed {
 			generateTreeHistory(tree, historyDir)
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-			if err = writeTreeUpsertQueue(tree); err != nil {
+			if beforeCommit != nil {
+				beforeCommit()
+			}
+			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
 			}

@@ -177,6 +177,14 @@ const run = async () => {
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
+                const compactPanel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
+                const noticeRect = root.querySelector(".sync-checkout__notice").getBoundingClientRect();
+                const actionsRect = root.querySelector(".sync-checkout__actions").getBoundingClientRect();
+                assert.ok(actionsRect.top >= noticeRect.bottom,"compact actions must be below the notice");
+                assert.ok(Math.abs(actionsRect.width-noticeRect.width) <= 1,"compact rows must fill the same available width");
+                assert.ok(compactPanel.left >= 0 && compactPanel.right <= innerWidth,"compact panel must fit the viewport");
+                const compactCancel = root.querySelector('[data-action="cancel"]').getBoundingClientRect();
+                assert.ok(Math.abs(compactCancel.right-actionsRect.right) <= 1,"compact actions must remain right aligned");
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
                 const restoringMessage = "Restoring 20231013134532-9doj565.sy\\n(3192/3192): 407 B / 407 B, 44 B/s, 00:00:00 remaining";

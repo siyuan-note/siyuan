@@ -121,10 +121,6 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         order: getEntryOrder(contextPath),
         isVisible: key => isEntryVisible(`${contextPath}.${key}`),
         isAvailable: name => {
-            if ((name === "undo" || name === "redo") &&
-                protyle?.wysiwyg.element.closest(".mindmap-view__editor")) {
-                return false;
-            }
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
                 return false;
             }

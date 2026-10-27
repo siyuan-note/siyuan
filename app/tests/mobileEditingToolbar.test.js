@@ -202,7 +202,7 @@ const runCases = async (sources, platform, topBarHTML) => {
     assert.equal(undoCalls, 1);
     action("heading1");
     assert.equal(inserts[0], "# ‸");
-    // 节点编辑使用画布顶部历史入口，切回正文后恢复共享工具栏的历史按钮和原有配置。
+    // 编辑导图节点时保留键盘工具栏历史入口，切换编辑器和刷新配置时均遵循显隐设置。
     const nodeEditor = document.createElement("div");
     nodeEditor.className = "mindmap-view__editor";
     const nodeProtyle = document.createElement("div");
@@ -225,8 +225,8 @@ const runCases = async (sources, platform, topBarHTML) => {
     nodeRange.setStart(nodeEditable.firstChild, 0); nodeRange.collapse(true);
     getSelection().removeAllRanges(); getSelection().addRange(nodeRange);
     await settle();
-    assert.equal(hidden("undo"), true);
-    assert.equal(hidden("redo"), true);
+    assert.equal(hidden("undo"), false);
+    assert.equal(hidden("redo"), false);
     assert.equal(toolbar.classList.contains("fn__none"), false, "other keyboard actions stay available");
     assert.equal(hidden("block"), false);
     const nodeActions = [...toolbar.querySelector(".keyboard__dynamic").children]
@@ -237,8 +237,14 @@ const runCases = async (sources, platform, topBarHTML) => {
         nodeActions[index + 1]?.classList.contains("keyboard__split")), false);
     window.dispatchEvent(new Event("siyuan-entry-visibility"));
     await settle();
-    assert.equal(hidden("undo"), true, "configuration refresh cannot restore duplicate history controls");
-    assert.equal(hidden("redo"), true);
+    assert.equal(hidden("undo"), false, "configuration refresh retains node editing history controls");
+    assert.equal(hidden("redo"), false);
+    visible.delete("mobile-redo");
+    window.dispatchEvent(new Event("siyuan-entry-visibility"));
+    await settle();
+    assert.equal(hidden("undo"), false);
+    assert.equal(hidden("redo"), true, "node editing respects explicitly hidden history entries");
+    visible.add("mobile-redo");
     nodeEditor.className = "table__cell-editor";
     await settle();
     assert.equal(hidden("undo"), false, "standalone cell editors retain their own history controls");
@@ -247,7 +253,7 @@ const runCases = async (sources, platform, topBarHTML) => {
     current = documentEditor;
     editable.focus(); select(0);
     await settle();
-    assert.equal(hidden("undo"), false, "ordinary document history returns after node editing");
+    assert.equal(hidden("undo"), false, "ordinary document history remains available after node editing");
     assert.equal(hidden("redo"), true, "returning to a document preserves explicitly hidden entries");
     visible.add("mobile-redo");
     await settle();

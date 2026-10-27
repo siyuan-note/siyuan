@@ -1346,8 +1346,9 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error
 	if nil != err {
 		return err
 	}
-	if nil != tree.Root.FirstChild {
-		tree.Root.FirstChild.Unlink()
+	// 只移除新建文档的空占位段落，保留模板渲染期间已经提交的首块编辑。
+	if first := tree.Root.FirstChild; isDocContentTemplatePlaceholder(first) {
+		first.Unlink()
 	}
 	newTree := util.NewLute().BlockDOM2Tree(templateDOM)
 	var children []*ast.Node
@@ -1388,6 +1389,18 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error
 	invalidateDocumentHistory(tree.ID)
 	av.BatchUpsertBlockRel(tree.Root.ChildrenByType(ast.NodeAttributeView))
 	return nil
+}
+
+func isDocContentTemplatePlaceholder(node *ast.Node) bool {
+	if node == nil || node.Type != ast.NodeParagraph || node.FirstChild != nil || len(node.Tokens) != 0 {
+		return false
+	}
+	for _, attr := range node.KramdownIAL {
+		if attr[0] != "id" && attr[0] != "updated" {
+			return false
+		}
+	}
+	return true
 }
 
 func resolveDocContentTemplatePath(templatePath string) (string, error) {

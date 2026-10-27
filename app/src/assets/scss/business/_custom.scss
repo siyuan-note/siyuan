@@ -243,6 +243,11 @@
 
   textarea.b3-text-field--text {
     field-sizing: content;
+
+    @supports not (field-sizing: content) {
+      min-height: 64px;
+      resize: vertical;
+    }
   }
 
   .b3-chip {

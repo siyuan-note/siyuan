@@ -7,7 +7,15 @@ import {getInstanceById, getWndByLayout, newModelByInitData, pdfIsLoading, setPa
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getAssetExtension, getDisplayName, getDocDisplayName, isEncryptedBox, useShell} from "../util/pathName";
+import {
+    getAssetExtension,
+    getAssetPathWithoutFragment,
+    getAssetPathWithoutQuery,
+    getDisplayName,
+    getDocDisplayName,
+    isEncryptedBox,
+    useShell
+} from "../util/pathName";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -622,7 +630,7 @@ export const newTab = (options: IOpenFileOptions, afterInitProtyle?: Constructor
             }
             tab = new Tab({
                 icon,
-                title: getDisplayName(options.assetPath),
+                title: getDisplayName(getAssetPathWithoutQuery(options.assetPath)),
                 callback(tab) {
                     tab.addModel(new Asset({
                         app: options.app,
@@ -943,7 +951,10 @@ export const openBy = (url: string, type: "folder" | "app") => {
     /// #if !BROWSER
     if (url.startsWith("assets/")) {
         const open = () => {
-            fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {
+            // 内核按文件名解析资源，需先去掉片段；查询中的 box 参数用于定位加密笔记本中的资源
+            fetchPost("/api/asset/resolveAssetPath", {
+                path: getAssetPathWithoutFragment(url).replace(/\.pdf\?page=\d{1,}$/, ".pdf")
+            }, (response) => {
                 if (type === "app") {
                     useShell("openPath", response.data);
                 } else if (type === "folder") {

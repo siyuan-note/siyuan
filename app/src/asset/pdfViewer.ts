@@ -1,15 +1,8 @@
 import {Constants} from "../constants";
 import {patchAppearancePreference} from "../config/tabs/appearancePreferences";
+import {ensureBrowserCompatibility} from "../protyle/util/browserCompat";
 
 const PDF_JS_VERSION = "6.4.299-siyuan.1";
-
-interface IPromiseWithResolversConstructor {
-    withResolvers?: <T>() => {
-        promise: Promise<T>,
-        resolve: (value: T | PromiseLike<T>) => void,
-        reject: (reason?: unknown) => void,
-    };
-}
 
 interface IPdfViewerModule {
     webViewerLoad: (file: string, element: HTMLElement, page?: number, annotationId?: string, previewOnly?: boolean) => any;
@@ -43,19 +36,7 @@ const loadPdfScript = () => new Promise<void>((resolve, reject) => {
 
 export const loadPdfViewerModule = () => {
     if (!pdfViewerModulePromise) {
-        const promiseConstructor = Promise as unknown as IPromiseWithResolversConstructor;
-        if (!promiseConstructor.withResolvers) {
-            promiseConstructor.withResolvers = <T>() => {
-                let resolve!: (value: T | PromiseLike<T>) => void;
-                let reject!: (reason?: unknown) => void;
-                const promise = new Promise<T>((promiseResolve, promiseReject) => {
-                    resolve = promiseResolve;
-                    reject = promiseReject;
-                });
-                return {promise, resolve, reject};
-            };
-        }
-        pdfViewerModulePromise = loadPdfScript().then(async () => {
+        pdfViewerModulePromise = ensureBrowserCompatibility().then(loadPdfScript).then(async () => {
             // @ts-ignore PDF.js viewer 由上游 JavaScript 源码构建，没有 TypeScript 声明
             return import("./pdf/viewer") as Promise<IPdfViewerModule>;
         }).catch((error) => {

@@ -4,7 +4,7 @@ import {setCustomBlockRootReady} from "../../../plugin/customBlockRender";
 import {escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
 import {getDefaultKeymapBindings, getKeymapBindings, visitKeymapItems} from "../../../util/keymapBindings";
-import {hintRef, hintSlash} from "../../hint/extend";
+import {hintRef, hintSlash, hintTag} from "../../hint/extend";
 import {registerBuiltinSlashHint} from "../../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../../lite/fragmentEditor";
 import {bindLiteCodeActions} from "../../lite/codeActions";
@@ -181,7 +181,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         hintSlash(key, protyle, hintSource).filter(item => !["list", "orderedList", "check"].includes(item.id)));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
-            {key: "[[", hint: hintRef}, {key: "/", hint: slash}, {key: "、", hint: slash}],
+            {key: "[[", hint: hintRef}, {key: "#", hint: hintTag}, {key: "/", hint: slash}, {key: "、", hint: slash}],
     };
     const originalMinWidth = host.style.minWidth;
     const embedSourceIDs = new Set<string>();

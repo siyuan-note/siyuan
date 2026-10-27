@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"golang.org/x/sync/errgroup"
 	"net/http"
 	"os"
 	"path"
@@ -139,6 +140,7 @@ type Calendars struct {
 }
 
 func (c *Calendars) load() error {
+	c.loaded = false
 	c.calendars.Clear()
 
 	// load calendars meta data file
@@ -160,7 +162,7 @@ func (c *Calendars) load() error {
 	}
 
 	// load iCalendar files (*.ics)
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, calendarMetaData := range c.calendarsMetaData {
 		calendar := &Calendar{
 			Changed:       false,
@@ -169,11 +171,13 @@ func (c *Calendars) load() error {
 			Objects:       sync.Map{},
 		}
 		c.calendars.Store(calendarMetaData.Path, calendar)
-		wg.Go(func() {
-			calendar.load()
+		wg.Go(func() error {
+			return calendar.load()
 		})
 	}
-	wg.Wait()
+	if err := wg.Wait(); err != nil {
+		return err
+	}
 
 	c.loaded = true
 	c.changed = false
@@ -233,7 +237,7 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 		return
 	}
 
-	if value, loaded := calendar.Objects.LoadAndDelete(objectID); loaded {
+	if value, loaded := calendar.Objects.Load(objectID); loaded {
 		calendarObject = value.(*CalendarObject)
 	} else {
 		err = ErrorCalDavCalendarObjectNotFound
@@ -241,9 +245,11 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 	}
 
 	if err = os.Remove(calendarObject.FilePath); err != nil {
+		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", calendarObject.FilePath, err)
 		return
 	}
+	calendar.Objects.Delete(objectID)
 
 	return
 }
@@ -314,7 +320,7 @@ func (c *Calendars) GetCalendar(calendarPath string) (calendar *caldav.Calendar,
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if value, ok := calendars.calendars.Load(calendarPath); ok {
+	if value, ok := c.calendars.Load(calendarPath); ok {
 		calendar = value.(*Calendar).MetaData
 		return
 	}
@@ -376,31 +382,35 @@ func (c *Calendars) PutCalendarObject(objectPath string, calendarData *ical.Cale
 		return
 	}
 
-	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
-
-	var object *CalendarObject
-	if value, ok := calendar.Objects.Load(objectID); ok {
-		object = value.(*CalendarObject)
-		object.Data.Data = calendarData
-		object.Changed = true
-	} else {
-		object = &CalendarObject{
-			Changed:      true,
-			FilePath:     DavPath2DirectoryPath(objectPath),
-			CalendarPath: calendarPath,
-			Data: &caldav.CalendarObject{
-				Data: calendarData,
-			},
+	if opts != nil {
+		etag := ""
+		if value, ok := calendar.Objects.Load(objectID); ok {
+			etag = value.(*CalendarObject).Data.ETag
 		}
+		if err = checkDAVConditions(etag, opts.IfMatch, opts.IfNoneMatch); err != nil {
+			return
+		}
+	}
+
+	// Do not mutate a cached object until its replacement is persisted.
+	object := &CalendarObject{
+		Changed:      true,
+		FilePath:     DavPath2DirectoryPath(objectPath),
+		CalendarPath: calendarPath,
+		Data: &caldav.CalendarObject{
+			Data: calendarData,
+		},
 	}
 
 	err = object.save(true)
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
 	err = object.update()
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -413,6 +423,11 @@ func (c *Calendars) ListCalendarObjects(calendarPath string, req *caldav.Calenda
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
+	return c.listCalendarObjects(calendarPath, req)
+}
+
+// listCalendarObjects requires c.lock to be held by the caller.
+func (c *Calendars) listCalendarObjects(calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
 	var calendar *Calendar
 	if value, ok := c.calendars.Load(calendarPath); ok {
 		calendar = value.(*Calendar)
@@ -448,7 +463,7 @@ func (c *Calendars) QueryCalendarObjects(calendarPath string, query *caldav.Cale
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	calendarObjects, err = c.ListCalendarObjects(calendarPath, &query.CompRequest)
+	calendarObjects, err = c.listCalendarObjects(calendarPath, &query.CompRequest)
 	if err != nil {
 		return
 	}
@@ -492,13 +507,13 @@ func (c *Calendar) load() error {
 		return err
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == ICalendarFileExt {
-				wg.Go(func() {
+				wg.Go(func() error {
 					// create & load calendar object
 					calendarObjectFilePath := path.Join(c.DirectoryPath, filename)
 					calendarObject := &CalendarObject{
@@ -506,19 +521,18 @@ func (c *Calendar) load() error {
 						FilePath:     calendarObjectFilePath,
 						CalendarPath: c.MetaData.Path,
 					}
-					err = calendarObject.load()
-					if err != nil {
-						return
+					if err := calendarObject.load(); err != nil {
+						return err
 					}
 
 					id := path.Base(filename)
 					c.Objects.Store(id, calendarObject)
+					return nil
 				})
 			}
 		}
 	}
-	wg.Wait()
-	return nil
+	return wg.Wait()
 }
 
 type CalendarObject struct {
@@ -570,7 +584,7 @@ func (o *CalendarObject) save(force bool) error {
 		}
 
 		// write file
-		if err := os.WriteFile(o.FilePath, objectData.Bytes(), 0755); err != nil {
+		if err := writeDAVFile(o.FilePath, objectData.Bytes(), 0755); err != nil {
 			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
 			return err
 		}
@@ -588,10 +602,14 @@ func (o *CalendarObject) update() error {
 		return err
 	}
 
+	etag, err := FileETag(o.FilePath)
+	if err != nil {
+		return err
+	}
 	o.Data.Path = PathJoinWithSlash(o.CalendarPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
-	o.Data.ETag = FileETag(addressFileInfo)
+	o.Data.ETag = etag
 
 	return nil
 }

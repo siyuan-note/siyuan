@@ -38,16 +38,15 @@ type DocumentPathSegment struct {
 
 // DocumentPath 的标题与段落边界来自同一个数据库快照，displayPath 仅用于展示。
 type DocumentPath struct {
-	Notebook          string                `json:"notebook"`
-	ID                string                `json:"id"`
-	ParentID          *string               `json:"parentID"`
-	Path              string                `json:"path"`
-	Title             DocumentTitle         `json:"title"`
-	Segments          []DocumentPathSegment `json:"segments"`
-	Depth             int                   `json:"depth"`
-	DisplayPath       string                `json:"displayPath"`
-	Revision          string                `json:"revision"`
-	AddressingVersion int                   `json:"addressingVersion"`
+	Notebook    string                `json:"notebook"`
+	ID          string                `json:"id"`
+	ParentID    *string               `json:"parentID"`
+	Path        string                `json:"path"`
+	Title       DocumentTitle         `json:"title"`
+	Segments    []DocumentPathSegment `json:"segments"`
+	Depth       int                   `json:"depth"`
+	DisplayPath string                `json:"displayPath"`
+	Revision    string                `json:"revision"`
 }
 
 func ensureDocumentMetadata(database *sql.DB) error {
@@ -334,7 +333,7 @@ func documentPathInTx(tx *sql.Tx, boxID, id, notebookDocumentID string, mode int
 	}
 	leaf := chain[0]
 	ret := &DocumentPath{Notebook: boxID, ID: id, ParentID: leaf.ParentID, Path: leaf.Path, Title: leaf.Title,
-		Segments: []DocumentPathSegment{}, AddressingVersion: mode}
+		Segments: []DocumentPathSegment{}}
 	var texts, revisions []string
 	for i := len(chain) - 1; i >= 0; i-- {
 		meta := chain[i]

@@ -5,6 +5,7 @@ import {getEditorRange} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {getStartScrollTop} from "./highlightPosition";
 import {isMobile} from "./functions";
+import {isUndoViewportPreserved} from "../protyle/undo/viewport";
 
 export const bgFade = (element: Element) => {
     element.classList.add("protyle-wysiwyg--hl");
@@ -60,6 +61,9 @@ export const scrollCenter = (
     position: ScrollLogicalPosition = "nearest",
     behavior: ScrollBehavior = "auto"
 ) => {
+    if (isUndoViewportPreserved(protyle.wysiwyg.element)) {
+        return;
+    }
     if (nodeElement instanceof HTMLElement) {
         const visible = resolveVisibleListMindmapBlock(nodeElement);
         if (visible === null) {

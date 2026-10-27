@@ -2,11 +2,14 @@ package model
 
 import (
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -72,6 +75,158 @@ func TestCheckoutRepoSnapshotBacksUpPreservedAttributes(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRepositoryCheckoutSavesEditorsBeforeBackup(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	file := filepath.Join(util.DataDir, "seed.txt")
+	if err := os.WriteFile(file, []byte("snapshot"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	id, _, err := CreateRepoSnapshotWithFullCheck("original", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, second := connectSyncCheckoutClient(t, "restore-first"), connectSyncCheckoutClient(t, "restore-second")
+	type result struct {
+		task *syncCheckoutTask
+		err  error
+	}
+	done := make(chan result, 1)
+	go func() { task, err := prepareRepoCheckout(repo); done <- result{task, err} }()
+	readPreparing := func(connection interface{ ReadJSON(any) error }) string {
+		t.Helper()
+		for {
+			var message struct {
+				Cmd  string
+				Data struct{ Phase, Token string }
+			}
+			if err := connection.ReadJSON(&message); err != nil {
+				t.Fatal(err)
+			}
+			if message.Data.Phase == "preparing" {
+				return message.Data.Token
+			}
+		}
+	}
+	_ = first.SetReadDeadline(time.Now().Add(5 * time.Second))
+	_ = second.SetReadDeadline(time.Now().Add(5 * time.Second))
+	a, b := readPreparing(first), readPreparing(second)
+	state := GetSyncCheckout("checkout-test", "restore-first").Task
+	if !ConfirmSyncCheckout(state.TaskID, a, true) {
+		t.Fatal("first editor confirmation rejected")
+	}
+	select {
+	case <-done:
+		t.Fatal("restoration proceeded before the second editor saved")
+	default:
+	}
+	// The second window's save must be included in the pre-restore backup.
+	if err = os.WriteFile(file, []byte("saved pending edit"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if !ConfirmSyncCheckout(state.TaskID, b, true) {
+		t.Fatal("second editor confirmation rejected")
+	}
+	var prepared result
+	select {
+	case prepared = <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("restore preparation blocked")
+	}
+	if prepared.err != nil {
+		t.Fatal(prepared.err)
+	}
+	checkout := prepared.task
+	defer func() {
+		if checkout != nil {
+			checkout.finish(repo, &err)
+		}
+	}()
+	assertGuard := func() {
+		t.Helper()
+		if flushLock.TryLock() {
+			flushLock.Unlock()
+			t.Fatal("restore released transaction exclusion")
+		}
+		if dataImportAccess.TryRLock() {
+			dataImportAccess.RUnlock()
+			t.Fatal("restore released API write exclusion")
+		}
+	}
+	assertGuard()
+	engine := gin.New()
+	written := false
+	engine.POST("/test-write", func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) }, CheckReadonly,
+		func(c *gin.Context) { written = true; c.Status(http.StatusOK) })
+	engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("POST", "/test-write", nil))
+	if written {
+		t.Fatal("restore admitted a concurrent write")
+	}
+	err = checkoutRepoSnapshot(repo, id, func(error) { assertGuard() })
+	if err != nil {
+		t.Fatal(err)
+	}
+	backup, err := repo.Latest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content := repoSnapshotTestContent(t, repo, backup.ID, "/seed.txt"); content != "saved pending edit" {
+		t.Fatalf("backup omitted an editor's saved input: %q", content)
+	}
+	if data, err := os.ReadFile(file); err != nil || string(data) != "snapshot" {
+		t.Fatalf("snapshot not restored: %q %v", data, err)
+	}
+	checkout.finish(repo, &err)
+	checkout = nil
+	if !flushLock.TryLock() {
+		t.Fatal("finished restore retained transaction exclusion")
+	}
+	flushLock.Unlock()
+	engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("POST", "/test-write", nil))
+	if !written {
+		t.Fatal("finished restore retained write admission guard")
+	}
+}
+
+func TestRepositoryCheckoutRejectsUnsavedEditor(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	before, err := repo.Latest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	connection := connectSyncCheckoutClient(t, "unsaved-restore")
+	done := make(chan error, 1)
+	go func() { _, err := prepareRepoCheckout(repo); done <- err }()
+	var stateID, token string
+	for token == "" {
+		state := readSyncCheckoutState(t, connection)
+		if state.Phase == "preparing" {
+			stateID, token = state.TaskID, state.Token
+		}
+	}
+	if !ConfirmSyncCheckout(stateID, token, false) {
+		t.Fatal("unsaved confirmation rejected")
+	}
+	select {
+	case err = <-done:
+		if !errors.Is(err, dejavu.ErrIndexFileChanged) {
+			t.Fatalf("unexpected preparation error: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("unsaved editor did not abort restoration")
+	}
+	after, err := repo.Latest()
+	if err != nil || after.ID != before.ID {
+		t.Fatalf("failed preparation changed snapshots: %v", err)
+	}
+	if GetSyncCheckout("", "").Task != nil {
+		t.Fatal("failed preparation left an active restore")
+	}
+	if !dataImportAccess.TryLock() {
+		t.Fatal("failed preparation retained write exclusion")
+	}
+	dataImportAccess.Unlock()
 }
 
 func TestCheckoutRepoSnapshotStopsWhenBackupFails(t *testing.T) {

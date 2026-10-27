@@ -28,7 +28,7 @@ func documentPathContract(document *treenode.DocumentPath) apicontract.DocumentP
 		Notebook: document.Notebook, ID: document.ID, ParentID: document.ParentID, Path: document.Path,
 		Title:    apicontract.DocumentTitle{Format: document.Title.Format, Text: document.Title.Text, Empty: document.Title.Empty},
 		Segments: segments, Depth: document.Depth, DisplayPath: document.DisplayPath,
-		Revision: document.Revision, AddressingVersion: document.AddressingVersion,
+		Revision: document.Revision,
 	}
 }
 

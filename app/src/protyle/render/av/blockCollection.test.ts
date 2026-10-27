@@ -39,13 +39,21 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
     const menu = document.createElement("div");
     document.body.append(menu);
     let addScope: (paths: string[], boxes: string[]) => void;
+    let validateScope: (paths: string[], boxes: string[]) => boolean;
+    const messages: string[] = [];
     Object.assign(window, {siyuan: {languages, notebooks: [{id: "box", name: "Notebook"}]}});
     new Function("exports", "require", sourceCode)(api, (name: string) => ({
         "../../../util/escape": {escapeAttr: String, escapeHtml: String},
         "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: "/Selected document"})},
         "./collectionConditions": {mountCollectionConditions() {}},
         "./collectionReference": {mountCollectionReference() {}},
-        "../../../util/pathName": {movePathTo: (options: {cb: typeof addScope}) => { addScope = options.cb; }},
+        "../../../util/pathName": {movePathTo: (options: {cb: typeof addScope, validate: typeof validateScope, multiple: boolean, sourceNotebookIds: string[]}) => {
+            check.equal(options.multiple, true);
+            check.deepEqual(options.sourceNotebookIds, ["box"]);
+            addScope = options.cb;
+            validateScope = options.validate;
+        }},
+        "../../../dialog/message": {showMessage: (message: string) => messages.push(message)},
         "../../../menus/menuToggle": {toggleMenu: (options: {build: () => void, show: () => void}) => { options.build(); options.show(); }},
         "../../../plugin/Menu": {Menu: class {
             constructor() { menu.replaceChildren(); }
@@ -129,6 +137,24 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
         host.querySelector<HTMLInputElement>("[data-include-selected-documents]").click();
         check.equal(source.includeSelectedDocuments, undefined);
         check.equal(saves.at(-1).includeSelectedDocuments, undefined);
+        const beforeBatch = saves.length;
+        const paths = ["/", "/", "/doc.sy", "/new.sy", "/new.sy"];
+        const boxes = ["box", "other-box", "box", "box", "box"];
+        check.equal(validateScope(paths, boxes), true);
+        addScope(paths, boxes);
+        await tick();
+        check.equal(saves.length, beforeBatch + 1, "batch selection must save only once");
+        check.deepEqual(source.notebookIDs, ["box", "other-box"]);
+        check.deepEqual(source.documentIDs, ["doc", "new"]);
+        source.documentIDs.push(...Array.from({length: 28}, (_, i) => `doc-${i}`));
+        check.equal(validateScope(["/doc.sy"], ["box"]), true, "existing scope at the limit must remain selectable");
+        const snapshot = JSON.stringify(source);
+        check.equal(validateScope(["/overflow.sy"], ["box"]), false);
+        check.equal(messages.at(-1), languages.automationCollectionScopeLimit);
+        check.equal(JSON.stringify(source), snapshot, "failed validation must preserve the rule");
+        source.documentIDs.push("legacy");
+        check.equal(validateScope(["/doc.sy"], ["box"]), true, "legacy rules must accept an unchanged scope");
+        check.equal(validateScope(["/overflow.sy"], ["box"]), false, "legacy rules must not expand past the limit");
         host.remove();
     }
     menu.remove();

@@ -19,7 +19,7 @@ test("mobile toolbar saves truncated Unicode titles on blur and Enter without du
         setAttribute: (name: string, value: string) => attributes.set(name, value),
         addEventListener: (name: string, handler: (event?: object) => void) => listeners.set(name, handler),
     };
-    const runtime = {siyuan: {documentAddressingVersion: 2, config: {editor: {autoDirection: false}},
+    const runtime = {siyuan: {config: {editor: {autoDirection: false}},
         languages: {fileNameRule: "Invalid filename", _kernel: {16: "Untitled", 106: "Title too long"}},
         mobile: {editor: {protyle: {notebookId: "box", path: "/root.sy", block: {rootID: "root"}}}}}};
     const constants = {SIZE_TITLE: 512};
@@ -79,13 +79,6 @@ test("mobile toolbar saves truncated Unicode titles on blur and Enter without du
         assert.equal(requests.length, 5);
         assert.ok(input.value.includes("\n"));
     }
-    runtime.siyuan.documentAddressingVersion = 1;
-    input.value = "😀".repeat(512);
-    blur();
-    assert.equal(requests.length, 5);
-    assert.equal(input.value, "😀".repeat(256));
-
-    runtime.siyuan.documentAddressingVersion = 2;
     input.value = "🚀".repeat(513);
     const keydown = listeners.get("keydown");
     const event = {key: "Enter", preventDefault: () => {}, stopPropagation: () => {}};

@@ -722,9 +722,9 @@ func CloseOIDCSessions() {
 
 var (
 	// lastActivityNs 记录最近一次用户写操作（前端发送 /api/transactions* 请求）的纳秒时间戳。
-	lastActivityNs atomic.Int64
-	// indexFixDirty 标记索引可能已脏（上次订正后用户又有新的写操作），需要再次订正。
-	indexFixDirty atomic.Bool
+	lastActivityNs       atomic.Int64
+	indexFixVersion      atomic.Uint64
+	indexFixCleanVersion atomic.Uint64
 )
 
 func init() {
@@ -736,12 +736,18 @@ func init() {
 // 在 model.Activity 中间件中，对 /api/transactions* 写操作请求调用。
 func RefreshActivity() {
 	lastActivityNs.Store(time.Now().UnixNano())
-	indexFixDirty.Store(true)
+	MarkIndexFixDirty()
 }
 
-// MarkIndexClean 标记索引已订正完成，清除脏标志。订正流水线结束后调用。
-func MarkIndexClean() {
-	indexFixDirty.Store(false)
+// MarkIndexFixDirty records a change without treating background writes as user activity.
+func MarkIndexFixDirty() { indexFixVersion.Add(1) }
+
+func IndexFixVersion() uint64 { return indexFixVersion.Load() }
+
+// MarkIndexClean acknowledges only the generation captured before a successful repair.
+func MarkIndexClean(version uint64) bool {
+	indexFixCleanVersion.Store(version)
+	return indexFixVersion.Load() == version
 }
 
 // IsIdle 自上次用户活动以来是否已超过 idleThreshold。
@@ -751,5 +757,5 @@ func IsIdle(idleThreshold time.Duration) bool {
 
 // IsIndexFixDirty 返回是否存在未订正的变更（上次订正后有新用户活动）。
 func IsIndexFixDirty() bool {
-	return indexFixDirty.Load()
+	return indexFixVersion.Load() != indexFixCleanVersion.Load()
 }

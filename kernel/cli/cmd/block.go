@@ -383,19 +383,17 @@ var blockDeleteCmd = &cobra.Command{
 		if bt == nil {
 			return fmt.Errorf("block not found: %s", id)
 		}
+		if bt.Type == "d" {
+			return fmt.Errorf("document cannot be deleted as a block [%s]", id)
+		}
 		if dryRun {
 			fmt.Printf("[dry-run] Would delete block %s\n", id)
 			return nil
 		}
 
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action: "delete",
-				ID:     id,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.WaitForTransactions(transactions)
+		if _, err := model.PerformBlockOperation(&model.Operation{Action: "delete", ID: id}); err != nil {
+			return err
+		}
 
 		if bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)

@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {isUndoViewportPreserved} from "../undo/viewport";
 
 const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/transaction.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -172,6 +173,7 @@ const fixture = (containerType: ContainerType = "editor") => {
     const identity = (value: string) => value;
     const record = (kind: keyof typeof rendered, element: TestElement) => rendered[kind].push(element.getAttribute("data-node-id"));
     const dependencies = {
+        isUndoViewportPreserved,
         Constants: {CUSTOM_SY_AV_STATIC_TEXT: "custom-sy-av-s-text-"},
         normalizeHTMLAssetIFrameBlockDOM: identity,
         invalidateTrackedRangesByOperations: noop, invalidateViewFoldRequests: noop,

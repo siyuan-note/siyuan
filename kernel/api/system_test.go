@@ -264,6 +264,9 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 			if response.Code != 0 {
 				t.Fatalf("getConf failed: %s", recorder.Body.String())
 			}
+			if strings.Contains(recorder.Body.String(), `"documentAddressingVersion"`) {
+				t.Fatal("getConf retained the retired addressing switch")
+			}
 
 			for _, sentinel := range sentinels {
 				contains := strings.Contains(recorder.Body.String(), sentinel)

@@ -64,7 +64,6 @@ func SyncDataDownload() (err error) {
 }
 
 func syncDataDownloadLocked() (err error) {
-	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
@@ -76,7 +75,8 @@ func syncDataDownloadLocked() (err error) {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
-	pendingSync.finish(revision, err == nil, notifySyncPending)
+	// Download-only completion does not publish local changes, including an empty remote.
+	// Keep the pending hint until an upload or full sync actually publishes them.
 	if 1 == code {
 		consumeShorthands()
 	}
@@ -970,7 +970,7 @@ func formatRepoErrorMsg(err error) string {
 	} else if errors.Is(err, dejavu.ErrLockCloudFailed) {
 		msg = Conf.Language(188)
 		if detail := cloudLockErrorDetail(err, Conf.Language); "" != detail {
-			msg += " " + detail
+			msg += ": " + detail
 		}
 	} else if errors.Is(err, dejavu.ErrCloudLocked) {
 		msg = Conf.Language(189)
@@ -1151,6 +1151,7 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 }
 
 func IncSync() {
+	util.MarkIndexFixDirty()
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Load().Interval) * time.Second)
 	pendingSync.change(notifySyncPending)

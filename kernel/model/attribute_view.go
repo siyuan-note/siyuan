@@ -223,7 +223,14 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 
 	checkedAvIDs := map[string]bool{}
 	for _, id := range allAvIDs {
-		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
+		if docReferencedAvIDs[id] {
+			continue
+		}
+		referenced, scanErr := isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		if !referenced {
 			name, _ := av.GetAttributeViewName(id)
 
 			var modTime time.Time
@@ -249,34 +256,38 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 	return
 }
 
-func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) bool {
+func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) (bool, error) {
 	if checkedAvIDs[destAvID] {
 		if docReferencedAvIDs[destAvID] {
-			return true
+			return true, nil
 		}
-		return false
+		return false, nil
 	}
 	checkedAvIDs[destAvID] = true
 
-	srcAvIDs := av.GetSrcAvIDs(destAvID)
+	srcAvIDs, err := av.GetSrcAvIDsWithErr(destAvID)
+	if err != nil {
+		return false, fmt.Errorf("read database relations [%s] failed: %w", destAvID, err)
+	}
 	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID) // 忽略自身关联
 	if 1 > len(srcAvIDs) {
-		return false
+		return false, nil
 	}
 
 	for _, srcAvID := range srcAvIDs {
 		if docReferencedAvIDs[srcAvID] {
-			return true
+			return true, nil
 		}
 	}
 
 	// 递归检查间接关联的 av
 	for _, srcAvID := range srcAvIDs {
-		if isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs) {
-			return true
+		referenced, err := isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs)
+		if err != nil || referenced {
+			return referenced, err
 		}
 	}
-	return false
+	return false, nil
 }
 
 func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {
@@ -4657,6 +4668,9 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	if err := tx.prepareRelationSourceJournal(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := updateAttributeViewColRelation(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -4720,8 +4734,6 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 				}
 			}
-
-			av.RemoveAvRel(srcAv.ID, srcRel.AvID)
 		}
 
 		var candidateFilters []*av.ViewFilter
@@ -4829,12 +4841,33 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	if !isSameAv {
 		regenAttrViewGroups(destAv)
 		err = av.SaveAttributeView(destAv)
+		if err != nil {
+			return
+		}
 		ReloadAttrView(destAv.ID)
 	}
 
-	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
+	if oldDestAvID != "" && oldDestAvID != destAv.ID {
+		stillRelated := false
+		for _, kv := range srcAv.KeyValues {
+			if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID == oldDestAvID {
+				stillRelated = true
+				break
+			}
+		}
+		if !stillRelated {
+			if err = av.RemoveAvRelWithErr(srcAv.ID, oldDestAvID); err != nil {
+				return
+			}
+		}
+	}
+	if err = av.UpsertAvBackRelWithErr(srcAv.ID, destAv.ID); err != nil {
+		return
+	}
 	if operation.IsTwoWay && !isSameAv {
-		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
+		if err = av.UpsertAvBackRelWithErr(destAv.ID, srcAv.ID); err != nil {
+			return
+		}
 	}
 	if "" != oldDestAvID && oldDestAvID != operation.ID && oldDestAvID != srcAv.ID {
 		ReloadAttrView(oldDestAvID)

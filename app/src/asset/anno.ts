@@ -1,4 +1,4 @@
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {readText, writeText} from "../protyle/util/compatibility";
@@ -37,11 +37,30 @@ import {appendPdfAnnotationId} from "../editor/pdfAssetLink";
 import {isPdfRectAnnotation, mergePdfTextAnnotationRects} from "./pdfTextAnnotation";
 import {pdfRectToViewport} from "./pdfCoordinates";
 import {getPdfSelectionText} from "./pdfSelectionText";
+import {AnnotationSaveQueue} from "./annotationSave";
 
 export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
 const RECT_RESIZE_MIN_SIZE = 8;
 const rectCopyRequests = new WeakMap<HTMLElement, object>();
+const annotationSaveQueues = new WeakMap<object, {file: string; queue: AnnotationSaveQueue}>();
+
+const getAnnotationSaveQueue = (pdf: any, config: Record<string, IPdfAnno>) => {
+    const file = pdf.appConfig.file;
+    let state = annotationSaveQueues.get(pdf);
+    if (!state || state.file !== file) {
+        state = {file, queue: new AnnotationSaveQueue(JSON.stringify(config), (baseData, data) =>
+            fetchSyncPost("/api/asset/setFileAnnotation", {
+                path: file.replace(location.origin, "").substr(1) + ".sya", baseData, data,
+            }), () => showMessage(window.siyuan.languages.pdfAnnotationSaveFailed, 0, "error"))};
+        annotationSaveQueues.set(pdf, state);
+    }
+    return state.queue;
+};
+
+const saveConfig = (pdf: any, config: Record<string, IPdfAnno>) => {
+    void getAnnotationSaveQueue(pdf, config).save(JSON.stringify(config));
+};
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     destroyAnno(element);
@@ -163,7 +182,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 newHeight = y - newTop;
             }
             rectResizeElement.setAttribute("style",
-                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
+                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;opacity:${moveEvent.altKey && !CSS.supports("background-color", "color-mix(in srgb, red, transparent)") ? ".35" : "1"};background-color:${moveEvent.altKey ? "var(--b3-pdf-background1)" : ""};background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
         };
         const stopRectCreation = () => {
             setRectCreationMode(false);
@@ -317,10 +336,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             pageItem.positions = [position];
             annoItem.mode = "rect";
             target.dataset.mode = "rect";
-            fetchPost("/api/asset/setFileAnnotation", {
-                path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-                data: JSON.stringify(config),
-            });
+            saveConfig(pdf, config);
             hideToolbarMenu(element);
             copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1), id),
                 "", pdf, target, true);
@@ -420,10 +436,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     getRectElementsByNodeId(element, rectElement.getAttribute("data-node-id")).forEach(rectItem => {
                         rectItem.style.setProperty("--pdf-annotation-color", color);
                     });
-                    fetchPost("/api/asset/setFileAnnotation", {
-                        path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-                        data: JSON.stringify(config),
-                    });
+                    saveConfig(pdf, config);
                 } else {
                     const coords = getHightlightCoordsByRange(pdf, color);
                     if (coords) {
@@ -484,10 +497,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 getRectElementsByNodeId(element, rectElement.getAttribute("data-node-id")).forEach(rectItem => {
                     rectItem.dataset.type = annoItem.type;
                 });
-                fetchPost("/api/asset/setFileAnnotation", {
-                    path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-                    data: JSON.stringify(config),
-                });
+                saveConfig(pdf, config);
                 event.preventDefault();
                 event.stopPropagation();
                 processed = true;
@@ -584,10 +594,7 @@ const setRelation = (pdf: any) => {
     };
 
     const updateRelation = (pdf: any, config: any) => {
-        fetchPost("/api/asset/setFileAnnotation", {
-            path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-            data: JSON.stringify(config),
-        });
+        saveConfig(pdf, config);
     };
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
@@ -1154,7 +1161,6 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
 
 const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
     const file = pdf.appConfig.file;
-    const urlPath = file.replace(location.origin, "").substr(1);
     const isCurrent = () => element.isConnected && getRegisteredPdfInstance(element) === pdf && pdf.appConfig.file === file;
     const remove = () => {
         if (!isCurrent()) {
@@ -1168,10 +1174,7 @@ const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
         getRectElementsByNodeId(element, id).forEach(item => {
             item.remove();
         });
-        fetchPost("/api/asset/setFileAnnotation", {
-            path: urlPath + ".sya",
-            data: JSON.stringify(config),
-        });
+        saveConfig(pdf, config);
     };
     fetchPost("/api/block/getRefIDsByFileAnnotationID", {
         id,
@@ -1194,28 +1197,36 @@ const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
     const config = getConfig(pdf);
     config[id] = data;
-    fetchPost("/api/asset/setFileAnnotation", {
-        path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-        data: JSON.stringify(config),
-    });
+    saveConfig(pdf, config);
 };
 
 const getConfig = (pdf: any) => {
     if (pdf.appConfig.config) {
+        getAnnotationSaveQueue(pdf, pdf.appConfig.config);
         return pdf.appConfig.config;
     }
-    const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya";
+    const file = pdf.appConfig.file;
+    const urlPath = file.replace(location.origin, "").substr(1) + ".sya";
     fetchPost("/api/asset/getFileAnnotation", {
         path: urlPath,
     }, (response) => {
-        let config = {};
+        if (pdf.appConfig.file !== file || pdf.appConfig.config || (response.code !== 0 && response.code !== 1)) {
+            return;
+        }
+        let config: Record<string, IPdfAnno> = {};
         if (response.code === 0) {
             try {
                 config = JSON.parse(response.data.data);
             } catch (e) {
-                config = {};
+                showMessage(window.siyuan.languages.pdfAnnotationSaveFailed, 0, "error");
+                return;
             }
         }
+        if (!config || typeof config !== "object" || Array.isArray(config)) {
+            showMessage(window.siyuan.languages.pdfAnnotationSaveFailed, 0, "error");
+            return;
+        }
         pdf.appConfig.config = config;
+        getAnnotationSaveQueue(pdf, config);
     });
 };

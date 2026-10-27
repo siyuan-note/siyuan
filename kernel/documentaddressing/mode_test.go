@@ -19,11 +19,11 @@ func TestFixedAddressingVersionDoesNotReadOrWriteRecords(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		mode, err := BoxMode(data, conf, box)
-		if err != nil || mode != 2 || DefaultMode() != 2 || MinimumReaderVersion() != nil {
+		mode, err := BoxMode(box)
+		if err != nil || mode != 2 || DefaultMode() != 2 {
 			t.Fatal(mode, err)
 		}
-		capability, err := InspectBox(data, conf, box)
+		capability, err := InspectBox(box)
 		if err != nil || capability.Mode != 2 || capability.State != "structured" {
 			t.Fatal(capability, err)
 		}
@@ -41,7 +41,7 @@ func TestFixedAddressingVersionDoesNotReadOrWriteRecords(t *testing.T) {
 			}
 		}
 	}
-	if _, err := BoxMode(data, conf, "../invalid"); err == nil {
+	if _, err := BoxMode("../invalid"); err == nil {
 		t.Fatal("invalid notebook identity accepted")
 	}
 }

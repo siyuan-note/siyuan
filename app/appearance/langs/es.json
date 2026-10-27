@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "El ámbito de supervisión puede contener hasta 32 cuadernos o documentos",
+	"pdfAnnotationSaveFailed": "No se pudieron guardar las anotaciones del PDF. Vuelve a abrir el PDF para cargar las anotaciones más recientes antes de seguir editando",
 	"docTreeBatchSize": "Tamaño del lote del árbol de documentos",
 	"docTreeBatchSizeTip": "Número de documentos cargados a la vez; sigue desplazándote para ver todos los documentos",
 	"skipExitSync": "Omitir sincronización y salir",
@@ -3468,6 +3470,10 @@
 		"437": "Descargar esta versión",
 		"438": "Selecciona una imagen JPEG, PNG o WebP válida de hasta 10 MiB y 16 megapíxeles",
 		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo",
-		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar"
+		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar",
+		"441": "Tarea de reconstrucción del índice de contenido de recursos enviada; consulta el progreso en las tareas en segundo plano",
+		"442": "Reconstrucción del índice de contenido de recursos completada",
+		"443": "Error al reconstruir el índice de contenido de recursos; consulta el registro del núcleo",
+		"444": "No se pudo guardar el registro de recuperación del índice; mantén SiYuan abierto y comprueba el espacio en disco y los permisos del directorio"
 	}
 }

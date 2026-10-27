@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -360,13 +359,6 @@ func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
 		return fmt.Errorf("prepare box conf [%s] failed: %w", confPath, err)
 	}
 	newData, err := gulu.JSON.MarshalIndentJSON(persisted, "", "  ")
-	if err == nil {
-		var fields map[string]json.RawMessage
-		if err = json.Unmarshal(newData, &fields); err == nil {
-			fields["documentAddressingVersion"] = json.RawMessage("2")
-			newData, err = json.MarshalIndent(fields, "", "  ")
-		}
-	}
 	if err != nil {
 		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
 	}
@@ -726,35 +718,16 @@ func isSkipFile(filename string) bool {
 	return strings.HasPrefix(filename, ".") || "node_modules" == filename || "dist" == filename || "target" == filename
 }
 
-func moveTree(tree *parse.Tree) error {
-	treenode.SetBlockTreePath(tree)
-	sql.MoveTreeQueue(tree)
-
-	box := Conf.Box(tree.Box)
-	subFiles, err := box.listFilesForIndex(tree.Path)
-	if err != nil {
-		return err
+func moveTree(trees []*parse.Tree) (err error) {
+	for _, tree := range trees {
+		// Continue publishing every physically moved document after an index error.
+		// The durable move record forces authenticated index recovery on restart.
+		err = errors.Join(err, treenode.ReplaceBlockTree(tree))
+		sql.MoveTreeQueue(tree)
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(107), html.EscapeString(tree.HPath)))
 	}
-	paths := make([]string, 0, len(subFiles))
-	for _, subFile := range subFiles {
-		if !strings.HasSuffix(subFile.path, ".sy") {
-			continue
-		}
-		paths = append(paths, subFile.path)
-	}
-	// 只读源快照重新构造 HPath，避免持有源提交锁时触发修复写入。
-	if err = filesys.WalkTreeSnapshots(box.ID, paths, func(subTree *parse.Tree) error {
-		treenode.SetBlockTreePath(subTree)
-		sql.MoveTreeQueue(subTree)
-		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
-		util.PushStatusBar(msg)
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	refreshDocInfoWithoutParent(tree)
-	return nil
+	refreshDocInfoWithoutParent(trees[0])
+	return
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
@@ -874,7 +847,12 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 						continue
 					}
 
-					for _, tag := range attrV.([]any) {
+					values, ok := attrV.([]any)
+					if !ok {
+						logging.LogWarnf("unsupported YAML tags type [%T] in [%s]", attrV, n.ID)
+						continue
+					}
+					for _, tag := range values {
 						tagStr := fmt.Sprintf("%v", tag)
 						if "" == tag {
 							continue
@@ -1076,6 +1054,11 @@ func ReindexFTS() {
 }
 
 func fullReindex() {
+	fullReindexWithTxFlush(true)
+}
+
+// Snapshot checkout already drained transactions while holding flushLock.
+func fullReindexWithTxFlush(flushTransactions bool) {
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1087,7 +1070,9 @@ func fullReindex() {
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
-	FlushTxQueue()
+	if flushTransactions {
+		FlushTxQueue()
+	}
 
 	sql.InitDatabase(true)
 

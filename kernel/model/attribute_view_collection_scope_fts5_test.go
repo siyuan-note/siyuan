@@ -3,6 +3,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -11,6 +12,83 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 )
+
+func TestBlockCollectionScopeLimitContract(t *testing.T) {
+	fixture, view, _ := setupBlockCollectionTest(t)
+	ids := []string{fixture.sourceID}
+	for range 33 {
+		created, err := CreateDocByMdSync(fixture.box.ID, "/"+ast.NewNodeID()+".sy", "Scope", "", nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ids = append(ids, created.ID)
+	}
+	save := func(source *av.AutomationBlockSource, enabled bool) error {
+		t.Helper()
+		current := readAttributeViewItemsTest(t, view.ID)
+		current.Automations.Rules[0].BlockSource = source
+		current.Automations.Rules[0].Enabled = enabled
+		return PerformAttributeViewOperations([]*Operation{{Action: "setAttrViewAutomations", AvID: view.ID, Data: current.Automations}})
+	}
+	source := func(count int) *av.AutomationBlockSource {
+		return &av.AutomationBlockSource{DocumentIDs: append([]string{}, ids[:count]...), Types: []string{"d"}, Tags: []string{"todo"}}
+	}
+	// 笔记本和文档合计计数，重复 ID 不额外占用名额。
+	boundary := source(31)
+	boundary.NotebookIDs = []string{fixture.box.ID, fixture.box.ID}
+	if err := save(boundary, true); err != nil {
+		t.Fatal("32 distinct scopes rejected", err)
+	}
+	before, _ := json.Marshal(readAttributeViewItemsTest(t, view.ID).Automations)
+	for _, enabled := range []bool{false, true} {
+		if err := save(source(33), enabled); err == nil {
+			t.Fatal("33 new scopes accepted", enabled)
+		}
+		after, _ := json.Marshal(readAttributeViewItemsTest(t, view.ID).Automations)
+		if !bytes.Equal(before, after) {
+			t.Fatal("rejected scope changed saved rules")
+		}
+	}
+	legacy := readAttributeViewItemsTest(t, view.ID)
+	legacy.Automations.Rules[0].BlockSource = source(34)
+	if err := av.SaveAttributeView(legacy); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := PreviewAttributeViewCollection(view.ID, legacy.Automations.Rules[0].ID, 1); err != nil {
+		t.Fatal("legacy scope preview rejected", err)
+	}
+	if err := save(source(34), true); err != nil {
+		t.Fatal("unchanged legacy scope rejected", err)
+	}
+	if err := save(source(33), true); err != nil {
+		t.Fatal("legacy scope could not be reduced while still above the limit", err)
+	}
+	replaced := source(33)
+	replaced.DocumentIDs[32] = ids[33]
+	if err := save(replaced, true); err == nil {
+		t.Fatal("legacy oversized scope accepted a new document")
+	}
+	if err := PerformTxSync(blockCollectionTags(t, ids[0], "todo")); err != nil {
+		t.Fatal("legacy scope stopped collecting", err)
+	}
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(ids[0]) == nil {
+		t.Fatal("legacy scope lost its live collection behavior")
+	}
+	if err := save(source(32), true); err != nil {
+		t.Fatal("legacy scope could not be reduced", err)
+	}
+	if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: []*Operation{{Action: "setAttrViewAutomations", AvID: view.ID, Data: legacy.Automations}}}); err != nil {
+		t.Fatal("undo could not restore legacy scope", err)
+	}
+	if got := len(readAttributeViewItemsTest(t, view.ID).Automations.Rules[0].BlockSource.DocumentIDs); got != 34 {
+		t.Fatal("undo truncated the legacy scope", got)
+	}
+	if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: []*Operation{{Action: "setAttrViewAutomations", AvID: view.ID,
+		Data: &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{{ID: legacy.Automations.Rules[0].ID, Name: "Collect", Trigger: "block", Enabled: true,
+			BlockSource: source(32), Actions: legacy.Automations.Rules[0].Actions}}}}}}); err != nil {
+		t.Fatal("redo could not reduce legacy scope", err)
+	}
+}
 
 func TestBlockCollectionSelectedDocumentScope(t *testing.T) {
 	ids := map[string]string{"parent": ast.NewNodeID(), "child": ast.NewNodeID(), "grand": ast.NewNodeID()}

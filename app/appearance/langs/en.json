@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",
+	"pdfAnnotationSaveFailed": "Unable to save PDF annotations. Reopen the PDF to load the latest annotations before editing again",
 	"docTreeBatchSize": "Document tree batch size",
 	"docTreeBatchSizeTip": "Number of documents loaded at a time; keep scrolling to browse all documents",
 	"skipExitSync": "Skip sync and exit",
@@ -3468,6 +3470,10 @@
 		"437": "Download this version",
 		"438": "Choose a valid JPEG, PNG or WebP image up to 10 MiB and 16 megapixels",
 		"439": "Could not save the lock screen wallpaper; check workspace write permissions",
-		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue"
+		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue",
+		"441": "Asset content index rebuild task submitted; follow progress in background tasks",
+		"442": "Asset content index rebuild completed",
+		"443": "Asset content index rebuild failed; check the kernel log",
+		"444": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions"
 	}
 }

@@ -224,7 +224,6 @@ class App {
             await ensureLute({reloadOnFailure: false});
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(confResponse.data.conf);
-            window.siyuan.documentAddressingVersion = confResponse.data.documentAddressingVersion;
             window.siyuan.isPublish = confResponse.data.isPublish;
             applyPlatformClasses();
             correctHotkey(siyuanApp);

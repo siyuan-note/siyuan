@@ -19,6 +19,7 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -60,7 +61,8 @@ func watchAssets() {
 		return
 	}
 
-	go watchAssetEvents(assetsWatcher)
+	recovery := newAssetWatchRecovery(assetsWatcher, assetsDir)
+	go watchAssetEvents(assetsWatcher, recovery)
 }
 
 func (batch assetWatchBatch) addFSNotifyEvent(event fsnotify.Event) {
@@ -70,28 +72,83 @@ func (batch assetWatchBatch) addFSNotifyEvent(event fsnotify.Event) {
 	}
 }
 
-func watchAssetEvents(watcher *fsnotify.Watcher) {
+func watchAssetEvents(watcher *fsnotify.Watcher, recovery *assetWatchRecovery) {
 	defer logging.Recover()
+	processAssetWatchEventsWithRecovery(watcher.Events, watcher.Errors, func(batch assetWatchBatch) {
+		recovery.remember(batch)
+		batch.flush()
+	}, recovery.recover)
+}
+
+func processAssetWatchEvents(events <-chan fsnotify.Event, errors <-chan error, flush func(assetWatchBatch)) {
+	processAssetWatchEventsWithRecovery(events, errors, flush, nil)
+}
+
+func processAssetWatchEventsWithRecovery(events <-chan fsnotify.Event, watchErrors <-chan error, flush func(assetWatchBatch), recoverWatch func(bool) (assetWatchBatch, error)) {
 	timer := time.NewTimer(100 * time.Millisecond)
 	timer.Stop()
 	defer timer.Stop()
+	deadline := time.NewTimer(time.Second)
+	deadline.Stop()
+	defer deadline.Stop()
 	batch := assetWatchBatch{}
+	var recoveryTicks <-chan time.Time
+	if recoverWatch != nil {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		recoveryTicks = ticker.C
+	}
+	flushBatch := func() {
+		timer.Stop()
+		deadline.Stop()
+		flush(batch)
+		batch = assetWatchBatch{}
+	}
+	recoverBatch := func(overflow bool) {
+		recovered, err := recoverWatch(overflow)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				logging.LogErrorf("recover assets watcher failed: %s", err)
+			}
+			return
+		}
+		if recovered == nil {
+			return
+		}
+		for name, changed := range recovered {
+			batch.add(name, changed)
+		}
+		flushBatch()
+	}
 	for {
 		select {
-		case event, ok := <-watcher.Events:
+		case event, ok := <-events:
 			if !ok {
 				return
 			}
+			empty := len(batch) == 0
 			batch.addFSNotifyEvent(event)
-			timer.Reset(100 * time.Millisecond)
-		case err, ok := <-watcher.Errors:
+			if len(batch) > 0 {
+				if empty {
+					// Bound batch latency even when another path never becomes idle.
+					deadline.Reset(time.Second)
+				}
+				timer.Reset(100 * time.Millisecond)
+			}
+		case err, ok := <-watchErrors:
 			if !ok {
 				return
 			}
 			logging.LogErrorf("watch assets failed: %s", err)
+			if recoverWatch != nil && errors.Is(err, fsnotify.ErrEventOverflow) {
+				recoverBatch(true)
+			}
+		case <-recoveryTicks:
+			recoverBatch(false)
 		case <-timer.C:
-			batch.flush()
-			batch = assetWatchBatch{}
+			flushBatch()
+		case <-deadline.C:
+			flushBatch()
 		}
 	}
 }

@@ -6,7 +6,7 @@ import {Constants} from "../constants";
 import {Tab} from "../layout/Tab";
 import {fetchSyncPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
-import {getAssetExtension, getDisplayName} from "../util/pathName";
+import {getAssetExtension, getAssetPathWithoutQuery, getDisplayName} from "../util/pathName";
 import {getSearch} from "../util/functions";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {appendRemoteQuery} from "../util/hostCapabilities";
@@ -118,7 +118,7 @@ export const openAssetNewWindow = (
             docIcon = "iconVideo";
         }
         const json: any = [{
-            title: getDisplayName(assetPath),
+            title: getDisplayName(getAssetPathWithoutQuery(assetPath)),
             docIcon,
             pin: false,
             active: true,

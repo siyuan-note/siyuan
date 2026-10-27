@@ -321,7 +321,7 @@ func TestAPIContractDocumentAddressingDocumentCopies(t *testing.T) {
 func TestAPIContractDocumentAddressingSettingsBackup(t *testing.T) {
 	addressingAPIWorkspace(t)
 	addressingAPIWrite(t, filepath.Join(util.DataDir, addressingAPIBox, ".siyuan", "conf.json"), `{"documentAddressingVersion":3}`)
-	_ = documentaddressing.CheckBox(util.DataDir, util.ConfDir, addressingAPIBox)
+	_ = documentaddressing.CheckBox(addressingAPIBox)
 	recorder := systemContractRequest(t, "POST", "exportConf", exportConf, nil)
 	var response struct {
 		Code int

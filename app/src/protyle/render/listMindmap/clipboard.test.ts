@@ -184,6 +184,9 @@ const browserCases = async (source: string, css: string) => {
             view.renderInspector();
             await wait();
             const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
+            check.deepEqual(Array.from(inspector.children).map(item => item.getAttribute("aria-label")),
+                ["connect", "listMindmapSummary", "color", "width", "copy", "paste", "delete", "more"],
+                "the compact bar keeps eight actions in visual and keyboard order");
             const more = inspector.querySelector<HTMLButtonElement>('[aria-label="more"]');
             check.equal(inspector.lastElementChild, more, "More follows the node actions in keyboard order");
             const right = more.getBoundingClientRect().right;
@@ -199,14 +202,15 @@ const browserCases = async (source: string, css: string) => {
     pointer(a.id);
     await checkNodeMenu();
     const action = (key: string) => host.querySelector<HTMLButtonElement>(`.mindmap-view__inspector > [aria-label="${key}"]`);
-    for (const key of ["copy", "cut", "paste"]) {
+    for (const key of ["copy", "paste"]) {
         check.ok(action(key), `${key} is directly available on the bottom bar`);
         check.equal(action(key).disabled, false);
         action(key).dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", pointerId: 12}));
         check.deepEqual(view.getSelectedIds(), [a.id], "touching a clipboard button keeps the node selection");
         action(key).click();
     }
-    check.deepEqual(copied.map(item => item.cut), [false, true]);
+    check.equal(action("cut"), null, "cut remains available through More and clipboard shortcuts");
+    check.deepEqual(copied.map(item => item.cut), [false]);
     check.deepEqual(pasted, [{id: a.id, kind: "child"}]);
     copied.length = 0;
     pasted.length = 0;
@@ -214,7 +218,6 @@ const browserCases = async (source: string, css: string) => {
     await checkNodeMenu();
     check.equal(action("paste").disabled, true, "multiple targets cannot receive a paste");
     view.focusNode(model.root.id);
-    check.equal(action("cut").disabled, true, "the map root cannot be cut away");
     check.equal(action("delete").disabled, true, "the map root cannot be deleted");
     pointer(a.id);
     pointer(b.id, {ctrlKey: true});

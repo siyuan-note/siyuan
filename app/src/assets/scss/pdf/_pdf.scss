@@ -192,7 +192,12 @@
     }
 
     &:not([data-type="border"]) > div {
+      background-color: var(--pdf-annotation-color);
       background-color: color-mix(in srgb, var(--pdf-annotation-color) 35%, transparent);
+
+      @supports not (background-color: color-mix(in srgb, red, transparent)) {
+        opacity: .35;
+      }
     }
   }
 

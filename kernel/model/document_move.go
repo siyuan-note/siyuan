@@ -13,8 +13,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// preflightDocumentMove 检查整棵子树，未知格式、认证失败和目标冲突都先于首次改动。
-func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode.BlockTree, error) {
+// preflightDocumentMoveSnapshots 检查整棵子树，未知格式、认证失败和目标冲突都先于首次改动。
+func preflightDocumentMoveSnapshots(fromBox, fromPath, toBox, toPath string,
+	visit func(before *parse.Tree, destination string)) ([]*treenode.BlockTree, error) {
 	if err := filesys.CheckDocumentAddressing(toBox); err != nil {
 		return nil, err
 	}
@@ -63,6 +64,9 @@ func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode
 		documents = append(documents,
 			&treenode.BlockTree{BoxID: fromBox, ID: tree.ID, RootID: tree.ID, Path: sourcePath, Type: "d"},
 			&treenode.BlockTree{BoxID: toBox, ID: tree.ID, RootID: tree.ID, Path: destination, Type: "d"})
+		if visit != nil {
+			visit(tree, destination)
+		}
 		return nil
 	})
 	return documents, err

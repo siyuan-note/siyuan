@@ -744,7 +744,9 @@ func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest)
 	}
 
 	notebook := tree.Box
-	model.DuplicateDoc(tree)
+	if err = model.DuplicateDoc(tree); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](-1, err.Error(), 7000)
+	}
 
 	return apicontract.Success(apicontract.FileTreeDuplicateData{ID: tree.Root.ID, Notebook: notebook, Path: tree.Path, HPath: tree.HPath})
 }

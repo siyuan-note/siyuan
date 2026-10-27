@@ -12,7 +12,7 @@ The development branch implements a shared title reader, document metadata organ
 
 Creation plans retain fixed IDs and never recreate confirmed ancestors. Desktop and mobile share failure handling: an uncertain response or a failure after source commit retains the plan until the user approves an identity check and continuation. Closing or locking a notebook clears its title and template caches. Local shorthands keep a recovery record containing only identities and digests, verify block identities in the actual source before consuming the input, and preserve unresolved input without automatically replaying the operation.
 
-Administrators can read `documentCapabilities` from notebook configuration. The addressing version is fixed at `2`; availability follows index readiness and existing access boundaries. `minimumReaderVersion` is `null`, which does not permit older-client mixed use. Whole-notebook imports still remap notebook and anchor IDs, partial imports retain destination configuration, and encrypted creation targets retain authentication, password-change and backup recovery boundaries.
+Administrators can read `documentCapabilities` from notebook configuration. It reports structured API support, title capabilities and index readiness; availability follows existing access boundaries. Whole-notebook imports still remap notebook and anchor IDs, partial imports retain destination configuration, and encrypted creation targets retain authentication, password-change and backup recovery boundaries.
 
 All notebooks use structured title rules without a mode switch, mode-1 migration or capability floors. New writes with ASCII `/` in a title use Spec 6; legacy string interfaces check each candidate ancestor chain. Every device must still upgrade together. Default support does not establish release-package, historical-data, performance or platform acceptance; inline-title extension requirements remain unchanged.
 
@@ -99,7 +99,7 @@ Update document metadata and the block-tree document row in the same database tr
 
 ### Structured path output
 
-`DocumentPath` contains `notebook`, `id`, `parentID`, `path`, `title`, `segments`, `depth`, `displayPath`, `revision`, and `addressingVersion`. `title` is `{format, text, empty}`; `segments` contains `{id, text, empty}` entries from the root through the current document. `displayPath` starts with `/` and joins segments with `/`, displaying `/` for an empty array, for presentation only. The notebook name is returned separately or obtained by the caller, not inserted into the segment array. Here, `title` is a summary, not a complete copy of a future rich source that can be written back.
+`DocumentPath` contains `notebook`, `id`, `parentID`, `path`, `title`, `segments`, `depth`, `displayPath`, and `revision`. `title` is `{format, text, empty}`; `segments` contains `{id, text, empty}` entries from the root through the current document. `displayPath` starts with `/` and joins segments with `/`, displaying `/` for an empty array, for presentation only. The notebook name is returned separately or obtained by the caller, not inserted into the segment array. Here, `title` is a summary, not a complete copy of a future rich source that can be written back.
 
 An ordinary root document has `depth: 1` and `parentID: null`. With notebook documents enabled, the notebook document has `depth: 0` and empty `segments`; ordinary root documents remain at level one, with no additional physical directory. Passing the notebook document ID as a creation parent is equivalent to the explicit root, retaining the existing logical-root mapping. Root child-name queries exclude the notebook document itself so it cannot be mistaken for an ordinary root document.
 
@@ -317,8 +317,7 @@ Business errors use `code: -1` with a stable `data.reason`. `msg` is for human r
 | `pathAmbiguous` | Clean and unsupported candidates collide, or a single target has multiple clean matches; select an explicit identity |
 | `indexUnavailable` | Structured metadata is not ready; wait for recovery without falling back to display paths |
 | `unsupportedTitleFormat` | Client or endpoint cannot handle the title format; upgrade or use an endpoint supporting that format |
-| `targetModeUnsupported` | The complete move, copy, import, or recovery set exceeds destination capabilities; upgrade the destination and complete automatic recovery before replanning |
-| `modeConflict` | Historical error value retained for existing callers; retired addressing modes no longer use it for path ambiguity |
+| `targetModeUnsupported` | Source document format validation failed; preserve the source, inspect the reported specification or representation error, and repair or upgrade before replanning the move |
 | `writeFailed` | A write or later processing failed; recover using `commitState` and the reported stage |
 
 ### Reading the effective creation target
@@ -335,9 +334,9 @@ The caller submits each `createDocByParent` request in order, updating the next 
 
 ### Capability discovery
 
-Administrator `getNotebookConf` responses include read-only `documentCapabilities`. `addressingVersion` is always `2`. `modeState` is `structured`, or `recovering` when required indexes are not ready; it never returns `legacy`. The existing `structuredPaths`, `literalSlash`, `titleFormats`, `indexState`, `minimumReaderVersion` and `revision` fields remain. The minimum reader release is `null` until an actual release has been verified, and `literalSlash` is true only with a ready index.
+Administrator `getNotebookConf` responses include read-only `documentCapabilities` with `structuredPaths`, `literalSlash`, `titleFormats`, `indexState` and `revision`. `structuredPaths` advertises ID and title-segment APIs; `literalSlash` is true only with a ready index. `indexState` reports `missing`, `building`, `ready` or `error`. All notebooks follow the same structured rules.
 
-Capability reads no longer write migration or floor records. `revision` summarizes the fixed capability declaration, not an individual document path. `getConf.documentAddressingVersion` stays `2` for desktop, browser and mobile input initialization. Existing closed-notebook, lock, publish-access and request-lease restrictions remain; capability metadata grants no additional access.
+Capability reads do not write migration or floor records. `revision` summarizes the capability declaration, not an individual document path. Desktop, browser and mobile inputs use the same title rules without a runtime addressing-mode switch. Existing closed-notebook, lock, publish-access and request-lease restrictions remain; capability metadata grants no additional access.
 
 ### Contract and declaration maintenance
 
@@ -364,7 +363,7 @@ Prefer `resolveDocPath` with independent title segments, `createDocByParent` wit
 
 ### Coordinated upgrades and older-client risks
 
-Mode 1 is retired. Every notebook follows structured rules without migrating or rewriting document IDs, source files, ciphertext or keys. Ordinary configuration saves write the diagnostic `documentAddressingVersion: 2` marker. Missing notebook configuration or directories no longer cause capability reads to stat missing directories or recreate data.
+Mode 1 is retired. Every notebook follows structured rules without migrating or rewriting document IDs, source files, ciphertext or keys. Configuration saves do not generate an addressing-version marker; an existing marker is ignored and omitted on the next ordinary save. Missing notebook configuration or directories do not cause capability reads to stat missing directories or recreate data.
 
 New writes with ASCII `/` in a title require at least Spec 6. Retain independent Spec detection, duplicate-property and single entity-decoding checks, and rejection of unknown title representations and future specifications. Supported historical low-Spec slash sources remain readable and recoverable; raw new writes must carry the required specification. Ordinary documents retain the specification required by body features, without bulk upgrades or version downgrades.
 
@@ -414,7 +413,7 @@ Stages A through D are implementation and acceptance groups, not a requirement t
 
 Release gates include migrated built-in consumers, replacement APIs and plugin guidance shipped with the feature, verified existing-data compatibility and format/capability rejection, interruptible ordinary and encrypted index migration, exports that do not overwrite files due to display-path collisions, consistent desktop/browser/mobile behavior, and user guides in all four bundled languages covering default behavior, plugin impact, coordinated upgrades, and the consequences of older-client mixed use. Safe mixed use with older clients is not a supported release scenario.
 
-The implementation allocates `.sy` specification `6`. Performance measurements, compatibility results, and platform acceptance remain release evidence. No separate protective-release number or non-null `minimumReaderVersion` is required for this issue's completion. Any later assignment of a feature-release version must be supported by verification of the actual release and its capabilities. Completing documentation, passing isolated tests, or rebuilding an index once does not establish full feature acceptance.
+The implementation allocates `.sy` specification `6`. Performance measurements, compatibility results, and platform acceptance remain release evidence. No separate protective-release number is required for this issue's completion. Feature-release compatibility claims must be supported by verification of the actual release and its capabilities. Completing documentation, passing isolated tests, or rebuilding an index once does not establish full feature acceptance.
 
 ## Verification and acceptance
 

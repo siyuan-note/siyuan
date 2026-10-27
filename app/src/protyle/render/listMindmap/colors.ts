@@ -5,14 +5,19 @@ import {
 } from "../../toolbar/inlineStyle";
 import type {IInlineStyles, TBuiltinInlineStyleID, TInlineStyleMode, TInlineStyleType} from "../../toolbar/inlineStyle";
 
+const prioritizeColors = <T>(items: {key: string, value: T}[], keys: readonly string[]): T[] => [
+    ...keys.flatMap(key => items.filter(item => item.key === key)),
+    ...items.filter(item => !keys.includes(item.key)),
+].map(item => item.value);
+
 export const getListMindmapLineColors = (data: IInlineStyles, labels: Record<string, string>, mode: TInlineStyleMode) =>
-    getVisibleOrderedStyleKeys("color", data).map(key => {
+    prioritizeColors(getVisibleOrderedStyleKeys("color", data).map(key => {
         if (isBuiltinOrderKey("color", key)) {
-            return {label: `${labels.color} ${key}`, value: getBuiltinColorPropertyValue(Number(key), "color")};
+            return {key, value: {label: `${labels.color} ${key}`, value: getBuiltinColorPropertyValue(Number(key), "color")}};
         }
         const style = getInlineStyleByID(key, data);
-        return {label: style.name, value: getInlineStylePropertyValue(style, "color", mode)};
-    });
+        return {key, value: {label: style.name, value: getInlineStylePropertyValue(style, "color", mode)}};
+    }), ["1", "2", "3", "4", "5", "6"]);
 
 export const getListMindmapNodeColors = (data: IInlineStyles, labels: Record<string, string>, mode: TInlineStyleMode): {
     label: string, color: string, backgroundColor: string, preview?: {color: string, backgroundColor: string},
@@ -20,22 +25,21 @@ export const getListMindmapNodeColors = (data: IInlineStyles, labels: Record<str
     const combined = getVisibleOrderedStyleKeys("style1", data).map(key => {
         if (isBuiltinOrderKey("style1", key)) {
             const id = key as TBuiltinInlineStyleID;
-            return {label: labels[`${key}Style`],
+            return {key, value: {label: labels[`${key}Style`],
                 color: getBuiltinInlineStylePropertyValue(id, "color"),
                 backgroundColor: getBuiltinInlineStylePropertyValue(id, "backgroundColor"),
-                preview: getBuiltinInlineStylePreview(id, mode, data)};
+                preview: getBuiltinInlineStylePreview(id, mode, data)}};
         }
         const style = getInlineStyleByID(key, data);
-        return {label: style.name, ...getInlineStylePreview(style, mode)};
+        return {key, value: {label: style.name, ...getInlineStylePreview(style, mode)}};
     });
-    // The first four font colors already have semantic combined styles. Complete the
-    // remaining pairs without changing their variables or the workspace configuration.
+    // 前四组使用语义组合样式，其余组合沿用现有文字和背景变量，不改写工作空间配置。
     const remaining = getVisibleOrderedStyleKeys("backgroundColor", data)
         .filter(key => isBuiltinOrderKey("backgroundColor", key) && Number(key) > BUILTIN_INLINE_STYLE_IDS.length)
-        .map(key => ({label: `${labels.color} ${key}`,
+        .map(key => ({key, value: {label: `${labels.color} ${key}`,
             color: getBuiltinColorPropertyValue(Number(key), "color"),
-            backgroundColor: getBuiltinColorPropertyValue(Number(key), "backgroundColor")}));
-    return [...combined, ...remaining];
+            backgroundColor: getBuiltinColorPropertyValue(Number(key), "backgroundColor")}}));
+    return prioritizeColors([...combined, ...remaining], [...BUILTIN_INLINE_STYLE_IDS, "5", "6"]);
 };
 
 export const getListMindmapNodeColorMenu = (labels: Record<string, string>, select: (type: TInlineStyleType) => void): IMenu[] =>

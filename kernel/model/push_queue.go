@@ -19,6 +19,7 @@ package model
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -134,7 +135,11 @@ func PollPushQueue() {
 	_ = pushFlock.Lock()
 	defer func() { _ = pushFlock.Unlock() }()
 
-	entries := loadPushQueue()
+	entries, err := loadPushQueue()
+	if err != nil {
+		logging.LogErrorf("read push queue failed: %s", err)
+		return
+	}
 	if 1 > len(entries) {
 		return
 	}
@@ -211,21 +216,30 @@ func StartPushQueueConsumer() {
 	}()
 }
 
-func loadPushQueue() (entries []pushEntry) {
+func loadPushQueue() (entries []pushEntry, err error) {
 	f, err := os.Open(pushQueuePath)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			logging.LogErrorf("open push queue for reading failed: %s", err)
+		if os.IsNotExist(err) {
+			return nil, nil
 		}
-		return
+		return nil, err
 	}
 	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Bytes()
+	return readPushQueue(f)
+}
+
+// Read the complete queue before dispatching anything. A failed read must never
+// turn a partial prefix into permission to truncate unread notifications.
+func readPushQueue(reader io.Reader) (entries []pushEntry, err error) {
+	buffer := bufio.NewReader(reader)
+	for {
+		line, readErr := buffer.ReadBytes('\n')
+		if readErr != nil && readErr != io.EOF {
+			return nil, readErr
+		}
 		if 0 == len(line) {
-			continue
+			return entries, nil
 		}
 		var entry pushEntry
 		if err = json.Unmarshal(line, &entry); err != nil {
@@ -233,11 +247,10 @@ func loadPushQueue() (entries []pushEntry) {
 			continue
 		}
 		entries = append(entries, entry)
+		if readErr == io.EOF {
+			return entries, nil
+		}
 	}
-	if err = scanner.Err(); err != nil {
-		logging.LogErrorf("scan push queue failed: %s", err)
-	}
-	return
 }
 
 func clearPushQueue() {

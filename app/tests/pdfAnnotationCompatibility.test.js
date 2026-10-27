@@ -11,6 +11,14 @@ async function runElectron() {
     let exitCode = 0;
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        if (process.argv[3] === "legacy") {
+            const compatibility = readFileSync(path.join(__dirname, "../stage/protyle/js/webview-compat.js"), "utf8");
+            await win.webContents.executeJavaScript(`
+                delete globalThis.structuredClone; delete URL.parse; delete AbortSignal.any;
+                delete Promise.withResolvers; delete Object.groupBy; delete Array.prototype.toReversed;
+                ${compatibility}
+            `);
+        }
         const moduleUrl = source => "data:text/javascript;base64," + Buffer.from(source).toString("base64");
         const treeUrl = moduleUrl(await require("./pdfViewerBundle.cjs")());
         const runtimeUrl = moduleUrl(readFileSync(path.join(__dirname, "../stage/protyle/js/pdf/pdf.min.mjs"), "utf8"));
@@ -339,7 +347,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("renders PDF annotation layers, highlights and rotated rectangle captures with the bundled runtime", {
+    for (const mode of ["native", "legacy"]) require("node:test").it(`renders PDF annotation layers, highlights and rotated rectangle captures (${mode} APIs)`, {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {
@@ -348,7 +356,7 @@ if (process.versions.electron && process.type === "browser") {
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-pdf-annotation-"));
         try {
             await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
+                require("electron"), [__filename, profile, mode], {env, windowsHide: true, timeout: 55000});
         } finally {
             rmSync(profile, {recursive: true, force: true});
         }

@@ -28,11 +28,12 @@ const browserCases = async (source: string) => {
         disposeCustomBlocksInElement: noop, processRender: noop, highlightRender: noop, avRender: noop, blockRender: noop,
         genListItemElement: () => blockDOM("- New\n").firstElementChild.firstElementChild,
         updateTransaction: (_owner: unknown, list: HTMLElement, before: string, undo: Record<string, string>,
-                            extra: {context: Record<string, string>}) => history.push({before, after: list.outerHTML, undo, redo: extra.context}),
+                            extra: {context: Record<string, string>}) => history.push({before,
+            after: api.cleanListMindmapHTML(list.outerHTML), undo, redo: extra.context}),
     };
     const api = new Function(...Object.keys(dependencies), source +
         "; return {readListMindmap, cleanListMindmapHTML, applyListMindmapListInput, retagMindmapBranch, replaceListMindmapContent, InputController};")(...Object.values(dependencies));
-    for (const legacy of [false, true]) {
+    for (const [legacy, fullscreen] of [[false, false], [true, false], [false, true], [true, true]]) {
         holder.replaceChildren(...Array.from(blockDOM("- Alpha\n  - Child\n- Beta\n  - Grandchild\n- Gamma\n").children));
         const list = holder.firstElementChild as HTMLElement;
         if (!legacy) api.retagMindmapBranch(list, true);
@@ -53,10 +54,32 @@ const browserCases = async (source: string) => {
         }
         check.equal(api.applyListMindmapListInput(list, b, {kind: "split", html: "stale"}), undefined);
         check.equal(list.outerHTML, original, "invalid boundaries and stale text do not mutate data");
+        const host = document.createElement("div");
+        host.className = "mindmap-view";
+        host.innerHTML = '<div class="mindmap-view__viewport"><div class="mindmap-view__node">Derived canvas</div></div>';
+        const marker = document.createComment("mindmap-view");
+        if (fullscreen) {
+            document.body.append(host);
+            list.append(marker);
+        } else {
+            list.append(host);
+        }
+        const assertCanvas = () => {
+            check.equal(list.querySelectorAll(":scope > .mindmap-view").length, fullscreen ? 0 : 1,
+                "structural input retains exactly the original canvas without inserting a clone");
+            check.equal(host.parentElement, fullscreen ? document.body : list);
+            const markers = Array.from(list.childNodes).filter(node => node.nodeType === Node.COMMENT_NODE &&
+                node.nodeValue === "mindmap-view");
+            check.deepEqual(markers, fullscreen ? [marker] : [], "fullscreen retains its exact single return marker");
+            for (const entry of history) {
+                check.doesNotMatch(entry.before + entry.after, /Derived canvas|class="mindmap-view"|<!--mindmap-view-->/,
+                    "transactions contain source content only");
+            }
+        };
         const controller = new api.InputController();
         const edits: {id: string; selection: Record<string, string>}[] = [];
         let focused = b;
-        Object.assign(controller, {list, owner: {block: {rootID: "document"}, wysiwyg: {element: holder}}, disposed: false,
+        Object.assign(controller, {list, host, owner: {block: {rootID: "document"}, wysiwyg: {element: holder}}, disposed: false,
             model: read(), view: {getSelectedId: () => focused, focusNode: (id: string) => { focused = id; },
                 getContentHost: () => holder},
             refresh: () => { controller.model = read(); },
@@ -71,6 +94,7 @@ const browserCases = async (source: string) => {
         let finished = 0;
         controller.activeEditor = {finish: async () => { finished++; controller.activeEditor = undefined; return true; }};
         await controller.listInput(b, {kind: "split", html: html(b), before: paragraph.outerHTML, after: after.innerHTML}, selection);
+        assertCanvas();
         check.equal(finished, 1);
         const splitID = focused;
         check.notEqual(splitID, b);
@@ -81,10 +105,13 @@ const browserCases = async (source: string) => {
         check.equal(history.at(-1).redo.undoFocusId, splitID);
         const transactionCount = history.length;
         await controller.listInput(splitID, {kind: "indent", html: html(splitID)}, edits.at(-1).selection);
+        assertCanvas();
         check.equal(read().nodes.get(splitID).parentId, b);
         await controller.listInput(splitID, {kind: "outdent", html: html(splitID)}, edits.at(-1).selection);
+        assertCanvas();
         check.equal(read().nodes.get(splitID).parentId, read().nodes.get(b).parentId);
         await controller.listInput(splitID, {kind: "mergePrevious", html: html(splitID)}, edits.at(-1).selection);
+        assertCanvas();
         check.equal(history.length, transactionCount+3, "each structural edit is one transaction");
         check.equal(read().nodes.has(splitID), false);
         check.ok(read().nodes.get(b).contentBlocks.some((block: HTMLElement) => block.dataset.nodeId === extraID));
@@ -92,11 +119,14 @@ const browserCases = async (source: string) => {
         const restore = (html: string) => { const dom = document.createElement("div"); dom.innerHTML = html;
             controller.replaceClipboardSource(dom.firstElementChild); controller.refresh(); };
         restore(merged.before);
+        assertCanvas();
         check.equal(read().nodes.has(splitID), true, "undo restores the separate node and all body IDs");
         restore(merged.after);
+        assertCanvas();
         check.equal(read().nodes.has(splitID), false, "redo restores the merged body");
         const moved = read().nodes.get(b).children.map((node: {id: string}) => node.id);
         await controller.listInput(a, {kind: "mergeNext", html: html(a)});
+        assertCanvas();
         check.equal(read().nodes.has(b), false);
         moved.forEach((id: string) => check.equal(read().nodes.get(id).parentId, a, "merge preserves descendant branches"));
         check.ok(read().nodes.get(a).contentBlocks.some((block: HTMLElement) => block.dataset.nodeId === extraID));
@@ -130,6 +160,7 @@ const browserCases = async (source: string) => {
         const canonical = blockDOM("");
         canonical.innerHTML = lute.SpinBlockDOM(api.cleanListMindmapHTML(list.outerHTML));
         check.ok(api.readListMindmap(canonical.firstElementChild).nodes.has(c), "Lute preserves the resulting hierarchy");
+        host.remove();
     }
     holder.remove();
     return "Mindmap list input cases passed";

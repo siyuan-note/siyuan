@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "L’ambito di monitoraggio può contenere fino a 32 taccuini o documenti",
+	"pdfAnnotationSaveFailed": "Impossibile salvare le annotazioni PDF. Riapri il PDF per caricare le annotazioni più recenti prima di continuare a modificare",
 	"docTreeBatchSize": "Dimensione del lotto nell'albero dei documenti",
 	"docTreeBatchSizeTip": "Numero di documenti caricati alla volta; continua a scorrere per visualizzare tutti i documenti",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
@@ -3468,6 +3470,10 @@
 		"437": "Scarica questa versione",
 		"438": "Scegli un’immagine JPEG, PNG o WebP valida fino a 10 MiB e 16 megapixel",
 		"439": "Impossibile salvare lo sfondo della schermata di blocco; controlla i permessi di scrittura dello spazio di lavoro",
-		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare"
+		"440": "È stato raggiunto il limite dei turni di chiamata agli strumenti. Le chiamate rimanenti non sono state eseguite; invia un altro messaggio per continuare",
+		"441": "Attività di ricostruzione dell’indice del contenuto delle risorse inviata; segui l’avanzamento nelle attività in background",
+		"442": "Ricostruzione dell’indice del contenuto delle risorse completata",
+		"443": "Ricostruzione dell’indice del contenuto delle risorse non riuscita; controlla il registro del kernel",
+		"444": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella"
 	}
 }

@@ -1328,7 +1328,17 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error
 	if "" == templateDOM {
 		return nil
 	}
-	tree, err := LoadTreeByBlockID(docID)
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	for _, queued := range takeQueuedTransactions() {
+		flushTx(queued)
+	}
+	bt, err := lookupBlockTreeInBox(docID, "", true)
+	if err != nil {
+		return err
+	}
+	tree, original, err := filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
 	if nil != err {
 		return err
 	}
@@ -1351,9 +1361,27 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error
 		}
 	}
 	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = indexWriteTreeUpsertQueue(tree); nil != err {
+	write := func(changed *parse.Tree) error {
+		size, writeErr := filesys.WriteTreeIfUnchanged(changed, original)
+		if writeErr != nil {
+			return writeErr
+		}
+		treenode.UpsertBlockTree(changed)
+		sql.UpsertTreeQueue(changed)
+		refreshDocInfoWithSize(changed, size)
+		return nil
+	}
+	handled, err := writeDocumentWithCollections(tree, write)
+	if err != nil {
 		return err
 	}
+	if !handled {
+		if err = write(tree); err != nil {
+			return err
+		}
+		IncSync()
+	}
+	invalidateDocumentHistory(tree.ID)
 	av.BatchUpsertBlockRel(tree.Root.ChildrenByType(ast.NodeAttributeView))
 	return nil
 }

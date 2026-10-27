@@ -377,11 +377,8 @@ func validateAnthropicHistory(blocks []json.RawMessage, calls []openai.ToolCall)
 			return errors.New("invalid Anthropic conversation content")
 		}
 		switch block.Type {
-		case "text":
-		case "thinking":
-			if block.Signature == "" {
-				return errors.New("Anthropic thinking signature is missing")
-			}
+		case "text", "thinking":
+			// 兼容接口可返回无签名思考块，保留原始内容，由供应商校验其签名语义。
 		case "redacted_thinking":
 			if block.Data == "" {
 				return errors.New("Anthropic redacted thinking is missing")

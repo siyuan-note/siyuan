@@ -56,8 +56,9 @@ type AssetDocumentAssetsRequest struct {
 }
 
 type SetAssetAnnotationRequest struct {
-	Path string `json:"path"`
-	Data string `json:"data"`
+	Path     string  `json:"path"`
+	Data     string  `json:"data"`
+	BaseData *string `json:"baseData,omitempty" api:"optional"`
 }
 
 type AssetCloudUploadRequest struct {

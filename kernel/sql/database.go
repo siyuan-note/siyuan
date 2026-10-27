@@ -311,7 +311,7 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [block_embeddings] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)")
+	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, space TEXT NOT NULL DEFAULT '', content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [block_embeddings] failed: %s", err)
 	}
@@ -446,14 +446,16 @@ func initHistoryDBTables() {
 
 var initAssetContentDatabaseLock = sync.Mutex{}
 
-func InitAssetContentDatabase(forceRebuild bool) {
+func InitAssetContentDatabase(forceRebuild bool) error {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 	initAssetContentDatabaseLock.Lock()
 	defer initAssetContentDatabaseLock.Unlock()
 
 	initAssetContentDBConnection()
 
 	if !forceRebuild && gulu.File.IsExist(util.AssetContentDBPath) {
-		return
+		return nil
 	}
 
 	assetContentDB.Close()
@@ -461,11 +463,12 @@ func InitAssetContentDatabase(forceRebuild bool) {
 	runtime.GC()
 	if err := os.RemoveAll(util.AssetContentDBPath); err != nil {
 		logging.LogErrorf("remove assets database file [%s] failed: %s", util.AssetContentDBPath, err)
-		return
+		return err
 	}
 
 	initAssetContentDBConnection()
 	initAssetContentDBTables()
+	return nil
 }
 
 func initAssetContentDBConnection() {
@@ -556,6 +559,13 @@ func ftsTokenize() string {
 
 func SetIndexAssetPath(b bool) {
 	indexAssetPath.Store(b)
+}
+
+// TreeHasRefs uses the same extraction as normal indexing, including rich
+// inline titles, attribute views and embedded references.
+func TreeHasRefs(tree *parse.Tree) bool {
+	refs, annotations := refsFromTree(tree)
+	return len(refs) > 0 || len(annotations) > 0
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
@@ -1715,6 +1725,9 @@ func migrateBlockEmbeddingsSchema() {
 	addColumn("fail_count", addColumns[0])
 	addColumn("last_tried", addColumns[1])
 	addColumn("ignored_type", addColumns[2])
+	// Existing vectors have unknown provenance; preserve them without guessing
+	// a space or scheduling paid re-embedding. Users can rebuild explicitly.
+	addColumn("space", "ALTER TABLE block_embeddings ADD COLUMN space TEXT NOT NULL DEFAULT ''")
 }
 
 func beginTx() (tx *sql.Tx, err error) {

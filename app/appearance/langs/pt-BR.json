@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "O escopo de monitoramento pode conter até 32 cadernos ou documentos",
+	"pdfAnnotationSaveFailed": "Não foi possível salvar as anotações do PDF. Reabra o PDF para carregar as anotações mais recentes antes de continuar editando",
 	"docTreeBatchSize": "Tamanho do lote na árvore de documentos",
 	"docTreeBatchSizeTip": "Quantidade de documentos carregados por vez; continue rolando para navegar por todos os documentos",
 	"skipExitSync": "Ignorar sincronização e sair",
@@ -3468,6 +3470,10 @@
 		"437": "Baixar esta versão",
 		"438": "Selecione uma imagem JPEG, PNG ou WebP válida de até 10 MiB e 16 megapixels",
 		"439": "Não foi possível salvar o papel de parede da tela de bloqueio; verifique as permissões de gravação do espaço de trabalho",
-		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar"
+		"440": "O limite de rodadas de chamadas de ferramentas foi atingido. As chamadas restantes não foram executadas; envie outra mensagem para continuar",
+		"441": "Tarefa de reconstrução do índice de conteúdo dos recursos enviada; acompanhe o progresso nas tarefas em segundo plano",
+		"442": "Reconstrução do índice de conteúdo dos recursos concluída",
+		"443": "Falha ao reconstruir o índice de conteúdo dos recursos; verifique o log do kernel",
+		"444": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório"
 	}
 }

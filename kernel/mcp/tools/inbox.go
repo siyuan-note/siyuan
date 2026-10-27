@@ -30,7 +30,7 @@ import (
 // 收集箱数据存放在思源云端，需要订阅会员；底层复用 model 层的云端 shorthand 读写函数。
 var InboxTool = &Tool{
 	Name:        "inbox",
-	Description: "Inbox management (cloud-clipped web pages, messages, and audio/video/file attachments; requires subscription). Actions: list(page=1), get(id), convert(ids, notebook, parentID=notebook root by default, remove_after=true) — converts one or more shorthands into local documents, deleting the cloud originals on success. Use parentID=\"\" for root. Legacy path is available only in compatibility-mode notebooks.",
+	Description: "Inbox management (cloud-clipped web pages, messages, and audio/video/file attachments; requires subscription). Actions: list(page=1), get(id), convert(ids, notebook, parentID=notebook root by default, remove_after=true) — converts one or more shorthands into local documents, deleting the cloud originals on success. Use parentID=\"\" for root. Legacy path requires a unique ancestor chain with non-empty titles and no literal slash; conflicts or unavailable indexes return explicit errors.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -40,7 +40,7 @@ var InboxTool = &Tool{
 			"ids":          {Type: "string", Description: "Comma-separated shorthand IDs (for convert), e.g. \"1700000000000,1700000000001\""},
 			"notebook":     {Type: "string", Description: "Target non-encrypted notebook ID (for convert)"},
 			"parentID":     DocumentTool.InputSchema.Properties["parentID"],
-			"path":         {Type: "string", Description: "Legacy hPath in compatibility-mode notebooks only. Its parent must already exist. Do not combine with parentID; structured-title notebooks require parentID instead."},
+			"path":         {Type: "string", Description: "Legacy hPath whose target parent must already exist. Requires a unique ancestor chain with non-empty titles and no literal slash. Conflicts return pathAmbiguous or legacyPathUnsupported; unavailable metadata returns indexUnavailable. Do not combine with parentID."},
 			"remove_after": {Type: "boolean", Description: "Whether to delete the cloud shorthand after a successful conversion (default true)"},
 		},
 		Required: []string{"action"},

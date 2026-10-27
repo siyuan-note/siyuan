@@ -26,6 +26,9 @@ func checkDocumentAddressingConf(boxID string, data []byte) error {
 // documentAddressingPreflight 在整批写入和删除前检查快照的规范路径及源规格。
 func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) error {
 	return func(plan *dejavu.CheckoutPlan) error {
+		if err := checkPasswordMigrationCheckout(plan); err != nil {
+			return err
+		}
 		upserts := make([]string, 0, len(plan.Upserts))
 		removes := make([]string, 0, len(plan.Removes))
 		paths := map[string]string{}

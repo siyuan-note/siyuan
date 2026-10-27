@@ -39,7 +39,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
@@ -824,7 +823,7 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
 	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish,
-		SettingTasks: activeSettingTasks(), Revision: revision, DocumentAddressingVersion: documentaddressing.DefaultMode()})
+		SettingTasks: activeSettingTasks(), Revision: revision})
 	return
 })
 

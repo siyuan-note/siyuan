@@ -112,6 +112,10 @@ type KernelPlugin struct {
 	watcher     *fsnotify.Watcher // watcher for kernel plugin storage file changes
 	watcherDone chan struct{}
 
+	storageWritesMu     sync.Mutex
+	storageWrites       sync.WaitGroup
+	storageWritesClosed bool
+
 	state atomic.Int64 //  PluginState
 
 	context context.Context    // Context for managing plugin lifecycle and cancellation
@@ -235,15 +239,32 @@ func (p *KernelPlugin) close() (err error) {
 		}
 	}()
 
+	p.storageWritesMu.Lock()
+	p.storageWritesClosed = true
+	p.storageWritesMu.Unlock()
+
 	runtime := p.runtime
 	p.runtime = nil
 	if runtime != nil {
 		runtime.Stop() // Stops the event loop and waits for it to finish.
 		// p.runtime.Terminate() // Interrupts the runtime and causes all executing code to throw an exception.
 	}
+	// Detached file I/O can continue after the event loop stops. Keep the stop
+	// boundary (and pending RPC leases) until every admitted mutation has ended.
+	p.storageWrites.Wait()
 	// Promise 可能永不完成；运行时停止后已无法继续写入，释放其剩余租约。
 	p.releaseRPCWrites()
 	return
+}
+
+func (p *KernelPlugin) beginStorageWrite() (func(), error) {
+	p.storageWritesMu.Lock()
+	defer p.storageWritesMu.Unlock()
+	if p.storageWritesClosed || (p.context != nil && p.context.Err() != nil) {
+		return nil, fmt.Errorf("plugin storage is stopping")
+	}
+	p.storageWrites.Add(1)
+	return p.storageWrites.Done, nil
 }
 
 // error sets the plugin state to errored and frees the goja runtime.

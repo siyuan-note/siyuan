@@ -135,7 +135,8 @@ func TestSystemPromptDocumentsStructuredDocumentAddressing(t *testing.T) {
 		"Never split an hPath or use it to recover identity",
 		"Document create/list/move and inbox.convert use notebook + parentID",
 		`parentID="" explicitly selects the notebook root`,
-		"returns legacyPathUnsupported in structured-title notebooks",
+		`Legacy path=hPath resolves only unambiguous ancestor chains with non-empty titles and no literal "/"`,
+		"unsupported or ambiguous candidates and unavailable indexes return explicit errors",
 		"document.list (notebook + parentID, omitted parentID lists the notebook root)",
 		"document.create (notebook + parentID + independent literal title)",
 	} {

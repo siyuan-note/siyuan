@@ -6,7 +6,7 @@
 		"id": "20211226122943-st7fpcj",
 		"title": "PDF 標注",
 		"type": "doc",
-		"updated": "20260614112631"
+		"updated": "20261027103930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614112630-wl3an62",
-				"updated": "20260614112630"
+				"updated": "20261027103930"
 			},
 			"Children": [
 				{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源支援 PDF 檔案預覽和標註，可在 PDF 中對文字或區域進行標記，並將標註引用複製到文件中，實現文獻閱讀與筆記寫作的雙向聯動。"
+				}
+			]
+		},
+		{
+			"ID": "20261027103930-cfww159",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027103930-cfww159",
+				"updated": "20261027103930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在多個檢視器中開啟同一 PDF 時，對不同標註的修改會在儲存時合併。如果同一條標註已被其他檢視器修改或刪除，過期儲存會被拒絕，並提示重新開啟 PDF。請先檢查並複製需要保留的未儲存修改，再重新開啟 PDF 載入最新標註後繼續編輯。"
 				}
 			]
 		},
@@ -542,7 +556,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/標註ID \"選取內容\"\u0026gt;\u0026gt;"
+									"TextMarkTextContent": "&lt;&lt;assets/xxx.pdf/標註ID \"選取內容\"&gt;&gt;"
 								},
 								{
 									"Type": "NodeText",

@@ -43,7 +43,9 @@ const isResolvedColor = (color: IAVColor | undefined): color is IAVColor => !!co
     COLOR_PATTERN.test(color.light?.color) && COLOR_PATTERN.test(color.light?.backgroundColor) &&
     COLOR_PATTERN.test(color.dark?.color) && COLOR_PATTERN.test(color.dark?.backgroundColor);
 
-const getModeColor = (light: string, dark: string) => `light-dark(${light}, ${dark})`;
+const getModeColor = (light: string, dark: string) => typeof CSS !== "undefined" &&
+    !CSS.supports("color", "light-dark(white, black)") ?
+    `var(--b3-legacy-light-color, ${light}) var(--b3-legacy-dark-color, ${dark})` : `light-dark(${light}, ${dark})`;
 
 const cssVarsForIndex = (index: number) =>
     `background-color:var(--b3-font-background${index});color:var(--b3-font-color${index})`;

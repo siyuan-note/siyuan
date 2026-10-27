@@ -7,6 +7,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
     max-width: min(680px, 92vw);
+    max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
     overflow: auto;
     box-sizing: border-box;
@@ -60,19 +61,18 @@
       bottom: 16px;
       transform: translateX(-50%);
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       gap: 12px;
-      width: max-content;
+      width: 680px;
     }
 
     .sync-checkout__notice {
-      flex: 1 1 200px;
       margin-bottom: 0;
     }
 
     .sync-checkout__actions {
-      margin-left: auto;
+      width: 100%;
     }
   }
 }

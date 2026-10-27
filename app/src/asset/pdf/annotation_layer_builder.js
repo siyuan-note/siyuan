@@ -308,7 +308,7 @@ class AnnotationLayerBuilder {
       ) {
         continue;
       }
-      section.inert = disableFormElements;
+      section.toggleAttribute("inert", disableFormElements);
     }
   }
 

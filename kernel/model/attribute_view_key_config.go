@@ -304,7 +304,8 @@ func updateAttributeViewKeyRelation(key *av.Key, op *Operation, value any) error
 			}
 		}
 	}
-	err = updateAttributeViewColRelation(op)
+	op.Action = "updateAttrViewColRelation"
+	err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{op}})
 	if nil == err {
 		ReloadAttrView(config.AvID)
 		if nil != key.Relation && key.Relation.AvID != config.AvID {

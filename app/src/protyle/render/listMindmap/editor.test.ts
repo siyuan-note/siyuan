@@ -109,13 +109,20 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             isMobile: () => false,
             hintRef: (): unknown[] => [],
             hintSlash: (): unknown[] => [],
+            hintTag: (): unknown[] => [],
             registerBuiltinSlashHint: (callback: unknown) => callback,
             mountProtyleLiteFragment: (target: HTMLElement, options: {
                 initialBlockHTML: string;
                 onChange: () => void;
                 afterSetContent: (owner: unknown, element: HTMLElement) => void;
                 runtimeCapabilities: {getTransactionOwner: typeof transactionOwner};
+                protyleOptions: {hint: {extend: Array<{key: string; hint: unknown}>}};
             }) => {
+                const hints = options.protyleOptions.hint.extend;
+                check.equal(hints.find(item => item.key === "#")?.hint, dependencies.hintTag,
+                    "mindmap nodes use the built-in tag creation and search hint");
+                check.ok(hints.findIndex(item => item.key === "#") < hints.findIndex(item => item.key === "/"),
+                    "tag searches containing a slash retain tag hint precedence");
                 transactionOwner = options.runtimeCapabilities.getTransactionOwner;
                 target.style.width = "";
                 wysiwyg.innerHTML = options.initialBlockHTML;

@@ -59,6 +59,9 @@ func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string)
 	if err == nil && current == nil {
 		err = av.ErrViewNotFound
 	}
+	if err == nil {
+		tx.watchSourceDatabase(current)
+	}
 	return current, err
 }
 
@@ -167,6 +170,10 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 			}
 			boxID, _, _ := strings.Cut(key, "/")
 			current, _ := av.ParseAttributeViewForIndexInBox(original.ID, boxID)
+			if tx.sourceDatabase(original.ID, boxID) != nil {
+				syncAttributeViewRelationIndexes(current, original)
+				continue
+			}
 			av.SetAVBoxID(original.ID, boxID)
 			if err := av.SaveAttributeView(original); err != nil {
 				logging.LogErrorf("restore database [%s] after transaction failure: %s", original.ID, err)
@@ -191,6 +198,9 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 			}
 		}
 		for _, tree := range state.trees {
+			if tx.documentSource(tree) != nil {
+				continue
+			}
 			if err := restoreCreatedDocTreeSnapshot(tree); err != nil {
 				logging.LogErrorf("restore database document [%s]: %s", tree.ID, err)
 			}

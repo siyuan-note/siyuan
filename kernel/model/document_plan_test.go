@@ -4,6 +4,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"path"
@@ -186,6 +187,35 @@ func TestDocumentCreationPlans(t *testing.T) {
 			plan, err := PlanDocumentCreation(request)
 			if err != nil || plan.DisplayPath != test.expected {
 				t.Fatalf("legacy target %+v: %+v, %v", test, plan, err)
+			}
+		}
+	})
+	t.Run("all template formats reject ambiguous ancestors and reuse targets", func(t *testing.T) {
+		for i := 0; i < 2; i++ {
+			newHPathTestDoc(t, box.ID, "/", "Ambiguous parent", 1)
+			newHPathTestDoc(t, box.ID, "/", "Ambiguous reuse", 1)
+		}
+		for _, structured := range []bool{false, true} {
+			for _, reuse := range []bool{false, true} {
+				target := &EffectiveDocumentTarget{Notebook: box.ID, Path: "/Ambiguous parent/Title"}
+				parents, title := []string{"Ambiguous parent"}, "Title"
+				if reuse {
+					target.Path, parents, title = "/Ambiguous reuse", []string{}, "Ambiguous reuse"
+				}
+				if structured {
+					target.Structured = &conf.DocumentTarget{Version: 2, Notebook: box.ID,
+						Anchor: conf.DocumentTargetAnchor{Kind: "notebookRoot"}, Parents: parents, Title: title, OnMissingParent: "create"}
+				}
+				id := ast.NewNodeID()
+				plan, err := PlanDocumentCreation(DocumentPlanRequest{Notebook: box.ID, Purpose: "document", ID: id,
+					Reuse: reuse, Target: target})
+				var failure *DocumentAddressingError
+				if plan != nil || !errors.As(err, &failure) || failure.Reason != "planChanged" {
+					t.Fatalf("structured=%t reuse=%t selected an ambiguous document: %+v, %v", structured, reuse, plan, err)
+				}
+				if treenode.GetBlockTree(id) != nil {
+					t.Fatal("rejected plan created a document")
+				}
 			}
 		}
 	})

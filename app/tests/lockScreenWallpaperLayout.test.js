@@ -109,7 +109,9 @@ const checkLayout = async (wallpaperPresent, dark, remote, glass = true) => {
     const panel = document.querySelector(remote ? "main" : "#authPanel");
     if (!remote) {
         check.equal(panel.querySelector(".ft__on-surface"), null, "the credits row is removed from authentication pages");
-        check.ok(panel.lastElementChild.classList.contains("auth-actions"), "the login card ends with its actions");
+        check.equal(panel.lastElementChild.id, "authForm", "the login card ends with its sign-in form");
+        check.ok(panel.lastElementChild.lastElementChild.classList.contains("auth-actions"),
+            "the sign-in form ends with its actions");
     }
     const cover = document.getElementById("lockScreenCover");
     if (wallpaperPresent) {
@@ -229,12 +231,27 @@ const prepareKeyboardCase = async () => {
     wallpaper.src = canvas.toDataURL();
     await loaded;
     window.testSubmits = 0;
-    document.getElementById("authCode").addEventListener("keydown", event => {
-        if (event.key === "Enter") window.testSubmits++;
-    });
+    const form = document.getElementById("authForm");
+    if (form) {
+        form.addEventListener("submit", event => {
+            event.preventDefault();
+            window.testSubmits++;
+        });
+    } else {
+        document.getElementById("authCode").addEventListener("keydown", event => {
+            if (event.key === "Enter") window.testSubmits++;
+        });
+    }
 };
 
 const assertKeyboardState = async (value, submits) => {
+    // 等待原生输入更新渲染状态，保留超时后的完整交互断言。
+    const deadline = performance.now() + 5000;
+    while ((document.getElementById("lockScreenCover").inert !== true ||
+        document.getElementById("authCode").value !== value || document.activeElement !== document.getElementById("authCode") ||
+        window.testSubmits !== submits) && performance.now() < deadline) {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+    }
     await new Promise(resolve => requestAnimationFrame(resolve));
     const check = require("node:assert/strict");
     check.equal(document.getElementById("lockScreenCover").inert, true);
@@ -321,6 +338,7 @@ if (process.versions.electron && process.type === "browser") {
         win.webContents.on("console-message", event => {
             if (event.message.includes("AssertionError")) console.error(event.message);
         });
+        let context;
         try {
             for (const file of ["stage/auth.html", "electron/remote-auth.html"]) {
                 for (const [width, height] of [[1200, 800], [320, 640], [640, 320], [320, 280]]) {
@@ -328,6 +346,7 @@ if (process.versions.electron && process.type === "browser") {
                     for (const dark of [false, true]) {
                         nativeTheme.themeSource = dark ? "dark" : "light";
                         for (const [present, glass] of [[false, true], [true, true], [true, false]]) {
+                            context = {file, width, height, dark, present, glass};
                             await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark, glass)));
                             await win.webContents.executeJavaScript(`(async () => {
                                 try { await (${checkLayout.toString()})(${present}, ${dark}, ${file.startsWith("electron")}, ${glass}); }
@@ -342,6 +361,7 @@ if (process.versions.electron && process.type === "browser") {
                         features: [{name: feature, value: feature === "forced-colors" ? "active" : "reduce"}],
                     });
                     for (const dark of [false, true]) {
+                        context = {file, feature, dark};
                         nativeTheme.themeSource = dark ? "dark" : "light";
                         await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, dark)));
                         await win.webContents.executeJavaScript(`(${checkLayout.toString()})(true, ${dark}, ${file.startsWith("electron")}, false)`);
@@ -349,6 +369,7 @@ if (process.versions.electron && process.type === "browser") {
                 }
                 await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: []});
                 for (const reduced of [false, true]) {
+                    context = {file, reduced};
                     await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
                         features: [{name: "prefers-reduced-motion", value: reduced ? "reduce" : "no-preference"}],
                     });
@@ -364,12 +385,14 @@ if (process.versions.electron && process.type === "browser") {
                     await win.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(fixtureHTML(file, false)));
                     await win.webContents.executeJavaScript(`(${prepareKeyboardCase.toString()})()`);
                 };
+                context = {file, input: "characters"};
                 await start();
                 for (const [type, keyCode] of [["keyDown", "A"], ["char", "a"], ["keyUp", "A"],
                     ["keyDown", "B"], ["char", "b"], ["keyUp", "B"]]) {
                     win.webContents.sendInputEvent({type, keyCode});
                 }
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("ab", 0)`);
+                context = {file, input: "captcha"};
                 await win.webContents.executeJavaScript(`{
                     const captcha = document.getElementById("captcha");
                     captcha.parentElement.style.display = "block";
@@ -377,33 +400,48 @@ if (process.versions.electron && process.type === "browser") {
                 }`);
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Escape"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Escape"});
-                await win.webContents.executeJavaScript(`{
+                await win.webContents.executeJavaScript(`(async () => {
                     const check = require("node:assert/strict");
+                    const cover = document.getElementById("lockScreenCover");
+                    const deadline = performance.now() + 5000;
+                    while (cover.inert && performance.now() < deadline) {
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+                    }
                     check.equal(document.getElementById("lockScreenCover").inert, false);
                     check.equal(document.getElementById("authCode").value, "ab");
                     check.equal(document.getElementById("captcha").value, "42");
-                }`);
+                })()`);
                 for (const [type, keyCode] of [["keyDown", "3"], ["char", "3"], ["keyUp", "3"]]) {
                     win.webContents.sendInputEvent({type, keyCode});
                 }
-                await win.webContents.executeJavaScript(`{
+                await win.webContents.executeJavaScript(`(async () => {
                     const check = require("node:assert/strict");
                     const captcha = document.getElementById("captcha");
+                    const deadline = performance.now() + 5000;
+                    while (captcha.value !== "423" && performance.now() < deadline) {
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+                    }
+                    await new Promise(resolve => requestAnimationFrame(resolve));
                     check.equal(document.activeElement, captcha);
                     check.equal(captcha.value, "423");
                     check.equal(document.getElementById("authCode").value, "ab");
-                }`);
+                })()`);
+                context = {file, input: "enter"};
                 await start();
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 0)`);
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Enter"});
+                win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Enter"});
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 1)`);
+                context = {file, input: "pointer"};
                 await start();
                 win.webContents.sendInputEvent({type: "mouseDown", x: 40, y: 300, button: "left", clickCount: 1});
                 win.webContents.sendInputEvent({type: "mouseUp", x: 40, y: 300, button: "left", clickCount: 1});
                 await win.webContents.executeJavaScript(`(${assertKeyboardState.toString()})("", 0)`);
+                context = {file, input: "composition"};
                 await start();
                 await win.webContents.executeJavaScript(`document.getElementById("lockScreenCover").dispatchEvent(
                     new KeyboardEvent("keydown", {key: "Process", isComposing: true, bubbles: true, cancelable: true}));`);
@@ -416,6 +454,7 @@ if (process.versions.electron && process.type === "browser") {
                 for (const theme of ["daylight", "midnight"]) {
                     const css = readFileSync(path.join(__dirname, `../appearance/themes/${theme}/theme.css`), "utf8") + styles;
                     for (const width of [1000, 600, 320]) {
+                        context = {name, theme, width};
                         win.setContentSize(width, 800);
                         await win.loadURL("data:text/html,<html><body></body></html>");
                         await win.webContents.executeJavaScript(`(${checkSettingsLayout.toString()})(${[
@@ -425,9 +464,11 @@ if (process.versions.electron && process.type === "browser") {
                 }
             }
             console.log("Wallpaper layouts passed");
+            win.destroy();
             app.exit(0);
         } catch (error) {
-            console.error(error);
+            console.error(context, error);
+            win.destroy();
             app.exit(1);
         }
     });

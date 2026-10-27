@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261026103001"
+		"updated": "20261027120633"
 	},
 	"Children": [
 		{
@@ -4985,12 +4985,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-nrq3k5z",
-				"updated": "20261024161816"
+				"updated": "20261027120633"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope to select notebooks or documents. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined."
+					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope to select notebooks or documents. In the picker, check multiple notebooks or documents and confirm to add them together. Selections are retained while searching or expanding the tree. Duplicate selections are ignored; each rule can contain up to 32 notebooks or documents in total. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined."
 				}
 			]
 		},
@@ -5448,7 +5448,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Collection is evaluated after block creation, content or attribute edits, and block moves. Moving an entire document in the document tree, imports, sync, and history restoration do not backfill matches; use the preview to collect existing content."
+					"Data": "Collection is evaluated after user creation, copying, content or attribute edits, content template application, global find and replace, and block or document moves into a watched scope. Document tree copies and moves include descendant documents. Existing rows keep their field values. Markdown and .sy imports, sync, history restoration, undo, and redo do not trigger new collection; use the preview to collect existing content explicitly."
 				}
 			]
 		},

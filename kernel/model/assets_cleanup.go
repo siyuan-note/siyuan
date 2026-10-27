@@ -125,6 +125,7 @@ func ordinaryAssetCleanupSourceDigest() (string, error) {
 // Call only after every candidate has a complete history backup. The second
 // check catches saves completed between the first check and an actual removal.
 func removeOrdinaryUnusedAssets(items []*UnusedItem, historyDir string, verify func() error, remove func(string) error) (removed []string, size int64, err error) {
+	removed = []string{}
 	if err = verify(); err != nil {
 		return
 	}

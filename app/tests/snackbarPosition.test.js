@@ -19,7 +19,11 @@ const cases = async (source, css, densityCSS, mobileCSS) => {
     const root = document.documentElement;
     const resize = async width => {
         await require("electron").ipcRenderer.invoke("resize", width);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        // 隐藏窗口的原生尺寸变更不保证在下一帧前传到渲染进程。
+        const deadline = performance.now() + 5000;
+        while (innerWidth !== width && performance.now() < deadline) {
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
         check.equal(innerWidth, width, "the renderer has applied the window resize");
     };
     for (const compact of [false, true]) {
@@ -103,7 +107,8 @@ if (process.versions.electron && process.type === "browser") {
         const {app, BrowserWindow, ipcMain} = require("electron");
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
-        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
+        const win = new BrowserWindow({show: false, frame: false,
+            webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
         ipcMain.handle("resize", (_event, width) => win.setContentSize(width, 600));
         await win.loadURL("data:text/html,<html><body></body></html>");
         const ts = require("typescript");

@@ -101,6 +101,29 @@ func TestOrdinaryAssetCleanupReferenceChanges(t *testing.T) {
 	}
 }
 
+func TestOrdinaryAssetCleanupEmptyResult(t *testing.T) {
+	for _, missing := range []bool{false, true} {
+		t.Run(fmt.Sprint("missing=", missing), func(t *testing.T) {
+			setupUnusedAssetWorkspace(t)
+			var items []*UnusedItem
+			if missing {
+				items = []*UnusedItem{{Item: "assets/missing.txt"}}
+			}
+			checks := 0
+			removed, size, err := removeOrdinaryUnusedAssets(items, t.TempDir(), func() error {
+				checks++
+				return nil
+			}, func(string) error {
+				t.Fatal("empty cleanup must not remove files")
+				return nil
+			})
+			if err != nil || removed == nil || len(removed) != 0 || size != 0 || checks != 2 {
+				t.Fatalf("unexpected empty cleanup result: %v %d %v, checks=%d", removed, size, err, checks)
+			}
+		})
+	}
+}
+
 func TestOrdinaryAssetCleanupRestoresPartialRemoval(t *testing.T) {
 	for _, fail := range []bool{false, true} {
 		t.Run(fmt.Sprint("failure=", fail), func(t *testing.T) {

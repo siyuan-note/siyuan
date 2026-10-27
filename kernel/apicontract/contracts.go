@@ -132,14 +132,11 @@ var ReorderNotebooks = define[ReorderNotebooksRequest, *ReorderData]("reorderNot
 
 var (
 	OpenNotebook = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	// GetNotebookConf preserves existing configuration and permission filtering. Administrator
-	// responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-	// not permission to open a closed or locked notebook. All notebooks use addressing version 2
-	// without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
-	// feature release is verified; it neither controls activation nor permits mixing with older clients.
-	// Revision identifies the fixed capability declaration, not a document path or retired record.
-	// Authentication, locking and network failures must
-	// never be interpreted as an absent capability object or as permission to retry a legacy write.
+	// GetNotebookConf 保留配置与权限过滤；管理员响应包含 documentCapabilities。
+	// structuredPaths 声明 ID 与标题段接口支持，literalSlash 仅在 indexState=ready 时为 true。
+	// titleFormats 列出支持的标题格式；revision 标识能力声明，不是文档路径或配置版本。
+	// 能力声明不授予关闭或锁定笔记本的访问权，也不表示允许与旧客户端混用。
+	// 认证、锁定和网络失败不能解释为缺少能力对象，失败后不得回退到旧接口继续写入。
 	GetNotebookConf = define[CloseNotebookRequest, NotebookConfData]("getNotebookConf", "/api/notebook/getNotebookConf", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
@@ -675,7 +672,6 @@ var CopyFile = define[CopyFileRequest, Null]("copyFile", "/api/file/copyFile", A
 // 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
 // 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
 // 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
-// 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
 var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", AuthenticatedAccess|AdminAccess|WritableAccess, FormBody, ResponseOptions{AdditionalCodes: []int{-3, 400, 403, 500}}, "POST")
 
 var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", AuthenticatedAccess, JSONBody,
@@ -822,6 +818,9 @@ var SearchTemplate = define[SearchKeywordRequest, SearchTemplateData]("searchTem
 
 var RemoveSearchTemplate = define[SearchPathRequest, Null]("removeTemplate", "/api/search/removeTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// GetAssetContent 按索引记录 ID 获取完整预览；queryMethod 为 0（关键词）或 1（查询语法）时使用 FTS 高亮，
+// 为 3 时按搜索使用的 Go 正则语义高亮；为 2（SQL）时不将 SQL 用作 MATCH，返回不高亮的完整内容。
+// 正则无效或仅命中文件名时仍返回完整内容；内容中的 HTML 会转义，仅输出 mark/br 标记。
 var GetAssetContent = define[AssetContentRequest, AssetContentData]("getAssetContent", "/api/search/getAssetContent", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetAssetContentByPath = define[SearchPathRequest, AssetContentData]("getAssetContentByPath", "/api/search/getAssetContentByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -830,6 +829,9 @@ var ListInvalidBlockRefs = define[SearchPageRequest, SearchBlocksData]("listInva
 
 var UpdateEmbedBlock = define[UpdateEmbedBlockRequest, Null]("updateEmbedBlock", "/api/search/updateEmbedBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// FullTextSearchAssetContent 使用 method 选择 0（关键词）、1（查询语法）、2（管理员 SQL）或 3（正则表达式）。
+// orderBy 为 0 时优先返回相关度高的结果，为 1 时优先返回相关度低的结果；2/3 分别为更新时间升序/降序。
+// 相关度按 FTS5 的 BM25 分数解释（越小越相关）；正则无 FTS 相关度，相关度排序选项按路径排序；SQL 使用自身的排序。
 var FullTextSearchAssetContent = define[SearchAssetContentRequest, SearchAssetContentData]("fullTextSearchAssetContent", "/api/search/fullTextSearchAssetContent", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // GetEmbedBlock 返回的文档面包屑项可附带 documentTitle，name 保留完整路径；标题不受路径分隔符影响。
@@ -850,6 +852,8 @@ var FindReplace = define[FindReplaceRequest, Null]("findReplace", "/api/search/f
 var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semanticSearchBlock", "/api/search/semanticSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
+// 关键字和查询语法模式下，精确块 ID 仍遵循笔记本、文档路径、类型、子类型和忽略条件。
+// 关键字模式的多词文档搜索按字面量匹配 %、_ 和反斜杠；按文档分组只整理当前页，不改变分页单位。
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // SearchRefBlock 的 exactDocTitle 默认关闭，保留候选搜索行为；启用后仅匹配完整文档标题，
@@ -1029,7 +1033,13 @@ var SkipReviewRiffCard = define[RiffCardRequest, Null]("skipReviewRiffCard", "/a
 var GetNotebookRiffDueCards = define[RiffNotebookDueCardsRequest, RiffDueCardsData]("getNotebookRiffDueCards", "/api/riff/getNotebookRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetTreeRiffDueCards = define[RiffTreeDueCardsRequest, RiffDueCardsData]("getTreeRiffDueCards", "/api/riff/getTreeRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetRiffDueCards = define[RiffDueCardsRequest, RiffDueCardsData]("getRiffDueCards", "/api/riff/getRiffDueCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveRiffCards waits for the document and deck transaction; persistence or
+// commit failures return code -1 with null data. Empty deckID removes from all decks.
 var RemoveRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("removeRiffCards", "/api/riff/removeRiffCards", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// AddRiffCards waits for the document and deck transaction; persistence or commit
+// failures return code -1 with null data instead of reporting an unsaved deck.
 var AddRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("addRiffCards", "/api/riff/addRiffCards", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenameRiffDeck = define[RenameRiffDeckRequest, Null]("renameRiffDeck", "/api/riff/renameRiffDeck", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveRiffDeck = define[RiffDeckRequest, Null]("removeRiffDeck", "/api/riff/removeRiffDeck", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1135,7 +1145,13 @@ var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathB
 // unsupportedIDs, filtered by existing access restrictions. Missing, pending, inconsistent or failed
 // metadata returns indexUnavailable. Prefer resolveDocPath with independent title segments.
 var GetIDsByHPath = define[FileTreeOptionalPathRequest, LegacyPathIDsResult]("getIDsByHPath", "/api/filetree/getIDsByHPath", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// MoveDocs evaluates block collection rules for moved documents and descendants entering a watched scope.
+// Existing database rows and their field values are preserved. A collection failure is returned after the
+// physical move; successfully moved documents remain at their new locations.
 var MoveDocs = define[FileTreeMoveRequest, Null]("moveDocs", "/api/filetree/moveDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// MoveDocsByID has the same collection and partial-failure behavior as MoveDocs.
 var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/filetree/moveDocsByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDocByID = define[FileTreeTrimIDRequest, Null]("removeDocByID", "/api/filetree/removeDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1146,7 +1162,11 @@ var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/
 
 // RenameDocByID 与 RenameDoc 使用相同的富文本保护；修改富文本必须使用带源版本的 setDocTitle 事务。
 var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// DuplicateDoc evaluates block collection rules for the new document and its blocks, initializing only new rows.
 var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// DuplicateDocTree evaluates block collection rules for every copied document and block, initializing only new rows.
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
@@ -1234,6 +1254,10 @@ var ExportAsciiDoc = define[ExportIDRequest, ExportNamedZipData]("exportAsciiDoc
 var ExportReStructuredText = define[ExportIDRequest, ExportNamedZipData]("exportReStructuredText", "/api/export/exportReStructuredText", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset/statAsset", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// FullReindexAssetContent 提交异步重建任务，成功响应只代表任务已提交，不代表索引已经完成。
+// 重建遍历及最后一批索引写入成功后，通过主 WebSocket 发送 assetContentIndexCompleted 并提示完成；
+// 遍历或写入失败时提示失败，不发送完成事件。不支持或解析失败的文件会跳过，加密资源不进入全局索引。
 var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
 // GetImageOCRText 保留已有 text 字段；无文本、缺失 path 和加密资源返回空字符串。
@@ -1298,6 +1322,11 @@ var GetLivePhotoPreview = define[LivePhotoPreviewRequest, BinaryContent]("getLiv
 // 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
 var CancelLivePhotoPreview = define[LivePhotoPreviewRequest, Null]("cancelLivePhotoPreview", "/api/asset/cancelLivePhotoPreview", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 保存 PDF 标注映射。省略 baseData 或传 null 保持旧版整份替换语义。
+// 提供 baseData 时，将 data 相对该读取基线的逐条变化合并到当前映射，保留其他查看器对不同标注的修改。
+// 同一标注已被不同内容修改或删除时返回 -1 / "annotation revision conflict"，不写入文件；重复的相同结果可成功。
+// 基线和 data 必须为 JSON 对象字符串；加密笔记本先认证当前密文，租约和文件格式保持不变。
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
 
@@ -1701,7 +1730,7 @@ var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspace
 // 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
 // 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
 // ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
-// documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
+// 忽略设置备份中的寻址模式记录，不改变笔记本源格式或加密恢复材料。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{Setting: SettingWrite{Namespace: "*"}}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
@@ -1758,6 +1787,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
 // 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。
 // 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
+// setAttrViewAutomations 新增范围最多包含 32 个去重后的笔记本或文档；既有超限规则可保留或删减，撤销重做不截断原范围。
 // cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
 // 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
 // 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。

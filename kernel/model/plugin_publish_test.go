@@ -9,13 +9,14 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func setupPluginPublishTest(t *testing.T) func(string) {
 	t.Helper()
 	originalData, originalConfDir, originalConf := util.DataDir, util.ConfDir, Conf
-	root := t.TempDir()
+	root := testutil.PublicDataDir(t)
 	util.DataDir, util.ConfDir = filepath.Join(root, "data"), filepath.Join(root, "conf")
 	Conf = NewAppConf()
 	Conf.Sync.Store(conf.NewSync())

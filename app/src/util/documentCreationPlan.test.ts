@@ -13,7 +13,7 @@ const fixture = (): DocumentCreatePlan => ({
 
 const document = (id: string): DocumentPath => ({
     id, notebook: "notebook", path: `/${id}.sy`, parentID: null, title: {format: "plain", text: id, empty: false},
-    segments: [], depth: 1, displayPath: `/${id}`, revision: `${id}-revision`, addressingVersion: 1,
+    segments: [], depth: 1, displayPath: `/${id}`, revision: `${id}-revision`,
 });
 
 test("the original IDs and committed parent revision are used by the next step", async () => {

@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "Cakupan pemantauan dapat memuat hingga 32 buku catatan atau dokumen",
+	"pdfAnnotationSaveFailed": "Anotasi PDF tidak dapat disimpan. Buka kembali PDF untuk memuat anotasi terbaru sebelum melanjutkan penyuntingan",
 	"documentTitleKeepLocal": "Simpan judul saya",
 	"documentTitleLatest": "Judul terbaru",
 	"documentTitleInlineOnly": "Judul dokumen hanya mendukung elemen sebaris",
@@ -3472,8 +3474,12 @@
 		"438": "Pilih gambar JPEG, PNG, atau WebP yang valid, maksimal 10 MiB dan 16 megapiksel",
 		"439": "Tidak dapat menyimpan wallpaper layar kunci; periksa izin tulis ruang kerja",
 		"440": "Batas putaran pemanggilan alat tercapai. Pemanggilan alat yang tersisa tidak dijalankan; kirim pesan lain untuk melanjutkan",
-		"441": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
-		"442": "Edit judul berformat ini melalui editor judul",
-		"443": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan"
+		"441": "Tugas pembangunan ulang indeks konten aset telah dikirim; pantau kemajuan di tugas latar belakang",
+		"442": "Pembangunan ulang indeks konten aset selesai",
+		"443": "Pembangunan ulang indeks konten aset gagal; periksa log kernel",
+		"444": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori",
+		"445": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
+		"446": "Edit judul berformat ini melalui editor judul",
+		"447": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan"
 	}
 }

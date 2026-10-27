@@ -341,7 +341,7 @@ class StructTreeLayerBuilder {
   #getHeaderIds(headers) {
     const result = [],
       visited = new Set(),
-      pending = headers.toReversed();
+      pending = headers.slice().reverse();
 
     while (pending.length > 0) {
       const structId = pending.pop();

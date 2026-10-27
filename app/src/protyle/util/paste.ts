@@ -696,6 +696,16 @@ const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) =
     scrollCenter(protyle, undefined, "nearest", "smooth");
 };
 
+// 位图预览文件与网页内容并存时判断是否按图片粘贴：浏览器复制的单图或含图表格优先上传图片；
+// 数据库网格粘贴目标携带表格数据时不降级为图片，Excel 单元格数据始终按表格解析写入
+export const shouldPasteClipboardImage = (textHTML: string, isAVTarget: boolean) => {
+    if (isAVTarget && /<table[\s>]/i.test(textHTML)) {
+        return false;
+    }
+    return textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
+        (textHTML.startsWith("<table") && textHTML.indexOf("<img") > -1);  // Excel 或者浏览器中复制带有图片的表格
+};
+
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
 }, uploadOptions?: IUploadInsertOptions) => {
@@ -1320,10 +1330,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         let isHTML = false;
         if (textHTML.replace("<!--StartFragment--><!--EndFragment-->", "").trim() !== "") {
             textHTML = textHTML.replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "").trim();
-            if (!officeListConverted && files && files.length === 1 && (
-                textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
-                (textHTML.startsWith("<table") && textHTML.indexOf("<img") > -1)  // Excel 或者浏览器中复制带有图片的表格
-            )) {
+            if (!officeListConverted && files && files.length === 1 &&
+                shouldPasteClipboardImage(textHTML, nodeElement.classList.contains("av"))) {
                 isHTML = false;
             } else {
                 // 需注意 Edge 中的划选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021

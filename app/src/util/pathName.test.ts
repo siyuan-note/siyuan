@@ -73,3 +73,16 @@ test("storage paths without a file segment are rejected instead of addressing th
         assert.equal(names.normalizeStoragePath(storageName), null, JSON.stringify(storageName));
     }
 });
+
+test("asset paths drop fragments but keep queries for kernel resolution", () => {
+    for (const [assetPath, expected] of [
+        ["assets/image.png", "assets/image.png"],
+        ["assets/image.png#preview", "assets/image.png"],
+        ["assets/video.mp4#t=10", "assets/video.mp4"],
+        ["assets/image.png?box=20260101000000-abcdefg#preview", "assets/image.png?box=20260101000000-abcdefg"],
+        ["assets/image.png?v=1.2", "assets/image.png?v=1.2"],
+        ["assets/image%23copy.png#preview", "assets/image%23copy.png"],
+    ]) {
+        assert.equal(names.getAssetPathWithoutFragment(assetPath), expected, assetPath);
+    }
+});

@@ -26,7 +26,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         isFoldedRenderContent: () => false,
         fetchPost: (url: string, data: Record<string, string>) => requests.push({url, data}),
         fetchSyncPost: () => check.fail("Preview requested database data"),
-        genRenderFrame: () => {},
+        genEmbedRenderFrame: () => {},
         isEncryptedBox: () => false,
         hasClosestByClassName: (element: HTMLElement, name: string) => element.closest(`.${name}`),
         mathRender: (): undefined => undefined,

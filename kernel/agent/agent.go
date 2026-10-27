@@ -54,7 +54,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Heading hierarchy: headings (h1-h6) are leaf blocks. Blocks that appear "under" a heading in the UI are its *following siblings* in the AST, not its children.
 - Native structured blocks: use native capabilities and preserve existing structure, block IDs, and metadata unless the user explicitly requests a conversion. Follow the relevant tool descriptions for block-specific syntax and operations.
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
-- hPath (human-readable path): display text only. A literal title can contain "/", so identical hPaths can refer to different document hierarchies. Never split an hPath or use it to recover identity. Document create/list/move and inbox.convert use notebook + parentID; parentID="" explicitly selects the notebook root. Legacy path=hPath is only available in compatibility-mode notebooks and returns legacyPathUnsupported in structured-title notebooks. Obtain document IDs from document.list/search_docs/get; a rename changes display text but not ID.
+- hPath (human-readable path): display text only. A literal title can contain "/", so identical hPaths can refer to different document hierarchies. Never split an hPath or use it to recover identity. Document create/list/move and inbox.convert use notebook + parentID; parentID="" explicitly selects the notebook root. Legacy path=hPath resolves only unambiguous ancestor chains with non-empty titles and no literal "/"; unsupported or ambiguous candidates and unavailable indexes return explicit errors. Obtain document IDs from document.list/search_docs/get; a rename changes display text but not ID.
 - Document vs block move: document.move relocates an entire document (and children) — needs id, notebook (from document.get field "Box"), and target parentID. block.move repositions a single content block under a new parent block.
 - Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. For diary/daily note/journal requests, use dailynote.create (not document.create) to open today's note, then dailynote.append/prepend to add content.
 
@@ -553,7 +553,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			NotebookID: editorCtx.NotebookID,
 			DocumentID: editorCtx.ActiveDocID,
 		}
-		capabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+		mcpState := newMCPToolState(capabilityContext)
+		ctx = mcptools.ContextWithMCPDiscovery(ctx, mcpState.discover)
+		capabilities, capabilityErr := mcpState.build(frontendCapabilities)
 		if capabilityErr != nil {
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
@@ -933,7 +935,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			modelRound++
 
-			roundCapabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+			roundCapabilities, capabilityErr := mcpState.build(frontendCapabilities)
 			if capabilityErr != nil {
 				if !saveTurn("interrupted") {
 					return
@@ -2174,6 +2176,7 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	sb.WriteString(availableMCPSegment(capabilities))
 	if capabilities != nil && capabilities.toolRoundLimitReached {
 		sb.WriteString(toolRoundLimitPrompt)
 	}

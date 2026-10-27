@@ -12,7 +12,7 @@ const fixture = (failRefresh = false) => {
     const source = transpileModule(readFileSync("src/config/util/configApi.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
-    runInNewContext(source, {exports, window: {siyuan: {config: memory}}, structuredClone, require: (name: string) => {
+    runInNewContext(source, {exports, window: {siyuan: {config: memory}}, require: (name: string) => {
         if (name === "../../util/fetch") return {fetchSyncPost: (_url: string, body: any) =>
             new Promise(resolve => requests.push({body, resolve}))};
         if (name === "./dotPath") return {mergeRecordByDottedPath};
@@ -32,6 +32,18 @@ const fixture = (failRefresh = false) => {
 };
 
 const settle = () => new Promise<void>(resolve => setImmediate(resolve));
+
+test("startup keymap saves work without structuredClone and preserve their submitted snapshot", async () => {
+    const f = fixture();
+    const keymap = {general: {newShortcut: {custom: "", default: ""}}, editor: {general: {}}};
+    const saved = f.config.set("keymap", keymap);
+    keymap.general.newShortcut.custom = "changed after submission";
+    await settle();
+    assert.equal(JSON.stringify(f.requests[0].body),
+        '{"keymap":{"general":{"newShortcut":{"custom":"","default":""}},"editor":{"general":{}}}}');
+    f.requests[0].resolve({code: 0});
+    await saved;
+});
 
 test("config.set queues a namespace, preserves submitted values and returns normalized memory", async () => {
     const f = fixture();

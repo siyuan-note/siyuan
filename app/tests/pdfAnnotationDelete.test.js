@@ -14,6 +14,7 @@ const code = ts.transpileModule(declaration.getText(source) + "\nremoveAnno;", {
 const setup = (file = "http://localhost/assets/document.pdf") => {
     const requests = [];
     const confirmations = [];
+    const saves = [];
     const config = {annotation: {page: 1}, other: {page: 2}};
     const pdf = {appConfig: {file, config}};
     const element = {isConnected: true};
@@ -25,6 +26,7 @@ const setup = (file = "http://localhost/assets/document.pdf") => {
         window: {siyuan: {languages: {deleteOpConfirm: "Delete", pdfAnnotationDeleteRefConfirm: "Referenced by ${x} blocks"}}},
         getRegisteredPdfInstance: () => registered,
         getConfig: () => config,
+        saveConfig: (owner, data) => { assert.equal(owner, pdf); saves.push(JSON.parse(JSON.stringify(data))); },
         getRectElementsByNodeId: (owner, id) => {
             assert.equal(owner, element);
             assert.equal(id, "annotation");
@@ -34,7 +36,7 @@ const setup = (file = "http://localhost/assets/document.pdf") => {
         confirmDialog: (title, text, confirm, cancel, isDelete) => { confirmations.push({title, text, confirm, cancel, isDelete}); },
     });
     removeAnno(pdf, element, "annotation");
-    return {requests, confirmations, config, pdf, element, removed: () => removed, replaceViewer: () => { registered = {}; }};
+    return {requests, confirmations, saves, config, pdf, element, removed: () => removed, replaceViewer: () => { registered = {}; }};
 };
 
 test("referenced PDF annotations remain intact until deletion is confirmed", () => {
@@ -55,10 +57,8 @@ test("referenced PDF annotations remain intact until deletion is confirmed", () 
     confirmation.confirm();
     assert.equal(state.removed(), 1);
     assert.equal(state.config.annotation, undefined);
-    const save = state.requests[1];
-    assert.equal(save.url, "/api/asset/setFileAnnotation");
-    assert.equal(save.data.path, "assets/document.pdf?box=20261003000000-abcdefg.sya");
-    assert.deepEqual(JSON.parse(save.data.data), {other: {page: 2}, latest: {page: 3}});
+    assert.equal(state.requests.length, 1);
+    assert.deepEqual(state.saves, [{other: {page: 2}, latest: {page: 3}}]);
 });
 
 test("unreferenced PDF annotations are deleted without a confirmation", () => {
@@ -67,7 +67,7 @@ test("unreferenced PDF annotations are deleted without a confirmation", () => {
     state.requests[0].callback({code: 0, data: {refDefs: []}});
     assert.equal(state.confirmations.length, 0);
     assert.equal(state.removed(), 1);
-    assert.equal(state.requests[1].data.path, "assets/document.pdf.sya");
+    assert.deepEqual(state.saves, [{other: {page: 2}}]);
 });
 
 test("a failed reference query preserves PDF annotations", () => {
@@ -76,6 +76,7 @@ test("a failed reference query preserves PDF annotations", () => {
     assert.equal(state.requests.length, 1);
     assert.ok(state.config.annotation);
     assert.equal(state.removed(), 0);
+    assert.equal(state.saves.length, 0);
 });
 
 test("closing or replacing the PDF viewer prevents delayed annotation deletion", () => {
@@ -86,11 +87,13 @@ test("closing or replacing the PDF viewer prevents delayed annotation deletion",
         pending.requests[0].callback({code: 0, data: {refDefs: []}});
         assert.equal(pending.removed(), 0);
         assert.equal(pending.requests.length, 1);
+        assert.equal(pending.saves.length, 0);
         const confirmed = setup();
         confirmed.requests[0].callback({code: 0, data: {refDefs: [{refID: "block"}]}});
         invalidate(confirmed);
         confirmed.confirmations[0].confirm();
         assert.equal(confirmed.removed(), 0);
         assert.ok(confirmed.config.annotation);
+        assert.equal(confirmed.saves.length, 0);
     }
 });

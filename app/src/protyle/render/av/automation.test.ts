@@ -257,7 +257,8 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement, avID: "source",
         menuElement: menu as unknown as HTMLElement, onResize() {}});
     assert.match(body.innerHTML, /data-action="rules"/);
-    assert.doesNotMatch(body.innerHTML, /data-name/);
+    assert.match(body.innerHTML, /data-action="rename-rule"/);
+    assert.doesNotMatch(body.innerHTML, /data-rule-name-input/);
     assert.match(body.innerHTML, /data-trigger/);
     assert.match(list.innerHTML, /data-action="add-field"/);
     assert.equal(transactions.length, 0);

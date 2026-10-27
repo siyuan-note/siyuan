@@ -226,6 +226,7 @@
     cursor: pointer;
     font-size: 12px;
     line-height: 20px;
+    background: var(--b3-av-calendar-background, var(--b3-theme-primary-lightest));
     background: color-mix(in srgb, var(--b3-av-calendar-background, var(--b3-theme-primary-lightest)) 50%, var(--b3-theme-background));
     color: var(--b3-theme-on-background);
     border: 1px solid transparent;
@@ -414,6 +415,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
+    background: var(--b3-theme-primary-lightest);
     background: color-mix(in srgb, var(--b3-theme-primary) 12%, transparent);
   }
 

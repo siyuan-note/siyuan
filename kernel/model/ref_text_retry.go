@@ -17,10 +17,16 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -36,13 +42,85 @@ type dynamicRefTextRetryKey struct {
 
 var dynamicRefTextRetries = struct {
 	sync.Mutex
-	pending map[dynamicRefTextRetryKey]time.Time
+	pending    map[dynamicRefTextRetryKey]time.Time
+	loadedPath string
 }{pending: map[dynamicRefTextRetryKey]time.Time{}}
+
+type dynamicRefTextRetryJournal struct {
+	Spec    int                        `json:"spec"`
+	Pending []dynamicRefTextRetryEntry `json:"pending"`
+}
+
+type dynamicRefTextRetryEntry struct {
+	BoxID   string `json:"box"`
+	BlockID string `json:"id"`
+}
+
+// Caller holds dynamicRefTextRetries. Unknown/corrupt journals are never
+// replaced with an empty queue, and no document content is stored here.
+func loadDynamicRefTextRetriesLocked() error {
+	filename := filepath.Join(util.QueueDir, "ref-text-retry.json")
+	if dynamicRefTextRetries.loadedPath == filename {
+		return nil
+	}
+	data, err := os.ReadFile(filename)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	var journal dynamicRefTextRetryJournal
+	if err == nil {
+		if err = json.Unmarshal(data, &journal); err != nil {
+			return err
+		}
+		if journal.Spec != 1 {
+			return fmt.Errorf("unknown dynamic reference retry journal format: %d", journal.Spec)
+		}
+		for _, entry := range journal.Pending {
+			if !ast.IsNodeIDPattern(entry.BoxID) || !ast.IsNodeIDPattern(entry.BlockID) {
+				return errors.New("invalid dynamic reference retry identifier")
+			}
+		}
+	}
+	for _, entry := range journal.Pending {
+		key := dynamicRefTextRetryKey{entry.BoxID, entry.BlockID}
+		if _, exists := dynamicRefTextRetries.pending[key]; !exists {
+			dynamicRefTextRetries.pending[key] = time.Time{}
+		}
+	}
+	dynamicRefTextRetries.loadedPath = filename
+	return nil
+}
+
+func saveDynamicRefTextRetriesLocked() error {
+	if err := loadDynamicRefTextRetriesLocked(); err != nil {
+		return err
+	}
+	journal := dynamicRefTextRetryJournal{Spec: 1, Pending: []dynamicRefTextRetryEntry{}}
+	for key := range dynamicRefTextRetries.pending {
+		if !ast.IsNodeIDPattern(key.boxID) || !ast.IsNodeIDPattern(key.blockID) {
+			return errors.New("invalid dynamic reference retry identifier")
+		}
+		journal.Pending = append(journal.Pending, dynamicRefTextRetryEntry{key.boxID, key.blockID})
+	}
+	sort.Slice(journal.Pending, func(i, j int) bool {
+		a, b := journal.Pending[i], journal.Pending[j]
+		return a.BoxID < b.BoxID || a.BoxID == b.BoxID && a.BlockID < b.BlockID
+	})
+	data, err := json.Marshal(journal)
+	if err != nil {
+		return err
+	}
+	if err = os.MkdirAll(util.QueueDir, 0755); err != nil {
+		return err
+	}
+	return gulu.File.WriteFileSafer(dynamicRefTextRetries.loadedPath, data, 0644)
+}
 
 // 重试只记录定义块标识，不保留过期树或加密笔记本的明文内容。
 func queueDynamicRefTextRetries(defs map[string]*ast.Node, trees map[string]*parse.Tree, err error) {
 	logging.LogErrorf("refresh dynamic reference text failed, retry pending: %s", err)
 	dynamicRefTextRetries.Lock()
+	loadErr := loadDynamicRefTextRetriesLocked()
 	notify := len(dynamicRefTextRetries.pending) == 0
 	for id, node := range defs {
 		key := dynamicRefTextRetryKey{updatedNodeBoxID(node, trees), id}
@@ -50,7 +128,13 @@ func queueDynamicRefTextRetries(defs map[string]*ast.Node, trees map[string]*par
 			dynamicRefTextRetries.pending[key] = time.Now().Add(3 * time.Second)
 		}
 	}
+	if loadErr == nil {
+		loadErr = saveDynamicRefTextRetriesLocked()
+	}
 	dynamicRefTextRetries.Unlock()
+	if loadErr != nil {
+		logging.LogErrorf("persist dynamic reference retry failed: %s", loadErr)
+	}
 	if notify {
 		util.PushErrMsg(util.I18nTerm(Conf.Lang, "dynamicRefTextRefreshRetry"), 7000)
 	}
@@ -61,6 +145,11 @@ func flushDynamicRefTextRetries() {
 		return
 	}
 	dynamicRefTextRetries.Lock()
+	if err := loadDynamicRefTextRetriesLocked(); err != nil {
+		dynamicRefTextRetries.Unlock()
+		logging.LogErrorf("load dynamic reference retry journal failed: %s", err)
+		return
+	}
 	var keys []dynamicRefTextRetryKey
 	for key, next := range dynamicRefTextRetries.pending {
 		if !time.Now().Before(next) {
@@ -90,6 +179,12 @@ func flushDynamicRefTextRetries() {
 		if retryDynamicRefText(key) {
 			dynamicRefTextRetries.Lock()
 			delete(dynamicRefTextRetries.pending, key)
+			if err := saveDynamicRefTextRetriesLocked(); err != nil {
+				// Replaying a completed definition is safe. Retain it in memory
+				// too so a failed checkpoint is retried without requiring restart.
+				dynamicRefTextRetries.pending[key] = time.Now().Add(30 * time.Second)
+				logging.LogErrorf("checkpoint dynamic reference retry failed: %s", err)
+			}
 			dynamicRefTextRetries.Unlock()
 		}
 	}

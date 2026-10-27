@@ -283,7 +283,8 @@ var databaseItemAddCmd = &cobra.Command{
 		}
 		srcs := []map[string]any{src}
 
-		if err := model.AddAttributeViewBlock(nil, srcs, avID, "", viewID, groupID, previousID, ignoreFill); err != nil {
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "insertAttrViewBlock", Srcs: srcs,
+			AvID: avID, ViewID: viewID, GroupID: groupID, PreviousID: previousID, IgnoreDefaultFill: ignoreFill}}); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)
@@ -341,7 +342,8 @@ var databaseItemUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		if _, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, valueData); err != nil {
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: avID,
+			KeyID: keyID, RowID: itemID, Data: valueData}}); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)

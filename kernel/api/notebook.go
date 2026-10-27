@@ -318,18 +318,14 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 	if !model.IsAdminRoleContext(c) {
 		model.HideBoxConfSecret(boxConf)
 	} else {
-		snapshot, err := documentaddressing.InspectBox(util.DataDir, util.ConfDir, notebook)
+		snapshot, err := documentaddressing.InspectBox(notebook)
 		if err != nil {
 			return apicontract.Failure[apicontract.NotebookConfData](-1, err.Error())
 		}
-		modeState := snapshot.State
 		indexState := treenode.DocumentMetadataState(notebook)
-		if modeState == "structured" && indexState != "ready" {
-			modeState = "recovering"
-		}
-		capabilities = &apicontract.DocumentCapabilities{AddressingVersion: snapshot.Mode,
-			ModeState: modeState, StructuredPaths: true, LiteralSlash: modeState == "structured", TitleFormats: []string{"plain", "inline-ast"},
-			IndexState: indexState, MinimumReaderVersion: documentaddressing.MinimumReaderVersion(), Revision: snapshot.Revision}
+		capabilities = &apicontract.DocumentCapabilities{StructuredPaths: true,
+			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain", "inline-ast"},
+			IndexState: indexState, Revision: snapshot.Revision}
 	}
 
 	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name,

@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",
+	"pdfAnnotationSaveFailed": "Unable to save PDF annotations. Reopen the PDF to load the latest annotations before editing again",
 	"documentTitleKeepLocal": "Save my title",
 	"documentTitleLatest": "Latest title",
 	"documentTitleInlineOnly": "Document titles support inline elements only",
@@ -3472,8 +3474,12 @@
 		"438": "Choose a valid JPEG, PNG or WebP image up to 10 MiB and 16 megapixels",
 		"439": "Could not save the lock screen wallpaper; check workspace write permissions",
 		"440": "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue",
-		"441": "This title changed in another editor. Your draft is preserved",
-		"442": "Edit this rich title with the title editor",
-		"443": "Unable to save this title; check its inline content, size and editing context"
+		"441": "Asset content index rebuild task submitted; follow progress in background tasks",
+		"442": "Asset content index rebuild completed",
+		"443": "Asset content index rebuild failed; check the kernel log",
+		"444": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions",
+		"445": "This title changed in another editor. Your draft is preserved",
+		"446": "Edit this rich title with the title editor",
+		"447": "Unable to save this title; check its inline content, size and editing context"
 	}
 }

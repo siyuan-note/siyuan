@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261026182843"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-t1r641c",
-				"updated": "20261010113646"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
@@ -59,12 +59,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009182324-1ulhib3",
-				"updated": "20261009182324"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Keyword and query syntax searches support block-type, notebook and document-path filters, including child documents, as well as sorting, grouping and replacement. Content-order sorting is available only when grouping by document."
+					"Data": "Keyword and query syntax searches support block-type, notebook and document-path filters, including child documents, as well as sorting, grouping and replacement. Content-order sorting is available only when grouping by document. An exact block ID follows the same notebook, document-path, block-type, subtype and ignore filters. Multi-keyword searches in keyword mode match %, _ and backslashes literally. Grouping by document organizes only the current page and keeps the pagination unit of the selected search method; with block-based pagination, matches from one document can span several pages."
 				}
 			]
 		},

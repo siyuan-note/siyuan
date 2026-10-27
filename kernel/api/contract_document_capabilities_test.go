@@ -24,6 +24,11 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 	read := func() *apicontract.DocumentCapabilities {
 		t.Helper()
 		data := documentPathAPIRequest(t, "/api/notebook/getNotebookConf", admin, map[string]string{"notebook": boxID})
+		for _, field := range []string{"addressingVersion", "modeState", "minimumReaderVersion"} {
+			if bytes.Contains(data, []byte(`"`+field+`"`)) {
+				t.Fatalf("capabilities retained retired field %s: %s", field, data)
+			}
+		}
 		var response struct {
 			Code int
 			Data apicontract.NotebookConfData
@@ -41,8 +46,7 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 	if bytes.Contains(public, []byte(`"documentCapabilities"`)) {
 		t.Fatal("configuration permissions were widened by capability discovery")
 	}
-	if !capabilities.StructuredPaths || capabilities.LiteralSlash || capabilities.AddressingVersion != 2 ||
-		capabilities.ModeState != "recovering" || capabilities.IndexState != "missing" || capabilities.MinimumReaderVersion != nil ||
+	if !capabilities.StructuredPaths || capabilities.LiteralSlash || capabilities.IndexState != "missing" ||
 		len(capabilities.TitleFormats) != 2 || capabilities.TitleFormats[0] != "plain" ||
 		capabilities.TitleFormats[1] != "inline-ast" || capabilities.Revision == "" {
 		t.Fatalf("capabilities claimed an unimplemented or unverified feature: %+v", capabilities)
@@ -50,7 +54,7 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 	if err := treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	if current := read(); current.IndexState != "ready" || !current.LiteralSlash || current.ModeState != "structured" || current.Revision != capabilities.Revision {
+	if current := read(); current.IndexState != "ready" || !current.LiteralSlash || current.Revision != capabilities.Revision {
 		t.Fatalf("ready metadata did not enable structured titles or changed the configuration revision: %+v", current)
 	}
 	name := filepath.Join(util.DataDir, boxID, documentaddressing.FloorPath)
@@ -58,7 +62,7 @@ func TestAPIContractDocumentCapabilities(t *testing.T) {
 		if err := os.WriteFile(name, []byte(record), 0600); err != nil {
 			t.Fatal(err)
 		}
-		if current := read(); current.AddressingVersion != 2 || current.ModeState != "structured" || !current.LiteralSlash || current.Revision != capabilities.Revision {
+		if current := read(); current.IndexState != "ready" || !current.LiteralSlash || current.Revision != capabilities.Revision {
 			t.Fatal("retired record changed fixed capabilities", current)
 		}
 		if data, err := os.ReadFile(name); err != nil || string(data) != record {

@@ -195,3 +195,36 @@ func TestUnusedAttributeViewsExcludesEncryptedNotebook(t *testing.T) {
 		t.Fatalf("encrypted document prevented scanning ordinary databases: %v %v", items, err)
 	}
 }
+
+func TestUnusedAttributeViewsAbortUnreadableRelations(t *testing.T) {
+	_, _ = setupUnusedAssetWorkspace(t)
+	setupAttributeViewRefI18n(t)
+	const id = "20261027000000-unused1"
+	if err := av.SaveAttributeView(av.NewAttributeView(id)); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(util.DataDir, "storage", "av", id+".json")
+	original, err := os.ReadFile(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	index := filepath.Join(util.DataDir, "storage", "av", "relations.msgpack")
+	invalid := []byte("invalid")
+	if err = os.WriteFile(index, invalid, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if items, scanErr := UnusedAttributeViews(false); scanErr == nil || len(items) != 0 {
+		t.Fatalf("failed relation scan returned candidates: %v %v", items, scanErr)
+	}
+	if err = RemoveUnusedAttributeView(id); err == nil {
+		t.Fatal("single cleanup ignored relation read failure")
+	}
+	if removed, removeErr := RemoveUnusedAttributeViews(); removeErr == nil || len(removed) != 0 {
+		t.Fatalf("batch cleanup ignored relation read failure: %v %v", removed, removeErr)
+	}
+	for p, want := range map[string][]byte{source: original, index: invalid} {
+		if data, readErr := os.ReadFile(p); readErr != nil || !bytes.Equal(data, want) {
+			t.Fatalf("original file changed: %s %v", p, readErr)
+		}
+	}
+}

@@ -1,7 +1,6 @@
 import {isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 import {addStyle} from "../util/addStyle";
-import {renderEmbedToolbarVisibility} from "../wysiwyg/embedToolbarVisibility";
 
 export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "more"]) => {
     let enable = true;
@@ -40,7 +39,6 @@ export const genRenderFrame = (renderElement: Element) => {
     <span aria-label="${window.siyuan.languages.refPopover}" data-position="4north" data-action="openFloat" class="ariaLabel protyle-icon"><svg><use xlink:href="#iconPictureInPicture"></use></svg></span>
     <span aria-label="${window.siyuan.languages.more}" data-position="4north" class="ariaLabel protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div><div class="protyle-cursor">${Constants.ZWSP}</div>`);
-        renderEmbedToolbarVisibility(renderElement);
     } else if (type === "NodeMathBlock" || renderElement.getAttribute("data-subtype") === "math") {
         renderElement.firstElementChild.innerHTML = `<span></span><span class="protyle-cursor">${Constants.ZWSP}</span>`;
     }

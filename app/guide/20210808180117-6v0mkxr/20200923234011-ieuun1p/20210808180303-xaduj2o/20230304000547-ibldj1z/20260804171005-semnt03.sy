@@ -6,7 +6,7 @@
 		"id": "20260804171005-semnt03",
 		"title": "Semantic Search",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261027103144"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170126-6x70vu9",
-				"updated": "20260804180000"
+				"updated": "20261027103144"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170127-3fpyace",
-				"updated": "20260804180000"
+				"updated": "20261027103144"
 			},
 			"Children": [
 				{
@@ -123,12 +123,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170129-j6gqedu",
-				"updated": "20260804180000"
+				"updated": "20261027103144"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Set vector dimensions to 0 to use the model default. Specify another value only when the target model supports custom dimensions. Rebuild the embedding index after changing the model or dimensions."
+					"Data": "Set vector dimensions to 0 to use the model default. Specify another value only when the target model supports custom dimensions. Search uses only vectors with the same service address, model and configured dimensions as the query, and checks their actual dimensions. Incompatible vectors and older vectors whose source cannot be verified are retained but excluded from search; changing settings or upgrading does not automatically rebuild them. Use the rebuild embedding index action below to recalculate them when needed; this sends model requests and may incur charges."
 				}
 			]
 		},

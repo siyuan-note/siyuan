@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "Zakres monitorowania może zawierać łącznie do 32 notatników lub dokumentów",
+	"pdfAnnotationSaveFailed": "Nie można zapisać adnotacji PDF. Otwórz ponownie plik PDF, aby wczytać najnowsze adnotacje przed dalszą edycją",
 	"documentTitleKeepLocal": "Zapisz mój tytuł",
 	"documentTitleLatest": "Najnowszy tytuł",
 	"documentTitleInlineOnly": "Tytuły dokumentów obsługują tylko elementy liniowe",
@@ -3472,8 +3474,12 @@
 		"438": "Wybierz prawidłowy obraz JPEG, PNG lub WebP o rozmiarze do 10 MiB i 16 megapikseli",
 		"439": "Nie można zapisać tapety ekranu blokady; sprawdź uprawnienia do zapisu w przestrzeni roboczej",
 		"440": "Osiągnięto limit rund wywołań narzędzi. Pozostałe wywołania nie zostały wykonane; wyślij kolejną wiadomość, aby kontynuować",
-		"441": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
-		"442": "Zmień ten sformatowany tytuł w edytorze tytułów",
-		"443": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji"
+		"441": "Zlecono odbudowę indeksu treści zasobów; śledź postęp w zadaniach w tle",
+		"442": "Odbudowa indeksu treści zasobów zakończona",
+		"443": "Odbudowa indeksu treści zasobów nie powiodła się; sprawdź dziennik jądra",
+		"444": "Nie udało się zapisać dziennika odzyskiwania indeksu; pozostaw SiYuan otwarty i sprawdź miejsce na dysku oraz uprawnienia do katalogu",
+		"445": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
+		"446": "Zmień ten sformatowany tytuł w edytorze tytułów",
+		"447": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji"
 	}
 }

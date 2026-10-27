@@ -111,7 +111,7 @@ func (tx *Transaction) writeDocumentTitleTree(tree *parse.Tree, preflight func()
 var ErrDocumentTitleConflict = errors.New("document title revision conflict")
 
 func documentTitleConflict(id string) *TxErr {
-	return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(441), id: id, cause: ErrDocumentTitleConflict}
+	return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(445), id: id, cause: ErrDocumentTitleConflict}
 }
 
 func captureDocumentTitle(root *ast.Node) documentTitleSnapshot {
@@ -139,7 +139,7 @@ func restoreDocumentTitle(root *ast.Node, snapshot documentTitleSnapshot) error 
 // doSetDocTitle 修改独立标题源，内核生成只包含标题的撤销快照，保留同期正文修改。
 func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 	fail := func(err error) *TxErr {
-		return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(443), id: operation.ID, cause: err}
+		return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(447), id: operation.ID, cause: err}
 	}
 	if len(tx.DoOperations) != 1 {
 		return fail(errors.New("document title requires a separate transaction"))

@@ -21,14 +21,18 @@ import (
 )
 
 func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
-	testMarkdownImportBatches(t, "Renamed parent")
+	testMarkdownImportBatches(t, "Renamed parent", ".md")
+}
+
+func TestMarkdownImportMarkdownParent(t *testing.T) {
+	testMarkdownImportBatches(t, "Renamed parent", ".markdown")
 }
 
 func TestStructuredTitlesMarkdownImport(t *testing.T) {
-	testMarkdownImportBatches(t, "Renamed/../parent%2F")
+	testMarkdownImportBatches(t, "Renamed/../parent%2F", ".md")
 }
 
-func testMarkdownImportBatches(t *testing.T, parentTitle string) {
+func testMarkdownImportBatches(t *testing.T, parentTitle, parentExtension string) {
 	t.Helper()
 	for _, encrypted := range []bool{false, true} {
 		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
@@ -89,7 +93,7 @@ func testMarkdownImportBatches(t *testing.T, parentTitle string) {
 			if err := os.MkdirAll(filepath.Join(source, "parent"), 0755); err != nil {
 				t.Fatal(err)
 			}
-			if err := os.WriteFile(filepath.Join(source, "parent.md"), []byte(fmt.Sprintf("---\ndate: 2020-01-02\ntitle: %s\n---\n\n[[parent/child|child]]", parentTitle)), 0600); err != nil {
+			if err := os.WriteFile(filepath.Join(source, "parent"+parentExtension), []byte(fmt.Sprintf("---\ndate: 2020-01-02\ntitle: %s\n---\n\n[[parent/child|child]]", parentTitle)), 0600); err != nil {
 				t.Fatal(err)
 			}
 			if err := os.WriteFile(filepath.Join(source, "parent", "child.markdown"), []byte("child content"), 0600); err != nil {

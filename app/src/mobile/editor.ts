@@ -115,7 +115,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         afterOpen?.(protyle);
         const titleElement = document.getElementById("toolbarName") as HTMLInputElement;
         if (isValid() && action.includes(Constants.CB_GET_OPENNEW) && !protyle.disabled &&
-            window.siyuan.documentAddressingVersion === 2 && protyle.block.rootID !== protyle.notebookId) {
+            protyle.block.rootID !== protyle.notebookId) {
             void protyle.title?.openEditor();
             return;
         }

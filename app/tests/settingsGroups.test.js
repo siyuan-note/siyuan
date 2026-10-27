@@ -27,7 +27,6 @@ const runCases = async sources => {
         return parts.join("/");
     };
     const render = load("config/render/render");
-    const collapse = load("config/setting/collapse");
     const mount = load("config/setting/mount");
     const group = (id, title) => render.genConfigGroup(
         `<label class="b3-label config-item" data-config-item-id="${id}"><input value="draft"></label>`,
@@ -38,56 +37,34 @@ const runCases = async sources => {
     for (const mobile of [false, true]) {
         document.body.innerHTML = `<div class="config__panel"><div class="${mobile ? "config config--mobile" : "config__tab-container"}">${html}</div></div>`;
         const root = document.body.firstElementChild.firstElementChild;
-        const other = document.createElement("div");
-        other.innerHTML = group("general", "Other tab");
-        root.after(other);
-        const init = () => collapse.initSettingGroupCollapse(root);
-        const button = () => root.querySelector("button");
         const content = () => root.querySelector(".config-items");
         const hidden = () => getComputedStyle(content()).display === "none";
         await mount.mountSettingTab("editor", root);
-        collapse.initSettingGroupCollapse(other);
-        check.equal(root.querySelectorAll("button").length, 2, "Untitled groups have no toggle");
+        check.equal(root.querySelectorAll("button").length, 0, "Settings groups have no collapse toggle");
         check.equal(hidden(), false);
-        button().querySelector("use").dispatchEvent(new MouseEvent("click", {bubbles: true}));
-        check.equal(hidden(), true, "Clicks on the icon collapse the group");
-        check.equal(button().getAttribute("aria-expanded"), "false");
-        check.equal(button().getAttribute("aria-label"), "Expand - General");
-        check.equal(getComputedStyle(other.querySelector(".config-items")).display === "none", false,
-            "Matching group IDs in other tabs stay independent");
         const input = root.querySelector("input");
         input.value = "unsaved";
-        button().click();
+        root.querySelector(".config-title").click();
+        check.equal(hidden(), false, "Clicking a title keeps its settings visible");
         check.equal(root.querySelector("input"), input);
-        check.equal(input.value, "unsaved", "Toggling preserves control state");
-        button().click();
         mount.applySettingTabSearchVisibility(root, new Set(["general"]), new Set(["general"]));
-        check.equal(hidden(), false, "Search reveals collapsed matches");
-        check.equal(button().disabled, true);
-        button().click();
+        check.equal(hidden(), false, "Matching settings stay visible during search");
+        check.equal(getComputedStyle(root.querySelector('[data-config-group-id="advanced"]')).display, "none");
+        check.equal(input.value, "unsaved", "Searching preserves control state");
         mount.clearSettingTabSearch(document.body);
-        check.equal(hidden(), true, "Clearing search restores the collapse choice");
+        check.notEqual(getComputedStyle(root.querySelector('[data-config-group-id="advanced"]')).display, "none");
+        check.equal(hidden(), false, "Clearing search keeps groups expanded");
         await mount.mountSettingTab("editor", root);
-        init();
-        check.equal(hidden(), true, "Rebuilding a tab retains its collapse choice");
-        // 原生键盘输入验证按钮语义与重复初始化后的事件绑定。
-        button().focus();
-        await require("electron").ipcRenderer.invoke("settings-collapse-key", "Space");
-        await new Promise(resolve => setTimeout(resolve, 30));
-        check.equal(hidden(), false, "Space expands the focused button");
-        check.equal(document.activeElement, button(), "Focus stays on the toggle");
-        await require("electron").ipcRenderer.invoke("settings-collapse-key", "Return");
-        await new Promise(resolve => setTimeout(resolve, 30));
-        check.equal(hidden(), true, "Return collapses the focused button");
+        check.equal(hidden(), false, "Rebuilding keeps settings expanded");
     }
-    return "Settings collapse passed on desktop and mobile";
+    return "Settings groups passed on desktop and mobile";
 };
 
 const runElectron = async () => {
-    const {app, BrowserWindow, ipcMain} = require("electron");
+    const {app, BrowserWindow} = require("electron");
     const ts = require("typescript");
     const appRoot = path.join(__dirname, "..");
-    const ids = ["config/setting/collapse", "config/setting/mount", "config/render/render", "util/escape"];
+    const ids = ["config/setting/mount", "config/render/render", "util/escape"];
     const sources = Object.fromEntries(ids.map(id => [id, ts.transpileModule(
         fs.readFileSync(path.join(appRoot, "src", `${id}.ts`), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
@@ -101,11 +78,6 @@ const runElectron = async () => {
     const win = new BrowserWindow({show: false, webPreferences: {
         nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true,
     }});
-    ipcMain.handle("settings-collapse-key", (_event, keyCode) => {
-        win.webContents.sendInputEvent({type: "keyDown", keyCode});
-        if (keyCode === "Return") win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
-        win.webContents.sendInputEvent({type: "keyUp", keyCode});
-    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.insertCSS(css);
@@ -125,19 +97,19 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("settings groups collapse, retain drafts and restore after search and rebuild", {
+    test("settings groups stay expanded and preserve search filtering and drafts", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
             ? "Real Electron DOM verification requires DISPLAY or WAYLAND_DISPLAY" : false,
         timeout: 60000,
     }, async () => {
-        const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-collapse-"));
+        const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-groups-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
                 env, windowsHide: true, timeout: 55000,
             });
-            assert.match(stdout, /Settings collapse passed on desktop and mobile/);
+            assert.match(stdout, /Settings groups passed on desktop and mobile/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

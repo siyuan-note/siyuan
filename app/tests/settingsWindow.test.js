@@ -29,6 +29,7 @@ const rendererModules = (sources) => {
     const context = {isSettingsWindow: () => document.body.classList.contains("body--settings")};
     const {ipcRenderer, webFrame} = require("electron");
     const overlay = loadRendererModule(sources.overlay, {
+        "../util/color": loadRendererModule(sources.color, {}),
         electron: {ipcRenderer, webFrame}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}}, "../layout/util": {},
     });
     const controls = loadRendererModule(sources.controls, {
@@ -212,6 +213,7 @@ const runCases = async (sources) => {
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => false},
         "../bazaar/openPath": bazaarPath,
+        "../tabs/compactMode": {isCompactModeEnabled: () => false},
         "./interface": settingInterface,
     });
     const {Setting} = loadRendererModule(sources.setting, {
@@ -476,10 +478,10 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            overlay: "boot/windowControlsOverlay.ts",
+            overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",
             settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
-            mount: "config/setting/mount.ts", collapse: "config/setting/collapse.ts",
+            mount: "config/setting/mount.ts",
             save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");

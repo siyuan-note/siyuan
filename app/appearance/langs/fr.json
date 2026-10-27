@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "Le périmètre de surveillance peut contenir jusqu’à 32 carnets ou documents",
+	"pdfAnnotationSaveFailed": "Impossible d’enregistrer les annotations du PDF. Rouvrez le PDF pour charger les dernières annotations avant de poursuivre les modifications",
 	"documentTitleKeepLocal": "Enregistrer mon titre",
 	"documentTitleLatest": "Dernier titre",
 	"documentTitleInlineOnly": "Les titres de document acceptent uniquement les éléments en ligne",
@@ -3472,8 +3474,12 @@
 		"438": "Choisissez une image JPEG, PNG ou WebP valide, de 10 MiB et 16 mégapixels maximum",
 		"439": "Impossible d’enregistrer le fond d’écran de verrouillage ; vérifiez les droits d’écriture de l’espace de travail",
 		"440": "La limite de tours d’appels d’outils est atteinte. Les appels restants n’ont pas été exécutés ; envoyez un autre message pour continuer",
-		"441": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
-		"442": "Modifiez ce titre enrichi dans l’éditeur de titres",
-		"443": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification"
+		"441": "Tâche de reconstruction de l’index du contenu des ressources soumise ; suivez la progression dans les tâches en arrière-plan",
+		"442": "Reconstruction de l’index du contenu des ressources terminée",
+		"443": "Échec de la reconstruction de l’index du contenu des ressources ; consultez le journal du noyau",
+		"444": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire",
+		"445": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
+		"446": "Modifiez ce titre enrichi dans l’éditeur de titres",
+		"447": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification"
 	}
 }

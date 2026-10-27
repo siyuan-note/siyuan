@@ -1,4 +1,6 @@
 {
+	"automationCollectionScopeLimit": "El ámbito de supervisión puede contener hasta 32 cuadernos o documentos",
+	"pdfAnnotationSaveFailed": "No se pudieron guardar las anotaciones del PDF. Vuelve a abrir el PDF para cargar las anotaciones más recientes antes de seguir editando",
 	"documentTitleKeepLocal": "Guardar mi título",
 	"documentTitleLatest": "Título más reciente",
 	"documentTitleInlineOnly": "Los títulos de documentos solo admiten elementos en línea",
@@ -3472,8 +3474,12 @@
 		"438": "Selecciona una imagen JPEG, PNG o WebP válida de hasta 10 MiB y 16 megapíxeles",
 		"439": "No se pudo guardar el fondo de bloqueo; comprueba los permisos de escritura del espacio de trabajo",
 		"440": "Se alcanzó el límite de rondas de llamadas a herramientas. Las llamadas restantes no se ejecutaron; envía otro mensaje para continuar",
-		"441": "Este título cambió en otro editor. Tu borrador se conserva",
-		"442": "Edita este título con formato en el editor de títulos",
-		"443": "No se puede guardar el título; revisa el contenido en línea, el tamaño y el contexto de edición"
+		"441": "Tarea de reconstrucción del índice de contenido de recursos enviada; consulta el progreso en las tareas en segundo plano",
+		"442": "Reconstrucción del índice de contenido de recursos completada",
+		"443": "Error al reconstruir el índice de contenido de recursos; consulta el registro del núcleo",
+		"444": "No se pudo guardar el registro de recuperación del índice; mantén SiYuan abierto y comprueba el espacio en disco y los permisos del directorio",
+		"445": "Este título cambió en otro editor. Tu borrador se conserva",
+		"446": "Edita este título con formato en el editor de títulos",
+		"447": "No se puede guardar el título; revisa el contenido en línea, el tamaño y el contexto de edición"
 	}
 }

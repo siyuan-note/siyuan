@@ -18,6 +18,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -94,6 +95,30 @@ func TestPerformBlockOperationReturnsErrors(t *testing.T) {
 			t.Fatalf("expected failed operation without success data: %+v, %v", op, err)
 		}
 	}
+}
+
+func TestPerformBlockOperationRejectsBoundDocument(t *testing.T) {
+	fixture, before, _ := setupAttributeViewDeletedBlockTest(t, "container")
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	filename := filepath.Join(util.DataDir, tree.Box, tree.Path)
+	original, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if txs, err := PerformBlockOperation(&Operation{Action: "delete", ID: tree.ID}); err == nil || txs != nil {
+		t.Fatal("document root deletion was accepted")
+	}
+	if data, err := os.ReadFile(filename); err != nil || !bytes.Equal(data, original) {
+		t.Fatal("rejected deletion changed document data")
+	}
+	cache.ClearTreeCache()
+	if _, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute()); err != nil {
+		t.Fatal(err)
+	}
+	assertAttributeViewItemsEqual(t, before, readAttributeViewItemsTest(t, before.ID))
 }
 
 func TestInsertDocumentSiblingAnchorRollsBackEarlierOperations(t *testing.T) {

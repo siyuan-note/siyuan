@@ -17,6 +17,7 @@ const sources = () => {
         viewer: compile("asset/pdf/viewer.js"),
         annotations: compile("asset/anno.ts"),
         annotationRuntime: compile("asset/annoRuntime.ts"),
+        annotationSave: compile("asset/annotationSave.ts"),
         textLayer: compile("asset/pdf/text_layer_builder.js"),
         viewerTemplate: compile("asset/pdf/viewerTemplate.ts"),
         pdfTheme: compile("asset/pdfViewer.ts"),
@@ -57,6 +58,7 @@ const runCases = async source => {
     });
     const pdfTheme = load(source.pdfTheme, {
         "../constants": {Constants},
+        "../protyle/util/browserCompat": {ensureBrowserCompatibility: async () => {}},
         "../config/tabs/appearancePreferences": {patchAppearancePreference: async (key, value) => {
             themePatches.push([key, value]);
         }},
@@ -413,6 +415,7 @@ const runCases = async source => {
             "../protyle/upload/uploadResult", "../editor/pdfAssetLink", "./pdfTextAnnotation", "./pdfCoordinates",
             "./pdfSelectionText"].map(name => [name, {}])),
         "./annoRuntime": runtime,
+        "./annotationSave": load(source.annotationSave),
         "../layout/getAll": {getAllModels: () => ({asset: []})},
         "../util/fetch": {fetchPost: (...args) => annotationRequests.push(args)},
     });

@@ -7,7 +7,7 @@
 		"id": "20240530101000-to5uvpi",
 		"title": "PDF 注釈",
 		"type": "doc",
-		"updated": "20260614112612"
+		"updated": "20261027103930"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614112611-ydoehak",
-				"updated": "20260614112611"
+				"updated": "20261027103930"
 			},
 			"Children": [
 				{
@@ -36,6 +36,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源はPDFファイルのプレビューと注釈をサポートしています。PDF内のテキストや領域にマークを付け、注釈参照をドキュメントにコピーすることで、文献読書とノート作成の双方向連携を実現します。"
+				}
+			]
+		},
+		{
+			"ID": "20261027103930-tbpnc0f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027103930-tbpnc0f",
+				"updated": "20261027103930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同じ PDF を複数のビューアーで開いている場合、異なる注釈への変更は保存時に統合されます。同じ注釈が別のビューアーですでに変更または削除されていると、古い状態に基づく保存は拒否され、PDF を開き直すよう表示されます。必要な未保存の変更を確認してコピーしてから、PDF を開き直して最新の注釈を読み込み、編集を続けてください。"
 				}
 			]
 		},
@@ -543,7 +557,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/注釈ID \"選択テキスト\"\u0026gt;\u0026gt;"
+									"TextMarkTextContent": "&lt;&lt;assets/xxx.pdf/注釈ID \"選択テキスト\"&gt;&gt;"
 								},
 								{
 									"Type": "NodeText",

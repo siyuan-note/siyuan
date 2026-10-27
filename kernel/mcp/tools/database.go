@@ -476,7 +476,8 @@ func databaseItemAdd(args map[string]any) (CallToolResult, error) {
 		src["content"] = content
 	}
 	srcs := []map[string]any{src}
-	if err := model.AddAttributeViewBlock(nil, srcs, id, "", viewID, groupID, previousID, ignoreFill); err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "insertAttrViewBlock", Srcs: srcs,
+		AvID: id, ViewID: viewID, GroupID: groupID, PreviousID: previousID, IgnoreDefaultFill: ignoreFill}}); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add item failed: " + err.Error()}}, IsError: true}, nil
 	}
 	model.ReloadAttrView(id)
@@ -511,10 +512,15 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	if id == "" || keyID == "" || itemID == "" || nil == valueData {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, keyID, itemID and value are required"}}, IsError: true}, nil
 	}
-	value, err := model.UpdateAttributeViewCell(nil, id, keyID, itemID, valueData)
-	if err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: id,
+		KeyID: keyID, RowID: itemID, Data: valueData}}); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "update cell failed: " + err.Error()}}, IsError: true}, nil
 	}
+	view, err := av.ParseAttributeView(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "read updated cell failed: " + err.Error()}}, IsError: true}, nil
+	}
+	value := view.GetValue(keyID, itemID)
 	model.ReloadAttrView(id)
 	return databaseSuccess("item_update", map[string]any{
 		"id":     id,

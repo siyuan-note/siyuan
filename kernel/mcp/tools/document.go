@@ -29,7 +29,7 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter works only in compatibility-mode notebooks; never derive identity or hierarchy from a display hPath.",
+	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter checks each candidate ancestor chain; ambiguous paths, empty or slash-containing ancestor titles and unavailable indexes return explicit errors. Never derive identity or hierarchy from a display hPath.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -37,7 +37,7 @@ var DocumentTool = &Tool{
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
 			"parentID": {Type: "string", Description: "Target parent document ID (for create, list, move); an empty string explicitly selects the notebook root. Do not combine with path. Obtain IDs from list, search_docs or get."},
-			"path":     {Type: "string", Description: "Legacy hPath for compatibility-mode notebooks only (for create, list, move). Structured-title notebooks reject this parameter with legacyPathUnsupported; use parentID instead."},
+			"path":     {Type: "string", Description: "Legacy hPath (for create, list, move). Requires a unique ancestor chain with non-empty titles and no literal slash. Conflicts return pathAmbiguous or legacyPathUnsupported; unavailable metadata returns indexUnavailable. Prefer parentID."},
 			"markdown": {Type: "string", Description: "Initial markdown content (for create).\n\n" + markdownContentSyntax},
 			"keyword":  {Type: "string", Description: "Search keyword (for search_docs)"},
 			"notebook": {Type: "string", Description: "Notebook ID (required for create, list, move)"},
@@ -307,7 +307,9 @@ func documentDuplicate(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	model.DuplicateDoc(tree)
+	if err = model.DuplicateDoc(tree); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("duplicate doc failed: %s", err)}}, IsError: true}, nil
+	}
 	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }

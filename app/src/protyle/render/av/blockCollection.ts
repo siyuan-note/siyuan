@@ -7,6 +7,7 @@ import {BlockPanel} from "../../../block/Panel";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {mountCollectionReference} from "./collectionReference";
+import {showMessage} from "../../../dialog/message";
 
 export const collectionSourceIncomplete = (source: AVAutomationBlockSourceInput) => !source ||
     !(source.notebookIDs?.length || source.documentIDs?.length) ||
@@ -84,7 +85,19 @@ ${documents.length ? `<div class="av__automation-control"><label class="av__auto
             return;
         }
         if (target.hasAttribute("data-scope")) {
-            movePathTo({title: lang.automationCollectionScope, flashcard: false, sourceNotebookIds: [protyle.notebookId],
+            movePathTo({title: lang.automationCollectionScope, flashcard: false, sourceNotebookIds: [protyle.notebookId], multiple: true,
+                validate: (paths, boxes) => {
+                    const notebooks = new Set(source.notebookIDs || []);
+                    const documents = new Set(source.documentIDs || []);
+                    const previousSize = notebooks.size + documents.size;
+                    paths.forEach((path, i) => {
+                        if (path === "/") { notebooks.add(boxes[i]); }
+                        else { documents.add(path.split("/").pop().replace(/\.sy$/, "")); }
+                    });
+                    if (notebooks.size + documents.size <= 32 || notebooks.size + documents.size === previousSize) { return true; }
+                    showMessage(lang.automationCollectionScopeLimit);
+                    return false;
+                },
                 cb: (paths, boxes) => {
                     paths.forEach((path, i) => {
                         if (path === "/") {

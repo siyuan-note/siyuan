@@ -47,7 +47,7 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 		t.Helper()
 		ret, err := CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ParentID: parent, ID: ast.NewNodeID(),
 			TitleFormat: "plain", Title: title, Markdown: "body"})
-		if err != nil || ret.Title.Text != title || ret.AddressingVersion != 2 {
+		if err != nil || ret.Title.Text != title {
 			t.Fatalf("create %q: %+v %v", title, ret, err)
 		}
 		return ret

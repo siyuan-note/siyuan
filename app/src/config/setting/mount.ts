@@ -4,7 +4,6 @@ import {Constants} from "../../constants";
 import type {SettingSearchUnavailableItem, SettingTabMountContext} from "./builder";
 import {getSettingTab, type TSettingTab} from "./tabs";
 import {getSettingsOwnerApp} from "./windowContext";
-import {initSettingGroupCollapse, syncSettingGroupCollapse} from "./collapse";
 
 const deferredTabs = new Set<TSettingTab>();
 let watchingFocus = false;
@@ -37,7 +36,6 @@ export const watchSettingTabInteractions = () => {
 export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
     const {html, items} = buildGroupedItemsView(tabId);
     root.innerHTML = html;
-    initSettingGroupCollapse(root);
 
     for (const item of items) {
         await item.afterMount?.(root);
@@ -128,7 +126,6 @@ export const applySettingTabSearchVisibility = (
         // 标记每组最后一个未隐藏条目，不显示 border-bottom
         lastVisibleItem?.classList.add("config-item--last-visible");
     });
-    syncSettingGroupCollapse(root, true);
 };
 
 export const clearSettingTabSearch = (root: HTMLElement) => {
@@ -136,7 +133,6 @@ export const clearSettingTabSearch = (root: HTMLElement) => {
     root.querySelectorAll("[data-config-group-id], [data-config-item-id]").forEach((el) => {
         el.classList.remove("config-search-hidden", "config-item--last-visible");
     });
-    syncSettingGroupCollapse(root, false);
 };
 
 /** 面板型 SettingTab：根据全局搜索关键词切换 layout-tab-bar 子 Tab */

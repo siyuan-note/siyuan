@@ -1,6 +1,7 @@
 import {setEditMode} from "../util/setEditMode";
 import {isTabGutterBridge} from "../gutter/tabs";
 import {isContainerGutterBridge} from "../gutter/container";
+import {cancelGutterHover, renderGutterOnHover} from "../gutter/hover";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -213,6 +214,7 @@ export const initUI = (protyle: IProtyle) => {
         }
     });
     let overAttr = false;
+    protyle.element.addEventListener("mouseleave", () => cancelGutterHover(protyle.gutter?.element));
     protyle.element.addEventListener(isMobile() ? "pointerover" : "mouseover", (event: PointerEvent & {
         target: HTMLElement
     }) => {
@@ -223,6 +225,7 @@ export const initUI = (protyle: IProtyle) => {
         if (isMobile() && event.pointerType !== "mouse") {
             return;
         }
+        cancelGutterHover(protyle.gutter?.element);
         if (hasClosestByClassName(event.target, "protyle-db-attr")) {
             return;
         }
@@ -270,11 +273,11 @@ export const initUI = (protyle: IProtyle) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                protyle.gutter.render(protyle,
+                renderGutterOnHover(protyle,
                     getEmbedGutterOperationContext(nodeElement) ? nodeElement : embedElement, event.target);
                 return;
             }
-            protyle.gutter.render(protyle, nodeElement, event.target);
+            renderGutterOnHover(protyle, nodeElement, event.target);
             return;
         }
 

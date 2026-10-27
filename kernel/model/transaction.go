@@ -39,7 +39,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -94,6 +93,26 @@ func PerformTxSync(tx *Transaction) (err error) {
 		}
 	}
 	return performTxSyncLocked(tx)
+}
+
+// WithTransactionHistory drains already queued edits before selecting a history entry.
+// Selection, replay, stack finalization and its broadcast share the transaction execution lock.
+// The callback must use execute instead of re-entering PerformTxSync.
+func WithTransactionHistory[T any](action func(execute func(*Transaction) error) T) T {
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+	for _, queued := range takeQueuedTransactions() {
+		flushTx(queued)
+	}
+	return action(func(tx *Transaction) error {
+		completion := tx.prepareCommitWait()
+		defer close(completion.done)
+		return performTxSyncLocked(tx)
+	})
 }
 
 func performTxSyncLocked(tx *Transaction) (err error) {
@@ -299,6 +318,15 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return
 	}
 
+	defer func() {
+		if tx.sourceRollbackErr != nil {
+			if ret == nil {
+				ret = &TxErr{code: TxErrCodePushMsg, msg: tx.sourceRollbackErr.Error()}
+			} else {
+				ret.msg += "; source recovery incomplete: " + tx.sourceRollbackErr.Error()
+			}
+		}
+	}()
 	defer func() {
 		if e := recover(); nil != e {
 			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
@@ -1389,7 +1417,9 @@ func (tx *Transaction) doLargeDelete(operations []*Operation) *TxErr {
 		ids = append(ids, deletedNode.BlockIDs()...)
 	}
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	treenode.RemoveBlockTreesByIDs(tree.Box, ids)
+	if err := treenode.RemoveBlockTreesByIDsWithError(tree.Box, ids); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	}
 	tx.writeTree(tree)
 	return nil
 }
@@ -1414,7 +1444,9 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	// 同步清理被删除容器块的索引节点及其子节点，否则删除列表/超级块等容器块后其子节点依然存在，ExistBlockTree 仍返回 true
 	// Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
 	deletedIDs := deletedNode.BlockIDs()
-	treenode.RemoveBlockTreesByIDs(tree.Box, deletedIDs)
+	if err := treenode.RemoveBlockTreesByIDsWithError(tree.Box, deletedIDs); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	}
 	tx.writeTree(tree)
 	return
 }
@@ -2781,6 +2813,16 @@ type Transaction struct {
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
 	blockSwapOriginalTrees        []*parse.Tree
+	sourceJournal                 *documentSourceJournal
+	sourceLeases                  map[string]bool
+	sourceErr                     error
+	sourceRollbackErr             error
+	sourceWatchers                []func()
+	sourceDatabaseBefore          map[string]*documentSourceFile
+	sourceRelationBoundaries      map[string]bool
+	flashcardLocked               bool
+	flashcardBefore               map[string]*flashcardDeckBefore
+	writeFlashcardFile            func(string, []byte, []byte) error
 	attributeViewRollback         *attributeViewRollback
 	attributeViewAutomations      *attributeViewAutomationState
 	pushAutomationMessage         func(string, int) string
@@ -2788,7 +2830,7 @@ type Transaction struct {
 	attributeViewItemCreation     bool
 	invalidatedAvHistory          map[string]bool
 
-	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
+	fromAPI  bool // 用户主动修改（HTTP、CLI、MCP 等）；允许自动化，撤销日志仍需具备 UndoOperations
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
 
 	listItemFoldCandidates    []listItemFoldCandidate
@@ -2861,6 +2903,10 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
+	tx.sourceJournal, tx.sourceLeases = nil, nil
+	tx.sourceDatabaseBefore = nil
+	tx.sourceRelationBoundaries = nil
+	tx.sourceErr, tx.sourceRollbackErr = nil, nil
 	expectedTemplateDocTreeRoot := tx.templateDocTreeRootSnapshot
 	expectedTemplateDocTreeRevision := tx.templateDocTreeRootRevision
 	tx.templateDocTreeCommitRevision = expectedTemplateDocTreeRevision
@@ -2939,6 +2985,22 @@ func (tx *Transaction) begin() (err error) {
 }
 
 func (tx *Transaction) commit() (err error) {
+	if tx.sourceErr != nil {
+		return tx.sourceErr
+	}
+	for _, tree := range tx.trees {
+		if err = tx.rememberDocumentSource(tree); err != nil {
+			return err
+		}
+	}
+	// Persist each staged deck only once, with write-ahead recovery for both files.
+	for id := range tx.flashcardBefore {
+		if deck := Decks[id]; deck != nil {
+			if err = tx.saveFlashcardDeck(deck); err != nil {
+				return err
+			}
+		}
+	}
 	if tx.attributeViewDeletionErr != nil {
 		return tx.attributeViewDeletionErr
 	}
@@ -2949,6 +3011,9 @@ func (tx *Transaction) commit() (err error) {
 	defer func() {
 		if !committed {
 			for _, tree := range tx.blockSwapOriginalTrees {
+				if tx.documentSource(tree) != nil {
+					continue
+				}
 				if restoreErr := restoreCreatedDocTreeSnapshot(tree); restoreErr != nil {
 					err = errors.Join(err, restoreErr)
 				}
@@ -3051,7 +3116,7 @@ func (tx *Transaction) commit() (err error) {
 				return writeTreeUpsertQueueWithPreflight(source, tx.treeIndexChanges(source), preflight)
 			}
 		}
-		if err = writeTransactionTree(tree); err != nil {
+		if err = tx.recordDocumentWrite(tree, func() error { return writeTransactionTree(tree) }); err != nil {
 			return
 		}
 
@@ -3118,6 +3183,12 @@ func (tx *Transaction) commit() (err error) {
 	}
 
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
+	if err = tx.commitDocumentSources(); err != nil {
+		return err
+	}
+	for _, refresh := range crossTreeMoveRefRefreshes {
+		sql.RefreshDefinitionRefsQueue(refresh.BoxID, refresh.MovedBlockIDs)
+	}
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
 	tx.appendAutomationBlockAttrs()
@@ -3137,6 +3208,8 @@ func (tx *Transaction) commit() (err error) {
 
 // releaseCommittedResources 释放执行期间的文档树；操作中的撤销快照及广播所需的文档 ID 继续保留。
 func (tx *Transaction) releaseCommittedResources() {
+	tx.releaseDocumentSources(true)
+	tx.finishFlashcardMutation(false)
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.indexChanges = nil
 	tx.documentTitleWrite = nil
@@ -3179,6 +3252,9 @@ func (tx *Transaction) rollback() {
 	if nil != tx.templateDocTreeRootSnapshot {
 		treenode.SetBlockTreePath(tx.templateDocTreeRootSnapshot)
 	}
+	tx.rollbackDocumentSources()
+	tx.finishFlashcardMutation(true)
+	tx.releaseDocumentSources(false)
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
@@ -3281,9 +3357,13 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return
 	}
 
-	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, tx.luteEngine)
+	var original []byte
+	ret, original, err = tx.readDocumentSource(bt.BoxID, bt.Path)
 	if err != nil {
 		return
+	}
+	if err = tx.rememberDocumentSourceBytes(ret, original); err != nil {
+		return nil, err
 	}
 	if err = tx.rememberAutomationTree(ret); err != nil {
 		return nil, err
@@ -3320,9 +3400,13 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return
 	}
 
-	ret, err = filesys.LoadTree(box, p, tx.luteEngine)
+	var original []byte
+	ret, original, err = tx.readDocumentSource(box, p)
 	if err != nil {
 		return
+	}
+	if err = tx.rememberDocumentSourceBytes(ret, original); err != nil {
+		return nil, err
 	}
 	if err = tx.rememberAutomationTree(ret); err != nil {
 		return nil, err
@@ -3344,11 +3428,17 @@ func (tx *Transaction) writeTree(tree *parse.Tree) {
 }
 
 func (tx *Transaction) writeTreeWithIndexChanges(tree *parse.Tree) {
+	if err := tx.rememberDocumentSource(tree); err != nil {
+		tx.sourceErr = err
+		return
+	}
 	tx.trees[tree.ID] = tree
 	if err := tx.captureCollectionTree(tree); err != nil {
 		tx.collectionState().err = err
 	}
-	treenode.UpsertBlockTreePending(tree)
+	if err := treenode.UpsertBlockTreePendingWithError(tree); err != nil {
+		tx.sourceErr = err
+	}
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, changedNodes []*ast.Node) {

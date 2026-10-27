@@ -115,7 +115,7 @@ const runCases = async (sources, mobile) => {
         protyle.disabled = false;
     }
 
-    // Real DOM focus: bound document title, hidden-title fallback, detached primary and mobile title.
+    // 真实 DOM 聚焦：笔记本标题、隐藏标题回退、独立主键及移动端标题。
     const primary = load(sources.primary, {
         "../../util/selection": {focusByOffset: (element, start, end) => {
             assert.equal(start, end);
@@ -135,7 +135,7 @@ const runCases = async (sources, mobile) => {
     const title = root.querySelector("[contenteditable]");
     const titleInput = root.querySelector("#toolbarName");
     const input = root.querySelector("[data-row-id] input");
-    const target = {...protyle, block: {rootID: "document"}, title: {editElement: title}};
+    const target = {...protyle, notebookId: "document", block: {rootID: "document"}, title: {editElement: title}};
     const focusRequest = () => ({avID: "database", itemID: "created", boundBlockID: "document", focusPrimary: true, focusTitle: true});
     const request = focusRequest();
     primary.focusDatabasePrimary(root, target, request);
@@ -171,7 +171,6 @@ const runCases = async (sources, mobile) => {
 
     // Compose the real title-loading and readonly paths with template focus. The source and mobile
     // editor chunk deliberately remain pending while the attribute panel finishes rendering.
-    window.siyuan.documentAddressingVersion = 2;
     window.siyuan.isPublish = false;
     for (const invalidation of ["none", "disabled", "readonly", "publish", "history", "root", "notebook",
         "destroyed", "detached", "replaced", "source-replaced", "hidden", ...(mobile ? ["mobile-editor"] : [])]) {

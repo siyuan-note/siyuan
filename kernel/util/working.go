@@ -46,7 +46,7 @@ var Mode = "prod"
 // SystemTempDir 保存工作空间初始化重定向之前的系统临时目录。
 var SystemTempDir = os.TempDir()
 
-const Ver = "3.8.9-beta.1"
+const Ver = "3.8.9-beta.3"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
@@ -163,6 +163,7 @@ func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, 
 
 	// 工作空间仅允许被一个内核进程伺服
 	tryLockWorkspace()
+	clearWorkspaceStartupTemp()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
 	logging.LogInfo("\n" + bootBanner.String())
@@ -359,15 +360,10 @@ func initWorkspaceDir(workspaceArg string) {
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	QueueDir = filepath.Join(TempDir, "queue")
 	osTmpDir := filepath.Join(TempDir, "os")
-	os.RemoveAll(osTmpDir)
 	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
 		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
-	os.RemoveAll(filepath.Join(TempDir, "repo"))
-	// export 目录只保存临时文件，启动时统一清理；插件不得依赖其中的文件跨进程存续。
-	os.RemoveAll(filepath.Join(TempDir, "export"))
-	os.RemoveAll(filepath.Join(TempDir, "clipboard"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)
@@ -377,6 +373,18 @@ func initWorkspaceDir(workspaceArg string) {
 	BlockTreeDBPath = filepath.Join(TempDir, "blocktree.db")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
 	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
+}
+
+// Only the kernel holding the workspace lock may discard previous-session files.
+func clearWorkspaceStartupTemp() {
+	for _, dir := range []string{"os", "repo", "export", "clipboard"} {
+		os.RemoveAll(filepath.Join(TempDir, dir))
+	}
+	osTmpDir := filepath.Join(TempDir, "os")
+	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
+		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
+	}
 }
 
 func DeduplicateWorkspacePaths(paths []string) []string {
@@ -659,10 +667,8 @@ func UnlockWorkspace() {
 		return
 	}
 
-	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); err != nil {
-		logging.LogErrorf("remove workspace lock failed: %s", err)
-		return
-	}
+	// Keep the lock file identity stable: a new kernel may already hold this file.
+	// Unlinking it would let another kernel create and lock a different file.
 }
 
 func LogDatabaseSize(dbPath string) {

@@ -19,8 +19,12 @@ module.exports = async ({annotations = false} = {}) => {
     }
     const annotationMocks = {
         "../util/fetch": `export const fetchPost = (url, data, callback) => {
-            if (url.endsWith('/setFileAnnotation')) window.pdfSavedAnnotations = JSON.parse(data.data);
             callback?.({code: 0, data: {data: JSON.stringify(window.pdfSavedAnnotations || {})}});
+        };
+        export const fetchSyncPost = async (url, data) => {
+            if (typeof data.baseData !== 'string') throw new Error('Missing annotation save baseline');
+            if (url.endsWith('/setFileAnnotation')) window.pdfSavedAnnotations = JSON.parse(data.data);
+            return {code: 0, msg: '', data: null};
         };`,
         "../layout/getAll": "export const getAllModels = () => ({asset: []});",
         "../protyle/util/compatibility": "export const readText = async () => ''; export const writeText = text => {window.pdfCopiedText = text;};",

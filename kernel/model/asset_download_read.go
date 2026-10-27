@@ -275,12 +275,19 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			avBoxID = tree.Box
 		}
 		avIDs := hashset.New()
+		var relationErr error
 		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if entering && node.Type == ast.NodeAttributeView && node.AttributeViewID != "" {
-				walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
+				relationErr = walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
+				if relationErr != nil {
+					return ast.WalkStop
+				}
 			}
 			return ast.WalkContinue
 		})
+		if relationErr != nil {
+			return relationErr
+		}
 		for _, id := range avIDs.Values() {
 			attrView, parseErr := av.ParseAttributeViewInBox(id.(string), avBoxID)
 			if parseErr != nil {

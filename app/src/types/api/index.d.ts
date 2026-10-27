@@ -1006,11 +1006,11 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
-export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "modeConflict" | "writeFailed"; };
+export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "writeFailed"; };
 
-export type DocumentCapabilities = { "addressingVersion": number; "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "minimumReaderVersion": string | null; "modeState": "legacy" | "structured" | "conflict" | "recovering"; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
+export type DocumentCapabilities = { "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
 
-export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "modeConflict" | "writeFailed"; "stage": string; };
+export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "writeFailed"; "stage": string; };
 
 export type DocumentCreatePlan = { "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
 
@@ -1028,7 +1028,7 @@ export type DocumentNameCondition = { "expectedID": string | null; "parentID": s
 
 export type DocumentNameConditionInput = { "expectedID": string | null; "parentID": string | null; "title": string; };
 
-export type DocumentPath = { "addressingVersion": number; "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
+export type DocumentPath = { "depth": number; "displayPath": string; "id": string; "notebook": string; "parentID": string | null; "path": string; "revision": string; "segments": Array<DocumentPathSegment> | null; "title": DocumentTitle; };
 
 export type DocumentPathSegment = { "empty": boolean; "id": string; "text": string; };
 
@@ -1986,7 +1986,7 @@ export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"
 
 export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
-export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
+export type SetAssetAnnotationRequestInput = { "baseData"?: string | null; "data": string; "path": string; };
 
 export type SetAssetOCRTextRequestInput = { "path": string; "text": string; };
 
@@ -2408,7 +2408,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "documentAddressingVersion": number; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "revision": number; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -3455,6 +3455,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 提交异步重建任务，成功响应只代表任务已提交，不代表索引已经完成。
+     * 重建遍历及最后一批索引写入成功后，通过主 WebSocket 发送 assetContentIndexCompleted 并提示完成；
+     * 遍历或写入失败时提示失败，不发送完成事件。不支持或解析失败的文件会跳过，加密资源不进入全局索引。
+     */
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3674,6 +3679,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 保存 PDF 标注映射。省略 baseData 或传 null 保持旧版整份替换语义。
+     * 提供 baseData 时，将 data 相对该读取基线的逐条变化合并到当前映射，保留其他查看器对不同标注的修改。
+     * 同一标注已被不同内容修改或删除时返回 -1 / "annotation revision conflict"，不写入文件；重复的相同结果可成功。
+     * 基线和 data 必须为 JSON 对象字符串；加密笔记本先认证当前密文，租约和文件格式保持不变。
+     */
     "/api/asset/setFileAnnotation": {
         request: SetAssetAnnotationRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5363,7 +5374,6 @@ export interface APIPOSTRoutes {
      * 文档 ID 路径检查传入内容及现有源的格式和标题；未知格式或标题冲突返回 -1，原文件和时间保持不变。
      * 新传入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；已有低 Spec 源仍可读取并由合法内容替换。
      * 实际文档写入在同一文件锁内重新校验现有源，保留请求字节；附件和插件文件不按文档格式解释。
-     * 不允许覆盖本机 conf/document-addressing.json，恢复设置时须使用 importConf 的逐身份合并流程。
      */
     "/api/file/putFile": {
         request: PutFileRequestInput;
@@ -5481,6 +5491,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * evaluates block collection rules for the new document and its blocks, initializing only new rows.
+     */
     "/api/filetree/duplicateDoc": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5488,6 +5501,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * evaluates block collection rules for every copied document and block, initializing only new rows.
+     */
     "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5654,6 +5670,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * evaluates block collection rules for moved documents and descendants entering a watched scope.
+     * Existing database rows and their field values are preserved. A collection failure is returned after the
+     * physical move; successfully moved documents remain at their new locations.
+     */
     "/api/filetree/moveDocs": {
         request: FileTreeMoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5661,6 +5682,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * has the same collection and partial-failure behavior as MoveDocs.
+     */
     "/api/filetree/moveDocsByID": {
         request: FileTreeMoveIDsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6352,14 +6376,11 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * preserves existing configuration and permission filtering. Administrator
-     * responses also contain documentCapabilities: structuredPaths advertises the ID/segment APIs,
-     * not permission to open a closed or locked notebook. All notebooks use addressing version 2
-     * without a user setting or special build flags. literalSlash requires ready indexes. minimumReaderVersion stays null until the minimum compatible
-     * feature release is verified; it neither controls activation nor permits mixing with older clients.
-     * Revision identifies the fixed capability declaration, not a document path or retired record.
-     * Authentication, locking and network failures must
-     * never be interpreted as an absent capability object or as permission to retry a legacy write.
+     * 保留配置与权限过滤；管理员响应包含 documentCapabilities。
+     * structuredPaths 声明 ID 与标题段接口支持，literalSlash 仅在 indexState=ready 时为 true。
+     * titleFormats 列出支持的标题格式；revision 标识能力声明，不是文档路径或配置版本。
+     * 能力声明不授予关闭或锁定笔记本的访问权，也不表示允许与旧客户端混用。
+     * 认证、锁定和网络失败不能解释为缺少能力对象，失败后不得回退到旧接口继续写入。
      */
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
@@ -6944,6 +6965,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * waits for the document and deck transaction; persistence or commit
+     * failures return code -1 with null data instead of reporting an unsaved deck.
+     */
     "/api/riff/addRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7024,6 +7049,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * waits for the document and deck transaction; persistence or
+     * commit failures return code -1 with null data. Empty deckID removes from all decks.
+     */
     "/api/riff/removeRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7082,6 +7111,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用 method 选择 0（关键词）、1（查询语法）、2（管理员 SQL）或 3（正则表达式）。
+     * orderBy 为 0 时优先返回相关度高的结果，为 1 时优先返回相关度低的结果；2/3 分别为更新时间升序/降序。
+     * 相关度按 FTS5 的 BM25 分数解释（越小越相关）；正则无 FTS 相关度，相关度排序选项按路径排序；SQL 使用自身的排序。
+     */
     "/api/search/fullTextSearchAssetContent": {
         request: SearchAssetContentRequestInput;
         response: { "code": 0; "data": SearchAssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7091,6 +7125,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
+     * 关键字和查询语法模式下，精确块 ID 仍遵循笔记本、文档路径、类型、子类型和忽略条件。
+     * 关键字模式的多词文档搜索按字面量匹配 %、_ 和反斜杠；按文档分组只整理当前页，不改变分页单位。
      */
     "/api/search/fullTextSearchBlock": {
         request: FullTextSearchBlockRequestInput;
@@ -7099,6 +7135,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 按索引记录 ID 获取完整预览；queryMethod 为 0（关键词）或 1（查询语法）时使用 FTS 高亮，
+     * 为 3 时按搜索使用的 Go 正则语义高亮；为 2（SQL）时不将 SQL 用作 MATCH，返回不高亮的完整内容。
+     * 正则无效或仅命中文件名时仍返回完整内容；内容中的 HTML 会转义，仅输出 mark/br 标记。
+     */
     "/api/search/getAssetContent": {
         request: AssetContentRequestInput;
         response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8264,7 +8305,7 @@ export interface APIPOSTRoutes {
      * 主题、图标和代码片段内容等独立资源不随设置包迁移，外观资源列表使用目标工作空间的可用资源。
      * 账号、API token、同步、锁屏密码、数据仓库和加密笔记本密钥保持不变；沿用本机代理及更新通道。
      * ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
-     * documentAddressing 按笔记本身份合并最高要求，缺失字段不清除本机记录；未知或损坏记录在采用设置前返回 -1。
+     * 忽略设置备份中的寻址模式记录，不改变笔记本源格式或加密恢复材料。
      */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;
@@ -8607,6 +8648,7 @@ export interface APIPOSTRoutes {
      * 类型和属性始终筛选最终对象；默认首个内容块优先归属合格列表项，每次标签命中只选择一个对象。
      * 无标签时收集对象不影响筛选；变更收集对象不转换已有条目，预览与实际收集使用相同规则。
      * 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
+     * setAttrViewAutomations 新增范围最多包含 32 个去重后的笔记本或文档；既有超限规则可保留或删减，撤销重做不截断原范围。
      * cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
      * 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
      * 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。

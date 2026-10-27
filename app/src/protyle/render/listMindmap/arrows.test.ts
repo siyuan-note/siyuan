@@ -13,9 +13,9 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
 const methods = view.members.filter(item => ["relationPath", "draw", "resizeViewport", "getViewportAnchorY",
-    "updateDocumentViewport", "rememberViewport", "findLine", "renderInspector"]
+    "updateDocumentViewport", "rememberViewport", "findLine", "renderInspector", "makePaletteRow"]
     .includes(item.name?.getText(source)));
-assert.equal(methods.length, 8);
+assert.equal(methods.length, 9);
 const compiled = transpileModule(`class View {
     ${methods.map(item => item.getText(source)).join("\n")}
 }
@@ -287,7 +287,7 @@ test("the shared direction selector preserves focus and only patches arrow direc
     class Control {
         public children: Control[] = [];
         public attributes = new Map<string, string>();
-        public style: Record<string, string> = {};
+        public style = {setProperty: (name: string, value: string) => this.attributes.set(name, value)};
         public classList = {add: () => {}, toggle: () => {}};
         public events = new Map<string, () => void>();
         public hidden = false;

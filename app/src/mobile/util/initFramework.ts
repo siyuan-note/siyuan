@@ -456,8 +456,7 @@ const initEditorName = () => {
     let enteringDocument = false;
     const richTitle = () => {
         const protyle = window.siyuan.mobile.editor?.protyle;
-        return window.siyuan.documentAddressingVersion === 2 &&
-            protyle?.block.rootID !== protyle?.notebookId;
+        return protyle?.block.rootID !== protyle?.notebookId;
     };
     const openTitle = () => {
         const protyle = window.siyuan.mobile.editor?.protyle;
@@ -471,11 +470,11 @@ const initEditorName = () => {
         if (richTitle() || inputElement.getAttribute("readonly") === "readonly") {
             return titleSavePromise;
         }
-        if (!validateName(inputElement.value, undefined, true)) {
+        if (!validateName(inputElement.value)) {
             const original = inputElement.value;
             inputElement.value = truncateDocumentTitle(inputElement.value);
-            if (window.siyuan.documentAddressingVersion !== 2 || inputElement.value === original ||
-                !validateName(inputElement.value, undefined, true)) {
+            if (inputElement.value === original ||
+                !validateName(inputElement.value)) {
                 return titleSavePromise;
             }
         }

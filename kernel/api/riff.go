@@ -129,9 +129,9 @@ var removeRiffCards = contractHandler(apicontract.RemoveRiffCards, func(c *gin.C
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "removeFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
-	model.PerformTransactions(&transactions)
-	model.WaitForTransactions(transactions)
+	if err := performRiffCardsTransaction("removeFlashcards", request.DeckID, blockIDs); err != nil {
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
 	if request.DeckID != "" {
 		return apicontract.Success(deckData(model.Decks[request.DeckID]))
 	}
@@ -143,11 +143,19 @@ var addRiffCards = contractHandler(apicontract.AddRiffCards, func(c *gin.Context
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "addFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
-	model.PerformTransactions(&transactions)
-	model.WaitForTransactions(transactions)
+	if err := performRiffCardsTransaction("addFlashcards", request.DeckID, blockIDs); err != nil {
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
 	return apicontract.Success(deckData(model.Decks[request.DeckID]))
 })
+
+func performRiffCardsTransaction(action, deckID string, blockIDs []string) error {
+	// Drain earlier edits under the execution lock, retaining queue order while
+	// returning the actual persistence/rollback result to this HTTP request.
+	return model.WithTransactionHistory(func(execute func(*model.Transaction) error) error {
+		return execute(&model.Transaction{DoOperations: []*model.Operation{{Action: action, DeckID: deckID, BlockIDs: blockIDs}}})
+	})
+}
 
 var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Context, request apicontract.RenameRiffDeckRequest) apicontract.Response[apicontract.Null] {
 	if err := model.RenameDeck(request.DeckID, request.Name); err != nil {

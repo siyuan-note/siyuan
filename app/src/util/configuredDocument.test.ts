@@ -10,7 +10,7 @@ const plan = (): DocumentCreatePlan => ({notebook: "box", title: "Title", steps:
     {notebook: "box", parentID: null, id: "fixed", title: {format: "plain", text: "Title"}, markdown: ""},
 ]});
 const location = (): DocumentPath => ({notebook: "box", id: "fixed", parentID: null, path: "/fixed.sy", depth: 1,
-    segments: [], displayPath: "/Title", revision: "saved", addressingVersion: 1,
+    segments: [], displayPath: "/Title", revision: "saved",
     title: {format: "plain", text: "Title", empty: false}});
 const input: Omit<PlanDocCreateRequestInput, "id"> = {notebook: "box", contextID: null, purpose: "document"};
 

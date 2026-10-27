@@ -53,6 +53,11 @@ func WriteTreeIfUnchangedWithPreflight(tree *parse.Tree, original []byte, prefli
 	if err != nil {
 		return 0, err
 	}
+	if recorder := treeRecorder(tree); recorder != nil {
+		if err = recorder.record(diskData); err != nil {
+			return 0, err
+		}
+	}
 	pending, err := treenode.BeginDocumentMetadataWrite(tree)
 	if err != nil {
 		return 0, err
@@ -68,13 +73,19 @@ func WriteTreeIfUnchangedWithPreflight(tree *parse.Tree, original []byte, prefli
 
 // LoadTreeSnapshot 从同一次磁盘读取返回文档及条件写基线，认证和格式兼容处理不写回源文件。
 func LoadTreeSnapshot(boxID, p string, luteEngine *lute.Lute) (tree *parse.Tree, original []byte, err error) {
+	tree, original, _, err = LoadTreeSnapshotWithFix(boxID, p, luteEngine)
+	return
+}
+
+// LoadTreeSnapshotWithFix also reports compatibility repairs that need a conditional write-back.
+func LoadTreeSnapshotWithFix(boxID, p string, luteEngine *lute.Lute) (tree *parse.Tree, original []byte, needFix bool, err error) {
 	mode, err := validateTreePathMode(boxID, p)
 	if err != nil {
 		return
 	}
 	dek, encrypted, release, err := acquireCryptoLease(boxID)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	defer release()
 	original, err = filelock.ReadFile(filepath.Join(util.DataDir, boxID, p))
@@ -83,11 +94,11 @@ func LoadTreeSnapshot(boxID, p string, luteEngine *lute.Lute) (tree *parse.Tree,
 	}
 	data, err := decryptDataWithDEK(boxID, p, original, dek)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	data, _, err = fixTreeJSONDataInMode(boxID, p, data, luteEngine, dek, encrypted, false, mode)
+	data, needFix, err = fixTreeJSONDataInMode(boxID, p, data, luteEngine, dek, encrypted, false, mode)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	tree, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
 	return

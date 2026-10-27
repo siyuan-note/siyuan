@@ -18,6 +18,7 @@ package model
 
 import (
 	"container/heap"
+	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"math"
@@ -369,7 +370,7 @@ func doEmbedAndStore(texts []string, blocks []map[string]any, generation uint64)
 		buf := encodeVector(vectors[i])
 
 		// 原内容仍存在时才写入，路径取当前值，避免编辑、移动或删除期间回写过期结果。
-		err = sql.Exec(stmtStoreEmbedding, buf, model, len(plainText), id, updated, plainText)
+		err = sql.Exec(stmtStoreEmbedding, buf, model, embeddingSpaceID(baseURL, model, dimensions), len(plainText), id, updated, plainText)
 		if err != nil {
 			embeddingStop.Store(true)
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)
@@ -477,12 +478,17 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions(), embeddingTimeout())
+	key, baseURL, model, dimensions := embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions()
+	space := embeddingSpaceID(baseURL, model, dimensions)
+	vectors, err := util.BatchGetEmbeddings([]string{query}, key, baseURL, model, dimensions, embeddingTimeout())
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
 	}
 	queryVec := vectors[0]
+	if len(queryVec) == 0 || space != embeddingSpaceID(embeddingBaseURL(), embeddingModel(), embeddingDimensions()) || !isEmbeddingEnabled() {
+		return
+	}
 
 	boxFilter, boxArgs := buildBoxesFilter(boxes, "be.")
 	pathFilter, pathArgs := buildPathsFilter(paths, "be.")
@@ -507,19 +513,21 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 	for {
 		var q string
-		var args []any
+		args := []any{space, len(queryVec) * embeddingVectorDim}
 		if hasFilter {
-			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.embedding IS NOT NULL AND length(be.embedding) > 0 AND be.rowid > %d", cursor)
+			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.space = ? AND length(be.embedding) = ? AND be.rowid > %d", cursor)
 			if hasTypeFilter {
 				q += " AND " + typeFilter
 			}
 			q += boxFilter + pathFilter + boxDocFilter + excludeFilter
 			// 过滤值通过绑定参数传递，避免 SQL 拼接注入
-			args = append(append(append([]any{}, boxArgs...), pathArgs...), boxDocArgs...)
+			args = append(args, boxArgs...)
+			args = append(args, pathArgs...)
+			args = append(args, boxDocArgs...)
 			args = append(args, excludeArgs...)
 			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
 		} else {
-			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
+			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE space = ? AND length(embedding) = ? AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
 		}
 		rows, qErr := sql.QueryNoLimitArgs(q, args...)
 		if qErr != nil {
@@ -581,6 +589,10 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		}
 	}
 
+	// Discard the search if settings changed while scanning candidates.
+	if space != embeddingSpaceID(embeddingBaseURL(), embeddingModel(), embeddingDimensions()) || !isEmbeddingEnabled() {
+		return
+	}
 	matchedBlockCount = h.Len()
 	if 1 > matchedBlockCount {
 		pageCount = 0
@@ -864,6 +876,12 @@ func embeddingDimensions() int {
 		return confAISnapshot.Embedding.Dimensions
 	}
 	return 0
+}
+
+// Versioned identity of the configured vector space, excluding credentials.
+// The stored byte length additionally verifies the provider's actual output dimension.
+func embeddingSpaceID(baseURL, model string, dimensions int) string {
+	return fmt.Sprintf("v1:%x", sha256.Sum256([]byte(fmt.Sprintf("%q:%q:%d", baseURL, model, dimensions))))
 }
 
 func embeddingModel() string {

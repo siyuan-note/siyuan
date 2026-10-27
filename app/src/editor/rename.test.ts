@@ -9,8 +9,7 @@ test("document and notebook names preserve slash characters independently of fil
     const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const runtime = {siyuan: {documentAddressingVersion: 2,
-        languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
+    const runtime = {siyuan: {languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
     let messages = 0;
     const methods = new Function("window", "Constants", "showMessage", source + "\nreturn {normalizeDocumentTitle, normalizeNotebookName, replaceFileName, validateName};")(
         runtime, {SIZE_TITLE: 512}, () => messages++);
@@ -22,14 +21,11 @@ test("document and notebook names preserve slash characters independently of fil
     assert.equal(methods.replaceFileName("Notebook/name"), "Notebook／name");
     assert.equal(methods.normalizeDocumentTitle("First\nSecond/third"), "FirstSecond/third");
     assert.equal(methods.normalizeDocumentTitle("😀".repeat(513)), "😀".repeat(512));
-    assert.equal(methods.validateName("😀".repeat(512), undefined, true), true);
-    assert.equal(methods.validateName("😀".repeat(513), undefined, true), false);
     assert.equal(methods.validateName("😀".repeat(512)), true);
     assert.equal(methods.validateName("😀".repeat(513)), false);
     assert.equal(methods.normalizeNotebookName(" First\nSecond/third／ "), "FirstSecond/third／");
     assert.equal(methods.normalizeNotebookName("😀".repeat(513)), "😀".repeat(512));
-    runtime.siyuan.documentAddressingVersion = 1;
-    assert.equal(methods.normalizeDocumentTitle("Old/server"), "Old／server");
+    assert.equal(methods.normalizeDocumentTitle("Old/server"), "Old/server");
     assert.equal(methods.normalizeNotebookName("Notebook/name／"), "Notebook/name／");
 });
 
@@ -63,7 +59,7 @@ test("document rename opens complete rich title source instead of editing the de
     const moduleExports: {rename?: (options: object) => void} = {};
     runInNewContext(source, {
         exports: moduleExports,
-        window: {siyuan: {documentAddressingVersion: 2, config: {readonly: false}}},
+        window: {siyuan: {config: {readonly: false}}},
         require: (name: string) => {
             if (name === "../protyle/header/documentTitleDialog") return {openDocumentTitleDialog: (options: unknown) => opened.push(options)};
             if (name === "../dialog/inputDialog") return {openInputDialog: () => assert.fail("A document summary must never become editable source")};

@@ -20,15 +20,16 @@ var (
 
 // BoxMode reports the fixed addressing version without reading or changing any files.
 // Notebook existence and source authentication belong to the caller's access boundary.
-func BoxMode(dataDir, confDir, boxID string) (int, error) {
+func BoxMode(boxID string) (int, error) {
 	if !ast.IsNodeIDPattern(boxID) {
 		return 0, ErrInvalid
 	}
 	return DefaultMode(), nil
 }
 
-func CheckBox(dataDir, confDir, boxID string) error {
-	_, err := BoxMode(dataDir, confDir, boxID)
+// CheckBox 仅校验笔记本 ID 格式，不检查目录、源格式或访问权限。
+func CheckBox(boxID string) error {
+	_, err := BoxMode(boxID)
 	return err
 }
 
@@ -61,7 +62,3 @@ func CheckPaths(upserts, removes []string) error {
 
 // DefaultMode is the fixed diagnostic addressing version, not a notebook setting.
 func DefaultMode() int { return 2 }
-
-// MinimumReaderVersion is unset until an actual released reader has been verified.
-// A nil value does not permit mixing structured-title notebooks with older clients.
-func MinimumReaderVersion() *string { return nil }

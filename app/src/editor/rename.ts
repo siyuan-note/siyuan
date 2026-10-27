@@ -13,7 +13,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 
-export const validateName = (name: string, targetElement?: HTMLElement, documentTitle = false) => {
+export const validateName = (name: string, targetElement?: HTMLElement) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t/.test(name)) {
         if (targetElement) {
             showTooltip(window.siyuan.languages.fileNameRule, targetElement, "error");
@@ -22,7 +22,7 @@ export const validateName = (name: string, targetElement?: HTMLElement, document
         }
         return false;
     }
-    const length = !documentTitle || window.siyuan.documentAddressingVersion === 2 ? Array.from(name).length : name.length;
+    const length = Array.from(name).length;
     if (length > Constants.SIZE_TITLE) {
         if (targetElement) {
             showTooltip(window.siyuan.languages["_kernel"]["106"], targetElement, "error");
@@ -49,15 +49,11 @@ export const normalizeNotebookName = (name: string) => {
 };
 
 export const truncateDocumentTitle = (name: string) => {
-    return window.siyuan.documentAddressingVersion === 2 ?
-        Array.from(name).slice(0, Constants.SIZE_TITLE).join("") : name.substring(0, Constants.SIZE_TITLE);
+    return Array.from(name).slice(0, Constants.SIZE_TITLE).join("");
 };
 
-// 文档标题与文件名分开处理；旧内核保留既有输入规则。
+// 文档标题按 Unicode 字符计数，保留字面斜杠。
 export const normalizeDocumentTitle = (name: string) => {
-    if (window.siyuan.documentAddressingVersion !== 2) {
-        return replaceFileName(name);
-    }
     return truncateDocumentTitle(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, ""));
 };
 
@@ -77,8 +73,7 @@ export const rename = (options: {
         return;
     }
     const rootID = options.path?.split("/").pop()?.replace(/\.sy$/, "");
-    if (options.type === "file" && rootID && rootID !== options.notebookId &&
-        window.siyuan.documentAddressingVersion === 2) {
+    if (options.type === "file" && rootID && rootID !== options.notebookId) {
         void import("../protyle/header/documentTitleDialog").then(({openDocumentTitleDialog}) => {
             openDocumentTitleDialog({id: rootID, notebook: options.notebookId});
         });
@@ -94,7 +89,7 @@ export const rename = (options: {
             }
         },
         onConfirm: (value, dialog) => {
-            if (!validateName(value, undefined, options.type === "file")) {
+            if (!validateName(value)) {
                 return;
             }
             let name = value.trim();

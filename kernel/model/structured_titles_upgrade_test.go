@@ -110,7 +110,7 @@ func TestStructuredTitlesReleasedDataUpgradeAndRestart(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err = documentaddressing.CheckBox(util.DataDir, util.ConfDir, box); err != nil {
+		if err = documentaddressing.CheckBox(box); err != nil {
 			t.Fatal(err)
 		}
 		after, err := os.ReadFile(configPath)
@@ -243,10 +243,10 @@ func TestStructuredTitlesSyncAndSnapshotKeepFixedCapabilities(t *testing.T) {
 	assertUpgraded := func() {
 		t.Helper()
 		for box := range boxes {
-			if err := documentaddressing.CheckBox(receiver.DataPath, util.ConfDir, box); err != nil {
+			if err := documentaddressing.CheckBox(box); err != nil {
 				t.Fatal(err)
 			}
-			snapshot, err := documentaddressing.InspectBox(receiver.DataPath, util.ConfDir, box)
+			snapshot, err := documentaddressing.InspectBox(box)
 			if err != nil || snapshot.Mode != 2 {
 				t.Fatal("sync or snapshot changed the fixed addressing version", snapshot, err)
 			}

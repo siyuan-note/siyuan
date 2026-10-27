@@ -149,4 +149,21 @@ func TestAssetWatcherFileEvents(t *testing.T) {
 			!cache.ExistAsset("assets/removed-b.txt") && !cache.ExistAsset("assets/photo.png") && !indexed("removed-a.txt", "old contents") &&
 			!indexed("removed-b.txt", "old contents") && os.IsNotExist(thumbnailErr)
 	})
+
+	// Moving the watched root leaves an old directory handle on Windows; bind the replacement.
+	if err = os.Rename(assetsDir, filepath.Join(util.DataDir, "retired-assets")); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Mkdir(assetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	write(filepath.Join(assetsDir, "recreated.txt"), "recreated contents")
+	waitFor("replacement root to reconcile missing and new files", func() bool {
+		return !cache.ExistAsset("assets/existing.txt") && !indexed("existing.txt", "replacement contents") &&
+			cache.ExistAsset("assets/recreated.txt") && indexed("recreated.txt", "recreated contents")
+	})
+	write(filepath.Join(assetsDir, "later.txt"), "later contents")
+	waitFor("replacement root to receive subsequent events", func() bool {
+		return cache.ExistAsset("assets/later.txt") && indexed("later.txt", "later contents")
+	})
 }

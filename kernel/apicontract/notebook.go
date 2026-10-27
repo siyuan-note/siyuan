@@ -55,14 +55,11 @@ type NotebookConfData struct {
 }
 
 type DocumentCapabilities struct {
-	AddressingVersion    int      `json:"addressingVersion"`
-	ModeState            string   `json:"modeState" api:"enum=legacy|structured|conflict|recovering"`
-	StructuredPaths      bool     `json:"structuredPaths"`
-	LiteralSlash         bool     `json:"literalSlash"`
-	TitleFormats         []string `json:"titleFormats"`
-	IndexState           string   `json:"indexState" api:"enum=missing|building|ready|error"`
-	MinimumReaderVersion *string  `json:"minimumReaderVersion"`
-	Revision             string   `json:"revision"`
+	StructuredPaths bool     `json:"structuredPaths"`
+	LiteralSlash    bool     `json:"literalSlash"`
+	TitleFormats    []string `json:"titleFormats"`
+	IndexState      string   `json:"indexState" api:"enum=missing|building|ready|error"`
+	Revision        string   `json:"revision"`
 }
 
 type ImportNotebookCryptoBackupRequest struct {

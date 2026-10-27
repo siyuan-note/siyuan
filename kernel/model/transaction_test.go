@@ -192,7 +192,11 @@ func TestCreateOperationTreeNotExposedInJSON(t *testing.T) {
 }
 
 func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
-	tree := &parse.Tree{ID: "20260912000000-doc0001", Root: &ast.Node{Type: ast.NodeDocument}}
+	fixture := setupFileOperationTest(t)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	preservedTree := &parse.Tree{ID: "20260912000001-doc0002"}
 	newOperations := func() []*Operation {
 		return []*Operation{
@@ -203,6 +207,7 @@ func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
 		}
 	}
 	tx := &Transaction{
+		luteEngine:     util.NewLute(),
 		trees:          map[string]*parse.Tree{tree.ID: tree},
 		DoOperations:   newOperations(),
 		UndoOperations: newOperations(),
@@ -229,7 +234,7 @@ func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
 		if nil != err {
 			t.Fatal(err)
 		}
-		if strings.Contains(string(data), "doc000") {
+		if strings.Contains(string(data), tree.ID) || strings.Contains(string(data), preservedTree.ID) {
 			t.Fatalf("AST leaked into transaction JSON: %s", data)
 		}
 		return stop

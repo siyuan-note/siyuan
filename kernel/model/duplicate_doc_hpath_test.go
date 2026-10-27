@@ -80,7 +80,9 @@ func TestDuplicateDocHPath(t *testing.T) {
 			if err != nil || util.IsCiphertext(before) != encrypted {
 				t.Fatalf("invalid source fixture: encrypted=%v, %v", encrypted, err)
 			}
-			DuplicateDoc(source)
+			if err := DuplicateDoc(source); err != nil {
+				t.Fatal(err)
+			}
 			title := source.Root.IALAttr("title")
 			wantHPath := parentHPath + "/" + title
 			if source.HPath != wantHPath || !strings.HasPrefix(title, "Example  Document (Duplicated ") {

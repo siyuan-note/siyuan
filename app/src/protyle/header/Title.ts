@@ -86,7 +86,7 @@ export class Title {
             });
             this.editElement.addEventListener("click", () => {
                 protyle.toolbar?.element.classList.add("fn__none");
-                if (window.siyuan.documentAddressingVersion === 2 && protyle.block.rootID !== protyle.notebookId) {
+                if (protyle.block.rootID !== protyle.notebookId) {
                     void this.openEditor().catch(error => console.error(error));
                 }
             });
@@ -361,14 +361,14 @@ export class Title {
         }
         clearTimeout(this.timeout);
         this.pendingRename = undefined;
-        if (!validateName(this.editElement.textContent, this.editElement, true)) {
+        if (!validateName(this.editElement.textContent, this.editElement)) {
             const original = this.editElement.textContent;
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
             this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
-            if (window.siyuan.documentAddressingVersion !== 2 || this.editElement.textContent === original ||
-                !validateName(this.editElement.textContent, this.editElement, true)) {
+            if (this.editElement.textContent === original ||
+                !validateName(this.editElement.textContent, this.editElement)) {
                 return false;
             }
         }
@@ -481,7 +481,7 @@ export class Title {
     private async loadSource() {
         const id = this.protyle.block.rootID;
         if (this.richEditor || !id || id === this.protyle.notebookId || !this.editElement ||
-            window.siyuan.documentAddressingVersion !== 2 || this.destroyed) {
+            this.destroyed) {
             return;
         }
         if (this.sourceLoading) {
@@ -539,8 +539,7 @@ export class Title {
     }
 
     private needsSourceEditor() {
-        return !this.richEditor && window.siyuan.documentAddressingVersion === 2 &&
-            !!this.protyle.block?.rootID && this.protyle.block.rootID !== this.protyle.notebookId;
+        return !this.richEditor && !!this.protyle.block?.rootID && this.protyle.block.rootID !== this.protyle.notebookId;
     }
 
     public async openEditor(isValid?: () => boolean) {

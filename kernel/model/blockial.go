@@ -143,20 +143,24 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 	if handled, collectionErr := performCollectionAttributeOperations(blockAttrs, true); handled || collectionErr != nil {
 		return collectionErr
 	}
+	return batchSetBlockAttrs(blockAttrs, indexWriteTreeUpsertQueue)
+}
 
+// Validate the entire batch before publishing changes, then publish only persisted documents.
+func batchSetBlockAttrs(blockAttrs []map[string]any, writeTree func(*parse.Tree) error) (err error) {
 	var blockIDs []string
 	for _, blockAttr := range blockAttrs {
 		blockIDs = append(blockIDs, blockAttr["id"].(string))
 	}
 
 	trees := filesys.LoadTrees(blockIDs)
-	var nodes []*ast.Node
-	type docSortModeChange struct {
+	type attributeChange struct {
 		oldAttrs map[string]string
 		node     *ast.Node
-		tree     *parse.Tree
 	}
-	var docSortModeChanges []docSortModeChange
+	changes := map[string][]attributeChange{}
+	var orderedTrees []*parse.Tree
+	seenTrees := map[string]bool{}
 	boxIcons := map[string]string{}
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
@@ -178,44 +182,49 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 				attrs["icon"] = boxIcons[tree.Box]
 			}
 		}
-		oldAttrs, e := setNodeAttrs0(node, attrs, tree.Box)
+		oldAttrs, e := setNodeAttrsData(node, attrs, tree.Box)
 		if nil != e {
 			return e
 		}
 
-		cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
-		pushBlockAttrs(oldAttrs, node)
-		docSortModeChanges = append(docSortModeChanges, docSortModeChange{oldAttrs: oldAttrs, node: node, tree: tree})
-		nodes = append(nodes, node)
+		if !seenTrees[tree.ID] {
+			seenTrees[tree.ID] = true
+			orderedTrees = append(orderedTrees, tree)
+		}
+		changes[tree.ID] = append(changes[tree.ID], attributeChange{oldAttrs: oldAttrs, node: node})
 	}
 
-	for _, tree := range trees {
-		if err = indexWriteTreeUpsertQueue(tree); err != nil {
-			return
+	for i, tree := range orderedTrees {
+		if err = writeTree(tree); err != nil {
+			return fmt.Errorf("batch attribute write failed after saving %d of %d documents: %w", i, len(orderedTrees), err)
+		}
+		IncSync()
+		for _, change := range changes[tree.ID] {
+			newAttrs := parse.IAL2Map(change.node.KramdownIAL)
+			cache.PutBlockIALInBox(change.node.ID, tree.Box, newAttrs)
+			pushBlockAttrs(change.oldAttrs, change.node)
+			if html.EscapeAttrVal(change.oldAttrs["tags"]) != change.node.IALAttr("tags") {
+				ReloadTag()
+			}
+			if change.oldAttrs[DocSortModeAttr] != newAttrs[DocSortModeAttr] && ast.NodeDocument == change.node.Type {
+				cache.RemoveDocIALInBox(tree.Path, tree.Box)
+				cache.PutDocIALInBox(tree.Path, tree.Box, newAttrs)
+			}
+			pushDocSortModeChanged(change.oldAttrs, change.node, tree)
+		}
+		if icon, ok := boxIcons[tree.Box]; ok && IsBoxDoc(tree.Box, tree.ID) {
+			box := &Box{ID: tree.Box}
+			boxConf := box.GetConf()
+			oldIcon := boxConf.Icon
+			boxConf.Icon = icon
+			if err = box.SaveConf(boxConf); err != nil {
+				return fmt.Errorf("batch attribute write failed after saving %d of %d documents: %w", i+1, len(orderedTrees), err)
+			}
+			if oldIcon != icon {
+				pushNotebookIconChanged(tree.Box, icon)
+			}
 		}
 	}
-	for boxID, icon := range boxIcons {
-		box := &Box{ID: boxID}
-		boxConf := box.GetConf()
-		oldIcon := boxConf.Icon
-		boxConf.Icon = icon
-		if err = box.SaveConf(boxConf); err != nil {
-			return
-		}
-		if oldIcon != icon {
-			pushNotebookIconChanged(boxID, icon)
-		}
-	}
-	for _, change := range docSortModeChanges {
-		newAttrs := parse.IAL2Map(change.node.KramdownIAL)
-		if change.oldAttrs[DocSortModeAttr] != newAttrs[DocSortModeAttr] && ast.NodeDocument == change.node.Type {
-			cache.RemoveDocIALInBox(change.tree.Path, change.tree.Box)
-			cache.PutDocIALInBox(change.tree.Path, change.tree.Box, newAttrs)
-		}
-		pushDocSortModeChanged(change.oldAttrs, change.node, change.tree)
-	}
-
-	IncSync()
 	// 不做锚文本刷新
 	return
 }
@@ -377,11 +386,19 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 }
 
 func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (oldAttrs map[string]string, err error) {
+	oldAttrs, err = setNodeAttrsData(node, nameValues, boxID)
+	if err == nil && html.EscapeAttrVal(oldAttrs["tags"]) != node.IALAttr("tags") {
+		ReloadTag()
+	}
+	return
+}
+
+func setNodeAttrsData(node *ast.Node, nameValues map[string]string, boxID string) (oldAttrs map[string]string, err error) {
 	if node.DocumentTitle != nil {
 		for name, value := range nameValues {
 			if strings.EqualFold(name, "title") && value != treenode.ReadDocumentTitle(node).Text ||
 				strings.EqualFold(name, treenode.DocumentTitleEmptyAttr) && value != node.IALAttr(treenode.DocumentTitleEmptyAttr) {
-				return nil, &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(442), cause: treenode.ErrRichDocumentTitleWrite}
+				return nil, &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(446), cause: treenode.ErrRichDocumentTitleWrite}
 			}
 		}
 	}
@@ -478,9 +495,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (
 
 	node.KramdownIAL = parse.Map2IAL(newAttrsUnEsc)
 
-	if html.EscapeAttrVal(oldAttrs["tags"]) != newAttrsUnEsc["tags"] {
-		ReloadTag()
-	}
 	return
 }
 

@@ -324,7 +324,7 @@ test("disposal drops failure state and ignores late requests after lock or destr
     await guard.flush();
 });
 
-test("legacy plain Title flushes debounce once, captures composition, and can cancel pending saves", () => {
+test("plain notebook Title flushes debounce once, captures composition, and can cancel pending saves", () => {
     let nextTimer = 0;
     const timers = new Map<number, () => void>();
     const requests: unknown[] = [];
@@ -338,12 +338,13 @@ test("legacy plain Title flushes debounce once, captures composition, and can ca
             if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 400}};
             return {};
         },
-        window: {siyuan: {documentAddressingVersion: 1},
+        window: {siyuan: {},
             setTimeout: (callback: () => void) => {timers.set(++nextTimer, callback); return nextTimer;}},
         clearTimeout: (timer: number) => timers.delete(timer),
     });
     const title = Object.create(exports.Title.prototype);
     const protyle = editor();
+    protyle.block = {rootID: protyle.notebookId};
     title.protyle = protyle;
     title.editElement = {textContent: "new title"};
     title.rename(protyle);

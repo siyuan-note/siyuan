@@ -65,7 +65,7 @@ func TestWebDAVErrorDetail(t *testing.T) {
 			expected := want
 			if locked {
 				input = fmt.Errorf("%w: %w", dejavu.ErrLockCloudFailed, err)
-				expected = "lock failed " + expected
+				expected = "lock failed: " + expected
 			}
 			if got := formatRepoErrorMsg(input); got != expected+" (Provider: WebDAV)" {
 				t.Fatalf("wrong formatted diagnostic: %q", got)
@@ -107,7 +107,7 @@ func TestFormatRepoCloudLockError(t *testing.T) {
 		err  error
 		want string
 	}{
-		{dns, "lock failed DNS failed [up.qbox.me]"},
+		{dns, "lock failed: DNS failed [up.qbox.me]"},
 		{dejavu.ErrLockCloudFailed, "lock failed"},
 		{fmt.Errorf("%w: secret", dejavu.ErrLockCloudFailed), "lock failed"},
 		{dejavu.ErrCloudLocked, "another device"},

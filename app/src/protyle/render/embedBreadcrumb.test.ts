@@ -54,7 +54,7 @@ test("SQL and JS embed rendering use global preferences and per-result document 
         normalizeHTMLAssetIFrameBlockDOM: (html: string) => html,
         improveBreadcrumbAppearance: noop, processRender: noop, renderEmbedToolbarVisibility: noop, highlightRender: noop, avRender: noop,
         hasClosestByAttribute: () => false, isDirectHeadingEmbed: () => false, isFoldedRenderContent: () => false,
-        isEncryptedBox: () => false, genRenderFrame: noop, getHostCapabilities: () => ({}),
+        isEncryptedBox: () => false, genEmbedRenderFrame: noop, getHostCapabilities: () => ({}),
         fetchPost: (_url: string, data: typeof requests[number], callback: (data: unknown) => void) => {
             requests.push(data);
             callback({data: {blocks: [{block: {rootID: "document", id: "block", content: "one"},

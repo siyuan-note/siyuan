@@ -6,7 +6,7 @@
 		"id": "20210127203829-qe2mzof",
 		"title": "PDF annotation",
 		"type": "doc",
-		"updated": "20260614112547"
+		"updated": "20261027103930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614112546-8xr6fj9",
-				"updated": "20260614112546"
+				"updated": "20261027103930"
 			},
 			"Children": [
 				{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "SiYuan supports PDF file preview and annotation. You can mark up text or areas in a PDF and copy annotation references into documents, enabling two-way linking between literature reading and note writing."
+				}
+			]
+		},
+		{
+			"ID": "20261027103930-m3bd0w0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027103930-m3bd0w0",
+				"updated": "20261027103930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When the same PDF is open in multiple viewers, saves merge changes to different annotations. If another viewer has already changed or deleted the same annotation, an outdated save is rejected and a message asks you to reopen the PDF. Check and copy any unsaved changes you need, then reopen the PDF to load the latest annotations before editing again."
 				}
 			]
 		},
@@ -542,7 +556,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/annotationID \"selected text\"\u0026gt;\u0026gt;"
+									"TextMarkTextContent": "&lt;&lt;assets/xxx.pdf/annotationID \"selected text\"&gt;&gt;"
 								},
 								{
 									"Type": "NodeText",

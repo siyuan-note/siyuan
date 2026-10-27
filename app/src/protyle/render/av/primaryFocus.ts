@@ -20,8 +20,7 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
     }
     if (focusTitle && !bindPrimary && request.boundBlockID && request.boundBlockID === protyle.block?.rootID) {
         const title = protyle.title;
-        const sourceAware = window.siyuan.documentAddressingVersion === 2 &&
-            protyle.block.rootID !== protyle.notebookId;
+        const sourceAware = protyle.block.rootID !== protyle.notebookId;
         let isTitleVisible: () => boolean;
         /// #if MOBILE
         if (sourceAware && window.siyuan.mobile.editor?.protyle !== protyle) {

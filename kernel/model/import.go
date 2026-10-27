@@ -885,7 +885,6 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		updateBoundBlockAvsAttribute(attrViewIDs, avBoxID)
 
 		// 插入关联关系 https://github.com/siyuan-note/siyuan/issues/11628
-		relationAvs := map[string]string{}
 		for _, avID := range avIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil == attrView {
@@ -893,14 +892,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			}
 
 			for _, keyValues := range attrView.KeyValues {
-				if nil != keyValues.Key && av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation {
-					relationAvs[avID] = keyValues.Key.Relation.AvID
+				if nil != keyValues.Key && av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.AvID != "" {
+					av.UpsertAvBackRel(avID, keyValues.Key.Relation.AvID)
 				}
 			}
-		}
-
-		for srcAvID, destAvID := range relationAvs {
-			av.UpsertAvBackRel(srcAvID, destAvID)
 		}
 	}
 
@@ -1597,9 +1592,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				}
 
 				// 如果当前文件夹路径下包含同名的 Markdown 文件，则不创建空文档 https://github.com/siyuan-note/siyuan/issues/13149
-				if gulu.File.IsExist(currentPath+".md") || gulu.File.IsExist(currentPath+".markdown") {
-					targetPaths[curRelPath+".md"] = targetPath
-					return nil
+				for _, extension := range []string{".md", ".markdown"} {
+					if gulu.File.IsExist(currentPath + extension) {
+						targetPaths[curRelPath+extension] = targetPath
+						return nil
+					}
 				}
 
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
@@ -2397,11 +2394,14 @@ func convertMdHyperlinks2WikiLinks(tree *parse.Tree) {
 		if strings.HasPrefix(linkDest, "assets/") {
 			return ast.WalkContinue
 		}
-		if !strings.HasSuffix(linkDest, ".md") && !strings.HasSuffix(linkDest, ".markdown") {
+		linkPath, fragment, hasFragment := strings.Cut(linkDest, "#")
+		if !strings.HasSuffix(linkPath, ".md") && !strings.HasSuffix(linkPath, ".markdown") {
 			return ast.WalkContinue
 		}
-		linkDest = strings.TrimSuffix(linkDest, ".md")
-		linkDest = strings.TrimSuffix(linkDest, ".markdown")
+		linkDest = strings.TrimSuffix(strings.TrimSuffix(linkPath, ".md"), ".markdown")
+		if hasFragment {
+			linkDest += "#" + fragment
+		}
 
 		buf := bytes.Buffer{}
 		buf.WriteString("[[")

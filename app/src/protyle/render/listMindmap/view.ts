@@ -516,6 +516,7 @@ export class ListMindmapView {
         }
         if (this.inspector.contains(target) || this.inspectorPopover.contains(target) || this.buttons.get("style")?.contains(target) ||
             this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
+            this.buttons.get("undo")?.contains(target) || this.buttons.get("redo")?.contains(target) ||
             this.buttons.get("summary")?.contains(target) || this.buttons.get("multiSelect")?.contains(target) ||
             this.levelSelect?.contains(target)) {
             return;
@@ -563,13 +564,16 @@ export class ListMindmapView {
     }
 
     private updateUndoControls() {
+        const hidden = !this.undoState.canUndo && !this.undoState.canRedo && !this.historyPending;
         for (const key of ["undo", "redo"] as const) {
             const button = this.buttons.get(key);
             if (button) {
+                button.hidden = hidden;
                 button.disabled = this.readOnly || this.historyPending || this.undoState.pending ||
                     !(key === "undo" ? this.undoState.canUndo : this.undoState.canRedo);
             }
         }
+        this.queueInspectorLayout();
     }
 
     private async runHistory(redo: boolean) {
@@ -1239,15 +1243,17 @@ export class ListMindmapView {
             .filter(id => this.model.nodes.has(id)) : [];
     }
 
-    public focusNode(id: string) {
+    public focusNode(id: string, reveal = true) {
         if (this.destroyed || !this.model.nodes.has(id)) {
             return;
         }
         this.setInteractionActive(true);
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
-        this.queueInspectorLayout(true);
-        this.revealNode(id);
+        this.queueInspectorLayout(reveal);
+        if (reveal) {
+            this.revealNode(id);
+        }
     }
 
     public setEditing(id?: string) {

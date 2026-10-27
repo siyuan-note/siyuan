@@ -3,20 +3,36 @@ import {readFileSync} from "node:fs";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
+import {isUndoViewportPreserved, preserveUndoViewport} from "./viewport";
 
 const compiled = transpileModule(readFileSync("src/protyle/undo/globalUndo.ts", "utf8")
     .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "") +
-    ";globalThis.api = {markMirror, getMirror, getUndoStateSnapshot, subscribeUndoState, syncMirrorFromBroadcast, initMirror, requestUndo, requestRedo};",
+    ";globalThis.api = {markMirror, getMirror, getUndoStateSnapshot, subscribeUndoState, syncMirrorFromBroadcast, initMirror, requestUndo, requestRedo, focusRootIDs};",
 {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 const load = (extra: Record<string, unknown> = {}) => {
-    const context: any = {console, Constants: {SIYUAN_APPID: "test"},
+    const context: any = {console, Constants: {SIYUAN_APPID: "test"}, isUndoViewportPreserved,
         getMobileToolbarProtyle: (): undefined => undefined, getCurrentEditor: (): undefined => undefined,
         getSelection: () => ({rangeCount: 0}), waitForPendingTransactions: async () => {}, ...extra};
     runInNewContext(compiled, context);
-    return context.api as typeof import("./globalUndo");
+    return context.api as typeof import("./globalUndo") & {focusRootIDs: (ids: string[], focus?: string) => void};
 };
 const plain = (value: unknown) => JSON.parse(JSON.stringify(value));
+
+test("canvas history does not scroll to an offscreen historical block, while ordinary history still locates it", () => {
+    let scrolls = 0;
+    const target = {getBoundingClientRect: () => ({top: -300, bottom: -200}), scrollIntoView: () => scrolls++};
+    const root = {querySelectorAll: () => [target]} as unknown as Element;
+    const owner = {block: {rootID: "doc"}, wysiwyg: {element: root}};
+    const api = load({getCurrentEditor: () => ({protyle: owner}), window: {innerHeight: 800},
+        getUndoFocusTarget: (targets: unknown[]) => targets[0]});
+    const release = preserveUndoViewport(root);
+    api.focusRootIDs(["doc"], "offscreen");
+    assert.equal(scrolls, 0);
+    release();
+    api.focusRootIDs(["doc"], "offscreen");
+    assert.equal(scrolls, 1);
+});
 
 test("history subscriptions follow their document, include broadcasts and dispose independently", () => {
     const api = load();

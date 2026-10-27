@@ -7,6 +7,7 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {getUndoFocusTarget} from "../util/selectionFocus";
 import {isKnownTransactionOperation} from "../util/transactionContract";
 import type {APIPOSTRoutes} from "../../types/api";
+import {isUndoViewportPreserved} from "./viewport";
 /// #if !MOBILE
 import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
@@ -229,7 +230,8 @@ const resolveRootNames = async (rootIDs: string[]): Promise<string[]> => {
 const focusRootIDs = (rootIDs: string[], focusBlockId?: string) => {
     // 只滚动发起窗口的焦点 protyle 到变更块；其他文档不强制重开（撤销物理结果在发起文档）
     const protyle = getActiveProtyle();
-    if (protyle && rootIDs.includes(protyle.block?.rootID) && focusBlockId) {
+    if (protyle && !isUndoViewportPreserved(protyle.wysiwyg.element) &&
+        rootIDs.includes(protyle.block?.rootID) && focusBlockId) {
         const targets = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${focusBlockId}"]`));
         const selection = getSelection();
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;

@@ -44,6 +44,7 @@ import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
+import {isUndoViewportPreserved} from "../undo/viewport";
 import {consumeGutterFoldRestore} from "../ui/gutterVisibility";
 import {setFold} from "../util/blockFold";
 import {refreshHeadingFoldIndicators} from "../util/headingFoldIndicator";
@@ -1573,13 +1574,14 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         syncTrackedRanges(protyle, operations);
     }
     void applyViewFoldStates(protyle);
+    const preserveViewport = isUndoViewportPreserved(protyle.wysiwyg.element);
     pendingUndoEmbedElements.forEach(item => {
         if (!item.isConnected) {
             return;
         }
         item.removeAttribute("data-render");
         blockRender(protyle, item, undefined, () => {
-            if (restoreUndoFocus(protyle, operations)) {
+            if (restoreUndoFocus(protyle, operations) && !preserveViewport) {
                 scrollCenter(protyle);
             }
         });

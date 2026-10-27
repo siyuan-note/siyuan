@@ -392,6 +392,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
             hasUndoStateMirror: () => true,
             subscribeUndoState: (_rootID: string, listener: () => void) => { listener(); return () => {}; },
+            preserveUndoViewport: () => () => {},
             isEncryptedBox: () => false,
             setStorageVal: () => check.fail("Embedded previews cannot persist viewport positions"),
             fetchSyncPost: async () => ({code: 0, data: {dom: full}}),
@@ -1826,8 +1827,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.setEditing();
     view.update(api.readListMindmap(list));
     check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').disabled, true,
-        "the canvas exposes undo while an empty history keeps it disabled");
+        "an empty history keeps undo disabled");
     check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').disabled, true);
+    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').hidden, true);
+    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').hidden, true);
     check.equal(undo, 0);
     check.equal(redo, 0);
     finishAllowed = false;
@@ -2129,6 +2132,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(fitButton.parentElement, toolbarPopup, "fit shares the zoom panel with the slider and reset");
     check.equal(toolbarGroup.querySelector(':scope > [aria-label="listMindmapFit"]'), null,
         "fit no longer occupies a separate top-level toolbar slot");
+    view.setUndoState({canUndo: true, canRedo: false});
     for (const width of [96, 180, 240, 260, 320, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
@@ -2182,6 +2186,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
         }
     }
+    view.setUndoState({canUndo: false, canRedo: false});
     host.style.cssText = originalHostStyle;
     host.focus();
     view.zoomAt(1);

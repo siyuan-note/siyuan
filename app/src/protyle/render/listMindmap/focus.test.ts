@@ -21,11 +21,13 @@ const visit = (item: import("typescript").Node) => {
 };
 visit(controller);
 assert.ok(editorUndo);
-const compiled = transpileModule(`class Controller {
+const compiled = transpileModule(readFileSync("src/protyle/undo/viewport.ts", "utf8").replace(/^export /gm, "") + `
+class Controller {
     ${methods.map(item => item.getText(source)).join("\n")}
     makeEditorUndo(id) { return ${editorUndo}; }
 }
-globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+globalThis.Controller = Controller;
+globalThis.isUndoViewportPreserved = isUndoViewportPreserved;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
 test("canvas history follows embedded source documents, local stacks, busy state and subscription lifetime", () => {
     const listeners = new Map<string, () => void>();
@@ -82,10 +84,38 @@ test("new mind map nodes become selected before editing", async () => {
     assert.deepEqual(steps, ["focus:new", "edit:new"]);
 });
 
+test("canvas undo and redo preserve the viewport throughout replay and release it on errors", async () => {
+    const editor = {isConnected: true};
+    let fail = false;
+    const history = async () => {
+        assert.equal(context.isUndoViewportPreserved(editor), true);
+        await Promise.resolve();
+        assert.equal(context.isUndoViewportPreserved(editor), true);
+        if (fail) { throw new Error("history failed"); }
+    };
+    const owner = {block: {rootID: "doc"}, wysiwyg: {element: editor}, undo: {undo: history, redo: history}};
+    const roots = new WeakMap([[owner, {focusRevision: 0, restoreFocus() {}}]]);
+    const context: any = {roots, canEdit: () => true, cleanListMindmapHTML: (html: string) => html,
+        hasMindmapFocusOverlay: () => false};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {owner,
+        list: {dataset: {nodeId: "map"}, outerHTML: "map", isConnected: true, closest: (): null => null},
+        model: {nodes: new Map()}, view: {getSelectedId: (): undefined => undefined},
+    });
+    for (const redo of [false, true]) {
+        await target.undo(redo);
+        assert.equal(context.isUndoViewportPreserved(editor), false);
+        fail = true;
+        await assert.rejects(target.undo(redo), /history failed/);
+        assert.equal(context.isUndoViewportPreserved(editor), false);
+        fail = false;
+    }
+});
+
 test("embedded history uses the source document and transaction owner without depending on the selection", async () => {
     for (const lite of [false, true]) {
         const submitted: unknown[] = [];
-        const mainOwner = {lite: false};
+        const mainOwner = {lite: false, wysiwyg: {element: {}}};
         const owner = {lite, block: {rootID: "host-document"}, wysiwyg: {element: {isConnected: true}},
             undo: {undo: assert.fail, redo: assert.fail}};
         const embed = {dataset: {rootId: "source-document"}};
@@ -134,7 +164,10 @@ test("undo from a node editor restores that node or its previous sibling", async
     const target = new context.Controller();
     Object.assign(target, {
         owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map", closest: (): null => null}, model: {nodes, root},
-        view: {getSelectedId: () => "root", focusNode: (id: string) => selected.push(id)},
+        view: {getSelectedId: () => "root", focusNode: (id: string, reveal: boolean) => {
+            assert.equal(reveal, false, "history selection must not reveal or pan to the node");
+            selected.push(id);
+        }},
     });
     roots.set(owner, {restoreFocus: (_listID: string, ids: string[]) => target.focusNode(ids)});
     const onEditorUndo = target.makeEditorUndo("new");

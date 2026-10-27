@@ -29,7 +29,11 @@ const runElectron = async () => {
             path.join(__dirname, "../stage/protyle/js/pdf/", name))).toString("base64");
         const runtime = moduleURL("pdf.min.mjs");
         const worker = moduleURL("pdf.worker.min.mjs");
+        const luteSource = readFileSync(path.join(__dirname, "../stage/protyle/js/lute/lute.min.js"), "utf8");
         const cases = [
+            {name: "paragraph-default", scale: 1, margin: 1, realDOM: true},
+            {name: "paragraph-full-width", scale: 1, margin: 1, realDOM: true, width: "100%"},
+            {name: "paragraph-caption", scale: 1, margin: 1, realDOM: true, width: "100%", caption: true},
             {name: "full-size", scale: 1, margin: 1},
             {name: "landscape", scale: 1, margin: 0.42, landscape: true},
             {name: "scaled-up", scale: 1.5, margin: 0.5},
@@ -44,6 +48,7 @@ const runElectron = async () => {
         for (const item of cases) {
             await win.loadURL("data:text/html,<!DOCTYPE html><html><body></body></html>");
             await win.webContents.insertCSS(css + (item.mobile ? mobileCSS : desktopCSS));
+            await win.webContents.executeJavaScript(luteSource);
             const options = await win.webContents.executeJavaScript(`(async () => {
                 const item = ${JSON.stringify(item)};
                 document.body.innerHTML = '<div id="action"></div><div id="previewContainer"><div id="preview"></div></div>';
@@ -77,6 +82,23 @@ const runElectron = async () => {
                     '<div data-node-id="before" data-type="NodeParagraph" style="height:140px">Before image</div>' +
                     '<div data-node-id="picture" data-type="NodeParagraph">' + image + '<hr style="margin:0;border:0"></div>' +
                     '<div data-node-id="after" data-type="NodeHeading">After image</div></div>';
+                if (item.realDOM) {
+                    const lute = Lute.New();
+                    lute.SetKramdownIAL(true);
+                    const markdown = 'Before image\\n\\n![description](assets/sample.png "' +
+                        (item.caption ? 'Image caption '.repeat(30) : '') + '")' +
+                        (item.width ? '{: style="width: ' + item.width + ';"}' : '') + '\\n\\n## After image';
+                    previewElement.firstElementChild.innerHTML = lute.Md2BlockDOM(markdown);
+                    previewElement.querySelector("[data-type=NodeParagraph]").style.height = "140px";
+                    previewElement.querySelectorAll("[data-node-id]").forEach(block => {
+                        if (block.querySelector(".img")) {
+                            block.insertAdjacentHTML("beforeend", '<hr style="margin:0;border:0">');
+                        }
+                    });
+                    const img = previewElement.querySelector("img");
+                    img.loading = "eager";
+                    img.src = canvas.toDataURL();
+                }
                 await previewElement.querySelector("img").decode();
                 if (item.mobile) {
                     previewElement.style.cssText = "max-width:800px;margin:0 auto";

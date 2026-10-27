@@ -224,6 +224,9 @@ const renderPDF = async (id: string) => {
         cmd: "getContentsId",
     });
     const defaultExportPath = await getAvailableExportPath();
+    // 开发编译不会改变版本号，预览页需刷新导出样式和渲染脚本，避免沿用编译前的缓存。
+    const exportResourceVersion = Constants.NODE_ENV === "development" ?
+        `${Constants.SIYUAN_VERSION}-${Date.now()}` : Constants.SIYUAN_VERSION;
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
@@ -234,7 +237,7 @@ const renderPDF = async (id: string) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}stage/build/export/base.css?v=${exportResourceVersion}"/>
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}appearance/themes/daylight/theme.css?v=${Constants.SIYUAN_VERSION}"/>
     <script src="${servePath}stage/protyle/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}"></script>
     ${themeStyle}
@@ -544,7 +547,7 @@ const renderPDF = async (id: string) => {
     </div>
 </div>
 ${getIconScript(servePath)}
-<script src="${servePath}stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
+<script src="${servePath}stage/build/export/protyle-method.js?${exportResourceVersion}"></script>
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     const previewElement = document.getElementById('preview');

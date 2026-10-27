@@ -56,29 +56,43 @@ func readRelations(boxID string) (avRels map[string][]string, err error) {
 }
 
 // writeRelations 写入 relations 索引（boxID 非空时加密）。
-func writeRelations(boxID string, avRels map[string][]string) {
+func writeRelations(boxID string, avRels map[string][]string) error {
 	p := relationsPath(boxID)
 	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
 		logging.LogErrorf("create attribute view dir failed: %s", err)
-		return
+		return err
 	}
 	data, err := msgpack.Marshal(avRels)
 	if err != nil {
 		logging.LogErrorf("marshal attribute view relations failed: %s", err)
-		return
+		return err
 	}
 	if boxID != "" {
 		enc, encErr := encryptAVData(boxID, "relation", data)
 		if encErr != nil {
 			logging.LogErrorf("encrypt attribute view relations failed: %s", encErr)
-			return
+			return encErr
 		}
 		data = enc
 	}
+	if value, ok := relationWriteRecorders.Load(boxID); ok {
+		before, readErr := filelock.ReadFile(p)
+		if os.IsNotExist(readErr) {
+			before, readErr = nil, nil
+		}
+		if readErr != nil {
+			return readErr
+		}
+		if err = value.(SourceWriteRecorder)(boxID, before, data); err != nil {
+			return err
+		}
+		return util.WriteFileIfUnchanged(p, before, data)
+	}
 	if err = filelock.WriteFile(p, data); err != nil {
 		logging.LogErrorf("write attribute view relations failed: %s", err)
-		return
+		return err
 	}
+	return nil
 }
 
 // relationsBoxIDByAvID 由 destAvID 反查归属 boxID，决定 relations 索引的存储位置。
@@ -140,19 +154,24 @@ func collectSrcAvIDsForRefresh(destAvIDs []string, getSrcAvIDs func(string) []st
 }
 
 func RemoveAvRel(srcAvID, destAvID string) {
+	if err := RemoveAvRelWithErr(srcAvID, destAvID); err != nil {
+		logging.LogErrorf("remove attribute view relation failed: %s", err)
+	}
+}
+
+func RemoveAvRelWithErr(srcAvID, destAvID string) error {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
 	boxID := relationsBoxIDByAvID(destAvID)
 	avRels, err := readRelations(boxID)
 	if err != nil {
-		logging.LogErrorf("read attribute view relations failed: %s", err)
-		return
+		return err
 	}
 
 	srcAvIDs := avRels[destAvID]
 	if nil == srcAvIDs {
-		return
+		return nil
 	}
 
 	var newAvIDs []string
@@ -162,10 +181,16 @@ func RemoveAvRel(srcAvID, destAvID string) {
 		}
 	}
 	avRels[destAvID] = newAvIDs
-	writeRelations(boxID, avRels)
+	return writeRelations(boxID, avRels)
 }
 
 func UpsertAvBackRel(srcAvID, destAvID string) {
+	if err := UpsertAvBackRelWithErr(srcAvID, destAvID); err != nil {
+		logging.LogErrorf("upsert attribute view relation failed: %s", err)
+	}
+}
+
+func UpsertAvBackRelWithErr(srcAvID, destAvID string) error {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
@@ -178,20 +203,19 @@ func UpsertAvBackRel(srcAvID, destAvID string) {
 		destEnc := destBox != "" && AVIsEncryptedBox(destBox)
 		if srcEnc != destEnc || (srcEnc && destEnc && srcBox != destBox) {
 			logging.LogWarnf("skip cross-boundary AV relation: src=%s(box=%s) dest=%s(box=%s)", srcAvID, srcBox, destAvID, destBox)
-			return
+			return fmt.Errorf("cross-boundary database relation")
 		}
 	}
 
 	boxID := destBox
 	avRels, err := readRelations(boxID)
 	if err != nil {
-		logging.LogErrorf("read attribute view relations failed: %s", err)
-		return
+		return err
 	}
 
 	srcAvIDs := avRels[destAvID]
 	srcAvIDs = append(srcAvIDs, srcAvID)
 	srcAvIDs = gulu.Str.RemoveDuplicatedElem(srcAvIDs)
 	avRels[destAvID] = srcAvIDs
-	writeRelations(boxID, avRels)
+	return writeRelations(boxID, avRels)
 }

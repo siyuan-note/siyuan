@@ -30,6 +30,12 @@ type documentSourceFile struct {
 }
 
 func (file *documentSourceFile) filename() (string, error) {
+	if file.Kind == "relations" {
+		if (file.Box != "" && !ast.IsNodeIDPattern(file.Box)) || file.Path != "/storage/av/relations.msgpack" {
+			return "", errors.New("invalid database relation recovery path")
+		}
+		return filepath.Join(util.DataDir, file.Box, filepath.FromSlash(file.Path)), nil
+	}
 	if file.Kind == "database" {
 		id := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/storage/av/"), ".json")
 		if (file.Box != "" && !ast.IsNodeIDPattern(file.Box)) || !ast.IsNodeIDPattern(id) || file.Path != "/storage/av/"+id+".json" {
@@ -253,7 +259,7 @@ func (j *documentSourceJournal) rollback() error {
 			id := strings.TrimSuffix(path.Base(file.Path), ".json")
 			cache.RemoveAVDataInBox(id, file.Box)
 			av.ClearBlockCollectionIndex(file.Box)
-		} else {
+		} else if file.Kind == "" {
 			cache.RemoveTreeDataInBox(util.GetTreeID(file.Path), file.Box)
 			cache.RemoveDocIALInBox(file.Path, file.Box)
 		}
@@ -275,6 +281,11 @@ func recoverDocumentSources() error {
 		} else {
 			entry.State = "recovered"
 			if err = entry.save(); err != nil {
+				return err
+			}
+		}
+		if !slices.ContainsFunc(entry.Files, func(file *documentSourceFile) bool { return file.Kind == "" }) {
+			if err = os.Remove(entry.filename()); err != nil {
 				return err
 			}
 		}

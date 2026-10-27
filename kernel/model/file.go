@@ -1904,16 +1904,18 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 
 		var newPath string
 		newPath, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback, refresh)
+		if newPath != "" {
+			movedDocs = append(movedDocs, moveDocResult{
+				FromNotebook: fromBox.ID,
+				FromPath:     fromPath,
+				ToNotebook:   toBox.ID,
+				ToPath:       toPath,
+				NewPath:      newPath,
+			})
+		}
 		if err != nil {
 			return
 		}
-		movedDocs = append(movedDocs, moveDocResult{
-			FromNotebook: fromBox.ID,
-			FromPath:     fromPath,
-			ToNotebook:   toBox.ID,
-			ToPath:       toPath,
-			NewPath:      newPath,
-		})
 		before := collectionBefore[fromPath]
 		var after []*parse.Tree
 		for id := range before {
@@ -2019,9 +2021,45 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 
 	needMoveSubDocs := fromBox.Exist(fromFolder)
-	newPath = path.Join(toFolder, tree.ID+".sy")
+	destinationPath := path.Join(toFolder, tree.ID+".sy")
+	var movingTrees []*parse.Tree
+	var recovery *documentSourceJournal
 	err = filesys.MutateDocumentSourceSet(func() ([]*treenode.BlockTree, error) {
-		return preflightDocumentMove(fromBox.ID, fromPath, toBox.ID, toPath)
+		movingTrees = nil
+		documents, err := preflightDocumentMoveSnapshots(fromBox.ID, fromPath, toBox.ID, toPath, func(snapshot *parse.Tree, destination string) {
+			snapshot.Box, snapshot.Path = toBox.ID, destination
+			movingTrees = append(movingTrees, snapshot)
+		})
+		if err != nil {
+			return nil, err
+		}
+		oldHPath := movingTrees[0].HPath
+		newHPath := "/" + treenode.ReadDocumentTitle(movingTrees[0].Root).Text
+		if toPath != "/" {
+			parent, _, readErr := filesys.ReadTreeSnapshot(toBox.ID, toPath)
+			if readErr != nil {
+				return nil, readErr
+			}
+			newHPath = parent.HPath + newHPath
+		}
+		for _, snapshot := range movingTrees {
+			snapshot.HPath = newHPath + strings.TrimPrefix(snapshot.HPath, oldHPath)
+		}
+		// All sources are authenticated under the source-write lock before renaming.
+		// No post-rename source read or directory walk can interrupt publication.
+		recovery = &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending", Forward: true}
+		seen := map[string]bool{}
+		for _, doc := range documents {
+			key := doc.BoxID + doc.Path
+			if !seen[key] {
+				seen[key] = true
+				recovery.Files = append(recovery.Files, &documentSourceFile{Box: doc.BoxID, Path: doc.Path})
+			}
+		}
+		if err = recovery.save(); err != nil {
+			return nil, err
+		}
+		return documents, nil
 	}, func() error {
 		oldFolder := filepath.Join(util.DataDir, fromBox.ID, fromFolder)
 		newFolder := filepath.Join(util.DataDir, toBox.ID, toFolder, tree.ID)
@@ -2038,20 +2076,24 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 			}
 		}
 		if err := filelock.RenameWithoutFatal(filepath.Join(util.DataDir, fromBox.ID, fromPath),
-			filepath.Join(util.DataDir, toBox.ID, newPath)); err != nil {
+			filepath.Join(util.DataDir, toBox.ID, destinationPath)); err != nil {
 			if needMoveSubDocs {
 				err = errors.Join(err, filelock.RenameWithoutFatal(newFolder, oldFolder))
 			}
 			return err
 		}
-		var readErr error
-		tree, _, readErr = filesys.ReadTreeSnapshot(toBox.ID, newPath)
-		if readErr != nil {
-			return readErr
-		}
-		return moveTree(tree)
+		newPath = destinationPath // The caller must publish this move even if indexing fails.
+		tree = movingTrees[0]
+		return moveTree(movingTrees)
 	})
-	if err != nil {
+	if recovery != nil {
+		if err == nil {
+			err = os.Remove(recovery.filename())
+		} else {
+			util.MarkIndexFixDirty()
+		}
+	}
+	if newPath == "" {
 		return
 	}
 	if !isSameBox {
@@ -2064,12 +2106,10 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 
 	if needMoveSubDocs {
 		// 将其所有子文档的移动事件推送到前端 https://github.com/siyuan-note/siyuan/issues/11661
-		subDocsFolder := path.Join(toFolder, tree.ID)
-		syFiles := listSyFiles(path.Join(toBox.ID, subDocsFolder))
-		for _, syFile := range syFiles {
-			relPath := strings.TrimPrefix(syFile, "/"+path.Join(toBox.ID, toFolder))
+		for _, subTree := range movingTrees[1:] {
+			relPath := strings.TrimPrefix(subTree.Path, toFolder)
 			subFromPath := path.Join(path.Dir(fromPath), relPath)
-			subToPath := path.Join(toFolder, relPath)
+			subToPath := subTree.Path
 
 			evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
 			evt.Data = map[string]any{

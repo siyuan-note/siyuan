@@ -4668,6 +4668,9 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	if err := tx.prepareRelationSourceJournal(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := updateAttributeViewColRelation(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -4853,12 +4856,18 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			}
 		}
 		if !stillRelated {
-			av.RemoveAvRel(srcAv.ID, oldDestAvID)
+			if err = av.RemoveAvRelWithErr(srcAv.ID, oldDestAvID); err != nil {
+				return
+			}
 		}
 	}
-	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
+	if err = av.UpsertAvBackRelWithErr(srcAv.ID, destAv.ID); err != nil {
+		return
+	}
 	if operation.IsTwoWay && !isSameAv {
-		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
+		if err = av.UpsertAvBackRelWithErr(destAv.ID, srcAv.ID); err != nil {
+			return
+		}
 	}
 	if "" != oldDestAvID && oldDestAvID != operation.ID && oldDestAvID != srcAv.ID {
 		ReloadAttrView(oldDestAvID)

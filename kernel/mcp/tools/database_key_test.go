@@ -15,14 +15,18 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func databaseKeyTestWorkspace(t *testing.T) {
 	t.Helper()
-	originalDataDir := util.DataDir
-	util.DataDir = t.TempDir()
-	t.Cleanup(func() { util.DataDir = originalDataDir })
+	originalDataDir, originalQueueDir, originalConf := util.DataDir, util.QueueDir, model.Conf
+	util.DataDir, util.QueueDir = t.TempDir(), t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	t.Cleanup(func() { util.DataDir, util.QueueDir, model.Conf = originalDataDir, originalQueueDir, originalConf })
 }
 
 func databaseKeyTestFixture(t *testing.T, keys ...*av.KeyValues) *av.AttributeView {

@@ -101,6 +101,75 @@ func (tx *Transaction) watchSourceDatabase(view *av.AttributeView) {
 	tx.sourceWatchers = append(tx.sourceWatchers, release)
 }
 
+// Relation configuration can save several databases without touching a document.
+// Establish the durable boundary before its first save, including old targets.
+func (tx *Transaction) prepareRelationSourceJournal(op *Operation) error {
+	if !tx.usesDocumentSourceJournal() {
+		return nil
+	}
+	source, err := av.ParseAttributeView(op.AvID)
+	if err != nil {
+		return err
+	}
+	_, boundary := av.FindAttributeViewPath(source.ID)
+	ids := []string{source.ID, op.ID}
+	if key, _ := source.GetKey(op.KeyID); key != nil && key.Relation != nil && key.Relation.IsTwoWay {
+		ids = append(ids, key.Relation.AvID)
+	}
+	for _, id := range ids {
+		_, box := av.FindAttributeViewPath(id)
+		if box != boundary {
+			return errors.New("cross-boundary database relation")
+		}
+		if _, err = tx.readAttributeViewForMutation(id, "", box); err != nil {
+			return err
+		}
+	}
+	if tx.sourceErr != nil {
+		return tx.sourceErr
+	}
+	if tx.sourceJournal == nil {
+		tx.sourceJournal = &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending"}
+		for _, file := range tx.sourceDatabaseBefore {
+			name, _ := file.filename()
+			file.After, err = os.ReadFile(name)
+			if err != nil {
+				return err
+			}
+			tx.sourceJournal.Files = append(tx.sourceJournal.Files, file)
+		}
+	}
+	tx.sourceJournal.Forward = false
+	if err = tx.sourceJournal.save(); err != nil {
+		return err
+	}
+	if tx.sourceRelationBoundaries == nil {
+		tx.sourceRelationBoundaries = map[string]bool{}
+	}
+	if !tx.sourceRelationBoundaries[boundary] {
+		tx.sourceRelationBoundaries[boundary] = true
+		tx.sourceWatchers = append(tx.sourceWatchers, av.RecordRelationWrites(boundary, func(box string, before, after []byte) error {
+			var file *documentSourceFile
+			for _, candidate := range tx.sourceJournal.Files {
+				if candidate.Kind == "relations" && candidate.Box == box {
+					file = candidate
+					break
+				}
+			}
+			if file == nil {
+				file = &documentSourceFile{Kind: "relations", Box: box, Path: "/storage/av/relations.msgpack", Before: before, After: before}
+				tx.sourceJournal.Files = append(tx.sourceJournal.Files, file)
+			}
+			if !bytes.Equal(before, file.After) {
+				return util.ErrFileChanged
+			}
+			file.After = after
+			return tx.sourceJournal.save()
+		}))
+	}
+	return nil
+}
+
 func (tx *Transaction) readDocumentSource(box, p string) (*parse.Tree, []byte, error) {
 	if !tx.usesDocumentSourceJournal() {
 		tree, err := filesys.LoadTree(box, p, tx.luteEngine)
@@ -212,6 +281,9 @@ func (tx *Transaction) rollbackDocumentSources() {
 	// Rebuild from actual authenticated sources, including failure before the first save.
 	// Queue replacement after any already-enqueued partial saves so SQL converges to the rollback.
 	for _, file := range j.Files {
+		if file.Kind == "relations" {
+			continue
+		}
 		if file.Kind == "database" {
 			id := strings.TrimSuffix(path.Base(file.Path), ".json")
 			av.NotifyAttributeViewSaved(id, file.Box)
@@ -247,6 +319,7 @@ func (tx *Transaction) releaseDocumentSources(committed bool) {
 	}
 	tx.sourceWatchers = nil
 	tx.sourceDatabaseBefore = nil
+	tx.sourceRelationBoundaries = nil
 	if committed && tx.sourceJournal != nil {
 		if err := os.Remove(tx.sourceJournal.filename()); err != nil {
 			logging.LogWarnf("retain committed transaction recovery [%s]: %s", tx.sourceJournal.ID, err)

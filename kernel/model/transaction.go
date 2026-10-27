@@ -2807,6 +2807,7 @@ type Transaction struct {
 	sourceRollbackErr             error
 	sourceWatchers                []func()
 	sourceDatabaseBefore          map[string]*documentSourceFile
+	sourceRelationBoundaries      map[string]bool
 	attributeViewRollback         *attributeViewRollback
 	attributeViewAutomations      *attributeViewAutomationState
 	pushAutomationMessage         func(string, int) string
@@ -2889,6 +2890,7 @@ func (tx *Transaction) WaitForCommit() {
 func (tx *Transaction) begin() (err error) {
 	tx.sourceJournal, tx.sourceLeases = nil, nil
 	tx.sourceDatabaseBefore = nil
+	tx.sourceRelationBoundaries = nil
 	tx.sourceErr, tx.sourceRollbackErr = nil, nil
 	expectedTemplateDocTreeRoot := tx.templateDocTreeRootSnapshot
 	expectedTemplateDocTreeRevision := tx.templateDocTreeRootRevision

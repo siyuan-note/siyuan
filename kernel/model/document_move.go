@@ -13,11 +13,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// preflightDocumentMove 检查整棵子树，未知格式、认证失败和目标冲突都先于首次改动。
-func preflightDocumentMove(fromBox, fromPath, toBox, toPath string) ([]*treenode.BlockTree, error) {
-	return preflightDocumentMoveSnapshots(fromBox, fromPath, toBox, toPath, nil)
-}
-
+// preflightDocumentMoveSnapshots 检查整棵子树，未知格式、认证失败和目标冲突都先于首次改动。
 func preflightDocumentMoveSnapshots(fromBox, fromPath, toBox, toPath string,
 	visit func(before *parse.Tree, destination string)) ([]*treenode.BlockTree, error) {
 	if err := filesys.CheckDocumentAddressing(toBox); err != nil {

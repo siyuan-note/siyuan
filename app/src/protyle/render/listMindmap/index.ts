@@ -881,9 +881,11 @@ class ListMindmapController {
             return;
         }
         this.view.focusNode(item.dataset.nodeId);
-        const content = this.view.getContentHost(item.dataset.nodeId);
-        if (content) {
-            await this.edit(item.dataset.nodeId, content, undefined, clipboard);
+        if (clipboard) {
+            const content = this.view.getContentHost(item.dataset.nodeId);
+            if (content) {
+                await this.edit(item.dataset.nodeId, content, undefined, clipboard);
+            }
         }
     }
 

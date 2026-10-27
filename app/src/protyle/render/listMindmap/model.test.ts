@@ -388,6 +388,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
+            matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
             getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
             hasUndoStateMirror: () => true,
@@ -403,7 +404,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             showMessage: () => check.fail("Embedded edit failed"), globalClickHideMenu: () => {},
             hideAllElements: () => {}, hideElements: () => {}, suspendBlockPopover: () => () => {},
             getInlineStylesCache: () => ({}), getVisibleOrderedStyleKeys: (): string[] => [],
-            openListMindmapEditor: (options: any) => { editorOptions = options; return {finish: async () => true, destroy() {}}; },
+            openListMindmapEditor: (options: any) => {
+                editorOptions = options;
+                return {finish: async () => { options.onFinish(); return true; }, destroy() {}};
+            },
             genListItemElement: () => {
                 const holder = document.createElement("div");
                 holder.innerHTML = lute.Md2BlockDOM("- Added\n");
@@ -442,15 +446,44 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
         check.match(operations[0].doOperations[0].data as string, /Folded child/);
         await target.view.options.onAdd(itemID, "child");
-        check.equal(editorOptions.rootID, "source-document");
+        const addedID = target.view.getSelectedId();
+        check.notEqual(addedID, itemID);
+        check.equal(target.activeEditor, undefined, "new nodes remain selected without mounting an editor");
+        check.equal(editorOptions, undefined);
+        check.equal(document.activeElement, target.host, "new nodes retain the canvas keyboard focus");
         check.match(copies[1].textContent, /Added/);
+        // Direct typing opens the new node's editor and preserves the embedded source identity.
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "typing opens the newly selected node editor");
+        check.equal(editorOptions.node.id, addedID);
+        check.equal(editorOptions.replaceFirstParagraph, "x");
+        check.equal(editorOptions.rootID, "source-document");
         await target.finish();
-        target.activeEditor = undefined;
+        check.equal(target.activeEditor, undefined, "finishing text input releases the node editor");
         await target.undo(false);
         check.doesNotMatch(copies[0].textContent, /Added/);
         await target.undo(true);
         check.match(copies[0].textContent, /Added/);
         check.deepEqual(historyRoots, ["source-document", "source-document"]);
+        // An explicitly created sibling can be deleted immediately, without Esc.
+        editorOptions = undefined;
+        await target.view.options.onAdd(itemID, "sibling");
+        const siblingID = target.view.getSelectedId();
+        check.equal(target.activeEditor, undefined);
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.model.nodes.has(siblingID), false);
+        check.equal(editorOptions, undefined, "deleting a newly selected node never opens an editor");
+        check.equal(target.model.nodes.has(addedID), true, "deleting the sibling preserves the previously added child");
+        // Double-click remains available on explicitly created children.
+        await target.view.options.onAdd(itemID, "child");
+        const childID = target.view.getSelectedId();
+        target.view.getContentHost(childID).dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "double-click opens the newly selected child editor");
+        check.equal(editorOptions.node.id, childID);
+        check.equal(editorOptions.replaceFirstParagraph, undefined);
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }

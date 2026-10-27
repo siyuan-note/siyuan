@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261027172226"
+		"updated": "20261027231810"
 	},
 	"Children": [
 		{
@@ -2052,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261025114801"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
@@ -3003,7 +3003,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xo714c2",
-				"updated": "20261024161816"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
@@ -3078,12 +3078,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-2f033n1",
-				"updated": "20261012014859"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+					"Data": "Double-click the summary text to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
 				}
 			]
 		},

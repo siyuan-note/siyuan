@@ -2311,6 +2311,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     host.style.setProperty("--b3-list-hover", "rgba(100, 100, 100, .4)");
     host.style.setProperty("--b3-menu-background", "#fff");
     host.style.setProperty("--b3-border-color", "#888");
+    host.style.setProperty("--b3-theme-primary", "#3583ff");
     view.selectNode(alpha, true);
     for (const width of [240, 320, 760]) {
         host.style.width = `${width}px`;
@@ -2348,14 +2349,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 "the next color stays outside the first page");
         }
         const selectedColor = palettes[0].querySelector<HTMLElement>(".color__square--current");
-        check.equal(getComputedStyle(selectedColor).boxShadow.match(/inset/g)?.length, 2,
-            "selected colors keep both feedback rings inside the clipped palette");
+        check.equal(getComputedStyle(selectedColor).boxShadow.match(/inset/g)?.length, 1,
+            "selection preserves the thin original border instead of shrinking the color fill");
+        check.equal(selectedColor.querySelector(".color__square-mark use")?.getAttribute("xlink:href"), "#iconSelect",
+            "selected node colors display a check mark");
+        check.equal(selectedColor.offsetWidth, 26);
+        check.equal(selectedColor.offsetHeight, 26);
+        const selectedLine = palettes[1].querySelector<HTMLElement>('[aria-pressed="true"]');
+        check.equal(selectedLine.getAttribute("aria-label"), "default");
+        check.ok(selectedLine.querySelector(".color__square-mark"), "multi-node line colors mark their common value");
         await moveMouse();
-        await moveMouse(palettes[0].children[6]);
-        check.equal(getComputedStyle(palettes[0].children[6]).boxShadow.match(/inset/g)?.length, 2,
-            "hover feedback also stays inside the last visible color: " + JSON.stringify({width,
-                hover: palettes[0].children[6].matches(":hover"), bounds: palettes[0].children[6].getBoundingClientRect().toJSON(),
-                shadow: getComputedStyle(palettes[0].children[6]).boxShadow}));
+        for (const palette of palettes) {
+            await moveMouse(palette.children[6]);
+            check.equal(getComputedStyle(palette.children[6]).boxShadow, "rgb(53, 131, 255) 0px 0px 0px 1px inset",
+                "node and line hover use a uniform thin border inside the last visible color");
+        }
         const beforeSettings = nodeStyles.length;
         managers[0].focus();
         check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapManageNodeColors");
@@ -2368,6 +2376,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(managers[1].getBoundingClientRect().left, managerLeft, "scrolling colors never scrolls the settings button");
         palettes[1].querySelector<HTMLButtonElement>('[aria-label="Line 14"]').click();
         check.deepEqual(nodeStyles.at(-1), [view.getSelectedIds(), {lineColor: "rgb(14, 0, 0)"}]);
+    }
+    const originalAlphaStyle = model.metadata.nodes[alpha];
+    const originalBetaStyle = model.metadata.nodes[beta];
+    for (const [alphaColor, betaColor] of [["rgb(2, 0, 0)", "rgb(2, 0, 0)"], ["rgb(2, 0, 0)", "rgb(3, 0, 0)"]]) {
+        model.metadata.nodes[alpha] = {...originalAlphaStyle, lineColor: alphaColor};
+        model.metadata.nodes[beta] = {...originalBetaStyle, lineColor: betaColor};
+        view.renderInspector();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        const lines = host.querySelectorAll<HTMLElement>(".mindmap-view__inspector-popover .mindmap-view__palette")[1];
+        const selected = lines.querySelectorAll('[aria-pressed="true"]');
+        check.equal(selected.length, alphaColor === betaColor ? 1 : 0, "mixed line colors never indicate a false common selection");
+        if (selected.length) {
+            check.equal(selected[0].getAttribute("aria-label"), "Line 2");
+            check.ok(selected[0].querySelector(".color__square-mark"));
+        }
+    }
+    if (originalAlphaStyle) {
+        model.metadata.nodes[alpha] = originalAlphaStyle;
+    } else {
+        delete model.metadata.nodes[alpha];
+    }
+    if (originalBetaStyle) {
+        model.metadata.nodes[beta] = originalBetaStyle;
+    } else {
+        delete model.metadata.nodes[beta];
     }
     options.nodeColors = () => Array.from({length: 13}, (_, i) => ({label: `Color ${i}`, color: `rgb(${i}, 0, 0)`, backgroundColor: "",
         preview: {color: `rgb(${i}, 0, 0)`, backgroundColor: ""}}));
@@ -2401,6 +2434,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const touchManager = touchPalette.nextElementSibling;
     const managerPosition = touchManager.getBoundingClientRect().left;
     const beforeColorSwipe = nodeStyles.length;
+    const settlePalette = async () => {
+        const deadline = performance.now() + 2000;
+        let stable = 0;
+        let last = -1;
+        while (performance.now() < deadline && stable < 12) {
+            await frame();
+            stable = !touchPalette.hasAttribute("data-scrolling") && Math.abs(touchPalette.scrollLeft - last) < .1 ? stable + 1 : 0;
+            last = touchPalette.scrollLeft;
+        }
+        const step = parseFloat(getComputedStyle(touchPalette).gridTemplateColumns);
+        check.ok(Math.abs(touchPalette.scrollLeft - Math.round(touchPalette.scrollLeft / step) * step) < 1 ||
+            Math.abs(touchPalette.scrollLeft - (touchPalette.scrollWidth - touchPalette.clientWidth)) < 1,
+        "scrolling settles on a complete color column: " + JSON.stringify({left: touchPalette.scrollLeft, step}));
+        check.ok(stable >= 12, "palette scrolling settles within the deadline");
+    };
     const swipeStart = {x: Math.round(touchBounds.right - 12), y: Math.round(touchBounds.top + touchBounds.height / 2)};
     await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
         {type: "touchStart", touchPoints: [{id: 1, ...swipeStart}]},
@@ -2408,7 +2456,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             touchPoints: [{id: 1, x: swipeStart.x - delta, y: swipeStart.y}]})),
         {type: "touchEnd", touchPoints: []},
     ]);
-    await settle();
+    await settlePalette();
     check.ok(touchPalette.scrollLeft > 0, "a native horizontal swipe reaches colors beyond the first six groups");
     check.equal(touchManager.getBoundingClientRect().left, managerPosition, "swiping the palette keeps color settings fixed");
     check.equal(nodeStyles.length, beforeColorSwipe, "swiping colors does not apply a color or alter document styles");
@@ -2427,15 +2475,18 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         ]);
         await settle();
         check.ok(touchPalette.scrollLeft > 0, "a native vertical mouse wheel browses the horizontal palette");
+        await settlePalette();
         touchPalette.scrollLeft = 0;
         await nativeInput([
             {type: "mouseMove", ...start},
             {type: "mouseDown", ...start, button: "left", clickCount: 1},
             ...[20, 40, 60, 80].map(delta => ({type: "mouseMove", x: start.x - delta, y: start.y, button: "left"})),
-            {type: "mouseUp", x: start.x - 80, y: start.y, button: "left", clickCount: 1},
         ]);
         await settle();
-        check.ok(Math.abs(touchPalette.scrollLeft - 80 / scale) < 2, "mouse dragging accounts for an outer editor scale");
+        check.ok(Math.abs(touchPalette.scrollLeft - 80 / scale) < 2,
+            "mouse dragging stays continuous and accounts for an outer editor scale before release");
+        await nativeInput([{type: "mouseUp", x: start.x - 80, y: start.y, button: "left", clickCount: 1}]);
+        await settlePalette();
         check.equal(nodeStyles.length, beforeColorSwipe, "drag release never applies the color underneath the pointer");
         check.deepEqual(view.getSelectedIds(), paletteSelection);
         check.deepEqual({x: view.offsetX, y: view.offsetY, scale: view.scale}, canvasPosition);
@@ -5239,32 +5290,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryLabel.click();
     check.equal(summaryView.selectedSummary, "summary", "touching the summary selects it");
     const summaryInspector = summaryHost.querySelector<HTMLElement>(".mindmap-view__inspector");
-    let summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
-    check.ok(summaryEdit, "summary editing retains its explicit toolbar entry");
+    check.equal(summaryInspector.querySelector('[aria-label="edit"]'), null, "summary editing uses the same double-click gesture as nodes");
     for (const width of [240, 320, 700]) {
         summaryHost.style.width = `${width}px`;
         summaryView.renderInspector();
         await settle();
         const summaryPalette = summaryInspector.querySelector<HTMLElement>(".mindmap-view__palette");
-        const fixed = ["edit", "delete", "listMindmapManageLineColors"]
+        const fixed = ["delete", "listMindmapManageLineColors"]
             .map(key => summaryInspector.querySelector<HTMLElement>(`[aria-label="${key}"]`));
+        check.ok(summaryPalette.children[5].getBoundingClientRect().right <= summaryPalette.getBoundingClientRect().right + 1,
+            "removing the edit control leaves room for default and five summary colors");
+        check.ok(summaryPalette.children[6].getBoundingClientRect().left >= summaryPalette.getBoundingClientRect().right - 1);
         const positions = fixed.map(control => control.getBoundingClientRect().left);
         summaryPalette.scrollLeft = summaryPalette.scrollWidth;
         check.deepEqual(fixed.map(control => control.getBoundingClientRect().left), positions,
-            "summary edit, delete and color settings stay fixed while colors scroll");
+            "summary delete and color settings stay fixed while colors scroll");
         const bounds = summaryInspector.getBoundingClientRect();
         fixed.forEach(control => check.ok(control.getBoundingClientRect().right <= bounds.right));
         check.equal(summaryPalette.children.length, 14, "all existing summary colors remain accessible");
     }
     summaryHost.style.width = "700px";
-    summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
-    summaryEdit.click();
-    check.ok(summaryHost.querySelector(".mindmap-view__summary-editor"), "the retained edit button opens summary text editing");
-    summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor")
-        .dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     summaryLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const reopenedSummary = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(reopenedSummary);
+    check.ok(reopenedSummary, "double-clicking still opens summary text editing without the toolbar edit button");
     reopenedSummary.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     const savedSummary = api.readListMindmap(summaryList).metadata.summaries[0];
     const summaryContext = summaryHost.querySelector("canvas").getContext("2d");

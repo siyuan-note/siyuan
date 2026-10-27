@@ -37,6 +37,8 @@ const browserCases = async (source: string, css: string) => {
             const model = api.readListMindmap(holder.firstElementChild);
             const original = holder.innerHTML;
             const view = new api.ListMindmapView({host, model, onExit: () => {},
+                colors: () => Array.from({length: 13}, (_, i) => ({label: `Color ${i}`, value: `rgb(${i}, 0, 0)`})),
+                onManageLineColors: () => {},
                 onNodeWidths: async () => true});
             const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
             const panel = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
@@ -53,6 +55,22 @@ const browserCases = async (source: string, css: string) => {
                 check.ok(rect.top >= clip.top - 1 && rect.bottom <= clip.bottom + 1,
                     `vertical bounds ${rect.top}..${rect.bottom} within ${clip.top}..${clip.bottom}`);
                 check.ok(rect.left >= clip.left - 1 && rect.right <= clip.right + 1);
+            };
+            const checkPalette = async (columns: number) => {
+                const palette = inspector.querySelector<HTMLElement>(".mindmap-view__palette");
+                const row = palette.parentElement;
+                check.equal(row.style.getPropertyValue("--mindmap-palette-columns"), String(columns));
+                check.ok(palette.querySelector('[aria-pressed="true"] .color__square-mark'));
+                const controls = Array.from(row.children).slice(1);
+                const positions = controls.map(control => control.getBoundingClientRect().left);
+                palette.scrollLeft = 73;
+                await settle();
+                const step = parseFloat(getComputedStyle(palette).gridTemplateColumns);
+                check.ok(palette.scrollLeft > 0);
+                check.ok(Math.abs(palette.scrollLeft - Math.round(palette.scrollLeft / step) * step) < 1,
+                    `${stage}: ${columns} color columns snap into alignment at scale ${scale}`);
+                check.deepEqual(controls.map(control => control.getBoundingClientRect().left), positions,
+                    "scroll snapping keeps action and settings controls fixed");
             };
             await settle();
             select();
@@ -134,13 +152,26 @@ const browserCases = async (source: string, css: string) => {
             view.renderInspector();
             await settle();
             visible(inspector);
+            await checkPalette(7);
             view.selectedEdge = undefined;
+            view.model.metadata.relations.push({id: "relation", from: model.root.children[0].id,
+                to: model.root.children[1].id, label: "Relation"});
+            view.selectedRelation = "relation";
+            view.renderInspector();
+            stage = "relation";
+            await settle();
+            visible(inspector);
+            await checkPalette(5);
+            view.selectedRelation = undefined;
+            view.model.metadata.relations = [];
             view.model.metadata.summaries = [{id: "summary", label: "Summary", parentId: model.root.id,
                 nodeIds: model.root.children.map((node: {id: string}) => node.id)}];
             view.selectSummary("summary");
             stage = "summary";
             await settle();
             visible(inspector);
+            check.equal(inspector.querySelector('[aria-label="edit"]'), null);
+            await checkPalette(6);
             delete view.model.metadata.summaries;
             select();
 

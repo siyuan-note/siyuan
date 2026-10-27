@@ -1029,6 +1029,16 @@
       width: 100%;
       order: 0;
       scrollbar-width: none;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: max(0px, calc((100% / var(--mindmap-palette-columns) - 26px) / 2));
+
+      &[data-scrolling] {
+        scroll-snap-type: none;
+      }
+
+      > .color__square {
+        scroll-snap-align: start;
+      }
     }
   }
 

@@ -3880,9 +3880,19 @@ export class ListMindmapView {
     }
 
     private makePaletteRow(palette: HTMLElement, controls: HTMLElement[], columns = 8) {
+        palette.querySelectorAll(".color__square--current").forEach(control => {
+            control.insertAdjacentHTML("beforeend",
+                '<svg class="color__square-mark" aria-hidden="true"><use xlink:href="#iconSelect"></use></svg>');
+        });
         // 触屏沿用原生横向滚动，鼠标支持拖动和滚轮浏览；拖动完成后不触发色卡点击。
         let drag: {id: number, x: number, scroll: number, scale: number};
         let moved = false;
+        let wheelTimer: number;
+        const snap = () => {
+            if (!drag) {
+                palette.removeAttribute("data-scrolling");
+            }
+        };
         palette.addEventListener("pointerdown", (event: PointerEvent) => {
             moved = false;
             if (event.pointerType !== "mouse" || event.button !== 0 ||
@@ -3902,6 +3912,7 @@ export class ListMindmapView {
             }
             if (!moved) {
                 moved = true;
+                palette.setAttribute("data-scrolling", "");
                 palette.setPointerCapture(event.pointerId);
                 this.tooltip.hidden = true;
             }
@@ -3911,6 +3922,7 @@ export class ListMindmapView {
         const end = (event: PointerEvent) => {
             if (drag?.id === event.pointerId) {
                 drag = undefined;
+                snap();
             }
         };
         palette.addEventListener("pointerup", end);
@@ -3919,6 +3931,7 @@ export class ListMindmapView {
         palette.addEventListener("pointerleave", () => {
             if (!moved) {
                 drag = undefined;
+                snap();
             }
         });
         palette.addEventListener("click", event => {
@@ -3934,9 +3947,12 @@ export class ListMindmapView {
             }
             const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
             if (delta) {
+                palette.setAttribute("data-scrolling", "");
+                window.clearTimeout(wheelTimer);
                 const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
                     event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
                 palette.scrollLeft += delta * unit;
+                wheelTimer = window.setTimeout(snap, 160);
                 event.preventDefault();
             }
         }, {passive: false});
@@ -4006,7 +4022,10 @@ export class ListMindmapView {
                 lines.setAttribute("aria-label", this.label("listMindmapLineColor"));
                 [{label: this.label("default"), value: ""}, ...(this.options.colors?.() || [])].forEach(item => {
                     const control = button("color", "", () => change({lineColor: item.value}));
+                    const selected = panel.ids.every(id => (this.model.metadata.nodes[id]?.lineColor || "") === item.value);
                     control.setAttribute("aria-label", item.label);
+                    control.setAttribute("aria-pressed", String(selected));
+                    control.classList.toggle("color__square--current", selected);
                     control.style.backgroundColor = item.value || "var(--b3-theme-background)";
                     lines.append(control);
                 });
@@ -4121,8 +4140,7 @@ export class ListMindmapView {
             const summary = this.model.metadata.summaries?.find(item => item.id === this.selectedSummary);
             if (summary) {
                 color(summary.color, value => this.options.onSummaryChange?.(summary.id, {color: value}),
-                    [squareButton("edit", "iconEdit", () => this.editSummaryLabel(summary.id)),
-                        squareButton("delete", "iconTrashcan", () => this.options.onSummaryDelete?.(summary.id))]);
+                    [squareButton("delete", "iconTrashcan", () => this.options.onSummaryDelete?.(summary.id))]);
             }
             return;
         }

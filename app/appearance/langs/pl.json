@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Po włączeniu \\(...\\) i \\[...\\] we wklejanej i importowanej treści są automatycznie rozpoznawane odpowiednio jako formuły w wierszu i blokowe",
 	"automationCollectionScopeLimit": "Zakres monitorowania może zawierać łącznie do 32 notatników lub dokumentów",
 	"pdfAnnotationSaveFailed": "Nie można zapisać adnotacji PDF. Otwórz ponownie plik PDF, aby wczytać najnowsze adnotacje przed dalszą edycją",
+	"documentTitleKeepLocal": "Zapisz mój tytuł",
+	"documentTitleLatest": "Najnowszy tytuł",
+	"documentTitleInlineOnly": "Tytuły dokumentów obsługują tylko elementy liniowe",
+	"documentTitleConflict": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
+	"documentTitleCopyReload": "Skopiuj szkic i wczytaj najnowszy tytuł",
 	"skipExitSync": "Pomiń synchronizację i wyjdź",
 	"skipExitSyncConfirm": "Synchronizacja nie została zakończona. Pominąć ją i wyjść? Niezsynchronizowane zmiany pozostaną zapisane na tym urządzeniu",
 	"automationCollectionReference": "Cel odwołania",
@@ -3474,6 +3479,9 @@
 		"441": "Zlecono odbudowę indeksu treści zasobów; śledź postęp w zadaniach w tle",
 		"442": "Odbudowa indeksu treści zasobów zakończona",
 		"443": "Odbudowa indeksu treści zasobów nie powiodła się; sprawdź dziennik jądra",
-		"444": "Nie udało się zapisać dziennika odzyskiwania indeksu; pozostaw SiYuan otwarty i sprawdź miejsce na dysku oraz uprawnienia do katalogu"
+		"444": "Nie udało się zapisać dziennika odzyskiwania indeksu; pozostaw SiYuan otwarty i sprawdź miejsce na dysku oraz uprawnienia do katalogu",
+		"445": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
+		"446": "Zmień ten sformatowany tytuł w edytorze tytułów",
+		"447": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji"
 	}
 }

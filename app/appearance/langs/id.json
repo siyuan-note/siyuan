@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Saat diaktifkan, \\(...\\) dan \\[...\\] dalam konten yang ditempel dan diimpor akan otomatis dikenali sebagai rumus sebaris dan blok",
 	"automationCollectionScopeLimit": "Cakupan pemantauan dapat memuat hingga 32 buku catatan atau dokumen",
 	"pdfAnnotationSaveFailed": "Anotasi PDF tidak dapat disimpan. Buka kembali PDF untuk memuat anotasi terbaru sebelum melanjutkan penyuntingan",
+	"documentTitleKeepLocal": "Simpan judul saya",
+	"documentTitleLatest": "Judul terbaru",
+	"documentTitleInlineOnly": "Judul dokumen hanya mendukung elemen sebaris",
+	"documentTitleConflict": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
+	"documentTitleCopyReload": "Salin draf dan muat judul terbaru",
 	"skipExitSync": "Lewati sinkronisasi dan keluar",
 	"skipExitSyncConfirm": "Sinkronisasi belum selesai. Lewati dan keluar? Perubahan yang belum disinkronkan akan tetap tersimpan di perangkat ini",
 	"automationCollectionReference": "Tujuan referensi",
@@ -3474,6 +3479,9 @@
 		"441": "Tugas pembangunan ulang indeks konten aset telah dikirim; pantau kemajuan di tugas latar belakang",
 		"442": "Pembangunan ulang indeks konten aset selesai",
 		"443": "Pembangunan ulang indeks konten aset gagal; periksa log kernel",
-		"444": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori"
+		"444": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori",
+		"445": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
+		"446": "Edit judul berformat ini melalui editor judul",
+		"447": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan"
 	}
 }

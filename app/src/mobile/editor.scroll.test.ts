@@ -59,6 +59,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
     const window: any = {siyuan: {
         storage: {positions: {root: clone(legacy)}},
         config: {editor: {dynamicLoadBlocks: 128, databaseAttrShow: true}, fileTree: {}}, mobile: {},
+        languages: {settingsPendingSaveError: "Save failed"},
     }};
     const document = {querySelector: (): null => null,
         getElementById: (id: string) => id === "toolbarName" ? toolbar : {}};
@@ -123,6 +124,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "../util/fetch": {fetchPost},
         "../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted-box"},
         "../protyle/util/onGet": {onGet},
+        "../dialog/message": {showMessage: noop},
         "../protyle/scroll/saveScroll": {getDocByScroll: scroll.getDocByScroll, saveScroll: noop},
         "../protyle/ui/hideElements": {hideElements: noop},
         "../protyle/ui/initUI": {addLoading: () => presentation.push("loading")},
@@ -186,6 +188,34 @@ test("cold mobile loading restores the tab's top instead of the document's old b
     assert.equal(state.docRequest.startID, "first");
     assert.equal(state.docRequest.endID, "last");
     assert.equal(state.window.siyuan.storage.positions.root.scrollTop, 8000);
+});
+
+test("mobile document reuse preserves the old owner until the rich title source is saved", async () => {
+    const state = setup();
+    const protyle = await state.load();
+    protyle.notebookId = "old-box";
+    let accept: () => void;
+    const pending = new Promise<void>(resolve => { accept = resolve; });
+    protyle.title.prepareForDocumentSwitch = () => pending;
+    state.presentation.length = 0;
+    const loading = state.load();
+    assert.equal(protyle.notebookId, "old-box");
+    assert.deepEqual(state.presentation, []);
+    accept();
+    assert.equal(await loading, protyle);
+    assert.equal(protyle.notebookId, "box");
+    assert.ok(state.presentation.includes("document"));
+});
+
+test("mobile failed title save retains the current document without hiding or reusing it", async () => {
+    const state = setup();
+    const protyle = await state.load();
+    protyle.notebookId = "old-box";
+    protyle.title.prepareForDocumentSwitch = async () => { throw new Error("Conflict"); };
+    state.presentation.length = 0;
+    await assert.rejects(state.load(), /Loading failed/);
+    assert.equal(protyle.notebookId, "old-box");
+    assert.deepEqual(state.presentation, []);
 });
 
 test("cold and reused mobile editors forward each tab's full saved range and focus", async () => {

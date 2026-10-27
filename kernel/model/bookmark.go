@@ -84,7 +84,7 @@ func removeBookmark(bookmark string, beforeCommit func()) (err error) {
 			if beforeCommit != nil {
 				beforeCommit()
 			}
-			if err = writeReplacementTree(tree, original, "", false); err != nil {
+			if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 				util.ClearPushProgress(100)
 				return
 			}
@@ -166,7 +166,7 @@ func renameBookmark(oldBookmark, newBookmark string, beforeCommit func()) (err e
 			if beforeCommit != nil {
 				beforeCommit()
 			}
-			if err = writeReplacementTree(tree, original, "", false); err != nil {
+			if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 				util.ClearPushProgress(100)
 				return
 			}

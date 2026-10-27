@@ -12,6 +12,7 @@ type transactionActionPayload struct {
 }
 
 var transactionActionPayloads = []transactionActionPayload{
+	{"setDocTitle", reflect.TypeFor[TransactionDocumentTitle](), reflect.TypeFor[string]()},
 	{"updateAttrs", reflect.TypeFor[TransactionAttributeChange](), reflect.TypeFor[Null]()},
 	{"create", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"restoreCreatedDoc", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},

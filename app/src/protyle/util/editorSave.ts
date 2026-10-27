@@ -21,6 +21,13 @@ const syncSessions = new Map<string, SyncSaveScope>();
 const syncTitles = new Map<string, SyncSaveScope>();
 const syncEditors = new Set<IProtyle>();
 
+// 仅在用户明确保留副本并重新加载标题源后，解除该标题的失败保存保护。
+export const acknowledgeDocumentTitleReload = (protyle: IProtyle) => {
+    const key = `title:${protyle.block.rootID}`;
+    editors.get(protyle)?.results.delete(key);
+    syncSessions.get(protyle.id)?.results.delete(key);
+};
+
 export const registerSyncEditorSave = (protyle: IProtyle) => syncEditors.add(protyle);
 
 export const disposeSyncEditorSave = (protyle: IProtyle) => {
@@ -92,8 +99,9 @@ export const trackEditorSaveRequest = <T>(url: string, data: any, promise: Promi
     const operations = transactionList.flatMap((item: {doOperations?: IOperation[]}) =>
         Array.isArray(item?.doOperations) ? item.doOperations : []);
     const keys: string[] = transactions ? operations.length && operations.every((item: IOperation) =>
-        item?.action === "update" && item.id && typeof item.data === "string") ?
-        [...new Set<string>(operations.map((item: IOperation) => `block:${item.id}`))] : [] : ["title"];
+        item.id && (item.action === "update" && typeof item.data === "string" || item.action === "setDocTitle")) ?
+        [...new Set<string>(operations.map((item: IOperation) =>
+            `${item.action === "setDocTitle" ? "title" : "block"}:${item.id}`))] : [] : ["title"];
     const transactionCount = transactionList.length;
     const saveScope = transactions ? data?.session : `${data?.notebook}:${data?.path}`;
     const scopes = transactions ? syncSessions : syncTitles;

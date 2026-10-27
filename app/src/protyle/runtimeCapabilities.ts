@@ -12,6 +12,7 @@ export interface ProtyleRuntimeCapabilities {
     getTransactionOwner?: (operations: IOperation[]) => IProtyle | undefined;
     sanitizeBlockDOM?: (blockDOM: string) => string;
     getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
+    getUnsupportedPasteMessage?: (blocks: string[]) => string;
     richHTMLPaste?: boolean;
     restoreLuteMarkdownSyntax?: (lute: Lute) => void;
 }
@@ -58,6 +59,9 @@ export const getProtyleBlockDOMSanitizer = (protyle: IProtyle) =>
 
 export const getProtyleUnsupportedPasteBlocks = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.getUnsupportedPasteBlocks;
+
+export const getProtyleUnsupportedPasteMessage = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.getUnsupportedPasteMessage;
 
 export const isProtyleRichHTMLPasteEnabled = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.richHTMLPaste === true;

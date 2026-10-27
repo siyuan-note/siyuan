@@ -340,7 +340,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (handleReadonlyAttributeHotkey(protyle, event)) {
             return true;
         }
-        if (protyle.disabled || event.target.closest(".tabs-header")) {
+        if (protyle.disabled || event.target.closest('.tabs-header, [data-document-title="true"]')) {
             return;
         }
         if (!protyle.selectElement.classList.contains("fn__none") &&

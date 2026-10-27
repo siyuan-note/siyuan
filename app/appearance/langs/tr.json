@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Etkinleştirildiğinde, yapıştırılan ve içe aktarılan içerikteki \\(...\\) ve \\[...\\] sırasıyla satır içi ve blok formüller olarak otomatik tanınır",
 	"automationCollectionScopeLimit": "İzleme kapsamı toplamda en fazla 32 not defteri veya belge içerebilir",
 	"pdfAnnotationSaveFailed": "PDF açıklamaları kaydedilemedi. Düzenlemeye devam etmeden önce en son açıklamaları yüklemek için PDF dosyasını yeniden açın",
+	"documentTitleKeepLocal": "Başlığımı kaydet",
+	"documentTitleLatest": "En son başlık",
+	"documentTitleInlineOnly": "Belge başlıkları yalnızca satır içi öğeleri destekler",
+	"documentTitleConflict": "Bu başlık başka bir düzenleyicide değiştirildi. Taslağınız korundu",
+	"documentTitleCopyReload": "Taslağı kopyala ve en son başlığı yükle",
 	"skipExitSync": "Eşitlemeyi atla ve çık",
 	"skipExitSyncConfirm": "Eşitleme henüz tamamlanmadı. Atlayıp çıkılsın mı? Eşitlenmemiş değişiklikler bu cihazda kayıtlı kalacak",
 	"automationCollectionReference": "Başvuru hedefi",
@@ -3474,6 +3479,9 @@
 		"441": "Kaynak içeriği dizinini yeniden oluşturma görevi gönderildi; ilerlemeyi arka plan görevlerinden izleyin",
 		"442": "Kaynak içeriği dizininin yeniden oluşturulması tamamlandı",
 		"443": "Kaynak içeriği dizini yeniden oluşturulamadı; çekirdek günlüğünü kontrol edin",
-		"444": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin"
+		"444": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin",
+		"445": "Bu başlık başka bir düzenleyicide değiştirildi. Taslağınız korundu",
+		"446": "Bu biçimlendirilmiş başlığı başlık düzenleyicisinde düzenleyin",
+		"447": "Başlık kaydedilemiyor; satır içi içeriği, boyutu ve düzenleme bağlamını kontrol edin"
 	}
 }

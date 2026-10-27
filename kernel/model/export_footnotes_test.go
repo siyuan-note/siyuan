@@ -75,6 +75,49 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 	}
 }
 
+func TestExportFootnotesLinkBackToDocumentWithoutTitle(t *testing.T) {
+	const boxID = "20261025000000-box0001"
+	setupExportRelatedTest(t, boxID)
+	Conf.Editor.Store(conf.NewEditor())
+	source := newFootnoteTestDoc(t, boxID, "source")
+	target := newFootnoteTestDoc(t, boxID, "target")
+	source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.ID))
+	target.Root.FirstChild.AppendChild(newFootnoteTestRef(source.ID))
+	for _, tree := range []*parse.Tree{source, target} {
+		writeExportRelatedTestTree(t, tree)
+	}
+
+	for _, wysiwyg := range []bool{false, true} {
+		exported, err := exportTree(source, treeExportOptions{
+			Config:           conf.Export{BlockRefMode: 4, AddTitle: false},
+			WYSIWYG:          wysiwyg,
+			AddDocAnchorSpan: true,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		links, anchors := 0, 0
+		ast.Walk(exported.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering {
+				if node.TextMarkAHref == "#"+source.ID {
+					links++
+				}
+				if node.Type == ast.NodeInlineHTML && strings.Contains(node.TokensStr(), `id="`+source.ID+`"`) {
+					anchors++
+				}
+			}
+			return ast.WalkContinue
+		})
+		if links != 1 || anchors != 1 {
+			t.Fatalf("footnote return link has no unique document anchor (WYSIWYG=%v): links=%d, anchors=%d", wysiwyg, links, anchors)
+		}
+		if source.Root.FirstChild.Type != ast.NodeParagraph || source.Root.FirstChild.Next != nil ||
+			!treenode.IsBlockRef(source.Root.FirstChild.LastChild) {
+			t.Fatal("export changed the source document")
+		}
+	}
+}
+
 func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	const sourceBox = "20260927000002-box0003"
 	const targetBox = "20260927000003-box0004"

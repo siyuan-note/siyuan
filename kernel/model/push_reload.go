@@ -17,7 +17,6 @@
 package model
 
 import (
-	"errors"
 	"maps"
 	"os"
 	"path"
@@ -400,17 +399,40 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 // refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) (changedRootIDs []string) {
-	changedRootIDs, _ = refreshDynamicRefTextsWithWriter(updatedDefNodes, updatedTrees, writeTreeUpsertQueue)
+	changedRootIDs, _ = refreshDynamicRefTextsWithWriter(updatedDefNodes, updatedTrees, writeDynamicRefTree)
 	return
 }
 
+// 动态锚文本仅修改已认证的源快照，遇到并发编辑交由后台重新读取后重试。
+func writeDynamicRefTree(tree *parse.Tree, original []byte) error {
+	size, err := filesys.WriteTreeIfUnchanged(tree, original)
+	if err != nil {
+		return err
+	}
+	sql.UpsertTreeQueue(tree)
+	refreshDocInfoWithSize(tree, size)
+	return nil
+}
+
 func refreshDynamicRefTextsWithWriter(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree,
-	writeTree func(*parse.Tree) error) (changedRootIDs []string, failed bool) {
+	writeTree func(*parse.Tree, []byte) error) (changedRootIDs []string, failed bool) {
 	for t := range updatedTrees {
 		changedRootIDs = append(changedRootIDs, t)
 	}
 
-	for range 7 {
+	visited := map[dynamicRefAnchorKey]bool{}
+	for len(updatedDefNodes) > 0 {
+		for id, node := range updatedDefNodes {
+			key := dynamicRefAnchorKey{dynamicRefAnchorScope(updatedNodeBoxID(node, updatedTrees)), id}
+			if visited[key] {
+				delete(updatedDefNodes, id)
+				continue
+			}
+			visited[key] = true
+		}
+		if len(updatedDefNodes) == 0 {
+			break
+		}
 		updatedRefNodes, updatedRefTrees, writeFailed := refreshDynamicRefTexts0(updatedDefNodes, updatedTrees, writeTree)
 		failed = failed || writeFailed
 		if 1 > len(updatedRefNodes) {
@@ -428,23 +450,27 @@ func refreshDynamicRefTextsWithWriter(updatedDefNodes map[string]*ast.Node, upda
 }
 
 func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree,
-	writeTree func(*parse.Tree) error) (updatedRefNodes map[string]*ast.Node, updatedRefTrees map[string]*parse.Tree, failed bool) {
+	writeTree func(*parse.Tree, []byte) error) (updatedRefNodes map[string]*ast.Node, updatedRefTrees map[string]*parse.Tree, failed bool) {
 	updatedRefNodes = map[string]*ast.Node{}
 	updatedRefTrees = map[string]*parse.Tree{}
 
 	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
-	var changedNodes []*ast.Node
-	var refs []*sql.Ref
+	treeBoxes := map[string]string{}
+	extraChangedNodes := map[string]*ast.Node{}
 	var attributeViewRefs []*sql.Ref
 	for _, updateNode := range updatedDefNodes {
 		boxID := updatedNodeBoxID(updateNode, updatedTrees)
-		refs, changedNodes = getRefsCacheByDefNode(updateNode, boxID)
+		refs, changedNodes := getRefsCacheByDefNode(updateNode, boxID)
+		for _, n := range changedNodes {
+			extraChangedNodes[n.ID] = n
+		}
 		for _, ref := range refs {
 			if sql.AttributeViewRefType == ref.Type {
 				attributeViewRefs = append(attributeViewRefs, ref)
 				continue
 			}
+			treeBoxes[ref.RootID] = ref.Box
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
 				refIDs.Add(ref.BlockID)
@@ -454,29 +480,37 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 			}
 		}
 	}
-	for _, n := range changedNodes {
-		updatedDefNodes[n.ID] = n
+	maps.Copy(updatedDefNodes, extraChangedNodes)
+	resolved, err := resolveDynamicRefAnchorTexts(updatedDefNodes, updatedTrees)
+	if err != nil {
+		queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, err)
+		return updatedRefNodes, updatedRefTrees, true
 	}
-	refreshAttributeViewDynamicRefTexts(updatedDefNodes, attributeViewRefs)
+	refreshAttributeViewDynamicRefTexts(updatedDefNodes, attributeViewRefs, resolved)
 
 	for refTreeID, refNodeIDs := range treeRefNodeIDs {
 		refTree, ok := updatedTrees[refTreeID]
+		boxID, p := "", ""
 		if !ok {
-			var err error
-			refTree, err = LoadTreeByBlockID(refTreeID)
-			if err != nil {
-				if !errors.Is(err, ErrTreeNotFound) {
-					failed = true
-					queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, err)
-				}
+			bt := treenode.GetBlockTreeInExactBox(refTreeID, treeBoxes[refTreeID])
+			if bt == nil {
 				continue
 			}
+			boxID, p = bt.BoxID, bt.Path
+		} else {
+			boxID, p = refTree.Box, refTree.Path
 		}
 
-		// 引用文本先在副本中更新，写入失败时保留已提交的树和索引。
-		cloned := *refTree
-		cloned.Root = cloneRenderNode(refTree.Root)
-		refTree = &cloned
+		// 重新读取认证快照，避免把调用方保留的旧正文或标题作为刷新源回写。
+		refTree, original, err := filesys.LoadTreeSnapshot(boxID, p, util.NewLute())
+		if err != nil {
+			if !os.IsNotExist(err) {
+				failed = true
+				queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, err)
+			}
+			continue
+		}
+		oldTitle := treenode.ReadDocumentTitle(refTree.Root)
 		changedRefNodes := map[string]*ast.Node{}
 		type refTextUpdate struct {
 			blockID string
@@ -489,7 +523,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 			}
 
 			if n.IsBlock() && refNodeIDs.Contains(n.ID) {
-				changed, changedDefNodes := updateRefText(n, updatedDefNodes)
+				changed, changedDefNodes := updateRefText(n, updatedDefNodes, resolved)
 				if changed {
 					changedRefNodes[n.ID] = n
 				}
@@ -509,13 +543,34 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		if len(changedRefNodes) == 0 {
 			continue
 		}
-		if err := writeTree(refTree); err != nil {
+		titleChanged := oldTitle != treenode.ReadDocumentTitle(refTree.Root)
+		if titleChanged {
+			parentPath, pathErr := documentParentDisplayPath(refTree.Box, refTree.Path)
+			if pathErr != nil {
+				failed = true
+				queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, pathErr)
+				continue
+			}
+			refTree.HPath = parentPath + "/" + treenode.ReadDocumentTitle(refTree.Root).Text
+		}
+		var writeErr error
+		if titleChanged {
+			_, writeErr = writeRenameDocWith(refTree, func(tree *parse.Tree) (uint64, error) {
+				return 0, writeTree(tree, original)
+			})
+		} else {
+			writeErr = writeTree(refTree, original)
+		}
+		if writeErr != nil {
 			failed = true
-			queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, err)
+			queueDynamicRefTextRetries(updatedDefNodes, updatedTrees, writeErr)
 			continue
 		}
 		treenode.UpsertBlockTree(refTree)
 		sql.UpdateRefsTreeQueue(refTree)
+		if titleChanged {
+			publishDocumentTitleProjection(refTree)
+		}
 		updatedRefTrees[refTreeID] = refTree
 		if ok {
 			updatedTrees[refTreeID] = refTree

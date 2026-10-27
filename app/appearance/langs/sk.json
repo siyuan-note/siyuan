@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Ak je táto možnosť zapnutá, \\(...\\) a \\[...\\] vo vloženom a importovanom obsahu sa automaticky rozpoznajú ako riadkové a blokové vzorce",
 	"automationCollectionScopeLimit": "Rozsah sledovania môže obsahovať najviac 32 zápisníkov alebo dokumentov",
 	"pdfAnnotationSaveFailed": "Anotácie PDF sa nepodarilo uložiť. Pred ďalšími úpravami znova otvorte PDF a načítajte najnovšie anotácie",
+	"documentTitleKeepLocal": "Uložiť môj názov",
+	"documentTitleLatest": "Najnovší názov",
+	"documentTitleInlineOnly": "Názvy dokumentov podporujú iba riadkové prvky",
+	"documentTitleConflict": "Tento názov bol zmenený v inom editore. Váš koncept zostal zachovaný",
+	"documentTitleCopyReload": "Skopírovať koncept a načítať najnovší názov",
 	"skipExitSync": "Preskočiť synchronizáciu a skončiť",
 	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",
@@ -3474,6 +3479,9 @@
 		"441": "Úloha obnovy indexu obsahu zdrojov bola odoslaná; priebeh sledujte v úlohách na pozadí",
 		"442": "Obnova indexu obsahu zdrojov bola dokončená",
 		"443": "Obnova indexu obsahu zdrojov zlyhala; skontrolujte denník jadra",
-		"444": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka"
+		"444": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka",
+		"445": "Tento názov bol zmenený v inom editore. Váš koncept zostal zachovaný",
+		"446": "Tento formátovaný názov upravte v editore názvov",
+		"447": "Názov sa nedá uložiť; skontrolujte riadkový obsah, veľkosť a kontext úprav"
 	}
 }

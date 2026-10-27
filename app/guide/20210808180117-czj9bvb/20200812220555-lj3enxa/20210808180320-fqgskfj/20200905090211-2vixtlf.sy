@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025133233"
 	},
 	"Children": [
 		{
@@ -3380,7 +3380,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-5abfwla",
-				"updated": "20261024164212"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
@@ -3428,6 +3428,108 @@
 			]
 		},
 		{
+			"ID": "20261025133233-wb4xxky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-wb4xxky",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档标题支持全部原生行级元素，包括组合文字样式、图片、超链接、标签、块引用、行内公式、备注和文件注解引用。可在文档上方编辑完整标题；移动端点击精简标题即可打开标题编辑器。文档树、页签和面包屑显示纯文本摘要。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-qyd5yh8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-qyd5yh8",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标题中的引用归属于文档块，会出现在目标的反向链接中；打开标题反链可定位到标题编辑器。动态锚文本随目标更新，循环引用使用稳定的局部文字，避免标题反复膨胀。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-xqrl2vp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-xqrl2vp",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标题块转换为文档时，行级内容完整进入文档标题；反向转换时恢复为标题块中的内容。已有正文段落即使文字与标题相同，也会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-d3o6mqo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-d3o6mqo",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "笔记本名称也可保留半角 /，仍使用纯文本。名称中的斜杠不产生层级，导出时会生成适合文件系统的名称，不修改已保存的名称。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-edwhu6s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-edwhu6s",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其他编辑器修改标题时，当前输入会保留。可先查看最新标题，再选择保存自己的标题；支持富文本剪贴板时，也可复制当前输入并加载最新标题。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-2ucvzs4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-2ucvzs4",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在标题编辑器中，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 进入正文，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 插入标题内换行。原有行级格式快捷键同样可用，块转换快捷键不适用于标题。"
+				}
+			]
+		},
+		{
 			"ID": "20261023112115-qkbgw0v",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -3460,12 +3562,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-m3x0226",
-				"updated": "20261024164212"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "迁移自动完成，中断后会继续恢复。升级后，请勿再用旧版本打开、编辑、恢复或同步同一数据。旧版本可能拒绝打开采用新版标题格式（Spec 6）的文档，但仍可能读写保留旧格式的文档，也可能将已打开页面中的旧编辑缓存写回，覆盖新标题或内容，并通过同步传播到其他设备。不能因为部分文档无法打开，就认为数据已受到保护。"
+					"Data": "迁移自动完成，中断后会继续恢复。升级后，请勿再用旧版本打开、编辑、恢复或同步同一数据。旧版本可能拒绝打开采用新版标题格式（Spec 6 / Spec 7）的文档，但仍可能读写保留旧格式的文档，也可能将已打开页面中的旧编辑缓存写回，覆盖新标题或内容，并通过同步传播到其他设备。不能因为部分文档无法打开，就认为数据已受到保护。"
 				}
 			]
 		},

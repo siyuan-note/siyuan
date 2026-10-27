@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "启用后自动将粘贴和导入内容中的 \\(...\\)、\\[...\\] 分别识别为行级公式和块级公式",
 	"automationCollectionScopeLimit": "监听范围最多可包含 32 个笔记本或文档",
 	"pdfAnnotationSaveFailed": "无法保存 PDF 标注，请重新打开 PDF 加载最新标注后再编辑",
+	"documentTitleKeepLocal": "保存我的标题",
+	"documentTitleLatest": "最新标题",
+	"documentTitleInlineOnly": "文档标题仅支持行级元素",
+	"documentTitleConflict": "标题已在其他编辑器中修改，当前输入已保留",
+	"documentTitleCopyReload": "复制当前输入并加载最新标题",
 	"skipExitSync": "跳过同步并退出",
 	"skipExitSyncConfirm": "同步尚未完成，是否跳过本次同步并退出？未同步的更改会保留在本机",
 	"automationCollectionReference": "引用目标",
@@ -3474,6 +3479,9 @@
 		"441": "资源文件内容索引重建任务已提交，可在后台任务中查看进度",
 		"442": "资源文件内容索引重建已完成",
 		"443": "资源文件内容索引重建失败，请检查内核日志",
-		"444": "索引恢复日志写入失败，请保持思源运行并检查磁盘空间和目录权限"
+		"444": "索引恢复日志写入失败，请保持思源运行并检查磁盘空间和目录权限",
+		"445": "标题已在其他编辑器中修改，当前输入已保留",
+		"446": "请通过标题编辑器修改此富文本标题",
+		"447": "无法保存标题，请检查行级内容、大小和编辑位置"
 	}
 }

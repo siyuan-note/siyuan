@@ -29,10 +29,10 @@ type attributeViewRefSource struct {
 	boxID string
 }
 
-func refreshAttributeViewDynamicRefTexts(updatedDefNodes map[string]*ast.Node, refs []*sql.Ref) {
+func refreshAttributeViewDynamicRefTexts(updatedDefNodes map[string]*ast.Node, refs []*sql.Ref, resolved ...*dynamicRefAnchorResolver) {
 	for _, source := range attributeViewRefSources(refs) {
 		attrView, err := av.ParseAttributeViewInBox(source.avID, source.boxID)
-		if nil != err || nil == attrView || !updateAttributeViewDynamicRefTexts(attrView, updatedDefNodes) {
+		if nil != err || nil == attrView || !updateAttributeViewDynamicRefTexts(attrView, updatedDefNodes, resolved...) {
 			continue
 		}
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -72,7 +72,7 @@ func attributeViewRefSources(refs []*sql.Ref) (ret []attributeViewRefSource) {
 	return
 }
 
-func updateAttributeViewDynamicRefTexts(attrView *av.AttributeView, updatedDefNodes map[string]*ast.Node) (changed bool) {
+func updateAttributeViewDynamicRefTexts(attrView *av.AttributeView, updatedDefNodes map[string]*ast.Node, resolved ...*dynamicRefAnchorResolver) (changed bool) {
 	if nil == attrView || 0 == len(updatedDefNodes) {
 		return
 	}
@@ -88,7 +88,7 @@ func updateAttributeViewDynamicRefTexts(attrView *av.AttributeView, updatedDefNo
 			if nil != err || nil == fragmentTree {
 				continue
 			}
-			valueChanged, _ := updateRefText(fragmentTree.Root, updatedDefNodes)
+			valueChanged, _ := updateRefText(fragmentTree.Root, updatedDefNodes, resolved...)
 			if !valueChanged {
 				continue
 			}

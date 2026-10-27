@@ -103,12 +103,12 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	sourceBefore := read(definition)
 	writeCalls := 0
 	_, failed := refreshDynamicRefTextsWithWriter(map[string]*ast.Node{def.ID: def},
-		map[string]*parse.Tree{definition.ID: definition, reference.ID: reference}, func(tree *parse.Tree) error {
+		map[string]*parse.Tree{definition.ID: definition, reference.ID: reference}, func(tree *parse.Tree, original []byte) error {
 			writeCalls++
 			if tree.ID == reference.ID {
 				return errors.New("injected disk write failure")
 			}
-			return writeTreeUpsertQueue(tree)
+			return writeDynamicRefTree(tree, original)
 		})
 	if !failed || writeCalls != 2 {
 		t.Fatalf("failed refresh must still save unrelated reference trees: failed=%v writes=%d", failed, writeCalls)

@@ -315,7 +315,7 @@ export const newFileAtPath = (options: {
     onCreated: (id: string, title: string) => void;
 }) => {
     const title = normalizeDocumentTitle(options.name.trim());
-    if (!options.isValid() || (title && !validateName(title, undefined, true))) {
+    if (!options.isValid() || (title && !validateName(title))) {
         return;
     }
     let submitted = false;

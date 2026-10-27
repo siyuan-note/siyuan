@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Wenn aktiviert, werden \\(...\\) und \\[...\\] in eingefügten und importierten Inhalten automatisch als Inline- bzw. Blockformeln erkannt",
 	"automationCollectionScopeLimit": "Der Überwachungsbereich kann höchstens 32 Notizbücher oder Dokumente enthalten",
 	"pdfAnnotationSaveFailed": "PDF-Anmerkungen konnten nicht gespeichert werden. Öffne die PDF erneut, um vor weiteren Änderungen die aktuellen Anmerkungen zu laden",
+	"documentTitleKeepLocal": "Meinen Titel speichern",
+	"documentTitleLatest": "Aktueller Titel",
+	"documentTitleInlineOnly": "Dokumenttitel unterstützen nur Inline-Elemente",
+	"documentTitleConflict": "Dieser Titel wurde in einem anderen Editor geändert. Ihr Entwurf bleibt erhalten",
+	"documentTitleCopyReload": "Entwurf kopieren und aktuellen Titel laden",
 	"skipExitSync": "Synchronisierung überspringen und beenden",
 	"skipExitSyncConfirm": "Die Synchronisierung ist noch nicht abgeschlossen. Überspringen und beenden? Nicht synchronisierte Änderungen bleiben auf diesem Gerät gespeichert",
 	"automationCollectionReference": "Referenzziel",
@@ -3474,6 +3479,9 @@
 		"441": "Neuaufbau des Ressourceninhaltsindex beauftragt; Fortschritt in den Hintergrundaufgaben verfolgen",
 		"442": "Neuaufbau des Ressourceninhaltsindex abgeschlossen",
 		"443": "Neuaufbau des Ressourceninhaltsindex fehlgeschlagen; Kernel-Protokoll prüfen",
-		"444": "Das Protokoll zur Indexwiederherstellung konnte nicht gespeichert werden; lassen Sie SiYuan geöffnet und prüfen Sie den Speicherplatz und die Verzeichnisberechtigungen"
+		"444": "Das Protokoll zur Indexwiederherstellung konnte nicht gespeichert werden; lassen Sie SiYuan geöffnet und prüfen Sie den Speicherplatz und die Verzeichnisberechtigungen",
+		"445": "Dieser Titel wurde in einem anderen Editor geändert. Ihr Entwurf bleibt erhalten",
+		"446": "Bearbeiten Sie diesen formatierten Titel im Titeleditor",
+		"447": "Der Titel kann nicht gespeichert werden; prüfen Sie Inline-Inhalt, Größe und Bearbeitungskontext"
 	}
 }

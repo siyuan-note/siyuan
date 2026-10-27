@@ -61,12 +61,23 @@ func TestMatchHTMLClipboardElements(t *testing.T) {
 	lute := util.NewLute()
 	lute.SetHTMLTag2TextMark(true)
 	blockDOM := lute.HTML2BlockDOM(output)
-	for _, want := range []string{`data-type="NodeHeading"`, `data-type="strong"`, `data-type="a"`, `data-type="s"`, `data-href="https://example.com"`, `data-title="title"`} {
+	for _, want := range []string{`data-type="NodeHeading"`, `data-type="strong"`} {
 		if !strings.Contains(blockDOM, want) {
 			t.Errorf("missing %q: %s", want, blockDOM)
 		}
 	}
-	for _, unexpected := range []string{"color:", "background", "font-family:", "font-size:", `data-type="a u`} {
+	for range 3 {
+		blockDoc, err := goquery.NewDocumentFromReader(strings.NewReader(blockDOM))
+		if err != nil {
+			t.Fatal(err)
+		}
+		// 组合样式平铺到同一文本标记，链接目标、标题和删除线必须在编辑转换后保留。
+		if blockDoc.Find(`[data-type~="a"][data-type~="s"][data-href="https://example.com"][data-title="title"]`).Text() != "link" || blockDoc.Find(`[data-type~="a"][data-type~="u"]`).Length() != 0 {
+			t.Fatalf("lost combined link styles: %s", blockDOM)
+		}
+		blockDOM = lute.SpinBlockDOM(blockDOM)
+	}
+	for _, unexpected := range []string{"color:", "background", "font-family:", "font-size:"} {
 		if strings.Contains(blockDOM, unexpected) {
 			t.Errorf("unexpected %q: %s", unexpected, blockDOM)
 		}

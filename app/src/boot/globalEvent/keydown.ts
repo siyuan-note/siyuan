@@ -292,7 +292,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
+            title: protyle.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : null,
         });
         return true;
     }
@@ -315,7 +315,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
+            title: protyle.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : null,
         });
         return true;
     }
@@ -325,7 +325,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             app,
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
-            title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
+            title: protyle.options.render.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : "",
             isPreview: !protyle.preview.element.classList.contains("fn__none")
         });
         return true;

@@ -137,10 +137,10 @@ func globalBacklinkSnapshotPut(query GlobalBacklinkQuery, items []*GlobalBacklin
 	return token, snapshot, nil
 }
 
-// 同一引用块只产生一个条目，按正文遍历选择首个命中的行内引用。
+// 同一引用块只产生一个条目，按源顺序选择首个命中的行内引用（含文档标题）。
 func globalBacklinkAnchor(node *ast.Node, targets map[string]bool) string {
 	text := ""
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

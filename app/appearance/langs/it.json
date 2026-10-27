@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Se abilitato, riconosce automaticamente \\(...\\) e \\[...\\] nei contenuti incollati e importati come formule in linea e a blocchi, rispettivamente",
 	"automationCollectionScopeLimit": "L’ambito di monitoraggio può contenere fino a 32 taccuini o documenti",
 	"pdfAnnotationSaveFailed": "Impossibile salvare le annotazioni PDF. Riapri il PDF per caricare le annotazioni più recenti prima di continuare a modificare",
+	"documentTitleKeepLocal": "Salva il mio titolo",
+	"documentTitleLatest": "Titolo più recente",
+	"documentTitleInlineOnly": "I titoli dei documenti supportano solo elementi in linea",
+	"documentTitleConflict": "Questo titolo è stato modificato in un altro editor. La bozza è conservata",
+	"documentTitleCopyReload": "Copia la bozza e carica il titolo più recente",
 	"skipExitSync": "Salta la sincronizzazione ed esci",
 	"skipExitSyncConfirm": "La sincronizzazione non è terminata. Saltarla e uscire? Le modifiche non sincronizzate rimarranno salvate su questo dispositivo",
 	"automationCollectionReference": "Destinazione del riferimento",
@@ -3474,6 +3479,9 @@
 		"441": "Attività di ricostruzione dell’indice del contenuto delle risorse inviata; segui l’avanzamento nelle attività in background",
 		"442": "Ricostruzione dell’indice del contenuto delle risorse completata",
 		"443": "Ricostruzione dell’indice del contenuto delle risorse non riuscita; controlla il registro del kernel",
-		"444": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella"
+		"444": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella",
+		"445": "Questo titolo è stato modificato in un altro editor. La bozza è conservata",
+		"446": "Modifica questo titolo formattato nell’editor dei titoli",
+		"447": "Impossibile salvare il titolo; verifica contenuto in linea, dimensioni e contesto di modifica"
 	}
 }

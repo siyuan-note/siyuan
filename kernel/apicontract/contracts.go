@@ -421,6 +421,10 @@ var (
 
 var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/getDocInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// GetDocTitle 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
+// 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
+var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle", "/api/block/getDocTitle", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
 var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/block/getTreeStat", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1157,7 +1161,11 @@ var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/fi
 var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDocByID = define[FileTreeTrimIDRequest, Null]("removeDocByID", "/api/filetree/removeDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDocs = define[FileTreePathsRequest, Null]("removeDocs", "/api/filetree/removeDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RenameDoc 仅修改普通标题；富文本标题原样回传摘要为无操作，其他摘要写入拒绝以保护完整源。
 var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/renameDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RenameDocByID 与 RenameDoc 使用相同的富文本保护；修改富文本必须使用带源版本的 setDocTitle 事务。
 var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // DuplicateDoc evaluates block collection rules for the new document and its blocks, initializing only new rows.
@@ -1801,7 +1809,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 字段失效或目标数据库被删除时，后续条目写入停用规则并保留配置，源修改仍提交；提交后提示失效引用。
 // 修复后需手动启用，撤销源修改不重新启用规则；锁定、认证失败、损坏及实际写入失败仍一起回滚。
 // 跨库动作限于同一加密边界，要求目标可访问；单笔事务最多执行 1000 个自动操作。
-var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-409}}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformRedo = define[TransactionHistoryRequest, TransactionHistoryResult]("performRedo", "/api/transactions/redo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

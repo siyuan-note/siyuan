@@ -1432,7 +1432,11 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	if id == "" {
 		id = ast.NewNodeID()
 	}
-	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, map[string]string{"tags": tags})
+	var attributes map[string]string
+	if tags != "" {
+		attributes = map[string]string{"tags": tags}
+	}
+	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, attributes)
 	if err != nil {
 		return
 	}
@@ -2428,6 +2432,12 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 // 规范化标题及空标题标记，由调用方选择普通写入或基于扫描源的条件写入。
 func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUpdated bool, err error) {
+	if tree.Root.DocumentTitle != nil {
+		if title != treenode.ReadDocumentTitle(tree.Root).Text {
+			err = &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(446), cause: treenode.ErrRichDocumentTitleWrite}
+		}
+		return
+	}
 	title = normalizeDocumentTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299

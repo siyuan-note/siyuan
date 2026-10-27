@@ -38,7 +38,6 @@ import (
 	"github.com/88250/lute/render"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -674,6 +673,9 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
 		return
 	}
+	if err = treenode.RefreshDocumentTitle(tree.Root); err != nil {
+		return
+	}
 	if err = treenode.CheckSpec(tree); nil != err {
 		return
 	}
@@ -786,7 +788,7 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 	}
 	jsonData, removedNull := removeUnescapedUnicodeNull(jsonData)
 	needFix = needFix || removedNull
-	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, parseNeedFix, err := treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if parseNeedFix {
 		needFix = true
 	}
@@ -896,7 +898,7 @@ func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lut
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
-	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, _, err = treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)

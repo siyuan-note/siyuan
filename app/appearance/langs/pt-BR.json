@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Quando ativado, reconhece automaticamente \\(...\\) e \\[...\\] no conteúdo colado e importado como fórmulas em linha e em bloco, respectivamente",
 	"automationCollectionScopeLimit": "O escopo de monitoramento pode conter até 32 cadernos ou documentos",
 	"pdfAnnotationSaveFailed": "Não foi possível salvar as anotações do PDF. Reabra o PDF para carregar as anotações mais recentes antes de continuar editando",
+	"documentTitleKeepLocal": "Salvar meu título",
+	"documentTitleLatest": "Título mais recente",
+	"documentTitleInlineOnly": "Os títulos de documentos aceitam apenas elementos em linha",
+	"documentTitleConflict": "Este título foi alterado em outro editor. Seu rascunho foi preservado",
+	"documentTitleCopyReload": "Copiar rascunho e carregar o título mais recente",
 	"skipExitSync": "Ignorar sincronização e sair",
 	"skipExitSyncConfirm": "A sincronização não terminou. Ignorar e sair? As alterações não sincronizadas permanecerão salvas neste dispositivo",
 	"automationCollectionReference": "Destino da referência",
@@ -3474,6 +3479,9 @@
 		"441": "Tarefa de reconstrução do índice de conteúdo dos recursos enviada; acompanhe o progresso nas tarefas em segundo plano",
 		"442": "Reconstrução do índice de conteúdo dos recursos concluída",
 		"443": "Falha ao reconstruir o índice de conteúdo dos recursos; verifique o log do kernel",
-		"444": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório"
+		"444": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório",
+		"445": "Este título foi alterado em outro editor. Seu rascunho foi preservado",
+		"446": "Edite este título formatado no editor de títulos",
+		"447": "Não foi possível salvar o título; verifique o conteúdo em linha, o tamanho e o contexto de edição"
 	}
 }

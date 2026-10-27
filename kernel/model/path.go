@@ -46,8 +46,10 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 	}
 	retID = id
 
-	hPath = strings.TrimSuffix(hPath, ".sy")
-	hPath = util.TrimSpaceInPath(hPath)
+	if len(checkedParents) == 0 {
+		hPath = strings.TrimSuffix(hPath, ".sy")
+		hPath = util.TrimSpaceInPath(hPath)
+	}
 	if IsBoxDoc(boxID, parentID) {
 		// 笔记本顶层文档是用户可见的逻辑根，完整路径应从笔记本根目录解析。
 		parentID = ""

@@ -72,4 +72,3 @@ export const applyListMindmapListInput = (list: HTMLElement, id: string, input: 
         return focus(destination.dataset.nodeId, content[0]);
     }
 };
-

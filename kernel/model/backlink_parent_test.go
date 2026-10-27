@@ -17,6 +17,7 @@
 package model
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -133,6 +134,34 @@ func TestSelectDocumentAndHeadingBacklinkParentRef(t *testing.T) {
 		treeCache,
 	); nil != selected {
 		t.Fatal("a paragraph containing other text should not propagate to the document")
+	}
+}
+
+func TestBacklinkParentMappingsPreserveTitleReferenceSource(t *testing.T) {
+	document := &Block{ID: "document", RootID: "document", Type: "NodeDocument"}
+	paragraph := &Block{ID: "paragraph", RootID: document.ID, ParentID: document.ID, Type: "NodeParagraph"}
+	for _, titleReference := range []bool{false, true} {
+		t.Run(fmt.Sprint("title reference ", titleReference), func(t *testing.T) {
+			refs := []*Block{nil, paragraph}
+			if titleReference {
+				refs = append(refs, document)
+			}
+			mappings := buildBacklinkParentMappingsForSources(refs,
+				map[string][]*Block{document.ID: {paragraph}}, []*Block{document}, true,
+				func(parent *Block, candidates []*Block) *Block { return candidates[0] },
+				func(parent *Block) map[string]bool {
+					t.Fatal("document grouping must not inspect heading coverage")
+					return nil
+				})
+			if titleReference {
+				if len(mappings) != 0 {
+					t.Fatal("body references must not be grouped into an independent title reference")
+				}
+			} else if len(mappings) != 1 || mappings[0].parent != document ||
+				mappings[0].refBlock != paragraph || !mappings[0].coveredRefIDs[paragraph.ID] {
+				t.Fatal("body-only references must retain document grouping")
+			}
+		})
 	}
 }
 

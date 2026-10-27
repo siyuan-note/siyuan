@@ -208,7 +208,7 @@ func findBoxDoc(box *Box) (ret string, err error) {
 
 func createBoxDoc(box *Box, boxDocID string) error {
 	boxConf := box.GetConf()
-	title := normalizeDocTitle(boxConf.Name)
+	title := normalizeTitleText(boxConf.Name)
 	if "" == title {
 		title = Conf.Language(16)
 	}
@@ -245,7 +245,7 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 		return err
 	}
 	boxConf := box.GetConf()
-	title := normalizeDocTitle(boxConf.Name)
+	title := normalizeTitleText(boxConf.Name)
 	if "" == title {
 		title = Conf.Language(16)
 	}

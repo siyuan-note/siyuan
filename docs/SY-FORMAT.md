@@ -2,7 +2,7 @@
 
 [中文](SY-FORMAT.zh-CN.md)
 
-> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text, `5` for documents containing mind map nodes, and `6` for document titles containing ASCII `/`; compatible readers may upgrade older or missing versions.
+> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text, `5` for documents containing mind map nodes, `6` for document titles containing ASCII `/`, and `7` for document titles with a complete inline source; compatible readers may upgrade older or missing versions.
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
 > All conclusions are based on real samples and the current Lute / SiYuan kernel source. The cited samples contain a few known legacy artifacts; canonical write rules follow the current source when a sample differs.
 > This guide describes plaintext `.sy` JSON in an ordinary notebook, or the decrypted AST of an unlocked encrypted notebook. An encrypted notebook's on-disk `.sy` file is ciphertext and must not be edited as JSON.
@@ -73,12 +73,31 @@ Division of labor among the four paths:
 | Top-level key | Required | Meaning |
 |---|---|---|
 | `ID` | ✅ | Document block ID. **Equals the filename without `.sy`** |
-| `Spec` | ✅ | `"2"` for ordinary documents, `"3"` for tabs, `"4"` for table-cell rich text, `"5"` for mind map nodes, `"6"` for titles containing ASCII `/`; use at least the highest required feature version and never lower an existing version |
+| `Spec` | ✅ | `"2"` for ordinary documents, `"3"` for tabs, `"4"` for table-cell rich text, `"5"` for mind map nodes, `"6"` for titles containing ASCII `/`, `"7"` for a complete inline title source; use at least the highest required feature version and never lower an existing version |
 | `Type` | ✅ | `"NodeDocument"` |
 | `Properties` | ✅ | Document-level IAL — see §8 |
+| `DocumentTitle` | Optional | Authoritative inline title source, only on the root; requires Spec `7`, as described below |
 | `Children` | ✅ | Array of body child blocks; canonical files contain at least one block |
 
 Spec `6` retains the ordinary `Properties.title` string representation and requires structured document addressing when the title contains ASCII `/`. The feature release adopts that addressing mode automatically; it does not rewrite old document sources just to migrate notebook records. Existing `／`, `%2F`, Markdown-like text, and HTML entity text retain their literal meaning. This specification does not enable inline formatting in titles. Encrypted notebooks authenticate the existing ciphertext envelope before interpreting the same JSON; key derivation, AAD, and recovery material remain unchanged. See [Document titles and addressing](DOCUMENT-ADDRESSING.md) for release protection and migration requirements.
+
+### 1.1 Complete document title source (Spec 7)
+
+A rich title belongs to the document root and does not create a body block or another block ID. Its authoritative source is a versioned envelope:
+
+```json
+"DocumentTitle": {
+  "spec": 1,
+  "format": "inline-ast",
+  "content": "[{\"Type\":\"NodeText\",\"Data\":\"Title \"},{\"Type\":\"NodeTextMark\",\"TextMarkType\":\"strong\",\"TextMarkTextContent\":\"example\"}]"
+}
+```
+
+`content` is a UTF-8 JSON string containing an array of canonical `.sy` inline nodes, not Markdown and not a paragraph wrapper. Native text marks, images and their marker children, escapes, entities, emoji, and soft breaks retain their complete supported attributes. Inline nodes have no persistent `ID`; block nodes, raw HTML nodes, and unknown node or mark types are rejected. This format does not enable syntax that the normal editor disables. An empty source is `[]`; it stays a rich source after clearing the title.
+
+`Properties.title` is a derived plain-text summary for compact surfaces, paths, and indexes. Visible text, image alt text, and formulas contribute to it; inline memo contents and resource destinations do not. Full title rendering and export use `DocumentTitle` rather than reconstructing rich content from the summary. Dynamic reference labels are derived caches and do not alter the source edit revision. Title references belong to the root document ID for backlinks and relationship indexing; title assets belong to the same document for resource handling. Neither title inlines nor their temporary paragraph become body children.
+
+Readers validate the original source envelope before tolerant AST repair. `spec`, `format`, and `content` are required, case-sensitive, and non-null; unknown or duplicate fields, invalid UTF-8, NUL, unsupported versions, malformed nodes, and exceeded limits are errors. The content limit is 1 MiB, with at most 8192 nodes and a maximum nesting depth of 64. Invalid source is preserved and must not be replaced with the summary or silently repaired away. Documents without `DocumentTitle` keep `Properties.title` as literal plain text; opening them does not parse Markdown or change the source. Existing document versions are never lowered. `.sy` export, history, backup, and recovery preserve the complete source; encrypted readers authenticate the existing ciphertext envelope before these checks.
 
 > ⚠️ The file path strictly corresponds to the root ID: `data/<box>/<...>/<rootID>.sy`. Changing the root ID means renaming the file — don't change it casually. For the full file-system layout see [`WORKSPACE.md`](./WORKSPACE.md).
 > A compatible reader inserts an empty paragraph when `Children` is missing or empty, but new writers should emit that paragraph themselves.
@@ -346,7 +365,7 @@ The table lists the five built-in types and their defaults. However, custom `Cal
 
 `NodeTabs.Properties["tabs-task"] = "true"` enables task status for every direct tab item; items without an explicit marker default to incomplete. `NodeTabItem.Properties["tabs-task"]` optionally preserves the original task-list marker. Without the group setting, absence means an ordinary tab. One ASCII space means incomplete, and other supported single-character task markers (including `X`, `/`, and `?`) retain their exact values. Task status is independent of title content and active-tab selection. Markdown export preserves the group setting in the group IAL and item states in an item IAL immediately after the `@tab` title line, for example `{: tabs-task="/"}`. Attribute values must use the same escaping as other IAL values. Conversion back to a task list restores the current marker; conversion to an ordinary list removes the task attribute. Existing item-only task states and mixed groups remain supported.
 
-Documents containing either tab node require at least `Spec: "3"`; table-cell rich text requires Spec 4, mind map nodes require Spec 5, and document titles containing ASCII `/` require Spec 6. Ordinary documents remain on Spec 2. Never lower the version after removing a feature. Check the raw root `Spec` before passing JSON to a tolerant parser, because unknown node types can otherwise cause their children to be lost. Unsupported versions must not be repaired and written back.
+Documents containing either tab node require at least `Spec: "3"`; table-cell rich text requires Spec 4, mind map nodes require Spec 5, document titles containing ASCII `/` require Spec 6, and complete inline title sources require Spec 7. Ordinary documents remain on Spec 2. Never lower the version after removing a feature. Check the raw root `Spec` before passing JSON to a tolerant parser, because unknown node types can otherwise cause their children to be lost. Unsupported versions must not be repaired and written back.
 
 The internal Markdown syntax uses `::: tabs` to open a group and `@tab <inline title>` to start each item; `@tab:active <inline title>` identifies the selected item. The opening fence requires at least three colons and whitespace (spaces or tabs) before `tabs`; canonical output uses one space. Items have no closing marker; the group closes with a standalone fence containing the same number of colons as its opening fence. Outer fences must be longer than nested fences. Indentation is optional, and canonical output computes fence lengths from nesting depth without adding indentation to tab bodies. Old `:::tabs` and `:::tab` syntax is not recognized; existing `.sy` tab nodes retain the same structure.
 
@@ -647,7 +666,7 @@ Canonical writers must not generate the following syntax or node families. Most 
 
 When generating or compatibly editing a `.sy` that SiYuan can load cleanly, verify item by item:
 
-1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"`, `"3"` (tabs), `"4"` (table-cell rich text), `"5"` (mind map nodes), or `"6"` (ASCII `/` in document titles), without lowering an existing version; root `ID` = filename (without `.sy`) and equals `Properties.id`
+1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"`, `"3"` (tabs), `"4"` (table-cell rich text), `"5"` (mind map nodes), `"6"` (ASCII `/` in document titles), or `"7"` (complete inline title source), without lowering an existing version; root `ID` = filename (without `.sy`) and equals `Properties.id`
 2. ☐ Root `Properties` contains `id`/`title`/`type:"doc"`/`updated`
 3. ☐ Every newly generated ID is fresh and workspace-wide unique; every canonical block has a 22-char `ID`, matching `Properties.id`, and a valid 14-digit `Properties.updated`
 4. ☐ Determine block status from `Type`, not from `ID`; do not add IDs to new inline/marker nodes, and only remove historical non-block IDs as field normalization without deleting the node

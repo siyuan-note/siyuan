@@ -137,8 +137,8 @@ const prepare = async (task: CheckoutState) => {
         unsavedPreparation = true;
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         await Promise.all(getAllEditor().filter(editor => editor?.protyle?.wysiwyg)
-            .map(editor => {
-                editor.protyle.title?.flushPendingInput();
+            .map(async editor => {
+                await editor.protyle.title?.flushPendingInput();
                 return editor.flushPendingTransactions();
             }));
         await flushPendingEditorSaves(failureVersion);

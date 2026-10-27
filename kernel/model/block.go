@@ -74,6 +74,8 @@ type Block struct {
 
 	RiffCardID string    `json:"riffCardID"`
 	RiffCard   *RiffCard `json:"riffCard"`
+
+	backlinkDocumentContext bool // 首段引用归并为文档上下文，与文档标题引用来源区分。
 }
 
 type RiffCard struct {

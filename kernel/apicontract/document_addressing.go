@@ -131,7 +131,7 @@ func (value CreateDocByParentResult) MarshalJSON() ([]byte, error) {
 }
 
 type DocumentTitle struct {
-	Format string `json:"format" api:"enum=plain"`
+	Format string `json:"format" api:"enum=plain|inline-ast"`
 	Text   string `json:"text"`
 	Empty  bool   `json:"empty"`
 }

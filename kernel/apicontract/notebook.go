@@ -142,10 +142,12 @@ type SetNotebookIconRequest struct {
 
 type RenameNotebookRequest struct {
 	NotebookIDRequest
+	// Name 是独立的纯文本显示名称，保留 ASCII /，不解析为目录、Markdown 或富文本。
 	Name string `json:"name"`
 }
 
 type CreateNotebookRequest struct {
+	// Name 是独立的纯文本显示名称，保留 ASCII /；存储身份和导出路径另行生成。
 	Name string `json:"name"`
 }
 

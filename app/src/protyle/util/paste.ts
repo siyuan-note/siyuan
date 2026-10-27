@@ -65,7 +65,7 @@ import {shouldPasteMarkdownFromHTML} from "./markdownClipboard";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 import {convertOfficeLists} from "./officeList";
 import {extractOfficeMathHTML} from "./officeMath";
-import {markdownMathPaste} from "./markdownMathPaste";
+import {htmlMathPaste, markdownMathPaste} from "./mathPaste";
 import {
     extractWPSPresentationClipboard,
     getWPSPresentationFallback,
@@ -83,6 +83,7 @@ import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
     getProtyleUnsupportedPasteBlocks,
+    getProtyleUnsupportedPasteMessage,
     getProtyleRestrictedPlainTextHTML,
     isProtyleRichHTMLPasteEnabled,
     isProtyleUploadDisabled,
@@ -710,6 +711,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     target: HTMLElement
 }, uploadOptions?: IUploadInsertOptions) => {
     const blockDOMSanitizer = getProtyleBlockDOMSanitizer(protyle);
+    const mathCompatible = window.siyuan.config.editor.mathDelimiterCompatibility !== false;
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -824,10 +826,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 表格单元格将可解析的富文本转换为块 DOM，再统一检查不支持的块和净化行内标记。
         const richBlockDOM = textHTML ?
             (!preserveSourceFormat && shouldPasteMarkdownFromHTML(textHTML, textPlain) ?
-                protyle.lute.Md2BlockDOM(textPlain) :
+                markdownMathPaste(protyle.lute, textPlain, mathCompatible) :
                 /^<span\b[^>]*\bdata-type\s*=\s*["']custom_[^>]*>[\s\S]*<\/span>$/i.test(textHTML.trim()) ?
-                protyle.lute.Md2BlockDOM(textHTML) : protyle.lute.HTML2BlockDOM(textHTML)) :
-            protyle.lute.Md2BlockDOM(textPlain);
+                markdownMathPaste(protyle.lute, textHTML, mathCompatible) : htmlMathPaste(protyle.lute, textHTML, mathCompatible)) :
+            markdownMathPaste(protyle.lute, textPlain, mathCompatible);
         const richTemplate = document.createElement("template");
         richTemplate.innerHTML = richBlockDOM;
         if (!richTemplate.content.querySelector(".img, img")) {
@@ -838,8 +840,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 在清洗和修改选区前检查完整载荷，避免不支持的块被静默删除后只粘贴部分内容。
         const getUnsupportedBlocks = getProtyleUnsupportedPasteBlocks(protyle);
         if (getUnsupportedBlocks) {
-            const source = siyuanHTML || (textHTML ? protyle.lute.HTML2BlockDOM(textHTML) :
-                protyle.lute.Md2BlockDOM(textPlain));
+            const source = siyuanHTML || (textHTML ? htmlMathPaste(protyle.lute, textHTML, mathCompatible) :
+                markdownMathPaste(protyle.lute, textPlain, mathCompatible));
             const tableCellContext = getTableCellRichContext(protyle);
             if (tableCellContext && /<table[\s>]/i.test(source)) {
                 const template = document.createElement("template");
@@ -872,7 +874,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const unsupported = getUnsupportedBlocks(source);
             if (unsupported.length > 0) {
-                showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
+                showMessage(getProtyleUnsupportedPasteMessage(protyle)?.(unsupported) ||
+                    window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
                 return;
             }
             if (initialBlockElement) {
@@ -1600,7 +1603,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
             let textPlainDom = markdownMathPaste(protyle.lute, textPlain,
-                window.siyuan.config.editor.mathDelimiterCompatibility !== false,
+                mathCompatible,
                 window.siyuan.config.editor.pasteURLAutoConvert);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
                 const tempElement = document.createElement("template");

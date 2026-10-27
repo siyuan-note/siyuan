@@ -9,6 +9,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -41,6 +42,10 @@ func WalkWithInlineTitles(root *ast.Node, walker ast.Walker) {
 		}
 		var paragraph *ast.Node
 		switch node.Type {
+		case ast.NodeDocument:
+			if node.DocumentTitle != nil {
+				paragraph, _ = DocumentTitleParagraph(node)
+			}
 		case ast.NodeTabItem:
 			paragraph = TabTitleParagraph(node)
 		case ast.NodeCallout:
@@ -51,6 +56,11 @@ func WalkWithInlineTitles(root *ast.Node, walker ast.Walker) {
 		}
 		luteEngine := util.NewLute()
 		before := FormatNode(paragraph, luteEngine)
+		if node.DocumentTitle != nil {
+			if source, err := render.NewDocumentTitle(paragraph); err == nil {
+				before = source.Content
+			}
+		}
 		stop := false
 		ast.Walk(paragraph, func(inline *ast.Node, titleEntering bool) ast.WalkStatus {
 			if inline == paragraph {
@@ -60,7 +70,12 @@ func WalkWithInlineTitles(root *ast.Node, walker ast.Walker) {
 			stop = ast.WalkStop == result
 			return result
 		})
-		if after := FormatNode(paragraph, luteEngine); after != before {
+		if node.DocumentTitle != nil {
+			if source, err := render.NewDocumentTitle(paragraph); err == nil && source.Content != before {
+				node.DocumentTitle = source
+				_ = RefreshDocumentTitle(node)
+			}
+		} else if after := FormatNode(paragraph, luteEngine); after != before {
 			after = strings.TrimSpace(after)
 			if ast.NodeCallout == node.Type {
 				node.CalloutTitle = after
@@ -92,6 +107,8 @@ func MaterializeInlineTitlesForExport(root *ast.Node) func() {
 func materializeInlineTitles(root *ast.Node, formatTitle func(*ast.Node) string) func() {
 	type titleFragment struct {
 		title     *string
+		owner     *ast.Node
+		source    *ast.DocumentTitle
 		original  string
 		paragraph *ast.Node
 		before    string
@@ -105,6 +122,16 @@ func materializeInlineTitles(root *ast.Node, formatTitle func(*ast.Node) string)
 			}
 			var title *string
 			switch node.Type {
+			case ast.NodeDocument:
+				if node.DocumentTitle != nil {
+					if paragraph, err := DocumentTitleParagraph(node); err == nil {
+						paragraph.Parent = nil
+						fragments = append(fragments, titleFragment{owner: node, source: node.DocumentTitle,
+							paragraph: paragraph, before: node.DocumentTitle.Content})
+						node.DocumentTitle = nil
+						node.PrependChild(paragraph)
+					}
+				}
 			case ast.NodeTabItem:
 				if nil == node.TabTitleBlock() {
 					title = &node.TabItemTitle
@@ -115,7 +142,7 @@ func materializeInlineTitles(root *ast.Node, formatTitle func(*ast.Node) string)
 			if nil != title {
 				if paragraph := inlineTitleParagraph(node, *title); nil != paragraph {
 					paragraph.Parent = nil
-					fragments = append(fragments, titleFragment{title, *title, paragraph, FormatNode(paragraph, luteEngine)})
+					fragments = append(fragments, titleFragment{title: title, original: *title, paragraph: paragraph, before: FormatNode(paragraph, luteEngine)})
 					*title = ""
 					node.PrependChild(paragraph)
 				}
@@ -131,6 +158,14 @@ func materializeInlineTitles(root *ast.Node, formatTitle func(*ast.Node) string)
 		finished = true
 		for _, fragment := range fragments {
 			fragment.paragraph.Unlink()
+			if fragment.owner != nil {
+				fragment.owner.DocumentTitle = fragment.source
+				if source, err := render.NewDocumentTitle(fragment.paragraph); err == nil && source.Content != fragment.before {
+					fragment.owner.DocumentTitle = source
+					_ = RefreshDocumentTitle(fragment.owner)
+				}
+				continue
+			}
 			*fragment.title = fragment.original
 			if after := FormatNode(fragment.paragraph, luteEngine); after != fragment.before || nil != formatTitle {
 				if nil != formatTitle {

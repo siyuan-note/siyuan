@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Indien ingeschakeld worden \\(...\\) en \\[...\\] in geplakte en geïmporteerde inhoud automatisch herkend als respectievelijk inline- en blokformules",
 	"automationCollectionScopeLimit": "Het bewakingsbereik kan maximaal 32 notitieboeken of documenten bevatten",
 	"pdfAnnotationSaveFailed": "PDF-annotaties kunnen niet worden opgeslagen. Open de PDF opnieuw om de nieuwste annotaties te laden voordat je verder bewerkt",
+	"documentTitleKeepLocal": "Mijn titel opslaan",
+	"documentTitleLatest": "Nieuwste titel",
+	"documentTitleInlineOnly": "Documenttitels ondersteunen alleen inline-elementen",
+	"documentTitleConflict": "Deze titel is in een andere editor gewijzigd. Je concept blijft behouden",
+	"documentTitleCopyReload": "Concept kopiëren en nieuwste titel laden",
 	"skipExitSync": "Synchronisatie overslaan en afsluiten",
 	"skipExitSyncConfirm": "De synchronisatie is nog niet voltooid. Overslaan en afsluiten? Niet-gesynchroniseerde wijzigingen blijven op dit apparaat opgeslagen",
 	"automationCollectionReference": "Verwijzingsdoel",
@@ -3474,6 +3479,9 @@
 		"441": "Taak voor het opnieuw opbouwen van de index van resource-inhoud ingediend; volg de voortgang bij de achtergrondtaken",
 		"442": "Index van resource-inhoud opnieuw opgebouwd",
 		"443": "Opnieuw opbouwen van de index van resource-inhoud mislukt; controleer het kernellogboek",
-		"444": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen"
+		"444": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen",
+		"445": "Deze titel is in een andere editor gewijzigd. Je concept blijft behouden",
+		"446": "Bewerk deze opgemaakte titel in de titeleditor",
+		"447": "Deze titel kan niet worden opgeslagen; controleer de inline-inhoud, grootte en bewerkingscontext"
 	}
 }

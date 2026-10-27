@@ -3,6 +3,11 @@
 	"mathDelimiterCompatibilityTip": "Lorsque cette option est activée, \\(...\\) et \\[...\\] sont automatiquement reconnus dans le contenu collé et importé comme des formules en ligne et en bloc, respectivement",
 	"automationCollectionScopeLimit": "Le périmètre de surveillance peut contenir jusqu’à 32 carnets ou documents",
 	"pdfAnnotationSaveFailed": "Impossible d’enregistrer les annotations du PDF. Rouvrez le PDF pour charger les dernières annotations avant de poursuivre les modifications",
+	"documentTitleKeepLocal": "Enregistrer mon titre",
+	"documentTitleLatest": "Dernier titre",
+	"documentTitleInlineOnly": "Les titres de document acceptent uniquement les éléments en ligne",
+	"documentTitleConflict": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
+	"documentTitleCopyReload": "Copier le brouillon et charger le dernier titre",
 	"skipExitSync": "Ignorer la synchronisation et quitter",
 	"skipExitSyncConfirm": "La synchronisation n’est pas terminée. L’ignorer et quitter ? Les modifications non synchronisées resteront enregistrées sur cet appareil",
 	"automationCollectionReference": "Cible de référence",
@@ -3474,6 +3479,9 @@
 		"441": "Tâche de reconstruction de l’index du contenu des ressources soumise ; suivez la progression dans les tâches en arrière-plan",
 		"442": "Reconstruction de l’index du contenu des ressources terminée",
 		"443": "Échec de la reconstruction de l’index du contenu des ressources ; consultez le journal du noyau",
-		"444": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire"
+		"444": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire",
+		"445": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
+		"446": "Modifiez ce titre enrichi dans l’éditeur de titres",
+		"447": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification"
 	}
 }

@@ -41,6 +41,7 @@ func TestHTML2BlockDOMContractMathDelimiters(t *testing.T) {
 	}{
 		{"basic", `<table><tr><th>Formula</th><th>Value</th></tr><tr><td>\(\hat VY\)</td><td>0.60</td></tr></table><p>\[x+y\]</p><p><code>\(code\)</code></p><p>unclosed \(x</p>`, "", 1, 1},
 		{"captured ChatGPT", fixture.HTML, fixture.Text, 3, 2},
+		{"styled and protected", `<p><strong>\(x+y\)</strong> <em>\(z\)</em></p><p><mark>\[w\]</mark></p><p><a href="https://example.com/\(path\)">\(link\)</a> <code>\(code\)</code></p>`, "", 2, 1},
 	}
 	for _, enabled := range []bool{true, false} {
 		for _, preserve := range []bool{true, false} {
@@ -72,7 +73,7 @@ func TestHTML2BlockDOMContractMathDelimiters(t *testing.T) {
 					wantInline, wantBlock = 0, 0
 				}
 				for range 3 {
-					if strings.Count(response.Data, `data-type="inline-math"`) != wantInline || strings.Count(response.Data, `data-type="NodeMathBlock"`) != wantBlock {
+					if strings.Count(response.Data, `data-subtype="math"`)-strings.Count(response.Data, `data-type="NodeMathBlock"`) != wantInline || strings.Count(response.Data, `data-type="NodeMathBlock"`) != wantBlock {
 						t.Fatalf("%s enabled=%v preserve=%v: %s", tc.name, enabled, preserve, response.Data)
 					}
 					if tc.name == "basic" {
@@ -81,7 +82,7 @@ func TestHTML2BlockDOMContractMathDelimiters(t *testing.T) {
 								t.Fatalf("lost %q: %s", text, response.Data)
 							}
 						}
-					} else {
+					} else if tc.name == "captured ChatGPT" {
 						for _, formula := range []string{`x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`, `e^{i\pi}+1=0`} {
 							want := formula
 							if enabled {
@@ -89,6 +90,12 @@ func TestHTML2BlockDOMContractMathDelimiters(t *testing.T) {
 							}
 							if !strings.Contains(response.Data, want) {
 								t.Fatalf("lost table formula %q: %s", formula, response.Data)
+							}
+						}
+					} else {
+						for _, text := range []string{"link", "code", `https://example.com/\(path\)`} {
+							if !strings.Contains(response.Data, text) {
+								t.Fatalf("lost protected content %q: %s", text, response.Data)
 							}
 						}
 					}

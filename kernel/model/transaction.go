@@ -272,10 +272,13 @@ const (
 )
 
 type TxErr struct {
-	code int
-	msg  string
-	id   string
+	code  int
+	msg   string
+	id    string
+	cause error
 }
+
+func (e *TxErr) Unwrap() error { return e.cause }
 
 // Error 实现 error 接口，供跨包（如 undo API）读取事务错误信息。
 func (e *TxErr) Error() string {
@@ -363,6 +366,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				continue
 			}
 			switch op.Action {
+			case "setDocTitle":
+				ret = tx.doSetDocTitle(op)
 			case "create":
 				ret = tx.doCreate(op)
 			case "restoreCreatedDoc":
@@ -625,7 +630,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		if 1 == tx.state.Load() {
 			tx.rollback()
 		}
-		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error()}
+		var txErr *TxErr
+		if errors.As(cr, &txErr) {
+			return txErr
+		}
+		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error(), cause: cr}
 	}
 	return
 }
@@ -2620,6 +2629,8 @@ type Operation struct {
 	templateDocTreeRootID         string
 	blockSwapState                *blockSwapState
 	blockSwapUndo                 bool
+	documentTitleState            *documentTitleUndoState
+	documentTitleUndo             bool
 	listConversion                *listConversionState
 	listConversionUndo            bool
 	attributeViewItems            *attributeViewItemsSnapshot
@@ -2800,6 +2811,7 @@ type Transaction struct {
 	templateDocTreeCommitRevision string
 	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree          func(*parse.Tree) error
+	documentTitleWrite            *documentTitleWriteState
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
 	sourceLeases                  map[string]bool
@@ -2903,6 +2915,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.indexChanges = nil
+	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.mutatedRootIDs = nil
 	tx.changedRootIDs = nil
@@ -3083,7 +3096,7 @@ func (tx *Transaction) commit() (err error) {
 		writeTransactionTree := tx.writeTransactionTree
 		if nil == writeTransactionTree {
 			writeTransactionTree = func(source *parse.Tree) error {
-				return writeTreeUpsertQueueWithPreflight(source, tx.treeIndexChanges(source), func() error {
+				preflight := func() error {
 					if tx.templateDocTreeCommitRevision == "" {
 						return nil
 					}
@@ -3096,7 +3109,11 @@ func (tx *Transaction) commit() (err error) {
 						return errors.New("the document used to render the template has changed")
 					}
 					return nil
-				})
+				}
+				if tx.documentTitleWrite != nil && tx.documentTitleWrite.id == source.ID {
+					return tx.writeDocumentTitleTree(source, preflight)
+				}
+				return writeTreeUpsertQueueWithPreflight(source, tx.treeIndexChanges(source), preflight)
 			}
 		}
 		if err = tx.recordDocumentWrite(tree, func() error { return writeTransactionTree(tree) }); err != nil {
@@ -3108,6 +3125,12 @@ func (tx *Transaction) commit() (err error) {
 		util.PushSaveDoc(tree.ID, "tx", sources)
 
 		checkUpsertInUserGuide(tree)
+		for _, operation := range tx.DoOperations {
+			if operation.Action == "setDocTitle" && operation.ID == tree.ID {
+				publishDocumentTitleProjection(tree)
+				break
+			}
+		}
 	}
 	for boxID, icon := range tx.boxIcons {
 		box := &Box{ID: boxID}
@@ -3189,6 +3212,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.finishFlashcardMutation(false)
 	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
 	tx.indexChanges = nil
+	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
@@ -3211,6 +3235,7 @@ func (tx *Transaction) releaseCommittedResources() {
 
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
+	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()
 	tx.finishAttributeViewMutation(true)
@@ -3499,10 +3524,13 @@ type changedDefNode struct {
 	refType string // ref-d/ref-s/embed
 }
 
-func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
+func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node, resolved ...*dynamicRefAnchorResolver) (changed bool, defNodes []*changedDefNode) {
 	treenode.WalkWithInlineTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
+		}
+		if refNode.Type == ast.NodeDocument && refNode.DocumentTitle != nil && n != refNode && n.IsBlock() {
+			return ast.WalkSkipChildren
 		}
 		if treenode.IsBlockRef(n) {
 			defID, refText, subtype := treenode.GetBlockRef(n)
@@ -3516,7 +3544,12 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 			}
 
 			if "d" == subtype {
-				newRefText := strings.TrimSpace(getNodeRefText(defNode))
+				var newRefText string
+				if len(resolved) > 0 && resolved[0] != nil {
+					newRefText = resolved[0].refText(refNode, defID)
+				} else {
+					newRefText = strings.TrimSpace(getNodeRefText(defNode))
+				}
 				if "" == newRefText {
 					newRefText = n.TextMarkBlockRefID
 				}

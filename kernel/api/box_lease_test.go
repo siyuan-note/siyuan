@@ -81,6 +81,10 @@ func TestContractDocInfoNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractDocTitleNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractDailyNoteNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -236,7 +240,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		t.Name() == "TestContractDocumentCreateTargetNotebookResponseLease" ||
 		t.Name() == "TestContractDocumentCreatePlanNotebookResponseLease" ||
 		t.Name() == "TestContractCreateDocumentByParentNotebookResponseLease"
-	if addressingTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
+	titleReplay := t.Name() == "TestContractDocTitleUndoNotebookResponseLease" || t.Name() == "TestContractDocTitleRedoNotebookResponseLease"
+	if addressingTest || titleReplay || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		content, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
 		if err != nil {
 			t.Fatal(err)
@@ -284,7 +289,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			t.Fatal(err)
 		}
 		treenode.UpsertBlockTree(tree)
-		if addressingTest || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
+		if addressingTest || titleReplay || t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 			if _, err := model.Mount(boxID); err != nil {
 				t.Fatal(err)
 			}
@@ -303,6 +308,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getRefIDs", getRefIDs)
 	engine.POST("/api/block/checkBlockRef", checkBlockRef)
 	engine.POST("/api/block/getDocInfo", getDocInfo)
+	engine.POST("/api/block/getDocTitle", getDocTitle)
 	engine.POST("/api/filetree/createDailyNote", createDailyNote)
 	engine.POST("/api/filetree/getDailyNoteInfo", getDailyNoteInfo)
 	engine.POST("/api/filetree/getDocPaths", getDocPaths)
@@ -326,6 +332,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getBlockSiblingID", getBlockSiblingID)
 	engine.POST("/api/block/getBlocksIndexes", getBlocksIndexes)
 	engine.POST("/api/block/checkBlocksExist", checkBlocksExist)
+	engine.POST("/api/transactions/undo", performUndo)
+	engine.POST("/api/transactions/redo", performRedo)
 	engine.POST("/review/blockSwapLease", func(c *gin.Context) {
 		tx := &model.Transaction{DoOperations: []*model.Operation{{Action: "swapBlockRef"}}}
 		if err := holdBlockSwapReplayRequests(c, tx, boxIDs); err != nil {
@@ -334,6 +342,10 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		}
 		c.JSON(http.StatusOK, map[string]int{"code": 0})
 	})
+	titleID := ""
+	if titleReplay {
+		titleID = prepareDocumentTitleReplayLease(t, engine, boxIDs[0], t.Name() == "TestContractDocTitleRedoNotebookResponseLease")
+	}
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var releaseWriter sync.Once
 	defer releaseWriter.Do(func() { close(writer.proceed) })
@@ -380,6 +392,14 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args["scope"] = "notebook"
 	case "TestContractDocInfoNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getDocInfo", true
+	case "TestContractDocTitleNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getDocTitle", true
+	case "TestContractDocTitleUndoNotebookResponseLease", "TestContractDocTitleRedoNotebookResponseLease":
+		endpoint, typedQuery = "/api/transactions/undo", true
+		if t.Name() == "TestContractDocTitleRedoNotebookResponseLease" {
+			endpoint = "/api/transactions/redo"
+		}
+		args = map[string]any{"rootID": titleID, "app": "lease-test", "session": "lease-test"}
 	case "TestContractDailyNoteNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/createDailyNote", true
 		args["date"] = "2024-02-29"
@@ -453,6 +473,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			}
 		}
 	}
+	if titleReplay {
+		requireDocumentTitleReplayResponse(t, body)
+	}
 	lockDone := make(chan string, len(boxIDs))
 	for _, boxID := range boxIDs {
 		go func() { model.LockBox(boxID); lockDone <- boxID }()
@@ -498,6 +521,24 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	if lockedBeforeResponse {
 		t.Fatalf("lock completed before plaintext response was sent: %s", writer.Body.String())
+	}
+	if titleReplay {
+		lockedEndpoint := "/api/transactions/redo"
+		if endpoint == lockedEndpoint {
+			lockedEndpoint = "/api/transactions/undo"
+		}
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, lockedEndpoint, strings.NewReader(string(requestBody)))
+		request.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, request)
+		requireAPIContract(t, http.MethodPost, lockedEndpoint, recorder)
+		var response struct {
+			Data struct{ Failed bool }
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || !response.Data.Failed ||
+			strings.Contains(recorder.Body.String(), "REVIEW-SECRET-TITLE") {
+			t.Fatalf("locked title replay returned source data: %s, %v", recorder.Body.String(), err)
+		}
 	}
 	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		recorder := httptest.NewRecorder()

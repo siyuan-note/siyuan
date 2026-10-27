@@ -17,6 +17,8 @@ for (const enable of [false, true]) {
             let layoutChanges = 0;
             let tableClears = 0;
             let legacyClears = 0;
+            let titleEnables = 0;
+            let bodyEnables = 0;
             const changeLayout = () => {
                 layoutChanges++;
                 state = reduceMobileBarsState(state, {type: "scroll", scrollTop: state.scrollTop + 6});
@@ -29,8 +31,14 @@ for (const enable of [false, true]) {
                     tableControl: {clear: () => tableClears++},
                     element: {
                         setAttribute() {}, style: {},
-                        querySelectorAll: (selector: string) => selector === ".table__select" ?
-                            [{removeAttribute: (name: string) => { assert.equal(name, "style"); legacyClears++; }}] : [],
+                        querySelectorAll: (selector: string) => {
+                            if (selector === ".table__select") return [{removeAttribute: (name: string) => { assert.equal(name, "style"); legacyClears++; }}];
+                            if (selector === '[contenteditable="false"][spellcheck]') return [
+                                {closest: () => true, setAttribute: () => titleEnables++},
+                                {closest: () => false, setAttribute: () => bodyEnables++},
+                            ];
+                            return [];
+                        },
                     },
                 },
             };
@@ -51,6 +59,8 @@ for (const enable of [false, true]) {
             assert.equal(layoutChanges, 1);
             assert.equal(tableClears, 1, "readonly transition clears managed table selection and pending drags");
             assert.equal(legacyClears, 1, "readonly transition clears the legacy table rectangle");
+            assert.equal(titleEnables, 0, "synthetic title backlink carriers are never editable body blocks");
+            assert.equal(bodyEnables, enable ? 1 : 0);
             assert.equal(pauses, current ? 1 : 0);
             assert.equal(state.readingBarsOffset, current ? 12 : 18);
             (enable ? exports.enable : exports.disable)();

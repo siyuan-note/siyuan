@@ -4,6 +4,7 @@ package tools
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path"
@@ -172,6 +173,36 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	}
 	if _, err := resolveDocumentTarget(foreign.ID, map[string]any{"parentID": literal.ID}, false, false); err == nil {
 		t.Fatal("parent from a different notebook was accepted")
+	}
+	// Content is committed before saving sort.json. Preserve that identity on failure.
+	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	if err := os.Remove(sortPath); err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(sortPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	failed, err := documentCreate(map[string]any{"notebook": box.ID, "parentID": "", "title": "Committed despite sort failure", "markdown": "retained body"})
+	if err != nil || !failed.IsError || !failed.HasStructuredContent() {
+		t.Fatalf("creation failure lost metadata: %+v, %v", failed, err)
+	}
+	var metadata struct {
+		ID          string   `json:"id"`
+		CommitState string   `json:"commitState"`
+		Stage       string   `json:"stage"`
+		Completed   []string `json:"completed"`
+	}
+	if err := json.Unmarshal([]byte(failed.Content[0].Text), &metadata); err != nil {
+		t.Fatal(err)
+	}
+	if metadata.CommitState != "committed" || metadata.Stage != "sort" || !ast.IsNodeIDPattern(metadata.ID) || len(metadata.Completed) != 1 || metadata.Completed[0] != "source" {
+		t.Fatalf("incorrect failure metadata: %+v", metadata)
+	}
+	if _, err := filesys.ReadDocumentMetadataTree(box.ID, "/"+metadata.ID+".sy"); err != nil {
+		t.Fatal("returned ID does not identify the committed document", err)
+	}
+	if err := os.Remove(sortPath); err != nil {
+		t.Fatal(err)
 	}
 	// Clean legacy paths use the same ready metadata checks as structured paths.
 	legacyBox := ast.NewNodeID()

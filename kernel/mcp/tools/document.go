@@ -17,6 +17,7 @@
 package tools
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
@@ -150,6 +151,14 @@ type documentTarget struct {
 }
 
 func documentTargetFailure(err error) CallToolResult {
+	var creation *model.DocumentCreateFailure
+	if errors.As(err, &creation) {
+		failure := map[string]any{"error": err.Error(), "reason": creation.Reason,
+			"commitState": creation.CommitState, "id": creation.ID, "stage": creation.Stage, "completed": creation.Completed}
+		encoded, _ := json.Marshal(failure)
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(encoded)}},
+			StructuredContent: failure, StructuredContentSet: true, IsError: true, ExecutionUnknown: creation.CommitState == "unknown"}
+	}
 	if failure, ok := model.LegacyPathFailure(err); ok {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: failure.Reason + ": " + err.Error()}}, IsError: true}
 	}

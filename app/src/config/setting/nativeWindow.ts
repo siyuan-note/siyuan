@@ -13,6 +13,7 @@ import {hasPluginSetting} from "../../plugin";
 import {getWorkspaceName} from "../../util/processTitle";
 import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
 import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
+import {getBreadcrumbButtonCatalogSnapshot} from "../../plugin/breadcrumbButtonRegistry";
 import {hasNativeSettingTasks} from "./taskBlocker";
 import {openBazaarPath} from "../bazaar/openPath";
 import {acceptSettingInterfaceRevision, watchSettingInterface} from "./interface";
@@ -115,6 +116,10 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         getEditorToolbarCatalogSnapshot: () => {
             assertActive();
             return getEditorToolbarCatalogSnapshot(app.plugins);
+        },
+        getBreadcrumbButtonCatalogSnapshot: () => {
+            assertActive();
+            return getBreadcrumbButtonCatalogSnapshot();
         },
         openBazaarPath: (type, name, storage) => { assertActive(); openBazaarPath(type, name, storage); },
         exit: setCurrentWorkspace => { assertActive(); return exitSiYuan(setCurrentWorkspace); },

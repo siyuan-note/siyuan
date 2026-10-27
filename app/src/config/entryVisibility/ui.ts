@@ -17,6 +17,8 @@ import {
     SLASH_MENU_FREQUENT_PATH,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
+    BREADCRUMB_ROOT_PATH,
+    refreshBreadcrumbCatalog,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -45,7 +47,8 @@ import {
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isMobile} from "../../util/functions";
-import {isInMobileApp} from "../../protyle/util/compatibility";
+import {isInMobileApp, isIPad, isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
+import {getBreadcrumbButtonCatalogSnapshot} from "../../plugin/breadcrumbButtonRegistry";
 import {bindTouchOrder} from "./touchOrder";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
@@ -67,14 +70,25 @@ import {
     TDockOrderSnapshot,
 } from "./dockOrder";
 
-const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image" ||
-    item.key === "editor.blockEmbed")
-    .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
-        children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
-    item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
-        {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
+const getVisibleEntryCatalog = () => {
+    const mobile = isMobile();
+    let padActions = false;
+    /// #if BROWSER && !MOBILE
+    padActions = Boolean(isIPad() || isInAndroid() || isInHarmony());
+    /// #endif
+    const sections = mobile ? entryCatalog.filter(item =>
+        item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image" ||
+        item.key === "editor.blockEmbed" || item.key === BREADCRUMB_ROOT_PATH)
+        .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
+            children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
+        item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
+        item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
+            {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
+    return sections.map(item => item.key === BREADCRUMB_ROOT_PATH ? {...item,
+        children: item.children.filter(child => child.key === "command-panel" ? mobile :
+            ["undo", "redo", "outdent", "indent"].includes(child.key) ? padActions : true),
+    } : item);
+};
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
@@ -601,12 +615,21 @@ const refreshEditorToolbarCatalog = (plugins: NonNullable<ReturnType<typeof getS
     /// #endif
 };
 
+const refreshBreadcrumbEntryCatalog = () => {
+    let entries = getBreadcrumbButtonCatalogSnapshot();
+    /// #if !MOBILE
+    entries = getSettingsWindowHost()?.getBreadcrumbButtonCatalogSnapshot() || entries;
+    /// #endif
+    refreshBreadcrumbCatalog(entries);
+};
+
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const plugins = getSettingsOwnerApp()?.plugins || [];
     refreshEditorToolbarCatalog(plugins);
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
+    refreshBreadcrumbEntryCatalog();
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     const dockOrderSnapshot = getProfileDockOrderSnapshot(builtin);
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;

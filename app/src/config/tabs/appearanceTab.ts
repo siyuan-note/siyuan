@@ -1001,7 +1001,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "entryVisibility",
         keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip,
-            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu,
+            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu, window.siyuan.languages.breadcrumb,
             ...(isMobile() ? [window.siyuan.languages.mobileToolbarEntryTip] : [])],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,

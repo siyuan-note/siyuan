@@ -322,6 +322,15 @@
     margin-left: 0;
   }
 
+  > .protyle-breadcrumb__bar {
+    flex: 1;
+    min-width: 0;
+
+    + .protyle-breadcrumb__space {
+      flex: 0 0 8px;
+    }
+  }
+
   &__space {
     min-width: 8px;
     transition: var(--b3-transition);
@@ -332,7 +341,8 @@
     flex: 1;
   }
 
-  &__plugin {
+  &__plugin,
+  &__actions {
     display: flex;
     align-items: center;
     flex: 0 1 auto;
@@ -345,8 +355,12 @@
       display: none;
     }
 
-    &:not(:empty) + .protyle-breadcrumb__icon {
+    > .protyle-breadcrumb__icon:not(:first-child) {
       margin-left: 8px;
+    }
+
+    > [data-entry-hidden="true"] {
+      display: none;
     }
   }
 

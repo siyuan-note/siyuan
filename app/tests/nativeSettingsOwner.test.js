@@ -15,6 +15,7 @@ const setup = () => {
     const calls = [];
     const requests = [];
     const subscriptions = [];
+    const breadcrumbButtons = [];
     const events = new EventEmitter();
     const window = {
         siyuan: {storage: {}, languages: {config: "Settings"}},
@@ -57,6 +58,7 @@ const setup = () => {
         "../../util/processTitle": {getWorkspaceName: () => "Workspace"},
         "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({left: ["outline"]})},
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
+        "../../plugin/breadcrumbButtonRegistry": {getBreadcrumbButtonCatalogSnapshot: () => breadcrumbButtons},
         "./taskBlocker": {hasNativeSettingTasks: () => nativeTask},
         "../bazaar/openPath": {openBazaarPath: record("openBazaarPath")},
         "../tabs/compactMode": {isCompactModeEnabled: () => false},
@@ -79,8 +81,21 @@ const setup = () => {
         return value;
     };
     return {native: context.exports, app, plugin, prepare, host, calls, requests, events, window, ipcRenderer, subscriptions,
-        setTask: active => { nativeTask = active; }};
+        breadcrumbButtons, setTask: active => { nativeTask = active; }};
 };
+
+test("settings owners expose current breadcrumb buttons and reject catalog reads after disposal", async () => {
+    const fixture = setup();
+    const opened = fixture.native.openNativeSettings(fixture.app);
+    fixture.prepare();
+    await opened;
+    const owner = fixture.host();
+    assert.deepEqual(owner.getBreadcrumbButtonCatalogSnapshot(), []);
+    fixture.breadcrumbButtons.push({key: "plugin:owner:button", label: "Owner button"});
+    assert.deepEqual(owner.getBreadcrumbButtonCatalogSnapshot(), fixture.breadcrumbButtons);
+    owner.dispose();
+    assert.throws(() => owner.getBreadcrumbButtonCatalogSnapshot(), /no longer available/);
+});
 
 test("host cleanup removes the token before throwing plugin callbacks and disposes every subscription", async () => {
     const fixture = setup();

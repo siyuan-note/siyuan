@@ -214,7 +214,9 @@ var inboxConvertCmd = &cobra.Command{
 			}
 		}
 
-		util.PushReloadFiletree()
+		// 转换会新增本地文档，需让运行中的界面刷新文件树。CLI 进程内没有 WebSocket 服务，
+		// 广播无法送达，因此与其它子命令一致改写入推送队列，由应用侧重放。
+		model.AppendPushReloadFiletreeEntry()
 
 		switch outputFormat {
 		case "json":

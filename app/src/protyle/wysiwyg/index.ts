@@ -410,7 +410,10 @@ export class WYSIWYG {
     private copyAsRichText = false;
     private mouseDownTarget: EventTarget | null = null;
     private inputTimeout: number;
-    private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
+    private pendingInputTimeouts = new Map<number, {
+        callback: () => void | Promise<void>;
+        compositionBlock?: HTMLElement;
+    }>();
     private runningInputTasks = new Set<Promise<void>>();
     private persistComposition?: () => void;
     public tableControl: TableControl;
@@ -426,7 +429,8 @@ export class WYSIWYG {
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
     private disposeImageResize?: () => void;
 
-    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
+    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true,
+                          compositionBlock?: HTMLElement) {
         if (replace && this.inputTimeout) {
             clearTimeout(this.inputTimeout);
             this.pendingInputTimeouts.delete(this.inputTimeout);
@@ -438,7 +442,7 @@ export class WYSIWYG {
             }
             void this.runInput(callback);
         }, delay);
-        this.pendingInputTimeouts.set(timeout, callback);
+        this.pendingInputTimeouts.set(timeout, {callback, compositionBlock});
         if (replace) {
             this.inputTimeout = timeout;
         }
@@ -459,7 +463,7 @@ export class WYSIWYG {
         this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
-            const callbacks = Array.from(this.pendingInputTimeouts.values());
+            const callbacks = Array.from(this.pendingInputTimeouts.values(), task => task.callback);
             this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
             this.pendingInputTimeouts.clear();
             this.inputTimeout = undefined;
@@ -4316,6 +4320,18 @@ export class WYSIWYG {
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
+            let pendingDeletion = false;
+            this.pendingInputTimeouts.forEach((task, timeout) => {
+                if (range.collapsed && nodeElement && task.compositionBlock === nodeElement) {
+                    // 原生补全先删词再组合输入，将删除并入本次组合，保留删除前快照并停用旧选区。
+                    clearTimeout(timeout);
+                    this.pendingInputTimeouts.delete(timeout);
+                    if (this.inputTimeout === timeout) {
+                        this.inputTimeout = undefined;
+                    }
+                    pendingDeletion = true;
+                }
+            });
             const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
             if (selectionModeElement) {
                 clearBlockSelectionMode(protyle.wysiwyg.element, true);
@@ -4342,7 +4358,7 @@ export class WYSIWYG {
                 crossBlockComposition = prepareCrossBlockComposition(
                     protyle, range, nodeElement, endElement);
             }
-            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
+            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition && !pendingDeletion) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             if (nodeElement && !crossBlockComposition) {
@@ -4667,7 +4683,8 @@ export class WYSIWYG {
                         Constants.TIMEOUT_INPUT, false);
                 } else {
                     this.scheduleInput(() => input(protyle, blockElement, range, true, event,
-                        inputOperations));
+                        inputOperations), 0, true,
+                    event.inputType === "deleteContentBackward" ? blockElement : undefined);
                 }
             }
             event.stopPropagation();

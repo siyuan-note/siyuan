@@ -78,3 +78,24 @@ test("field membership decisions use declared capabilities", () => {
     inspectDirectory(root);
     assert.deepEqual(violations, []);
 });
+
+test("field type predicates read the precomputed index", () => {
+    // 渲染按单元格反复判断字段类型，逐次读取能力表对象比集合查找慢一倍以上。
+    // 这里锁定这五个常用谓词的实现，避免为了「集中来源」退回逐次属性链。
+    const predicates = ["isAVDateType", "isAVTimestampType", "isAVSelectType", "isAVTextType", "isAVReadonlyType"];
+    const file = path.join(__dirname, "capabilities.ts");
+    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const found: string[] = [];
+    const visit = (node: ts.Node) => {
+        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && predicates.includes(node.name.text)) {
+            found.push(node.name.text);
+            const body = node.initializer?.getText(source) || "";
+            assert.ok(!body.includes("getAVKeyCapability"),
+                `${node.name.text} 不应逐次读取能力表`);
+            assert.ok(body.includes(".has("), `${node.name.text} 应查询预计算索引`);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(source);
+    assert.deepEqual(found.sort(), [...predicates].sort());
+});

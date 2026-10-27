@@ -639,6 +639,7 @@
   margin: 0;
   padding: 8px 12px 8px 30px;
   border-top: 1px solid var(--b3-border-color);
+  background: var(--b3-theme-surface);
   background: color-mix(in srgb, var(--b3-card-warning-color) 10%, transparent);
   color: var(--b3-theme-on-background);
   font-size: 12px;
@@ -705,14 +706,15 @@
 }
 
 .agent-chat__composer-host {
-  min-height: 40px;
+  // 一行正文、段落边距与上下滚动留白。
+  min-height: calc(var(--b3-font-size) * 1.625 + 44px);
   max-height: min(240px, 40vh);
   overflow: hidden;
   cursor: text;
 
   .protyle-content {
     min-height: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     padding: 8px 0 24px;
     scroll-padding-block: 8px 24px;
     box-sizing: border-box;

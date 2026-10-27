@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -16,9 +17,71 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocumentCreateInNewNotebook(t *testing.T) {
+	const subprocessEnv = "SIYUAN_TEST_DOCUMENT_CREATE_NEW_NOTEBOOK"
+	if os.Getenv(subprocessEnv) != "1" {
+		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		defer cancel()
+		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestDocumentCreateInNewNotebook$", "-test.v")
+		cmd.Env = append(os.Environ(), subprocessEnv+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("new notebook document creation subprocess: %v\n%s", err, output)
+		}
+		return
+	}
+	prepareHPathRefreshTest(t)
+	for _, enabled := range []bool{false, true} {
+		name := "without notebook document"
+		if enabled {
+			name = "with notebook document"
+		}
+		t.Run(name, func(t *testing.T) {
+			Conf.FileTree.Load().BoxDocEnabled = enabled
+			boxID, err := CreateBox(name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = Mount(boxID); err != nil {
+				t.Fatal(err)
+			}
+			if state := treenode.DocumentMetadataState(boxID); state != "building" {
+				t.Fatalf("queued notebook index state = %q, want building", state)
+			}
+			request := DocumentCreateRequest{Notebook: boxID, ID: ast.NewNodeID(), TitleFormat: "plain",
+				Title: "Docker smoke", Markdown: "Docker OCR smoke 123"}
+			_, err = CreateDocByParent(request)
+			var failure *DocumentCreateFailure
+			if !errors.As(err, &failure) || failure.Reason != "indexUnavailable" || failure.CommitState != "none" {
+				t.Fatalf("queued index allowed document creation: %#v, %v", failure, err)
+			}
+			for task.ContainIndexTask() {
+				task.ExecTaskJob()
+			}
+			document, err := CreateDocByParent(request)
+			if err != nil {
+				t.Fatalf("create document immediately after notebook creation: %v", err)
+			}
+			if document.ID != request.ID || document.ParentID != nil || document.Title.Text != request.Title {
+				t.Fatalf("unexpected created document: %+v", document)
+			}
+			tree, err := filesys.LoadTree(boxID, document.Path, util.NewLute())
+			if err != nil || tree.ID != request.ID {
+				t.Fatalf("read created document: %+v, %v", tree, err)
+			}
+			if markdown := GetBlockKramdownInBox(request.ID, "", boxID); !strings.Contains(markdown, request.Markdown) {
+				t.Fatalf("created document lost its content: %s", markdown)
+			}
+			if state := treenode.DocumentMetadataState(boxID); state != "ready" {
+				t.Fatalf("new notebook metadata state = %q, want ready", state)
+			}
+		})
+	}
+}
 
 func TestDocumentCreateByParent(t *testing.T) {
 	if os.Getenv("SIYUAN_TEST_DOCUMENT_CREATE") != "1" {

@@ -213,18 +213,31 @@ class CaretBrowsingMode {
       );
       return;
     }
-    this.#mainContainer.addEventListener(
-      "scrollend",
-      this.#setCaretPositionHelper.bind(
+    const positionCaret = this.#setCaretPositionHelper.bind(
         this,
         selection,
         caretX,
         select,
         newLineElement,
         null
-      ),
-      { once: true }
     );
+    if ("onscrollend" in this.#mainContainer) {
+      this.#mainContainer.addEventListener("scrollend", positionCaret, { once: true });
+    } else {
+      // Older WebViews still finish smooth scrolling; update after it becomes idle.
+      let timer;
+      const finish = () => {
+        clearTimeout(timer);
+        this.#mainContainer.removeEventListener("scroll", onScroll);
+        positionCaret();
+      };
+      const onScroll = () => {
+        clearTimeout(timer);
+        timer = setTimeout(finish, 100);
+      };
+      this.#mainContainer.addEventListener("scroll", onScroll);
+      onScroll();
+    }
     newLineElement.scrollIntoView();
   }
 

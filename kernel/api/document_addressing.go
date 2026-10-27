@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
@@ -16,9 +15,6 @@ func documentAddressingFailure(err error) (apicontract.DocumentAddressingFailure
 	var addressingErr *model.DocumentAddressingError
 	if errors.As(err, &addressingErr) {
 		return apicontract.DocumentAddressingFailure{Reason: addressingErr.Reason}, true
-	}
-	if errors.Is(err, documentaddressing.ErrModeConflict) {
-		return apicontract.DocumentAddressingFailure{Reason: "modeConflict"}, true
 	}
 	return apicontract.DocumentAddressingFailure{}, false
 }
@@ -32,7 +28,7 @@ func documentPathContract(document *treenode.DocumentPath) apicontract.DocumentP
 		Notebook: document.Notebook, ID: document.ID, ParentID: document.ParentID, Path: document.Path,
 		Title:    apicontract.DocumentTitle{Format: document.Title.Format, Text: document.Title.Text, Empty: document.Title.Empty},
 		Segments: segments, Depth: document.Depth, DisplayPath: document.DisplayPath,
-		Revision: document.Revision, AddressingVersion: document.AddressingVersion,
+		Revision: document.Revision,
 	}
 }
 

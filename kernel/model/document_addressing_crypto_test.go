@@ -8,7 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
+
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -33,7 +35,7 @@ func setDocumentAddressingTestMode(t *testing.T, boxDirectory string, mode int) 
 	}
 }
 
-func TestDocumentAddressingEncryptedRecoveryPreservesKeys(t *testing.T) {
+func TestDocumentAddressingEncryptedAuthenticationPreservesKeys(t *testing.T) {
 	notebookArchiveTestWorkspace(t)
 	password := "addressing-password"
 	if err := EnableEncryptedNotebook(password); err != nil {
@@ -56,17 +58,8 @@ func TestDocumentAddressingEncryptedRecoveryPreservesKeys(t *testing.T) {
 		t.Fatal(err)
 	}
 	keyState, _ := json.Marshal(currentNotebookCrypto())
-	for _, operation := range []func() error{
-		func() error { return UnlockBox(boxID, password, crypt) },
-		func() error { _, err := UnlockAndMountBox(boxID, password, crypt); return err },
-		func() error { return AcquireEncryptedBoxOperation(boxID) },
-		func() error { return writeNotebookCryptBackup(boxID, crypt) },
-		func() error { return ChangeMasterPassword(password, "different-password") },
-		func() error { _, _, err := PrepareNotebookArchive([]string{boxID}); return err },
-	} {
-		if err = operation(); !errors.Is(err, documentaddressing.ErrUnsupported) {
-			t.Fatalf("encrypted operation admitted unsupported mode: %v", err)
-		}
+	if err := UnlockBox(boxID, "wrong-password", crypt); err == nil {
+		t.Fatal("wrong password accepted")
 	}
 	after, err := archiveDirectoryFiles(util.DataDir)
 	if err != nil {
@@ -86,7 +79,41 @@ func TestDocumentAddressingEncryptedRecoveryPreservesKeys(t *testing.T) {
 	}
 }
 
-func TestDocumentAddressingEncryptedArchiveImportPreflight(t *testing.T) {
+func TestDocumentAddressingCorruptEncryptedConfigurationWithoutBackup(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	Conf.FileTree.Store(conf.NewFileTree())
+	password := "corrupt-addressing-configuration"
+	if err := EnableEncryptedNotebook(password); err != nil {
+		t.Fatal(err)
+	}
+	kek, err := deriveKEK(password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer zeroAndClear(kek)
+	const boxID = "20261026000000-corrupt"
+	_ = notebookArchiveTestBox(t, boxID, kek)
+	name := filepath.Join(util.DataDir, boxID, documentaddressing.ConfigPath)
+	original, err := os.ReadFile(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	corrupt := append(bytes.Clone(original), '{')
+	if err := os.WriteFile(name, corrupt, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(notebookCryptoBackupPath(boxID)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := listNotebooks(true); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(name); err != nil || !bytes.Equal(got, corrupt) {
+		t.Fatal("notebook discovery removed recoverable encrypted configuration", err)
+	}
+}
+
+func TestDocumentAddressingEncryptedArchiveIgnoresRetiredModes(t *testing.T) {
 	notebookArchiveTestWorkspace(t)
 	password := "addressing-archive-password"
 	if err := EnableEncryptedNotebook(password); err != nil {
@@ -126,7 +153,7 @@ func TestDocumentAddressingEncryptedArchiveImportPreflight(t *testing.T) {
 			notebookArchiveTestWorkspace(t)
 			if test.remembered {
 				backup := []byte(`{"documentAddressing":{"version":1,"notebooks":{"` + boxID + `":3}}}`)
-				if err := documentaddressing.RestoreBackup(util.ConfDir, backup); err != nil {
+				if err := os.WriteFile(filepath.Join(util.ConfDir, "document-addressing.json"), backup, 0600); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -134,12 +161,12 @@ func TestDocumentAddressingEncryptedArchiveImportPreflight(t *testing.T) {
 			if err := ImportNotebookArchive(test.archive, "wrong-password", nil); !errors.Is(err, ErrNotebookArchiveAuthentication) {
 				t.Fatalf("mode check bypassed authentication: %v", err)
 			}
-			if err := ImportNotebookArchive(test.archive, password, nil); !errors.Is(err, documentaddressing.ErrUnsupported) {
-				t.Fatalf("archive restored unsupported notebook: %v", err)
+			if err := ImportNotebookArchive(test.archive, password, nil); err != nil {
+				t.Fatalf("retired mode blocked authenticated archive: %v", err)
 			}
 			entries, _ := os.ReadDir(util.DataDir)
-			if len(entries) != 0 || currentNotebookCrypto().Enabled {
-				t.Fatal("rejected archive partially installed data or keys")
+			if len(entries) == 0 || !currentNotebookCrypto().Enabled {
+				t.Fatal("authenticated archive lost data or keys")
 			}
 			current, _ := os.ReadFile(test.archive)
 			if !bytes.Equal(current, original) {

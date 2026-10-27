@@ -10,12 +10,25 @@ html {
 }
 
 // 声明当前配色方案，用于修正 iOS 深色模式下输入法候选词高亮项背景丢失等问题 https://github.com/siyuan-note/siyuan/issues/17894
+:root {
+  --b3-legacy-light-color: initial;
+  --b3-legacy-dark-color: ;
+}
+
 :root[data-theme-mode="dark"] {
   color-scheme: dark;
+  --b3-legacy-light-color: ;
+  --b3-legacy-dark-color: initial;
 }
 
 :root[data-theme-mode="light"] {
   color-scheme: light;
+  --b3-legacy-light-color: initial;
+  --b3-legacy-dark-color: ;
+}
+
+[inert] {
+  pointer-events: none;
 }
 
 // iOS 使用固定蓝色光标，改善系统与应用明暗模式不同组合下的输入法候选字对比度。
@@ -158,8 +171,11 @@ body {
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      height: calc(100% - var(--b3-ui-panel-height, 42px));
       margin-top: var(--b3-ui-panel-height, 42px);
+
+      &:not(.dock--float) {
+        height: calc(100% - var(--b3-ui-panel-height, 42px));
+      }
     }
 
     .toolbar {

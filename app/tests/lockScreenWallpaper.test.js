@@ -72,17 +72,20 @@ test("both authentication pages share the wallpaper interaction and clock implem
     assert.equal(loader(sources[0].source), loader(sources[1].source));
 });
 
-test("the password Enter handler waits for IME composition to finish", () => {
-    const handler = /inputElement.addEventListener\('keydown', \(event\) => \{[\s\S]*?\n {8}\}\)/.exec(sources[0].source);
+test("authentication submits through the form without a separate password key handler", () => {
+    const handler = /document.getElementById\('authForm'\).addEventListener\('submit', \(event\) => \{[\s\S]*?\n {4}\}\)/.exec(sources[0].source);
     assert.ok(handler);
-    let keydown;
+    let submit;
     let submits = 0;
-    runInNewContext(handler[0], {inputElement: {addEventListener: (_type, callback) => { keydown = callback; }},
+    let prevented = 0;
+    runInNewContext(handler[0], {document: {getElementById: () => ({addEventListener: (_type, callback) => { submit = callback; }})},
         submitAuth: () => submits++});
-    keydown({key: "Enter", isComposing: true});
     assert.equal(submits, 0);
-    keydown({key: "Enter", isComposing: false});
+    submit({preventDefault: () => prevented++});
     assert.equal(submits, 1);
+    assert.equal(prevented, 1);
+    // Native form submission handles Enter and IME; a second key handler would submit twice.
+    assert.ok(!sources[0].source.includes("inputElement.addEventListener('keydown'"));
 });
 
 for (const {file, source} of sources) {

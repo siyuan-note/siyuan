@@ -3,6 +3,9 @@
 @use "../component/svg";
 
 body {
+  --b3-snackbar-gap: 16px;
+  --b3-snackbar-right: 30px;
+  --b3-snackbar-top: max(22px, calc(var(--b3-window-controls-height, 0px) + 16px));
   --mobile-top-safe-area: env(safe-area-inset-top);
   --mobile-topbar-height: 48px;
   --mobile-breadcrumb-height: 42px;
@@ -259,15 +262,10 @@ body.mobile-keyboard--open {
     border: 0;
     background-color: transparent;
     color: var(--b3-theme-on-background);
-
-    &:not(.toolbar__title--readonly) {
-      -webkit-user-select: text;
-      user-select: text;
-    }
+    -webkit-user-select: text;
+    user-select: text;
 
     &--readonly {
-      -webkit-user-select: none;
-      user-select: none;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -1526,7 +1524,14 @@ body.mobile-topbar--merged {
     }
 
     &-text {
+      flex: 1;
+      min-width: 0;
       margin-left: 6px;
+
+      .b3-list-item__first {
+        display: flex;
+        align-items: center;
+      }
     }
 
     &-description {
@@ -2035,7 +2040,13 @@ body.mobile-topbar--merged {
 }
 
 .b3-snackbars {
-  top: calc(var(--mobile-top-safe-area) + 35px);
+  --b3-snackbar-top: calc(var(--mobile-top-safe-area) + 35px);
+}
+
+@media (max-width: 520px) {
+  .b3-snackbars {
+    --b3-snackbar-right: calc(10vw - 18px);
+  }
 }
 
 .b3-menu--fullscreen:not(.b3-menu--sheet) {

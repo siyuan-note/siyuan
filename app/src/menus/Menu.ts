@@ -529,7 +529,9 @@ export class Menu {
         // 按实际边框和内边距扣除菜单外壳高度，兼容主题及字号调整。
         const rect = menuElement.getBoundingClientRect();
         const chromeHeight = rect.height - itemsMenuElement.getBoundingClientRect().height;
-        itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - rect.top - chromeHeight, 0) + "px";
+        const availableHeight = Math.max(window.innerHeight - rect.top - chromeHeight, 0) + "px";
+        const preferredHeight = getComputedStyle(itemsMenuElement).getPropertyValue("--b3-menu-items-max-height").trim();
+        itemsMenuElement.style.maxHeight = preferredHeight ? `min(${availableHeight}, ${preferredHeight})` : availableHeight;
         // 滚动条可能改变菜单宽度，限高后再按最终尺寸校正窗口边界。
         setPosition(menuElement, rect.left, rect.top);
     }

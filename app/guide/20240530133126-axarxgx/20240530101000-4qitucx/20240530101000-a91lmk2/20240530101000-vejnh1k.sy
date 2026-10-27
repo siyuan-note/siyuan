@@ -7,7 +7,7 @@
 		"id": "20240530101000-vejnh1k",
 		"title": "クエリ構文",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-tyyk26i",
 				"id": "20240530101000-omyfbt2",
-				"updated": "20260613193647"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -31,48 +31,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-cdbpnhl",
-				"updated": "20260613193647"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "グローバル検索 ("
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "P"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​) はクエリ構文による高度な検索をサポートしています。たとえば、"
+					"Data": "グローバル検索で「クエリ構文」を選ぶと、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "foo"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ というキーワードを含め "
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "bar"
+					"TextMarkTextContent": "OR"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ というキーワードを含めたくない場合は、"
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で条件を組み合わせられます。たとえば "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -81,7 +72,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ のように論理演算子を使った検索が可能です。"
+					"Data": " は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を含み、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を含まないコンテンツを検索します。"
 				}
 			]
 		},
@@ -91,12 +100,12 @@
 			"Properties": {
 				"ID": "20240530101000-rgcipxr",
 				"id": "20240530101000-eilt3un",
-				"updated": "20240530101000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "クエリ構文を使用する前にその構成について簡単に理解しておきましょう:"
+					"Data": "クエリ構文は、次の 3 つの要素で構成されます。"
 				}
 			]
 		},
@@ -250,12 +259,12 @@
 			"Properties": {
 				"ID": "20240530101000-4hw0pz5",
 				"id": "20240530101000-cby4sig",
-				"updated": "20240530101000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以下では、それぞれの詳細について説明します。"
+					"Data": "まず文字列とフレーズを説明し、続いてクエリの組み合わせ方を紹介します。"
 				}
 			]
 		},
@@ -266,7 +275,7 @@
 			"Properties": {
 				"ID": "20240530101000-0o1hul2",
 				"id": "20240530101000-kt180bu",
-				"updated": "20261016202856"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -281,12 +290,12 @@
 			"Properties": {
 				"ID": "20240530101000-ssvyj3g",
 				"id": "20240530101000-7mce5bu",
-				"updated": "20240530101000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文字列は以下の 2 つの要件を満たす必要があります:"
+					"Data": "文字列には、次の 2 通りの書き方があります。"
 				}
 			]
 		},
@@ -297,7 +306,7 @@
 			"Properties": {
 				"ID": "20240530101000-yrc1tk4",
 				"id": "20240530101000-0e6zt6f",
-				"updated": "20261016202856"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -310,7 +319,7 @@
 					"Properties": {
 						"ID": "20240530101000-k0mq0my",
 						"id": "20240530101000-d5ksxdw",
-						"updated": "20261016202856"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -319,75 +328,39 @@
 							"Properties": {
 								"ID": "20240530101000-1y6xxln",
 								"id": "20240530101000-fu8ks02",
-								"updated": "20261016202856"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用符 ("
+									"Data": "文字列を半角の二重引用符（"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "'"
+									"TextMarkTextContent": "\""
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​) または ("
+									"Data": "）で囲みます。文字列中の二重引用符は 2 つ重ねて記述します。たとえば "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "&quot;"
+									"TextMarkTextContent": "\"foo\"\"bar\"\"\""
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​) が含まれる文字列はエスケープする: エスケープするには別の種類の引用符で囲むか SQL スタイルのエスケープ (もうひとつの "
+									"Data": " は "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "&quot;"
+									"TextMarkTextContent": "foo\"bar\""
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ または "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "'"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ を追加する) を使用します。たとえば、"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "foo &quot;bar&quot;"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ という文字列にマッチさせるには "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "'foo &quot;bar&quot;'"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ とするか、"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "&quot;foo&quot;&quot;bar&quot;&quot;&quot;"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ とします"
+									"Data": " を表します"
 								}
 							]
 						}
@@ -403,7 +376,7 @@
 					"Properties": {
 						"ID": "20240530101000-905bare",
 						"id": "20240530101000-l6rtfrj",
-						"updated": "20240530101000"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -412,12 +385,12 @@
 							"Properties": {
 								"ID": "20240530101000-4fqdbfy",
 								"id": "20240530101000-sm69xdq",
-								"updated": "20240530101000"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "引用符を付けない文字列は、予約語 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -426,7 +399,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -435,7 +408,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -444,7 +417,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を除いた以下の文字を使用する:"
+									"Data": " 以外で、次の文字だけを含むものです："
 								}
 							]
 						},
@@ -455,7 +428,7 @@
 							"Properties": {
 								"ID": "20240530101000-8lmvxrl",
 								"id": "20240530101000-szoz7v3",
-								"updated": "20240530101000"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
@@ -615,7 +588,7 @@
 									"Properties": {
 										"ID": "20240530101000-bo6xeej",
 										"id": "20240530101000-v3uxe61",
-										"updated": "20240530101000"
+										"updated": "20261024163828"
 									},
 									"Children": [
 										{
@@ -624,12 +597,12 @@
 											"Properties": {
 												"ID": "20240530101000-w3xicl0",
 												"id": "20240530101000-fezlut1",
-												"updated": "20240530101000"
+												"updated": "20261024163828"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "置換文字 (U+001A)"
+													"Data": "制御文字 U+001A（SUB）"
 												}
 											]
 										}
@@ -647,12 +620,12 @@
 			"Properties": {
 				"ID": "20240530101000-2c6o3kp",
 				"id": "20240530101000-wapppt7",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文字列は常に引用符で囲むことが安全な検索方法です。上記の文字以外 (例: スペース、"
+					"Data": "空白や "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -661,7 +634,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": " など、上記以外の文字を含む文字列は二重引用符で囲みます。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -670,7 +643,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​) が含まれている文字列は必ず全体を引用符で囲んでエスケープする必要があります。"
+					"Data": " などの記号は検索演算子としても使われるため、文字列とクエリ構文を区別してください。"
 				}
 			]
 		},
@@ -681,7 +654,7 @@
 			"Properties": {
 				"ID": "20240530101000-tb96zqp",
 				"id": "20240530101000-vjyfeqv",
-				"updated": "20240530101000"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -696,12 +669,12 @@
 			"Properties": {
 				"ID": "20240530101000-n07cm10",
 				"id": "20240530101000-cpv3qpa",
-				"updated": "20240530101000"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "フレーズは文字列で構成され、"
+					"Data": "フレーズは、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -710,25 +683,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で連結できます。フレーズはトークナイザーによってユーザーが入力したテキストを処理して生成された複数のトークンの組み合わせです。SiYuanでは、中国語の検索を容易にするため (単漢字検索をサポート)、文字単位でトークン化する方式を採用しています。つまり、各漢字や英字はひとつのトークンとして扱われます。これは "
+					"Data": " で連結した文字列から構成されます。入力はトークナイザーによってトークンへ変換され、フレーズはそれらが順序どおり隣接することを要求します。複数のキーワードを含むだけでよく、隣接が不要な場合は、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
+					"TextMarkTextContent": "AND"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ での連結に影響を与えるため、よくわからない場合は "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "+"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ で複数のフレーズを組み合わせないことをお勧めします。"
+					"Data": " でクエリを組み合わせてください。"
 				}
 			]
 		},
@@ -1058,7 +1022,7 @@
 			"Properties": {
 				"ID": "20240530101000-lk1pndp",
 				"id": "20240530101000-xs3ijea",
-				"updated": "20260803163243"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1098,40 +1062,9 @@
 			"Properties": {
 				"ID": "20240530101000-fw96t88",
 				"id": "20240530101000-s56tsh5",
-				"updated": "20260803163243"
+				"updated": "20261024161058"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "システムが生成するクエリ文は、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:&quot; + query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ の形式です。ここでの "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "query"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ はユーザーが入力した検索語句で、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{content name alias memo}:"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ は "
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
@@ -1139,7 +1072,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1148,26 +1081,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " の属性オプションで、検索対象の属性を選択します。FTS5 では列フィルタで範囲を指定します。たとえば "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ブロックの属性"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:foo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ で指定された検索対象の"
+					"Data": " は、本文、名前、エイリアス、メモから "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.sqlite.org/fts5.html#fts5_column_filters",
-					"TextMarkTextContent": "カラムフィルタ"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "を表します。"
+					"Data": " を検索します。完全な SQL の例は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH '{content name alias memo}:foo'"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。"
 				}
 			]
 		},

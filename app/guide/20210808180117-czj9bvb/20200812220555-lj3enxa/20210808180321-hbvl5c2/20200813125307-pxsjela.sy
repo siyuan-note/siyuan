@@ -6,7 +6,7 @@
 		"id": "20200813125307-pxsjela",
 		"title": "导入和导出",
 		"type": "doc",
-		"updated": "20261020225315"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201229120428-dgzkno8",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511184321-um53ppo",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -44,12 +44,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210120161018-1mdw4fy",
-				"updated": "20220511190018"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持导入 Markdown 文件。所以如果你需要导入其他笔记软件的数据，请先将数据转换为 Markdown 文件。"
+					"Data": "可导入 Markdown 文件或文件夹。迁移其他软件的数据时，可先导出为 Markdown；对于提供专用导入入口的来源，也可使用对应入口。导入前请核对资源文件路径和扩展语法。"
 				}
 			]
 		},
@@ -133,7 +133,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184018-e8mz594",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -161,7 +161,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "#foo"
+					"TextMarkTextContent": "#foo#"
 				},
 				{
 					"Type": "NodeText",
@@ -183,7 +183,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -192,7 +192,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -201,7 +201,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 相关开关。"
+					"Data": " 相关开关。"
 				}
 			]
 		},

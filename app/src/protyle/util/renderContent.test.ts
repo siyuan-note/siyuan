@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (renderSource: string, onGetSource: string) => {
+const browserCases = async (renderSource: string, onGetSource: string, reloadSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const calls: {kind: string, root: Element}[] = [];
     let releaseDatabase: (() => void) | undefined;
@@ -32,7 +32,9 @@ const browserCases = async (renderSource: string, onGetSource: string) => {
         renderContent: (protyle: IProtyle, roots: Element[], before?: () => void, valid?: () => boolean) => Promise<boolean>,
     };
     const Constants = {CB_GET_APPEND: "append", CB_GET_BEFORE: "before", CB_GET_HISTORY: "history",
-        CB_GET_BACKLINK: "backlink", SIYUAN_VERSION: "test"};
+        CB_GET_BACKLINK: "backlink", SIYUAN_VERSION: "test", ATTRIBUTE_V_SCROLL: "data-v-scroll"};
+    const preserveReloadScroll = new Function("Constants", reloadSource + "\nreturn preserveReloadScroll;")(Constants) as
+        typeof import("./reloadScroll").preserveReloadScroll;
     let disposed: Element[] = [];
     const dependencies = {Constants, getInsertedRenderRoots, renderContent,
         migrateLegacyMindmapsBeforeRender: () => false, setCustomBlockRootReady: noop,
@@ -93,6 +95,62 @@ const browserCases = async (renderSource: string, onGetSource: string) => {
     await settle();
     check.equal(calls.find(call => call.kind === "process").root, container, "full replacements retain whole-root rendering");
     check.equal(disposed.at(-1), container, "full replacements retain disposal");
+
+    // 设置刷新会替换首个节点，渲染检查必须使用这次替换后的基准。
+    container.innerHTML = '<div data-type="NodeBlockQueryEmbed" style="height: 800px">Old embed</div>' +
+        '<div class="av" data-render="true" data-node-id="av" data-av-id="data" data-av-type="table">' +
+        '<div class="av__container"><div class="av__body" data-page-size="100">Saved database</div></div></div>';
+    content.scrollTop = 120;
+    const reload = preserveReloadScroll(protyle, content.scrollTop);
+    const reloadFirst = container.firstElementChild;
+    calls.length = 0;
+    let reloadCompleted = 0;
+    load([], '<div data-type="NodeBlockQueryEmbed" style="height: 800px"></div>' +
+        '<div class="av" data-node-id="av" data-av-id="data" data-av-type="table"><div></div></div>', {
+        isValid: reload.isValid, beforeAVRender: reload.beforeAVRender,
+        afterAVRender: async () => { await reload.afterAVRender(); reloadCompleted++; },
+        onAVRenderError: () => check.fail("a valid document replacement must render"),
+    });
+    await settle();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    check.notEqual(container.firstElementChild, reloadFirst);
+    check.deepEqual(calls.map(call => call.kind), ["process", "highlight", "database", "embed"],
+        "a settings reload must initialize content, highlighting, databases and embedded queries");
+    check.equal(container.querySelector(".av__body").getAttribute("data-page-size"), "100");
+    check.equal(content.scrollTop, 120);
+    check.equal(protyle.scroll.lastScrollTop, 120);
+    check.equal(reloadCompleted, 1);
+
+    // 新请求、导航和关闭仍拒绝旧响应，用户输入只取消位置恢复。
+    calls.length = 0;
+    const staleReload = preserveReloadScroll(protyle, 120);
+    const currentReload = preserveReloadScroll(protyle, 120);
+    let reloadFailures = 0;
+    const rejectReload = (state: typeof staleReload) => load([], "<div>Stale content</div>", {
+        isValid: state.isValid, beforeAVRender: state.beforeAVRender,
+        onAVRenderError: () => reloadFailures++,
+    });
+    rejectReload(staleReload);
+    check.equal(reloadFailures, 1);
+    protyle.block.rootID = "other-root";
+    rejectReload(currentReload);
+    check.equal(reloadFailures, 2);
+    protyle.block.rootID = "root";
+    const closedReload = preserveReloadScroll(protyle, 120);
+    content.remove();
+    rejectReload(closedReload);
+    check.equal(reloadFailures, 3);
+    check.equal(calls.length, 0, "invalid reloads do not initialize components");
+    document.body.append(content);
+    const inputReload = preserveReloadScroll(protyle, 120);
+    content.dispatchEvent(new Event("pointerdown", {bubbles: true}));
+    load([], '<div data-type="NodeBlockQueryEmbed" style="height: 800px"></div>', {
+        isValid: inputReload.isValid, beforeAVRender: inputReload.beforeAVRender,
+    });
+    content.scrollTop = 80;
+    await inputReload.afterAVRender();
+    check.deepEqual(calls.map(call => call.kind), ["process", "highlight", "database", "embed"]);
+    check.equal(content.scrollTop, 80, "user input cancels scrolling without suppressing the reload");
 
     // 裁剪可能移除已收集的新节点，异步数据库工作必须再次检查实际归属。
     container.innerHTML = '<div id="a"></div><div id="b"></div><div id="c"></div>';
@@ -163,6 +221,8 @@ test("dynamic content renders inserted roots and preserves replacement, selectio
     const compile = (source: string) => transpileModule(source, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const renderSource = readFileSync(path.join(__dirname, "renderContent.ts"), "utf8")
         .replace(/^import .*;\r?\n/gm, "").replaceAll("export const", "const");
+    const reloadSource = readFileSync(path.join(__dirname, "reloadScroll.ts"), "utf8")
+        .replace(/^import .*;\r?\n/gm, "").replaceAll("export const", "const");
     const onGetSource = readFileSync(path.join(__dirname, "onGet.ts"), "utf8");
     const start = onGetSource.indexOf("const setHTML = ");
     const end = onGetSource.indexOf("export const disabledForeverProtyle", start);
@@ -170,7 +230,8 @@ test("dynamic content renders inserted roots and preserves replacement, selectio
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-render-content-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" +
-        JSON.stringify(compile(renderSource)) + "," + JSON.stringify(compile(onGetSource.slice(start, end))) + ")";
+        JSON.stringify(compile(renderSource)) + "," + JSON.stringify(compile(onGetSource.slice(start, end))) + "," +
+        JSON.stringify(compile(reloadSource)) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

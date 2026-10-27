@@ -8,6 +8,8 @@ import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import * as dates from "./date";
 import {cellValueIsEmpty, createEmptyAVValue} from "../cellValue";
 import {getConditionalBackground} from "../conditionalColor";
+import {DOMFixture} from "../testDOM";
+import {escapeAttr, escapeHtml} from "../../../../util/escape";
 
 const search = {bindAvSearch() {}, captureAvSearchSelection() {}, deferAvSearchRender: () => false};
 
@@ -84,7 +86,7 @@ test("calendar refreshes the current view after composition and captures the lat
     assert.equal(bound.selection, selection);
 });
 
-test("calendar omits empty fields while preserving zero, unchecked boxes and rendered values", async () => {
+test("calendar field names preserve titles, empty fields, zero, unchecked boxes and rendered values in month and week views", async () => {
     const start = new Date(2026, 8, 1).getTime();
     const range = {start, end: dates.addCalendarDays(start, 7), timeZone: "UTC"};
     const types: TAVCol[] = ["text", "number", "phone", "url", "email", "template", "select", "mSelect", "relation", "rollup", "mAsset", "date"];
@@ -96,20 +98,22 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
         {...createEmptyAVValue("rendered", "text"), renderedContent: "Rendered", hasRenderTemplate: true},
         {...createEmptyAVValue("blank-rendered", "text"), text: {content: "Source"}, renderedContent: "", hasRenderTemplate: true},
         createEmptyAVValue("primary", "block"),
+        {...createEmptyAVValue("hidden", "text"), text: {content: "Hidden value"}},
     );
     let html = "";
     const complete = new Error("rendered");
     const api = {} as typeof import("./render");
+    const state = {anchor: start, mode: "week", rowLimit: 3, expandedWeeks: new Set()};
     const modules: Record<string, unknown> = {
         "./date": dates,
-        "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
+        "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
         "./settings": {isCalendarDateColumn: () => true},
         "../cellValue": {cellValueIsEmpty},
         "../conditionalColor": {getConditionalBackground},
         "../cell": {renderCell: () => "<span></span>"},
         "../render": {genTabHeaderHTML: () => ""},
         "../search": search,
-        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../util/escape": {escapeAttr, escapeHtml},
         "../../../../constants": {Constants: {}},
         "../virtualScroll": {getAVSelectedItemIDs: (): string[] => []},
         "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; throw complete; }},
@@ -120,19 +124,38 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
         exports: api, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
         window: {siyuan: {config: {lang: "en"}, languages: {}}}, document: {activeElement: null},
     });
-    await assert.rejects(api.renderCalendar({querySelector: (): null => null, removeAttribute() {}} as unknown as HTMLElement,
-        {disabled: true, options: {}} as IProtyle, {viewID: "calendar", view: {
-            calendar: {dateKeyID: "date"}, calendarRange: range,
-            columns: values.map(value => ({id: value.keyID, type: value.type, name: value.keyID})),
-            rows: [{id: "row", cells: values.map(value => ({value})), conditionalColors: {background: {content: "", color: "3"}}}],
-        }} as unknown as IAV), error => error === complete);
-    for (const type of types) {
-        assert.doesNotMatch(html, new RegExp(`data-field-id="empty-${type}"`));
-    }
-    assert.doesNotMatch(html, /data-field-id="blank-rendered"/);
-    assert.match(html, /--b3-av-calendar-background:var\(--b3-font-background3\)/);
-    for (const key of ["primary", "date", "zero", "unchecked", "rendered"]) {
-        assert.match(html, new RegExp(`data-field-id="${key}"`));
+    for (const mode of ["month", "week"]) {
+        state.mode = mode;
+        for (const displayFieldName of [undefined, false, true]) {
+            await assert.rejects(api.renderCalendar({querySelector: (): null => null, removeAttribute() {}} as unknown as HTMLElement,
+                {disabled: true, options: {}} as IProtyle, {viewID: "calendar", view: {
+                    calendar: {dateKeyID: "date", displayFieldName}, calendarRange: range,
+                    columns: values.map(value => ({id: value.keyID, type: value.type, name: `Name ${value.keyID} <&>`, hidden: value.keyID === "hidden"})),
+                    rows: [{id: "row", cells: values.map(value => ({value})), conditionalColors: {background: {content: "", color: "3"}}}],
+                }} as unknown as IAV), error => error === complete);
+            for (const type of types) {
+                assert.doesNotMatch(html, new RegExp(`data-field-id="empty-${type}"`));
+            }
+            assert.doesNotMatch(html, /data-field-id="blank-rendered"/);
+            assert.doesNotMatch(html, /data-field-id="hidden"/);
+            assert.match(html, /--b3-av-calendar-background:var\(--b3-font-background3\)/);
+            for (const key of ["primary", "date", "zero", "unchecked", "rendered"]) {
+                assert.match(html, new RegExp(`data-field-id="${key}"`));
+            }
+            const document = new DOMFixture();
+            document.body.innerHTML = html;
+            const labels = document.body.querySelectorAll(".av__calendar-field-name");
+            assert.equal(labels.length, displayFieldName ? 4 : 0);
+            assert.equal(document.body.querySelector('[data-field-id="primary"]').parentElement.classList.contains("av__calendar-field-row"), false);
+            if (displayFieldName) {
+                assert.deepEqual(labels.map(label => label.textContent), ["date", "zero", "unchecked", "rendered"].map(key => `Name ${key} <&>`));
+                assert.equal(labels[1].getAttribute("title"), "Name zero <&>");
+                assert.equal(labels[1].children.length, 0);
+                const checkbox = document.body.querySelector('[data-field-id="unchecked"]');
+                assert.equal(checkbox.getAttribute("role"), "checkbox");
+                assert.equal(checkbox.getAttribute("aria-checked"), "false");
+            }
+        }
     }
 });
 
@@ -312,13 +335,22 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         assert.match(html, new RegExp(`role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="false" aria-disabled="${!editable}"`));
         const item = {dataset: {calendarItem: "row"}};
         const field = {dataset: {colId: "second"}, closest: () => item};
-        const target = {closest: (selector: string) => selector.includes("checkbox") ? field : item};
+        const target = {closest: (selector: string) => selector.includes("checkbox") ? field :
+            selector === "[data-calendar-item]" ? item : null};
         handlers.click({target, stopPropagation() {}});
         handlers.keydown({target, key: " ", preventDefault() {}, stopPropagation() {}});
         handlers.pointerdown({target, button: 0, pointerType: "mouse", stopPropagation() {}});
         handlers.touchstart({target, touches: [{}]});
         assert.equal(opens, 0);
         assert.equal(updates.length, editable ? 2 : 0);
+        let referenceStopped = false;
+        const referenceTarget = {closest: (selector: string) => selector.includes(".av__celltext--ref[data-id]") ? {} : null};
+        handlers.click({target: referenceTarget, stopPropagation() { referenceStopped = true; }});
+        handlers.pointerdown({target: referenceTarget, stopPropagation() { referenceStopped = true; }});
+        handlers.touchstart({target: referenceTarget, touches: [{}]});
+        assert.equal(referenceStopped, false, "primary references bubble to the shared editor navigation on desktop and mobile");
+        assert.equal(startDrag, undefined, "primary references never start calendar dragging");
+        assert.equal(opens, 0, "primary references do not also open the row preview");
         for (const args of updates as Parameters<typeof import("../cell").updateCellsValue>[]) {
             assert.deepEqual(JSON.parse(JSON.stringify(args[2])), {checked: true});
             assert.equal(args[9][0].cell, cells[2]);

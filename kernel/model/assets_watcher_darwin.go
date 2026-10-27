@@ -26,7 +26,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/radovskyb/watcher"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -55,42 +54,46 @@ func watchAssets() {
 		return
 	}
 
+	watcherInstance := assetsWatcher
 	go func() {
 		defer logging.Recover()
 
 		for {
 			select {
-			case event, ok := <-assetsWatcher.Event:
+			case event, ok := <-watcherInstance.Event:
 				if !ok {
 					return
 				}
 
-				if watcher.Write == event.Op {
-					IncSync()
-				}
-
-				// 重新缓存资源文件，以便使用 /资源 搜索
-				go cache.LoadAssets()
-
-				if watcher.Remove == event.Op {
-					HandleAssetsRemoveEvent(event.Path)
-				} else {
-					HandleAssetsChangeEvent(event.Path)
-				}
-			case err, ok := <-assetsWatcher.Error:
+				batch := assetWatchBatch{}
+				batch.addDarwinEvent(event)
+				batch.flush()
+			case err, ok := <-watcherInstance.Error:
 				if !ok {
 					return
 				}
 				logging.LogErrorf("watch assets failed: %s", err)
-			case <-assetsWatcher.Closed:
+			case <-watcherInstance.Closed:
 				return
 			}
 		}
 	}()
 
-	if err := assetsWatcher.Start(10 * time.Second); err != nil {
+	if err := watcherInstance.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
+	}
+}
+
+func (batch assetWatchBatch) addDarwinEvent(event watcher.Event) {
+	switch event.Op {
+	case watcher.Create, watcher.Write, watcher.Remove:
+		batch.add(event.Path, true)
+	case watcher.Rename, watcher.Move:
+		batch.add(event.OldPath, true)
+		batch.add(event.Path, true)
+	case watcher.Chmod:
+		batch.add(event.Path, false)
 	}
 }
 

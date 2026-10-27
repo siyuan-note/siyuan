@@ -14,7 +14,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -62,8 +61,6 @@ func documentCreateFailure(err error, state, id, stage string, completed []strin
 	var addressingErr *DocumentAddressingError
 	if errors.As(err, &addressingErr) {
 		reason = addressingErr.Reason
-	} else if errors.Is(err, documentaddressing.ErrModeConflict) {
-		reason = "modeConflict"
 	}
 	return &DocumentCreateFailure{Reason: reason, CommitState: state, ID: id, Stage: stage,
 		Completed: completed, Cause: err}

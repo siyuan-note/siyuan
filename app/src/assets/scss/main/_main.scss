@@ -279,6 +279,65 @@ body.body--harmony {
   }
 }
 
+// 原生按钮的实际尺寸由 Electron 上报，页面仅为同一块区域预留空间。
+html.window-controls-overlay {
+  --b3-window-controls-width: calc(100vw - env(titlebar-area-width, 100vw) - env(titlebar-area-x, 0px));
+  --b3-window-controls-height: env(titlebar-area-height, 0px);
+  --b3-window-controls-top-height: max(var(--b3-ui-panel-height, 42px), var(--b3-window-controls-height));
+
+  &.window-controls-overlay--hidden {
+    --b3-window-controls-width: 0px;
+    --b3-window-controls-height: 0px;
+  }
+
+  .body--windows {
+    #toolbar,
+    .toolbar--settings {
+      height: max(var(--b3-ui-toolbar-height, 32px), var(--b3-window-controls-height));
+    }
+
+    .window-controls-overlay__placeholder {
+      width: var(--b3-window-controls-width);
+      height: var(--b3-window-controls-height);
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .toolbar__window,
+    .toolbar__window .toolbar__item,
+    .window-controls-overlay__top-row {
+      min-height: var(--b3-window-controls-top-height);
+    }
+
+    .fullscreen > .protyle-breadcrumb,
+    .fullscreen > .block__icons {
+      padding-right: calc(var(--b3-window-controls-width) + 8px);
+      min-height: var(--b3-window-controls-height);
+    }
+
+    &.body--toolbar-hide {
+      #toolbar,
+      #toolbar #drag,
+      #toolbar #drag::before,
+      #toolbar #drag::after {
+        height: var(--b3-window-controls-top-height);
+      }
+
+      #dockLeft,
+      #dockRight,
+      .layout__dockl:not(.layout--float),
+      .layout__dockr:not(.layout--float) {
+        margin-top: var(--b3-window-controls-top-height);
+      }
+
+      #dockLeft:not(.dock--float),
+      #dockRight:not(.dock--float) {
+        height: calc(100% - var(--b3-window-controls-top-height));
+      }
+    }
+  }
+}
+
 .status {
   & > [data-entry-hidden="true"] {
     display: none !important;

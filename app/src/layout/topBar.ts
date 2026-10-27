@@ -277,7 +277,8 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 event.stopPropagation();
                 break;
             } else if (targetId === "barCommand") {
-                toggleMenu({target, build: () => commandPanel(app)});
+                // 命令面板在桌面端是独立对话框，不自建共享菜单，因此不接入共享菜单的开关状态，开关由面板自身处理
+                commandPanel(app);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barZoom") {

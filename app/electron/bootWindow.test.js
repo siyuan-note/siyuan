@@ -146,6 +146,7 @@ const mainWindowSetup = () => {
         constructor() {
             super();
             this.webContents = Object.assign(new EventEmitter(), {id: ++windowId,
+                send: (...args) => { this.messages = [...(this.messages || []), args]; },
                 session: {webRequest: {onBeforeSendHeaders() {}, onHeadersReceived() {}}}});
         }
         isDestroyed() { return !!this.destroyed; }
@@ -161,7 +162,8 @@ const mainWindowSetup = () => {
         fs: {readFileSync: () => "{}"}, windowStatePath: "state.json", path, appDir: "app", appVer: "3.8.6",
         screen: {getPrimaryDisplay: () => ({size: {width: 1000}, workAreaSize: {height: 800}})},
         BrowserWindow: Window, remote: {enable() {}}, bindSpellcheckContextMenu() {}, bindTopBarContextMenu() {},
-        rememberWindowKernelTarget() {}, windowNavigate() {}, writeLog() {}, process: {platform: "win32"},
+        getTitleBarOverlayOptions: require("./windowControlsOverlay").getTitleBarOverlayOptions,
+        rememberWindowKernelTarget() {}, windowNavigate() {}, writeLog() {}, process: {platform: "win32", argv: []},
         net: {fetch: () => new Promise(() => {})}, getServer: port => "https://127.0.0.1:" + port,
         setStartupApplicationMenu() {}, isOpenAsHidden: () => false, ipcMain,
         setTimeout: callback => { const key = {}; timers.set(key, callback); return key; },
@@ -213,6 +215,43 @@ test("main window timeout and closure clean up their own boot windows and readin
     assert.equal(boots[1].destroyed, true);
     assert.equal(ipcMain.listenerCount("siyuan-ready-to-show"), 0);
     assert.equal(timers.size, 0);
+});
+
+test("deep-link startup waits for the interface before showing the window and forwarding the link", () => {
+    const {context, ipcMain, Window} = mainWindowSetup();
+    const boot = new Window();
+    context.localKernelStartups.set("workspace", {window: boot, workspace: "workspace", port: 6806});
+    const url = "siyuan://blocks/20261025000000-abcdefg";
+    context.process.argv.push(url);
+    vm.runInContext("initMainWindow(6806)", context);
+    const window = context.workspaces[0].browserWindow;
+    window.webContents.emit("did-finish-load");
+    assert.equal(window.shown, undefined);
+    assert.equal(window.messages, undefined);
+    assert.equal(boot.destroyed, undefined);
+    ipcMain.emit("siyuan-ready-to-show", {sender: window.webContents});
+    assert.equal(window.shown, true);
+    assert.equal(boot.destroyed, true);
+    assert.deepEqual(window.messages, [["siyuan-open-url", url]]);
+});
+
+test("ready hidden startup stays minimized and restores its saved maximized state later", () => {
+    const {context, ipcMain, Window} = mainWindowSetup();
+    const boot = new Window();
+    context.isOpenAsHidden = () => true;
+    context.fs.readFileSync = () => '{"isMaximized":true}';
+    context.localKernelStartups.set("workspace", {window: boot, workspace: "workspace", port: 6806});
+    vm.runInContext("initMainWindow(6806)", context);
+    const window = context.workspaces[0].browserWindow;
+    window.minimize = () => { window.minimized = true; };
+    window.maximize = () => { window.maximized = true; };
+    ipcMain.emit("siyuan-ready-to-show", {sender: window.webContents});
+    assert.equal(window.minimized, true);
+    assert.equal(window.shown, undefined);
+    assert.equal(window.maximized, undefined);
+    assert.equal(boot.destroyed, true);
+    window.emit("restore");
+    assert.equal(window.maximized, true);
 });
 
 test("system shutdown includes every booting workspace and closes only successful exits", async () => {

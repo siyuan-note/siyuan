@@ -1,9 +1,11 @@
 package util
 
 import (
+	"bytes"
 	"os"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/filelock"
 )
 
@@ -19,15 +21,22 @@ func WriteFileWithPreflight(path string, data []byte, useMmap bool, check func([
 	if err = check(current); err != nil {
 		return err
 	}
+	if current != nil && bytes.Equal(current, data) {
+		return nil
+	}
 	if useMmap {
 		file, openErr := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 		if openErr == nil {
 			writeErr := writeFileByMmap(file, data)
 			closeErr := file.Close()
 			if writeErr == nil && closeErr == nil {
+				dejavu.MarkFileChanged(path)
 				return nil
 			}
 		}
 	}
-	return gulu.File.WriteFileSafer(path, data, 0644)
+	if err = gulu.File.WriteFileSafer(path, data, 0644); err == nil {
+		dejavu.MarkFileChanged(path)
+	}
+	return err
 }

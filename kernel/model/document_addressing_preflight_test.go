@@ -144,10 +144,6 @@ func TestDocumentAddressingCheckoutSourcePreflight(t *testing.T) {
 	future := `{"Spec":"999","Properties":{"title":"Future"}}`
 	title := `{"Spec":"2","Properties":{"title":{"format":"future"}}}`
 	slash := `{"Spec":"6","Properties":{"title":"Parent/Child"}}`
-	var slashError error
-	if documentaddressing.DefaultMode() < 2 {
-		slashError = documentaddressing.ErrModeConflict
-	}
 	for _, test := range []struct {
 		name, incoming, current, config, floor, document string
 		wantErr                                          error
@@ -156,11 +152,11 @@ func TestDocumentAddressingCheckoutSourcePreflight(t *testing.T) {
 		{name: "incoming future title", incoming: title, current: ordinary, wantErr: documentaddressing.ErrInvalidTitle},
 		{name: "current future spec", incoming: ordinary, current: future, wantErr: treenode.ErrSpecTooNew},
 		{name: "current future title", incoming: ordinary, current: title, wantErr: documentaddressing.ErrInvalidTitle},
-		{name: "mode before source", incoming: future, current: ordinary, config: `{"documentAddressingVersion":3}`, wantErr: documentaddressing.ErrUnsupported},
-		{name: "floor before source", incoming: future, current: ordinary,
-			floor: `{"version":1,"notebook":"` + checkoutSourceBox + `","minimumMode":3}`, wantErr: documentaddressing.ErrUnsupported},
+		{name: "retired mode does not bypass source", incoming: future, current: ordinary, config: `{"documentAddressingVersion":3}`, wantErr: treenode.ErrSpecTooNew},
+		{name: "retired floor does not bypass source", incoming: future, current: ordinary,
+			floor: `{"version":1,"notebook":"` + checkoutSourceBox + `","minimumMode":3}`, wantErr: treenode.ErrSpecTooNew},
 		{name: "ordinary", incoming: ordinary, current: `{"Spec":"2","Properties":{"title":"Old"}}`},
-		{name: "literal slash", incoming: slash, current: ordinary, wantErr: slashError},
+		{name: "literal slash", incoming: slash, current: ordinary, wantErr: nil},
 		{name: "BOM source", incoming: "\xef\xbb\xbf" + ordinary, current: ordinary},
 		{name: "recover corrupt source", incoming: ordinary, current: `{"Spec":"2","Properties":`},
 		{name: "asset sy", incoming: future, current: ordinary, document: "assets/" + checkoutSourceDocument},

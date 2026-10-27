@@ -33,7 +33,7 @@ const compiled = transpileModule(`class Controller {
 }
 globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-test("desktop and mobile connector menus persist one undoable change and preserve existing metadata", async () => {
+test("desktop and mobile settings cancel theme previews and persist one undoable change with existing metadata", async () => {
     for (const mobile of [false, true]) {
         let data = {version: 2, nodes: {child: {lineColor: "red"}}, relations: [] as unknown[], extension: "keep"};
         const original = JSON.stringify(data);
@@ -47,6 +47,16 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         let expandItem: IMenu;
         let panItem: IMenu;
         let entries: IMenu[];
+        let closeMenu: () => void;
+        const rendered: import("./model").ListMindmapModel[] = [];
+        const menuWindow = Object.assign(new EventTarget(), {
+            siyuan: {languages: {listMindmapExpandToLevel: "Level ${level}"}},
+        });
+        const dismiss = () => {
+            const close = closeMenu;
+            closeMenu = undefined;
+            close?.();
+        };
         let defaultStyle = "bezier";
         const defaults: string[] = [];
         const placements: unknown[] = [];
@@ -72,10 +82,11 @@ test("desktop and mobile connector menus persist one undoable change and preserv
             isMobile: () => mobile,
             toggleMenu: ({target, build}: {target: unknown, build: (menu: unknown, session: unknown) => void}) => {
                 assert.equal(target, anchor);
+                dismiss();
                 build(undefined, {show: (open: () => void) => open()});
             },
             Menu: class {
-                constructor() { entries = []; }
+                constructor(_id?: string, close?: () => void) { entries = []; closeMenu = close; }
                 addItem(value: IMenu) {
                     entries.push(value);
                     if (value.id === "defaultConnectorStyle") { defaultItem = value; }
@@ -89,11 +100,13 @@ test("desktop and mobile connector menus persist one undoable change and preserv
                 open(position: unknown) { placements.push(position); }
                 fullscreen(position: unknown) { placements.push(position); }
             },
-            window: {siyuan: {languages: {listMindmapExpandToLevel: "Level ${level}"}}}, console,
+            window: menuWindow, console,
         };
         runInNewContext(compiled, context);
         const target = new context.Controller();
-        Object.assign(target, {list, owner: {}, view: {getSelectedId: () => "root"}, refresh: () => {}});
+        Object.assign(target, {list, owner: {}, model: context.readListMindmap(),
+            view: {getSelectedId: () => "root", update: (model: import("./model").ListMindmapModel) => rendered.push(model)},
+            refresh: () => target.model = context.readListMindmap()});
         const choose = (style: string) => (item.submenu as IMenu[]).find(entry => entry.id === style).click(undefined, undefined);
         target.onSettingsMenu(anchor);
         assert.equal((item.submenu as IMenu[]).find(entry => entry.checked).id, "bezier");
@@ -139,11 +152,55 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         const theme = (appearanceItem.submenu as IMenu[]).find(entry => entry.id === "theme");
         const beforeTheme = list.outerHTML;
         const beforeCount = transactions.length;
-        (theme.submenu as IMenu[]).find(entry => entry.id === "colorful").click(undefined, undefined);
+        const waves = (theme.submenu as IMenu[]).find(entry => entry.id === "waves");
+        let applyTheme = waves;
+        const swatch = new EventTarget();
+        waves.bind?.(swatch as unknown as HTMLElement);
+        const enter = (pointerType: string) => swatch.dispatchEvent(Object.assign(new Event("pointerenter"), {pointerType}));
+        const beforeRenderCount = rendered.length;
+        enter("touch");
+        assert.equal(rendered.length, beforeRenderCount, "touch does not preview or select a theme");
+        enter("mouse");
+        if (mobile) {
+            assert.equal(waves.bind, undefined, "mobile themes retain tap-to-apply behavior");
+        } else {
+            assert.equal(rendered.at(-1).metadata.appearance.rootColor, "#849695", "hover previews the theme immediately");
+            assert.notEqual(rendered.at(-1).metadata, target.model.metadata, "preview uses a separate metadata snapshot");
+            assert.equal(rendered.at(-1).metadata.nodes.child.lineColor, "red", "preview preserves manual colors");
+            assert.equal(target.model.metadata.appearance, undefined, "hover leaves the controller's canonical model unchanged");
+            swatch.dispatchEvent(new Event("pointerleave"));
+            assert.equal(rendered.at(-1), target.model, "leaving the row restores the saved model");
+            enter("mouse");
+            menuWindow.dispatchEvent(Object.assign(new Event("keydown"), {key: "Escape"}));
+            assert.equal(rendered.at(-1), target.model, "Escape cancels preview even when only a submenu closes");
+            enter("mouse");
+            dismiss();
+            assert.equal(rendered.at(-1), target.model, "dismissing the menu restores the latest saved model");
+            const closedRenderCount = rendered.length;
+            enter("mouse");
+            assert.equal(rendered.length, closedRenderCount, "a closed menu cannot reapply an obsolete preview");
+            target.onSettingsMenu(anchor);
+            applyTheme = ((appearanceItem.submenu as IMenu[]).find(entry => entry.id === "theme").submenu as IMenu[])
+                .find(entry => entry.id === "waves");
+            const activeSwatch = new EventTarget();
+            applyTheme.bind(activeSwatch as unknown as HTMLElement);
+            activeSwatch.dispatchEvent(Object.assign(new Event("pointerenter"), {pointerType: "mouse"}));
+        }
+        assert.equal(list.outerHTML, beforeTheme, "preview never changes source attributes or content");
+        assert.equal(transactions.length, beforeCount, "preview never creates undo entries");
+        applyTheme.click(undefined, undefined);
+        dismiss();
+        if (!mobile) {
+            assert.equal(rendered.at(-1), target.model, "closing after applying retains the newly saved model");
+        }
         assert.equal(transactions.length, beforeCount + 1, "applying a palette is one document transaction on both platforms");
         assert.equal(transactions.at(-1).before, beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).nodes.child.lineColor, "red", "theme changes retain manual overrides");
         assert.equal(JSON.parse(list.outerHTML).nodes.child.branchColor, 0, "branch slots are saved with the same snapshot");
+        assert.equal(JSON.parse(list.outerHTML).appearance.rootColor, "#849695",
+            "the root theme color is saved in the same document transaction on desktop and mobile");
+        assert.equal(JSON.parse(list.outerHTML).appearance.nodeStyle, "branch",
+            "the reference style is saved with the root and branch palette on both platforms");
         const themed = list.outerHTML;
         data = JSON.parse(beforeTheme);
         assert.equal(JSON.parse(list.outerHTML).appearance, undefined, "undo restores the unthemed document");
@@ -158,7 +215,7 @@ test("desktop and mobile connector menus persist one undoable change and preserv
         const count = transactions.length;
         editable = false;
         choose("spline");
-        (theme.submenu as IMenu[]).find(entry => entry.id === "forest").click(undefined, undefined);
+        (theme.submenu as IMenu[]).find(entry => entry.id === "dream").click(undefined, undefined);
         target.onNodesStyle(["root", "child"], {backgroundColor: "#ffffff"});
         (defaultItem.submenu as IMenu[]).find(entry => entry.id === "spline").click(undefined, undefined);
         assert.deepEqual(defaults, ["rounded"], "a stale menu cannot change preferences after editing is disabled");

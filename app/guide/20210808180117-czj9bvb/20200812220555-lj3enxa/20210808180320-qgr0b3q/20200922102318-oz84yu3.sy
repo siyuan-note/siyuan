@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806104349-3cpwtum",
-				"updated": "20261016202635"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -121,230 +121,19 @@
 			]
 		},
 		{
-			"ID": "20220806104355-9smwbwz",
-			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
+			"ID": "20261024162311-tmefu1b",
+			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20220806104355-9smwbwz",
-				"updated": "20261016202635"
+				"id": "20261024162311-tmefu1b",
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
-					"ID": "20220806104408-dzqx5tq",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20220806104408-dzqx5tq",
-						"updated": "20261016202635"
-					},
-					"Children": [
-						{
-							"ID": "20220806104408-6buoa98",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220806104408-6buoa98",
-								"updated": "20261016202635"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "打开 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外观"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "代码片段"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，选择 CSS 页签"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230417141127-5xeqn2w",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20230417141127-5xeqn2w",
-						"updated": "20230417141127"
-					},
-					"Children": [
-						{
-							"ID": "20230417141127-ykva27k",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230417141127-ykva27k",
-								"updated": "20230417141132"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "填入标题"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220806104453-r93vur1",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20220806104453-r93vur1",
-						"updated": "20220806104453"
-					},
-					"Children": [
-						{
-							"ID": "20220806104453-w1275cy",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220806104453-w1275cy",
-								"updated": "20230417141054"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "根据主题和 theme.css 中的变量参照如下写法进行编码后填入代码片段中"
-								}
-							]
-						},
-						{
-							"ID": "20230417140641-qkwfqkh",
-							"Type": "NodeCodeBlock",
-							"IsFencedCodeBlock": true,
-							"Properties": {
-								"id": "20230417140641-qkwfqkh",
-								"updated": "20230417140651"
-							},
-							"Children": [
-								{
-									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```"
-								},
-								{
-									"Type": "NodeCodeBlockFenceInfoMarker",
-									"CodeBlockInfo": "Y3Nz"
-								},
-								{
-									"Type": "NodeCodeBlockCode",
-									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
-								},
-								{
-									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220806104553-x0zop0s",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "NC4=",
-						"Num": 4
-					},
-					"Properties": {
-						"id": "20220806104553-x0zop0s",
-						"updated": "20220806104606"
-					},
-					"Children": [
-						{
-							"ID": "20220806104553-fnd0qjf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220806104553-fnd0qjf",
-								"updated": "20230417141206"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "开启该代码片段"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230417141206-1re3sk4",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "NS4=",
-						"Num": 5
-					},
-					"Properties": {
-						"id": "20230417141206-1re3sk4",
-						"updated": "20230417141216"
-					},
-					"Children": [
-						{
-							"ID": "20230417141206-wv1436f",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230417141206-wv1436f",
-								"updated": "20230417141216"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "点击确定按钮"
-								}
-							]
-						}
-					]
+					"Type": "NodeText",
+					"Data": "类型与管理"
 				}
-			]
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20260614110216-a0tmxyt",
@@ -648,6 +437,265 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中浏览。"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-7871k77",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024162311-7871k77",
+				"updated": "20261024163429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "禁用 CSS 片段会移除其样式。JS 片段已执行的操作不会因关闭开关而自动撤销；需要清除运行效果时，请禁用后重新加载界面。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 片段已经写入的数据需要另行恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-zm7szcq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024162311-zm7szcq",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编写 CSS 片段"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20220806104355-9smwbwz",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220806104355-9smwbwz",
+				"updated": "20261024160716"
+			},
+			"Children": [
+				{
+					"ID": "20220806104408-dzqx5tq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220806104408-dzqx5tq",
+						"updated": "20261016202635"
+					},
+					"Children": [
+						{
+							"ID": "20220806104408-6buoa98",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220806104408-6buoa98",
+								"updated": "20261016202635"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "打开 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外观"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "代码片段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，选择 CSS 页签"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141127-5xeqn2w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230417141127-5xeqn2w",
+						"updated": "20230417141127"
+					},
+					"Children": [
+						{
+							"ID": "20230417141127-ykva27k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141127-ykva27k",
+								"updated": "20230417141132"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "填入标题"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220806104453-r93vur1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220806104453-r93vur1",
+						"updated": "20261024160716"
+					},
+					"Children": [
+						{
+							"ID": "20220806104453-w1275cy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220806104453-w1275cy",
+								"updated": "20230417141054"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根据主题和 theme.css 中的变量参照如下写法进行编码后填入代码片段中"
+								}
+							]
+						},
+						{
+							"ID": "20230417140641-qkwfqkh",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230417140641-qkwfqkh",
+								"updated": "20261024160716"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-dark-theme=\"midnight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220806104553-x0zop0s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220806104553-x0zop0s",
+						"updated": "20220806104606"
+					},
+					"Children": [
+						{
+							"ID": "20220806104553-fnd0qjf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220806104553-fnd0qjf",
+								"updated": "20230417141206"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "开启该代码片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141206-1re3sk4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230417141206-1re3sk4",
+						"updated": "20230417141216"
+					},
+					"Children": [
+						{
+							"ID": "20230417141206-wv1436f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141206-wv1436f",
+								"updated": "20230417141216"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击确定按钮"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

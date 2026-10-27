@@ -22,7 +22,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -47,11 +46,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 
 	box := Conf.Box(targetBoxID)
 	listItemText := sql.GetContainerText(listItemNode)
-	if documentaddressing.DefaultMode() == 2 {
-		listItemText = normalizeDocumentTitle(listItemText)
-	} else {
-		listItemText = util.FilterFileName(listItemText)
-	}
+	listItemText = normalizeDocumentTitle(listItemText)
 
 	moveToRoot := "/" == targetPath
 	toHP := "/" + listItemText

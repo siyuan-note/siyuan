@@ -4,6 +4,7 @@ import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
+import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
@@ -199,7 +200,6 @@ import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold, toggleListFold} from "../util/blockFold";
 import {bindHeadingFoldIndicators} from "../util/headingFoldIndicator";
-import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
@@ -577,7 +577,16 @@ export class WYSIWYG {
         if (isIOSDevice()) {
             this.disposeTouchCaret = bindIOSTouchCaret(this.element, () => !protyle.disabled &&
                 !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
-                !getBlockSelectionModeElement(this.element));
+                !getBlockSelectionModeElement(this.element), (target, point) => {
+                const cell = target.closest("td, th");
+                if (!cell || cell.closest(".protyle-wysiwyg") !== this.element) {
+                    return false;
+                }
+                // 在短按结束时进入单元格编辑，避免键盘动画后的延迟点击重新命中其他内容。
+                target.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+                    clientX: point.x, clientY: point.y, button: 0, detail: 1}));
+                return true;
+            });
         }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
@@ -5283,16 +5292,7 @@ export class WYSIWYG {
             const openFloatElement = hasClosestByAttribute(event.target, "data-action", "openFloat");
             if (openFloatElement) {
                 const id = openFloatElement.getAttribute("data-id");
-                /// #if MOBILE
-                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
-                /// #else
-                window.siyuan.blockPanels.push(new BlockPanel({
-                    app: protyle.app,
-                    isBacklink: false,
-                    targetElement: openFloatElement,
-                    refDefs: [{refID: id}]
-                }));
-                /// #endif
+                openEmbedBlock(protyle, openFloatElement, id);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

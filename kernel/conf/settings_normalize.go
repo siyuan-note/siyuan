@@ -84,6 +84,9 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.CheckBlockRef == nil {
 		editor.CheckBlockRef = defaults.CheckBlockRef
 	}
+	if editor.EmbedBlockBreadcrumbParentPath == nil {
+		editor.EmbedBlockBreadcrumbParentPath = defaults.EmbedBlockBreadcrumbParentPath
+	}
 	if editor.HashTagSearch == nil {
 		editor.HashTagSearch = defaults.HashTagSearch
 	}

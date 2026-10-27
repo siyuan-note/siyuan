@@ -5,7 +5,6 @@ package model
 import (
 	"bytes"
 	"context"
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -49,7 +47,7 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 		t.Helper()
 		ret, err := CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ParentID: parent, ID: ast.NewNodeID(),
 			TitleFormat: "plain", Title: title, Markdown: "body"})
-		if err != nil || ret.Title.Text != title || ret.AddressingVersion != 2 {
+		if err != nil || ret.Title.Text != title {
 			t.Fatalf("create %q: %+v %v", title, ret, err)
 		}
 		return ret
@@ -99,10 +97,10 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 		paths[0].Title.Text != leaf.Title.Text {
 		t.Fatal(paths, missing, err)
 	}
-	if _, err = GetIDsByHPath("/A/B", box.ID); !errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+	if ids, err := GetIDsByHPath("/A/B", box.ID); err != nil || len(ids) != 1 || ids[0] != child.ID {
 		t.Fatal(err)
 	}
-	if _, err = CreateWithMarkdown("", box.ID, "/Plain", "", parent.ID, ast.NewNodeID(), false, "", nil); !errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
+	if _, err = CreateWithMarkdown("", box.ID, "/Plain", "", parent.ID, ast.NewNodeID(), false, "", nil); err != nil {
 		t.Fatal(err)
 	}
 	newSource, _ := os.ReadFile(filepath.Join(util.DataDir, box.ID, ordinary.Path))

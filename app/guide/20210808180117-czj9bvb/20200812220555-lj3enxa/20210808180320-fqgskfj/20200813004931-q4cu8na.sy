@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024160716"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118100623-i00rgj0",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -33,21 +33,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118100631-nhy9fe2",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "“"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "内容块"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "”指的是一块内容，每块这样的内容通过一个全局唯一的 ID 进行标识。ID 是程序自动生成的，形如： "
+					"Data": "内容块是思源中可独立编辑、引用和组织的内容单元。每个内容块都有程序自动生成的全局唯一 ID，例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -56,7 +47,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，由 14 位时间戳（"
+					"Data": "。ID 由 14 位时间戳（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -75,7 +66,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090752-2n7t087",
-				"updated": "20210415202508"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -93,12 +84,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090752-98ivtnt",
-				"updated": "20211110154030"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "最常见的内容块就是我们所熟悉的段落（Paragraph）。在中文传统排版中，段落通常是通过段首缩进（空两格）来表示，互联网的发展逐渐影响了段落的表示，现在使用较多的方式是增加段落之间的行距，或者使用空行来分隔段落。"
+					"Data": "最常见的内容块是段落，用于书写正文。每个段落都是独立的内容块，可以单独移动、设置属性或被其他内容引用。"
 				}
 			]
 		},
@@ -106,12 +97,13 @@
 			"ID": "20210104090752-7efgvis",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090752-7efgvis"
+				"id": "20210104090752-7efgvis",
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "实际使用时，仅仅靠段落排版是不够的，往往还需要用到标题（Heading）、列表（List）、表格（Table）、块引用（Blockquote）等来丰富我们的排版。这些排版样式除了视觉上的不同，更重要的是它们在一定程度上表达了内容的语义。比如在看到无序列表时，我们可以知道每个列表项是不分先后的平级关系，而在看到有序列表时则相反。"
+					"Data": "标题、列表、表格和块引用等类型用于表达不同的内容结构。标题划分章节，无序列表组织并列项目，有序列表表示步骤或顺序。选择合适的类型，既能改善排版，也能让内容的层次更清楚。"
 				}
 			]
 		},
@@ -120,28 +112,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090752-c49qfvi",
-				"updated": "20210415202309"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所以，内容块存在"
+					"Data": "各类型的特点和包含规则请参阅 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200905090211-2vixtlf",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "很多类型"
+					"TextMarkTextContent": "内容块类型"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，不同的排版格式会形成不同的内容块。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "内容块/类型"
+					"Data": "。"
 				}
 			]
 		},
@@ -151,7 +138,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090752-qxk7yz6",
-				"updated": "20260810212846"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -169,23 +156,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090752-cg21nhc",
-				"updated": "20260810212846"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "一篇文档由多个内容块组成。部分内容块可以包含其他内容块，因此称为容器块。完整的类型和包含规则请参考"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20200905090211-2vixtlf",
-					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "内容块类型"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "一篇文档由多个内容块组成。能包含其他内容块的类型称为容器块，例如列表和块引用。"
 				}
 			]
 		},
@@ -193,23 +169,24 @@
 			"ID": "20210104090752-hjcn822",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090752-hjcn822"
+				"id": "20210104090752-hjcn822",
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "至此，我们已经能够用内容块来描述所有的内容了，这样就能通过统一的用法来"
+					"Data": "文档本身也是内容块。无论是整篇文档还是其中的段落，都可以通过 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200813013559-sgbzl5k",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "链接内容块"
+					"TextMarkTextContent": "内容块引用"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "了。逻辑上没有页面（Page）概念，减少使用中不必要的负担，让用户将注意力集中在内容块上。"
+					"Data": " 建立联系，不必为了引用一段内容而将它拆成独立文档。"
 				}
 			]
 		},
@@ -219,7 +196,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118101911-tbt6kkp",
-				"updated": "20261016013311"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -234,23 +211,23 @@
 			"Properties": {
 				"id": "20210118101917-4n4ygss",
 				"memo": "备注通常是一句简短的话。",
-				"updated": "20221026234721"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们可以为每个内容块命名、添加别名和备注。命名和别名主要用于反链"
+					"Data": "可以为内容块设置命名、别名和备注。命名和别名用于 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20210106201736-oyu11fw",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "提及"
+					"TextMarkTextContent": "反链提及"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "搜索，备注用于记录一些不便在内容区中出现的信息。"
+					"Data": " 搜索；备注用于记录不需要出现在正文中的补充信息。"
 				}
 			]
 		},
@@ -393,7 +370,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230419153207-l40wjv2",
-				"updated": "20230419153534"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -405,7 +382,7 @@
 					},
 					"Properties": {
 						"id": "20230419153259-2do0vsl",
-						"updated": "20230419153259"
+						"updated": "20261024160716"
 					},
 					"Children": [
 						{
@@ -413,12 +390,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230419153259-02ihc3r",
-								"updated": "20230419153308"
+								"updated": "20261024160716"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "命名是唯一的，一个块只能设置一个命名"
+									"Data": "一个内容块只能设置一个命名；不同内容块可以使用相同的命名"
 								}
 							]
 						}

@@ -110,6 +110,40 @@ func TestMarkdownImportSpoolPreservesConversion(t *testing.T) {
 	}
 }
 
+func TestMarkdownImportHeadingFragments(t *testing.T) {
+	setupMarkdownSpoolTest(t)
+	target := markdownSpoolFixture("# Section\n\nTarget", "two", 2)
+	headingID := target.Root.ChildrenByType(ast.NodeHeading)[0].ID
+	links := map[string]string{}
+	addImportSearchLinks(target, links)
+	for _, extension := range []string{".md", ".markdown"} {
+		t.Run(extension, func(t *testing.T) {
+			tree := markdownSpoolFixture("[document](two"+extension+") [section](two"+extension+"#Section) [empty](two"+extension+"#) [asset](assets/two"+extension+"#Section) [web](https://example.com/page.html#Section)", "one", 1)
+			if err := convertMarkdownImportTree(tree, links, NewLute()); err != nil {
+				t.Fatal(err)
+			}
+			refs, hrefs := map[string]string{}, map[string]string{}
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && treenode.IsBlockRef(n) {
+					refs[n.TextMarkTextContent] = n.TextMarkBlockRefID
+				}
+				if entering && n.IsTextMarkType("a") {
+					hrefs[n.TextMarkTextContent] = n.TextMarkAHref
+				}
+				return ast.WalkContinue
+			})
+			for label, want := range map[string]string{"document": target.ID, "section": headingID, "empty": target.ID} {
+				if refs[label] != want {
+					t.Errorf("%s target = %q, want %q", label, refs[label], want)
+				}
+			}
+			if hrefs["asset"] != "assets/two"+extension+"#Section" || hrefs["web"] != "https://example.com/page.html#Section" {
+				t.Fatalf("unrelated links changed: %v", hrefs)
+			}
+		})
+	}
+}
+
 func TestMarkdownImportSpoolSeparatesFilePathsFromTitles(t *testing.T) {
 	setupMarkdownSpoolTest(t)
 	spool, err := newMarkdownImportSpool()

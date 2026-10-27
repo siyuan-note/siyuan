@@ -54,6 +54,7 @@ test("Mermaid follows both theme directions and discards renders superseded by a
         },
         require: () => ({
             Constants: {PROTYLE_CDN: "", ZWSP: ""}, addScript: async () => {},
+            ensureBrowserCompatibility: async () => {},
             isFoldedRenderContent: () => false, isZenumlDiagram: () => false,
             getMermaidLayout: () => "", applyMermaidLayout: (value: string) => value,
             hasClosestByClassName: (): Element => null, getHostCapabilities: () => ({remoteKernel: false}),

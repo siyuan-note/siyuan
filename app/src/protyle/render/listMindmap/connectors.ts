@@ -42,12 +42,15 @@ export const buildListMindmapSummaryConnector = <T extends ConnectorPath>(
 // 连线路径只使用已完成的节点布局，共享主干不进入分支的命中路径。
 export const buildListMindmapConnectors = <T extends ConnectorPath>(
     rootID: string, positions: Map<string, ListMindmapPosition>, edges: {from: string, to: string}[],
-    style: ListMindmapConnectorStyle, makePath: () => T,
+    style: ListMindmapConnectorStyle, makePath: () => T, branchTheme = false,
 ) => {
     const trunks: T[] = [];
     const trunkParents: string[] = [];
-    const branches: {id: string, path: T}[] = [];
+    const branches: {id: string, path: T, trunk?: T}[] = [];
     const groups = new Map<string, ListMindmapPosition[]>();
+    const firstLevel = new Set(branchTheme ? edges.filter(edge => edge.from === rootID).map(edge => edge.to) : []);
+    const anchorY = (node: ListMindmapPosition) => node.y +
+        (node.id === rootID || firstLevel.has(node.id) ? node.height / 2 : node.height);
     edges.forEach(edge => {
         const from = positions.get(edge.from);
         const to = positions.get(edge.to);
@@ -62,8 +65,8 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
             return;
         }
         const startX = from.x + from.width;
-        const startY = from.y + (edge.from === rootID ? from.height / 2 : from.height);
-        const endY = to.y + to.height;
+        const startY = anchorY(from);
+        const endY = anchorY(to);
         const center = (startX + to.x) / 2;
         const path = makePath();
         path.moveTo(startX, startY);
@@ -74,14 +77,14 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
     groups.forEach((children, parentID) => {
         const from = positions.get(parentID);
         const startX = from.x + from.width;
-        const startY = from.y + (parentID === rootID ? from.height / 2 : from.height);
+        const startY = anchorY(from);
         const endX = children.reduce((left, node) => Math.min(left, node.x), Infinity);
         const trunkX = (startX + endX) / 2;
         const radius = style === "rounded" ? Math.min(8, Math.max(0, endX - startX) / 4) : 0;
         let top = startY;
         let bottom = startY;
         children.forEach(to => {
-            const endY = to.y + to.height;
+            const endY = anchorY(to);
             const corner = Math.min(radius, Math.abs(endY - startY) / 2);
             const branchY = endY - Math.sign(endY - startY) * corner;
             top = Math.min(top, branchY);
@@ -92,8 +95,19 @@ export const buildListMindmapConnectors = <T extends ConnectorPath>(
                 path.quadraticCurveTo(trunkX, endY, trunkX + corner, endY);
             }
             path.lineTo(to.x + to.width, endY);
-            branches.push({id: to.id, path});
+            if (branchTheme && parentID === rootID) {
+                const trunk = makePath();
+                trunk.moveTo(startX, startY);
+                trunk.lineTo(trunkX, startY);
+                trunk.lineTo(trunkX, branchY);
+                branches.push({id: to.id, path, trunk});
+            } else {
+                branches.push({id: to.id, path});
+            }
         });
+        if (branchTheme && parentID === rootID) {
+            return;
+        }
         const trunk = makePath();
         trunk.moveTo(startX, startY);
         trunk.lineTo(trunkX, startY);

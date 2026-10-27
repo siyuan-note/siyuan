@@ -7,7 +7,7 @@
 		"id": "20211226115043-afhev0g",
 		"title": "資料安全",
 		"type": "doc",
-		"updated": "20261016111431"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115155-regsto0",
-				"updated": "20211225214451"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115155-pjw3jlt",
-				"updated": "20211228141106"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "資料安全主要分為兩方面："
+					"Data": "使用思源時，需要分別考慮資料復原和存取保護："
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115155-2bnjxep",
-				"updated": "20230422123349"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -92,7 +92,7 @@
 					},
 					"Properties": {
 						"id": "20211226115155-0r6gtqb",
-						"updated": "20211228141111"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
@@ -100,12 +100,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115155-tqfo7hf",
-								"updated": "20211228141111"
+								"updated": "20261024161440"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "機密性：資料不被泄漏、不被篡改"
+									"Data": "機密性與完整性：限制未授權存取，並透過相應的加密和驗證機制保護資料"
 								}
 							]
 						}
@@ -118,12 +118,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115155-kznvu4y",
-				"updated": "20211228141118"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源對這兩方面都進行了一定支援，下面是關於資料安全方面的說明。"
+					"Data": "下面介紹不同儲存方式的保護範圍和使用時需要注意的事項。"
 				}
 			]
 		},

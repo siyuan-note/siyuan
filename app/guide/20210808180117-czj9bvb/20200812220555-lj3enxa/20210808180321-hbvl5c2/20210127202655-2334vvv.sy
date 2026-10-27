@@ -6,7 +6,7 @@
 		"id": "20210127202655-2334vvv",
 		"title": "PDF 标注",
 		"type": "doc",
-		"updated": "20260614112550"
+		"updated": "20261027103930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614112525-7f8cngf",
-				"updated": "20260614112525"
+				"updated": "20261027103930"
 			},
 			"Children": [
 				{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源支持 PDF 文件预览和标注，可在 PDF 中对文字或区域进行标记，并将标注引用复制到文档中，实现文献阅读与笔记写作的双向联动。"
+				}
+			]
+		},
+		{
+			"ID": "20261027103930-yptymdx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027103930-yptymdx",
+				"updated": "20261027103930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在多个查看器中打开同一 PDF 时，对不同标注的修改会在保存时合并。如果同一条标注已被其他查看器修改或删除，过期保存会被拒绝，并提示重新打开 PDF。请先检查并复制需要保留的未保存修改，再重新打开 PDF 加载最新标注后继续编辑。"
 				}
 			]
 		},
@@ -542,7 +556,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/标注ID \"选中内容\"\u0026gt;\u0026gt;"
+									"TextMarkTextContent": "&lt;&lt;assets/xxx.pdf/标注ID \"选中内容\"&gt;&gt;"
 								},
 								{
 									"Type": "NodeText",

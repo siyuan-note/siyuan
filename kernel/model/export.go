@@ -2866,10 +2866,6 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 			logging.LogErrorf("write export notebook conf failed: %s", writeErr)
 			return
 		}
-		if copyErr := copyExportedDocumentAddressing(boxID, exportDir); copyErr != nil {
-			logging.LogErrorf("copy export notebook addressing metadata failed: %s", copyErr)
-			return
-		}
 		sourceBoxDocMetaPath := boxDocMetaPath(boxID)
 		if filelock.IsExist(sourceBoxDocMetaPath) {
 			if copyErr := filelock.Copy(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {
@@ -3210,7 +3206,13 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		}
 	}
 
-	attrView, parseErr := av.ParseAttributeViewInBox(avID, boxID)
+	var attrView *av.AttributeView
+	var parseErr error
+	if avData == nil {
+		parseErr = av.ErrViewNotFound
+	} else {
+		attrView, parseErr = av.ParseAttributeViewData(avID, avData)
+	}
 	if parseErr != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
 		return attributeViewExportError(avID, parseErr)
@@ -3250,7 +3252,9 @@ func copyExportAttributeViewAssets(attrView *av.AttributeView, boxID, exportFold
 
 func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) error {
 	avIDs := hashset.New()
-	walkRelationAvs(avID, boxID, avIDs)
+	if err := walkRelationAvs(avID, boxID, avIDs); err != nil {
+		return err
+	}
 
 	for _, v := range avIDs.Values() {
 		relAvID := v.(string)
@@ -3260,27 +3264,28 @@ func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, ass
 		relAvData, readErr := av.ReadAttributeViewDataInBox(relAvID, boxID)
 		if readErr != nil {
 			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
-			continue
+			return attributeViewExportError(relAvID, readErr)
 		}
 		if boxID != "" && relAvData != nil {
 			relAvData, readErr = rewriteAttributeViewDataAssetReferences(relAvData,
 				assetReferenceRewriteOptions{rewriteUnmapped: true})
 			if readErr != nil {
 				logging.LogErrorf("rewrite exported relation attribute view assets [%s] failed: %s", relAvID, readErr)
-				continue
+				return attributeViewExportError(relAvID, readErr)
 			}
 		}
 		if relAvData == nil {
-			continue
+			return attributeViewExportError(relAvID, av.ErrViewNotFound)
 		}
 		if writeErr := os.WriteFile(filepath.Join(exportStorageAvDir, relAvID+".json"), relAvData, 0644); writeErr != nil {
 			logging.LogErrorf("write av json failed: %s", writeErr)
+			return attributeViewExportError(relAvID, writeErr)
 		}
 
-		attrView, parseErr := av.ParseAttributeViewInBox(relAvID, boxID)
+		attrView, parseErr := av.ParseAttributeViewData(relAvID, relAvData)
 		if parseErr != nil {
 			logging.LogErrorf("parse relation attribute view [%s] failed: %s", relAvID, parseErr)
-			continue
+			return attributeViewExportError(relAvID, parseErr)
 		}
 		if err := copyExportAttributeViewAssets(attrView, boxID, exportFolder, assetPathMap); err != nil {
 			return err
@@ -3289,14 +3294,22 @@ func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, ass
 	return nil
 }
 
-func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) {
-	if exportAvIDs.Contains(avID) {
-		return
+func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) error {
+	if exportAvIDs.Contains(avID) || !ast.IsNodeIDPattern(avID) {
+		return nil
 	}
 
-	attrView, _ := av.ParseAttributeViewInBox(avID, boxID)
-	if nil == attrView {
-		return
+	data, err := av.ReadAttributeViewDataInBox(avID, boxID)
+	if err != nil {
+		return attributeViewExportError(avID, err)
+	}
+	if data == nil {
+		// Missing targets and targets outside this storage boundary are not exported.
+		return nil
+	}
+	attrView, err := av.ParseAttributeViewData(avID, data)
+	if err != nil {
+		return attributeViewExportError(avID, err)
 	}
 
 	exportAvIDs.Add(avID)
@@ -3307,9 +3320,12 @@ func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) {
 				break
 			}
 
-			walkRelationAvs(keyValues.Key.Relation.AvID, boxID, exportAvIDs)
+			if err := walkRelationAvs(keyValues.Key.Relation.AvID, boxID, exportAvIDs); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 func ExportMarkdownContent(id string, opts *ExportOptions) (hPath, exportedMd string) {

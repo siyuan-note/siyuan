@@ -8,8 +8,7 @@ test("document titles preserve slash characters while notebook and file names re
     const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const runtime = {siyuan: {documentAddressingVersion: 2,
-        languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
+    const runtime = {siyuan: {languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
     let messages = 0;
     const methods = new Function("window", "Constants", "showMessage", source + "\nreturn {normalizeDocumentTitle, replaceFileName, validateName};")(
         runtime, {SIZE_TITLE: 512}, () => messages++);
@@ -23,8 +22,6 @@ test("document titles preserve slash characters while notebook and file names re
     assert.equal(methods.validateName("😀".repeat(512), undefined, true), true);
     assert.equal(methods.validateName("😀".repeat(513), undefined, true), false);
     assert.equal(methods.validateName("😀".repeat(512)), false);
-    runtime.siyuan.documentAddressingVersion = 1;
-    assert.equal(methods.normalizeDocumentTitle("Old/server"), "Old／server");
 });
 
 test("failed asset rename keeps the dialog open and does not update or reload editors", async () => {

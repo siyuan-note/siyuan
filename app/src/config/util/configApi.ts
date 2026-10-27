@@ -18,7 +18,8 @@ const get = <T>(path: string): T => {
 
 // 同一配置段按提交顺序保存，成功后通过统一刷新流程应用内核的规范化结果。
 const set = (path: string, value: unknown, onApplied?: (data: unknown, response?: IWebSocketData) => void): Promise<void> => {
-    value = structuredClone(value);
+    // Configuration is JSON data; take the request snapshot without newer WebView APIs.
+    value = value === undefined ? undefined : JSON.parse(JSON.stringify(value));
     const separator = path.indexOf(".");
     const namespace = separator === -1 ? path : path.slice(0, separator);
     const relativePath = separator === -1 ? "" : path.slice(separator + 1);

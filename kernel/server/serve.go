@@ -474,7 +474,7 @@ func serveWidgets(ginServer *gin.Engine) {
 			if !model.CheckWidgetAccessableByPublishAccess(c, name, model.GetPublishAccess()) {
 				return false
 			}
-			file, err := util.OpenPublishFile(util.DataDir, "widgets/"+resource)
+			file, err := util.OpenPublishReaderFile(util.DataDir, "widgets/"+resource)
 			if err != nil {
 				return false
 			}

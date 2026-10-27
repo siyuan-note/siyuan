@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/fs"
@@ -124,6 +123,11 @@ func unindex(boxID string) {
 }
 
 func (box *Box) Index() {
+	// 排队时即撤销就绪状态，避免创建请求在后台重建开始前通过检查。
+	if err := treenode.SetDocumentMetadataState(box.ID, "building"); err != nil {
+		logging.LogErrorf("prepare queued document metadata [%s] failed: %s", box.ID, err)
+		return
+	}
 	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
 	task.AppendTask(task.DatabaseIndex, indexBox, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
@@ -175,6 +179,7 @@ func indexBox(boxID string) {
 	}()
 	// 全量索引使用纯 INSERT，开始前必须清理该笔记本的旧数据，避免重复任务叠加相同行。
 	sql.DeleteBoxQueue(boxID)
+	recoveringSources := hasDocumentSourceRecovery(boxID)
 
 	util.SetBootDetails(Conf.Language(303))
 	files, scanErr := box.listFilesForIndex("/")
@@ -236,7 +241,20 @@ func indexBox(boxID string) {
 		lock.Unlock()
 
 		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
-		treenode.IndexBlockTree(tree)
+		if recoveringSources {
+			for _, block := range treenode.GetBlockTreesByRootIDInBox(tree.ID, tree.Box) {
+				cache.RemoveBlockIALInBox(block.ID, tree.Box)
+			}
+			if err := treenode.ReplaceBlockTree(tree); err != nil {
+				lock.Lock()
+				sourceFailed = true
+				lock.Unlock()
+				logging.LogErrorf("rebuild recovered block identities [%s]: %s", tree.ID, err)
+				return
+			}
+		} else {
+			treenode.IndexBlockTree(tree)
+		}
 		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		if 1 < i && 0 == i%64 {
@@ -285,6 +303,13 @@ func indexBox(boxID string) {
 	}
 	flushBatch()
 	if !sourceFailed {
+		if recoveringSources {
+			paths := make([]string, 0, len(files))
+			for _, file := range files {
+				paths = append(paths, file.path)
+			}
+			treenode.ClearRedundantBlockTrees(boxID, paths)
+		}
 		pending, pendingErr := treenode.PendingDocumentMetadata(boxID)
 		for _, doc := range pending {
 			if pendingErr = filesys.RecoverDocumentMetadataWrite(doc); pendingErr != nil {
@@ -302,6 +327,11 @@ func indexBox(boxID string) {
 
 	// 关联数据库和块
 	av.BatchUpsertBlockRel(avNodes)
+	if metadataReady {
+		if err := finishDocumentSourceRecovery(box.ID); err != nil {
+			logging.LogErrorf("complete document source recovery [%s] failed: %s", box.ID, err)
+		}
+	}
 
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()
@@ -341,7 +371,7 @@ func IndexRefs() {
 			for _, treeAbsPath := range paths {
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, box.ID)))
 
-				// 加密笔记本的 .sy 是密文，必须走 filesys.LoadTree 透明解密；无法用 bytes.Contains 预检
+				// Encrypted documents must be authenticated by filesys.LoadTree.
 				var tree *parse.Tree
 				if encryptedBox {
 					loadTree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
@@ -357,10 +387,6 @@ func IndexRefs() {
 						continue
 					}
 
-					if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
-						continue
-					}
-
 					parseTree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
 					if nil != parseErr {
 						logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
@@ -369,17 +395,10 @@ func IndexRefs() {
 					tree = parseTree
 				}
 
-				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-					if !entering {
-						return ast.WalkContinue
-					}
-
-					if treenode.IsBlockRef(n) || treenode.IsFileAnnotationRef(n) {
-						defBlockIDs = append(defBlockIDs, tree.Root.ID)
-						defBlockBoxes[tree.Root.ID] = box.ID
-					}
-					return ast.WalkContinue
-				})
+				if sql.TreeHasRefs(tree) {
+					defBlockIDs = append(defBlockIDs, tree.Root.ID)
+					defBlockBoxes[tree.Root.ID] = box.ID
+				}
 			}
 		}
 	}

@@ -7,7 +7,7 @@
 		"id": "20240530101000-boiita2",
 		"title": "コンテンツブロックのナビゲーション",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -234,7 +234,7 @@
 			"Properties": {
 				"ID": "20240530101000-ze8q2b0",
 				"id": "20240530101000-0ljj6fo",
-				"updated": "20240530101000"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -264,21 +264,30 @@
 			"Properties": {
 				"ID": "20240530101000-9b3vknk",
 				"id": "20240530101000-g1gkl7m",
-				"updated": "20240530101000"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "ノードをクリックすると対応するブロックが開きます。"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ キーを押しながらノードをクリックすると、そのノードに対応するブロックがフローティングウィンドウで開きます。"
+					"Data": "（macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）を押しながらクリックすると、フローティングプレビューが開きます。"
 				}
 			]
 		},
@@ -289,7 +298,7 @@
 			"Properties": {
 				"ID": "20240530101000-of5c9sy",
 				"id": "20240530101000-mclq02e",
-				"updated": "20260810212846"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -429,13 +438,84 @@
 			]
 		},
 		{
+			"ID": "20261024160716-dzezmwq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024160716-dzezmwq",
+				"updated": "20261024160716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "絞り込みと折りたたみ"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024160716-q7upkxp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024160716-q7upkxp",
+				"updated": "20261024160716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメント下部またはサイドバーのバックリンクで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "バックリンクの参照元を絞り込む"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開くと、参照元の絞り込みや、ブロックの種類に応じた折りたたみができます。この 2 種類の設定は保存方法が異なります。"
+				}
+			]
+		},
+		{
+			"ID": "20261024160716-9deuxpj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024160716-9deuxpj",
+				"updated": "20261024160716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デイリーノート、ノートブック、現在のドキュメントの除外、参照の除外は一時的な絞り込みです。現在のパネルにのみ適用され、永続的には保存されません。下部パネルとサイドバーパネルの間でも共有されません。"
+				}
+			]
+		},
+		{
+			"ID": "20261024160716-rhl5l2i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024160716-rhl5l2i",
+				"updated": "20261024160716"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックの種類で折りたたむ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 設定は記憶されます。たとえば、ドキュメント A の下部バックリンクでリストを折りたたむと、開き直しても維持され、ドキュメント B には影響しません。同じドキュメントでも下部とサイドバーは別々に記憶されます。個々のブロックのバックリンクにも、それぞれの折りたたみ設定が保存されます。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-b39286y",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"ID": "20240530101000-s6bgqlw",
 				"id": "20240530101000-b39286y",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -450,7 +530,7 @@
 			"Properties": {
 				"ID": "20240530101000-su0tplm",
 				"id": "20240530101000-wz1614w",
-				"updated": "20260803170332"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -464,7 +544,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -473,7 +553,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -482,7 +562,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ から調整できます。"
+					"Data": " から調整できます。"
 				}
 			]
 		},

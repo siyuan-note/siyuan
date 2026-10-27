@@ -11,6 +11,11 @@ import {applySettingTask} from "../config/setting/taskBlocker";
 import {notifyOCRChanged} from "../config/ocrRuntime";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "assetContentIndexCompleted" && response.code === 0) {
+        const {refreshAssetContentSearch}: typeof import("../search/assets") = require("../search/assets");
+        refreshAssetContentSearch();
+        return false;
+    }
     if (response.cmd === "ocrChanged") {
         notifyOCRChanged();
         return false;

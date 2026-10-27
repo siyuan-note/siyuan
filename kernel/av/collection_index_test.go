@@ -146,7 +146,7 @@ func TestBlockCollectionIndexScopesAndSnapshots(t *testing.T) {
 		t.Fatal("disabling last rule did not update empty fast path")
 	}
 	view.Automations.Rules[0].Enabled = true
-	view.Automations.Spec = 8
+	view.Automations.Spec = 9
 	rememberCollectionView(view, "")
 	unknown, err := BlockCollectionIndexInBox("")
 	if err != nil || !unknown.MatchesDocument("unrelated", child, "/child.sy") {

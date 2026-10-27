@@ -15,7 +15,8 @@ for (const [width, height] of [[1000, 760], [493, 376]]) {
                 const exports = {};
                 runInNewContext(transpileModule(readFileSync(file, "utf8"), {
                     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-                }).outputText, {exports, window, document, require: name => modules[name] || {}});
+                }).outputText, {exports, window, document, getComputedStyle: () => ({getPropertyValue: () => ""}),
+                    require: name => modules[name] || {}});
                 return exports;
             };
             const topBar = load("src/layout/getTopBarHeight.ts");

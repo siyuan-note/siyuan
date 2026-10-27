@@ -22,7 +22,7 @@ func TestDocumentAddressingWholeNotebookDeletionRetainsRecoveryData(t *testing.T
 	t.Cleanup(func() { util.TempDir, util.HistoryDir, util.WorkspaceDir = oldTemp, oldHistory, oldWorkspace })
 	setupNotebookDocumentImportDatabase(t)
 	boxID := fixture.box.ID
-	source := []byte("unparsed future source")
+	source := []byte(`{"Spec":"999","Properties":{"title":"Future"}}`)
 	config := []byte(`{"name":"future","closed":true,"documentAddressingVersion":3}`)
 	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, documentaddressing.ConfigPath), config, 0644); err != nil {
 		t.Fatal(err)
@@ -58,8 +58,8 @@ func TestDocumentAddressingWholeNotebookDeletionRetainsRecoveryData(t *testing.T
 	if data, readErr := os.ReadFile(sharedHistory); readErr != nil || !bytes.Equal(data, shared) {
 		t.Fatalf("shared database recovery data missing: %v", readErr)
 	}
-	if err = filesys.CheckDocumentAddressing(boxID); !errors.Is(err, documentaddressing.ErrUnsupported) {
-		t.Fatalf("deletion discarded capability floor: %v", err)
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		t.Fatalf("retired mode blocked missing notebook: %v", err)
 	}
 	if _, err = os.Stat(filepath.Join(util.DataDir, boxID)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("floor check recreated deleted notebook")

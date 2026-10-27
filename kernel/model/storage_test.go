@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -26,6 +27,66 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestLocalStorageIncrementalReadFailure(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	path := filepath.Join(util.DataDir, "storage", "local.json")
+	if err := os.MkdirAll(path, 0700); err != nil {
+		t.Fatal(err)
+	}
+	// A directory yields a non-permission read error on Windows and Unix.
+	for _, update := range []func() error{
+		func() error {
+			set, err := SetLocalStorageVals(map[string]any{"new": "value"})
+			if len(set) != 0 {
+				t.Fatalf("failed reads must not report applied values: %v", set)
+			}
+			return err
+		},
+		func() error { return RemoveLocalStorageVals([]string{"old"}) },
+	} {
+		var pathErr *os.PathError
+		if err := update(); !errors.As(err, &pathErr) || (pathErr.Op != "read" && pathErr.Op != "open") {
+			t.Fatalf("must return the original read error: %v", err)
+		}
+	}
+}
+
+func TestLocalStorageIncrementalPreservesState(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	if _, err := SetLocalStorageVals(map[string]any{"old": "keep", "remove": "value"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := SetLocalStorageVals(map[string]any{"new": "added"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := RemoveLocalStorageVals([]string{"remove"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := GetLocalStorage(); !reflect.DeepEqual(got, map[string]any{"old": "keep", "new": "added"}) {
+		t.Fatalf("incremental update lost unrelated state: %v", got)
+	}
+	path := filepath.Join(util.DataDir, "storage", "local.json")
+	corrupt := []byte(`{"old":"keep",`)
+	if err := os.WriteFile(path, corrupt, 0600); err != nil {
+		t.Fatal(err)
+	}
+	// Startup reads remain tolerant, but runtime edits cannot replace unread state.
+	_ = GetLocalStorage()
+	if _, err := SetLocalStorageVals(map[string]any{"new": "value"}); err == nil {
+		t.Fatal("corrupt state must not be replaced by a partial update")
+	}
+	if err := RemoveLocalStorageVals([]string{"old"}); err == nil {
+		t.Fatal("corrupt state must not be replaced by a partial removal")
+	}
+	if data, err := os.ReadFile(path); err != nil || !bytes.Equal(data, corrupt) {
+		t.Fatalf("failed update changed unread state: %s, %v", data, err)
+	}
+}
 
 func TestClearRecentDocs(t *testing.T) {
 	fixture := setupFileOperationTest(t)

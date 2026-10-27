@@ -116,7 +116,7 @@ func OpenPluginPublishResource(name, resource string) (*os.File, error) {
 	if err != nil || !isPluginPublishResource(declaration, resource) {
 		return nil, ErrPluginPublishDenied
 	}
-	return util.OpenPublishFile(util.DataDir, "plugins/"+name+"/"+resource)
+	return util.OpenPublishReaderFile(util.DataDir, "plugins/"+name+"/"+resource)
 }
 
 func loadPluginPublishCode(petal *Petal) bool {
@@ -169,7 +169,7 @@ func OpenPublishPackageFile(c *gin.Context, requestPath string) (file *os.File, 
 			if !ok || !CheckWidgetAccessableByPublishAccess(c, name, GetPublishAccess()) {
 				return nil, true, ErrPluginPublishDenied
 			}
-			file, err = util.OpenPublishFile(util.DataDir, "widgets/"+resource)
+			file, err = util.OpenPublishReaderFile(util.DataDir, "widgets/"+resource)
 		}
 		return file, true, err
 	}

@@ -40,6 +40,7 @@ import {openCard} from "../../../card/openCard";
 import {syncGuide} from "../../../sync/syncGuide";
 import {unsplitCurrentWnd, unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
+import {getAssetPathWithoutFragment} from "../../../util/pathName";
 import {fetchPost} from "../../../util/fetch";
 import {sanitizeClosedTabs, setStorageVal} from "../../../protyle/util/compatibility";
 import {adjustEditorFontSize} from "../../../util/editorFontSize";
@@ -186,7 +187,8 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
                     return true;
                 }
                 if (childData.instance === "Asset") {
-                    fetchPost("/api/asset/statAsset", {path: childData.path}, (response) => {
+                    // 内核按文件名检查资源，需先去掉片段；重新打开时仍使用原始路径，保留 #t= 等媒体片段
+                    fetchPost("/api/asset/statAsset", {path: getAssetPathWithoutFragment(childData.path)}, (response) => {
                         if (response.code !== 1) {
                             openFile({
                                 app,

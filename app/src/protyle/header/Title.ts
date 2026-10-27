@@ -353,7 +353,7 @@ export class Title {
             const offset = getSelectionOffset(this.editElement);
             this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
-            if (window.siyuan.documentAddressingVersion !== 2 || this.editElement.textContent === original ||
+            if (this.editElement.textContent === original ||
                 !validateName(this.editElement.textContent, this.editElement, true)) {
                 return false;
             }

@@ -265,11 +265,15 @@ func TestSyncCheckoutPreparationRejectsUnsavedWindowAndCancellation(t *testing.T
 
 func TestSyncCheckoutPreparationRetriesWithAdmittedWrite(t *testing.T) {
 	task := prepareSyncCheckoutStateTest(t)
+	util.Langs["en"][239] = "Write requests are still running; retry later"
 	dataImportAccess.RLock()
 	err := task.prepareApply()
 	dataImportAccess.RUnlock()
 	if !errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
 		t.Fatalf("preparation waited on a write holding the sync lock: %v", err)
+	}
+	if !strings.Contains(err.Error(), "Write requests are still running; retry later") {
+		t.Fatalf("write contention was reported as an editor save failure: %v", err)
 	}
 }
 

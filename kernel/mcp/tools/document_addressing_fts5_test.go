@@ -97,13 +97,21 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	}
 	before, _ := os.ReadFile(filepath.Join(util.DataDir, box.ID, source.Path))
 	for _, action := range []string{"create", "list", "move"} {
-		for _, hPath := range []string{"/A/B", "/"} {
-			args := map[string]any{"action": action, "notebook": box.ID, "path": hPath, "id": source.ID, "title": "New"}
-			result, err := documentHandler(args)
-			if err != nil || !result.IsError || !strings.Contains(result.Content[0].Text, "legacyPathUnsupported") {
-				t.Fatalf("%s accepted a legacy path: %+v, %v", action, result, err)
-			}
+		hPath := "/A/B"
+		if action == "create" {
+			hPath += "/New"
 		}
+		args := map[string]any{"action": action, "notebook": box.ID, "path": hPath, "id": source.ID, "title": "New"}
+		result, err := documentHandler(args)
+		if err != nil || !result.IsError || !strings.Contains(result.Content[0].Text, "pathAmbiguous") {
+			t.Fatalf("%s: %+v %v", action, result, err)
+		}
+	}
+	if target, err := resolveDocumentTarget(box.ID, map[string]any{"path": "/Move me"}, false, false); err != nil || target.path != source.Path {
+		t.Fatal(target, err)
+	}
+	if target, err := resolveDocumentTarget(box.ID, map[string]any{"path": "/"}, false, false); err != nil || target.path != "/" {
+		t.Fatal(target, err)
 	}
 	after, _ := os.ReadFile(filepath.Join(util.DataDir, box.ID, source.Path))
 	if !bytes.Equal(before, after) {
@@ -165,10 +173,16 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	if _, err := resolveDocumentTarget(foreign.ID, map[string]any{"parentID": literal.ID}, false, false); err == nil {
 		t.Fatal("parent from a different notebook was accepted")
 	}
-	// 缺少配置的旧模式夹具不触发自动升级，保留旧路径的父目录解释。
+	// Clean legacy paths use the same ready metadata checks as structured paths.
 	legacyBox := ast.NewNodeID()
+	if err := (&model.Box{ID: legacyBox}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
 	legacyDoc := treenode.NewTree(legacyBox, "/"+ast.NewNodeID()+".sy", "/Legacy", "Legacy")
 	treenode.UpsertBlockTree(legacyDoc)
+	if err := treenode.SetDocumentMetadataState(legacyBox, "ready"); err != nil {
+		t.Fatal(err)
+	}
 	for _, create := range []bool{false, true} {
 		hPath := "/Legacy"
 		if create {
@@ -180,7 +194,7 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 		}
 	}
 	if result, err = inboxConvert(map[string]any{"notebook": box.ID, "path": "/A/B/New", "ids": "1"}); err != nil || !result.IsError ||
-		!strings.Contains(result.Content[0].Text, "legacyPathUnsupported") {
+		!strings.Contains(result.Content[0].Text, "pathAmbiguous") {
 		t.Fatalf("inbox reached cloud conversion before rejecting the legacy path: %+v, %v", result, err)
 	}
 }

@@ -110,7 +110,7 @@ func TestStructuredTitlesReleasedDataUpgradeAndRestart(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err = documentaddressing.CheckBox(util.DataDir, util.ConfDir, box); err != nil {
+		if err = documentaddressing.CheckBox(box); err != nil {
 			t.Fatal(err)
 		}
 		after, err := os.ReadFile(configPath)
@@ -179,13 +179,13 @@ func TestStructuredTitlesReleasedDataUpgradeAndRestart(t *testing.T) {
 	}
 }
 
-func TestStructuredTitlesSyncAndSnapshotRetainUpgradedMode(t *testing.T) {
+func TestStructuredTitlesSyncAndSnapshotKeepFixedCapabilities(t *testing.T) {
 	const helper = "SIYUAN_TEST_RELEASED_TITLES_SYNC"
 	if os.Getenv(helper) != "1" {
 		// 同步事件及笔记本生命周期是进程级状态，不能继承其他模型用例的后台任务。
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
-		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestStructuredTitlesSyncAndSnapshotRetainUpgradedMode$", "-test.v")
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestStructuredTitlesSyncAndSnapshotKeepFixedCapabilities$", "-test.v")
 		command.Env = append(os.Environ(), helper+"=1")
 		if output, err := command.CombinedOutput(); err != nil {
 			t.Fatalf("released-data sync: %v\n%s", err, output)
@@ -243,12 +243,12 @@ func TestStructuredTitlesSyncAndSnapshotRetainUpgradedMode(t *testing.T) {
 	assertUpgraded := func() {
 		t.Helper()
 		for box := range boxes {
-			if err := documentaddressing.CheckBox(receiver.DataPath, util.ConfDir, box); err != nil {
+			if err := documentaddressing.CheckBox(box); err != nil {
 				t.Fatal(err)
 			}
-			snapshot, err := documentaddressing.InspectBox(receiver.DataPath, util.ConfDir, box)
-			if err != nil || snapshot.Mode != 2 || !snapshot.RecordsConsistent {
-				t.Fatal("sync or snapshot lowered a confirmed capability", snapshot, err)
+			snapshot, err := documentaddressing.InspectBox(box)
+			if err != nil || snapshot.Mode != 2 {
+				t.Fatal("sync or snapshot changed the fixed addressing version", snapshot, err)
 			}
 		}
 		for _, document := range fixture.Documents {
@@ -279,14 +279,11 @@ func TestStructuredTitlesSyncAndSnapshotRetainUpgradedMode(t *testing.T) {
 		if err = os.Chtimes(name, stamp, stamp); err != nil {
 			t.Fatal(err)
 		}
-		if err = os.Remove(filepath.Join(sender.DataPath, box, documentaddressing.FloorPath)); err != nil {
-			t.Fatal(err)
-		}
 	}
 	synchronize(sender, "stale notebook configuration", receiver)
 	for box := range boxes {
 		if _, err = os.Stat(filepath.Join(receiver.DataPath, box, documentaddressing.FloorPath)); !os.IsNotExist(err) {
-			t.Fatal("the stale remote deletion was not exercised", err)
+			t.Fatal("sync regenerated a retired notebook record", err)
 		}
 	}
 	assertUpgraded()

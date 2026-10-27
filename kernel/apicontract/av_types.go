@@ -449,6 +449,9 @@ type AVNewItemTemplate struct {
 	SaveLocation        *AVNewItemSaveLocation          `json:"saveLocation,omitempty" api:"optional,nullable"`
 	ContentTemplatePath string                          `json:"contentTemplatePath,omitempty" api:"optional,nullable"`
 	HideInFileTree      bool                            `json:"hideInFileTree,omitempty" api:"optional,nullable"`
+	// 创建后是否由交互客户端分屏打开绑定或游离条目。省略或 null 保留旧行为（仅日历自动打开）；false 禁止自动打开。
+	// 该配置随模板保存，API 调用本身不会打开界面；移动端使用已有的页面或弹层。
+	OpenAfterCreate *bool `json:"openAfterCreate,omitempty" api:"optional,nullable"`
 }
 
 type AVNewItemFieldValue struct {
@@ -691,6 +694,8 @@ type AVCreateAttributeViewItemResult struct {
 	Content    string   `json:"content" api:"optional,nullable"`
 	IsDetached bool     `json:"isDetached" api:"optional,nullable"`
 	Warnings   []string `json:"warnings,omitempty" api:"optional,nullable"`
+	// 返回实际使用模板的自动打开偏好，省略时交互客户端保留旧行为；此字段不会触发服务端界面操作。
+	OpenAfterCreate *bool `json:"openAfterCreate,omitempty" api:"optional,nullable"`
 }
 
 type AVCreateAttributeViewItemDocsResult struct {

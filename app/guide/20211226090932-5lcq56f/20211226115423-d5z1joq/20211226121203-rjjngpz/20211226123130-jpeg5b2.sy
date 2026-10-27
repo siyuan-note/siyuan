@@ -6,7 +6,7 @@
 		"id": "20211226123130-jpeg5b2",
 		"title": "書籤和標籤",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123145-atmx4pn",
-				"updated": "20260810212846"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -43,35 +43,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-3rhy0b6",
-				"updated": "20260810212846"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有收藏過的內容區塊會在書簽分頁（"
+					"Data": "收藏的內容區塊會列在書籤面板中（"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Alt"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "3"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " / "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃"
 				},
 				{
 					"Type": "NodeText",
@@ -79,12 +61,30 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "3"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果要取消收藏，在該內容區塊標識下拉菜單中選擇刪除即可。"
+					"Data": "，macOS 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Control"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。取消收藏時，清空區塊的書籤屬性，或使用書籤面板中的刪除操作；這只移除書籤，不會刪除內容區塊。"
 				}
 			]
 		},

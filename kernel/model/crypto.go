@@ -1749,6 +1749,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if len(newPassword) == 0 {
 		return errors.New("new password must not be empty")
 	}
+	// Serialize the complete multi-file change with snapshot readers and all sync modes.
+	// Acquire these locks before notebookCryptoMu, as sync refresh also uses that mutex.
+	release := lockAssetSourceChange()
+	defer release()
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
@@ -2766,6 +2770,9 @@ func createEncryptedBox(name, password string, initializeBoxDoc func(string) (st
 
 	if _, err = initializeBoxDoc(id); err != nil {
 		return "", fmt.Errorf("initialize encrypted notebook document failed: %w", err)
+	}
+	if err = treenode.SetDocumentMetadataState(id, "ready"); err != nil {
+		return "", fmt.Errorf("initialize encrypted notebook document metadata failed: %w", err)
 	}
 
 	setEncryptedBoxState(id, EncryptedBoxStateUnlocked)

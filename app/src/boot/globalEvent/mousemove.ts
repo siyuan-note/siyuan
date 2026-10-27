@@ -3,6 +3,7 @@ import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
 import {isContainerGutterBridge} from "../../protyle/gutter/container";
+import {renderGutterOnHover} from "../../protyle/gutter/hover";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -110,8 +111,9 @@ export const windowMouseMove = (event: MouseEvent) => {
                 !hasClosestByClassName(target, "protyle-util");
             const leftDock = window.siyuan.layout.leftDock;
             const leftBar = document.getElementById("dockLeft");
-            const leftBarWidth = leftBar.clientWidth;
-            const leftTrigger = canTrigger && inYRange && leftDock.isFloating() && leftDock.layout.element.clientWidth > 0 &&
+            const leftBarWidth = leftBar.classList.contains("dock--float") ? 0 : leftBar.clientWidth;
+            const leftTrigger = canTrigger && inYRange && leftDock.isFloating() &&
+                (leftDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock) &&
                 event.clientX < Math.max(leftBarWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
                 (leftBarWidth > 0 || event.clientX < 8);
@@ -123,8 +125,9 @@ export const windowMouseMove = (event: MouseEvent) => {
 
             const rightDock = window.siyuan.layout.rightDock;
             const rightBar = document.getElementById("dockRight");
-            const rightBarWidth = rightBar.clientWidth;
-            const rightTrigger = canTrigger && inYRange && rightDock.isFloating() && rightDock.layout.element.clientWidth > 0 &&
+            const rightBarWidth = rightBar.classList.contains("dock--float") ? 0 : rightBar.clientWidth;
+            const rightTrigger = canTrigger && inYRange && rightDock.isFloating() &&
+                (rightDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock) &&
                 event.clientX > window.innerWidth - Math.max(rightBarWidth - 2, 16) &&
                 (rightBarWidth > 0 || event.clientX > window.innerWidth - 8);
             if (rightTrigger || rightDock.layout.element.contains(target) || rightBar.contains(target)) {
@@ -161,7 +164,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 // 鼠标经过编辑器留白移向子块块标时，使用实际坐标保留当前块标。
                 if (!isContainerGutterBridge(protyle.gutter.element, targetBlockElement, eventPath0,
                     event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
-                    protyle.gutter.render(protyle, targetBlockElement, mouseElement);
+                    renderGutterOnHover(protyle, targetBlockElement, mouseElement);
                 }
             };
             const allModels = getAllModels();
@@ -219,7 +222,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             // 经过列表序标或留白移向块标时，保留当前子块的操作入口。
             if (!listElement || !isContainerGutterBridge(protyle.gutter.element, listElement, eventPath0,
                 event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
-                protyle.gutter.render(protyle, targetBlockElement);
+                renderGutterOnHover(protyle, targetBlockElement);
             }
         };
         const allModels = getAllModels();

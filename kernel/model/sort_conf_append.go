@@ -310,7 +310,7 @@ func recoverSortConfAppends() error {
 			return fmt.Errorf("invalid sort recovery notebook [%s]", boxID)
 		}
 		if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
-			if errors.Is(err, documentaddressing.ErrUnsupported) || errors.Is(err, documentaddressing.ErrInvalid) {
+			if errors.Is(err, documentaddressing.ErrInvalid) {
 				logging.LogWarnf("keep sort recovery for unavailable notebook [%s]: %s", boxID, err)
 				continue
 			}

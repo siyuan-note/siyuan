@@ -6,7 +6,7 @@
 		"id": "20260613155453-sgecaav",
 		"title": "Field Types",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-piff4he",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -45,7 +45,6 @@
 		{
 			"ID": "20260613155453-ga53qn2",
 			"Type": "NodeTable",
-			"Data": "| Field Type | Use Case | Sortable | Filterable | Table calculations | Special Template Suffix |\n|---------|---------|--------|--------|--------|------------|\n| Text | Titles, descriptions, arbitrary text | √ | √ | √ | — |\n| Number | Amounts, quantities, ratings | √ | √ | √ | — |\n| Date | Deadlines, birthdays, creation dates | √ | √ | √ | `_end` |\n| Select | Status, category, priority | √ | √ | √ | — |\n| Multi-Select | Tags, multi-category | √ | √ | √ | `_str` |\n| URL | External links, references | √ | √ | √ | — |\n| Email | Contact email | √ | √ | √ | — |\n| Phone | Contact phone | √ | √ | √ | — |\n| Checkbox | Completed/not, enabled/disabled | √ | √ | √ | — |\n| Primary Key (Block) | Unique record identifier, can bind to a content block | √ | √ | √ | `_created` |\n| Asset | Attachments, images, files | √ | √ | √ | — |\n| Relation | Cross-database record relations | √ | √ | √ | — |\n| Rollup | Statistical calculations based on relation fields | √ | √ | √ | — |\n| Template | Calculate values from fields in the same entry | √ | √ | √ | — |\n| Created Time | Record creation time (auto) | √ | √ | √ | — |\n| Updated Time | Record last modified time (auto) | √ | √ | √ | — |\n| Line Number | Row position in the current view | × | × | × | — |\n| Location | Place names and coordinates | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +55,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-ga53qn2",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -753,7 +752,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Unique record identifier, can bind to a content block"
+									"Data": "Entry content, optionally bound to a block"
 								}
 							]
 						},
@@ -1669,7 +1668,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-6df7phn",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1708,7 +1707,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-c1c1f0s",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1724,7 +1723,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-rhzqopz",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1732,17 +1731,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-1l4frnq",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Configuration"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": When creating, you can check \"Multi-line\" to use a multi-line text box"
+									"Data": "Configuration: Adjust wrapping in the field settings to display longer text"
 								}
 							]
 						}
@@ -1761,7 +1755,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-iak54ph",
-						"updated": "20260809232000"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -1769,21 +1763,16 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-gkly2lg",
-								"updated": "20260809232000"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Editing"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Type directly in the cell; use "
+									"Data": "Editing: Enter text in the cell and use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "Shift"
 								},
 								{
@@ -1792,12 +1781,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " for line breaks in multi-line mode"
+									"Data": " for a line break"
 								}
 							]
 						}
@@ -1885,7 +1874,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-j0stc70",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1924,7 +1913,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-l873oba",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1940,7 +1929,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-vfwy9zx",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1948,17 +1937,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-jocsybi",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Configuration"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": When creating, you can choose the number format — integer, decimal, percentage, currency"
+									"Data": "Configuration: Choose a display format in the field settings, such as a plain number, percentage, or currency"
 								}
 							]
 						}
@@ -2120,7 +2104,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-tvixbm7",
-				"updated": "20261009120841"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -2159,7 +2143,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-pjxds7m",
-				"updated": "20260613155453"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -2249,7 +2233,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-lbc7iza",
-						"updated": "20260613155453"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -2257,7 +2241,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-sb6k7ec",
-								"updated": "20260613155453"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
@@ -2267,7 +2251,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Supports specific day, before/after a day, between two dates, has value/no value, etc."
+									"Data": ": Supports specific day, before/after a day, between two dates, has value/no value, etc"
 								}
 							]
 						}
@@ -3450,7 +3434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-nz8xbd6",
-				"updated": "20260613155453"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3468,12 +3452,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-0ahugdf",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The unique identifier for each record in a database. In content-block-type records, the primary key is bound to the corresponding content block, thereby connecting structured data with unstructured content. Each table must have exactly one primary key field."
+					"Data": "The primary-key field displays an entry’s main content and can bind it to a content block, connecting structured fields with note content. Each database has one primary-key field, but its display text may repeat and is not a unique ID."
 				}
 			]
 		},
@@ -3489,7 +3473,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-nsinh0n",
-				"updated": "20260613155453"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3542,7 +3526,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-9xb44ut",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -3576,7 +3560,7 @@
 							},
 							"Properties": {
 								"id": "20260613155453-el2hw4f",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
@@ -3624,7 +3608,7 @@
 									},
 									"Properties": {
 										"id": "20260613155453-og0aedx",
-										"updated": "20260613155453"
+										"updated": "20261024162311"
 									},
 									"Children": [
 										{
@@ -3632,12 +3616,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613155453-w3iz03p",
-												"updated": "20260613155453"
+												"updated": "20261024162311"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Non-content block records: Add entries directly in the view; the primary key is automatically generated by the system"
+													"Data": "Unbound entries: Add them directly in a view and edit their primary-key text; the system generates the entry ID"
 												}
 											]
 										}
@@ -3697,7 +3681,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-ufsztba",
-						"updated": "20260613155453"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -3705,17 +3689,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-ytr34wl",
-								"updated": "20260613155453"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Notes"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": The binding relationship cannot be modified directly through the cell; if the content block is deleted, the corresponding record is also deleted"
+									"Data": "Binding management: Use the bind or rebind button in the entry’s attribute panel to change its bound block; deleting the bound block also removes the database entry"
 								}
 							]
 						}
@@ -4040,7 +4019,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-unpy2mo",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4079,7 +4058,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-b4gshar",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4287,7 +4266,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-q9y7pjp",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -4295,17 +4274,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-mheww77",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Filtering"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Supports has value/no value filtering"
+									"Data": "Filtering: Supports inclusion or exclusion of related entries, as well as empty and non-empty checks"
 								}
 							]
 						}
@@ -5028,7 +5002,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-lridmci",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5046,12 +5020,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-setkknr",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatically records the creation time of an entry."
+					"Data": "Displays the entry’s creation time, or the bound block’s creation time for a bound entry."
 				}
 			]
 		},
@@ -5067,7 +5041,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-8x2e186",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5194,7 +5168,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-1zmd4dw",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -5202,17 +5176,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-mxl1z3v",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Notes"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": The value remains fixed after the record is created"
+									"Data": "Note: Binding or rebinding an entry changes the displayed time to that of the bound block"
 								}
 							]
 						}
@@ -5226,7 +5195,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-vr78bzj",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5244,12 +5213,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-btqsyau",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatically records the last modified time of an entry."
+					"Data": "Displays the entry’s update time, or the bound block’s update time for a bound entry."
 				}
 			]
 		},
@@ -5622,7 +5591,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-6kd9rk5",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5664,7 +5633,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-dub50kq",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5705,7 +5674,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", omitting the name and semicolon when no name is set. You can paste this text or a WGS84 "
+					"Data": ", omitting the name and semicolon when no name is set."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-7p35wey",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-7p35wey",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can paste this text or a WGS84 "
 				},
 				{
 					"Type": "NodeTextMark",

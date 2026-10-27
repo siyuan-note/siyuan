@@ -6,7 +6,7 @@
 		"id": "20210824201257-cy7icrc",
 		"title": "挂件",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210824201352-apdkqps",
-				"updated": "20210824201352"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,21 +29,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210824201352-z3731rx",
-				"updated": "20230512170805"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "挂件是思源内核伺服的静态网页，它通过 API 存取数据，通过 "
+					"Data": "挂件是在文档中运行的小工具，以网页形式嵌入编辑器。挂件文件由思源内核提供，通过 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "iframe"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 进行渲染展现。"
+					"Data": " 显示，也可以通过 API 读写数据。"
 				}
 			]
 		},

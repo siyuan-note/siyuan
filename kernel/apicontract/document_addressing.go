@@ -100,7 +100,7 @@ type CreatedDocumentData struct {
 }
 
 type DocumentCreateFailure struct {
-	Reason      string   `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|indexUnavailable|unsupportedTitleFormat|modeConflict|writeFailed"`
+	Reason      string   `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|indexUnavailable|unsupportedTitleFormat|writeFailed"`
 	CommitState string   `json:"commitState" api:"enum=none|committed|unknown"`
 	ID          string   `json:"id,omitempty" api:"optional"`
 	Stage       string   `json:"stage"`
@@ -143,16 +143,15 @@ type DocumentPathSegment struct {
 }
 
 type DocumentPath struct {
-	Notebook          string                `json:"notebook"`
-	ID                string                `json:"id"`
-	ParentID          *string               `json:"parentID"`
-	Path              string                `json:"path"`
-	Title             DocumentTitle         `json:"title"`
-	Segments          []DocumentPathSegment `json:"segments"`
-	Depth             int                   `json:"depth"`
-	DisplayPath       string                `json:"displayPath"`
-	Revision          string                `json:"revision"`
-	AddressingVersion int                   `json:"addressingVersion"`
+	Notebook    string                `json:"notebook"`
+	ID          string                `json:"id"`
+	ParentID    *string               `json:"parentID"`
+	Path        string                `json:"path"`
+	Title       DocumentTitle         `json:"title"`
+	Segments    []DocumentPathSegment `json:"segments"`
+	Depth       int                   `json:"depth"`
+	DisplayPath string                `json:"displayPath"`
+	Revision    string                `json:"revision"`
 }
 
 type GetDocPathsRequest struct {
@@ -199,7 +198,7 @@ type ResolvedDocumentPathData struct {
 }
 
 type DocumentAddressingFailure struct {
-	Reason string `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|legacyPathUnsupported|indexUnavailable|unsupportedTitleFormat|targetModeUnsupported|modeConflict|writeFailed"`
+	Reason string `json:"reason" api:"enum=invalidTitle|parentUnavailable|planChanged|documentIDConflict|legacyPathUnsupported|pathAmbiguous|indexUnavailable|unsupportedTitleFormat|targetModeUnsupported|writeFailed"`
 }
 
 type DocumentPathsResult struct {

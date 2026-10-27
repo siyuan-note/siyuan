@@ -27,6 +27,8 @@
 
 .mindmap-view {
   --mindmap-node-text-color: initial;
+  --mindmap-node-semantic-color: initial;
+  --b3-task-completed-color: initial;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -126,6 +128,18 @@
     min-width: 0;
     gap: 8px;
     padding: 4px;
+  }
+
+  &--history &__toolbar-group {
+    gap: 3px;
+  }
+
+  &--history &__toolbar {
+    box-sizing: border-box;
+  }
+
+  &--history &__spacer {
+    display: none;
   }
 
   &__spacer {
@@ -245,6 +259,44 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+
+  &__document-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    color: var(--b3-theme-primary);
+    border: 1px solid currentColor;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center;
+    box-sizing: border-box;
+    z-index: 4;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      opacity: .5;
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      border-left: 1px dashed currentColor;
+    }
+
+    &::after {
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px dashed currentColor;
+    }
   }
 
   &__selection-box {
@@ -403,6 +455,15 @@
   &__content {
     @include inline.interactive-marks;
 
+    // 有独立底色的组合标记保留自身配色，普通链接和标签沿用所在内容的前景。
+    span[data-type~="a"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-link-color));
+    }
+
+    span[data-type~="tag"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-tag-color));
+    }
+
     min-width: 0;
     min-height: 24px;
     overflow-wrap: anywhere;
@@ -482,7 +543,19 @@
     }
   }
 
+  &__node--colored {
+    --b3-task-completed-color: var(--mindmap-node-text-color);
+    --mindmap-node-semantic-color: currentColor;
+  }
+
   &__node--colored > .mindmap-view__content {
+    // 默认的列表正文和删除线沿用节点前景，手动行内颜色仍由正文自身决定。
+    .li,
+    s,
+    span[data-type~="s"] {
+      color: var(--mindmap-node-text-color);
+    }
+
     .bq,
     .callout {
       color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
@@ -491,6 +564,15 @@
     .protyle-wysiwyg--empty:empty::before {
       color: var(--mindmap-node-text-color, var(--b3-empty-color));
     }
+  }
+
+  &__theme-preview {
+    width: 48px;
+    flex-basis: 48px;
+  }
+
+  &__theme-menu .b3-menu__label {
+    min-width: 0;
   }
 
   &__node[data-task] {
@@ -852,7 +934,7 @@
     transform: translateX(-50%);
     bottom: 8px;
     z-index: 6;
-    width: max-content;
+    width: 244px;
     min-width: 0;
     max-width: calc(100% - 16px);
     padding: 4px;
@@ -877,9 +959,9 @@
   }
 
   &__inspector--node {
-    .color__square {
-      flex-shrink: 0;
-    }
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    justify-items: center;
   }
 
   &__inspector--line {
@@ -889,6 +971,20 @@
 
     .mindmap-view__palette {
       margin: 0;
+    }
+
+    > .b3-select {
+      max-width: 100px;
+      min-width: 0;
+    }
+  }
+
+  &__inspector--relation {
+    width: max-content;
+
+    .mindmap-view__palette-row {
+      width: 176px;
+      flex-shrink: 0;
     }
   }
 
@@ -913,6 +1009,26 @@
     pointer-events: none;
   }
 
+  &__palette-row {
+    display: grid;
+    grid-template-columns: repeat(var(--mindmap-toolbar-columns, 8), minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    min-width: 0;
+    width: 100%;
+
+    .mindmap-view__palette {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: calc(100% / var(--mindmap-palette-columns));
+      grid-column: span var(--mindmap-palette-columns);
+      justify-items: center;
+      width: 100%;
+      order: 0;
+      scrollbar-width: none;
+    }
+  }
+
   &__palette {
     display: flex;
     flex-wrap: nowrap;
@@ -927,19 +1043,23 @@
   }
 
   &__node-width {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     align-items: center;
-    gap: 4px;
+    justify-items: center;
+    width: 100%;
     flex-shrink: 0;
 
     .b3-text-field {
-      width: 80px;
+      grid-column: span 2;
+      width: 100%;
+      min-width: 0;
     }
 
     .b3-slider {
-      width: 100px;
-      min-width: 48px;
-      flex: 1;
+      grid-column: span 4;
+      width: 100%;
+      min-width: 0;
     }
 
     .color__square {
@@ -953,21 +1073,20 @@
     z-index: 7;
     display: flex;
     flex-direction: column;
+    width: max-content;
     max-width: calc(100% - 16px);
-    padding: 8px;
+    gap: 4px;
+    padding: 4px;
     box-sizing: border-box;
     overflow: auto;
 
     .mindmap-view__palette {
-      flex-wrap: wrap;
-      overflow: visible;
-      max-width: 320px;
+      max-width: 100%;
     }
 
     .mindmap-view__node-width {
       min-width: 0;
       flex-shrink: 1;
-      flex-wrap: wrap;
     }
   }
 
@@ -995,6 +1114,7 @@
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__document-viewport,
     &__inspector-popover,
     &__add-bridge,
     &__fold,

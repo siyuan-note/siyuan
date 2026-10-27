@@ -26,7 +26,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         isFoldedRenderContent: () => false,
         fetchPost: (url: string, data: Record<string, string>) => requests.push({url, data}),
         fetchSyncPost: () => check.fail("Preview requested database data"),
-        genRenderFrame: () => {},
+        genEmbedRenderFrame: () => {},
         isEncryptedBox: () => false,
         hasClosestByClassName: (element: HTMLElement, name: string) => element.closest(`.${name}`),
         mathRender: (): undefined => undefined,
@@ -185,7 +185,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         nodes: {} as Record<string, {width?: number}>, relations: [] as {id: string}[],
     }};
     const view = Object.assign(new api.MindmapPreviewView(), {
-        options: {}, viewport: document.createElement("div"), persistedLocked: false,
+        options: {host: map}, viewport: document.createElement("div"), persistedLocked: false,
         nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
         renderTask: () => {}, destroyContentViews: () => {},
         label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
@@ -251,6 +251,36 @@ const cases = async (source: string, css: string, formulas: string[]) => {
         view.update(model);
         check.equal(map.querySelector(".mindmap-view__text").innerHTML, html, "real line breaks survive the preview");
     }
+    // 高亮代码末尾保留换行，切换到编辑器后不应增加或减少一行。
+    const code = document.createElement("div");
+    code.className = "code-block";
+    code.dataset.type = "NodeCodeBlock";
+    code.dataset.nodeId = "code";
+    node.contentBlocks = [code];
+    for (const mobile of [false, true]) {
+        document.body.className = mobile ? "body--android" : "body--windows";
+        for (const fontSize of [16, 32]) {
+            map.style.fontSize = `${fontSize}px`;
+            for (const text of ["line\n", "line\nsecond\n", "line\n\n"]) {
+                code.innerHTML = '<div class="protyle-action"><span>text</span></div>' +
+                    '<div class="hljs" style="display:block"><div class="fn__none"></div>' +
+                    `<div contenteditable="true" spellcheck="false" style="white-space:pre">${text}</div></div>`;
+                const original = code.outerHTML;
+                view.update(model);
+                const content = view.getContentHost(node.id);
+                const preview = content.innerHTML;
+                const previewHeight = nodeElement.getBoundingClientRect().height;
+                content.classList.add("mindmap-view__editor", "protyle");
+                content.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg" spellcheck="false">' +
+                    code.outerHTML + "</div></div>";
+                check.ok(Math.abs(nodeElement.getBoundingClientRect().height - previewHeight) < 0.1,
+                    `code preview and editor keep equal heights: ${JSON.stringify({mobile, fontSize, text})}`);
+                content.classList.remove("mindmap-view__editor", "protyle");
+                content.innerHTML = preview;
+                check.equal(code.outerHTML, original, "code sizing never rewrites source content");
+            }
+        }
+    }
     style.remove();
 
     // 脑图预览保留复杂块，数据库和表格单元格仍按原有规则拒绝这些块。
@@ -288,8 +318,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
     assert.equal(methods.length, 2);
     const viewSource = createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"), ScriptTarget.Latest, true);
     const viewClass = viewSource.statements.find(isClassDeclaration);
-    const viewMethods = viewClass.members.filter(member => ["update", "getContentHost"].includes(member.name?.getText(viewSource)));
-    assert.equal(viewMethods.length, 2);
+    const viewMethods = viewClass.members.filter(member => ["update", "updateColors", "getContentHost"].includes(member.name?.getText(viewSource)));
+    assert.equal(viewMethods.length, 3);
     const katexDirectory = path.resolve(__dirname, "../../../../stage/protyle/js/katex");
     const katex = require(path.join(katexDirectory, "katex.min.js"));
     const formulas = ["x", "\\frac{y}{x}", "AAA=" + "A".repeat(40)].map(value =>
@@ -298,7 +328,8 @@ test("special block previews cannot acquire document writes or lose unsupported 
         logger: require("sass").Logger.silent,
     }).css;
     const source = compile(readFileSync(path.join(__dirname, "../../../plugin/customBlockRender.ts"), "utf8")) +
-        extract("../htmlRender.ts", ["htmlRender"]) + extract("../blockRender.ts", ["blockRender"]) +
+        extract("../htmlRender.ts", ["htmlRender"]) + compile(readFileSync(path.join(__dirname, "../embedBreadcrumb.ts"), "utf8")) +
+        extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +

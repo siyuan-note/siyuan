@@ -39,13 +39,12 @@ const browserCases = async (sources, css, template) => {
     window.siyuan = {zIndex: 10, config: {uiLayout: {hideDock: true}, appearance: {hideStatusBar: false}, system: {os: "linux"}},
         layout: {layout: {children: [outer, bottom]}, centerLayout: center}};
     const bar = load("barVisibility");
-    const resizes = [];
     const dependencies = {
         ...bar, ...load("panelVisibility"),
         Constants: {TIMEOUT_DOCK_TOGGLE: 20, TIMEOUT_TRANSITION: 20, ATTRIBUTE_DOCK_WIDTH: "data-width"},
         bindPanelTransitionGuard() {}, isTouchHoverInput: () => false,
         isWindow: () => false, isAbove: (a, b) => Number(a.style.zIndex) > Number(b.style.zIndex),
-        resizeTabs(save) { resizes.push(save); }, setTabPosition() {}, adjustLayout() {}, setPanelFocus() {},
+        resizeTabs() {}, setTabPosition() {}, adjustLayout() {}, setPanelFocus() {},
         recordBeforeResizeTop() {}, clearBeforeResizeTop() {},
         hasClosestByClassName: (element, name) => element?.closest?.("." + name),
     };
@@ -75,7 +74,7 @@ const browserCases = async (sources, css, template) => {
     };
     const appearance = element => {
         const style = getComputedStyle(element);
-        return Object.fromEntries(["position", "backgroundColor", "borderTopLeftRadius", "borderTopRightRadius",
+        return Object.fromEntries(["borderTopLeftRadius", "borderTopRightRadius",
             "borderBottomLeftRadius", "borderBottomRightRadius", "marginTop", "boxShadow"]
             .map(key => [key, style[key]]));
     };
@@ -84,29 +83,64 @@ const browserCases = async (sources, css, template) => {
     const leftBar = document.getElementById("dockLeft");
     const rightBar = document.getElementById("dockRight");
     check.ok(hidden(leftBar) && hidden(rightBar));
+    const rightDockSpace = () => document.documentElement.style.getPropertyValue("--b3-dock-right-width");
+    const checkRightDockSpace = (message) => {
+        const reserved = !hidden(rightBar) && !rightBar.classList.contains("dock--float");
+        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "0px", message);
+    };
+    checkRightDockSpace("a hidden right bar reserves no space for fixed overlays");
+    const {windowMouseMove} = load("mousemove", dependencies);
+    const move = event => windowMouseMove(event);
+    document.addEventListener("mousemove", move);
     for (const position of ["Left", "Right"]) {
         const dock = docks[position];
         const element = position === "Left" ? leftBar : rightBar;
         const otherBar = position === "Left" ? rightBar : leftBar;
         const entries = Array.from(element.querySelectorAll(".dock__item"));
         const order = entries.map(item => item.dataset.entryId);
-        open(position);
+        check.equal(dock.layout.element.clientWidth, 0);
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
         await settle();
+        check.ok(!hidden(element) && hidden(otherBar), "the edge reveals a bar with all panels closed");
+        check.equal(dock.hasActive(), false);
+        check.equal(dock.layout.element.style.opacity, "0", "revealing a bar does not open an empty panel");
+        check.deepEqual(rect(center.element), initialEditor, "bar-only edge hover does not resize the editor");
+        const menu = document.getElementById("commonMenu");
+        menu.style.zIndex = "9999";
+        menu.classList.remove("fn__none");
+        dock.hideDock();
+        check.ok(!hidden(element), "a menu opened from a bar keeps the bar visible without an active panel");
+        menu.classList.add("fn__none");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: window.innerWidth / 2, clientY: 200}));
+        await settle();
+        check.ok(hidden(element), "bar-only hover closes after leaving the edge");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
+        await settle();
+        entries.forEach((entry, index) => entry.addEventListener("click", () =>
+            dock.toggleModel(position + (index === 0 ? "one" : "two"), false, true, false, false)));
+        entries[0].click();
+        await settle();
+        check.equal(dock.layout.element.style.opacity, "1", "clicking a revealed entry opens its panel");
         check.ok(!hidden(element) && hidden(otherBar), "only the expanded side reveals its bar");
-        check.ok(rect(center.element).width < initialEditor.width, "a temporary bar uses its normal layout space");
-        check.ok(resizes.includes(false), "bar visibility resizes the editor without saving the hidden preference");
+        check.equal(getComputedStyle(element).position, "fixed");
+        check.deepEqual(rect(center.element), initialEditor, "revealing a bar and panel does not resize the editor");
         const panelRect = dock.layout.element.getBoundingClientRect();
         const barRect = element.getBoundingClientRect();
         check.equal(position === "Left" ? panelRect.left : panelRect.right,
             position === "Left" ? barRect.right : barRect.left, "panel stays beside the bar");
         const temporary = {bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)};
+        const effectiveBackground = getComputedStyle(element).backgroundColor;
+        check.equal(effectiveBackground, getComputedStyle(document.body).backgroundColor, "bar uses the window background color");
         window.siyuan.config.uiLayout.hideDock = false;
         bar.syncDockBarVisibility();
         dock.showDock(true);
         check.deepEqual({bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)}, temporary,
-        "temporary bars preserve the geometry, colors and corners of normally visible bars and panels");
+        "floating bars preserve the normal dock geometry and panel corners");
         window.siyuan.config.uiLayout.hideDock = true;
         bar.syncDockBarVisibility();
         dock.showDock(true);
@@ -115,9 +149,6 @@ const browserCases = async (sources, css, template) => {
             await require("electron").ipcRenderer.invoke("dock-bar-capture", position);
         }
 
-        const {windowMouseMove} = load("mousemove", dependencies);
-        const move = event => windowMouseMove(event);
-        document.addEventListener("mousemove", move);
         dock.hideDockByHover();
         // 覆盖停靠栏最外侧像素，不能因旧的边缘范围少两个像素而收起。
         element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
@@ -128,24 +159,28 @@ const browserCases = async (sources, css, template) => {
         check.equal(dock.layout.element.style.opacity, "1", "moving from panel to bar keeps the panel open");
         check.ok(!hidden(element));
 
-        entries[1].addEventListener("click", () => dock.toggleModel(position + "two", false, true, false, false));
         entries[1].click();
         await settle();
         check.ok(entries[1].classList.contains("dock__item--active"));
         check.ok(!hidden(dock.layout.element.querySelector(`[data-id="${position}two"]`)));
         check.deepEqual(entries.map(item => item.dataset.entryId), order, "plugin entry identifiers and order are preserved");
-        check.deepEqual(rect(center.element), expandedEditor, "switching tools preserves the occupied dock space");
+        check.deepEqual(rect(center.element), expandedEditor, "switching tools keeps the editor layout unchanged");
         entries[0].classList.add("fn__none");
         bar.syncDockBarVisibility();
         check.ok(hidden(entries[0]) && !hidden(element), "profile-hidden entries stay hidden during refresh");
         entries[0].classList.remove("fn__none");
+
+        dock.hideDockByHover();
+        dock.showDock(true);
+        await settle();
+        check.ok(hidden(element), "position refreshes do not cancel a pending hover close");
+        dock.showDock();
 
         const input = dock.layout.element.querySelector(`[data-id="${position}two"] input`);
         input.focus();
         dock.hideDock();
         check.ok(!hidden(element), "focused input keeps both panel and bar open");
         input.blur();
-        const menu = document.getElementById("commonMenu");
         menu.style.zIndex = "9999";
         menu.classList.remove("fn__none");
         dock.hideDock();
@@ -158,10 +193,15 @@ const browserCases = async (sources, css, template) => {
         check.ok(hidden(element), "leaving the dock and panel restores the hidden state");
         check.equal(dock.layout.element.style.opacity, "0");
         check.deepEqual(rect(center.element), initialEditor, "closing a temporary bar restores the editor space");
-        document.removeEventListener("mousemove", move);
         dock.showDock();
         dock.togglePanel(false);
         check.ok(hidden(element), "explicitly collapsing a panel clears its temporary bar");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
+        await settle();
+        check.ok(!hidden(element), "edge hover reveals entries when the panel is explicitly collapsed");
+        check.ok(hidden(dock.layout.element), "bar hover preserves the explicit panel collapse");
+        dock.hideDock();
         dock.togglePanel(true);
         await settle();
         check.ok(!hidden(element));
@@ -174,17 +214,25 @@ const browserCases = async (sources, css, template) => {
         dock.toggleModel(position + "two", false, true, false, false);
         await settle();
         check.ok(hidden(element), "closing the final active item hides the temporary bar");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
+        await settle();
+        check.ok(!hidden(element), "the edge remains usable after closing the last panel");
+        dock.hideDock();
     }
+    document.removeEventListener("mousemove", move);
 
     open("Left");
     open("Right");
     open("Bottom");
     await settle();
     check.ok(!hidden(leftBar) && !hidden(rightBar));
+    checkRightDockSpace("a temporary right bar overlays the editor instead of reserving space");
     docks.Left.hideDock();
     check.ok(hidden(leftBar) && !hidden(rightBar), "each side closes independently");
     check.equal(bottom.element.style.left, "0px");
-    check.equal(bottom.element.style.right, rightBar.clientWidth + "px", "bottom panel follows normally occupied side bars");
+    check.equal(bottom.element.style.right, "0px", "temporary bars do not narrow the bottom panel");
+    check.deepEqual(rect(center.element), initialEditor);
     docks.Right.hideDock();
     check.ok(hidden(leftBar) && hidden(rightBar), "the bottom panel alone reveals no side bars");
     check.equal(bottom.element.style.right, "0px", "closing the side bar restores bottom panel width");
@@ -229,6 +277,8 @@ const browserCases = async (sources, css, template) => {
     bar.syncDockBarVisibility();
     docks.Right.showDock(true);
     check.ok(!hidden(leftBar) && !hidden(rightBar));
+    check.equal(rightDockSpace(), "var(--b3-ui-dock-width, 42px)",
+        "a fixed right bar publishes its width so notifications keep a gap from it");
     check.equal(rightBar.style.top, "");
     check.equal(rightBar.style.zIndex, "");
     docks.Right.hideDock();
@@ -236,6 +286,7 @@ const browserCases = async (sources, css, template) => {
     window.siyuan.config.uiLayout.hideDock = true;
     bar.syncDockBarVisibility();
     check.ok(hidden(leftBar) && hidden(rightBar));
+    check.equal(rightDockSpace(), "0px", "hiding the right bar restores the window edge offset");
     check.equal(window.siyuan.config.uiLayout.hideDock, true);
     return "Floating dock bar cases passed";
 };
@@ -290,16 +341,16 @@ if (process.versions.electron && process.type === "browser") {
         }
     });
 } else {
-    test("floating side panels temporarily reveal dock bars using their normal layout and appearance", {
+    test("floating dock bars preserve editor width and remain accessible when every panel is closed", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 120000,
+        timeout: 180000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-dock-bar-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 115000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 175000});
             assert.match(stdout, /Floating dock bar cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

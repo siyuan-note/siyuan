@@ -6776,6 +6776,9 @@
             "type": "string"
           }
         },
+        "referenceID": {
+          "type": "string"
+        },
         "tagMatch": {
           "type": "string",
           "enum": [
@@ -6862,6 +6865,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "referenceID": {
+          "type": "string"
         },
         "tagMatch": {
           "type": "string",
@@ -7537,6 +7543,9 @@
         "dateKeyID": {
           "type": "string"
         },
+        "displayFieldName": {
+          "type": "boolean"
+        },
         "rowLimit": {
           "type": "integer"
         },
@@ -7559,6 +7568,9 @@
         },
         "dateKeyID": {
           "type": "string"
+        },
+        "displayFieldName": {
+          "type": "boolean"
         },
         "rowLimit": {
           "type": "integer"
@@ -8126,6 +8138,9 @@
         },
         "itemID": {
           "type": "string"
+        },
+        "openAfterCreate": {
+          "type": "boolean"
         },
         "warnings": {
           "type": "array",
@@ -10414,6 +10429,9 @@
         "name": {
           "type": "string"
         },
+        "openAfterCreate": {
+          "type": "boolean"
+        },
         "primaryKeyTemplate": {
           "type": "string"
         },
@@ -10502,6 +10520,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "openAfterCreate": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -20652,6 +20680,9 @@
             }
           ]
         },
+        "documentTitle": {
+          "type": "string"
+        },
         "hasChildren": {
           "type": "boolean"
         },
@@ -22763,6 +22794,9 @@
     "CreateSnapshotRequestInput": {
       "type": "object",
       "properties": {
+        "fullCheck": {
+          "type": "boolean"
+        },
         "memo": {
           "type": "string"
         }
@@ -24500,10 +24534,10 @@
             "planChanged",
             "documentIDConflict",
             "legacyPathUnsupported",
+            "pathAmbiguous",
             "indexUnavailable",
             "unsupportedTitleFormat",
             "targetModeUnsupported",
-            "modeConflict",
             "writeFailed"
           ]
         }
@@ -24516,9 +24550,6 @@
     "DocumentCapabilities": {
       "type": "object",
       "properties": {
-        "addressingVersion": {
-          "type": "integer"
-        },
         "indexState": {
           "type": "string",
           "enum": [
@@ -24530,25 +24561,6 @@
         },
         "literalSlash": {
           "type": "boolean"
-        },
-        "minimumReaderVersion": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "modeState": {
-          "type": "string",
-          "enum": [
-            "legacy",
-            "structured",
-            "conflict",
-            "recovering"
-          ]
         },
         "revision": {
           "type": "string"
@@ -24571,11 +24583,8 @@
         }
       },
       "required": [
-        "addressingVersion",
         "indexState",
         "literalSlash",
-        "minimumReaderVersion",
-        "modeState",
         "revision",
         "structuredPaths",
         "titleFormats"
@@ -24618,7 +24627,6 @@
             "documentIDConflict",
             "indexUnavailable",
             "unsupportedTitleFormat",
-            "modeConflict",
             "writeFailed"
           ]
         },
@@ -24820,9 +24828,6 @@
     "DocumentPath": {
       "type": "object",
       "properties": {
-        "addressingVersion": {
-          "type": "integer"
-        },
         "depth": {
           "type": "integer"
         },
@@ -24869,7 +24874,6 @@
         }
       },
       "required": [
-        "addressingVersion",
         "depth",
         "displayPath",
         "id",
@@ -38525,11 +38529,25 @@
     "LegacyPathUnsupported": {
       "type": "object",
       "properties": {
+        "cleanIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "reason": {
           "type": "string",
           "enum": [
-            "legacyPathUnsupported"
+            "legacyPathUnsupported",
+            "pathAmbiguous",
+            "indexUnavailable"
           ]
+        },
+        "unsupportedIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -48254,6 +48272,16 @@
     "SetAssetAnnotationRequestInput": {
       "type": "object",
       "properties": {
+        "baseData": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "data": {
           "type": "string"
         },
@@ -48940,6 +48968,16 @@
           ]
         },
         "embedBlockBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedBlockBreadcrumbParentPath": {
           "anyOf": [
             {
               "type": "boolean"
@@ -53228,6 +53266,16 @@
         "embedBlockBreadcrumb": {
           "type": "boolean"
         },
+        "embedBlockBreadcrumbParentPath": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "emoji": {
           "anyOf": [
             {
@@ -53423,6 +53471,7 @@
         "dragHTMLFileToIframe",
         "dynamicLoadBlocks",
         "embedBlockBreadcrumb",
+        "embedBlockBreadcrumbParentPath",
         "emoji",
         "floatWindowDelay",
         "floatWindowMode",
@@ -53879,6 +53928,16 @@
           ]
         },
         "embedBlockBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedBlockBreadcrumbParentPath": {
           "anyOf": [
             {
               "type": "boolean"
@@ -60237,9 +60296,6 @@
             }
           ]
         },
-        "documentAddressingVersion": {
-          "type": "integer"
-        },
         "isPublish": {
           "type": "boolean"
         },
@@ -60255,7 +60311,6 @@
       },
       "required": [
         "conf",
-        "documentAddressingVersion",
         "isPublish",
         "revision",
         "start"
@@ -60514,6 +60569,18 @@
       "required": [
         "name",
         "zip"
+      ],
+      "additionalProperties": false
+    },
+    "SystemFileTraversalData": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
       ],
       "additionalProperties": false
     },
@@ -124057,6 +124124,32 @@
       ],
       "additionalProperties": false
     },
+    "UnusedAssetsRequestInput": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "UnzipRequestInput": {
       "type": "object",
       "properties": {
@@ -135096,9 +135189,9 @@
         "authenticated",
         "admin"
       ],
-      "body": "none",
+      "body": "legacyOptional",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/UnusedAssetsRequestInput"
       },
       "response": {
         "anyOf": [
@@ -182920,6 +183013,85 @@
               },
               "data": {
                 "$ref": "#/$defs/BootProgressData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/checkFileTraversal",
+      "handler": "checkFileTraversal",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemFileTraversalData"
               },
               "msg": {
                 "type": "string"

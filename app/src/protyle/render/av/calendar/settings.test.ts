@@ -66,7 +66,7 @@ test("calendar layout submenus filter choices, mark selection and preserve undo"
         const {methods, transactions, menus} = setup();
         const current = data();
         const view = current.view as IAVTable;
-        view.calendar = {dateKeyID: "date", colorKeyID: "color", weekStart: 1};
+        view.calendar = {dateKeyID: "date", colorKeyID: "color", weekStart: 1, displayFieldName: true};
         view.columns = [{id: "date", type: "date", name: "Date"}, {id: "created", type: "created", name: "Created"},
             {id: "updated", type: "updated", name: "Updated"}, {id: "color", type: "select", name: "Color"},
             {id: "text", type: "text", name: "Text"}] as IAVColumn[];
@@ -89,6 +89,8 @@ test("calendar layout submenus filter choices, mark selection and preserve undo"
         assert.equal(transactions.length, 1);
         assert.equal(settingsOf(transactions[0].do[0])[key], key === "weekStart" ? 0 : "");
         assert.equal(settingsOf(transactions[0].undo[0])[key], key === "weekStart" ? 1 : "date");
+        assert.equal(settingsOf(transactions[0].do[0]).displayFieldName, true);
+        assert.equal(settingsOf(transactions[0].undo[0]).displayFieldName, true);
         assert.equal(refreshed, 1);
     }
 });

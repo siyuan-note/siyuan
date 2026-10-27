@@ -1,9 +1,11 @@
 import {ipcRenderer} from "electron";
 import {Constants} from "../constants";
 import {setToolbarLeftMac} from "../util/functions";
+import {initWindowControlsOverlay} from "./windowControlsOverlay";
 
 // 主窗口和设置窗口共用本机窗口控件及其命令，关闭行为由各窗口提供。
 export const initWindowControls = (container: HTMLElement, close: () => void) => {
+    if (initWindowControlsOverlay(container)) return;
     container.insertAdjacentHTML("beforeend", `<div class="toolbar__item ariaLabel toolbar__item--win" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg><use xlink:href="#iconMin"></use></svg>
 </div>

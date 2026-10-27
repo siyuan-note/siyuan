@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20261010225402"
+		"updated": "20261026182843"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-kyzslnl",
-				"updated": "20260613193945"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193945-ihvrl5l",
-				"updated": "20260613193945"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "全域搜尋支援查詢語法進行進階搜尋，包括 AND/OR/NOT 邏輯組合、類型過濾、字段篩選等。同時提供資料庫表直查、忽略索引和忽略搜尋等進階功能，滿足從簡單關鍵字到複雜條件的各類搜尋需求。以下子文檔將逐一介紹這些功能的詳細用法。"
+					"Data": "全域搜尋用於尋找工作空間中的內容區塊，支援關鍵字、查詢語法、正規表示式和 SQL；設定語意索引後，還可使用語意搜尋。開啟搜尋後，先選擇搜尋方式，再輸入關鍵字或查詢條件。本章介紹各方式的可用選項，以及索引和搜尋範圍的設定。"
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-g42svwc",
-				"updated": "20261010113646"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
@@ -59,12 +59,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009182324-g6i7omp",
-				"updated": "20261009182324"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "關鍵字與查詢語法搜尋支援區塊類型、筆記本和文件路徑篩選、包含子文件，以及排序、分組和取代。依內容順序排序僅在依文件分組時可用。"
+					"Data": "關鍵字與查詢語法搜尋支援區塊類型、筆記本和文件路徑篩選、包含子文件，以及排序、分組和取代。依內容順序排序僅在依文件分組時可用。直接輸入區塊 ID 時，同樣遵循筆記本、文件路徑、區塊類型、子類型和忽略條件。關鍵字模式的多詞搜尋會依字面量比對 %、_ 和反斜線。依文件分組只整理目前頁面的結果，不改變目前搜尋方式的分頁單位；依區塊分頁時，同一文件的命中區塊可能分布在多頁。"
 				}
 			]
 		},
@@ -200,7 +200,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-7pjioog",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -214,7 +214,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193945-f8wb78d",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -237,7 +237,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -246,7 +246,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中設定。預設關閉，即搜尋 "
+					"Data": " 中設定。預設關閉，即搜尋 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -274,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-pk2v0po",
-				"updated": "20260803163402"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -288,7 +288,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193945-sftcfdo",
-				"updated": "20260803163402"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -302,7 +302,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -311,7 +311,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -320,7 +320,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中設定。預設開啟，即搜尋\"經濟\"不會匹配\"經濟\"。關閉後搜尋\"經濟\"將同時匹配\"經濟\"和\"經濟\"。切換該選項後需等待索引重建完成方可生效。"
+					"Data": " 中設定。預設開啟，搜尋「经济」不會匹配「經濟」。關閉後，搜尋「经济」會同時匹配「经济」與「經濟」。切換後需等待索引重建完成才會生效。"
 				}
 			]
 		},
@@ -330,7 +330,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-4wxkgoj",
-				"updated": "20260809232000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -625,7 +625,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508002838-mfvpbim",
-				"updated": "20240508002838"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -633,7 +633,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226121808-fnxmngk",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "資料庫表"
+					"TextMarkTextContent": "SQL 索引資料表"
 				}
 			]
 		},

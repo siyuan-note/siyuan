@@ -253,11 +253,13 @@ type SettingEditor struct {
 	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
 	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
 	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
-	ListLogicalOutdent              bool                 `json:"listLogicalOutdent" api:"optional,nullable"`
-	ListItemDotNumberClickFocus     bool                 `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
-	FloatWindowMode                 int                  `json:"floatWindowMode" api:"optional,nullable"`
-	FloatWindowDelay                *int                 `json:"floatWindowDelay" api:"optional,nullable"`
-	KeepLoadedContent               bool                 `json:"keepLoadedContent" api:"optional,nullable"`
+	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
+	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`
+	ListLogicalOutdent             bool  `json:"listLogicalOutdent" api:"optional,nullable"`
+	ListItemDotNumberClickFocus    bool  `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
+	FloatWindowMode                int   `json:"floatWindowMode" api:"optional,nullable"`
+	FloatWindowDelay               *int  `json:"floatWindowDelay" api:"optional,nullable"`
+	KeepLoadedContent              bool  `json:"keepLoadedContent" api:"optional,nullable"`
 	// PageScrollButtons 控制翻屏按钮，默认关闭，不迁移旧的本地偏好。
 	PageScrollButtons bool `json:"pageScrollButtons" api:"optional,nullable"`
 	DynamicLoadBlocks int  `json:"dynamicLoadBlocks" api:"optional,nullable"`

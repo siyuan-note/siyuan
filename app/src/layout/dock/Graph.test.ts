@@ -28,7 +28,7 @@ for (const type of ["global", "local", "pin"]) {
         runInNewContext(transpileModule(readFileSync("src/config/util/configApi.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {
-            exports: configExports, window: runtimeWindow, structuredClone,
+            exports: configExports, window: runtimeWindow,
             require: (name: string) => {
                 if (name === "../../util/fetch") return {fetchSyncPost: (url: string, data: typeof writes[number]) => {
                     assert.equal(url, "/api/graph/setGraphConf");
@@ -78,7 +78,7 @@ for (const type of ["global", "local", "pin"]) {
         await started;
         assert.equal(writes.length, 1);
         assert.equal(writes[0].type, type === "global" ? "global" : "local");
-        assert.deepEqual(writes[0].conf, conf);
+        assert.deepEqual(JSON.parse(JSON.stringify(writes[0].conf)), conf);
         assert.notEqual(writes[0].conf, conf, "queued configuration is copied before saving");
         graph.searchGraph();
         assert.equal(writes.length, 1);

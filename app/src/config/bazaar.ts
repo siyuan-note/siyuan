@@ -35,6 +35,7 @@ import {
     sortBazaarPackages,
 } from "../util/bazaarPackage";
 import {BAZAAR_README_SANITIZE_OPTIONS} from "./bazaarReadmeSanitize";
+import {hasDataTransferFiles} from "../protyle/upload/localDropFiles";
 import {
     BAZAAR_PACKAGE_CONFIG,
     BAZAAR_PACKAGE_TYPES,
@@ -1703,13 +1704,30 @@ type="checkbox">
         const dropTarget = mount.element.firstElementChild as HTMLElement;
         const dropElement = dropTarget.querySelector(".config-bazaar__drop");
         let dragDepth = 0;
-        const isFileDrag = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes("Files");
+        // 内部拖拽标记随本次数据传递，拖拽源被移除也不会影响后续本地文件拖入
+        const internalDragType = "application/siyuan-bazaar-internal";
+        dropTarget.addEventListener("dragstart", (event: DragEvent) => {
+            event.dataTransfer?.setData(internalDragType, "1");
+        });
+        const isFileDrag = (event: DragEvent) =>
+            !Array.from(event.dataTransfer?.types || []).includes(internalDragType) &&
+            hasDataTransferFiles(event.dataTransfer?.types || []);
+        // 系统拖入已知非 ZIP 文件（如图片）时不显示安装遮罩，但拖拽数据里的类型可能缺失，缺失时按未知处理
+        const localPackageMimeTypes = ["application/zip", "application/x-zip-compressed", "multipart/x-zip"];
+        const isLocalPackageDrag = (event: DragEvent) => {
+            const mimes = Array.from(event.dataTransfer?.items || [])
+                .filter(item => item.kind === "file")
+                .map(item => item.type.toLowerCase());
+            return mimes.length === 0 || mimes.some(mime => mime === "" || localPackageMimeTypes.includes(mime));
+        };
         dropTarget.addEventListener("dragenter", (event: DragEvent) => {
             if (!isFileDrag(event)) {
                 return;
             }
-            dragDepth++;
-            dropElement.classList.remove("fn__none");
+            if (isLocalPackageDrag(event)) {
+                dragDepth++;
+                dropElement.classList.remove("fn__none");
+            }
             event.preventDefault();
             event.stopPropagation();
         });

@@ -102,6 +102,24 @@ func TestCalendarTemplateAllLanguages(t *testing.T) {
 	}
 }
 
+func TestCalendarDisplayFieldNameCompatibility(t *testing.T) {
+	var settings CalendarSettings
+	if err := json.Unmarshal([]byte(`{"dateKeyID":"date","colorKeyID":"","weekStart":1}`), &settings); err != nil {
+		t.Fatal(err)
+	}
+	if settings.DisplayFieldName {
+		t.Fatal("existing calendars must keep field names hidden")
+	}
+	for _, enabled := range []bool{true, false} {
+		settings.DisplayFieldName = enabled
+		data, err := json.Marshal(settings)
+		var actual CalendarSettings
+		if err != nil || json.Unmarshal(data, &actual) != nil || actual != settings {
+			t.Fatalf("field name setting round trip: %s", data)
+		}
+	}
+}
+
 func TestCalendarRowLimitCompatibility(t *testing.T) {
 	var settings CalendarSettings
 	if err := json.Unmarshal([]byte(`{"dateKeyID":"date","colorKeyID":"","weekStart":1}`), &settings); err != nil {

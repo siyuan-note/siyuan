@@ -47,6 +47,28 @@ func TestWalkBlockBreadcrumbChildren(t *testing.T) {
 	assertBlockBreadcrumbChildIDs(t, paragraph1, []string{})
 }
 
+func TestEmbedBreadcrumbDocumentTitle(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Root.SetIALAttr("title", "Title / Section <A> & B")
+	for _, embedded := range []bool{true, false} {
+		paths := buildBlockBreadcrumb(treenode.GetNodeInTree(tree, fixture.childID), nil, embedded)
+		if len(paths) == 0 || paths[0].ID != tree.Root.ID {
+			t.Fatalf("missing document breadcrumb: %+v", paths)
+		}
+		if embedded {
+			if paths[0].DocumentTitle != "Title / Section &lt;A&gt; &amp; B" || paths[0].Name == paths[0].DocumentTitle {
+				t.Fatalf("document title must be separate from the unchanged full path: %+v", paths[0])
+			}
+		} else if paths[0].DocumentTitle != "" {
+			t.Fatalf("ordinary breadcrumbs changed: %+v", paths[0])
+		}
+	}
+}
+
 func TestWalkBlockBreadcrumbContainerChildren(t *testing.T) {
 	list := &ast.Node{Type: ast.NodeList, ID: "list"}
 	item1 := &ast.Node{Type: ast.NodeListItem, ID: "item1"}

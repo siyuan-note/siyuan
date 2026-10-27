@@ -17,6 +17,7 @@ const sources = () => {
         viewer: compile("asset/pdf/viewer.js"),
         annotations: compile("asset/anno.ts"),
         annotationRuntime: compile("asset/annoRuntime.ts"),
+        annotationSave: compile("asset/annotationSave.ts"),
         textLayer: compile("asset/pdf/text_layer_builder.js"),
         viewerTemplate: compile("asset/pdf/viewerTemplate.ts"),
         pdfTheme: compile("asset/pdfViewer.ts"),
@@ -57,6 +58,7 @@ const runCases = async source => {
     });
     const pdfTheme = load(source.pdfTheme, {
         "../constants": {Constants},
+        "../protyle/util/browserCompat": {ensureBrowserCompatibility: async () => {}},
         "../config/tabs/appearancePreferences": {patchAppearancePreference: async (key, value) => {
             themePatches.push([key, value]);
         }},
@@ -277,9 +279,11 @@ const runCases = async source => {
             }},
             "../protyle/util/onGet": {disabledProtyle: () => {}},
             "../protyle/ui/initUI": {removeLoading: () => {}},
-            "../util/fetch": {fetchPost: (url, _data, callback) => {
-                if (url.endsWith("getUnusedAssets")) callback({data: ["note.txt", "other.txt", "audio.mp3", "book.pdf"].map(name =>
-                    ({item: "assets/" + name, path: "assets/" + name}))});
+            "../util/fetch": {fetchSyncPost: async (url, data) => {
+                check.equal(url, "/api/asset/getUnusedAssets");
+                check.deepEqual(data, {all: true});
+                return {code: 0, data: ["note.txt", "other.txt", "audio.mp3", "book.pdf"].map(name =>
+                    ({name, item: "assets/" + name, path: "assets/" + name}))};
             }},
         });
         const root = document.createElement("div");
@@ -288,6 +292,7 @@ const runCases = async source => {
         style.textContent = source.styles[isMobile ? 1 : 0];
         document.body.append(root);
         await assetsAPI.mountAssetsTab(root, undefined, {});
+        await settle();
         const item = root.querySelector('[data-tab-type="unrefAssets"]');
         const panel = root.querySelector(".config-assets__preview");
         item.dispatchEvent(new MouseEvent(isMobile ? "click" : "mouseover", {bubbles: true}));
@@ -410,6 +415,7 @@ const runCases = async source => {
             "../protyle/upload/uploadResult", "../editor/pdfAssetLink", "./pdfTextAnnotation", "./pdfCoordinates",
             "./pdfSelectionText"].map(name => [name, {}])),
         "./annoRuntime": runtime,
+        "./annotationSave": load(source.annotationSave),
         "../layout/getAll": {getAllModels: () => ({asset: []})},
         "../util/fetch": {fetchPost: (...args) => annotationRequests.push(args)},
     });

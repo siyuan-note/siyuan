@@ -28,6 +28,7 @@
 | <a href="README.zh-CN.md">中文</a>
 | <a href="README.ja.md">日本語</a>
 | <b>Türkçe</b>
+| <a href="README.pt-BR.md">Português</a>
 </p>
 
 ---
@@ -350,7 +351,7 @@ Not: Terminalde önce şu komutu çalıştır: `chown -R 1000:1000 /mnt/user/app
 ```
 Web UI: 6806
 Container Port: 6806
-Container Path: /home/siyuan
+Container Path: /siyuan/workspace
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000

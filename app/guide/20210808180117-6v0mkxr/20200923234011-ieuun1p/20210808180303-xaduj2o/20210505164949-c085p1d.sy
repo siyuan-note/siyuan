@@ -6,7 +6,7 @@
 		"id": "20210505164949-c085p1d",
 		"title": "Web Clipping",
 		"type": "doc",
-		"updated": "20260809160000"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -47,7 +47,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210505165011-h715v6a",
-				"updated": "20260803171606"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -138,7 +138,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210531181045-0x2syfg",
-				"updated": "20260809160000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -155,7 +155,7 @@
 			},
 			"Properties": {
 				"id": "20210820171625-1k4iq6x",
-				"updated": "20260809160000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 					},
 					"Properties": {
 						"id": "20210820171625-vjo1bcb",
-						"updated": "20260803171606"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -177,12 +177,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210820171625-cerwawc",
-								"updated": "20260803171606"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Install the extension, configure the API token in the extended options (token can be viewed in SiYuan "
+									"Data": "Install the extension and enter the API token in its options. Find the token in SiYuan under "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -191,7 +191,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -200,16 +200,21 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Login and tokens"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "API token"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​)"
 								}
 							]
 						}
@@ -288,6 +293,57 @@
 				{
 					"Type": "NodeText",
 					"Data": "If you need to clip the entire article, you can click \"Send to SiYuan\" directly on the extension."
+				}
+			]
+		},
+		{
+			"ID": "20261024163429-ojht7hl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163429-ojht7hl",
+				"updated": "20261024163429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mobile capture"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163429-j97yh5b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163429-j97yh5b",
+				"updated": "20261024163429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To capture text or links on a phone, use system sharing with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240113110040-7sgw8kl",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "mobile shorthand"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Content is saved locally and then imported into documents. Use the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230802114825-2jkkct7",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "cloud inbox"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to collect content in the cloud and organize it from another device."
 				}
 			]
 		}

@@ -49,6 +49,7 @@ func setupFileOperationTest(t testing.TB) *fileOperationTestFixture {
 	originalConf := Conf
 	originalDataDir := util.DataDir
 	originalBlockTreeDBPath := util.BlockTreeDBPath
+	originalQueueDir := util.QueueDir
 	const testLang = "file-operation-test"
 	originalTimeLang, hadTimeLang := util.TimeLangs[testLang]
 	util.TimeLangs[testLang] = map[string]any{
@@ -60,6 +61,7 @@ func setupFileOperationTest(t testing.TB) *fileOperationTestFixture {
 	tempDir := t.TempDir()
 	util.DataDir = filepath.Join(tempDir, "data")
 	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
+	util.QueueDir = t.TempDir()
 	Conf = NewAppConf()
 	Conf.Lang = testLang
 	Conf.FileTree.Store(conf.NewFileTree())
@@ -104,6 +106,7 @@ func setupFileOperationTest(t testing.TB) *fileOperationTestFixture {
 		Conf = originalConf
 		util.DataDir = originalDataDir
 		util.BlockTreeDBPath = originalBlockTreeDBPath
+		util.QueueDir = originalQueueDir
 		if "" != originalBlockTreeDBPath {
 			treenode.InitBlockTree(false)
 		}

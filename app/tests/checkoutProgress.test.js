@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {readFileSync, mkdtempSync, rmSync, mkdirSync, writeFileSync} = require("node:fs");
+const {readFileSync, readdirSync, mkdtempSync, rmSync, mkdirSync, writeFileSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
@@ -16,11 +16,14 @@ const run = async () => {
     const source = compile("sync/checkoutProgress.ts");
     const escape = compile("util/escape.ts");
     const progressContent = compile("dialog/progress.ts");
+    const languageDirectory = path.join(__dirname, "../appearance/langs");
+    const exitLabels = readdirSync(languageDirectory).filter(name => name.endsWith(".json"))
+        .map(name => [name, JSON.parse(readFileSync(path.join(languageDirectory, name), "utf8")).skipExitSync]);
     const sass = require("sass");
     const css = ["component/_dialog.scss", "component/_button.scss", "component/_sync-checkout.scss", "util/_function.scss"]
         .map(file => sass.compile(path.join(__dirname, "../src/assets/scss", file)).css).join("\n");
     try {
-        for (const [width, height, font, dark] of [[1100, 720, 16, false], [1100, 720, 24, true], [360, 640, 24, false], [640, 360, 24, true]]) {
+        for (const [width, height, font, dark] of [[1100, 720, 16, false], [1100, 720, 24, true], [360, 640, 14, false], [360, 640, 24, false], [640, 360, 24, true]]) {
             win.setContentSize(width, height);
             await win.loadURL("data:text/html,<html><body><input id='editor' value='original'></body></html>");
             await win.webContents.insertCSS(css + `
@@ -52,12 +55,37 @@ const run = async () => {
                 assert.equal(standard.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
                 assert.ok(standard.querySelector(".b3-dialog__progress--indeterminate"));
                 progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress");
+                let skipped = 0;
+                progressExports.progressLoading({code:1,msg:"Waiting"},"other-progress", {
+                    label:"Skip sync and exit", callback:() => skipped++,
+                });
+                const skipButton = document.querySelector("#other-progress button");
+                assert.ok(skipButton.classList.contains("b3-button"));
+                assert.equal(document.activeElement,skipButton,"exit action did not receive keyboard focus");
+                assert.equal(getComputedStyle(skipButton).backgroundColor,"rgb(90, 100, 110)");
+                skipButton.click();
+                assert.equal(skipped,1);
                 progressExports.progressLoading({code:1,msg:"<img src=y>"},"other-progress");
                 assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
+                assert.equal(document.querySelector("#other-progress button"),skipButton,"progress update replaced the exit action");
+                const skipBounds = skipButton.getBoundingClientRect();
+                assert.ok(skipBounds.left >= 0 && skipBounds.right <= innerWidth && skipBounds.bottom <= innerHeight,
+                    "exit action overflowed the progress panel");
                 assert.equal(document.querySelector("#other-progress img"),null);
                 progressExports.progressLoading({code:2},"standard-progress");
                 assert.ok(document.getElementById("other-progress"),"closing sync progress removed another task");
                 progressExports.progressLoading({code:2},"other-progress");
+                for (const [language, label] of ${JSON.stringify(exitLabels)}) {
+                    progressExports.progressLoading({code:1,msg:"Waiting"},"localized-exit", {label,callback() {}});
+                    const panel = document.querySelector("#localized-exit .b3-dialog__loading").getBoundingClientRect();
+                    const button = document.querySelector("#localized-exit button");
+                    const bounds = button.getBoundingClientRect();
+                    assert.ok(button.classList.contains("b3-button--wrap"),language+": missing shared wrapping modifier");
+                    assert.ok(bounds.left >= panel.left && bounds.right <= panel.right && bounds.left >= 0 &&
+                        bounds.right <= innerWidth && bounds.bottom <= innerHeight,language+": exit action overflowed");
+                    assert.ok(button.scrollWidth <= button.clientWidth + 1,language+": exit action text overflowed");
+                    progressExports.progressLoading({code:2},"localized-exit");
+                }
                 const calls = [];
                 const flushes = [];
                 const titles = [];
@@ -149,12 +177,31 @@ const run = async () => {
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
+                const compactPanel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
+                const noticeRect = root.querySelector(".sync-checkout__notice").getBoundingClientRect();
+                const actionsRect = root.querySelector(".sync-checkout__actions").getBoundingClientRect();
+                assert.ok(actionsRect.top >= noticeRect.bottom,"compact actions must be below the notice");
+                assert.ok(Math.abs(actionsRect.width-noticeRect.width) <= 1,"compact rows must fill the same available width");
+                assert.ok(compactPanel.left >= 0 && compactPanel.right <= innerWidth,"compact panel must fit the viewport");
+                const compactCancel = root.querySelector('[data-action="cancel"]').getBoundingClientRect();
+                assert.ok(Math.abs(compactCancel.right-actionsRect.right) <= 1,"compact actions must remain right aligned");
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),false);
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
-                progress("first",0,3,"applying",{current:9,message:"Still restoring"});
+                const restoringMessage = "Restoring 20231013134532-9doj565.sy\\n(3192/3192): 407 B / 407 B, 44 B/s, 00:00:00 remaining";
+                progress("first",0,3,"applying",{current:9,message:restoringMessage});
                 assert.ok(root.classList.contains("sync-checkout--compact"));
                 root.querySelector('[data-action="toggle"]').click();
                 assert.equal(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"90");
+                const message = root.querySelector('[data-type="message"]');
+                assert.equal(message.textContent,restoringMessage);
+                const fileRange = document.createRange();
+                fileRange.setStart(message.firstChild,0);
+                fileRange.setEnd(message.firstChild,restoringMessage.indexOf("\\n"));
+                const statsRange = document.createRange();
+                statsRange.setStart(message.firstChild,restoringMessage.indexOf("\\n")+1);
+                statsRange.setEnd(message.firstChild,restoringMessage.indexOf(")")+1);
+                assert.ok(statsRange.getBoundingClientRect().top >= fileRange.getBoundingClientRect().bottom,
+                    "progress statistics must start on a separate line at every viewport size");
                 const panel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
                 assert.ok(panel.left>=0 && panel.right<=innerWidth && panel.top>=0 && panel.bottom<=innerHeight,JSON.stringify(panel));
                 if (innerWidth <= 600) assert.ok(panel.width >= innerWidth - 40,"narrow progress view wastes available width");
@@ -215,7 +262,7 @@ const run = async () => {
                 progress("restarted",2,2,"done");
                 progress("stale",0,1);
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
-                progress("second",0,3,"applying",{current:999,message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                progress("second",0,3,"applying",{current:999,message:"Restoring long-resource-file-name.bin\\n(1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
                 runtime.openSyncCheckoutProgress();
                 assert.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"),"100");
                 assert.equal(document.querySelector(".b3-dialog__progressbar").style.width,"100%");
@@ -224,7 +271,7 @@ const run = async () => {
                 assert.equal(document.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
                 assert.ok(document.querySelector(".b3-dialog__progress--indeterminate"));
                 progress("second",0,3,"applying",{current:460,total:1050,
-                    message:"Restoring /assets/long-resource-file-name.bin (1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
+                    message:"Restoring long-resource-file-name.bin\\n(1/60): 4.60 GB / 10.50 GB, 32 MB/s, 00:03:12 remaining"});
                 assert.equal(document.querySelector(".b3-dialog__progress--indeterminate"),null);
                 return "passed";
             })()`);

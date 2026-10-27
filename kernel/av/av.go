@@ -117,6 +117,8 @@ type NewItemTemplate struct {
 	SaveLocation        *NewItemSaveLocation          `json:"saveLocation,omitempty"`
 	ContentTemplatePath string                        `json:"contentTemplatePath,omitempty"`
 	HideInFileTree      bool                          `json:"hideInFileTree,omitempty"`
+	// nil 保留旧客户端行为；false 不自动打开，true 创建后由交互客户端分屏打开。
+	OpenAfterCreate *bool `json:"openAfterCreate,omitempty"`
 }
 
 // NewItemTemplatesConfig 描述一次完整的新增条目模板配置修改。
@@ -867,6 +869,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = version
 	} else {
 		var readErr error
+		readVersion := cache.AVDataReadVersion()
 		data, readErr = filelock.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
@@ -884,7 +887,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
 			return nil, nil
 		}
-		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
+		dataVersion = cache.SetAVDataFromReadInBox(avID, boxID, data, readVersion)
 	}
 
 	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {
@@ -1098,6 +1101,53 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		// 文件不存在（首次创建），使用全局路径，boxID 为空（普通 box）
 		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
 		avJSONPath = GetAttributeViewDataPath(av.ID)
+	}
+	if value, recorded := sourceWriteRecorders.Load(avBoxID + "/" + av.ID); recorded && value.(*sourceWriteRecord).active() {
+		before, readErr := filelock.ReadFile(avJSONPath)
+		if os.IsNotExist(readErr) {
+			before, readErr = nil, nil
+		}
+		if readErr != nil {
+			return readErr
+		}
+		if original != nil {
+			if avBoxID != "" {
+				return errors.New("conditional replacement of encrypted attribute views is not supported")
+			}
+			if !bytes.Equal(before, original) {
+				return util.ErrFileChanged
+			}
+		}
+		if before != nil {
+			plain := before
+			if avBoxID != "" {
+				plain, readErr = decryptAVDataLocked(avBoxID, av.ID, before)
+			}
+			if readErr != nil {
+				return readErr
+			}
+			if _, readErr = ParseAttributeViewData(av.ID, plain); readErr != nil {
+				return readErr
+			}
+		}
+		writeData := data
+		if avBoxID != "" {
+			if writeData, err = encryptAVDataLocked(avBoxID, av.ID, data); err != nil {
+				return err
+			}
+		}
+		if err = value.(*sourceWriteRecord).record(avBoxID, before, writeData); err != nil {
+			return err
+		}
+		if err = os.MkdirAll(filepath.Dir(avJSONPath), 0755); err != nil {
+			return err
+		}
+		if err = util.WriteFileIfUnchanged(avJSONPath, before, writeData); err != nil {
+			return err
+		}
+		cacheAttributeViewData(av, avBoxID, data)
+		NotifyAttributeViewSaved(av.ID, avBoxID)
+		return nil
 	}
 	if original != nil {
 		if avBoxID != "" {

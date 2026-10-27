@@ -39,6 +39,7 @@ const sources = () => {
         compile("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]),
         compile("protyle/util/tabsCopy.ts", ["preserveTabTask"]),
         compile("protyle/wysiwyg/transactionUpdate.ts"),
+        compile("protyle/undo/viewport.ts"),
         compile("protyle/wysiwyg/transaction.ts", ["onTransaction"]),
         compile("protyle/wysiwyg/tabs.ts", ["boundFocusedTitles", "canEdit", "changeTabs", "renameTab", "openTabsMenu", "initEditorTabs"]),
         compile("protyle/util/selection.ts", ["selectAll"]),

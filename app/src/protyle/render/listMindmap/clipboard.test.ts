@@ -47,12 +47,13 @@ const browserCases = async (source: string, css: string) => {
         }
         return list;
     };
-    for (const native of [true, false]) {
+    for (const {native, nodeStyle} of [true, false].flatMap(native =>
+        ["layered", "branch"].map(nodeStyle => ({native, nodeStyle})))) {
         const list = makeList(native);
         const model = api.readListMindmap(list);
         const [a, b, c] = model.root.children;
         model.metadata.nodes[a.id] = {backgroundColor: "red"};
-        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+        model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", nodeStyle, backgroundColor: "#1e1e1e"};
         api.assignListMindmapBranchColors(model);
         model.metadata.relations = [
             {id: Lute.NewNodeID(), from: a.id, to: b.id, label: "Inside"},
@@ -72,10 +73,11 @@ const browserCases = async (source: string, css: string) => {
         check.equal(selected.nodes.size, 4);
         check.equal(selected.metadata.relations.length, 1);
         check.equal(selected.metadata.summaries[0].parentId, payload.dataset.nodeId);
-        for (const placement of ["child", "after"]) {
+        for (const {placement, destinationStyle} of ["child", "after"].flatMap(placement =>
+            ["layered", "branch"].map(destinationStyle => ({placement, destinationStyle})))) {
             const destination = list.cloneNode(true) as HTMLElement;
             const destinationModel = api.readListMindmap(destination);
-            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], backgroundColor: "#ffffff"};
+            destinationModel.metadata.appearance = {version: 1, palette: ["#166534", "#047857"], rootColor: "#14532d", nodeStyle: destinationStyle, backgroundColor: "#ffffff"};
             api.writeListMindmapMetadata(destination, destinationModel.metadata);
             const pasted = api.pasteMindmapBranches(destination, payload, c.id, placement, lute);
             check.ok(pasted);
@@ -131,7 +133,7 @@ const browserCases = async (source: string, css: string) => {
     document.body.append(list);
     const model = api.readListMindmap(list);
     const [a, b] = model.root.children;
-    model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], backgroundColor: "#1e1e1e"};
+    model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", backgroundColor: "#1e1e1e"};
     api.assignListMindmapBranchColors(model);
     model.metadata.nodes[a.id].backgroundColor = "red";
     model.metadata.nodes[a.id].textColor = "white";
@@ -182,6 +184,9 @@ const browserCases = async (source: string, css: string) => {
             view.renderInspector();
             await wait();
             const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
+            check.deepEqual(Array.from(inspector.children).map(item => item.getAttribute("aria-label")),
+                ["connect", "listMindmapSummary", "color", "width", "copy", "paste", "delete", "more"],
+                "the compact bar keeps eight actions in visual and keyboard order");
             const more = inspector.querySelector<HTMLButtonElement>('[aria-label="more"]');
             check.equal(inspector.lastElementChild, more, "More follows the node actions in keyboard order");
             const right = more.getBoundingClientRect().right;
@@ -197,14 +202,15 @@ const browserCases = async (source: string, css: string) => {
     pointer(a.id);
     await checkNodeMenu();
     const action = (key: string) => host.querySelector<HTMLButtonElement>(`.mindmap-view__inspector > [aria-label="${key}"]`);
-    for (const key of ["copy", "cut", "paste"]) {
+    for (const key of ["copy", "paste"]) {
         check.ok(action(key), `${key} is directly available on the bottom bar`);
         check.equal(action(key).disabled, false);
         action(key).dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType: "touch", pointerId: 12}));
         check.deepEqual(view.getSelectedIds(), [a.id], "touching a clipboard button keeps the node selection");
         action(key).click();
     }
-    check.deepEqual(copied.map(item => item.cut), [false, true]);
+    check.equal(action("cut"), null, "cut remains available through More and clipboard shortcuts");
+    check.deepEqual(copied.map(item => item.cut), [false]);
     check.deepEqual(pasted, [{id: a.id, kind: "child"}]);
     copied.length = 0;
     pasted.length = 0;
@@ -212,7 +218,6 @@ const browserCases = async (source: string, css: string) => {
     await checkNodeMenu();
     check.equal(action("paste").disabled, true, "multiple targets cannot receive a paste");
     view.focusNode(model.root.id);
-    check.equal(action("cut").disabled, true, "the map root cannot be cut away");
     check.equal(action("delete").disabled, true, "the map root cannot be deleted");
     pointer(a.id);
     pointer(b.id, {ctrlKey: true});
@@ -227,7 +232,8 @@ const browserCases = async (source: string, css: string) => {
     check.equal(styleChanges.length, 2);
     check.equal(model.metadata.nodes[a.id].lineColor, "#15803d");
     check.equal(model.metadata.nodes[b.id].lineColor, "#15803d");
-    const nodePalette = host.querySelector<HTMLElement>('.mindmap-view__palette[aria-label="color"]');
+    const nodePalette = host.querySelector<HTMLElement>('.mindmap-view__palette[aria-label="listMindmapNodeColor"]');
+    check.ok(nodePalette, "the node color palette uses its dedicated accessible label");
     nodePalette.querySelector<HTMLButtonElement>('[aria-label="default"]').click();
     check.equal(view.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
         "resetting manual node colors restores the branch theme");
@@ -243,6 +249,8 @@ const browserCases = async (source: string, css: string) => {
         check.equal(preview.viewport.style.backgroundColor, "rgb(30, 30, 30)");
         check.equal(preview.nodeElements.get(a.id).style.backgroundColor, "rgb(37, 99, 235)",
             "read-only HTML and PDF layout render the saved palette");
+        check.equal(preview.nodeElements.get(model.root.id).style.backgroundColor, "rgb(30, 41, 59)",
+            "read-only HTML and PDF layout retain the independent root color");
         preview.destroy();
         previewHost.remove();
     }

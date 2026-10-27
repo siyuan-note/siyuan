@@ -38,16 +38,15 @@ type DocumentPathSegment struct {
 
 // DocumentPath 的标题与段落边界来自同一个数据库快照，displayPath 仅用于展示。
 type DocumentPath struct {
-	Notebook          string                `json:"notebook"`
-	ID                string                `json:"id"`
-	ParentID          *string               `json:"parentID"`
-	Path              string                `json:"path"`
-	Title             DocumentTitle         `json:"title"`
-	Segments          []DocumentPathSegment `json:"segments"`
-	Depth             int                   `json:"depth"`
-	DisplayPath       string                `json:"displayPath"`
-	Revision          string                `json:"revision"`
-	AddressingVersion int                   `json:"addressingVersion"`
+	Notebook    string                `json:"notebook"`
+	ID          string                `json:"id"`
+	ParentID    *string               `json:"parentID"`
+	Path        string                `json:"path"`
+	Title       DocumentTitle         `json:"title"`
+	Segments    []DocumentPathSegment `json:"segments"`
+	Depth       int                   `json:"depth"`
+	DisplayPath string                `json:"displayPath"`
+	Revision    string                `json:"revision"`
 }
 
 func ensureDocumentMetadata(database *sql.DB) error {
@@ -212,12 +211,28 @@ func BeginDocumentMetadataRecovery(doc *BlockTree) (bool, error) {
 func CommitDocumentMetadataWrite(tree *parse.Tree) error {
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
+	docs, err := DocHPaths(tree.Box, tree.Path)
+	if err != nil {
+		return err
+	}
 	tx, err := beginTxForBox(tree.Box)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 	execInsertBlocktrees(tx, tree, []*ast.Node{tree.Root})
+	var state string
+	if stateErr := tx.QueryRow("SELECT state FROM document_metadata_state WHERE box_id=? AND version=1", tree.Box).Scan(&state); stateErr != nil && !errors.Is(stateErr, sql.ErrNoRows) {
+		return stateErr
+	}
+	// Rebuilds may not yet have descendant summaries. They cannot serve legacy
+	// queries until the existing full rebuild publishes ready.
+	if state == "ready" {
+		if err = refreshDocumentHPathsInTx(tx, tree, docs); err != nil {
+			return err
+		}
+	}
+
 	if _, err = tx.Exec("DELETE FROM document_metadata_pending WHERE box_id=? AND id=? AND revision=?",
 		tree.Box, tree.ID, documentMetadataFromTree(tree).Revision); err != nil {
 		return err
@@ -318,7 +333,7 @@ func documentPathInTx(tx *sql.Tx, boxID, id, notebookDocumentID string, mode int
 	}
 	leaf := chain[0]
 	ret := &DocumentPath{Notebook: boxID, ID: id, ParentID: leaf.ParentID, Path: leaf.Path, Title: leaf.Title,
-		Segments: []DocumentPathSegment{}, AddressingVersion: mode}
+		Segments: []DocumentPathSegment{}}
 	var texts, revisions []string
 	for i := len(chain) - 1; i >= 0; i-- {
 		meta := chain[i]

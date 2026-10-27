@@ -6,7 +6,7 @@
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010211311-p49lqrm",
-				"updated": "20211010211345"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211010211345-ewlmf4o",
-				"updated": "20211010212407"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "虚拟引用是一种根据已有块链的锚文本或者块命名等来自动探测的“块链”，但它并不会真实链接到块上，而是仅在编辑器内标记，并支持浮窗预览。"
+					"Data": "虚拟引用根据已有引用的锚文本、内容块命名等信息，在编辑器中标记可能相关的文本，并支持浮窗预览。它只是关联提示，不会自动建立实际的块引用。"
 				}
 			]
 		},
@@ -109,7 +109,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010211708-0qn8cpl",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240228163645-zvlgahq",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -151,7 +151,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -160,7 +160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -169,7 +169,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中调整关键字搜索范围。"
+					"Data": " 中调整关键字搜索范围。"
 				}
 			]
 		},

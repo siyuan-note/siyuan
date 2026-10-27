@@ -7,7 +7,7 @@
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
 		"type": "doc",
-		"updated": "20260930224728"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115740-9l80any",
-				"updated": "20230429115740"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115740-yhr68al",
-				"updated": "20230429120220"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, some relatively complicated terminology is involved, which can be confusing. In this chapter, we will explain these terms one by one, hoping to help you better understand and use SiYuan."
+					"Data": "This glossary explains terms used throughout the guide and their specific meaning in SiYuan."
 				}
 			]
 		},
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115740-s72e6yy",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -83,7 +83,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115740-jegf4ou",
-				"updated": "20230429115801"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -97,7 +97,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429115740-fnmy34z",
-				"updated": "20230429115740"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -109,12 +109,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429115740-21j01p3",
-						"updated": "20230429115740"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "Typically, a breadcrumb is an auxiliary element in application navigation, usually in a horizontal sequence at the top or below the top of the page. It shows the path of the user's current location, providing a convenient memory and sense of direction during the user's navigation. Breadcrumbs make it easier for users to navigate the site structure, quickly return to a previous page or a higher-level page, and reduce the chance of invalid clicks and getting lost. It can be used as part of user experience design to improve the usability and ease of use of the application."
+							"Data": "Breadcrumbs show your current position and its parent structure, letting you navigate back to a parent."
 						}
 					]
 				}
@@ -140,7 +140,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115740-nprcl4k",
-				"updated": "20230429115757"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -154,7 +154,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429115740-ewj59ik",
-				"updated": "20230429115740"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -166,12 +166,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429115740-id1s5ff",
-						"updated": "20230429115740"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "Typically, anchor text refers to the portion of text that is clicked on within a hyperlink, and it is usually blue. The anchor text can be connected with the URL address of the hyperlink. When the user clicks the anchor text, it will automatically jump to the corresponding webpage or file. Anchor text can be any word or phrase, but it should usually be associated with the content being linked, usually the title of the target jump content."
+							"Data": "Anchor text is the visible text of a link, describing the content it points to."
 						}
 					]
 				}
@@ -560,7 +560,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111229-xhhdmql",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -602,7 +602,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111229-2a1poix",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -616,7 +616,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -625,7 +625,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -634,7 +634,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -643,7 +643,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": "."
 				}
 			]
 		},
@@ -824,7 +824,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429120050-5xk88t9",
-				"updated": "20260930224728"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -1114,7 +1114,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429120050-i338ss7",
-				"updated": "20260614111245"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -1128,12 +1128,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429120050-9yrwodu",
-				"updated": "20230429120050"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Icons appearing in front of blocks, and block labels appearing in the panel support opening the floating preview window by hovering the mouse in most cases, such as the block labels in the outline panel and anti-link panel."
+					"Data": "Icons appearing in front of blocks, and block labels appearing in the panel support opening the floating preview window by hovering the mouse in most cases, such as the block labels in the outline panel and backlink panel."
 				}
 			]
 		},
@@ -1142,7 +1142,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429120050-7kwyta0",
-				"updated": "20250115151002"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -1165,7 +1165,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ to open in the tab, which is especially useful in scenarios such as anti-link panels that require context jumping."
+					"Data": "​ to open in the tab, which is especially useful in scenarios such as backlink panels that require context jumping."
 				}
 			]
 		},
@@ -1175,7 +1175,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111245-do79b2w",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1189,7 +1189,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111245-ne03z3w",
-				"updated": "20260614111245"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1201,12 +1201,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111245-4exrwcd",
-						"updated": "20260614111245"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "A bazaar is a marketplace where goods are traded, originating from Persian."
+							"Data": "The marketplace is a central place to browse and manage community extensions."
 						}
 					]
 				}
@@ -1346,7 +1346,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111245-ejrp4c3",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1388,17 +1388,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111245-8viirmm",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, the command palette is invoked with "
+					"Data": "Open the command palette with "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Alt"
 				},
 				{
 					"Type": "NodeText",
@@ -1406,7 +1406,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Shift"
 				},
 				{
@@ -1415,12 +1415,39 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, allowing quick execution of operations like opening panels, toggling features, and navigating documents without navigating through menus."
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Option"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS), then search for and run a command. Available commands depend on the current interface and focus."
 				}
 			]
 		},
@@ -1430,7 +1457,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429120050-b0r6bh0",
-				"updated": "20260614111257"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1485,7 +1512,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111257-gh2a33v",
-				"updated": "20260614111257"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1499,7 +1526,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111257-erncw1g",
-				"updated": "20260614111257"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1511,12 +1538,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111257-uo9f96w",
-						"updated": "20260614111257"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "A kernel is the core component of an operating system, responsible for managing processes, memory, device drivers, file systems, and networking, determining system performance and stability."
+							"Data": "In this guide, “kernel” means SiYuan’s backend program that processes data."
 						}
 					]
 				}

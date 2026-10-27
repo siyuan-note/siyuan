@@ -10,6 +10,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -90,6 +91,9 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 	attributes := make([]func(*ast.Node) bool, 0, len(source.Attributes))
 	for _, attr := range source.Attributes {
 		attributes = append(attributes, collectionAttributeMatcher(attr))
+	}
+	if source.ReferenceID != "" {
+		return collectionReferenceMatches(source, tree, attributes)
 	}
 	var containers []*ast.Node
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
@@ -219,6 +223,33 @@ func validateCollectionAttribute(attr *av.AutomationBlockAttribute) (*regexp.Reg
 	return nil, nil
 }
 
+// 新增范围最多包含 32 项；既有超限规则可保留或删减，读取和事务重放继续使用原校验。
+func blockCollectionScopeCanSave(source, previous *av.AutomationBlockSource) bool {
+	keys := func(source *av.AutomationBlockSource) map[string]bool {
+		ret := map[string]bool{}
+		if source != nil {
+			for _, id := range source.NotebookIDs {
+				ret["notebook:"+id] = true
+			}
+			for _, id := range source.DocumentIDs {
+				ret["document:"+id] = true
+			}
+		}
+		return ret
+	}
+	current := keys(source)
+	if len(current) <= 32 {
+		return true
+	}
+	old := keys(previous)
+	for key := range current {
+		if !old[key] {
+			return false
+		}
+	}
+	return true
+}
+
 func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule *av.AutomationRule, boxID string) error {
 	source := rule.BlockSource
 	if source == nil || len(source.NotebookIDs)+len(source.DocumentIDs) == 0 ||
@@ -243,6 +274,15 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		bt := attributeViewBindingBlockTree(id, boxID)
 		if bt == nil || bt.Type != "d" {
 			return fmt.Errorf("invalid block collection document [%s]", id)
+		}
+	}
+	if source.ReferenceID != "" {
+		if !ast.IsNodeIDPattern(source.ReferenceID) {
+			return fmt.Errorf("invalid block collection reference [%s]", source.ReferenceID)
+		}
+		if attributeViewBindingBlockTree(source.ReferenceID, boxID) == nil {
+			return unavailableAutomationReference("automationCollectionReference", source.ReferenceID,
+				fmt.Sprintf("unavailable block collection reference [%s]", source.ReferenceID))
 		}
 	}
 	for _, typ := range source.Types {
@@ -307,6 +347,14 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 		}
 	}
 	if !observesBlocks {
+		return nil
+	}
+	return tx.captureDocumentCollectionTree(tree)
+}
+
+// Non-editor document replacements use the same before/after collection capture.
+func (tx *Transaction) captureDocumentCollectionTree(tree *parse.Tree) (captureErr error) {
+	if !tx.fromAPI || tx.isReplay || tree == nil {
 		return nil
 	}
 	defer func() {
@@ -389,7 +437,7 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 	if tx.attributeViewRollback == nil {
 		tx.attributeViewRollback = &attributeViewRollback{views: map[string]*av.AttributeView{}, trees: map[string]*parse.Tree{}, leases: map[string]bool{}}
 	}
-	original, err := filesys.LoadTree(tree.Box, tree.Path, tx.luteEngine)
+	original, _, err := filesys.LoadTreeSnapshot(tree.Box, tree.Path, tx.luteEngine)
 	if err != nil {
 		if _, statErr := os.Stat(filepath.Join(util.DataDir, tree.Box, tree.Path)); !os.IsNotExist(statErr) {
 			return err
@@ -401,6 +449,85 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 		tx.attributeViewRollback.trees[tree.ID] = original
 	}
 	return nil
+}
+
+// Caller holds flushLock and has checked the replacement's source bytes.
+func writeDocumentWithCollections(tree *parse.Tree, write func(*parse.Tree) error) (handled bool, err error) {
+	return writeDocumentsWithCollections([]*parse.Tree{tree}, nil, write)
+}
+
+// collectDocumentChanges observes committed user-created or moved documents. An explicit
+// nil before snapshot represents creation; import, sync and recovery never call this entry.
+// Rollback snapshots come from the committed after locations, not the old matching scope.
+// Caller holds flushLock until collection and its document writes finish.
+func collectDocumentChanges(before map[string]*parse.Tree, after []*parse.Tree) error {
+	_, err := writeDocumentsWithCollections(after, before, nil)
+	return err
+}
+
+func documentCollectionIndex(boxID string) (*av.BlockCollectionIndex, error) {
+	boundary := ""
+	if IsEncryptedBox(boxID) {
+		boundary = boxID
+	}
+	if av.BlockCollectionIndexKnownEmpty(boundary) {
+		return nil, nil
+	}
+	return av.BlockCollectionIndexInBox(boundary)
+}
+
+func writeDocumentsWithCollections(after []*parse.Tree, before map[string]*parse.Tree,
+	write func(*parse.Tree) error) (handled bool, err error) {
+	tx := &Transaction{fromAPI: true, m: &sync.Mutex{}}
+	if err = tx.begin(); err != nil {
+		return false, err
+	}
+	defer func() {
+		if tx.state.Load() == 1 {
+			tx.rollback()
+		}
+	}()
+	for _, tree := range after {
+		if err = tx.captureDocumentCollectionTree(tree); err != nil {
+			return true, err
+		}
+	}
+	if tx.attributeViewCollections == nil || len(tx.attributeViewCollections.before) == 0 {
+		return false, nil
+	}
+	sources := map[string]bool{}
+	for _, tree := range after {
+		if _, captured := tx.attributeViewCollections.before[tree.ID]; !captured {
+			continue
+		}
+		if before != nil {
+			tx.attributeViewCollections.before[tree.ID] = before[tree.ID]
+		}
+		sources[tree.ID] = true
+		tx.trees[tree.ID] = tree
+		if write != nil {
+			// Content templates may introduce blocks that collection must resolve before commit.
+			treenode.UpsertBlockTreePending(tree)
+		}
+	}
+	if err = tx.runAttributeViewCollections(); err != nil {
+		return true, err
+	}
+	if write == nil {
+		// The file operation already committed its sources; persist only new binding changes.
+		for id := range tx.trees {
+			if tx.indexChanges[id] == nil {
+				delete(tx.trees, id)
+			}
+		}
+	}
+	tx.writeTransactionTree = func(changed *parse.Tree) error {
+		if write != nil && sources[changed.ID] {
+			return write(changed)
+		}
+		return writeTreeUpsertQueue(changed)
+	}
+	return true, tx.commit()
 }
 
 func collectionNodes(tree *parse.Tree) map[string]*ast.Node {
@@ -712,6 +839,13 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 	}
 	for id, before := range state.before {
 		if before != nil {
+			continue
+		}
+		if tree := tx.trees[id]; tree != nil && tx.documentSource(tree) != nil {
+			continue
+		}
+		if tx.attributeViewRollback != nil && tx.attributeViewRollback.trees[id] != nil {
+			// A committed copy has a rollback baseline even though its matching "before" is empty.
 			continue
 		}
 		tree := tx.trees[id]

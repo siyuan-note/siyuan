@@ -23,6 +23,40 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
+func TestAVCacheRejectsStaleDiskRead(t *testing.T) {
+	defer ClearAVCache()
+	for name, mutate := range map[string]func(){
+		"write":      func() { SetAVDataInBox("database", "box", []byte("new")) },
+		"remove":     func() { RemoveAVData("database") },
+		"remove box": func() { RemoveAVDataInBox("database", "box") },
+		"clear":      ClearAVCache,
+	} {
+		t.Run(name, func(t *testing.T) {
+			ClearAVCache()
+			version := AVDataReadVersion()
+			mutate()
+			if got := SetAVDataFromReadInBox("database", "box", []byte("old disk bytes"), version); got != 0 {
+				t.Fatal("stale disk read was admitted after a cache mutation")
+			}
+			avCache.Wait()
+			if data, ok := GetAVDataInBox("database", "box"); ok && string(data) != "new" {
+				t.Fatalf("stale disk read replaced current cache: %q", data)
+			}
+			if SetAVSearchDataInBox("database", "box", 0, "stale derived state") {
+				t.Fatal("rejected source must not admit derived search data")
+			}
+			version = AVDataReadVersion()
+			if got := SetAVDataFromReadInBox("database", "box", []byte("fresh disk bytes"), version); got == 0 {
+				t.Fatal("unchanged source read was rejected")
+			}
+			avCache.Wait()
+			if data, ok := GetAVDataInBox("database", "box"); !ok || string(data) != "fresh disk bytes" {
+				t.Fatalf("fresh source was not cached: %q, %v", data, ok)
+			}
+		})
+	}
+}
+
 func TestAVSearchDataInvalidation(t *testing.T) {
 	const avID = "20260728120000-search"
 	const boxID = "20260728120000-box"

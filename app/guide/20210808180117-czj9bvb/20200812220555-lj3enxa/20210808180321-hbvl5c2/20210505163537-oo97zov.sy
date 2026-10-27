@@ -6,7 +6,7 @@
 		"id": "20210505163537-oo97zov",
 		"title": "剪藏",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210505163741-w3p5lx5",
-				"updated": "20260803163440"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -139,7 +139,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210531180555-mcz0ihc",
-				"updated": "20260809232000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -156,7 +156,7 @@
 			},
 			"Properties": {
 				"id": "20210531180907-u4jeq2k",
-				"updated": "20260809232000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -170,7 +170,7 @@
 					},
 					"Properties": {
 						"id": "20210820171356-ky8ms7s",
-						"updated": "20260803163440"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -178,12 +178,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210820171356-8doieb3",
-								"updated": "20260803163440"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "安装扩展，在扩展的选项中配置 API token（token 可在思源 "
+									"Data": "安装扩展，并在扩展选项中填写 API token。可在思源的 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -192,7 +192,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -201,7 +201,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "登录与令牌"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -210,7 +219,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中查看）"
+									"Data": " 中查看"
 								}
 							]
 						}
@@ -298,7 +307,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220420001516-9rek6if",
-				"updated": "20220420001521"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -312,12 +321,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220420001522-igble2k",
-				"updated": "20230905090027"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要在手机上进行剪藏，请使用"
+					"Data": "在手机上记录文本或链接，可通过系统分享使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240113102857-c63dmo5",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "闪念速记"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，内容先保存在本地，再转入文档。需要通过云端暂存并在其他设备上整理时，可使用 "
 				},
 				{
 					"Type": "NodeTextMark",

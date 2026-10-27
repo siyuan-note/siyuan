@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260930224728"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-3y8u0uj",
-				"updated": "20230429090147"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -40,28 +40,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429114837-d5s8qi7",
-				"updated": "20230429090932"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "思源"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "中，涉及到了一些相对复杂的术语，这些术语可能会让人感到困惑。在本章节中，我们会逐一对这些术语进行解释，希望能够帮助你更好地理解和使用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "思源"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "本章解释指南中常见的术语，并说明它们在思源中的具体含义。"
 				}
 			]
 		},
@@ -94,7 +78,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-ua8g2lw",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -109,7 +93,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-hxy4fie",
-				"updated": "20230429091240"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -123,7 +107,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429114837-npgtpv4",
-				"updated": "20230429092525"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -135,12 +119,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429114837-g45yk2o",
-						"updated": "20230429092525"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "通常情况下，面包屑是应用程序导航中的一种辅助元素，通常位于顶部或页面顶部下方的水平序列中。它显示了用户当前所在位置的路径，在用户导航过程中提供了便利的记忆和方向感。面包屑可以让用户更容易地浏览网站结构、快速返回到前一个页面或更高级别的页面，并减少无效点击和迷路的可能性。它可以作为用户体验设计的一部分，提高应用的可用性和易用性。"
+							"Data": "面包屑是显示当前位置及其上级结构的导航路径，可以用于返回上级内容。"
 						}
 					]
 				}
@@ -166,7 +150,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-2z8tol5",
-				"updated": "20230429091244"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -190,7 +174,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20230429114837-x8yli02",
-				"updated": "20230429092502"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -202,12 +186,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20230429114837-rygun1z",
-						"updated": "20230429092502"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "通常情况下，锚文本是指在超链接中被点击的文本部分，它通常是蓝色的。锚文本可以与超链接的 URL 地址相连接，当用户点击锚文本时，就会自动跳转到相应的网页或文件。锚文本可以是任何文字或短语，但通常应与所链接的内容相关联，一般是目标跳转内容的标题。"
+							"Data": "锚文本是链接中显示给读者的文字，用于说明链接所指向的内容。"
 						}
 					]
 				}
@@ -592,7 +576,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111005-6sdm2sp",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -634,7 +618,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111005-4emt0wz",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -648,7 +632,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -657,7 +641,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -666,7 +650,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -675,7 +659,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中开启或关闭。"
+					"Data": " 中开启或关闭。"
 				}
 			]
 		},
@@ -874,7 +858,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-j6668qw",
-				"updated": "20260930224728"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1225,7 +1209,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-m6i3oiu",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1239,7 +1223,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111026-lumv7vo",
-				"updated": "20260614111026"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1251,12 +1235,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111026-cwuwynl",
-						"updated": "20260614111026"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "集市（Bazaar）源自波斯语，指集中进行商品交易的场所。"
+							"Data": "集市是集中浏览和管理社区扩展的地方。"
 						}
 					]
 				}
@@ -1396,7 +1380,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-6d10qhl",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1438,17 +1422,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111026-l60fd37",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，通过 "
+					"Data": "默认通过 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Alt"
 				},
 				{
 					"Type": "NodeText",
@@ -1456,7 +1440,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Shift"
 				},
 				{
@@ -1465,12 +1449,39 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 调用命令面板，可快速执行打开面板、切换功能、导航文档等操作，无需通过菜单逐级查找。"
+					"Data": "（macOS 为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Option"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）打开命令面板，输入关键词查找并执行命令。可用命令取决于当前界面和焦点位置。"
 				}
 			]
 		},
@@ -1480,7 +1491,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-ecvrylp",
-				"updated": "20260614111112"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1545,7 +1556,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111112-t0moz97",
-				"updated": "20260614111112"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1559,7 +1570,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260614111112-i55rnwt",
-				"updated": "20260614111112"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -1571,12 +1582,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20260614111112-m8sb27o",
-						"updated": "20260614111112"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "内核是操作系统的核心组件，负责管理系统的进程、内存、设备驱动程序、文件和网络系统等，决定着系统的性能和稳定性。"
+							"Data": "本指南中的「内核」指思源负责处理数据的后端程序。"
 						}
 					]
 				}

@@ -497,6 +497,23 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(transactions.length, count + 2, "dragging from a body row creates one width transaction");
         f.dispose();
     }
+    for (const columnWidth of [12, 16]) {
+        const f = fixture();
+        f.table.querySelector<HTMLTableColElement>("col").style.width = `${columnWidth}px`;
+        Array.from(f.table.rows).forEach(row => row.cells[0].textContent = "");
+        const cell = f.cell(1, 0);
+        const rect = cell.getBoundingClientRect();
+        const middle = new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: (rect.left + rect.right) / 2, clientY: (rect.top + rect.bottom) / 2});
+        cell.dispatchEvent(middle);
+        check.equal(middle.defaultPrevented, false, "narrow cell centers remain available for text editing");
+        check.equal(f.touch("[data-action='width']"), null);
+        cell.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: rect.right, clientY: (rect.top + rect.bottom) / 2}));
+        f.render();
+        check.ok(f.touch("[data-action='width']"), "the narrow column divider can still be resized");
+        f.dispose();
+    }
     for (const kind of ["merged", "no-header", "disabled", "block", "link"]) {
         const f = fixture();
         const first = f.cell(0, 0);

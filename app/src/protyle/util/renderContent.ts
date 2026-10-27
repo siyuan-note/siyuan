@@ -21,10 +21,11 @@ export const renderContent = (protyle: IProtyle, roots: Element[], beforeAVRende
     const rootID = protyle.block.rootID;
     const canRender = (root: Element) => (!isValid || isValid()) && protyle.block.rootID === rootID &&
         (root === container || (root.isConnected && root.parentElement === container));
+    // 文档替换后先更新重载基准并恢复数据库容器，再检查渲染任务是否有效。
+    beforeAVRender?.();
     const currentRoots = roots.filter(canRender);
     currentRoots.forEach(root => processRender(root));
     currentRoots.forEach(root => highlightRender(root));
-    beforeAVRender?.();
     // 数据库仍按文档顺序串行初始化，保留原来的请求并发和完成回调边界。
     const renderDatabases = async () => {
         const timing = beginPerformance("editor.databases");

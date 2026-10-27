@@ -1,0 +1,86 @@
+[
+  {
+    "id": "colorful",
+    "rootColor": "#1e293b",
+    "colors": [
+      "#2563eb",
+      "#dc2626",
+      "#15803d",
+      "#9333ea",
+      "#c2410c",
+      "#0e7490"
+    ]
+  },
+  {
+    "id": "soft",
+    "rootColor": "#64748b",
+    "colors": [
+      "#bfdbfe",
+      "#fecaca",
+      "#bbf7d0",
+      "#e9d5ff",
+      "#fed7aa",
+      "#a5f3fc"
+    ]
+  },
+  {
+    "id": "forest",
+    "rootColor": "#14532d",
+    "colors": [
+      "#166534",
+      "#047857",
+      "#4d7c0f",
+      "#0f766e",
+      "#3f6212",
+      "#15803d"
+    ]
+  },
+  {
+    "id": "ocean",
+    "rootColor": "#082f49",
+    "colors": [
+      "#0c4a6e",
+      "#0369a1",
+      "#0277b4",
+      "#087e9b",
+      "#087f75",
+      "#0f766e"
+    ]
+  },
+  {
+    "id": "sunset",
+    "rootColor": "#7c2d12",
+    "colors": [
+      "#9a3412",
+      "#c2410c",
+      "#c94c0d",
+      "#be123c",
+      "#9f1239",
+      "#7e22ce"
+    ]
+  },
+  {
+    "id": "lavender",
+    "rootColor": "#3b0764",
+    "colors": [
+      "#4c1d95",
+      "#6d28d9",
+      "#7c3aed",
+      "#9842db",
+      "#c084fc",
+      "#e9d5ff"
+    ]
+  },
+  {
+    "id": "monochrome",
+    "rootColor": "#111827",
+    "colors": [
+      "#1f2937",
+      "#374151",
+      "#4b5563",
+      "#6b7280",
+      "#9ca3af",
+      "#d1d5db"
+    ]
+  }
+]

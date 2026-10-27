@@ -126,6 +126,36 @@ func TestAVContractCalendarTemplateDate(t *testing.T) {
 	}
 }
 
+func TestAVContractCalendarFieldNames(t *testing.T) {
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	database := fixture.attrView
+	view := database.Views[0]
+	view.LayoutType = av.LayoutTypeCalendar
+	view.Calendar = &av.LayoutCalendar{LayoutTable: view.Table, Settings: av.CalendarSettings{WeekStart: 1}}
+	view.Table = nil
+	for _, enabled := range []bool{false, true} {
+		view.Calendar.Settings.DisplayFieldName = enabled
+		if err := av.SaveAttributeView(database); err != nil {
+			t.Fatal(err)
+		}
+		assertAVContractJSONEqual(t, view.Calendar, toContractAVLayoutCalendar(view.Calendar))
+		path := "/api/av/renderAttributeView"
+		response := callAttributeViewContextFilterAPI(t, path, map[string]any{
+			"id": database.ID, "viewID": view.ID,
+		}, renderAttributeView)
+		requireAPIContract(t, http.MethodPost, path, response)
+		var result struct {
+			Code int
+			Data struct{ View *av.Table }
+		}
+		decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+		if result.Code != 0 || result.Data.View == nil || result.Data.View.Calendar == nil ||
+			result.Data.View.Calendar.DisplayFieldName != enabled {
+			t.Fatalf("calendar field name setting lost: %s", response.Body.String())
+		}
+	}
+}
+
 func TestAVContractCalendarLegacyRowIDs(t *testing.T) {
 	for _, test := range []struct {
 		name string

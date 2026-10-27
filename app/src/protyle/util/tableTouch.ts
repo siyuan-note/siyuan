@@ -390,11 +390,13 @@ export class TableTouchControl {
         }
         const columns = Array.from(table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col"));
         const rect = cell.getBoundingClientRect();
-        if (Math.min(Math.abs(rect.left - event.clientX), Math.abs(rect.right - event.clientX)) > 8) {
+        // 窄单元格保留中间的文字点击区域，分隔线仍可进入列宽调整。
+        const tolerance = Math.min(8, rect.width / 4);
+        if (Math.min(Math.abs(rect.left - event.clientX), Math.abs(rect.right - event.clientX)) > tolerance) {
             return false;
         }
         // 点击可见的单元格分隔线后激活列宽调整，合并单元格内部没有分隔线的位置不响应。
-        const index = columns.findIndex(column => Math.abs(column.getBoundingClientRect().right - event.clientX) <= 8);
+        const index = columns.findIndex(column => Math.abs(column.getBoundingClientRect().right - event.clientX) <= tolerance);
         if (index < 0 || !this.actions.activate(cell)) {
             return false;
         }

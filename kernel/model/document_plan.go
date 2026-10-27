@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -42,7 +41,6 @@ type renderedDocumentTarget struct {
 	parents  []string
 	title    string
 	missing  string
-	legacy   bool
 }
 
 func documentParentLocation(boxID string, id *string) (*string, error) {
@@ -58,7 +56,7 @@ func documentParentLocation(boxID string, id *string) (*string, error) {
 
 // renderDocumentTarget 只对旧模板拆分渲染结果；版本 2 的每一段在同一时间快照独立求值。
 func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanRequest) (ret renderedDocumentTarget, err error) {
-	ret.missing, ret.legacy = "create", target.Structured == nil && documentaddressing.DefaultMode() == 1
+	ret.missing = "create"
 	if request.Now.IsZero() {
 		request.Now = time.Now()
 	}
@@ -144,15 +142,8 @@ func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanR
 					return
 				}
 			default:
-				ret.parents = append(ret.parents, normalizeDocTitle(segment))
+				ret.parents = append(ret.parents, normalizeDocumentTitle(segment))
 			}
-		}
-	}
-	// 兼容旧 parentID 优先规则：相同展示位置仍使用调用方的实际父身份。
-	if ret.legacy && request.ContextID != nil && target.Notebook == request.Notebook && ret.parentID == nil {
-		if current, readErr := getDocumentPath(target.Notebook, *request.ContextID); readErr == nil &&
-			current.DisplayPath == "/"+strings.Join(ret.parents, "/") {
-			ret.parentID, ret.parents = request.ContextID, nil
 		}
 	}
 	if ret.parentID != nil && IsBoxDoc(target.Notebook, *ret.parentID) {
@@ -162,7 +153,7 @@ func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanR
 }
 
 // PlanDocumentCreation 预先验证整组标题并分配全部 ID，不创建源文件或目录。
-// 旧模板保留兼容模式的同名选择，新对象逐级拒绝歧义；执行仍按单篇提交并保留已完成结果。
+// 各类模板均逐级拒绝歧义；执行仍按单篇提交并保留已完成结果。
 func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, error) {
 	if !ast.IsNodeIDPattern(request.ID) || request.ContextID != nil && !ast.IsNodeIDPattern(*request.ContextID) ||
 		request.Placement != "" && request.Placement != "configured" && request.Placement != "child" {
@@ -255,17 +246,11 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 				return nil, resolveErr
 			}
 			if resolved.Status == "ambiguous" {
-				if !rendered.legacy {
-					return nil, documentAddressingError("planChanged", fmt.Errorf("ambiguous document ancestor [%s]", title))
-				}
-				resolved.Resolved = legacyDocumentCandidate(target.Notebook, resolved.Candidates)
-				resolved.Status = "resolved"
+				return nil, documentAddressingError("planChanged", fmt.Errorf("ambiguous document ancestor [%s]", title))
 			}
 			if resolved.Status == "resolved" {
 				id := resolved.Resolved.ID
-				if !rendered.legacy {
-					conditions = append(conditions, treenode.DocumentNameCondition{ParentID: parentID, Title: title, ExpectedID: &id})
-				}
+				conditions = append(conditions, treenode.DocumentNameCondition{ParentID: parentID, Title: title, ExpectedID: &id})
 				parentID, revision = &id, resolved.Resolved.Revision
 				continue
 			}
@@ -291,10 +276,6 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 			return plan, nil
 		}
 		if resolved.Status == "ambiguous" {
-			if rendered.legacy {
-				plan.ExistingID = legacyDocumentCandidate(target.Notebook, resolved.Candidates).ID
-				return plan, nil
-			}
 			return nil, documentAddressingError("planChanged", errors.New("ambiguous document reuse target"))
 		}
 	}
@@ -336,17 +317,6 @@ func documentCreationPlanPaths(plan *DocumentCreatePlan) (map[string]string, err
 		paths[step.ID] = path.Join(folder, step.ID+".sy")
 	}
 	return paths, nil
-}
-
-func legacyDocumentCandidate(boxID string, candidates []*treenode.DocumentPath) *treenode.DocumentPath {
-	if previous := treenode.GetBlockTreeRootByHPath(boxID, candidates[0].DisplayPath); previous != nil {
-		for _, candidate := range candidates {
-			if candidate.ID == previous.ID {
-				return candidate
-			}
-		}
-	}
-	return candidates[0]
 }
 
 // executeDocumentCreationPlan 保留已完成文档，下一步使用实际提交后的父版本，不重放正文副作用。

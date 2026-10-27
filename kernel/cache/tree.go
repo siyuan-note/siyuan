@@ -86,12 +86,30 @@ func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
 }
 
 func SetTreeDataInBox(rootID, boxID string, raw []byte) {
+	setTreeDataInBox(rootID, boxID, raw, nil)
+}
+
+// TreeDataReadVersion captures the mutation boundary before reading source bytes.
+// A global clock avoids retaining per-document tombstones for in-flight reads.
+func TreeDataReadVersion() uint64 {
+	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
+	return treeCacheGeneration
+}
+
+func SetTreeDataFromReadInBox(rootID, boxID string, raw []byte, version uint64) bool {
+	return setTreeDataInBox(rootID, boxID, raw, &version)
+}
+
+func setTreeDataInBox(rootID, boxID string, raw []byte, expected *uint64) bool {
 	if raw == nil {
-		return
+		return false
 	}
 	if len(raw) >= treeCacheMaxCost {
-		RemoveTreeDataInBox(rootID, boxID)
-		return
+		if expected == nil {
+			RemoveTreeDataInBox(rootID, boxID)
+		}
+		return false
 	}
 	entry := &treeCacheEntry{rawSize: len(raw)}
 	// 小文档不压缩；只有实际减少驻留字节时才保存压缩结果。
@@ -108,6 +126,9 @@ func SetTreeDataInBox(rootID, boxID string, raw []byte) {
 	key := treeCacheKey(rootID, boxID)
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	if expected != nil && *expected != treeCacheGeneration {
+		return false
+	}
 	treeCacheGeneration++
 	entry.generation = treeCacheGeneration
 	keys := treeCacheKeys[rootID]
@@ -116,12 +137,13 @@ func SetTreeDataInBox(rootID, boxID string, raw []byte) {
 		treeCacheKeys[rootID] = keys
 	}
 	keys[key] = entry.generation
-	treeCache.Set(key, entry, int64(cap(entry.raw))+64)
+	return treeCache.Set(key, entry, int64(cap(entry.raw))+64)
 }
 
 func RemoveTreeData(rootID string) {
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	treeCacheGeneration++
 	keys := treeCacheKeys[rootID]
 	delete(treeCacheKeys, rootID)
 
@@ -136,6 +158,7 @@ func RemoveTreeDataInBox(rootID, boxID string) {
 	key := treeCacheKey(rootID, boxID)
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	treeCacheGeneration++
 	treeCache.Del(key)
 	if keys := treeCacheKeys[rootID]; keys != nil {
 		delete(keys, key)
@@ -148,6 +171,7 @@ func RemoveTreeDataInBox(rootID, boxID string) {
 func ClearTreeCache() {
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
+	treeCacheGeneration++
 	treeCacheKeys = map[string]map[string]uint64{}
 	treeCache.Clear()
 }

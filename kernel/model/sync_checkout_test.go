@@ -2,14 +2,66 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSyncCheckoutProgressMessage(t *testing.T) {
+	previousConf, previousLangs := Conf, util.Langs
+	previousStatusBar := util.StatusBarCfg.Load()
+	t.Cleanup(func() {
+		Conf, util.Langs = previousConf, previousLangs
+		util.StatusBarCfg.Store(previousStatusBar)
+	})
+	Conf = &AppConf{}
+	util.Langs = map[string]map[int]string{}
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	languages, err := filepath.Glob("../../app/appearance/langs/*.json")
+	if err != nil || len(languages) == 0 {
+		t.Fatalf("find language files: %v", err)
+	}
+	for _, language := range languages {
+		t.Run(filepath.Base(language), func(t *testing.T) {
+			data, err := os.ReadFile(language)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var messages struct {
+				Kernel map[int]string `json:"_kernel"`
+			}
+			if err = json.Unmarshal(data, &messages); err != nil {
+				t.Fatal(err)
+			}
+			Conf.Lang = strings.TrimSuffix(filepath.Base(language), ".json")
+			util.Langs[Conf.Lang] = messages.Kernel
+			const filePath = "/notebook/parent/child/20231013134532-9doj565.sy"
+			task := &syncCheckoutTask{progress: dejavu.CheckoutProgress{
+				Path: filePath, Count: 3192, Total: 3192, Written: 407, Size: 407,
+			}, fileStarted: time.Now().Add(-time.Second)}
+			task.push()
+			lines := strings.Split(task.message, "\n")
+			if len(lines) != 2 || !strings.Contains(lines[0], "20231013134532-9doj565.sy") || strings.Contains(lines[0], "/") {
+				t.Fatalf("expected basename on the first line: %q", task.message)
+			}
+			if !strings.Contains(lines[1], "3192/3192") || !strings.Contains(lines[1], "407 B / 407 B") || !strings.Contains(lines[1], "00:00:00") {
+				t.Fatalf("missing progress statistics on the second line: %q", task.message)
+			}
+			if task.progress.Path != filePath {
+				t.Fatal("display formatting changed the checkout path")
+			}
+		})
+	}
+}
 
 func TestSyncCheckoutSpaceAndProgress(t *testing.T) {
 	previousDisk, previousConf, previousLangs := checkoutDiskUsage, Conf, util.Langs

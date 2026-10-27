@@ -82,6 +82,7 @@ const setup = () => {
         };
         const settingInterface = load(interfaceCode, {electron: {ipcRenderer}});
         const native = load(nativeCode, {
+            "../tabs/compactMode": {isCompactModeEnabled: () => false},
             electron: {ipcRenderer}, "../../util/genID": {genUUID: () => "token-" + (++sequence)},
             "../../protyle/util/compatibility": {}, "../../layout/util": {}, "../../dialog/processSystem": {},
             "../../plugin/globalState": {}, "../../plugin/loader": {},

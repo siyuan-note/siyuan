@@ -88,6 +88,7 @@ const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const {createSettingsWindows} = require("./settingsWindows");
+const {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
 const {createWebPageFetcher, installWebPageFetchIPC} = require("./webPageFetch");
@@ -2251,6 +2252,8 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         },
         frame: "darwin" === process.platform,
         titleBarStyle: "hidden",
+        // 首帧按默认主题的工具栏高度预留，融合页签与自定义主题由渲染进程校正。
+        titleBarOverlay: getTitleBarOverlayOptions(),
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
     remote.enable(currentWindow.webContents);
@@ -2369,17 +2372,6 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             }
             return;
         }
-        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        if (siyuanOpenURL) {
-            if (currentWindow.isMinimized()) {
-                currentWindow.restore();
-            }
-            currentWindow.show();
-            setTimeout(() => { // 等待界面js执行完毕
-                writeLog(siyuanOpenURL);
-                currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
-            }, 2000);
-        }
     });
 
     if ("darwin" !== process.platform) {
@@ -2408,10 +2400,17 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         workspaceDir: startup?.workspace,
     });
     if (startup) localKernelStartups.delete(getWorkspaceStartupKey(startup.workspace));
-    bindMainWindowReady(currentWindow, currentBootWindow, windowState);
+    bindMainWindowReady(currentWindow, currentBootWindow, windowState, () => {
+        if (kernelTarget.mode === "remote") return;
+        const siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
+        if (siyuanOpenURL) {
+            writeLog(siyuanOpenURL);
+            currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
+        }
+    });
 };
 
-const bindMainWindowReady = (currentWindow, currentBootWindow, windowState) => {
+const bindMainWindowReady = (currentWindow, currentBootWindow, windowState, onReady) => {
     // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
     const readyToShowTimeout = setTimeout(() => {
@@ -2450,6 +2449,7 @@ const bindMainWindowReady = (currentWindow, currentBootWindow, windowState) => {
         if (currentBootWindow && !currentBootWindow.isDestroyed()) {
             currentBootWindow.destroy();
         }
+        onReady?.();
     };
     ipcMain.on("siyuan-ready-to-show", readyToShow);
     currentWindow.once("closed", () => {
@@ -3992,6 +3992,11 @@ app.whenReady().then(() => {
                 }
                 break;
             }
+            case "setTitleBarOverlay":
+                if (event.senderFrame === event.sender.mainFrame && webContentsId === event.sender.id) {
+                    updateTitleBarOverlay(currentWindow, data);
+                }
+                break;
             case "setTrafficLightPosition":
                 if (!currentWindow || !currentWindow.setWindowButtonPosition) {
                     return;
@@ -4226,6 +4231,8 @@ app.whenReady().then(() => {
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
+            // 独立文档窗口的顶栏使用面板高度，并跟随当前界面密度预留。
+            titleBarOverlay: getTitleBarOverlayOptions(process.platform, getCaptionHeight(data.compactMode, true)),
             webPreferences: {
                 contextIsolation: false,
                 nodeIntegration: true,

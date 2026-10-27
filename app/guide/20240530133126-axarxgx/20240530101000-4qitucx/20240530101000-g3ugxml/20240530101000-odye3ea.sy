@@ -7,7 +7,7 @@
 		"id": "20240530101000-odye3ea",
 		"title": "Web クリッピング",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-l4c2a0h",
 				"id": "20240530101000-idgu5da",
-				"updated": "20261016202856"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -146,7 +146,7 @@
 			"Properties": {
 				"ID": "20240530101000-zltmk5c",
 				"id": "20240530101000-w0jf26z",
-				"updated": "20261016202856"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -164,7 +164,7 @@
 			"Properties": {
 				"ID": "20240530101000-u4y17sv",
 				"id": "20240530101000-bekjbcd",
-				"updated": "20261016202856"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -179,7 +179,7 @@
 					"Properties": {
 						"ID": "20240530101000-u3d71bv",
 						"id": "20240530101000-wn2oht8",
-						"updated": "20261016202856"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -188,12 +188,12 @@
 							"Properties": {
 								"ID": "20240530101000-dvz5049",
 								"id": "20240530101000-gb0thjm",
-								"updated": "20261016202856"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "拡張機能をインストールして、設定オプションから API トークンを設定します (トークンは SiYuan の "
+									"Data": "拡張機能をインストールし、オプションに API トークンを入力します。トークンは SiYuan の "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -202,16 +202,34 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "情報"
+									"TextMarkTextContent": "認証"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ から確認できます)"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ログインとトークン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "API トークン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で確認できます"
 								}
 							]
 						}
@@ -305,6 +323,57 @@
 				"ID": "20240530101000-qtur8hl",
 				"id": "20240530101000-mgqbzz5"
 			}
+		},
+		{
+			"ID": "20261024163429-60t8dy7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163429-60t8dy7",
+				"updated": "20261024163429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルでの収集"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163429-1iv2he1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163429-1iv2he1",
+				"updated": "20261024163429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スマートフォンでテキストやリンクを記録する場合は、システム共有から"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-e6z5okf",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "クイックメモ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を利用できます。内容は端末に保存され、その後ドキュメントに取り込まれます。クラウドに一時保存して別の端末で整理する場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-vql5s27",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "受信トレイ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を使います。"
+				}
+			]
 		}
 	]
 }

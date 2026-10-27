@@ -28,7 +28,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -67,7 +66,6 @@ func LogoutAuth(c *gin.Context, request apicontract.EmptyRequest) (ret apicontra
 func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret apicontract.Response[apicontract.Null]) {
 	ret = apicontract.Success(apicontract.Null{})
 
-	var inputCaptcha string
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
 	if util.NeedCaptcha() {
@@ -79,13 +77,14 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 			logging.LogWarnf("invalid captcha")
 			return
 		}
-		inputCaptcha = request.Captcha
 
-		if !strings.EqualFold(workspaceSession.Captcha, inputCaptcha) {
+		// 挑战在服务端一次性消费，旧签名 Cookie 重放时挑战已不存在
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-23g4-vqq8-5764
+		if !util.ConsumeCaptchaChallenge(workspaceSession.CaptchaID, request.Captcha) {
 			ret = apicontract.Failure[apicontract.Null](1, Conf.Language(22))
 			logging.LogWarnf("invalid captcha")
 
-			workspaceSession.Captcha = gulu.Rand.String(7) // https://github.com/siyuan-note/siyuan/issues/13147
+			workspaceSession.CaptchaID = ""
 			if err := session.Save(c); err != nil {
 				logging.LogError("save session failed: " + err.Error())
 				session.Clear(c)
@@ -94,6 +93,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 			}
 			return
 		}
+		workspaceSession.CaptchaID = ""
 	}
 
 	if request.AuthCodeError() != nil {
@@ -108,7 +108,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		logging.LogWarnf("invalid auth code [ip=%s]", util.GetRemoteAddr(c.Request))
 
 		util.WrongAuthCount++
-		workspaceSession.Captcha = gulu.Rand.String(7)
+		workspaceSession.CaptchaID = ""
 		if util.NeedCaptcha() {
 			code = 1 // 需要渲染验证码
 		}
@@ -126,7 +126,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 	workspaceSession.OIDCSessionVersion = ""
 	util.WrongAuthCount = 0
 	util.AuthThrottleReset(c.ClientIP())
-	workspaceSession.Captcha = gulu.Rand.String(7)
+	workspaceSession.CaptchaID = ""
 
 	maxAge := 0 // Default session expiration (browser session)
 	if request.RememberMe {
@@ -170,7 +170,12 @@ func GetCaptcha(c *gin.Context, request apicontract.EmptyRequest) apicontract.Re
 
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
-	workspaceSession.Captcha = img.Text
+	captchaID := util.NewCaptchaChallenge(img.Text)
+	if "" == captchaID {
+		logging.LogError("generates captcha challenge failed")
+		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
+	}
+	workspaceSession.CaptchaID = captchaID
 	if err = session.Save(c); err != nil {
 		logging.LogError("save session failed: " + err.Error())
 		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
@@ -223,6 +228,11 @@ func CheckReadonly(c *gin.Context) {
 		// 同步控制接口会在实际应用阶段取得写租约，不跨整轮网络请求持有读租约。
 		switch c.Request.URL.Path {
 		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks":
+			dataImportAccess.RUnlock()
+			released = true
+		}
+		// RPC 握手仍做只读及恢复检查，实际方法单独持有写入准入租约。
+		if c.FullPath() == "/ws/plugin/rpc" || c.FullPath() == "/ws/plugin/rpc/:name" {
 			dataImportAccess.RUnlock()
 			released = true
 		}

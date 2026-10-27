@@ -7,7 +7,7 @@
 		"id": "20240530101000-5gi76ax",
 		"title": "ウィジェット",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-wih8sqk",
 				"id": "20240530101000-3ccwwa1",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -32,21 +32,21 @@
 			"Properties": {
 				"ID": "20240530101000-mfbsor1",
 				"id": "20240530101000-6u5tdvq",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ウィジェットは、SiYuan Kernel サーバーによって提供される静的な Web ページです。API を介してデータにアクセスし、"
+					"Data": "ウィジェットは、ドキュメントに埋め込む小さな Web ツールです。SiYuan カーネルがファイルを配信し、エディタ内の "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "iframe"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ によってレンダリングされます。"
+					"Data": " に表示します。API を使ってデータを読み書きすることもできます。"
 				}
 			]
 		},

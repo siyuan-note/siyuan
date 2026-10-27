@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime/debug"
 	"sort"
 	"sync"
@@ -42,8 +43,6 @@ var (
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
 )
 
-const maxBeginTxRetries = 3
-
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
@@ -57,7 +56,7 @@ type dbQueueOperation struct {
 	block                         *Block   // update_block_content
 	id                            string   // index_node
 	removeAssetHashes             []string // delete_assets
-	beginTxRetries                uint8
+	refreshDefIDs                 []string // refresh_def_refs
 	recoveryEntry                 *indexEntry
 	recoveredIndex                bool
 }
@@ -118,7 +117,7 @@ func (change *backlinkIndexChange) addOperation(op *dbQueueOperation) {
 		} else {
 			change.full = true
 		}
-	case "delete", "delete_box", "delete_box_refs":
+	case "delete", "delete_box", "delete_box_refs", "refresh_def_refs":
 		change.changed = true
 		change.full = true
 	}
@@ -154,7 +153,7 @@ func (op *dbQueueOperation) boxID() string {
 		}
 	case "delete", "delete_id":
 		return op.removeTreeBox
-	case "delete_box", "delete_box_refs", "index_node":
+	case "delete_box", "delete_box_refs", "index_node", "refresh_def_refs":
 		return op.box
 	case "update_block_content":
 		if op.block != nil {
@@ -286,13 +285,14 @@ func FlushQueue() {
 			return
 		}
 		recovered := op.recoveryEntry != nil
+		boxID := op.boxID()
+		if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) && GetEncryptedDB(boxID) == nil {
+			// Locked notebooks rebuild derived indexes on mount. Obsolete live or
+			// recovered work must not block indexing ordinary notebooks.
+			ops[i] = nil
+			continue
+		}
 		if recovered {
-			boxID := op.boxID()
-			if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) && GetEncryptedDB(boxID) == nil {
-				// 锁定笔记本的派生索引由下次解锁挂载后重新建立，旧会话任务不应阻塞普通笔记本。
-				ops[i] = nil
-				continue
-			}
 			if recoveryLute == nil {
 				recoveryLute = lute.New()
 			}
@@ -313,18 +313,8 @@ func FlushQueue() {
 		timing.Stage("begin")
 		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
-			logging.LogWarnf("skip queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
-			if recovered {
-				return
-			}
-			if op.beginTxRetries < maxBeginTxRetries {
-				op.beginTxRetries++
-				requeueOperation(op)
-			} else {
-				logging.LogErrorf("drop queue operation [%s] for box [%s] after %d retries: %s", op.action, op.boxID(), maxBeginTxRetries, err)
-			}
-			ops[i] = nil
-			continue
+			logging.LogWarnf("retain queue operation [%s] for box [%s]: %s", op.action, op.boxID(), err)
+			return
 		}
 
 		groupOpsCurrent[op.action]++
@@ -337,11 +327,7 @@ func FlushQueue() {
 			closeTxPreparedStmts(tx)
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
-			if recovered {
-				return
-			}
-			ops[i] = nil
-			continue
+			return
 		}
 
 		diagnostic.Stage("commit " + op.action)
@@ -349,11 +335,7 @@ func FlushQueue() {
 		if err = commitTx(tx); err != nil {
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
-			if recovered {
-				return
-			}
-			ops[i] = nil
-			continue
+			return
 		}
 		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
@@ -400,6 +382,11 @@ func FlushQueue() {
 }
 
 func invalidateRefsCacheForOperation(op *dbQueueOperation) {
+	if op != nil && op.action == "refresh_def_refs" {
+		for _, id := range op.refreshDefIDs {
+			removeRefCacheByDefID(id)
+		}
+	}
 	if nil != op && ("update_refs" == op.action || "delete_refs" == op.action) && nil != op.upsertTree {
 		removeRefCacheByPath(op.upsertTree.Box, op.upsertTree.Path)
 	}
@@ -422,6 +409,15 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 	if op.upsertTree != nil && op.action == "upsert" {
 		op.upsertTree = currentDocumentIndexSnapshot(op.upsertTree)
 	}
+	updateEmbeddings := func(stmt string, args ...any) error {
+		// Encrypted notebooks do not participate in vector indexing and their
+		// content database intentionally has no block_embeddings table.
+		if GetEncryptedDB(op.boxID()) != nil {
+			return nil
+		}
+		_, execErr := tx.Exec(stmt, args...)
+		return execErr
+	}
 	switch op.action {
 	case "index":
 		if op.recoveredIndex {
@@ -437,18 +433,20 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		if nil == err {
 			condition, args := documentPathPrefixCondition("path", op.removeTreeBox, op.removeTreePath)
-			tx.Exec("DELETE FROM block_embeddings WHERE "+condition, args...)
+			err = updateEmbeddings("DELETE FROM block_embeddings WHERE "+condition, args...)
 		}
 	case "delete_id":
 		err = deleteByRootID(tx, op.removeTreeID, context)
 		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", op.removeTreeID)
+			err = updateEmbeddings("DELETE FROM block_embeddings WHERE root_id = ?", op.removeTreeID)
 		}
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 		if nil == err {
 			for _, rootID := range op.removeTreeIDs {
-				tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", rootID)
+				if err = updateEmbeddings("DELETE FROM block_embeddings WHERE root_id = ?", rootID); err != nil {
+					return
+				}
 			}
 		}
 	case "rename", "rename_doc":
@@ -464,12 +462,12 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 
 		err = updateRootContent(tx, treenode.ReadDocumentTitle(op.indexTree.Root).Text, op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
 		if nil == err {
-			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+			err = updateEmbeddings("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "move":
 		err = batchUpdatePath(tx, op.indexTree, context)
 		if nil == err {
-			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+			err = updateEmbeddings("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "delete_box":
 		// 清理 box 的内容索引。事务由 beginTxForBox(op.boxID()) 按所属库路由：
@@ -478,7 +476,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		// 会用纯 INSERT 在无主键的 blocks 表上叠加重复行，导致搜索结果翻倍。
 		err = deleteByBoxTx(tx, op.box)
 		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
+			err = updateEmbeddings("DELETE FROM block_embeddings WHERE box = ?", op.box)
 		}
 	case "delete_box_refs":
 		err = deleteRefsByBoxTx(tx, op.box)
@@ -486,6 +484,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = upsertRefs(tx, op.upsertTree)
 	case "delete_refs":
 		err = deleteRefs(tx, op.upsertTree)
+	case "refresh_def_refs":
+		err = refreshDefinitionRefLocations(tx, op.box, op.refreshDefIDs)
 	case "update_block_content":
 		err = updateBlockContent(tx, op.block)
 	case "delete_assets":
@@ -511,11 +511,40 @@ func IndexNodeQueue(id string) {
 	newOp := &dbQueueOperation{id: id, box: boxID, inQueueTime: time.Now(), action: "index_node"}
 	for i, op := range operationQueue {
 		if "index_node" == op.action && op.recoveryEntry == nil && op.id == id {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
 	appendOperation(newOp)
+}
+
+// RefreshDefinitionRefsQueue follows the committed source/target indexing
+// operations. Recovery needs only stable IDs, never the reference source files.
+func RefreshDefinitionRefsQueue(boxID string, ids []string) {
+	if len(ids) == 0 {
+		return
+	}
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	appendOperation(&dbQueueOperation{action: "refresh_def_refs", box: boxID,
+		refreshDefIDs: append([]string(nil), ids...), inQueueTime: time.Now()})
+}
+
+func refreshDefinitionRefLocations(tx *sql.Tx, boxID string, ids []string) error {
+	for _, id := range ids {
+		var parent, root, path string
+		err := tx.QueryRow("SELECT parent_id, root_id, path FROM blocks WHERE id = ? AND box = ? LIMIT 1", id, boxID).Scan(&parent, &root, &path)
+		if errors.Is(err, sql.ErrNoRows) {
+			continue // A later deletion superseded the move.
+		}
+		if err != nil {
+			return err
+		}
+		if err = execStmtTx(tx, "UPDATE refs SET def_block_parent_id = ?, def_block_root_id = ?, def_block_path = ? WHERE def_block_id = ?", parent, root, path, id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {
@@ -537,7 +566,7 @@ func UpdateBlockContentQueue(block *Block) {
 	newOp := &dbQueueOperation{block: block, inQueueTime: time.Now(), action: "update_block_content"}
 	for i, op := range operationQueue {
 		if "update_block_content" == op.action && op.recoveryEntry == nil && op.block.ID == block.ID && op.block.Box == block.Box {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -551,7 +580,7 @@ func DeleteRefsTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}
 	for i, op := range operationQueue {
 		if "delete_refs" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -565,7 +594,7 @@ func UpdateRefsTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "update_refs"}
 	for i, op := range operationQueue {
 		if "update_refs" == op.action && op.upsertTree != nil && op.upsertTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -579,7 +608,7 @@ func DeleteBoxRefsQueue(boxID string) {
 	newOp := &dbQueueOperation{box: boxID, inQueueTime: time.Now(), action: "delete_box_refs"}
 	for i, op := range operationQueue {
 		if "delete_box_refs" == op.action && op.recoveryEntry == nil && op.box == boxID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -593,7 +622,7 @@ func DeleteBoxQueue(boxID string) {
 	newOp := &dbQueueOperation{box: boxID, inQueueTime: time.Now(), action: "delete_box"}
 	for i, op := range operationQueue {
 		if "delete_box" == op.action && op.recoveryEntry == nil && op.box == boxID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -607,7 +636,7 @@ func IndexTreeQueue(tree *parse.Tree) {
 	newOp := &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
 	for i, op := range operationQueue {
 		if "index" == op.action && op.indexTree != nil && op.indexTree.ID == tree.ID { // 相同树则覆盖
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -629,7 +658,7 @@ func UpsertTreeQueueWithChanges(tree *parse.Tree, changes *TreeIndexChanges) {
 		if "upsert" == op.action && op.upsertTree != nil && op.upsertTree.Box == tree.Box && op.upsertTree.ID == tree.ID && op.upsertTree.Path == tree.Path {
 			newOp.indexChanges = mergeTreeIndexChanges(op.indexChanges, newOp.indexChanges)
 			newOp.inQueueTime = op.inQueueTime
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 		// 删除、移动、重命名及其他索引操作不参与快照覆盖，保留原始执行顺序。
@@ -657,7 +686,7 @@ func renameTreeQueue(tree *parse.Tree, action string) {
 	}
 	for i, op := range operationQueue {
 		if action == op.action && op.indexTree != nil && op.indexTree.Box == tree.Box && op.indexTree.ID == tree.ID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -675,7 +704,7 @@ func MoveTreeQueue(tree *parse.Tree) {
 	}
 	for i, op := range operationQueue {
 		if "move" == op.action && op.indexTree != nil && op.indexTree.ID == tree.ID { // 相同树则覆盖
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -689,7 +718,7 @@ func RemoveTreeQueue(boxID, rootID string) {
 	newOp := &dbQueueOperation{removeTreeBox: boxID, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
 	for i, op := range operationQueue {
 		if "delete_id" == op.action && op.removeTreeID == rootID {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -715,7 +744,7 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 	newOp := &dbQueueOperation{removeTreeBox: treeBox, removeTreePath: treePathPrefix, inQueueTime: time.Now(), action: "delete"}
 	for i, op := range operationQueue {
 		if "delete" == op.action && (op.removeTreeBox == treeBox && op.removeTreePath == treePathPrefix) {
-			operationQueue[i] = newOp
+			replaceOperation(i, newOp)
 			return
 		}
 	}
@@ -734,14 +763,17 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
-	appendToIndexQueue(op)
+	recordIndexOperation(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 }
 
-func requeueOperation(op *dbQueueOperation) {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-	operationQueue = append(operationQueue, op)
-	appendToIndexQueue(op)
-	eventbus.Publish(eventbus.EvtSQLIndexChanged)
+// Caller holds dbQueueLock. Preserve the latest recovery location when an
+// in-memory operation is coalesced. Unchanged descriptors already reload the
+// latest document from disk and do not need another journal entry.
+func replaceOperation(index int, op *dbQueueOperation) {
+	previous := dbOpToIndexEntry(operationQueue[index])
+	operationQueue[index] = op
+	if !reflect.DeepEqual(previous, dbOpToIndexEntry(op)) {
+		recordIndexOperation(op)
+	}
 }

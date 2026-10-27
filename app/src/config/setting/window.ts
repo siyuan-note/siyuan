@@ -173,7 +173,6 @@ const initialize = async () => {
         return;
     }
     window.siyuan.config = systemConfig(response.data.conf);
-    window.siyuan.documentAddressingVersion = response.data.documentAddressingVersion;
     window.siyuan.isPublish = response.data.isPublish;
     await loadDesktopHostConnection();
     if (!isActive()) return;

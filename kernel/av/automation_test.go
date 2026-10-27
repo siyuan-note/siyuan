@@ -112,7 +112,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 8
+	source.Automations.Spec = 9
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
@@ -261,5 +261,31 @@ func TestAutomationPreservesPersistedColors(t *testing.T) {
 	}}}}
 	if !slices.Contains(view.UsedCustomColorIndexes(), 18) {
 		t.Fatal("automation-only custom color was considered unused")
+	}
+}
+
+func TestAutomationReferenceSpecCompatibility(t *testing.T) {
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for spec := 1; spec <= 8; spec++ {
+		view, err := ParseAttributeViewData("20260921000000-layouts", data)
+		if err != nil {
+			t.Fatal(err)
+		}
+		source := &AutomationBlockSource{ReferenceID: "20261026000000-target1", IncludeSelectedDocuments: new(false), TagTarget: "container"}
+		view.Automations = &AutomationConfig{Spec: spec, Rules: []*AutomationRule{{BlockSource: source}}}
+		raw, _ := json.Marshal(view)
+		read, err := ParseAttributeViewData(view.ID, raw)
+		if (err == nil) != (spec == 8) {
+			t.Fatalf("reference spec %d: %v", spec, err)
+		}
+		if spec == 8 && read.Automations.Rules[0].BlockSource.ReferenceID != source.ReferenceID {
+			t.Fatal("reference target lost in storage round trip")
+		}
+		if view.Automations.Rules[0].RequiredSpec() != 8 {
+			t.Fatal("other options masked the reference specification")
+		}
 	}
 }

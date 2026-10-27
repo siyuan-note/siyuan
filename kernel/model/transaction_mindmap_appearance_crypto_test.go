@@ -82,10 +82,16 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	}
 	var data map[string]any
 	_ = json.Unmarshal([]byte(original), &data)
-	data["appearance"] = map[string]any{"version": 1, "palette": []string{"#2563eb", "#15803d"}, "backgroundColor": "#1e1e1e"}
+	appearance := map[string]any{"version": 1, "palette": []string{"#2563eb", "#15803d"}, "backgroundColor": "#1e1e1e"}
+	data["appearance"] = appearance
+	legacyStyled, _ := json.Marshal(data)
+	appearance["rootColor"] = "#1e293b"
+	appearance["nodeStyle"] = "layered"
 	data["nodes"].(map[string]any)[ids[1]].(map[string]any)["branchColor"] = 0
 	styled, _ := json.Marshal(data)
-	for _, value := range []string{string(styled), original, string(styled)} {
+	appearance["nodeStyle"] = "branch"
+	referenceStyled, _ := json.Marshal(data)
+	for _, value := range []string{string(legacyStyled), string(styled), string(referenceStyled), string(styled), original, string(referenceStyled)} {
 		attrs, _ := json.Marshal(map[string]string{listMindmapMetadataAttr: value})
 		tx := &Transaction{DoOperations: []*Operation{{Action: "setAttrs", ID: list.ID, Data: string(attrs)}}}
 		if err = PerformTxSync(tx); err != nil {
@@ -96,13 +102,13 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 			t.Fatalf("appearance update or undo lost metadata: %v", readErr)
 		}
 		ciphertext, _ := os.ReadFile(filename)
-		if !util.IsCiphertext(ciphertext) || bytes.Contains(ciphertext, []byte("palette")) {
+		if !util.IsCiphertext(ciphertext) || bytes.Contains(ciphertext, []byte("palette")) || bytes.Contains(ciphertext, []byte("rootColor")) {
 			t.Fatal("appearance update wrote plaintext")
 		}
 	}
 	relative, _ := filepath.Rel(util.WorkspaceDir, historyFile)
 	_, _, content, _, err := GetDocHistoryContent(relative, "", false)
-	if err != nil || !strings.Contains(content, "Legacy summary") || strings.Contains(content, "#2563eb") {
+	if err != nil || !strings.Contains(content, "Legacy summary") || strings.Contains(content, "#2563eb") || strings.Contains(content, "#1e293b") {
 		t.Fatalf("legacy history cannot recover the original content: %v", err)
 	}
 	archivePath := exportSYZip(boxID, "/", "Appearance", []string{tree.Path}, false)
@@ -121,6 +127,7 @@ func TestListMindmapAppearanceEncrypted(t *testing.T) {
 	exported, err := io.ReadAll(reader)
 	_ = reader.Close()
 	if err != nil || !json.Valid(exported) || !bytes.Contains(exported, []byte("#2563eb")) ||
+		!bytes.Contains(exported, []byte("#1e293b")) || !bytes.Contains(exported, []byte("branch")) ||
 		!bytes.Contains(exported, []byte("Legacy summary")) {
 		t.Fatalf("export lost the appearance or legacy content: %v", err)
 	}

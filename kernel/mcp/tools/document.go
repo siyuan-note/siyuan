@@ -23,15 +23,13 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter works only in compatibility-mode notebooks; never derive identity or hierarchy from a display hPath.",
+	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter checks each candidate ancestor chain; ambiguous paths, empty or slash-containing ancestor titles and unavailable indexes return explicit errors. Never derive identity or hierarchy from a display hPath.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -39,7 +37,7 @@ var DocumentTool = &Tool{
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
 			"parentID": {Type: "string", Description: "Target parent document ID (for create, list, move); an empty string explicitly selects the notebook root. Do not combine with path. Obtain IDs from list, search_docs or get."},
-			"path":     {Type: "string", Description: "Legacy hPath for compatibility-mode notebooks only (for create, list, move). Structured-title notebooks reject this parameter with legacyPathUnsupported; use parentID instead."},
+			"path":     {Type: "string", Description: "Legacy hPath (for create, list, move). Requires a unique ancestor chain with non-empty titles and no literal slash. Conflicts return pathAmbiguous or legacyPathUnsupported; unavailable metadata returns indexUnavailable. Prefer parentID."},
 			"markdown": {Type: "string", Description: "Initial markdown content (for create).\n\n" + markdownContentSyntax},
 			"keyword":  {Type: "string", Description: "Search keyword (for search_docs)"},
 			"notebook": {Type: "string", Description: "Notebook ID (required for create, list, move)"},
@@ -152,10 +150,13 @@ type documentTarget struct {
 }
 
 func documentTargetFailure(err error) CallToolResult {
+	if failure, ok := model.LegacyPathFailure(err); ok {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: failure.Reason + ": " + err.Error()}}, IsError: true}
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}
 }
 
-// resolveDocumentTarget 在任何旧 hPath 查询前检查整本模式，父身份只通过结构化模型解析。
+// resolveDocumentTarget uses the shared ancestor-chain check for legacy paths and identity resolution for parentID.
 func resolveDocumentTarget(notebook string, args map[string]any, create, defaultRoot bool) (*documentTarget, error) {
 	parent, hasParent := args["parentID"]
 	legacy, hasPath := args["path"]
@@ -189,22 +190,19 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 	if !hasPath || !ok || hPath == "" {
 		return nil, errors.New("parentID or path is required")
 	}
-	if err := model.CheckLegacyDocumentPath(notebook); err != nil {
-		if errors.Is(err, documentaddressing.ErrLegacyPathUnsupported) {
-			return nil, fmt.Errorf("legacyPathUnsupported: %w; use parentID (empty string for the notebook root), or resolveDocPath/createDocByParent via the HTTP API", err)
-		}
-		return nil, err
-	}
 	if create {
 		hPath = parentDir(hPath)
 	}
-	target := &documentTarget{path: "/", hPath: hPath}
-	if hPath != "/" {
-		bt := treenode.GetBlockTreeRootByHPath(notebook, hPath)
-		if bt == nil {
-			return nil, fmt.Errorf("target path not found: %s", hPath)
-		}
-		target.path, target.id = bt.Path, &bt.ID
+	bt, err := model.ResolveLegacyDocumentPath(notebook, hPath, create)
+	if err != nil {
+		return nil, err
+	}
+	if bt == nil {
+		return nil, fmt.Errorf("target path not found: %s", hPath)
+	}
+	target := &documentTarget{path: bt.Path, hPath: hPath}
+	if bt.Path != "/" {
+		target.id = &bt.ID
 	}
 	return target, nil
 }
@@ -309,7 +307,9 @@ func documentDuplicate(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	model.DuplicateDoc(tree)
+	if err = model.DuplicateDoc(tree); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("duplicate doc failed: %s", err)}}, IsError: true}, nil
+	}
 	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }

@@ -6,7 +6,7 @@
 		"id": "20260613155453-n1se73o",
 		"title": "字段类型",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-unck12x",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -45,7 +45,6 @@
 		{
 			"ID": "20260613155453-vj5a9bx",
 			"Type": "NodeTable",
-			"Data": "| 字段类型 | 适用场景 | 可排序 | 可过滤 | 表格计算 | 特殊模板后缀 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 标题、描述、任意文字 | √ | √ | √ | — |\n| 数字 | 金额、数量、评分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、创建日 | √ | √ | √ | `_end` |\n| 单选 | 状态、分类、优先级 | √ | √ | √ | — |\n| 多选 | 标签、多分类 | √ | √ | √ | `_str` |\n| 网址 | 外部链接、参考来源 | √ | √ | √ | — |\n| 邮箱 | 联系人邮箱 | √ | √ | √ | — |\n| 电话 | 联系人电话 | √ | √ | √ | — |\n| 复选框 | 是否完成、是否启用 | √ | √ | √ | — |\n| 主键（绑定块） | 记录的唯一标识，可绑定内容块 | √ | √ | √ | `_created` |\n| 资源 | 附件、图片、文件 | √ | √ | √ | — |\n| 关联 | 跨数据库关联记录 | √ | √ | √ | — |\n| 汇总 | 基于关联字段的统计计算 | √ | √ | √ | — |\n| 模板 | 按模板计算同一条目的字段值 | √ | √ | √ | — |\n| 创建时间 | 记录创建时间（自动） | √ | √ | √ | — |\n| 更新时间 | 记录更新时间（自动） | √ | √ | √ | — |\n| 行号 | 当前视图中的行位置 | × | × | × | — |\n| 位置 | 地点名称和经纬度 | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +55,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-vj5a9bx",
-				"updated": "20261016191345"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -753,7 +752,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "记录的唯一标识，可绑定内容块"
+									"Data": "条目的主体内容，可绑定内容块"
 								}
 							]
 						},
@@ -1669,7 +1668,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-r1eaue4",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1708,7 +1707,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-ruxy5mq",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1724,7 +1723,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-n0zrmr3",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1732,17 +1731,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-j4jt785",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "配置项"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：创建时可勾选「多行」切换为多行文本框"
+									"Data": "配置项：在字段设置中调整换行显示，以便查看较长文本"
 								}
 							]
 						}
@@ -1761,7 +1755,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-mg0ergn",
-						"updated": "20260809232000"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -1769,21 +1763,16 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-lf0ybif",
-								"updated": "20260809232000"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "编辑方式"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：在单元格中直接输入；多行模式下 "
+									"Data": "编辑方式：在单元格中输入文本，使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "Shift"
 								},
 								{
@@ -1792,8 +1781,8 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "回车"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -1885,7 +1874,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-ce69tco",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1924,7 +1913,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-pvg51jr",
-				"updated": "20260613155453"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1940,7 +1929,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-2f1zbk5",
-						"updated": "20260613155453"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1948,17 +1937,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-ixxypb9",
-								"updated": "20260613155453"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "配置项"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：创建时可选择数字格式——整数、小数、百分比、货币"
+									"Data": "配置项：在字段设置中选择数字显示格式，例如普通数字、百分比或货币"
 								}
 							]
 						}
@@ -3450,7 +3434,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-10v8u7c",
-				"updated": "20260613155453"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3468,12 +3452,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-voar3v0",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "数据库每条记录的唯一标识。在内容块类型的记录中，主键绑定到对应的内容块，从而实现结构化数据与非结构化内容的连接。每张表必须且仅有一个主键字段。"
+					"Data": "主键字段显示条目的主体内容，也可绑定一个内容块，将结构化字段与笔记正文连接起来。每个数据库只有一个主键字段，但其显示文字可以重复，不能把显示文字当作唯一 ID。"
 				}
 			]
 		},
@@ -3489,7 +3473,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-j1njjv8",
-				"updated": "20260613155453"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3542,7 +3526,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-ibdh9v8",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -3576,7 +3560,7 @@
 							},
 							"Properties": {
 								"id": "20260613155453-z98w6q3",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
@@ -3624,7 +3608,7 @@
 									},
 									"Properties": {
 										"id": "20260613155453-5s1lo2p",
-										"updated": "20260613155453"
+										"updated": "20261024162311"
 									},
 									"Children": [
 										{
@@ -3632,12 +3616,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260613155453-r3kt4vm",
-												"updated": "20260613155453"
+												"updated": "20261024162311"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非内容块记录：直接在视图中添加条目，主键由系统自动生成"
+													"Data": "未绑定条目：直接在视图中添加，可以编辑主键文字；条目 ID 由系统自动生成"
 												}
 											]
 										}
@@ -3697,7 +3681,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-dgh01qw",
-						"updated": "20260613155453"
+						"updated": "20261024164212"
 					},
 					"Children": [
 						{
@@ -3705,17 +3689,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-69kmocp",
-								"updated": "20260613155453"
+								"updated": "20261024164212"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "注意事项"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：不支持通过单元格直接修改绑定关系；若内容块被删除，对应记录也随之删除"
+									"Data": "绑定管理：可在条目属性面板中使用绑定或重新绑定按钮更改关联的内容块；删除绑定块时，对应的数据库条目也会移除"
 								}
 							]
 						}
@@ -4040,7 +4019,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-5ggsojg",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4079,7 +4058,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-dnjcrfm",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4287,7 +4266,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-0ee9qzd",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -4295,17 +4274,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-j6wb2ld",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "过滤行为"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：支持有值/无值筛选"
+									"Data": "过滤行为：支持按关联条目进行包含、不包含，以及有值、无值等筛选"
 								}
 							]
 						}
@@ -5028,7 +5002,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-8n0nq3f",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5046,12 +5020,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-v5dwx09",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自动记录条目的创建时间。"
+					"Data": "显示条目的创建时间；绑定内容块后使用该块的创建时间。"
 				}
 			]
 		},
@@ -5067,7 +5041,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-o1cj0kr",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5194,7 +5168,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-fqr0jfp",
-						"updated": "20260613155453"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -5202,17 +5176,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-lt1jiz9",
-								"updated": "20260613155453"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "注意事项"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：每条记录创建后此值固定不变"
+									"Data": "注意事项：绑定或重新绑定内容块后，显示时间随绑定块变化"
 								}
 							]
 						}
@@ -5226,7 +5195,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-ky6e7xt",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -5244,12 +5213,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-ltdo9ip",
-				"updated": "20260613155453"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自动记录条目最后一次修改的时间。"
+					"Data": "显示条目的更新时间；绑定内容块后使用该块的更新时间。"
 				}
 			]
 		},
@@ -5622,7 +5591,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-m7nwg3o",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5664,7 +5633,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-kag8uox",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -5705,7 +5674,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 格式，未填写名称时省略名称及分号。可将该文本或 WGS84 的 "
+					"Data": " 格式，未填写名称时省略名称及分号。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-9imm9ka",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-9imm9ka",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可将该文本或 WGS84 的 "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -214,7 +214,8 @@ export const openAutomationMenu = async (options: {
         const usesAttributeNameMatch = rules.some(rule => rule.blockSource?.attributes?.some(attr =>
             attr?.nameOperator && attr.nameOperator !== "equals"));
         const excludesSelectedDocuments = rules.some(rule => rule.blockSource?.includeSelectedDocuments === false);
-        const next = {spec: Math.max(previous.spec, excludesSelectedDocuments ? 7 : usesAttributeNameMatch ? 6 : usesDocumentDepth ? 5 : usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
+        const usesReferences = rules.some(rule => !!rule.blockSource?.referenceID);
+        const next = {spec: Math.max(previous.spec, usesReferences ? 8 : excludesSelectedDocuments ? 7 : usesAttributeNameMatch ? 6 : usesDocumentDepth ? 5 : usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }
@@ -320,7 +321,7 @@ export const openAutomationMenu = async (options: {
         }
         const scrollTop = scrollElement.scrollTop;
         body.innerHTML = `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTip}</div>
-<div class="av__automation-row">${rule ? `<button type="button" class="b3-button b3-button--cancel fn__flex-1 av__automation-source-action" data-action="rules" aria-label="${escapeAttr(lang.automationRule)}"><span class="fn__ellipsis" data-rule-name>${escapeHtml(rule.name)}</span><svg><use xlink:href="#iconDown"></use></svg></button><input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}</div>
+<div class="av__automation-row">${rule ? `<button type="button" class="b3-button b3-button--cancel fn__flex-1 av__automation-source-action ariaLabel" data-action="rename-rule" aria-label="${escapeAttr(lang.rename)}" data-position="north"><span class="fn__ellipsis" data-rule-name>${escapeHtml(rule.name)}</span></button>${iconButton("rules", "iconDown", lang.automationRule)}<input type="checkbox" class="b3-switch ariaLabel" aria-label="${escapeAttr(lang.enable)}" data-position="north" data-enabled${rule.enabled ? " checked" : ""}>` : ""}${iconButton("add-rule", "iconAdd", lang.new)}</div>
 ${rule ? `
 <label class="av__automation-row"><span class="fn__flex-1">${lang.automationNotifySuccess}</span><input type="checkbox" class="b3-switch" data-notify-success${rule.notifyOnSuccess !== false ? " checked" : ""}></label>
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationAutoSaveTip}</div>
@@ -487,6 +488,39 @@ ${iconButton("remove-field", "iconClose", lang.delete, true, true)}`;
         const actionIndex = Number(target.closest<HTMLElement>("[data-index]")?.dataset.index);
         const action = rule?.actions[actionIndex];
         switch (target.dataset.action) {
+            case "rename-rule": {
+                const input = document.createElement("input");
+                input.className = "b3-text-field fn__flex-1";
+                input.dataset.ruleNameInput = "true";
+                input.value = rule.name;
+                input.setAttribute("aria-label", lang.rename);
+                target.replaceWith(input);
+                let finished = false;
+                const finish = (cancel = false, restoreFocus = false) => {
+                    if (finished || !input.isConnected || rules[index] !== rule) { return; }
+                    finished = true;
+                    const name = input.value.trim() || rule.name;
+                    input.replaceWith(target);
+                    if (!cancel && name !== rule.name) {
+                        rule.name = name;
+                        target.querySelector("[data-rule-name]").textContent = name;
+                        save(null);
+                    }
+                    if (restoreFocus) { target.focus({preventScroll: true}); }
+                };
+                input.addEventListener("blur", () => finish(), {once: true});
+                input.addEventListener("keydown", event => {
+                    event.stopPropagation();
+                    if (event.isComposing || event.keyCode === 229) { return; }
+                    if (event.key === "Enter" || event.key === "Escape") {
+                        event.preventDefault();
+                        finish(event.key === "Escape", true);
+                    }
+                });
+                input.focus();
+                input.select();
+                return;
+            }
             case "rules":
                 openAutomationRules(target, rules, rule.id, id => {
                     index = rules.findIndex(item => item.id === id);

@@ -34,7 +34,7 @@ import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
 import {isWindow} from "../../util/functions";
 import {bindPanelTransitionGuard} from "../../util/panelTransition";
 import {isTouchHoverInput} from "../../util/hoverInput";
-import {syncDockBarVisibility} from "./barVisibility";
+import {setDockBarHover, syncDockBarVisibility} from "./barVisibility";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -423,7 +423,7 @@ export class Dock {
             this.collapsedPanelSize = "";
             this.layout.element.classList.remove("fn__none");
             this.resizeElement.classList.add("fn__none");
-            this.syncDockBar();
+            syncDockBarVisibility();
             return false;
         }
 
@@ -457,6 +457,9 @@ export class Dock {
         }
         if (!resolution.visible) {
             this.clearDockHoverTimeout();
+            if (this.position === "Left" || this.position === "Right") {
+                setDockBarHover(this.elements[0].parentElement, false);
+            }
             window.clearTimeout(this.hideResizeTimeout);
             if (document.activeElement && this.layout.element.contains(document.activeElement)) {
                 (document.activeElement as HTMLElement).blur();
@@ -475,7 +478,7 @@ export class Dock {
                 }
             }
         }
-        this.syncDockBar();
+        syncDockBarVisibility();
         resizeTabs(false);
         setTabPosition(true);
         if (resolution.visible) {
@@ -525,7 +528,7 @@ export class Dock {
         if (!hasActive && !this.isFloating()) {
             this.layout.element.style[this.position === "Bottom" ? "height" : "width"] = "0px";
         }
-        this.syncDockBar();
+        syncDockBarVisibility();
         resizeTabs(isSaveLayout);
         setTabPosition(true);
     }
@@ -557,12 +560,18 @@ export class Dock {
     public showDockByHover() {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
-        if (isTouchHoverInput() || !this.panelVisible || this.showDockTimeout || !this.isFloating() ||
-            this.layout.element.style.opacity === "1") {
+        const canRevealBar = (this.position === "Left" || this.position === "Right") && window.siyuan.config.uiLayout.hideDock;
+        const needsBar = canRevealBar && !this.elements[0].parentElement.classList.contains("dock--float");
+        if (isTouchHoverInput() || this.showDockTimeout || !this.isFloating() ||
+            !needsBar && (!this.panelVisible || this.layout.element.style.opacity === "1" || canRevealBar && !this.hasActive())) {
             return;
         }
         this.showDockTimeout = window.setTimeout(() => {
             this.showDockTimeout = 0;
+            if (canRevealBar && window.siyuan.config.uiLayout.hideDock && this.isFloating()) {
+                this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
+                setDockBarHover(this.elements[0].parentElement, true);
+            }
             this.showDock();
         }, Constants.TIMEOUT_DOCK_TOGGLE);
     }
@@ -570,8 +579,10 @@ export class Dock {
     public hideDockByHover() {
         window.clearTimeout(this.showDockTimeout);
         this.showDockTimeout = 0;
-        if (isTouchHoverInput() || !this.panelVisible || this.hideDockTimeout || !this.isFloating() ||
-            this.layout.element.style.opacity === "0") {
+        const barVisible = (this.position === "Left" || this.position === "Right") &&
+            this.elements[0].parentElement.classList.contains("dock--float");
+        if (isTouchHoverInput() || this.hideDockTimeout || !this.isFloating() ||
+            !barVisible && (!this.panelVisible || this.layout.element.style.opacity === "0")) {
             return;
         }
         this.hideDockTimeout = window.setTimeout(() => {
@@ -587,21 +598,10 @@ export class Dock {
         this.hideDockTimeout = 0;
     }
 
-    private syncDockBar() {
-        if (!syncDockBarVisibility()) {
-            return;
-        }
-        // 临时显示停靠栏时沿用正常占位，并同步编辑区和已展开的底部面板。
-        resizeTabs(false);
-        setTabPosition(true);
-        const bottomDock = window.siyuan.layout.bottomDock;
-        if (this.position !== "Bottom" && bottomDock?.isFloating() && bottomDock.layout.element.style.opacity === "1") {
-            bottomDock.showDock(true);
-        }
-    }
-
     public showDock(reset = false) {
-        this.clearDockHoverTimeout();
+        if (!reset) {
+            this.clearDockHoverTimeout();
+        }
         if (this.initializing || !this.panelVisible || (!reset && (!this.isFloating() || this.layout.element.style.opacity === "1")) ||
             (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
         ) {
@@ -631,15 +631,15 @@ export class Dock {
             this.layout.element.style.opacity = "1";
         }
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
-        this.syncDockBar();
+        syncDockBarVisibility();
         if (this.position === "Left") {
             this.layout.element.style.transform = `translateX(${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(-${this.elements[0].clientWidth}px)`;
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(-${document.getElementById("status").offsetHeight}px)`;
-            this.layout.element.style.left = this.elements[0].clientWidth + "px";
-            this.layout.element.style.right = this.elements[1].clientWidth + "px";
+            this.layout.element.style.left = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[0].clientWidth) + "px";
+            this.layout.element.style.right = (window.siyuan.config.uiLayout.hideDock ? 0 : this.elements[1].clientWidth) + "px";
         }
         // 全屏面板以窗口定位，浮动位移保留到退出全屏时恢复。
         const fullscreenElement = this.layout.element.querySelector(".fullscreen");
@@ -658,7 +658,8 @@ export class Dock {
 
     public hideDock(reset = false, preferredSize?: number) {
         this.clearDockHoverTimeout();
-        if (!reset && (this.layout.element.style.opacity === "0" || !this.isFloating())) {
+        const barVisible = this.position !== "Bottom" && this.elements[0].parentElement.classList.contains("dock--float");
+        if (!reset && (this.layout.element.style.opacity === "0" && !barVisible || !this.isFloating())) {
             return;
         }
         // 关系图全屏不应该退出 & https://github.com/siyuan-note/siyuan/issues/11775
@@ -696,7 +697,11 @@ export class Dock {
         this.elements[0].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.elements[1].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
-        this.syncDockBar();
+        if (this.position === "Left" || this.position === "Right") {
+            setDockBarHover(this.elements[0].parentElement, false);
+        } else {
+            syncDockBarVisibility();
+        }
     }
 
     public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true,
@@ -1029,7 +1034,7 @@ export class Dock {
             anotherWnd.element.style.height = "";
             anotherWnd.element.style.width = "";
         }
-        this.syncDockBar();
+        syncDockBarVisibility();
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && this.panelVisible) {
             this.showDockAfterResponsiveLayout();

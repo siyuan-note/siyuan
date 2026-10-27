@@ -128,6 +128,7 @@ test("iOS repeated text taps cannot enter multi-select when the native gesture o
     for (const initiallyCollapsed of [true, false]) {
         const f = fixture("word", initiallyCollapsed);
         f.nativeMenu();
+        f.hideKeyboard();
         f.startBlockTouch(1000);
         f.delay();
         f.startBlockTouch(1100);
@@ -143,7 +144,10 @@ test("iOS repeated text taps cannot enter multi-select when the native gesture o
 test("separate iOS text presses and other platforms retain long-press multi-select", () => {
     for (const kind of ["later", "elsewhere", "otherPlatform"]) {
         const f = fixture("", true);
-        if (kind !== "otherPlatform") f.nativeMenu();
+        if (kind !== "otherPlatform") {
+            f.nativeMenu();
+            f.hideKeyboard();
+        }
         f.startBlockTouch(1000);
         f.exports.handleTouchUp();
         f.startBlockTouch(kind === "later" ? 1500 : 1100, kind === "elsewhere" ? 140 : 100);
@@ -184,6 +188,50 @@ test("an uninterrupted long press still enters block multi-select", () => {
         stopImmediatePropagation: () => {}, preventDefault: () => { consumed = true; }});
     assert.equal(consumed, true);
     assert.equal(f.multiSelectCount(), 1);
+});
+
+test("text input and native editing menus cancel block selection without changing the caret", () => {
+    const f = fixture("word", true);
+    f.startBlockTouch();
+    const original = {...f.range};
+    f.exports.handleTouchEditing();
+    f.flushTimers();
+    assert.equal(f.multiSelectCount(), 0);
+    assert.equal(f.selection.rangeCount, 1);
+    assert.equal(f.range.startContainer, original.startContainer);
+    assert.equal(f.range.startOffset, original.startOffset);
+    assert.equal(f.range.endOffset, original.endOffset);
+    assert.equal(f.focusCount(), 0);
+    assert.equal(f.blurCount(), 0);
+});
+
+test("releasing an iOS native text gesture leaves its editing menu and selection handles native", () => {
+    const f = fixture("word", true);
+    f.nativeMenu();
+    f.startBlockTouch();
+    f.exports.handleTouchEditing();
+    f.flushTimers();
+    let prevented = false;
+    f.exports.handleTouchEnd({target: f.element, timeStamp: 3000,
+        changedTouches: [{clientX: 100, clientY: 100}],
+        stopImmediatePropagation: () => {}, preventDefault: () => { prevented = true; }});
+    assert.equal(prevented, false);
+    assert.equal(f.multiSelectCount(), 0);
+});
+
+test("iOS editing long presses retain the keyboard without waiting for a native menu callback", () => {
+    const f = fixture("", true);
+    f.nativeMenu();
+    f.startBlockTouch();
+    f.delay();
+    f.flushTimers();
+    assert.equal(f.multiSelectCount(), 0);
+    let prevented = false;
+    f.exports.handleTouchEnd({target: f.element, timeStamp: 3000,
+        changedTouches: [{clientX: 100, clientY: 100}],
+        stopImmediatePropagation: () => {}, preventDefault: () => { prevented = true; }});
+    assert.equal(prevented, false);
+    assert.equal(f.blurCount(), 0);
 });
 
 test("releasing a blank editor selection preserves the caret and keyboard", () => {

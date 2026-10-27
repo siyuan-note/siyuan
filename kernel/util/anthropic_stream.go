@@ -180,7 +180,9 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 			s.block["text"] = anthropicJSON(s.text.String())
 		case "thinking":
 			s.block["thinking"] = anthropicJSON(s.thinking.String())
-			s.block["signature"] = anthropicJSON(s.signature.String())
+			if s.signature.Len() > 0 {
+				s.block["signature"] = anthropicJSON(s.signature.String())
+			}
 		}
 		if s.blockType == "tool_use" {
 			if s.arguments.Len() > 0 {

@@ -6,7 +6,7 @@
 		"id": "20260612191214-ymtlxn2",
 		"title": "命令列",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024162311"
 	},
 	"Children": [
 		{
@@ -1316,7 +1316,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123823-n8l9nsl",
-				"updated": "20261016112115"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1542,7 +1542,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123823-fe82ndy",
-				"updated": "20261016112115"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1556,7 +1556,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260618123823-18qolcy",
-				"updated": "20261016112115"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1570,7 +1570,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "repo create --memo"
+					"TextMarkTextContent": "repo create --memo \"checkpoint\""
 				},
 				{
 					"Type": "NodeText",
@@ -1817,7 +1817,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123823-higd400",
-				"updated": "20261016112115"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -4597,7 +4597,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123823-5n9vh1d",
-				"updated": "20261016112115"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -5178,7 +5178,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123823-1depvwg",
-				"updated": "20260913020024"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -5191,7 +5191,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan search \"關鍵字\"\nsiyuan search \"關鍵字\" --notebook box1 --notebook box2\nsiyuan search \"關鍵字\" --path \"/目錄\"\nsiyuan search \"關鍵字\" --type document --type heading\nsiyuan search \"關鍵字\" --type listItem --subtype listItem:o --subtype listItem:u\nsiyuan search \"關鍵字\" --method 2\nsiyuan search \"關鍵字\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"關鍵字\" --group-by 1\n"
+					"Data": "siyuan search \"關鍵字\"\nsiyuan search \"關鍵字\" --notebook box1 --notebook box2\nsiyuan search \"關鍵字\" --path \"/目錄\"\nsiyuan search \"關鍵字\" --type document --type heading\nsiyuan search \"關鍵字\" --type listItem --subtype listItem:o --subtype listItem:u\nsiyuan search \"SELECT * FROM blocks WHERE type='h' LIMIT 20\" --method 2\nsiyuan search \"關鍵字\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"關鍵字\" --group-by 1\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9992,7 +9992,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123823-68rq10j",
-				"updated": "20260809232000"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -11170,7 +11170,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260618123823-w37cz3v",
-				"updated": "20260809232000"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -11257,6 +11257,15 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "location"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",

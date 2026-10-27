@@ -72,7 +72,8 @@ export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
     if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`) &&
         path !== SLASH_MENU_ROOT_PATH && !path.startsWith(`${SLASH_MENU_ROOT_PATH}.`) &&
-        path !== "editor.image" && !path.startsWith("editor.image.")) {
+        path !== "editor.image" && !path.startsWith("editor.image.") &&
+        path !== "editor.blockEmbed" && !path.startsWith("editor.blockEmbed.")) {
         return true;
     }
     /// #endif

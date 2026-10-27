@@ -9,7 +9,8 @@ import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
-import {finishMobileStartup, setEmpty} from "./setEmpty";
+import {setEmpty} from "./setEmpty";
+import {finishMobileStartup} from "./startup";
 import {getOpenNotebookCount, parseSiYuanUriInfo, parseUriInfo} from "../../util/pathName";
 import {processMobileSystemUri} from "./systemUri";
 import {popMenu} from "../menu";
@@ -460,7 +461,7 @@ const initEditorName = () => {
         if (!validateName(inputElement.value, undefined, true)) {
             const original = inputElement.value;
             inputElement.value = truncateDocumentTitle(inputElement.value);
-            if (window.siyuan.documentAddressingVersion !== 2 || inputElement.value === original ||
+            if (inputElement.value === original ||
                 !validateName(inputElement.value, undefined, true)) {
                 return titleSavePromise;
             }

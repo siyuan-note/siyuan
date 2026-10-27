@@ -70,6 +70,42 @@ test("rounded orthogonal corners stop the shared trunk at each outer tangent", (
         "aligned nodes need no corner and retain a continuous horizontal connection");
 });
 
+test("reference themes overlay root trunks in branch order and keep their shared geometry out of hit paths", () => {
+    for (const style of ["orthogonal", "rounded"] as const) {
+        const result = buildListMindmapConnectors("root", positions, edges, style, () => new PathFixture(), true);
+        assert.deepEqual(result.trunkParents, ["b"], "only non-root parents retain one common trunk");
+        const corner = style === "rounded" ? 8 : 0;
+        assert.deepEqual(result.branches[0].trunk.commands, [
+            ["move", 120, 120], ["line", 140, 120], ["line", 140, 20 + corner],
+        ]);
+        assert.deepEqual(result.branches[1].trunk.commands, [
+            ["move", 120, 120], ["line", 140, 120], ["line", 140, 220 - corner],
+        ]);
+        assert.equal(result.branches[2].trunk, undefined);
+        assert.ok(result.branches.every(branch => {
+            const x = branch.path.commands[0][1];
+            return typeof x === "number" && x >= 140;
+        }),
+            "selectable paths exclude the horizontal root stem and vertical overlap");
+        assert.equal(result.branches[0].path.commands.at(-1).at(-1), 20,
+            "filled first-level nodes attach at their center");
+        assert.equal(result.branches[2].path.commands.at(-1).at(-1), 240,
+            "deeper unfilled nodes keep their text underline");
+        const reordered = buildListMindmapConnectors("root", positions, [edges[1], edges[0], edges[2]],
+            style, () => new PathFixture(), true);
+        assert.deepEqual(reordered.branches.map(branch => branch.id), ["b", "a", "c"]);
+        assert.deepEqual(reordered.branches[0].trunk.commands, result.branches[1].trunk.commands);
+        assert.deepEqual(reordered.branches[1].trunk.commands, result.branches[0].trunk.commands);
+    }
+    for (const style of ["spline", "bezier"] as const) {
+        const result = buildListMindmapConnectors("root", positions, edges, style, () => new PathFixture(), true);
+        assert.equal(result.trunks.length, 0);
+        assert.ok(result.branches.every(branch => !branch.trunk));
+        assert.equal(result.branches[0].path.commands.at(-1).at(-1), 20);
+        assert.equal(result.branches[2].path.commands[0].at(-1), 220);
+    }
+});
+
 test("the connector submenu checks the saved preset and selects exactly one whole-map style", () => {
     const labels = {listMindmapConnectorStyle: "Connectors", listMindmapConnectorSpline: "Fork",
         listMindmapConnectorOrthogonal: "Elbow", listMindmapConnectorBezier: "Fan", listMindmapConnectorRounded: "Rounded"};

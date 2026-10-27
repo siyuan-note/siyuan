@@ -75,6 +75,9 @@ func TestAPIContractDocumentPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 	response = documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, request)
+	if bytes.Contains(response, []byte(`"addressingVersion"`)) {
+		t.Fatalf("document path retained retired addressing version: %s", response)
+	}
 	var result struct {
 		Code int
 		Data apicontract.DocumentPathsData

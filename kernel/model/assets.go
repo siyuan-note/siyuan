@@ -161,14 +161,23 @@ func GetAssetPathByHash(hash, boxID string) string {
 }
 
 func HandleAssetsRemoveEvent(assetAbsPath string) {
-	if !filelock.IsExist(assetAbsPath) {
+	relativePath, err := filepath.Rel(util.DataDir, assetAbsPath)
+	if err != nil {
 		return
 	}
-	if gulu.File.IsDir(assetAbsPath) {
+	relativePath = filepath.ToSlash(relativePath)
+	if _, _, ok := AssetPathFromDataRelativePath(relativePath); !ok {
 		return
 	}
-	// 跳过隐藏文件，如 WPS 的临时文件、Mac 的 .DS_Store
-	if filelock.IsHidden(assetAbsPath) {
+	info, err := os.Stat(assetAbsPath)
+	if err != nil && !os.IsNotExist(err) {
+		return
+	}
+	if info != nil && (info.IsDir() || filelock.IsHidden(assetAbsPath)) {
+		return
+	}
+	// 删除后无法读取文件属性，仍按文件名过滤 WPS 临时文件和 .DS_Store 等隐藏文件。
+	if strings.HasPrefix(filepath.Base(assetAbsPath), ".") {
 		return
 	}
 	if util.IsOfficeTempFile(assetAbsPath) {
@@ -187,12 +196,7 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 
-	hash, err := util.GetEtag(assetAbsPath)
-	if nil != err {
-		logging.LogErrorf("calc asset [%s] hash failed: %s", assetAbsPath, err)
-	} else {
-		cache.RemoveAssetHash(hash)
-	}
+	cache.RemoveAssetHashByPath(relativePath)
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
@@ -1620,6 +1624,11 @@ func uploadAssets2CloudWithApp(assetPaths []string, bizType string, ignorePushMs
 
 func RemoveUnusedAssets() (ret []string, err error) {
 	ret = []string{}
+	verify, release, err := beginOrdinaryAssetCleanup()
+	if err != nil {
+		return
+	}
+	defer release()
 	unusedAssets, err := UnusedAssets(false)
 	if err != nil {
 		return
@@ -1663,39 +1672,20 @@ func RemoveUnusedAssets() (ret []string, err error) {
 
 			hash, _ := util.GetEtag(p)
 			hashes = append(hashes, hash)
-			cache.RemoveAssetHash(hash)
 		}
 	}
 
+	ret, size, err = removeOrdinaryUnusedAssets(unusedAssets, historyDir, verify, filelock.RemoveWithoutFatal)
+	if err != nil {
+		return
+	}
 	sql.BatchRemoveAssetsQueue(hashes)
-
-	for _, unusedAsset := range unusedAssets {
-		p := unusedAsset.Item
-		absPath := filepath.Join(util.DataDir, p)
-		if filelock.IsExist(absPath) {
-			info, statErr := os.Stat(absPath)
-			if statErr == nil {
-				if info.IsDir() {
-					dirSize, _ := util.SizeOfDirectory(absPath)
-					size += dirSize
-				} else {
-					size += info.Size()
-				}
-			}
-
-			if util.IsMobileContainer() {
-				HandleAssetsRemoveEvent(absPath)
-			}
-
-			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
-				err = removeErr
-				return
-			}
-
-			util.RemoveAssetText(p)
+	for _, item := range unusedAssets {
+		cache.RemoveAssetHashByPath(item.Item)
+		util.RemoveAssetText(item.Item)
+		if util.IsMobileContainer() {
+			HandleAssetsRemoveEvent(filepath.Join(util.DataDir, item.Item))
 		}
-		ret = append(ret, absPath)
 	}
 	if 0 < len(ret) {
 		IncSync()
@@ -1707,6 +1697,11 @@ func RemoveUnusedAssets() (ret []string, err error) {
 }
 
 func RemoveUnusedAsset(p string) (ret string, err error) {
+	verify, release, err := beginOrdinaryAssetCleanup()
+	if err != nil {
+		return
+	}
+	defer release()
 	relativePath, absPath, err := ResolveUnusedDataAssetPath(p)
 	if err != nil {
 		return
@@ -1727,20 +1722,18 @@ func RemoveUnusedAsset(p string) (ret string, err error) {
 	}
 
 	hash, _ := util.GetEtag(absPath)
-	sql.BatchRemoveAssetsQueue([]string{hash})
-	cache.RemoveAssetHash(hash)
-
-	if util.IsMobileContainer() {
-		HandleAssetsRemoveEvent(absPath)
-	}
-
-	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
+	if _, _, err = removeOrdinaryUnusedAssets([]*UnusedItem{{Item: relativePath}}, historyDir, verify, filelock.RemoveWithoutFatal); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
 		err = fmt.Errorf("remove unused asset [%s] failed: %w", absPath, err)
 		return
 	}
 	ret = absPath
+	sql.BatchRemoveAssetsQueue([]string{hash})
+	cache.RemoveAssetHashByPath(relativePath)
+	if util.IsMobileContainer() {
+		HandleAssetsRemoveEvent(absPath)
+	}
 
 	util.RemoveAssetText(relativePath)
 
@@ -1805,30 +1798,24 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
-	filelock.Lock(oldAbsPath)
-	if err = os.Rename(oldAbsPath, newAbsPath); err != nil {
-		if err = gulu.File.Copy(oldAbsPath, newAbsPath); err != nil {
-			filelock.Unlock(oldAbsPath)
-			logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
-			return
-		}
+	// Keep both paths readable until all references have been rewritten. On a
+	// partial failure or restart, each committed reference still has its file.
+	if err = copyPromotedAsset(oldAbsPath, newAbsPath); err != nil {
+		return
 	}
-	filelock.Unlock(oldAbsPath)
 
 	oldSya := oldAbsPath + ".sya"
-	filelock.Lock(oldSya)
-	if gulu.File.IsExist(oldSya) {
+	hasSya := false
+	if _, statErr := os.Stat(oldSya); statErr == nil {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		newSya := newAbsPath + ".sya"
-		if err = os.Rename(oldSya, newSya); err != nil {
-			if err = gulu.File.Copy(oldSya, newSya); err != nil {
-				filelock.Unlock(oldSya)
-				logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
-				return
-			}
+		if err = copyPromotedAsset(oldSya, newAbsPath+".sya"); err != nil {
+			return
 		}
+		hasSya = true
+	} else if !os.IsNotExist(statErr) {
+		err = statErr
+		return
 	}
-	filelock.Unlock(oldSya)
 
 	oldName := path.Base(oldCleanPath)
 	oldNameBytes := []byte(oldName)
@@ -1920,6 +1907,15 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	if ocrText := util.GetAssetText(oldCleanPath); "" != ocrText {
 		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
 		util.SetAssetText(newPath, ocrText)
+	}
+
+	if hasSya {
+		if err = filelock.RemoveWithoutFatal(oldSya); err != nil {
+			return
+		}
+	}
+	if err = filelock.RemoveWithoutFatal(oldAbsPath); err != nil {
+		return
 	}
 
 	IncSync()
@@ -3209,7 +3205,7 @@ func copyAssetsToDataAssets(rootPath string) error {
 
 	dataAssetsPath := filepath.Join(util.DataDir, "assets")
 	for _, assetsDirPath := range assetsDirPaths {
-		if err := filelock.Copy(assetsDirPath, dataAssetsPath); err != nil {
+		if err := promoteAssetDirectory(assetsDirPath, dataAssetsPath); err != nil {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 			return err
 		}

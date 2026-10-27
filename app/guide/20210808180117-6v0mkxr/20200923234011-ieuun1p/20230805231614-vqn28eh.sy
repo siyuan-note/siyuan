@@ -7,7 +7,7 @@
 		"id": "20230805231614-vqn28eh",
 		"title": "Member's privileges",
 		"type": "doc",
-		"updated": "20230805231924"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -110,12 +110,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230805231739-8ld7004",
-				"updated": "20230805231924"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "These two parts need to be purchased separately, and the annual subscription includes one-time payment features, that is, all function features can be used during the subscription period."
+					"Data": "Choose the service that meets your needs. An annual cloud subscription includes paid features while the subscription is active. A one-time feature purchase does not include cloud services."
 				}
 			]
 		}

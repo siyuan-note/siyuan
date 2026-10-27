@@ -145,14 +145,14 @@ test("background time does not consume a startup deadline", () => {
 });
 
 test("normal layout completion preserves a visible startup failure until the application is ready", () => {
-    const source = readFileSync("src/mobile/util/setEmpty.ts", "utf8");
+    const source = readFileSync("src/mobile/util/startup.ts", "utf8");
     const functionSource = source.match(/export const finishMobileStartup = \(\) => \{[\s\S]*?\n};/)[0];
     let removed = false;
     const loading = {classList: {contains: () => true}, remove: () => removed = true};
     const document = {getElementById: () => loading, body: {style: {removeProperty() {}}}};
-    runInNewContext(functionSource.replace("export const", "const") + "\nfinishMobileStartup();", {document});
+    runInNewContext(functionSource.replace("export const", "const") + "\nfinishMobileStartup();", {document, finishInitialView: undefined});
     assert.equal(removed, false);
     loading.classList.contains = () => false;
-    runInNewContext(functionSource.replace("export const", "const") + "\nfinishMobileStartup();", {document});
+    runInNewContext(functionSource.replace("export const", "const") + "\nfinishMobileStartup();", {document, finishInitialView: undefined});
     assert.equal(removed, true);
 });

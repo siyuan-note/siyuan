@@ -10,6 +10,9 @@ import (
 
 type CreateSnapshotRequest struct {
 	Memo string `json:"memo" api:"optional"`
+	// FullCheck 为 true 时读取全部已落盘文件，检查大小及修改时间均未变化的内容修改。
+	// 默认为 false，复用本机已确认的文件属性；未下载资源保留逻辑版本，不为校验主动下载。
+	FullCheck bool `json:"fullCheck" api:"optional"`
 }
 
 type CreateSnapshotData struct {

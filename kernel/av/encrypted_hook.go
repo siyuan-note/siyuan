@@ -222,7 +222,9 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 func readMirrorBlocksWithErr(boxID string) (ret map[string][]string, err error) {
 	ret = map[string][]string{}
 	p := mirrorBlocksPath(boxID)
-	if !filelock.IsExist(p) {
+	if _, err = os.Stat(p); os.IsNotExist(err) {
+		return ret, nil
+	} else if err != nil {
 		return
 	}
 	data, err := filelock.ReadFile(p)
@@ -240,6 +242,9 @@ func readMirrorBlocksWithErr(boxID string) (ret map[string][]string, err error) 
 	}
 	if err = msgpack.Unmarshal(data, &ret); err != nil {
 		return
+	}
+	if ret == nil {
+		err = errors.New("invalid database mirror index")
 	}
 	return
 }

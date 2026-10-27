@@ -30,6 +30,65 @@ func addBootSyncSession(t *testing.T, id string) *melody.Session {
 	return session
 }
 
+func TestBootSyncUnreachableCloudDoesNotBlockLocalStartup(t *testing.T) {
+	const childEnv = "SIYUAN_TEST_OFFLINE_BOOT"
+	if os.Getenv(childEnv) == "" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestBootSyncUnreachableCloudDoesNotBlockLocalStartup$", "-test.timeout=30s")
+		cmd.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("isolated offline startup failed: %v\n%s", err, output)
+		}
+		return
+	}
+	prepareSyncDirectoryTest(t)
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	util.AttachUI = true
+	Conf.Sync.Load().Enabled = true
+	Conf.Sync.Load().Perception = false
+	Conf.Sync.Load().CloudName = "main"
+	Conf.SetUser(&conf.User{UserId: "offline-test", UserSiYuanOneTimePayStatus: 1})
+	requested := make(chan struct{}, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !util.IsBooted() {
+			t.Error("network request blocked local startup")
+		}
+		select {
+		case requested <- struct{}{}:
+		default:
+		}
+		<-r.Context().Done()
+	}))
+	t.Cleanup(func() { server.CloseClientConnections(); server.Close() })
+	Conf.Sync.Load().S3.Endpoint = server.URL
+	BootSyncData()
+	if !bootSyncScheduled.Load() || isSyncingStorages() {
+		t.Fatal("offline boot did not defer synchronization")
+	}
+	select {
+	case <-requested:
+		t.Fatal("cloud request started before local startup")
+	default:
+	}
+	util.SetBooted()
+	acknowledgeBootSyncClient(t, "offline-ready")
+	select {
+	case <-requested:
+	case <-time.After(5 * time.Second):
+		t.Fatal("background synchronization did not start")
+	}
+	snapshot := GetSyncCheckout("", "")
+	if snapshot.Task == nil || !CancelSyncCheckout(snapshot.Task.TaskID) {
+		t.Fatal("offline background sync could not be canceled")
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for bootSyncScheduled.Load() && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if bootSyncScheduled.Load() || BootSyncSucc.Load() != 1 {
+		t.Fatal("canceled offline boot sync did not finish as unsuccessful")
+	}
+}
+
 func TestBootSyncUIWaitSurvivesSlowStartupAndRefresh(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		first := addBootSyncSession(t, "first")

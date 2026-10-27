@@ -106,7 +106,7 @@ export class Dialog {
         }
         this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">
 <div class="b3-dialog__scrim"${options.transparent ? ' style="background-color:transparent"' : ""}></div>
-<div role="dialog" aria-modal="true" ${options.title ? `aria-labelledby="dialog-title-${this.id}" ` : ""}tabindex="-1" class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height || "auto"};
+<div role="dialog" aria-modal="true" ${options.title ? `aria-labelledby="dialog-title-${this.id}" ` : ""}tabindex="-1" class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height?.replace(/dvh/g, "vh") || "auto"};height:${options.height || "auto"};
 left:${left || "auto"};top:${top || "auto"}">
   <svg class="b3-dialog__close${(!isMobile() || this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
   <div id="dialog-title-${this.id}" class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" ${(isMobile() &&options.title) ? 'style="padding-right: 38px;"' : ""} onselectstart="return false;">${options.title || ""}</div>

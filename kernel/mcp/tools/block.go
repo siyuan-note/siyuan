@@ -447,14 +447,7 @@ func blockDelete(args map[string]any) (CallToolResult, error) {
 
 	bt := treenode.GetBlockTreeInExactBox(id, boxID)
 
-	transaction := &model.Transaction{
-		DoOperations: []*model.Operation{{
-			Action: "delete",
-			ID:     id,
-		}},
-	}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(&model.Operation{Action: "delete", ID: id}); err != nil {
 		return blockToolError("delete block failed: " + err.Error())
 	}
 

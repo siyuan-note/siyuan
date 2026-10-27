@@ -222,6 +222,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
+	readVersion := cache.TreeDataReadVersion()
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		if !os.IsNotExist(err) {
@@ -243,7 +244,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 
 	ret, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
 	if nil == err {
-		cache.SetTreeDataInBox(rootID, boxID, data)
+		cache.SetTreeDataFromReadInBox(rootID, boxID, data, readVersion)
 	}
 	return
 }
@@ -415,7 +416,7 @@ func readDocumentHeaderInMode(absPath string, strict bool, mode int) (*documentH
 		return nil, err
 	}
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSONForMode(data, mode); err != nil {
+	if err = treenode.CheckSpecJSON(data); err != nil {
 		return nil, err
 	}
 	var doc documentHeader
@@ -523,8 +524,7 @@ func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err 
 			}
 		case field == "Properties":
 			properties = iter.SkipAndReturnBytes()
-			if checkErr := documentaddressing.CheckTitleProperties(properties, mode); checkErr != nil &&
-				(titleErr == nil || errors.Is(checkErr, documentaddressing.ErrModeConflict)) {
+			if _, checkErr := documentaddressing.CheckTitleProperties(properties); checkErr != nil && titleErr == nil {
 				titleErr = checkErr
 			}
 		default:
@@ -537,9 +537,6 @@ func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err 
 	}
 	if r.err != nil {
 		return nil, r.err
-	}
-	if errors.Is(titleErr, documentaddressing.ErrModeConflict) {
-		return nil, titleErr
 	}
 	// 属性可以排在版本之前，完整检查根对象后才能返回，版本错误不能进入属性修复。
 	if specErr != nil {
@@ -603,6 +600,12 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 		err = encErr
 		return
 	}
+	recorder := treeRecorder(tree)
+	if recorder != nil {
+		if err = recorder.record(encData); err != nil {
+			return 0, err
+		}
+	}
 	pending, metadataErr := treenode.BeginDocumentMetadataWrite(tree)
 	if metadataErr != nil {
 		return 0, metadataErr
@@ -612,12 +615,12 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	timing.Stage("compare")
 	var validatedSource []byte
-	if cachedData, ok := cache.GetTreeDataInBox(tree.ID, tree.Box); ok {
+	if cachedData, ok := cache.GetTreeDataInBox(tree.ID, tree.Box); ok && recorder == nil {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
 			return
 		}
 		validatedSource = cachedData
-	} else {
+	} else if recorder == nil {
 		// 读盘比对：加密笔记本的磁盘数据是密文，需先解密成明文再与 data 比对
 		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr {
 			decDisk, decErr := decryptDataWithDEK(tree.Box, tree.Path, diskData, dek)
@@ -629,7 +632,10 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 	}
 
 	timing.Stage("write")
-	err = util.WriteFileWithPreflight(filePath, encData, !encrypted, func(current []byte) error {
+	err = util.WriteFileWithPreflight(filePath, encData, !encrypted && recorder == nil, func(current []byte) error {
+		if recorder != nil && !bytes.Equal(current, recorder.before) {
+			return fmt.Errorf("%w: %s", util.ErrFileChanged, filePath)
+		}
 		if current == nil {
 			return nil
 		}
@@ -661,14 +667,14 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 }
 
 func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
-	mode, err := validateTreePathMode(tree.Box, tree.Path)
+	_, err = validateTreePathMode(tree.Box, tree.Path)
 	if err != nil {
 		return
 	}
 	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
 		return
 	}
-	if err = treenode.CheckSpecForMode(tree, mode); nil != err {
+	if err = treenode.CheckSpec(tree); nil != err {
 		return
 	}
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
@@ -775,7 +781,7 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 	withoutBOM := bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
 	needFix = len(withoutBOM) != len(jsonData)
 	jsonData = withoutBOM
-	if err = treenode.CheckSpecJSONForMode(jsonData, mode); nil != err {
+	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
 	jsonData, removedNull := removeUnescapedUnicodeNull(jsonData)
@@ -793,7 +799,7 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpecForMode(ret, mode); nil != err {
+	if err = treenode.CheckSpec(ret); nil != err {
 		return
 	}
 	if err = treenode.RefreshTableCellRichProjection(ret.Root); nil != err {
@@ -887,7 +893,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
 	jsonData = bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSONForMode(jsonData, mode); nil != err {
+	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
 	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
@@ -900,7 +906,7 @@ func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lut
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpecForMode(ret, mode); nil != err {
+	if err = treenode.CheckSpec(ret); nil != err {
 		return
 	}
 	err = treenode.RefreshTableCellRichProjection(ret.Root)

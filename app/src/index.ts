@@ -339,7 +339,6 @@ export class App {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
-            window.siyuan.documentAddressingVersion = response.data.documentAddressingVersion;
             await loadDesktopHostConnection();
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
@@ -360,6 +359,10 @@ export class App {
                         await ensureOnboarding();
                         await setNoteBook();
                         await initWindowWithLoading(() => onGetConfig(response.data.start, this), setTabPosition);
+                        /// #if !BROWSER
+                        // 加载遮罩移除后再显示主窗口，避免原生窗口按钮出现在启动界面上。
+                        ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
+                        /// #endif
                         onSetaccount();
                         setTitle("", true);
                         initMessage();
@@ -435,6 +438,4 @@ if (window.JSAndroid?.setWebViewFocusable) {
 } else if (window.JSHarmony?.setWebViewFocusable) {
     window.JSHarmony.setWebViewFocusable(true);
 }
-/// #else
-ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
 /// #endif

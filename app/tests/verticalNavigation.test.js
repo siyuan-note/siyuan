@@ -45,10 +45,12 @@ const rendererModules = () => {
         'import {focusBlock} from "./selection";\n' + extract("util/tableCellRichNavigation", ["leaveRichTableCell"]);
     modules["../util/highlightById"] = "export const scrollCenter = () => {};";
     modules["util/codeScrollCenter"] = 'import {hasClosestBlock} from "./hasClosest";\n' +
+        'import {isUndoViewportPreserved} from "../undo/viewport";\n' +
         'import {getEditorRange} from "./selection";\n' +
         'import {focusByRange} from "./selectionOffsets";\n' +
         "const resolveVisibleListMindmapBlock = () => undefined, revealTabsForTarget = () => {};\n" +
         "const isMobile = () => false;\n" + extract("../util/highlightById", ["scrollCenter"]);
+    modules["undo/viewport"] = readFileSync(path.join(root, "undo/viewport.ts"), "utf8");
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
         'import {isTableLikeView} from "./viewType";\n' +
         'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +

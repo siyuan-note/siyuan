@@ -36,6 +36,7 @@ export const newDatabaseRowModel = (options: {
         matchedKeyID?: string,
         keywords?: string[],
         focusPrimary?: boolean,
+        focusTitle?: boolean,
         bindPrimary?: boolean,
         navigation?: IDatabaseRowOpenData["navigation"],
         boundBlockID?: string,

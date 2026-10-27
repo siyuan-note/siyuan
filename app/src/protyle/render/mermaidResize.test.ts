@@ -32,6 +32,7 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
     Object.assign(window, {siyuan: {config: {appearance: {mode: 0}}}, DOMPurify: {sanitize: (value: string) => value}});
     new Function("exports", "require", sources.renderer)(api, () => ({
         Constants: {PROTYLE_CDN: "", ZWSP: "\u200b"}, addScript: async () => {},
+        ensureBrowserCompatibility: async () => {},
         isFoldedRenderContent: () => false, isZenumlDiagram: () => false,
         getMermaidLayout: (): undefined => undefined, applyMermaidLayout: (value: string) => value,
         hasClosestByClassName: (element: Element, name: string) => element.closest("." + name),

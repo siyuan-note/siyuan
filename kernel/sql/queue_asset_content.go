@@ -48,15 +48,18 @@ func FlushAssetContentTxJob() {
 	task.AppendTask(task.AssetContentDatabaseIndexCommit, FlushAssetContentQueue)
 }
 
-func FlushAssetContentQueue() {
+func FlushAssetContentQueue() error {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 	ops := getAssetContentOperations()
 	total := len(ops)
 	if 1 > total {
-		return
+		return nil
 	}
 
-	assetContentTxLock.Lock()
-	defer assetContentTxLock.Unlock()
+	if assetContentDB == nil {
+		return errors.New("asset content database is unavailable")
+	}
 	start := time.Now()
 
 	groupOpsTotal := map[string]int{}
@@ -68,12 +71,12 @@ func FlushAssetContentQueue() {
 	groupOpsCurrent := map[string]int{}
 	for i, op := range ops {
 		if util.IsExiting.Load() {
-			return
+			return errors.New("asset content indexing interrupted by shutdown")
 		}
 
 		tx, err := beginAssetContentTx()
 		if err != nil {
-			return
+			return err
 		}
 
 		groupOpsCurrent[op.action]++
@@ -84,12 +87,12 @@ func FlushAssetContentQueue() {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 			eventbus.Publish(util.EvtSQLAssetContentRebuild)
-			return
+			return err
 		}
 
 		if err = commitAssetContentTx(tx); err != nil {
 			logging.LogErrorf("commit tx failed: %s", err)
-			return
+			return err
 		}
 
 		if 16 < i && 0 == i%128 {
@@ -105,6 +108,7 @@ func FlushAssetContentQueue() {
 	if 7000 < elapsed {
 		logging.LogInfof("database asset content op tx [%dms]", elapsed)
 	}
+	return nil
 }
 
 func execAssetContentOp(op *assetContentDBQueueOperation, tx *sql.Tx, context map[string]any) (err error) {

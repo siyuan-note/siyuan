@@ -54,9 +54,10 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
         api.mermaidRender(element);
         await waitForRender(element);
     };
-    const create = async (alignment = "", width = "33%") => {
+    const create = async (alignment = "", width = "33%",
+                          source = "graph LR; A[First Mermaid diagram node]-->B[Second Mermaid diagram node];") => {
         root.style.zoom = "";
-        root.innerHTML = lute.Md2BlockDOM("```mermaid\ngraph LR; A[First Mermaid diagram node]-->B[Second Mermaid diagram node];\n```");
+        root.innerHTML = lute.Md2BlockDOM("```mermaid\n" + source + "\n```");
         const block = root.firstElementChild as HTMLElement;
         check.equal(block.dataset.subtype, "mermaid");
         block.style.width = width;
@@ -65,18 +66,37 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
         check.equal(block.querySelectorAll(":scope > .protyle-block-resize").length, 1);
         return block;
     };
+    const automaticSource = 'flowchart LR\n    A["1"] --> B["2"] --> C["3"] --> D["4"]\n    D -. "哈哈哈" .-> B';
+    let automaticWidth = 0;
+    const checkAutomaticWidth = (block: Element) => {
+        const svgWidth = block.querySelector("svg").getBoundingClientRect().width;
+        check.ok(Math.abs(svgWidth - automaticWidth) < 1, "alignment preserves the automatic diagram size: " +
+            JSON.stringify({alignment: (block as HTMLElement).style.textAlign, expected: automaticWidth, actual: svgWidth}));
+        const parentRect = root.getBoundingClientRect();
+        const parentStyle = getComputedStyle(root);
+        const blockRect = block.getBoundingClientRect();
+        check.ok(blockRect.left >= parentRect.left + parseFloat(parentStyle.paddingLeft) - 1);
+        check.ok(blockRect.right <= parentRect.right - parseFloat(parentStyle.paddingRight) + 1,
+            "automatic widths stay inside the editor");
+    };
     for (const alignment of ["", "left", "center", "right"]) {
-        const block = await create(alignment, "");
+        const block = await create(alignment, "", automaticSource);
         check.equal(block.style.width, "", "automatic widths render without persisting a width");
-        check.ok(block.querySelector("svg").getBoundingClientRect().width > 0);
+        if (!alignment) {
+            automaticWidth = block.querySelector("svg").getBoundingClientRect().width;
+            check.ok(automaticWidth > 0);
+        }
+        checkAutomaticWidth(block);
         const before = lute.BlockDOM2Md(block.outerHTML);
         window.siyuan.config.appearance.mode = 1;
         api.refreshMermaidTheme(block);
         await waitForRender(block);
+        checkAutomaticWidth(block);
         check.equal(lute.BlockDOM2Md(block.outerHTML), before, "theme changes preserve automatic widths and alignment");
         window.siyuan.config.appearance.mode = 0;
         root.innerHTML = lute.Md2BlockDOM(before);
         await render(root.firstElementChild);
+        checkAutomaticWidth(root.firstElementChild);
         check.equal(lute.BlockDOM2Md(root.innerHTML), before, "automatic widths render again after reopening");
     }
     const hiddenDiagram = lute.Md2BlockDOM("```mermaid\ngraph TD; A-->B;\n```");

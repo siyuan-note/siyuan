@@ -493,10 +493,6 @@ func GetBlockRefIDsByFileAnnotationIDInBox(id, boxID string) []string {
 	return sql.QueryRefIDsByAnnotationIDInBox(id, boxID)
 }
 
-func GetBlockDefIDsByRefText(refText string) (ret []string) {
-	return GetBlockDefIDsByRefTextInBox(refText, "")
-}
-
 func GetBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	if boxID == "" {
 		ret = sql.QueryBlockDefIDsByRefText(refText)
@@ -644,10 +640,6 @@ func BuildBlockBreadcrumbInBox(id string, excludeTypes []string, boxID string) (
 
 	ret = buildBlockBreadcrumb(node, excludeTypes, false)
 	return
-}
-
-func GetBlockBreadcrumbChildren(id string, excludeTypes []string, offset, limit int) (ret *BlockBreadcrumbChildren, err error) {
-	return GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, "")
 }
 
 func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, limit int, boxID string) (

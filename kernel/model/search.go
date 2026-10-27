@@ -320,10 +320,6 @@ func GetQueryEmbedStatement(embedBlockID string) (stmt, boxID string, err error)
 	return
 }
 
-func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, "")
-}
-
 // SearchEmbedBlockInBox 与 SearchEmbedBlock 一致，但按 boxID 路由 SQL 到加密 content db。
 // 加密笔记本的嵌入块查询走独立加密库（全局 siyuan.db 不含加密数据），boxID 为空时落回全局库。
 func SearchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string) (ret []*EmbedBlock) {
@@ -598,10 +594,6 @@ func filterSelfHPath(blocks []*Block) {
 			}
 		}
 	}
-}
-
-func trimSelfHPath(hPath string) string {
-	return trimDocumentTitleHPath(hPath, "")
 }
 
 func trimDocumentTitleHPath(hPath, title string) string {
@@ -3358,10 +3350,6 @@ func fromSQLBlockWithHPathTermsContext(ctx context.Context, sqlBlock *sql.Block,
 		return nil
 	}
 	return
-}
-
-func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
-	markBlockHPathContext(context.Background(), block, hPath, terms, beforeLen)
 }
 
 func markBlockHPathContext(ctx context.Context, block *Block, hPath, terms string, beforeLen int) {

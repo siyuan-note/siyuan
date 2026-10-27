@@ -262,10 +262,6 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 
 type TagBlocks []*Block
 
-func (s TagBlocks) Len() int           { return len(s) }
-func (s TagBlocks) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s TagBlocks) Less(i, j int) bool { return s[i].ID < s[j].ID }
-
 type Tag struct {
 	Name     string `json:"name"`
 	Label    string `json:"label"`

@@ -59,10 +59,6 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 	return ExportPandocConvertZipWithOptions(ids, pandocTo, ext, nil)
 }
 
-func ExportNotebookMarkdown(boxID string) (zipPath string) {
-	return ExportNotebookMarkdownWithOptions(boxID, nil)
-}
-
 func ExportNotebooksMarkdown(boxIDs []string) (zipPath string) {
 	return ExportNotebooksMarkdownWithOptions(boxIDs, nil)
 }

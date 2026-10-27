@@ -132,12 +132,6 @@ func newBlockRefCheckGroup() *blockRefCheckGroup {
 	}
 }
 
-// CheckBlockRef 检查将被删除的块是否被引用或绑定到仍存在的数据库。
-func CheckBlockRef(ids []string) bool {
-	ret, _ := CheckBlockRefInBox(ids, nil, ids, "")
-	return ret
-}
-
 // CheckBlockRefInBox 检查受影响块的引用，并检查实际删除块的数据库绑定。
 func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret bool, err error) {
 	sql.FlushQueue()
@@ -398,10 +392,6 @@ type BlockTreeInfo struct {
 	NextType        string `json:"nextType"`
 }
 
-func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
-	return GetBlockTreeInfosInBox(ids, "")
-}
-
 // GetBlockTreeInfosInBox 获取指定笔记本内的块树信息。空 box 仅查询普通全局库。
 func GetBlockTreeInfosInBox(ids []string, boxID string) (ret map[string]*BlockTreeInfo) {
 	ret = map[string]*BlockTreeInfo{}
@@ -455,10 +445,6 @@ func GetBlockTreeInfosInBox(ids []string, boxID string) (ret map[string]*BlockTr
 		}
 	}
 	return
-}
-
-func GetBlockSiblingID(id string) (parent, previous, next string) {
-	return GetBlockSiblingIDInBox(id, "")
 }
 
 // GetBlockSiblingIDInBox 获取指定笔记本内块的相邻关系。空 box 不回退搜索加密笔记本。
@@ -570,10 +556,6 @@ func getPreNext(parent *ast.Node) (previous, next string) {
 		return
 	}
 	return
-}
-
-func GetBlockRelevantIDs(id string) (parentID, previousID, nextID string, err error) {
-	return GetBlockRelevantIDsInBox(id, "")
 }
 
 // GetBlockRelevantIDsInBox 获取指定笔记本内块的父级及相邻块 ID。空 box 不回退搜索加密笔记本。
@@ -1068,10 +1050,6 @@ func prepareHeadingChildrenDOMNodes(heading *ast.Node, children []*ast.Node, rem
 	return
 }
 
-func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction, err error) {
-	return GetHeadingLevelBatchTransaction([]string{id}, level)
-}
-
 func GetHeadingLevelBatchTransaction(ids []string, level int) (transaction *Transaction, err error) {
 	if len(ids) == 0 || level < 1 || 6 < level {
 		return
@@ -1216,10 +1194,6 @@ func GetBlockDOMInBox(id, boxID string) (ret string) {
 	return
 }
 
-func GetBlockDOMs(ids []string) (ret map[string]string) {
-	return GetBlockDOMsInBox(ids, "")
-}
-
 // GetBlockDOMsInBox 渲染指定笔记本内的块 DOM。禁止在 boxID 未指定时遍历加密笔记本。
 func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
 	ret = map[string]string{}
@@ -1254,15 +1228,6 @@ func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
 	return
 }
 
-func GetBlockDOMWithEmbed(id string) (ret string) {
-	return GetBlockDOMWithEmbedInBox(id, "")
-}
-
-// GetBlockDOMWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。
-func GetBlockDOMWithEmbedInBox(id, boxID string) (ret string) {
-	return GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, nil)
-}
-
 // EmbedBlockAccessChecker 判断嵌入查询结果块是否允许返回。
 type EmbedBlockAccessChecker func(blockID string) bool
 
@@ -1275,15 +1240,6 @@ func GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID string, accessChecker 
 	doms := GetBlockDOMsWithEmbedInBoxWithAccessChecker([]string{id}, boxID, accessChecker)
 	ret = doms[id]
 	return
-}
-
-func GetBlockDOMsWithEmbed(ids []string) (ret map[string]string) {
-	return GetBlockDOMsWithEmbedInBox(ids, "")
-}
-
-// GetBlockDOMsWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。boxID 为空时仅查询普通全局库。
-func GetBlockDOMsWithEmbedInBox(ids []string, boxID string) (ret map[string]string) {
-	return GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, nil)
 }
 
 // GetBlockDOMsWithEmbedInBoxWithAccessChecker 按访问权限渲染指定笔记本内包含嵌入块的 DOM。
@@ -1697,10 +1653,6 @@ func childBlockFromNode(node *ast.Node, tree *parse.Tree) *ChildBlock {
 		Content:  block.Content,
 		Markdown: block.Markdown,
 	}
-}
-
-func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
-	return GetTailChildBlocksInBox(id, n, "")
 }
 
 // GetTailChildBlocksInBox 返回指定笔记本边界内末尾的子块。

@@ -85,11 +85,6 @@ var (
 	}{}
 )
 
-// StartModelMetadataRefresh 在后台刷新 models.dev 模型目录，不阻塞内核启动。
-func StartModelMetadataRefresh() {
-	refreshModelsDevContextCatalogAsync()
-}
-
 func getModelsDevContextLimit(providerBaseURL, model string) int {
 	if providerBaseURL == "" || model == "" {
 		return 0

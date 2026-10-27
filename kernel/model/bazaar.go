@@ -156,11 +156,6 @@ func filterUpdatableBazaarPackages(packages []*UpdatedPackage) (updatable []*Upd
 	return
 }
 
-// BatchUpdatePackages 更新所有集市包
-func BatchUpdatePackages(frontend string) error {
-	return BatchUpdatePackagesContext(context.Background(), frontend)
-}
-
 // BatchUpdatePackagesContext 取消时保留已提交的包，并停止当前下载和后续更新。
 func BatchUpdatePackagesContext(ctx context.Context, frontend string) error {
 	if err := ctx.Err(); err != nil {

@@ -70,10 +70,6 @@ type mcpContent struct {
 	Text string `json:"text"`
 }
 
-func WebSearch(query, exaApiKey string) (string, error) {
-	return WebSearchContext(context.Background(), query, exaApiKey, 0)
-}
-
 func WebSearchContext(ctx context.Context, query, exaApiKey string, timeout int) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(NormalizeWebTimeout(timeout))*time.Second)
 	defer cancel()

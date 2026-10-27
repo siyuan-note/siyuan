@@ -132,21 +132,6 @@ func GetBlocksInBoxContext(ctx context.Context, ids []string, boxID string) (ret
 	return
 }
 
-// GetRefTextInBox 按 defBlockID 在指定 box 的 db 里查引用文本。
-func GetRefTextInBox(defBlockID, boxID string) (ret string) {
-	row := queryRowForBox(boxID, "SELECT content FROM blocks WHERE id = ?", defBlockID)
-	if row == nil {
-		return
-	}
-	if err := row.Scan(&ret); err != nil {
-		if err != sql.ErrNoRows {
-			logging.LogErrorf("sql query failed: %s", err)
-		}
-		ret = ""
-	}
-	return
-}
-
 // QueryRefsByDefIDInBox 按 defBlockID 在指定 box 的 db 里查引用列表。
 // containChildren 为 true 时递归查询定义块及其所有子块，与 QueryRefsByDefID 保持一致。
 func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string) (ret []*Ref) {
@@ -483,12 +468,6 @@ func SelectBlocksRegexInBox(stmt string, exp *regexp.Regexp, name, alias, memo, 
 			}
 		}
 	}
-	return
-}
-
-// SelectBlocksRegexArgsInBox 与 SelectBlocksRegexInBox 一致，但通过绑定参数执行。
-func SelectBlocksRegexArgsInBox(stmt string, exp *regexp.Regexp, name, alias, memo, ial bool, page, pageSize int, boxID string, args ...any) (ret []*Block) {
-	ret, _ = SelectBlocksRegexArgsInBoxContext(context.Background(), stmt, exp, name, alias, memo, ial, page, pageSize, boxID, args...)
 	return
 }
 

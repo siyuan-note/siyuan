@@ -132,10 +132,6 @@ var filterOperators = []FilterOperator{
 	FilterOperatorStartsWith, FilterOperatorEndsWith, FilterOperatorIsBetween, FilterOperatorIsTrue, FilterOperatorIsFalse,
 }
 
-func FilterOperators() []FilterOperator {
-	return append([]FilterOperator(nil), filterOperators...)
-}
-
 func IsDateKeyType(typ KeyType) bool {
 	kind := GetKeyCapability(typ).ValueKind
 	return kind == "date" || kind == "timestamp"

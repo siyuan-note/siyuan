@@ -214,14 +214,6 @@ func (m *Manager) lookup(id string) (*previewJob, error) {
 	return job, nil
 }
 
-func (m *Manager) Scope(id string) (string, error) {
-	job, err := m.lookup(id)
-	if err != nil {
-		return "", err
-	}
-	return job.scope, nil
-}
-
 func (m *Manager) Origin(id string) (string, error) {
 	job, err := m.lookup(id)
 	if err != nil {

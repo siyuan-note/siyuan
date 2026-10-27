@@ -593,10 +593,14 @@ func (o *CalendarObject) update() error {
 		return err
 	}
 
+	etag, err := FileETag(o.FilePath)
+	if err != nil {
+		return err
+	}
 	o.Data.Path = PathJoinWithSlash(o.CalendarPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
-	o.Data.ETag = FileETag(addressFileInfo)
+	o.Data.ETag = etag
 
 	return nil
 }

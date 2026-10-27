@@ -17,12 +17,12 @@
 package model
 
 import (
+	"crypto/sha256"
 	"fmt"
-	"io/fs"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/emersion/go-webdav/caldav"
@@ -67,11 +67,17 @@ func SaveMetaData[T []*caldav.Calendar | []*carddav.AddressBook](metaData T, met
 	return nil
 }
 
-// FileETag generates an ETag for a file
-func FileETag(fileInfo fs.FileInfo) string {
-	return fmt.Sprintf(
-		"%s-%x",
-		fileInfo.ModTime().Format(time.RFC3339),
-		fileInfo.Size(),
-	)
+// FileETag identifies the persisted representation, including equal-size changes
+// whose timestamps may be identical after synchronization.
+func FileETag(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	hash := sha256.New()
+	if _, err = io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }

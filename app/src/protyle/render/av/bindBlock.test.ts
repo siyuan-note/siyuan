@@ -1,9 +1,8 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("panel binding searches the primary text and anchors to the original field", () => {
     const requests: unknown[][] = [];
@@ -12,15 +11,11 @@ test("panel binding searches the primary text and anchors to the original field"
     const protyle = {options: {}, toolbar: {}} as IProtyle;
     const field = {isConnected: true, dataset: {rowId: "item"},
         querySelector: () => ({value: "  Current title  "})} as unknown as HTMLElement;
-    const exports = {} as typeof import("./bindBlock");
-    runInNewContext(transpileModule(readFileSync(join(__dirname, "bindBlock.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-    }).outputText, {
-        exports,
+    const exports = loadModule<typeof import("./bindBlock")>(join(__dirname, "bindBlock.ts"), {
         require: () => ({hintRef: (...args: unknown[]) => requests.push(args)}),
         document: {createRange: () => range},
         window: {siyuan: {menus: {menu: {remove() {}}}}},
-    });
+    }, ScriptTarget.ES2020);
     exports.openAVBindBlock(protyle, field);
     assert.equal(selected, field);
     assert.equal(protyle.toolbar.range, range);

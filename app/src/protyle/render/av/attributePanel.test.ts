@@ -1,13 +1,11 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
-const exports = {} as typeof import("./attributePanel");
-runInNewContext(transpileModule(readFileSync("src/protyle/render/av/attributePanel.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText, {exports, require: () => ({})});
+const exports = loadModule<typeof import("./attributePanel")>("src/protyle/render/av/attributePanel.ts", {
+    require: () => ({}),
+}, ScriptTarget.ES2021);
 
 const setup = (database = "", item = "") => {
     const panel = Object.create(exports.AVAttributePanel.prototype);

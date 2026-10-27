@@ -1,8 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 
 const loadReload = () => {
     let doc: {cb: (keys: string[]) => void, onRenderError: () => void, afterAVRender: () => Promise<void>};
@@ -11,11 +10,9 @@ const loadReload = () => {
     let finishScroll: () => void;
     const scroll = new Promise<void>(resolve => finishScroll = resolve);
     const noop = () => {};
-    const exports = {} as Pick<typeof import("./reload"), "reloadProtyleAndWait">;
     const defaults = new Proxy({}, {get: () => noop});
-    runInNewContext(transpileModule(readFileSync("src/protyle/util/reload.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports, console,
+    const exports = loadModule<Pick<typeof import("./reload"), "reloadProtyleAndWait">>(
+        "src/protyle/util/reload.ts", {console,
         window: {siyuan: {config: {editor: {spellcheck: false}}}},
         require: (name: string) => {
             if (name === "./reloadState") return {shouldReloadProtyle: () => true};
@@ -29,7 +26,7 @@ const loadReload = () => {
             }};
             return defaults;
         },
-    });
+    }, ScriptTarget.ES2021);
     const element = {classList: {add: noop, remove: noop}, getAttribute: () => "", setAttribute: noop};
     const protyle = {
         wysiwyg: {element}, element, options: {}, lute: new Proxy({}, {get: () => noop}),
@@ -60,10 +57,8 @@ test("sync reload waits beyond document insertion for database rendering and scr
 });
 
 test("invalidated document renders report failure instead of leaving sync reload pending", () => {
-    const exports = {} as Pick<typeof import("./onGet"), "onGet">;
-    runInNewContext(transpileModule(readFileSync("src/protyle/util/onGet.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports, require: () => ({})});
+    const exports = loadModule<Pick<typeof import("./onGet"), "onGet">>("src/protyle/util/onGet.ts",
+        {require: () => ({})}, ScriptTarget.ES2021);
     let failures = 0;
     exports.onGet({protyle: {} as IProtyle, data: {} as IWebSocketData,
         isValid: () => false, onAVRenderError: () => failures++});

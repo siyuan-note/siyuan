@@ -1,8 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 import {getFocusedHeadingChildren} from "./heading";
 import * as focusFold from "./focusFold";
 
@@ -99,12 +98,9 @@ const heading = (id: string, level: number, folded = false) => new HeadingElemen
     fold: folded ? "1" : "0",
 });
 
-const compiledViewFold = transpileModule(readFileSync("src/protyle/util/viewFold.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiledViewFold = compileModule("src/protyle/util/viewFold.ts", ScriptTarget.ES2021);
 
 const loadView = (responseContent: HeadingElement) => {
-    const exports = {} as {applyFocusFold: (protyle: IProtyle) => Promise<void>};
     let requests = 0;
     const dependencies = {
         fetchSyncPost: async (url: string, data: {id: string, removeFoldAttr: boolean}) => {
@@ -123,8 +119,7 @@ const loadView = (responseContent: HeadingElement) => {
         queueHeadingNumberRefresh: (): void => undefined,
         updateDocumentBottomEof: (): void => undefined,
     };
-    runInNewContext(compiledViewFold, {
-        exports,
+    const exports = evaluateModule<{applyFocusFold: (protyle: IProtyle) => Promise<void>}>(compiledViewFold, {
         require: (id: string) => id === "./focusFold" ? focusFold :
             id === "./heading" ? {getFocusedHeadingChildren} : dependencies,
         document: {

@@ -1,14 +1,12 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import {DOMFixture} from "./testDOM";
 import * as capabilities from "./capabilities";
 
 const setup = () => {
-    const api = {} as typeof import("./layout");
     const transactions: Array<{perform: IOperation[]; undo: IOperation[]}> = [];
     let calendarBindings = 0;
     const modules: Record<string, unknown> = {
@@ -23,10 +21,10 @@ const setup = () => {
         "./gallery/style": {getCardWidth: () => 240, getCardAspectRatioValue: () => 1, getCardAspectRatioLabel: () => "1:1"},
         "./gallery/cardLayout": {CARD_LAYOUT_COMPACT: 1},
     };
-    runInNewContext(transpileModule(readFileSync(join(__dirname, "layout.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports: api, require: (name: string) => modules[name] || {},
-        window: {siyuan: {languages: {displayFieldName: "Display field names"}}}});
+    const api = loadModule<typeof import("./layout")>(join(__dirname, "layout.ts"), {
+        require: (name: string) => modules[name] || {},
+        window: {siyuan: {languages: {displayFieldName: "Display field names"}}},
+    }, ScriptTarget.ES2022);
     return {api, transactions, getCalendarBindings: () => calendarBindings};
 };
 

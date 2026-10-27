@@ -16,6 +16,7 @@ const sources = () => {
         localAssets: compile("protyle/upload/htmlLocalAssets.ts"),
         uploadResult: compile("protyle/upload/uploadResult.ts"),
         fixture: JSON.parse(readFileSync(path.join(__dirname, "fixtures/doubao-clipboard.json"), "utf8")),
+        mathFixture: JSON.parse(readFileSync(path.join(__dirname, "fixtures/chatgpt-math-clipboard.json"), "utf8")),
     };
 };
 
@@ -81,6 +82,7 @@ const runCases = async source => {
     lute.SetProtyleWYSIWYG(true);
     lute.SetTextMark(true);
     lute.SetHTMLTag2TextMark(true);
+    lute.SetKramdownIAL(true);
     const validateResult = result => {
         const root = document.createElement("div");
         root.innerHTML = result;
@@ -195,6 +197,30 @@ const runCases = async source => {
         return {inserted, htmlConversions, checkedBlockDOM, convertedSource};
     };
     for (const mobile of [false, true]) {
+        for (const preserve of [false, true]) {
+            for (const enabled of [true, false]) {
+                const captured = await paste(mobile, preserve, false, undefined, false,
+                    {...source.mathFixture, enabled});
+                const root = document.createElement("div");
+                let dom = captured.inserted;
+                for (let round = 0; round < 3; round++) {
+                    root.innerHTML = dom;
+                    check.equal(root.querySelectorAll('[data-type="inline-math"]').length, enabled ? 3 : 0);
+                    check.equal(root.querySelectorAll('[data-type="NodeMathBlock"]').length, enabled ? 2 : 0);
+                    const cells = Array.from(root.querySelectorAll("tbody tr"), row => row.lastElementChild);
+                    check.equal(cells.length, 2, `mobile=${mobile} preserve=${preserve} enabled=${enabled}: ${root.innerHTML}`);
+                    const formulas = ["x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}", "e^{i\\pi}+1=0"];
+                    cells.forEach((cell, index) => {
+                        if (enabled) {
+                            check.equal(cell.querySelector('[data-type="inline-math"]').dataset.content, formulas[index]);
+                        } else {
+                            check.ok(cell.textContent.includes(formulas[index]));
+                        }
+                    });
+                    dom = lute.SpinBlockDOM(dom);
+                }
+            }
+        }
         for (const enabled of [true, false]) {
             for (const html of ["", "<p>\\(x+y\\)</p><p>\\[z\\]</p>"]) {
                 const externalMath = await paste(mobile, false, false, undefined, false,

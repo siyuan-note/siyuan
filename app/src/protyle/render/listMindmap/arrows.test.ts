@@ -296,6 +296,8 @@ test("the shared direction selector preserves focus and only patches arrow direc
         constructor(public tag: string) {}
         append(...elements: Control[]) { this.children.push(...elements); }
         replaceChildren() { this.children = []; }
+        // 色卡行会遍历带 --current 的子项补标记；本桩的 classList 不记录类名，因而确实没有命中项。
+        querySelectorAll(): Control[] { return []; }
         querySelector(tag: string): Control | undefined {
             for (const child of this.children) {
                 const result = child.tag === tag ? child : child.querySelector(tag);

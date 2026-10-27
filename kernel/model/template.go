@@ -826,7 +826,7 @@ func prepareTemplateAttributeViews(tree *parse.Tree, preview bool) (plans map[*a
 	return
 }
 
-func saveTemplateAttributeViewCopies(copies []*templateAttributeViewCopy, boxID string) {
+func saveTemplateAttributeViewCopies(copies []*templateAttributeViewCopy, boxID string) error {
 	for _, copied := range copies {
 		if "" != boxID {
 			av.SetAVBoxID(copied.target.ID, boxID)
@@ -836,9 +836,10 @@ func saveTemplateAttributeViewCopies(copies []*templateAttributeViewCopy, boxID 
 			av.SetAVBoxID(copied.target.ID, "")
 		}
 		if nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", copied.target.ID, err)
+			return fmt.Errorf("save attribute view [%s] failed: %w", copied.target.ID, err)
 		}
 	}
+	return nil
 }
 
 func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewPlan) (*av.View, error) {
@@ -1144,7 +1145,9 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 		return
 	}
 	if !preview {
-		saveTemplateAttributeViewCopies(attributeViewCopies, templateAttributeViewBoxID(tree))
+		if err = saveTemplateAttributeViewCopies(attributeViewCopies, templateAttributeViewBoxID(tree)); nil != err {
+			return
+		}
 	}
 
 	restoreTabsSelection()

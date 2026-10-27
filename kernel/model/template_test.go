@@ -383,6 +383,105 @@ func TestTemplateDatabaseCopyClonesSharedDatabaseOnce(t *testing.T) {
 	}
 }
 
+func TestTemplateDatabaseCopySaveFailureDoesNotReturnDOM(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	first := addTemplateAttributeViewTestFixture(t, fixture, "20260904000500-avfail1")
+	second := addTemplateAttributeViewTestFixture(t, fixture, "20260904000501-avfail2")
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, node := range first.nodes {
+		tree.Root.AppendChild(node)
+	}
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	if _, err = DocSaveAsTemplate(fixture.sourceID, "save-failure", false); err != nil {
+		t.Fatal(err)
+	}
+	avDir := filepath.Join(util.DataDir, "storage", "av")
+	backup := avDir + "-backup"
+	before := map[string]string{}
+	for _, database := range []*templateAttributeViewTestFixture{first, second} {
+		data, readErr := os.ReadFile(av.GetAttributeViewDataPath(database.attrView.ID))
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		before[database.attrView.ID] = string(data)
+	}
+	originalSaved := av.AttributeViewSaved
+	blocked := false
+	var savedID string
+	restore := func() {
+		av.AttributeViewSaved = originalSaved
+		if blocked {
+			if err := os.Remove(avDir); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Rename(backup, avDir); err != nil {
+				t.Fatal(err)
+			}
+			blocked = false
+		}
+	}
+	t.Cleanup(restore)
+	av.AttributeViewSaved = func(id, boxID string) {
+		savedID = id
+		if err := os.Rename(avDir, backup); err != nil {
+			t.Fatal(err)
+		}
+		blocked = true
+		if err := os.WriteFile(avDir, []byte("block new database files"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, dom, summary, err := RenderTemplateWithMode(filepath.Join(util.DataDir, "templates", "save-failure.md"),
+		fixture.targetID, TemplateRenderModeContent)
+	if err == nil || dom != "" || summary != nil {
+		t.Errorf("failed database copy returned successful content: err=%v, dom=%q, summary=%+v", err, dom, summary)
+	}
+	restore()
+	if savedID == "" || savedID == first.attrView.ID || savedID == second.attrView.ID {
+		t.Fatal("the first independent copy was not saved before the injected failure")
+	}
+	if _, err := os.Stat(av.GetAttributeViewDataPath(savedID)); err != nil {
+		t.Fatalf("successfully saved copy was removed: %v", err)
+	}
+	for id, expected := range before {
+		data, err := os.ReadFile(av.GetAttributeViewDataPath(id))
+		if err != nil || string(data) != expected {
+			t.Fatalf("source database %s changed: %v", id, err)
+		}
+	}
+}
+
+func TestSaveTemplateAttributeViewCopiesStopsOnFirstFailure(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	addTemplateAttributeViewTestFixture(t, fixture, "20260904000502-avfail3")
+	first, second := av.NewAttributeView(ast.NewNodeID()), av.NewAttributeView(ast.NewNodeID())
+	markRuntimeEncryptedBox(fixture.box.ID)
+	t.Cleanup(func() { forgetRuntimeEncryptedBox(fixture.box.ID) })
+	originalAcquire := av.AVLockAcquire
+	attempts := 0
+	av.AVLockAcquire = func(boxID string) {
+		attempts++
+		originalAcquire(boxID)
+	}
+	t.Cleanup(func() { av.AVLockAcquire = originalAcquire })
+	err := saveTemplateAttributeViewCopies([]*templateAttributeViewCopy{{target: first}, {target: second}}, fixture.box.ID)
+	if err == nil || !strings.Contains(err.Error(), first.ID) || !strings.Contains(err.Error(), "locked") {
+		t.Fatalf("save error was not propagated with the failed database ID: %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("continued saving after the first copy failed: attempts=%d", attempts)
+	}
+	if av.GetAVBoxID(first.ID) != "" || av.GetAVBoxID(second.ID) != "" {
+		t.Fatal("failed save retained the pending notebook mapping")
+	}
+}
+
 func TestTemplateDatabaseReferenceValidatesExistenceViewsAndEncryptionBoundary(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	database := addTemplateAttributeViewTestFixture(t, fixture, "20260904000200-avtmpl3")

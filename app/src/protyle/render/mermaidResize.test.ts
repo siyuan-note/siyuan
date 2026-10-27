@@ -29,24 +29,30 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
     const api = {} as typeof import("./mermaidRender");
     const image = {} as typeof import("./imageResize");
     new Function("exports", sources.image)(image);
+    const closest = {} as typeof import("../util/hasClosest");
+    new Function("exports", sources.closest)(closest);
     Object.assign(window, {siyuan: {config: {appearance: {mode: 0}}}, DOMPurify: {sanitize: (value: string) => value}});
     new Function("exports", "require", sources.renderer)(api, () => ({
         Constants: {PROTYLE_CDN: "", ZWSP: "\u200b"}, addScript: async () => {},
         ensureBrowserCompatibility: async () => {},
         isFoldedRenderContent: () => false, isZenumlDiagram: () => false,
         getMermaidLayout: (): undefined => undefined, applyMermaidLayout: (value: string) => value,
-        hasClosestByClassName: (element: Element, name: string) => element.closest("." + name),
+        ...closest,
         genIconHTML: () => '<div class="protyle-icons"></div>', getHostCapabilities: () => ({remoteKernel: false}),
         escapeHtml: (value: string) => value,
     }));
     const settle = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    const render = async (element: Element) => {
-        api.mermaidRender(element);
+    const waitForRender = async (element: Element) => {
+        await settle();
         for (let count = 0; count < 100 && !element.querySelector("svg"); count++) {
             await new Promise(resolve => setTimeout(resolve, 20));
         }
         check.ok(element.querySelector("svg"), element.outerHTML);
         await settle();
+    };
+    const render = async (element: Element) => {
+        api.mermaidRender(element);
+        await waitForRender(element);
     };
     const create = async (alignment = "", width = "33%") => {
         root.style.zoom = "";
@@ -59,6 +65,44 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
         check.equal(block.querySelectorAll(":scope > .protyle-block-resize").length, 1);
         return block;
     };
+    for (const alignment of ["", "left", "center", "right"]) {
+        const block = await create(alignment, "");
+        check.equal(block.style.width, "", "automatic widths render without persisting a width");
+        check.ok(block.querySelector("svg").getBoundingClientRect().width > 0);
+        const before = lute.BlockDOM2Md(block.outerHTML);
+        window.siyuan.config.appearance.mode = 1;
+        api.refreshMermaidTheme(block);
+        await waitForRender(block);
+        check.equal(lute.BlockDOM2Md(block.outerHTML), before, "theme changes preserve automatic widths and alignment");
+        window.siyuan.config.appearance.mode = 0;
+        root.innerHTML = lute.Md2BlockDOM(before);
+        await render(root.firstElementChild);
+        check.equal(lute.BlockDOM2Md(root.innerHTML), before, "automatic widths render again after reopening");
+    }
+    const hiddenDiagram = lute.Md2BlockDOM("```mermaid\ngraph TD; A-->B;\n```");
+    root.innerHTML = '<div class="bq" data-node-id="folded" data-type="NodeBlockquote" fold="1">' +
+        '<div data-node-id="summary">Summary</div>' + hiddenDiagram + "</div>";
+    const foldedDiagram = root.querySelector('[data-subtype="mermaid"]');
+    check.equal(foldedDiagram.getClientRects().length, 0);
+    api.mermaidRender(foldedDiagram);
+    await settle();
+    check.equal(foldedDiagram.hasAttribute("data-render"), false, "folded diagrams wait for expansion");
+    root.firstElementChild.removeAttribute("fold");
+    await waitForRender(foldedDiagram);
+    const card = document.createElement("div");
+    card.className = "card__block card__block--hideh";
+    document.body.appendChild(card);
+    card.appendChild(root);
+    root.innerHTML = '<div data-node-id="heading" data-type="NodeHeading" custom-riff-decks="deck">Question</div>' + hiddenDiagram;
+    const cardDiagram = root.querySelector('[data-subtype="mermaid"]');
+    check.equal(cardDiagram.getClientRects().length, 0);
+    api.mermaidRender(cardDiagram);
+    await settle();
+    check.equal(cardDiagram.hasAttribute("data-render"), false, "flashcard answers wait until revealed");
+    card.classList.remove("card__block--hideh");
+    await waitForRender(cardDiagram);
+    document.body.appendChild(root);
+    card.remove();
     const updates: {before: string, after: string}[] = [];
     const start = new Function("getImageResizeWidth", "protyle", "target", "nodeElement", "event", "documentSelf",
         "mostRight", "mostBottom", "y", "focusBlock", "updateTransaction", "img3115", resizeSource);
@@ -189,7 +233,7 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
     return "Mermaid resize cases passed";
 };
 
-test("Mermaid width handles support alignment, replay, zoom and touch without changing diagram source", {
+test("Mermaid automatic widths and width handles support alignment, visibility, replay, zoom and touch", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {
@@ -210,11 +254,12 @@ test("Mermaid width handles support alignment, replay, zoom and touch without ch
         .outputText + "\nreturn resize.call(this);";
     const sources = {
         renderer: compile("src/protyle/render/mermaidRender.ts"), image: compile("src/protyle/render/imageResize.ts"),
+        closest: compile("src/protyle/util/hasClosest.ts"),
         lute: readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"),
         mermaid: readFileSync("stage/protyle/js/mermaid/mermaid.min.js", "utf8"),
         bridge: compile("src/util/touchDragBridge.ts"), core: compile("src/util/touchDragBridgeCore.ts"),
     };
-    const css = compileString('@use "protyle/protyle"; @use "component/typography";',
+    const css = compileString('@use "util/function"; @use "protyle/protyle"; @use "component/typography"; @use "business/card";',
         {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;
     const mobileCSS = compileString('@use "main/mobile";',
         {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;

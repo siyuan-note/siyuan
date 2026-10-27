@@ -1522,6 +1522,8 @@ func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	// 恢复会核对实际内容，备份也必须完整校验，保留随后可能被覆盖的当前数据。
 	if _, err := repo.IndexWithOptions("Backup before checkout", false,
 		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},

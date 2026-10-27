@@ -572,6 +572,12 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint64, err error) {
 	unlock := lockDocumentSource()
 	defer unlock()
+	var finishDocTreeChange func()
+	defer func() {
+		if finishDocTreeChange != nil {
+			finishDocTreeChange()
+		}
+	}()
 	if preflight != nil {
 		if err = preflight(); err != nil {
 			return
@@ -636,6 +642,7 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 			return fmt.Errorf("%w: %s", util.ErrFileChanged, filePath)
 		}
 		if current == nil {
+			finishDocTreeChange = cache.BeginDocTreeMutation(tree.Box)
 			return nil
 		}
 		plain, readErr := decryptDataWithDEK(tree.Box, tree.Path, current, dek)
@@ -643,10 +650,13 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 			return readErr
 		}
 		// 缓存只在成功读取或写入后发布；磁盘认证结果完全一致时复用已验证的源。
-		if validatedSource != nil && bytes.Equal(plain, validatedSource) {
-			return nil
+		if validatedSource == nil || !bytes.Equal(plain, validatedSource) {
+			if err := CheckDocumentSpecJSON(tree.Box, plain); err != nil {
+				return err
+			}
 		}
-		return CheckDocumentSpecJSON(tree.Box, plain)
+		finishDocTreeChange = beginDocumentTreeWrite(tree.Box, tree.Path, plain, data, len(current) != len(encData))
+		return nil
 	})
 	if err != nil {
 		return

@@ -2484,6 +2484,7 @@ func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUp
 // 在标题持久化成功后广播变更并刷新引用，避免失败的条件写入发布过期标题。
 func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	if titleChanged || emptyAttrUpdated {
+		cache.InvalidateDocTree(tree.Box)
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
@@ -2756,6 +2757,8 @@ func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	if err := recoverSortConfAppend(confPath); err != nil {
 		return err
 	}
@@ -2834,6 +2837,7 @@ func pushDocSortModeChanged(oldAttrs map[string]string, node *ast.Node, tree *pa
 
 // PushDocSortModeChanged 广播会改变子文档有效排序方式的配置变更。
 func PushDocSortModeChanged(scope, boxID, id, p string, sortMode *int) {
+	cache.InvalidateDocTree(boxID)
 	util.BroadcastByType("main", "docSortModeChanged", 0, "", map[string]any{
 		"scope":    scope,
 		"box":      boxID,

@@ -2,6 +2,8 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
     getDocTreeDeleteTargets,
+    getDocTreeActionItems,
+    getDocTreeTopPaths,
     getDocTreeMenuItems,
     getDocTreeMenuType,
     isDocTreeDragSelectionAllowed
@@ -11,6 +13,7 @@ const createItem = (type: "navigation-file" | "navigation-root", options: {
     id?: string,
     notebookId?: string,
     path: string,
+    flat?: boolean,
 }) => ({
     getAttribute(name: string) {
         if (name === "data-type") {
@@ -22,10 +25,13 @@ const createItem = (type: "navigation-file" | "navigation-root", options: {
         if (name === "data-path") {
             return options.path;
         }
+        if (name === "data-notebook-id" && options.flat) {
+            return options.notebookId;
+        }
         return null;
     },
     closest(selector: string) {
-        if (selector !== "ul[data-url]") {
+        if (options.flat || selector !== "ul[data-url]") {
             return null;
         }
         return {
@@ -79,4 +85,42 @@ test("mixed document tree deletion includes documents and notebooks", () => {
         notebookIds: ["notebook-1", "notebook-2"],
         paths: ["/doc-1.sy", "/doc-2.sy"],
     });
+});
+
+test("offscreen document tree snapshots retain notebook identity without DOM ancestors", () => {
+    const item = createItem("navigation-file", {id: "far", notebookId: "box", path: "/far.sy", flat: true});
+    assert.deepEqual(getDocTreeMenuItems([item]), [{id: "far", path: "/far.sy", notebookId: "box"}]);
+});
+
+test("deleting selected pinned occurrences addresses each document once", () => {
+    assert.deepEqual(getDocTreeDeleteTargets([doc1, doc1, notebook1, notebook1]), {
+        notebookIds: ["notebook-1"], paths: ["/doc-1.sy"],
+    });
+});
+
+test("document actions deduplicate occurrences while retaining same IDs in different notebooks", () => {
+    const first = {id: "doc", notebookId: "first", occurrenceKey: "one"};
+    const duplicate = {...first, occurrenceKey: "two"};
+    const other = {...first, notebookId: "second"};
+    assert.deepEqual(getDocTreeActionItems([first, duplicate, other]), [duplicate, other]);
+});
+
+test("moving selected documents excludes nested descendants while preserving the remaining selection order", () => {
+    assert.deepEqual(getDocTreeTopPaths([
+        {notebookId: "box", path: "/parent/child.sy", kind: "document"},
+        {notebookId: "box", path: "/peer.sy", kind: "document"},
+        {notebookId: "box", path: "/parent.sy", kind: "document"},
+        {notebookId: "box", path: "/parent.sy", kind: "document"},
+        {notebookId: "other", path: "/parent/child.sy", kind: "document"},
+        {notebookId: "box", path: "/", kind: "notebook"},
+    ]), ["/peer.sy", "/parent.sy", "/parent/child.sy"]);
+});
+
+test("move pruning preserves unordered document and notebook order while removing repeated occurrences", () => {
+    assert.deepEqual(getDocTreeTopPaths([
+        {notebookId: "z", path: "/z.sy", kind: "document"},
+        {notebookId: "a", path: "/z.sy", kind: "document"},
+        {notebookId: "z", path: "/z.sy", kind: "document"},
+        {notebookId: "z", path: "/a.sy", kind: "document"},
+    ]), ["/z.sy", "/z.sy", "/a.sy"]);
 });

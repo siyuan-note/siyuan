@@ -398,7 +398,7 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
         "./request": {cancelSearchRequest() {}},
         // 当前用例只覆盖搜索入口，不应访问其他命令或复用窗口的路径更新。
         ...Object.fromEntries(["./path", "../protyle/render/av/addToDatabase", "../protyle/util/hasClosest",
-            "../protyle/hint/extend"].map(name => [name, new Proxy({}, {get: (_target, key) => {
+            "../protyle/hint/extend", "./contextTargets", "../menus/navigationSelection"].map(name => [name, new Proxy({}, {get: (_target, key) => {
             throw new Error(`Unexpected search fixture dependency: ${name}.${String(key)}`);
         }})])),
         "./util": {genSearch: (_app, _config, element) => {

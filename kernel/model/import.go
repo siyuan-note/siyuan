@@ -1097,6 +1097,8 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
 	}
 
+	finishDocTreeChange := cache.BeginDocTreeMutation(boxID)
+	defer finishDocTreeChange()
 	targetDir := filepath.Join(util.DataDir, boxID, baseTargetPath)
 	if err = os.MkdirAll(targetDir, 0755); err != nil {
 		return
@@ -1328,6 +1330,8 @@ func validateImportedNotebookIdentities(tmpDataPath string) ([]string, error) {
 }
 
 func ImportData(zipPath string) (err error) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 

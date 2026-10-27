@@ -36,7 +36,6 @@ const browserCases = async (sources: Record<string, string>) => {
     const tooltip = load("tooltip") as typeof import("../../dialog/tooltip");
     const Pinned = load("PinnedDocs") as unknown as {PinnedDocs: {prototype: object}};
     const panel = Object.create(Pinned.PinnedDocs.prototype);
-    panel.expanded = new Set();
     const regular: {render?: (item: unknown) => string, renderExpanded?: (item: unknown) => string} = {};
     const dependencies = {...modules.escape, ...helper, getDocDisplayName: names.getDocDisplayName,
         FILE_TREE_CHILDREN_SORT_MODE: "data-children-sort-mode", getFileTreeDefaultIconAttr: () => "",
@@ -53,7 +52,7 @@ const browserCases = async (sources: Record<string, string>) => {
         bookmark: 'Mark "quoted"', name1: "Named <tag>", alias: "Alias & text", memo: "Memo <img src=x>"};
     for (const depth of [0, 1]) {
         pinned.replaceChildren();
-        await panel.appendDoc(pinned, doc, "doc", depth, 0);
+        pinned.append(panel.renderRow({file: doc, notebookId: doc.notebook, occurrenceKey: "pin:doc", depth}));
         ordinary.innerHTML = regular.render.call({element: ordinary}, doc);
         expanded.innerHTML = regular.renderExpanded(doc);
         const title = pinned.querySelector(".b3-list-item__text");
@@ -77,7 +76,7 @@ const browserCases = async (sources: Record<string, string>) => {
         tooltip.hideTooltip();
     }
     pinned.replaceChildren();
-    await panel.appendDoc(pinned, {...doc, unavailable: true}, "doc", 0, 0);
+    pinned.append(panel.renderRow({file: doc, notebookId: doc.notebook, occurrenceKey: "pin:doc", depth: 0, unavailable: true}));
     const closed = pinned.querySelector(".b3-list-item__text");
     closed.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tip.textContent, doc.name + " (Closed notebook)");

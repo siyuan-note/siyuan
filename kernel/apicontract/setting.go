@@ -356,28 +356,30 @@ type SettingFileTree struct {
 	// 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档。
 	// 没有子文档时各取值均直接打开文档；取 2 时单击需等待约 300 毫秒以判断是否双击。超出取值范围的输入按 0 处理。
 	// 已废弃的 parentDocClickExpand 与 parentDocDoubleClickOpen 不再读取，旧配置升级后回到 0。
-	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
-	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
-	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
-	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`
-	RefCreateSavePath        string `json:"refCreateSavePath" api:"optional,nullable"`
-	DocCreateSaveBox         string `json:"docCreateSaveBox" api:"optional,nullable"`
-	DocCreateSavePath        string `json:"docCreateSavePath" api:"optional,nullable"`
-	DocCreateTemplatePath    string `json:"docCreateTemplatePath" api:"optional,nullable"`
-	ShorthandSaveBox         string `json:"shorthandSaveBox" api:"optional,nullable"`
-	ShorthandSavePath        string `json:"shorthandSavePath" api:"optional,nullable"`
-	MaxListCount             int    `json:"maxListCount" api:"optional,nullable"`
-	MaxOpenTabCount          int    `json:"maxOpenTabCount" api:"optional,nullable"`
-	AllowCreateDeeper        bool   `json:"allowCreateDeeper" api:"optional,nullable"`
-	RemoveDocWithoutConfirm  bool   `json:"removeDocWithoutConfirm" api:"optional,nullable"`
-	CloseTabsOnStart         bool   `json:"closeTabsOnStart" api:"optional,nullable"`
-	TabStartupMode           *int   `json:"tabStartupMode" api:"optional,nullable"`
-	UseSingleLineSave        bool   `json:"useSingleLineSave" api:"optional,nullable"`
-	LargeFileWarningSize     int    `json:"largeFileWarningSize" api:"optional,nullable"`
-	CreateDocAtTop           *bool  `json:"createDocAtTop" api:"optional,nullable"`
-	Sort                     int    `json:"sort" api:"optional,nullable"`
-	RecentDocsMaxListCount   int    `json:"recentDocsMaxListCount" api:"optional,nullable"`
-	NoSplitScreenWhenOpenTab bool   `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
+	ParentDocTitleClickMode int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
+	BoxDocEnabled           *bool  `json:"boxDocEnabled" api:"optional,nullable"`
+	UseSVGDefaultIcon       *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
+	RefCreateSaveBox        string `json:"refCreateSaveBox" api:"optional,nullable"`
+	RefCreateSavePath       string `json:"refCreateSavePath" api:"optional,nullable"`
+	DocCreateSaveBox        string `json:"docCreateSaveBox" api:"optional,nullable"`
+	DocCreateSavePath       string `json:"docCreateSavePath" api:"optional,nullable"`
+	DocCreateTemplatePath   string `json:"docCreateTemplatePath" api:"optional,nullable"`
+	ShorthandSaveBox        string `json:"shorthandSaveBox" api:"optional,nullable"`
+	ShorthandSavePath       string `json:"shorthandSavePath" api:"optional,nullable"`
+	MaxListCount            int    `json:"maxListCount" api:"optional,nullable"`
+	// 文档树单次加载数量，默认 512，范围 1..10240；省略保留现值，null 恢复默认。
+	DocTreeBatchSize         *int  `json:"docTreeBatchSize" api:"optional,nullable"`
+	MaxOpenTabCount          int   `json:"maxOpenTabCount" api:"optional,nullable"`
+	AllowCreateDeeper        bool  `json:"allowCreateDeeper" api:"optional,nullable"`
+	RemoveDocWithoutConfirm  bool  `json:"removeDocWithoutConfirm" api:"optional,nullable"`
+	CloseTabsOnStart         bool  `json:"closeTabsOnStart" api:"optional,nullable"`
+	TabStartupMode           *int  `json:"tabStartupMode" api:"optional,nullable"`
+	UseSingleLineSave        bool  `json:"useSingleLineSave" api:"optional,nullable"`
+	LargeFileWarningSize     int   `json:"largeFileWarningSize" api:"optional,nullable"`
+	CreateDocAtTop           *bool `json:"createDocAtTop" api:"optional,nullable"`
+	Sort                     int   `json:"sort" api:"optional,nullable"`
+	RecentDocsMaxListCount   int   `json:"recentDocsMaxListCount" api:"optional,nullable"`
+	NoSplitScreenWhenOpenTab bool  `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
 }
 
 type SettingSearch struct {

@@ -41,6 +41,9 @@ export interface ICommandFileTreeContext {
     elements: Element[];
     ids: string[];
     paths: string[];
+    items?: import("../layout/dock/docTree/types").IDocTreeItem[];
+    controller?: import("../layout/dock/docTree/DocTreeController").DocTreeController;
+    selectionVersion?: number;
 }
 
 export interface ICommandTabContext {

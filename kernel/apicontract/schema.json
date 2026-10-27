@@ -27300,6 +27300,88 @@
       ],
       "additionalProperties": false
     },
+    "FileTreeLocateData": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "steps": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FileTreeLocateStep"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "box",
+        "id",
+        "steps"
+      ],
+      "additionalProperties": false
+    },
+    "FileTreeLocateRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
+    "FileTreeLocateStep": {
+      "type": "object",
+      "properties": {
+        "effectiveSortMode": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "parentID": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "effectiveSortMode",
+        "id",
+        "index",
+        "parentID",
+        "path",
+        "revision",
+        "total"
+      ],
+      "additionalProperties": false
+    },
     "FileTreeMoveIDsRequestInput": {
       "type": "object",
       "properties": {
@@ -27512,6 +27594,97 @@
         "id",
         "password",
         "visible"
+      ],
+      "additionalProperties": false
+    },
+    "FileTreeRangeData": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "effectiveSortMode": {
+          "type": "integer"
+        },
+        "files": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/FileTreeFile"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "parentID": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "box",
+        "effectiveSortMode",
+        "files",
+        "limit",
+        "offset",
+        "parentID",
+        "path",
+        "revision",
+        "stale",
+        "total"
+      ],
+      "additionalProperties": false
+    },
+    "FileTreeRangeRequestInput": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "parentID": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "offset",
+        "parentID"
       ],
       "additionalProperties": false
     },
@@ -43414,6 +43587,16 @@
             }
           ]
         },
+        "docTreeBatchSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "largeFileWarningSize": {
           "anyOf": [
             {
@@ -48690,6 +48873,16 @@
         "docIconClickMode": {
           "type": "integer"
         },
+        "docTreeBatchSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "largeFileWarningSize": {
           "type": "integer"
         },
@@ -48768,6 +48961,7 @@
         "docCreateSavePath",
         "docCreateTemplatePath",
         "docIconClickMode",
+        "docTreeBatchSize",
         "largeFileWarningSize",
         "maxListCount",
         "maxOpenTabCount",
@@ -48892,6 +49086,16 @@
           ]
         },
         "docIconClickMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docTreeBatchSize": {
           "anyOf": [
             {
               "type": "integer"
@@ -150746,6 +150950,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/filetree/listDocTreeRange",
+      "handler": "listDocTreeRange",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/FileTreeRangeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FileTreeRangeData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/filetree/listDocsByPath",
       "handler": "listDocsByPath",
       "authorization": [
@@ -150768,6 +151050,84 @@
               },
               "data": {
                 "$ref": "#/$defs/FileTreeListData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/locateDocTreeItem",
+      "handler": "locateDocTreeItem",
+      "authorization": [
+        "authenticated"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/FileTreeLocateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FileTreeLocateData"
               },
               "msg": {
                 "type": "string"

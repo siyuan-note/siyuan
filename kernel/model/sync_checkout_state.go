@@ -10,6 +10,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -183,7 +184,8 @@ func (task *syncCheckoutTask) prepareApply() error {
 	if err := lockAssetRelink(ctx, &flushLock); err != nil {
 		return err
 	}
-	task.releaseWrites = func() { flushLock.Unlock(); dataImportAccess.Unlock() }
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	task.releaseWrites = func() { finishDocTreeChange(); flushLock.Unlock(); dataImportAccess.Unlock() }
 	for _, tx := range takeQueuedTransactions() {
 		flushTx(tx)
 	}

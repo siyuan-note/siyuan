@@ -522,6 +522,16 @@ func upsertTreeWithChanges(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	if err != nil {
 		return
 	}
+	if context != nil {
+		changed := false
+		if len(refChange.remove)+len(refChange.insert) > 0 {
+			changed, err = docTreeRefCountsChanged(tx, tree.Box, tree.Path, refs)
+			if err != nil {
+				return
+			}
+		}
+		context["docTreeRefsChanged"] = changed
+	}
 	fileChange, err := diffAuxiliaryIndex(tx, fileAnnotationIndex, tree.ID, tree.Box, tree.Path, fileAnnotationRefs, fileAnnotationIndexKey)
 	if err != nil {
 		return

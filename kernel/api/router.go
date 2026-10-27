@@ -304,6 +304,8 @@ func registerFiletreeRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/getPinnedDocs", contractRouteHandlers(apicontract.GetPinnedDocs, getPinnedDocs)...)
 	ginServer.Handle("POST", "/api/filetree/updatePinnedDocs", contractRouteHandlers(apicontract.UpdatePinnedDocs, updatePinnedDocs)...)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", contractRouteHandlers(apicontract.ListDocsByPath, listDocsByPath)...)
+	ginServer.Handle("POST", "/api/filetree/listDocTreeRange", contractRouteHandlers(apicontract.ListDocTreeRange, listDocTreeRange)...)
+	ginServer.Handle("POST", "/api/filetree/locateDocTreeItem", contractRouteHandlers(apicontract.LocateDocTreeItem, locateDocTreeItem)...)
 	ginServer.Handle("POST", "/api/filetree/getDoc", contractRouteHandlers(apicontract.GetDoc, getDoc)...)
 	ginServer.Handle("POST", "/api/filetree/getDocCreateSavePath", contractRouteHandlers(apicontract.GetDocCreateSavePath, getDocCreateSavePath)...)
 	ginServer.Handle("POST", "/api/filetree/getRefCreateSavePath", contractRouteHandlers(apicontract.GetRefCreateSavePath, getRefCreateSavePath)...)

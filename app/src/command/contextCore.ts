@@ -25,6 +25,7 @@ export const createCommandContextSnapshot = (context: ICommandContextSnapshot): 
         elements: [...context.fileTree.elements],
         ids: [...context.fileTree.ids],
         paths: [...context.fileTree.paths],
+        items: context.fileTree.items?.map(item => ({...item})),
     } : undefined,
     activeTab: context.activeTab ? {...context.activeTab} : undefined,
     dock: context.dock ? {...context.dock} : undefined,

@@ -118,6 +118,8 @@ func (box *Box) Unindex() {
 }
 
 func unindex(boxID string) {
+	cache.InvalidateDocTree(boxID)
+	cache.InvalidateDocTreeRefs()
 	treenode.RemoveBlockTreesByBoxID(boxID)
 	sql.DeleteBoxQueue(boxID)
 }
@@ -148,6 +150,8 @@ func removeBoxRefs(boxID string) {
 }
 
 func indexBox(boxID string) {
+	finishDocTreeChange := cache.BeginDocTreeMutation(boxID)
+	defer finishDocTreeChange()
 	encrypted := IsEncryptedBox(boxID)
 	if encrypted {
 		if err := AcquireEncryptedBoxOperation(boxID); err != nil {

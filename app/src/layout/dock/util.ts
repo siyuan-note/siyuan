@@ -288,7 +288,6 @@ export const selectOpenTab = async () => {
             tab.model.editor.protyle.wysiwyg.element.blur();
             tab.model.editor.protyle.title.editElement.blur();
             await files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
-            files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
         }
     }
     dockFile.toggleModel("file", true);

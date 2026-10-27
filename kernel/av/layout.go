@@ -80,18 +80,45 @@ type BaseInstance struct {
 	GroupHidden int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
-func NewViewBaseInstance(view *View) *BaseInstance {
-	showIcon, wrapField := true, false
+// GetBaseLayout 返回当前布局的基础设置，布局缺失时返回 nil。
+// 表格、列表和日历共用表格布局的基础设置。
+func (view *View) GetBaseLayout() *BaseLayout {
 	switch view.LayoutType {
 	case LayoutTypeTable, LayoutTypeList, LayoutTypeCalendar:
-		showIcon = view.GetTableLayout().ShowIcon
-		wrapField = view.GetTableLayout().WrapField
+		if table := view.GetTableLayout(); nil != table {
+			return table.BaseLayout
+		}
 	case LayoutTypeGallery:
-		showIcon = view.Gallery.ShowIcon
-		wrapField = view.Gallery.WrapField
+		if nil != view.Gallery {
+			return view.Gallery.BaseLayout
+		}
 	case LayoutTypeKanban:
-		showIcon = view.Kanban.ShowIcon
-		wrapField = view.Kanban.WrapField
+		if nil != view.Kanban {
+			return view.Kanban.BaseLayout
+		}
+	}
+	return nil
+}
+
+// GetCardSettings 返回卡片类布局共有的卡片设置，其他布局返回 nil。
+func (view *View) GetCardSettings() *CardSettings {
+	switch view.LayoutType {
+	case LayoutTypeGallery:
+		if nil != view.Gallery {
+			return &view.Gallery.CardSettings
+		}
+	case LayoutTypeKanban:
+		if nil != view.Kanban {
+			return &view.Kanban.CardSettings
+		}
+	}
+	return nil
+}
+
+func NewViewBaseInstance(view *View) *BaseInstance {
+	showIcon, wrapField := true, false
+	if base := view.GetBaseLayout(); nil != base {
+		showIcon, wrapField = base.ShowIcon, base.WrapField
 	}
 	return &BaseInstance{
 		ConditionalColors: view.EffectiveConditionalColors(),

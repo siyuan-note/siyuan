@@ -24,6 +24,20 @@ describe("PDF asset link resolution", () => {
         });
     });
 
+    it("preserves non-page parameters when page is first", () => {
+        assert.deepEqual(resolvePdfAssetLink("assets/document.pdf?page=3&box=20240101000000-abcdefg&dataPath=%2Fdocs%2Fnote.sy"), {
+            linkAddress: "assets/document.pdf?box=20240101000000-abcdefg&dataPath=%2Fdocs%2Fnote.sy",
+            pdfParams: 3,
+        });
+    });
+
+    it("preserves non-page parameters when page is last", () => {
+        assert.deepEqual(resolvePdfAssetLink("assets/document.pdf?box=20240101000000-abcdefg&dataPath=%2Fdocs%2Fnote.sy&page=4"), {
+            linkAddress: "assets/document.pdf?box=20240101000000-abcdefg&dataPath=%2Fdocs%2Fnote.sy",
+            pdfParams: 4,
+        });
+    });
+
     it("preserves non-page parameters when page is in the middle", () => {
         assert.deepEqual(resolvePdfAssetLink("assets/document.pdf?box=20240101000000-abcdefg&page=5&dataPath=%2Fdocs%2Fnote.sy"), {
             linkAddress: "assets/document.pdf?box=20240101000000-abcdefg&dataPath=%2Fdocs%2Fnote.sy",

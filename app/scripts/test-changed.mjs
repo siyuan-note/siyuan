@@ -27,19 +27,22 @@ export const scanReferences = (text) => {
     for (const match of text.matchAll(/(?:from|require\s*\(|import\s*\()\s*["']([^"'\n]+)["']/g)) {
         references.add(match[1]);
     }
-    for (const match of text.matchAll(/["']((?:\.\.?\/)?(?:src|tests|electron|scripts)\/[^"'\n]+?\.(?:ts|js|mjs|scss|tpl))["']/g)) {
+    for (const match of text.matchAll(/["']((?:(?:\.\.?\/)+)?[^"'\n:*?<>|]+?\.(?:ts|js|mjs|scss|tpl))["']/g)) {
         references.add(match[1]);
     }
     return [...references];
 };
 
 // 把说明符或路径字面量解析成 app 内的绝对路径；外部模块返回 undefined。
-export const resolveReference = (fromFile, reference, root = appRoot) => {
+export const resolveReference = (fromFile, reference, root = appRoot, knownFiles = new Set()) => {
     let base;
     if (reference.startsWith(".")) {
         base = path.resolve(path.dirname(fromFile), reference);
     } else if (/^(?:src|tests|electron|scripts)\//.test(reference)) {
         base = path.resolve(root, reference);
+    } else if (moduleExtensions.some(extension => reference.endsWith(extension)) && !reference.includes("/")) {
+        // path.join(__dirname, "source.ts") 以测试所在目录为基准。
+        base = path.resolve(path.dirname(fromFile), reference);
     } else {
         return undefined;
     }
@@ -51,11 +54,12 @@ export const resolveReference = (fromFile, reference, root = appRoot) => {
     if (base.endsWith(".js")) {
         candidates.push(base.replace(/\.js$/, ".ts"));
     }
-    return candidates.find(candidate => existsSync(candidate) && statSync(candidate).isFile());
+    return candidates.find(candidate => knownFiles.has(candidate) ||
+        (existsSync(candidate) && statSync(candidate).isFile()));
 };
 
 // 收集 file -> 它直接引用的文件的依赖边。
-export const buildGraph = (files, root = appRoot) => {
+export const buildGraph = (files, root = appRoot, knownFiles = new Set(files)) => {
     const edges = new Map();
     for (const file of files) {
         let text;
@@ -66,7 +70,7 @@ export const buildGraph = (files, root = appRoot) => {
         }
         const targets = new Set();
         for (const reference of scanReferences(text)) {
-            const resolved = resolveReference(file, reference, root);
+            const resolved = resolveReference(file, reference, root, knownFiles);
             if (resolved && resolved !== file) {
                 targets.add(resolved);
             }
@@ -78,16 +82,23 @@ export const buildGraph = (files, root = appRoot) => {
 
 // 从改动文件出发反向遍历，找出直接或间接引用它们的测试文件。
 export const selectTests = (changedFiles, allFiles, root = appRoot) => {
+    const changed = new Set(changedFiles.map(file => path.resolve(file)));
+    // 依赖与转译配置影响所有测试，不能仅靠源码引用图推导。
+    if ([...changed].some(file => path.dirname(file) === root &&
+        (/^tsconfig(?:\..+)?\.json$/.test(path.basename(file)) ||
+            ["package.json", "pnpm-lock.yaml"].includes(path.basename(file))))) {
+        return allFiles.filter(isTestFile).sort();
+    }
     const reverse = new Map();
-    for (const [file, targets] of buildGraph(allFiles, root)) {
+    // 删除的源文件也保留依赖边，避免删除操作被误报为没有受影响的测试。
+    for (const [file, targets] of buildGraph(allFiles, root, new Set([...allFiles, ...changed]))) {
         for (const target of targets) {
             const list = reverse.get(target) ?? [];
             list.push(file);
             reverse.set(target, list);
         }
     }
-    const changed = new Set(changedFiles.map(file => path.resolve(file)));
-    const selected = new Set([...changed].filter(isTestFile));
+    const selected = new Set([...changed].filter(file => isTestFile(file) && existsSync(file)));
     const visited = new Set(changed);
     const queue = [...changed];
     while (queue.length > 0) {
@@ -113,14 +124,14 @@ export const listFiles = () => testRoots
 
 const repositoryRoot = path.resolve(appRoot, "..");
 
-const changedFiles = (base) => {
+export const changedFiles = (base, root = repositoryRoot) => {
     // `git diff --name-only <base>` 覆盖已提交的分支改动，未跟踪文件需单独收集。
-    const run = (arguments_) => execFileSync("git", arguments_, {cwd: repositoryRoot, encoding: "utf8"});
+    const run = (arguments_) => execFileSync("git", arguments_, {cwd: root, encoding: "utf8"});
     const files = [
-        ...run(["diff", "--name-only", base]).split("\n"),
-        ...run(["ls-files", "--others", "--exclude-standard"]).split("\n"),
+        ...run(["diff", "--name-only", "--no-renames", "-z", base, "--"]).split("\0"),
+        ...run(["ls-files", "--others", "--exclude-standard", "-z"]).split("\0"),
     ].filter(Boolean);
-    return files.map(file => path.resolve(repositoryRoot, file)).filter(file => existsSync(file));
+    return files.map(file => path.resolve(root, file));
 };
 
 const main = () => {
@@ -128,7 +139,7 @@ const main = () => {
     const baseIndex = arguments_.indexOf("--base");
     const base = baseIndex >= 0 ? arguments_[baseIndex + 1] : "HEAD";
     const touched = changedFiles(base).filter(file =>
-        testRoots.some(root => file.startsWith(path.join(appRoot, root) + path.sep)));
+        file.startsWith(appRoot + path.sep));
     if (touched.length === 0) {
         console.log("src/tests/electron/scripts 没有改动");
         return 0;

@@ -6,7 +6,8 @@ import {ModuleKind, transpileModule} from "typescript";
 
 const fixture = (frontend = "desktop", nativeBridge = {}) => {
     const appearance = {compactMode: false};
-    const siyuan = {config: {appearance, readonly: false}, isPublish: false, isReady: true};
+    const siyuan = {config: {appearance, readonly: false}, isPublish: false, isReady: true,
+        storage: {"local-compact-mode": true, "local-menu-mouse-scroll": true}};
     const attributes = new Map<string, string>();
     const input = {checked: false};
     const saved: unknown[][] = [];
@@ -29,6 +30,18 @@ const fixture = (frontend = "desktop", nativeBridge = {}) => {
     return {api: exports, appearance, siyuan, saved, events, input, attributes,
         setFrontend: (value: string) => {frontend = value;}};
 };
+
+test("compactMode ignores retired KV values and reads confirmed configuration updates", () => {
+    const f = fixture();
+    f.api.applyCompactMode();
+    assert.equal(f.input.checked, false);
+    f.appearance.compactMode = true;
+    f.api.applyCompactMode();
+    assert.equal(f.input.checked, true);
+    f.appearance.compactMode = false;
+    f.api.applyCompactMode();
+    assert.equal(f.input.checked, false);
+});
 
 test("compactMode saves through the appearance namespace without optimistic config mutation", async () => {
     const f = fixture();

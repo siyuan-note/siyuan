@@ -3,7 +3,8 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const {test} = require("node:test");
-const {selectTests, scanReferences} = require("./test-changed.mjs");
+const {execFileSync} = require("node:child_process");
+const {selectTests, scanReferences, changedFiles} = require("./test-changed.mjs");
 
 const fixture = t => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-"));
@@ -54,4 +55,62 @@ test("an undetectable dependency reports no tests instead of guessing", t => {
     const source = write("src/source.ts", "export const value = 1;");
     const testFile = write("src/source.test.ts", "// 只由运行期字符串拼接决定加载目标\nconst name = \"source\";");
     assert.deepEqual(selectTests([source], [source, testFile], root), []);
+});
+
+test("relative and sibling source literals select their loading tests", t => {
+    const {root, write} = fixture(t);
+    const source = write("src/source.ts", "export const value = 1;");
+    const parentLoader = write("src/nested/parent.test.ts",
+        'readFileSync(path.join(__dirname, "../source.ts"), "utf8");');
+    const siblingLoader = write("src/sibling.test.ts",
+        'readFileSync(path.join(__dirname, "source.ts"), "utf8");');
+    assert.deepEqual(selectTests([source], [source, parentLoader, siblingLoader], root),
+        [parentLoader, siblingLoader].sort());
+});
+
+test("deleted sources still select importers without trying to run deleted tests", t => {
+    const {root, write} = fixture(t);
+    const removed = write("src/source.ts", "export const value = 1;");
+    const imported = write("src/imported.test.ts", 'import {value} from "./source";');
+    const loaded = write("src/loaded.test.ts", 'load("src/source.ts");');
+    const deletedTest = write("src/deleted.test.ts", "");
+    fs.unlinkSync(removed);
+    fs.unlinkSync(deletedTest);
+    assert.deepEqual(selectTests([removed, deletedTest], [imported, loaded], root), [imported, loaded].sort());
+});
+
+test("git paths preserve Unicode, whitespace and deleted entries", t => {
+    const {root, write} = fixture(t);
+    const run = (...args) => execFileSync("git", args, {cwd: root});
+    const source = write("src/路径 with spaces.ts", "export const value = 1;");
+    run("init", "--quiet");
+    run("add", ".");
+    const tree = run("write-tree").toString("utf8").trim();
+    fs.unlinkSync(source);
+    const added = write("src/新增.ts", "export {};");
+    assert.deepEqual(changedFiles(tree, root).sort(), [source, added].sort());
+});
+
+test("renames keep the old path so stale importers are selected", t => {
+    const {root, write} = fixture(t);
+    const run = (...args) => execFileSync("git", args, {cwd: root});
+    const source = write("src/source.ts", "export const value = 1;");
+    const importer = write("src/source.test.ts", 'import {value} from "./source";');
+    run("init", "--quiet");
+    run("add", ".");
+    const tree = run("write-tree").toString("utf8").trim();
+    run("mv", "src/source.ts", "src/moved.ts");
+    const touched = changedFiles(tree, root);
+    assert.ok(touched.includes(source));
+    assert.deepEqual(selectTests(touched, [importer, path.join(root, "src/moved.ts")], root), [importer]);
+});
+
+test("dependency and transpiler configuration changes select the whole suite", t => {
+    const {root, write} = fixture(t);
+    const first = write("src/first.test.ts", "");
+    const second = write("tests/second.test.js", "");
+    const source = write("src/unrelated.ts", "export {};");
+    for (const name of ["package.json", "pnpm-lock.yaml", "tsconfig.json", "tsconfig.typecheck.json"]) {
+        assert.deepEqual(selectTests([path.join(root, name)], [first, second, source], root), [first, second].sort());
+    }
 });

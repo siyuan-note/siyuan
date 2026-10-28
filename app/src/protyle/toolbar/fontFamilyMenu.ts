@@ -323,8 +323,8 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
                     session.show(() => menu.fullscreen("bottom"));
                 } else {
                     const rect = target.getBoundingClientRect();
-                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target}));
                     markMenuInnerScroll(menu.element);
+                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target}));
                 }
             };
             target.setAttribute("aria-expanded", "true");

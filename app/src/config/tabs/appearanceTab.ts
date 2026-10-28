@@ -577,9 +577,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     }
                 });
                 const rect = fontFamiliesElement.getBoundingClientRect();
-                session.show(() => fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height}));
                 // 内部列表自行滚动，搜索框保持固定
                 markMenuInnerScroll(fontMenu.element);
+                session.show(() => fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height}));
                 if (!isMobile()) {
                     fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
                 }

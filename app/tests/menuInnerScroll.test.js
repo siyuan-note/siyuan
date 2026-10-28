@@ -4,7 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 
 // 搜索框固定、滚动交给内层列表的菜单（AI 编辑、字体族、背景图、模型选择、汇总）结构一致：
-// .b3-menu__items--inner-scroll（由 Menu.useInnerScroll() 标记，并保留 open() 写入的可用高度）
+// .b3-menu__items--inner-scroll（由 markMenuInnerScroll() 标记，并保留 open() 写入的可用高度）
 // > div > .b3-menu__filter > .b3-list
 
 const browserCases = (entries) => {

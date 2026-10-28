@@ -362,8 +362,8 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], 
                 },
             });
             const rect = modelInput.getBoundingClientRect();
-            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput}));
             markMenuInnerScroll(menu.element);
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput}));
 
         },
     });

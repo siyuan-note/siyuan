@@ -102,6 +102,7 @@ const createPendingFontMenu = (key: string) => {
     const attributes = new Map<string, string>();
     const state = {opened: 0, focused: 0, items: 0};
     let visible = false;
+    let innerScroll = false;
     let resolveFonts: (fonts: unknown[]) => void;
     const input = {style: {removeProperty() {}}, isConnected: true, closest: (): null => null, setAttribute() {},
         addEventListener: (name: string, callback: () => Promise<void>) => listeners.set(name, callback),
@@ -112,19 +113,23 @@ const createPendingFontMenu = (key: string) => {
         contains: (target: unknown) => target === element,
         getAttribute: (name: string) => attributes.get(name),
         setAttribute: (name: string, value: string) => attributes.set(name, value),
-        querySelector: (selector: string) => selector === ".b3-menu__items" ? {setAttribute() {}} :
-            {focus: () => state.focused++},
+        querySelector: () => ({focus: () => state.focused++}),
     };
     const menu = {element, data: undefined as Element, removeCB: undefined as (() => void),
         remove() {
             visible = false;
+            innerScroll = false;
             this.data = undefined;
             const callback = this.removeCB;
             this.removeCB = undefined;
             callback?.();
             attributes.clear();
         },
-        addItem: () => state.items++, popup: () => { visible = true; state.opened++; },
+        addItem: () => state.items++, popup: () => {
+            assert.equal(innerScroll, true, "enable inner scrolling before measuring the font menu");
+            visible = true;
+            state.opened++;
+        },
     };
     const window = {siyuan: {menus: {menu}, languages: {default: "Default"},
         config: {appearance: {globalFontFamilies: [] as unknown[]},
@@ -143,6 +148,10 @@ const createPendingFontMenu = (key: string) => {
     });
     const appearance = load("src/config/tabs/appearanceTab.ts", {
         "../../menus/menuToggle": loadMenuToggle({window}),
+        "../../menus/Menu": {markMenuInnerScroll: (target: unknown) => {
+            assert.equal(target, element);
+            innerScroll = true;
+        }},
         "../../plugin/Menu": pluginMenu,
         "../../util/availableFont": {loadAvailableFonts: () => new Promise(resolve => {
             resolveFonts = fonts => resolve({customFontSupported: false, customFonts: [], fontItems: fonts});

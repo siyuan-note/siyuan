@@ -1,6 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {escapeHtmlTextAndAttr, escapeSearchHighlight, stripSearchMark} from "./escape";
+import {
+    escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr, escapeMarkdownPlainText,
+    escapeSearchHighlight, stripSearchMark,
+} from "./escape";
 
 describe("escape HTML strings", () => {
     it("matches the bundled Lute engine for text and double-quoted attributes", () => {
@@ -24,6 +27,31 @@ describe("escape HTML strings", () => {
         assert.equal(escapeHtmlTextAndAttr("\ud800&<\udc00>\"'"), "\ud800&amp;&lt;\udc00&gt;&quot;'");
         assert.equal(escapeHtmlTextAndAttr("\ud800"), "\ud800");
         assert.equal(escapeHtmlTextAndAttr("\udc00"), "\udc00");
+    });
+});
+
+describe("escape HTML fragments and attributes", () => {
+    it("escapes only ampersands and less-than signs for HTML fragments", () => {
+        assert.equal(escapeHtml(""), "");
+        assert.equal(escapeHtml("a&b<c>d\"e'f"), "a&amp;b&lt;c>d\"e'f");
+    });
+
+    it("escapes both quote kinds for attributes", () => {
+        assert.equal(escapeAttr(""), "");
+        assert.equal(escapeAttr("&<>\"'"), "&<>&quot;&apos;");
+    });
+
+    it("escapes aria-label text with the inner attribute level", () => {
+        assert.equal(escapeAriaLabel(""), "");
+        assert.equal(escapeAriaLabel("&lt;a<b>'c\"d"), "&amp;lt;a&amp;lt;b>&apos;c&quot;d");
+    });
+});
+
+describe("escape Markdown plain text", () => {
+    it("prefixes every escapable marker with a backslash", () => {
+        assert.equal(escapeMarkdownPlainText("plain text"), "plain text");
+        assert.equal(escapeMarkdownPlainText("\\*_[]!`<>&~{}()=#$^|."),
+            "\\\\\\*\\_\\[\\]\\!\\`\\<\\>\\&\\~\\{\\}\\(\\)\\=\\#\\$\\^\\|\\.");
     });
 });
 

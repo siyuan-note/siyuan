@@ -34,11 +34,12 @@ const animateFloatingBar = (element: HTMLElement, from: number, to: number, clos
     element.classList.toggle("dock--closing", closing);
     element.inert = closing;
     effects.animations = [element, effects.backdrop].flatMap(target => [
-        target.animate([{transform: `translateX(${from}px)`}, {transform: `translateX(${to}px)`}], {
-            duration: 200, easing: "cubic-bezier(0, 0, .2, 1)", fill: "forwards",
+        target.animate(panel ? [{transform: `translateX(${from}px)`}] :
+            [{transform: `translateX(${from}px)`}, {transform: `translateX(${to}px)`}], {
+            duration: panel ? 0 : 200, easing: "cubic-bezier(0, 0, .2, 1)", fill: "both",
         }),
-        target.animate([{opacity}, {opacity: closing ? "0" : "1"}], {
-            duration: 300, easing: "cubic-bezier(0, 0, .2, 1)", fill: "forwards",
+        target.animate(panel ? [{opacity}] : [{opacity}, {opacity: closing ? "0" : "1"}], {
+            duration: panel ? 0 : 300, easing: "cubic-bezier(0, 0, .2, 1)", fill: "both",
         }),
     ]);
     const finish = () => {
@@ -50,33 +51,49 @@ const animateFloatingBar = (element: HTMLElement, from: number, to: number, clos
             effects.animations = [];
         }
     };
-    effects.animations[effects.animations.length - 1].onfinish = finish;
+    const finishAnimations = () => {
+        const animations = effects.animations;
+        // 位移与透明度可使用不同的时长和延迟；反向操作取消的动画不能清理新一轮动画。
+        Promise.all(animations.map(animation => animation.finished)).then(() => {
+            if (floatingBarEffects.get(element) === effects && effects.animations === animations) {
+                finish();
+            }
+        }).catch(() => {
+            // 取消动画时 finished 会拒绝，当前显隐状态由接替的动画负责。
+        });
+    };
     if (panel) {
         // 原生过渡在反向播放时会缩短时长，复制其关键帧和时间轴以保持边缘贴合。
         effects.frame = requestAnimationFrame(() => {
             const offset = (element.id === "dockLeft" ? -1 : 1) * element.clientWidth;
-            for (const source of panel.getAnimations()) {
-                if (!(source instanceof CSSTransition) || !["transform", "opacity"].includes(source.transitionProperty)) {
-                    continue;
-                }
-                const transform = source.transitionProperty === "transform";
-                const frames = (source.effect as KeyframeEffect).getKeyframes().map(frame => ({
+            const panelStyle = getComputedStyle(panel);
+            const sources = panel.getAnimations();
+            effects.animations.forEach(animation => animation.cancel());
+            effects.animations = ["transform", "opacity"].flatMap(property => {
+                const source = sources.find(animation => animation instanceof CSSTransition &&
+                    animation.transitionProperty === property);
+                const transform = property === "transform";
+                const frames = source ? (source.effect as KeyframeEffect).getKeyframes().map(frame => ({
                     offset: frame.offset, easing: frame.easing,
                     ...(transform ? {transform: `translateX(${new DOMMatrixReadOnly(frame.transform as string).m41 + offset}px)`} :
                         {opacity: frame.opacity}),
-                }));
-                [element, effects.backdrop].forEach((target, index) => {
-                    const slot = index * 2 + (transform ? 0 : 1);
-                    effects.animations[slot].cancel();
-                    const animation = target.animate(frames, {...source.effect.getTiming(), fill: "forwards"});
-                    if (typeof source.startTime === "number") {
+                })) : [transform ? {transform: `translateX(${new DOMMatrixReadOnly(panelStyle.transform).m41 + offset}px)`} :
+                    {opacity: panelStyle.opacity}];
+                // 无过渡的属性直接使用面板当前值；延迟开始的过渡也要保持起始帧。
+                return [element, effects.backdrop].map(target => {
+                    const animation = target.animate(frames, {
+                        ...(source ? source.effect.getTiming() : {duration: 0}), fill: "both",
+                    });
+                    if (typeof source?.startTime === "number") {
                         animation.startTime = source.startTime;
                     }
-                    effects.animations[slot] = animation;
+                    return animation;
                 });
-            }
-            effects.animations[effects.animations.length - 1].onfinish = finish;
+            });
+            finishAnimations();
         });
+    } else {
+        finishAnimations();
     }
 };
 

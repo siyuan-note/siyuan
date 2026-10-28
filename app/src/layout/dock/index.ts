@@ -409,6 +409,19 @@ export class Dock {
         return widePanel ? WIDE_DOCK_SIZE : DEFAULT_DOCK_SIZE;
     }
 
+    private ensureMinimumWidth() {
+        if (this.position === "Bottom" || !this.isPanelVisible()) {
+            return;
+        }
+        const minimumWidth = this.getResponsiveMinimumSize();
+        // 使用未受响应式压缩的宽度，保留用户设置的更大宽度。
+        if (this.getResponsivePreferredSize() < minimumWidth) {
+            this.restoreResponsivePreferredSize(minimumWidth);
+            // 新面板需要更多空间时，允许响应式布局重新决定是否悬浮。
+            this.clearResponsiveManualOverride();
+        }
+    }
+
     public isPanelVisible() {
         return this.panelVisible && this.hasActive();
     }
@@ -452,6 +465,9 @@ export class Dock {
         }
         this.panelVisible = resolution.storedVisible;
         this.layout.element.classList.toggle("fn__none", !resolution.visible);
+        if (resolution.visible) {
+            this.ensureMinimumWidth();
+        }
         if (resolution.visible && !this.isFloating()) {
             adjustLayout();
             this.resizeElement.classList.remove("fn__none");
@@ -1052,6 +1068,7 @@ export class Dock {
             anotherWnd.element.style.height = "";
             anotherWnd.element.style.width = "";
         }
+        this.ensureMinimumWidth();
         syncDockBarVisibility();
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && this.panelVisible) {

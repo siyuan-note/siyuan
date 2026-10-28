@@ -73,6 +73,10 @@ const browserCases = ({css, desktop, community}) => {
             near(number(".b3-dialog__header", "paddingLeft"), padding, "dialog title left padding");
             near(number(".b3-dialog__header", "paddingRight"), padding, "dialog title right padding");
         }
+        for (const selector of [".b3-dialog__content", ".b3-dialog__action"]) {
+            near(number(selector, "paddingLeft"), padding, `${selector} left padding`);
+            near(number(selector, "paddingRight"), padding, `${selector} right padding`);
+        }
         header.textContent = "Dialog title";
     };
     const settle = () => document.getAnimations().filter(animation => animation instanceof CSSTransition)
@@ -102,7 +106,7 @@ const browserCases = ({css, desktop, community}) => {
     ].map(([key, selector]) => [key, {height: height(selector), font: getComputedStyle(find(selector)).fontSize}]));
     const normal = snapshot();
     if (desktop && !community) {
-        checkDialogAlignment(24);
+        checkDialogAlignment(16);
         checkTabEdge();
         for (const [key, expected] of Object.entries({toolbar: 32, tabs: 42, panel: 42, breadcrumb: 42,
             list: 28, menu: 28, dialog: 43, status: 32})) {

@@ -126,7 +126,7 @@
 
   &__header {
     cursor: default;
-    padding: var(--b3-ui-dialog-header-padding, 9px 24px);
+    padding: var(--b3-ui-dialog-header-padding, 9px 16px);
     line-height: 24px;
     font-size: 16px;
     font-weight: 500;
@@ -141,14 +141,14 @@
   }
 
   &__content {
-    padding: var(--b3-ui-dialog-content-padding, 16px 24px);
+    padding: var(--b3-ui-dialog-content-padding, 16px 16px);
     word-break: break-all;
     flex: 1;
     overflow: auto;
   }
 
   &__action {
-    padding: var(--b3-ui-dialog-action-padding, 7px 24px);
+    padding: var(--b3-ui-dialog-action-padding, 7px 16px);
     border-top: 1px solid var(--b3-theme-surface-lighter);
     display: flex;
     flex-shrink: 0;

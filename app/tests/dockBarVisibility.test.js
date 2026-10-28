@@ -117,18 +117,28 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
             await settle();
             dock.hideDock();
             await settle();
-            const checkAttached = (message) => {
+            const checkAttached = (message, checkOpacity = true) => {
                 const panelRect = panel.getBoundingClientRect();
                 const barRect = element.getBoundingClientRect();
                 const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
                 check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
-                check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
-                    `${position} ${message}: opacity follows the panel`);
+                if (checkOpacity) {
+                    check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
+                        `${position} ${message}: opacity follows the panel`);
+                }
                 check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
             };
             const finish = async () => {
                 await Promise.all([...panel.getAnimations(), ...element.getAnimations()].map(animation => animation.finished));
                 await nextFrames();
+            };
+            // 动画结束后必须回到停靠栏原始位置，否则边缘会留出缝隙并在动画释放时跳动。
+            const checkResting = (message) => {
+                const barRect = element.getBoundingClientRect();
+                const edge = position === "Left" ? barRect.left : window.innerWidth - barRect.right;
+                check.ok(Math.abs(edge) < 1, `${position} ${message}: resting edge=${edge}`);
+                check.equal(getComputedStyle(element).transform, "none",
+                    `${position} ${message}: no residual translation`);
             };
             for (const transition of ["none", "transform 600ms linear, opacity 50ms linear",
                 "transform 600ms linear", "opacity 300ms linear", "transform 350ms linear 120ms, opacity 50ms linear 120ms"]) {
@@ -143,6 +153,7 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
                     checkAttached(`entry after opacity completes with ${transition}`);
                 }
                 await finish();
+                checkResting(`entry with ${transition}`);
                 dock.hideDock();
                 await nextFrames();
                 if (transition === "none") {
@@ -169,6 +180,23 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
             checkAttached("reversing custom transitions");
             await finish();
             check.ok(!hidden(element) && !element.inert, "canceled animations cannot clean up the reopened bar");
+            dock.hideDock();
+            await nextFrames();
+            await finish();
+            check.ok(hidden(element));
+            // 面板在停靠栏已经浮出时展开，停靠栏仍需贴着面板外沿一起移动。
+            bar.setDockBarHover(element, true);
+            await nextFrames();
+            check.ok(!hidden(element) && element.classList.contains("dock--float"),
+                "the edge reveals the bar before the panel opens");
+            await finish();
+            dock.showDock();
+            await nextFrames();
+            // 停靠栏已在位时面板只淡入，停靠栏不参与透明度过渡。
+            checkAttached("panel opens while the bar is already floating", false);
+            await finish();
+            checkResting("panel opens while the bar is already floating");
+            bar.setDockBarHover(element, false);
             dock.hideDock();
             await nextFrames();
             await finish();
@@ -214,11 +242,15 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         check.equal(dock.layout.element.style.opacity, "1", "clicking a revealed entry opens its panel");
         check.ok(!hidden(element) && hidden(otherBar), "only the expanded side reveals its bar");
         check.equal(getComputedStyle(element).position, "fixed");
+        check.equal(getComputedStyle(element).transform, "none",
+            "clicking a revealed entry does not restart the bar from the window edge");
         check.deepEqual(rect(center.element), initialEditor, "revealing a bar and panel does not resize the editor");
         const panelRect = dock.layout.element.getBoundingClientRect();
         const barRect = element.getBoundingClientRect();
         check.equal(position === "Left" ? panelRect.left : panelRect.right,
             position === "Left" ? barRect.right : barRect.left, "panel stays beside the bar");
+        check.equal(getComputedStyle(element).transform, "none",
+            "the settled bar keeps no residual translation, so no gap opens at the window edge");
         const temporary = {bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)};
         const backdrop = element.previousElementSibling;
@@ -294,8 +326,12 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         check.ok(hidden(entries[0]) && !hidden(element), "profile-hidden entries stay hidden during refresh");
         entries[0].classList.remove("fn__none");
 
-        dock.hideDockByHover();
+        // 指针离开图标栏后，位置刷新不应取消待执行的收起。
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: window.innerWidth / 2, clientY: 200}));
         dock.showDock(true);
+        // 悬停收起要等延迟计时和面板过渡都结束，位置刷新不得打断它们。
+        await settle();
         await settle();
         check.ok(hidden(element), "position refreshes do not cancel a pending hover close");
         dock.showDock();
@@ -345,6 +381,10 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         check.deepEqual(rect(center.element), initialEditor, "closing a temporary bar restores the editor space");
         dock.showDock();
         dock.togglePanel(false);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        check.ok(!hidden(element) && element.getAnimations().length > 0,
+            "explicitly collapsing a panel slides its temporary bar out instead of removing it at once");
+        await settle();
         check.ok(hidden(element), "explicitly collapsing a panel clears its temporary bar");
         center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
             clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
@@ -361,13 +401,25 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         dock.showDock();
         await settle();
         check.ok(!hidden(element));
+        // 指针停在图标栏上时点击已打开的图标收起面板，停靠栏保持可见以便继续切换工具。
+        element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
+        await settle();
         dock.toggleModel(position + "two", false, true, false, false);
         await settle();
-        check.ok(hidden(element), "closing the final active item hides the temporary bar");
+        check.ok(!hidden(element), "the pointer over the bar keeps the temporary bar visible after the panel closes");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: window.innerWidth / 2, clientY: 200}));
+        await new Promise(resolve => setTimeout(resolve, 60));
+        check.ok(!hidden(element) && element.getAnimations().length > 0,
+            "leaving the bar slides it out instead of removing it at once");
+        await settle();
+        check.ok(hidden(element), "leaving the bar hides the temporary bar after the panel closes");
         center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
             clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
         await settle();
         check.ok(!hidden(element), "the edge remains usable after closing the last panel");
+        bar.setDockBarHover(element, false);
         dock.hideDock();
     }
     document.removeEventListener("mousemove", move);

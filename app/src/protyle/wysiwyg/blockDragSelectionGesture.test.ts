@@ -1,12 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/blockDragSelectionGesture.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiled = compileModule("src/protyle/wysiwyg/blockDragSelectionGesture.ts", ScriptTarget.ES2021);
 
 class Surface {
     listeners = new Map<string, Set<(event: any) => void>>();
@@ -45,7 +42,6 @@ class Surface {
 }
 
 const fixture = (mountScroll = true) => {
-    const exports: any = {};
     let time = 10000;
     const window = new Surface();
     const document = Object.assign(new Surface(), {defaultView: window});
@@ -56,10 +52,7 @@ const fixture = (mountScroll = true) => {
     const selections: string[][] = [];
     const finishes: boolean[] = [];
     const scrolls: unknown[] = [];
-    runInNewContext(compiled, {
-        exports,
-        Date: {now: () => time},
-    });
+    const exports = evaluateModule<any>(compiled, {Date: {now: () => time}});
     let mountedScrollElement: Surface;
     const dispose = exports.bindBlockDragSelectionGesture(element, () => mountedScrollElement, {
         canStart: () => enabled,

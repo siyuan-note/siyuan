@@ -1,20 +1,16 @@
 import * as capabilities from "../capabilities";
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
-import {runInNewContext} from "node:vm";
-import * as ts from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../../testSupport/loadModule";
 
 const setup = () => {
     const transactions: Array<{do: IOperation[], undo: IOperation[]}> = [];
     const menus: Array<Array<{label: string; checked: boolean; click: () => void}>> = [];
-    const exports = {};
     const window = {siyuan: {isPublish: false, languages: {}, config: {lang: "en"}}};
-    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "settings.ts"), "utf8"), {
-        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
-    }).outputText, {
-        exports, window, Lute: {NewNodeID: () => "new-field"},
+    const methods = loadModule<typeof import("./settings")>(join(__dirname, "settings.ts"), {
+        window, Lute: {NewNodeID: () => "new-field"},
         require: (id: string) => id === "./capabilities" || id === "../capabilities" ? capabilities : (({
             "../../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) =>
                 transactions.push({do: perform, undo})},
@@ -28,8 +24,8 @@ const setup = () => {
                 open() { return; }
             }},
         })[id]),
-    });
-    return {methods: exports as typeof import("./settings"), transactions, window, menus};
+    }, ScriptTarget.ES2022);
+    return {methods, transactions, window, menus};
 };
 
 const data = () => ({id: "database", viewID: "calendar-view", view: {

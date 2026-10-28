@@ -22,10 +22,14 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
     const resizeWindow = async (width: number, height: number) => {
         await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
         // 原生窗口调用返回时，渲染进程可能尚未收到新的视口尺寸。
-        for (let count = 0; count < 120 && (innerWidth !== width || innerHeight !== height); count++) {
+        // 窗口尺寸由操作系统取整，高 DPI 下可能与请求值相差 1px，因此按容差等待。
+        for (let count = 0; count < 120 &&
+            (Math.abs(innerWidth - width) > 1 || Math.abs(innerHeight - height) > 1); count++) {
             await frame();
         }
-        check.deepEqual([innerWidth, innerHeight], [width, height]);
+        // 仍要求尺寸确实换了，只是允许 1px 的设备像素取整。
+        check.ok(Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1,
+            `viewport did not resize: ${innerWidth}x${innerHeight} vs ${width}x${height}`);
         await settle();
     };
     const originalWindow = {width: innerWidth, height: innerHeight};
@@ -730,6 +734,7 @@ app.whenReady().then(async () => {
         });
         assert.match(result.stdout, /Mindmap fullscreen cases passed/);
     } finally {
-        rmSync(temporary, {recursive: true, force: true});
+        // Electron 子进程退出后文件句柄可能尚未释放，Windows 上需要重试删除。
+        rmSync(temporary, {recursive: true, force: true, maxRetries: 10, retryDelay: 100});
     }
 });

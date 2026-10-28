@@ -295,7 +295,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
         source.value = original;
         if (mobile && width === 360) {
             await require("electron").ipcRenderer.invoke("template-manager-size", width, 360);
-            await waitFor(() => window.innerHeight === 360, "mobile keyboard viewport did not resize");
+            await waitFor(() => Math.abs(window.innerHeight - 360) <= 1, "mobile keyboard viewport did not resize");
             button("source").scrollIntoView({block: "nearest"});
             assert.ok(button("source").getBoundingClientRect().bottom <= 360, "actions remain reachable above the keyboard");
         }

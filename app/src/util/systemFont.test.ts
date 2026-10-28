@@ -1,21 +1,15 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
 import {describe, it, test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 import {getFontFamilyDisplayName, getUniqueFontFamilies, parseSystemFontsJSON} from "./systemFontCore";
 
 const font = {family: "HarmonyOS Sans", displayName: "HarmonyOS Sans", weight: 400};
 
 const load = (container: string, bridge?: () => Promise<string>, kernel?: () => Promise<unknown>) => {
     let requests = 0;
-    const exports: {loadSystemFonts?: () => Promise<typeof font[]>} = {};
     const window = {siyuan: {config: {system: {container}}}, JSHarmony: {getSystemFonts: bridge}};
-    runInNewContext(transpileModule(readFileSync(resolve(process.cwd(), "src/util/systemFont.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {
-        exports, window, console: {warn() {}},
+    const exports = loadModule<{loadSystemFonts?: () => Promise<typeof font[]>}>("src/util/systemFont.ts", {
+        window, console: {warn() {}},
         require: (name: string) => name === "./systemFontCore" ? {parseSystemFontsJSON} : {
             fetchSyncPost: async () => {
                 requests++;

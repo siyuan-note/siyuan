@@ -1,12 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-
-const compiled = transpileModule(readFileSync(__dirname + "/touchBlockSelection.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 
 const fixture = (multi = false, editable = true, nested = false) => {
     const calls: string[] = [];
@@ -14,11 +9,10 @@ const fixture = (multi = false, editable = true, nested = false) => {
     const root = {querySelector: () => ({}), querySelectorAll: () => [highlight]};
     const target = {isContentEditable: editable, closest: () => nested ? {} : root};
     const protyle = {wysiwyg: {element: root}, toolbar: {isMultiSelectMode: () => multi}};
-    const exports = {} as typeof import("./touchBlockSelection");
-    runInNewContext(compiled, {
-        exports,
-        require: () => ({hideElements: () => calls.push("selection"), countBlockWord: () => calls.push("status")}),
-    });
+    const exports = loadModule<typeof import("./touchBlockSelection")>(
+        "src/protyle/wysiwyg/touchBlockSelection.ts", {
+            require: () => ({hideElements: () => calls.push("selection"), countBlockWord: () => calls.push("status")}),
+        }, ScriptTarget.ES2021);
     return {calls, down: (overrides: Partial<PointerEvent> = {}) => {
         exports.clearTouchBlockSelection(protyle as unknown as IProtyle, {
             target, pointerType: "touch", button: 0, ...overrides,

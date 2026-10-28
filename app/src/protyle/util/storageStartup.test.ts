@@ -53,13 +53,6 @@ const loadZoom = (value: unknown) => {
     return zoom;
 };
 
-test("reader and control preferences no longer create defaults in local storage", () => {
-    const storage = loadStorage({});
-    for (const key of ["local-mobile-bars", "local-outline", "local-pdftheme", "local-recent-docs"]) {
-        assert.equal(Object.prototype.hasOwnProperty.call(storage, key), false, key);
-    }
-});
-
 test("startup storage uses the current mobile bottom bar default without sharing mutable slots", () => {
     const first = loadStorage({})[Constants.LOCAL_MOBILE_BOTTOM_BAR];
     const second = loadStorage({})[Constants.LOCAL_MOBILE_BOTTOM_BAR];

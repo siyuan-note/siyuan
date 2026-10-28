@@ -1,22 +1,16 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 const {createMockRequire} = require("../../../tests/fixtures/mockModules.cjs");
 
-const api = {} as typeof import("./tabsList");
-runInNewContext(transpileModule(readFileSync("src/protyle/wysiwyg/tabsList.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText, {
-    exports: api,
+const {isEmptyTabPlaceholder} = loadModule<typeof import("./tabsList")>("src/protyle/wysiwyg/tabsList.ts", {
     require: createMockRequire({
         "../render/tabsRender": {},
         "../render/listMindmap/model": {},
         "../render/listMindmap/preferences": {},
     }),
-});
-const {isEmptyTabPlaceholder} = api;
+}, ScriptTarget.ES2021);
 
 const paragraph = (attrs: Record<string, string>, text = "", rich = false) => ({
     attributes: Object.entries(attrs).map(([name, value]) => ({name, value})),

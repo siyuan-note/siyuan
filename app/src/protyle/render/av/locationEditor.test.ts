@@ -1,13 +1,8 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {describe, it} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import * as locationValue from "./locationValue";
-
-const compiled = transpileModule(readFileSync("src/protyle/render/av/locationEditor.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-}).outputText;
 
 class Control {
     value = "";
@@ -80,7 +75,6 @@ const createEditor = (options: {
             this.options.destroyCallback();
         }
     }
-    const methods = {} as typeof import("./locationEditor");
     const modules: Record<string, unknown> = {
         "../../../dialog": {Dialog: MockDialog},
         "../../../util/escape": {escapeHtml: (text: string) => text},
@@ -98,8 +92,7 @@ const createEditor = (options: {
         "./locationValue": locationValue,
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
     };
-    runInNewContext(compiled, {
-        exports: methods,
+    const methods = loadModule<typeof import("./locationEditor")>("src/protyle/render/av/locationEditor.ts", {
         require: (name: string) => {
             assert.ok(Object.prototype.hasOwnProperty.call(modules, name), `Unexpected location editor dependency: ${name}`);
             return modules[name];
@@ -117,7 +110,7 @@ const createEditor = (options: {
                 lifecycle.push("disconnect");
             }
         },
-    });
+    }, ScriptTarget.ES2020);
     const dialog = methods.openAVLocationEditor({
         value: options.value,
         ownerElement: owner as HTMLElement,

@@ -1,21 +1,17 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
-import {runInNewContext} from "node:vm";
-import * as ts from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const open = (left: number, right: number, viewport: number, width: number, mobile = false) => {
-    const exports = {};
-    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "viewSettingMenu.ts"), "utf8"), {
-        compilerOptions: {module: ts.ModuleKind.CommonJS},
-    }).outputText, {exports, window: {innerWidth: viewport}, require: () => ({isMobile: () => mobile})});
+    const methods = loadModule<typeof import("./viewSettingMenu")>(join(__dirname, "viewSettingMenu.ts"), {
+        window: {innerWidth: viewport}, require: () => ({isMobile: () => mobile}),
+    });
     let position: IPosition;
     const element = {style: {left: ""}, getBoundingClientRect: () => ({width})};
     const menu = {element, open: (value: IPosition) => { position = value; }};
     const target = {getBoundingClientRect: () => ({left: left + 8, right: right - 8, top: 120, bottom: 148, height: 28}),
         closest: () => ({getBoundingClientRect: () => ({left, right})})};
-    const methods = exports as typeof import("./viewSettingMenu");
     methods.openViewSettingMenu(menu as unknown as Parameters<typeof methods.openViewSettingMenu>[0], target as unknown as HTMLElement);
     return {position, element};
 };

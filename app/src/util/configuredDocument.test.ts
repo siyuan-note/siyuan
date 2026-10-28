@@ -1,9 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {DocumentCreationAttempt} from "./documentCreationPlan";
+import {loadModule} from "../testSupport/loadModule";
 import type {DocumentCreatePlan, DocumentPath, PlanDocCreateRequestInput} from "../types/api";
 
 const plan = (): DocumentCreatePlan => ({notebook: "box", title: "Title", steps: [
@@ -15,12 +13,10 @@ const location = (): DocumentPath => ({notebook: "box", id: "fixed", parentID: n
 const input: Omit<PlanDocCreateRequestInput, "id"> = {notebook: "box", contextID: null, purpose: "document"};
 
 function setup(fetch: (url: string, data: unknown) => Promise<unknown>) {
-    const methods = {} as typeof import("./configuredDocument");
     const dialogs: Array<{yes: () => void; no: () => void; destroyed: boolean; destroy: () => void}> = [];
     const messages: string[] = [];
-    runInNewContext(transpileModule(readFileSync("src/util/configuredDocument.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports: methods, Lute: {NewNodeID: () => "allocated-once"},
+    const methods = loadModule<typeof import("./configuredDocument")>("src/util/configuredDocument.ts", {
+        Lute: {NewNodeID: () => "allocated-once"},
         window: {siyuan: {languages: {documentCreationRecovery: "Review", documentCreationLimit: "Limit"}}},
         require: (name: string) => ({
             "./fetch": {fetchSyncPost: fetch},

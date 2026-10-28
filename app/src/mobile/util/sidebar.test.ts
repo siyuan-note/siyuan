@@ -1,9 +1,6 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 
 test("sidebar opening restores the active dock, falls back to visible docks and ignores empty sides", () => {
     const tab = (type: string, active: boolean, hidden = false) => ({
@@ -20,14 +17,10 @@ test("sidebar opening restores the active dock, falls back to visible docks and 
     let closed = 0;
     let blurred = 0;
     let cellEditorsClosed = 0;
-    const moduleExports: {
+    const moduleExports = loadModule<{
         openSidebar?: (side: string) => void;
         popSidebar?: (side: string) => void;
-    } = {};
-    const source = readFileSync(resolve(process.cwd(), "src/mobile/util/sidebar.ts"), "utf8");
-    const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-    runInNewContext(code, {
-        exports: moduleExports,
+    }>("src/mobile/util/sidebar.ts", {
         document: {getElementById: (id: string) => id === "sidebar" ? left : right},
         window: {siyuan: {zIndex: 10}},
         CustomEvent: class {

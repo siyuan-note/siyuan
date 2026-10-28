@@ -1,9 +1,8 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const setup = (text = "before after") => {
     type TText = {textContent: string};
@@ -54,13 +53,10 @@ const setup = (text = "before after") => {
         "../../util/selection": {focusBlock() {}},
         "../../undo": {electronUndo() {}},
     };
-    const api = {} as typeof import("./search");
-    runInNewContext(transpileModule(readFileSync(join(__dirname, "search.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-    }).outputText, {
-        exports: api, require: (name: string) => modules[name] || {}, document,
+    const api = loadModule<typeof import("./search")>(join(__dirname, "search.ts"), {
+        require: (name: string) => modules[name] || {}, document,
         getSelection: () => selection, setTimeout: (callback: () => void) => timers.push(callback),
-    });
+    }, ScriptTarget.ES2020);
     const blockElement = {querySelector: (selector: string) => selector === ".av__views" ?
         {classList: {add() {}, remove() {}}} : input} as unknown as HTMLElement;
     const bind = (query: string, isSearching = true, saved?: ReturnType<typeof api.captureAvSearchSelection>) => {

@@ -1,8 +1,6 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import test from "node:test";
-import {runInNewContext} from "node:vm";
-import {transpileModule, ModuleKind} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 class Control {
     value = "";
@@ -43,15 +41,12 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
     let observerCallback: () => void;
     const browserWindow = {opener: {}, location: {href: "about:blank"}, close: () => {}};
     const profiles = [...initialProfiles];
-    const namespace: Record<string, unknown> = {};
     let pendingStatus: (response: unknown) => void;
     let loginCount = 0;
     const confirmations: Array<{text: string; confirm: () => void; cancel: () => void}> = [];
     const messages: string[] = [];
     const outcomes = {removeCode: 0, revoked: true};
-    const source = readFileSync("src/config/tabs/ai/chatGPTAccount.ts", "utf8");
-    runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
-        exports: namespace,
+    const namespace = loadModule<Record<string, unknown>>("src/config/tabs/ai/chatGPTAccount.ts", {
         require: (name: string) => {
             if (name.endsWith("util/fetch")) {
                 return {fetchPost: async (path: string, body: unknown, callback?: (response: unknown) => void) => {

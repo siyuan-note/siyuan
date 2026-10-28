@@ -18,6 +18,8 @@
     "api:generate": "node scripts/api-contracts.mjs",
     "api:check": "node scripts/api-contracts.mjs --check",
     "test": "node scripts/test.mjs",
+    "test:changed": "node scripts/test-changed.mjs",
+    "test:affected": "node scripts/test-changed.mjs --run",
     "dev": "webpack --mode development --config webpack.config.js",
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",

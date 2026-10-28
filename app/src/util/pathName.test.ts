@@ -1,21 +1,16 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import * as path from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 import * as escape from "./escape";
 import * as mergePathSegments from "./mergePathSegments";
 
-const names = {} as typeof import("./pathName");
-runInNewContext(transpileModule(readFileSync("src/util/pathName.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText, {
-    exports: names,
+const names = loadModule<typeof import("./pathName")>("src/util/pathName.ts", {
     window: {siyuan: {languages: {_kernel: {16: "Untitled"}}}},
     require: (id: string) => id === "path" ? path : id === "./escape" ? escape :
         id === "./mergePathSegments" ? mergePathSegments : {},
-});
+}, ScriptTarget.ES2021);
 
 test("document display names preserve complete literal titles", () => {
     for (const title of ["Plain", "A/B", "/A//B/", "A／B", "A%2FB", ".", "..", "/", "A/../B",

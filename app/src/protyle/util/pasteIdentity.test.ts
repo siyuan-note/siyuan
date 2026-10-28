@@ -11,6 +11,9 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (sources: Record<string, string>, lutePath: string) => {
     const check = require("node:assert/strict");
     require(lutePath);
+    // 粘贴入口读取编辑器配置来决定 Markdown 语法、公式分隔符与 URL 自动转换。
+    Object.assign(window, {siyuan: {languages: {}, config: {editor: {markdown: {},
+        mathDelimiterCompatibility: true, pasteURLAutoConvert: false}}}});
     const constants = {Constants: {ZWSP: "\u200b", CUSTOM_RIFF_DECKS: "custom-riff-decks"}};
     const load = (source: string, mocks: Record<string, unknown>) => {
         const api = {};

@@ -126,7 +126,9 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
                                 const contentRect = switchRoot.querySelector(".switch-doc").getBoundingClientRect();
                                 const style = getComputedStyle(path);
                                 check.equal(style.padding, "4px 8px", "switch path padding: " + label);
-                                check.equal(style.borderTopWidth, "1px", "switch path border: " + label);
+                                // 1px 边框在非整数缩放下会被吸附到整设备像素，计算值可能为 0.666667px。
+                                check.ok(Math.abs(parseFloat(style.borderTopWidth) - 1) < 0.5,
+                                    "switch path border: " + label);
                                 check.ok(Math.abs(pathRect.height - 27) < 1, "switch path height: " + label);
                                 check.ok(Math.abs(pathRect.top - path.previousElementSibling.getBoundingClientRect().bottom) < 1,
                                     "switch path follows list: " + label);

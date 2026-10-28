@@ -1,9 +1,7 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {updateFrozenColumns} from "./frozenColumns";
-import {readFileSync} from "node:fs";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("frozen columns adapt to available width without changing the saved boundary", () => {
     let viewportWidth = 352;
@@ -39,18 +37,14 @@ test("frozen columns adapt to available width without changing the saved boundar
 });
 
 test("cell navigation reveals previously frozen cells when freezing is suspended", () => {
-    const compiled = transpileModule(readFileSync("src/protyle/render/av/cell.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText;
     let suspended = true;
     const scroll = {scrollLeft: 600, getBoundingClientRect: () => ({left: 16, right: 368})};
     const row = {
         parentElement: {classList: {contains: () => suspended}},
         querySelector: () => ({contains: () => true}),
     };
-    const exports: {cellScrollIntoView?: (block: unknown, cell: unknown, onlyHeight: boolean) => void} = {};
-    runInNewContext(compiled, {
-        exports,
+    const exports = loadModule<{cellScrollIntoView?: (block: unknown, cell: unknown, onlyHeight: boolean) => void}>(
+        "src/protyle/render/av/cell.ts", {
         require: () => ({hasClosestByClassName: (_element: unknown, name: string) => name === "av__row" ? row : null}),
     });
     const block = {querySelector: (name: string) => name === ".av__scroll" ? scroll : null};

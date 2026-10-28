@@ -1,19 +1,13 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 
 const createMenu = () => {
     const inside = {};
     const outside = {};
     const trigger = {};
     const state = {removed: 0, closedPending: false, active: outside, selection: outside, rangeCount: 0};
-    const exports = {} as typeof import("./menuClick");
-    runInNewContext(transpileModule(readFileSync("src/menus/menuClick.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports,
+    const exports = loadModule<typeof import("./menuClick")>("src/menus/menuClick.ts", {
         require: () => ({hasClosestByAttribute: (element: unknown) => element === trigger}),
         window: {siyuan: {menus: {menu: {
             element: {contains: (element: unknown) => element === inside},

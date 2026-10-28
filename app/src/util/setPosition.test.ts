@@ -1,16 +1,10 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 
 test("sticky menus retain their anchor while staying inside a resized viewport", () => {
-    const methods = {} as typeof import("./setPosition");
     const viewport = {innerWidth: 1000, innerHeight: 800};
-    runInNewContext(transpileModule(readFileSync("src/util/setPosition.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./setPosition")>("src/util/setPosition.ts", {
         require: () => ({getTopBarHeight: () => 30}),
         window: viewport,
     });

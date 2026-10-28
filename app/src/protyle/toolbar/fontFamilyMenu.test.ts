@@ -172,7 +172,9 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     controls.hideKeyboardToolbarUtilOnEditorClick();
     await require("electron").ipcRenderer.invoke("font-resize", 350);
     await settle();
-    check.equal(menuElement.style.height, "350px", "font sheet still tracks the available viewport while searching");
+    // 断言跟随本次 resize 传入的高度，不是与 innerHeight 自比；设备像素取整会差 1px。
+    check.ok(Math.abs(parseFloat(menuElement.style.height) - 350) <= 1,
+        "font sheet still tracks the available viewport while searching");
     check.ok(search().getBoundingClientRect().top >= menuElement.getBoundingClientRect().top);
     check.ok(search().getBoundingClientRect().bottom <= innerHeight);
     search().value = "Font 12";

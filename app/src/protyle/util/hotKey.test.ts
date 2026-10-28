@@ -1,16 +1,12 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 import * as keymapBindings from "../../util/keymapBindings";
 
-const compiled = transpileModule(readFileSync("src/protyle/util/hotKey.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiled = compileModule("src/protyle/util/hotKey.ts", ScriptTarget.ES2021);
 
 const fixture = (ios = true, mac = true) => {
-    const exports: any = {};
     const dependencies: Record<string, object> = {
         "../../util/keymapBindings": keymapBindings,
         "../../constants": {Constants: {KEYCODELIST: {67: "C", 70: "F", 76: "L", 80: "P", 82: "R"}}},
@@ -21,7 +17,7 @@ const fixture = (ios = true, mac = true) => {
             isOnlyMeta: (event: KeyboardEvent) => mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey,
         },
     };
-    runInNewContext(compiled, {exports, require: (name: string) => dependencies[name]});
+    const exports = evaluateModule<any>(compiled, {require: (name: string) => dependencies[name]});
     return exports.matchHotKey as (binding: string | keymapBindings.IShortcutKeymap, event: KeyboardEvent) => boolean;
 };
 

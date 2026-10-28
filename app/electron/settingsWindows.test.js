@@ -279,9 +279,14 @@ for (const platform of ["win32", "linux", "darwin"]) {
         const {policy, owner, open} = setup(platform);
         const prepared = open();
         policy(owner, prepared);
-        let toggled = 0;
+        const state = {opened: false, options: [], closed: 0};
         let prevented = 0;
-        const contents = Object.assign(new EventEmitter(), {toggleDevTools() { toggled++; }});
+        const contents = Object.assign(new EventEmitter(), {
+            isDestroyed: () => false,
+            isDevToolsOpened: () => state.opened,
+            openDevTools(options) { state.opened = true; state.options.push(options); },
+            closeDevTools() { state.opened = false; state.closed++; },
+        });
         const win = Object.assign(new EventEmitter(), {webContents: contents, isDestroyed: () => false, setMenu() {}});
         owner.emit("did-create-window", win, {url: prepared.url});
         const input = {type: "keyDown", key: "I", isAutoRepeat: false, control: platform !== "darwin",
@@ -291,11 +296,13 @@ for (const platform of ["win32", "linux", "darwin"]) {
         press({type: "keyUp"});
         press({isAutoRepeat: true});
         press(platform === "darwin" ? {control: true} : {alt: true});
-        assert.equal(toggled, 0);
+        assert.equal(state.options.length, 0);
+        assert.equal(state.closed, 0);
         assert.equal(prevented, 0);
         press({});
         press({key: "i"});
-        assert.equal(toggled, 2);
+        assert.deepEqual(state.options, [platform === "win32" ? {mode: "bottom"} : undefined]);
+        assert.equal(state.closed, 1);
         assert.equal(prevented, 2);
     });
 }

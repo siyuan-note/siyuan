@@ -79,6 +79,7 @@ const {createSettingsWindows} = require("./settingsWindows");
 const {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay} = require("./windowControlsOverlay");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
+const devToolsDock = require("./devToolsDock");
 const {createWebPageFetcher, installWebPageFetchIPC} = require("./webPageFetch");
 const fetchRenderedWebPage = createWebPageFetcher({BrowserWindow, session});
 const windowWorkspaces = new WindowWorkspaceRegistry();
@@ -1043,6 +1044,23 @@ const loadAppMenuLanguages = (language) => {
     }
 };
 
+// Windows 的菜单栏不可见，但菜单项快捷键仍然生效，这里改用自定义菜单项把开发者工具停在底部。
+const getDevToolsMenuItem = (label) => {
+    if ("win32" !== process.platform) {
+        return {role: "toggledevtools", label};
+    }
+    return {
+        label,
+        accelerator: "Ctrl+Shift+I",
+        click: () => {
+            const win = BrowserWindow.getFocusedWindow() || getAppWindow();
+            if (win && !win.isDestroyed()) {
+                devToolsDock.toggleDevTools(win.webContents);
+            }
+        },
+    };
+};
+
 const applyMacAppMenu = (sync) => {
     if ("darwin" !== process.platform || !sync || typeof sync.lang !== "string" ||
         !sync.hotkey || typeof sync.hotkey !== "object") {
@@ -1140,7 +1158,7 @@ const applyMacAppMenu = (sync) => {
                     shell.openExternal("https://github.com/siyuan-note/siyuan");
                 },
             },
-            {role: "toggledevtools", label: languages.debug || "Developer Tools"},
+            getDevToolsMenuItem(languages.debug || "Developer Tools"),
         ],
     }];
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -1194,7 +1212,7 @@ const setStartupApplicationMenu = () => {
             {role: "zoom", label: languages.zoom},
             {role: "togglefullscreen", label: languages.appMenuTogglefullscreen},
             {type: "separator"},
-            {role: "toggledevtools", label: languages.debug},
+            getDevToolsMenuItem(languages.debug),
             {type: "separator"},
             {role: "front", label: languages.appMenuBringAllToFront},
         ],
@@ -2431,7 +2449,7 @@ const bindMainWindowReady = (currentWindow, currentBootWindow, windowState, onRe
                 currentWindow.unmaximize();
             }
             if (windowState.isDevToolsOpened) {
-                currentWindow.webContents.openDevTools(); // 保证开发者工具窗口在前
+                devToolsDock.openDevTools(currentWindow.webContents); // 保证开发者工具窗口在前
             }
         }
         if (currentBootWindow && !currentBootWindow.isDestroyed()) {
@@ -3934,23 +3952,11 @@ app.whenReady().then(() => {
                 }
                 shell.openPath(data.filePath);
                 break;
-            case "openDevTools": {
-                /** @type {import("electron").OpenDevToolsOptions} */
-                const options = {};
-                if (["left", "right", "bottom", "undocked", "detach"].includes(data.mode)) {
-                    options.mode = data.mode;
-                }
-                if (typeof data.activate === "boolean") {
-                    options.activate = data.activate;
-                }
-                if (typeof data.title === "string") {
-                    options.title = data.title;
-                }
-                event.sender.openDevTools(options);
+            case "openDevTools":
+                devToolsDock.openDevTools(event.sender);
                 break;
-            }
             case "toggleDevTools":
-                event.sender.toggleDevTools();
+                devToolsDock.toggleDevTools(event.sender);
                 break;
             case "unregisterGlobalShortcut": {
                 const workspaceItem = workspaces.find(item => item.webContentsId === event.sender.id);

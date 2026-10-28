@@ -13,6 +13,9 @@ const createContents = (id, type = "window") => Object.assign(new EventEmitter()
     devToolsOpened: false,
     getType() { return type; },
     isDestroyed() { return this.destroyed; },
+    isDevToolsOpened() { return this.devToolsOpened; },
+    openDevTools() { this.toggled++; this.devToolsOpened = true; },
+    closeDevTools() { this.toggled++; this.devToolsOpened = false; },
     toggleDevTools() { this.toggled++; this.devToolsOpened = !this.devToolsOpened; },
     destroy() { this.destroyed = true; this.emit("destroyed"); },
     setWindowOpenHandler(handler) { this.windowOpenHandler = handler; },
@@ -167,7 +170,7 @@ test("native destruction races do not escape the input handler", () => {
     Object.defineProperty(guest, "hostWebContents", {get() { throw new Error("Object has been destroyed"); }, configurable: true});
     assert.equal(press(guest), 0);
     Object.defineProperty(guest, "hostWebContents", {value: host});
-    host.toggleDevTools = () => { throw new Error("Object has been destroyed"); };
+    host.openDevTools = () => { throw new Error("Object has been destroyed"); };
     assert.equal(press(guest), 1);
 });
 

@@ -19,19 +19,6 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
     lute.SetProtyleWYSIWYG(true);
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); await frame(); };
-    const resizeWindow = async (width: number, height: number) => {
-        await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
-        // 原生窗口调用返回时，渲染进程可能尚未收到新的视口尺寸。
-        // 窗口尺寸由操作系统取整，高 DPI 下可能与请求值相差 1px，因此按容差等待。
-        for (let count = 0; count < 120 &&
-            (Math.abs(innerWidth - width) > 1 || Math.abs(innerHeight - height) > 1); count++) {
-            await frame();
-        }
-        // 仍要求尺寸确实换了，只是允许 1px 的设备像素取整。
-        check.ok(Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1,
-            `viewport did not resize: ${innerWidth}x${innerHeight} vs ${width}x${height}`);
-        await settle();
-    };
     const originalWindow = {width: innerWidth, height: innerHeight};
     for (const mobile of [false, true]) {
         for (const dark of [false, true]) {
@@ -57,6 +44,23 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 onViewportChange: remember, onExit: () => {}});
             await settle();
             const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
+            const resizeWindow = async (width: number, height: number) => {
+                await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
+                // 原生尺寸通知、ResizeObserver 和布局绘制分步完成；尺寸到达后还须等待导图同步。
+                // 操作系统在高 DPI 下可能产生 1px 取整，取景框的位置断言仍使用原有精度。
+                const ready = () => Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1 &&
+                    view.viewportSize.width === viewport.clientWidth && view.viewportSize.height === viewport.clientHeight &&
+                    !view.frame && !view.drawFrame;
+                await settle();
+                for (let count = 0; count < 120 && !ready(); count++) {
+                    await frame();
+                }
+                check.ok(ready(), "mindmap did not finish resizing: " + JSON.stringify({
+                    requested: {width, height}, window: {width: innerWidth, height: innerHeight},
+                    viewport: {width: viewport.clientWidth, height: viewport.clientHeight},
+                    layout: view.viewportSize, frame: view.frame, drawFrame: view.drawFrame,
+                }));
+            };
             const center = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
                 (viewport.clientHeight / 2 - view.offsetY) / view.scale];
             const equalCenter = (expected: number[]) => center().forEach((value, index) =>
@@ -175,7 +179,10 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 check.ok(Math.abs(rect.left - viewportRect.left -
                     (viewport.clientWidth - rect.width) / 2) < .1);
                 check.ok(Math.abs(rect.top - viewportRect.top -
-                    Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1);
+                    Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1,
+                "document frame vertical position: " + JSON.stringify({mobile, dark, dpr: devicePixelRatio,
+                    top: rect.top, viewportTop: viewportRect.top, viewportHeight: viewport.clientHeight,
+                    frameHeight: rect.height, transform: preview.style.transform, size: view.viewportSize}));
                 const style = getComputedStyle(preview);
                 const canvasStyle = getComputedStyle(host);
                 check.equal(style.pointerEvents, "none", "the frame does not intercept gestures");

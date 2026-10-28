@@ -127,7 +127,8 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 8. **LD246:**
    - When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
    - Read post details with `GET https://ld246.com/api/v2/article/{articleId}?p=1`; `data.article` contains the post, and `p` paginates replies. For Markdown, use `GET https://ld246.com/article/raw/{articleId}`
-   - Authenticate both endpoints with `Authorization: token <LD_TOKEN>` using the environment variable; on Windows, check process, user, then machine scope. Do not expose the Token or rely on UA exemptions
+   - Publish a reply with `POST https://ld246.com/api/v2/comment`, sending `articleId` and `commentContent` in the JSON body; optionally include `commentOriginalCommentId` when replying to an existing comment
+   - Authenticate these endpoints with `Authorization: token <LD_TOKEN>` using the environment variable; on Windows, check process, user, then machine scope. Do not expose the Token or rely on UA exemptions
    - Check HTTP status and JSON `code` (`0` means success); report missing credentials or authentication errors
 9. **Configurable entries:**
    - Treat configurable desktop menu `data-id` values and stable dock entry keys as persisted configuration identifiers. Resolve dock keys through `getDockEntryKey` in `app/src/config/entryVisibility/catalog.ts`: it prefers `data-entry-id`, maps plugin runtime types to stable keys derived from plugin name and dock ID, and falls back to the built-in `data-type`. Do not rename or reuse persisted keys unless the same change migrates existing visibility and order configuration

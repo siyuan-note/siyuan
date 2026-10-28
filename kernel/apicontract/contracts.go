@@ -434,12 +434,9 @@ var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/blo
 
 var TransferBlockRef = define[TransferBlockRefRequest, Null]("transferBlockRef", "/api/block/transferBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
-// 编辑器通过独立事务转换块引用：id 指定引用块，blockID 指定定义块，data 携带布尔选项 includeChildren
-// 和 originalToEmbed。内核在 retData 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作；
-// 快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖，
-// originalToEmbed 省略或为 false 时在原定义位置保留引用，为 true 时替换为查询已移动定义 ID 的嵌入块；
-// includeChildren 保留标题和列表行为。
-// 提交失败时补偿已写入的文档。撤销与重放期间为所有受影响文档持有笔记本租约，直至响应序列化完成。
+// refID 指定引用块，defID 指定定义块；includeChildren 控制标题或列表的子块范围。
+// originalToEmbed 省略或为 false 时在原定义位置保留引用，为 true 时替换为查询已移动定义 ID 的嵌入块。
+// 成功响应的 data 为 null；可撤销的编辑器操作使用 /api/transactions 的 swapBlockRef 动作。
 var SwapBlockRef = define[SwapBlockRefRequest, Null]("swapBlockRef", "/api/block/swapBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetBlockReminder = define[BlockReminderRequest, Null]("setBlockReminder", "/api/block/setBlockReminder", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1189,6 +1186,7 @@ var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api
 var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 将单篇文档及全部子文档复制到同一笔记本的原父目录，返回副本根文档的 id、notebook、path 和 hPath。
+// 为副本文档和块执行块收集规则，仅初始化新行。
 // 副本内部块引用、块链接和查询嵌入的显式块 ID 统一重映射，数据库定义与行绑定保持为共享镜像。
 // 源快照经过认证读取且不执行修复写回；运行期失败时清理新建文档并恢复排序，属运行时补偿，
 // 不保证进程崩溃时的事务原子性。
@@ -1841,6 +1839,10 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 字段失效或目标数据库被删除时，后续条目写入停用规则并保留配置，源修改仍提交；提交后提示失效引用。
 // 修复后需手动启用，撤销源修改不重新启用规则；锁定、认证失败、损坏及实际写入失败仍一起回滚。
 // 跨库动作限于同一加密边界，要求目标可访问；单笔事务最多执行 1000 个自动操作。
+// swapBlockRef 必须独立提交：id 指定引用块，blockID 指定定义块，data 携带 includeChildren 和 originalToEmbed，
+// retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
+// 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
+// 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
 var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

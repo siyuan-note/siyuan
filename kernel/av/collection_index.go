@@ -5,7 +5,9 @@
 package av
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"iter"
 	"maps"
 	"os"
@@ -207,14 +209,14 @@ func BlockCollectionIndexInBox(boxID string) (*BlockCollectionIndex, error) {
 			}
 			data, readErr := ReadAttributeViewDataInBox(id, boxID)
 			if readErr != nil {
-				return nil, readErr
+				return nil, fmt.Errorf("read attribute view [%s] in box [%s] failed: %w", id, boxID, readErr)
 			}
 			var header struct {
 				Spec        int               `json:"spec"`
 				Automations *AutomationConfig `json:"automations"`
 			}
-			if readErr = json.Unmarshal(data, &header); readErr != nil {
-				return nil, readErr
+			if readErr = json.Unmarshal(bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")), &header); readErr != nil {
+				return nil, fmt.Errorf("parse attribute view [%s] in box [%s] failed: %w", id, boxID, readErr)
 			}
 			views[id] = collectionScopes(header.Automations)
 			if header.Spec > CurrentSpec && len(views[id]) > 0 {

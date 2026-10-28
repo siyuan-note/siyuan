@@ -619,6 +619,7 @@ func cacheAttributeViewData(attrView *AttributeView, boxID string, data []byte) 
 }
 
 func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, err error) {
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeViewSearchInfo{}
 	if err = json.Unmarshal(data, ret); err != nil {
 		return
@@ -687,7 +688,7 @@ func loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID string) (ret *At
 
 		if ret, err = parseAttributeViewSearchInfo(data); err != nil {
 			logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
-			return nil, err
+			return nil, fmt.Errorf("parse attribute view search info [%s] failed: %w", avJSONPath, err)
 		}
 		if cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret) {
 			return ret, nil
@@ -836,6 +837,11 @@ func ReadAttributeViewCustomColorUsageByPath(avJSONPath string) (avID string, in
 }
 
 func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveColors bool) (ret *AttributeView, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("load attribute view [%s] failed: %w", avJSONPath, err)
+		}
+	}()
 	generation := cache.GetAVCacheGeneration()
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
@@ -905,6 +911,8 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 }
 
 func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
+	// 仅处理已认证明文的开头 BOM；缓存和条件写入保留原始字节以检测外部修改。
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {

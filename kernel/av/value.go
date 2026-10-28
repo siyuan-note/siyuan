@@ -225,56 +225,42 @@ func (value *Value) IsEdited() bool {
 	return value.CreatedAt != value.UpdatedAt
 }
 
-func (value *Value) IsBlank() bool {
+// isBlankContent 判断内容是否为空，trimSpace 为真时忽略首尾空白。
+func isBlankContent(content string, trimSpace bool) bool {
+	if trimSpace {
+		return "" == strings.TrimSpace(content)
+	}
+	return "" == content
+}
+
+// isEmpty 判断值是否为空。IsEmpty 按原始内容比较，IsBlank 额外忽略首尾空白；
+// 生成字段的模板内容始终按去空白后比较。
+func (value *Value) isEmpty(trimSpace bool) bool {
 	if nil == value {
 		return true
 	}
 
 	switch value.Type {
 	case KeyTypeBlock:
-		if nil == value.Block {
-			return true
-		}
-		return "" == strings.TrimSpace(value.Block.Content)
+		return nil == value.Block || isBlankContent(value.Block.Content, trimSpace)
 	case KeyTypeText:
-		if nil == value.Text {
-			return true
-		}
-		return "" == strings.TrimSpace(value.Text.Content)
+		return nil == value.Text || isBlankContent(value.Text.Content, trimSpace)
 	case KeyTypeNumber:
-		if nil == value.Number {
-			return true
-		}
-		return !value.Number.IsNotEmpty
+		return nil == value.Number || !value.Number.IsNotEmpty
 	case KeyTypeDate:
-		if nil == value.Date {
-			return true
-		}
-		return !value.Date.IsNotEmpty
+		return nil == value.Date || !value.Date.IsNotEmpty
 	case KeyTypeSelect:
-		if 1 > len(value.MSelect) {
-			return true
-		}
-		return "" == strings.TrimSpace(value.MSelect[0].Content)
+		return 1 > len(value.MSelect) || nil == value.MSelect[0] || isBlankContent(value.MSelect[0].Content, trimSpace)
 	case KeyTypeMSelect:
 		return 1 > len(value.MSelect)
 	case KeyTypeURL:
-		if nil == value.URL {
-			return true
-		}
-		return "" == strings.TrimSpace(value.URL.Content)
+		return nil == value.URL || isBlankContent(value.URL.Content, trimSpace)
 	case KeyTypeEmail:
-		if nil == value.Email {
-			return true
-		}
-		return "" == strings.TrimSpace(value.Email.Content)
+		return nil == value.Email || isBlankContent(value.Email.Content, trimSpace)
 	case KeyTypeLocation:
 		return value.Location.IsEmpty()
 	case KeyTypePhone:
-		if nil == value.Phone {
-			return true
-		}
-		return "" == strings.TrimSpace(value.Phone.Content)
+		return nil == value.Phone || isBlankContent(value.Phone.Content, trimSpace)
 	case KeyTypeMAsset:
 		return 1 > len(value.MAsset)
 	case KeyTypeTemplate:
@@ -283,106 +269,27 @@ func (value *Value) IsBlank() bool {
 		}
 		return "" == strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
-		if nil == value.Created {
-			return true
-		}
-		return !value.Created.IsNotEmpty
+		return nil == value.Created || !value.Created.IsNotEmpty
 	case KeyTypeUpdated:
-		if nil == value.Updated {
-			return true
-		}
-		return !value.Updated.IsNotEmpty
+		return nil == value.Updated || !value.Updated.IsNotEmpty
 	case KeyTypeCheckbox:
-		if nil == value.Checkbox {
-			return true
-		}
-		return false // 复选框不会为空
+		return nil == value.Checkbox // 复选框不会为空
 	case KeyTypeRelation:
-		return 1 > len(value.Relation.Contents)
+		return nil == value.Relation || 1 > len(value.Relation.Contents)
 	case KeyTypeRollup:
-		return 1 > len(value.Rollup.Contents)
+		return nil == value.Rollup || 1 > len(value.Rollup.Contents)
 	}
 	return false
 }
 
-func (value *Value) IsEmpty() bool {
-	if nil == value {
-		return true
-	}
+// IsBlank 判断值是否为空，忽略内容首尾空白。
+func (value *Value) IsBlank() bool {
+	return value.isEmpty(true)
+}
 
-	switch value.Type {
-	case KeyTypeBlock:
-		if nil == value.Block {
-			return true
-		}
-		return "" == value.Block.Content
-	case KeyTypeText:
-		if nil == value.Text {
-			return true
-		}
-		return "" == value.Text.Content
-	case KeyTypeNumber:
-		if nil == value.Number {
-			return true
-		}
-		return !value.Number.IsNotEmpty
-	case KeyTypeDate:
-		if nil == value.Date {
-			return true
-		}
-		return !value.Date.IsNotEmpty
-	case KeyTypeSelect:
-		if 1 > len(value.MSelect) {
-			return true
-		}
-		return "" == value.MSelect[0].Content
-	case KeyTypeMSelect:
-		return 1 > len(value.MSelect)
-	case KeyTypeURL:
-		if nil == value.URL {
-			return true
-		}
-		return "" == value.URL.Content
-	case KeyTypeEmail:
-		if nil == value.Email {
-			return true
-		}
-		return "" == value.Email.Content
-	case KeyTypeLocation:
-		return value.Location.IsEmpty()
-	case KeyTypePhone:
-		if nil == value.Phone {
-			return true
-		}
-		return "" == value.Phone.Content
-	case KeyTypeMAsset:
-		return 1 > len(value.MAsset)
-	case KeyTypeTemplate:
-		if nil == value.Template {
-			return true
-		}
-		return "" == strings.TrimSpace(value.Template.Content)
-	case KeyTypeCreated:
-		if nil == value.Created {
-			return true
-		}
-		return !value.Created.IsNotEmpty
-	case KeyTypeUpdated:
-		if nil == value.Updated {
-			return true
-		}
-		return !value.Updated.IsNotEmpty
-	case KeyTypeCheckbox:
-		if nil == value.Checkbox {
-			return true
-		}
-		return false // 复选框不会为空
-	case KeyTypeRelation:
-		return 1 > len(value.Relation.Contents)
-	case KeyTypeRollup:
-		return 1 > len(value.Rollup.Contents)
-	}
-	return false
+// IsEmpty 判断值是否为空，按原始内容比较。
+func (value *Value) IsEmpty() bool {
+	return value.isEmpty(false)
 }
 
 func (value *Value) SetValByType(typ KeyType, val any) {

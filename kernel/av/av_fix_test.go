@@ -17,12 +17,16 @@ func TestUpgradeSpec6CardConfiguration(t *testing.T) {
 		Spec: 5,
 		Views: []*View{{
 			Gallery: &LayoutGallery{
-				CardSize:        CardSizeSmall,
-				CardAspectRatio: CardAspectRatio3_4,
+				CardSettings: CardSettings{
+					CardSize:        CardSizeSmall,
+					CardAspectRatio: CardAspectRatio3_4,
+				},
 			},
 			Kanban: &LayoutKanban{
-				CardSize:        CardSizeLarge,
-				CardAspectRatio: CardAspectRatio2_3,
+				CardSettings: CardSettings{
+					CardSize:        CardSizeLarge,
+					CardAspectRatio: CardAspectRatio2_3,
+				},
 			},
 		}},
 	}

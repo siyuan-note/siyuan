@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "数据库字段布局",
+	"databaseAttrLayout": "数据库面板字段布局",
 	"databaseAttrLayoutTip": "设置文档顶部数据库面板和独立条目面板中的字段布局，空间不足时自动使用单栏",
 	"databaseAttrLayoutSingle": "单栏",
 	"databaseAttrLayoutRow": "双栏（按行）",

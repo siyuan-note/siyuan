@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "פריסת שדות מסד הנתונים",
+	"databaseAttrLayout": "פריסת השדות בחלונית מסד הנתונים",
 	"databaseAttrLayoutTip": "קביעת פריסת השדות בלוח מסד הנתונים בראש המסמך ובלוח הפריט העצמאי, עם מעבר אוטומטי לעמודה אחת כשאין מספיק מקום",
 	"databaseAttrLayoutSingle": "עמודה אחת",
 	"databaseAttrLayoutRow": "שתי עמודות (לפי שורות)",

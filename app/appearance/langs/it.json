@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Disposizione dei campi del database",
+	"databaseAttrLayout": "Disposizione dei campi del pannello del database",
 	"databaseAttrLayoutTip": "Imposta la disposizione dei campi nel pannello del database in cima al documento e nel pannello della voce indipendente; quando lo spazio è insufficiente viene usata automaticamente una colonna",
 	"databaseAttrLayoutSingle": "Una colonna",
 	"databaseAttrLayoutRow": "Due colonne (per riga)",

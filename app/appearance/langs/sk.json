@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Rozloženie polí databázy",
+	"databaseAttrLayout": "Rozloženie polí panela databázy",
 	"databaseAttrLayoutTip": "Nastaví rozloženie polí na paneli databázy v hornej časti dokumentu a na samostatnom paneli položky; pri nedostatku miesta sa automaticky použije jeden stĺpec",
 	"databaseAttrLayoutSingle": "Jeden stĺpec",
 	"databaseAttrLayoutRow": "Dva stĺpce (po riadkoch)",

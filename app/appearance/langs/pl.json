@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Układ pól bazy danych",
+	"databaseAttrLayout": "Układ pól panelu bazy danych",
 	"databaseAttrLayoutTip": "Ustawia układ pól w panelu bazy danych u góry dokumentu i w osobnym panelu elementu; przy braku miejsca automatycznie używana jest jedna kolumna",
 	"databaseAttrLayoutSingle": "Jedna kolumna",
 	"databaseAttrLayoutRow": "Dwie kolumny (wierszami)",

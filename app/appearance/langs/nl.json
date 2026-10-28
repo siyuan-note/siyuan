@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Indeling van databasevelden",
+	"databaseAttrLayout": "Veldindeling van het databasepaneel",
 	"databaseAttrLayoutTip": "Stelt de veldindeling in het databasepaneel bovenaan het document en het afzonderlijke itempaneel in; bij onvoldoende ruimte wordt automatisch één kolom gebruikt",
 	"databaseAttrLayoutSingle": "Eén kolom",
 	"databaseAttrLayoutRow": "Twee kolommen (per rij)",

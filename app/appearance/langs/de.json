@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Layout der Datenbankfelder",
+	"databaseAttrLayout": "Feldlayout des Datenbankpanels",
 	"databaseAttrLayoutTip": "Legt das Feldlayout im Datenbankbereich am Dokumentanfang und im separaten Eintragsbereich fest; bei Platzmangel wird automatisch eine Spalte verwendet",
 	"databaseAttrLayoutSingle": "Eine Spalte",
 	"databaseAttrLayoutRow": "Zwei Spalten (zeilenweise)",

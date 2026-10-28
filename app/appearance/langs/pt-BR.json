@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Layout dos campos do banco de dados",
+	"databaseAttrLayout": "Layout dos campos do painel do banco de dados",
 	"databaseAttrLayoutTip": "Define o layout dos campos no painel do banco de dados no topo do documento e no painel de item independente; uma coluna é usada automaticamente quando não há espaço suficiente",
 	"databaseAttrLayoutSingle": "Uma coluna",
 	"databaseAttrLayoutRow": "Duas colunas (por linha)",

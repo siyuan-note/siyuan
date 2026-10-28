@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Disposition des champs de la base de données",
+	"databaseAttrLayout": "Disposition des champs du panneau de base de données",
 	"databaseAttrLayoutTip": "Définit la disposition des champs du panneau de base de données en haut du document et du panneau de fiche indépendant ; une seule colonne est utilisée automatiquement si l’espace est insuffisant",
 	"databaseAttrLayoutSingle": "Une colonne",
 	"databaseAttrLayoutRow": "Deux colonnes (par ligne)",

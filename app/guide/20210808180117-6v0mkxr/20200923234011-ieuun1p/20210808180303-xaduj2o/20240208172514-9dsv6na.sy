@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261028110235"
+		"updated": "20261028120132"
 	},
 	"Children": [
 		{
@@ -3113,7 +3113,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261028100554-5uvtrxl",
-				"updated": "20261028110235"
+				"updated": "20261028120132"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3128,7 +3128,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261028100554-vymrc6v",
-				"updated": "20261028110235"
+				"updated": "20261028120132"
 			},
 			"Children": [
 				{
@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
 				}
 			]
 		},

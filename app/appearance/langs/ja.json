@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "データベースフィールドのレイアウト",
+	"databaseAttrLayout": "データベースパネルのフィールドレイアウト",
 	"databaseAttrLayoutTip": "ドキュメント上部のデータベースパネルと独立した項目パネルのフィールドの配置を設定し、スペースが不足する場合は自動的に1列で表示",
 	"databaseAttrLayoutSingle": "1列",
 	"databaseAttrLayoutRow": "2列（行順）",

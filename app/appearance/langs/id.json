@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Tata letak bidang basis data",
+	"databaseAttrLayout": "Tata letak bidang panel basis data",
 	"databaseAttrLayoutTip": "Atur tata letak bidang pada panel basis data di bagian atas dokumen dan panel item terpisah; satu kolom digunakan secara otomatis jika ruang tidak cukup",
 	"databaseAttrLayoutSingle": "Satu kolom",
 	"databaseAttrLayoutRow": "Dua kolom (menurut baris)",

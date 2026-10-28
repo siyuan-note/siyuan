@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "تخطيط حقول قاعدة البيانات",
+	"databaseAttrLayout": "تخطيط حقول لوحة قاعدة البيانات",
 	"databaseAttrLayoutTip": "تحديد تخطيط الحقول في لوحة قاعدة البيانات أعلى المستند ولوحة العنصر المستقلة، مع استخدام عمود واحد تلقائيًا عند عدم توفر مساحة كافية",
 	"databaseAttrLayoutSingle": "عمود واحد",
 	"databaseAttrLayoutRow": "عمودان (حسب الصفوف)",

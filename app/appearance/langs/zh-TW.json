@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "資料庫欄位佈局",
+	"databaseAttrLayout": "資料庫面板欄位佈局",
 	"databaseAttrLayoutTip": "設定文件頂部資料庫面板和獨立項目面板中的欄位佈局，空間不足時自動使用單欄",
 	"databaseAttrLayoutSingle": "單欄",
 	"databaseAttrLayoutRow": "雙欄（按行）",

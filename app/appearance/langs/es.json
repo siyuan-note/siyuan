@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Disposición de los campos de la base de datos",
+	"databaseAttrLayout": "Disposición de los campos del panel de base de datos",
 	"databaseAttrLayoutTip": "Configura la disposición de los campos del panel de base de datos en la parte superior del documento y del panel de elemento independiente; se usa una columna automáticamente cuando falta espacio",
 	"databaseAttrLayoutSingle": "Una columna",
 	"databaseAttrLayoutRow": "Dos columnas (por filas)",

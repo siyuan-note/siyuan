@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Veritabanı alanı düzeni",
+	"databaseAttrLayout": "Veritabanı paneli alan düzeni",
 	"databaseAttrLayoutTip": "Belgenin üstündeki veritabanı panelinde ve bağımsız öğe panelinde alan düzenini ayarlar; alan yetersiz olduğunda otomatik olarak tek sütun kullanılır",
 	"databaseAttrLayoutSingle": "Tek sütun",
 	"databaseAttrLayoutRow": "İki sütun (satır sırasıyla)",

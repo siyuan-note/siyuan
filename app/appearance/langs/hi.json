@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "डेटाबेस फ़ील्ड का लेआउट",
+	"databaseAttrLayout": "डेटाबेस पैनल के फ़ील्ड का लेआउट",
 	"databaseAttrLayoutTip": "दस्तावेज़ के शीर्ष पर डेटाबेस पैनल और अलग आइटम पैनल के फ़ील्ड का लेआउट चुनें, जगह कम होने पर अपने आप एक कॉलम का उपयोग होता है",
 	"databaseAttrLayoutSingle": "एक कॉलम",
 	"databaseAttrLayoutRow": "दो कॉलम (पंक्ति के अनुसार)",

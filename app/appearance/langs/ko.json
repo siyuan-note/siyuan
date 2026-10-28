@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "데이터베이스 필드 배치",
+	"databaseAttrLayout": "데이터베이스 패널 필드 배치",
 	"databaseAttrLayoutTip": "문서 상단의 데이터베이스 패널과 독립 항목 패널의 필드 배치를 설정하며 공간이 부족하면 자동으로 한 열로 표시",
 	"databaseAttrLayoutSingle": "한 열",
 	"databaseAttrLayoutRow": "두 열 (행 우선)",

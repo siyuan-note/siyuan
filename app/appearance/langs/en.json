@@ -1,5 +1,5 @@
 {
-	"databaseAttrLayout": "Database field layout",
+	"databaseAttrLayout": "Database panel field layout",
 	"databaseAttrLayoutTip": "Set the field layout in the database panel at the top of a document and the standalone item panel; one column is used automatically when space is limited",
 	"databaseAttrLayoutSingle": "One column",
 	"databaseAttrLayoutRow": "Two columns (by row)",

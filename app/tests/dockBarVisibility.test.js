@@ -100,7 +100,8 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
     const rightDockSpace = () => document.documentElement.style.getPropertyValue("--b3-dock-right-width");
     const checkRightDockSpace = (message) => {
         const reserved = !hidden(rightBar) && !rightBar.classList.contains("dock--float");
-        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "0px", message);
+        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "var(--b3-layout-space)",
+            message);
     };
     checkRightDockSpace("a hidden right bar reserves no space for fixed overlays");
     if (animationOnly) {
@@ -490,7 +491,8 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
     window.siyuan.config.uiLayout.hideDock = true;
     bar.syncDockBarVisibility();
     check.ok(hidden(leftBar) && hidden(rightBar));
-    check.equal(rightDockSpace(), "0px", "hiding the right bar restores the window edge offset");
+    check.equal(rightDockSpace(), "var(--b3-layout-space)",
+        "hiding the right bar keeps only the editor outer margin for fixed overlays");
     check.equal(window.siyuan.config.uiLayout.hideDock, true);
     return "Floating dock bar cases passed";
 };

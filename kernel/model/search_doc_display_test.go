@@ -1,24 +1,12 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-package tools
+package model
 
 import "testing"
 
-func TestDocumentSearchDisplayFields(t *testing.T) {
+func TestSearchDocDisplayFields(t *testing.T) {
 	tests := []struct {
 		name     string
 		doc      map[string]string
@@ -54,9 +42,9 @@ func TestDocumentSearchDisplayFields(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			typ, id, name := documentSearchDisplayFields(test.doc)
+			typ, id, name := SearchDocDisplayFields(test.doc)
 			if typ != test.wantType || id != test.wantID || name != test.wantName {
-				t.Fatalf("documentSearchDisplayFields() = (%q, %q, %q), want (%q, %q, %q)",
+				t.Fatalf("SearchDocDisplayFields() = (%q, %q, %q), want (%q, %q, %q)",
 					typ, id, name, test.wantType, test.wantID, test.wantName)
 			}
 		})

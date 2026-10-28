@@ -883,7 +883,7 @@ var getBlockDOMs = contractHandler(apicontract.GetBlockDOMs, func(c *gin.Context
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockDOMsByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(doms)
@@ -950,7 +950,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockDOMsByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(doms)
@@ -960,19 +960,27 @@ func isEncryptedNotebookDeniedForPublish(c *gin.Context, notebook string) bool {
 	return notebook != "" && model.IsReadOnlyRoleContext(c) && model.IsEncryptedBoxDeniedByPublishAccess(notebook)
 }
 
-func filterBlockDOMsByPublishAccess(c *gin.Context, doms map[string]string, ids []string, boxID string, publishAccess model.PublishAccess, publishIgnore model.PublishAccess) {
+// blockPublishDenied 判断块在当前会话下是否应被发布访问控制屏蔽。
+// 块树缺失时视为不可访问，与路径密码、发布忽略规则判定一致。
+func blockPublishDenied(c *gin.Context, id, boxID string, publishAccess, publishIgnore model.PublishAccess) bool {
+	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt {
+		return true
+	}
+	passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	return (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) ||
+		!model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore)
+}
+
+// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块内容置空，保留原有键位。
+func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids []string, boxID string,
+	publishAccess, publishIgnore model.PublishAccess) {
 	for _, id := range ids {
-		if _, ok := doms[id]; !ok {
+		if _, ok := contents[id]; !ok {
 			continue
 		}
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
-			doms[id] = ""
-			continue
-		}
-		passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			doms[id] = ""
+		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
+			contents[id] = ""
 		}
 	}
 }
@@ -1015,14 +1023,8 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
+		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
 			kramdown = ""
-		} else {
-			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-				kramdown = ""
-			}
 		}
 	}
 
@@ -1069,28 +1071,11 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockKramdownsByPublishAccess(c, kramdowns, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, kramdowns, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(kramdowns)
 })
-
-func filterBlockKramdownsByPublishAccess(c *gin.Context, kramdowns map[string]string, ids []string, boxID string, publishAccess model.PublishAccess, publishIgnore model.PublishAccess) {
-	for _, id := range ids {
-		if _, ok := kramdowns[id]; !ok {
-			continue
-		}
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
-			kramdowns[id] = ""
-			continue
-		}
-		passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			kramdowns[id] = ""
-		}
-	}
-}
 
 var getChildBlocks = contractHandler(apicontract.GetChildBlocks, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[[]*apicontract.ChildBlock] {
 	ret := gulu.Ret.NewResult()

@@ -100,7 +100,7 @@ func prepareDecisionAssetImage(image decisionImageInput) (util.DecisionImage, er
 	if err != nil {
 		return util.DecisionImage{}, errors.New("decision image asset is unavailable")
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	if model.IsEncryptedBox(boxID) && (image.Notebook != boxID || !model.IsBoxUnlocked(boxID)) {
 		return util.DecisionImage{}, errors.New("encrypted image requires its unlocked notebook")
 	}

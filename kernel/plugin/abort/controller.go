@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
+
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 )
@@ -143,7 +145,7 @@ func newSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.Objec
 
 // signalArrayOf 读取 AbortSignal.any() 的 signals 参数：接受数组，数组之外的可迭代对象未支持。
 func signalArrayOf(rt *goja.Runtime, value goja.Value) []*SignalState {
-	if !isJsArray(rt, value) {
+	if !gojaext.IsArray(rt, value) {
 		panic(rt.NewTypeError("signals must be an array of AbortSignal"))
 	}
 	object := value.ToObject(rt)
@@ -229,12 +231,12 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 			return goja.Undefined()
 		}
 		callback := call.Argument(1)
-		if !isJsValueNotNull(callback) {
+		if !gojaext.IsValueNotNull(callback) {
 			return goja.Undefined()
 		}
 
 		once := false
-		if options := call.Argument(2); isJsValueNotNull(options) {
+		if options := call.Argument(2); gojaext.IsValueNotNull(options) {
 			if optionsObj := options.ToObject(rt); optionsObj != nil {
 				if value := dictMember(optionsObj, "once"); value != nil {
 					once = value.ToBoolean()
@@ -275,7 +277,7 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 	if err := prototype.Set("dispatchEvent", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		s := self(call, "dispatchEvent")
 		eventType := ""
-		if event := call.Argument(0); isJsValueNotNull(event) {
+		if event := call.Argument(0); gojaext.IsValueNotNull(event) {
 			if eventObj := event.ToObject(rt); eventObj != nil {
 				if value := dictMember(eventObj, "type"); value != nil {
 					eventType = value.String()

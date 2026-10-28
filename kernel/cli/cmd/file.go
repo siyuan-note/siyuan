@@ -203,59 +203,12 @@ var fileCopyCmd = &cobra.Command{
 			return nil
 		}
 
-		if err := copyPath(src, dst); err != nil {
+		if err := util.CopyPath(src, dst); err != nil {
 			return err
 		}
 		fmt.Println("ok")
 		return nil
 	},
-}
-
-func copyPath(src, dst string) error {
-	srcInfo, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-	if srcInfo.IsDir() {
-		return copyDir(src, dst)
-	}
-	return copyFile(src, dst)
-}
-
-func copyDir(src, dst string) error {
-	if err := os.MkdirAll(dst, 0755); err != nil {
-		return err
-	}
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
-	for _, e := range entries {
-		srcPath := filepath.Join(src, e.Name())
-		dstPath := filepath.Join(dst, e.Name())
-		if err := copyPath(srcPath, dstPath); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func copyFile(src, dst string) error {
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
-		return err
-	}
-	srcF, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcF.Close()
-	dstF, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstF.Close()
-	_, err = io.Copy(dstF, srcF)
-	return err
 }
 
 var fileGrepCmd = &cobra.Command{
@@ -333,7 +286,7 @@ var fileFindCmd = &cobra.Command{
 			if !d.Type().IsRegular() {
 				return nil
 			}
-			if include != "" && !matchGlob(d.Name(), include) {
+			if include != "" && !util.MatchGlob(d.Name(), include) {
 				return nil
 			}
 			total++
@@ -400,35 +353,6 @@ var fileStatCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func matchGlob(filename, pattern string) bool {
-	for _, p := range expandGlobBrace(pattern) {
-		if matched, _ := filepath.Match(p, filename); matched {
-			return true
-		}
-	}
-	return false
-}
-
-func expandGlobBrace(pattern string) []string {
-	i := strings.Index(pattern, "{")
-	if i < 0 {
-		return []string{pattern}
-	}
-	j := strings.Index(pattern[i:], "}")
-	if j < 0 {
-		return []string{pattern}
-	}
-	j += i
-	prefix := pattern[:i]
-	body := pattern[i+1 : j]
-	suffix := pattern[j+1:]
-	var result []string
-	for opt := range strings.SplitSeq(body, ",") {
-		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
-	}
-	return result
 }
 
 func init() {

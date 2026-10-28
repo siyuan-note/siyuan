@@ -97,10 +97,10 @@ func queryRefTexts(refSearchIgnoreLines []string, boxIDs ...string) (ret []strin
 func ExistRefByDefIDsInBox(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []string, boxID string) (ret bool, err error) {
 	const batchSize = 900
 
-	defIDs = filterNonEmptyRefCheckIDs(defIDs)
-	defRootIDs = filterNonEmptyRefCheckIDs(defRootIDs)
-	excludeBlockIDs = filterNonEmptyRefCheckIDs(excludeBlockIDs)
-	excludeRootIDs = filterNonEmptyRefCheckIDs(excludeRootIDs)
+	defIDs = FilterNonEmptyRefCheckIDs(defIDs)
+	defRootIDs = FilterNonEmptyRefCheckIDs(defRootIDs)
+	excludeBlockIDs = FilterNonEmptyRefCheckIDs(excludeBlockIDs)
+	excludeRootIDs = FilterNonEmptyRefCheckIDs(excludeRootIDs)
 	excludeBlockIDSet := map[string]struct{}{}
 	for _, id := range excludeBlockIDs {
 		excludeBlockIDSet[id] = struct{}{}
@@ -177,8 +177,8 @@ func ExistRefByDefIDs(defIDs, defRootIDs, excludeBlockIDs, excludeRootIDs []stri
 func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret map[string][]string, err error) {
 	const batchSize = 900
 
-	blockIDs = filterNonEmptyRefCheckIDs(blockIDs)
-	rootIDs = filterNonEmptyRefCheckIDs(rootIDs)
+	blockIDs = FilterNonEmptyRefCheckIDs(blockIDs)
+	rootIDs = FilterNonEmptyRefCheckIDs(rootIDs)
 	ret = map[string][]string{}
 	queryByColumn := func(column string, ids []string) error {
 		for start := 0; start < len(ids); start += batchSize {
@@ -235,7 +235,9 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 	return
 }
 
-func filterNonEmptyRefCheckIDs(ids []string) (ret []string) {
+// FilterNonEmptyRefCheckIDs 去空格、去空串并去重，保留首次出现的顺序。
+// 供引用校验的多个入参列表共用，避免调用方各自实现一份。
+func FilterNonEmptyRefCheckIDs(ids []string) (ret []string) {
 	seen := map[string]struct{}{}
 	for _, id := range ids {
 		id = strings.TrimSpace(id)

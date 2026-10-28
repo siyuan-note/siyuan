@@ -129,9 +129,9 @@ func CheckBlockRef(ids []string) bool {
 // CheckBlockRefInBox 检查受影响块的引用，并检查实际删除块的数据库绑定。
 func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret bool, err error) {
 	sql.FlushQueue()
-	ids = filterNonEmptyBlockRefCheckIDs(ids)
-	exactIDs = filterNonEmptyBlockRefCheckIDs(exactIDs)
-	deletedIDs = filterNonEmptyBlockRefCheckIDs(deletedIDs)
+	ids = sql.FilterNonEmptyRefCheckIDs(ids)
+	exactIDs = sql.FilterNonEmptyRefCheckIDs(exactIDs)
+	deletedIDs = sql.FilterNonEmptyRefCheckIDs(deletedIDs)
 	if 1 > len(ids) {
 		return
 	}
@@ -236,22 +236,6 @@ func expandBlockRefCheckDescendants(group *blockRefCheckGroup, selected, deleted
 			group.deletedBlockIDs[bt.ID] = struct{}{}
 		}
 	}
-}
-
-func filterNonEmptyBlockRefCheckIDs(ids []string) (ret []string) {
-	seen := map[string]struct{}{}
-	for _, id := range ids {
-		id = strings.TrimSpace(id)
-		if "" == id {
-			continue
-		}
-		if _, exists := seen[id]; exists {
-			continue
-		}
-		seen[id] = struct{}{}
-		ret = append(ret, id)
-	}
-	return
 }
 
 // CheckDocsRef 检查文档删除时会递归移除的全部文档。

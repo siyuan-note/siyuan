@@ -8,7 +8,6 @@ import (
 	archivezip "archive/zip"
 	"fmt"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -254,7 +253,7 @@ func unzipWorkspaceArchive(zipPath, destination string) error {
 			continue
 		}
 		sources[i] = filepath.Join(staging, fmt.Sprint(i))
-		if err = extractWorkspaceArchiveEntry(entry, sources[i]); err != nil {
+		if err = util.ExtractArchiveEntry(entry, sources[i]); err != nil {
 			return err
 		}
 		copySources = append(copySources, sources[i])
@@ -309,31 +308,4 @@ func validateArchiveEntryPath(destination, entryPath string) error {
 		return fmt.Errorf("archive entry resolves outside destination [%s]", entryPath)
 	}
 	return rejectEncryptedArchivePath(entryPath)
-}
-
-func extractWorkspaceArchiveEntry(entry *archivezip.File, destination string) error {
-	if entry.FileInfo().IsDir() {
-		return os.MkdirAll(destination, 0755)
-	}
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
-	}
-	source, err := entry.Open()
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-	target, err := os.Create(destination)
-	if err != nil {
-		return err
-	}
-	_, copyErr := io.Copy(target, source)
-	closeErr := target.Close()
-	if copyErr != nil {
-		return copyErr
-	}
-	if closeErr != nil {
-		return closeErr
-	}
-	return os.Chtimes(destination, entry.Modified, entry.Modified)
 }

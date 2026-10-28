@@ -101,7 +101,7 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 		} else {
 			resolvedBoxID := boxID
 			if resolvedBoxID == "" {
-				resolvedBoxID = ExtractBoxIDFromAssetsPath(absPath)
+				resolvedBoxID = util.BoxIDFromDataPath(absPath)
 			}
 			root, rootErr := ResolveAssetPathWithMissingLeaf(filepath.Join(util.DataDir, resolvedBoxID, "assets"))
 			resolved, resolveErr := ResolveAssetPathWithMissingLeaf(absPath)
@@ -127,7 +127,7 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 
 // ensureReadableAssetLocal 先检查加密笔记本准入，再下载原始密文；实际读取仍须认证解密。
 func ensureReadableAssetLocal(absPath string) error {
-	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	if boxID != "" && IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return errors.New(Conf.Language(314))
 	}

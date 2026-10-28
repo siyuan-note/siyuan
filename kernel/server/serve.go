@@ -1071,7 +1071,7 @@ func isValidAssetRequestPath(requestPath string) bool {
 }
 
 func isValidResolvedAssetPath(assetAbsPath, requestBoxID string) bool {
-	pathBoxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
+	pathBoxID := util.BoxIDFromDataPath(assetAbsPath)
 	if requestBoxID != "" {
 		if requestBoxID != pathBoxID {
 			return false
@@ -1166,7 +1166,7 @@ func serveAssets(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
-		if model.IsEncryptedAssetPath(p) && !model.IsBoxUnlocked(model.ExtractBoxIDFromAssetsPath(p)) {
+		if model.IsEncryptedAssetPath(p) && !model.IsBoxUnlocked(util.BoxIDFromDataPath(p)) {
 			context.Status(http.StatusForbidden)
 			return
 		}
@@ -1286,7 +1286,7 @@ func setEncryptedAssetCacheHeaders(c *gin.Context) {
 
 func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	if strings.HasSuffix(assetAbsPath, ".svg") {
-		boxID := model.ExtractBoxIDFromAssetsPath(assetAbsPath)
+		boxID := util.BoxIDFromDataPath(assetAbsPath)
 		var dek []byte
 		if boxID != "" && model.IsEncryptedBox(boxID) {
 			setEncryptedAssetCacheHeaders(context)
@@ -1375,7 +1375,7 @@ func readAssetBytesLocked(absPath, boxID string, dek []byte) ([]byte, error) {
 
 // serveHEIFPreview 将 HEIF/HEIC 资源按需转成 JPEG。加密笔记本只使用受限内存缓存，不把明文写入磁盘。
 func serveHEIFPreview(c *gin.Context, absPath string) {
-	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	encrypted := boxID != "" && model.IsEncryptedBox(boxID)
 	var dek []byte
 	if encrypted {
@@ -1506,7 +1506,7 @@ func writeHEIFPreview(c *gin.Context, absPath string, source []byte, boxID strin
 // 若 absPath 在已解锁的加密笔记本下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
 func serveEncryptedAsset(context *gin.Context, absPath string) bool {
-	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return false // 非加密 box，走原路径
 	}

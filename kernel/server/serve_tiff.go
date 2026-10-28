@@ -23,7 +23,7 @@ func shouldTranscodeTIFF(c *gin.Context, path string) bool {
 
 // serveTIFFPreview 在资源鉴权后读取首帧，加密笔记本持有操作租约和读锁直至输出结束。
 func serveTIFFPreview(c *gin.Context, path string) {
-	boxID := model.ExtractBoxIDFromAssetsPath(path)
+	boxID := util.BoxIDFromDataPath(path)
 	encrypted := boxID != "" && model.IsEncryptedBox(boxID)
 	var dek []byte
 	if encrypted {

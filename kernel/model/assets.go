@@ -95,7 +95,7 @@ func readAssetBytesInBox(boxID, relativePath string, download bool) ([]byte, err
 	var readErr error
 	if heif.IsPath(relativePath) {
 		limit := int64(heif.MaxInputBytes)
-		if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+		if effectiveBoxID := util.BoxIDFromDataPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
 			limit += 2 * 1024 * 1024
 		}
 		data, readErr = heif.ReadFileLimited(absPath, limit)
@@ -106,7 +106,7 @@ func readAssetBytesInBox(boxID, relativePath string, download bool) ([]byte, err
 		return nil, readErr
 	}
 	// 从解析到的绝对路径反推有效 boxID，不轻信传入参数（路径可能通过 ?box= 指定了不同 box）
-	effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath)
+	effectiveBoxID := util.BoxIDFromDataPath(absPath)
 	if effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
 		HoldBoxReadLock(effectiveBoxID)
 		dek, dekErr := GetDEKIfUnlocked(effectiveBoxID)
@@ -2044,7 +2044,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 	// 排除加密笔记本的资源：加密笔记本锁定时 loadTree 失败会误判引用关系，
 	// 且加密笔记本是孤岛，资源不参与全局未引用清理
 	for dest, absPath := range assetsPathMap {
-		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
+		if boxID := util.BoxIDFromDataPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
 			delete(assetsPathMap, dest)
 		}
 	}

@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
+
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
@@ -173,13 +175,13 @@ func newAbortEvent(rt *goja.Runtime, target *goja.Object) *goja.Object {
 	lo.Must0(event.Set("stopPropagation", noop))
 	lo.Must0(event.Set("stopImmediatePropagation", noop))
 
-	lo.Must0(objectFreeze(rt, event))
+	lo.Must0(gojaext.Freeze(rt, event))
 	return event
 }
 
 // SignalOf 从 JS 值取出 AbortSignal 的宿主状态，只接受由本包创建的 AbortSignal 对象。
 func SignalOf(rt *goja.Runtime, value goja.Value, name string) (*SignalState, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, fmt.Errorf("%s must be an AbortSignal", name)
 	}
 	object := value.ToObject(rt)

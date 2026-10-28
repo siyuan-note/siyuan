@@ -215,7 +215,7 @@ var setFileAnnotation = contractHandler(apicontract.SetFileAnnotation, func(c *g
 	if err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(writePath)
+	boxID := util.BoxIDFromDataPath(writePath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -286,7 +286,7 @@ var getFileAnnotation = contractHandler(apicontract.GetFileAnnotation, func(c *g
 			return apicontract.Failure[apicontract.AssetAnnotationData](http.StatusForbidden, http.StatusText(http.StatusForbidden))
 		}
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(readPath)
+	boxID := util.BoxIDFromDataPath(readPath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AssetAnnotationData](-1, err.Error())
 	}
@@ -408,7 +408,7 @@ var resolveAssetPath = contractHandler(apicontract.ResolveAssetPath, func(c *gin
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 	}
 	if model.IsEncryptedAssetPath(p) {
-		if err = holdEncryptedBoxRequest(c, model.ExtractBoxIDFromAssetsPath(p)); err != nil {
+		if err = holdEncryptedBoxRequest(c, util.BoxIDFromDataPath(p)); err != nil {
 			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 		}
 		p, err = model.PrepareEncryptedAssetForExternalOpen(path)

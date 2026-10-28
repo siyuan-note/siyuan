@@ -10,6 +10,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // normalizeAlgorithm 将 JS 的算法参数（字符串或对象）转换为算法层的 Algorithm。
@@ -19,7 +20,7 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		return
 	}
 
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		err = crypto.NewError(crypto.ErrNameType, "algorithm must be a string or an object")
 		return
 	}
@@ -38,14 +39,14 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		return
 	}
 
-	if hashValue := object.Get("hash"); isJsValueNotNull(hashValue) {
+	if hashValue := object.Get("hash"); gojaext.IsValueNotNull(hashValue) {
 		if alg.Hash, err = h.normalizeHash(rt, hashValue); err != nil {
 			return
 		}
 	}
 
 	// ECDH 与 X25519 的 public 成员是对方的 CryptoKey。
-	if publicValue := object.Get("public"); isJsValueNotNull(publicValue) {
+	if publicValue := object.Get("public"); gojaext.IsValueNotNull(publicValue) {
 		if alg.Public, err = cryptoKeyOf(rt, publicValue, "algorithm.public"); err != nil {
 			return
 		}
@@ -63,14 +64,14 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		{"label", &alg.Label},
 		{"publicExponent", &alg.PublicExponent},
 	} {
-		if memberValue := object.Get(member.name); isJsValueNotNull(memberValue) {
+		if memberValue := object.Get(member.name); gojaext.IsValueNotNull(memberValue) {
 			if *member.target, err = h.cryptoBytesOf(rt, memberValue, "algorithm."+member.name); err != nil {
 				return
 			}
 		}
 	}
 
-	if curveValue := object.Get("namedCurve"); isJsValueNotNull(curveValue) {
+	if curveValue := object.Get("namedCurve"); gojaext.IsValueNotNull(curveValue) {
 		if !goja.IsString(curveValue) {
 			err = crypto.NewError(crypto.ErrNameType, "algorithm.namedCurve must be a string")
 			return
@@ -88,7 +89,7 @@ func (h *cryptoHost) normalizeAlgorithm(rt *goja.Runtime, value goja.Value) (alg
 		{"saltLength", &alg.SaltLength},
 		{"modulusLength", &alg.ModulusLength},
 	} {
-		if memberValue := object.Get(member.name); isJsValueNotNull(memberValue) {
+		if memberValue := object.Get(member.name); gojaext.IsValueNotNull(memberValue) {
 			var number int
 			if number, err = integerOf(memberValue, "algorithm."+member.name); err != nil {
 				return
@@ -130,7 +131,7 @@ func integerOf(value goja.Value, name string) (int, error) {
 
 // keyUsagesOf 解析用法数组，取值必须是规范定义的字符串。
 func keyUsagesOf(rt *goja.Runtime, value goja.Value) ([]crypto.KeyUsage, error) {
-	if !isJsArray(rt, value) {
+	if !gojaext.IsArray(rt, value) {
 		return nil, crypto.NewError(crypto.ErrNameType, "keyUsages must be an array")
 	}
 

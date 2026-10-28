@@ -5351,8 +5351,9 @@ func getKanbanPreferredGroupKey(attrView *av.AttributeView) (ret *av.Key) {
 	return
 }
 
-func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
-	var err error
+// setAttrViewViewField 读取视图并应用 apply 修改后保存，供视图名称、图标、描述的写入共用。
+// 视图不存在时按视图 ID 报错，不再沿用上层解析留下的 err，避免打印 "failed: <nil>"。
+func (tx *Transaction) setAttrViewViewField(operation *Operation, apply func(view *av.View)) (ret *TxErr) {
 	avID := operation.AvID
 	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
@@ -5363,11 +5364,11 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 	viewID := operation.ID
 	view := attrView.GetView(viewID)
 	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		logging.LogErrorf("attribute view [%s] has no view [%s]", avID, viewID)
 		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
 	}
 
-	view.Name = strings.TrimSpace(operation.Data.(string))
+	apply(view)
 	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
@@ -5375,28 +5376,16 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Name = strings.TrimSpace(operation.Data.(string))
+	})
+}
+
 func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := avParseView(avID, operation.BlockID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: avID}
-	}
-
-	viewID := operation.ID
-	view := attrView.GetView(viewID)
-	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
-	}
-
-	view.Icon = filterAttrViewIconValue(operation.Data.(string))
-	if err = avSaveView(attrView, operation.BlockID); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
-	}
-	return
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Icon = filterAttrViewIconValue(operation.Data.(string))
+	})
 }
 
 // filterAttrViewIconValue 过滤属性视图图标值，非法值置空，防止存储可执行标记
@@ -5409,27 +5398,9 @@ func filterAttrViewIconValue(icon string) string {
 }
 
 func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := avParseView(avID, operation.BlockID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: avID}
-	}
-
-	viewID := operation.ID
-	view := attrView.GetView(viewID)
-	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
-	}
-
-	view.Desc = strings.TrimSpace(operation.Data.(string))
-	if err = avSaveView(attrView, operation.BlockID); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
-	}
-	return
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Desc = strings.TrimSpace(operation.Data.(string))
+	})
 }
 
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {

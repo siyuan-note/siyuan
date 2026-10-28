@@ -44,7 +44,7 @@ func StartLivePhotoPreview(assetPath string, clientEncode bool) (livephoto.Sessi
 	if err != nil {
 		return livephoto.Session{}, errors.New("Live Photo asset not found")
 	}
-	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	scope := ""
 	if IsEncryptedBox(boxID) {
 		scope = boxID

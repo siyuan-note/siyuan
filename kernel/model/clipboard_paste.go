@@ -80,7 +80,7 @@ func PrepareClipboardPasteAssets(boxID string, references []string) (result map[
 		if resolveErr != nil {
 			return nil, resolveErr
 		}
-		effectiveBox := ExtractBoxIDFromAssetsPath(absPath)
+		effectiveBox := util.BoxIDFromDataPath(absPath)
 		if IsEncryptedAssetPath(absPath) && effectiveBox != boxID {
 			return nil, errors.New("cannot copy assets between encrypted notebooks")
 		}

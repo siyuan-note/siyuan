@@ -3422,46 +3422,35 @@ func fieldRegexp(regexp string) string {
 	return buf.String()
 }
 
-func columnFilter() string {
+// searchColumns 返回参与全文检索的列，顺序固定。MATCH 过滤与 || 拼接共用本函数，
+// 新增可检索列时只改这一处。
+func searchColumns() []string {
 	confSearchSnapshot := Conf.LoadSearch()
 
-	buf := bytes.Buffer{}
-	buf.WriteString("{content")
+	columns := []string{"content"}
 	if confSearchSnapshot.Name {
-		buf.WriteString(" name")
+		columns = append(columns, "name")
 	}
 	if confSearchSnapshot.Alias {
-		buf.WriteString(" alias")
+		columns = append(columns, "alias")
 	}
 	if confSearchSnapshot.Memo {
-		buf.WriteString(" memo")
+		columns = append(columns, "memo")
 	}
 	if confSearchSnapshot.IAL {
-		buf.WriteString(" ial")
+		columns = append(columns, "ial")
 	}
-	buf.WriteString(" tag}")
-	return buf.String()
+	return append(columns, "tag")
 }
 
-func columnConcat() string {
-	confSearchSnapshot := Conf.LoadSearch()
+// columnFilter 把 searchColumns 渲染为 FTS5 MATCH 的列过滤表达式，如 {content name tag}。
+func columnFilter() string {
+	return "{" + strings.Join(searchColumns(), " ") + "}"
+}
 
-	buf := bytes.Buffer{}
-	buf.WriteString("content")
-	if confSearchSnapshot.Name {
-		buf.WriteString("||name")
-	}
-	if confSearchSnapshot.Alias {
-		buf.WriteString("||alias")
-	}
-	if confSearchSnapshot.Memo {
-		buf.WriteString("||memo")
-	}
-	if confSearchSnapshot.IAL {
-		buf.WriteString("||ial")
-	}
-	buf.WriteString("||tag")
-	return buf.String()
+// columnConcat 把 searchColumns 渲染为 FTS5 || 拼接表达式，如 content||name||tag。
+func columnConcat() string {
+	return strings.Join(searchColumns(), "||")
 }
 
 func buildKeywordSearchQueries(query string) (ftsQuery, hPathQuery string) {

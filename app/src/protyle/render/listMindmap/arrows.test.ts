@@ -76,6 +76,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         style: {}, classList: {toggle: () => {}}});
     Object.assign(target, {
         scale: 1, offsetX: 0, offsetY: 0, world: {style: {}}, zoomLabel: {}, zoomSlider: {},
+        syncSelectionInput: () => {},
         viewport: {clientWidth: 400, clientHeight: 200, getBoundingClientRect: () => ({left: 0, top: 0})},
         canvas: {getContext: () => context}, options: {host: {}}, colorProbe: {style: {}},
         inspector: {hidden: true},

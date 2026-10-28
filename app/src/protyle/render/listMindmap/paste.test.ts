@@ -48,12 +48,13 @@ test("selected mind map nodes paste all clipboard files into a new child after f
 });
 
 test("mind map paste respects edit state, selection and read-only boundaries", () => {
-    for (const mode of ["readonly", "editing", "relation", "multiple", "missing", "unselected",
+    for (const mode of ["readonly", "editing", "composing", "relation", "multiple", "missing", "unselected",
         "input", "editable", "handled", "text", "export"]) {
         const current = create();
         switch (mode) {
             case "readonly": current.target.readOnly = true; break;
             case "editing": current.target.editingId = "node"; break;
+            case "composing": current.target.selectionComposing = true; break;
             case "relation": current.target.relationFrom = "node"; break;
             case "multiple": current.target.getSelectedIds = () => ["node", "other"]; break;
             case "missing": current.target.model.nodes.clear(); break;
@@ -69,6 +70,21 @@ test("mind map paste respects edit state, selection and read-only boundaries", (
         assert.equal(current.calls.length, 0, mode);
         assert.equal(current.event.defaultPrevented, mode === "handled", mode);
     }
+});
+
+test("the selection input preserves node paste until native composition starts", () => {
+    const current = create();
+    current.event.target.isContentEditable = true;
+    current.target.selectionInput = current.event.target;
+    current.target.pasteSelection(current.event);
+    current.finish();
+    assert.equal(current.event.defaultPrevented, true);
+    assert.equal(current.calls.length, 1);
+    current.event.defaultPrevented = false;
+    current.target.selectionComposing = true;
+    current.target.pasteSelection(current.event);
+    assert.equal(current.event.defaultPrevented, false);
+    assert.equal(current.calls.length, 1);
 });
 
 test("delayed node paste never follows a changed selection or deleted node", () => {

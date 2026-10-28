@@ -51,6 +51,20 @@
     outline: 1px solid var(--b3-theme-primary);
   }
 
+  &__selection-input {
+    position: absolute;
+    z-index: 3;
+    min-height: 28px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    opacity: 0;
+
+    &--composing {
+      opacity: 1;
+    }
+  }
+
   &--nested {
     width: 260px;
     --mindmap-view-height: 260px;
@@ -1121,6 +1135,7 @@
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__selection-input,
     &__document-viewport,
     &__inspector-popover,
     &__add-bridge,

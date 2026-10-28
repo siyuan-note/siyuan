@@ -36,6 +36,7 @@ const setup = () => {
             offsetWidth: 400, offsetHeight: 300,
             getBoundingClientRect: () => ({left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300})},
         selectNode: () => {}, queueInspectorLayout: () => {}, findLine: (): unknown => undefined, selectLine: () => {},
+        focusSelectionInput: () => {},
         clearSelection: () => { target.selectedId = undefined; },
         boundedPan: (x: number, y: number) => ({x, y}), draw: () => drawn++,
         finishThen: (action: () => void) => { finished++; target.editingId = undefined; action(); },

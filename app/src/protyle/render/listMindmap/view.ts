@@ -182,6 +182,13 @@ export class ListMindmapView {
     private relationFrom?: string;
     private relationPreview?: {x: number, y: number, targetId?: string};
     private editingId?: string;
+    private readonly selectionInput = createElement("div", "b3-text-field mindmap-view__selection-input");
+    private selectionInputId?: string;
+    private selectionInputRevision = 0;
+    private selectionCompositionRevision = 0;
+    private selectionComposing = false;
+    private selectionCompositionEnding = false;
+    private touchInput = false;
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
     private pinching = false;
@@ -241,6 +248,12 @@ export class ListMindmapView {
         this.documentViewport.hidden = true;
         this.documentViewport.setAttribute("aria-hidden", "true");
         this.viewport.append(this.canvas, this.world, this.documentViewport);
+        this.selectionInput.contentEditable = "plaintext-only";
+        this.selectionInput.tabIndex = -1;
+        this.selectionInput.hidden = true;
+        this.selectionInput.setAttribute("role", "textbox");
+        this.selectionInput.setAttribute("aria-label", this.label("text"));
+        this.world.append(this.selectionInput);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -268,6 +281,39 @@ export class ListMindmapView {
         this.viewport.append(this.selectionBox);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
+        this.listen(options.host, "pointerdown", (event: PointerEvent) => {
+            this.touchInput = event.pointerType === "touch";
+        }, {capture: true});
+        this.listen(options.host, "focus", () => queueMicrotask(() => {
+            // 等待调用方交接选区，避免嵌套 focus 被浏览器恢复到不可编辑的画布。
+            if (!this.destroyed && document.activeElement === options.host) {
+                this.focusSelectionInput();
+            }
+        }));
+        this.listen(this.selectionInput, "compositionstart", () => {
+            this.selectionComposing = true;
+            this.selectionCompositionRevision = this.selectionInputRevision;
+            this.selectionInput.classList.add("mindmap-view__selection-input--composing");
+        });
+        this.listen(this.selectionInput, "compositionend", () => {
+            this.selectionComposing = false;
+            this.selectionCompositionEnding = true;
+            const revision = this.selectionCompositionRevision;
+            // 等待浏览器写入最后一次 input，整个组词过程保持同一输入目标。
+            queueMicrotask(() => {
+                this.selectionCompositionEnding = false;
+                if (revision === this.selectionInputRevision) {
+                    this.commitSelectionInput();
+                } else if (!this.selectionComposing) {
+                    this.selectionInput.textContent = "";
+                }
+            });
+        });
+        this.listen(this.selectionInput, "input", (event: InputEvent) => {
+            if (!event.isComposing && !this.selectionComposing && !this.selectionCompositionEnding) {
+                this.commitSelectionInput();
+            }
+        });
         this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
         this.listen(options.host, "click", this.activatePointer, {capture: true});
         this.listen(options.host, "click", (event: MouseEvent) => {
@@ -1193,6 +1239,7 @@ export class ListMindmapView {
         this.setInteractionActive(true);
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
+        this.focusSelectionInput();
         this.queueInspectorLayout(reveal);
         if (reveal) {
             this.revealNode(id);
@@ -1204,6 +1251,7 @@ export class ListMindmapView {
             this.nodeElements.get(this.editingId)?.classList.remove("mindmap-view__node--editing");
         }
         this.editingId = id;
+        this.syncSelectionInput();
         if (id) {
             this.setInteractionActive(true);
             this.destroyContentViews(id);
@@ -1211,6 +1259,64 @@ export class ListMindmapView {
             this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
         }
         this.refreshLayout();
+    }
+
+    private syncSelectionInput() {
+        const focused = document.activeElement === this.selectionInput;
+        const id = !this.destroyed && !this.readOnly && !this.editingId && !this.relationFrom &&
+            !this.selectedRelation && !this.selectedSummary && !this.selectedEdge &&
+            this.getSelectedIds().length === 1 && this.model.nodes.has(this.selectedId) ? this.selectedId : undefined;
+        if (id !== this.selectionInputId) {
+            this.selectionInputId = id;
+            this.selectionInputRevision++;
+            this.selectionInput.textContent = "";
+            this.selectionComposing = false;
+            this.selectionCompositionEnding = false;
+            this.selectionInput.classList.remove("mindmap-view__selection-input--composing");
+        }
+        this.selectionInput.hidden = !id;
+        const position = this.positions.get(id);
+        if (position) {
+            this.selectionInput.style.left = `${position.x}px`;
+            this.selectionInput.style.top = `${position.y}px`;
+            this.selectionInput.style.width = `${position.width}px`;
+        }
+        if (!id && focused) {
+            this.options.host.focus({preventScroll: true});
+        }
+    }
+
+    private focusSelectionInput() {
+        this.syncSelectionInput();
+        // 触屏点选仍保持画布焦点，避免仅选择节点就弹出软键盘。
+        if (this.selectionInputId && !this.touchInput &&
+            !document.body.matches(".body--ios, .body--android, .body--harmony")) {
+            this.selectionInput.focus({preventScroll: true});
+        }
+    }
+
+    private commitSelectionInput() {
+        this.selectionInput.classList.remove("mindmap-view__selection-input--composing");
+        const id = this.selectionInputId;
+        const revision = this.selectionInputRevision;
+        if (!id || this.selectionComposing || this.selectionCompositionEnding || !this.selectionInput.textContent) {
+            return;
+        }
+        this.finishThen(() => {
+            if (revision !== this.selectionInputRevision || this.readOnly || this.editingId || this.selectionComposing) {
+                return;
+            }
+            const text = this.selectionInput.textContent;
+            if (!text) {
+                return;
+            }
+            if (this.model.nodes.get(id)?.virtual) {
+                this.editRootTitle(id, false, text);
+            } else {
+                this.setEditing(id);
+                this.options.onEdit?.(id, this.getContentHost(id), text);
+            }
+        });
     }
 
     public refreshLayout() {
@@ -2052,6 +2158,7 @@ export class ListMindmapView {
         const height = this.viewport.clientHeight;
         this.resizeViewport(width, height);
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.syncSelectionInput();
         this.rememberViewport();
         this.updateDocumentViewport();
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
@@ -2640,12 +2747,14 @@ export class ListMindmapView {
             if (event.ctrlKey || event.metaKey || this.multiSelect) {
                 this.suppressLinkClick = true;
                 this.options.host.focus({preventScroll: true});
+                this.focusSelectionInput();
                 this.cancelPointer();
                 return;
             }
         }
         if ((!this.editingId || id) && !this.isTemporaryPan(event)) {
             this.options.host.focus({preventScroll: true});
+            this.focusSelectionInput();
         }
         // 在捕获指针改变悬停状态前记录控件所属节点，避免拖动时重算整张脑图。
         const hiddenControls = Array.from(this.world.querySelectorAll<HTMLElement>(
@@ -3391,9 +3500,9 @@ export class ListMindmapView {
 
     private copySelection = (event: ClipboardEvent) => {
         const cut = event.type === "cut";
-        if (event.defaultPrevented || this.editingId || this.relationFrom ||
+        if (event.defaultPrevented || this.editingId || this.relationFrom || this.selectionComposing ||
             cut && this.readOnly || !this.options.onCopy || !this.getSelectedIds().length ||
-            (event.target as HTMLElement).isContentEditable ||
+            (event.target !== this.selectionInput && (event.target as HTMLElement).isContentEditable) ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
             return;
         }
@@ -3402,9 +3511,9 @@ export class ListMindmapView {
     };
 
     private pasteSelection = (event: ClipboardEvent) => {
-        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom ||
+        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.selectionComposing ||
             !this.options.onPaste || this.getSelectedIds().length !== 1 ||
-            (event.target as HTMLElement).isContentEditable ||
+            (event.target !== this.selectionInput && (event.target as HTMLElement).isContentEditable) ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
             return;
         }
@@ -3446,7 +3555,15 @@ export class ListMindmapView {
             }
             return;
         }
-        const target = event.target as HTMLElement;
+        const selectionInput = event.target === this.selectionInput;
+        if (selectionInput && (this.selectionComposing || this.selectionCompositionEnding || event.isComposing ||
+            event.key === "Process" || event.key === "Dead" || event.keyCode === 229 ||
+            !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== " " && Array.from(event.key).length === 1)) {
+            // 原生输入事件提供实际文本，keydown 的字母不能代替输入法结果。
+            event.stopPropagation();
+            return;
+        }
+        const target = selectionInput ? this.options.host : event.target as HTMLElement;
         const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
             event.keyCode === 229;
         if (target.closest("input, textarea, select, audio, video, iframe") ||

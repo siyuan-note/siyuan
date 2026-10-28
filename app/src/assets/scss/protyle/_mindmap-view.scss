@@ -59,10 +59,6 @@
     overflow-wrap: anywhere;
     pointer-events: none;
     opacity: 0;
-
-    &--composing {
-      opacity: 1;
-    }
   }
 
   &--nested {

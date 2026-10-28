@@ -293,7 +293,6 @@ export class ListMindmapView {
         this.listen(this.selectionInput, "compositionstart", () => {
             this.selectionComposing = true;
             this.selectionCompositionRevision = this.selectionInputRevision;
-            this.selectionInput.classList.add("mindmap-view__selection-input--composing");
         });
         this.listen(this.selectionInput, "compositionend", () => {
             this.selectionComposing = false;
@@ -1272,7 +1271,6 @@ export class ListMindmapView {
             this.selectionInput.textContent = "";
             this.selectionComposing = false;
             this.selectionCompositionEnding = false;
-            this.selectionInput.classList.remove("mindmap-view__selection-input--composing");
         }
         this.selectionInput.hidden = !id;
         const position = this.positions.get(id);
@@ -1296,7 +1294,6 @@ export class ListMindmapView {
     }
 
     private commitSelectionInput() {
-        this.selectionInput.classList.remove("mindmap-view__selection-input--composing");
         const id = this.selectionInputId;
         const revision = this.selectionInputRevision;
         if (!id || this.selectionComposing || this.selectionCompositionEnding || !this.selectionInput.textContent) {

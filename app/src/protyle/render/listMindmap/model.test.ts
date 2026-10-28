@@ -2083,7 +2083,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(document.activeElement, selectionInput, "composition retains its original input target");
     check.equal(edits.length, beforeIME, "uncommitted phonetic text does not replace node content");
     check.equal(selectionInput.textContent, "ni");
-    check.equal(getComputedStyle(selectionInput).opacity, "1", "composition preview is visible");
+    check.equal(getComputedStyle(selectionInput).opacity, "0", "composition does not expose an extra input box over the node");
     const confirmation = new KeyboardEvent("keydown", {key: "Enter", keyCode: 229, bubbles: true, cancelable: true});
     selectionInput.dispatchEvent(confirmation);
     check.equal(confirmation.defaultPrevented, false, "IME confirmation is not a node shortcut");

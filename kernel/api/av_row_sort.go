@@ -7,7 +7,6 @@ package api
 import (
 	"fmt"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -15,9 +14,11 @@ import (
 )
 
 var getAttributeViewRowSort = contractHandler(apicontract.GetAttributeViewRowSort, func(c *gin.Context, request apicontract.GetAttributeViewRowSortRequest) apicontract.Response[apicontract.AVRowSortPreview] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.AvID, ret) || util.InvalidIDPattern(request.ViewID, ret) {
-		return contractFailure[apicontract.AVRowSortPreview](ret)
+	if err := util.ValidateID(request.AvID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVRowSortPreview](err)
+	}
+	if err := util.ValidateID(request.ViewID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVRowSortPreview](err)
 	}
 	input := model.AttributeViewRowSortRequest{AvID: request.AvID, BlockID: request.BlockID, ViewID: request.ViewID, GroupID: request.GroupID, ItemIDs: request.ItemIDs, PreviousID: request.PreviousID, NextID: request.NextID}
 	preview, err := model.PrepareAttributeViewRowSort(&input)

@@ -479,9 +479,8 @@ var startObsidianVaultAnalysis = contractHandler(apicontract.StartObsidianVaultA
 })
 
 var getObsidianVaultTask = contractHandler(apicontract.GetObsidianVaultTask, func(c *gin.Context, request apicontract.ObsidianTaskRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.TaskID, ret) {
-		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	if err := util.ValidateID(request.TaskID); err != nil {
+		return apicontract.FailureFrom[*apicontract.ObsidianVaultTask](err)
 	}
 	task, err := model.GetObsidianVaultTask(request.TaskID)
 	if err != nil {
@@ -491,9 +490,8 @@ var getObsidianVaultTask = contractHandler(apicontract.GetObsidianVaultTask, fun
 })
 
 var startObsidianVaultImport = contractHandler(apicontract.StartObsidianVaultImport, func(c *gin.Context, request apicontract.ObsidianImportRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.TaskID, ret) {
-		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	if err := util.ValidateID(request.TaskID); err != nil {
+		return apicontract.FailureFrom[*apicontract.ObsidianVaultTask](err)
 	}
 	task, err := model.StartObsidianVaultImport(request.TaskID, request.NotebookName)
 	if err != nil {
@@ -503,9 +501,8 @@ var startObsidianVaultImport = contractHandler(apicontract.StartObsidianVaultImp
 })
 
 var cancelObsidianVaultTask = contractHandler(apicontract.CancelObsidianVaultTask, func(c *gin.Context, request apicontract.ObsidianTaskRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.TaskID, ret) {
-		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	if err := util.ValidateID(request.TaskID); err != nil {
+		return apicontract.FailureFrom[*apicontract.ObsidianVaultTask](err)
 	}
 	task, err := model.CancelObsidianVaultTask(request.TaskID)
 	if err != nil {

@@ -7,11 +7,9 @@ package api
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"mime/multipart"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	goccyJSON "github.com/goccy/go-json"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -180,18 +178,6 @@ func mergeSettingBody(namespace string, body []byte) []byte {
 		return merged
 	}
 	return body
-}
-
-// contractFailure 保留既有业务校验的错误码和消息，并限制其错误载荷形态。
-func contractFailure[Data any](result *gulu.Result) apicontract.Response[Data] {
-	switch data := result.Data.(type) {
-	case nil:
-		return apicontract.Failure[Data](result.Code, result.Msg)
-	case string:
-		return apicontract.FailureWithText[Data](result.Code, result.Msg, data)
-	default:
-		panic(fmt.Sprintf("unsupported API error data %T", result.Data))
-	}
 }
 
 func notebookContract(box *model.Box) *apicontract.Notebook {

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -16,9 +15,8 @@ import (
 )
 
 var refreshBacklink = contractHandler(apicontract.RefreshBacklink, func(c *gin.Context, request apicontract.RefreshBacklinkRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.ID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	model.RefreshBacklink(request.ID)
 	model.FlushTxQueue()

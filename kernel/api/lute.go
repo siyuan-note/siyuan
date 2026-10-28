@@ -445,14 +445,11 @@ func msWordCommentID(anchor *goquery.Selection, style string) string {
 }
 
 var spinBlockDOM = contractHandler(apicontract.SpinBlockDOM, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[apicontract.DOMData] {
-	ret := gulu.Ret.NewResult()
 
 	dom := request.DOM
 	if len(dom) > maxSpinBlockDOMBytes {
 		// 限制输入大小，避免解析超大 DOM 导致资源消耗
-		ret.Code = http.StatusRequestEntityTooLarge
-		ret.Msg = "dom input exceeds the maximum permitted size"
-		return contractFailure[apicontract.DOMData](ret)
+		return apicontract.Failure[apicontract.DOMData](http.StatusRequestEntityTooLarge, "dom input exceeds the maximum permitted size")
 	}
 	luteEngine := model.NewLute()
 
@@ -462,7 +459,6 @@ var spinBlockDOM = contractHandler(apicontract.SpinBlockDOM, func(c *gin.Context
 
 // md2HTML 将 Markdown 转换为 HTML。
 var md2HTML = contractHandler(apicontract.Md2HTML, func(c *gin.Context, request apicontract.MarkdownHTMLRequest) apicontract.Response[apicontract.HTMLData] {
-	ret := gulu.Ret.NewResult()
 
 	markdown, mode := request.Markdown, request.Mode
 
@@ -473,9 +469,7 @@ var md2HTML = contractHandler(apicontract.Md2HTML, func(c *gin.Context, request 
 	case "":
 		html = model.MarkdownToMarkdownStrHTML(markdown)
 	default:
-		ret.Code = -1
-		ret.Msg = "unknown [mode]"
-		return contractFailure[apicontract.HTMLData](ret)
+		return apicontract.Failure[apicontract.HTMLData](-1, "unknown [mode]")
 	}
 
 	return apicontract.Success(apicontract.HTMLData{HTML: html})

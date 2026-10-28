@@ -5,9 +5,6 @@
 package api
 
 import (
-	"encoding/json"
-
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -36,18 +33,6 @@ var deactivateUser = contractHandler(apicontract.DeactivateUser, func(c *gin.Con
 	return apicontract.Success(apicontract.Null{})
 })
 var login = contractHandler(apicontract.AccountLogin, func(c *gin.Context, request apicontract.AccountLoginRequest) apicontract.Response[*apicontract.AccountLoginData] {
-	result := model.Login(request.UserName, request.UserPassword, request.Captcha, int(request.CloudRegion))
-	return accountLoginResponse(result)
+	data, code, msg := model.Login(request.UserName, request.UserPassword, request.Captcha, int(request.CloudRegion))
+	return apicontract.AccountLogin.FailureWithData(code, msg, data)
 })
-
-func accountLoginResponse(result *gulu.Result) apicontract.Response[*apicontract.AccountLoginData] {
-	raw, err := json.Marshal(result.Data)
-	if err != nil {
-		return apicontract.Failure[*apicontract.AccountLoginData](-1, err.Error())
-	}
-	var data *apicontract.AccountLoginData
-	if err = json.Unmarshal(raw, &data); err != nil {
-		return apicontract.Failure[*apicontract.AccountLoginData](-1, err.Error())
-	}
-	return apicontract.AccountLogin.FailureWithData(result.Code, result.Msg, data)
-}

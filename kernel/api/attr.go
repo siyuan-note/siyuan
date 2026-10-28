@@ -5,7 +5,6 @@
 package api
 
 import (
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -27,25 +26,21 @@ var batchGetBlockAttrs = contractHandler(apicontract.BatchGetBlockAttrs, func(c 
 })
 
 var getBlockAttrs = contractHandler(apicontract.GetBlockAttrs, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[map[string]string] {
-	ret := gulu.Ret.NewResult()
-
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[map[string]string](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[map[string]string](err)
 	}
-	if !checkBlockPublishAccess(c, id, ret) {
-		return contractFailure[map[string]string](ret)
+	if err := checkBlockPublishAccess(c, id); err != nil {
+		return apicontract.FailureFrom[map[string]string](err)
 	}
 
 	return apicontract.Success(sql.GetBlockAttrs(id))
 })
 
 var setBlockAttrs = contractHandler(apicontract.SetBlockAttrs, func(c *gin.Context, request apicontract.SetBlockAttrsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	attrs := request.Attrs
@@ -68,19 +63,16 @@ var setBlockAttrs = contractHandler(apicontract.SetBlockAttrs, func(c *gin.Conte
 	}
 	err := model.SetBlockAttrs(id, nameValues)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.Null{})
 })
 
 var batchSetBlockAttrs = contractHandler(apicontract.BatchSetBlockAttrs, func(c *gin.Context, request apicontract.BatchSetBlockAttrsRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	var blockAttrs []map[string]any
 	for _, block := range request.BlockAttrs {
-		if util.InvalidIDPattern(block.ID, ret) {
-			return contractFailure[apicontract.Null](ret)
+		if err := util.ValidateID(block.ID); err != nil {
+			return apicontract.FailureFrom[apicontract.Null](err)
 		}
 		attrs := map[string]string{}
 		for name, value := range block.Attrs {

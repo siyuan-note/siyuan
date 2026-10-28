@@ -5,7 +5,6 @@
 package api
 
 import (
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -153,9 +152,8 @@ var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Con
 })
 
 var removeRiffDeck = contractHandler(apicontract.RemoveRiffDeck, func(c *gin.Context, request apicontract.RiffDeckRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.DeckID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(request.DeckID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := model.RemoveDeck(request.DeckID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())

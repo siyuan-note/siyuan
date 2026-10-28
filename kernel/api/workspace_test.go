@@ -14,21 +14,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestRejectMobileWorkspaceBaseDir(t *testing.T) {
 	_, workspaceBaseDir := prepareMobileWorkspaceBaseDirTest(t)
-	ret := gulu.Ret.NewResult()
 
-	if !rejectMobileWorkspaceBaseDir(ret, workspaceBaseDir) {
+	response := rejectMobileWorkspaceBaseDirResponse[apicontract.Null](workspaceBaseDir)
+	if response == nil {
 		t.Fatal("mobile workspace base dir should be rejected")
 	}
-	if -1 != ret.Code {
-		t.Fatalf("unexpected result code: got %d, want -1", ret.Code)
+	if got := response.Code(); -1 != got {
+		t.Fatalf("unexpected result code: got %d, want -1", got)
 	}
 	if !isInvalidWorkspacePath(workspaceBaseDir) {
 		t.Fatal("mobile workspace base dir should be excluded from workspace discovery")

@@ -74,38 +74,27 @@ func resolveArchivePath(path string) (string, error) {
 }
 
 var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontract.ZipRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	entryPath, zipFilePath := request.Path, request.ZipPath
 
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	// 在创建归档前检查全部源条目，避免通过父目录打包加密笔记本。
 	resolvedEntryPath, err := resolveArchivePath(entryAbsPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = filepath.WalkDir(resolvedEntryPath, func(path string, _ fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -113,24 +102,18 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 		}
 		return rejectEncryptedArchivePath(path)
 	}); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	resolvedZipPath, err := resolveArchivePath(zipAbsFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if util.IsPluginDevelopmentRawWriteForbidden(resolvedZipPath) {
 		return apicontract.Failure[apicontract.Null](-1, "managed plugin development files require their dedicated tools")
 	}
 	if err = rejectEncryptedArchivePath(resolvedZipPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = model.CheckDocumentAddressingFileWrite(resolvedZipPath, nil, false); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -138,9 +121,7 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 	zipFile, err := gulu.Zip.Create(resolvedZipPath)
 	if err != nil {
 		logging.LogErrorf("create zip [%s] failed: %s", zipAbsFilePath, err)
-		ret.Code = -1
-		ret.Msg = "create zip file failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "create zip file failed"+errMsgSeeKernelLog)
 	}
 
 	base := filepath.Base(entryAbsPath)
@@ -151,60 +132,43 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 	}
 	if err != nil {
 		logging.LogErrorf("zip add entry [%s] failed: %s", entryAbsPath, err)
-		ret.Code = -1
-		ret.Msg = "zip failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "zip failed"+errMsgSeeKernelLog)
 	}
 
 	if err = zipFile.Close(); err != nil {
 		logging.LogErrorf("close zip [%s] failed: %s", zipAbsFilePath, err)
-		ret.Code = -1
-		ret.Msg = "close zip file failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "close zip file failed"+errMsgSeeKernelLog)
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var unzip = contractHandler(apicontract.Unzip, func(c *gin.Context, request apicontract.UnzipRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	entryPath, zipFilePath := request.Path, request.ZipPath
 
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	if !gulu.File.IsExist(zipAbsFilePath) {
-		ret.Code = -1
-		ret.Msg = "zip file does not exist"
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "zip file does not exist")
 	}
 
 	if err := unzipWorkspaceArchive(zipAbsFilePath, entryAbsPath); err != nil {
 		logging.LogErrorf("unzip [%s] -> [%s] failed: %s", zipAbsFilePath, entryAbsPath, err)
-		ret.Code = -1
-		ret.Msg = "unzip failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "unzip failed"+errMsgSeeKernelLog)
 	}
 
 	return apicontract.Success(apicontract.Null{})

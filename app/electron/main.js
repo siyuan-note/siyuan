@@ -3953,7 +3953,7 @@ app.whenReady().then(() => {
                 shell.openPath(data.filePath);
                 break;
             case "openDevTools":
-                devToolsDock.openDevTools(event.sender);
+                devToolsDock.openDevTools(event.sender, process.platform, data);
                 break;
             case "toggleDevTools":
                 devToolsDock.toggleDevTools(event.sender);

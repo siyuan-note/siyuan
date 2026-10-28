@@ -1,5 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
 const {openDevTools, toggleDevTools} = require("./devToolsDock");
 
 const createContents = ({destroyed = false, opened = false} = {}) => ({
@@ -23,6 +26,51 @@ test("other platforms keep the last dock position", () => {
         const contents = createContents();
         openDevTools(contents, platform);
         assert.deepEqual(contents.calls, [["open", undefined]]);
+    }
+});
+
+test("explicit dock modes and activation/title options are preserved on every platform", () => {
+    for (const platform of ["win32", "linux", "darwin"]) {
+        for (const mode of ["left", "right", "bottom", "undocked", "detach"]) {
+            const contents = createContents();
+            const options = Object.freeze({mode, activate: false, title: "Custom DevTools", ignored: true});
+            openDevTools(contents, platform, options);
+            assert.deepEqual(contents.calls, [["open", {mode, activate: false, title: "Custom DevTools"}]]);
+        }
+    }
+});
+
+test("activation and title options retain the platform default dock mode", () => {
+    for (const platform of ["win32", "linux", "darwin"]) {
+        const contents = createContents();
+        openDevTools(contents, platform, {activate: true, title: ""});
+        assert.deepEqual(contents.calls, [["open", {
+            ...(platform === "win32" ? {mode: "bottom"} : {}), activate: true, title: "",
+        }]]);
+    }
+});
+
+test("invalid options are ignored without losing platform defaults", () => {
+    for (const platform of ["win32", "linux", "darwin"]) {
+        for (const options of [null, false, "right", {}, {mode: "invalid", activate: "false", title: 123, ignored: true}]) {
+            const contents = createContents();
+            openDevTools(contents, platform, options);
+            assert.deepEqual(contents.calls, [["open", platform === "win32" ? {mode: "bottom"} : undefined]]);
+        }
+    }
+});
+
+test("openDevTools IPC forwards options through the docking helper", () => {
+    const source = fs.readFileSync(path.join(__dirname, "main.js"), "utf8");
+    const start = source.indexOf('case "openDevTools":');
+    const handler = source.slice(start, source.indexOf('case "toggleDevTools":', start));
+    for (const platform of ["win32", "linux", "darwin"]) {
+        const contents = createContents();
+        vm.runInNewContext(`switch ("openDevTools") { ${handler} }`, {
+            devToolsDock: {openDevTools}, event: {sender: contents}, process: {platform},
+            data: {mode: "detach", activate: false, title: "IPC DevTools"},
+        });
+        assert.deepEqual(contents.calls, [["open", {mode: "detach", activate: false, title: "IPC DevTools"}]]);
     }
 });
 

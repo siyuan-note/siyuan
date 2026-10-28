@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 //go:build fts5
 
@@ -32,6 +20,61 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCompleteContainerDOMUpdatePreservesFoldedContentOnce(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tree.Root.FirstChild != nil {
+		tree.Root.FirstChild.Unlink()
+	}
+	quote := &ast.Node{Type: ast.NodeBlockquote, ID: ast.NewNodeID()}
+	quote.SetIALAttr("id", quote.ID)
+	heading := newHeadingLevelTestNode(ast.NewNodeID(), 1)
+	heading.SetIALAttr("id", heading.ID)
+	treenode.SetSelfFolded(heading, true)
+	paragraph := treenode.NewParagraph(ast.NewNodeID())
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("hidden original")})
+	quote.AppendChild(heading)
+	quote.AppendChild(paragraph)
+	tree.Root.AppendChild(quote)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+	dom := strings.ReplaceAll(GetBlockDOM(quote.ID), "hidden original", "hidden edited")
+	if !strings.Contains(dom, "hidden edited") {
+		t.Fatal("complete DOM omitted hidden content")
+	}
+	if _, _, err = PerformBlockUpdates([]BlockUpdateInput{{ID: quote.ID, DataType: "dom", Data: dom}}); err != nil {
+		t.Fatal(err)
+	}
+	actual, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+	if err != nil {
+		t.Fatal(err)
+	}
+	counts := map[string]int{}
+	ast.Walk(actual.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() && n.Type != ast.NodeKramdownBlockIAL {
+			counts[n.ID]++
+		}
+		return ast.WalkContinue
+	})
+	for _, id := range []string{quote.ID, heading.ID, paragraph.ID} {
+		if counts[id] != 1 {
+			t.Fatalf("block %s persisted %d times", id, counts[id])
+		}
+	}
+	node := treenode.GetNodeInTree(actual, paragraph.ID)
+	if node == nil || node.FirstChild == nil || string(node.FirstChild.Tokens) != "hidden edited" {
+		t.Fatal("incoming hidden content was overwritten")
+	}
+}
 
 func TestCancelFoldedHeadingSuperBlockKeepsUndoBoundary(t *testing.T) {
 	const (

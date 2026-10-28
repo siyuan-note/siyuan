@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // 包 apicontract 定义 HTTP 接口的线协议，不依赖内核启动或持久化模型。
 package apicontract
 
@@ -314,7 +318,10 @@ var (
 	// 读取失败或扫描超时返回 code=-1、data=null；调用方应保留旧结果的时间标记，并允许用户重试。
 	GetWorkspaceStorage = define[EmptyRequest, WorkspaceStorageData]("getWorkspaceStorage", "/api/system/getWorkspaceStorage", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 	GetNetwork          = define[EmptyRequest, NetworkData]("getNetwork", "/api/system/getNetwork", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-	GetRuntimeInfo      = define[EmptyRequest, SystemRuntimeInfoData]("getRuntimeInfo", "/api/system/getRuntimeInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+	// 无需请求体，要求管理员权限并允许只读模式，返回 {text} 诊断摘要：内核版本、运行时、操作系统、
+	// 逻辑 CPU 数量、当前系统与进程内存，以及检测到的工作空间存储类型。
+	// 无法探测的内存或存储返回 unknown，不把移动端存储推断为 SSD；文本不含工作空间路径、主机名和账户标识。
+	GetRuntimeInfo = define[EmptyRequest, SystemRuntimeInfoData]("getRuntimeInfo", "/api/system/getRuntimeInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 	// 无需参数，要求管理员权限并允许只读模式，以当前内核进程身份诊断 data 目录的遍历。
 	// text 为 JSON Lines，比较标准库和原始目录项，不读取正文、不写入工作空间、不下载或解密资源。
 	// 首行包含思源版本、容器和移动端提供的系统版本，便于关联 Android/SDK 及具体内核版本。
@@ -436,6 +443,9 @@ var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/blo
 
 var TransferBlockRef = define[TransferBlockRefRequest, Null]("transferBlockRef", "/api/block/transferBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// refID 指定引用块，defID 指定定义块；includeChildren 控制标题或列表的子块范围。
+// originalToEmbed 省略或为 false 时在原定义位置保留引用，为 true 时替换为查询已移动定义 ID 的嵌入块。
+// 成功响应的 data 为 null；可撤销的编辑器操作使用 /api/transactions 的 swapBlockRef 动作。
 var SwapBlockRef = define[SwapBlockRefRequest, Null]("swapBlockRef", "/api/block/swapBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetBlockReminder = define[BlockReminderRequest, Null]("setBlockReminder", "/api/block/setBlockReminder", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -492,6 +502,9 @@ var BatchInsertBlock = define[BatchInsertBlockRequest, []*BlockTransaction]("bat
 
 var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock", "/api/block/updateBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 要求管理员身份，保留只读保护及加密笔记本请求租约；请求必须提供文档 id 和 notebook。
+// 保存历史后在一次可撤销事务中转换能够完整解析的旧 mindmap 列表，返回 converted 数量与文档脑图的
+// 权威 blocks（id、dom）。重复请求返回当前块内容而不重复转换，不完整的原文保持不变。
 var MigrateLegacyMindmaps = define[MigrateLegacyMindmapsRequest, MigrateLegacyMindmapsData]("migrateLegacyMindmaps", "/api/block/migrateLegacyMindmaps", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -589,6 +602,8 @@ var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/a
 var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "storage", Mode: SettingSilent}}, "POST")
 
+// 根据编辑器 mathDelimiterCompatibility 设置识别正文中的 \(...\) 和独占段落的 \[...\]，默认开启。
+// 保留表格和文字格式，跳过代码及已有公式；未闭合分隔符保留为正文。输出使用既有公式节点。
 var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
@@ -652,7 +667,7 @@ var ReadDirectory = define[ReadDirectoryRequest, []DirectoryEntry]("readDir", "/
 // 新移入的标题含 ASCII / 时必须声明 Spec >= 6，否则返回 -1 和 document title requires spec 6；不自动改写原始内容。
 var RenameFile = define[RenameFileRequest, Null]("renameFile", "/api/file/renameFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}}, "POST")
 
-// RemoveFile 保留既有敏感路径和加密边界检查；整本删除不读取已撤销的寻址模式记录。
+// RemoveFile 保留既有敏感路径和加密边界检查；整本删除时校验树内全部文档寻址记录。
 var RemoveFile = define[RemoveFileRequest, Null]("removeFile", "/api/file/removeFile", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 500}}, "POST")
 
 // GlobalCopyFiles 在创建目标目录及复制前预检整批规范路径和文档源；预检不兼容时返回 -1，不写入目标。
@@ -708,7 +723,7 @@ var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph
 
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "graph"}}, "POST")
 
-// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知，包装层不再补发。
+// 图谱查询需要与配置写入互斥；查询自带的配置由配置段发布负责通知。
 var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
 
 var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "graph", Mode: SettingSilent}}, "POST")
@@ -720,6 +735,9 @@ var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData](
 
 // sourceFilter.database 在父块合并前按来源块的数据库字段筛选，不修改原数据库视图。
 // 无条件仅筛数据库成员，失效字段不放宽结果；原来源筛选、排序及加密笔记本租约保持不变。
+// blockSort 为 0（默认）时保持正文顺序，1 按匹配引用的锚文本自然升序，2 为自然降序，其他值回退正文顺序。
+// 条目取首个匹配引用的锚文本并去除首尾空白；排序键相同时保持正文顺序，无锚文本的条目在两个方向均置后。
+// 来源文档内部把整篇文档条目展开为可独立排序的引用，恢复正文顺序时重新合并；排序模式参与上下文版本哈希。
 var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
@@ -734,6 +752,8 @@ var GetBacklinkDatabases = define[BacklinkDatabasesRequest, []*BacklinkDatabase]
 var GetGlobalBacklinks = define[GlobalBacklinkListRequest, GlobalBacklinkListData]("getGlobalBacklinks", "/api/ref/getGlobalBacklinks", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 数据库条件与列表快照一致，不修改来源数据或原数据库视图。
+// 必需的 snapshot 与最多 20 个属于该快照的块 ids 返回可独立编辑的块正文，保留面包屑和数据库引用信息。
+// 返回前重新检查来源权限并持有加密笔记本请求租约；发布阅读者不能读取加密笔记本。
 var GetGlobalBacklinkContexts = define[GlobalBacklinkContextRequest, GlobalBacklinkContextData]("getGlobalBacklinkContexts", "/api/ref/getGlobalBacklinkContexts", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var ContinueImportSY = define[ContinueImportSYRequest, ImportDocumentData]("continueImportSY", "/api/import/continueImportSY", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -744,6 +764,7 @@ var StartObsidianVaultAnalysis = define[ObsidianAnalysisRequest, *ObsidianVaultT
 
 var GetObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("getObsidianVaultTask", "/api/import/getObsidianVaultTask", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
+// Markdown 公式分隔符遵循编辑器 mathDelimiterCompatibility 设置，默认兼容 \(...\)、\[...\]。
 var StartObsidianVaultImport = define[ObsidianImportRequest, *ObsidianVaultTask]("startObsidianVaultImport", "/api/import/startObsidianVaultImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("cancelObsidianVaultTask", "/api/import/cancelObsidianVaultTask", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
@@ -751,6 +772,7 @@ var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("c
 // 标准脚注定义保存为独立列表项，正文引用转换为指向列表项的上标静态块引用。
 // 多段内容保留在同一列表项内；多次引用共享目标，标签匹配忽略大小写，重复定义引用第一个匹配项。
 // 未定义的脚注不生成块引用，代码和转义的脚注文本保持原样；反链复用块引用索引。
+// 根据编辑器 mathDelimiterCompatibility 设置兼容 \(...\)、\[...\]，默认开启；保存和导出仍使用既有公式格式。
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 旧 Data.zip 入口仍拒绝覆盖已有加密笔记本，也拒绝加密来源覆盖同 ID 的普通笔记本。
@@ -773,6 +795,7 @@ var CommitDataImport = define[CommitDataImportRequest, DataImportResult]("commit
 var CancelDataImport = define[DataImportRequest, Null]("cancelDataImport", "/api/import/cancelDataImport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。
+// 同样遵循编辑器 mathDelimiterCompatibility 设置，默认识别 \(...\)、\[...\]。
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 // `.sy.zip` 导入复用同名同内容的自定义表情。
@@ -951,6 +974,10 @@ var SetSyncLAN = define[SyncLANRequest, SyncLANStatus]("setSyncLAN", "/api/sync/
 var GetSyncLANStatus = define[EmptyRequest, SyncLANStatus]("getSyncLANStatus", "/api/sync/getSyncLANStatus", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SetSyncGenerateConflictDoc = define[SyncEnabledRequest, Null]("setSyncGenerateConflictDoc", "/api/sync/setSyncGenerateConflictDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncMode = define[SyncModeRequest, Null]("setSyncMode", "/api/sync/setSyncMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
+
+// completeAssets 为 true 时，在切换来源前从原提供商下载缺失的当前资源和历史快照内容；
+// 省略、null 与 false 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。
+// 确认后的操作通过全局进度遮罩显示检查与补齐阶段，成功或失败均关闭遮罩。
 var SetSyncProvider = define[SyncProviderRequest, Null]("setSyncProvider", "/api/sync/setSyncProvider", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncProviderS3 = define[SetSyncS3Request, SyncS3Data]("setSyncProviderS3", "/api/sync/setSyncProviderS3", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
@@ -1137,7 +1164,7 @@ var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetD
 // PlanDocCreate 只读编译有效创建目标，同一次计划使用相同时间，日期可指定为 YYYY-MM-DD。
 // contextID 是源笔记本内的文档，child 使用该位置，configured 使用配置目标；title 可显式替换最终标题。
 // 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
-// reuse 仅用于明确允许复用的业务。existingID 非空时不再创建；普通新建应保持 reuse=false。
+// reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
 // 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
 var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1167,11 +1194,22 @@ var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api
 // DuplicateDoc evaluates block collection rules for the new document and its blocks, initializing only new rows.
 var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
-// DuplicateDocTree evaluates block collection rules for every copied document and block, initializing only new rows.
+// 将单篇文档及全部子文档复制到同一笔记本的原父目录，返回副本根文档的 id、notebook、path 和 hPath。
+// 为副本文档和块执行块收集规则，仅初始化新行。
+// 副本内部块引用、块链接和查询嵌入的显式块 ID 统一重映射，数据库定义与行绑定保持为共享镜像。
+// 源快照经过认证读取且不执行修复写回；运行期失败时清理新建文档并恢复排序，属运行时补偿，
+// 不保证进程崩溃时的事务原子性。
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// CreateDailyNote 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。
+// 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
+// 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// GetDailyNoteInfo 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
+// 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
 var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
@@ -1342,7 +1380,7 @@ var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAsset
 
 // 扫描失败返回标准错误，不将失败表示为成功的空列表。
 // keyword 可省略、为 null 或空白；非空时按完整文件名进行不区分大小写的字面量包含匹配。
-// 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体及旧调用保留原有行为。
+// 完整未引用扫描后先筛选再截断，最多返回 512 项；空请求体按截断返回。
 // all 为 true 时返回完整清单且不发送截断提示，供前端在当前面板内过滤；省略、null 或 false 保留截断行为。
 // 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
 var GetUnusedAssets = define[UnusedAssetsRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", AuthenticatedAccess|AdminAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
@@ -1364,6 +1402,7 @@ var RemoveUnusedEncryptedBoxAssets = define[RemoveEncryptedBoxAssetsRequest, Ass
 var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // ResolveAssetPath 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
+// 请求持有加密笔记本租约直至响应序列化完成，外部编辑不写回加密源数据。
 var ResolveAssetPath = define[AssetPathRequest, string]("resolveAssetPath", "/api/asset/resolveAssetPath", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 上传提示生命周期使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，状态栏仍全局更新。
@@ -1540,7 +1579,7 @@ var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPaste
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-// true 表示创建后分屏打开，false 表示不打开，省略时保留旧行为（仅日历自动打开）。API 本身不触发界面操作。
+// true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
@@ -1579,6 +1618,10 @@ var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditor
 var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// 用固定的 TypeSafe System One 样例测试已保存的可选 ai.decision 配置，返回 {matched, msg?}。
+// 遵循全局人工智能禁用标记和请求取消，配置错误与供应商错误不会被转换为判断结果。
+// 省略决策配置时补齐默认关闭的配置，关闭后保留密钥，并沿用现有配置加密存储机制。
 var AITestDecisionModel = define[AIDecisionTestRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按提供商协议读取模型及上下文上限；gemini-interactions 使用原生模型清单并去除 models/ 前缀。
@@ -1650,6 +1693,13 @@ var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/ag
 var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSkill = define[AISkillNameRequest, Null]("removeSkill", "/api/ai/agent/removeSkill", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/agent/renameSkill", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 使用严格字符串字段，通过管理员和只读检查管理工作空间技能文件。相对路径标识实际目录，
+// 与文件头中的技能名称无关，允许普通的点开头名称。读写支持不超过 8 MiB 的 UTF-8 文本，
+// 不依赖扩展名并保留原文字节。目录和资源读取保留基于内容的版本；不支持编辑的内容省略 content，
+// 并增加可选的 readOnlyReason（binary、encoding 或 tooLarge）。
+// 修改已有文件时重新校验内容并要求当前版本，与旧技能修改接口和安装共享临界区，成功后通知同步。
+// 路径穿越、平台别名、链接、过期版本，以及单独修改不支持的内容或重命名、删除根 SKILL.md 均被拒绝。
 var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", AuthenticatedAccess|AdminAccess, StructJSONBody, aiEditorSSEOptions(), "POST")
@@ -1713,7 +1763,7 @@ var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnbo
 // 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
 var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3}, DataOnError: true}, "POST")
 
-// SystemExportConf 保持单个 JSON 文件的设置压缩包，不再附加已撤销的 documentAddressing 下界记录。
+// SystemExportConf 导出单个 JSON 文件的设置压缩包。
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -1798,6 +1848,10 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 字段失效或目标数据库被删除时，后续条目写入停用规则并保留配置，源修改仍提交；提交后提示失效引用。
 // 修复后需手动启用，撤销源修改不重新启用规则；锁定、认证失败、损坏及实际写入失败仍一起回滚。
 // 跨库动作限于同一加密边界，要求目标可访问；单笔事务最多执行 1000 个自动操作。
+// swapBlockRef 必须独立提交：id 指定引用块，blockID 指定定义块，data 携带 includeChildren 和 originalToEmbed，
+// retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
+// 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
+// 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
 var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

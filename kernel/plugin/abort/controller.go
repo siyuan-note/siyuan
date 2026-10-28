@@ -1,24 +1,14 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package abort
 
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
@@ -155,7 +145,7 @@ func newSignalConstructor(rt *goja.Runtime, prototype *goja.Object) (*goja.Objec
 
 // signalArrayOf 读取 AbortSignal.any() 的 signals 参数：接受数组，数组之外的可迭代对象未支持。
 func signalArrayOf(rt *goja.Runtime, value goja.Value) []*SignalState {
-	if !isJsArray(rt, value) {
+	if !gojaext.IsArray(rt, value) {
 		panic(rt.NewTypeError("signals must be an array of AbortSignal"))
 	}
 	object := value.ToObject(rt)
@@ -241,12 +231,12 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 			return goja.Undefined()
 		}
 		callback := call.Argument(1)
-		if !isJsValueNotNull(callback) {
+		if !gojaext.IsValueNotNull(callback) {
 			return goja.Undefined()
 		}
 
 		once := false
-		if options := call.Argument(2); isJsValueNotNull(options) {
+		if options := call.Argument(2); gojaext.IsValueNotNull(options) {
 			if optionsObj := options.ToObject(rt); optionsObj != nil {
 				if value := dictMember(optionsObj, "once"); value != nil {
 					once = value.ToBoolean()
@@ -287,7 +277,7 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 	if err := prototype.Set("dispatchEvent", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		s := self(call, "dispatchEvent")
 		eventType := ""
-		if event := call.Argument(0); isJsValueNotNull(event) {
+		if event := call.Argument(0); gojaext.IsValueNotNull(event) {
 			if eventObj := event.ToObject(rt); eventObj != nil {
 				if value := dictMember(eventObj, "type"); value != nil {
 					eventType = value.String()

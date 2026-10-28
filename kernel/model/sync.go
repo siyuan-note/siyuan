@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -262,8 +250,8 @@ func finishBootSync(revision uint64, cloudPublished bool, err error) {
 	}
 }
 
-func SyncData(byHand bool) {
-	syncData(false, byHand)
+func SyncData(byHand bool) error {
+	return syncData(false, byHand)
 }
 
 // SyncDataBeforeEnableEncryptedNotebook 在启用加密笔记本前执行一次完整同步。
@@ -333,6 +321,9 @@ func syncData(exit, byHand bool) (err error) {
 	defer logging.Recover()
 
 	if !checkSync(false, exit, byHand) {
+		if byHand {
+			return err
+		}
 		return nil
 	}
 
@@ -344,6 +335,9 @@ func syncData(exit, byHand bool) (err error) {
 	}
 	unlock, ok := lockSyncRequest(requests)
 	if !ok {
+		if byHand {
+			return err
+		}
 		return nil
 	}
 	defer unlock()

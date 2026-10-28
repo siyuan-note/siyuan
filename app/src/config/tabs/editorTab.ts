@@ -67,6 +67,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,
     });
+    group.switch("editor.mathDelimiterCompatibility", {
+        title: window.siyuan.languages.mathDelimiterCompatibility,
+        desc: window.siyuan.languages.mathDelimiterCompatibilityTip,
+    });
     group.switch("editor.keepLoadedContent", {
         title: window.siyuan.languages.keepLazyLoad,
         desc: window.siyuan.languages.keepLazyLoadTip,
@@ -291,6 +295,15 @@ const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
         desc: window.siyuan.languages.databaseAttrUseTabsTip,
+    });
+    group.select("editor.databaseAttrLayout", {
+        title: window.siyuan.languages.databaseAttrLayout,
+        desc: window.siyuan.languages.databaseAttrLayoutTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.databaseAttrLayoutSingle},
+            {value: 1, label: window.siyuan.languages.databaseAttrLayoutRow},
+            {value: 2, label: window.siyuan.languages.databaseAttrLayoutColumn},
+        ],
     });
 };
 

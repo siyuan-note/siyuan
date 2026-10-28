@@ -1,20 +1,3 @@
-/**
- * Copyright (C) 2023 SiYuan Community
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 declare namespace Config {
 
     /**
@@ -705,6 +688,8 @@ declare namespace Config {
          * Whether to use tabs for database attributes
          */
         databaseAttrUseTabs: boolean;
+        /** 数据库字段布局：0 单栏，1 双栏按行（默认），2 双栏按列，空间不足时使用单栏 */
+        databaseAttrLayout: number;
         /**
          * Whether to retain dynamically loaded content blocks
          */
@@ -822,6 +807,8 @@ declare namespace Config {
          * Whether to auto-convert pasted URLs to links
          */
         pasteURLAutoConvert: boolean;
+        /** Recognize alternate LaTeX math delimiters in pasted and imported content; defaults to true */
+        mathDelimiterCompatibility: boolean;
         /**
          * Whether to embed dragged HTML files as IFrame blocks
          */

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -320,10 +308,6 @@ func GetQueryEmbedStatement(embedBlockID string) (stmt, boxID string, err error)
 	return
 }
 
-func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, "")
-}
-
 // SearchEmbedBlockInBox 与 SearchEmbedBlock 一致，但按 boxID 路由 SQL 到加密 content db。
 // 加密笔记本的嵌入块查询走独立加密库（全局 siyuan.db 不含加密数据），boxID 为空时落回全局库。
 func SearchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string) (ret []*EmbedBlock) {
@@ -600,10 +584,6 @@ func filterSelfHPath(blocks []*Block) {
 	}
 }
 
-func trimSelfHPath(hPath string) string {
-	return trimDocumentTitleHPath(hPath, "")
-}
-
 func trimDocumentTitleHPath(hPath, title string) string {
 	inTag := false
 	var separators []int
@@ -797,6 +777,11 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				}
 			}
 		} else {
+			finishRich, richErr := treenode.MaterializeTableCellRich(node)
+			if richErr != nil {
+				return richErr
+			}
+			finishTitles := treenode.MaterializeInlineTitles(node)
 			var unlinks []*ast.Node
 			skipReplaceNodes := map[*ast.Node]struct{}{}
 			if replaceTypes["text"] {
@@ -1073,6 +1058,10 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 
 			for _, unlink := range unlinks {
 				unlink.Unlink()
+			}
+			finishTitles()
+			if err = finishRich(); err != nil {
+				return err
 			}
 		}
 
@@ -3351,10 +3340,6 @@ func fromSQLBlockWithHPathTermsContext(ctx context.Context, sqlBlock *sql.Block,
 	return
 }
 
-func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
-	markBlockHPathContext(context.Background(), block, hPath, terms, beforeLen)
-}
-
 func markBlockHPathContext(ctx context.Context, block *Block, hPath, terms string, beforeLen int) {
 	hPath, _ = markSearchContext(ctx, hPath, terms, beforeLen, false)
 	if !strings.HasPrefix(hPath, "/") {
@@ -3425,46 +3410,35 @@ func fieldRegexp(regexp string) string {
 	return buf.String()
 }
 
-func columnFilter() string {
+// searchColumns 返回参与全文检索的列，顺序固定。MATCH 过滤与 || 拼接共用本函数，
+// 新增可检索列时只改这一处。
+func searchColumns() []string {
 	confSearchSnapshot := Conf.LoadSearch()
 
-	buf := bytes.Buffer{}
-	buf.WriteString("{content")
+	columns := []string{"content"}
 	if confSearchSnapshot.Name {
-		buf.WriteString(" name")
+		columns = append(columns, "name")
 	}
 	if confSearchSnapshot.Alias {
-		buf.WriteString(" alias")
+		columns = append(columns, "alias")
 	}
 	if confSearchSnapshot.Memo {
-		buf.WriteString(" memo")
+		columns = append(columns, "memo")
 	}
 	if confSearchSnapshot.IAL {
-		buf.WriteString(" ial")
+		columns = append(columns, "ial")
 	}
-	buf.WriteString(" tag}")
-	return buf.String()
+	return append(columns, "tag")
 }
 
-func columnConcat() string {
-	confSearchSnapshot := Conf.LoadSearch()
+// columnFilter 把 searchColumns 渲染为 FTS5 MATCH 的列过滤表达式，如 {content name tag}。
+func columnFilter() string {
+	return "{" + strings.Join(searchColumns(), " ") + "}"
+}
 
-	buf := bytes.Buffer{}
-	buf.WriteString("content")
-	if confSearchSnapshot.Name {
-		buf.WriteString("||name")
-	}
-	if confSearchSnapshot.Alias {
-		buf.WriteString("||alias")
-	}
-	if confSearchSnapshot.Memo {
-		buf.WriteString("||memo")
-	}
-	if confSearchSnapshot.IAL {
-		buf.WriteString("||ial")
-	}
-	buf.WriteString("||tag")
-	return buf.String()
+// columnConcat 把 searchColumns 渲染为 FTS5 || 拼接表达式，如 content||name||tag。
+func columnConcat() string {
+	return strings.Join(searchColumns(), "||")
 }
 
 func buildKeywordSearchQueries(query string) (ftsQuery, hPathQuery string) {

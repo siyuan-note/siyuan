@@ -1,24 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
 import (
 	"github.com/dop251/goja"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // setKeyMethods 在 subtle 上设置密钥管理相关的方法。
@@ -210,7 +199,7 @@ func (h *cryptoHost) setKeyMethods(rt *goja.Runtime, subtle *goja.Object) error 
 func (h *cryptoHost) keyDataOf(rt *goja.Runtime, format crypto.KeyFormat, value goja.Value) (
 	data crypto.KeyData, err error) {
 	if format == crypto.FormatJWK {
-		if !isJsValueNotNull(value) {
+		if !gojaext.IsValueNotNull(value) {
 			err = crypto.NewError(crypto.ErrNameType, "keyData must be a JsonWebKey object")
 			return
 		}
@@ -237,7 +226,7 @@ func (h *cryptoHost) keyDataOf(rt *goja.Runtime, format crypto.KeyFormat, value 
 
 // optionalLengthOf 解析 deriveBits 的 length 参数，null 与 undefined 表示未指定。
 func optionalLengthOf(value goja.Value) (*int, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, nil
 	}
 

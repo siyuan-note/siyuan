@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 type SettingSnpt struct {
@@ -273,23 +277,30 @@ type SettingEditor struct {
 	HashTagSearch       *bool    `json:"hashTagSearch" api:"optional,nullable"`
 	OnlySearchForDoc    bool     `json:"onlySearchForDoc" api:"optional,nullable"`
 	// AutoCloseRefBrackets 默认关闭；启用后输入 [[ 自动补全 ]]，输入 ]] 时引用同名文档、日记或新建文档。
-	AutoCloseRefBrackets    bool             `json:"autoCloseRefBrackets" api:"optional,nullable"`
-	BacklinkExpandCount     int              `json:"backlinkExpandCount" api:"optional,nullable"`
-	BackmentionExpandCount  int              `json:"backmentionExpandCount" api:"optional,nullable"`
-	BacklinkMentionExclude  string           `json:"backlinkMentionExclude" api:"optional,nullable"`
-	BacklinkContainChildren bool             `json:"backlinkContainChildren" api:"optional,nullable"`
-	BacklinkHideReference   bool             `json:"backlinkHideReference" api:"optional,nullable"`
-	BacklinkShowBottom      bool             `json:"backlinkShowBottom" api:"optional,nullable"`
-	BacklinkSort            *int             `json:"backlinkSort" api:"optional,nullable"`
-	BacklinkGlobalSort      int              `json:"backlinkGlobalSort" api:"optional,nullable"`
-	BacklinkBlockSort       int              `json:"backlinkBlockSort" api:"optional,nullable"`
-	BackmentionSort         *int             `json:"backmentionSort" api:"optional,nullable"`
-	HeadingNumber           bool             `json:"headingNumber" api:"optional,nullable"`
-	HeadingNumberFormat     string           `json:"headingNumberFormat" api:"optional,nullable"`
-	HeadingEmbedMode        int              `json:"headingEmbedMode" api:"optional,nullable"`
-	PasteURLAutoConvert     bool             `json:"pasteURLAutoConvert" api:"optional,nullable"`
-	DragHTMLFileToIframe    bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
-	Markdown                *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+	AutoCloseRefBrackets    bool   `json:"autoCloseRefBrackets" api:"optional,nullable"`
+	BacklinkExpandCount     int    `json:"backlinkExpandCount" api:"optional,nullable"`
+	BackmentionExpandCount  int    `json:"backmentionExpandCount" api:"optional,nullable"`
+	BacklinkMentionExclude  string `json:"backlinkMentionExclude" api:"optional,nullable"`
+	BacklinkContainChildren bool   `json:"backlinkContainChildren" api:"optional,nullable"`
+	BacklinkHideReference   bool   `json:"backlinkHideReference" api:"optional,nullable"`
+	BacklinkShowBottom      bool   `json:"backlinkShowBottom" api:"optional,nullable"`
+	BacklinkSort            *int   `json:"backlinkSort" api:"optional,nullable"`
+	BacklinkGlobalSort      int    `json:"backlinkGlobalSort" api:"optional,nullable"`
+	BacklinkBlockSort       int    `json:"backlinkBlockSort" api:"optional,nullable"`
+	BackmentionSort         *int   `json:"backmentionSort" api:"optional,nullable"`
+	HeadingNumber           bool   `json:"headingNumber" api:"optional,nullable"`
+	HeadingNumberFormat     string `json:"headingNumberFormat" api:"optional,nullable"`
+	HeadingEmbedMode        int    `json:"headingEmbedMode" api:"optional,nullable"`
+	PasteURLAutoConvert     bool   `json:"pasteURLAutoConvert" api:"optional,nullable"`
+	// MathDelimiterCompatibility defaults to true, including existing configurations without this field.
+	// Only pasted HTML/Markdown and imported Markdown recognize \(...\) and \[...\]; editing and exports retain the existing syntax.
+	MathDelimiterCompatibility *bool            `json:"mathDelimiterCompatibility" api:"optional,nullable"`
+	DragHTMLFileToIframe       bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
+	Markdown                   *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+
+	// 文档顶部与独立条目面板的字段布局：0 单栏，1 双栏按行（默认），2 双栏按列；空间不足时使用单栏。
+	// 省略保留当前值，null 或越界整数恢复默认，按列时按可见字段数量均分，奇数时左栏多一个。
+	DatabaseAttrLayout *int `json:"databaseAttrLayout" api:"optional,nullable"`
 }
 
 type SettingEditorFont struct {

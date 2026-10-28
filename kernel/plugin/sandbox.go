@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
@@ -40,6 +28,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
 	"github.com/siyuan-note/siyuan/kernel/plugin/encoding"
 	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 )
 
@@ -175,26 +164,10 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectSecretsVars(p, rt, siyuan))
 	lo.Must0(injectCrypto(p, rt))
 
-	lo.Must0(ObjectFreeze(rt, siyuan))
+	lo.Must0(gojaext.Freeze(rt, siyuan))
 
 	lo.Must0(rt.GlobalObject().Set("siyuan", siyuan))
 	return
-}
-
-// ObjectFreeze calls Object.freeze() on the given goja object.
-func ObjectFreeze(rt *goja.Runtime, obj *goja.Object) error {
-	Object := rt.GlobalObject().Get("Object").ToObject(rt)
-	if Object == nil {
-		return fmt.Errorf("globalThis.Object is not an object")
-	}
-
-	freeze, ok := goja.AssertFunction(Object.Get("freeze"))
-	if !ok {
-		return fmt.Errorf("globalThis.Object.freeze is not a function")
-	}
-
-	_, err := freeze(Object, obj)
-	return err
 }
 
 // ObjectSeal calls Object.seal() on the given goja object.
@@ -568,44 +541,6 @@ func isGoPromise(goValue any) bool {
 	return ok
 }
 
-// isJsArray checks if a goja.Value is a JavaScript Array.
-func isJsArray(rt *goja.Runtime, jsValue goja.Value) bool {
-	if jsValue == nil {
-		return false
-	}
-
-	if goja.IsUndefined(jsValue) || goja.IsNull(jsValue) {
-		return false
-	}
-
-	jsObject := jsValue.ToObject(rt)
-	return isJsObjectArray(jsObject)
-}
-
-// isJsObjectArray checks if a goja.Object is a JavaScript Array by inspecting its class name.
-func isJsObjectArray(jsObject *goja.Object) bool {
-	if jsObject == nil {
-		return false
-	}
-
-	switch jsObject.ClassName() {
-	case "Array":
-		return true
-	default:
-		return false
-	}
-}
-
-// isJsValueNotUndefined checks if a goja.Value is not nil and not undefined.
-func isJsValueNotUndefined(jsValue goja.Value) bool {
-	return jsValue != nil && !goja.IsUndefined(jsValue)
-}
-
-// isJsValueNotNull checks if a goja.Value is not nil, undefined or null.
-func isJsValueNotNull(jsValue goja.Value) bool {
-	return isJsValueNotUndefined(jsValue) && !goja.IsNull(jsValue)
-}
-
 // jsValueToBytes attempts to convert a goja.Value to a byte slice, supporting string, Buffer, ArrayBuffer, etc.
 func jsValueToBytes(rt *goja.Runtime, value goja.Value) (data []byte, err error) {
 	if goValue := value.Export(); goValue != nil {
@@ -644,7 +579,7 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 
 	// Get handler: siyuan.server[scope][requestType].handler
 	handlerValue := handlerObj.Get("handler")
-	if !isJsValueNotNull(handlerValue) {
+	if !gojaext.IsValueNotNull(handlerValue) {
 		err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, requestType)
 		return
 	}

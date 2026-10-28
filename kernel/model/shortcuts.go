@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -56,11 +44,6 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 		return
 	}
 	defer ReleaseEncryptedBoxOperation(boxID)
-	if recovered, recoveryErr := recoverLocalShorthandCreation(boxID); recoveryErr != nil {
-		return nil, recoveryErr
-	} else if recovered != "" {
-		retIDs = append(retIDs, recovered)
-	}
 	entries, err := os.ReadDir(shorthandsDir)
 	if err != nil {
 		return retIDs, err
@@ -72,7 +55,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 			assetsEntries, readErr := os.ReadDir(filepath.Join(shorthandsDir, entry.Name()))
 			if nil != readErr {
 				logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, readErr)
-				continue
+				return retIDs, readErr
 			}
 			for _, assetEntry := range assetsEntries {
 				if assetEntry.IsDir() {
@@ -83,10 +66,17 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				assetWritePath := filepath.Join(assetsDir, assetEntry.Name())
 				if renameErr := os.Rename(p, assetWritePath); nil != renameErr {
 					logging.LogErrorf("rename file [%s] to [%s] failed: %s", p, assetWritePath, renameErr)
-					continue
+					return retIDs, renameErr
 				}
 			}
 		}
+	}
+
+	// Complete attachment migration before creating content or consuming a recovered source.
+	if recovered, recoveryErr := recoverLocalShorthandCreation(boxID); recoveryErr != nil {
+		return nil, recoveryErr
+	} else if recovered != "" {
+		retIDs = append(retIDs, recovered)
 	}
 
 	hPath := Conf.FileTree.Load().ShorthandSavePath

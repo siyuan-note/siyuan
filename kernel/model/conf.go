@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -587,7 +575,7 @@ func InitConf() {
 	}
 
 	// CLI 子命令通过 --log-level 显式指定日志级别时（util.CLILogLevel 非空），优先使用命令行级别，
-	// 不再用 conf.json 的 system.logLevel 覆盖，使命令行参数在初始化早期即生效。
+	// 使命令行参数在初始化早期即生效。
 	if "" == util.CLILogLevel {
 		logging.SetLogLevel(Conf.LogLevel)
 	}

@@ -38,7 +38,8 @@ export const updateMobileTopBarLayout = () => {
         return;
     }
 
-    const breadcrumbSpace = editorElement.querySelector<HTMLElement>(".protyle-breadcrumb__space");
+    const breadcrumbSpace = editorElement.querySelector<HTMLElement>(".protyle-breadcrumb__space") ||
+        document.querySelector<HTMLElement>(".protyle-breadcrumb--fullscreen .protyle-breadcrumb__space");
     const merged = isMobileLandscape() &&
         !editorElement.classList.contains("fn__none") && Boolean(breadcrumbSpace);
     const targetElement = merged ? breadcrumbSpace : topBarElement;

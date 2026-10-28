@@ -90,8 +90,7 @@ export class Undo implements IUndo {
         countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element), protyle, true);
     }
 
-    // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。
-    // 保留签名以兼容 transaction.ts 的调用点。
+    // add 只置位本地镜像并刷新按钮态，栈由 kernel 在 commit 后记录；签名仍被 transaction.ts 调用。
     public add(doOperations: IOperation[], undoOperations: IOperation[], protyle: IProtyle) {
         const rootID = getUndoRootID(protyle);
         this.lastHistoryRootID = rootID;

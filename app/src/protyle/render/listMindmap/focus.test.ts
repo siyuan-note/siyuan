@@ -9,8 +9,8 @@ const source = createSourceFile("index.ts", readFileSync("src/protyle/render/lis
 const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
 const methods = controller.members.filter(item => item.name &&
-    ["add", "change", "undo", "focusNode", "edit", "refreshUndoState", "bindUndoState"].includes(item.name.getText(source)));
-assert.equal(methods.length, 7);
+    ["add", "deleteNode", "change", "undo", "focusNode", "edit"].includes(item.name.getText(source)));
+assert.equal(methods.length, 6);
 let editorUndo = "";
 const visit = (item: import("typescript").Node) => {
     if (isPropertyAssignment(item) && item.name.getText(source) === "onUndo" &&
@@ -29,45 +29,15 @@ class Controller {
 globalThis.Controller = Controller;
 globalThis.isUndoViewportPreserved = isUndoViewportPreserved;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-test("canvas history follows embedded source documents, local stacks, busy state and subscription lifetime", () => {
-    const listeners = new Map<string, () => void>();
-    const states: unknown[] = [];
-    let editable = true;
-    let embedded = true;
-    const root = {undoPending: false};
-    const owner = {block: {rootID: "document"}, lite: false, undo: {undoStack: [] as unknown[], redoStack: [] as unknown[]}};
-    const context: any = {roots: new WeakMap([[owner, root]]), canEdit: () => editable,
-        getUndoStateSnapshot: (id: string) => ({canUndo: id === "source", canRedo: false, pending: false}),
-        hasUndoStateMirror: () => true,
-        subscribeUndoState: (id: string, listener: () => void) => {
-            listeners.set(id, listener); listener();
-            return () => listeners.delete(id);
-        }};
-    runInNewContext(compiled, context);
-    const target = Object.assign(new context.Controller(), {owner,
-        list: {closest: () => embedded ? {dataset: {rootId: "source"}} : null},
-        view: {setUndoState: (state: unknown) => states.push(JSON.parse(JSON.stringify(state)))}});
-    target.bindUndoState();
-    assert.deepEqual([...listeners.keys()], ["source"]);
-    assert.deepEqual(states.at(-1), {canUndo: true, canRedo: false, pending: false});
-    root.undoPending = true; listeners.get("source")();
-    assert.deepEqual(states.at(-1), {canUndo: true, canRedo: false, pending: true});
-    root.undoPending = false; embedded = false; target.bindUndoState();
-    assert.deepEqual([...listeners.keys()], ["document"]);
-    assert.deepEqual(states.at(-1), {canUndo: false, canRedo: false, pending: false});
-    owner.lite = true; owner.undo.redoStack.push({}); target.refreshUndoState();
-    assert.deepEqual(states.at(-1), {canUndo: false, canRedo: true, pending: false});
-    editable = false; target.bindUndoState();
-    assert.equal(listeners.size, 0);
-});
-
-test("new mind map nodes become selected before editing", async () => {
+test("explicit mind map additions stay selected while clipboard additions still open the editor", async () => {
     const steps: string[] = [];
-    const item = {dataset: {nodeId: "new"}, classList: {replace: () => {}}};
+    const item = {dataset: {nodeId: "new"}, classList: {replace: () => {}}, outerHTML: "new node"};
+    const clipboard = {textPlain: "Pasted content"};
     const context: any = {
         canEdit: () => true,
         genListItemElement: () => item,
         addListMindmapNode: () => true,
+        cleanListMindmapHTML: (html: string) => html,
     };
     runInNewContext(compiled, context);
     const target = new context.Controller();
@@ -78,10 +48,82 @@ test("new mind map nodes become selected before editing", async () => {
         view: {focusNode: (id: string) => steps.push(`focus:${id}`),
             getContentHost: () => ({}),
         },
-        edit: async (id: string) => { steps.push(`edit:${id}`); },
+        edit: async (id: string, _host: unknown, replace: unknown, data: unknown) => {
+            assert.equal(replace, undefined);
+            assert.equal(data, clipboard);
+            steps.push(`edit:${id}`);
+        },
     });
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        target.list.dataset.type = type;
+        for (const kind of ["child", "sibling"]) {
+            steps.length = 0;
+            await target.add("root", kind);
+            assert.deepEqual(steps, ["focus:new"], `${type} ${kind} keeps node selection without opening the editor`);
+            steps.length = 0;
+            await target.add("root", kind, clipboard);
+            assert.deepEqual(steps, ["focus:new", "edit:new"], `${type} ${kind} imports clipboard content through the editor`);
+        }
+    }
+    target.change = async () => false;
+    steps.length = 0;
     await target.add("root", "child");
-    assert.deepEqual(steps, ["focus:new", "edit:new"]);
+    await target.add("root", "sibling", clipboard);
+    assert.deepEqual(steps, [], "failed additions neither move focus nor open the editor");
+});
+
+test("canceling new nodes restores their origin without overriding changed content, failed deletes or newer selection", async () => {
+    for (const scenario of ["new", "changed", "replaced", "missing origin", "ordinary", "failed", "newer selection"]) {
+        const original = {outerHTML: "new node"};
+        const element = scenario === "replaced" ? {...original} : original;
+        if (scenario === "changed") {
+            element.outerHTML = "changed content";
+        }
+        const nodes = new Map([["new", {element}], ["origin", {}], ["other", {}]]);
+        if (scenario === "missing origin") {
+            nodes.delete("origin");
+        }
+        let selected: string = "new";
+        let focusID: string;
+        const origins = new WeakMap();
+        if (scenario !== "ordinary") {
+            origins.set(original, {id: "origin", html: "new node"});
+        }
+        const context: any = {cleanListMindmapHTML: (html: string) => html,
+            deleteListMindmapNode: (_list: unknown, id: string) => scenario !== "failed" && nodes.delete(id)};
+        runInNewContext(compiled, context);
+        const target = Object.assign(new context.Controller(), {
+            list: {contains: (node: unknown) => node === element}, model: {nodes}, newNodeOrigins: origins,
+            view: {getSelectedId: () => selected, focusNode: (id: string) => { selected = id; }},
+            change: async (action: () => boolean, _editing: boolean, nextID: string) => {
+                focusID = nextID;
+                const changed = action();
+                if (changed) {
+                    selected = scenario === "newer selection" ? "other" : undefined;
+                }
+                return changed;
+            },
+        });
+        assert.equal(await target.deleteNode("new"), scenario !== "failed", scenario);
+        const special = ["new", "failed", "newer selection"].includes(scenario);
+        assert.equal(focusID, special ? "origin" : undefined, `${scenario}: transaction uses the same destination`);
+        assert.equal(selected, scenario === "new" ? "origin" : scenario === "failed" ? "new" :
+            scenario === "newer selection" ? "other" : undefined, `${scenario}: focus follows the current interaction`);
+        assert.equal(origins.has(element), scenario === "failed", `${scenario}: successful deletion clears creation state`);
+    }
+});
+
+test("entering a new node editor permanently cancels its creation-origin shortcut", async () => {
+    const element = {};
+    const origins = new WeakMap([[element, {id: "origin", html: "new node"}]]);
+    const context: any = {roots: new WeakMap(), canEdit: () => true, openListMindmapEditor: () => ({})};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {
+        owner: {}, list: {closest: (): null => null}, model: {nodes: new Map([["new", {element}]])},
+        newNodeOrigins: origins, view: {setEditing: () => {}}, editRequest: 0,
+    });
+    await target.edit("new", {isConnected: true});
+    assert.equal(origins.has(element), false, "even an editor closed without text changes counts as entering editing");
 });
 
 test("canvas undo and redo preserve the viewport throughout replay and release it on errors", async () => {

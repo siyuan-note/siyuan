@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package sql
 
@@ -128,21 +116,6 @@ func GetBlocksInBoxContext(ctx context.Context, ids []string, boxID string) (ret
 	}
 	for _, id := range ids {
 		ret = append(ret, cached[id])
-	}
-	return
-}
-
-// GetRefTextInBox 按 defBlockID 在指定 box 的 db 里查引用文本。
-func GetRefTextInBox(defBlockID, boxID string) (ret string) {
-	row := queryRowForBox(boxID, "SELECT content FROM blocks WHERE id = ?", defBlockID)
-	if row == nil {
-		return
-	}
-	if err := row.Scan(&ret); err != nil {
-		if err != sql.ErrNoRows {
-			logging.LogErrorf("sql query failed: %s", err)
-		}
-		ret = ""
 	}
 	return
 }
@@ -445,7 +418,7 @@ func SelectBlocksRawStmtArgsInBoxContext(ctx context.Context, stmt string, args 
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}
@@ -483,12 +456,6 @@ func SelectBlocksRegexInBox(stmt string, exp *regexp.Regexp, name, alias, memo, 
 			}
 		}
 	}
-	return
-}
-
-// SelectBlocksRegexArgsInBox 与 SelectBlocksRegexInBox 一致，但通过绑定参数执行。
-func SelectBlocksRegexArgsInBox(stmt string, exp *regexp.Regexp, name, alias, memo, ial bool, page, pageSize int, boxID string, args ...any) (ret []*Block) {
-	ret, _ = SelectBlocksRegexArgsInBoxContext(context.Background(), stmt, exp, name, alias, memo, ial, page, pageSize, boxID, args...)
 	return
 }
 
@@ -768,7 +735,7 @@ func SelectBlocksRawStmtNoParseInBox(stmt string, limit int, boxID string) (ret 
 			errCount++
 		}
 
-		if (noLimit && limit < count) || 0 < errCount {
+		if (noLimit && count >= limit) || 0 < errCount {
 			break
 		}
 	}
@@ -896,7 +863,7 @@ func queryRawStmtForBox(boxID, stmt string, limit int) (ret []map[string]any, er
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -942,7 +909,7 @@ func queryRawStmtArgsForBoxContext(ctx context.Context, boxID, stmt string, args
 		}
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}
@@ -987,7 +954,7 @@ func queryRawStmtArgsForBox(boxID, stmt string, args []any, limit int) (ret []ma
 
 		ret = append(ret, m)
 		count++
-		if noLimit && limit < count {
+		if noLimit && count >= limit {
 			break
 		}
 	}

@@ -241,6 +241,19 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         }}},
     } as unknown as typeof window.siyuan;
 
+    const documentHistoryEditor = create();
+    const documentHistory = document.createElement("div");
+    documentHistory.className = "protyle-breadcrumb__history";
+    const undoButton = document.createElement("button");
+    documentHistory.append(undoButton); document.body.append(documentHistory);
+    undoButton.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await settle();
+    check.equal(documentHistoryEditor.state.finished, 0,
+        "document history controls preserve the node editor until the explicit save gate runs");
+    check.equal(await documentHistoryEditor.editor.finish(), true);
+    check.equal(documentHistoryEditor.state.finished, 1);
+    documentHistory.remove(); await documentHistoryEditor.remove();
+
     // 普通段落与软键盘回车走同一节点拆分路径；保留富文本、后续块和原生编辑边界。
     const listParagraph = '<div data-type="NodeParagraph" data-node-id="paragraph"><div contenteditable="true"><span data-type="strong">AlphaBeta</span></div></div>';
     for (const softKeyboard of [false, true]) {

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261025114801"
+		"updated": "20261028111611"
 	},
 	"Children": [
 		{
@@ -2052,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2168,7 +2168,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-f51bzy4",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2189,6 +2189,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. Click the map on desktop or tap it once on mobile to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes."
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-1147a49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-1147a49",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, use Undo and Redo in the document breadcrumb bar, even when the keyboard is closed or a mind map is full screen. These actions use the document history and can also undo changes outside the mind map. The buttons are hidden when both histories are empty or the document is read-only."
 				}
 			]
 		},
@@ -3003,7 +3017,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xo714c2",
-				"updated": "20261024161816"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
@@ -3078,12 +3092,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-2f033n1",
-				"updated": "20261012014859"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+					"Data": "Double-click the summary text to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
 				}
 			]
 		},
@@ -5335,6 +5349,97 @@
 				{
 					"Type": "NodeText",
 					"Data": "Mathematical formula"
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-6hnjkr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-6hnjkr0",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When pasting or importing Markdown, SiYuan recognizes "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\(...\\)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as inline math and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\[...\\]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in a separate paragraph as block math by default. Pasted HTML supports the same delimiters. Code is preserved, and Markdown exports continue to use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-neji60s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-neji60s",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can disable this in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with “Recognize LaTeX math delimiters when pasting and importing”. Disabling it affects subsequent pastes and imports; formulas already converted remain unchanged."
 				}
 			]
 		},

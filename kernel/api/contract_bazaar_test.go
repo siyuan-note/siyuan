@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -9,8 +13,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"maps"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -24,1653 +26,723 @@ func TestBazaarContractInputCompatibility(t *testing.T) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
+			if !legacyParseArgs(arg, ret, legacyBind("frontend", &frontend, true, true)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/batchUpdatePackage", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/batchUpdatePackage", `{"frontend":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.BatchUpdatePackage.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getUpdatedPackage", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
+			if !legacyParseArgs(arg, ret, legacyBind("frontend", &frontend, true, true)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getUpdatedPackage", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getUpdatedPackage", `{"frontend":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetUpdatedPackage.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("updateBazaarPackage", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType, packageName, frontend, keyword string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageName", &packageName, true, true),
-				util.BindJsonArg("frontend", &frontend, true, true),
-				util.BindJsonArg("keyword", &keyword, false, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageName", &packageName, true, true),
+				legacyBind("frontend", &frontend, true, true),
+				legacyBind("keyword", &keyword, false, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageName":" valid ","frontend":" valid ","keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageName":" valid ","frontend":" valid ","keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/updateBazaarPackage", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/updateBazaarPackage", `{"packageType":"plugins","packageName":" valid ","frontend":" valid ","keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UpdateBazaarPackage.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledPackageSize", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledPackageSize", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledPackageSize", `{"packageType":"plugins","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledPackageSize.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPackage", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType, packageName, frontend string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageName", &packageName, true, true),
-				util.BindJsonArg("frontend", &frontend, false, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageName", &packageName, true, true),
+				legacyBind("frontend", &frontend, false, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageName":" valid ","frontend":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageName":" valid ","frontend":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPackage", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPackage", `{"packageType":"plugins","packageName":" valid ","frontend":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPackage.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPackageRatings", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType string
 			var packageNamesArg []any
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageNames", &packageNamesArg, true, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageNames", &packageNamesArg, true, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageNames":[]}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageNames":[]}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPackageRatings", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPackageRatings", `{"packageType":"plugins","packageNames":[]}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPackageRatings.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPackageUserRatings", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType string
 			var packageNamesArg []any
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageNames", &packageNamesArg, true, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageNames", &packageNamesArg, true, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageNames":[]}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageNames":[]}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPackageUserRatings", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPackageUserRatings", `{"packageType":"plugins","packageNames":[]}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPackageUserRatings.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPackageRating", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPackageRating", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPackageRating", `{"packageType":"plugins","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPackageRating.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("setBazaarPackageRating", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var pkgType, packageName string
 			var ratingArg float64
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("packageType", &pkgType, true, true),
-				util.BindJsonArg("packageName", &packageName, true, true),
-				util.BindJsonArg("rating", &ratingArg, true, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("packageType", &pkgType, true, true),
+				legacyBind("packageName", &packageName, true, true),
+				legacyBind("rating", &ratingArg, true, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"packageType":"plugins","packageName":" valid ","rating":3}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"packageType":"plugins","packageName":" valid ","rating":3}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/setBazaarPackageRating", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/setBazaarPackageRating", `{"packageType":"plugins","packageName":" valid ","rating":3}`, legacy, func(body []byte) error {
 			_, err := apicontract.SetBazaarPackageRating.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPackageREADME", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var repoURL, repoHash, pkgType string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("packageType", &pkgType, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("packageType", &pkgType, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"repoURL":" valid ","repoHash":" valid ","packageType":"plugins"}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"repoURL":" valid ","repoHash":" valid ","packageType":"plugins"}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPackageREADME", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPackageREADME", `{"repoURL":" valid ","repoHash":" valid ","packageType":"plugins"}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPackageREADME.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarPlugin", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, true, true),
-				util.BindJsonArg("keyword", &keyword, false, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, true, true),
+				legacyBind("keyword", &keyword, false, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarPlugin", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarPlugin", `{"frontend":" valid ","keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarPlugin.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledPlugin", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, true, true),
-				util.BindJsonArg("keyword", &keyword, false, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, true, true),
+				legacyBind("keyword", &keyword, false, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledPlugin", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledPlugin", `{"frontend":" valid ","keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledPlugin.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("installBazaarPlugin", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword, repoURL, repoHash, repoRef, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, true, true),
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("repoRef", &repoRef, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, true, true),
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("repoRef", &repoRef, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/installBazaarPlugin", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/installBazaarPlugin", `{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.InstallBazaarPlugin.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("uninstallBazaarPlugin", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, false, false),
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, false, false),
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/uninstallBazaarPlugin", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/uninstallBazaarPlugin", `{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UninstallBazaarPlugin.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarWidget", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarWidget", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarWidget", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarWidget.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledWidget", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledWidget", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledWidget", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledWidget.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("installBazaarWidget", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, repoURL, repoHash, repoRef, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("repoRef", &repoRef, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("repoRef", &repoRef, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/installBazaarWidget", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/installBazaarWidget", `{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.InstallBazaarWidget.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("uninstallBazaarWidget", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/uninstallBazaarWidget", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/uninstallBazaarWidget", `{"keyword":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UninstallBazaarWidget.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarIcon", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarIcon", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarIcon", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarIcon.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledIcon", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledIcon", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledIcon", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledIcon.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("installBazaarIcon", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, repoURL, repoHash, repoRef, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("repoRef", &repoRef, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("repoRef", &repoRef, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/installBazaarIcon", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/installBazaarIcon", `{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.InstallBazaarIcon.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("uninstallBazaarIcon", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/uninstallBazaarIcon", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/uninstallBazaarIcon", `{"keyword":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UninstallBazaarIcon.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarTemplate", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarTemplate", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarTemplate", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarTemplate.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledTemplate", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword string
-			if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
+			if !legacyParseArgs(arg, ret, legacyBind("keyword", &keyword, false, false)) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledTemplate", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledTemplate", `{"keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledTemplate.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("installBazaarTemplate", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, repoURL, repoHash, repoRef, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("repoRef", &repoRef, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("repoRef", &repoRef, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/installBazaarTemplate", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/installBazaarTemplate", `{"keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.InstallBazaarTemplate.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("uninstallBazaarTemplate", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var keyword, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"keyword":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"keyword":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/uninstallBazaarTemplate", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/uninstallBazaarTemplate", `{"keyword":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UninstallBazaarTemplate.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getBazaarTheme", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, false, false),
-				util.BindJsonArg("keyword", &keyword, false, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, false, false),
+				legacyBind("keyword", &keyword, false, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getBazaarTheme", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getBazaarTheme", `{"frontend":" valid ","keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetBazaarTheme.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("getInstalledTheme", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, false, false),
-				util.BindJsonArg("keyword", &keyword, false, false),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, false, false),
+				legacyBind("keyword", &keyword, false, false),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/getInstalledTheme", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/getInstalledTheme", `{"frontend":" valid ","keyword":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.GetInstalledTheme.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("installBazaarTheme", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword, repoURL, repoHash, repoRef, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, false, false),
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("repoURL", &repoURL, true, true),
-				util.BindJsonArg("repoHash", &repoHash, true, true),
-				util.BindJsonArg("repoRef", &repoRef, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, false, false),
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("repoURL", &repoURL, true, true),
+				legacyBind("repoHash", &repoHash, true, true),
+				legacyBind("repoRef", &repoRef, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/installBazaarTheme", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/installBazaarTheme", `{"frontend":" valid ","keyword":" valid ","repoURL":" valid ","repoHash":" valid ","repoRef":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.InstallBazaarTheme.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 	t.Run("uninstallBazaarTheme", func(t *testing.T) {
 		legacy := func(c *gin.Context) (result *gulu.Result) {
 			ret := gulu.Ret.NewResult()
 			defer func() { result = ret }()
 
-			arg, ok := util.JsonArg(c, ret)
+			arg, ok := legacyJSONArg(c, ret)
 			if !ok {
 				return
 			}
 
 			var frontend, keyword, packageName string
-			if !util.ParseJsonArgs(arg, ret,
-				util.BindJsonArg("frontend", &frontend, false, false),
-				util.BindJsonArg("keyword", &keyword, false, false),
-				util.BindJsonArg("packageName", &packageName, true, true),
+			if !legacyParseArgs(arg, ret,
+				legacyBind("frontend", &frontend, false, false),
+				legacyBind("keyword", &keyword, false, false),
+				legacyBind("packageName", &packageName, true, true),
 			) {
 				return
 			}
 			return
 		}
-		base := map[string]json.RawMessage{}
-		if err := json.Unmarshal([]byte(`{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`), &base); err != nil {
-			t.Fatal(err)
-		}
-		bodies := [][]byte{[]byte(`{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`), []byte(`{}`), []byte(`null`), []byte(``), []byte(`[`), []byte(`[]`), []byte(`1`)}
-		for key := range base {
-			for _, value := range []string{"null", "false", "1", "[]", "{}", `""`, `"  "`} {
-				changed := map[string]json.RawMessage{}
-				maps.Copy(changed, base)
-				changed[key] = json.RawMessage(value)
-				data, _ := json.Marshal(changed)
-				bodies = append(bodies, data)
-			}
-			changed := map[string]json.RawMessage{}
-			for k, v := range base {
-				if k != key {
-					changed[k] = v
-				}
-			}
-			data, _ := json.Marshal(changed)
-			bodies = append(bodies, data)
-		}
-		for _, body := range bodies {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request = httptest.NewRequest(http.MethodPost, "/api/bazaar/uninstallBazaarTheme", bytes.NewReader(body))
-			expected := legacy(c)
+		checkLegacyInputCompatibility(t, "/api/bazaar/uninstallBazaarTheme", `{"frontend":" valid ","keyword":" valid ","packageName":" valid "}`, legacy, func(body []byte) error {
 			_, err := apicontract.UninstallBazaarTheme.Decode(bytes.NewReader(body))
-			message := ""
-			if err != nil {
-				message = err.Error()
-			}
-			if message != expected.Msg {
-				t.Errorf("body %s: got %q, want %q", body, message, expected.Msg)
-			}
-		}
+			return err
+		})
 	})
 }
 

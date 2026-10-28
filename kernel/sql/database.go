@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package sql
 
@@ -1764,20 +1752,6 @@ func beginHistoryTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func commitHistoryTx(tx *sql.Tx) (err error) {
-	if nil == tx {
-		logging.LogErrorf("tx is nil")
-		return errors.New("tx is nil")
-	}
-
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
-	}
-
-	closeTxPreparedStmts(tx)
-	return
-}
-
 func beginAssetContentTx() (tx *sql.Tx, err error) {
 	if tx, err = assetContentDB.Begin(); err != nil {
 		logging.LogErrorf("begin asset content tx failed: %s\n  %s", err, logging.ShortStack())
@@ -1785,20 +1759,6 @@ func beginAssetContentTx() (tx *sql.Tx, err error) {
 			os.Exit(logging.ExitCodeUnavailableDatabase)
 		}
 	}
-	return
-}
-
-func commitAssetContentTx(tx *sql.Tx) (err error) {
-	if nil == tx {
-		logging.LogErrorf("tx is nil")
-		return errors.New("tx is nil")
-	}
-
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
-	}
-
-	closeTxPreparedStmts(tx)
 	return
 }
 

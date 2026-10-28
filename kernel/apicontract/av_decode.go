@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -9,7 +13,7 @@ import (
 	"strings"
 )
 
-// avDecodeBoundFields 仅对原本经过 JSON 结构体绑定的字段保留大小写匹配和数字归一化。
+// avDecodeBoundFields 仅对经过 JSON 结构体绑定的字段保留大小写匹配和数字归一化。
 func avDecodeBoundFields[Request any](reader io.Reader, path string, boundFields map[string]string, ignoredBools []string) (request Request, err error) {
 	fields, err := blockRequestFields(reader, path)
 	if err != nil {

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package tools
 
 import (
@@ -96,7 +100,7 @@ func prepareDecisionAssetImage(image decisionImageInput) (util.DecisionImage, er
 	if err != nil {
 		return util.DecisionImage{}, errors.New("decision image asset is unavailable")
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	if model.IsEncryptedBox(boxID) && (image.Notebook != boxID || !model.IsBoxUnlocked(boxID)) {
 		return util.DecisionImage{}, errors.New("encrypted image requires its unlocked notebook")
 	}

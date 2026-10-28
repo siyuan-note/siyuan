@@ -1,16 +1,14 @@
 import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import {moveConditionalColorRule} from "./conditionalColor";
 import * as filterDropdown from "./filterDropdown";
 
 test("returning from the color menu during field loading does not restore or bind a detached panel", async () => {
     let finishLoading: () => void;
     const loading = new Promise<void>(resolve => { finishLoading = resolve; });
-    const methods = {} as typeof import("./conditionalColorMenu");
     const content = {
         isConnected: true,
         querySelector: () => ({}),
@@ -21,13 +19,10 @@ test("returning from the color menu during field loading does not restore or bin
         querySelector: () => content,
     };
     let resized = 0;
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/conditionalColorMenu.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./conditionalColorMenu")>("src/protyle/render/av/conditionalColorMenu.ts", {
         window: {siyuan: {config: {}, languages: {conditionalColors: "Colors"}}},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "./filter" ? {prepareFilterColumns: () => loading} : {}),
-    });
+    }, ScriptTarget.ES2022);
     const pending = methods.openConditionalColorsMenu({
         protyle: {options: {}} as IProtyle,
         blockElement: {} as HTMLElement,
@@ -45,7 +40,6 @@ test("returning from the color menu during field loading does not restore or bin
 });
 
 test("rule menus dismiss outside dropdowns, preserve selections, and support drag sorting and SVG deletion", async () => {
-    const methods = {} as typeof import("./conditionalColorMenu");
     const listeners = new Map<string, (event: unknown) => void>();
     const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
     const source = {dataset: {ruleId: "a"}, style: {opacity: ".38"}};
@@ -65,10 +59,8 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
         addEventListener: (type: string, callback: (event: unknown) => void) => listeners.set(type, callback),
     };
     const window = {siyuan: {config: {}, languages: {}, dragElement: source}};
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/conditionalColorMenu.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods, window,
+    const methods = loadModule<typeof import("./conditionalColorMenu")>("src/protyle/render/av/conditionalColorMenu.ts", {
+        window,
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./filter": {prepareFilterColumns: async () => {}},
             "./filterDropdown": filterDropdown,
@@ -79,7 +71,7 @@ test("rule menus dismiss outside dropdowns, preserve selections, and support dra
                 transactions.push({perform, undo});
             }},
         })[name] || {}),
-    });
+    }, ScriptTarget.ES2022);
     const rules: IAVConditionalColorRule[] = ["a", "b", "c"].map((id): IAVConditionalColorRule => ({id, target: "item", color: null,
         matchOption: false, filter: {column: "text", operator: "Is not empty"}}));
     await methods.openConditionalColorsMenu({

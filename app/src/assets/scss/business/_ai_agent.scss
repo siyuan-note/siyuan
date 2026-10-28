@@ -1132,39 +1132,37 @@
 
 .agent-chat__nav-rail {
   position: absolute;
-  right: 4px;
+  right: 12px;
   top: 8px;
+  box-sizing: border-box;
+  width: 24px;
+  max-height: calc(100% - 56px);
+  overflow-y: auto;
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--nav-gap, 3px);
   z-index: 6;
-  border: 1px solid transparent;
-  border-radius: var(--b3-border-radius-b);
-  padding: 6px 4px 6px 12px;
-  transition: background 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out, gap 200ms ease-out;
+  padding: 4px 2px;
 }
 
 .agent-chat__nav-rail-marker {
   box-sizing: content-box;
   width: 10px;
   height: 2px;
-  padding-left: 10px;
+  flex-shrink: 0;
+  padding: 3px 5px;
   background-clip: content-box;
   background-color: var(--b3-theme-on-surface);
   opacity: 0.3;
   cursor: pointer;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 12px;
-  line-height: 20px;
-  color: transparent;
   border-radius: var(--b3-border-radius-b);
-  transition: width 200ms ease-out, height 200ms ease-out,
-  opacity 200ms ease-out, padding 200ms ease-out,
-  background 200ms ease-out, color 200ms ease-out,
-  line-height 200ms ease-out, border-radius 200ms ease-out;
+  transition: opacity 150ms ease-out;
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .agent-chat__nav-rail-marker--active {
@@ -1172,36 +1170,10 @@
   opacity: 0.7;
 }
 
-.agent-chat__nav-rail--expanded {
-  background: var(--b3-menu-background);
-  box-shadow: var(--b3-dialog-shadow);
-  border: 1px solid var(--b3-theme-surface-lighter);
-  gap: 0;
-  padding: 8px;
+.tooltip--agent-nav {
+  pointer-events: none;
+  max-height: min(160px, 90vh);
   overflow: hidden;
-
-  .agent-chat__nav-rail-marker {
-    width: 160px;
-    height: 28px;
-    line-height: 28px;
-    opacity: 1;
-    padding: 0 8px;
-    margin: 1px 0;
-    background: transparent;
-    background-clip: padding-box;
-    color: var(--b3-theme-on-background);
-    border-radius: var(--b3-border-radius);
-    transition: none;
-
-    &:hover {
-      background: var(--b3-list-hover);
-      color: var(--b3-theme-on-background);
-    }
-  }
-
-  .agent-chat__nav-rail-marker--active {
-    background: var(--b3-list-hover);
-  }
 }
 
 .agent-chat__msg--jumped .agent-chat__body {

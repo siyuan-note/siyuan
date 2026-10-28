@@ -1,12 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/list.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiled = compileModule("src/protyle/wysiwyg/list.ts", ScriptTarget.ES2021);
 
 class TestElement {
     parentElement: TestElement;
@@ -111,7 +108,6 @@ const fixture = (single: boolean, containerClass = "tab-item", confirmed = true,
     const operations: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
     const checks: Array<{ids: string[], exactIDs: string[], deletedIDs: string[]}> = [];
     let focused: TestElement;
-    const exports: any = {};
     const dependencies = {
         getParentBlock: (element: TestElement) => element.parentElement === content ? container : element.parentElement,
         getPreviousBlockSibling: (element: TestElement) => element.previousElementSibling,
@@ -127,8 +123,7 @@ const fixture = (single: boolean, containerClass = "tab-item", confirmed = true,
             operations.push({doOperations, undoOperations}),
         focusByWbr: (element: TestElement) => focused = element,
     };
-    runInNewContext(compiled, {
-        exports,
+    const exports = evaluateModule<any>(compiled, {
         require: () => dependencies,
         window: {siyuan: {config: {editor: {listLogicalOutdent: logical}}}},
         document: {createElement: (name: string) => new TestElement(name)},

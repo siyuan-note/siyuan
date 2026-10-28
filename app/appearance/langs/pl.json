@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Układ pól panelu bazy danych",
+	"databaseAttrLayoutTip": "Ustawia układ pól w panelu bazy danych u góry dokumentu i w osobnym panelu elementu; przy braku miejsca automatycznie używana jest jedna kolumna",
+	"databaseAttrLayoutSingle": "Jedna kolumna",
+	"databaseAttrLayoutRow": "Dwie kolumny (wierszami)",
+	"databaseAttrLayoutColumn": "Dwie kolumny (kolumnami)",
+	"mathDelimiterCompatibility": "Rozpoznawaj delimitery formuł LaTeX podczas wklejania i importowania",
+	"mathDelimiterCompatibilityTip": "Po włączeniu \\(...\\) i \\[...\\] we wklejanej i importowanej treści są automatycznie rozpoznawane odpowiednio jako formuły w wierszu i blokowe",
 	"automationCollectionScopeLimit": "Zakres monitorowania może zawierać łącznie do 32 notatników lub dokumentów",
 	"pdfAnnotationSaveFailed": "Nie można zapisać adnotacji PDF. Otwórz ponownie plik PDF, aby wczytać najnowsze adnotacje przed dalszą edycją",
 	"skipExitSync": "Pomiń synchronizację i wyjdź",

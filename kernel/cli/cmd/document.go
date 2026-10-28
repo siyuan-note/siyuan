@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cmd
 
@@ -399,7 +387,7 @@ var documentSearchCmd = &cobra.Command{
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "TYPE\tID\tNAME\tHPATH")
 			for _, d := range docs {
-				typ, id, name := documentSearchDisplayFields(d)
+				typ, id, name := model.SearchDocDisplayFields(d)
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", typ, id, name, d["hPath"])
 			}
 			w.Flush()
@@ -407,13 +395,6 @@ var documentSearchCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	if "/" == doc["path"] {
-		return "NOTEBOOK", doc["box"], doc["title"]
-	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), doc["title"]
 }
 
 func printDocumentTable(files []*model.File) {

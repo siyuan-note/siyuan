@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package treenode
 
@@ -292,26 +280,6 @@ func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
 		}
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
-	}
-	return
-}
-
-func GetBlockTreeRootsByHPath(boxID, hPath string) (ret []*BlockTree) {
-	hPath = gulu.Str.RemoveInvisible(hPath)
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND type = 'd'"
-	rows, err := queryForBox(boxID, sqlStmt, boxID, hPath)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var block BlockTree
-		if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret = append(ret, &block)
 	}
 	return
 }
@@ -670,10 +638,6 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 		return
 	}
 	return
-}
-
-func RemoveBlockTreesByIDs(boxID string, ids []string) {
-	RemoveBlockTreesByIDsWithError(boxID, ids)
 }
 
 func RemoveBlockTreesByIDsWithError(boxID string, ids []string) error {

@@ -1,13 +1,11 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const noop = () => {};
 
 const setup = (mobile = false) => {
-    const exports = {} as typeof import("./relation");
     const listeners = new Map<string, (event: unknown) => void>();
     const timers = new Map<number, () => void>();
     const requests: {signal: AbortSignal, callback: (response: unknown) => void}[] = [];
@@ -26,10 +24,8 @@ const setup = (mobile = false) => {
         closeCallback = undefined;
         callback?.();
     }};
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/relation.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {
-        exports, AbortController,
+    const exports = loadModule<typeof import("./relation")>("src/protyle/render/av/relation.ts", {
+        AbortController,
         clearTimeout: (id: number) => timers.delete(id),
         require: (name: string) => {
             if (name === "../../../plugin/Menu") { return {Menu: class {
@@ -50,7 +46,7 @@ const setup = (mobile = false) => {
         },
         window: {siyuan: {menus: {menu}, languages: {}},
             setTimeout: (callback: () => void) => { timers.set(++timerId, callback); return timerId; }},
-    });
+    }, ScriptTarget.ES2021);
     exports.openSearchAV({avID: "", purpose: "addToDatabase", position: {x: 60, y: 90},
         target: {getBoundingClientRect: () => ({left: 0, bottom: 0, height: 0})} as HTMLElement});
     const respond = (index: number) => requests[index].callback({data: {results: []}});

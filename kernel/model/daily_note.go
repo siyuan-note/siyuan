@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -16,15 +20,6 @@ type DailyNoteInfo struct {
 	HPath   string
 	Title   string
 	Existed bool
-}
-
-// resolveDailyNote 定位日期对应的文档；已有日记以认证后的源文档为准。
-func resolveDailyNote(box *Box, now time.Time, findByDate bool) (hPath string, tree *parse.Tree, err error) {
-	plan, tree, err := resolveDailyNotePlan(box, now, findByDate)
-	if plan != nil {
-		hPath = plan.DisplayPath
-	}
-	return
 }
 
 func resolveDailyNotePlan(box *Box, now time.Time, findByDate bool) (plan *DocumentCreatePlan, tree *parse.Tree, err error) {

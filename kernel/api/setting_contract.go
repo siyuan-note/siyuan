@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -383,6 +387,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.DatabaseAttrViewMode = value.DatabaseAttrViewMode
 	result.DatabaseAttrHideEmpty = value.DatabaseAttrHideEmpty
 	result.DatabaseAttrUseTabs = value.DatabaseAttrUseTabs
+	result.DatabaseAttrLayout = value.DatabaseAttrLayout
 	result.GenerateHistoryInterval = value.GenerateHistoryInterval
 	result.HistoryRetentionDays = value.HistoryRetentionDays
 	result.Emoji = value.Emoji
@@ -427,6 +432,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.HeadingNumberFormat = value.HeadingNumberFormat
 	result.HeadingEmbedMode = value.HeadingEmbedMode
 	result.PasteURLAutoConvert = value.PasteURLAutoConvert
+	result.MathDelimiterCompatibility = value.MathDelimiterCompatibility
 	result.DragHTMLFileToIframe = value.DragHTMLFileToIframe
 	result.Markdown = settingMarkdownPayload(value.Markdown)
 	return result

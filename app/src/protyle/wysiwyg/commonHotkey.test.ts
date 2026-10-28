@@ -1,15 +1,10 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 
-const source = transpileModule(readFileSync("src/protyle/wysiwyg/commonHotkey.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
-const caretSource = transpileModule(readFileSync("src/protyle/wysiwyg/verticalCaret.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const source = compileModule("src/protyle/wysiwyg/commonHotkey.ts", ScriptTarget.ES2021);
+const caretSource = compileModule("src/protyle/wysiwyg/verticalCaret.ts", ScriptTarget.ES2021);
 
 const copy = (options: {selected?: string[], rangeBlocks?: string[], collapsed?: boolean, outside?: boolean, document?: boolean}) => {
     const block = (id: string) => ({getAttribute: () => id});
@@ -28,9 +23,10 @@ const copy = (options: {selected?: string[], rangeBlocks?: string[], collapsed?:
         },
         copyTextByType: (ids: string[], type: string) => writes.push({ids: Array.from(ids), type}),
     };
-    const exports = {} as {commonHotkey: (...args: unknown[]) => boolean};
-    runInNewContext(source, {exports, require: () => dependencies,
-        window: {siyuan: {config: {keymap: {editor: {general: {copyBlockEmbed: "embed"}}}}}}});
+    const exports = evaluateModule<{commonHotkey: (...args: unknown[]) => boolean}>(source, {
+        require: () => dependencies,
+        window: {siyuan: {config: {keymap: {editor: {general: {copyBlockEmbed: "embed"}}}}}},
+    });
     const result = exports.commonHotkey({block: {rootID: "document"}, wysiwyg: {element: {
         querySelectorAll: () => (options.selected || []).map(block),
         contains: () => !options.outside,
@@ -135,9 +131,7 @@ const expandToBlockEdge = (direction: "up" | "down", options: {
         },
     });
     const caretRange = createCaretRange();
-    const caretExports = {} as {getVerticalCaretRect: (element: unknown, range: unknown) => unknown};
-    runInNewContext(caretSource, {
-        exports: caretExports,
+    const caretExports = evaluateModule<{getVerticalCaretRect: (element: unknown, range: unknown) => unknown}>(caretSource, {
         require: () => ({
             getFoldedNavigationOwner: (): undefined => undefined,
             getReachableVerticalRects: (_element: unknown, rects: unknown[]) => rects,
@@ -168,9 +162,7 @@ const expandToBlockEdge = (direction: "up" | "down", options: {
         hideElements: () => calls.push("hideElements"),
         countBlockWord: () => calls.push("countBlockWord"),
     };
-    const exports = {} as {upSelect: (options: unknown) => void, downSelect: (options: unknown) => void};
-    runInNewContext(source, {
-        exports,
+    const exports = evaluateModule<{upSelect: (options: unknown) => void, downSelect: (options: unknown) => void}>(source, {
         require: () => dependencies,
         getComputedStyle: () => ({paddingTop: "0px", paddingBottom: "0px"}),
         getSelection: () => ({

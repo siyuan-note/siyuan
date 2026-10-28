@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -21,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -32,9 +19,8 @@ import (
 )
 
 var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttributeView, func(c *gin.Context, request apicontract.RemoveUnusedAttributeViewRequest) apicontract.Response[apicontract.AVIDData] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.ID, ret) {
-		return contractFailure[apicontract.AVIDData](ret)
+	if err := util.ValidateID(request.ID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVIDData](err)
 	}
 	if err := model.RemoveUnusedAttributeView(request.ID); err != nil {
 		return apicontract.Failure[apicontract.AVIDData](-1, err.Error())
@@ -345,9 +331,20 @@ var getAttributeView = contractHandler(apicontract.GetAttributeView, func(c *gin
 })
 
 var getAttributeViewPasteRows = contractHandler(apicontract.GetAttributeViewPasteRows, func(c *gin.Context, request apicontract.GetAttributeViewPasteRowsRequest) apicontract.Response[apicontract.AVPasteRowsData] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.AvID, ret) || util.InvalidIDPattern(request.BlockID, ret) || util.InvalidIDPattern(request.StartItemID, ret) || (request.ViewID != "" && util.InvalidIDPattern(request.ViewID, ret)) || (request.GroupID != "" && util.InvalidIDPattern(request.GroupID, ret)) {
-		return contractFailure[apicontract.AVPasteRowsData](ret)
+	if err := util.ValidateID(request.AvID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVPasteRowsData](err)
+	}
+	if err := util.ValidateID(request.BlockID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVPasteRowsData](err)
+	}
+	if err := util.ValidateID(request.StartItemID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVPasteRowsData](err)
+	}
+	if err := util.ValidateOptionalID(request.ViewID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVPasteRowsData](err)
+	}
+	if err := util.ValidateOptionalID(request.GroupID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVPasteRowsData](err)
 	}
 	count := int(request.Count)
 	if request.Count != float64(count) || count < 1 || count > 100000 {
@@ -361,9 +358,11 @@ var getAttributeViewPasteRows = contractHandler(apicontract.GetAttributeViewPast
 })
 
 var getAttributeViewFieldViews = contractHandler(apicontract.GetAttributeViewFieldViews, func(c *gin.Context, request apicontract.GetAttributeViewFieldViewsRequest) apicontract.Response[apicontract.AVFieldViewsData] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.AvID, ret) || util.InvalidIDPattern(request.KeyID, ret) {
-		return contractFailure[apicontract.AVFieldViewsData](ret)
+	if err := util.ValidateID(request.AvID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVFieldViewsData](err)
+	}
+	if err := util.ValidateID(request.KeyID); err != nil {
+		return apicontract.FailureFrom[apicontract.AVFieldViewsData](err)
 	}
 	views, err := model.GetAttributeViewFieldViews(request.AvID, request.KeyID)
 	if err != nil {

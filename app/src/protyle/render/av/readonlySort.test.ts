@@ -1,11 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("locked sorting uses checked field submenus, refreshes without transactions and rejects stale clicks", () => {
-    const api = {} as typeof import("./readonlySort");
     const items: IMenu[] = [];
     let renders = 0;
     let viewID = "view";
@@ -13,10 +11,7 @@ test("locked sorting uses checked field submenus, refreshes without transactions
     const protyle = {disabled: true} as IProtyle;
     const data = {viewID: "view"} as IAV;
     const element = {removeAttribute: () => {}} as unknown as HTMLElement;
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/readonlySort.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: api,
+    const api = loadModule<typeof import("./readonlySort")>("src/protyle/render/av/readonlySort.ts", {
         window: {siyuan: {languages: {asc: "Ascending", desc: "Descending", avRestoreDefaultSort: "Restore"}}},
         require: (name: string) => {
             const mocks: Record<string, unknown> = {
@@ -42,7 +37,7 @@ test("locked sorting uses checked field submenus, refreshes without transactions
             assert.ok(name in mocks, `unexpected dependency: ${name}`);
             return mocks[name];
         },
-    });
+    }, ScriptTarget.ES2022);
     api.openReadonlyAVSortMenu(element, protyle, {getBoundingClientRect: () => ({})} as HTMLElement);
     assert.equal(items.length, 4);
     assert.equal(items[1].type, "submenu");

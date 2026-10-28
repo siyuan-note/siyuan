@@ -1,16 +1,10 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import type {bindBlockDragSelectionGesture} from "./blockDragSelectionGesture";
 
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/boundedBlockDragSelect.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
-
 const fixture = (mobile = false) => {
-    const exports: any = {};
     const classes = new Set<string>();
     let rootEditable = "false";
     let backlink = false;
@@ -73,9 +67,10 @@ const fixture = (mobile = false) => {
         "../../layout/status": {countBlockWord: () => {}},
         "../../mobile/util/multiSelectToolbar": {updateMultiSelectToolbar: (_element: unknown, count: number) => toolbarCount = count},
     };
-    runInNewContext(compiled, {exports, require: (name: string) => modules[name], window: {siyuan: {}},
-        requestAnimationFrame: (callback: FrameRequestCallback) => frames.push(callback)});
-    // 构造 WYSIWYG 时实例尚未赋给 protyle，绑定阶段不能从 protyle 读取编辑器元素。
+    const exports = loadModule<any>("src/protyle/wysiwyg/boundedBlockDragSelect.ts", {
+        require: (name: string) => modules[name], window: {siyuan: {}},
+        requestAnimationFrame: (callback: FrameRequestCallback) => frames.push(callback),
+    }, ScriptTarget.ES2021);    // 构造 WYSIWYG 时实例尚未赋给 protyle，绑定阶段不能从 protyle 读取编辑器元素。
     exports.bindBoundedBlockDragSelect(protyle, element);
     protyle.wysiwyg = {element};
     protyle.contentElement = {getBoundingClientRect: () => ({left: 0, right: 100, top: 0, bottom: 100})};

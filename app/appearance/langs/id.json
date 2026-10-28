@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Tata letak bidang panel basis data",
+	"databaseAttrLayoutTip": "Atur tata letak bidang pada panel basis data di bagian atas dokumen dan panel item terpisah; satu kolom digunakan secara otomatis jika ruang tidak cukup",
+	"databaseAttrLayoutSingle": "Satu kolom",
+	"databaseAttrLayoutRow": "Dua kolom (menurut baris)",
+	"databaseAttrLayoutColumn": "Dua kolom (menurut kolom)",
+	"mathDelimiterCompatibility": "Kenali pembatas rumus LaTeX saat menempel dan mengimpor",
+	"mathDelimiterCompatibilityTip": "Saat diaktifkan, \\(...\\) dan \\[...\\] dalam konten yang ditempel dan diimpor akan otomatis dikenali sebagai rumus sebaris dan blok",
 	"automationCollectionScopeLimit": "Cakupan pemantauan dapat memuat hingga 32 buku catatan atau dokumen",
 	"pdfAnnotationSaveFailed": "Anotasi PDF tidak dapat disimpan. Buka kembali PDF untuk memuat anotasi terbaru sebelum melanjutkan penyuntingan",
 	"skipExitSync": "Lewati sinkronisasi dan keluar",

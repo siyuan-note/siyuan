@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -25,11 +29,6 @@ type attributeViewSearchPart struct {
 	value  *av.Value
 	view   bool
 	ranges []attributeViewSearchRange
-}
-
-// compactAttributeViewSearchResults 只精简已命中的数据库块，不改变索引、结果数量和排序。
-func compactAttributeViewSearchResults(blocks []*Block) {
-	compactAttributeViewSearchResultsContext(context.Background(), blocks)
 }
 
 func compactAttributeViewSearchResultsContext(ctx context.Context, blocks []*Block) {

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -48,8 +52,8 @@ func compareSyncDecode[Request, Data, Value any](t *testing.T, endpoint apicontr
 		context.Request = httptest.NewRequest("POST", endpoint.Definition().Path, strings.NewReader(body))
 		expected := gulu.Ret.NewResult()
 		var value Value
-		if args, ok := util.JsonArg(context, expected); ok {
-			util.ParseJsonArgs(args, expected, util.BindJsonArg(key, &value, required, rejectEmpty))
+		if args, ok := legacyJSONArg(context, expected); ok {
+			legacyParseArgs(args, expected, legacyBind(key, &value, required, rejectEmpty))
 		}
 		request, err := endpoint.Decode(strings.NewReader(body))
 		if expected.Code != 0 {

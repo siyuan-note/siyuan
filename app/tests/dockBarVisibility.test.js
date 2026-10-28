@@ -15,13 +15,23 @@ const browserCases = async (sources, css, template) => {
     };
     document.head.innerHTML = "<style></style>";
     document.querySelector("style").textContent = css;
-    document.body.innerHTML = '<div id="toolbar" class="toolbar"></div>' + template +
+    if (window.innerWidth === 700) {
+        document.body.style.setProperty("--b3-body-background-gradient", document.body.classList.contains("body--toolbar-hide") ?
+            "none" : "radial-gradient(ellipse 60% 40% at 0% 0%, rgba(220, 80, 40, .6), transparent)");
+    }
+    document.body.innerHTML = '<div id="toolbar" class="toolbar">' +
+        '<span style="display:block;width:20px;height:20px;margin:6px;background:rgb(180,40,80)"></span></div>' + template +
         '<div id="status" class="status"></div><div id="commonMenu" class="fn__none"></div>';
     const layouts = document.getElementById("layouts");
     layouts.classList.add("fn__flex-column");
     layouts.innerHTML = '<div id="outer" class="fn__flex fn__flex-1">' +
         '<div id="left" class="layout fn__flex-column"></div><div class="layout__resize"></div>' +
-        '<div id="center" class="layout__center fn__flex-1 fn__flex"><div class="layout-tab-container fn__flex-1">Editor</div></div>' +
+        '<div id="center" class="layout__center fn__flex-1 fn__flex"><div class="fn__flex-1 fn__flex">' +
+        '<div data-type="wnd" class="fn__flex-column fn__flex-1">' +
+        '<div class="fn__flex"><ul class="layout-tab-bar fn__flex"><li class="item item--focus">' +
+        '<span class="item__text">Document</span></li></ul><ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1">' +
+        '<li class="item item--readonly"><span class="fn__flex-1"></span></li></ul></div>' +
+        '<div class="layout-tab-container fn__flex-1">Editor</div></div></div></div>' +
         '<div class="layout__resize"></div>' +
         '<div id="right" class="layout fn__flex-column"></div></div><div class="layout__resize"></div>' +
         '<div id="bottom" class="layout fn__flex"></div>';
@@ -35,6 +45,10 @@ const browserCases = async (sources, css, template) => {
     const right = makeLayout("right");
     const bottom = makeLayout("bottom");
     const center = {element: document.getElementById("center")};
+    if (document.body.classList.contains("body--toolbar-hide")) {
+        center.element.firstElementChild.classList.add("layout__wnd--left", "layout__wnd--right", "layout__wnd--center");
+        center.element.querySelector('[data-type="wnd"]').firstElementChild.style.paddingLeft = "112px";
+    }
     const outer = {element: document.getElementById("outer"), children: [left, center, right]};
     window.siyuan = {zIndex: 10, config: {uiLayout: {hideDock: true}, appearance: {hideStatusBar: false}, system: {os: "linux"}},
         layout: {layout: {children: [outer, bottom]}, centerLayout: center}};
@@ -133,20 +147,56 @@ const browserCases = async (sources, css, template) => {
             position === "Left" ? barRect.right : barRect.left, "panel stays beside the bar");
         const temporary = {bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)};
-        const effectiveBackground = getComputedStyle(element).backgroundColor;
-        check.equal(effectiveBackground, getComputedStyle(document.body).backgroundColor, "bar uses the window background color");
+        const backdrop = element.previousElementSibling;
+        check.ok(backdrop.classList.contains("dock__backdrop"));
+        check.equal(getComputedStyle(backdrop).backgroundColor, getComputedStyle(document.body).backgroundColor);
+        check.equal(getComputedStyle(backdrop).backgroundImage, getComputedStyle(document.body).backgroundImage,
+            "the overlay shares the window gradient, including theme overrides");
+        const rowTop = document.body.classList.contains("body--toolbar-hide") ?
+            center.element.querySelector(".layout-tab-container").getBoundingClientRect().top :
+            element.parentElement.getBoundingClientRect().top;
+        const radius = parseFloat(getComputedStyle(center.element).borderTopLeftRadius);
+        const edge = position === "Left" ? barRect.right : barRect.left;
+        const sign = position === "Left" ? 1 : -1;
+        const toolbarButton = document.getElementById("toolbar").firstElementChild.getBoundingClientRect();
+        const samples = [
+            {x: edge - sign * 2, y: rowTop + 2},
+            {x: edge + sign * 2, y: rowTop + 1},
+            {x: edge + sign * (radius + 2), y: rowTop + 2},
+            {x: edge + sign * 2, y: barRect.bottom - 2},
+            {x: toolbarButton.x + toolbarButton.width / 2, y: toolbarButton.y + toolbarButton.height / 2},
+        ];
+        const pixels = () => require("electron").ipcRenderer.invoke("dock-bar-pixels", samples);
+        const overlayPixels = await pixels();
         window.siyuan.config.uiLayout.hideDock = false;
         bar.syncDockBarVisibility();
         dock.showDock(true);
         check.deepEqual({bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)}, temporary,
         "floating bars preserve the normal dock geometry and panel corners");
+        const normalPixels = await pixels();
+        overlayPixels.forEach((pixel, index) => pixel.forEach((channel, component) =>
+            check.ok(Math.abs(channel - normalPixels[index][component]) <= 3,
+                `background and inner corner sample ${index} matches the normal dock: ${pixel} / ${normalPixels[index]}`)));
         window.siyuan.config.uiLayout.hideDock = true;
         bar.syncDockBarVisibility();
         dock.showDock(true);
+        await settle();
         const expandedEditor = rect(center.element);
         if (process.env.SIYUAN_DOCK_TEST_SCREENSHOTS) {
             await require("electron").ipcRenderer.invoke("dock-bar-capture", position);
+        }
+        if (document.body.classList.contains("body--toolbar-hide")) {
+            const header = center.element.querySelector('[data-type="wnd"]').firstElementChild;
+            header.classList.add("fn__none");
+            await settle();
+            check.equal(parseFloat(element.previousElementSibling.style.top),
+                center.element.querySelector(".layout-tab-container").getBoundingClientRect().top,
+                "merged layout without tabs restores the top corner to the editor edge");
+            header.classList.remove("fn__none");
+            await settle();
+            check.equal(parseFloat(element.previousElementSibling.style.top), rowTop,
+                "opening tabs places the inner corner below the merged tab bar");
         }
 
         dock.hideDockByHover();
@@ -175,6 +225,32 @@ const browserCases = async (sources, css, template) => {
         await settle();
         check.ok(hidden(element), "position refreshes do not cancel a pending hover close");
         dock.showDock();
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const during = [];
+        for (let frame = 0; frame < 4; frame++) {
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            const movingPanel = dock.layout.element.getBoundingClientRect();
+            const movingBar = element.getBoundingClientRect();
+            const gap = position === "Left" ? movingPanel.left - movingBar.right : movingBar.left - movingPanel.right;
+            check.ok(Math.abs(gap) < 2, `bar follows the panel during entry, gap=${gap}`);
+            during.push(position === "Left" ? movingBar.left : window.innerWidth - movingBar.right);
+            check.deepEqual(rect(center.element), initialEditor, "animation does not move the editor");
+        }
+        check.ok(during[0] < 0 && during.at(-1) > during[0], "the bar slides into the window instead of appearing instantly");
+        dock.hideDock();
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        dock.showDock();
+        for (let frame = 0; frame < 4; frame++) {
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            const movingPanel = dock.layout.element.getBoundingClientRect();
+            const movingBar = element.getBoundingClientRect();
+            const gap = position === "Left" ? movingPanel.left - movingBar.right : movingBar.left - movingPanel.right;
+            check.ok(Math.abs(gap) < 2, `interrupted animations keep the bar attached, gap=${gap}`);
+        }
+        await settle();
+        check.equal(element.inert, false, "reentering during close restores interaction");
+        check.equal(element.parentElement.querySelectorAll(".dock__backdrop").length, 1,
+            "interrupted animation reuses its background");
 
         const input = dock.layout.element.querySelector(`[data-id="${position}two"] input`);
         input.focus();
@@ -229,11 +305,13 @@ const browserCases = async (sources, css, template) => {
     check.ok(!hidden(leftBar) && !hidden(rightBar));
     checkRightDockSpace("a temporary right bar overlays the editor instead of reserving space");
     docks.Left.hideDock();
+    await settle();
     check.ok(hidden(leftBar) && !hidden(rightBar), "each side closes independently");
     check.equal(bottom.element.style.left, "0px");
     check.equal(bottom.element.style.right, "0px", "temporary bars do not narrow the bottom panel");
     check.deepEqual(rect(center.element), initialEditor);
     docks.Right.hideDock();
+    await settle();
     check.ok(hidden(leftBar) && hidden(rightBar), "the bottom panel alone reveals no side bars");
     check.equal(bottom.element.style.right, "0px", "closing the side bar restores bottom panel width");
     docks.Bottom.hideDock();
@@ -299,6 +377,17 @@ if (process.versions.electron && process.type === "browser") {
             nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
         }});
         let captureName;
+        ipcMain.handle("dock-bar-pixels", async (_event, points) => {
+            const capture = await win.webContents.capturePage();
+            const bitmap = capture.toBitmap();
+            const size = capture.getSize();
+            const [width] = win.getContentSize();
+            const scale = size.width / width;
+            return points.map(({x, y}) => {
+                const offset = (Math.floor(y * scale) * size.width + Math.floor(x * scale)) * 4;
+                return Array.from(bitmap.subarray(offset, offset + 4));
+            });
+        });
         if (process.env.SIYUAN_DOCK_TEST_SCREENSHOTS) {
             ipcMain.handle("dock-bar-capture", async (_event, position) => {
                 assert.ok(["Left", "Right"].includes(position));

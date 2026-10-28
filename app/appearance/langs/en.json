@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Database panel field layout",
+	"databaseAttrLayoutTip": "Set the field layout in the database panel at the top of a document and the standalone item panel; one column is used automatically when space is limited",
+	"databaseAttrLayoutSingle": "One column",
+	"databaseAttrLayoutRow": "Two columns (by row)",
+	"databaseAttrLayoutColumn": "Two columns (by column)",
+	"mathDelimiterCompatibility": "Recognize LaTeX math delimiters when pasting and importing",
+	"mathDelimiterCompatibilityTip": "When enabled, automatically recognize \\(...\\) and \\[...\\] in pasted and imported content as inline and block math, respectively",
 	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",
 	"pdfAnnotationSaveFailed": "Unable to save PDF annotations. Reopen the PDF to load the latest annotations before editing again",
 	"skipExitSync": "Skip sync and exit",

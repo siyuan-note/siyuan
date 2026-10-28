@@ -14,7 +14,8 @@ import {genAgentConfirmActionButtons} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
-import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
+import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
 import {setPosition} from "../../../util/setPosition";
 import {fetchPost} from "../../../util/fetch";
 import {confirmDialog} from "../../../dialog/confirmDialog";
@@ -198,7 +199,7 @@ export class AgentChat extends Model {
     private panelElement: HTMLElement;
     private messagesContainer: HTMLElement;
     private composerHost: HTMLElement;
-    private destroyComposerResize?: () => void;
+    private composerResize?: ReturnType<typeof bindAgentComposerResize>;
     private composer: ReturnType<typeof mountComposer> | null = null;
     private sendBtn: HTMLElement;
     private stopBtn: HTMLElement;
@@ -291,7 +292,6 @@ export class AgentChat extends Model {
     private settingDialogObserver: MutationObserver | null = null;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
-    private navExpandTimer = 0;
     // 镜像态：当前会话正由其他实例流式对话，本实例处于只读占位锁定，期间不重绘当前视图。
     // 由 ws 的 streamStart/streamEnd 事件驱动，与发起者的 isStreaming 互斥（发起者走 SSE）。
     private mirrorLocked = false;
@@ -345,7 +345,7 @@ export class AgentChat extends Model {
     }
 
     public destroy() {
-        this.destroyComposerResize?.();
+        this.composerResize?.destroy();
         this.welcomeObserver?.disconnect();
         super.destroy();
     }
@@ -471,8 +471,8 @@ export class AgentChat extends Model {
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;
         this.composerHost = panel.querySelector(".agent-chat__composer-host") as HTMLElement;
-        this.destroyComposerResize?.();
-        this.destroyComposerResize = bindAgentComposerResize(panel, this.composerHost,
+        this.composerResize?.destroy();
+        this.composerResize = bindAgentComposerResize(panel, this.composerHost,
             panel.querySelector(".agent-chat__input-resize .protyle-block-resize"));
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
@@ -925,15 +925,17 @@ export class AgentChat extends Model {
         this.navRail = document.createElement("div");
         this.navRail.className = "agent-chat__nav-rail";
 
-        this.navRail.addEventListener("mouseenter", () => {
-            this.navExpandTimer = window.setTimeout(() => {
-                this.navRail.classList.add("agent-chat__nav-rail--expanded");
-            }, 200);
+        this.navRail.addEventListener("mouseover", (event: MouseEvent) => {
+            const marker = (event.target as HTMLElement).closest(".agent-chat__nav-rail-marker");
+            if (!marker) {
+                return;
+            }
+            // 单条消息预览复用提示框，不扩大导航的点击区域。
+            event.stopPropagation();
+            showTooltip(escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || ""), marker, "agent-nav", event);
         });
-        this.navRail.addEventListener("mouseleave", () => {
-            clearTimeout(this.navExpandTimer);
-            this.navRail.classList.remove("agent-chat__nav-rail--expanded");
-        });
+        this.navRail.addEventListener("mouseleave", hideTooltip);
+        this.navRail.addEventListener("scroll", hideTooltip, {passive: true});
         this.navRail.addEventListener("click", (e: MouseEvent) => {
             const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
             if (!marker) {
@@ -946,6 +948,9 @@ export class AgentChat extends Model {
     }
 
     private rebuildNavMarkers() {
+        if (this.navRail.childElementCount > 0 && this.navRail.matches(":hover")) {
+            hideTooltip();
+        }
         this.navRail.innerHTML = "";
         const userEntries = this.entries.filter((entry): entry is UserEntry => entry.type === "user");
         if (userEntries.length === 0) {
@@ -957,11 +962,10 @@ export class AgentChat extends Model {
 
         for (const entry of userEntries) {
             const marker = document.createElement("div");
-            marker.className = "agent-chat__nav-rail-marker ariaLabel";
+            marker.className = "agent-chat__nav-rail-marker";
             marker.dataset.messageId = entry.id || "";
             marker.setAttribute("data-position", "west");
-            marker.setAttribute("aria-label", escapeAriaLabel(escapeHtml(entry.content)));
-            marker.textContent = entry.content.slice(0, 120);
+            marker.setAttribute("aria-label", entry.content);
             this.navRail.appendChild(marker);
         }
         this.updateActiveMarker();
@@ -2387,6 +2391,7 @@ export class AgentChat extends Model {
         this.hasInterveningCard = false;
         this.currentRoundID = "";
         this.composer.clear();
+        this.composerResize?.reset();
         const selectedModel = this.getSelectedModel();
         const reasoningEffort = this.selectedReasoningEffort;
 

@@ -92,7 +92,8 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
         const hideElements: Element[] = [];
         const normalElements: Element[] = [];
         mermaidElements.forEach(item => {
-            if (item.firstElementChild.clientWidth === 0) {
+            // 可见的自动宽度块在图形生成前可能没有内容宽度，按布局盒判断是否隐藏。
+            if (item.getClientRects().length === 0) {
                 hideElements.push(item);
             } else {
                 normalElements.push(item);

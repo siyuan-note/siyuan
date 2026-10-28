@@ -1,12 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../../testSupport/loadModule";
 
-const compiled = transpileModule(readFileSync("src/protyle/render/av/rowSort.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiled = compileModule("src/protyle/render/av/rowSort.ts", ScriptTarget.ES2021);
 
 const fixture = () => {
     let commit: () => void;
@@ -22,9 +19,7 @@ const fixture = () => {
         querySelector: () => ({classList: {contains: () => block.sorted}}),
     };
     const protyle = {disabled: false};
-    const exports: any = {};
-    runInNewContext(compiled, {
-        exports,
+    const exports = evaluateModule<any>(compiled, {
         window: {siyuan: {languages: {removeSorts: "Remove sort rules", avDragRemoveSorts: "Confirm"}}},
         require: () => ({
             waitForPendingTransactions: () => pending,

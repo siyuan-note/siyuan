@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "資料庫面板欄位佈局",
+	"databaseAttrLayoutTip": "設定文件頂部資料庫面板和獨立項目面板中的欄位佈局，空間不足時自動使用單欄",
+	"databaseAttrLayoutSingle": "單欄",
+	"databaseAttrLayoutRow": "雙欄（按行）",
+	"databaseAttrLayoutColumn": "雙欄（按列）",
+	"mathDelimiterCompatibility": "貼上和匯入時相容 LaTeX 公式分隔符",
+	"mathDelimiterCompatibilityTip": "啟用後自動將貼上和匯入內容中的 \\(...\\)、\\[...\\] 分別識別為行內公式和區塊公式",
 	"automationCollectionScopeLimit": "監聽範圍最多可包含 32 個筆記本或文件",
 	"pdfAnnotationSaveFailed": "無法儲存 PDF 標註，請重新開啟 PDF 載入最新標註後再編輯",
 	"skipExitSync": "略過同步並結束",

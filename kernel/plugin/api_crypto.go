@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
@@ -25,6 +13,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/plugin/crypto"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 )
 
 // randomValuesMaxLength 是 getRandomValues 单次可填充的最大字节数，与浏览器一致。
@@ -66,7 +55,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	subtle := lo.Must(host.newSubtleObject(rt))
 	lo.Must0(cryptoObj.Set("subtle", subtle))
 
-	lo.Must0(ObjectFreeze(rt, cryptoObj))
+	lo.Must0(gojaext.Freeze(rt, cryptoObj))
 	lo.Must0(rt.GlobalObject().Set("crypto", cryptoObj))
 	return
 }
@@ -74,7 +63,7 @@ func injectCrypto(p *KernelPlugin, rt *goja.Runtime) (err error) {
 // randomValuesTarget 校验 getRandomValues 的参数并返回可写入的字节视图。
 // 规范只接受整数类型的 TypedArray，浮点数组与 DataView 返回 TypeMismatchError。
 func randomValuesTarget(rt *goja.Runtime, value goja.Value) ([]byte, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, crypto.NewError(crypto.ErrNameTypeMismatch, "getRandomValues requires an integer TypedArray")
 	}
 
@@ -190,7 +179,7 @@ func (h *cryptoHost) newSubtleObject(rt *goja.Runtime) (*goja.Object, error) {
 		return nil, err
 	}
 
-	if err := ObjectFreeze(rt, subtle); err != nil {
+	if err := gojaext.Freeze(rt, subtle); err != nil {
 		return nil, err
 	}
 	return subtle, nil

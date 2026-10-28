@@ -22,10 +22,14 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
     const resizeWindow = async (width: number, height: number) => {
         await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
         // 原生窗口调用返回时，渲染进程可能尚未收到新的视口尺寸。
-        for (let count = 0; count < 120 && (innerWidth !== width || innerHeight !== height); count++) {
+        // 窗口尺寸由操作系统取整，高 DPI 下可能与请求值相差 1px，因此按容差等待。
+        for (let count = 0; count < 120 &&
+            (Math.abs(innerWidth - width) > 1 || Math.abs(innerHeight - height) > 1); count++) {
             await frame();
         }
-        check.deepEqual([innerWidth, innerHeight], [width, height]);
+        // 仍要求尺寸确实换了，只是允许 1px 的设备像素取整。
+        check.ok(Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1,
+            `viewport did not resize: ${innerWidth}x${innerHeight} vs ${width}x${height}`);
         await settle();
     };
     const originalWindow = {width: innerWidth, height: innerHeight};
@@ -133,6 +137,36 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             const layoutCenter = center();
             const layoutScale = view.scale;
             const root = host.querySelector<HTMLElement>(".mindmap-view__node");
+            const checkGrid = () => {
+                const style = getComputedStyle(preview);
+                check.equal(style.backgroundImage.match(/radial-gradient/g)?.length, 2,
+                    "separate dot rows and columns form the grid lines");
+                check.match(style.backgroundImage, /1px/);
+                check.equal(style.backgroundSize, "12px 96px, 96px 12px");
+                check.ok(style.backgroundPosition.split(", ").every(position => position === "50% 50%"),
+                    "both dot layers share the center origin");
+                check.ok(style.backgroundOrigin.split(", ").every(origin => origin === "padding-box"));
+                check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
+                const vertical = getComputedStyle(preview, "::before");
+                const horizontal = getComputedStyle(preview, "::after");
+                check.equal(vertical.borderLeftStyle, "dashed");
+                check.equal(horizontal.borderTopStyle, "dashed");
+                check.equal(vertical.borderLeftColor, style.borderTopColor);
+                check.equal(horizontal.borderTopColor, style.borderTopColor);
+                const rect = preview.getBoundingClientRect();
+                const width = rect.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+                const height = rect.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth);
+                const x = parseFloat(vertical.left) + new DOMMatrixReadOnly(vertical.transform).m41 +
+                    parseFloat(vertical.borderLeftWidth) / 2;
+                const y = parseFloat(horizontal.top) + new DOMMatrixReadOnly(horizontal.transform).m42 +
+                    parseFloat(horizontal.borderTopWidth) / 2;
+                check.ok(Math.abs(x - width / 2) < .02, "the vertical stroke center meets the center grid dot");
+                check.ok(Math.abs(y - height / 2) < .02, "the horizontal stroke center meets the center grid dot");
+                for (const guide of [vertical, horizontal]) {
+                    check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
+                    check.equal(guide.pointerEvents, "none");
+                }
+            };
             const checkFrame = () => {
                 const rect = preview.getBoundingClientRect();
                 const viewportRect = viewport.getBoundingClientRect();
@@ -149,22 +183,7 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 check.equal(style.borderTopColor, canvasStyle.outlineColor, "the frame follows the active canvas color");
                 check.equal(style.borderTopWidth, canvasStyle.outlineWidth);
                 check.equal(style.borderTopLeftRadius, documentRadius, "the frame keeps the document canvas radius");
-                check.match(style.backgroundImage, /radial-gradient/);
-                check.equal(style.backgroundSize, "24px 24px");
-                check.equal(style.backgroundPosition, "50% 50%");
-                check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
-                const vertical = getComputedStyle(preview, "::before");
-                const horizontal = getComputedStyle(preview, "::after");
-                check.equal(vertical.borderLeftStyle, "dashed");
-                check.equal(horizontal.borderTopStyle, "dashed");
-                check.equal(vertical.borderLeftColor, style.borderTopColor);
-                check.equal(horizontal.borderTopColor, style.borderTopColor);
-                check.ok(Math.abs(parseFloat(vertical.left) - preview.clientWidth / 2) < .1);
-                check.ok(Math.abs(parseFloat(horizontal.top) - preview.clientHeight / 2) < .1);
-                for (const guide of [vertical, horizontal]) {
-                    check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
-                    check.equal(guide.pointerEvents, "none");
-                }
+                checkGrid();
                 check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
             };
             const captureLayout = () => {
@@ -192,6 +211,46 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "false");
             button("listMindmapDocumentLayout").click();
             check.equal(preview.hidden, false);
+            checkFrame();
+            // 奇数和小数尺寸下，验证笔画中心与网格原点，而非只验证线条边缘的百分比位置。
+            const frameStyle = preview.style.cssText;
+            for (const [width, height] of [[320, 200], [321, 201], [320.5, 200.5], [321.25, 201.75]]) {
+                preview.style.width = `${width}px`;
+                preview.style.height = `${height}px`;
+                checkGrid();
+            }
+            preview.style.cssText = frameStyle;
+            checkFrame();
+            // 栅格采样确认大格边上有中间刻度，格内留白，避免仅检查 CSS 字符串却绘成孤立交点。
+            const gridSample = document.createElement("div");
+            gridSample.style.cssText = "position:fixed;left:16px;top:16px;width:322px;height:202px;z-index:9999;" +
+                `background:${getComputedStyle(host).backgroundColor}`;
+            const gridClone = preview.cloneNode(false) as HTMLElement;
+            gridClone.style.cssText = "left:0;top:0;width:321.25px;height:201.75px";
+            gridSample.append(gridClone);
+            document.body.append(gridSample);
+            try {
+                for (const dpr of [1, 2]) {
+                    const rect = gridClone.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    const dots = Array.from({length: 7}, (_, index) => index * 12 + 12).flatMap(offset => [
+                        {x: x + offset, y: y - 96}, {x: x + 96, y: y - offset},
+                    ]);
+                    const gaps = [{x: x + 6, y: y - 96}, {x: x + 96, y: y - 6}, {x: x + 12, y: y - 84}];
+                    const differences: number[] = await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid",
+                        {width: innerWidth, height: innerHeight, dpr, background: {x: x + 6, y: y + 6},
+                            points: [...dots, ...gaps]});
+                    check.ok(differences.slice(0, dots.length).every(value => value > 10),
+                        `every intermediate grid dot is visible, dpr=${dpr}, dark=${dark}: ${differences}`);
+                    check.ok(differences.slice(dots.length).every(value => value < 2),
+                        `dot gaps and grid interiors stay clear, dpr=${dpr}, dark=${dark}: ${differences}`);
+                }
+            } finally {
+                await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid-reset");
+                gridSample.remove();
+                await settle();
+            }
             checkFrame();
             const savedLayout = JSON.stringify(view.documentView);
             const fixedFrame = preview.getBoundingClientRect().toJSON();
@@ -617,6 +676,43 @@ app.whenReady().then(async () => {
         }
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
     });
+    require("electron").ipcMain.handle("mindmap-fullscreen-grid", async (_event, options) => {
+        if (!win.webContents.debugger.isAttached()) {
+            win.webContents.debugger.attach("1.3");
+        }
+        await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
+            width: options.width, height: options.height, deviceScaleFactor: options.dpr, mobile: false,
+        });
+        await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+        const {data} = await win.webContents.debugger.sendCommand("Page.captureScreenshot", {format: "png"});
+        const image = require("electron").nativeImage.createFromBuffer(Buffer.from(data, "base64"));
+        const size = image.getSize();
+        if (Math.abs(size.width - options.width * options.dpr) > 1) {
+            throw new Error("Grid raster did not use the requested pixel density");
+        }
+        const bitmap = image.toBitmap();
+        const pixel = (x, y) => {
+            const offset = (y * size.width + x) * 4;
+            return [bitmap[offset], bitmap[offset + 1], bitmap[offset + 2]];
+        };
+        const background = pixel(Math.floor(options.background.x * options.dpr), Math.floor(options.background.y * options.dpr));
+        const radius = Math.ceil(1.5 * options.dpr);
+        return options.points.map(point => {
+            let difference = 0;
+            const centerX = Math.floor(point.x * options.dpr);
+            const centerY = Math.floor(point.y * options.dpr);
+            for (let y = centerY - radius; y <= centerY + radius; y++) {
+                for (let x = centerX - radius; x <= centerX + radius; x++) {
+                    pixel(x, y).forEach((value, channel) => {
+                        difference = Math.max(difference, Math.abs(value - background[channel]));
+                    });
+                }
+            }
+            return difference;
+        });
+    });
+    require("electron").ipcMain.handle("mindmap-fullscreen-grid-reset", () =>
+        win.webContents.debugger.sendCommand("Emulation.clearDeviceMetricsOverride"));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));
@@ -638,6 +734,7 @@ app.whenReady().then(async () => {
         });
         assert.match(result.stdout, /Mindmap fullscreen cases passed/);
     } finally {
-        rmSync(temporary, {recursive: true, force: true});
+        // Electron 子进程退出后文件句柄可能尚未释放，Windows 上需要重试删除。
+        rmSync(temporary, {recursive: true, force: true, maxRetries: 10, retryDelay: 100});
     }
 });

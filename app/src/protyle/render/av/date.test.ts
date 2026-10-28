@@ -1,9 +1,8 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("date inputs keep native arrow keys while allowing Escape to close the panel", () => {
     const inputs = Array.from({length: 4}, () => {
@@ -16,10 +15,9 @@ test("date inputs keep native arrow keys while allowing Escape to close the pane
             listeners,
         };
     });
-    const exports = {} as typeof import("./date");
-    runInNewContext(transpileModule(readFileSync(join(__dirname, "date.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-    }).outputText, {exports, require: () => ({})});
+    const exports = loadModule<typeof import("./date")>(join(__dirname, "date.ts"), {
+        require: () => ({}),
+    }, ScriptTarget.ES2020);
     exports.bindDateEvent({menuElement: {querySelectorAll: () => inputs}} as unknown as
         Parameters<typeof exports.bindDateEvent>[0]);
     for (const input of inputs.slice(0, 2)) {

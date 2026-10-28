@@ -70,8 +70,6 @@ export interface ListMindmapViewOptions {
     onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
     isTaskCompletionToggle?: (event: KeyboardEvent) => boolean;
-    onUndo?: () => void | Promise<void>;
-    onRedo?: () => void | Promise<void>;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
     onNodesStyle?: (ids: string[], patch: Partial<ListMindmapNodeStyle>) => void;
     onNodeWidths?: (widths: {id: string, width: number}[], expected: string) => Promise<boolean>;
@@ -139,8 +137,6 @@ export class ListMindmapView {
         widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
     };
     private widthPending = false;
-    private undoState = {canUndo: false, canRedo: false, pending: false};
-    private historyPending = false;
     private inspectorFrame = 0;
     private revealInspectorHost = false;
     private readonly zoomLabel: HTMLSpanElement;
@@ -516,7 +512,6 @@ export class ListMindmapView {
         }
         if (this.inspector.contains(target) || this.inspectorPopover.contains(target) || this.buttons.get("style")?.contains(target) ||
             this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
-            this.buttons.get("undo")?.contains(target) || this.buttons.get("redo")?.contains(target) ||
             this.buttons.get("summary")?.contains(target) || this.buttons.get("multiSelect")?.contains(target) ||
             this.levelSelect?.contains(target)) {
             return;
@@ -555,49 +550,9 @@ export class ListMindmapView {
         return this.locked;
     }
 
-    public setUndoState(state: {canUndo: boolean, canRedo: boolean, pending?: boolean}) {
-        if (this.destroyed) {
-            return;
-        }
-        this.undoState = {...state, pending: !!state.pending};
-        this.updateUndoControls();
-    }
-
-    private updateUndoControls() {
-        const hidden = !this.undoState.canUndo && !this.undoState.canRedo && !this.historyPending;
-        for (const key of ["undo", "redo"] as const) {
-            const button = this.buttons.get(key);
-            if (button) {
-                button.hidden = hidden;
-                button.disabled = this.readOnly || this.historyPending || this.undoState.pending ||
-                    !(key === "undo" ? this.undoState.canUndo : this.undoState.canRedo);
-            }
-        }
-        this.queueInspectorLayout();
-    }
-
-    private async runHistory(redo: boolean) {
-        if (this.readOnly || this.historyPending || this.buttons.get(redo ? "redo" : "undo")?.disabled) {
-            return;
-        }
-        this.historyPending = true;
-        this.updateUndoControls();
-        try {
-            this.closeInspectorPanel();
-            this.finishSummaryEdit?.(true);
-            this.finishRelationEdit?.(true);
-            const finished = await this.options.finishEdit?.();
-            if (finished !== false && !this.destroyed && !this.readOnly) {
-                await (redo ? this.options.onRedo?.() : this.options.onUndo?.());
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            this.historyPending = false;
-            if (!this.destroyed) {
-                this.updateUndoControls();
-            }
-        }
+    public finishLabels() {
+        this.finishSummaryEdit?.(true);
+        this.finishRelationEdit?.(true);
     }
 
     private activatePointer = (event: PointerEvent) => {
@@ -679,10 +634,6 @@ export class ListMindmapView {
     }
 
     private createToolbar() {
-        this.toolbar.style.top = this.toolbar.style.left = this.toolbar.style.right = this.toolbar.style.width =
-            this.toolbar.style.visibility = "";
-        const history = !this.readOnly && !!(this.options.onUndo || this.options.onRedo);
-        this.options.host.classList.toggle("mindmap-view--history", history);
         const controls = createElement("div", "mindmap-view__toolbar-group");
         const add = (id: string, key: string, icon: string, action: () => void, nodeAction = false, finish = true) => {
             const button = this.makeButton(key, icon, action, "", finish);
@@ -713,15 +664,6 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
         };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
-        if (history) {
-            for (const [key, icon] of [["undo", "iconUndo"], ["redo", "iconRedo"]] as const) {
-                if (key === "undo" ? this.options.onUndo : this.options.onRedo) {
-                    add(key, key, icon, () => void this.runHistory(key === "redo"), false, false);
-                    this.buttons.get(key).dataset.type = key;
-                }
-            }
-            this.updateUndoControls();
-        }
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
         add("lock", this.locked ? "listMindmapUnlock" : "listMindmapLock", this.locked ? "iconLock" : "iconUnlock", () => {
@@ -1161,15 +1103,16 @@ export class ListMindmapView {
             this.options.host.querySelector<HTMLElement>(`[data-mindmap-source-id="${id}"]`);
     }
 
-    private getToolbarBounds() {
+    private getToolbarBounds(includePopup = true) {
         const bounds: DOMRect[] = [];
         const toolbarStyle = getComputedStyle(this.toolbar);
         if (this.toolbar.hidden || toolbarStyle.display === "none" || toolbarStyle.visibility === "hidden" ||
             Number(toolbarStyle.opacity) === 0) {
             return bounds;
         }
-        // 顶部遮挡范围只包含可见控件及展开的缩放面板，不包含左侧空白区域。
-        this.toolbar.querySelectorAll<HTMLElement>(".mindmap-view__toolbar-group, .mindmap-view__zoom-actions")
+        // 节点定位避让可见控件及缩放面板；整图适配只考虑常驻按钮组，不包含左侧空白。
+        this.toolbar.querySelectorAll<HTMLElement>(includePopup ?
+            ".mindmap-view__toolbar-group, .mindmap-view__zoom-actions" : ".mindmap-view__toolbar-group")
             .forEach(control => {
                 const rect = control.getBoundingClientRect();
                 const style = getComputedStyle(control);
@@ -3426,21 +3369,21 @@ export class ListMindmapView {
         const viewport = this.viewport.getBoundingClientRect();
         const scaleY = viewport.height / (this.viewport.offsetHeight || viewport.height) || 1;
         let insetTop = 16;
-        // 整图适配在顶部控件下方缩放居中，外层缩放的屏幕尺寸换算为画布局部尺寸。
-        this.getToolbarBounds().forEach(bounds => {
+        // 只为全屏常驻按钮组预留空间，文档内工具栏和临时浮层不缩小整图适配范围。
+        const toolbarBounds = this.options.host.classList.contains("fullscreen") ? this.getToolbarBounds(false) : [];
+        toolbarBounds.forEach(bounds => {
             if (bounds.right > viewport.left && bounds.left < viewport.right &&
                 bounds.bottom > viewport.top && bounds.top < viewport.bottom) {
                 insetTop = Math.max(insetTop, (bounds.bottom - viewport.top) / scaleY + 16);
             }
         });
-        // 底部为菜单、外侧间距和横向滚动条留出空间，避免选中节点时画布跳动。
-        const insetBottom = 66;
+        const insetBottom = 16;
         const availableWidth = Math.max(1, width - 48);
         const availableHeight = Math.max(1, height - insetTop - insetBottom);
         this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
             availableHeight / Math.max(1, bottom - top))));
         this.offsetX = width / 2 - (left + right) * this.scale / 2;
-        // 达到最小缩放仍无法容纳整图时，优先保证顶部正文避开工具栏。
+        // 达到最小缩放仍无法容纳整图时，优先保证顶部正文留在可用区域内。
         this.offsetY = (bottom - top) * this.scale > availableHeight ? insetTop - top * this.scale :
             insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();
@@ -3722,8 +3665,7 @@ export class ListMindmapView {
     }
 
     private queueInspectorLayout(reveal = false) {
-        const history = !this.readOnly && !!(this.options.onUndo || this.options.onRedo);
-        if (this.destroyed || this.inspector.hidden && !reveal && !history) {
+        if (this.destroyed || this.inspector.hidden && !reveal) {
             return;
         }
         this.revealInspectorHost ||= reveal;
@@ -3737,7 +3679,6 @@ export class ListMindmapView {
             if (this.destroyed) {
                 return;
             }
-            this.positionToolbar();
             if (this.inspector.hidden || this.readOnly) {
                 return;
             }
@@ -3787,26 +3728,9 @@ export class ListMindmapView {
         this.inspector.style.bottom = `${this.options.host.clientTop + this.options.host.clientHeight -
             (visible.bottom - host.top) / scaleY + 8}px`;
         // 可见条带放不下操作栏时保留选择，滚动回足够的空间后恢复显示。
-        const toolbarHeight = !this.readOnly && (this.options.onUndo || this.options.onRedo) ? this.toolbar.offsetHeight + 4 : 0;
         this.inspector.style.visibility = width <= 0 ||
-            (visible.bottom - visible.top) / scaleY < toolbarHeight + this.inspector.offsetHeight + 16 ? "hidden" : "";
+            (visible.bottom - visible.top) / scaleY < this.inspector.offsetHeight + 16 ? "hidden" : "";
         this.positionInspectorPanel();
-    }
-
-    private positionToolbar() {
-        if (this.readOnly || !(this.options.onUndo || this.options.onRedo)) {
-            return;
-        }
-        const host = this.options.host.getBoundingClientRect();
-        const visible = this.getVisibleViewportBounds();
-        const scaleX = host.width / this.options.host.offsetWidth || 1;
-        const scaleY = host.height / this.options.host.offsetHeight || 1;
-        this.toolbar.style.left = `${(visible.left - host.left) / scaleX - this.options.host.clientLeft}px`;
-        this.toolbar.style.right = "auto";
-        this.toolbar.style.width = `${Math.max(0, (visible.right - visible.left) / scaleX)}px`;
-        this.toolbar.style.top = `${Math.max(0, (visible.top - host.top) / scaleY - this.options.host.clientTop)}px`;
-        this.toolbar.style.visibility = visible.right <= visible.left ||
-            (visible.bottom - visible.top) / scaleY < this.toolbar.offsetHeight + 8 ? "hidden" : "";
     }
 
     private positionInspectorPanel() {
@@ -3879,6 +3803,82 @@ export class ListMindmapView {
     }
 
     private makePaletteRow(palette: HTMLElement, controls: HTMLElement[], columns = 8) {
+        palette.querySelectorAll(".color__square--current").forEach(control => {
+            control.insertAdjacentHTML("beforeend",
+                '<svg class="color__square-mark" aria-hidden="true"><use xlink:href="#iconSelect"></use></svg>');
+        });
+        // 触屏沿用原生横向滚动，鼠标支持拖动和滚轮浏览；拖动完成后不触发色卡点击。
+        let drag: {id: number, x: number, scroll: number, scale: number};
+        let moved = false;
+        let wheelTimer: number;
+        const snap = () => {
+            if (!drag) {
+                palette.removeAttribute("data-scrolling");
+            }
+        };
+        palette.addEventListener("pointerdown", (event: PointerEvent) => {
+            moved = false;
+            if (event.pointerType !== "mouse" || event.button !== 0 ||
+                palette.scrollWidth <= palette.clientWidth) {
+                return;
+            }
+            drag = {id: event.pointerId, x: event.clientX, scroll: palette.scrollLeft,
+                scale: palette.getBoundingClientRect().width / palette.offsetWidth || 1};
+        });
+        palette.addEventListener("pointermove", (event: PointerEvent) => {
+            if (!drag || event.pointerId !== drag.id) {
+                return;
+            }
+            const delta = (event.clientX - drag.x) / drag.scale;
+            if (!moved && Math.abs(delta) < 4) {
+                return;
+            }
+            if (!moved) {
+                moved = true;
+                palette.setAttribute("data-scrolling", "");
+                palette.setPointerCapture(event.pointerId);
+                this.tooltip.hidden = true;
+            }
+            palette.scrollLeft = drag.scroll - delta;
+            event.preventDefault();
+        });
+        const end = (event: PointerEvent) => {
+            if (drag?.id === event.pointerId) {
+                drag = undefined;
+                snap();
+            }
+        };
+        palette.addEventListener("pointerup", end);
+        palette.addEventListener("pointercancel", end);
+        palette.addEventListener("lostpointercapture", end);
+        palette.addEventListener("pointerleave", () => {
+            if (!moved) {
+                drag = undefined;
+                snap();
+            }
+        });
+        palette.addEventListener("click", event => {
+            if (moved && event.detail !== 0) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+            moved = false;
+        }, {capture: true});
+        palette.addEventListener("wheel", (event: WheelEvent) => {
+            if (event.ctrlKey || event.metaKey || palette.scrollWidth <= palette.clientWidth) {
+                return;
+            }
+            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+            if (delta) {
+                palette.setAttribute("data-scrolling", "");
+                window.clearTimeout(wheelTimer);
+                const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+                    event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
+                palette.scrollLeft += delta * unit;
+                wheelTimer = window.setTimeout(snap, 160);
+                event.preventDefault();
+            }
+        }, {passive: false});
         const row = createElement("div", "mindmap-view__palette-row");
         row.style.setProperty("--mindmap-palette-columns", String(columns - controls.length));
         row.style.setProperty("--mindmap-toolbar-columns", String(columns));
@@ -3945,7 +3945,10 @@ export class ListMindmapView {
                 lines.setAttribute("aria-label", this.label("listMindmapLineColor"));
                 [{label: this.label("default"), value: ""}, ...(this.options.colors?.() || [])].forEach(item => {
                     const control = button("color", "", () => change({lineColor: item.value}));
+                    const selected = panel.ids.every(id => (this.model.metadata.nodes[id]?.lineColor || "") === item.value);
                     control.setAttribute("aria-label", item.label);
+                    control.setAttribute("aria-pressed", String(selected));
+                    control.classList.toggle("color__square--current", selected);
                     control.style.backgroundColor = item.value || "var(--b3-theme-background)";
                     lines.append(control);
                 });
@@ -3965,7 +3968,7 @@ export class ListMindmapView {
             slider.value = String(panel.slider);
             slider.setAttribute("aria-label", this.label("width"));
             slider.dataset.widthControl = "slider";
-            const width = createElement("input", "b3-text-field b3-text-field--size");
+            const width = createElement("input", "b3-text-field b3-text-field--small");
             width.type = "number";
             width.min = "32";
             width.step = "1";
@@ -4060,8 +4063,7 @@ export class ListMindmapView {
             const summary = this.model.metadata.summaries?.find(item => item.id === this.selectedSummary);
             if (summary) {
                 color(summary.color, value => this.options.onSummaryChange?.(summary.id, {color: value}),
-                    [squareButton("edit", "iconEdit", () => this.editSummaryLabel(summary.id)),
-                        squareButton("delete", "iconTrashcan", () => this.options.onSummaryDelete?.(summary.id))]);
+                    [squareButton("delete", "iconTrashcan", () => this.options.onSummaryDelete?.(summary.id))]);
             }
             return;
         }

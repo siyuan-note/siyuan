@@ -59,7 +59,7 @@
     cursor: pointer;
     height: 16px;
     background-color: var(--b3-theme-surface);
-    z-index: 1; // 防止被 protyle-scroll 遮挡
+    z-index: 7; // 防止被图片缩放手柄和 protyle-scroll 遮挡
     white-space: nowrap;
 
     &:hover {

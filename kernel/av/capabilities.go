@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package av
 
 import "sort"
@@ -130,10 +134,6 @@ var filterOperators = []FilterOperator{
 	FilterOperatorIsLess, FilterOperatorIsLessOrEqual, FilterOperatorContains, FilterOperatorDoesNotContain,
 	FilterOperatorContainsAnyItem, FilterOperatorDoesNotContainAnyItem, FilterOperatorIsEmpty, FilterOperatorIsNotEmpty,
 	FilterOperatorStartsWith, FilterOperatorEndsWith, FilterOperatorIsBetween, FilterOperatorIsTrue, FilterOperatorIsFalse,
-}
-
-func FilterOperators() []FilterOperator {
-	return append([]FilterOperator(nil), filterOperators...)
 }
 
 func IsDateKeyType(typ KeyType) bool {

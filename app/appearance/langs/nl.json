@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Veldindeling van het databasepaneel",
+	"databaseAttrLayoutTip": "Stelt de veldindeling in het databasepaneel bovenaan het document en het afzonderlijke itempaneel in; bij onvoldoende ruimte wordt automatisch één kolom gebruikt",
+	"databaseAttrLayoutSingle": "Eén kolom",
+	"databaseAttrLayoutRow": "Twee kolommen (per rij)",
+	"databaseAttrLayoutColumn": "Twee kolommen (per kolom)",
+	"mathDelimiterCompatibility": "LaTeX-formulescheidingstekens herkennen bij plakken en importeren",
+	"mathDelimiterCompatibilityTip": "Indien ingeschakeld worden \\(...\\) en \\[...\\] in geplakte en geïmporteerde inhoud automatisch herkend als respectievelijk inline- en blokformules",
 	"automationCollectionScopeLimit": "Het bewakingsbereik kan maximaal 32 notitieboeken of documenten bevatten",
 	"pdfAnnotationSaveFailed": "PDF-annotaties kunnen niet worden opgeslagen. Open de PDF opnieuw om de nieuwste annotaties te laden voordat je verder bewerkt",
 	"skipExitSync": "Synchronisatie overslaan en afsluiten",

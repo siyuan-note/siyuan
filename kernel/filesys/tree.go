@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package filesys
 
@@ -154,7 +142,6 @@ func ValidateBoxRelativePath(boxID, p string) (string, error) {
 	p = filepath.ToSlash(p)
 	// 记录原始路径用于 IsSubPath 校验
 	origP := p
-	// 标准化：去掉前导 /
 	p = strings.TrimPrefix(p, "/")
 	// 根路径直接放行（box 根目录本身是合法路径）
 	if p == "" {
@@ -388,7 +375,7 @@ type documentHeader struct {
 }
 
 func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	mode, err := DocumentAddressingMode(boxID)
 	if err != nil {
 		return nil, err
@@ -397,7 +384,7 @@ func readDocumentHeader(absPath string, strict bool) (*documentHeader, error) {
 }
 
 func readDocumentHeaderInMode(absPath string, strict bool, mode int) (*documentHeader, error) {
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
 		return nil, err
@@ -440,7 +427,7 @@ var ErrInvalidDocIAL = errors.New("invalid document properties")
 func DocIAL(absPath string) (ret map[string]string, err error) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
 	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
-	boxID := docIALBoxID(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	mode, err := DocumentAddressingMode(boxID)
 	if err != nil {
 		return nil, err

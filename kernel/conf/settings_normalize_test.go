@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package conf
 
 import (
@@ -27,6 +31,40 @@ func TestNormalizeSettingsEditorCompatibility(t *testing.T) {
 	}
 	if NormalizeEditor(nil).Markdown == nil {
 		t.Fatal("missing editor defaults")
+	}
+}
+
+func TestNormalizeSettingsDatabaseAttrLayout(t *testing.T) {
+	for _, entry := range []struct {
+		input string
+		want  int
+	}{
+		{`{}`, 1}, {`{"databaseAttrLayout":null}`, 1}, {`{"databaseAttrLayout":0}`, 0},
+		{`{"databaseAttrLayout":1}`, 1}, {`{"databaseAttrLayout":2}`, 2},
+		{`{"databaseAttrLayout":-1}`, 1}, {`{"databaseAttrLayout":3}`, 1},
+	} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(entry.input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		got := NormalizeEditor(&editor)
+		if got.DatabaseAttrLayout == nil || *got.DatabaseAttrLayout != entry.want {
+			t.Fatalf("%s: unexpected database field layout: %+v", entry.input, got)
+		}
+		encoded, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var saved Editor
+		if err = json.Unmarshal(encoded, &saved); err != nil {
+			t.Fatal(err)
+		}
+		if *NormalizeEditor(&saved).DatabaseAttrLayout != entry.want {
+			t.Fatal("normalization changed the saved preference")
+		}
+	}
+	if *NewEditor().DatabaseAttrLayout != 1 || *NormalizeEditor(nil).DatabaseAttrLayout != 1 {
+		t.Fatal("new and missing editor settings must use row-first two columns")
 	}
 }
 

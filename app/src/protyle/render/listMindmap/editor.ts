@@ -583,7 +583,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             `[data-type="NodeAttributeView"][data-node-id="${avOverlay.dataset.avBlockId}"]`)) {
             return true;
         }
-        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog");
+        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog, .protyle-breadcrumb__history");
     };
     document.addEventListener("pointerdown", event => {
         if (options.isPanTarget?.(event)) {

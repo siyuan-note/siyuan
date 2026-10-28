@@ -68,7 +68,7 @@ jobs:
           pkgdesc="auto upload to AUR when SiYuan stable release"
           arch=("x86_64")
           url="https://b3log.org/siyuan"
-          license=("AGPL-3.0-only")
+          license=("AGPL-3.0-or-later")
           options=("!strip" "!debug")
           depends=("fuse2")
           optdepends=('pandoc: docx export')

@@ -130,18 +130,6 @@
     padding: 4px;
   }
 
-  &--history &__toolbar-group {
-    gap: 3px;
-  }
-
-  &--history &__toolbar {
-    box-sizing: border-box;
-  }
-
-  &--history &__spacer {
-    display: none;
-  }
-
   &__spacer {
     flex: 1;
   }
@@ -270,9 +258,12 @@
     border: 1px solid currentColor;
     border-radius: var(--b3-border-radius);
     overflow: hidden;
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px),
+    radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px),
+    radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px);
+    // 横纵点线组成 96px 大格，每 12px 一点；网格固定于取景框，不随导图缩放。
+    background-size: 12px 96px, 96px 12px;
     background-position: center;
     box-sizing: border-box;
     z-index: 4;
@@ -289,6 +280,7 @@
       bottom: 0;
       left: 50%;
       border-left: 1px dashed currentColor;
+      transform: translateX(-50%);
     }
 
     &::after {
@@ -296,6 +288,7 @@
       right: 0;
       top: 50%;
       border-top: 1px dashed currentColor;
+      transform: translateY(-50%);
     }
   }
 
@@ -1026,6 +1019,16 @@
       width: 100%;
       order: 0;
       scrollbar-width: none;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: max(0px, calc((100% / var(--mindmap-palette-columns) - 26px) / 2));
+
+      &[data-scrolling] {
+        scroll-snap-type: none;
+      }
+
+      > .color__square {
+        scroll-snap-align: start;
+      }
     }
   }
 
@@ -1052,7 +1055,9 @@
 
     .b3-text-field {
       grid-column: span 2;
-      width: 100%;
+      // 两侧控件按相同外边界排列，滑块左右留白随列宽保持一致。
+      width: calc(50% + 26px);
+      max-width: 100%;
       min-width: 0;
     }
 
@@ -1060,6 +1065,8 @@
       grid-column: span 4;
       width: 100%;
       min-width: 0;
+      margin: 0;
+      box-sizing: border-box;
     }
 
     .color__square {

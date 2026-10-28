@@ -1,7 +1,13 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package sql
 
 import (
+	"context"
 	gosql "database/sql"
+	"fmt"
 	"math"
 	"testing"
 )
@@ -55,6 +61,99 @@ func TestQueryRowLimit(t *testing.T) {
 	rows, err := Query(`SELECT n FROM items WHERE content LIKE '%a%' ESCAPE '\' ORDER BY n`, 3)
 	if err != nil || len(rows) != 3 {
 		t.Fatalf("raw fallback exceeded default limit: %v %v", rows, err)
+	}
+}
+
+// 带参查询与资源内容查询同样以 limit 为上限：语句未写 LIMIT 时不得多返回一行，
+// 否则以 len(rows) == limit 判定截断的调用方会误认结果未截断。
+func TestRawStatementQueriesHonourRowLimit(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() { _ = testDB.Close() })
+	previousDB, previousAssetDB := db, assetContentDB
+	db, assetContentDB = testDB, testDB
+	t.Cleanup(func() { db, assetContentDB = previousDB, previousAssetDB })
+	if _, err = testDB.Exec("CREATE TABLE items (n INTEGER, content TEXT); INSERT INTO items VALUES (1, 'a'), (2, 'a'), (3, 'a'), (4, 'a'), (5, 'a')"); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, limit := range []int{1, 3, 5} {
+		rows, queryErr := queryRawStmtArgs("SELECT n FROM items WHERE n >= ? ORDER BY n", []any{1}, limit)
+		if queryErr != nil || len(rows) != limit {
+			t.Fatalf("queryRawStmtArgs limit=%d: got %d rows, err=%v", limit, len(rows), queryErr)
+		}
+		assetRows, assetErr := queryAssetContentRawStmt("SELECT n FROM items WHERE n >= ? ORDER BY n", []any{1}, limit)
+		if assetErr != nil || len(assetRows) != limit {
+			t.Fatalf("queryAssetContentRawStmt limit=%d: got %d rows, err=%v", limit, len(assetRows), assetErr)
+		}
+		assets := selectAssetContentsRawStmt("SELECT n, content, '', content, 0, 0, content FROM items WHERE n >= ? ORDER BY n", []any{1}, limit)
+		if len(assets) != limit {
+			t.Fatalf("selectAssetContentsRawStmt limit=%d: got %d rows", limit, len(assets))
+		}
+	}
+
+	// 语句自带 LIMIT 时由语句决定行数，本层不再截断。
+	rows, err := queryRawStmtArgs("SELECT n FROM items ORDER BY n LIMIT 2", nil, 3)
+	if err != nil || len(rows) != 2 {
+		t.Fatalf("statement limit was overridden: %d rows, err=%v", len(rows), err)
+	}
+}
+
+func TestBlockRawStatementRowLimitsInBothDatabases(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() { db = previousDB })
+	for i := 1; i <= 5; i++ {
+		insertEncryptedQueryTestBlock(t, testDB, fmt.Sprintf("row-%d", i), "", "root", "p")
+	}
+	const statement = "SELECT * FROM blocks ORDER BY id"
+	for _, scenario := range []struct {
+		name string
+		run  func(string, int) (int, error)
+	}{
+		{"global block args", func(stmt string, limit int) (int, error) {
+			rows := SelectBlocksRawStmtArgs(stmt, nil, limit)
+			return len(rows), nil
+		}},
+		{"global block no parse", func(stmt string, limit int) (int, error) {
+			return len(SelectBlocksRawStmtNoParse(stmt, limit)), nil
+		}},
+		{"encrypted block args", func(stmt string, limit int) (int, error) {
+			rows, err := SelectBlocksRawStmtArgsInBoxContext(context.Background(), stmt, nil, limit, boxID)
+			return len(rows), err
+		}},
+		{"encrypted block no parse", func(stmt string, limit int) (int, error) {
+			return len(SelectBlocksRawStmtNoParseInBox(stmt, limit, boxID)), nil
+		}},
+		{"encrypted map", func(stmt string, limit int) (int, error) {
+			rows, err := queryRawStmtForBox(boxID, stmt, limit)
+			return len(rows), err
+		}},
+		{"encrypted map args", func(stmt string, limit int) (int, error) {
+			rows, err := queryRawStmtArgsForBox(boxID, stmt, nil, limit)
+			return len(rows), err
+		}},
+		{"encrypted map args context", func(stmt string, limit int) (int, error) {
+			rows, err := queryRawStmtArgsForBoxContext(context.Background(), boxID, stmt, nil, limit)
+			return len(rows), err
+		}},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			for _, limit := range []int{1, 3, 5, 6} {
+				count, err := scenario.run(statement, limit)
+				if err != nil || count != min(limit, 5) {
+					t.Fatalf("limit %d: count=%d, err=%v", limit, count, err)
+				}
+			}
+			count, err := scenario.run(statement+" LIMIT 4", 1)
+			if err != nil || count != 4 {
+				t.Fatalf("explicit SQL limit must take precedence: count=%d, err=%v", count, err)
+			}
+		})
 	}
 }
 

@@ -1,19 +1,12 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {readFileSync} from "node:fs";
-import {join} from "node:path";
-import {runInNewContext} from "node:vm";
-import * as ts from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import {registerEditorSave, trackEditorSaveRequest} from "./editorSave";
 
-const source = (path: string) => ts.transpileModule(readFileSync(join(__dirname, path), "utf8"), {
-    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-}).outputText;
-
 const loadFetch = (fetchImplementation: typeof fetch) => {
-    const exports: {fetchPost?: (...args: any[]) => Promise<void>, fetchSyncPost?: (...args: any[]) => Promise<unknown>} = {};
-    runInNewContext(source("../../util/fetch.ts"), {
-        exports,
+    const exports = loadModule<{fetchPost?: (...args: any[]) => Promise<void>, fetchSyncPost?: (...args: any[]) => Promise<unknown>}>(
+        "src/util/fetch.ts", {
         require: (name: string) => {
             switch (name) {
                 case "./fetchWithAppId": return {fetchWithAppId: fetchImplementation};
@@ -31,7 +24,7 @@ const loadFetch = (fetchImplementation: typeof fetch) => {
         FormData,
         window: {siyuan: {languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
         console: {warn: () => {}},
-    });
+    }, ScriptTarget.ES2020);
     return exports;
 };
 
@@ -46,14 +39,11 @@ const request = (session = "drawer", action = "update", id = "block") => ({
 const success = {code: 0, data: [{doOperations: [{action: "update"}]}]};
 const response = (data: unknown) => new Response(JSON.stringify(data), {headers: {"Content-Type": "application/json"}});
 
-const loadSyncSaves = () => {
-    const exports = {} as Pick<typeof import("./editorSave"),
-        "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion" |
-        "registerSyncEditorSave" | "disposeSyncEditorSave">;
-    runInNewContext(source("editorSave.ts"), {exports,
-        window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}}});
-    return exports;
-};
+const loadSyncSaves = () => loadModule<Pick<typeof import("./editorSave"),
+    "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion" |
+    "registerSyncEditorSave" | "disposeSyncEditorSave">>("src/protyle/util/editorSave.ts", {
+        window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}},
+    }, ScriptTarget.ES2020);
 
 test("sync preparation waits for ordinary unregistered editor requests and rejects earlier unconfirmed saves", async () => {
     const saves = loadSyncSaves();
@@ -157,9 +147,9 @@ test("editor destruction cancels pending title input and removes its sync save f
     saves.registerSyncEditorSave(protyle);
     await saves.trackEditorSaveRequest("/api/transactions", request(protyle.id), Promise.resolve({code: -1}));
     await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
-    const exports = {} as Pick<typeof import("./destroy"), "destroy">;
-    runInNewContext(source("destroy.ts"), {exports, require: (name: string) =>
-        name === "./editorSave" ? saves : new Proxy({}, {get: () => noop})});
+    const exports = loadModule<Pick<typeof import("./destroy"), "destroy">>("src/protyle/util/destroy.ts", {
+        require: (name: string) => name === "./editorSave" ? saves : new Proxy({}, {get: () => noop}),
+    }, ScriptTarget.ES2020);
     exports.destroy(protyle);
     assert.equal(cancelled, true);
     await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
@@ -298,9 +288,7 @@ test("Title flushes debounce once, captures composition, and can cancel pending 
     let nextTimer = 0;
     const timers = new Map<number, () => void>();
     const requests: unknown[] = [];
-    const exports: {Title?: {prototype: any}} = {};
-    runInNewContext(source("../header/Title.ts"), {
-        exports,
+    const exports = loadModule<{Title?: {prototype: any}}>("src/protyle/header/Title.ts", {
         require: (name: string) => {
             if (name === "../../util/fetch") return {fetchPost: (_url: string, data: unknown) => requests.push(data)};
             if (name === "../../editor/rename") return {validateName: () => true, normalizeDocumentTitle: (name: string) => name};
@@ -310,7 +298,7 @@ test("Title flushes debounce once, captures composition, and can cancel pending 
         },
         window: {setTimeout: (callback: () => void) => {timers.set(++nextTimer, callback); return nextTimer;}},
         clearTimeout: (timer: number) => timers.delete(timer),
-    });
+    }, ScriptTarget.ES2020);
     const title = Object.create(exports.Title.prototype);
     const protyle = editor();
     title.protyle = protyle;

@@ -1,9 +1,6 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import {resolveMobileSidebarConfig} from "./mobileBarsConfig";
 
 test("sidebar switches retain one entry and preserve unrelated configuration", async () => {
@@ -18,11 +15,8 @@ test("sidebar switches retain one entry and preserve unrelated configuration", a
     }]));
     let saves = 0;
     let updates = 0;
-    const moduleExports: {mountSidebarSetting?: (root: unknown) => void} = {};
-    const source = readFileSync(resolve(process.cwd(), "src/mobile/util/sidebarSetting.ts"), "utf8");
-    const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-    runInNewContext(code, {
-        exports: moduleExports,
+    const moduleExports = loadModule<{mountSidebarSetting?: (root: unknown) => void}>(
+        "src/mobile/util/sidebarSetting.ts", {
         window: {siyuan: {config: {readonly: false, appearance: {mobileBars}}, isPublish: false}},
         require: (name: string) => {
             if (name === "./mobileBarsConfig") {

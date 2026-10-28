@@ -1,38 +1,56 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
 	"encoding/json"
-	"github.com/88250/gulu"
-	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 )
 
 func TestAPIContractAccountLoginResponses(t *testing.T) {
-	for _, result := range []*gulu.Result{
-		{Code: -1, Msg: "offline"},
-		{Code: 1, Msg: "captcha", Data: map[string]any{"userName": nil, "token": nil, "needCaptcha": "user-id"}},
-		{Code: 10, Data: map[string]any{"userName": nil, "token": "second-factor", "needCaptcha": nil}},
-		{Code: 0, Data: map[string]any{"userName": "user", "token": "token", "needCaptcha": nil}},
+	str := func(value string) *string { return &value }
+	for _, test := range []struct {
+		name string
+		code int
+		msg  string
+		data *apicontract.AccountLoginData
+		want string
+	}{
+		// 云端失败时由模型层给出本地提示，载荷为 null。
+		{name: "offline", code: -1, msg: "offline", want: `{"code":-1,"msg":"offline","data":null}`},
+		// 需要验证码时仍然返回 needCaptcha（值为 user id）。
+		{name: "captcha", code: 1, msg: "captcha", data: &apicontract.AccountLoginData{NeedCaptcha: str("user-id")},
+			want: `{"code":1,"msg":"captcha","data":{"userName":null,"token":null,"needCaptcha":"user-id"}}`},
+		// 云端返回的其他码原样透传。
+		{name: "second factor", code: 10, data: &apicontract.AccountLoginData{Token: str("second-factor")},
+			want: `{"code":10,"msg":"","data":{"userName":null,"token":"second-factor","needCaptcha":null}}`},
+		{name: "success", code: 0, data: &apicontract.AccountLoginData{UserName: str("user"), Token: str("token")},
+			want: `{"code":0,"msg":"","data":{"userName":"user","token":"token","needCaptcha":null}}`},
 	} {
-		recorder := httptest.NewRecorder()
-		context, _ := gin.CreateTestContext(recorder)
-		context.JSON(200, accountLoginResponse(result))
-		requireAPIContract(t, "POST", "/api/account/login", recorder)
-		original, _ := json.Marshal(result)
-		var before, after map[string]any
-		if err := json.Unmarshal(original, &before); err != nil {
-			t.Fatal(err)
-		}
-		if err := json.Unmarshal(recorder.Body.Bytes(), &after); err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(before, after) {
-			t.Fatalf("login response changed: %s != %s", original, recorder.Body.String())
-		}
+		t.Run(test.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			context, _ := gin.CreateTestContext(recorder)
+			context.JSON(200, apicontract.AccountLogin.FailureWithData(test.code, test.msg, test.data))
+			requireAPIContract(t, "POST", "/api/account/login", recorder)
+			var got, want map[string]any
+			if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+				t.Fatalf("%s: %s", recorder.Body.String(), err)
+			}
+			if err := json.Unmarshal([]byte(test.want), &want); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(want, got) {
+				t.Fatalf("login response changed: %s != %s", recorder.Body.String(), test.want)
+			}
+		})
 	}
 }
 

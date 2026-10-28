@@ -10,6 +10,31 @@ const source = ts.transpileModule(readFileSync(join(__dirname, "assets.ts"), "ut
     compilerOptions: {module: ts.ModuleKind.CommonJS},
 }).outputText;
 
+test("database field layout preference updates existing global styles and defaults to row-first two columns", async () => {
+    const api = {} as typeof import("./assets");
+    const editor: {fontSize: number, databaseAttrLayout?: number} = {fontSize: 16};
+    const style = {innerHTML: ""};
+    runInNewContext(source, {
+        exports: api,
+        window: {siyuan: {config: {editor}}},
+        document: {getElementById: () => style},
+        require: (id: string) => {
+            if (id === "../protyle/util/compatibility") return {
+                isMac: () => false, isIPad: () => false, isIPhone: () => false,
+                isWin11: async () => false, resolvePlatformClass: () => "body--windows",
+            };
+            if (id === "./hostCapabilities") return {getHostCapabilities: () => ({customAppearance: false})};
+            return new Proxy({}, {get: () => () => ""});
+        },
+    });
+    for (const value of [undefined, 0, 1, 2]) {
+        editor.databaseAttrLayout = value;
+        await api.setInlineStyle();
+        assert.match(style.innerHTML, new RegExp(`--b3-database-attr-columns: ${value === 0 ? 1 : 2}`));
+        assert.match(style.innerHTML, new RegExp(`--b3-database-attr-column-flow: ${value === 2 ? 1 : 0}`));
+    }
+});
+
 for (const [name, platformClass, win11, apple] of [
     ["Windows 11", "body--windows", true, false],
     ["Windows fallback", "body--windows", false, false],

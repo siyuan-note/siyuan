@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Rozloženie polí panela databázy",
+	"databaseAttrLayoutTip": "Nastaví rozloženie polí na paneli databázy v hornej časti dokumentu a na samostatnom paneli položky; pri nedostatku miesta sa automaticky použije jeden stĺpec",
+	"databaseAttrLayoutSingle": "Jeden stĺpec",
+	"databaseAttrLayoutRow": "Dva stĺpce (po riadkoch)",
+	"databaseAttrLayoutColumn": "Dva stĺpce (po stĺpcoch)",
+	"mathDelimiterCompatibility": "Rozpoznávať oddeľovače vzorcov LaTeX pri vkladaní a importe",
+	"mathDelimiterCompatibilityTip": "Ak je táto možnosť zapnutá, \\(...\\) a \\[...\\] vo vloženom a importovanom obsahu sa automaticky rozpoznajú ako riadkové a blokové vzorce",
 	"automationCollectionScopeLimit": "Rozsah sledovania môže obsahovať najviac 32 zápisníkov alebo dokumentov",
 	"pdfAnnotationSaveFailed": "Anotácie PDF sa nepodarilo uložiť. Pred ďalšími úpravami znova otvorte PDF a načítajte najnovšie anotácie",
 	"skipExitSync": "Preskočiť synchronizáciu a skončiť",

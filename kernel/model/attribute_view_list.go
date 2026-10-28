@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -51,7 +51,7 @@ func cloneAttributeViewLayouts(target, source *av.View) (err error) {
 	return
 }
 
-// attributeViewFieldIDs 按当前布局的字段顺序返回字段 ID。
+// attributeViewFieldIDs 按当前布局的字段顺序返回字段 ID，布局数据缺失时返回空列表。
 func attributeViewFieldIDs(view *av.View) (ret []string) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
@@ -61,12 +61,16 @@ func attributeViewFieldIDs(view *av.View) (ret []string) {
 			}
 		}
 	case av.LayoutTypeGallery:
-		for _, field := range view.Gallery.CardFields {
-			ret = append(ret, field.ID)
+		if nil != view.Gallery {
+			for _, field := range view.Gallery.CardFields {
+				ret = append(ret, field.ID)
+			}
 		}
 	case av.LayoutTypeKanban:
-		for _, field := range view.Kanban.Fields {
-			ret = append(ret, field.ID)
+		if nil != view.Kanban {
+			for _, field := range view.Kanban.Fields {
+				ret = append(ret, field.ID)
+			}
 		}
 	}
 	return

@@ -1,16 +1,13 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const position = (viewport: {innerWidth: number, innerHeight: number}, rect: {
     left: number, top: number, bottom: number, width: number
 }, labelWidth: number, height: number) => {
-    const methods = {} as typeof import("./selectPosition");
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/selectPosition.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {exports: methods, require: () => ({}), window: viewport});
+    const methods = loadModule<typeof import("./selectPosition")>("src/protyle/render/av/selectPosition.ts", {
+        require: () => ({}), window: viewport,
+    });
     const style = {} as CSSStyleDeclaration;
     const dropdown = {
         style,

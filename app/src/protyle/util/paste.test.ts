@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {normalizePictureImages} from "./pictureImages";
+import {htmlMathPaste, markdownMathPaste} from "./mathPaste";
 
 // 执行粘贴入口，替换剪贴板和上传接口，检查图片不会在受限片段中被丢弃。
 const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/util/paste.ts"), "utf8"), {
@@ -44,6 +45,7 @@ const createHarness = (disabled = false, richPaste = false) => {
         "./hasClosest": {hasClosestBlock: (): undefined => undefined},
         "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
         "./markdownClipboard": {shouldPasteMarkdownFromHTML: () => false},
+        "./mathPaste": {htmlMathPaste, markdownMathPaste},
         "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false,
             getTextSiyuanFromTextHTML: (html: string) => ({textSiyuan: "", textHtml: html})},
         "../upload": {
@@ -55,12 +57,13 @@ const createHarness = (disabled = false, richPaste = false) => {
     };
     const module = {exports: {}};
     runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
+        window: {siyuan: {config: {editor: {mathDelimiterCompatibility: true}}}},
         document: {createElement: () => ({content: {querySelector: (): null => null}})},
     });
     const api = module.exports as typeof import("./paste");
     const paste = (files: unknown[] = [], siyuanHTML = "", textPlain = "", textHTML = "") => api.paste({
         wysiwyg: {element: {}},
-        lute: {Md2BlockDOM: (html: string) => {
+        lute: {SetLatexMath: () => {}, Md2BlockDOM: (html: string) => {
             convertedHTML = html;
             convertedBy = "markdown";
             return `<div data-type="NodeParagraph">${html}</div>`;
@@ -69,7 +72,7 @@ const createHarness = (disabled = false, richPaste = false) => {
             convertedBy = "html";
             return `<div data-type="NodeParagraph">${html}</div>`;
         }},
-    } as IProtyle, {
+    } as unknown as IProtyle, {
         target: {}, stopPropagation() {}, preventDefault() {},
         clipboardData: {files, types: [], getData: (type: string) => type === "text/siyuan" ? siyuanHTML :
                 type === "text/plain" ? textPlain : type === "text/html" ? textHTML : ""},
@@ -210,6 +213,7 @@ describe("restricted cell selected text paste", () => {
             getAttribute: () => options.code ? "NodeCodeBlock" : "NodeParagraph"};
         const mocks: Record<string, unknown> = {
             "../../constants": {Constants: {ZWSP: "\u200b"}},
+            "./mathPaste": {htmlMathPaste, markdownMathPaste},
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => (html: string) => html,
                 isProtyleRichHTMLPasteEnabled: () => false,
@@ -250,11 +254,12 @@ describe("restricted cell selected text paste", () => {
                 return {querySelector: (): null => null, querySelectorAll: (): Element[] => [], body: {innerHTML: ""}};
             }},
             Lute: {Sanitize: (value: string) => value},
-            window: {siyuan: {languages: {cellPasteUnsupported: "Unsupported: ${x}"}}},
+            window: {siyuan: {config: {editor: {mathDelimiterCompatibility: true}},
+                languages: {cellPasteUnsupported: "Unsupported: ${x}"}}},
         });
         const protyle = {
             lite: true,
-            lute: {Md2BlockDOM: (value: string) => value},
+            lute: {SetLatexMath: () => {}, Md2BlockDOM: (value: string) => value},
             hint: {enableExtend: false},
             wysiwyg: {element: {querySelectorAll: (): Element[] => []}},
             toolbar: {range, getCurrentType: () => options.inlineCode ? ["code"] : [],

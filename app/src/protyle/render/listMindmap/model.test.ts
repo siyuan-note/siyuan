@@ -361,7 +361,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     for (const mobile of [false, true]) {
         const root = document.createElement("div");
         root.className = "protyle-wysiwyg";
-        root.innerHTML = lute.Md2BlockDOM("- Original\n  - Folded child\n");
+        root.innerHTML = lute.Md2BlockDOM("- Original\n  - Folded child\n- Following\n");
         const original = root.firstElementChild as HTMLElement;
         api.retagMindmapBranch(original, true);
         original.firstElementChild.setAttribute("fold", "1");
@@ -388,10 +388,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
+            matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
-            getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
-            hasUndoStateMirror: () => true,
-            subscribeUndoState: (_rootID: string, listener: () => void) => { listener(); return () => {}; },
             preserveUndoViewport: () => () => {},
             isEncryptedBox: () => false,
             setStorageVal: () => check.fail("Embedded previews cannot persist viewport positions"),
@@ -403,7 +401,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             showMessage: () => check.fail("Embedded edit failed"), globalClickHideMenu: () => {},
             hideAllElements: () => {}, hideElements: () => {}, suspendBlockPopover: () => () => {},
             getInlineStylesCache: () => ({}), getVisibleOrderedStyleKeys: (): string[] => [],
-            openListMindmapEditor: (options: any) => { editorOptions = options; return {finish: async () => true, destroy() {}}; },
+            openListMindmapEditor: (options: any) => {
+                editorOptions = options;
+                return {finish: async () => { options.onFinish(); return true; }, destroy() {}};
+            },
             genListItemElement: () => {
                 const holder = document.createElement("div");
                 holder.innerHTML = lute.Md2BlockDOM("- Added\n");
@@ -436,21 +437,66 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         copies.forEach(copy => controllers.push(new embedded.ListMindmapController(owner, copy)));
         const target = controllers[0];
         const itemID = copies[0].firstElementChild.getAttribute("data-node-id");
+        const followingID = target.model.root.children[1].id;
         await target.view.options.onNodeStyle(itemID, {backgroundColor: "#ff0000"});
         check.equal(api.readListMindmap(copies[1]).metadata.nodes[itemID].backgroundColor, "#ff0000");
         check.equal(operations[0].undoOperations[0].context.undoFocusEmbedId, "first");
         check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
         check.match(operations[0].doOperations[0].data as string, /Folded child/);
         await target.view.options.onAdd(itemID, "child");
-        check.equal(editorOptions.rootID, "source-document");
+        const addedID = target.view.getSelectedId();
+        check.notEqual(addedID, itemID);
+        check.equal(target.activeEditor, undefined, "new nodes remain selected without mounting an editor");
+        check.equal(editorOptions, undefined);
+        check.equal(document.activeElement, target.host, "new nodes retain the canvas keyboard focus");
         check.match(copies[1].textContent, /Added/);
+        // Direct typing opens the new node's editor and preserves the embedded source identity.
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "typing opens the newly selected node editor");
+        check.equal(editorOptions.node.id, addedID);
+        check.equal(editorOptions.replaceFirstParagraph, "x");
+        check.equal(editorOptions.rootID, "source-document");
         await target.finish();
-        target.activeEditor = undefined;
+        check.equal(target.activeEditor, undefined, "finishing text input releases the node editor");
         await target.undo(false);
         check.doesNotMatch(copies[0].textContent, /Added/);
         await target.undo(true);
         check.match(copies[0].textContent, /Added/);
         check.deepEqual(historyRoots, ["source-document", "source-document"]);
+        // An explicitly created sibling can be deleted immediately, without Esc.
+        editorOptions = undefined;
+        await target.view.options.onAdd(itemID, "sibling");
+        const siblingID = target.view.getSelectedId();
+        check.equal(target.activeEditor, undefined);
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.model.nodes.has(siblingID), false);
+        check.equal(target.view.getSelectedId(), itemID, "canceling a new sibling returns to its creation source instead of the following sibling");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, itemID,
+            "redo of the deletion also returns to the creation source");
+        check.equal(editorOptions, undefined, "deleting a newly selected node never opens an editor");
+        check.equal(target.model.nodes.has(addedID), true, "deleting the sibling preserves the previously added child");
+        await target.view.options.onAdd(itemID, "child");
+        const canceledChildID = target.view.getSelectedId();
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.model.nodes.has(canceledChildID), false);
+        check.equal(target.view.getSelectedId(), itemID, "canceling a new child returns to the parent even when sibling children remain");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, itemID);
+        // Entering editing ends the cancellation shortcut, even without changing the text.
+        await target.view.options.onAdd(itemID, "sibling");
+        const editedID = target.view.getSelectedId();
+        target.view.getContentHost(editedID).dispatchEvent(new MouseEvent("dblclick", {bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(editorOptions, "double-click opens the newly selected sibling editor");
+        check.equal(editorOptions.node.id, editedID);
+        check.equal(editorOptions.replaceFirstParagraph, undefined);
+        await target.finish();
+        target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true}));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(target.view.getSelectedId(), followingID, "after entering editing, deletion keeps the normal next-sibling policy");
+        check.equal(operations.at(-1).doOperations[0].context.undoFocusId, followingID);
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }
@@ -1206,8 +1252,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const nodeStyles: unknown[] = [];
     const fullscreenChanges: boolean[] = [];
     let interactions = 0;
-    let undo = 0;
-    let redo = 0;
     let settingsOpened = 0;
     const colorSettings: {kind: string, anchor?: HTMLButtonElement}[] = [];
     let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
@@ -1239,8 +1283,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             deletions.push(id);
         },
         onFold: (id: string) => folds.push(id),
-        onUndo: () => undo++,
-        onRedo: () => redo++,
         onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand, pan?: typeof panMenu) => {
             settingsOpened++;
             overflowExpand = expand;
@@ -1507,7 +1549,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual([navigationView.offsetX, navigationView.offsetY], hiddenToolbarTransform,
         "a hidden toolbar does not move a visible node");
 
-    // 高脑图实际点击适应画布后，整图在工具栏下方缩放居中，重复点击保持稳定。
+    // 实际点击适应画布时不为临时浮层预留空间，全屏仍避让常驻按钮组，重复点击保持稳定。
     const fittingSource = document.createElement("div");
     fittingSource.innerHTML = lute.Md2BlockDOM("* Root\n" +
         Array.from({length: 20}, (_value, index) => `  * Branch ${index}\n`).join(""));
@@ -1578,18 +1620,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(navigationView.scale < 1 && navigationView.scale > .15,
                 `the tall map needs an unconstrained fit, mode=${mode}, width=${width}, scale=${navigationView.scale}`);
             const viewportBounds = navigationViewport.getBoundingClientRect();
-            const toolbarBottom = Math.max(...navigationView.getToolbarBounds().filter((bounds: DOMRect) =>
+            const toolbarBottom = Math.max(...navigationView.getToolbarBounds(false).filter((bounds: DOMRect) =>
                 bounds.right > viewportBounds.left && bounds.left < viewportBounds.right).map((bounds: DOMRect) => bounds.bottom));
             const fittedContent = navigationView.contentBounds();
             const contentTop = viewportBounds.top + (fittedContent.top * navigationView.scale + navigationView.offsetY) * outerScale;
             const contentBottom = viewportBounds.top + (fittedContent.bottom * navigationView.scale + navigationView.offsetY) * outerScale;
-            check.ok(contentTop >= toolbarBottom + 15 * outerScale,
-                `fit leaves the whole map below the toolbar, mode=${mode}, width=${width}`);
-            check.ok(contentBottom <= viewportBounds.bottom - 65 * outerScale, "fit preserves the bottom panel clearance");
+            if (mode === "fullscreen") {
+                check.ok(contentTop >= toolbarBottom + 15 * outerScale,
+                    `fullscreen fit clears the persistent toolbar, width=${width}`);
+            } else {
+                check.ok(Math.abs(contentTop - viewportBounds.top - 16 * outerScale) < 1,
+                    `document fit ignores triggered toolbars and the zoom popup, mode=${mode}, width=${width}`);
+            }
+            check.ok(Math.abs(contentBottom - viewportBounds.bottom + 16 * outerScale) < 1,
+                "fit uses the bottom area without reserving space for the node menu");
             const fittedTransform = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
             await activateNavigationFit(mode === "focus", mode === "touch");
             check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
                 "repeated fit activation preserves scale and centering");
+            navigationHost.focus();
+            await moveNavigationPointer(false);
+            check.equal(getComputedStyle(navigationToolbar.querySelector(".mindmap-view__zoom-actions")).display, "none",
+                "the transient zoom popup can close after fitting");
+            navigationView.fit();
+            check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], fittedTransform,
+                "closing the transient popup does not change the fitted view");
             navigationToolbar.querySelector<HTMLButtonElement>('[aria-label="reset"]').click();
             check.equal(navigationView.scale, 1, "reset restores 100% independently of fit to canvas");
         }
@@ -1607,6 +1662,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const hiddenFitBounds = navigationView.contentBounds();
     check.ok(Math.abs(hiddenFitBounds.top * navigationView.scale + navigationView.offsetY - 16) < 1,
         "fitting with a hidden toolbar keeps the normal top margin");
+    const withoutInspector = [navigationView.scale, navigationView.offsetX, navigationView.offsetY];
+    navigationView.setReadOnly(false);
+    navigationView.setInteractionActive(true);
+    navigationView.selectNode(navigationView.model.root.children[0].id);
+    await settle();
+    check.equal(navigationInspector.hidden, false, "selecting a node opens the bottom menu");
+    check.ok(navigationInspector.getBoundingClientRect().height > 0, "the bottom menu occupies actual screen space");
+    navigationView.fit();
+    check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], withoutInspector,
+        "opening the bottom node menu does not shrink the fitted map");
+    navigationView.setInteractionActive(false);
+    await settle();
+    check.equal(navigationInspector.hidden, true, "leaving interaction mode hides the node menu");
+    navigationView.fit();
+    check.deepEqual([navigationView.scale, navigationView.offsetX, navigationView.offsetY], withoutInspector,
+        "hiding the bottom node menu keeps the fitted view stable");
     for (const background of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
         for (const width of [760, 320, 220]) {
             for (const fullscreen of [false, true]) {
@@ -1640,7 +1711,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                 lock.disabled = false;
                 check.ok(navigationView.getToolbarBounds().some((rect: DOMRect) =>
                     rect.left === groupBounds.left && rect.right === groupBounds.right && rect.bottom === groupBounds.bottom),
-                "fit and node reveal avoid the complete opaque toolbar group");
+                "node reveal measures the complete opaque toolbar group");
             }
         }
     }
@@ -1826,13 +1897,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(view.getContentHost(alpha).firstElementChild, editorMarker);
     view.setEditing();
     view.update(api.readListMindmap(list));
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').disabled, true,
-        "an empty history keeps undo disabled");
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').disabled, true);
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').hidden, true);
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').hidden, true);
-    check.equal(undo, 0);
-    check.equal(redo, 0);
+    check.equal(host.querySelector('[data-type="undo"], [data-type="redo"]'), null,
+        "history controls belong to the document action bar");
     finishAllowed = false;
     nodeElement(alpha).querySelector<HTMLButtonElement>(".mindmap-view__add-child").click();
     check.equal(additions.length, 0);
@@ -2132,7 +2198,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(fitButton.parentElement, toolbarPopup, "fit shares the zoom panel with the slider and reset");
     check.equal(toolbarGroup.querySelector(':scope > [aria-label="listMindmapFit"]'), null,
         "fit no longer occupies a separate top-level toolbar slot");
-    view.setUndoState({canUndo: true, canRedo: false});
     for (const width of [96, 180, 240, 260, 320, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
@@ -2186,7 +2251,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
         }
     }
-    view.setUndoState({canUndo: false, canRedo: false});
     host.style.cssText = originalHostStyle;
     host.focus();
     view.zoomAt(1);
@@ -2230,6 +2294,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     }
     const originalLineColors = options.colors;
     options.colors = () => Array.from({length: 15}, (_, i) => ({label: `Line ${i}`, value: `rgb(${i}, 0, 0)`}));
+    host.style.setProperty("--b3-list-hover", "rgba(100, 100, 100, .4)");
+    host.style.setProperty("--b3-menu-background", "#fff");
+    host.style.setProperty("--b3-border-color", "#888");
+    host.style.setProperty("--b3-theme-primary", "#3583ff");
     view.selectNode(alpha, true);
     for (const width of [240, 320, 760]) {
         host.style.width = `${width}px`;
@@ -2266,6 +2334,22 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(buttons[7].getBoundingClientRect().left >= palette.getBoundingClientRect().right - 1,
                 "the next color stays outside the first page");
         }
+        const selectedColor = palettes[0].querySelector<HTMLElement>(".color__square--current");
+        check.equal(getComputedStyle(selectedColor).boxShadow.match(/inset/g)?.length, 1,
+            "selection preserves the thin original border instead of shrinking the color fill");
+        check.equal(selectedColor.querySelector(".color__square-mark use")?.getAttribute("xlink:href"), "#iconSelect",
+            "selected node colors display a check mark");
+        check.equal(selectedColor.offsetWidth, 26);
+        check.equal(selectedColor.offsetHeight, 26);
+        const selectedLine = palettes[1].querySelector<HTMLElement>('[aria-pressed="true"]');
+        check.equal(selectedLine.getAttribute("aria-label"), "default");
+        check.ok(selectedLine.querySelector(".color__square-mark"), "multi-node line colors mark their common value");
+        await moveMouse();
+        for (const palette of palettes) {
+            await moveMouse(palette.children[6]);
+            check.equal(getComputedStyle(palette.children[6]).boxShadow, "rgb(53, 131, 255) 0px 0px 0px 1px inset",
+                "node and line hover use a uniform thin border inside the last visible color");
+        }
         const beforeSettings = nodeStyles.length;
         managers[0].focus();
         check.equal(host.querySelector('[role="tooltip"]').textContent, "listMindmapManageNodeColors");
@@ -2278,6 +2362,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(managers[1].getBoundingClientRect().left, managerLeft, "scrolling colors never scrolls the settings button");
         palettes[1].querySelector<HTMLButtonElement>('[aria-label="Line 14"]').click();
         check.deepEqual(nodeStyles.at(-1), [view.getSelectedIds(), {lineColor: "rgb(14, 0, 0)"}]);
+    }
+    const originalAlphaStyle = model.metadata.nodes[alpha];
+    const originalBetaStyle = model.metadata.nodes[beta];
+    for (const [alphaColor, betaColor] of [["rgb(2, 0, 0)", "rgb(2, 0, 0)"], ["rgb(2, 0, 0)", "rgb(3, 0, 0)"]]) {
+        model.metadata.nodes[alpha] = {...originalAlphaStyle, lineColor: alphaColor};
+        model.metadata.nodes[beta] = {...originalBetaStyle, lineColor: betaColor};
+        view.renderInspector();
+        inspector.querySelector<HTMLButtonElement>('[aria-label="color"]').click();
+        const lines = host.querySelectorAll<HTMLElement>(".mindmap-view__inspector-popover .mindmap-view__palette")[1];
+        const selected = lines.querySelectorAll('[aria-pressed="true"]');
+        check.equal(selected.length, alphaColor === betaColor ? 1 : 0, "mixed line colors never indicate a false common selection");
+        if (selected.length) {
+            check.equal(selected[0].getAttribute("aria-label"), "Line 2");
+            check.ok(selected[0].querySelector(".color__square-mark"));
+        }
+    }
+    if (originalAlphaStyle) {
+        model.metadata.nodes[alpha] = originalAlphaStyle;
+    } else {
+        delete model.metadata.nodes[alpha];
+    }
+    if (originalBetaStyle) {
+        model.metadata.nodes[beta] = originalBetaStyle;
+    } else {
+        delete model.metadata.nodes[beta];
     }
     options.nodeColors = () => Array.from({length: 13}, (_, i) => ({label: `Color ${i}`, color: `rgb(${i}, 0, 0)`, backgroundColor: "",
         preview: {color: `rgb(${i}, 0, 0)`, backgroundColor: ""}}));
@@ -2311,6 +2420,21 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const touchManager = touchPalette.nextElementSibling;
     const managerPosition = touchManager.getBoundingClientRect().left;
     const beforeColorSwipe = nodeStyles.length;
+    const settlePalette = async () => {
+        const deadline = performance.now() + 2000;
+        let stable = 0;
+        let last = -1;
+        while (performance.now() < deadline && stable < 12) {
+            await frame();
+            stable = !touchPalette.hasAttribute("data-scrolling") && Math.abs(touchPalette.scrollLeft - last) < .1 ? stable + 1 : 0;
+            last = touchPalette.scrollLeft;
+        }
+        const step = parseFloat(getComputedStyle(touchPalette).gridTemplateColumns);
+        check.ok(Math.abs(touchPalette.scrollLeft - Math.round(touchPalette.scrollLeft / step) * step) < 1 ||
+            Math.abs(touchPalette.scrollLeft - (touchPalette.scrollWidth - touchPalette.clientWidth)) < 1,
+        "scrolling settles on a complete color column: " + JSON.stringify({left: touchPalette.scrollLeft, step}));
+        check.ok(stable >= 12, "palette scrolling settles within the deadline");
+    };
     const swipeStart = {x: Math.round(touchBounds.right - 12), y: Math.round(touchBounds.top + touchBounds.height / 2)};
     await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
         {type: "touchStart", touchPoints: [{id: 1, ...swipeStart}]},
@@ -2318,10 +2442,51 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             touchPoints: [{id: 1, x: swipeStart.x - delta, y: swipeStart.y}]})),
         {type: "touchEnd", touchPoints: []},
     ]);
-    await settle();
+    await settlePalette();
     check.ok(touchPalette.scrollLeft > 0, "a native horizontal swipe reaches colors beyond the first six groups");
     check.equal(touchManager.getBoundingClientRect().left, managerPosition, "swiping the palette keeps color settings fixed");
     check.equal(nodeStyles.length, beforeColorSwipe, "swiping colors does not apply a color or alter document styles");
+    for (const scale of [1, .75]) {
+        host.style.transformOrigin = "top left";
+        host.style.transform = `scale(${scale})`;
+        await settle();
+        touchPalette.scrollLeft = 0;
+        const bounds = touchPalette.getBoundingClientRect();
+        const start = {x: Math.round(bounds.right - 12), y: Math.round(bounds.top + bounds.height / 2)};
+        const canvasPosition = {x: view.offsetX, y: view.offsetY, scale: view.scale};
+        const settingsPosition = touchManager.getBoundingClientRect().left;
+        await nativeInput([
+            {type: "mouseMove", ...start},
+            {type: "mouseWheel", ...start, deltaX: 0, deltaY: -60},
+        ]);
+        await settle();
+        check.ok(touchPalette.scrollLeft > 0, "a native vertical mouse wheel browses the horizontal palette");
+        await settlePalette();
+        touchPalette.scrollLeft = 0;
+        await nativeInput([
+            {type: "mouseMove", ...start},
+            {type: "mouseDown", ...start, button: "left", clickCount: 1},
+            ...[20, 40, 60, 80].map(delta => ({type: "mouseMove", x: start.x - delta, y: start.y, button: "left"})),
+        ]);
+        await settle();
+        check.ok(Math.abs(touchPalette.scrollLeft - 80 / scale) < 2,
+            "mouse dragging stays continuous and accounts for an outer editor scale before release");
+        await nativeInput([{type: "mouseUp", x: start.x - 80, y: start.y, button: "left", clickCount: 1}]);
+        await settlePalette();
+        check.equal(nodeStyles.length, beforeColorSwipe, "drag release never applies the color underneath the pointer");
+        check.deepEqual(view.getSelectedIds(), paletteSelection);
+        check.deepEqual({x: view.offsetX, y: view.offsetY, scale: view.scale}, canvasPosition);
+        check.equal(touchManager.getBoundingClientRect().left, settingsPosition);
+    }
+    const visibleColor = touchPalette.children[Math.ceil(touchPalette.scrollLeft /
+        (touchPalette.scrollWidth / touchPalette.children.length)) + 1] as HTMLButtonElement;
+    await clickMouse(visibleColor);
+    check.equal(nodeStyles.length, beforeColorSwipe + 1, "a regular click after dragging still applies a color");
+    visibleColor.focus({preventScroll: true});
+    await nativeInput([{type: "keyDown", keyCode: "Return"}, {type: "char", keyCode: "\r"},
+        {type: "keyUp", keyCode: "Return"}]);
+    await settle();
+    check.equal(nodeStyles.length, beforeColorSwipe + 2, "keyboard activation remains available after palette dragging");
     options.colors = originalLineColors;
     view.focusNode(beta);
     host.style.cssText = originalHostStyle;
@@ -2342,12 +2507,37 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual(Array.from(widthControls.children).map(control => control.tagName === "INPUT" ?
         control.getAttribute("type") : control.getAttribute("aria-label")),
     ["number", "range", "listMindmapRestoreWidth", "default"], "the width input precedes the centered slider and reset controls");
-    check.ok(Math.abs(widthInput().getBoundingClientRect().width - inspector.getBoundingClientRect().width / 4 + 2) < 2,
-        "the numeric input occupies two of the eight columns");
+    for (const canvasWidth of [240, 320, 760]) {
+        host.style.width = `${canvasWidth}px`;
+        await settle();
+        const row = widthControls.getBoundingClientRect();
+        const numeric = widthInput().getBoundingClientRect();
+        const range = widthControls.querySelector(".b3-slider").getBoundingClientRect();
+        const restore = widthControls.querySelector('[aria-label="listMindmapRestoreWidth"]').getBoundingClientRect();
+        const automatic = widthControls.querySelector('[aria-label="default"]').getBoundingClientRect();
+        check.ok(Math.abs((range.left + range.right) / 2 - (row.left + row.right) / 2) < 1,
+            "the width slider stays centered within the panel");
+        check.ok(Math.abs(range.left - numeric.right - (restore.left - range.right)) < 1,
+            "the slider has equal space beside the number field and reset controls");
+        check.ok(Math.abs(numeric.width - (automatic.right - restore.left)) < 1,
+            "the numeric field matches the combined width of the two right-hand controls");
+        check.equal(getComputedStyle(widthInput()).paddingRight, "4px", "the compact number field retains a reachable native stepper");
+    }
+    host.style.cssText = originalHostStyle;
     widthInput().value = "640";
     widthInput().dispatchEvent(new Event("change", {bubbles: true}));
     await settle();
     check.deepEqual(nodeStyles.at(-1), [beta, {width: 640}]);
+    const stepper = widthInput().getBoundingClientRect();
+    const stepperPoint = {x: Math.round(stepper.right - 8), y: Math.round(stepper.top + 5)};
+    await nativeInput([
+        {type: "mouseMove", ...stepperPoint},
+        {type: "mouseDown", ...stepperPoint, button: "left", clickCount: 1},
+        {type: "mouseUp", ...stepperPoint, button: "left", clickCount: 1},
+    ]);
+    host.focus();
+    await settle();
+    check.deepEqual(nodeStyles.at(-1), [beta, {width: 641}], "the native number stepper stays reachable at the field's right edge");
     const styleCount = nodeStyles.length;
     widthInput().value = "12";
     widthInput().dispatchEvent(new Event("change", {bubbles: true}));
@@ -3235,7 +3425,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     host.dispatchEvent(new KeyboardEvent("keydown", {key: "z", ctrlKey: true, bubbles: true}));
     check.equal(edits.length, editsBeforeReadonly);
-    check.equal(undo, 0);
     const persistedBeforeFold = list.outerHTML;
     pressDelete();
     check.deepEqual(deletions, [beta]);
@@ -5086,32 +5275,29 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     summaryLabel.click();
     check.equal(summaryView.selectedSummary, "summary", "touching the summary selects it");
     const summaryInspector = summaryHost.querySelector<HTMLElement>(".mindmap-view__inspector");
-    let summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
-    check.ok(summaryEdit, "summary editing retains its explicit toolbar entry");
+    check.equal(summaryInspector.querySelector('[aria-label="edit"]'), null, "summary editing uses the same double-click gesture as nodes");
     for (const width of [240, 320, 700]) {
         summaryHost.style.width = `${width}px`;
         summaryView.renderInspector();
         await settle();
         const summaryPalette = summaryInspector.querySelector<HTMLElement>(".mindmap-view__palette");
-        const fixed = ["edit", "delete", "listMindmapManageLineColors"]
+        const fixed = ["delete", "listMindmapManageLineColors"]
             .map(key => summaryInspector.querySelector<HTMLElement>(`[aria-label="${key}"]`));
+        check.ok(summaryPalette.children[5].getBoundingClientRect().right <= summaryPalette.getBoundingClientRect().right + 1,
+            "removing the edit control leaves room for default and five summary colors");
+        check.ok(summaryPalette.children[6].getBoundingClientRect().left >= summaryPalette.getBoundingClientRect().right - 1);
         const positions = fixed.map(control => control.getBoundingClientRect().left);
         summaryPalette.scrollLeft = summaryPalette.scrollWidth;
         check.deepEqual(fixed.map(control => control.getBoundingClientRect().left), positions,
-            "summary edit, delete and color settings stay fixed while colors scroll");
+            "summary delete and color settings stay fixed while colors scroll");
         const bounds = summaryInspector.getBoundingClientRect();
         fixed.forEach(control => check.ok(control.getBoundingClientRect().right <= bounds.right));
         check.equal(summaryPalette.children.length, 14, "all existing summary colors remain accessible");
     }
     summaryHost.style.width = "700px";
-    summaryEdit = summaryInspector.querySelector<HTMLButtonElement>('[aria-label="edit"]');
-    summaryEdit.click();
-    check.ok(summaryHost.querySelector(".mindmap-view__summary-editor"), "the retained edit button opens summary text editing");
-    summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor")
-        .dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     summaryLabel.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     const reopenedSummary = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
-    check.ok(reopenedSummary);
+    check.ok(reopenedSummary, "double-clicking still opens summary text editing without the toolbar edit button");
     reopenedSummary.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     const savedSummary = api.readListMindmap(summaryList).metadata.summaries[0];
     const summaryContext = summaryHost.querySelector("canvas").getContext("2d");

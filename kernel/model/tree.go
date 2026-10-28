@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -157,7 +145,7 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 func loadTreeByData(localPath string, data []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	// 加密笔记本的 .sy 是密文，需先解密。从路径反推 boxID，已解锁的加密笔记本用 fileKey 解密；
 	// 加密笔记本未解锁时返回错误（fail-closed）；非加密笔记本原样 data。
-	if boxID := extractBoxIDFromPath(localPath); boxID != "" && IsEncryptedBox(boxID) {
+	if boxID := util.BoxIDFromDataPath(localPath); boxID != "" && IsEncryptedBox(boxID) {
 		HoldBoxReadLock(boxID)
 		defer ReleaseBoxReadLock(boxID)
 		dek, dekErr := GetDEKIfUnlocked(boxID)

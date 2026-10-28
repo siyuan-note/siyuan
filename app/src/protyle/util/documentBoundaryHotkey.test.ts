@@ -1,21 +1,11 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule as loadSharedModule} from "../../testSupport/loadModule";
 import * as keymapBindings from "../../util/keymapBindings";
 
-const compiled = new Map<string, string>();
-const loadModule = (path: string, globals: Record<string, unknown>, dependencies: Record<string, object>) => {
-    if (!compiled.has(path)) {
-        compiled.set(path, transpileModule(readFileSync(path, "utf8"), {
-            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-        }).outputText);
-    }
-    const exports: any = {};
-    runInNewContext(compiled.get(path), {exports, ...globals, require: (name: string) => dependencies[name] || {}});
-    return exports;
-};
+const loadModule = (path: string, globals: Record<string, unknown>, dependencies: Record<string, object>) =>
+    loadSharedModule<any>(path, {...globals, require: (name: string) => dependencies[name] || {}}, ScriptTarget.ES2021);
 
 const fixture = (mac = false) => {
     const calls: string[] = [];

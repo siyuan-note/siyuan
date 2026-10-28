@@ -1,24 +1,11 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package filesys
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -126,25 +113,4 @@ func SyAAD(boxID, relativePath string) (string, error) {
 		return "", err
 	}
 	return "siyuan:file:" + boxID + ":" + base, nil
-}
-
-// docIALBoxID 从 .sy 绝对路径反推 boxID，供 DocIAL 判断是否需整体解密。
-// 路径形如 <DataDir>/<boxID>/...；若不在 DataDir 下或 boxID 非合法 ID 模式，返回空串。
-func docIALBoxID(absPath string) string {
-	absPath = filepath.ToSlash(absPath)
-	dataDir := filepath.ToSlash(util.DataDir)
-	rel, err := filepath.Rel(dataDir, absPath)
-	if err != nil {
-		return ""
-	}
-	rel = filepath.ToSlash(rel)
-	if strings.HasPrefix(rel, "..") || rel == "." || rel == "" {
-		return ""
-	}
-	parts := strings.SplitN(rel, "/", 2)
-	boxID := parts[0]
-	if !ast.IsNodeIDPattern(boxID) {
-		return ""
-	}
-	return boxID
 }

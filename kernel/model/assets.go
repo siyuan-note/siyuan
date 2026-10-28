@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -107,7 +95,7 @@ func readAssetBytesInBox(boxID, relativePath string, download bool) ([]byte, err
 	var readErr error
 	if heif.IsPath(relativePath) {
 		limit := int64(heif.MaxInputBytes)
-		if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+		if effectiveBoxID := util.BoxIDFromDataPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
 			limit += 2 * 1024 * 1024
 		}
 		data, readErr = heif.ReadFileLimited(absPath, limit)
@@ -118,7 +106,7 @@ func readAssetBytesInBox(boxID, relativePath string, download bool) ([]byte, err
 		return nil, readErr
 	}
 	// 从解析到的绝对路径反推有效 boxID，不轻信传入参数（路径可能通过 ?box= 指定了不同 box）
-	effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath)
+	effectiveBoxID := util.BoxIDFromDataPath(absPath)
 	if effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
 		HoldBoxReadLock(effectiveBoxID)
 		dek, dekErr := GetDEKIfUnlocked(effectiveBoxID)
@@ -2056,7 +2044,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 	// 排除加密笔记本的资源：加密笔记本锁定时 loadTree 失败会误判引用关系，
 	// 且加密笔记本是孤岛，资源不参与全局未引用清理
 	for dest, absPath := range assetsPathMap {
-		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
+		if boxID := util.BoxIDFromDataPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
 			delete(assetsPathMap, dest)
 		}
 	}

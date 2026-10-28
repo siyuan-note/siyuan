@@ -1,25 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -150,6 +138,14 @@ type documentTarget struct {
 }
 
 func documentTargetFailure(err error) CallToolResult {
+	var creation *model.DocumentCreateFailure
+	if errors.As(err, &creation) {
+		failure := map[string]any{"error": err.Error(), "reason": creation.Reason,
+			"commitState": creation.CommitState, "id": creation.ID, "stage": creation.Stage, "completed": creation.Completed}
+		encoded, _ := json.Marshal(failure)
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(encoded)}},
+			StructuredContent: failure, StructuredContentSet: true, IsError: true, ExecutionUnknown: creation.CommitState == "unknown"}
+	}
 	if failure, ok := model.LegacyPathFailure(err); ok {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: failure.Reason + ": " + err.Error()}}, IsError: true}
 	}
@@ -191,7 +187,7 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 		return nil, errors.New("parentID or path is required")
 	}
 	if create {
-		hPath = parentDir(hPath)
+		hPath = util.ParentHPath(hPath)
 	}
 	bt, err := model.ResolveLegacyDocumentPath(notebook, hPath, create)
 	if err != nil {
@@ -205,14 +201,6 @@ func resolveDocumentTarget(notebook string, args map[string]any, create, default
 		target.id = &bt.ID
 	}
 	return target, nil
-}
-
-func parentDir(p string) string {
-	i := strings.LastIndex(p, "/")
-	if i <= 0 {
-		return "/"
-	}
-	return p[:i]
 }
 
 func documentList(args map[string]any) (CallToolResult, error) {
@@ -328,7 +316,7 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Search results matching '%s' (%d):\n\n", keyword, len(docs))
 	for _, d := range docs {
-		typ, id, name := documentSearchDisplayFields(d)
+		typ, id, name := model.SearchDocDisplayFields(d)
 		if typ == "NOTEBOOK" {
 			fmt.Fprintf(&sb, "- [%s] %s (id: %s, hPath: %s)\n", typ, name, id, d["hPath"])
 		} else {
@@ -336,13 +324,6 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
-}
-
-func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	if doc["path"] == "/" {
-		return "NOTEBOOK", doc["box"], doc["title"]
-	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), doc["title"]
 }
 
 func documentInfo(args map[string]any) (CallToolResult, error) {

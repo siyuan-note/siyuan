@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Veritabanı paneli alan düzeni",
+	"databaseAttrLayoutTip": "Belgenin üstündeki veritabanı panelinde ve bağımsız öğe panelinde alan düzenini ayarlar; alan yetersiz olduğunda otomatik olarak tek sütun kullanılır",
+	"databaseAttrLayoutSingle": "Tek sütun",
+	"databaseAttrLayoutRow": "İki sütun (satır sırasıyla)",
+	"databaseAttrLayoutColumn": "İki sütun (sütun sırasıyla)",
+	"mathDelimiterCompatibility": "Yapıştırma ve içe aktarmada LaTeX formül sınırlayıcılarını tanı",
+	"mathDelimiterCompatibilityTip": "Etkinleştirildiğinde, yapıştırılan ve içe aktarılan içerikteki \\(...\\) ve \\[...\\] sırasıyla satır içi ve blok formüller olarak otomatik tanınır",
 	"automationCollectionScopeLimit": "İzleme kapsamı toplamda en fazla 32 not defteri veya belge içerebilir",
 	"pdfAnnotationSaveFailed": "PDF açıklamaları kaydedilemedi. Düzenlemeye devam etmeden önce en son açıklamaları yüklemek için PDF dosyasını yeniden açın",
 	"skipExitSync": "Eşitlemeyi atla ve çık",

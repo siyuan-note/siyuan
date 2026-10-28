@@ -1,21 +1,16 @@
 import * as capabilities from "./capabilities";
 import * as filterDropdown from "./filterDropdown";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const createEditor = () => {
     const rollup = {id: "employees", name: "Employees", type: "rollup",
         rollup: {relationKeyID: "tasks", keyID: "staff"}} as IAVColumn;
     const fields = [rollup, {id: "tasks", type: "relation", relation: {avID: "tasks-db"}}];
     const requests: Array<{url: string, data: {id: string, blockIDs?: string[]}}> = [];
-    const methods = {} as typeof import("./filter");
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/filter.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
         window: {siyuan: {languages: new Proxy({}, {get: (_, name) => String(name)})}},
         document: {createElement: () => ({style: {}, offsetWidth: 10}), body: {appendChild() {}, removeChild() {}}},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
@@ -31,7 +26,7 @@ const createEditor = () => {
                 }}]}} : {rows: {values: [{blockID: "alice", block: {content: "Alice"}}]}}};
             }},
         })[name] || {}),
-    });
+    }, ScriptTarget.ES2022);
     const data = {view: {filters: [{column: rollup.id, operator: "Contains any item", value: {
         type: "rollup", rollup: {contents: [{type: "relation", relation: {blockIDs: ["alice"], contents: []}}]},
     }}]}} as IAV;

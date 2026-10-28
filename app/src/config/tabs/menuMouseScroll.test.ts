@@ -6,8 +6,7 @@ import {ModuleKind, transpileModule} from "typescript";
 
 const fixture = (frontend = "desktop", mobileApp = false) => {
     const appearance = {menuMouseScroll: false};
-    const siyuan = {config: {appearance, readonly: false}, isPublish: false, isReady: true,
-        storage: {"local-compact-mode": true, "local-menu-mouse-scroll": true}};
+    const siyuan = {config: {appearance, readonly: false}, isPublish: false, isReady: true};
     const attributes = new Map<string, string>();
     const input = {checked: false};
     const saved: unknown[][] = [];
@@ -30,7 +29,7 @@ const fixture = (frontend = "desktop", mobileApp = false) => {
     return {api: exports, appearance, siyuan, saved, events, input, attributes};
 };
 
-test("menuMouseScroll ignores retired KV values and reads confirmed configuration updates", () => {
+test("menuMouseScroll reflects confirmed configuration updates in its control", () => {
     const f = fixture();
     f.api.syncMenuMouseScroll();
     assert.equal(f.input.checked, false);

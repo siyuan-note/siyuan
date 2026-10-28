@@ -1,4 +1,11 @@
 {
+	"databaseAttrLayout": "Disposition des champs du panneau de base de données",
+	"databaseAttrLayoutTip": "Définit la disposition des champs du panneau de base de données en haut du document et du panneau de fiche indépendant ; une seule colonne est utilisée automatiquement si l’espace est insuffisant",
+	"databaseAttrLayoutSingle": "Une colonne",
+	"databaseAttrLayoutRow": "Deux colonnes (par ligne)",
+	"databaseAttrLayoutColumn": "Deux colonnes (par colonne)",
+	"mathDelimiterCompatibility": "Reconnaître les délimiteurs de formules LaTeX lors du collage et de l’importation",
+	"mathDelimiterCompatibilityTip": "Lorsque cette option est activée, \\(...\\) et \\[...\\] sont automatiquement reconnus dans le contenu collé et importé comme des formules en ligne et en bloc, respectivement",
 	"automationCollectionScopeLimit": "Le périmètre de surveillance peut contenir jusqu’à 32 carnets ou documents",
 	"pdfAnnotationSaveFailed": "Impossible d’enregistrer les annotations du PDF. Rouvrez le PDF pour charger les dernières annotations avant de poursuivre les modifications",
 	"skipExitSync": "Ignorer la synchronisation et quitter",

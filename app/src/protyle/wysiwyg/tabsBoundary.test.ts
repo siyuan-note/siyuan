@@ -1,12 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/tabsBoundary.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+const compiled = compileModule("src/protyle/wysiwyg/tabsBoundary.ts", ScriptTarget.ES2021);
 
 const fixture = (sideIDs: string[], text = "", media = false) => {
     const content = {};
@@ -33,9 +30,7 @@ const fixture = (sideIDs: string[], text = "", media = false) => {
         querySelector: () => media ? {} : null,
     };
     const directions: string[] = [];
-    const exports: any = {};
-    runInNewContext(compiled, {
-        exports,
+    const exports = evaluateModule<any>(compiled, {
         require: () => ({visibleTabsSelectionHTML: (html: string) => html}),
         Node: {ELEMENT_NODE: 1},
         document: {

@@ -48877,6 +48877,16 @@
             }
           ]
         },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseAttrShow": {
           "anyOf": [
             {
@@ -49214,6 +49224,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingMarkdownInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -53222,6 +53242,16 @@
         "databaseAttrHideEmpty": {
           "type": "boolean"
         },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseAttrShow": {
           "anyOf": [
             {
@@ -53390,6 +53420,16 @@
             }
           ]
         },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "onlySearchForDoc": {
           "type": "boolean"
         },
@@ -53461,6 +53501,7 @@
         "cursorSurroundingLines",
         "databaseAttrClickMode",
         "databaseAttrHideEmpty",
+        "databaseAttrLayout",
         "databaseAttrShow",
         "databaseAttrUseTabs",
         "databaseAttrViewMode",
@@ -53494,6 +53535,7 @@
         "listItemDotNumberClickFocus",
         "listLogicalOutdent",
         "markdown",
+        "mathDelimiterCompatibility",
         "onlySearchForDoc",
         "pageScrollButtons",
         "pasteURLAutoConvert",
@@ -53837,6 +53879,16 @@
             }
           ]
         },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseAttrShow": {
           "anyOf": [
             {
@@ -54174,6 +54226,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingMarkdownInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mathDelimiterCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

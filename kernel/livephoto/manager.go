@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -212,14 +212,6 @@ func (m *Manager) lookup(id string) (*previewJob, error) {
 		return nil, errors.New("Live Photo preview session expired")
 	}
 	return job, nil
-}
-
-func (m *Manager) Scope(id string) (string, error) {
-	job, err := m.lookup(id)
-	if err != nil {
-		return "", err
-	}
-	return job.scope, nil
 }
 
 func (m *Manager) Origin(id string) (string, error) {

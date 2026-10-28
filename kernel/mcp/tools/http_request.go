@@ -1,24 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -66,9 +55,11 @@ func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 
 	headers := map[string]string{}
 	if hs, ok := args["headers"].(map[string]any); ok {
-		for k, v := range hs {
-			headers[k] = fmt.Sprintf("%v", v)
+		parsed, err := parseHeaderValues(hs)
+		if err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 		}
+		headers = parsed
 	}
 	body, _ := args["body"].(string)
 
@@ -101,4 +92,27 @@ func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
 	}, nil
+}
+
+// parseHeaderValues 把请求头收敛成字符串。嵌套对象与数组必须报错：直接格式化会把 Go 的
+// 内部表示（map[a:1]、[a b]）当成头值发出去，调用方看到成功却发了一段自己没写过的内容。
+// 标量按可读形式接受，与 attr 工具对属性值的处理保持一致。
+func parseHeaderValues(values map[string]any) (map[string]string, error) {
+	headers := make(map[string]string, len(values))
+	for name, value := range values {
+		switch typed := value.(type) {
+		case string:
+			headers[name] = typed
+		case bool:
+			headers[name] = strconv.FormatBool(typed)
+		case float64:
+			// JSON 数字统一解析为 float64，用最短往返表示避免出现 5.000000。
+			headers[name] = strconv.FormatFloat(typed, 'f', -1, 64)
+		case nil:
+			return nil, fmt.Errorf("header %q must be a string, number or boolean (got null)", name)
+		default:
+			return nil, fmt.Errorf("header %q must be a string, number or boolean (got %T)", name, value)
+		}
+	}
+	return headers, nil
 }

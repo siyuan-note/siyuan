@@ -1,26 +1,19 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/touchNavigation.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 
 const fixture = (handled = false, canTapTarget?: (target: unknown) => boolean) => {
-    const exports: any = {};
     let time = 0;
     const targets: unknown[] = [];
     const points: unknown[] = [];
     let prevented = 0;
     const listeners = new Map<string, (event: any) => void>();
     const element = {addEventListener: (type: string, listener: (event: any) => void) => listeners.set(type, listener)};
-    runInNewContext(compiled, {
-        exports,
+    const exports = loadModule<any>("src/protyle/wysiwyg/touchNavigation.ts", {
         require: () => ({Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460}}),
         Date: {now: () => time},
-    });
+    }, ScriptTarget.ES2021);
     exports.bindTouchNavigation(element, (target: unknown, point: unknown) => {
         targets.push(target);
         points.push(point);

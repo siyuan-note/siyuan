@@ -401,6 +401,46 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     document.onmouseup(new MouseEvent("mouseup"));
     check.ok(bounded.getBoundingClientRect().right <= root.getBoundingClientRect().right + 1,
         "vertical resizing respects the editor's right boundary");
+    for (const fontSize of [24, 48]) {
+        for (const background of ["#fff", "#202124"]) {
+            const adjacent = await create();
+            root.classList.add("protyle-wysiwyg--attr");
+            root.style.width = "280px";
+            root.style.fontSize = fontSize + "px";
+            root.style.background = background;
+            adjacent.parentElement.style.width = "1000px";
+            adjacent.parentElement.querySelectorAll(".img__name, .img__alt, .protyle-action__title")
+                .forEach(caption => caption.remove());
+            root.insertAdjacentHTML("beforeend", lute.Md2BlockDOM("Following paragraph"));
+            const attr = root.lastElementChild.querySelector(".protyle-attr");
+            attr.innerHTML = '<div class="protyle-attr--refcount">1</div>';
+            const badge = attr.firstElementChild as HTMLElement;
+            if (touchMode) {
+                tap(adjacent);
+            }
+            await settle();
+            const corner = adjacent.parentElement.querySelector<HTMLElement>('[data-resize-axis="both"]');
+            const handleRect = corner.getBoundingClientRect();
+            const badgeRect = badge.getBoundingClientRect();
+            const left = Math.max(handleRect.left, badgeRect.left);
+            const right = Math.min(handleRect.right, badgeRect.right);
+            const top = Math.max(handleRect.top, badgeRect.top);
+            const bottom = Math.min(handleRect.bottom, badgeRect.bottom);
+            check.ok(left < right && top < bottom, "the narrow editor reproduces overlapping image and reference targets");
+            const x = (left + right) / 2;
+            const y = (top + bottom) / 2;
+            check.equal(document.elementFromPoint(x, y), badge,
+                "the following block's reference badge accepts input over the image resize corner");
+            let clicked = false;
+            badge.addEventListener("click", () => clicked = true);
+            (document.elementFromPoint(x, y) as HTMLElement).click();
+            check.equal(clicked, true);
+        }
+    }
+    root.classList.remove("protyle-wysiwyg--attr");
+    root.style.width = "";
+    root.style.fontSize = "";
+    root.style.background = "";
     const image = await create();
     const frame = image.parentElement.querySelector<HTMLElement>(".protyle-image-resize");
     const move = (x: number, y: number) => require("electron").ipcRenderer.invoke("image-resize-pointer", x, y);

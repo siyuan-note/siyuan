@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -29,7 +33,7 @@ func compareSettingConfig[Request settingConfigInput, Data, Config any](t *testi
 			context, _ := gin.CreateTestContext(httptest.NewRecorder())
 			context.Request = httptest.NewRequest("POST", endpoint.Definition().Path, strings.NewReader(body))
 			result := gulu.Ret.NewResult()
-			fields, ok := util.JsonArg(context, result)
+			fields, ok := legacyJSONArg(context, result)
 			if !ok {
 				t.Fatal(result.Msg)
 			}
@@ -186,7 +190,7 @@ func TestAPIContractSettingParserCompatibility(t *testing.T) {
 		context, _ := gin.CreateTestContext(httptest.NewRecorder())
 		context.Request = httptest.NewRequest("POST", "/api/setting/setEditor", strings.NewReader(body))
 		result := gulu.Ret.NewResult()
-		_, ok := util.JsonArg(context, result)
+		_, ok := legacyJSONArg(context, result)
 		_, err := apicontract.SetEditor.Decode(strings.NewReader(body))
 		if ok != (err == nil) || err != nil && err.Error() != result.Msg {
 			t.Fatalf("parser changed for %s: before=%s after=%v", body, result.Msg, err)

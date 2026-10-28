@@ -43,6 +43,26 @@ body.mobile-keyboard--open {
   -webkit-user-select: none;
   user-select: none;
 
+  &__history {
+    flex-shrink: 0;
+  }
+
+  > .protyle-breadcrumb__icon {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--fullscreen {
+    position: fixed;
+    top: var(--mobile-top-safe-area);
+    right: env(safe-area-inset-right);
+    left: env(safe-area-inset-left);
+    height: var(--mobile-breadcrumb-height);
+    border-radius: 0;
+    z-index: 9;
+  }
+
   &__space--mobile-title {
     display: flex;
     align-items: center;
@@ -61,6 +81,11 @@ body.mobile-keyboard--open {
       height: 40px;
     }
   }
+}
+
+.mindmap-view--document-bar.fullscreen {
+  top: calc(var(--mobile-top-safe-area) + var(--mobile-breadcrumb-height));
+  height: calc(100dvh - var(--mobile-top-safe-area) - var(--mobile-breadcrumb-height));
 }
 
 .protyle-preview__title {

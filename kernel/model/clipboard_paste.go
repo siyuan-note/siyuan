@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -80,7 +80,7 @@ func PrepareClipboardPasteAssets(boxID string, references []string) (result map[
 		if resolveErr != nil {
 			return nil, resolveErr
 		}
-		effectiveBox := ExtractBoxIDFromAssetsPath(absPath)
+		effectiveBox := util.BoxIDFromDataPath(absPath)
 		if IsEncryptedAssetPath(absPath) && effectiveBox != boxID {
 			return nil, errors.New("cannot copy assets between encrypted notebooks")
 		}

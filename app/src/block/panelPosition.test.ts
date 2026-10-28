@@ -130,7 +130,9 @@ for (const scale of [1, 1.25, 1.5, 2]) {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 20000,
     }, async () => {
-        const source = ["../layout/getTopBarHeight.ts", "../util/setPosition.ts", "panelPosition.ts"].map(file =>
+        // getTopBarHeight 依赖 util/functions 的 isMobile，需一并加载真实实现，而不是在用例里另写判定
+        const source = ["../util/functions.ts", "../layout/getTopBarHeight.ts", "../util/setPosition.ts",
+            "panelPosition.ts"].map(file =>
             transpileModule(readFileSync(path.join(__dirname, file), "utf8")
                 .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
             {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");

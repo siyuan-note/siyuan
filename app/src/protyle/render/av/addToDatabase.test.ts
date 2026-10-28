@@ -1,17 +1,13 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("adding graph documents to a database preserves explicit positioning and undo transaction context", () => {
-    const exports = {} as typeof import("./addToDatabase");
     const searches: {target: HTMLElement, position: IPosition, callback: (row: unknown) => void}[] = [];
     const operations: IOperation[][] = [];
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/addToDatabase.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {
-        exports, Lute: {NewNodeID: () => "item"},
+    const exports = loadModule<typeof import("./addToDatabase")>("src/protyle/render/av/addToDatabase.ts", {
+        Lute: {NewNodeID: () => "item"},
         require: (name: string) => {
             if (name === "./relation") { return {openSearchAV: (options: typeof searches[number]) => searches.push(options)}; }
             if (name === "../../wysiwyg/transaction") { return {
@@ -20,7 +16,7 @@ test("adding graph documents to a database preserves explicit positioning and un
             if (name === "dayjs") { return () => ({format: () => "20261006123456"}); }
             return {};
         },
-    });
+    }, ScriptTarget.ES2021);
     const target = {} as HTMLElement;
     const position = {x: 60, y: 90};
     exports.addBlocksToDatabase(["document"], target, position);

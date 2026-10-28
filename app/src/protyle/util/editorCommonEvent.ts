@@ -2176,7 +2176,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             data: newUpdated,
                         }], [{
                             action: "removeAttrViewBlock",
-                            srcIDs: ids,
+                            srcIDs: srcs.map(src => src.itemID),
                             avID,
                         }, {
                             action: "doUpdateUpdated",
@@ -2503,7 +2503,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
             } else if (event.altKey || (event.shiftKey && protyle.lite)) {
-                // Alt=引用；lite 模式 Shift 也为引用（原嵌入块改为引用）
+                // Alt=引用；lite 模式 Shift 也为引用
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;

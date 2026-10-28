@@ -41,7 +41,7 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 3. **Kernel development:** After modifying Go code, run `gofmt`, but do not compile the kernel binary or restart a running kernel; the developer handles both manually. Isolated regression tests and contract generation are allowed; they must not replace the product binary or restart the running instance
 4. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
 5. **UI verification in a browser:** Open `/stage/build/desktop/` directly instead of `/`. The kernel selects the frontend bundle by User-Agent in `kernel/server/serve.go`, and a UA containing `Electron` is redirected to the Electron-only `/stage/build/app/`, which fails in a plain browser with `require is not defined`; VSCode's built-in browser sends such a UA. The Electron main window does not expose a remote debugging port by default
-6. **Verification scope:** Run the checks and regression tests applicable to the changed behavior, including non-API Go code, frontend interactions, and scripts. Select scope according to impact and risk; a full suite is not required for every task, and lint or formatting alone does not establish behavioral correctness. Use `app/scripts/test.mjs` and the relevant maintenance guides to identify test discovery and commands. For documentation-only changes, check accuracy, links, language alignment, and the diff rather than running auto-fixing code checks. Report passed, failed, and unrun checks with their limits; do not infer that tests passed solely from a successful CI job or release
+6. **Verification scope:** Run the checks and regression tests applicable to the changed behavior, including non-API Go code, frontend interactions, and scripts. Select scope according to impact and risk; a full suite is not required for every task, and lint or formatting alone does not establish behavioral correctness. Use `app/scripts/test.mjs` and the relevant maintenance guides to identify test discovery and commands. For frontend changes, `pnpm run test:affected` from `app/` derives the affected tests from the changed files (it follows both imports and the source paths that tests read and evaluate themselves) and runs only those; `pnpm run test:changed` lists them without running. Fall back to the full suite when a change crosses many modules or touches shared setup, and say which scope you ran. For documentation-only changes, check accuracy, links, language alignment, and the diff rather than running auto-fixing code checks. Report passed, failed, and unrun checks with their limits; do not infer that tests passed solely from a successful CI job or release
 7. **Test synchronization:** Whenever code or files change, handle the corresponding tests and fixtures in the same change rather than leaving them for later
    - Rename, move, merge, split, or delete a test file together with its source, and keep the file name reflecting the code it covers; a test file whose source no longer exists or whose name no longer matches is stale and must be repaired or removed
    - When behavior changes intentionally, update the affected assertions, case names, and comments to the new contract instead of dropping the coverage; when behavior is removed, delete only the cases that cover the removed behavior and keep adjacent assertions
@@ -165,7 +165,9 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 
 ## 3. Coding conventions
 
-1. **Comments:** Write in Chinese, wrap at 120 characters, and describe what the code does without referencing the old implementation
+1. **Comments:** Write in Chinese, wrap at 120 characters, and state the behavior in effect now; do not narrate how the code got there or describe it relative to a previous implementation (`不再创建`、`保留旧行为`), and drop any comment that only restates the next line
+   - Keep an issue link only when it explains why the current rule exists
+   - Legacy **data** is the exception: deprecated fields and format migrations must still say which older shape they read
 2. **Punctuation:** Use language-appropriate punctuation in UI text, comments, user guides, and documentation (e.g. Chinese punctuation ，。：；！？「」 for Chinese). Keep UI text and its punctuation in i18n language files rather than hard-coding them in code
 3. **UI paths:** In all contexts, including code comments, UI text, i18n, user guides, documentation, issue/PR content, and responses, separate navigation levels with a hyphen surrounded by spaces (for example, `设置 - 快捷键 - 通用`); do not use arrow symbols such as `→`
 4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
@@ -198,6 +200,17 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - `body--win32` and `body--win32-browser` are retained only for existing third-party themes; use neither in new code, and do not add consumers when changing related styles
    - Do not derive the frontend platform from the kernel reported container or from `data-backend`: a remote kernel reports its own host, so both differ from the platform of the current frontend
    - `data-frontend` on the root element reports the frontend form (`desktop`, `desktop-window`, `mobile`, `browser-desktop`, `browser-mobile`) and may be used by built-in styles and third-party theme CSS; `data-backend` on the root element is for third-party JavaScript only and must not appear in built-in CSS
+
+11. **Source file headers:** `kernel/**/*.go` and `app/electron/main.js` start with exactly these three lines, then one blank line
+    ```
+    // SiYuan - https://github.com/siyuan-note/siyuan
+    // Copyright (c) 2020-present, b3log.org
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    ```
+    - Sources in other languages carry no header; remove it from a non-Go file that still has one instead of extending the convention
+    - `//go:build` follows the header after a blank line and needs its own blank line before `package`; a build constraint without that blank line silently stops applying
+    - Do not add this header under `kernel/plugin/encoding/` (`grafana/sobek-webapi-encoding`, Apache-2.0) or `kernel/heif/internal/h265heic/` (`roticv/h265`, MIT); those subtrees keep their own license and a SiYuan header there would overwrite it
+    - `scripts/check-license-headers.mjs` checks both directions; the scopes are declared in `scripts/license-header.mjs`. CI runs it as a non-blocking step, so run it yourself before committing header changes
 
 ---
 

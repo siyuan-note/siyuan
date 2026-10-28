@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261025114801"
+		"updated": "20261028111611"
 	},
 	"Children": [
 		{
@@ -2177,7 +2177,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2216,7 +2216,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-8fr1gcz",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2237,6 +2237,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップ上のマウスホイールと 1 本指のスワイプは、初期状態では文書をスクロールします。デスクトップではマップをクリック、タッチ画面ではマップを 1 回タップするとキャンバスを操作できます。操作中は枠が強調表示され、ホイールまたはマウスの右ボタンを押したドラッグでキャンバスを移動します。"
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-70ba205",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-70ba205",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイル版では、文書のパンくずリストにある元に戻す・やり直しボタンを使えます。キーボードを閉じた状態やマインドマップの全画面表示中も操作できます。文書全体の履歴を共有するため、マインドマップ以外の変更も対象になります。元に戻す操作とやり直す操作がどちらもない場合や、文書が読み取り専用の場合はボタンが非表示になります。"
 				}
 			]
 		},
@@ -3064,7 +3078,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-ymjcdgg",
-				"updated": "20261024164212"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
@@ -3139,12 +3153,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926151827-l7l2w92",
-				"updated": "20261012014859"
+				"updated": "20261027231810"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "要約テキストをダブルクリックするか、要約を選択して下部の編集ボタンを押すと、テキストを編集できます。Enter で保存し、Esc でキャンセルします。下部のツールバーで色の変更や削除ができ、Delete でも選択中の要約を削除できます。これらの操作は元に戻す・やり直しに対応しています。"
+					"Data": "要約テキストをダブルクリックすると、テキストを編集できます。Enter で保存し、Esc でキャンセルします。下部のツールバーで色の変更や削除ができ、Delete でも選択中の要約を削除できます。これらの操作は元に戻す・やり直しに対応しています。"
 				}
 			]
 		},
@@ -5428,6 +5442,97 @@
 				{
 					"Type": "NodeText",
 					"Data": "数式"
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-35g7iv6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-35g7iv6",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown の貼り付け・インポート時、思源は既定で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\(...\\)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をインライン数式、独立した段落の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\[...\\]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をブロック数式として認識します。HTML の貼り付けでも認識します。コードはそのまま保持され、Markdown のエクスポートには引き続き "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-1okjrja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-1okjrja",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この機能は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の「貼り付け・インポート時に LaTeX 数式の区切り文字を認識する」で無効にできます。変更は以後の貼り付け・インポートに適用され、変換済みの数式はそのまま保持されます。"
 				}
 			]
 		},

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -225,6 +229,42 @@ func TestAPIContractRiffInvalidBodies(t *testing.T) {
 		if code != -1 || !strings.Contains(msg, "the request body is empty or truncated (EOF)") || string(data) != "null" {
 			t.Fatalf("%s parse error changed: %d %s %s", entry.name, code, msg, data)
 		}
+	}
+}
+
+func TestAPIContractRiffV2AdapterFailure(t *testing.T) {
+	previousConf, previousData, previousTemp := model.Conf, util.DataDir, util.TempDir
+	model.Conf, util.DataDir, util.TempDir = model.NewAppConf(), t.TempDir(), t.TempDir()
+	system := conf.NewSystem()
+	system.ID = "test-device"
+	model.Conf.System.Store(system)
+	t.Cleanup(func() { model.Conf, util.DataDir, util.TempDir = previousConf, previousData, previousTemp })
+	root := flashcardv2.V2Root(util.DataDir)
+	if err := os.MkdirAll(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := filepath.Join(root, "manifest.json")
+	if err := os.WriteFile(manifestPath, []byte(`{"formatVersion":999}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		body    string
+	}{
+		{"getRiffDecks", getRiffDecks, ""},
+		{"createRiffDeck", createRiffDeck, `{"name":"deck"}`},
+		{"removeRiffDeck", removeRiffDeck, `{"deckID":"20260101000000-aaaaaaa"}`},
+	} {
+		t.Run(entry.name, func(t *testing.T) {
+			code, msg, data := riffContractRequest(t, entry.name, entry.handler, entry.body)
+			if code != -1 || !strings.Contains(msg, "flashcard manifest") || string(data) != "null" {
+				t.Fatalf("adapter failure changed: %d %s %s", code, msg, data)
+			}
+		})
+	}
+	if data, err := os.ReadFile(manifestPath); err != nil || string(data) != `{"formatVersion":999}` {
+		t.Fatalf("unsupported manifest was changed: %s (%v)", data, err)
 	}
 }
 

@@ -1,18 +1,13 @@
 import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("numeric field editors accept decimal steps and preserve decimal and empty values", () => {
-    const methods = {} as typeof import("./fieldValueEditor");
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/fieldValueEditor.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./fieldValueEditor")>("src/protyle/render/av/fieldValueEditor.ts", {
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "../../../util/escape" ? {escapeAttr: String} : {}),
-    });
+    }, ScriptTarget.ES2022);
     const column = {type: "number"} as IAVColumn;
     for (const content of ["1.25", "-0.125", "1e-7", "0", ""]) {
         const value = methods.genFieldValue(column, {value: content} as unknown as HTMLElement);

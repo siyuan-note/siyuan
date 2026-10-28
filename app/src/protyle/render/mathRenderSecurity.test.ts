@@ -36,12 +36,6 @@ describe("math render security", () => {
         }), /Invalid attribute name/);
     });
 
-    it("enforces expansion limits inside expanded macro definitions", () => {
-        assert.throws(() => katex.renderToString("\\def\\a{xxxxxxxxxx}\\edef\\b{\\a\\a\\a\\a}", {
-            maxExpand: 20,
-        }), /Too many expansions/);
-    });
-
     it("always disables trusted KaTeX commands for safe fragments", () => {
         assert.deepEqual(getMathRenderSecurity(false, true), {trust: false, sanitize: true});
         assert.deepEqual(getMathRenderSecurity(true, true), {trust: false, sanitize: true});

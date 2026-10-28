@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -52,7 +40,6 @@ var colorSchemes = map[string]ColorScheme{
 }
 
 func getColorScheme(color string) ColorScheme {
-	// 去除可能的空格
 	color = strings.TrimSpace(color)
 
 	// 检查是否是预定义的颜色
@@ -379,7 +366,6 @@ func daysBetween(date1, date2 time.Time) int {
 	return days
 }
 
-// 判断是否为闰年
 func isLeapYear(year int) bool {
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
@@ -415,12 +401,13 @@ func generateTypeTwoSVG(color string, dateInfo map[string]any) string {
     `, colorScheme.Primary, dateInfo["month"], dateInfo["day"], dateInfo["year"])
 }
 
-// Type 3: 显示年月
-func generateTypeThreeSVG(color string, dateInfo map[string]any) string {
+// calendarTextSVG 渲染动态图标 type 3、4、5 共用的日历外框、配色与装饰圆点，body 为底部文字区域。
+// iconType 只用于生成 SVG 元素 id（如 type3），不参与样式计算。
+func calendarTextSVG(iconType string, color string, body string) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type3" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
+    <svg id="dynamic_icon_%s" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
         <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
         <g style="fill: %s;">
@@ -431,53 +418,32 @@ func generateTypeThreeSVG(color string, dateInfo map[string]any) string {
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>
+%s
     </svg>
-    `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"], dateInfo["month"])
+    `, iconType, colorScheme.Primary, colorScheme.Secondary, body)
+}
+
+// Type 3: 显示年月
+func generateTypeThreeSVG(color string, dateInfo map[string]any) string {
+	body := fmt.Sprintf(`        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>`,
+		dateInfo["year"], dateInfo["month"])
+	return calendarTextSVG("type3", color, body)
 }
 
 // Type 4: 仅显示年
 func generateTypeFourSVG(color string, dateInfo map[string]any) string {
-	colorScheme := getColorScheme(color)
-
-	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type4" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
-        <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
-        <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
-        <g style="fill: %s;">
-            <circle  cx="468.5" cy="135" r="14"/>
-            <circle  cx="468.5" cy="93" r="14"/>
-            <circle  cx="425.5" cy="135" r="14"/>
-            <circle  cx="425.5" cy="93" r="14"/>
-            <circle  cx="382.5" cy="135" r="14"/>
-            <circle  cx="382.5" cy="93" r="14"/>
-        </g>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%d</text>
-    </svg>
-    `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"])
+	body := fmt.Sprintf(`        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%d</text>`,
+		dateInfo["year"])
+	return calendarTextSVG("type4", color, body)
 }
 
 // Type 5:: 显示周数
 func generateTypeFiveSVG(color string, dateInfo map[string]any) string {
-	colorScheme := getColorScheme(color)
-
-	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type5" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
-        <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
-        <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
-        <g style="fill: %s;">
-            <circle  cx="468.5" cy="135" r="14"/>
-            <circle  cx="468.5" cy="93" r="14"/>
-            <circle  cx="425.5" cy="135" r="14"/>
-            <circle  cx="425.5" cy="93" r="14"/>
-            <circle  cx="382.5" cy="135" r="14"/>
-            <circle  cx="382.5" cy="93" r="14"/>
-        </g>
-        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>
-    </svg>
-    `, colorScheme.Primary, colorScheme.Secondary, dateInfo["isoYear"], dateInfo["week"])
+	body := fmt.Sprintf(`        <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;">%s</text>`,
+		dateInfo["isoYear"], dateInfo["week"])
+	return calendarTextSVG("type5", color, body)
 }
 
 // Type 6: 仅显示星期

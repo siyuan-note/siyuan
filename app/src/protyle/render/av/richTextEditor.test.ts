@@ -1,15 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {describe, it} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-
-const compiled = transpileModule(readFileSync("src/protyle/render/av/richTextEditor.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-}).outputText;
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>} = {}) => {
-    const methods = {} as typeof import("./richTextEditor");
     const lifecycle: string[] = [];
     const masks: Array<{
         firstElementChild: ReturnType<typeof createPanel>;
@@ -78,8 +72,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
             createAVRichTextValue: (markdown: string) => ({type: "text", text: {content: markdown}}),
         },
     };
-    runInNewContext(compiled, {
-        exports: methods,
+    const methods = loadModule<typeof import("./richTextEditor")>("src/protyle/render/av/richTextEditor.ts", {
         require: (name: string) => modules[name] || {},
         document: {
             body: {appendChild: () => {}},
@@ -107,7 +100,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
             observe() {}
             disconnect() {}
         },
-    });
+    }, ScriptTarget.ES2020);
     const open = () => methods.openAVRichTextEditor(options as unknown as Parameters<typeof methods.openAVRichTextEditor>[0]);
     open();
     if (settings.changed) {

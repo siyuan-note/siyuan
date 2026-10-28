@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
@@ -22,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -859,55 +846,10 @@ func fileCopy(args map[string]any) (CallToolResult, error) {
 	if err = authorizeCopyTree(srcAbs, dstAbs); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
-	if err := copyPath(srcAbs, dstAbs); err != nil {
+	if err := util.CopyPath(srcAbs, dstAbs); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "copy failed: " + err.Error()}}, IsError: true}, nil
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("copied: %s -> %s", src, dst)}}}, nil
-}
-
-func copyPath(src, dst string) error {
-	srcInfo, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-	if srcInfo.IsDir() {
-		return copyDir(src, dst)
-	}
-	return copyFile(src, dst)
-}
-
-func copyDir(src, dst string) error {
-	if err := os.MkdirAll(dst, 0755); err != nil {
-		return err
-	}
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
-	for _, e := range entries {
-		if err := copyPath(filepath.Join(src, e.Name()), filepath.Join(dst, e.Name())); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func copyFile(src, dst string) error {
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
-		return err
-	}
-	srcF, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer srcF.Close()
-	dstF, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer dstF.Close()
-	_, err = io.Copy(dstF, srcF)
-	return err
 }
 
 func typeLabel(isDir bool) string {
@@ -993,7 +935,7 @@ func grepGuarded(root, include, pattern string, context, maxResults int) ([]*gul
 		if !d.Type().IsRegular() {
 			return nil
 		}
-		if include != "" && !matchGlob(d.Name(), include) {
+		if include != "" && !util.MatchGlob(d.Name(), include) {
 			return nil
 		}
 		if authorizeFinalPath(path) != nil {
@@ -1113,7 +1055,7 @@ func fileFind(args map[string]any) (CallToolResult, error) {
 		if !d.Type().IsRegular() {
 			return nil
 		}
-		if include != "" && !matchGlob(d.Name(), include) {
+		if include != "" && !util.MatchGlob(d.Name(), include) {
 			return nil
 		}
 		if authorizeFinalPath(path) != nil {
@@ -1154,39 +1096,6 @@ func fileFind(args map[string]any) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
-}
-
-func matchGlob(filename, pattern string) bool {
-	patterns := expandGlobBrace(pattern)
-	for _, p := range patterns {
-		if matched, _ := filepath.Match(p, filename); matched {
-			return true
-		}
-	}
-	return false
-}
-
-func expandGlobBrace(pattern string) []string {
-	i := strings.Index(pattern, "{")
-	if i < 0 {
-		return []string{pattern}
-	}
-
-	j := strings.Index(pattern[i:], "}")
-	if j < 0 {
-		return []string{pattern}
-	}
-	j += i
-
-	prefix := pattern[:i]
-	body := pattern[i+1 : j]
-	suffix := pattern[j+1:]
-
-	var result []string
-	for opt := range strings.SplitSeq(body, ",") {
-		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
-	}
-	return result
 }
 
 func fileStat(args map[string]any) (CallToolResult, error) {

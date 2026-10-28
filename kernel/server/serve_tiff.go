@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package server
 
@@ -27,7 +23,7 @@ func shouldTranscodeTIFF(c *gin.Context, path string) bool {
 
 // serveTIFFPreview 在资源鉴权后读取首帧，加密笔记本持有操作租约和读锁直至输出结束。
 func serveTIFFPreview(c *gin.Context, path string) {
-	boxID := model.ExtractBoxIDFromAssetsPath(path)
+	boxID := util.BoxIDFromDataPath(path)
 	encrypted := boxID != "" && model.IsEncryptedBox(boxID)
 	var dek []byte
 	if encrypted {

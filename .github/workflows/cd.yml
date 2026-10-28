@@ -156,6 +156,29 @@ jobs:
           WORKFLOW_STEPS: ${{ toJSON(steps) }}
         run: node scripts/report-workflow-outcomes.mjs
 
+  headers:
+    name: Source file headers
+    needs: prepare
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Check project source file headers
+        id: check_source_file_headers
+        # 文件头只是格式约定，偏离不阻塞发布，按其他非阻塞检查的方式记录结果。
+        continue-on-error: true
+        run: node scripts/check-license-headers.mjs
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
+
   contracts:
     name: API contracts and types
     needs: prepare

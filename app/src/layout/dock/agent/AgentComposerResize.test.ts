@@ -50,7 +50,7 @@ const cases = async (source: string, css: string, mobile: boolean) => {
         `<div contenteditable="true" spellcheck="false">${text}</div></div>`;
     const short = () => editor.innerHTML = paragraph("Short input");
     short();
-    const destroy = module.exports.bindAgentComposerResize(panel, composer, handle);
+    const resize = module.exports.bindAgentComposerResize(panel, composer, handle);
     await tick();
     const small = composer.clientHeight;
     check.ok(small < 100, `short input stays compact: ${small}`);
@@ -126,7 +126,8 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     const long = () => editor.innerHTML = paragraph(image) + Array.from({length: 24}, (_, i) => paragraph(`Line ${i + 1}`)).join("");
     long();
     await tick();
-    check.equal(composer.clientHeight, 240);
+    const automaticMaximum = panelHeight - 160;
+    check.equal(composer.clientHeight, automaticMaximum, "automatic growth uses the available panel space beyond 240px");
     check.equal(composer.scrollHeight, composer.clientHeight, "only the inner editor scrolls");
     check.ok(content.scrollHeight > content.clientHeight);
     content.scrollTop = content.scrollHeight;
@@ -137,10 +138,10 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     check.ok(editor.firstElementChild.getBoundingClientRect().top - content.getBoundingClientRect().top >= 7);
 
     handle.focus();
-    key("ArrowUp");
-    check.equal(composer.style.maxHeight, "264px");
     key("ArrowDown");
-    check.equal(composer.style.maxHeight, "240px");
+    check.equal(composer.style.height, `${automaticMaximum - 24}px`);
+    key("ArrowUp");
+    check.equal(composer.style.height, `${automaticMaximum}px`);
     key("End");
     check.equal(composer.style.maxHeight, `${panelHeight - 160}px`, "End uses the available panel height");
     await tick();
@@ -149,14 +150,19 @@ const cases = async (source: string, css: string, mobile: boolean) => {
 
     // 原生指针事件验证捕获、鼠标拖动以及触摸取消。
     handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    key("Home");
+    for (let i = 0; i < 8; i++) {
+        key("ArrowUp");
+    }
     await tick();
+    const beforeDrag = composer.clientHeight;
     const editable = editor.querySelector<HTMLElement>('[contenteditable="true"]');
     editable.focus();
     const rect = handle.getBoundingClientRect();
     const x = Math.round(rect.left + rect.width / 2);
     const y = Math.round(rect.top + rect.height / 2);
     await require("electron").ipcRenderer.invoke("composer-drag", {x, y, dy: -100, touch: false});
-    check.ok(composer.clientHeight >= 338 && composer.clientHeight <= 342, "mouse dragging raises the actual height");
+    check.equal(composer.clientHeight, beforeDrag + 100, "mouse dragging raises the actual height");
     check.equal(handle.classList.contains("touch-resize-active"), false);
     check.equal(document.activeElement, editable, "mouse dragging keeps focus in the composer");
     check.equal(getComputedStyle(handle).outlineStyle, "none", "mouse dragging does not leave a keyboard focus box");
@@ -212,14 +218,30 @@ const cases = async (source: string, css: string, mobile: boolean) => {
     });
     check.equal(composer.style.height, preferred, "clicking without dragging does not change the chosen height");
     handle.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
-    check.equal(composer.style.maxHeight, "240px", "double click restores the automatic cap");
+    check.equal(composer.style.maxHeight, `${automaticMaximum}px`, "double click restores the automatic height range");
     await tick();
     check.ok(composer.clientHeight < 120, "resetting returns short content to intrinsic height");
     long();
     await tick();
+    check.equal(composer.clientHeight, automaticMaximum, "restored automatic mode grows with the next input");
+    key("Home");
+    const manualHeight = composer.clientHeight;
+    short();
+    await tick();
+    long();
+    await tick();
+    check.equal(composer.clientHeight, manualHeight, "manually selected height stays fixed as content increases");
+    editor.innerHTML = paragraph("");
+    resize.reset();
+    await tick();
+    check.equal(composer.style.height, "", "sending clears the manually selected height");
+    check.equal(composer.clientHeight, Number(handle.getAttribute("aria-valuemin")), "the cleared input returns to its initial height");
+    long();
+    await tick();
+    check.equal(composer.clientHeight, automaticMaximum, "the next message grows automatically after sending");
     key("End");
     check.notEqual(composer.style.height, "");
-    destroy();
+    resize.destroy();
     key("End");
     check.equal(composer.style.maxHeight, "", "destroy removes listeners and the temporary geometry");
     check.equal(composer.style.height, "");

@@ -1,22 +1,11 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -107,5 +96,39 @@ func TestVerifyShorthandDocPersisted(t *testing.T) {
 	}
 	if err := verifyShorthandDocPersisted(bt, fixture.sourceID); nil == err {
 		t.Fatal("expected missing persisted shorthand document to fail verification")
+	}
+}
+
+func TestMoveLocalShorthandsKeepsSourceWhenAttachmentMoveFails(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	original := util.ShortcutsPath
+	util.ShortcutsPath = t.TempDir()
+	t.Cleanup(func() { util.ShortcutsPath = original })
+	assets := filepath.Join(util.ShortcutsPath, "shorthands", "assets")
+	if err := os.MkdirAll(assets, 0755); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(filepath.Dir(assets), "1788062238740.md")
+	content := []byte("![image](assets/image.png)")
+	if err := os.WriteFile(source, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+	attachment := filepath.Join(assets, "image.png")
+	if err := os.WriteFile(attachment, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// A directory at the destination makes rename fail on every supported platform.
+	if err := os.MkdirAll(filepath.Join(util.DataDir, "assets", "image.png"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	ids, err := MoveLocalShorthands(fixture.box.ID)
+	if err == nil || len(ids) != 0 {
+		t.Fatalf("attachment failure created documents: %v, %v", ids, err)
+	}
+	if got, err := os.ReadFile(source); err != nil || !bytes.Equal(got, content) {
+		t.Fatalf("source changed: %q, %v", got, err)
+	}
+	if _, err := os.Stat(attachment); err != nil {
+		t.Fatalf("attachment lost: %v", err)
 	}
 }

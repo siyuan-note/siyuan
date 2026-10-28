@@ -1034,6 +1034,7 @@
       width: 100%;
       order: 0;
       scrollbar-width: none;
+      overscroll-behavior: contain;
       scroll-snap-type: x mandatory;
       scroll-padding-left: max(0px, calc((100% / var(--mindmap-palette-columns) - 26px) / 2));
 

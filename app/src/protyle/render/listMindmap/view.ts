@@ -3921,16 +3921,64 @@ export class ListMindmapView {
             control.insertAdjacentHTML("beforeend",
                 '<svg class="color__square-mark" aria-hidden="true"><use xlink:href="#iconSelect"></use></svg>');
         });
-        // 触屏沿用原生横向滚动，鼠标支持拖动和滚轮浏览；拖动完成后不触发色卡点击。
+        // 触屏和横向滚轮沿用原生滚动，纵向滚轮累计小数位移；拖动完成后不触发色卡点击。
         let drag: {id: number, x: number, scroll: number, scale: number};
         let moved = false;
+        let wheel: {position: number, direction: number, target?: number};
+        let wheelFrame = 0;
         let wheelTimer: number;
-        const snap = () => {
-            if (!drag) {
+        let settleTimer: number;
+        let nativeWheelUntil = 0;
+        const stopWheel = (restore = true) => {
+            window.clearTimeout(wheelTimer);
+            window.clearTimeout(settleTimer);
+            cancelAnimationFrame(wheelFrame);
+            wheelFrame = 0;
+            if (wheel?.target !== undefined) {
+                palette.scrollTo({left: palette.scrollLeft, behavior: "instant"});
+            }
+            wheel = undefined;
+            if (restore && !drag) {
                 palette.removeAttribute("data-scrolling");
             }
         };
+        const snap = (direction = 0, position = palette.scrollLeft) => {
+            if (drag || !palette.isConnected) {
+                stopWheel();
+                return;
+            }
+            cancelAnimationFrame(wheelFrame);
+            wheelFrame = 0;
+            const step = parseFloat(getComputedStyle(palette).gridTemplateColumns);
+            if (!(step > 0)) {
+                stopWheel();
+                return;
+            }
+            // 纵向滚轮沿输入方向停靠，避免小于半列的滚动反复回到原列。
+            const column = direction > 0 ? Math.ceil((position - .001) / step) :
+                direction < 0 ? Math.floor((position + .001) / step) : Math.round(position / step);
+            const target = Math.max(0, Math.min(palette.scrollWidth - palette.clientWidth, column * step));
+            wheel = {position, direction, target};
+            palette.setAttribute("data-scrolling", "");
+            palette.scrollTo({left: target, behavior:
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+            // 部分 WebView 没有 scrollend；超时后完成对齐并恢复原生吸附。
+            settleTimer = window.setTimeout(() => {
+                if (palette.isConnected) {
+                    palette.scrollLeft = target;
+                }
+                stopWheel();
+            }, 500);
+        };
+        palette.addEventListener("scrollend", () => {
+            if (wheel?.target !== undefined && Math.abs(palette.scrollLeft - wheel.target) < 1) {
+                stopWheel();
+            }
+        });
+        palette.addEventListener("keydown", () => stopWheel());
         palette.addEventListener("pointerdown", (event: PointerEvent) => {
+            stopWheel();
+            nativeWheelUntil = 0;
             moved = false;
             if (event.pointerType !== "mouse" || event.button !== 0 ||
                 palette.scrollWidth <= palette.clientWidth) {
@@ -3938,6 +3986,22 @@ export class ListMindmapView {
             }
             drag = {id: event.pointerId, x: event.clientX, scroll: palette.scrollLeft,
                 scale: palette.getBoundingClientRect().width / palette.offsetWidth || 1};
+        });
+        const finishDrag = (event: PointerEvent) => {
+            if (drag?.id === event.pointerId) {
+                drag = undefined;
+                if (moved) {
+                    snap();
+                }
+            }
+        };
+        palette.addEventListener("pointerup", finishDrag);
+        palette.addEventListener("pointercancel", finishDrag);
+        palette.addEventListener("lostpointercapture", finishDrag);
+        palette.addEventListener("pointerleave", () => {
+            if (drag && !moved) {
+                drag = undefined;
+            }
         });
         palette.addEventListener("pointermove", (event: PointerEvent) => {
             if (!drag || event.pointerId !== drag.id) {
@@ -3956,21 +4020,6 @@ export class ListMindmapView {
             palette.scrollLeft = drag.scroll - delta;
             event.preventDefault();
         });
-        const end = (event: PointerEvent) => {
-            if (drag?.id === event.pointerId) {
-                drag = undefined;
-                snap();
-            }
-        };
-        palette.addEventListener("pointerup", end);
-        palette.addEventListener("pointercancel", end);
-        palette.addEventListener("lostpointercapture", end);
-        palette.addEventListener("pointerleave", () => {
-            if (!moved) {
-                drag = undefined;
-                snap();
-            }
-        });
         palette.addEventListener("click", event => {
             if (moved && event.detail !== 0) {
                 event.preventDefault();
@@ -3980,18 +4029,45 @@ export class ListMindmapView {
         }, {capture: true});
         palette.addEventListener("wheel", (event: WheelEvent) => {
             if (event.ctrlKey || event.metaKey || palette.scrollWidth <= palette.clientWidth) {
+                stopWheel();
                 return;
             }
-            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-            if (delta) {
-                palette.setAttribute("data-scrolling", "");
-                window.clearTimeout(wheelTimer);
-                const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
-                    event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
-                palette.scrollLeft += delta * unit;
-                wheelTimer = window.setTimeout(snap, 160);
+            if (drag) {
                 event.preventDefault();
+                return;
             }
+            // 同一横向手势即使末尾只剩纵向抖动，也由浏览器处理，避免轴向切换。
+            if (event.deltaX || event.shiftKey || performance.now() < nativeWheelUntil) {
+                nativeWheelUntil = performance.now() + 240;
+                stopWheel();
+                return;
+            }
+            if (!event.deltaY) {
+                return;
+            }
+            if (!wheel || wheel.target !== undefined) {
+                stopWheel(false);
+                wheel = {position: palette.scrollLeft, direction: 0};
+                palette.setAttribute("data-scrolling", "");
+            }
+            const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+                event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
+            wheel.position = Math.max(0, Math.min(palette.scrollWidth - palette.clientWidth,
+                wheel.position + event.deltaY * unit));
+            wheel.direction = Math.sign(event.deltaY);
+            if (!wheelFrame) {
+                wheelFrame = requestAnimationFrame(() => {
+                    wheelFrame = 0;
+                    if (!palette.isConnected) {
+                        stopWheel();
+                    } else if (wheel) {
+                        palette.scrollLeft = wheel.position;
+                    }
+                });
+            }
+            window.clearTimeout(wheelTimer);
+            wheelTimer = window.setTimeout(() => snap(wheel?.direction, wheel?.position), 160);
+            event.preventDefault();
         }, {passive: false});
         const row = createElement("div", "mindmap-view__palette-row");
         row.style.setProperty("--mindmap-palette-columns", String(columns - controls.length));

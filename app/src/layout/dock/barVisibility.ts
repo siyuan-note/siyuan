@@ -10,8 +10,25 @@ const floatingBarEffects = new WeakMap<HTMLElement, {
     backdrop: HTMLElement;
     animations: Animation[];
     closing: boolean;
+    followsPanel: boolean;
     frame: number;
 }>();
+
+// 面板偏移与停靠栏动画共用停靠栏宽度，宽度来源不同会在动画结束时留下缝隙。
+export const getDockBarWidth = (barElement: HTMLElement) => barElement.clientWidth;
+
+const pointerOverDockBars = new WeakSet<HTMLElement>();
+
+// 面板收起时指针仍停在图标栏上，保留临时显示以便继续切换工具。
+export const setDockBarPointerOver = (barElement: HTMLElement, over: boolean) => {
+    if (over) {
+        pointerOverDockBars.add(barElement);
+    } else {
+        pointerOverDockBars.delete(barElement);
+    }
+};
+
+export const isDockBarPointerOver = (barElement: HTMLElement) => pointerOverDockBars.has(barElement);
 
 const clearFloatingBarEffects = (element: HTMLElement) => {
     const effects = floatingBarEffects.get(element);
@@ -31,6 +48,7 @@ const animateFloatingBar = (element: HTMLElement, from: number, to: number, clos
     effects.animations.forEach(animation => animation.cancel());
     cancelAnimationFrame(effects.frame);
     effects.closing = closing;
+    effects.followsPanel = Boolean(panel);
     element.classList.toggle("dock--closing", closing);
     element.inert = closing;
     effects.animations = [element, effects.backdrop].flatMap(target => [
@@ -81,7 +99,8 @@ const animateFloatingBar = (element: HTMLElement, from: number, to: number, clos
                     {opacity: panelStyle.opacity}];
                 // 无过渡的属性直接使用面板当前值；延迟开始的过渡也要保持起始帧。
                 return [element, effects.backdrop].map(target => {
-                    const animation = target.animate(frames, {
+                    const animation = target.animate(transform && !closing ?
+                        [...frames.slice(0, -1), {...frames[frames.length - 1], transform: "translateX(0px)"}] : frames, {
                         ...(source ? source.effect.getTiming() : {duration: 0}), fill: "both",
                     });
                     if (typeof source?.startTime === "number") {
@@ -152,10 +171,14 @@ export const syncDockBarVisibility = () => {
         const effects = floatingBarEffects.get(item);
         const direction = item.id === "dockLeft" ? -1 : 1;
         if (!floating && effects) {
-            if (canFloat && dock.isPanelVisible() && !dock.layout.element.classList.contains("fn__none")) {
+            if (canFloat) {
+                // 面板收起时图标栏跟随面板；面板已经消失时单独滑出，避免被瞬间移除。
+                const panelVisible = dock.isPanelVisible() && !dock.layout.element.classList.contains("fn__none");
                 if (!effects.closing) {
+                    const barWidth = Math.max(item.clientWidth, effects.backdrop.clientWidth);
                     animateFloatingBar(item, getTranslateX(item),
-                        direction * (dock.layout.element.clientWidth + item.clientWidth + 8), true, dock.layout.element);
+                        direction * (dock.layout.element.clientWidth + barWidth + 8), true,
+                        panelVisible ? dock.layout.element : undefined);
                 }
             } else {
                 clearFloatingBarEffects(item);
@@ -185,7 +208,7 @@ export const syncDockBarVisibility = () => {
                 backdrop.className = item.id === "dockLeft" ? "dock__backdrop" : "dock__backdrop dock__backdrop--right";
                 backdrop.setAttribute("aria-hidden", "true");
                 item.before(backdrop);
-                floatingBarEffects.set(item, {backdrop, animations: [], closing: false, frame: 0});
+                floatingBarEffects.set(item, {backdrop, animations: [], closing: false, followsPanel: false, frame: 0});
             }
             const currentEffects = floatingBarEffects.get(item);
             const cornerElement = document.body.classList.contains("body--toolbar-hide") ?
@@ -199,10 +222,13 @@ export const syncDockBarVisibility = () => {
             currentEffects.backdrop.style.top = backgroundTop + "px";
             currentEffects.backdrop.style.bottom = item.style.bottom;
             currentEffects.backdrop.style.setProperty("--b3-dock-background-y", -backgroundTop + "px");
-            if (floating && (!effects || effects.closing)) {
+            // 面板展开时图标栏要重新贴合面板外沿；面板已就位时保持当前状态，避免重复启动动画。
+            const needsFollow = floating && floatingPanelOpen && !currentEffects?.followsPanel &&
+                Math.abs(getTranslateX(item) - (getTranslateX(dock.layout.element) + direction * item.clientWidth)) >= 1;
+            if (floating && (!effects || effects.closing || needsFollow)) {
                 // 面板先进入窗口，图标栏贴着面板外沿使用相同的位移曲线滑入。
-                const from = effects ? getTranslateX(item) : floatingPanelOpen ?
-                    getTranslateX(dock.layout.element) + direction * item.clientWidth : direction * item.clientWidth;
+                const from = floatingPanelOpen ? getTranslateX(dock.layout.element) + direction * item.clientWidth :
+                    effects ? getTranslateX(item) : direction * item.clientWidth;
                 animateFloatingBar(item, from, 0, false, floatingPanelOpen ? dock.layout.element : undefined);
             }
         } else if (wasFloating) {

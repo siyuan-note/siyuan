@@ -42,7 +42,9 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
                 return {bindPanelTransitionGuard() {}};
             }
             if (name.endsWith("/barVisibility")) {
-                return {syncDockBarVisibility() {}, setDockBarHover() {}};
+                return {syncDockBarVisibility() {}, setDockBarHover() {}, setDockBarPointerOver() {},
+                    isDockBarPointerOver: () => false,
+                    getDockBarWidth: (element: {clientWidth: number}) => element.clientWidth};
             }
             return {};
         },
@@ -74,7 +76,7 @@ describe("dock initialization", () => {
                     },
                 };
                 const active = {classList, getAttribute: () => "outline"};
-                const items = {clientWidth: 40, parentElement: {classList, addEventListener() {}},
+                const items = {clientWidth: 40, parentElement: {classList, clientWidth: 40, addEventListener() {}},
                     querySelector: () => active};
                 const layout = {element, children: [] as unknown[]};
                 const siyuan = {zIndex: 10, config: {uiLayout: {hideDock: false}},

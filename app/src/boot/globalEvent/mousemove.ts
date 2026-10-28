@@ -4,6 +4,7 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../pro
 import {getColIndex} from "../../protyle/util/table";
 import {isContainerGutterBridge} from "../../protyle/gutter/container";
 import {renderGutterOnHover} from "../../protyle/gutter/hover";
+import {setDockBarPointerOver} from "../../layout/dock/barVisibility";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -118,8 +119,10 @@ export const windowMouseMove = (event: MouseEvent) => {
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
                 (leftBarWidth > 0 || event.clientX < 8);
             if (leftTrigger || leftDock.layout.element.contains(target) || leftBar.contains(target)) {
+                setDockBarPointerOver(leftBar, leftBar.contains(target));
                 leftDock.showDockByHover();
             } else {
+                setDockBarPointerOver(leftBar, false);
                 leftDock.hideDockByHover();
             }
 
@@ -131,8 +134,10 @@ export const windowMouseMove = (event: MouseEvent) => {
                 event.clientX > window.innerWidth - Math.max(rightBarWidth - 2, 16) &&
                 (rightBarWidth > 0 || event.clientX > window.innerWidth - 8);
             if (rightTrigger || rightDock.layout.element.contains(target) || rightBar.contains(target)) {
+                setDockBarPointerOver(rightBar, rightBar.contains(target));
                 rightDock.showDockByHover();
             } else {
+                setDockBarPointerOver(rightBar, false);
                 rightDock.hideDockByHover();
             }
 

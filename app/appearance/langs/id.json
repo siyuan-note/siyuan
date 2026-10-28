@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Kunci API Exa",
+	"aiWebExaKeyTip": "Opsional; kosongkan untuk akses anonim dengan batas laju, atau gunakan kuota akun Exa Anda; kueri dikirim ke Exa dan mungkin dikenakan biaya",
 	"mathDelimiterCompatibility": "Kenali pembatas rumus LaTeX saat menempel dan mengimpor",
 	"mathDelimiterCompatibilityTip": "Saat diaktifkan, \\(...\\) dan \\[...\\] dalam konten yang ditempel dan diimpor akan otomatis dikenali sebagai rumus sebaris dan blok",
 	"automationCollectionScopeLimit": "Cakupan pemantauan dapat memuat hingga 32 buku catatan atau dokumen",

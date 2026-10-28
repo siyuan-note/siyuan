@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa API 키",
+	"aiWebExaKeyTip": "선택 사항입니다. 비워 두면 요청 횟수가 제한된 익명 서비스를 사용하고, 입력하면 본인의 Exa 계정 할당량을 사용합니다. 검색어는 Exa로 전송되며 요금이 발생할 수 있습니다",
 	"mathDelimiterCompatibility": "붙여넣기 및 가져오기 시 LaTeX 수식 구분자 인식",
 	"mathDelimiterCompatibilityTip": "활성화하면 붙여넣거나 가져온 내용의 \\(...\\)와 \\[...\\]를 각각 인라인 수식과 블록 수식으로 자동 인식합니다",
 	"automationCollectionScopeLimit": "모니터링 범위에는 노트북 또는 문서를 합계 32개까지 포함할 수 있습니다",

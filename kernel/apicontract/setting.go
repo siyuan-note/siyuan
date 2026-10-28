@@ -23,6 +23,8 @@ type SettingAI struct {
 }
 
 // SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// exaApiKey 独立于 DeepSeek 的 apiKey；留空使用匿名 Exa，非空通过 x-api-key 认证并可能产生费用。
+// 省略密钥保留当前值，null 或空字符串清除；认证或限流失败不会回退到匿名模式或其他服务。
 // 超时默认 30 秒，上限 600 秒。
 // DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
 // Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
@@ -30,6 +32,7 @@ type SettingAIWeb struct {
 	SearchProvider string `json:"searchProvider" api:"optional,nullable"`
 	FetchProvider  string `json:"fetchProvider" api:"optional,nullable"`
 	APIKey         string `json:"apiKey" api:"optional,nullable"`
+	ExaAPIKey      string `json:"exaApiKey" api:"optional,nullable"`
 	Timeout        int    `json:"timeout" api:"optional,nullable"`
 }
 

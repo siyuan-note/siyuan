@@ -1400,7 +1400,8 @@ var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet
 var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
-// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
+// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用 apiKey 的 DeepSeek。
+// exaApiKey 是独立的 Exa 凭据，空值使用匿名模式；非空通过请求头认证，可能产生费用，失败不切换模式或服务。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
 // 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
 // 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。

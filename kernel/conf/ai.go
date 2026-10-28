@@ -48,6 +48,7 @@ type AIWeb struct {
 	SearchProvider string `json:"searchProvider"`
 	FetchProvider  string `json:"fetchProvider"`
 	APIKey         string `json:"apiKey"`
+	ExaAPIKey      string `json:"exaApiKey"`
 	Timeout        int    `json:"timeout"`
 }
 
@@ -61,6 +62,7 @@ func (web *AIWeb) Normalize() {
 		web.FetchProvider = "direct"
 	}
 	web.APIKey = strings.TrimSpace(web.APIKey)
+	web.ExaAPIKey = strings.TrimSpace(web.ExaAPIKey)
 	web.Timeout = util.NormalizeWebTimeout(web.Timeout)
 }
 
@@ -954,6 +956,13 @@ func normalizeApprovalPolicy(policy *ApprovalPolicy) {
 }
 
 func (ai *AI) DecryptAPIKeys() {
+	if ai.Web != nil && ai.Web.ExaAPIKey != "" {
+		if dec := util.AESDecrypt(ai.Web.ExaAPIKey); dec != nil {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				ai.Web.ExaAPIKey = string(plain)
+			}
+		}
+	}
 	if ai.Web != nil && ai.Web.APIKey != "" {
 		if dec := util.AESDecrypt(ai.Web.APIKey); dec != nil {
 			if plain, err := hex.DecodeString(string(dec)); err == nil {
@@ -1012,6 +1021,9 @@ func (ai *AI) DecryptAPIKeys() {
 }
 
 func (ai *AI) EncryptAPIKeys() {
+	if ai.Web != nil && ai.Web.ExaAPIKey != "" {
+		ai.Web.ExaAPIKey = util.AESEncrypt(ai.Web.ExaAPIKey)
+	}
 	if ai.Web != nil && ai.Web.APIKey != "" {
 		ai.Web.APIKey = util.AESEncrypt(ai.Web.APIKey)
 	}

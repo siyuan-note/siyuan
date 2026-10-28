@@ -536,6 +536,7 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	if nil != clonedConf.AI.Load() {
 		if clonedConf.AI.Load().Web != nil {
 			clonedConf.AI.Load().Web.APIKey = ""
+			clonedConf.AI.Load().Web.ExaAPIKey = ""
 		}
 		for _, provider := range clonedConf.AI.Load().Providers {
 			if nil != provider {
@@ -768,8 +769,13 @@ func preserveImportedAISecrets(imported, current *conf.AI) {
 	if imported == nil || current == nil {
 		return
 	}
-	if imported.Web != nil && current.Web != nil && imported.Web.APIKey == "" {
-		imported.Web.APIKey = current.Web.APIKey
+	if imported.Web != nil && current.Web != nil {
+		if imported.Web.APIKey == "" {
+			imported.Web.APIKey = current.Web.APIKey
+		}
+		if imported.Web.ExaAPIKey == "" {
+			imported.Web.ExaAPIKey = current.Web.ExaAPIKey
+		}
 	}
 
 	currentProviders := map[string]*conf.Provider{}

@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Clave API de Exa",
+	"aiWebExaKeyTip": "Opcional; déjelo vacío para el acceso anónimo con límites de solicitudes o utilice la cuota de su cuenta de Exa; las consultas se envían a Exa y pueden generar cargos",
 	"mathDelimiterCompatibility": "Reconocer delimitadores de fórmulas LaTeX al pegar e importar",
 	"mathDelimiterCompatibilityTip": "Al activarlo, se reconocen automáticamente \\(...\\) y \\[...\\] en el contenido pegado e importado como fórmulas en línea y de bloque, respectivamente",
 	"automationCollectionScopeLimit": "El ámbito de supervisión puede contener hasta 32 cuadernos o documentos",

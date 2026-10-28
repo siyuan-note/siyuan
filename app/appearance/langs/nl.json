@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa-API-sleutel",
+	"aiWebExaKeyTip": "Optioneel; laat leeg voor anonieme toegang met snelheidslimieten of gebruik het quotum van uw Exa-account; zoekopdrachten worden naar Exa verzonden en kunnen kosten met zich meebrengen",
 	"mathDelimiterCompatibility": "LaTeX-formulescheidingstekens herkennen bij plakken en importeren",
 	"mathDelimiterCompatibilityTip": "Indien ingeschakeld worden \\(...\\) en \\[...\\] in geplakte en geïmporteerde inhoud automatisch herkend als respectievelijk inline- en blokformules",
 	"automationCollectionScopeLimit": "Het bewakingsbereik kan maximaal 32 notitieboeken of documenten bevatten",

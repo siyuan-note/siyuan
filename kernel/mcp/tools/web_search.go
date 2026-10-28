@@ -23,9 +23,15 @@ import (
 )
 
 var WebSearchTool = &Tool{
-	Name:           "web_search",
-	Description:    "Search the web using the configured provider (Exa or DeepSeek). Returns links and summaries; use web_fetch for page content. Query is sent externally; DeepSeek charges per successful request.",
-	ResolveEffects: func(string) (ToolEffects, bool) { return webToolEffects(webToolConfig().SearchProvider) },
+	Name:        "web_search",
+	Description: "Search the web using the configured provider (Exa or DeepSeek). Returns links and summaries; use web_fetch for page content. Query is sent externally; authenticated Exa and DeepSeek requests may incur charges.",
+	ResolveEffects: func(string) (ToolEffects, bool) {
+		config := webToolConfig()
+		if (config.SearchProvider == "exa" || config.SearchProvider == "") && config.ExaAPIKey != "" {
+			return ToolEffects{DataEgress: true, ExternalCost: true}, true
+		}
+		return webToolEffects(config.SearchProvider)
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -40,6 +46,8 @@ func init() {
 	register(WebSearchTool)
 }
 
+var exaWebSearch = util.WebSearchContext
+
 func webSearchHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 
@@ -50,7 +58,7 @@ func webSearchHandler(ctx context.Context, args map[string]any) (CallToolResult,
 	case "deepseek":
 		result, err = util.DeepSeekWebSearch(ctx, util.DeepSeekWebOptions{APIKey: config.APIKey, Timeout: config.Timeout}, query)
 	case "exa", "":
-		result, err = util.WebSearchContext(ctx, query, "", config.Timeout)
+		result, err = exaWebSearch(ctx, query, config.ExaAPIKey, config.Timeout)
 	default:
 		err = fmt.Errorf("unknown web search provider: %s", config.SearchProvider)
 	}

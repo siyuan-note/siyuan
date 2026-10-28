@@ -44930,6 +44930,9 @@
         "apiKey": {
           "type": "string"
         },
+        "exaApiKey": {
+          "type": "string"
+        },
         "fetchProvider": {
           "type": "string"
         },
@@ -44942,6 +44945,7 @@
       },
       "required": [
         "apiKey",
+        "exaApiKey",
         "fetchProvider",
         "searchProvider",
         "timeout"
@@ -44952,6 +44956,16 @@
       "type": "object",
       "properties": {
         "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exaApiKey": {
           "anyOf": [
             {
               "type": "string"

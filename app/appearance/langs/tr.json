@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa API anahtarı",
+	"aiWebExaKeyTip": "İsteğe bağlı; hız sınırı olan anonim erişim için boş bırakın veya Exa hesabınızın kotasını kullanın; arama sorguları Exa hizmetine gönderilir ve ücret oluşabilir",
 	"mathDelimiterCompatibility": "Yapıştırma ve içe aktarmada LaTeX formül sınırlayıcılarını tanı",
 	"mathDelimiterCompatibilityTip": "Etkinleştirildiğinde, yapıştırılan ve içe aktarılan içerikteki \\(...\\) ve \\[...\\] sırasıyla satır içi ve blok formüller olarak otomatik tanınır",
 	"automationCollectionScopeLimit": "İzleme kapsamı toplamda en fazla 32 not defteri veya belge içerebilir",

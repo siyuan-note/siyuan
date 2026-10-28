@@ -161,7 +161,9 @@ declare namespace Config {
         fetchProvider: string;
         /** DeepSeek Search 与 Fetch 共用的凭证，由内核加密保存。 */
         apiKey: string;
-        /** DeepSeek 请求超时秒数，默认 30，范围 1–600。 */
+        /** 独立 Exa 凭据，由内核加密保存；空值使用匿名模式，非空可能产生费用。 */
+        exaApiKey: string;
+        /** 网页请求超时秒数，默认 30，范围 1–600。 */
         timeout: number;
     }
 

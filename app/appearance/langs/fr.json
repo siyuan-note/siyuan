@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Clé API Exa",
+	"aiWebExaKeyTip": "Facultatif ; laissez vide pour un accès anonyme avec limitation du débit, ou utilisez le quota de votre compte Exa ; les recherches sont envoyées à Exa et peuvent entraîner des frais",
 	"mathDelimiterCompatibility": "Reconnaître les délimiteurs de formules LaTeX lors du collage et de l’importation",
 	"mathDelimiterCompatibilityTip": "Lorsque cette option est activée, \\(...\\) et \\[...\\] sont automatiquement reconnus dans le contenu collé et importé comme des formules en ligne et en bloc, respectivement",
 	"automationCollectionScopeLimit": "Le périmètre de surveillance peut contenir jusqu’à 32 carnets ou documents",

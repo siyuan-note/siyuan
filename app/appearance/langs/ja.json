@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa API キー",
+	"aiWebExaKeyTip": "任意入力。空欄ではレート制限付きの匿名サービスを使用し、入力すると自分の Exa アカウントの利用枠を使用します。検索語は Exa に送信され、料金が発生する場合があります",
 	"mathDelimiterCompatibility": "貼り付け・インポート時に LaTeX 数式の区切り文字を認識する",
 	"mathDelimiterCompatibilityTip": "有効にすると、貼り付け・インポートした内容の \\(...\\) と \\[...\\] を、それぞれインライン数式とブロック数式として自動的に認識します",
 	"automationCollectionScopeLimit": "監視範囲に含められるノートブックまたはドキュメントは合計32件までです",

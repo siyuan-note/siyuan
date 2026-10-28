@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa API 金鑰",
+	"aiWebExaKeyTip": "選填；留空使用有限流的匿名服務，填寫後使用自己的 Exa 帳戶額度；搜尋詞會傳送給 Exa，可能產生費用",
 	"mathDelimiterCompatibility": "貼上和匯入時相容 LaTeX 公式分隔符",
 	"mathDelimiterCompatibilityTip": "啟用後自動將貼上和匯入內容中的 \\(...\\)、\\[...\\] 分別識別為行內公式和區塊公式",
 	"automationCollectionScopeLimit": "監聽範圍最多可包含 32 個筆記本或文件",

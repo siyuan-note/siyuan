@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Kľúč API Exa",
+	"aiWebExaKeyTip": "Voliteľné; ponechajte prázdne pre anonymný prístup s obmedzením počtu požiadaviek alebo použite kvótu svojho účtu Exa; vyhľadávania sa odosielajú do Exa a môžu byť spoplatnené",
 	"mathDelimiterCompatibility": "Rozpoznávať oddeľovače vzorcov LaTeX pri vkladaní a importe",
 	"mathDelimiterCompatibilityTip": "Ak je táto možnosť zapnutá, \\(...\\) a \\[...\\] vo vloženom a importovanom obsahu sa automaticky rozpoznajú ako riadkové a blokové vzorce",
 	"automationCollectionScopeLimit": "Rozsah sledovania môže obsahovať najviac 32 zápisníkov alebo dokumentov",

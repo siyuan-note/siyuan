@@ -75,19 +75,20 @@ func TestAPIContractSettingSectionVisibility(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	ai := conf.NewAI()
 	ai.Providers = []*conf.Provider{{ID: "20261019120000-prov001", BaseURL: "https://example.com", APIKey: "secret-key", Enabled: true}}
+	ai.Web.ExaAPIKey = "secret-exa-key"
 	model.Conf.AI.Store(ai)
 	model.Conf.System.Store(conf.NewSystem())
 	model.NormalizeAppConf(model.Conf)
 
 	admin := requestSettingSection(t, model.RoleAdministrator, `{"namespace":"ai"}`)
 	if admin.Conf == nil || admin.Conf.AI == nil || len(admin.Conf.AI.Providers) != 1 ||
-		admin.Conf.AI.Providers[0].APIKey != "secret-key" {
+		admin.Conf.AI.Providers[0].APIKey != "secret-key" || admin.Conf.AI.Web == nil || admin.Conf.AI.Web.ExaAPIKey != "secret-exa-key" {
 		t.Fatalf("administrator did not receive AI credentials: %+v", admin.Conf)
 	}
 
 	// 非管理员使用与 getConf 相同的脱敏规则，不返回任何凭据。
 	reader := requestSettingSection(t, model.RoleReader, `{"namespace":"ai"}`)
-	if reader.Conf == nil || reader.Conf.AI == nil || len(reader.Conf.AI.Providers) != 0 {
+	if reader.Conf == nil || reader.Conf.AI == nil || len(reader.Conf.AI.Providers) != 0 || reader.Conf.AI.Web != nil {
 		t.Fatalf("non-administrator received AI credentials: %+v", reader.Conf)
 	}
 

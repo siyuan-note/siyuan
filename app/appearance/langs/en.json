@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Exa API Key",
+	"aiWebExaKeyTip": "Optional; leave empty for anonymous access with rate limits, or use your Exa account quota; queries are sent to Exa and charges may apply",
 	"mathDelimiterCompatibility": "Recognize LaTeX math delimiters when pasting and importing",
 	"mathDelimiterCompatibilityTip": "When enabled, automatically recognize \\(...\\) and \\[...\\] in pasted and imported content as inline and block math, respectively",
 	"automationCollectionScopeLimit": "The watch scope can contain up to 32 notebooks or documents",

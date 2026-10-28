@@ -1,4 +1,6 @@
 {
+	"aiWebExaKey": "Klucz API Exa",
+	"aiWebExaKeyTip": "Opcjonalny; pozostaw puste, aby korzystać anonimowo z limitem zapytań, lub użyj limitu swojego konta Exa; zapytania są wysyłane do Exa i mogą wiązać się z opłatami",
 	"mathDelimiterCompatibility": "Rozpoznawaj delimitery formuł LaTeX podczas wklejania i importowania",
 	"mathDelimiterCompatibilityTip": "Po włączeniu \\(...\\) i \\[...\\] we wklejanej i importowanej treści są automatycznie rozpoznawane odpowiednio jako formuły w wierszu i blokowe",
 	"automationCollectionScopeLimit": "Zakres monitorowania może zawierać łącznie do 32 notatników lub dokumentów",

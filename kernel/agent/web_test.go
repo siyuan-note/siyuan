@@ -17,6 +17,17 @@ func TestWebToolProviderConfirmation(t *testing.T) {
 			t.Fatal("legacy web provider confirmation changed")
 		}
 	}
+	model.Conf.AI.Load().Web.ExaAPIKey = "exa-key"
+	if !needsConfirm("web_search", "", nil) || needsConfirm("web_fetch", "", nil) || needsLocalSnapshot("web_search", "") {
+		t.Fatal("authenticated Exa needs external request approval without affecting direct fetch")
+	}
+	if needsConfirm("web_search", "", map[string]bool{"web_search::": true}) {
+		t.Fatal("explicit Exa approval was ignored")
+	}
+	model.Conf.AI.Load().Web.ExaAPIKey = ""
+	if needsConfirm("web_search", "", nil) {
+		t.Fatal("clearing Exa key did not restore anonymous approval behavior")
+	}
 	model.Conf.AI.Load().Web.SearchProvider = "deepseek"
 	if !needsConfirm("web_search", "", nil) || needsConfirm("web_fetch", "", nil) {
 		t.Fatal("search confirmation did not follow independent provider selection")

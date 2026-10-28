@@ -2176,7 +2176,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             data: newUpdated,
                         }], [{
                             action: "removeAttrViewBlock",
-                            srcIDs: ids,
+                            srcIDs: srcs.map(src => src.itemID),
                             avID,
                         }, {
                             action: "doUpdateUpdated",

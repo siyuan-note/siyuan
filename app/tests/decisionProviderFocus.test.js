@@ -29,6 +29,7 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
         "dialog/message": {showMessage: unexpected},
         "util/fetch": {fetchPost: unexpected},
         "plugin/Menu": {Menu: unexpected},
+        "menus/Menu": {markMenuInnerScroll: unexpected},
         "util/upDownHint": {upDownHint: unexpected},
         "config/tabs/ai/chatGPTAccount": {genChatGPTAccountHTML: unexpected, mountChatGPTAccount: unexpected},
     };

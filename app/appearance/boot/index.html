@@ -100,6 +100,48 @@
             }
         }
 
+
+        /* 倒下动画在光带汇聚后依次填充对应的折页区域。 */
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]) .logo path {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]) .boot-reveal,
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]) .boot-reveal-base { opacity: 0; }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .streak {
+            animation: bootStreakConverge 1.35s cubic-bezier(.33, 0, .2, 1) var(--delay) forwards,
+                       bootFall .4s cubic-bezier(.3, 0, .2, 1) var(--fall-delay) forwards;
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .streaks > g:first-child {
+            animation: bootClipRed .01s 1.65s forwards;
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .streaks > g:last-child {
+            animation: bootClipGray .01s 1.65s forwards;
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .boot-reveal {
+            animation: bootReveal .3s ease-out var(--reveal-delay) forwards;
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .boot-reveal-base {
+            animation: bootReveal .3s ease-in-out 2.2s forwards;
+        }
+        @keyframes bootClipRed { to { clip-path: url(#boot-logo-red); } }
+        @keyframes bootClipGray { to { clip-path: url(#boot-logo-gray); } }
+        @keyframes bootReveal { to { opacity: 1; } }
+        @keyframes bootFall {
+            0% { transform: rotate(0deg) translate(0, 0); opacity: .9; }
+            65% { transform: rotate(var(--fall-mid)) scaleX(1.6); opacity: .8; stroke-width: 20; }
+            100% { transform: rotate(var(--fall-end)) scaleX(2); opacity: 0; stroke-width: 28; }
+        }
+        @keyframes bootSwirl {
+            0% { opacity: 0; transform: rotate(180deg) translate(var(--dx, 0), var(--dy, 0)); }
+            20% { opacity: .9; }
+            100% { opacity: .9; transform: rotate(0deg) translate(0, 0); }
+        }
+        #bg svg[data-boot-variant]:not([data-boot-variant="original"]).started .streak {
+            animation-name: bootSwirl, bootFall;
+        }
+
         /* 底部进度区，预留安全区域防止移动端手势条遮挡 */
         #progressWrap {
             position: absolute;
@@ -157,6 +199,82 @@
     <div id="details"></div>
 </div>
 <script>
+
+    // 每次启动选取一种动画；初始化后不会随进度消息改变。
+    const bootVariant = ["original", "left", "inward", "right"][Math.floor(Math.random() * 4)];
+    const bootAnimationDuration = bootVariant === "original" ? 2000 : 2500;
+    const setupBootVariant = (svg) => {
+        svg.dataset.bootVariant = bootVariant;
+        if (bootVariant === "original") return;
+        const ns = "http://www.w3.org/2000/svg";
+        const streaks = svg.querySelector(".streaks");
+        const lines = Array.from(streaks.querySelectorAll(".streak"));
+        const paths = Array.from(svg.querySelectorAll(".logo path"));
+        const defs = document.createElementNS(ns, "defs");
+        const gradient = document.createElementNS(ns, "radialGradient");
+        gradient.id = "boot-fragment-gradient";
+        [["0%", "1"], ["65%", "1"], ["100%", "0"]].forEach(([offset, opacity]) => {
+            const stop = document.createElementNS(ns, "stop");
+            stop.setAttribute("offset", offset);
+            stop.setAttribute("stop-color", "white");
+            stop.setAttribute("stop-opacity", opacity);
+            gradient.appendChild(stop);
+        });
+        defs.appendChild(gradient);
+        const redClip = document.createElementNS(ns, "clipPath");
+        const grayClip = document.createElementNS(ns, "clipPath");
+        redClip.id = "boot-logo-red";
+        grayClip.id = "boot-logo-gray";
+        paths.forEach((path, index) => (index % 2 ? grayClip : redClip).appendChild(path.cloneNode()));
+        defs.append(redClip, grayClip);
+        const mask = document.createElementNS(ns, "mask");
+        mask.id = "boot-fragment-mask";
+        mask.setAttribute("maskUnits", "userSpaceOnUse");
+        mask.setAttribute("x", "0"); mask.setAttribute("y", "0");
+        mask.setAttribute("width", "1024"); mask.setAttribute("height", "1024");
+        const base = document.createElementNS(ns, "rect");
+        base.setAttribute("width", "1024"); base.setAttribute("height", "1024");
+        base.setAttribute("fill", "white"); base.setAttribute("class", "boot-reveal-base");
+        mask.appendChild(base);
+        const redGroup = document.createElementNS(ns, "g");
+        const grayGroup = document.createElementNS(ns, "g");
+        redGroup.style.filter = "drop-shadow(0 0 4px rgba(210,63,49,.5))";
+        grayGroup.style.filter = "drop-shadow(0 0 4px rgba(130,135,143,.35))";
+        streaks.append(redGroup, grayGroup);
+        const edges = [
+            [37, 372, 307, 102], [37, 922, 307, 652], [307, 102, 512, 307], [307, 652, 512, 857],
+            [512, 307, 717, 102], [512, 857, 717, 652], [717, 102, 987, 372], [717, 652, 987, 922],
+        ];
+        lines.forEach((line, index) => {
+            const edgeIndex = Math.floor(index / 16);
+            const i = index % 16;
+            const edge = edges[edgeIndex];
+            const t = (Math.floor(i / 4) + .5) / 4;
+            const x = edge[0] + (edge[2] - edge[0]) * t;
+            const y = edge[1] + (edge[3] - edge[1]) * t + (edgeIndex % 2 ? -1 : 1) * 550 * ((i % 4 + .5) / 8);
+            const position = bootVariant === "inward" ? Math.min(x, 1024 - x) / 512 : bootVariant === "right" ? (1024 - x) / 1024 : x / 1024;
+            const angle = bootVariant === "inward" ? (x < 512 ? 1 : -1) : bootVariant === "right" ? -1 : 1;
+            const delay = 1.65 + position * .45;
+            line.setAttribute("x1", String(x)); line.setAttribute("x2", String(x));
+            line.setAttribute("y1", String(y - 52)); line.setAttribute("y2", String(y));
+            line.style.filter = "";
+            line.style.setProperty("--delay", (Math.random() * .3) + "s");
+            line.style.setProperty("--fall-delay", delay + "s");
+            line.style.setProperty("--fall-mid", angle * 70 + "deg");
+            line.style.setProperty("--fall-end", angle * 90 + "deg");
+            (edgeIndex < 2 || edgeIndex >= 4 && edgeIndex < 6 ? redGroup : grayGroup).appendChild(line);
+            const spot = document.createElementNS(ns, "circle");
+            spot.setAttribute("cx", String(x)); spot.setAttribute("cy", String(y));
+            spot.setAttribute("r", "95"); spot.setAttribute("fill", "url(#boot-fragment-gradient)");
+            spot.setAttribute("class", "boot-reveal");
+            spot.style.setProperty("--reveal-delay", (delay + .1) + "s");
+            mask.appendChild(spot);
+        });
+        defs.appendChild(mask);
+        svg.prepend(defs);
+        paths.forEach(path => path.setAttribute("mask", "url(#boot-fragment-mask)"));
+        svg.appendChild(streaks);
+    };
     // 生成斜向发光光带，沿 logo 折页的斜边排布，汇聚到位时勾勒出 logo 形状
     (() => {
         const streaksG = document.querySelector("#bg svg .streaks");
@@ -179,7 +297,7 @@
             {x1: 717, y1: 102, x2: 987, y2: 372, color: "#3b3e43"},
             {x1: 717, y1: 652, x2: 987, y2: 922, color: "#3b3e43"},
         ];
-        const perEdge = 12; // 每条斜边上的光带数
+        const perEdge = 16; // 每条斜边上的光带数
         edges.forEach((e) => {
             for (let i = 0; i < perEdge; i++) {
                 // 沿斜边均匀采样终点（带轻微抖动，避免过于规整）
@@ -214,6 +332,9 @@
             }
         });
     })();
+
+    setupBootVariant(document.querySelector("#bg svg"));
+    document.querySelector("#bg svg").classList.add("started");
 
     const getSearch = (key) => {
         if (window.location.search.indexOf('?') === -1) {
@@ -538,17 +659,13 @@
                     es.close()
                     if (navigator.userAgent.indexOf('Electron') === -1) {
                         // 内核完成后尽快结束动画，把剩余动画快进到终态（200ms 收尾）
-                        const animTotalMs = 2000
+                        const animTotalMs = bootAnimationDuration
                         const elapsed = Date.now() - bootShowStart
                         const remaining = animTotalMs - elapsed
                         const bootSvg = document.querySelector("#bg svg")
                         if (remaining > 0 && bootSvg) {
                             const rate = remaining / 200
-                            bootSvg.querySelectorAll(".streak, .logo path").forEach((el) => {
-                                el.getAnimations().forEach((a) => {
-                                    a.playbackRate = rate
-                                })
-                            })
+                            bootSvg.getAnimations({subtree: true}).forEach((a) => { a.playbackRate = rate })
                             setTimeout(redirect, 200)
                         } else {
                             redirect()

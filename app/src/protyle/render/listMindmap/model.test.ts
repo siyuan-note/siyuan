@@ -390,9 +390,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
             matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
-            getUndoStateSnapshot: () => ({canUndo: true, canRedo: true, pending: false}),
-            hasUndoStateMirror: () => true,
-            subscribeUndoState: (_rootID: string, listener: () => void) => { listener(); return () => {}; },
             preserveUndoViewport: () => () => {},
             isEncryptedBox: () => false,
             setStorageVal: () => check.fail("Embedded previews cannot persist viewport positions"),
@@ -1255,8 +1252,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const nodeStyles: unknown[] = [];
     const fullscreenChanges: boolean[] = [];
     let interactions = 0;
-    let undo = 0;
-    let redo = 0;
     let settingsOpened = 0;
     const colorSettings: {kind: string, anchor?: HTMLButtonElement}[] = [];
     let overflowExpand: ((level: number | "expandAll" | "foldAll") => void) | undefined;
@@ -1288,8 +1283,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             deletions.push(id);
         },
         onFold: (id: string) => folds.push(id),
-        onUndo: () => undo++,
-        onRedo: () => redo++,
         onSettingsMenu: (_anchor: HTMLElement, expand?: typeof overflowExpand, pan?: typeof panMenu) => {
             settingsOpened++;
             overflowExpand = expand;
@@ -1904,13 +1897,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(view.getContentHost(alpha).firstElementChild, editorMarker);
     view.setEditing();
     view.update(api.readListMindmap(list));
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').disabled, true,
-        "an empty history keeps undo disabled");
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').disabled, true);
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="undo"]').hidden, true);
-    check.equal(host.querySelector<HTMLButtonElement>('[aria-label="redo"]').hidden, true);
-    check.equal(undo, 0);
-    check.equal(redo, 0);
+    check.equal(host.querySelector('[data-type="undo"], [data-type="redo"]'), null,
+        "history controls belong to the document action bar");
     finishAllowed = false;
     nodeElement(alpha).querySelector<HTMLButtonElement>(".mindmap-view__add-child").click();
     check.equal(additions.length, 0);
@@ -2210,7 +2198,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(fitButton.parentElement, toolbarPopup, "fit shares the zoom panel with the slider and reset");
     check.equal(toolbarGroup.querySelector(':scope > [aria-label="listMindmapFit"]'), null,
         "fit no longer occupies a separate top-level toolbar slot");
-    view.setUndoState({canUndo: true, canRedo: false});
     for (const width of [96, 180, 240, 260, 320, 360, 700]) {
         for (const fontSize of [14, 32]) {
             host.style.width = `${width}px`;
@@ -2264,7 +2251,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }
         }
     }
-    view.setUndoState({canUndo: false, canRedo: false});
     host.style.cssText = originalHostStyle;
     host.focus();
     view.zoomAt(1);
@@ -3439,7 +3425,6 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     nodeElement(beta).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
     host.dispatchEvent(new KeyboardEvent("keydown", {key: "z", ctrlKey: true, bubbles: true}));
     check.equal(edits.length, editsBeforeReadonly);
-    check.equal(undo, 0);
     const persistedBeforeFold = list.outerHTML;
     pressDelete();
     check.deepEqual(deletions, [beta]);

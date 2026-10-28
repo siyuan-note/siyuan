@@ -24,6 +24,7 @@ export const destroy = (protyle: IProtyle) => {
     disposeSyncEditorSave(protyle);
     destroyFoldedRender(protyle);
     destroyListMindmaps(protyle);
+    protyle.breadcrumb?.destroy();
     cancelLegacyMindmapMigration(protyle);
     invalidateFocusFoldRequests(protyle);
     unregisterViewFoldContext(protyle);

@@ -70,8 +70,6 @@ export interface ListMindmapViewOptions {
     onTabTaskMenu?: (id: string, itemId: string, anchor: HTMLElement) => void;
     isTaskCycle?: (event: KeyboardEvent) => boolean;
     isTaskCompletionToggle?: (event: KeyboardEvent) => boolean;
-    onUndo?: () => void | Promise<void>;
-    onRedo?: () => void | Promise<void>;
     onNodeStyle?: (id: string, patch: Partial<ListMindmapNodeStyle>) => void;
     onNodesStyle?: (ids: string[], patch: Partial<ListMindmapNodeStyle>) => void;
     onNodeWidths?: (widths: {id: string, width: number}[], expected: string) => Promise<boolean>;
@@ -139,8 +137,6 @@ export class ListMindmapView {
         widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
     };
     private widthPending = false;
-    private undoState = {canUndo: false, canRedo: false, pending: false};
-    private historyPending = false;
     private inspectorFrame = 0;
     private revealInspectorHost = false;
     private readonly zoomLabel: HTMLSpanElement;
@@ -516,7 +512,6 @@ export class ListMindmapView {
         }
         if (this.inspector.contains(target) || this.inspectorPopover.contains(target) || this.buttons.get("style")?.contains(target) ||
             this.buttons.get("relation")?.contains(target) || this.buttons.get("expandLevel")?.contains(target) ||
-            this.buttons.get("undo")?.contains(target) || this.buttons.get("redo")?.contains(target) ||
             this.buttons.get("summary")?.contains(target) || this.buttons.get("multiSelect")?.contains(target) ||
             this.levelSelect?.contains(target)) {
             return;
@@ -555,49 +550,9 @@ export class ListMindmapView {
         return this.locked;
     }
 
-    public setUndoState(state: {canUndo: boolean, canRedo: boolean, pending?: boolean}) {
-        if (this.destroyed) {
-            return;
-        }
-        this.undoState = {...state, pending: !!state.pending};
-        this.updateUndoControls();
-    }
-
-    private updateUndoControls() {
-        const hidden = !this.undoState.canUndo && !this.undoState.canRedo && !this.historyPending;
-        for (const key of ["undo", "redo"] as const) {
-            const button = this.buttons.get(key);
-            if (button) {
-                button.hidden = hidden;
-                button.disabled = this.readOnly || this.historyPending || this.undoState.pending ||
-                    !(key === "undo" ? this.undoState.canUndo : this.undoState.canRedo);
-            }
-        }
-        this.queueInspectorLayout();
-    }
-
-    private async runHistory(redo: boolean) {
-        if (this.readOnly || this.historyPending || this.buttons.get(redo ? "redo" : "undo")?.disabled) {
-            return;
-        }
-        this.historyPending = true;
-        this.updateUndoControls();
-        try {
-            this.closeInspectorPanel();
-            this.finishSummaryEdit?.(true);
-            this.finishRelationEdit?.(true);
-            const finished = await this.options.finishEdit?.();
-            if (finished !== false && !this.destroyed && !this.readOnly) {
-                await (redo ? this.options.onRedo?.() : this.options.onUndo?.());
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            this.historyPending = false;
-            if (!this.destroyed) {
-                this.updateUndoControls();
-            }
-        }
+    public finishLabels() {
+        this.finishSummaryEdit?.(true);
+        this.finishRelationEdit?.(true);
     }
 
     private activatePointer = (event: PointerEvent) => {
@@ -679,10 +634,6 @@ export class ListMindmapView {
     }
 
     private createToolbar() {
-        this.toolbar.style.top = this.toolbar.style.left = this.toolbar.style.right = this.toolbar.style.width =
-            this.toolbar.style.visibility = "";
-        const history = !this.readOnly && !!(this.options.onUndo || this.options.onRedo);
-        this.options.host.classList.toggle("mindmap-view--history", history);
         const controls = createElement("div", "mindmap-view__toolbar-group");
         const add = (id: string, key: string, icon: string, action: () => void, nodeAction = false, finish = true) => {
             const button = this.makeButton(key, icon, action, "", finish);
@@ -713,15 +664,6 @@ export class ListMindmapView {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
         };
         this.toolbar.append(createElement("span", "mindmap-view__spacer fn__flex-1"), controls);
-        if (history) {
-            for (const [key, icon] of [["undo", "iconUndo"], ["redo", "iconRedo"]] as const) {
-                if (key === "undo" ? this.options.onUndo : this.options.onRedo) {
-                    add(key, key, icon, () => void this.runHistory(key === "redo"), false, false);
-                    this.buttons.get(key).dataset.type = key;
-                }
-            }
-            this.updateUndoControls();
-        }
         this.levelSelect = undefined;
         this.options.host.classList.toggle("mindmap-view--locked", this.locked);
         add("lock", this.locked ? "listMindmapUnlock" : "listMindmapLock", this.locked ? "iconLock" : "iconUnlock", () => {
@@ -3723,8 +3665,7 @@ export class ListMindmapView {
     }
 
     private queueInspectorLayout(reveal = false) {
-        const history = !this.readOnly && !!(this.options.onUndo || this.options.onRedo);
-        if (this.destroyed || this.inspector.hidden && !reveal && !history) {
+        if (this.destroyed || this.inspector.hidden && !reveal) {
             return;
         }
         this.revealInspectorHost ||= reveal;
@@ -3738,7 +3679,6 @@ export class ListMindmapView {
             if (this.destroyed) {
                 return;
             }
-            this.positionToolbar();
             if (this.inspector.hidden || this.readOnly) {
                 return;
             }
@@ -3788,26 +3728,9 @@ export class ListMindmapView {
         this.inspector.style.bottom = `${this.options.host.clientTop + this.options.host.clientHeight -
             (visible.bottom - host.top) / scaleY + 8}px`;
         // 可见条带放不下操作栏时保留选择，滚动回足够的空间后恢复显示。
-        const toolbarHeight = !this.readOnly && (this.options.onUndo || this.options.onRedo) ? this.toolbar.offsetHeight + 4 : 0;
         this.inspector.style.visibility = width <= 0 ||
-            (visible.bottom - visible.top) / scaleY < toolbarHeight + this.inspector.offsetHeight + 16 ? "hidden" : "";
+            (visible.bottom - visible.top) / scaleY < this.inspector.offsetHeight + 16 ? "hidden" : "";
         this.positionInspectorPanel();
-    }
-
-    private positionToolbar() {
-        if (this.readOnly || !(this.options.onUndo || this.options.onRedo)) {
-            return;
-        }
-        const host = this.options.host.getBoundingClientRect();
-        const visible = this.getVisibleViewportBounds();
-        const scaleX = host.width / this.options.host.offsetWidth || 1;
-        const scaleY = host.height / this.options.host.offsetHeight || 1;
-        this.toolbar.style.left = `${(visible.left - host.left) / scaleX - this.options.host.clientLeft}px`;
-        this.toolbar.style.right = "auto";
-        this.toolbar.style.width = `${Math.max(0, (visible.right - visible.left) / scaleX)}px`;
-        this.toolbar.style.top = `${Math.max(0, (visible.top - host.top) / scaleY - this.options.host.clientTop)}px`;
-        this.toolbar.style.visibility = visible.right <= visible.left ||
-            (visible.bottom - visible.top) / scaleY < this.toolbar.offsetHeight + 8 ? "hidden" : "";
     }
 
     private positionInspectorPanel() {

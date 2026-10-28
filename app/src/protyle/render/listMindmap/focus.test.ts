@@ -9,8 +9,8 @@ const source = createSourceFile("index.ts", readFileSync("src/protyle/render/lis
 const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
 const methods = controller.members.filter(item => item.name &&
-    ["add", "deleteNode", "change", "undo", "focusNode", "edit", "refreshUndoState", "bindUndoState"].includes(item.name.getText(source)));
-assert.equal(methods.length, 8);
+    ["add", "deleteNode", "change", "undo", "focusNode", "edit"].includes(item.name.getText(source)));
+assert.equal(methods.length, 6);
 let editorUndo = "";
 const visit = (item: import("typescript").Node) => {
     if (isPropertyAssignment(item) && item.name.getText(source) === "onUndo" &&
@@ -28,38 +28,6 @@ class Controller {
 }
 globalThis.Controller = Controller;
 globalThis.isUndoViewportPreserved = isUndoViewportPreserved;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-
-test("canvas history follows embedded source documents, local stacks, busy state and subscription lifetime", () => {
-    const listeners = new Map<string, () => void>();
-    const states: unknown[] = [];
-    let editable = true;
-    let embedded = true;
-    const root = {undoPending: false};
-    const owner = {block: {rootID: "document"}, lite: false, undo: {undoStack: [] as unknown[], redoStack: [] as unknown[]}};
-    const context: any = {roots: new WeakMap([[owner, root]]), canEdit: () => editable,
-        getUndoStateSnapshot: (id: string) => ({canUndo: id === "source", canRedo: false, pending: false}),
-        hasUndoStateMirror: () => true,
-        subscribeUndoState: (id: string, listener: () => void) => {
-            listeners.set(id, listener); listener();
-            return () => listeners.delete(id);
-        }};
-    runInNewContext(compiled, context);
-    const target = Object.assign(new context.Controller(), {owner,
-        list: {closest: () => embedded ? {dataset: {rootId: "source"}} : null},
-        view: {setUndoState: (state: unknown) => states.push(JSON.parse(JSON.stringify(state)))}});
-    target.bindUndoState();
-    assert.deepEqual([...listeners.keys()], ["source"]);
-    assert.deepEqual(states.at(-1), {canUndo: true, canRedo: false, pending: false});
-    root.undoPending = true; listeners.get("source")();
-    assert.deepEqual(states.at(-1), {canUndo: true, canRedo: false, pending: true});
-    root.undoPending = false; embedded = false; target.bindUndoState();
-    assert.deepEqual([...listeners.keys()], ["document"]);
-    assert.deepEqual(states.at(-1), {canUndo: false, canRedo: false, pending: false});
-    owner.lite = true; owner.undo.redoStack.push({}); target.refreshUndoState();
-    assert.deepEqual(states.at(-1), {canUndo: false, canRedo: true, pending: false});
-    editable = false; target.bindUndoState();
-    assert.equal(listeners.size, 0);
-});
 
 test("explicit mind map additions stay selected while clipboard additions still open the editor", async () => {
     const steps: string[] = [];

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261027231810"
+		"updated": "20261028111611"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-731sqd6",
-				"updated": "20261027231810"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2092,7 +2092,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xvhal7o",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2113,6 +2113,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "心智圖預設將滑鼠滾輪和單指滑動交給文件捲動。桌面版點擊心智圖、行動版輕點一次心智圖即可操作畫布；行動版也可使用工具列中的「手形工具」進行單指平移，關閉手形工具後可選取、拖曳或按兩下編輯節點，也可在閱讀時直接按兩下節點進入編輯。"
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-4b5448e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-4b5448e",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動版可使用文件導覽路徑列中的撤銷、重做按鈕，收起鍵盤或將心智圖全螢幕顯示後也能操作。它們共用文件的撤銷歷程，也可能撤銷心智圖以外的修改。沒有可撤銷或重做的操作時，以及文件唯讀時，按鈕隱藏。"
 				}
 			]
 		},

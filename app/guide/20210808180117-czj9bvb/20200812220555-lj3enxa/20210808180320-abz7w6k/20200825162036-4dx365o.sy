@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261027231810"
+		"updated": "20261028111611"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261027231810"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2094,7 +2094,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-k1vwtue",
-				"updated": "20261025114801"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -2115,6 +2115,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "思维导图默认将鼠标滚轮和单指滑动交给文档滚动。桌面端点击导图、移动端轻点一次导图即可操作画布；移动端也可使用工具栏中的“手形工具”进行单指平移，关闭手形工具后可选择、拖动或双击编辑节点，也可在阅读时直接双击节点进入编辑。"
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-9011ee1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-9011ee1",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端可使用文档面包屑栏中的撤销、重做按钮，收起键盘或将思维导图全屏后也能操作。它们共用文档的撤销历史，也可能撤销导图以外的修改。没有可撤销或重做的操作时，以及文档只读时，按钮隐藏。"
 				}
 			]
 		},

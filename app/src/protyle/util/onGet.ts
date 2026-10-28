@@ -597,9 +597,10 @@ export const disabledProtyle = (protyle: IProtyle) => {
         if (undoElement && !undoElement.classList.contains("fn__none")) {
             undoElement.classList.add("fn__none");
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]').classList.add("fn__none");
-            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]').classList.add("fn__none");
-            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]').classList.add("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')?.classList.add("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]')?.classList.add("fn__none");
         }
+        protyle.breadcrumb.refreshHistory?.(protyle.block.rootID);
     }
     hideTooltip();
 };
@@ -671,9 +672,10 @@ export const enableProtyle = (protyle: IProtyle) => {
         if (undoElement && undoElement.classList.contains("fn__none")) {
             undoElement.classList.remove("fn__none");
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]').classList.remove("fn__none");
-            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]').classList.remove("fn__none");
-            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]').classList.remove("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')?.classList.remove("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]')?.classList.remove("fn__none");
         }
+        protyle.breadcrumb.refreshHistory?.(protyle.block.rootID);
     }
     hideElements(["gutter"], protyle);
     hideTooltip();

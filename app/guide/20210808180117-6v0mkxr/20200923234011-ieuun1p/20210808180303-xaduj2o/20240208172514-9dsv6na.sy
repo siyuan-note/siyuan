@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028142713"
 	},
 	"Children": [
 		{
@@ -5463,6 +5463,187 @@
 				{
 					"Type": "NodeText",
 					"Data": "Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-yv18520",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-yv18520",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sub-items"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-lyyg6cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-lyyg6cb",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sub-items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the database settings to create parent and child relation fields or select existing self-relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-73q7plg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-73q7plg",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An item has at most one parent and can contain multiple levels of children. An item cannot use itself or a descendant as its parent. All database views and mirrors share the relations, which do not change the document or block hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-sb1l5ya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-sb1l5ya",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table and list views offer "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Nested display"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flat display"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". In nested display, use the control before the primary field to expand or collapse children. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-rbsadma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-rbsadma",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The item menu provides "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add sub-item"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Change parent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Promote one level"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-1vm606a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-1vm606a",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a filter matches a child, its ancestor path remains visible as context, while nonmatching siblings are hidden. Nested groups follow the root item, but children retain their own group-field values. Flat views group each item by its own values."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-rlnm22x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-rlnm22x",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Nested views page root items and load children on expansion, with previous and next page controls for long child lists. Collapsing does not change statistics, and ancestors shown only for context do not count as filter matches. Pasting multiple rows writes to the current page's visible items, including context ancestors; excess rows create top-level items without overwriting collapsed items or items on other pages."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-977oeu1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-977oeu1",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting a parent promotes its surviving direct children by one level without deleting descendants or bound documents and blocks. Duplicating a parent copies its entire subtree, including collapsed or filtered-out descendants. Copies receive new item identities; a copy of a bound item is unbound and does not duplicate its body. Structural operations support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-wvifawj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-wvifawj",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. Expansion state for encrypted databases is cleared when the notebook locks or closes."
 				}
 			]
 		},

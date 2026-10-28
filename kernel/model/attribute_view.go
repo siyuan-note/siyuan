@@ -2308,6 +2308,9 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 		if av.KeyTypeBlock == keyValues.Key.Type {
 			continue // 主键已处理
 		}
+		if attrView.IsSubItemsKey(keyValues.Key.ID) {
+			continue
+		}
 		if av.HasKeyGroup(keyValues.Key.Type, av.KeyGroupSkipRowCopy) {
 			continue // 汇总/创建时间/更新时间字段在渲染或自动生成时处理，不复制
 		}
@@ -2358,6 +2361,16 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 		addRowToViewItems(v, newRowID, previousItemID)
 	}
 	attrView.CopyCardCoverPositions(srcRowID, newRowID)
+	if attrView.HasSubItems() {
+		parents, _ := attrView.GetKeyValues(attrView.SubItems.ParentKeyID)
+		parent := ""
+		if value := parents.GetValue(srcRowID); value != nil && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
+			parent = value.Relation.BlockIDs[0]
+		}
+		if err = attrView.SetSubItemsParents(map[string]string{newRowID: parent}); err != nil {
+			return
+		}
+	}
 
 	// 统一处理双向关联：按目标属性视图聚合，每个目标只 parse/save 一次
 	twoWayByDestAv := map[string][]*pendingTwoWay{}
@@ -2453,7 +2466,9 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		}
 	}
 
-	data = bytes.ReplaceAll(data, []byte(avID), []byte(newAvID))
+	if oldAv.SubItems == nil {
+		data = bytes.ReplaceAll(data, []byte(avID), []byte(newAvID))
+	}
 	av.UpsertBlockRel(newAvID, newBlockID)
 
 	newAv := &av.AttributeView{}
@@ -2467,6 +2482,9 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	}
 
 	for _, keyValues := range newAv.KeyValues {
+		if newAv.SubItems != nil && (keyValues.Key.ID == newAv.SubItems.ParentKeyID || keyValues.Key.ID == newAv.SubItems.ChildrenKeyID) {
+			continue
+		}
 		if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
 			// 断开双向关联
 			keyValues.Key.Relation.IsTwoWay = false
@@ -2474,6 +2492,9 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		}
 	}
 
+	if newAv, err = remapCopiedSubItemsDatabase(newAv, newAvID); err != nil {
+		return
+	}
 	data, err = gulu.JSON.MarshalJSON(newAv)
 	if err != nil {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", newAvID, err)
@@ -2696,6 +2717,14 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
 ) {
+	return GetAttributeViewRelationCandidatesWithExcludes(srcAvID, relationKeyID, keyword, selectedBlockIDs, page, pageSize, candidateSort, nil, blockIDs...)
+}
+
+func GetAttributeViewRelationCandidatesWithExcludes(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort, excludeItemIDs []string, blockIDs ...string) (
+	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
+	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
+	total int, err error,
+) {
 	waitForSyncingStorages()
 
 	var srcAttrView *av.AttributeView
@@ -2737,6 +2766,29 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 	if nil == table {
 		err = av.ErrViewNotFound
 		return
+	}
+	if len(excludeItemIDs) > 0 {
+		excluded := map[string]bool{}
+		pending := append([]string(nil), excludeItemIDs...)
+		var children map[string][]string
+		if attrView.SubItems != nil && attrView.SubItems.Enabled {
+			index, indexErr := attrView.BuildSubItemsIndex()
+			if indexErr != nil {
+				err = indexErr
+				return
+			}
+			children = index.Children
+		}
+		for len(pending) > 0 {
+			id := pending[len(pending)-1]
+			pending = pending[:len(pending)-1]
+			if excluded[id] {
+				continue
+			}
+			excluded[id] = true
+			pending = append(pending, children[id]...)
+		}
+		table.Rows = slices.DeleteFunc(table.Rows, func(row *av.TableRow) bool { return excluded[row.ID] })
 	}
 	columns = table.Columns
 	if candidateSort != nil {
@@ -3018,6 +3070,7 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 
 // AttributeViewData 是面向外部接口的兼容数据，不参与数据库文件持久化。
 type AttributeViewData struct {
+	SubItems           *av.SubItemsConfig                          `json:"subItems,omitempty"`
 	Spec               int                                         `json:"spec"`
 	ID                 string                                      `json:"id"`
 	Name               string                                      `json:"name"`
@@ -3037,7 +3090,8 @@ func NewAttributeViewData(attrView *av.AttributeView) (ret *AttributeViewData) {
 		return
 	}
 	ret = &AttributeViewData{
-		Spec: attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
+		SubItems: attrView.SubItems,
+		Spec:     attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
 		Views: attrView.Views, NewItemTemplates: attrView.NewItemTemplates, DefaultTemplateID: attrView.DefaultTemplateID,
 		CardCoverPositions: attrView.CardCoverPositions, CustomColors: attrView.Palette(),
 		Automations: attrView.Automations,
@@ -4244,14 +4298,15 @@ func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourc
 
 // GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
 type GroupState struct {
-	ID         string
-	LayoutID   string
-	LayoutType av.LayoutType
-	Position   int
-	Folded     bool
-	Hidden     int
-	Sort       int
-	ItemIDs    []string
+	ID              string
+	LayoutID        string
+	LayoutType      av.LayoutType
+	Position        int
+	Folded          bool
+	Hidden          int
+	Sort            int
+	ItemIDs         []string
+	SubItemsItemIDs []string
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -4267,14 +4322,15 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 		}
 
 		groupStates[groupView.GetGroupValue()] = &GroupState{
-			ID:         groupView.ID,
-			LayoutID:   attrViewGroupLayoutID(groupView),
-			LayoutType: groupView.LayoutType,
-			Position:   position,
-			Folded:     groupView.GroupFolded,
-			Hidden:     groupView.GroupHidden,
-			Sort:       groupView.GroupSort,
-			ItemIDs:    groupView.GroupItemIDs,
+			ID:              groupView.ID,
+			LayoutID:        attrViewGroupLayoutID(groupView),
+			LayoutType:      groupView.LayoutType,
+			Position:        position,
+			Folded:          groupView.GroupFolded,
+			Hidden:          groupView.GroupHidden,
+			Sort:            groupView.GroupSort,
+			ItemIDs:         groupView.GroupItemIDs,
+			SubItemsItemIDs: groupView.SubItemsItemIDs,
 		}
 	}
 	return
@@ -4287,6 +4343,7 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
+			groupView.SubItemsItemIDs = slices.Clone(state.SubItemsItemIDs)
 			if groupView.LayoutType == state.LayoutType && state.LayoutID != "" {
 				switch groupView.LayoutType {
 				case av.LayoutTypeTable:
@@ -4691,10 +4748,29 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	if err != nil {
 		return
 	}
+	if srcAv.IsSubItemsKey(operation.KeyID) {
+		key, keyErr := srcAv.GetKey(operation.KeyID)
+		if keyErr != nil {
+			return keyErr
+		}
+		if operation.ID != srcAv.ID || !operation.IsTwoWay || operation.BackRelationKeyID != key.Relation.BackKeyID {
+			return errors.New("disable database sub-items before changing their relation fields")
+		}
+		back, backErr := srcAv.GetKey(key.Relation.BackKeyID)
+		if backErr != nil {
+			return backErr
+		}
+		key.Name, back.Name = strings.TrimSpace(operation.Format), strings.TrimSpace(operation.Name)
+		regenAttrViewGroups(srcAv)
+		return av.SaveAttributeView(srcAv)
+	}
 
 	destAv, err := av.ParseAttributeView(operation.ID)
 	if err != nil {
 		return
+	}
+	if destAv.IsSubItemsKey(operation.BackRelationKeyID) {
+		return errors.New("database sub-item fields cannot be reused by another relation")
 	}
 
 	isSameAv := srcAv.ID == destAv.ID
@@ -6183,6 +6259,9 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if _, err := tx.validateCreatedSubItemsChanges(operation, false); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	if operation.attributeViewFields != nil {
 		if err := tx.restoreDeletedAttributeViewBlocks(operation); err != nil {
 			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -6195,10 +6274,39 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 		}
 		return
 	}
+	if operation.ParentID != "" {
+		parentView, err := avParseView(operation.AvID, operation.BlockID)
+		if err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		if !parentView.HasSubItems() || parentView.GetBlockValue(operation.ParentID) == nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "database parent entry does not exist"}
+		}
+		if _, err = tx.readAttributeViewForMutation(operation.AvID, operation.BlockID, av.GetAVBoxID(operation.AvID)); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+	}
 	result, err := addAttributeViewBlocks(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID,
 		operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.attributeViewAutomation, operation.attributeViewCollectionRuleID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if operation.ParentID != "" && len(result.InsertedItemIDs) > 0 {
+		current, parseErr := avParseView(operation.AvID, operation.BlockID)
+		if parseErr != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: parseErr.Error()}
+		}
+		parents := map[string]string{}
+		for _, id := range result.InsertedItemIDs {
+			parents[id] = operation.ParentID
+		}
+		if err = current.SetSubItemsParents(parents); err == nil {
+			regenAttrViewGroups(current)
+			err = avSaveView(current, operation.BlockID)
+		}
+		if err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
 	}
 	operation.RetData = result
 	return
@@ -6619,6 +6727,9 @@ func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousI
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if err := tx.restoreCreatedSubItemsChanges(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	if err := tx.prepareAttributeViewItemRemoval(operation); err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -6639,13 +6750,17 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	if err != nil {
 		return
 	}
+	if err = attrView.PromoteSubItemsForRemoval(srcIDs); err != nil {
+		return
+	}
+	removedIDs := attributeViewItemIDSet(srcIDs)
 	relationDestAvIDs := map[string]bool{}
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeRelation != keyValues.Key.Type || nil == keyValues.Key.Relation {
 			continue
 		}
 		for _, value := range keyValues.Values {
-			if gulu.Str.Contains(value.BlockID, srcIDs) {
+			if removedIDs[value.BlockID] {
 				relationDestAvIDs[keyValues.Key.Relation.AvID] = true
 				break
 			}
@@ -6657,7 +6772,7 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	for _, keyValues := range attrView.KeyValues {
 		tmp := keyValues.Values[:0]
 		for i, val := range keyValues.Values {
-			if !gulu.Str.Contains(val.BlockID, srcIDs) {
+			if !removedIDs[val.BlockID] {
 				tmp = append(tmp, keyValues.Values[i])
 			} else {
 				removedValues = true
@@ -6709,9 +6824,7 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	}
 
 	for _, view := range attrView.Views {
-		for _, blockID := range srcIDs {
-			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
-		}
+		view.ItemIDs = slices.DeleteFunc(view.ItemIDs, func(id string) bool { return removedIDs[id] })
 	}
 	for _, itemID := range srcIDs {
 		attrView.RemoveCardCoverPositions(itemID)
@@ -7902,6 +8015,9 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	}
 
 	colType := av.KeyType(operation.Typ)
+	if attrView.IsSubItemsKey(operation.ID) && colType != av.KeyTypeRelation {
+		return errors.New("disable database sub-items before changing their field type")
+	}
 	changeType := false
 	if av.IsKnownKeyType(colType) {
 		for _, keyValues := range attrView.KeyValues {
@@ -8120,18 +8236,29 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 }
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
-	_, err := updateAttributeViewCellInBlock(tx, operation.AvID, operation.BlockID, operation.KeyID,
-		operation.RowID, operation.Data)
-	if err != nil {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
+	return tx.doBatchUpdateAttrViewCells([]*Operation{operation})
 }
 
 func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret *TxErr) {
+	updates := make([]*AttrViewCellUpdate, 0, len(operations))
+	for _, op := range operations {
+		updates = append(updates, &AttrViewCellUpdate{KeyID: op.KeyID, RowID: op.RowID, Data: op.Data})
+	}
+	if operations[0].attributeViewFields != nil {
+		if _, err := tx.updateSubItemsCells(operations, updates, nil); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error()}
+		}
+		return nil
+	}
 	attrView, err := avParseView(operations[0].AvID, operations[0].BlockID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error()}
+	}
+	if handled, updateErr := tx.updateSubItemsCells(operations, updates, attrView); handled {
+		if updateErr != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: updateErr.Error()}
+		}
+		return nil
 	}
 
 	var cells []*AttrViewCellUpdate
@@ -8156,12 +8283,24 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 }
 
 func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) {
+	if operation.attributeViewFields != nil {
+		if _, err := tx.updateSubItemsCells([]*Operation{operation}, operation.CellUpdates, nil); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+		return nil
+	}
 	if "" == operation.AvID || 0 == len(operation.CellUpdates) {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "invalid attribute view cell updates"}
 	}
 	attrView, err := avParseView(operation.AvID, operation.BlockID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if handled, updateErr := tx.updateSubItemsCells([]*Operation{operation}, operation.CellUpdates, attrView); handled {
+		if updateErr != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: updateErr.Error()}
+		}
+		return nil
 	}
 	if err = preflightAttributeViewCellBindings(tx, attrView, operation.CellUpdates); err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: attrView.ID, msg: err.Error()}
@@ -8257,6 +8396,27 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		blockID = blockIDs[0]
 	}
 	if err = tx.rememberAutomationView(attrView, blockID); err != nil {
+		return
+	}
+	if attrView.IsSubItemsKey(keyID) {
+		changes, changeErr := subItemsCellChanges(attrView, []*AttrViewCellUpdate{{KeyID: keyID, RowID: itemID, Data: valueData}})
+		if changeErr != nil {
+			return nil, changeErr
+		}
+		if changeErr = attrView.SetSubItemsParents(changes); changeErr != nil {
+			return nil, changeErr
+		}
+		values, _ := attrView.GetKeyValues(keyID)
+		for _, value := range values.Values {
+			if value.BlockID == itemID {
+				val = value
+				break
+			}
+		}
+		if save {
+			regenAttrViewGroups(attrView)
+			err = avSaveView(attrView, blockID)
+		}
 		return
 	}
 	var keyValues *av.KeyValues
@@ -8682,6 +8842,12 @@ func updateTwoWayRelationDestAttrViewInBlock(attrView *av.AttributeView, relKey 
 
 // regenAttrViewGroups 重新生成分组视图。
 func regenAttrViewGroups(attrView *av.AttributeView) {
+	var rootByID map[string]string
+	if attrView.HasSubItems() {
+		if index, err := attrView.BuildSubItemsIndex(); err == nil {
+			rootByID, _ = subItemRootIdentities(index)
+		}
+	}
 	for _, view := range attrView.Views {
 		groupKey := view.GetGroupKey(attrView)
 		if nil == groupKey {
@@ -8689,6 +8855,9 @@ func regenAttrViewGroups(attrView *av.AttributeView) {
 		}
 
 		genAttrViewGroups(view, attrView)
+		if rootByID != nil {
+			pruneSubItemGroupOrders(view, rootByID)
+		}
 	}
 }
 

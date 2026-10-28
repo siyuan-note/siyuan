@@ -1,6 +1,7 @@
 package apicontract
 
 type AVTable struct {
+	Nested *AVNestedResult `json:"nested,omitempty"`
 	// 仅日历布局返回字段绑定及一周起始日；创建、更新系统时间作为只读日期源。
 	Calendar *AVCalendarSettings `json:"calendar,omitempty" api:"optional"`
 	// 回显本次请求的日期范围，省略范围的请求不返回此字段。
@@ -329,6 +330,7 @@ type AVBaseInstanceField struct {
 }
 
 type AVTableRow struct {
+	Hierarchy         *AVItemHierarchy         `json:"hierarchy,omitempty"`
 	ConditionalColors *AVItemConditionalColors `json:"conditionalColors,omitempty" api:"optional"`
 	ID                string                   `json:"id" api:"optional,nullable"`
 	Cells             []*AVTableCell           `json:"cells" api:"optional,nullable"`
@@ -429,6 +431,7 @@ type AVKeyValues struct {
 }
 
 type AVViewData struct {
+	SubItemsDisplay  string `json:"subItemsDisplay,omitempty" api:"enum=flat|nested"`
 	ID               string `json:"id" api:"optional,nullable"`
 	Icon             string `json:"icon" api:"optional,nullable"`
 	Name             string `json:"name" api:"optional,nullable"`
@@ -477,6 +480,7 @@ type AVAttributeViewContextFilterField struct {
 }
 
 type AVAttributeViewData struct {
+	SubItems           *AVSubItemsConfig                          `json:"subItems,omitempty"`
 	Spec               int                                        `json:"spec" api:"optional,nullable"`
 	ID                 string                                     `json:"id" api:"optional,nullable"`
 	Name               string                                     `json:"name" api:"optional,nullable"`
@@ -498,6 +502,7 @@ type AVAttributeViewCustomColor struct {
 }
 
 type AVView struct {
+	SubItemsDisplay   string                    `json:"subItemsDisplay,omitempty" api:"enum=flat|nested"`
 	ConditionalColors []*AVConditionalColorRule `json:"conditionalColors" api:"optional,nullable"`
 	ID                string                    `json:"id" api:"optional,nullable"`
 	Icon              string                    `json:"icon" api:"optional,nullable"`
@@ -518,12 +523,14 @@ type AVView struct {
 	GroupCreated      int64                     `json:"groupCreated" api:"optional,nullable"`
 	Groups            []*AVView                 `json:"groups,omitempty" api:"optional,nullable"`
 	GroupItemIDs      []string                  `json:"groupItemIds" api:"optional,nullable"`
-	GroupCalc         *AVGroupCalc              `json:"groupCalc,omitempty" api:"optional,nullable"`
-	GroupKey          *AVKey                    `json:"groupKey,omitempty" api:"optional,nullable"`
-	GroupVal          *AVValue                  `json:"groupVal,omitempty" api:"optional,nullable"`
-	GroupFolded       bool                      `json:"groupFolded" api:"optional,nullable"`
-	GroupHidden       int                       `json:"groupHidden" api:"optional,nullable"`
-	GroupSort         int                       `json:"groupSort" api:"optional,nullable"`
+	// SubItemsItemIDs 保留树形分组的独立手工顺序；缺省回退既有组及视图顺序，不改变平铺成员。
+	SubItemsItemIDs []string     `json:"subItemsItemIds,omitempty" api:"optional,nullable"`
+	GroupCalc       *AVGroupCalc `json:"groupCalc,omitempty" api:"optional,nullable"`
+	GroupKey        *AVKey       `json:"groupKey,omitempty" api:"optional,nullable"`
+	GroupVal        *AVValue     `json:"groupVal,omitempty" api:"optional,nullable"`
+	GroupFolded     bool         `json:"groupFolded" api:"optional,nullable"`
+	GroupHidden     int          `json:"groupHidden" api:"optional,nullable"`
+	GroupSort       int          `json:"groupSort" api:"optional,nullable"`
 }
 
 type AVLayoutTable struct {
@@ -680,12 +687,13 @@ type AVAttributeViewBacklinkRelation struct {
 }
 
 type AVAttributeViewRenderTarget struct {
-	Status   string `json:"status" api:"optional,nullable,enum=visible|filtered|itemNotFound|groupHidden"`
-	ItemID   string `json:"itemID" api:"optional,nullable"`
-	GroupID  string `json:"groupID,omitempty" api:"optional,nullable"`
-	Index    int    `json:"index" api:"optional,nullable"`
-	Offset   int    `json:"offset" api:"optional,nullable"`
-	PageSize int    `json:"pageSize" api:"optional,nullable"`
+	AncestorIDs []string `json:"ancestorIDs,omitempty"`
+	Status      string   `json:"status" api:"optional,nullable,enum=visible|filtered|itemNotFound|groupHidden"`
+	ItemID      string   `json:"itemID" api:"optional,nullable"`
+	GroupID     string   `json:"groupID,omitempty" api:"optional,nullable"`
+	Index       int      `json:"index" api:"optional,nullable"`
+	Offset      int      `json:"offset" api:"optional,nullable"`
+	PageSize    int      `json:"pageSize" api:"optional,nullable"`
 }
 
 type AVCreateAttributeViewItemResult struct {

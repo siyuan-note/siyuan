@@ -1537,7 +1537,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             protyle.databaseAttributePanel?.refreshForOperation(operation);
             return;
         }
-        if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
+        if (["setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree",
+            "addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
             "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewAutomations", "collectAttrViewBlocks", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",

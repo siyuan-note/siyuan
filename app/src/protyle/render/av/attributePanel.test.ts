@@ -45,3 +45,20 @@ test("binding transactions do not refresh unrelated panels or operations without
     panel.refreshForOperation({action: "replaceAttrViewBlock", previousID: "other-item", nextID: "document"});
     assert.equal(refreshed(), 0);
 });
+
+test("sub-item structure changes refresh only attribute panels bound to the database", () => {
+    const relevant = setup("database");
+    const unrelated = setup("other");
+    const operations: IOperation[] = [
+        {action: "setAttrViewSubItems", avID: "database", data: {enabled: true}},
+        {action: "reparentAttrViewItems", avID: "database", srcIDs: ["child"], parentID: "parent"},
+        {action: "promoteAttrViewItems", avID: "database", srcIDs: ["child"]},
+        {action: "duplicateAttrViewSubtree", avID: "database", srcIDs: ["parent"]},
+    ];
+    operations.forEach(operation => {
+        relevant.panel.refreshForOperation(operation);
+        unrelated.panel.refreshForOperation(operation);
+    });
+    assert.equal(relevant.refreshed(), operations.length);
+    assert.equal(unrelated.refreshed(), 0);
+});

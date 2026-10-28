@@ -227,7 +227,7 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	undoOperations = append(undoOperations, &Operation{Action: "doUpdateUpdated", ID: blockID, Data: dbNode.IALAttr("updated")})
 	tx := &Transaction{DoOperations: doOperations, UndoOperations: undoOperations, Timestamp: createdAt.UnixMilli()}
 	// 关联新建在没有启用自动化时也保留数据库和载体快照，覆盖联合写入失败后的恢复。
-	tx.attributeViewItemCreation = options != nil
+	tx.attributeViewItemCreation = options != nil || attrView.HasSubItems()
 	tx.MarkFromAPI()
 	if err = PerformTxSync(tx); nil != err {
 		// 事务回滚可能已经移除新条目，只有仍存在时才清理，避免再次改动恢复后的关联。

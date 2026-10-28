@@ -12,12 +12,21 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestImportSYAttributeViewCopyFailure(t *testing.T) {
+	for _, subItems := range []bool{false, true} {
+		t.Run(map[bool]string{false: "ordinary", true: "subitems"}[subItems], func(t *testing.T) {
+			testImportSYAttributeViewCopyFailure(t, subItems)
+		})
+	}
+}
+
+func testImportSYAttributeViewCopyFailure(t *testing.T, subItems bool) {
 	const boxID = "20261010000000-box0001"
 	const docID = "20261010000001-doc0001"
 	const avID = "20261010000002-av00001"
@@ -29,7 +38,16 @@ func TestImportSYAttributeViewCopyFailure(t *testing.T) {
 	t.Cleanup(func() { util.Lang, util.AttrViewLangs = originalLang, originalAVLangs })
 	tree := treenode.NewTree(boxID, "/"+docID+".sy", "/Notes", "Notes")
 	tree.Root.SetIALAttr(av.NodeAttrNameAvs, avID)
-	avData, err := json.Marshal(av.NewAttributeView(avID))
+	database := av.NewAttributeView(avID)
+	if subItems {
+		p, c := ast.NewNodeID(), ast.NewNodeID()
+		database.SubItems = &av.SubItemsConfig{Enabled: true, ParentKeyID: p, ChildrenKeyID: c}
+		database.KeyValues = append(database.KeyValues,
+			&av.KeyValues{Key: &av.Key{ID: p, Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: avID, IsTwoWay: true, BackKeyID: c}}},
+			&av.KeyValues{Key: &av.Key{ID: c, Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: avID, IsTwoWay: true, BackKeyID: p}}})
+		av.UpgradeSpec(database)
+	}
+	avData, err := json.Marshal(database)
 	if err != nil {
 		t.Fatal(err)
 	}

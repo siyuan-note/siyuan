@@ -14,20 +14,23 @@ import {getAVColorStyle} from "./color";
 export const getPageSize = (blockElement: Element) => {
     const groupPageSize: {
         [key: string]: {
-            pageSize: number
+            pageSize: number,
+            page?: number
         }
     } = {};
     let unGroupPageSize: number;
+    let unGroupPage: number;
     blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         const id = item.dataset.groupId;
         const pageSize = parseInt(item.dataset.pageSize);
         if (id) {
-            groupPageSize[id] = {pageSize};
+            groupPageSize[id] = {pageSize, ...(item.dataset.rootPage ? {page: Number(item.dataset.rootPage)} : {})};
         } else if (!unGroupPageSize) {
             unGroupPageSize = pageSize;
+            unGroupPage = item.dataset.rootPage ? Number(item.dataset.rootPage) : undefined;
         }
     });
-    return {groupPageSize, unGroupPageSize};
+    return {groupPageSize, unGroupPageSize, unGroupPage};
 };
 
 export const setGroupMethod = async (options: {

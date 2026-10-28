@@ -1136,7 +1136,31 @@ interface IAVCustomColor extends IAVColor {
     hidden?: boolean;
 }
 
+interface IAVSubItemsConfig {
+    enabled: boolean;
+    parentKeyID: string;
+    childrenKeyID: string;
+}
+
+interface IAVNestedResult {
+    page: number;
+    pageSize: number;
+    rootCount: number;
+    rootLoaded: number;
+    matchedCount: number;
+    childPaging: Record<string, {page: number; pageSize: number; total: number; loaded: number}>;
+}
+
+interface IAVItemHierarchy {
+    parentID?: string;
+    depth: number;
+    childCount: number;
+    context: boolean;
+    expanded: boolean;
+}
+
 interface IAV {
+    subItems?: IAVSubItemsConfig;
     id: string;
     name: string;
     view: IAVTable | IAVGallery;
@@ -1170,6 +1194,7 @@ interface IAVContextFilterField {
 }
 
 interface IAVRenderTarget {
+    ancestorIDs?: string[];
     status: "visible" | "filtered" | "itemNotFound" | "groupHidden";
     itemID: string;
     groupID?: string;
@@ -1222,6 +1247,8 @@ interface IAVItemConditionalColors {
 }
 
 interface IAVView {
+    subItemsDisplay?: "flat" | "nested";
+    nested?: IAVNestedResult;
     conditionalColors?: IAVConditionalColorRule[];
     name?: string;
     desc?: string;
@@ -1435,6 +1462,7 @@ interface IAVColumn {
 }
 
 interface IAVRow {
+    hierarchy?: IAVItemHierarchy;
     conditionalColors?: IAVItemConditionalColors;
     id: string,
     cells: IAVCell[]

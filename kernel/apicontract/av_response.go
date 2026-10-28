@@ -57,6 +57,7 @@ type AVSearchData struct {
 	Results []*AVAvSearchResult `json:"results"`
 }
 type AVArchiveRenderData struct {
+	SubItems               *AVSubItemsConfig             `json:"subItems,omitempty"`
 	Name                   string                        `json:"name"`
 	ID                     string                        `json:"id"`
 	CustomColors           []*AVAttributeViewCustomColor `json:"customColors"`

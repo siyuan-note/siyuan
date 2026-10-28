@@ -10,6 +10,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 // 执行完整粘贴入口及真实 DOM，检查内核存在性结果对复制、剪切和失败中止的影响。
 const browserCases = async (sources: Record<string, string>, lutePath: string) => {
     const check = require("node:assert/strict");
+    window.siyuan = {config: {editor: {mathDelimiterCompatibility: true}}} as unknown as typeof window.siyuan;
     require(lutePath);
     const constants = {Constants: {ZWSP: "\u200b", CUSTOM_RIFF_DECKS: "custom-riff-decks"}};
     const load = (source: string, mocks: Record<string, unknown>) => {

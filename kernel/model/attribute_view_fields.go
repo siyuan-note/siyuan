@@ -75,6 +75,9 @@ func (tx *Transaction) removeAttributeViewField(op *Operation) error {
 	if resolved == nil {
 		return av.ErrViewNotFound
 	}
+	if resolved.IsSubItemsKey(op.ID) {
+		return errors.New("disable database sub-items before deleting their fields")
+	}
 	state := &attributeViewFieldsSnapshot{avID: op.AvID, keyID: op.ID, blockID: blockID,
 		boxID: av.GetAVBoxID(op.AvID), changes: map[string]*attributeViewFieldChange{}, relationValues: map[string]map[string]attributeViewRelationValues{}}
 	before := map[string]*av.AttributeView{}

@@ -17,6 +17,7 @@
 package model
 
 import (
+	"container/list"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,13 +35,16 @@ import (
 
 // 删除快照只保存在内核撤销日志中，保留字段值、条目身份和各视图顺序，不参与接口序列化。
 type attributeViewItemsSnapshot struct {
-	AvID, BoxID, BlockID string
-	ItemIDs              []string
-	Keys                 []*av.KeyValues
-	Orders               map[string][]string
-	Covers               map[string]map[string]*av.CardCoverPosition
-	MissingBlocks        map[string]bool
-	relatedChanges       *attributeViewFieldsSnapshot
+	AvID, BoxID, BlockID  string
+	ItemIDs               []string
+	Keys                  []*av.KeyValues
+	Orders                map[string][]string
+	Covers                map[string]map[string]*av.CardCoverPosition
+	MissingBlocks         map[string]bool
+	relatedChanges        *attributeViewFieldsSnapshot
+	SubItemsParents       map[string]string
+	SubItemsPromoted      map[string]string
+	SubItemsRemovedOrders map[string][]string
 }
 
 func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
@@ -52,17 +56,20 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 		if err = validateAttributeViewItemKeys(current, op.attributeViewItems); err != nil {
 			return err
 		}
+		currentValues := newAttrViewValueUpdateContext(current).values
+		oldValues := newAttrViewValueUpdateContext(&av.AttributeView{KeyValues: op.attributeViewItems.Keys}).values
+		itemIDs := attributeViewItemIDSet(op.attributeViewItems.ItemIDs)
 		for _, kv := range op.attributeViewItems.Keys {
 			for _, value := range kv.Values {
-				if !reflect.DeepEqual(value, av.GetValue(current.KeyValues, kv.Key.ID, value.BlockID)) {
+				if !reflect.DeepEqual(value, currentValues[kv.Key.ID][value.BlockID]) {
 					return fmt.Errorf("database entry [%s] changed since deletion was undone", value.BlockID)
 				}
 			}
 		}
 		for _, kv := range current.KeyValues {
 			for _, value := range kv.Values {
-				if slices.Contains(op.attributeViewItems.ItemIDs, value.BlockID) &&
-					!reflect.DeepEqual(value, av.GetValue(op.attributeViewItems.Keys, kv.Key.ID, value.BlockID)) {
+				if itemIDs[value.BlockID] &&
+					!reflect.DeepEqual(value, oldValues[kv.Key.ID][value.BlockID]) {
 					return fmt.Errorf("database entry [%s] has newer field values", value.BlockID)
 				}
 			}
@@ -91,9 +98,12 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	if current == nil {
 		return av.ErrViewNotFound
 	}
+	primaryValues := newAttrViewValueUpdateContext(current).blockValues
+	selectedIDs := map[string]bool{}
 	for _, id := range op.SrcIDs {
-		if current.GetBlockValue(id) != nil && !slices.Contains(state.ItemIDs, id) {
+		if primaryValues[id] != nil && !selectedIDs[id] {
 			state.ItemIDs = append(state.ItemIDs, id)
+			selectedIDs[id] = true
 		}
 	}
 	if len(state.ItemIDs) == 0 {
@@ -103,16 +113,26 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	matched := map[*Operation]bool{}
 	var inverse *Operation
 	var srcs []map[string]any
-	for _, id := range state.ItemIDs {
-		primary := current.GetBlockValue(id)
-		var match *Operation
-		for _, undo := range tx.UndoOperations {
-			if undo.Action != "insertAttrViewBlock" || undo.AvID != op.AvID || matched[undo] || len(undo.Srcs) != 1 {
-				continue
+	inverseByID := map[string][]*Operation{}
+	for _, undo := range tx.UndoOperations {
+		if undo.Action != "insertAttrViewBlock" || undo.AvID != op.AvID || len(undo.Srcs) != 1 {
+			continue
+		}
+		for _, member := range []string{"itemID", "id"} {
+			if id, ok := undo.Srcs[0][member].(string); ok {
+				inverseByID[id] = append(inverseByID[id], undo)
 			}
-			src := undo.Srcs[0]
-			if src["itemID"] == id || src["id"] == id ||
-				(!primary.IsDetached && primary.Block != nil && src["id"] == primary.Block.ID) {
+		}
+	}
+	for _, id := range state.ItemIDs {
+		primary := primaryValues[id]
+		var match *Operation
+		candidates := inverseByID[id]
+		if !primary.IsDetached && primary.Block != nil {
+			candidates = append(slices.Clone(candidates), inverseByID[primary.Block.ID]...)
+		}
+		for _, undo := range candidates {
+			if !matched[undo] {
 				match = undo
 				break
 			}
@@ -139,7 +159,7 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	for _, kv := range current.KeyValues {
 		copyKV := &av.KeyValues{Key: kv.Key}
 		for _, value := range kv.Values {
-			if slices.Contains(state.ItemIDs, value.BlockID) {
+			if selectedIDs[value.BlockID] {
 				copyKV.Values = append(copyKV.Values, value)
 			}
 		}
@@ -149,6 +169,7 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 		state.Orders[view.ID] = view.ItemIDs
 		for _, group := range view.Groups {
 			state.Orders[group.ID] = group.GroupItemIDs
+			state.Orders[group.ID+"#subitems"] = group.SubItemsItemIDs
 		}
 	}
 	for _, id := range state.ItemIDs {
@@ -161,6 +182,43 @@ func (tx *Transaction) prepareAttributeViewItemRemoval(op *Operation) error {
 	state = &attributeViewItemsSnapshot{}
 	if err = json.Unmarshal(data, state); err != nil {
 		return err
+	}
+	if current.HasSubItems() {
+		index, indexErr := current.BuildSubItemsIndex()
+		if indexErr != nil {
+			return indexErr
+		}
+		state.SubItemsParents, state.SubItemsPromoted = map[string]string{}, map[string]string{}
+		state.SubItemsRemovedOrders = map[string][]string{}
+		removed := map[string]bool{}
+		for _, id := range state.ItemIDs {
+			removed[id] = true
+		}
+		ancestors := map[string]string{}
+		for id, parent := range index.Parents {
+			if removed[id] {
+				continue
+			}
+			previous := parent
+			path := []string{}
+			for removed[parent] {
+				if cached, ok := ancestors[parent]; ok {
+					parent = cached
+					break
+				}
+				path = append(path, parent)
+				parent = index.Parents[parent]
+			}
+			for _, ancestor := range path {
+				ancestors[ancestor] = parent
+			}
+			if parent != previous {
+				state.SubItemsParents[id], state.SubItemsPromoted[id] = previous, parent
+			}
+		}
+		for key, order := range state.Orders {
+			state.SubItemsRemovedOrders[key] = index.OrderAfterRemoval(order, removed)
+		}
 	}
 	if err = tx.prepareAttributeViewItemMutation(current, state); err != nil {
 		return err
@@ -262,10 +320,11 @@ func (tx *Transaction) prepareAttributeViewItemMutation(current *av.AttributeVie
 		return err
 	}
 	ids := append([]string{state.AvID}, av.GetSrcAvIDs(state.AvID)...)
+	itemIDs := attributeViewItemIDSet(state.ItemIDs)
 	for _, kv := range current.KeyValues {
 		if kv.Key.Relation != nil && kv.Key.Relation.IsTwoWay {
 			for _, value := range kv.Values {
-				if slices.Contains(state.ItemIDs, value.BlockID) && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
+				if itemIDs[value.BlockID] && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
 					ids = append(ids, kv.Key.Relation.AvID)
 					break
 				}
@@ -335,9 +394,25 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 	if err != nil {
 		return err
 	}
+	if len(state.SubItemsPromoted) > 0 {
+		for _, view := range current.Views {
+			if err = validatePromotedSubItemsOrder(view.ItemIDs, state.SubItemsRemovedOrders[view.ID], state.SubItemsPromoted); err != nil {
+				return err
+			}
+			for _, group := range view.Groups {
+				if err = validatePromotedSubItemsOrder(group.GroupItemIDs, state.SubItemsRemovedOrders[group.ID], state.SubItemsPromoted); err != nil {
+					return err
+				}
+				if err = validatePromotedSubItemsOrder(group.SubItemsItemIDs, state.SubItemsRemovedOrders[group.ID+"#subitems"], state.SubItemsPromoted); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	itemIDs := attributeViewItemIDSet(state.ItemIDs)
 	for _, kv := range current.KeyValues {
 		for _, value := range kv.Values {
-			if slices.Contains(state.ItemIDs, value.BlockID) {
+			if itemIDs[value.BlockID] {
 				return fmt.Errorf("database entry [%s] already exists", value.BlockID)
 			}
 		}
@@ -386,6 +461,9 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 	// 双向关联先在内存中校验并合并，保留目标条目的其他关联。
 	changed := map[string]*av.AttributeView{state.AvID: current}
 	for _, kv := range state.Keys {
+		if current.IsSubItemsKey(kv.Key.ID) {
+			continue
+		}
 		if kv.Key.Relation == nil || !kv.Key.Relation.IsTwoWay {
 			continue
 		}
@@ -420,10 +498,42 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 			}
 		}
 	}
+	if current.HasSubItems() {
+		parents, parentErr := current.GetKeyValues(current.SubItems.ParentKeyID)
+		if parentErr != nil {
+			return parentErr
+		}
+		for id, expected := range state.SubItemsPromoted {
+			actual := ""
+			if value := parents.GetValue(id); value != nil && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
+				actual = value.Relation.BlockIDs[0]
+			}
+			if actual != expected {
+				return fmt.Errorf("database parent entry [%s] changed since deletion", id)
+			}
+		}
+		if err = current.RestoreSubItemsParents(state.SubItemsParents); err != nil {
+			return err
+		}
+	}
+	orderIDs := slices.Clone(state.ItemIDs)
+	for id := range state.SubItemsPromoted {
+		orderIDs = append(orderIDs, id)
+	}
+	restoreOrder := func(current, original []string) []string {
+		current = slices.DeleteFunc(current, func(id string) bool {
+			_, promoted := state.SubItemsPromoted[id]
+			return promoted
+		})
+		return restoreAttributeViewItemOrder(current, original, orderIDs)
+	}
 	for _, view := range current.Views {
-		view.ItemIDs = restoreAttributeViewItemOrder(view.ItemIDs, state.Orders[view.ID], state.ItemIDs)
+		view.ItemIDs = restoreOrder(view.ItemIDs, state.Orders[view.ID])
 		for _, group := range view.Groups {
-			group.GroupItemIDs = restoreAttributeViewItemOrder(group.GroupItemIDs, state.Orders[group.ID], state.ItemIDs)
+			group.GroupItemIDs = restoreOrder(group.GroupItemIDs, state.Orders[group.ID])
+			if original := state.Orders[group.ID+"#subitems"]; original != nil {
+				group.SubItemsItemIDs = restoreOrder(group.SubItemsItemIDs, original)
+			}
 		}
 	}
 	for id, covers := range state.Covers {
@@ -444,8 +554,9 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 			return err
 		}
 	}
+	primaryValues := newAttrViewValueUpdateContext(current).blockValues
 	for _, id := range state.ItemIDs {
-		primary := current.GetBlockValue(id)
+		primary := primaryValues[id]
 		if primary == nil || primary.IsDetached || primary.Block == nil {
 			continue
 		}
@@ -492,26 +603,84 @@ func validateAttributeViewItemKeys(current *av.AttributeView, state *attributeVi
 }
 
 func restoreAttributeViewItemOrder(current, original, itemIDs []string) []string {
-	for index, id := range original {
-		if !slices.Contains(itemIDs, id) || slices.Contains(current, id) {
+	// 按身份定位锚点，整批恢复时不反复扫描或移动长数组。
+	order := list.New()
+	present := make(map[string]*list.Element, len(current)+len(itemIDs))
+	for _, id := range current {
+		element := order.PushBack(id)
+		if present[id] == nil {
+			present[id] = element
+		}
+	}
+	restored := make(map[string]bool, len(itemIDs))
+	for _, id := range itemIDs {
+		restored[id] = true
+	}
+	var previous *list.Element
+	for _, id := range original {
+		if existing := present[id]; existing != nil {
+			previous = existing
 			continue
 		}
-		position := -1
-		for previous := index - 1; previous >= 0; previous-- {
-			if found := slices.Index(current, original[previous]); found >= 0 {
-				position = found + 1
-				break
-			}
+		if !restored[id] {
+			continue
 		}
-		if position < 0 {
-			position = 0
+		if previous == nil {
+			previous = order.PushFront(id)
+		} else {
+			previous = order.InsertAfter(id, previous)
 		}
-		current = slices.Insert(current, position, id)
+		present[id] = previous
 	}
 	for _, id := range itemIDs {
-		if !slices.Contains(current, id) {
-			current = append(current, id)
+		if present[id] == nil {
+			present[id] = order.PushBack(id)
 		}
 	}
-	return current
+	if order.Len() == 0 {
+		return current
+	}
+	ret := make([]string, 0, order.Len())
+	for element := order.Front(); element != nil; element = element.Next() {
+		ret = append(ret, element.Value.(string))
+	}
+	return ret
+}
+
+func attributeViewItemIDSet(ids []string) map[string]bool {
+	ret := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		ret[id] = true
+	}
+	return ret
+}
+
+// 新增或移除无关条目可以合并；存活子项相对原有邻项的位置变化必须由用户解决。
+func validatePromotedSubItemsOrder(current, expected []string, promoted map[string]string) error {
+	currentIDs, expectedIDs := attributeViewItemIDSet(current), attributeViewItemIDSet(expected)
+	type neighbors struct{ previous, next string }
+	index := func(order []string, allowed map[string]bool) map[string]neighbors {
+		ret := map[string]neighbors{}
+		previous := ""
+		for _, id := range order {
+			if !allowed[id] {
+				continue
+			}
+			ret[id] = neighbors{previous: previous}
+			if previous != "" {
+				entry := ret[previous]
+				entry.next = id
+				ret[previous] = entry
+			}
+			previous = id
+		}
+		return ret
+	}
+	actual, original := index(current, expectedIDs), index(expected, currentIDs)
+	for id := range promoted {
+		if expectedIDs[id] && actual[id] != original[id] {
+			return fmt.Errorf("database entry [%s] order changed since deletion", id)
+		}
+	}
+	return nil
 }

@@ -39,12 +39,13 @@ import (
 )
 
 type AttributeViewRenderTarget struct {
-	Status   string `json:"status"`
-	ItemID   string `json:"itemID"`
-	GroupID  string `json:"groupID,omitempty"`
-	Index    int    `json:"index"`
-	Offset   int    `json:"offset"`
-	PageSize int    `json:"pageSize"`
+	AncestorIDs []string `json:"ancestorIDs,omitempty"`
+	Status      string   `json:"status"`
+	ItemID      string   `json:"itemID"`
+	GroupID     string   `json:"groupID,omitempty"`
+	Index       int      `json:"index"`
+	Offset      int      `json:"offset"`
+	PageSize    int      `json:"pageSize"`
 }
 
 type AttributeViewSearchTarget struct {
@@ -231,6 +232,26 @@ func GetAttributeViewItemStatuses(blockID, avID, viewID, query string, itemIDs [
 	return getAttributeViewItemStatuses(attrView, viewable, itemIDs), nil
 }
 
+func GetAttributeViewItemStatusesWithNested(blockID, avID, viewID, query string, itemIDs []string, nested *av.NestedRequest) (map[string]string, error) {
+	if nested == nil {
+		return GetAttributeViewItemStatuses(blockID, avID, viewID, query, itemIDs)
+	}
+	statuses := map[string]string{}
+	for _, id := range itemIDs {
+		if id != "" {
+			statuses[id] = "itemNotFound"
+		}
+	}
+	viewable, source, _, err := RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, 1, math.MaxInt, nil, "", false, false, "", "", AttributeViewRenderOptions{ReadOnly: true, Nested: nested, ItemStatuses: statuses})
+	if err != nil {
+		return nil, err
+	}
+	if table := av.TableFromViewable(viewable); table != nil && table.Nested != nil {
+		return statuses, nil
+	}
+	return getAttributeViewItemStatuses(source, viewable, itemIDs), nil
+}
+
 func getAttributeViewItemStatuses(attrView *av.AttributeView, viewable av.Viewable, itemIDs []string) (ret map[string]string) {
 	ret = map[string]string{}
 	requested := map[string]bool{}
@@ -315,6 +336,70 @@ func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemI
 	}
 	table.Rows = rows
 	return table, getPasteInferableAttributeViewKeyIDs(attrView, getDependentRollupKeyIDs(attrView.ID)), nil
+}
+
+// 显式目标用于树形可见窗口；筛选补齐的祖先同样可编辑，不读取其他分页条目。
+func GetAttributeViewPasteRowsWithItems(blockID, avID, viewID, groupID, query, startItemID string, count int, itemIDs []string) (*av.Table, []string, error) {
+	if itemIDs == nil {
+		return GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID, count)
+	}
+	if count < 1 || count > 100000 || len(itemIDs) > count {
+		return nil, nil, fmt.Errorf("too many paste target items")
+	}
+	attrView, err := avParseView(avID, blockID)
+	if err != nil {
+		return nil, nil, err
+	}
+	view, err := getRenderAttributeViewView(attrView, viewID, "", blockID, false)
+	if err != nil {
+		return nil, nil, err
+	}
+	if view.LayoutType != av.LayoutTypeTable && view.LayoutType != av.LayoutTypeList {
+		return nil, nil, fmt.Errorf("attribute view is not a table or list")
+	}
+	seen := map[string]bool{}
+	existing := map[string]bool{}
+	if primary := attrView.GetBlockKeyValues(); primary != nil {
+		for _, value := range primary.Values {
+			if value != nil {
+				existing[value.BlockID] = true
+			}
+		}
+	}
+	for _, id := range itemIDs {
+		if seen[id] || !existing[id] {
+			return nil, nil, fmt.Errorf("invalid paste target item")
+		}
+		seen[id] = true
+	}
+	keys := getPasteInferableAttributeViewKeyIDs(attrView, getDependentRollupKeyIDs(attrView.ID))
+	copy, err := cloneNestedView(view)
+	if err != nil {
+		return nil, nil, err
+	}
+	copy.Filters, copy.Sorts, copy.Group, copy.Groups = nil, nil, nil, nil
+	copy.GroupItemIDs = append([]string{}, itemIDs...)
+	copy.ItemIDs = append([]string{}, itemIDs...)
+	delete(attrView.RenderedViewables, copy.ID)
+	context := sql.NewAttributeViewRenderContext()
+	context.ReadOnly = true
+	defer context.PushTemplateErrors()
+	instance := sql.RenderViewWithContext(attrView, copy, "", false, context)
+	table := av.TableFromViewable(instance)
+	byID := map[string]*av.TableRow{}
+	for _, row := range table.Rows {
+		byID[row.ID] = row
+	}
+	table.Rows = []*av.TableRow{}
+	for _, id := range itemIDs {
+		row := byID[id]
+		if row == nil {
+			return nil, nil, fmt.Errorf("paste target item is no longer available")
+		}
+		table.Rows = append(table.Rows, row)
+	}
+	table.RowCount = len(table.Rows)
+	return table, keys, nil
 }
 
 func getPasteInferableAttributeViewKeyIDs(attrView *av.AttributeView, dependentRollupKeyIDs map[string]struct{}) (ret []string) {
@@ -422,9 +507,13 @@ func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, 
 
 // AttributeViewRenderOptions 仅影响本次渲染，不参与数据库持久化。
 type AttributeViewRenderOptions struct {
-	ReadOnly      bool
-	CalendarRange *av.CalendarRange
-	TemporarySort *av.ViewSort
+	historicalSource bool // 仅认证历史/快照入口设置，客户端不能覆盖实时块索引的校验。
+	ItemStatuses     map[string]string
+	Nested           *av.NestedRequest
+	ScopeFilter      func(av.Viewable) av.Viewable
+	ReadOnly         bool
+	CalendarRange    *av.CalendarRange
+	TemporarySort    *av.ViewSort
 }
 
 // RenderAttributeViewWithTargetOptions 在分页前应用临时排序；临时排序和只读请求均不创建或保存数据库。
@@ -498,7 +587,7 @@ func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, p
 	}
 
 	timing.Stage("render")
-	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, options.CalendarRange)
+	viewable, err = renderAttributeViewWithOptions(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, options)
 	return
 }
 
@@ -526,6 +615,14 @@ const (
 )
 
 func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, err error) {
+	options := AttributeViewRenderOptions{}
+	if len(calendarRanges) > 0 {
+		options.CalendarRange = calendarRanges[0]
+	}
+	return renderAttributeViewWithOptions(attrView, nodeID, viewID, carrierViewID, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, options)
+}
+
+func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, err error) {
 	timing := util.BeginPerformance("database.fields")
 	defer timing.Finish()
 	if err = attrView.ValidateLayouts(); nil != err {
@@ -540,7 +637,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 做一些数据兼容和订正处理
 	changed := checkAttrView(attrView, view)
 	changed = upgradeAttributeViewSpec(attrView) || changed
-	if !ignoreRows {
+	if !ignoreRows && !options.historicalSource {
 		changed = normalizeAttributeViewBlockRefSubtypes(attrView) || changed
 	}
 	if writable && changed {
@@ -554,10 +651,16 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		err = contextErr
 		return
 	}
+	if options.Nested != nil && attrView.SubItems != nil && attrView.SubItems.Enabled && view.SubItemsDisplay == "nested" && (view.LayoutType == av.LayoutTypeTable || view.LayoutType == av.LayoutTypeList) {
+		return renderNestedAttributeView(attrView, view, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, filterContext, options)
+	}
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
 	renderContext.ReadOnly = !writable
+	if options.historicalSource {
+		renderContext.HistoricalAttributeViewID = attrView.ID
+	}
 	defer renderContext.PushTemplateErrors()
 	var orderReuse *attributeViewOrderReuse
 	if !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" {
@@ -578,8 +681,8 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	} else {
 		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
 	}
-	if calendar, ok := viewable.(*av.Calendar); ok && len(calendarRanges) > 0 {
-		calendar.CalendarRange = calendarRanges[0]
+	if calendar, ok := viewable.(*av.Calendar); ok {
+		calendar.CalendarRange = options.CalendarRange
 	}
 	var groupRenderSource *sql.GroupViewRenderSource
 	timing.Stage("rows_groups")
@@ -1411,6 +1514,18 @@ func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.Cust
 }
 
 func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	options := AttributeViewRenderOptions{}
+	if len(calendarRanges) > 0 {
+		options.CalendarRange = calendarRanges[0]
+	}
+	return RenderRepoSnapshotAttributeViewWithOptions(indexID, avID, viewID, carrierViewID, options)
+}
+
+func RenderRepoSnapshotAttributeViewWithOptions(indexID, avID, viewID, carrierViewID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	return RenderRepoSnapshotAttributeViewWithPagingOptions(indexID, avID, viewID, carrierViewID, "", 1, -1, nil, options)
+}
+
+func RenderRepoSnapshotAttributeViewWithPagingOptions(indexID, avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -1485,11 +1600,20 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 		snapshotColors, snapshotOrder, snapshotPaletteFound)
 	attrView.ResolveDirectColors()
 
-	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "", calendarRanges...)
+	options.historicalSource = true
+	viewable, err = renderAttributeViewWithOptions(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "", options)
 	return
 }
 
 func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, created string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	options := AttributeViewRenderOptions{}
+	if len(calendarRanges) > 0 {
+		options.CalendarRange = calendarRanges[0]
+	}
+	return RenderHistoryAttributeViewWithOptions(avID, viewID, carrierViewID, query, page, pageSize, groupPaging, created, options)
+}
+
+func RenderHistoryAttributeViewWithOptions(avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, created string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
 		return
@@ -1568,7 +1692,8 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 	attrView.CustomColorRenderContext = newHistoryAttributeViewCustomColorRenderContext(source.historyDir)
 	attrView.ResolveDirectColors()
 
-	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "", calendarRanges...)
+	options.historicalSource = true
+	viewable, err = renderAttributeViewWithOptions(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "", options)
 	return
 }
 

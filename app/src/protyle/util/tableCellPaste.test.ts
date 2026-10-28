@@ -22,10 +22,10 @@ const browserCases = async (source: string, pasteSource: string) => {
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {getAgentLute, configureAVRichTextLute, " +
         "getAVRichTextUnsupportedPasteBlocks, getTableClipboardBlockDOM, getTableRangeHTML, processTable, getTablePasteTarget, " +
         "hasClosestBlock, getTableCellRichContext, setTableCellRichContext, restoreTableVirtualizationDOM, " +
-        "setTableCellRich, getTableCellRichBlockDOM};")(...Object.values(dependencies)) as
+        "setTableCellRich, getTableCellRichBlockDOM, htmlMathPaste, markdownMathPaste};")(...Object.values(dependencies)) as
         typeof import("../render/setLute") & typeof import("../render/av/richText") & typeof import("./table") &
         typeof import("./hasClosest") & typeof import("./tableCellRichContext") & typeof import("./tableCellRich") &
-        typeof import("./tableVirtualizationDOM") & {
+        typeof import("./tableVirtualizationDOM") & typeof import("./mathPaste") & {
             processTable: (range: Range, html: string, protyle: IProtyle, block: HTMLElement, target: unknown) => boolean,
             getTablePasteTarget: (range: Range) => unknown,
         };
@@ -43,6 +43,7 @@ const browserCases = async (source: string, pasteSource: string) => {
         "../../constants": {Constants: dependencies.Constants},
         "../../util/pathName": {isEncryptedBox: () => false},
         "./tableCellRichContext": api, "./hasClosest": api, "./tableVirtualizationDOM": api,
+        "./mathPaste": api,
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: (protyle: IProtyle) => protyle === cellEditor ? (html: string) => html : undefined,
             getProtyleUnsupportedPasteBlocks: () => (html: string) => {
@@ -51,6 +52,7 @@ const browserCases = async (source: string, pasteSource: string) => {
                 }
                 return api.getAVRichTextUnsupportedPasteBlocks(html, true);
             },
+            getProtyleUnsupportedPasteMessage: (): undefined => undefined,
             isProtyleRichHTMLPasteEnabled: () => true, isProtyleUploadDisabled: () => true,
             areProtylePluginExtensionsEnabled: () => false,
         },
@@ -208,7 +210,7 @@ test("table clipboard fills the outer grid while a cell editor is active", {time
         .map(statement => statement.getText(insert)).join("\n");
     const source = ["longTextWrap.ts", "inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts", "../../util/escape.ts",
         "../render/setLute.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts", "tableCellRichValue.ts",
-        "tableCellRich.ts", "tableCellRichContext.ts", "tableVirtualizationDOM.ts", "hasClosest.ts", "table.ts"]
+        "tableCellRich.ts", "tableCellRichContext.ts", "tableVirtualizationDOM.ts", "hasClosest.ts", "table.ts", "mathPaste.ts"]
         .map(name => compile(read(name))).join("\n") + "\n" + compile(processTable);
     const pasteSource = transpileModule(read("paste.ts"), {
         compilerOptions: {target: ScriptTarget.ES2022, module: ModuleKind.CommonJS},

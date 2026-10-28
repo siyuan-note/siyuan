@@ -11,6 +11,7 @@ import { setPageSize } from "../row";
 import { setGalleryCover, setGallerySize, setGalleryRatio } from "../gallery/util";
 import { goGroupsDate, goGroupsSort, setGroupMethod, getGroupsHTML, bindGroupsEvent, getGroupsMethodHTML, getGroupsNumberHTML, bindGroupsNumber } from "../groups";
 import type { IAVPanelDescriptor, TAVPanelActionResult } from "./types";
+import {bindSubItemsSettings, getSubItemsSettingsHTML} from "../subItems";
 export const configPanel: IAVPanelDescriptor = {
     render: context => {
         context.html = getViewHTML(context.data);
@@ -20,6 +21,13 @@ export const configPanel: IAVPanelDescriptor = {
         bindViewEvent({ protyle: context.options.protyle, data: context.data, menuElement: context.menuElement, blockElement: context.options.blockElement });
     },
     actions: {
+        "go-sub-items": (context, action) => {
+            context.menuElement.innerHTML = getSubItemsSettingsHTML(context.data);
+            bindSubItemsSettings(context.menuElement, context.options.protyle, context.options.blockElement as HTMLElement, context.data);
+            action.event.preventDefault();
+            action.event.stopPropagation();
+            return "handled";
+        },
         "automations": (context, action) => {
             window.siyuan.menus.menu.remove();
             void openAutomationMenu({

@@ -69,6 +69,7 @@ type ViewTableColumn struct {
 // Table 描述了表格视图实例的结构。
 type Table struct {
 	*BaseInstance
+	Nested *NestedResult `json:"nested,omitempty"`
 
 	Calendar           *CalendarSettings `json:"calendar,omitempty"`
 	CalendarRange      *CalendarRange    `json:"calendarRange,omitempty"`
@@ -89,6 +90,7 @@ type TableColumn struct {
 
 // TableRow 描述了表格实例行的结构。
 type TableRow struct {
+	Hierarchy         *ItemHierarchy         `json:"hierarchy,omitempty"`
 	ConditionalColors *ItemConditionalColors `json:"conditionalColors,omitempty"`
 	ID                string                 `json:"id"`    // 行 ID
 	Cells             []*TableCell           `json:"cells"` // 行单元格

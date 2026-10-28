@@ -15,11 +15,13 @@ type GetAttributeViewBoundBlockIDsByItemIDsRequest struct {
 }
 
 type GetAttributeViewItemStatusesRequest struct {
-	ID      string   `json:"id"`
-	BlockID string   `json:"blockID" api:"optional,nullable,ignoretype"`
-	ViewID  string   `json:"viewID" api:"optional,nullable,ignoretype"`
-	Query   string   `json:"query" api:"optional,nullable,ignoretype"`
-	ItemIDs []string `json:"itemIDs"`
+	// Nested 启用树形归组状态判断，结果不受展开状态或分页影响。
+	Nested  *AVNestedRequest `json:"nested" api:"optional,nullable"`
+	ID      string           `json:"id"`
+	BlockID string           `json:"blockID" api:"optional,nullable,ignoretype"`
+	ViewID  string           `json:"viewID" api:"optional,nullable,ignoretype"`
+	Query   string           `json:"query" api:"optional,nullable,ignoretype"`
+	ItemIDs []string         `json:"itemIDs"`
 }
 
 type GetAttributeViewAddingBlockDefaultValuesRequest struct {
@@ -104,6 +106,8 @@ type GetAttributeViewPrimaryKeyValuesRequest struct {
 }
 
 type GetAttributeViewRelationCandidatesRequest struct {
+	// ExcludeItemIDs 在计数和分页前排除指定条目及其后代。
+	ExcludeItemIDs []string `json:"excludeItemIDs" api:"optional,nullable,filterstrings"`
 	// 按需返回目标数据库默认条目的名称预览；省略时保持候选查询响应。
 	// BlockID 指定来源载体并限定候选读取的加密边界；省略时保留原有全局查询行为。
 	IncludeNewItemPreview bool     `json:"includeNewItemPreview" api:"optional,nullable"`
@@ -195,13 +199,16 @@ type GetAttributeViewRequest struct {
 }
 
 type GetAttributeViewPasteRowsRequest struct {
-	AvID        string  `json:"avID" api:"trim"`
-	BlockID     string  `json:"blockID" api:"trim"`
-	ViewID      string  `json:"viewID" api:"optional,nullable"`
-	GroupID     string  `json:"groupID" api:"optional,nullable"`
-	Query       string  `json:"query" api:"optional,nullable"`
-	StartItemID string  `json:"startItemID" api:"trim"`
-	Count       float64 `json:"count"`
+	// ItemIDs 显式指定当前可见窗口中的目标顺序，空数组表示没有现有目标。
+	// 指定时不按平铺顺序补充隐藏条目；所有 ID 必须属于当前数据库且不可重复。
+	ItemIDs     []string `json:"itemIDs" api:"optional,nullable"`
+	AvID        string   `json:"avID" api:"trim"`
+	BlockID     string   `json:"blockID" api:"trim"`
+	ViewID      string   `json:"viewID" api:"optional,nullable"`
+	GroupID     string   `json:"groupID" api:"optional,nullable"`
+	Query       string   `json:"query" api:"optional,nullable"`
+	StartItemID string   `json:"startItemID" api:"trim"`
+	Count       float64  `json:"count"`
 }
 
 type GetAttributeViewFieldViewsRequest struct {
@@ -294,6 +301,11 @@ type SearchAttributeViewRequest struct {
 }
 
 type RenderSnapshotAttributeViewRequest struct {
+	Page        *float64                  `json:"page" api:"optional,nullable"`
+	PageSize    *float64                  `json:"pageSize" api:"optional,nullable"`
+	Query       string                    `json:"query" api:"optional,nullable"`
+	GroupPaging map[string]*AVGroupPaging `json:"groupPaging" api:"optional,nullable"`
+	Nested      *AVNestedRequest          `json:"nested" api:"optional,nullable"`
 	// 仅限制本次快照中的日历渲染范围，语义见 AVCalendarRange；不修改快照及共享视图。
 	CalendarRange *AVCalendarRange `json:"calendarRange" api:"optional,nullable"`
 	Snapshot      string           `json:"snapshot"`
@@ -304,6 +316,7 @@ type RenderSnapshotAttributeViewRequest struct {
 }
 
 type RenderHistoryAttributeViewRequest struct {
+	Nested *AVNestedRequest `json:"nested" api:"optional,nullable"`
 	// 仅限制本次历史版本中的日历渲染范围，语义见 AVCalendarRange；不修改历史及共享视图。
 	CalendarRange *AVCalendarRange          `json:"calendarRange" api:"optional,nullable"`
 	ID            string                    `json:"id"`
@@ -318,7 +331,8 @@ type RenderHistoryAttributeViewRequest struct {
 }
 
 type RenderAttributeViewRequest struct {
-	TemporarySort *AVViewSort `json:"temporarySort" api:"optional,nullable"`
+	Nested        *AVNestedRequest `json:"nested" api:"optional,nullable"`
+	TemporarySort *AVViewSort      `json:"temporarySort" api:"optional,nullable"`
 	// 仅限制本次日历渲染范围，语义见 AVCalendarRange；无效区间返回错误，不修改已存数据。
 	// 发布读取保留权限过滤；日期范围和定位参数不扩大条目访问权限。
 	CalendarRange    *AVCalendarRange          `json:"calendarRange" api:"optional,nullable"`

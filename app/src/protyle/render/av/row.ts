@@ -1,4 +1,5 @@
 import {isAVTimestampType} from "./capabilities";
+import {getSubItemsControlHTML} from "./subItemsState";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
@@ -27,6 +28,7 @@ import {getCompressURL} from "../../../util/image";
 import {
     getAVSelectStat,
     getAVSelectedItemInfos,
+    getAVSelectedItemPoints,
     getAvBodyData,
     IAVItemInfo,
     resetAVRowSelect,
@@ -209,7 +211,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     const isList = options.type === "list";
     const pinIndex = isList ? -1 : options.pinIndex;
 
-    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}" style="${getConditionalItemStyle(tableRow)}">`;
+    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}${tableRow.hierarchy?.context ? " av__row--context" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}"${tableRow.hierarchy ? ` data-parent-id="${escapeAttr(tableRow.hierarchy.parentID || "")}" data-depth="${tableRow.hierarchy.depth}"${tableRow.hierarchy.context ? ` aria-label="${window.siyuan.languages.avSubItemsContext}"` : ""}` : ""} style="${getConditionalItemStyle(tableRow)}">`;
     if (pinIndex > -1) {
         html += `<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div>`;
     } else {
@@ -235,7 +237,7 @@ data-align="${column.align || ""}"
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
 ${cell.bgColor && !tableRow.conditionalColors?.background && !tableRow.conditionalColors?.properties?.[column.id] ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${column.type === "block" && tableRow.hierarchy ? getSubItemsControlHTML(tableRow, tableData) : ""}${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
 
         if (pinIndex === index) {
             html += "</div>";
@@ -334,7 +336,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
 
 export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    let selectCount = 0;
+    const selectCount = new Set(getAVSelectedItemPoints(blockElement).map(item => item.itemID)).size;
     if (isTableLikeView(avType)) {
         blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
             if (hasClosestByClassName(bodyElement, "av") !== blockElement) {
@@ -345,7 +347,6 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
             const bodySelectCount = stat ? stat.selectCount :
                 bodyElement.querySelectorAll(".av__row--select[data-id]").length;
             const count = stat ? stat.loadedCount : bodyElement.querySelectorAll(".av__row[data-id]").length;
-            selectCount += bodySelectCount;
             const headElement = bodyElement.firstElementChild as HTMLElement;
             const headUseElement = headElement?.querySelector("use");
             if (!headElement || !headUseElement) {
@@ -361,15 +362,6 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
                 headElement.classList.add("av__row--select");
                 headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
             }
-        });
-    } else {
-        // 卡片/看板视图按分组（.av__body）聚合选中数，看板与分组卡片视图存在多个 body。
-        blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-            if (hasClosestByClassName(bodyItem, "av") !== blockElement) {
-                return;
-            }
-            const stat = getAVSelectStat(bodyItem);
-            selectCount += stat ? stat.selectCount : bodyItem.querySelectorAll(".av__gallery-item--select").length;
         });
     }
 
@@ -390,6 +382,9 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
 };
 
 export const setPage = (blockElement: Element) => {
+    if (blockElement.hasAttribute("data-sub-items-nested")) {
+        return;
+    }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
     blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         const pageSize = item.dataset.pageSize;
@@ -963,7 +958,8 @@ export const insertRows = (options: {
     protyle: IProtyle,
     count: number,
     previousID: string,
-    groupID?: string
+    groupID?: string,
+    parentID?: string
 }) => {
     const avID = options.blockElement.getAttribute("data-av-id");
     const srcIDs: string[] = [];
@@ -983,6 +979,7 @@ export const insertRows = (options: {
     transaction(options.protyle, [{
         action: "insertAttrViewBlock",
         avID,
+        parentID: options.parentID,
         previousID: options.previousID,
         srcs,
         blockID: options.blockElement.dataset.nodeId,
@@ -1025,6 +1022,13 @@ export const insertRows = (options: {
 
 export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowIDs: string[]) => {
     if (rowIDs.length === 0) {
+        return;
+    }
+    if (blockElement.hasAttribute("data-sub-items")) {
+        const operation: IOperation = {action: "duplicateAttrViewSubtree", avID: blockElement.dataset.avId,
+            blockID: blockElement.dataset.nodeId, viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            srcIDs: rowIDs, context: getAVFilteredTipContext("target", protyle)};
+        transaction(protyle, [operation], [{...operation}]);
         return;
     }
     const avID = blockElement.getAttribute("data-av-id");

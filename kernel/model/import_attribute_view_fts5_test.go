@@ -22,10 +22,14 @@ import (
 )
 
 func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
-	for _, encrypted := range []bool{false, true} {
+	for _, testCase := range []struct{ encrypted, subItems bool }{{}, {encrypted: true}, {subItems: true}, {encrypted: true, subItems: true}} {
+		encrypted, subItems := testCase.encrypted, testCase.subItems
 		name := "normal"
 		if encrypted {
 			name = "encrypted"
+		}
+		if subItems {
+			name += "-subitems"
 		}
 		t.Run(name, func(t *testing.T) {
 			const (
@@ -113,6 +117,52 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 					BlockID: itemID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: id, Content: []string{"External", "Internal"}[i]}})
 				attrView.Views[0].ItemIDs = append(attrView.Views[0].ItemIDs, itemID)
 			}
+			if subItems {
+				p, c := ast.NewNodeID(), ast.NewNodeID()
+				attrView.SubItems = &av.SubItemsConfig{Enabled: true, ParentKeyID: p, ChildrenKeyID: c}
+				attrView.KeyValues = append(attrView.KeyValues,
+					&av.KeyValues{Key: &av.Key{ID: p, Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: avID, IsTwoWay: true, BackKeyID: c}}},
+					&av.KeyValues{Key: &av.Key{ID: c, Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: avID, IsTwoWay: true, BackKeyID: p}}})
+				if err = attrView.SetSubItemsParents(map[string]string{values.Values[1].BlockID: values.Values[0].BlockID}); err != nil {
+					t.Fatal(err)
+				}
+				attrView.Views[0].SubItemsDisplay = "nested"
+				carrier := &ast.Node{Type: ast.NodeAttributeView, ID: ast.NewNodeID(), AttributeViewID: avID}
+				carrier.SetIALAttr("id", carrier.ID)
+				carrier.SetIALAttr(av.NodeAttrView, attrView.Views[0].ID)
+				carrier.SetIALAttr(av.NodeAttrVisibleViewIDs, attrView.Views[0].ID)
+				contextFilter, encodeErr := (&av.AttributeViewContextFilter{Spec: av.AttributeViewContextFilterSpec, KeyID: p}).Marshal()
+				if encodeErr != nil {
+					t.Fatal(encodeErr)
+				}
+				carrier.SetIALAttr(av.NodeAttrContextFilter, contextFilter)
+				source.Root.AppendChild(carrier)
+				writeExportRelatedTestTree(t, source)
+				// 两个库故意使用相同旧条目 ID，验证按所属库重映射。
+				target := relationTargets[0]
+				targetRow := values.Values[0].BlockID
+				target.GetBlockKeyValues().Values = []*av.Value{{ID: ast.NewNodeID(), KeyID: target.GetBlockKey().ID, BlockID: targetRow,
+					Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Related row"}}}
+				target.Views[0].ItemIDs = []string{targetRow}
+				var relation *av.KeyValues
+				for _, kv := range attrView.KeyValues {
+					if kv.Key.Relation != nil && kv.Key.Relation.AvID == target.ID {
+						relation = kv
+						break
+					}
+				}
+				backID := ast.NewNodeID()
+				relation.Key.Relation.IsTwoWay, relation.Key.Relation.BackKeyID = true, backID
+				relation.Values = []*av.Value{{ID: ast.NewNodeID(), KeyID: relation.Key.ID, BlockID: values.Values[0].BlockID,
+					Type: av.KeyTypeRelation, Relation: &av.ValueRelation{BlockIDs: []string{targetRow}}}}
+				target.KeyValues = append(target.KeyValues, &av.KeyValues{Key: &av.Key{ID: backID, Type: av.KeyTypeRelation,
+					Relation: &av.Relation{AvID: avID, IsTwoWay: true, BackKeyID: relation.Key.ID}}, Values: []*av.Value{{ID: ast.NewNodeID(),
+					KeyID: backID, BlockID: targetRow, Type: av.KeyTypeRelation, Relation: &av.ValueRelation{BlockIDs: []string{values.Values[0].BlockID}}}}})
+				archiveEntries["Daily/storage/av/"+target.ID+".json"], err = json.Marshal(target)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 			if err = av.SaveAttributeView(attrView); err != nil {
 				t.Fatal(err)
 			}
@@ -154,7 +204,7 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			var newAvID, newDocID string
+			var newAvID, newDocID, newViewID, newVisibleViewID, newContextKeyID string
 			for _, entry := range entries {
 				if !strings.HasSuffix(entry.Name(), ".sy") {
 					continue
@@ -164,6 +214,15 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 					t.Fatal(loadErr)
 				}
 				newAvID, newDocID = tree.Root.IALAttr(av.NodeAttrNameAvs), tree.ID
+				if subItems {
+					carrier := tree.Root.ChildrenByType(ast.NodeAttributeView)[0]
+					newViewID, newVisibleViewID = carrier.IALAttr(av.NodeAttrView), carrier.IALAttr(av.NodeAttrVisibleViewIDs)
+					contextFilter, contextErr := av.ParseAttributeViewContextFilter(carrier.IALAttr(av.NodeAttrContextFilter))
+					if contextErr != nil || contextFilter == nil {
+						t.Fatalf("imported context filter is invalid: %v", contextErr)
+					}
+					newContextKeyID = contextFilter.KeyID
+				}
 			}
 			if newAvID == "" || newAvID == avID || newDocID == docID {
 				t.Fatalf("imported IDs were not remapped: %s, %s", newAvID, newDocID)
@@ -182,14 +241,27 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 				if kv.Key.Type != av.KeyTypeRelation {
 					continue
 				}
+				if imported.IsSubItemsKey(kv.Key.ID) {
+					continue
+				}
 				relationCount++
 				targetID := kv.Key.Relation.AvID
 				t.Cleanup(func() { av.SetAVBoxID(targetID, "") })
 				if targetID == relationTargets[0].ID || targetID == relationTargets[1].ID {
 					t.Fatal("relation target ID was not remapped")
 				}
-				if _, err := av.ParseAttributeViewInBox(targetID, avBoxID); err != nil {
+				target, err := av.ParseAttributeViewInBox(targetID, avBoxID)
+				if err != nil {
 					t.Fatal(err)
+				}
+				if subItems && kv.Key.Relation.IsTwoWay {
+					rowID := imported.GetBlockKeyValues().Values[0].BlockID
+					targetRow := target.GetBlockKeyValues().Values[0].BlockID
+					back, keyErr := target.GetKeyValues(kv.Key.Relation.BackKeyID)
+					if keyErr != nil || back.Key.Relation.BackKeyID != kv.Key.ID || back.Key.Relation.AvID != imported.ID ||
+						!slices.Equal(back.Values[0].Relation.BlockIDs, []string{rowID}) || !slices.Equal(kv.Values[0].Relation.BlockIDs, []string{targetRow}) || targetRow == rowID {
+						t.Fatalf("cross-database identities were not remapped consistently: %v", keyErr)
+					}
 				}
 				if !slices.Contains(av.GetSrcAvIDs(targetID), newAvID) {
 					t.Fatalf("import omitted relation dependency %s -> %s", newAvID, targetID)
@@ -200,8 +272,23 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			}
 			rows := imported.GetBlockKeyValues().Values
 			if len(rows) != 2 || rows[0].IsDetached != encrypted || rows[1].IsDetached || rows[1].Block.ID != newDocID ||
-				rows[0].Block.Content != "External" || rows[0].BlockID != values.Values[0].BlockID {
+				rows[0].Block.Content != "External" || (!subItems && rows[0].BlockID != values.Values[0].BlockID) {
 				t.Fatalf("imported bindings or row data changed unexpectedly: %+v", rows)
+			}
+			if subItems {
+				if rows[0].BlockID == values.Values[0].BlockID || rows[1].BlockID == values.Values[1].BlockID ||
+					rows[0].ID == values.Values[0].ID || imported.SubItems.ParentKeyID == attrView.SubItems.ParentKeyID ||
+					imported.GetBlockKey().ID == attrView.GetBlockKey().ID || newViewID == attrView.Views[0].ID ||
+					newViewID != imported.Views[0].ID || newVisibleViewID != newViewID {
+					t.Fatal("native import retained database field, row, value or view identities")
+				}
+				if newContextKeyID != imported.SubItems.ParentKeyID {
+					t.Fatal("native import retained the context filter's original field identity")
+				}
+				index, graphErr := imported.BuildSubItemsIndex()
+				if graphErr != nil || index.Parents[rows[1].BlockID] != rows[0].BlockID || imported.Views[0].SubItemsDisplay != "nested" {
+					t.Fatalf("native import lost hierarchy: %v", graphErr)
+				}
 			}
 			after, err := os.ReadFile(externalPath)
 			if err != nil {

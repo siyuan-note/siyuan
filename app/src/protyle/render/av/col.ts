@@ -119,6 +119,8 @@ export const getEditHTML = (options: {
             return true;
         }
     });
+    const protectedSubItem = options.data.subItems?.enabled &&
+        [options.data.subItems.parentKeyID, options.data.subItems.childrenKeyID].includes(options.colId);
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
     <span class="block__icon block__icon--menu-back${options.isCustomAttr ? " fn__none" : ""}" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
@@ -142,7 +144,7 @@ export const getEditHTML = (options: {
         <div class="fn__hr--small"></div>
     </div>
 </button>
-<button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" ? "disabled" : ""}>
+<button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" || protectedSubItem ? "disabled" : ""}>
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
@@ -176,7 +178,7 @@ export const getEditHTML = (options: {
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
-<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+<button class="b3-menu__item" data-type="goSearchAV" ${protectedSubItem ? "disabled" : ""} data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -189,7 +191,7 @@ export const getEditHTML = (options: {
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
-    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${protectedSubItem ? "disabled" : ""} ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${escapeAttr(options.data.name)} ${escapeAttr(colData.name)}">
@@ -260,10 +262,13 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicateCopy}</span>
 </button>
-<button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol">
+<button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol" ${protectedSubItem ? "disabled" : ""}>
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`;
+    }
+    if (protectedSubItem) {
+        html += `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__secondary">${window.siyuan.languages.avSubItemsProtectedTip}</span></div>`;
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -1470,6 +1475,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
+            disabled: Boolean(getAVData(blockElement as HTMLElement)?.subItems?.enabled &&
+                [getAVData(blockElement as HTMLElement).subItems.parentKeyID,
+                    getAVData(blockElement as HTMLElement).subItems.childrenKeyID].includes(colId)),
             async click() {
                 if (type === "relation") {
                     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});

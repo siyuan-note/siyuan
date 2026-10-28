@@ -100,7 +100,7 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 			continue
 		}
 		switch op.Action {
-		case "insertAttrViewBlock", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "duplicateAttrViewRow":
+		case "insertAttrViewBlock", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "duplicateAttrViewRow", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree":
 		default:
 			continue
 		}

@@ -14,21 +14,27 @@ test("switching one database carrier refreshes only its copies and preserves oth
     const root = document.createElement("div");
     document.body.append(root);
     root.innerHTML = ["carrier", "mirror", "carrier"].map(id =>
-        `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div></div>`).join("");
+        `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true" data-view="original" data-v-scroll="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div></div>`).join("");
     const blocks = root.children;
     const rendered: unknown[] = [];
     const exports: any = {};
     runInNewContext(compiled, {exports, require: () => ({
         getAVViewPageSize: (_pages: string, id: string) => id === "limited" ? "50" : undefined,
+        Constants: {CUSTOM_SY_AV_VIEW: "data-view", ATTRIBUTE_V_SCROLL: "data-v-scroll"},
+        clearSubItemsViewportAnchor() {}, locateRequests: new WeakMap(),
     }), window: {setTimeout: () => assert.fail("Carrier-only view changes must not schedule a database-wide refresh")}});
     exports.avRender = (block: unknown) => { rendered.push(block); };
     const protyle = {wysiwyg: {element: root}};
     exports.refreshAV(protyle, {action: "setAttrViewBlockView", avID: "database", blockID: "carrier", id: "limited"});
     assert.deepEqual(rendered, [blocks[0], blocks[2]]);
     assert.equal(blocks[1].getAttribute("data-render"), "true");
+    assert.equal(blocks[1].getAttribute("data-view"), "original");
+    assert.equal(blocks[1].getAttribute("data-v-scroll"), "true");
     assert.equal(blocks[1].querySelector(".av__body").dataset.pageSize, "100");
     for (const block of [blocks[0], blocks[2]]) {
         assert.equal(block.getAttribute("data-render"), null);
+        assert.equal(block.getAttribute("data-view"), "limited");
+        assert.equal(block.getAttribute("data-v-scroll"), null);
         assert.equal(block.querySelector(".av__body").dataset.pageSize, "50");
     }
     rendered.length = 0;

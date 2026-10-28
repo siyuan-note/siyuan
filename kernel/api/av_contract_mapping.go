@@ -47,6 +47,7 @@ func toContractAVTable(value *av.Table) *apicontract.AVTable {
 		return nil
 	}
 	return &apicontract.AVTable{
+		Nested:             toContractAVNestedResult(value.Nested),
 		AVBaseInstance:     toContractAVBaseInstance(value.BaseInstance),
 		Calendar:           toContractAVCalendarSettings(value.Calendar),
 		CalendarRange:      toContractAVCalendarRange(value.CalendarRange),
@@ -769,6 +770,7 @@ func toContractAVTableRow(value *av.TableRow) *apicontract.AVTableRow {
 		return nil
 	}
 	return &apicontract.AVTableRow{
+		Hierarchy:         toContractAVItemHierarchy(value.Hierarchy),
 		ConditionalColors: toContractAVItemConditionalColors(value.ConditionalColors),
 		ID:                value.ID,
 		Cells:             avContractSlice(value.Cells, func(value *av.TableCell) *apicontract.AVTableCell { return toContractAVTableCell(value) }),
@@ -982,9 +984,10 @@ func toContractAVAttributeViewData(value *model.AttributeViewData) *apicontract.
 		return nil
 	}
 	return &apicontract.AVAttributeViewData{
-		Spec: value.Spec,
-		ID:   value.ID,
-		Name: value.Name,
+		SubItems: toContractAVSubItemsConfig(value.SubItems),
+		Spec:     value.Spec,
+		ID:       value.ID,
+		Name:     value.Name,
 		CustomColors: avContractSlice(value.CustomColors, func(value *av.AttributeViewCustomColor) *apicontract.AVAttributeViewCustomColor {
 			return toContractAVAttributeViewCustomColor(value)
 		}),
@@ -1019,6 +1022,7 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		return nil
 	}
 	return &apicontract.AVView{
+		SubItemsDisplay:   value.SubItemsDisplay,
 		ConditionalColors: avContractSlice(value.ConditionalColors, toContractAVConditionalColorRule),
 		ID:                value.ID,
 		Icon:              value.Icon,
@@ -1039,6 +1043,7 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		GroupCreated:      value.GroupCreated,
 		Groups:            avContractSlice(value.Groups, func(value *av.View) *apicontract.AVView { return toContractAVView(value) }),
 		GroupItemIDs:      value.GroupItemIDs,
+		SubItemsItemIDs:   value.SubItemsItemIDs,
 		GroupCalc:         toContractAVGroupCalc(value.GroupCalc),
 		GroupKey:          toContractAVKey(value.GroupKey),
 		GroupVal:          toContractAVValue(value.GroupVal),
@@ -1291,12 +1296,13 @@ func toContractAVAttributeViewRenderTarget(value *model.AttributeViewRenderTarge
 		return nil
 	}
 	return &apicontract.AVAttributeViewRenderTarget{
-		Status:   value.Status,
-		ItemID:   value.ItemID,
-		GroupID:  value.GroupID,
-		Index:    value.Index,
-		Offset:   value.Offset,
-		PageSize: value.PageSize,
+		AncestorIDs: value.AncestorIDs,
+		Status:      value.Status,
+		ItemID:      value.ItemID,
+		GroupID:     value.GroupID,
+		Index:       value.Index,
+		Offset:      value.Offset,
+		PageSize:    value.PageSize,
 	}
 }
 func toContractAVCreateAttributeViewItemResult(value *model.CreateAttributeViewItemResult) *apicontract.AVCreateAttributeViewItemResult {

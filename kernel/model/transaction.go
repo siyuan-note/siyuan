@@ -448,6 +448,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewColAttributePanelVisibility(op)
 			case "insertAttrViewBlock":
 				ret = tx.doInsertAttrViewBlock(op)
+			case "setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree":
+				ret = tx.doAttributeViewSubItems(op)
 			case "removeAttrViewBlock":
 				ret = tx.doRemoveAttrViewBlock(op)
 			case "addAttrViewCol":
@@ -1706,8 +1708,24 @@ func removeAttributeViewBoundItems(attrView *av.AttributeView, deletedBlockIDs m
 		values = append(values, blockValue)
 	}
 	if changed {
+		if attrView.HasSubItems() {
+			ids := make([]string, 0, len(itemIDs))
+			for id := range itemIDs {
+				ids = append(ids, id)
+			}
+			if err := attrView.PromoteSubItemsForRemoval(ids); err != nil {
+				return false
+			}
+		}
 		blockValues.Values = values
 		if !removeValues {
+			if attrView.HasSubItems() {
+				for _, kv := range attrView.KeyValues {
+					if attrView.IsSubItemsKey(kv.Key.ID) {
+						kv.Values = slices.DeleteFunc(kv.Values, func(value *av.Value) bool { return value != nil && itemIDs[value.BlockID] })
+					}
+				}
+			}
 			return true
 		}
 		for _, kv := range attrView.KeyValues {
@@ -2634,6 +2652,7 @@ type Operation struct {
 	listConversion                *listConversionState
 	listConversionUndo            bool
 	attributeViewItems            *attributeViewItemsSnapshot
+	attributeViewCreatedSubItems  *attributeViewCreatedSubItemsSnapshot
 	attributeViewFields           *attributeViewFieldsSnapshot
 	attributeViewFieldUndo        bool
 	attributeViewAutomation       bool

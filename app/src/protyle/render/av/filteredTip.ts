@@ -37,6 +37,7 @@ export const getAVItemRenderStatuses = async (blockElement: HTMLElement, itemIDs
         query: searchInputElement?.textContent?.trim() || "",
         blockID: blockElement.dataset.nodeId,
         itemIDs,
+        nested: blockElement.hasAttribute("data-sub-items-nested") ? {} : undefined,
     });
     return response.data as Record<string, IAVRenderTarget["status"]>;
 };
@@ -96,7 +97,8 @@ export const inspectAVInsertedItem = async (protyle: IProtyle, operation: IOpera
     window.setTimeout(() => handledTokens.delete(token), 60000);
 
     const result = operation.retData as IInsertAttrViewBlockRetData;
-    const insertedItemIDs = result?.insertedItemIDs;
+    const insertedItemIDs = result?.insertedItemIDs ||
+        (["reparentAttrViewItems", "promoteAttrViewItems"].includes(operation.action) ? operation.srcIDs : undefined);
     if (!insertedItemIDs?.length) {
         return;
     }
@@ -115,7 +117,7 @@ export const inspectAVInsertedItem = async (protyle: IProtyle, operation: IOpera
     if (scope !== "target" || context.openFilteredItem !== "true" || insertedItemIDs.length !== 1) {
         return;
     }
-    const insertedItem = operation.srcs.find(item => item.itemID === filteredItemID);
+    const insertedItem = operation.srcs?.find(item => item.itemID === filteredItemID);
     if (!insertedItem) {
         return;
     }

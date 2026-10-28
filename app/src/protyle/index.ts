@@ -49,6 +49,7 @@ import {getDocByScroll} from "./scroll/saveScroll";
 import type {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
+import {clearSubItemsState} from "./render/av/subItemsState";
 import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
 import {setStorageVal} from "./util/compatibility";
@@ -403,6 +404,7 @@ export class Protyle {
                         case "closeBox":
                         case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
+                                clearSubItemsState(this.protyle.element);
                                 /// #if MOBILE
                                 // 主编辑器由页签管理切换文档，避免切换前显示空白主页
                                 if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {

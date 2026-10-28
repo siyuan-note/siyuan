@@ -29,9 +29,9 @@ func avGroupPaging(values map[string]*apicontract.AVGroupPaging) map[string]any 
 func avArchiveRenderData(attrView *av.AttributeView, view av.Viewable) apicontract.AVArchiveRenderData {
 	var views []*apicontract.AVViewData
 	for _, v := range attrView.Views {
-		views = append(views, &apicontract.AVViewData{ID: v.ID, Icon: v.Icon, Name: v.Name, Desc: v.Desc, HideAttrViewName: v.HideAttrViewName, Type: string(v.LayoutType), PageSize: v.PageSize})
+		views = append(views, &apicontract.AVViewData{ID: v.ID, Icon: v.Icon, Name: v.Name, Desc: v.Desc, HideAttrViewName: v.HideAttrViewName, Type: string(v.LayoutType), PageSize: v.PageSize, SubItemsDisplay: v.SubItemsDisplay})
 	}
-	return apicontract.AVArchiveRenderData{Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
+	return apicontract.AVArchiveRenderData{SubItems: toContractAVSubItemsConfig(attrView.SubItems), Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
 }
 
 func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool, renderOptions ...model.AttributeViewRenderOptions) apicontract.Response[apicontract.AVRenderResult] {
@@ -40,6 +40,7 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		options = renderOptions[0]
 	}
 	options.ReadOnly = options.ReadOnly || filter != nil
+	options.ScopeFilter = filter
 	view, attrView, target, err := model.RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, options)
 	if err != nil {
 		message := err.Error()

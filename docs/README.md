@@ -11,6 +11,7 @@
 | On-demand asset downloads | [ASSET-DOWNLOAD.md](ASSET-DOWNLOAD.md) | [ASSET-DOWNLOAD.zh-CN.md](ASSET-DOWNLOAD.zh-CN.md) |
 | Encrypted notebooks | [ENCRYPTED-NOTEBOOK.md](ENCRYPTED-NOTEBOOK.md) | [ENCRYPTED-NOTEBOOK.zh-CN.md](ENCRYPTED-NOTEBOOK.zh-CN.md) |
 | Document titles and addressing (design draft) | [DOCUMENT-ADDRESSING.md](DOCUMENT-ADDRESSING.md) | [DOCUMENT-ADDRESSING.zh-CN.md](DOCUMENT-ADDRESSING.zh-CN.md) |
+| Database sub-items (design draft) | [DATABASE-SUBITEMS.md](DATABASE-SUBITEMS.md) | [DATABASE-SUBITEMS.zh-CN.md](DATABASE-SUBITEMS.zh-CN.md) |
 | Pinned documents | [PINNED-DOCUMENTS.md](PINNED-DOCUMENTS.md) | [PINNED-DOCUMENTS.zh-CN.md](PINNED-DOCUMENTS.zh-CN.md) |
 | Performance measurement | [PERFORMANCE.md](PERFORMANCE.md) | [PERFORMANCE.zh-CN.md](PERFORMANCE.zh-CN.md) |
 | Tab blocks | [TAB-BLOCK.md](TAB-BLOCK.md) | [TAB-BLOCK.zh-CN.md](TAB-BLOCK.zh-CN.md) |

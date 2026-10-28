@@ -76,7 +76,7 @@ var getAttributeViewItemStatuses = contractHandler(apicontract.GetAttributeViewI
 	if err := holdAttributeViewRequest(c, request.BlockID, request.ID); err != nil {
 		return apicontract.Failure[map[string]string](-1, model.Conf.Language(314))
 	}
-	values, err := model.GetAttributeViewItemStatuses(request.BlockID, request.ID, request.ViewID, request.Query, append([]string{}, request.ItemIDs...))
+	values, err := model.GetAttributeViewItemStatusesWithNested(request.BlockID, request.ID, request.ViewID, request.Query, append([]string{}, request.ItemIDs...), fromContractAVNestedRequest(request.Nested))
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
@@ -228,7 +228,7 @@ var getAttributeViewRelationCandidates = contractHandler(apicontract.GetAttribut
 	if request.Sort != nil {
 		candidateSort = &av.ViewSort{Column: request.Sort.Column, Order: av.SortOrder(request.Sort.Order)}
 	}
-	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1), candidateSort, request.BlockID)
+	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidatesWithExcludes(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1), candidateSort, avNonemptyStrings(request.ExcludeItemIDs), request.BlockID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRelationCandidatesData](-1, err.Error())
 	}
@@ -353,7 +353,7 @@ var getAttributeViewPasteRows = contractHandler(apicontract.GetAttributeViewPast
 	if request.Count != float64(count) || count < 1 || count > 100000 {
 		return apicontract.Failure[apicontract.AVPasteRowsData](-1, "invalid paste row count")
 	}
-	view, keys, err := model.GetAttributeViewPasteRows(request.BlockID, request.AvID, request.ViewID, request.GroupID, request.Query, request.StartItemID, count)
+	view, keys, err := model.GetAttributeViewPasteRowsWithItems(request.BlockID, request.AvID, request.ViewID, request.GroupID, request.Query, request.StartItemID, count, request.ItemIDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVPasteRowsData](-1, err.Error())
 	}
@@ -442,7 +442,7 @@ var renderSnapshotAttributeView = contractHandler(apicontract.RenderSnapshotAttr
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, model.Conf.Language(314))
 	}
-	view, attrView, err := model.RenderRepoSnapshotAttributeView(request.Snapshot, request.ID, request.ViewID, request.CarrierViewID, fromContractAVCalendarRange(request.CalendarRange))
+	view, attrView, err := model.RenderRepoSnapshotAttributeViewWithPagingOptions(request.Snapshot, request.ID, request.ViewID, request.CarrierViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), model.AttributeViewRenderOptions{CalendarRange: fromContractAVCalendarRange(request.CalendarRange), Nested: fromContractAVNestedRequest(request.Nested)})
 	if err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, err.Error())
 	}
@@ -460,7 +460,7 @@ var renderHistoryAttributeView = contractHandler(apicontract.RenderHistoryAttrib
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, model.Conf.Language(314))
 	}
-	view, attrView, err := model.RenderHistoryAttributeView(request.ID, request.ViewID, request.CarrierViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), request.Created, fromContractAVCalendarRange(request.CalendarRange))
+	view, attrView, err := model.RenderHistoryAttributeViewWithOptions(request.ID, request.ViewID, request.CarrierViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), request.Created, model.AttributeViewRenderOptions{CalendarRange: fromContractAVCalendarRange(request.CalendarRange), Nested: fromContractAVNestedRequest(request.Nested)})
 	if err != nil {
 		return apicontract.Failure[apicontract.AVArchiveRenderData](-1, err.Error())
 	}
@@ -487,7 +487,7 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 		create = *request.CreateIfNotExist
 	}
 	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, model.AttributeViewRenderOptions{
-		CalendarRange: fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort),
+		CalendarRange: fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort), Nested: fromContractAVNestedRequest(request.Nested),
 	})
 })
 

@@ -756,10 +756,11 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	storage := filepath.Join(unzipRootPath, "storage")
 	storageAvDir := filepath.Join(storage, "av")
 	avIDs := map[string]string{}
+	var avIdentityMappings map[string]map[string]string
 	renameAvPaths := map[string]string{}
 	if gulu.File.IsExist(storageAvDir) {
 		// 重新生成数据库数据
-		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
+		err = filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -786,22 +787,38 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			avIDs[oldAvID] = newAvID
 			return nil
 		})
+		if err != nil {
+			return
+		}
+		// 在修改任何临时数据库前完成整包读取及校验，失败时保留原始归档。
+		importedData := map[string][]byte{}
+		for oldPath := range renameAvPaths {
+			id := strings.TrimSuffix(filepath.Base(oldPath), ".json")
+			importedData[id], err = os.ReadFile(oldPath)
+			if err != nil {
+				return
+			}
+		}
+		var remappedData map[string][]byte
+		remappedData, avIdentityMappings, err = remapImportedSubItemsDatabases(importedData, avIDs, blockIDs)
+		if err != nil {
+			return
+		}
 
 		// 重命名数据库文件
 		for oldPath, newPath := range renameAvPaths {
-			data, readErr := os.ReadFile(oldPath)
-			if nil != readErr {
-				logging.LogErrorf("read av file [%s] failed: %s", oldPath, readErr)
-				err = readErr
-				return
-			}
+			oldID := strings.TrimSuffix(filepath.Base(oldPath), ".json")
+			data := importedData[oldID]
 
 			// 将数据库文件中的 ID 替换为新的 ID
-			newData := data
-			for oldAvID, newAvID := range avIDs {
-				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+			newData := remappedData[oldID]
+			if newData == nil {
+				newData = data
+				for oldAvID, newAvID := range avIDs {
+					newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+				}
+				newData = []byte(blockIDReplacer.Replace(string(newData)))
 			}
-			newData = []byte(blockIDReplacer.Replace(string(newData)))
 			newData, err = isolateImportedAttributeViewBindings(newData, importedBlockIDs, encryptedTarget)
 			if err != nil {
 				return
@@ -863,6 +880,29 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 				}
 
 				if ast.NodeAttributeView == n.Type {
+					if identities := avIdentityMappings[n.AttributeViewID]; identities != nil {
+						if encoded := n.IALAttr(av.NodeAttrContextFilter); encoded != "" {
+							if context, contextErr := av.ParseAttributeViewContextFilter(encoded); contextErr == nil && context != nil {
+								if id := identities[context.KeyID]; id != "" {
+									context.KeyID = id
+									if updated, encodeErr := context.Marshal(); encodeErr == nil {
+										n.SetIALAttr(av.NodeAttrContextFilter, updated)
+									}
+								}
+							}
+						}
+						for _, name := range []string{av.NodeAttrView, av.NodeAttrVisibleViewIDs} {
+							if existing := n.IALAttr(name); existing != "" {
+								ids := strings.Split(existing, ",")
+								for i, id := range ids {
+									if replacement := identities[id]; replacement != "" {
+										ids[i] = replacement
+									}
+								}
+								n.SetIALAttr(name, strings.Join(ids, ","))
+							}
+						}
+					}
 					n.AttributeViewID = avIDs[n.AttributeViewID]
 				}
 				if encryptedTarget {

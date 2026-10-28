@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028142713"
 	},
 	"Children": [
 		{
@@ -5211,6 +5211,187 @@
 				{
 					"Type": "NodeText",
 					"Data": "用户新增、复制、修改正文或属性、应用内容模板、全局查找替换，以及将块或文档移入监听范围后，都会判断收集条件。文档树复制和移动包含子文档。已有条目保留字段值。Markdown 和 .sy 导入、同步、历史恢复、撤销及重做不会触发新的收集，可通过预览手动收集存量内容。自动动作不会串联触发其他规则。来源与目标数据库须处于同一加密边界，加密笔记本需先解锁再预览或编辑规则。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-3x4gx5d",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-3x4gx5d",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "父子条目"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-88hjqza",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-88hjqza",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在数据库设置中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "父子条目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，创建父项和子项关系字段，或选择已有的自关联字段。启用后，访问这个数据库的各端需要支持新格式。未启用的数据库不受影响。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-c3m185q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-c3m185q",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一个条目最多有一个父项，可以包含多层子项。不能把自己或后代设为父项。父子关系由数据库的所有视图和镜像共享，不改变文档或块的原有层级。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-yqwfcri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-yqwfcri",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格和列表可以选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "树形显示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "平铺显示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。树形显示通过主字段前的按钮展开和折叠子项。卡片、看板和日历仍保持平铺，可以通过条目属性查看和修改父子关系。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-2xkabyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-2xkabyi",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "条目菜单提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增子项"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更改父项"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "提升一级"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。移动父项时，其后代一起移动；改父项不会自动修改子项的状态、日期等字段。自动排序开启时，同级顺序由排序规则决定。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-uxlly8l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-uxlly8l",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筛选命中子项时，会保留它的祖先路径作为上下文，不显示未命中的兄弟条目。树形分组跟随顶层父项，子项仍保留自己的分组字段值。平铺分组按每个条目自己的字段值处理。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-ctns6ab",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-ctns6ab",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "树形视图按顶层条目分页，展开时加载子项，子项较多时可以前后翻页。折叠不会改变统计结果，仅为上下文显示的祖先不计入筛选匹配数量。多行粘贴只覆盖当前页可见条目，包括上下文祖先；超出可见范围的行新增为顶层条目，不会覆盖折叠条目或其他页的条目。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-v7h0fce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-v7h0fce",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除父项后，未删除的直接子项提升一级，不会连带删除后代或绑定的文档、块。复制父项会复制整棵子树，包括折叠或被筛选隐藏的后代；副本使用新的条目身份，绑定条目的副本为未绑定条目，不复制正文。结构操作支持撤销和重做。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-o25vwu0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-o25vwu0",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "切换为平铺或停用父子条目不会删除关系字段或关联数据，也不会自动降低数据库格式版本。再次启用会重新检查已有关系。加密数据库的展开状态在锁定或关闭笔记本后清除。"
 				}
 			]
 		},

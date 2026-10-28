@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028142713"
 	},
 	"Children": [
 		{
@@ -5211,6 +5211,187 @@
 				{
 					"Type": "NodeText",
 					"Data": "使用者新增、複製、修改內文或屬性、套用內容範本、全域尋找取代，以及將區塊或文件移入監聽範圍後，都會判斷收集條件。文件樹複製和移動包含子文件。既有條目保留欄位值。Markdown 和 .sy 匯入、同步、歷史復原、復原及重做不會觸發新的收集，可透過預覽手動收集既有內容。自動動作不會連鎖觸發其他規則。來源與目標資料庫須處於同一加密邊界，加密筆記本需先解鎖再預覽或編輯規則。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-43ejq28",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-43ejq28",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "父子條目"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-hifua3k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-hifua3k",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在資料庫設定中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "父子條目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，建立父項與子項關聯欄位，或選擇現有的自關聯欄位。啟用後，存取此資料庫的各端需要支援新格式。未啟用的資料庫不受影響。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-0o36gge",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-0o36gge",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一個條目最多有一個父項，可以包含多層子項。不能將自己或後代設為父項。父子關係由資料庫的所有檢視及鏡像共用，不改變文件或區塊原有的層級。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-tdkilch",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-tdkilch",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格與清單可以選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "樹狀顯示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "平鋪顯示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。樹狀顯示透過主欄位前的按鈕展開或摺疊子項。卡片、看板及日曆仍維持平鋪，可以透過條目屬性查看及修改父子關係。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-oc3lgae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-oc3lgae",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "條目選單提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增子項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "變更父項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 及 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "提升一級"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。移動父項時，其後代一起移動；變更父項不會自動修改子項的狀態、日期等欄位。啟用自動排序時，同級順序由排序規則決定。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-l5t4o62",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-l5t4o62",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "篩選符合子項時，會保留它的祖先路徑作為上下文，不顯示未符合的同級條目。樹狀分組跟隨頂層父項，子項仍保留自己的分組欄位值。平鋪分組依每個條目自己的欄位值處理。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-vnrl3n5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-vnrl3n5",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "樹狀檢視以頂層條目分頁，展開時載入子項，子項較多時可以前後翻頁。摺疊不會改變統計結果，僅作為上下文顯示的祖先不計入篩選符合數量。多行貼上只覆寫目前頁面的可見條目，包括上下文祖先；超出可見範圍的行新增為頂層條目，不會覆寫摺疊條目或其他頁面的條目。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-v5npi7a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-v5npi7a",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除父項後，未刪除的直接子項提升一級，不會連帶刪除後代或綁定的文件、區塊。複製父項會複製整棵子樹，包括摺疊或被篩選隱藏的後代；副本使用新的條目身分，綁定條目的副本為未綁定條目，不複製正文。結構操作支援復原與重做。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-nyhwdet",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-nyhwdet",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "切換為平鋪或停用父子條目不會刪除關聯欄位或資料，也不會自動降低資料庫格式版本。再次啟用會重新檢查現有關係。加密資料庫的展開狀態在鎖定或關閉筆記本後清除。"
 				}
 			]
 		},

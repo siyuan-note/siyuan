@@ -43,6 +43,7 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     compactAVCellOperations,
+    getAVNestedPasteItemIDs,
     getAVPasteCellValue,
     getAVPasteContentRowCount,
     getAVPasteValueForType,
@@ -62,7 +63,7 @@ import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
-import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {getAVSelectedTableCells, getAvBodyData} from "../render/av/virtualScroll";
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
@@ -319,6 +320,11 @@ const pasteAVMatrix = async (options: {
     }
 
     const groupID = bodyElement.dataset.groupId || "";
+    const nestedItemIDs = options.blockElement.hasAttribute("data-sub-items-nested") ?
+        getAVNestedPasteItemIDs((getAvBodyData(bodyElement) as IAVTable)?.rows || [], startItemID, options.values.length) : undefined;
+    if (nestedItemIDs && !nestedItemIDs.length) {
+        return;
+    }
     const response = await fetchSyncPost("/api/av/getAttributeViewPasteRows", {
         avID: options.blockElement.dataset.avId,
         blockID: options.blockElement.dataset.nodeId,
@@ -327,6 +333,7 @@ const pasteAVMatrix = async (options: {
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent || "",
         startItemID,
         count: Math.max(options.values.length, 1),
+        itemIDs: nestedItemIDs,
     });
     if (response.code !== 0) {
         return;

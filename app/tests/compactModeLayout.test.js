@@ -60,6 +60,21 @@ const browserCases = ({css, desktop, community}) => {
     const number = (selector, property) => parseFloat(getComputedStyle(find(selector))[property]);
     const near = (actual, expected, label) => check.ok(Math.abs(actual - expected) < 1,
         `${label}: ${actual} / ${expected}`);
+    const checkDialogAlignment = padding => {
+        const header = find(".b3-dialog__header");
+        const content = document.createRange();
+        content.selectNodeContents(find(".b3-dialog__content"));
+        for (const title of ["Dialog title", "📚 Dialog title"]) {
+            header.textContent = title;
+            const text = document.createRange();
+            text.selectNodeContents(header);
+            near(text.getBoundingClientRect().left, content.getBoundingClientRect().left,
+                `${title} aligns with dialog content`);
+            near(number(".b3-dialog__header", "paddingLeft"), padding, "dialog title left padding");
+            near(number(".b3-dialog__header", "paddingRight"), padding, "dialog title right padding");
+        }
+        header.textContent = "Dialog title";
+    };
     const settle = () => document.getAnimations().filter(animation => animation instanceof CSSTransition)
         .forEach(animation => animation.finish());
     const checkTabEdge = () => {
@@ -87,6 +102,7 @@ const browserCases = ({css, desktop, community}) => {
     ].map(([key, selector]) => [key, {height: height(selector), font: getComputedStyle(find(selector)).fontSize}]));
     const normal = snapshot();
     if (desktop && !community) {
+        checkDialogAlignment(24);
         checkTabEdge();
         for (const [key, expected] of Object.entries({toolbar: 32, tabs: 42, panel: 42, breadcrumb: 42,
             list: 28, menu: 28, dialog: 43, status: 32})) {
@@ -105,6 +121,7 @@ const browserCases = ({css, desktop, community}) => {
     }
     for (const key of Object.keys(normal)) check.equal(compact[key].font, normal[key].font, `${key} keeps its font size`);
     if (!community) {
+        checkDialogAlignment(16);
         checkTabEdge();
         for (const key of ["toolbar", "tabs", "panel", "breadcrumb", "list", "menu", "dialog", "status"]) {
             check.ok(compact[key].height < normal[key].height, `${key} becomes smaller: ${JSON.stringify({normal, compact})}`);

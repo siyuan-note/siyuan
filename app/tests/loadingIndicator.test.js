@@ -76,6 +76,47 @@ const browserCases = async (sources, entries, themes) => {
     check.equal(forced.borderTopWidth, "2px");
     await ipcRenderer.invoke("loading-media", []);
 
+    const progress = {};
+    new Function("exports", sources.progress)(progress);
+    window.siyuan = {zIndex: 1};
+    for (const entry of ["base", "mobile"]) {
+        for (const theme of ["light", "dark"]) {
+            styles.textContent = entries[entry] + themes[theme];
+            host.replaceChildren();
+            progress.progressLoading({code: 1, msg: "Rebuilding index, please wait..."});
+            const panel = document.querySelector(".b3-dialog__loading");
+            const track = panel.querySelector('[role="progressbar"]');
+            const bar = track.firstElementChild;
+            const bounds = panel.getBoundingClientRect();
+            check.ok(bounds.left >= 16 && bounds.right <= innerWidth - 16);
+            check.ok(bounds.top >= 16 && bounds.bottom <= innerHeight - 16);
+            check.ok(Math.abs(bounds.x + bounds.width / 2 - innerWidth / 2) < 1);
+            check.equal(getComputedStyle(track).color, getComputedStyle(panel).color);
+            check.notEqual(getComputedStyle(track).backgroundColor, "rgb(255, 255, 255)");
+            const first = getComputedStyle(bar, "::before").transform;
+            await wait(100);
+            check.notEqual(getComputedStyle(bar, "::before").transform, first, `${entry}/${theme}: progress animates`);
+            await ipcRenderer.invoke("capture-loading", `progress-${entry}-${theme}`);
+            custom.textContent = ":root{--b3-loading-color:#345678;--b3-loading-duration:2s}";
+            check.equal(getComputedStyle(track).color, "rgb(52, 86, 120)");
+            check.equal(getComputedStyle(bar, "::before").animationDuration, "2s");
+            custom.textContent = "";
+            await ipcRenderer.invoke("loading-media", [{name: "prefers-reduced-motion", value: "reduce"}]);
+            check.equal(getComputedStyle(bar, "::before").animationName, "none");
+            const segment = bar.getAnimations({subtree: true});
+            check.equal(segment.length, 0);
+            await ipcRenderer.invoke("loading-media", [{name: "forced-colors", value: "active"}]);
+            check.equal(getComputedStyle(bar, "::before").backgroundImage, "none");
+            check.notEqual(getComputedStyle(bar, "::before").backgroundColor, "rgba(0, 0, 0, 0)");
+            await ipcRenderer.invoke("loading-media", []);
+            progress.progressLoading({code: 0, msg: "Rebuilding index", data: {current: 42, total: 100}});
+            check.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"), "42");
+            check.equal(getComputedStyle(document.querySelector(".b3-dialog__progressbar"), "::before").content, "none");
+            await ipcRenderer.invoke("capture-loading", `progress-determinate-${entry}-${theme}`);
+            progress.progressLoading({code: 2});
+        }
+    }
+
     styles.textContent = entries.base + themes.light;
     host.replaceChildren();
     const editor = {};
@@ -162,6 +203,7 @@ if (process.versions.electron && process.type === "browser") {
                 .declarationList.declarations[0].initializer;
             const method = bazaarObject.properties.find(property => property.name?.getText(bazaarAST) === "_onBazaar");
             const sources = {
+                progress: compile(read("src/dialog/progress.ts")),
                 editor: compile(declarations("src/protyle/ui/initUI.ts", ["addLoading", "removeLoading"])),
                 MobileBookmarks: compile(read("src/mobile/dock/MobileBookmarks.ts")),
                 MobileTags: compile(read("src/mobile/dock/MobileTags.ts")),

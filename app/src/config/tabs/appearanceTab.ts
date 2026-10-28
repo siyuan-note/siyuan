@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../util/pathName";
@@ -578,7 +579,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                 const rect = fontFamiliesElement.getBoundingClientRect();
                 session.show(() => fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height}));
                 // 内部列表自行滚动，搜索框保持固定
-                fontMenu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+                markMenuInnerScroll(fontMenu.element);
                 if (!isMobile()) {
                     fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
                 }

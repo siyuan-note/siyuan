@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {markMenuInnerScroll} from "../../menus/Menu";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {getRandom} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -846,8 +847,7 @@ export class Background {
                         });
                     }
                 });
-                const itemsElement = menu.element.querySelector(".b3-menu__items");
-                itemsElement.setAttribute("style", "overflow: initial");
+                const itemsElement = markMenuInnerScroll(menu.element);
                 /// #if MOBILE
                 session.show(() => menu.fullscreen("bottom"));
                 itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");

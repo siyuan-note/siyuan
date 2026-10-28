@@ -122,7 +122,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
     document.head.append(style);
     Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {}, config: {appearance: {}},
         mobile: {size: {portrait: {height1: innerHeight}}}, menus: {}}});
-    const {Menu, MenuItem}: typeof import("./Menu") = load("menus/Menu");
+    const {Menu, MenuItem, markMenuInnerScroll}: typeof import("./Menu") = load("menus/Menu");
     const {Menu: PluginMenu}: typeof import("../plugin/Menu") = load("plugin/Menu");
     const settle = async () => {
         for (let i = 0; i < 3; i++) {
@@ -635,6 +635,19 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.ok(visibleItems.scrollTop > 0, "A hidden sibling must not intercept the visible list's scrolling");
     check.equal(hiddenItems.scrollTop, 0);
     dispose(multiple);
+
+    const innerScroll = createMenu();
+    const innerScrollItems = markMenuInnerScroll(innerScroll.element);
+    innerScroll.popup({x: 40, y: 40});
+    await settle();
+    check.ok(innerScrollItems === innerScroll.element.lastElementChild,
+        "markMenuInnerScroll returns the content container");
+    check.ok(innerScrollItems.classList.contains("b3-menu__items--inner-scroll"), "the container is marked for inner scrolling");
+    check.equal(getComputedStyle(innerScrollItems).overflow, "visible", "the container does not scroll by itself");
+    innerScroll.remove();
+    check.equal(innerScrollItems.classList.contains("b3-menu__items--inner-scroll"), false,
+        "closing the menu clears the inner scroll marker");
+    dispose(innerScroll);
 
     const {getPdfViewerHTML} = load("asset/pdf/viewerTemplate");
     const {SecondaryToolbar} = load("asset/pdf/secondary_toolbar.js");

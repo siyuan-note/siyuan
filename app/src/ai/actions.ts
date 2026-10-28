@@ -1,4 +1,5 @@
 import {toggleMenu} from "../menus/menuToggle";
+import {markMenuInnerScroll} from "../menus/Menu";
 import {fetchPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Dialog} from "../dialog";
@@ -267,7 +268,7 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+    markMenuInnerScroll(menu.element);
     /// #if MOBILE
     menu.fullscreen();
     /// #else

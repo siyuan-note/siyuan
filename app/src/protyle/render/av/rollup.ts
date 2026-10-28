@@ -1,4 +1,5 @@
 import {Menu} from "../../../plugin/Menu";
+import {markMenuInnerScroll} from "../../../menus/Menu";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
@@ -188,7 +189,7 @@ export const goSearchRollupCol = (options: {
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+    markMenuInnerScroll(menu.element);
 };
 
 export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[], colData?: IAVColumn }) => {

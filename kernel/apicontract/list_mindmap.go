@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 // MigrateLegacyMindmapsRequest 指定可编辑文档及其笔记本。迁移在文档事务中执行，并遵守加密笔记本访问校验。

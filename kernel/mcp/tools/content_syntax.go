@@ -1,5 +1,6 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-// Licensed under the GNU Affero General Public License v3.0.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 

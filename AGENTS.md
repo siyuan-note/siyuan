@@ -199,6 +199,17 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - Do not derive the frontend platform from the kernel reported container or from `data-backend`: a remote kernel reports its own host, so both differ from the platform of the current frontend
    - `data-frontend` on the root element reports the frontend form (`desktop`, `desktop-window`, `mobile`, `browser-desktop`, `browser-mobile`) and may be used by built-in styles and third-party theme CSS; `data-backend` on the root element is for third-party JavaScript only and must not appear in built-in CSS
 
+11. **Source file headers:** `kernel/**/*.go` and `app/electron/main.js` start with exactly these three lines, then one blank line
+    ```
+    // SiYuan - https://github.com/siyuan-note/siyuan
+    // Copyright (c) 2020-present, b3log.org
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    ```
+    - Sources in other languages carry no header; remove it from a non-Go file that still has one instead of extending the convention
+    - `//go:build` follows the header after a blank line and needs its own blank line before `package`; a build constraint without that blank line silently stops applying
+    - Do not add this header under `kernel/plugin/encoding/` (`grafana/sobek-webapi-encoding`, Apache-2.0) or `kernel/heif/internal/h265heic/` (`roticv/h265`, MIT); those subtrees keep their own license and a SiYuan header there would overwrite it
+    - `scripts/check-license-headers.mjs` checks both directions; the scopes are declared in `scripts/license-header.mjs`. CI runs it as a non-blocking step, so run it yourself before committing header changes
+
 ---
 
 ## 4. Required toolchain

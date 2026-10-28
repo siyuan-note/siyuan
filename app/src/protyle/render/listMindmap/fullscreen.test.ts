@@ -333,6 +333,14 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             window.dispatchEvent(new Event("beforeprint"));
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
             check.equal(getComputedStyle(preview).display, "none", "layout guides are excluded from printing");
+            const printBounds = viewport.getBoundingClientRect();
+            for (const node of host.querySelectorAll<HTMLElement>(".mindmap-view__node:not([hidden])")) {
+                const bounds = node.getBoundingClientRect();
+                check.ok(bounds.width > 0 && bounds.height > 0, "printed nodes retain their dimensions");
+                check.ok(bounds.left >= printBounds.left - 1 && bounds.right <= printBounds.right + 1 &&
+                    bounds.top >= printBounds.top - 1 && bounds.bottom <= printBounds.bottom + 1,
+                    "print fitting retains every node inside the printable viewport");
+            }
             check.equal(JSON.stringify(remembered), rememberedBeforePrint, "print fitting does not overwrite the saved view");
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
             window.dispatchEvent(new Event("afterprint"));

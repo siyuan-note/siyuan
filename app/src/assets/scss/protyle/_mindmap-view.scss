@@ -237,6 +237,11 @@
     touch-action: pan-y;
     user-select: none;
 
+    @media screen {
+      // 画布独立参与绘制，编辑菜单和工具栏位于视口外侧。
+      contain: paint;
+    }
+
     &--dragging {
       cursor: grabbing;
     }

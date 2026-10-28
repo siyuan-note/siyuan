@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "Layout dos campos do banco de dados",
+	"databaseAttrLayoutTip": "Define o layout dos campos no painel do banco de dados no topo do documento e no painel de item independente; uma coluna é usada automaticamente quando não há espaço suficiente",
+	"databaseAttrLayoutSingle": "Uma coluna",
+	"databaseAttrLayoutRow": "Duas colunas (por linha)",
+	"databaseAttrLayoutColumn": "Duas colunas (por coluna)",
 	"mathDelimiterCompatibility": "Reconhecer delimitadores de fórmulas LaTeX ao colar e importar",
 	"mathDelimiterCompatibilityTip": "Quando ativado, reconhece automaticamente \\(...\\) e \\[...\\] no conteúdo colado e importado como fórmulas em linha e em bloco, respectivamente",
 	"automationCollectionScopeLimit": "O escopo de monitoramento pode conter até 32 cadernos ou documentos",

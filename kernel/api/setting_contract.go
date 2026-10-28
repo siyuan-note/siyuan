@@ -383,6 +383,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.DatabaseAttrViewMode = value.DatabaseAttrViewMode
 	result.DatabaseAttrHideEmpty = value.DatabaseAttrHideEmpty
 	result.DatabaseAttrUseTabs = value.DatabaseAttrUseTabs
+	result.DatabaseAttrLayout = value.DatabaseAttrLayout
 	result.GenerateHistoryInterval = value.GenerateHistoryInterval
 	result.HistoryRetentionDays = value.HistoryRetentionDays
 	result.Emoji = value.Emoji

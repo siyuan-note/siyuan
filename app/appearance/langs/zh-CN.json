@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "数据库字段布局",
+	"databaseAttrLayoutTip": "设置文档顶部数据库面板和独立条目面板中的字段布局，空间不足时自动使用单栏",
+	"databaseAttrLayoutSingle": "单栏",
+	"databaseAttrLayoutRow": "双栏（按行）",
+	"databaseAttrLayoutColumn": "双栏（按列）",
 	"mathDelimiterCompatibility": "粘贴和导入时兼容 LaTeX 公式分隔符",
 	"mathDelimiterCompatibilityTip": "启用后自动将粘贴和导入内容中的 \\(...\\)、\\[...\\] 分别识别为行级公式和块级公式",
 	"automationCollectionScopeLimit": "监听范围最多可包含 32 个笔记本或文档",

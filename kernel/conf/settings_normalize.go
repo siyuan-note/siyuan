@@ -85,6 +85,9 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.DatabaseAttrUseTabs == nil {
 		editor.DatabaseAttrUseTabs = defaults.DatabaseAttrUseTabs
 	}
+	if editor.DatabaseAttrLayout == nil || *editor.DatabaseAttrLayout < 0 || *editor.DatabaseAttrLayout > 2 {
+		editor.DatabaseAttrLayout = defaults.DatabaseAttrLayout
+	}
 	if editor.CheckBlockRef == nil {
 		editor.CheckBlockRef = defaults.CheckBlockRef
 	}

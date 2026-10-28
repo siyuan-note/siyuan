@@ -56,6 +56,7 @@ type Editor struct {
 	DatabaseAttrViewMode            int            `json:"databaseAttrViewMode"`            // 数据库属性默认展开状态，0：展开，1：折叠
 	DatabaseAttrHideEmpty           bool           `json:"databaseAttrHideEmpty"`           // 是否隐藏数据库空属性
 	DatabaseAttrUseTabs             *bool          `json:"databaseAttrUseTabs"`             // 数据库属性是否使用页签
+	DatabaseAttrLayout              *int           `json:"databaseAttrLayout"`              // 数据库字段布局，0：单栏，1：双栏按行，2：双栏按列
 	GenerateHistoryInterval         int            `json:"generateHistoryInterval"`         // 生成历史时间间隔，单位：分钟
 	HistoryRetentionDays            int            `json:"historyRetentionDays"`            // 历史保留天数
 	Emoji                           []string       `json:"emoji"`                           // 常用表情
@@ -206,6 +207,7 @@ func NewEditor() *Editor {
 		DatabaseAttrViewMode:            0,
 		DatabaseAttrHideEmpty:           false,
 		DatabaseAttrUseTabs:             new(true),
+		DatabaseAttrLayout:              new(1),
 		GenerateHistoryInterval:         10,
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028110235"
 	},
 	"Children": [
 		{
@@ -3105,6 +3105,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-5uvtrxl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028100554-5uvtrxl",
+				"updated": "20261028110235"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database panel layout and sorting"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-vymrc6v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-vymrc6v",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Database"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-o8rd07g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-o8rd07g",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The row layout reads from left to right, then top to bottom. Drag a field by its left handle to another field’s grid position to preview the resulting order, then drop to save it. The column layout reads down the left column, then down the right column; visible fields are split by count, with one extra field on the left when the count is odd. Editing field content does not move fields between columns. Column and single-column layouts use horizontal indicators for insertion above or below a field. Canceling a drag restores the original order; sorting supports undo and redo."
 				}
 			]
 		},

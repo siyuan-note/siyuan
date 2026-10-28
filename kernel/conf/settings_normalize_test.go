@@ -34,6 +34,40 @@ func TestNormalizeSettingsEditorCompatibility(t *testing.T) {
 	}
 }
 
+func TestNormalizeSettingsDatabaseAttrLayout(t *testing.T) {
+	for _, entry := range []struct {
+		input string
+		want  int
+	}{
+		{`{}`, 1}, {`{"databaseAttrLayout":null}`, 1}, {`{"databaseAttrLayout":0}`, 0},
+		{`{"databaseAttrLayout":1}`, 1}, {`{"databaseAttrLayout":2}`, 2},
+		{`{"databaseAttrLayout":-1}`, 1}, {`{"databaseAttrLayout":3}`, 1},
+	} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(entry.input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		got := NormalizeEditor(&editor)
+		if got.DatabaseAttrLayout == nil || *got.DatabaseAttrLayout != entry.want {
+			t.Fatalf("%s: unexpected database field layout: %+v", entry.input, got)
+		}
+		encoded, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var saved Editor
+		if err = json.Unmarshal(encoded, &saved); err != nil {
+			t.Fatal(err)
+		}
+		if *NormalizeEditor(&saved).DatabaseAttrLayout != entry.want {
+			t.Fatal("normalization changed the saved preference")
+		}
+	}
+	if *NewEditor().DatabaseAttrLayout != 1 || *NormalizeEditor(nil).DatabaseAttrLayout != 1 {
+		t.Fatal("new and missing editor settings must use row-first two columns")
+	}
+}
+
 func TestNormalizeSettingsFileTreeAndSearch(t *testing.T) {
 	fileTree := NormalizeFileTree(&FileTree{CloseTabsOnStart: true, ShorthandSavePath: "notes", MaxOpenTabCount: 99})
 	if *fileTree.TabStartupMode != 2 || !fileTree.CloseTabsOnStart || fileTree.ShorthandSavePath != "/notes" ||

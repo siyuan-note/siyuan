@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "डेटाबेस फ़ील्ड का लेआउट",
+	"databaseAttrLayoutTip": "दस्तावेज़ के शीर्ष पर डेटाबेस पैनल और अलग आइटम पैनल के फ़ील्ड का लेआउट चुनें, जगह कम होने पर अपने आप एक कॉलम का उपयोग होता है",
+	"databaseAttrLayoutSingle": "एक कॉलम",
+	"databaseAttrLayoutRow": "दो कॉलम (पंक्ति के अनुसार)",
+	"databaseAttrLayoutColumn": "दो कॉलम (कॉलम के अनुसार)",
 	"mathDelimiterCompatibility": "पेस्ट और आयात करते समय LaTeX सूत्र सीमांकक पहचानें",
 	"mathDelimiterCompatibilityTip": "सक्षम होने पर, पेस्ट और आयात की गई सामग्री में \\(...\\) और \\[...\\] को क्रमशः इनलाइन और ब्लॉक सूत्रों के रूप में स्वचालित रूप से पहचाना जाता है",
 	"automationCollectionScopeLimit": "निगरानी के दायरे में अधिकतम 32 नोटबुक या दस्तावेज़ हो सकते हैं",

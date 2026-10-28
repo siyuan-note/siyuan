@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "Disposizione dei campi del database",
+	"databaseAttrLayoutTip": "Imposta la disposizione dei campi nel pannello del database in cima al documento e nel pannello della voce indipendente; quando lo spazio è insufficiente viene usata automaticamente una colonna",
+	"databaseAttrLayoutSingle": "Una colonna",
+	"databaseAttrLayoutRow": "Due colonne (per riga)",
+	"databaseAttrLayoutColumn": "Due colonne (per colonna)",
 	"mathDelimiterCompatibility": "Riconosci i delimitatori delle formule LaTeX durante incolla e importazione",
 	"mathDelimiterCompatibilityTip": "Se abilitato, riconosce automaticamente \\(...\\) e \\[...\\] nei contenuti incollati e importati come formule in linea e a blocchi, rispettivamente",
 	"automationCollectionScopeLimit": "L’ambito di monitoraggio può contenere fino a 32 taccuini o documenti",

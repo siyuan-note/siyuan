@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028110235"
 	},
 	"Children": [
 		{
@@ -3105,6 +3105,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-7lm3pcm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028100554-7lm3pcm",
+				"updated": "20261028110235"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料庫面板佈局與排序"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-7r40o96",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-7r40o96",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中透過「資料庫欄位佈局」選擇「單欄」「雙欄（按行）」或「雙欄（按列）」，預設為「雙欄（按行）」。此設定同時作用於文件頂部資料庫面板和獨立項目面板，空間不足時自動使用單欄，切換佈局不會改變欄位順序。"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-tchwmuu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-tchwmuu",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按行排列時，欄位由左到右、由上到下顯示。使用滑鼠拖曳欄位左側的把手至目標欄位所在的格位，可以即時預覽新的排列，放開後儲存排序。按列排列時，先由上到下顯示左欄，再顯示右欄；可見欄位依數量均分，奇數時左欄多一個，編輯欄位內容不會導致欄位自動換欄。按列和單欄佈局使用水平指示線提示上下插入位置。取消拖曳會恢復原順序，欄位排序支援復原與重做。"
 				}
 			]
 		},

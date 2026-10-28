@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "Disposición de los campos de la base de datos",
+	"databaseAttrLayoutTip": "Configura la disposición de los campos del panel de base de datos en la parte superior del documento y del panel de elemento independiente; se usa una columna automáticamente cuando falta espacio",
+	"databaseAttrLayoutSingle": "Una columna",
+	"databaseAttrLayoutRow": "Dos columnas (por filas)",
+	"databaseAttrLayoutColumn": "Dos columnas (por columnas)",
 	"mathDelimiterCompatibility": "Reconocer delimitadores de fórmulas LaTeX al pegar e importar",
 	"mathDelimiterCompatibilityTip": "Al activarlo, se reconocen automáticamente \\(...\\) y \\[...\\] en el contenido pegado e importado como fórmulas en línea y de bloque, respectivamente",
 	"automationCollectionScopeLimit": "El ámbito de supervisión puede contener hasta 32 cuadernos o documentos",

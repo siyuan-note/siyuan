@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028110235"
 	},
 	"Children": [
 		{
@@ -3105,6 +3105,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-8qephai",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028100554-8qephai",
+				"updated": "20261028110235"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据库面板布局与排序"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-4angel6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-4angel6",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据库"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中通过「数据库字段布局」选择「单栏」「双栏（按行）」或「双栏（按列）」，默认「双栏（按行）」。该设置同时作用于文档顶部数据库面板和独立条目面板，空间不足时自动使用单栏，切换布局不会改变字段顺序。"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-n4mrrtp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-n4mrrtp",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按行排列时，字段从左到右、从上到下显示。使用鼠标拖动字段左侧的手柄到目标字段所在的格位，可以实时预览新的排列，松手后保存排序。按列排列时，先从上到下显示左栏，再显示右栏；可见字段按数量均分，奇数时左栏多一个，编辑字段内容不会导致字段自动换栏。按列和单栏布局使用横向指示线提示上下插入位置。取消拖拽恢复原顺序，字段排序支持撤销和重做。"
 				}
 			]
 		},

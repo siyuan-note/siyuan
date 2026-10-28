@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261027120633"
+		"updated": "20261028110235"
 	},
 	"Children": [
 		{
@@ -3134,6 +3134,72 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-r4kl6qy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028100554-r4kl6qy",
+				"updated": "20261028110235"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースパネルのレイアウトと並べ替え"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-n216b4x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-n216b4x",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データベース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の「データベースフィールドのレイアウト」で「1列」「2列（行順）」「2列（列順）」を選べます。デフォルトは「2列（行順）」です。ドキュメント上部のデータベースパネルと独立した項目パネルに適用され、スペースが不足する場合は自動的に1列になります。レイアウトを切り替えてもフィールドの順序は変わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-oitbzhe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-oitbzhe",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行順では左から右、上から下へフィールドを表示します。マウスで左側のハンドルを移動先フィールドの位置へドラッグすると配置をプレビューし、ドロップすると順序を保存します。列順では左列を上から下へ表示してから右列を表示します。表示中のフィールドを個数で二等分し、奇数の場合は左列が一つ多くなります。内容を編集してもフィールドの列は変わりません。列順と1列では横の挿入線で上下の挿入位置を示します。ドラッグをキャンセルすると元の順序に戻り、並べ替えは元に戻す操作とやり直しに対応しています。"
 				}
 			]
 		},

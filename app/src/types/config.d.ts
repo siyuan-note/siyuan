@@ -688,6 +688,8 @@ declare namespace Config {
          * Whether to use tabs for database attributes
          */
         databaseAttrUseTabs: boolean;
+        /** 数据库字段布局：0 单栏，1 双栏按行（默认），2 双栏按列，空间不足时使用单栏 */
+        databaseAttrLayout: number;
         /**
          * Whether to retain dynamically loaded content blocks
          */

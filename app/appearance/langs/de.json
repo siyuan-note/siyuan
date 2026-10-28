@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "Layout der Datenbankfelder",
+	"databaseAttrLayoutTip": "Legt das Feldlayout im Datenbankbereich am Dokumentanfang und im separaten Eintragsbereich fest; bei Platzmangel wird automatisch eine Spalte verwendet",
+	"databaseAttrLayoutSingle": "Eine Spalte",
+	"databaseAttrLayoutRow": "Zwei Spalten (zeilenweise)",
+	"databaseAttrLayoutColumn": "Zwei Spalten (spaltenweise)",
 	"mathDelimiterCompatibility": "LaTeX-Formelbegrenzer beim Einfügen und Importieren unterstützen",
 	"mathDelimiterCompatibilityTip": "Wenn aktiviert, werden \\(...\\) und \\[...\\] in eingefügten und importierten Inhalten automatisch als Inline- bzw. Blockformeln erkannt",
 	"automationCollectionScopeLimit": "Der Überwachungsbereich kann höchstens 32 Notizbücher oder Dokumente enthalten",

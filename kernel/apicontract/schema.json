@@ -42451,6 +42451,16 @@
             }
           ]
         },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseAttrShow": {
           "anyOf": [
             {
@@ -46736,6 +46746,16 @@
         "databaseAttrHideEmpty": {
           "type": "boolean"
         },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseAttrShow": {
           "anyOf": [
             {
@@ -46985,6 +47005,7 @@
         "cursorSurroundingLines",
         "databaseAttrClickMode",
         "databaseAttrHideEmpty",
+        "databaseAttrLayout",
         "databaseAttrShow",
         "databaseAttrUseTabs",
         "databaseAttrViewMode",
@@ -47356,6 +47377,16 @@
           "anyOf": [
             {
               "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrLayout": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"

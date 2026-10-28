@@ -293,6 +293,10 @@ type SettingEditor struct {
 	MathDelimiterCompatibility *bool            `json:"mathDelimiterCompatibility" api:"optional,nullable"`
 	DragHTMLFileToIframe       bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
 	Markdown                   *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+
+	// 文档顶部与独立条目面板的字段布局：0 单栏，1 双栏按行（默认），2 双栏按列；空间不足时使用单栏。
+	// 省略保留当前值，null 或越界整数恢复默认，按列时按可见字段数量均分，奇数时左栏多一个。
+	DatabaseAttrLayout *int `json:"databaseAttrLayout" api:"optional,nullable"`
 }
 
 type SettingEditorFont struct {

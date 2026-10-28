@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "تخطيط حقول قاعدة البيانات",
+	"databaseAttrLayoutTip": "تحديد تخطيط الحقول في لوحة قاعدة البيانات أعلى المستند ولوحة العنصر المستقلة، مع استخدام عمود واحد تلقائيًا عند عدم توفر مساحة كافية",
+	"databaseAttrLayoutSingle": "عمود واحد",
+	"databaseAttrLayoutRow": "عمودان (حسب الصفوف)",
+	"databaseAttrLayoutColumn": "عمودان (حسب الأعمدة)",
 	"mathDelimiterCompatibility": "التوافق مع محددات صيغ LaTeX عند اللصق والاستيراد",
 	"mathDelimiterCompatibilityTip": "عند التفعيل، يتم التعرف تلقائيًا على \\(...\\) و\\[...\\] في المحتوى الملصق والمستورد كصيغ مضمنة وصيغ كتلية على التوالي",
 	"automationCollectionScopeLimit": "يمكن تحديد ما يصل إلى 32 دفتر ملاحظات أو مستند في نطاق المراقبة",

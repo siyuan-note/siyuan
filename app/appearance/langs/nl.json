@@ -1,4 +1,9 @@
 {
+	"databaseAttrLayout": "Indeling van databasevelden",
+	"databaseAttrLayoutTip": "Stelt de veldindeling in het databasepaneel bovenaan het document en het afzonderlijke itempaneel in; bij onvoldoende ruimte wordt automatisch één kolom gebruikt",
+	"databaseAttrLayoutSingle": "Eén kolom",
+	"databaseAttrLayoutRow": "Twee kolommen (per rij)",
+	"databaseAttrLayoutColumn": "Twee kolommen (per kolom)",
 	"mathDelimiterCompatibility": "LaTeX-formulescheidingstekens herkennen bij plakken en importeren",
 	"mathDelimiterCompatibilityTip": "Indien ingeschakeld worden \\(...\\) en \\[...\\] in geplakte en geïmporteerde inhoud automatisch herkend als respectievelijk inline- en blokformules",
 	"automationCollectionScopeLimit": "Het bewakingsbereik kan maximaal 32 notitieboeken of documenten bevatten",

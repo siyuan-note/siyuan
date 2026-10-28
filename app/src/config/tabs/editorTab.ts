@@ -296,6 +296,15 @@ const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.databaseAttrUseTabs,
         desc: window.siyuan.languages.databaseAttrUseTabsTip,
     });
+    group.select("editor.databaseAttrLayout", {
+        title: window.siyuan.languages.databaseAttrLayout,
+        desc: window.siyuan.languages.databaseAttrLayoutTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.databaseAttrLayoutSingle},
+            {value: 1, label: window.siyuan.languages.databaseAttrLayoutRow},
+            {value: 2, label: window.siyuan.languages.databaseAttrLayoutColumn},
+        ],
+    });
 };
 
 const registerEditorCodeGroup = (tab: SettingTabBuilder) => {

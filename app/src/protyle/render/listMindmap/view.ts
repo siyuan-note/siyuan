@@ -3921,14 +3921,15 @@ export class ListMindmapView {
             control.insertAdjacentHTML("beforeend",
                 '<svg class="color__square-mark" aria-hidden="true"><use xlink:href="#iconSelect"></use></svg>');
         });
-        // 触屏和横向滚轮沿用原生滚动，纵向滚轮累计小数位移；拖动完成后不触发色卡点击。
+        // 滚轮手势期间暂停吸附，横向位移由浏览器处理，纵向位移累计后写入；触屏沿用原生滚动。
         let drag: {id: number, x: number, scroll: number, scale: number};
         let moved = false;
         let wheel: {position: number, direction: number, target?: number};
         let wheelFrame = 0;
         let wheelTimer: number;
         let settleTimer: number;
-        let nativeWheelUntil = 0;
+        let nativeScrolling = false;
+        let nativeDirection = 0;
         const stopWheel = (restore = true) => {
             window.clearTimeout(wheelTimer);
             window.clearTimeout(settleTimer);
@@ -3938,6 +3939,7 @@ export class ListMindmapView {
                 palette.scrollTo({left: palette.scrollLeft, behavior: "instant"});
             }
             wheel = undefined;
+            nativeScrolling = false;
             if (restore && !drag) {
                 palette.removeAttribute("data-scrolling");
             }
@@ -3970,6 +3972,18 @@ export class ListMindmapView {
                 stopWheel();
             }, 500);
         };
+        const waitForNativeScroll = () => {
+            window.clearTimeout(wheelTimer);
+            wheelTimer = window.setTimeout(() => {
+                nativeScrolling = false;
+                snap(nativeDirection);
+            }, 240);
+        };
+        palette.addEventListener("scroll", () => {
+            if (nativeScrolling) {
+                waitForNativeScroll();
+            }
+        }, {passive: true});
         palette.addEventListener("scrollend", () => {
             if (wheel?.target !== undefined && Math.abs(palette.scrollLeft - wheel.target) < 1) {
                 stopWheel();
@@ -3978,7 +3992,6 @@ export class ListMindmapView {
         palette.addEventListener("keydown", () => stopWheel());
         palette.addEventListener("pointerdown", (event: PointerEvent) => {
             stopWheel();
-            nativeWheelUntil = 0;
             moved = false;
             if (event.pointerType !== "mouse" || event.button !== 0 ||
                 palette.scrollWidth <= palette.clientWidth) {
@@ -4037,9 +4050,19 @@ export class ListMindmapView {
                 return;
             }
             // 同一横向手势即使末尾只剩纵向抖动，也由浏览器处理，避免轴向切换。
-            if (event.deltaX || event.shiftKey || performance.now() < nativeWheelUntil) {
-                nativeWheelUntil = performance.now() + 240;
-                stopWheel();
+            if (event.deltaX || event.shiftKey || nativeScrolling) {
+                if (!nativeScrolling) {
+                    stopWheel(false);
+                    nativeScrolling = true;
+                    nativeDirection = 0;
+                    palette.setAttribute("data-scrolling", "");
+                }
+                if (event.deltaX) {
+                    nativeDirection = Math.sign(event.deltaX);
+                } else if (event.shiftKey && event.deltaY) {
+                    nativeDirection = Math.sign(event.deltaY);
+                }
+                waitForNativeScroll();
                 return;
             }
             if (!event.deltaY) {

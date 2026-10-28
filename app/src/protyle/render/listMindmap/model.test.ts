@@ -2548,6 +2548,17 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const settingsPosition = touchManager.getBoundingClientRect().left;
         await nativeInput([
             {type: "mouseMove", ...start},
+            ...Array.from({length: 20}, () => ({type: "mouseWheel", ...start, deltaX: -2, deltaY: 0})),
+        ]);
+        check.ok(touchPalette.scrollLeft > 30, "a continuous trackpad gesture scrolls the actual node palette");
+        check.equal(touchPalette.hasAttribute("data-scrolling"), true,
+            "the actual node palette keeps snapping disabled during a horizontal gesture");
+        await settlePalette();
+        check.deepEqual({x: view.offsetX, y: view.offsetY, scale: view.scale}, canvasPosition);
+        check.equal(touchManager.getBoundingClientRect().left, settingsPosition);
+        touchPalette.scrollLeft = 0;
+        await nativeInput([
+            {type: "mouseMove", ...start},
             {type: "mouseWheel", ...start, deltaX: 0, deltaY: -60},
         ]);
         await settle();

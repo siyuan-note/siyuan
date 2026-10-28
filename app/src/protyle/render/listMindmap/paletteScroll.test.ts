@@ -83,7 +83,7 @@ const browserCases = async (source: string, css: string) => {
         host.remove();
     }
 
-    // 横向、斜向和 Shift 滚轮交给原生滚动，手势末尾的纵向抖动不会切换到脚本路径。
+    // 横向、斜向和 Shift 滚轮交给原生滚动，手势期间暂停吸附，纵向抖动不会改变方向。
     {
         const {host, palette, wheel} = make();
         const outer = document.createElement("div");
@@ -103,7 +103,7 @@ const browserCases = async (source: string, css: string) => {
         }
         await frame();
         check.equal(palette.scrollLeft, 0, "synthetic native gestures do not trigger scripted movement");
-        check.equal(palette.hasAttribute("data-scrolling"), false);
+        check.equal(palette.hasAttribute("data-scrolling"), true);
         check.equal(wheel(0, 50, {shiftKey: true}).defaultPrevented, false);
         for (const modifier of ["ctrlKey", "metaKey"]) {
             check.equal(wheel(0, 50, {[modifier]: true}).defaultPrevented, false, "zoom input stays native");
@@ -118,7 +118,7 @@ const browserCases = async (source: string, css: string) => {
         await until(() => palette.scrollLeft > 0, "native horizontal wheel input scrolls the real palette");
         check.ok(blocked.length > 0);
         check.ok(blocked.every(value => !value), "native wheel default actions remain enabled");
-        check.equal(palette.hasAttribute("data-scrolling"), false);
+        check.equal(palette.hasAttribute("data-scrolling"), true);
         await delay(80);
         check.equal(outer.scrollTop, 120, "diagonal palette scrolling preserves the outer document position");
         await require("electron").ipcRenderer.invoke("palette-wheel", {
@@ -128,6 +128,32 @@ const browserCases = async (source: string, css: string) => {
         await delay(350);
         check.equal(outer.scrollTop, 120, "vertical jitter at the end of a native gesture stays inside the palette");
         outer.remove();
+    }
+
+    // 连续细小横向输入必须跨过一列，不能在手势期间被强制吸附拉住。
+    {
+        const {host, palette, wheel} = make();
+        const bounds = palette.getBoundingClientRect();
+        const positions: number[] = [];
+        for (let i = 0; i < 20; i++) {
+            await require("electron").ipcRenderer.invoke("palette-wheel", {
+                type: "mouseWheel", x: Math.round(bounds.left + bounds.width / 2),
+                y: Math.round(bounds.top + bounds.height / 2), deltaX: 2, deltaY: 0,
+            });
+            await delay(20);
+            positions.push(palette.scrollLeft);
+        }
+        check.ok(palette.scrollLeft > 30, "continuous fine horizontal wheel input makes progress: " + JSON.stringify(positions));
+        check.equal(palette.hasAttribute("data-scrolling"), true, "snapping stays disabled throughout the gesture");
+        await delay(180);
+        palette.scrollBy({left: 1, behavior: "instant"});
+        await delay(180);
+        check.equal(palette.hasAttribute("data-scrolling"), true, "continued native scrolling delays alignment after the last wheel event");
+        check.equal(wheel(0, -3).defaultPrevented, false,
+            "late vertical jitter during horizontal inertia does not switch to scripted scrolling");
+        await until(() => !palette.hasAttribute("data-scrolling"), "horizontal input aligns after the gesture");
+        check.ok(palette.scrollLeft > 30);
+        host.remove();
     }
 
     // 原生惯性滚动不受纵向滚轮的定时对齐干扰；新的输入可中断平滑停靠。
@@ -154,7 +180,8 @@ const browserCases = async (source: string, css: string) => {
         wheel(0, 13);
         await frame();
         wheel(10, 0);
-        check.equal(palette.hasAttribute("data-scrolling"), false, "horizontal input cancels scripted alignment");
+        check.equal(palette.hasAttribute("data-scrolling"), true, "horizontal input keeps snapping disabled while scrolling");
+        await settled();
         const nativePosition = palette.scrollLeft;
         await delay(650);
         check.equal(palette.scrollLeft, nativePosition, "a stale timer cannot change a native gesture");

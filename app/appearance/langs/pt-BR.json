@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "Converter em blocos comuns",
+	"embedToReferences": "Converter em referências de blocos",
 	"aiWebExaKey": "Chave de API da Exa",
 	"aiWebExaKeyTip": "Opcional; deixe em branco para acesso anônimo com limite de requisições ou use a cota da sua conta Exa; as consultas são enviadas à Exa e podem gerar cobranças",
 	"mathDelimiterCompatibility": "Reconhecer delimitadores de fórmulas LaTeX ao colar e importar",

@@ -104,9 +104,14 @@ test("embedded heading levels follow display modes and expose all levels in Simp
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
         "refresh", "update", "refPopover", "separator_breadcrumb", "embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath",
-        "headingEmbedMode", "embedHeadingLevel",
+        "headingEmbedMode", "embedHeadingLevel", "separator_conversion", "convertToBlocks", "convertToReferences",
     ]);
     const levelPath = `${path}.embedHeadingLevel`;
+    for (const key of ["convertToBlocks", "convertToReferences"]) {
+        assert.equal(getEntryCatalogNode(`${path}.${key}`).simple, true);
+        assert.equal(getEntryParentPath(`${path}.${key}`), path);
+    }
+    assert.equal(getEntryCatalogNode(`${path}.separator_conversion`).type, "separator");
     assert.equal(getEntryCatalogNode(`${path}.embedBlockBreadcrumbParentPath`)?.simple, true);
     assert.equal(getEntryParentPath(`${path}.embedBlockBreadcrumbParentPath`), path);
     for (const key of ["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"]) {

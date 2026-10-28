@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "일반 블록으로 변환",
+	"embedToReferences": "블록 참조로 변환",
 	"aiWebExaKey": "Exa API 키",
 	"aiWebExaKeyTip": "선택 사항입니다. 비워 두면 요청 횟수가 제한된 익명 서비스를 사용하고, 입력하면 본인의 Exa 계정 할당량을 사용합니다. 검색어는 Exa로 전송되며 요금이 발생할 수 있습니다",
 	"mathDelimiterCompatibility": "붙여넣기 및 가져오기 시 LaTeX 수식 구분자 인식",

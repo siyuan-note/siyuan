@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "Ubah menjadi blok biasa",
+	"embedToReferences": "Ubah menjadi referensi blok",
 	"aiWebExaKey": "Kunci API Exa",
 	"aiWebExaKeyTip": "Opsional; kosongkan untuk akses anonim dengan batas laju, atau gunakan kuota akun Exa Anda; kueri dikirim ke Exa dan mungkin dikenakan biaya",
 	"mathDelimiterCompatibility": "Kenali pembatas rumus LaTeX saat menempel dan mengimpor",

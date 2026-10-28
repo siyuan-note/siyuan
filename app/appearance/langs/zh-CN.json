@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "转为普通内容",
+	"embedToReferences": "转为块引用",
 	"aiWebExaKey": "Exa API 密钥",
 	"aiWebExaKeyTip": "选填；留空使用有限流的匿名服务，填写后使用自己的 Exa 账户额度；搜索词会发送给 Exa，可能产生费用",
 	"mathDelimiterCompatibility": "粘贴和导入时兼容 LaTeX 公式分隔符",

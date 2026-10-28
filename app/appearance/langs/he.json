@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "המרה לבלוקים רגילים",
+	"embedToReferences": "המרה להפניות לבלוקים",
 	"aiWebExaKey": "מפתח API של Exa",
 	"aiWebExaKeyTip": "אופציונלי; יש להשאיר ריק לגישה אנונימית עם הגבלת קצב, או להשתמש במכסה של חשבון Exa שלך; שאילתות נשלחות אל Exa וייתכנו חיובים",
 	"mathDelimiterCompatibility": "זיהוי תוחמי נוסחאות LaTeX בהדבקה ובייבוא",

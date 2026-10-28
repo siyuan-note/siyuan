@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "Convert to regular blocks",
+	"embedToReferences": "Convert to block references",
 	"aiWebExaKey": "Exa API Key",
 	"aiWebExaKeyTip": "Optional; leave empty for anonymous access with rate limits, or use your Exa account quota; queries are sent to Exa and charges may apply",
 	"mathDelimiterCompatibility": "Recognize LaTeX math delimiters when pasting and importing",

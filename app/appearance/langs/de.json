@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "In normale Blöcke umwandeln",
+	"embedToReferences": "In Blockreferenzen umwandeln",
 	"aiWebExaKey": "Exa-API-Schlüssel",
 	"aiWebExaKeyTip": "Optional; leer lassen für anonymen Zugriff mit Ratenbegrenzung oder das Kontingent Ihres Exa-Kontos nutzen; Suchanfragen werden an Exa gesendet und können Kosten verursachen",
 	"mathDelimiterCompatibility": "LaTeX-Formelbegrenzer beim Einfügen und Importieren unterstützen",

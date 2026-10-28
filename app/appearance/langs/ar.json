@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "تحويل إلى كتل عادية",
+	"embedToReferences": "تحويل إلى مراجع كتل",
 	"aiWebExaKey": "مفتاح API لخدمة Exa",
 	"aiWebExaKeyTip": "اختياري؛ اتركه فارغًا للوصول المجهول المحدود بمعدل الطلبات، أو استخدم حصة حسابك في Exa؛ تُرسل عبارات البحث إلى Exa وقد تُفرض رسوم",
 	"mathDelimiterCompatibility": "التوافق مع محددات صيغ LaTeX عند اللصق والاستيراد",

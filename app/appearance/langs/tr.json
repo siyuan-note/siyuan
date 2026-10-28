@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "Normal bloklara dönüştür",
+	"embedToReferences": "Blok referanslarına dönüştür",
 	"aiWebExaKey": "Exa API anahtarı",
 	"aiWebExaKeyTip": "İsteğe bağlı; hız sınırı olan anonim erişim için boş bırakın veya Exa hesabınızın kotasını kullanın; arama sorguları Exa hizmetine gönderilir ve ücret oluşabilir",
 	"mathDelimiterCompatibility": "Yapıştırma ve içe aktarmada LaTeX formül sınırlayıcılarını tanı",

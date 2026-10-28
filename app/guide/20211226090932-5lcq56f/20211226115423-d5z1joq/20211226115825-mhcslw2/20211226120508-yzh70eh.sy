@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容區塊",
 		"type": "doc",
-		"updated": "20261024163828"
+		"updated": "20261028115947"
 	},
 	"Children": [
 		{
@@ -615,6 +615,85 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-iwkuyci",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028115947-iwkuyci",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "轉換嵌入結果"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028115947-3pbh7f5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-3pbh7f5",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟嵌入區塊的區塊選單，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉為一般內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可依顯示順序將目前結果轉為獨立副本，保留格式及子區塊，包括摺疊內容。標題內容遵循嵌入顯示模式，並保留來源標題層級。內容中已有的區塊引用、巢狀嵌入和資料庫保留各自原有行為，此操作不會凍結所有關聯資料。"
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-tkg5k3v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-tkg5k3v",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉為區塊引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可依顯示順序為每個目前結果產生一個動態區塊引用，仍然依賴來源區塊。兩種轉換均可復原。沒有結果，或 JavaScript 僅輸出自訂內容而未傳回區塊結果時，無法轉換。"
 				}
 			]
 		},

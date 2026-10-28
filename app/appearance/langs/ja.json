@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "通常のブロックに変換",
+	"embedToReferences": "ブロック参照に変換",
 	"aiWebExaKey": "Exa API キー",
 	"aiWebExaKeyTip": "任意入力。空欄ではレート制限付きの匿名サービスを使用し、入力すると自分の Exa アカウントの利用枠を使用します。検索語は Exa に送信され、料金が発生する場合があります",
 	"mathDelimiterCompatibility": "貼り付け・インポート時に LaTeX 数式の区切り文字を認識する",

@@ -1,4 +1,6 @@
 {
+	"embedToBlocks": "Previesť na bežné bloky",
+	"embedToReferences": "Previesť na odkazy na bloky",
 	"aiWebExaKey": "Kľúč API Exa",
 	"aiWebExaKeyTip": "Voliteľné; ponechajte prázdne pre anonymný prístup s obmedzením počtu požiadaviek alebo použite kvótu svojho účtu Exa; vyhľadávania sa odosielajú do Exa a môžu byť spoplatnené",
 	"mathDelimiterCompatibility": "Rozpoznávať oddeľovače vzorcov LaTeX pri vkladaní a importe",

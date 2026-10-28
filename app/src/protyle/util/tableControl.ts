@@ -1030,8 +1030,10 @@ export class TableControl {
         if (!this.rowResizeCleanup && !fromControl) {
             const row = targetCell && !this.protyle.disabled && getTableNode(targetCell) ?
                 getTableRowBoundary(targetCell, event.clientX, event.clientY, 4) : undefined;
-            this.rowBoundary = row ? {cell: targetCell, row} : undefined;
-            this.renderRowBoundary();
+            if (row !== this.rowBoundary?.row || targetCell !== this.rowBoundary?.cell && row) {
+                this.rowBoundary = row ? {cell: targetCell, row} : undefined;
+                this.scheduleRender();
+            }
         }
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
@@ -1444,7 +1446,23 @@ export class TableControl {
 
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
-        this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
+        const tables = new Set<HTMLTableElement>();
+        const addTables = (element: Element) => {
+            const node = element?.closest('[data-type="NodeTable"]');
+            if (node && this.wysiwygElement.contains(node)) {
+                node.querySelectorAll<HTMLTableElement>("table").forEach(table => tables.add(table));
+            }
+        };
+        // 添加按钮位于表格右侧和下方，命中范围向内探测即可定位候选表格，避免扫描整篇文档。
+        const reach = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS + 1;
+        for (const dx of [0, reach]) {
+            for (const dy of [0, reach]) {
+                addTables(this.wysiwygElement.ownerDocument.elementFromPoint(clientX - dx, clientY - dy));
+            }
+        }
+        addTables(this.hoverCell);
+        const contentRect = tables.size ? (this.protyle.contentElement || this.protyle.element).getBoundingClientRect() : undefined;
+        tables.forEach(table => {
             if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
@@ -1452,7 +1470,6 @@ export class TableControl {
             const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
             const addRowEdge = this.getTableAddRowEdge(table);
-            const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
                 isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                     TABLE_ADD_CONTROL_GAP);

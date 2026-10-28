@@ -1,3 +1,5 @@
+const {toggleDevTools} = require("./devToolsDock");
+
 const bindWebviewDevToolsShortcut = (contents, getTarget, platform = process.platform) => {
     if (contents.isDestroyed() || contents.getType() !== "webview") return;
     const onInput = (event, input) => {
@@ -12,7 +14,7 @@ const bindWebviewDevToolsShortcut = (contents, getTarget, platform = process.pla
             if (!host || host.isDestroyed() || host.getType() !== "window" || !getTarget(host.id)) return;
             // 主进程同步阻止 guest 和菜单处理同一按键；长按时仍拦截，但只切换一次。
             event.preventDefault();
-            if (!input.isAutoRepeat) host.toggleDevTools();
+            if (!input.isAutoRepeat) toggleDevTools(host, platform);
         } catch {
             // guest 或宿主可能已在窗口关闭过程中销毁。
         }

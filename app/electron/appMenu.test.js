@@ -14,7 +14,7 @@ test("startup editing menu uses requested or system language and preserves nativ
     for (const [requested, system, expected] of [["zh-CN", "en", "zh-CN"], ["", "zh-Hant", "zh-TW"], ["", "en-US", "en"]]) {
         let menu;
         const context = vm.createContext({
-            fs, path, appDir,
+            fs, path, appDir, process: {platform: "win32"},
             app: {getPreferredSystemLanguages: () => [system]},
             getArg: name => name === "--lang" ? requested : "",
             lastWorkspacePath: "", remoteKernelTarget: undefined,
@@ -35,6 +35,8 @@ test("startup editing menu uses requested or system language and preserves nativ
             assert.equal(edit.submenu.find(item => item.role === role).label, languages[role]);
         }
         assert.equal(edit.submenu.find(item => item.role === "pasteAndMatchStyle").label, languages.pasteAsPlainText);
+        const windowMenu = menu.find(item => item.role === "windowMenu");
+        assert.equal(windowMenu.submenu.find(item => item.accelerator === "Ctrl+Shift+I").label, languages.debug);
     }
 });
 
@@ -44,7 +46,7 @@ test("startup menu honors saved workspace language and command-line precedence",
         const context = vm.createContext({
             fs: {readFileSync: (file, encoding) => file === path.join("workspace", "conf", "conf.json")
                 ? JSON.stringify({appearance: {lang: "en"}, lang: "en"}) : fs.readFileSync(file, encoding)},
-            path, appDir,
+            path, appDir, process: {platform: "win32"},
             app: {getPreferredSystemLanguages: () => ["zh-CN"]},
             getArg: name => name === "--lang" ? requested : "",
             lastWorkspacePath: "workspace", remoteKernelTarget: remote ? {} : undefined,

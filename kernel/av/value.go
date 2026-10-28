@@ -2439,11 +2439,6 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 	return
 }
 
-// Round rounds to nearest like 12.3456 -> 12.35
-func Round(val float64, precision int) float64 {
-	return math.Round(val*(math.Pow10(precision))) / math.Pow10(precision)
-}
-
 type ValueSelect struct {
 	Content       string              `json:"content"`
 	Color         string              `json:"color"`                   // 1-78

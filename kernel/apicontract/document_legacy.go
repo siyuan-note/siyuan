@@ -29,9 +29,6 @@ func NewLegacyPathIDsFailure(value LegacyPathUnsupported) LegacyPathIDsResult {
 	return LegacyPathIDsResult{failure: &value}
 }
 func NewLegacyPathIDs(value []string) LegacyPathIDsResult { return LegacyPathIDsResult{value: value} }
-func UnsupportedLegacyPathIDs() LegacyPathIDsResult {
-	return LegacyPathIDsResult{failure: &LegacyPathUnsupported{Reason: "legacyPathUnsupported"}}
-}
 func (result LegacyPathIDsResult) MarshalJSON() ([]byte, error) {
 	if result.failure != nil {
 		return json.Marshal(result.failure)
@@ -49,9 +46,6 @@ func NewLegacyPathDocumentFailure(value LegacyPathUnsupported) LegacyPathDocumen
 }
 func NewLegacyPathDocument(value string) LegacyPathDocumentResult {
 	return LegacyPathDocumentResult{value: value}
-}
-func UnsupportedLegacyPathDocument() LegacyPathDocumentResult {
-	return LegacyPathDocumentResult{failure: &LegacyPathUnsupported{Reason: "legacyPathUnsupported"}}
 }
 func (result LegacyPathDocumentResult) MarshalJSON() ([]byte, error) {
 	if result.failure != nil {

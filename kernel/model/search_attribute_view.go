@@ -31,11 +31,6 @@ type attributeViewSearchPart struct {
 	ranges []attributeViewSearchRange
 }
 
-// compactAttributeViewSearchResults 只精简已命中的数据库块，不改变索引、结果数量和排序。
-func compactAttributeViewSearchResults(blocks []*Block) {
-	compactAttributeViewSearchResultsContext(context.Background(), blocks)
-}
-
 func compactAttributeViewSearchResultsContext(ctx context.Context, blocks []*Block) {
 	for _, block := range blocks {
 		if ctx.Err() != nil {

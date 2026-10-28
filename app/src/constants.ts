@@ -227,10 +227,6 @@ export abstract class Constants {
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
     public static readonly LOCAL_MINDMAP_VIEWPORTS = "local-mindmap-viewports";
-    /** @deprecated 内置偏好改用 config.appearance.compactMode，不再读取此旧键 */
-    public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
-    /** @deprecated 内置偏好改用 config.appearance.menuMouseScroll，不再读取此旧键 */
-    public static readonly LOCAL_MENU_MOUSE_SCROLL = "local-menu-mouse-scroll";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";

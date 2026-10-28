@@ -178,12 +178,6 @@ func AddSession(username, credentialVersion string) string {
 	return sessionID
 }
 
-func DeleteSession(sessionID string) {
-	sessionLock.Lock()
-	defer sessionLock.Unlock()
-	delete(sessionsMap, sessionID)
-}
-
 // purgeExpiredPublishSessions 删除空闲超过 publishSessionTTL 的会话，调用方需持有 sessionLock。
 func purgeExpiredPublishSessions(now time.Time) {
 	for id, session := range sessionsMap {

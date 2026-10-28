@@ -284,26 +284,6 @@ func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
 	return
 }
 
-func GetBlockTreeRootsByHPath(boxID, hPath string) (ret []*BlockTree) {
-	hPath = gulu.Str.RemoveInvisible(hPath)
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND type = 'd'"
-	rows, err := queryForBox(boxID, sqlStmt, boxID, hPath)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var block BlockTree
-		if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret = append(ret, &block)
-	}
-	return
-}
-
 // GetBlockTreeRootByIDAndHPath 按笔记本、根块 ID 和原始 HPath 精确查找文档。
 func GetBlockTreeRootByIDAndHPath(boxID, id, hPath string) (ret *BlockTree) {
 	ret = GetBlockTreeInExactBox(id, boxID)
@@ -658,10 +638,6 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 		return
 	}
 	return
-}
-
-func RemoveBlockTreesByIDs(boxID string, ids []string) {
-	RemoveBlockTreesByIDsWithError(boxID, ids)
 }
 
 func RemoveBlockTreesByIDsWithError(boxID string, ids []string) error {

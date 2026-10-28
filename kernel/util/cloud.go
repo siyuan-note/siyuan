@@ -6,10 +6,6 @@ package util
 
 var CurrentCloudRegion = 0
 
-func IsChinaCloud() bool {
-	return 0 == CurrentCloudRegion
-}
-
 func GetCloudServer() string {
 	if 0 == CurrentCloudRegion {
 		return chinaServer

@@ -7,13 +7,14 @@ import * as ts from "typescript";
 import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {normalizePictureImages} from "./pictureImages";
 import {htmlMathPaste, markdownMathPaste} from "./mathPaste";
+import {escapeMarkdownPlainText} from "../../util/escape";
 
 // 执行粘贴入口，替换剪贴板和上传接口，检查图片不会在受限片段中被丢弃。
 const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/util/paste.ts"), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;
 
-const createHarness = (disabled = false, richPaste = false) => {
+const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
     const uploads: Array<{files: unknown; options: {document: {rootID: string}; insertPosition: unknown}}> = [];
     const position = {range: {startContainer: {}}};
     let available = true;
@@ -21,6 +22,7 @@ const createHarness = (disabled = false, richPaste = false) => {
     let convertedHTML = "";
     let convertedBy = "";
     let checkedBlockDOM = "";
+    let clipboardText = "";
     const restrictedFallback = new Error("restricted fallback");
     const mocks: Record<string, unknown> = {
         "./pictureImages": {normalizePictureImages},
@@ -46,7 +48,8 @@ const createHarness = (disabled = false, richPaste = false) => {
         "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
         "./markdownClipboard": {shouldPasteMarkdownFromHTML: () => false},
         "./mathPaste": {htmlMathPaste, markdownMathPaste},
-        "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false,
+        "../../util/escape": {escapeMarkdownPlainText},
+        "./compatibility": {getLocalFiles: async () => localFiles, readText: async () => clipboardText, isInHarmony: () => false,
             getTextSiyuanFromTextHTML: (html: string) => ({textSiyuan: "", textHtml: html})},
         "../upload": {
             uploadFiles: (_protyle: unknown, files: unknown, _element: unknown, _success: unknown,
@@ -60,10 +63,10 @@ const createHarness = (disabled = false, richPaste = false) => {
         window: {siyuan: {config: {editor: {mathDelimiterCompatibility: true}}}},
         document: {createElement: () => ({content: {querySelector: (): null => null}})},
     });
-    const api = module.exports as typeof import("./paste");
-    const paste = (files: unknown[] = [], siyuanHTML = "", textPlain = "", textHTML = "") => api.paste({
+    const api = module.exports as {-readonly [K in keyof typeof import("./paste")]: typeof import("./paste")[K]};
+    const protyle = {
         wysiwyg: {element: {}},
-        lute: {SetLatexMath: () => {}, Md2BlockDOM: (html: string) => {
+        lute: lute || {SetLatexMath: () => {}, Md2BlockDOM: (html: string) => {
             convertedHTML = html;
             convertedBy = "markdown";
             return `<div data-type="NodeParagraph">${html}</div>`;
@@ -72,17 +75,53 @@ const createHarness = (disabled = false, richPaste = false) => {
             convertedBy = "html";
             return `<div data-type="NodeParagraph">${html}</div>`;
         }},
-    } as unknown as IProtyle, {
+    } as unknown as IProtyle;
+    const paste = (files: unknown[] = [], siyuanHTML = "", textPlain = "", textHTML = "") => api.paste(protyle, {
         target: {}, stopPropagation() {}, preventDefault() {},
         clipboardData: {files, types: [], getData: (type: string) => type === "text/siyuan" ? siyuanHTML :
                 type === "text/plain" ? textPlain : type === "text/html" ? textHTML : ""},
     } as unknown as ClipboardEvent & {target: HTMLElement});
-    return {paste, uploads, position, restrictedFallback, api: module.exports as typeof import("./paste"),
+    const pasteEscaped = async (text: string) => {
+        clipboardText = text;
+        const originalPaste = api.paste;
+        let pending: ReturnType<typeof api.paste> | undefined;
+        api.paste = (...args) => {
+            pending = originalPaste(...args);
+            void pending.catch(() => {});
+            return pending;
+        };
+        try {
+            await api.pasteEscaped(protyle, {} as HTMLElement);
+            assert.ok(pending, "escaped paste must reach the shared paste entry");
+            await assert.rejects(pending, restrictedFallback);
+        } finally {
+            api.paste = originalPaste;
+        }
+    };
+    return {paste, pasteEscaped, uploads, position, restrictedFallback, api,
         getConvertedHTML: () => convertedHTML, getConvertedBy: () => convertedBy,
         getCheckedBlockDOM: () => checkedBlockDOM,
         setLocalFiles: (files: unknown[]) => { localFiles = files; },
         invalidate: () => { available = false; }};
 };
+
+describe("escaped text paste", () => {
+    if (typeof Lute === "undefined") {
+        require("../../../stage/protyle/js/lute/lute.min.js");
+    }
+    for (const richPaste of [false, true]) {
+        it(`preserves literal links and math delimiters with math compatibility enabled (richPaste=${richPaste})`, async () => {
+            const lute = Lute.New();
+            const harness = createHarness(false, richPaste, lute);
+            const text = "**literal** [link](https://example.com) \\(x\\) \\[y\\]";
+            await harness.pasteEscaped(text);
+            const dom = harness.getCheckedBlockDOM();
+            assert.doesNotMatch(dom, /data-type="(?:inline-math|NodeMathBlock|strong|a)"/);
+            assert.equal(lute.BlockDOM2Content(dom).trim(), text);
+            assert.match(markdownMathPaste(lute, "\\(x\\)", true), /data-type="inline-math"/);
+        });
+    }
+});
 
 describe("restricted cell image paste", () => {
     it("uploads screenshot clipboard files with the captured document and cursor", async () => {

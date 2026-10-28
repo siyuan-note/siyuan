@@ -223,6 +223,7 @@ const runElectron = async () => {
         };
         // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
         const sources = [extract("capabilities.generated"), extract("capabilities"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
+            extract("attributePanelLayout"),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),
             extract("primaryFocus", ["focusDatabasePrimary"]),

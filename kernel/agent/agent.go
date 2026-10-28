@@ -374,14 +374,15 @@ type AgentGoogleToolCallProviderData struct {
 }
 
 type AgentAttachment struct {
-	Type       string `json:"type"`
-	Data       []byte `json:"-"`
-	MIMEType   string `json:"mimeType,omitempty"`
-	Path       string `json:"path"`
-	DocumentID string `json:"documentId"`
-	Detail     string `json:"detail,omitempty"`
-	Width      int    `json:"width,omitempty"`
-	Height     int    `json:"height,omitempty"`
+	PDFImage   *kernelModel.PDFImageSelection `json:"pdfImage,omitempty"`
+	Type       string                         `json:"type"`
+	Data       []byte                         `json:"-"`
+	MIMEType   string                         `json:"mimeType,omitempty"`
+	Path       string                         `json:"path"`
+	DocumentID string                         `json:"documentId"`
+	Detail     string                         `json:"detail,omitempty"`
+	Width      int                            `json:"width,omitempty"`
+	Height     int                            `json:"height,omitempty"`
 }
 
 type Reference struct {

@@ -2,9 +2,9 @@
 
 export type AIActionRequestInput = { "action": string; "ids": Array<string>; };
 
-export type AIAgentAttachment = { "detail"?: string; "documentId": string; "height"?: number; "mimeType"?: string; "path": string; "type": string; "width"?: number; };
+export type AIAgentAttachment = { "detail"?: string; "documentId": string; "height"?: number; "mimeType"?: string; "path": string; "pdfImage"?: AIPDFImageSelection; "type": string; "width"?: number; };
 
-export type AIAgentAttachmentInput = { "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; };
+export type AIAgentAttachmentInput = { "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "pdfImage"?: AIPDFImageSelectionInput | null; "type"?: string | null; "width"?: number | null; };
 
 export type AIAgentChatRequestInput = { "blockHTML"?: string | null; "contentRevision"?: number | null; "editorContext"?: AIEditorContextInput | null; "frontendCapabilities"?: Array<AIFrontendCapabilityInput> | null; "language"?: string | null; "message"?: string | null; "model"?: string | null; "reasoningEffort"?: string | null; "references"?: Array<AIReferenceInput> | null; "regenerate"?: boolean | null; "sessionID"?: string | null; "userEntryID"?: string | null; };
 
@@ -80,6 +80,10 @@ export type AINativeContent = { "blocks": Array<JSONValue> | null; "protocol": s
 
 export type AINativeContentInput = { "blocks": Array<JSONValue>; "protocol": string; "version": number; };
 
+export type AIPDFImageSelection = { "object": number; "page": number; "revision": string; };
+
+export type AIPDFImageSelectionInput = { "object"?: number | null; "page"?: number | null; "revision"?: string | null; };
+
 export type AIPermissionData = { "permissionMode": string; };
 
 export type AIPermissionRequestInput = { "permissionMode"?: string | null; "sessionID"?: string | null; };
@@ -130,9 +134,9 @@ export type AISessionEntryStep = { "content"?: string; "reasoning": string; "rea
 
 export type AISessionEntryStepInput = { "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; };
 
-export type AISessionExtensionAIAgentAttachment = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIAgentAttachment = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "pdfImage"?: AISessionExtensionAIPDFImageSelection | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIAgentAttachmentInput = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIAgentAttachmentInput = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "pdfImage"?: AISessionExtensionAIPDFImageSelectionInput | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAIAgentGoogleToolCallProviderData = ({ "thoughtSignature"?: string | null; } & { [key: string]: JSONValue });
 
@@ -157,6 +161,10 @@ export type AISessionExtensionAIEditorContextInput = ({ "activeDocID"?: string |
 export type AISessionExtensionAINativeContent = ({ "blocks"?: Array<JSONValue> | null; "protocol"?: string | null; "version"?: number | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAINativeContentInput = ({ "blocks"?: Array<JSONValue> | null; "protocol"?: string | null; "version"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIPDFImageSelection = ({ "object"?: number | null; "page"?: number | null; "revision"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIPDFImageSelectionInput = ({ "object"?: number | null; "page"?: number | null; "revision"?: string | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAIReference = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
@@ -3012,6 +3020,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 会话保留扩展字段。图片附件只持久化来源元数据，不包含图片字节。
+     * PDF 预览附件的 path 指向来源 PDF，pdfImage 记录 revision、page 和 object；恢复时认证读取来源并校验版本。
+     */
     "/api/ai/agent/getSession": {
         request: AISessionIDRequestInput;
         response: { "code": 0; "data": AISessionExtensionAISessionFields | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

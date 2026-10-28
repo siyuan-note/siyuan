@@ -38,6 +38,9 @@
         "path": {
           "type": "string"
         },
+        "pdfImage": {
+          "$ref": "#/$defs/AIPDFImageSelection"
+        },
         "type": {
           "type": "string"
         },
@@ -99,6 +102,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfImage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AIPDFImageSelectionInput"
             },
             {
               "type": "null"
@@ -1574,6 +1587,62 @@
       ],
       "additionalProperties": false
     },
+    "AIPDFImageSelection": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "integer"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "object",
+        "page",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "AIPDFImageSelectionInput": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "AIPermissionData": {
       "type": "object",
       "properties": {
@@ -2598,6 +2667,16 @@
             }
           ]
         },
+        "pdfImage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAIPDFImageSelection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "type": {
           "anyOf": [
             {
@@ -2670,6 +2749,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfImage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AISessionExtensionAIPDFImageSelectionInput"
             },
             {
               "type": "null"
@@ -3434,6 +3523,82 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
+    "AISessionExtensionAIPDFImageSelection": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
+    },
+    "AISessionExtensionAIPDFImageSelectionInput": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"

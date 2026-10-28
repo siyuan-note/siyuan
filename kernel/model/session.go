@@ -112,6 +112,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 
 	workspaceSession.AccessAuthCode = authCode
 	workspaceSession.OIDCSessionVersion = ""
+	BindDesktopSession(c, workspaceSession, request.RememberMe)
 	util.WrongAuthCount = 0
 	util.AuthThrottleReset(c.ClientIP())
 	workspaceSession.CaptchaID = ""

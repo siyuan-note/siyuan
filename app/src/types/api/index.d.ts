@@ -8363,6 +8363,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 校验锁屏密码并建立当前工作空间的会话。
+     * rememberMe 为 true 时 Cookie 有效期为 30 天；否则使用浏览器会话 Cookie，
+     * 本机桌面端登录还绑定本次内核启动，工作空间退出重开后须重新认证；隐藏窗口或取消退出不使会话失效。
+     * 浏览器、移动端及旧版未携带启动批次的 Cookie 保持原有有效性；旧会话重新登录后应用上述规则。
+     */
     "/api/system/loginAuth": {
         request: SystemLoginAuthRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8391,6 +8397,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["public"];
     };
+    /**
+     * 发起 OIDC 登录；rememberMe 的会话有效期及本机桌面启动绑定与 loginAuth 一致。
+     */
     "/api/system/oidc/start": {
         request: SystemOIDCStartRequestInput;
         response: { "code": 0; "data": SystemOIDCStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8472,6 +8481,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 修改锁屏密码并更新当前会话；已有有效会话保留其启动绑定及记住策略。
+     * 没有有效会话时，本机桌面端新建的会话绑定本次内核启动。
+     */
     "/api/system/setAccessAuthCode": {
         request: SystemAccessAuthCodeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

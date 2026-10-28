@@ -921,11 +921,14 @@ var setAccessAuthCode = contractHandler(apicontract.SystemSetAccessAuthCode, fun
 		}
 	}
 
+	session := util.GetSession(c)
+	workspaceSession := util.GetWorkspaceSession(session)
+	if !model.IsWorkspaceSessionAuthenticated(workspaceSession) {
+		model.BindDesktopSession(c, workspaceSession, false)
+	}
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
 
-	session := util.GetSession(c)
-	workspaceSession := util.GetWorkspaceSession(session)
 	workspaceSession.AccessAuthCode = aac
 	session.Save(c)
 	go func() {

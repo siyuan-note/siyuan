@@ -146,6 +146,7 @@ type SessionData struct {
 type WorkspaceSession struct {
 	AccessAuthCode     string
 	OIDCSessionVersion string
+	DesktopSessionID   string `json:",omitempty"` // 未记住的本机桌面登录所属内核启动批次
 	OIDCBinding        string
 	CaptchaID          string // 服务端验证码挑战 ID，验证码答案不写入会话
 }

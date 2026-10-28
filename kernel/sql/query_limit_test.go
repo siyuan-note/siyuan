@@ -58,6 +58,36 @@ func TestQueryRowLimit(t *testing.T) {
 	}
 }
 
+// 带参查询与资源内容查询同样以 limit 为上限：语句未写 LIMIT 时不得多返回一行，
+// 否则以 len(rows) == limit 判定截断的调用方会误认结果未截断。
+func TestRawStatementQueriesHonourRowLimit(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() { _ = testDB.Close() })
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() { db = previousDB })
+	if _, err = testDB.Exec("CREATE TABLE items (n INTEGER, content TEXT); INSERT INTO items VALUES (1, 'a'), (2, 'a'), (3, 'a'), (4, 'a'), (5, 'a')"); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, limit := range []int{1, 3, 5} {
+		rows, queryErr := queryRawStmtArgs("SELECT n FROM items ORDER BY n", nil, limit)
+		if queryErr != nil || len(rows) != limit {
+			t.Fatalf("queryRawStmtArgs limit=%d: got %d rows, err=%v", limit, len(rows), queryErr)
+		}
+	}
+
+	// 语句自带 LIMIT 时由语句决定行数，本层不再截断。
+	rows, err := queryRawStmtArgs("SELECT n FROM items ORDER BY n LIMIT 2", nil, 3)
+	if err != nil || len(rows) != 2 {
+		t.Fatalf("statement limit was overridden: %d rows, err=%v", len(rows), err)
+	}
+}
+
 func TestQueryWithLimitInfo(t *testing.T) {
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
 	if err != nil {

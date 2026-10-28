@@ -180,7 +180,7 @@ func CheckDocumentAddressingFileCopies(sources, destinations []string) error {
 	return nil
 }
 
-// CheckDocumentAddressingFileRemoval 保留整本删除语义及规范路径校验。
+// CheckDocumentAddressingFileRemoval 校验整本删除：逐条检查树内文档寻址记录，无记录时校验该路径本身。
 func CheckDocumentAddressingFileRemoval(absPath string) error {
 	var removes []string
 	err := filepath.WalkDir(absPath, func(name string, entry os.DirEntry, err error) error {

@@ -102,7 +102,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                                 mathElement.insertAdjacentText("afterend", "\n");
                             } else {
                                 // https://ld246.com/article/1651595975481，https://ld246.com/article/1658903123429
-                                // 随着浏览器的升级，从 beforeend 修改为 afterend
+                                // ZWSP 插到 KaTeX 外层之后，不进入公式内部
                                 mathElement.insertAdjacentText("afterend", Constants.ZWSP);
                             }
                         } else if (nextSibling && nextSibling.nodeType !== 3 &&

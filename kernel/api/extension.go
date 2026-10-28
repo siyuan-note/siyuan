@@ -239,7 +239,6 @@ var extensionCopy = contractHandler(apicontract.ExtensionCopy, func(c *gin.Conte
 		}
 
 		if ast.NodeText == n.Type {
-			// 剔除行首空白
 			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
 				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
 			}

@@ -142,7 +142,6 @@ func ValidateBoxRelativePath(boxID, p string) (string, error) {
 	p = filepath.ToSlash(p)
 	// 记录原始路径用于 IsSubPath 校验
 	origP := p
-	// 标准化：去掉前导 /
 	p = strings.TrimPrefix(p, "/")
 	// 根路径直接放行（box 根目录本身是合法路径）
 	if p == "" {

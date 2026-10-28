@@ -777,7 +777,7 @@ ${genRelationFilterTriggerContent(avID, selectedBlockIDs, path)}<svg class="av__
 };
 
 // readInlineValue 从叶子行内 DOM 读取值，按类型返回 { value, relativeDate, relativeDate2 }。
-// 修正点①：date 用 data-type 精确定位，废弃全局 textElements 索引。
+// date 值按 data-type 定位，不依赖全局 textElements 索引。
 const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: string, filter: IAVFilter, menuElement: HTMLElement): { newValue: IAVCellValue, relativeDate: IAVRelativeDate, relativeDate2: IAVRelativeDate } => {
     let newValue: IAVCellValue = filter.value;
     let relativeDate: IAVRelativeDate = filter.relativeDate;
@@ -812,7 +812,7 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
         const val = input?.value || "";
         newValue = val ? genCellValue(valueType, val) : genEmptyCellValue(valueType);
     } else if (isAVDateType(valueType)) {
-        // 修正点①：用 data-type 精确定位绝对日期 input
+        // 绝对日期 input 按 data-type 定位
         const dateTypeSel = rowElement.querySelector('[data-type="dateType"]') as HTMLSelectElement;
         const isRelative = dateTypeSel?.value === "custom";
         if (isRelative) {

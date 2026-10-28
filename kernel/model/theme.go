@@ -348,7 +348,7 @@ func isCSSIdentifierByte(value byte) bool {
 		'a' <= value && value <= 'z' || 'A' <= value && value <= 'Z'
 }
 
-// 获取主题的样式变量映射表
+// getThemeStyleVar 读取主题 CSS 变量；第三方主题缺基础变量时以 daylight/midnight 兜底。
 func getThemeStyleVar(theme string, isDarkMode bool) (ret map[string]string) {
 	ret = map[string]string{}
 

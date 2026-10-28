@@ -866,7 +866,7 @@ export class Gutter {
 
     public isMatchNode(item: Element) {
         const itemRect = item.getBoundingClientRect();
-        // 原本为4，由于 https://github.com/siyuan-note/siyuan/issues/12166 改为 6
+        // 命中偏移 6px，见 https://github.com/siyuan-note/siyuan/issues/12166
         let gutterTop = this.element.getBoundingClientRect().top + 6;
         if (itemRect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8) {
             gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2;

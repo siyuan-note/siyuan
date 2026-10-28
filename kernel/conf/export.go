@@ -14,7 +14,7 @@ type Export struct {
 	//  （5：锚点哈希 https://github.com/siyuan-note/siyuan/issues/10265 已经废弃 https://github.com/siyuan-note/siyuan/issues/13331）
 	//  （0：使用原始文本，1：使用 Blockquote，都已经废弃 https://github.com/siyuan-note/siyuan/issues/3155）
 	BlockRefMode          int    `json:"blockRefMode"`
-	BlockEmbedMode        int    `json:"blockEmbedMode"`        // 内容块引用导出模式，0：使用原始文本，1：使用 Blockquote
+	BlockEmbedMode        int    `json:"blockEmbedMode"`        // 内容块嵌入导出模式，0：使用原始文本，1：使用引述块
 	BlockRefTextLeft      string `json:"blockRefTextLeft"`      // 内容块引用导出锚文本左侧符号，默认留空
 	BlockRefTextRight     string `json:"blockRefTextRight"`     // 内容块引用导出锚文本右侧符号，默认留空
 	TagOpenMarker         string `json:"tagOpenMarker"`         // 标签开始标记符，默认是 #

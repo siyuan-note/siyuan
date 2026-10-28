@@ -40,7 +40,6 @@ var colorSchemes = map[string]ColorScheme{
 }
 
 func getColorScheme(color string) ColorScheme {
-	// 去除可能的空格
 	color = strings.TrimSpace(color)
 
 	// 检查是否是预定义的颜色
@@ -367,7 +366,6 @@ func daysBetween(date1, date2 time.Time) int {
 	return days
 }
 
-// 判断是否为闰年
 func isLeapYear(year int) bool {
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }

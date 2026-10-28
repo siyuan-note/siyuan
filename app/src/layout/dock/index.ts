@@ -561,18 +561,19 @@ export class Dock {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
         const canRevealBar = (this.position === "Left" || this.position === "Right") && window.siyuan.config.uiLayout.hideDock;
-        const needsBar = canRevealBar && !this.elements[0].parentElement.classList.contains("dock--float");
+        const needsBar = canRevealBar && (!this.elements[0].parentElement.classList.contains("dock--float") ||
+            this.elements[0].parentElement.classList.contains("dock--closing"));
         if (isTouchHoverInput() || this.showDockTimeout || !this.isFloating() ||
             !needsBar && (!this.panelVisible || this.layout.element.style.opacity === "1" || canRevealBar && !this.hasActive())) {
             return;
         }
         this.showDockTimeout = window.setTimeout(() => {
             this.showDockTimeout = 0;
+            this.showDock();
             if (canRevealBar && window.siyuan.config.uiLayout.hideDock && this.isFloating()) {
                 this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
                 setDockBarHover(this.elements[0].parentElement, true);
             }
-            this.showDock();
         }, Constants.TIMEOUT_DOCK_TOGGLE);
     }
 

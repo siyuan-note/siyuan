@@ -35,6 +35,7 @@ class BuildTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.args = build.parser().parse_args([])
+        self.args.kernel_jobs = 1
         self.args.android_dir = self.root / "android"
         self.args.harmony_dir = self.root / "harmony"
         self.args.output = self.root / "output"
@@ -47,6 +48,46 @@ class BuildTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
         return path
+
+    def test_kernel_queue_overlaps_two_compilers_and_preserves_logs(self):
+        script = self.write(self.root / "compiler.py", b"import time\nprint(time.time(), flush=True)\ntime.sleep(0.4)\nprint(time.time(), flush=True)\n")
+        commands = [(str(n), [sys.executable, script], self.root, dict(build.os.environ)) for n in range(3)]
+        build.compile_kernels(commands, self.root / "logs")
+        spans = [list(map(float, (self.root / "logs" / f"{n}.log").read_text().split())) for n in range(3)]
+        self.assertLess(max(spans[0][0], spans[1][0]), min(spans[0][1], spans[1][1]))
+        self.assertGreaterEqual(spans[2][0], min(spans[0][1], spans[1][1]))
+
+    def test_kernel_queue_failure_reaps_running_compiler_and_skips_queued(self):
+        processes = []
+        original = build.subprocess.Popen
+        def launch(*args, **kwargs):
+            process = original(*args, **kwargs)
+            processes.append(process)
+            return process
+        commands = [("fail", [sys.executable, "-c", "raise SystemExit(9)"], self.root, None),
+                    ("wait", [sys.executable, "-c", "import time; time.sleep(30)"], self.root, None),
+                    ("queued", [sys.executable, "-c", "print('unexpected')"], self.root, None)]
+        with patch.object(build.subprocess, "Popen", side_effect=launch):
+            with self.assertRaises(build.BuildError):
+                build.compile_kernels(commands, self.root / "logs")
+        self.assertTrue(all(process.poll() is not None for process in processes))
+        self.assertFalse((self.root / "logs/queued.log").exists())
+
+    def test_windows_queue_includes_android_and_serializes_packaging(self):
+        self.args.kernel_jobs = 3
+        packed = []
+        def compile(commands, directory, jobs):
+            self.assertEqual(jobs, 3)
+            self.assertEqual([item[0] for item in commands], ["amd64", "android", "arm64"])
+            self.assertEqual(len({str(item[1][item[1].index("-o") + 1]) for item in commands}), 3)
+        with patch.object(self.builder, "windows_tools"), patch.object(self.builder, "check_kernel"), \
+                patch.object(self.builder, "android_kernel", return_value=(self.root / "kernel.aar", {},
+                             ["gomobile", "bind", "-o", self.root / "kernel.aar"])), \
+                patch.object(build, "compile_kernels", side_effect=compile), \
+                patch.object(self.builder, "windows_arch", side_effect=lambda arch, config: packed.append(arch)):
+            self.builder.windows()
+        self.assertEqual(packed, ["amd64", "arm64"])
+        self.assertTrue(self.builder.android_prebuilt)
 
     def test_signing_pin_uses_hidden_input_or_supplied_value(self):
         with patch.object(build.getpass, "getpass", return_value="hidden-pin") as prompt:
@@ -327,7 +368,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(config["win"]["signtoolOptions"]["sign"], str(hook))
         self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
 
-    def test_harmony_copies_each_architecture_before_next_build(self):
+    def test_harmony_builds_only_arm64(self):
         remote = self.root / "wsl"
         self.builder.wsl_root = remote
         assets = self.write(self.root / "app.zip", b"current assets")
@@ -335,6 +376,7 @@ class BuildTests(unittest.TestCase):
                                   b"stale kernel")
 
         def fake_wsl(command, directory=None, capture=False):
+            self.assertEqual(command[-1], "build.sh")
             architecture = "arm64" if command[-1] == "build.sh" else "amd64"
             self.write(remote / "kernel/harmony/libkernel.so", kernel(architecture=architecture))
             self.write(remote / "kernel/harmony/libkernel.h", architecture.encode())
@@ -356,14 +398,36 @@ class BuildTests(unittest.TestCase):
         arm = self.args.harmony_dir / "entry/libs/arm64-v8a/libkernel.so"
         amd = self.args.harmony_dir / "entry/libs/x86_64/libkernel.so"
         self.assertEqual(arm.read_bytes(), kernel(architecture="arm64"))
-        self.assertEqual(amd.read_bytes(), kernel(architecture="amd64"))
+        self.assertFalse(amd.exists())
         self.assertEqual([path.name for path in self.builder.artifacts], ["siyuan-harmony-default-signed.app"])
         self.assertEqual(self.builder.artifacts[0].read_bytes(), b"signed app")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/libkernel.h").read_bytes(), b"arm64")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/lan_sync_bridge.h").read_bytes(), b"bridge")
-        for abi in ("arm64-v8a", "x86_64"):
+        for abi in ("arm64-v8a",):
             self.assertEqual({path.name for path in (self.args.harmony_dir / "entry/libs" / abi).iterdir()},
                              {"libkernel.so"})
+
+    def test_harmony_reuses_kernel_compiled_during_linux_packaging(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.builder.harmony_prebuilt_started = time.time() - 1
+        self.write(self.builder.wsl_root / "kernel/harmony/libkernel.so", kernel())
+        self.write(self.builder.wsl_root / "kernel/harmony/libkernel.h")
+        self.write(self.builder.wsl_root / "kernel/harmony/lan_sync_bridge.h")
+        assets = self.write(self.root / "app.zip")
+        def run(command, cwd, env=None, capture=False):
+            if command[-1] == "assembleApp":
+                self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app")
+        with patch.object(self.builder, "wsl") as wsl, patch.object(build, "run", side_effect=run):
+            self.builder.harmony(assets)
+        wsl.assert_not_called()
+
+    def test_linux_requests_harmony_kernel_only_when_selected(self):
+        self.builder.wsl_root = self.root / "wsl"
+        for selected in (True, False):
+            self.args.platforms = ["linux", "harmony"] if selected else ["linux"]
+            with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
+                self.builder.linux()
+            self.assertEqual("--with-harmony-kernel" in wsl.call_args.args[0], selected)
 
     def test_harmony_rejects_unsigned_only_output(self):
         self.builder.wsl_root = self.root / "wsl"
@@ -483,6 +547,7 @@ class RecordTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
         self.args = build.parser().parse_args([])
+        self.args.kernel_jobs = 1
         self.args.platforms = ["windows", "linux"]
         self.args.output = self.root / "output"
         self.args.android_dir = self.root / "android"

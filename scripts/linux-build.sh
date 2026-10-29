@@ -14,6 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET='all'
+HARMONY_KERNEL=false
 validate_target() {
     if [[ -z "$1" ]]; then
         echo 'Error: --target option requires a value'
@@ -29,6 +30,10 @@ validate_target() {
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --with-harmony-kernel)
+            HARMONY_KERNEL=true
+            shift
+            ;;
         --target=*)
             TARGET="${1#*=}"
             validate_target "$TARGET"
@@ -47,6 +52,50 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo 'Checking OCR worker toolchains (glibc)'
+# Each compiler runs in its own process group so failures and interrupts also
+# stop its compiler/linker children before packaging can start.
+KERNEL_PIDS=()
+cleanup_kernels() {
+    local pid
+    for pid in "${KERNEL_PIDS[@]}"; do
+        kill -TERM -- "-$pid" 2>/dev/null || true
+    done
+    for pid in "${KERNEL_PIDS[@]}"; do
+        wait "$pid" 2>/dev/null || true
+    done
+}
+build_kernels() {
+    local arch suffix remaining=0
+    local jobs=1
+    [[ "$TARGET" == 'all' ]] && jobs=2
+    local package_jobs=$(( $(getconf _NPROCESSORS_ONLN) / jobs ))
+    (( package_jobs < 1 )) && package_jobs=1
+    trap 'cleanup_kernels' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    for arch in amd64 arm64; do
+        [[ "$TARGET" != 'all' && "$TARGET" != "$arch" ]] && continue
+        setup_cc "$arch"
+        echo "Building Kernel $arch"
+        suffix=''
+        [[ "$arch" == 'arm64' ]] && suffix='-arm64'
+        GOARCH="$arch" setsid go build -p "$package_jobs" -buildmode=pie -tags "fts5 sqlcipher" \
+            -o "../app/kernel-linux${suffix}/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" . &
+        KERNEL_PIDS+=("$!")
+        remaining=$((remaining + 1))
+    done
+    while (( remaining > 0 )); do
+        if wait -n; then
+            remaining=$((remaining - 1))
+        else
+            echo 'Kernel compilation failed; stopping remaining compilers'
+            return 1
+        fi
+    done
+    KERNEL_PIDS=()
+    trap - EXIT INT TERM
+}
+
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     python3 "$PROJECT_ROOT/scripts/prepare-ocr.py" --runtime linux-amd64 --build-worker --check-only
 fi
@@ -109,19 +158,14 @@ setup_cc() {
     echo "Using CC=$CC"
 }
 
-if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
-    echo
-    echo 'Building Kernel amd64'
-    export GOARCH=amd64
-    setup_cc amd64
-    go build -buildmode=pie -tags "fts5 sqlcipher" -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
-fi
-if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
-    echo
-    echo 'Building Kernel arm64'
-    export GOARCH=arm64
-    setup_cc arm64
-    go build -buildmode=pie -tags "fts5 sqlcipher" -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
+build_kernels
+
+if $HARMONY_KERNEL; then
+    trap 'cleanup_kernels' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    (cd "$PROJECT_ROOT/kernel/harmony"; exec setsid bash -e build.sh) &
+    KERNEL_PIDS=("$!")
 fi
 
 echo
@@ -138,6 +182,11 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     pnpm run dist-linux-arm64
 fi
 
+if $HARMONY_KERNEL; then
+    wait "${KERNEL_PIDS[0]}"
+    KERNEL_PIDS=()
+    trap - EXIT INT TERM
+fi
 echo
 echo '=============================='
 echo '      Build successful!'

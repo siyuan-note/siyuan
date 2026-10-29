@@ -29,6 +29,56 @@ PLATFORMS = ("windows", "linux", "android", "harmony")
 ACTIVE_RECORD = None
 
 
+def compile_kernels(commands, directory, jobs=2):
+    """Run isolated compiler processes; keep all record updates on the calling thread."""
+    processes = []
+    directory.mkdir(parents=True, exist_ok=True)
+    try:
+        queued = iter(commands)
+        pending = []
+        exhausted = False
+        while pending or not exhausted:
+            while len(pending) < jobs and not exhausted:
+                item = next(queued, None)
+                if item is None:
+                    exhausted = True
+                    break
+                name, command, cwd, env = item
+                path = directory / (name + ".log")
+                stream = path.open("wb")
+                try:
+                    process = subprocess.Popen([str(part) for part in command], cwd=cwd, env=env,
+                                               stdout=stream, stderr=subprocess.STDOUT)
+                except BaseException:
+                    stream.close()
+                    raise
+                entry = (name, process, stream, path)
+                processes.append(entry)
+                pending.append(entry)
+                print(f"内核编译已启动：{name}；日志：{path}", flush=True)
+            for item in pending[:]:
+                name, process, stream, path = item
+                code = process.poll()
+                if code is None:
+                    continue
+                pending.remove(item)
+                if code:
+                    raise BuildError(f"内核编译失败：{name}（{code}）；日志：{path}")
+                print(f"内核编译完成：{name}", flush=True)
+            if pending:
+                time.sleep(0.1)
+    finally:
+        for _, process, stream, _ in processes:
+            if process.poll() is None:
+                if os.name == "nt":
+                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+                else:
+                    process.terminate()
+                process.wait()
+            stream.close()
+
+
 class BuildError(Exception):
     pass
 
@@ -490,6 +540,23 @@ class Builder:
     def windows(self):
         with self.stage("windows_tools"):
             self.windows_tools()
+            if self.args.kernel_jobs > 1:
+                commands = []
+                for arch in ("amd64", "arm64"):
+                    kernel, env = self.windows_kernel(arch)
+                    # Each Go invocation also limits its package parallelism.
+                    command = ["go", "build", "-p", str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs)),
+                               "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."]
+                    commands.append((arch, command, ROOT / "kernel", env))
+                if "android" in self.args.platforms:
+                    aar, env, command = self.android_kernel()
+                    env["GOMAXPROCS"] = str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs))
+                    commands.insert(1, ("android", command, ROOT / "kernel", env))
+                compile_kernels(commands, self.work / "kernel-logs", jobs=self.args.kernel_jobs)
+                for arch in ("amd64", "arm64"):
+                    self.check_kernel(self.work / "kernels" / arch / "SiYuan-Kernel.exe", arch)
+                self.kernels_prebuilt = True
+                self.android_prebuilt = "android" in self.args.platforms
         for arch, config in (("amd64", "electron-builder.yml"), ("arm64", "electron-builder-arm64.yml")):
             with self.stage("windows_" + arch):
                 self.windows_arch(arch, config)
@@ -502,15 +569,20 @@ class Builder:
         run([Path(go_bin) / "goversioninfo.exe", "-platform-specific=true", "-icon=resource/icon.ico",
              "-manifest=resource/goversioninfo.exe.manifest"], ROOT / "kernel")
 
-    def windows_arch(self, arch, config):
-        output = self.work / "windows"
-        started = time.time()
+    def windows_kernel(self, arch):
         env = dict(os.environ, GOOS="windows", GOARCH=arch, CGO_ENABLED="1")
         if arch == "arm64":
             env["CC"] = '"' + str(self.args.arm64_cc) + '"'
         kernel = self.work / "kernels" / arch / "SiYuan-Kernel.exe"
         kernel.parent.mkdir(parents=True, exist_ok=True)
-        run(["go", "build", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."], ROOT / "kernel", env)
+        return kernel, env
+
+    def windows_arch(self, arch, config):
+        output = self.work / "windows"
+        started = time.time()
+        kernel, env = self.windows_kernel(arch)
+        if not getattr(self, "kernels_prebuilt", False):
+            run(["go", "build", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."], ROOT / "kernel", env)
         self.check_kernel(kernel, arch)
         copy_verified(ROOT / "app/elevator" / f"elevator-{arch}.exe", kernel.parent / "elevator.exe", self.work)
         generated_config = self.work / f"windows-{arch}.json"
@@ -544,7 +616,12 @@ class Builder:
 
     def linux(self):
         started = time.time()
-        self.wsl(["bash", "scripts/linux-build.sh", "--target=all"])
+        command = ["bash", "scripts/linux-build.sh", "--target=all"]
+        if "harmony" in self.args.platforms:
+            command.append("--with-harmony-kernel")
+        self.wsl(command)
+        if "harmony" in self.args.platforms:
+            self.harmony_prebuilt_started = started
         folder = self.wsl_root / "app/build"
         expected = [folder / f"siyuan-{self.version}-linux{arch}.{extension}"
                     for arch in ("", "-arm64") for extension in ("tar.gz", "AppImage", "deb", "rpm")]
@@ -555,7 +632,7 @@ class Builder:
         if info["version"] != self.version or info["architecture"] != architecture:
             raise BuildError(f"新构建内核的版本或架构不匹配：{path}，{info['version']}，{info['architecture']}")
 
-    def android(self, assets):
+    def android_kernel(self):
         env = dict(os.environ)
         for key in ("GOOS", "GOARCH", "CC", "CXX"):
             env.pop(key, None)
@@ -577,8 +654,14 @@ class Builder:
             env["ANDROID_NDK_HOME"] = str(max(ndks, key=lambda path: tuple(int(v) for v in path.name.split("."))))
         aar = self.work / "android/kernel.aar"
         aar.parent.mkdir(parents=True, exist_ok=True)
-        run(["gomobile", "bind", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-v", "-o", aar,
-             "-target=android/arm64", "-androidapi", "26", "./mobile/"], ROOT / "kernel", env)
+        command = ["gomobile", "bind", "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-v", "-o", aar,
+                   "-target=android/arm64", "-androidapi", "26", "./mobile/"]
+        return aar, env, command
+
+    def android(self, assets):
+        aar, env, command = self.android_kernel()
+        if not getattr(self, "android_prebuilt", False):
+            run(command, ROOT / "kernel", env)
         with tempfile.TemporaryDirectory(prefix="siyuan-aar-check-") as temporary:
             layers = VERIFY.Unpacker(Path(temporary)).layers(aar)
             kernels = VERIFY.kernel_files(layers)
@@ -603,14 +686,16 @@ class Builder:
 
     def harmony(self, assets):
         directory = self.args.wsl_repo.rstrip("/") + "/kernel/harmony"
-        for script, abi, architecture in (("build.sh", "arm64-v8a", "arm64"), ("build-win.sh", "x86_64", "amd64")):
-            started = time.time()
-            self.wsl(["bash", "-e", script], directory)
+        for script, abi, architecture in (("build.sh", "arm64-v8a", "arm64"),):
+            started = getattr(self, "harmony_prebuilt_started", None)
+            if started is None:
+                started = time.time()
+                self.wsl(["bash", "-e", script], directory)
             source = self.wsl_root / "kernel/harmony/libkernel.so"
             if source.stat().st_mtime < started - 2:
                 raise BuildError(f"鸿蒙内核未更新：{source}")
             self.check_kernel(source, architecture)
-            # 两个脚本写同一个文件名，必须在下一次构建前分别复制。
+            # 正式包仅使用 ARM64 真机内核。
             copy_verified(source, self.args.harmony_dir / "entry/libs" / abi / "libkernel.so", self.args.harmony_dir)
             header = source.with_suffix(".h")
             if not header.is_file() or header.stat().st_mtime < started - 2:
@@ -651,6 +736,8 @@ class Builder:
 
 def parser():
     result = argparse.ArgumentParser(description=__doc__, epilog="示例：python scripts/build-release.py --platforms windows,linux,android,harmony --execute。执行前停止前端开发构建并完成各仓库版本号准备。不会自动提交、打标签或上传发布。")
+    result.add_argument("--kernel-jobs", type=int, choices=(1, 2, 3), default=3,
+                        help="Windows 内核及同时选中的 Android 内核编译并发数，默认 3；1 为串行")
     result.add_argument("--platforms", default=",".join(PLATFORMS), help="逗号分隔的平台，可分批构建")
     result.add_argument("--execute", action="store_true", help="实际执行；不传时只显示计划")
     result.add_argument("--appx", action="store_true", help="Windows 额外生成两个 Microsoft Store Appx 包")
@@ -693,9 +780,10 @@ def main():
         "windows": "构建 AMD64/ARM64 内核 - YubiKey 签名 - 生成两个 NSIS 安装包 - 检查签名",
         "linux": f"WSL 用户 {args.wsl_user}、目录 {args.wsl_repo} - 检查源代码一致 - 双架构构建 TAR/AppImage/DEB/RPM",
         "android": "生成新 kernel.aar - 核对版本和架构 - 自动复制内核及 app.zip - Gradle 四渠道 release 构建",
-        "harmony": "WSL 构建两种架构内核并分别复制 - 更新 app.zip - Hvigor release 构建 APP",
+        "harmony": "WSL 构建 ARM64 真机内核 - 更新 app.zip - Hvigor release 构建 APP",
     }
     print("本地前端仅构建一次；Linux 前端在 WSL 中构建")
+    print(f"Windows 与同时选中的 Android 内核编译并发数：{args.kernel_jobs}；打包与签名串行")
     if {"linux", "harmony"} & set(args.platforms):
         print("构建前自动同步 WSL 到 Windows 当前提交；提交不同时要求两端工作区干净，目标已推送且包含 WSL 当前提交")
     for platform in args.platforms:

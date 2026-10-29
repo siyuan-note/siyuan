@@ -351,6 +351,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 - 本地前端生产构建一次，Linux 前端在 WSL 中构建
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
+- Windows 资源工具固定为 `goversioninfo v1.7.0`：先检查 `GOBIN`（未设置时为 `GOPATH/bin`）下的工具及其 Go 模块版本，匹配时直接复用，仅缺失或版本不符时安装该固定版本，安装后再次验证；不在每次构建时查询 `latest`
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.9.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙仅构建并复制 ARM64 真机内核，不构建 x86_64 模拟器内核；release 工程须保持 ARM64 ABI 筛选及排除 x86_64 库的配置。使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 `build/outputs/default/siyuan-harmony-default-signed.app`，缺少签名产物时失败，不收集 `unsigned.app` 或单独的 HAP

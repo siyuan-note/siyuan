@@ -316,6 +316,30 @@ class BuildTests(unittest.TestCase):
         with self.assertRaises(build.BuildError):
             self.builder.collect([self.root / "missing.apk"], "Android", time.time())
 
+    def test_windows_resource_tool_reuses_matching_version_and_pins_install(self):
+        for current in (build.GOVERSIONINFO_VERSION, "v0.0.0", None):
+            tool = self.root / "bin/goversioninfo.exe"
+            tool.unlink(missing_ok=True)
+            version = [current]
+            if current:
+                self.write(tool)
+            commands = []
+            def run(command, cwd, env=None, capture=False):
+                commands.append(command)
+                if command == ["go", "env", "GOBIN"]:
+                    return str(tool.parent)
+                if command[:3] == ["go", "version", "-m"]:
+                    return "mod " + build.GOVERSIONINFO_MODULE + " " + version[0]
+                if command[:2] == ["go", "install"]:
+                    self.assertEqual(command[2], build.GOVERSIONINFO_MODULE + "/cmd/goversioninfo@" + build.GOVERSIONINFO_VERSION)
+                    self.write(tool)
+                    version[0] = build.GOVERSIONINFO_VERSION
+                return ""
+            with self.subTest(current=current), patch.object(build, "run", side_effect=run):
+                self.builder.windows_tools()
+            self.assertEqual(sum(command[:2] == ["go", "install"] for command in commands),
+                             0 if current == build.GOVERSIONINFO_VERSION else 1)
+
     def test_old_kernel_version_is_rejected(self):
         path = self.write(self.root / "libkernel.so", kernel("3.8.3"))
         with self.assertRaises(build.BuildError):
@@ -338,6 +362,10 @@ class BuildTests(unittest.TestCase):
             commands.append(command)
             if command[:3] in (["go", "env", "GOBIN"], ["go", "env", "GOPATH"]):
                 return str(self.root / "go-bin")
+            if command[:2] == ["go", "install"]:
+                self.write(self.root / "go-bin/goversioninfo.exe")
+            if command[:3] == ["go", "version", "-m"]:
+                return "mod " + build.GOVERSIONINFO_MODULE + " " + build.GOVERSIONINFO_VERSION
             if command[:2] == ["go", "build"]:
                 self.write(command[command.index("-o") + 1])
             if command[0] == "node":

@@ -26,6 +26,8 @@ SPEC = importlib.util.spec_from_file_location("verify_release", Path(__file__).w
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
 PLATFORMS = ("windows", "linux", "android", "harmony")
+GOVERSIONINFO_MODULE = "github.com/josephspurrier/goversioninfo"
+GOVERSIONINFO_VERSION = "v1.7.0"
 ACTIVE_RECORD = None
 
 
@@ -581,11 +583,26 @@ class Builder:
                 self.windows_arch(arch, config)
 
     def windows_tools(self):
-        run(["go", "install", "github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest"], ROOT / "kernel")
         go_bin = run(["go", "env", "GOBIN"], ROOT, capture=True)
         if not go_bin:
             go_bin = str(Path(run(["go", "env", "GOPATH"], ROOT, capture=True).split(os.pathsep)[0]) / "bin")
-        run([Path(go_bin) / "goversioninfo.exe", "-platform-specific=true", "-icon=resource/icon.ico",
+        tool = Path(go_bin) / "goversioninfo.exe"
+        def matches():
+            if not tool.is_file():
+                return False
+            try:
+                metadata = run(["go", "version", "-m", tool], ROOT, capture=True)
+            except BuildError:
+                return False
+            return re.search(r"(?m)^\s*mod\s+" + re.escape(GOVERSIONINFO_MODULE) +
+                             r"\s+" + re.escape(GOVERSIONINFO_VERSION) + r"(?:\s|$)", metadata) is not None
+        if not matches():
+            run(["go", "install", GOVERSIONINFO_MODULE + "/cmd/goversioninfo@" + GOVERSIONINFO_VERSION], ROOT / "kernel")
+            if not matches():
+                raise BuildError("Windows 资源工具安装后的版本不匹配")
+        else:
+            print(f"复用 Windows 资源工具：{GOVERSIONINFO_VERSION}", flush=True)
+        run([tool, "-platform-specific=true", "-icon=resource/icon.ico",
              "-manifest=resource/goversioninfo.exe.manifest"], ROOT / "kernel")
 
     def windows_kernel(self, arch):

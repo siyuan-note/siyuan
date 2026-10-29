@@ -60,6 +60,38 @@ public static class SiYuanReleaseKey {
 }
 '@
 
+function Set-VerifiedFileSignature($file, $certificate) {
+    Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1')
+    $file = [IO.Path]::GetFullPath($file)
+    $temporary = Join-Path ([IO.Path]::GetDirectoryName($file)) ('.siyuan-sign-' + [guid]::NewGuid().ToString('N') + [IO.Path]::GetExtension($file))
+    $inputFile = $null
+    try {
+        # Deny concurrent writes until the verified replacement is installed.
+        $inputFile = [IO.File]::Open($file, [IO.FileMode]::Open, [IO.FileAccess]::Read,
+                                   ([IO.FileShare]::Read -bor [IO.FileShare]::Delete))
+        $originalHash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+        $copy = [IO.File]::Create($temporary)
+        try { $inputFile.CopyTo($copy) } finally { $copy.Dispose() }
+        if ((Get-FileHash -LiteralPath $temporary -Algorithm SHA256).Hash -ne $originalHash) {
+            throw 'Signing input changed during copy'
+        }
+        $script:stage = 'signing'
+        $null = Set-AuthenticodeSignature -LiteralPath $temporary -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
+        $script:stage = 'verification'
+        $signature = Get-AuthenticodeSignature -LiteralPath $temporary
+        [Console]::Error.WriteLine('SIGNING_STATUS:' + [int]$signature.Status + ':' + [int]($null -ne $signature.TimeStamperCertificate))
+        if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $certificate.Thumbprint -or
+            $null -eq $signature.TimeStamperCertificate) { throw 'Signature or timestamp verification failed' }
+        if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $originalHash) {
+            throw 'Signing input changed before replacement'
+        }
+        [IO.File]::Replace($temporary, $file, [System.Management.Automation.Language.NullString]::Value)
+    } finally {
+        if ($null -ne $inputFile) { $inputFile.Dispose() }
+        if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) }
+    }
+}
+
 $payload = $null
 $certificate = $null
 $stage = "request"
@@ -85,14 +117,7 @@ try {
     [SiYuanReleaseKey]::Authenticate($certificate.Handle, $payload.pin, $oid -eq '1.2.840.113549.1.1.1')
     $payload.pin = $null
     foreach ($file in $payload.files) {
-        $stage = "signing"
-        $signature = Set-AuthenticodeSignature -LiteralPath $file -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com"
-        $stage = 'verification'
-        [Console]::Error.WriteLine('SIGNING_STATUS:' + [int]$signature.Status + ':' + [int]($null -ne $signature.TimeStamperCertificate))
-        if ($signature.Status -ne "Valid" -or $signature.SignerCertificate.Thumbprint -ne $certificate.Thumbprint -or
-            $null -eq $signature.TimeStamperCertificate) {
-            throw "Signature or timestamp verification failed"
-        }
+        Set-VerifiedFileSignature $file $certificate
         Write-Output ("Signed and verified: " + $file)
     }
 } catch {

@@ -188,7 +188,7 @@ class BuildTests(unittest.TestCase):
     @unittest.skipUnless(sys.platform == "win32", "Windows certificate provider")
     def test_signing_certificate_provider_loads_without_module_path(self):
         source = Path(__file__).with_name("release-sign-windows.ps1").read_text(encoding="utf-8")
-        load = next(line.strip() for line in source.splitlines() if "Import-Module" in line)
+        load = next(line.strip() for line in source.splitlines() if "Import-Module" in line and "Microsoft.PowerShell.Security" in line)
         env = dict(build.os.environ)
         env.pop("PSModulePath", None)
         result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
@@ -196,6 +196,13 @@ class BuildTests(unittest.TestCase):
                                  "; Get-PSDrive -Name Cert -ErrorAction Stop | Out-Null"],
                                 env=env, capture_output=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows file replacement semantics")
+    def test_staged_signing_preserves_original_on_failure(self):
+        result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+                                 "-File", str(Path(__file__).with_name("test_release_sign_windows.ps1"))],
+                                capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     @unittest.skipUnless(sys.platform == "win32", "需要 Windows 批处理")
     def test_batch_restores_missing_windows_environment_marker(self):

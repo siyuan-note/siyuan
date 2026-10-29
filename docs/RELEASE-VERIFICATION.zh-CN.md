@@ -365,6 +365,8 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 自动执行时可由启动程序通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供 PIN，无需把密码写进命令或脚本。仍需保持签名设备连接；脚本不改变 PIN 或触摸策略，需要触摸的密钥不能完全无人值守。若驱动不支持自动认证，可添加 `--signing-ui` 沿用系统弹窗。
 
+自动签名对每个文件使用同目录临时副本：签名期间禁止原文件写入，副本签名后独立检查签名、证书和时间戳，并确认原文件哈希未变化，才原子替换原文件。失败时保留原文件并删除临时副本，不以重签或忽略 `HashMismatch` 代替验证。安装包收集前仍执行最终验签。
+
 默认按现有证书主题选择有效代码签名证书；多张证书时用 `--certificate-sha1` 指定 40 位公开指纹，它不是密码。SignTool 的 `/p` 是证书文件密码选项，不能当成通用 YubiKey PIN 参数。参见 [Yubico 驱动说明](https://www.yubico.com/support/download/smart-card-drivers-tools/) 和 [SignTool 文档](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)。
 
 ## 可选的完整摘要基准

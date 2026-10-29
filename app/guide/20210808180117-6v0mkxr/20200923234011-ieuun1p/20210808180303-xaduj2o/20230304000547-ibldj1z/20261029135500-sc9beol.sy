@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261029135900"
+		"updated": "20261029155830"
 	},
 	"Children": [
 		{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-7kelad9",
-				"updated": "20261029135500"
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-1na7hjs",
-				"updated": "20261029135500"
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
@@ -90,21 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " . Then scroll to Long-term memory at the bottom of the AI settings, after the Rerank group. Turn on the master switch and choose the dedicated processing model and reasoning effort. Click Manage to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-5k5bwhb",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-5k5bwhb",
-				"updated": "20261029134000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Open "
+					"Data": ". Then open "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -131,97 +117,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to configure shared workspace memory. Choose a separate processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
+					"Data": " at the bottom of the AI settings, after the Rerank group. The master switch starts off; turn it on to use long-term memory. Click Manage to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
 				}
 			]
 		},
 		{
-			"ID": "20261029135500-iknqk8t",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261029135500-iknqk8t",
-				"updated": "20261029135900"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Collection scope"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20261029051700-o1lc8ft",
+			"ID": "20261029051700-5k5bwhb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261029051700-o1lc8ft",
-				"updated": "20261029134000"
+				"id": "20261029051700-5k5bwhb",
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "One switch controls memory use, automatic maintenance, and future user-message capture, and starts off. Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
-				},
-				{
-					"Type": "NodeText",
-					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
-				}
-			]
-		},
-		{
-			"ID": "20261029135500-7s47asc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029135500-7s47asc",
-				"updated": "20261029135500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To record an explicit fact immediately, create and confirm it in the manager."
-				}
-			]
-		},
-		{
-			"ID": "20261029135900-gllgfcf",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029135900-gllgfcf",
-				"updated": "20261029135900"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "When a decision model is enabled and configured, automatic maintenance of notes not already linked to memories can first screen for clearly empty or purely social content containing no facts, requests, directives or conditions. Only a high-confidence skip omits subsequent memory-model processing, without writing records or overviews. Uncertain or low-confidence results, timeouts, errors or missing configuration fall back to the selected memory model. User messages, manual organization and repairs to existing memory sources bypass this screening. Screening sends permitted source content to the configured decision service and may incur charges; it guarantees neither perfect decisions nor lower total costs."
-				}
-			]
-		},
-		{
-			"ID": "20261029135500-eyepamf",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261029135500-eyepamf",
-				"updated": "20261029135500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Review candidates and changed sources"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20261029135500-vpy6gbc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029135500-vpy6gbc",
-				"updated": "20261029135500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or create a new explicitly confirmed record rather than forcing the old record to become active."
+					"Data": "Choose a dedicated processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
 				}
 			]
 		},
@@ -230,7 +140,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-w46deg2",
-				"updated": "20261029135500"
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
@@ -245,12 +155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-mlne86v",
-				"updated": "20261029051700"
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open Manage to search and inspect records, evidence and scope. New explicitly confirmed records use active. Model suggestions may remain candidate; check their subject, scope, conditions and evidence before selecting active and saving. Correct a record through this manager rather than editing a derived overview."
+					"Data": "Open Manage to search and inspect records, evidence and scope. New explicitly confirmed records use Active (active). Model suggestions may remain Candidate (candidate); check their subject, scope, conditions and evidence before selecting Active (active) and saving. Correct a record through this manager rather than editing a derived overview."
 				}
 			]
 		},
@@ -297,11 +207,40 @@
 			]
 		},
 		{
+			"ID": "20261029135500-eyepamf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-eyepamf",
+				"updated": "20261029155830"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Review candidates and changed sources"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-vpy6gbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-vpy6gbc",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or create a new explicitly confirmed record rather than forcing the old record to become active."
+				}
+			]
+		},
+		{
 			"ID": "20261029135500-oj02bkz",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-oj02bkz",
-				"updated": "20261029135500"
+				"updated": "20261029155830"
 			},
 			"Children": [
 				{
@@ -322,6 +261,67 @@
 				{
 					"Type": "NodeText",
 					"Data": "Organize with model processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model does not prevent manual viewing, correction, disabling or forgetting."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-iknqk8t",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-iknqk8t",
+				"updated": "20261029155830"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection scope"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-o1lc8ft",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-o1lc8ft",
+				"updated": "20261029155830"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-7s47asc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-7s47asc",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To record an explicit fact immediately, create and confirm it in the manager."
+				}
+			]
+		},
+		{
+			"ID": "20261029135900-gllgfcf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135900-gllgfcf",
+				"updated": "20261029135900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a decision model is enabled and configured, automatic maintenance of notes not already linked to memories can first screen for clearly empty or purely social content containing no facts, requests, directives or conditions. Only a high-confidence skip omits subsequent memory-model processing, without writing records or overviews. Uncertain or low-confidence results, timeouts, errors or missing configuration fall back to the selected memory model. User messages, manual organization and repairs to existing memory sources bypass this screening. Screening sends permitted source content to the configured decision service and may incur charges; it guarantees neither perfect decisions nor lower total costs."
 				}
 			]
 		},

@@ -82,7 +82,8 @@ export class DocumentTitleEditor {
             app: owner.app,
             initialBlockHTML: prepareDocumentTitleInitialDOM(initial.blockDOM, this.blockID),
             placeholder: window.siyuan.languages._kernel[16],
-            protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
+            protyleOptions: {notebookId: owner.notebookId, toolbar, hint,
+                click: {preventInsetEmptyBlock: true}},
             runtimeCapabilities: {
                 upload: true, websocket: false, pluginExtensions: false, customBlockRender: false,
                 lute, lockedOptions: {toolbar, hint}, richHTMLPaste: true,

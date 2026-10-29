@@ -984,6 +984,12 @@
 .protyle-title__rich {
   .protyle-content {
     overflow: visible;
+
+    &[data-padding-mode="responsive"] > .protyle-wysiwyg {
+      // 外层标题已跟随正文边距，内部片段不能再次叠加响应式留白。
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 
   .protyle-wysiwyg {

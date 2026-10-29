@@ -39,7 +39,7 @@ Automatic consolidation processes notes and interactions within the allowed scop
 
 After an ordinary conversation or task reaches a suitable stopping point, candidates may be extracted in batches and compared with existing memory. Consolidation should coalesce successive edits and support cancellation and retries, rather than regenerate every file after each keystroke or sentence. A candidate that fails validation should retain a diagnosable failure state without discarding other valid records in the batch.
 
-**Open decisions:** The default consolidation switch, source selection, task-completion event, initial processing of existing notes, and scan budget are not yet determined. The proposed starting point is user-selected source scope rather than sending the entire notebook collection to a model by default. Whatever defaults are chosen, disabling consolidation must prevent new jobs from being queued and require running jobs to recheck permission before committing results.
+Automatic consolidation is off initially. Users select allowed sources before enabling it; enabling it does not queue a full scan of existing notes. Explicit remember, correct, and forget requests remain available independently. Queue consolidation only after a successfully committed ordinary task or a committed source change, coalescing affected sources rather than processing every edit. Disabling consolidation stops new jobs and makes running jobs recheck permission before committing. Source-selection presentation and numerical scan/call budgets may be tuned without changing these boundaries.
 
 ### Model and reasoning-effort configuration
 
@@ -49,13 +49,13 @@ This configuration applies to model calls for candidate extraction, search-term 
 
 If the selected model is removed, disabled, inaccessible, or incompatible with the configuration, preserve existing memory and report the affected tasks rather than silently switching providers or clearing records. Reading existing memory and suspending or withdrawing an unambiguous target without model involvement must not depend on the generation service recovering.
 
-**Open decisions:** The configuration entry point and fields, initial model and reasoning effort, explicit inheritance or fallback options, and the treatment of queued and running tasks after configuration changes remain to be determined. Configuration choices must be traceable rather than chosen ad hoc by the model. Until fallback rules are defined, do not promise automatic completion with another model.
+The shared AI settings expose separate memory-use and automatic-consolidation switches, an independent configured model reference, supported reasoning effort, allowed sources, and processing status. Model selection is initially unset and requires an explicit user choice before model work; effort defaults to the provider/model default, with no unsupported parameter sent. Do not reuse existing model reconciliation that silently selects another enabled model. Validate capabilities by the selected model and protocol; unknown custom-model capabilities do not imply support for arbitrary effort values. Jobs capture a configuration generation and revalidate it before model dispatch and commit; changed configuration cancels stale work for an explicit retry. There is no automatic provider/model fallback in the first version.
 
 ### Visible limitations and failures
 
 No matching memory, incomplete search, inaccessible sources, malformed records, write conflicts, and model service failures must be distinguishable. A failed file search does not mean there is no relevant memory, and failed model generation must not clear existing records. When appropriate, continue the current task and disclose the lack of reliable memory rather than repeatedly interrupting the user to confirm low-value details.
 
-The initial management entry point should support viewing, correcting, and forgetting on desktop and mobile. Its exact location, bulk operations, and support for editing record files directly in external editors remain open decisions.
+The shared AI settings provide the initial management entry for desktop, browser, and mobile viewing, correction, suspension, and forgetting. Bulk-operation UX and supported external-editor workflows can be refined separately; external file changes must still be validated and must not bypass revision or withdrawal checks.
 
 ## Data and storage
 
@@ -69,7 +69,9 @@ data/storage/ai/
 └── memos/
     ├── USER.md
     ├── MEMORY.md
-    └── records/
+    ├── records/
+    │   └── <SiYuanID>.md
+    └── withdrawals/
         └── <SiYuanID>.md
 ```
 
@@ -83,7 +85,7 @@ Model and reasoning-effort choices belong to AI configuration, not `records/` or
 
 ### Canonical records
 
-Each record contains readable Markdown content and fixed metadata validated by the program. The following are conceptual constraints; exact field names, front matter encoding, and format version values are to be determined before implementation.
+Each record uses UTF-8 Markdown with a strictly validated YAML front matter and a readable body. Version 1 metadata includes `schema`, `id`, `kind`, `subject`, `scope`, `state`, `sources`, `created`, `updated`, and operation identity; optional confirmation/validity times and replacement links are separate. Sources carry stable identity, source version, and permitted evidence, not merely a mutable title. Use a constrained typed schema: reject duplicate or unknown keys, aliases, custom tags, invalid types and identities, and unsupported schema versions. Do not use arbitrary YAML objects or implicit time coercion. The following constraints apply:
 
 | Information | Constraint |
 |---|---|
@@ -97,11 +99,13 @@ Each record contains readable Markdown content and fixed metadata validated by t
 
 Content should preserve the subject, action, state, conditions, and negation necessary for later judgments. A provenance link does not establish trust. The program can validate reference existence and access scope, while content judgments still require a model and, where necessary, user review. Metadata parsing must reject ambiguous structures and must not execute arbitrary tags, expressions, or instructions in the content.
 
-Withdrawal information is canonical persistent state, not merely a cache entry. Retain only what is necessary to identify withdrawn records, relevant sources, and revision relationships, without duplicating the content the user asked to forget. Its exact representation, retention period, and cleanup conditions remain open decisions. Until these rules are settled, deletion must not be presented as already providing cross-device protection against resurrection.
+Use `candidate`, `active`, `review`, `disabled`, and `superseded` as record states. Only `active` records with currently valid scope, evidence, and no withdrawal/conflict are eligible. Uncertain extraction stays a candidate; changed or unverifiable evidence moves affected content to review rather than asserting it. Repetition preserves the ID and adds provenance; replacement relationships preserve the distinction between correction and change over time. The service computes a SHA-256 revision of the complete file bytes for compare-and-swap (CAS); the model cannot assign this revision. A semantic fingerprint used for overviews is separate from this byte revision.
+
+Withdrawal information is canonical persistent state under `withdrawals/`, represented by versioned Markdown metadata containing a program-generated ID, target record IDs, source identity/version suppression references, operation ID, and time. It contains no forgotten body or evidence excerpts. Persist the marker before removing the targeted record; if cleanup fails, the marker immediately excludes it from use and status reports incomplete physical cleanup. Retain markers without automatic expiry in the first version; they are not a cache. Old jobs, sync versions, and automatic re-extraction must check these references before committing. A changed source version alone is not permission to restore a withdrawn fact; an ambiguous match remains excluded pending review, while a later explicit remember request can establish a new authorized relationship. Cross-device protection applies only when withdrawal state has reached the device; offline clients cannot promise immediate global erasure.
 
 ### Overview consistency
 
-Overviews must identify the version, or equivalent fingerprint, of usable memory on which they are based, and distinguish content changes from provenance-only changes. The program checks applicability before use. An older overview received through sync must not overwrite canonical records or be accepted solely because its file timestamp is newer.
+Each overview carries the schema and a fingerprint of the complete eligible source set relevant to that overview, including record IDs, semantic content, scope, state, validity, and withdrawal/conflict eligibility. Additions as well as changes and removals invalidate the fingerprint. Provenance-only confirmation may avoid regeneration only if it changes neither meaning nor eligibility. Validate the fingerprint and current access scope before use; a globally generated overview must not leak content outside the caller’s allowed scope. An older overview received through sync must not overwrite canonical records or be accepted solely because its timestamp is newer.
 
 Overview generation uses a verified record snapshot. If relevant records change before the result is saved, discard that stale result and reschedule it. The two overviews may refresh independently; every update need not rewrite both. If an overview is temporarily unavailable, eligible canonical records can be read on demand. Waiting for an overview must not reactivate invalidated content.
 
@@ -118,7 +122,9 @@ Overview generation uses a verified record snapshot. If relevant records change 
 
 Model output is a proposed operation subject to validation, not unrestricted file-write access. The shared service must constrain the target directory, validate paths and file identities, prevent symlink escapes, and reuse existing read-only workspace and access-control rules. Memory content does not elevate source instructions or authorize other actions.
 
-Reading, searching, maintenance, and status queries should use the same kernel service, rather than separate deduplication and update rules in each AI feature. HTTP routes, tool names, and parameters are not yet defined. New interfaces must follow the [API type contracts](API-CONTRACTS.md); conceptual names in this design are not existing APIs.
+Use a low-dependency `kernel/memo` package for parsing, storage, revisions, retrieval, and projection validation; `kernel/model/ai_memory.go` orchestrates sources, configuration, model calls, and sync notification. Shared AI settings and management consume typed kernel contracts, not direct filesystem access. Reading/listing, search, proposed mutations, job cancellation/status, and overview retrieval need explicit typed request/result/error contracts, including revisions, operation IDs, incomplete-search indicators, and saved-record versus pending-overview state. Route and tool spellings are implementation details; new interfaces follow the [API type contracts](API-CONTRACTS.md), including generated declarations. These are planned modules and contracts, not released APIs.
+
+Consumers opt in at the business entry point, reusing the same service across current and future AI features. Do not inject memory in the low-level model protocol adapter. Title generation, compaction, model connection tests, and memory-maintenance model calls must not recursively trigger memory capture.
 
 ### Write and update triggers
 
@@ -134,6 +140,17 @@ Reading, searching, maintenance, and status queries should use the same kernel s
 Deleting a source must neither mechanically delete all related memory nor leave unverifiable content treated as certain. A historical fact still supported by several sources and a preference supported only by a deleted source require different review. An explicit request to forget takes precedence over extraction from the same old source. A later explicit request to remember again may establish a new valid relationship.
 
 Commit records reliably before deriving overviews. A refresh failure does not roll back a successful correction or withdrawal; reported state must distinguish saved records from an overview refresh still pending. Retries need source and operation identity checks so timeouts or process interruptions do not repeatedly create the same memory.
+
+### Validated maintenance pipeline
+
+1. Capture an operation ID, source identities/versions, allowed scope, and configuration generation; derive source authority in the kernel rather than trusting caller-provided IDs
+2. Retrieve related records using original text and optional model-proposed keyword groups; read candidate bodies on demand
+3. Ask the configured model for structured create, reinforce, revise, supersede, or no-op proposals with evidence; model proposals are not filesystem instructions
+4. Recheck source versions, permissions, cancellation, configuration, withdrawals, and expected record revisions before committing
+5. Under a short write lock, allocate IDs, apply CAS and operation deduplication, and atomically save each validated record; never hold the lock across a model request
+6. Notify normal data synchronization, invalidate affected projections, and generate them asynchronously from a fixed eligible snapshot; report individual failures without pretending the batch is a single transaction
+
+A retry carries the same operation ID and source version. Persist completed operation identities with their result record or withdrawal marker, retaining earlier identities rather than overwriting them with only the latest operation, so retry does not create another record. Each item in a multi-record proposal has a stable operation identity across retries. Multi-record proposals report per-record results and can resume only uncommitted operations; a process interruption is not evidence of rollback. A source or record revision conflict requires re-reading and re-evaluation, never forced overwrite.
 
 ### Retrieval and use
 
@@ -161,11 +178,13 @@ Ordinary global Markdown records must not contain plaintext extracted from encry
 
 Canonical records must carry a format version. Unknown formats, malformed metadata, and incomplete writes must not trigger clearing, silent reconstruction, or full-corpus extraction. Preserve the original file, exclude the affected record from use, and report the error while other valid records remain usable. Rebuilding applies only to derived overviews and optional caches; an overview must not replace canonical records in reverse.
 
-Sync conflicts should preserve recoverable versions from both sides and suspend unresolved records from use, rather than use last-write time to decide which preference is correct. An overview written by another device must be checked against source versions before use or regeneration. Concurrent consolidation on several devices must avoid repeatedly overwriting the same overview. The exact merge protocol and generation coordination remain open decisions.
+Memory Markdown needs explicit conflict handling; existing `.sy` conflict-document behavior does not prove it handles these files. Preserve both recoverable versions of a conflicting record before replacement and exclude the unresolved record from retrieval and projections. Reconcile withdrawal markers before activating received records. Do not select truth by device timestamp or last writer. Synced overviews are disposable projections: compare fingerprints, skip an already applicable generation, and regenerate locally only when needed. Verify this integration before enabling automatic maintenance across devices.
 
-Forgetting must consistently invalidate records, overviews, and retrieval results, accounting for older devices, retry queues, repeated extraction, and historical restoration. Historical snapshots may still contain the previous content. Ordinary forgetting is not permanent erasure of all backups, and the UI must explain the distinction. How an explicit historical snapshot restore handles newer withdrawal decisions requires a separate product rule; resurrection prevention must not be promised unconditionally.
+Forgetting must consistently invalidate records, overviews, and retrieval results, accounting for old devices, retries, extraction, and historical restoration. Historical snapshots may still contain previous content: ordinary forgetting is not erasure of all backups. During an in-app snapshot restore, preserve currently known withdrawal markers and reconcile them before exposing restored memory; do not automatically reactivate matching records. Restoring a complete older workspace outside this flow may also remove the newer markers and is outside this guarantee; explain the limitation rather than promising unconditional resurrection prevention.
 
-Before implementation, settle automatic consolidation defaults and budgets, automatic handling of invalid sources, external file editing, withdrawal-state representation, and snapshot restoration rules. These decisions do not change the directory layout, but they determine safe defaults and acceptance criteria and must not be left for the model to choose ad hoc.
+The first version does not automatically resume model jobs after process restart. For requests identifiable from existing persisted task state, report interruption and offer an explicit retry that revalidates configuration, sources, and operation identity; do not claim to reconstruct unpersisted queued jobs or their status; do not add a persistent job database merely to imply recovery. Cancellation acknowledged before commit prevents that commit; cancellation arriving after a successful write cannot undo it and must report what was saved. Projection refresh failure leaves canonical records intact.
+
+Adjustable product choices are source-selection UX, bulk operations, external-editor support, and measured scan/context/call budgets. Safe defaults, record semantics, withdrawal retention, and failure behavior above are implementation requirements rather than decisions delegated to the model.
 
 ## Verification
 
@@ -186,3 +205,5 @@ The specified behavior requires tests after implementation. Neither file format 
 | Cost and performance | Measure search latency, reads, misses, model calls, and cancellation/recovery across dataset sizes |
 
 Evaluate effectiveness through repeated explanations and manual corrections in real tasks, alongside irrelevant-memory use, misses, and cost. Existing small extraction, question-answering, and representation comparisons offer design evidence only. They do not establish effective automatic memory formation, long-term personalization, or synchronized forgetting. Neither record count nor perfect reading-question scores are completion criteria for the first version.
+
+Implementation proceeds through storage and explicit management, file retrieval and model proposals, projection validation and consumer integration, then opt-in automatic consolidation and synchronization/recovery verification. Each stage needs deterministic failure and concurrency tests before the next stage exposes dependent behavior. Use temporary-workspace fixtures for strict parsing, path escapes, CAS, operation retries, source/config changes during calls, invalidated projection additions, withdrawal-before-cleanup failure, Markdown sync conflicts, and restore preservation. Model-driven task evaluation follows these tests and reports accuracy, false adoption, misses, latency, and cost separately; no existing benchmark result substitutes for these lifecycle checks.

@@ -134,6 +134,14 @@ python -X utf8 scripts/build-release.py --appx --execute
 
 包含 Windows 时，先隐藏输入一次签名 PIN；预检验证通过后自动完成后续签名。仅查看计划或构建其他平台时不询问 PIN。WSL 的 SSH 认证仍在预检阶段完成，预检通过后再离开电脑。
 
+由代理协助启动时，打开本机可见、可交互的终端运行脚本，让发布者直接在该终端隐藏输入签名 PIN，以及后续可能提示的 SSH 私钥口令。不要通过聊天传递口令，也不要通过无法交互的后台命令启动需要认证的构建。在仓库根目录可执行：
+
+```powershell
+Start-Process -FilePath "powershell.exe" -WorkingDirectory "D:\88250\siyuan" -ArgumentList '-NoExit', '-Command', 'python -u -X utf8 scripts/build-release.py --appx --execute'
+```
+
+默认先输入 Windows 签名 PIN，再在 WSL 同步阶段按提示输入 SSH 私钥口令。若日志停在 `git fetch`，先查看交互终端是否等待认证，不要重复启动构建；认证完成后脚本继续执行。`--signing-ui` 仅将 Windows 签名改为系统认证弹窗，不能代替 WSL 的 SSH 终端交互。
+
 补充：需要单独构建某个平台或排查构建问题时，可选择对应命令：
 
 ```powershell

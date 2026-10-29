@@ -14,7 +14,7 @@ Creation plans retain fixed IDs and never recreate confirmed ancestors. Desktop 
 
 Administrators can read `documentCapabilities` from notebook configuration. It reports structured API support, title capabilities and index readiness; availability follows existing access boundaries. Whole-notebook imports still remap notebook and anchor IDs, partial imports retain destination configuration, and encrypted creation targets retain authentication, password-change and backup recovery boundaries.
 
-All notebooks use structured title rules without a mode switch, mode-1 migration or capability floors. New writes with ASCII `/` in a title use Spec 6; legacy string interfaces check each candidate ancestor chain. Every device must still upgrade together. Default support does not establish release-package, historical-data, performance or platform acceptance; rich root title sources use Spec 7, which every device must support.
+All notebooks use structured title rules without a mode switch, mode-1 migration or capability floors. New writes with ASCII `/` in a title require at least Spec 6, and rich root title sources require at least Spec 7. Compatibility depends on each document's actual source specification and title representation. Legacy string interfaces check each candidate ancestor chain. Default support does not establish release-package, historical-data, performance or platform acceptance.
 
 ## Goals and scope
 
@@ -35,7 +35,7 @@ The design covers desktop, browser, mobile, kernel APIs, and plugin-visible data
 | Readable paths | Join original ancestor title text for display; do not encode `/` or decode `／` or `%2F` |
 | Indexes | Retain existing `hpath` columns and add internal document metadata; do not store full title segment arrays on every content block |
 | Title sources | Preserve existing plain titles; rich titles use a versioned root source with a one-way plain-text summary |
-| Upgrade policy | Stop all clients accessing the same workspace or synchronized data, upgrade every device to a version supporting mode `2` and Spec `7`, and resume only with those versions |
+| Version compatibility | Determine support from each document's actual source specification and title representation without bulk notebook migration; safe mixed use with older clients is not promised |
 
 `/A/B` can describe two documents or one literal title. Legacy queries return results only when every candidate ancestor has a nonempty title without `/`; collisions return an explicit error. Identity operations and structured replacement APIs remain available. Display strings are not stable identities.
 
@@ -370,13 +370,15 @@ Prefer `resolveDocPath` with independent title segments, `createDocByParent` wit
 
 ## Versions, encryption, and recovery
 
-### Coordinated upgrades and older-client risks
+### Document specifications and older-client risks
 
 Mode 1 is retired. Every notebook follows structured rules without migrating or rewriting document IDs, source files, ciphertext or keys. Configuration saves do not generate an addressing-version marker; an existing marker is ignored and omitted on the next ordinary save. Missing notebook configuration or directories do not cause capability reads to stat missing directories or recreate data.
 
 New writes with ASCII `/` in a title require at least Spec 6. Retain independent Spec detection, duplicate-property and single entity-decoding checks, and rejection of unknown title representations and future specifications. Supported historical low-Spec slash sources remain readable and recoverable; raw new writes must carry the required specification. Ordinary documents retain the specification required by body features, without bulk upgrades or version downgrades.
 
-Stop all clients accessing the workspace or synchronized data before upgrading every desktop, mobile and server instance; offline older devices must upgrade before reconnecting. Older clients ignore mode records, and Spec 6 cannot protect every legacy-Spec document in the notebook, so retirement does not permit mixed-version use. The existing isolated `v3.8.9-alpha.4` source probe established direct Spec 6 rejection, continued legacy-Spec reads and stale-edit source overwrite, without covering every old-client operation or complete mixed-device synchronization. Older clients may use verified independent exports or pre-upgrade backups restored into separate workspaces, never overwrite original configuration and resume synchronization.
+Source specifications apply per document, without notebook-level title-mode migration or format protection covering the entire notebook. A client that does not support a specification rejects documents using it, but may still read and write documents retaining earlier formats in the same notebook. Older clients may also write back stale edits from open pages, overwriting newer titles or content and propagating them through sync. Rejection of some documents does not establish protection of the entire notebook or promise safe mixed use of older and newer clients.
+
+The existing isolated `v3.8.9-alpha.4` source probe established direct Spec 6 rejection, continued legacy-Spec reads and stale-edit source overwrite, without covering every old-client operation or complete mixed-device synchronization. When an older client is needed, use verified independent exports or pre-upgrade backups restored into separate workspaces, and avoid syncing that client's writes back to the original data.
 
 Plain titles containing ASCII `/` require at least `DocumentTitleSpec = "6"`; a root rich title source requires at least `RichDocumentTitleSpec = "7"`, even when its summary contains no slash. Normal tree writes raise specifications as needed without downgrading newer body formats. Client upgrades, no-op title reads, and ordinary formatting do not upgrade untouched plain titles to rich sources. The title envelope also has its own version; unknown source representations are never tolerated and overwritten.
 
@@ -426,9 +428,9 @@ The versioned configuration-payload extension retains the existing authenticated
 | D: New characters | Uniform structured rules and index recovery, legacy API rejection, plugin migration guidance, cross-notebook operations, and import/export checks | Ordinary builds support `/` by default; whole-subtree preflight, index recovery, and all release criteria must pass to complete external release acceptance |
 | E: Inline titles | Spec `7` source, source-aware editing, title backlinks, conversions, and export | Retain identity APIs and plain creation limits; verify full native inline preservation, conditional writes, undo, encryption, and unsupported-writer protection |
 
-Stages A through E describe implementation and acceptance groups, not separate transitional releases. The current development work includes inline titles without changing the foundational identity and creation protocols. Each relevant release condition and the coordinated-upgrade instructions still apply; source implementation and focused regression checks do not establish completed package, platform, performance, or third-party plugin acceptance.
+Stages A through E describe implementation and acceptance groups, not separate transitional releases. The current development work includes inline titles without changing the foundational identity and creation protocols. Each relevant release condition and compatibility requirement verified against per-document source specifications still applies; source implementation and focused regression checks do not establish completed package, platform, performance, or third-party plugin acceptance.
 
-Release gates include migrated built-in consumers, replacement APIs and plugin guidance shipped with the feature, verified existing-data compatibility and format/capability rejection, interruptible ordinary and encrypted index migration, exports that do not overwrite files due to display-path collisions, consistent desktop/browser/mobile behavior, and user guides in all four bundled languages covering default behavior, plugin impact, coordinated upgrades, and the consequences of older-client mixed use. Safe mixed use with older clients is not a supported release scenario.
+Release gates include migrated built-in consumers, replacement APIs and plugin guidance shipped with the feature, verified existing-data compatibility and format/capability rejection, interruptible ordinary and encrypted index migration, exports that do not overwrite files due to display-path collisions, consistent desktop/browser/mobile behavior, and user guides in all four bundled languages consistent with implemented default behavior, plugin impact, and available features. Regression coverage for older data and protocols does not promise safe mixed use with older clients.
 
 The implementation uses `.sy` specification `6` for literal slash titles and `7` for rich title sources. Performance measurements, compatibility results, and platform acceptance remain release evidence. No separate protective-release number is required for this issue's completion. Any later assignment of a feature-release version must be supported by verification of the actual release and its capabilities. Completing documentation, passing isolated tests, or rebuilding an index once does not establish full feature acceptance.
 

@@ -296,6 +296,9 @@ def check_signing_pin(pin, thumbprint):
         if result.returncode == 0:
             return
         if result.returncode != 20 or attempt:
+            diagnostic = re.search(r'SIGNING_DIAGNOSTIC:(request|certificate|authentication):((?:0x[0-9a-fA-F]{8},?)+)', result.stderr or '')
+            if diagnostic:
+                print(diagnostic.group(0), flush=True)
             raise BuildError("Windows 签名认证失败，请检查 PIN、设备和证书；PIN 错误不会自动重试")
         # 仅重试已识别的设备通信中断，不重试 PIN 错误。
         time.sleep(1)

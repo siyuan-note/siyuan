@@ -89,6 +89,28 @@ class BuildTests(unittest.TestCase):
                     self.assertNotIn("secret", str(error.exception))
             self.assertEqual(run.call_count, len(codes))
 
+    def test_signing_diagnostic_does_not_echo_raw_stderr(self):
+        result = subprocess.CompletedProcess([], 1, stdout="secret", stderr=
+            "secret SIGNING_DIAGNOSTIC:authentication:0x8010006b,0x80131500 secret")
+        output = io.StringIO()
+        with patch.object(build.subprocess, "run", return_value=result), contextlib.redirect_stdout(output):
+            with self.assertRaises(build.BuildError):
+                build.check_signing_pin("secret", "A" * 40)
+        self.assertEqual(output.getvalue().strip(),
+                         "SIGNING_DIAGNOSTIC:authentication:0x8010006b,0x80131500")
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows certificate provider")
+    def test_signing_certificate_provider_loads_without_module_path(self):
+        source = Path(__file__).with_name("release-sign-windows.ps1").read_text(encoding="utf-8")
+        load = next(line.strip() for line in source.splitlines() if "Import-Module" in line)
+        env = dict(build.os.environ)
+        env.pop("PSModulePath", None)
+        result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                                 "$ErrorActionPreference='Stop'; " + load +
+                                 "; Get-PSDrive -Name Cert -ErrorAction Stop | Out-Null"],
+                                env=env, capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     @unittest.skipUnless(sys.platform == "win32", "需要 Windows 批处理")
     def test_batch_restores_missing_windows_environment_marker(self):
         batch = self.write(self.root / "environment.bat",

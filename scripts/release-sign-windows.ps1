@@ -62,12 +62,15 @@ public static class SiYuanReleaseKey {
 
 $payload = $null
 $certificate = $null
+$stage = "request"
 try {
     # PIN 仅通过标准输入传递，失败信息不包含请求内容。
     $payload = [Console]::ReadLine() | ConvertFrom-Json
     if ($payload.thumbprint -notmatch '^[0-9a-fA-F]{40}$' -or [string]::IsNullOrEmpty($payload.pin)) {
         throw "Invalid signing request"
     }
+    $stage = "certificate"
+    Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1')
     $certificate = Get-Item -LiteralPath ("Cert:\CurrentUser\My\" + $payload.thumbprint)
     if (!$certificate.HasPrivateKey -or $certificate.NotAfter -le (Get-Date) -or
         $certificate.NotBefore -ge (Get-Date) -or
@@ -78,6 +81,7 @@ try {
     if ($oid -notin @('1.2.840.113549.1.1.1', '1.2.840.10045.2.1')) {
         throw "The signing key must use RSA or ECDSA"
     }
+    $stage = "authentication"
     [SiYuanReleaseKey]::Authenticate($certificate.Handle, $payload.pin, $oid -eq '1.2.840.113549.1.1.1')
     $payload.pin = $null
     foreach ($file in $payload.files) {
@@ -89,6 +93,9 @@ try {
         Write-Output ("Signed and verified: " + $file)
     }
 } catch {
+    $codes = @([regex]::Matches($_.Exception.ToString(), '0x[0-9a-fA-F]{8}') | ForEach-Object { $_.Value })
+    $codes += '0x' + $_.Exception.HResult.ToString('x8')
+    [Console]::Error.WriteLine('SIGNING_DIAGNOSTIC:' + $stage + ':' + ($codes -join ','))
     [Console]::Error.WriteLine("Windows hardware signing failed; check the PIN, token, certificate and timestamp connection")
     # 仅标识设备通信中断，PIN 错误不重试，避免消耗智能卡重试次数。
     if ($_.Exception.ToString() -match '0x8010001f|0x80100068') { exit 20 }

@@ -43,6 +43,7 @@ import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../p
 import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 import {canBatchConvertHeadings, showHeadingBatchDialog} from "../../protyle/util/headingBatch";
 import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
+import {renderOutlineDocumentTitle} from "../../protyle/header/outlineDocumentTitle";
 
 export class Outline extends Model {
     private currentRequestID = 0;
@@ -516,9 +517,17 @@ export class Outline extends Model {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }
                 const title = getDocDisplayName(ial.title, ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
-                docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
+                const previous = docTitleElement.querySelector<HTMLElement>(".b3-list-item__text");
+                const label = previous?.dataset.documentTitleId === this.blockId && this.blockId ? previous.outerHTML :
+                    `<span class="b3-list-item__text">${escapeHtml(title)}</span>`;
+                docTitleElement.innerHTML = `${iconHTML}${label}${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
                 docTitleElement.setAttribute("title", title);
                 docTitleElement.classList.remove("fn__none");
+                if (this.blockId) {
+                    const id = this.blockId;
+                    renderOutlineDocumentTitle(docTitleElement.querySelector(".b3-list-item__text"), id,
+                        this.getNotebookId(), () => this.blockId === id);
+                }
             }
             // count 为 -1 时，不对数量进行更新
             if (typeof count === "number" && count !== -1) {

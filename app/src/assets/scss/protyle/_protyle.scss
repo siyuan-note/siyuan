@@ -4,6 +4,20 @@
 @use "attr" as *;
 @use "mindmap-view" as *;
 @use "block-resize" as *;
+@use "inline";
+
+.b3-typography.outline-document-title {
+  display: block;
+  font-size: inherit;
+  font-family: inherit;
+  @include inline.interactive-marks;
+
+  img {
+    max-height: 1.5em;
+    width: auto;
+    vertical-align: middle;
+  }
+}
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;

@@ -39,6 +39,7 @@ const setup = () => {
         require: (id: string) => {
             switch (id) {
                 case "../../layout/Model": return {Model: class {}};
+                case "../../protyle/header/outlineDocumentTitle": return {renderOutlineDocumentTitle: () => {}};
                 case "../../util/pathName": return {getDocDisplayName: (value: string) => value, isEncryptedBox: (box: string) => box === "secret-box"};
                 case "../../util/escape": return {escapeHtml};
                 case "../../emoji/fileTreeIcon": return {getFileTreeIconHTML: () => ""};

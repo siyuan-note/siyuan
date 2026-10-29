@@ -1558,6 +1558,7 @@ table + .protyle-action__table {
   }
 
   &__height {
+    z-index: 0;
     height: 8px;
     cursor: row-resize;
     touch-action: none;

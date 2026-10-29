@@ -7,6 +7,7 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,6 +24,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocTreeRangeRetriesPendingWriter(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	for _, locate := range []bool{false, true} {
+		finish := cache.BeginDocTreeMutation(fixture.box.ID)
+		done := make(chan struct{})
+		go func() {
+			time.Sleep(10 * time.Millisecond)
+			finish()
+			close(done)
+		}()
+		var err error
+		if locate {
+			_, err = LocateDocTreeItem(context.Background(), fixture.box.ID, fixture.sourceID, DocTreeAccess{})
+		} else {
+			_, err = ListDocTreeRange(context.Background(), fixture.box.ID, "", 0, 32, "", DocTreeAccess{})
+		}
+		<-done
+		if err != nil {
+			t.Fatalf("pending writer (locate=%v): %v", locate, err)
+		}
+	}
+	finish := cache.BeginDocTreeMutation(fixture.box.ID)
+	defer finish()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Millisecond)
+	defer cancel()
+	if _, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 32, "", DocTreeAccess{}); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("retry ignored cancellation: %v", err)
+	}
+}
 
 func TestDocTreeRangeCompleteAndLocate(t *testing.T) {
 	fixture := setupFileOperationTest(t)

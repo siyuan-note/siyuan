@@ -726,6 +726,7 @@ export class MobileFiles extends Model {
 
     public onFiletreeSortChanged(data: {notebook: string, parentPath: string}) {
         const parentID = data.parentPath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "") || "";
+        void this.pinnedDocs?.docTree.reload({notebook: data.notebook, parentID});
         void this.docTree.reload({notebook: data.notebook, parentID});
     }
 
@@ -737,6 +738,7 @@ export class MobileFiles extends Model {
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
         this.pinnedDocs.scheduleRefresh();
+        void this.pinnedDocs.docTree.reload(data.scope === "global" ? undefined : {notebook: data.box});
         updateFileTreeSortMode(data);
         void this.docTree.reload(data.scope === "global" ? undefined : {notebook: data.box});
     }

@@ -112,6 +112,15 @@ for (const mobile of [false, true]) {
     });
 }
 
+test("an unresolved tree row cannot reuse another document selection for its menu", () => {
+    const {exports, items} = setup(false, false, {
+        getItemFromElement: () => undefined,
+        getSelectedItems: () => { throw new Error("Unrelated selections must not become menu targets"); },
+    });
+    exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/target.sy", {} as Element);
+    assert.equal(items.length, 0);
+});
+
 test("document menu keeps the existing configurable IDs, hierarchy and built-in order", () => {
     const {open, items, menuAttributes} = setup();
     open();

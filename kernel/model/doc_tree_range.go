@@ -372,11 +372,29 @@ func (query *docTreeQuery) order(ctx context.Context) (*cache.DocTreeOrder, erro
 	return pending.order, pending.err
 }
 
+// 短暂让出执行机会，避免连续空转耗尽重试，而源写入尚无机会完成。
+func waitDocTreeRetry(ctx context.Context, attempt int) error {
+	if attempt == 0 {
+		return ctx.Err()
+	}
+	timer := time.NewTimer(time.Duration(attempt) * 20 * time.Millisecond)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
 func ListDocTreeRange(ctx context.Context, notebook, parentID string, offset, limit int, revision string, access DocTreeAccess) (*DocTreeRange, error) {
 	if offset < 0 || limit < 1 || limit > 10240 {
 		return nil, fmt.Errorf("invalid document tree range")
 	}
 	for attempt := 0; attempt < 3; attempt++ {
+		if err := waitDocTreeRetry(ctx, attempt); err != nil {
+			return nil, err
+		}
 		version, stable := cache.DocTreeSourceVersion(notebook, true)
 		if !stable {
 			continue
@@ -441,6 +459,9 @@ func LocateDocTreeItem(ctx context.Context, notebook, id string, access DocTreeA
 		return nil, errDocTreeUnavailable
 	}
 	for attempt := 0; attempt < 3; attempt++ {
+		if err := waitDocTreeRetry(ctx, attempt); err != nil {
+			return nil, err
+		}
 		version, stable := cache.DocTreeSourceVersion(notebook, true)
 		if !stable {
 			continue

@@ -421,17 +421,18 @@ exports.cases = async sources => {
         source.range = request => reject ? original(request) : new Promise((_resolve, fail) => { reject = fail; });
         const older = controller.reload();
         while (!reject) { await Promise.resolve(); }
-        await controller.reload();
+        const newer = controller.reload();
         const warnings = [];
         const warn = console.warn;
         console.warn = (...args) => warnings.push(args);
         try {
             reject(new Error("document tree changed, please retry"));
             await older;
+            await newer;
         } finally {
             console.warn = warn;
         }
-        check.equal(warnings.length, 0, "a superseded request cannot report a current load failure");
+        check.equal(warnings.length, 1, "a failed refresh is reported once before its queued successor recovers");
         check.equal(element.querySelector("[data-tree-loading]"), null);
         check.ok(controller.getMountedElement("notebook:box/d0"), "an older failure cannot replace the newer completed refresh");
         fixture.destroy();
@@ -543,6 +544,75 @@ exports.cases = async sources => {
         element.querySelector("[data-tree-loading]").click();
         await frame();
         check.ok(controller.getMountedElement("notebook:box/d0"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(15);
+        const {controller, source} = fixture;
+        await controller.toggle("notebook:box", true);
+        await controller.select("notebook:box/d0", {scroll: false});
+        await frame();
+        const row = controller.getMountedElement("notebook:box/d5");
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        const refresh = controller.reload();
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        check.equal(controller.getItemFromElement(row).id, "d5", "visible refresh rows remain actionable");
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d0"]);
+        row.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        await controller.select(row.dataset.treeKey, {scroll: false});
+        source.range = range;
+        release();
+        await refresh;
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d5"], "refresh cannot restore an older selection over a click");
+        fixture.destroy();
+    }
+    {
+        const fixture = make(10);
+        const {controller, source} = fixture;
+        await controller.toggle("notebook:box", true);
+        await controller.select("notebook:box/d5", {scroll: false});
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        const first = controller.reload();
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        const second = controller.reload({notebook: "box", parentID: ""});
+        source.range = range;
+        release();
+        await Promise.all([first, second]);
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d5"], "overlapping refreshes retain selection");
+        let stale = true;
+        source.range = async request => {
+            const result = await range(request);
+            if (stale) { stale = false; return {...result, stale: true, files: []}; }
+            return result;
+        };
+        await controller.reload();
+        await controller.reloadTail;
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d5"], "stale ranges during refresh do not deadlock the refresh queue");
+        fixture.destroy();
+    }
+    {
+        const fixture = make(70);
+        const {controller, source, directories} = fixture;
+        const range = source.range;
+        source.range = async request => ({...await range(request), effectiveSortMode: 3});
+        await controller.toggle("notebook:box", true);
+        const directory = controller.model.directory(controller.model.roots[0]);
+        check.equal(directory.indices.has("d69"), false);
+        directories.get("").unshift(directories.get("").pop());
+        fixture.revise("two");
+        controller.handleMessage({cmd: "reloadDocInfo", data: {box: "box", rootID: "d69", hMtime: "updated"}});
+        await controller.reloadTail;
+        check.equal(directory.files.get(0).id, "d69", "offscreen metadata changes invalidate dependent sorting");
         fixture.destroy();
     }
     return "File tree selection cases passed";

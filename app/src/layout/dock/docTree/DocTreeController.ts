@@ -58,6 +58,8 @@ export class DocTreeController {
     private interaction = 0;
     private generation = 0;
     private refresh: {interaction: number};
+    private reloadTail: Promise<void>;
+    private refreshItems = new Map<string, IDocTreeItem>();
     private disposed = false;
     private frame = 0;
     private rowHeight = 28;
@@ -167,7 +169,8 @@ export class DocTreeController {
     public getItem(key: string) {
         return this.model.getItem(key) || this.selected.get(key) ||
             (key === this.focused ? this.focusedItem : undefined) ||
-            (key === this.anchor ? this.anchorItem : undefined);
+            (key === this.anchor ? this.anchorItem : undefined) ||
+            (this.mounted.has(key) ? this.refreshItems.get(key) : undefined);
     }
 
     private positionOf(key: string) {
@@ -639,7 +642,21 @@ export class DocTreeController {
     }
 
     public async reload(filter: {notebook?: string, parentID?: string} = {}) {
+        const previous = this.reloadTail;
+        const pending = (async () => {
+            if (previous) { await previous; }
+            await this.performReload(filter);
+        })();
+        this.reloadTail = pending.catch((): void => undefined);
+        return pending;
+    }
+
+    private async performReload(filter: {notebook?: string, parentID?: string}) {
         if (this.disposed) { return; }
+        this.mounted.forEach((_, key) => {
+            const item = this.getItem(key);
+            if (item) { this.refreshItems.set(key, item); }
+        });
         const refresh = {interaction: this.interaction};
         this.refresh = refresh;
         try {
@@ -648,6 +665,7 @@ export class DocTreeController {
             // 只发布最新刷新结果；加载过程保留已有行，真实输入仍可立即更新视区。
             if (this.refresh === refresh) {
                 this.refresh = undefined;
+                this.refreshItems.clear();
                 this.render();
             }
         }
@@ -673,12 +691,6 @@ export class DocTreeController {
         const generation = ++this.generation;
         const operation = ++this.operation;
         this.finishSelection(this.selectionPending);
-        if (this.focusedItem && affected(this.focusedItem) && this.focusedItem.parentKey) {
-            this.focusedItem = undefined;
-        }
-        if (this.anchorItem && affected(this.anchorItem) && this.anchorItem.parentKey) {
-            this.anchorItem = undefined;
-        }
         this.model.invalidate(filter.notebook, filter.parentID);
         for (const [key, page] of this.pages) {
             if ((!filter.notebook || page.directory.notebookId === filter.notebook) &&
@@ -686,14 +698,14 @@ export class DocTreeController {
                 this.pages.delete(key);
             }
         }
-        this.selected = new Map(selected.filter(item => !affected(item) || !item.parentKey).map(item => [item.occurrenceKey, item]));
         this.errors.clear();
         this.version++;
         await this.restoreExpanded(expanded);
         if (this.disposed || generation !== this.generation) {
             return;
         }
-        const nextSelection = new Map(this.selected);
+        const nextSelection = new Map(selected.filter(item => !affected(item) || !item.parentKey)
+            .map(item => [item.occurrenceKey, item]));
         const groups = new Map<string, IDocTreeItem[]>();
         for (const item of selected) {
             if (affected(item) && item.parentKey) {
@@ -790,7 +802,7 @@ export class DocTreeController {
             for (const key of ["name", "name1", "alias", "memo", "bookmark", "icon", "hMtime", "hCtime", "hSize", "subFileCount", "count", "titleEmpty"] as const) {
                 if (data.data[key] !== undefined) { Object.assign(metadata, {[key]: data.data[key]}); }
             }
-            this.applyMetadata(data.data.rootID, metadata, true);
+            this.applyMetadata(data.data.rootID, metadata, true, data.data.box);
         } else if (["create", "heading2doc", "li2doc", "createdailynote", "rename"].includes(data.cmd)) {
             const notebook = data.data.box?.id || data.data.box;
             const path = data.data.path;
@@ -841,7 +853,7 @@ export class DocTreeController {
         this.options.onExpansionChange?.();
     }
 
-    private applyMetadata(id: string, metadata: Partial<IFile>, refreshSort: boolean) {
+    private applyMetadata(id: string, metadata: Partial<IFile>, refreshSort: boolean, notebook?: string) {
         const changed = new Map<string, {notebook: string, parentID: string}>();
         const updateItem = (item: IDocTreeItem) => {
             if (item.id !== id) { return item; }
@@ -856,9 +868,9 @@ export class DocTreeController {
         this.model.directories.forEach(directory => {
             const index = directory.indices.get(id);
             const file = index === undefined ? undefined : directory.files.get(index);
-            if (!file) { return; }
-            directory.files.set(index, {...file, ...metadata});
-            if (refreshSort && [2, 3, 7, 8, 11, 12, 13, 14].includes(directory.effectiveSortMode)) {
+            if (file) { directory.files.set(index, {...file, ...metadata}); }
+            if (refreshSort && (file || notebook === directory.notebookId) &&
+                [2, 3, 7, 8, 11, 12, 13, 14].includes(directory.effectiveSortMode)) {
                 changed.set(directory.key, {notebook: directory.notebookId, parentID: directory.parentID});
             }
         });
@@ -971,7 +983,10 @@ export class DocTreeController {
             console.warn("Failed to load document tree range", error);
         }).then(async () => {
             if (stale && !this.disposed && generation === this.generation) {
-                await this.reload({notebook: directory.notebookId, parentID: directory.parentID});
+                const refreshing = Boolean(this.refresh);
+                const reload = this.reload({notebook: directory.notebookId, parentID: directory.parentID});
+                // 当前刷新可能正等待本次 load，不能反过来等待队列中的刷新。
+                if (!refreshing) { await reload; }
             }
         }).finally(() => this.inFlight.delete(key));
         this.inFlight.set(key, request);
@@ -1182,6 +1197,7 @@ export class DocTreeController {
         this.anchor = undefined;
         this.anchorItem = undefined;
         this.mounted.clear();
+        this.refreshItems.clear();
         this.pages.clear();
         this.errors.clear();
         this.inFlight.clear();

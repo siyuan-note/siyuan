@@ -101,6 +101,7 @@ const getMenuSelection = (liElement: Element) => {
     let elements: () => NodeListOf<HTMLElement>;
     if (controller) {
         const item = controller.getItemFromElement(liElement);
+        if (!item) { return; }
         if (item && !controller.getSelectedItems().some(value => value.occurrenceKey === item.occurrenceKey)) {
             void controller.select(item.occurrenceKey);
         }

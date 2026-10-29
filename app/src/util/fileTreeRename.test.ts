@@ -8,7 +8,7 @@ for (const sourcePath of ["src/layout/dock/Files.ts", "src/mobile/dock/MobileFil
     const source = createSourceFile(sourcePath, readFileSync(sourcePath, "utf8"), ScriptTarget.ES2021, true);
     const declaration = source.statements.find(isClassDeclaration);
     const methods = declaration.members.filter(member =>
-        ["onRename", "onFiletreeSortChanged"].includes(member.name?.getText(source))
+        ["onRename", "onFiletreeSortChanged", "onDocSortModeChanged"].includes(member.name?.getText(source))
     ).map(member => member.getText(source)).join("\n");
     const compiled = transpileModule(`class Handler {${methods}} exports.Handler = Handler;`, {
         compilerOptions: {target: ScriptTarget.ES2021},
@@ -18,20 +18,30 @@ for (const sourcePath of ["src/layout/dock/Files.ts", "src/mobile/dock/MobileFil
         test(`${sourcePath}: renaming an unmounted row refreshes notebook ordering and metadata in ${parentPath}`, () => {
             const exports: {Handler?: new () => {
                 docTree: {reload: (filter: {notebook: string}) => Promise<void>};
+                pinnedDocs: {docTree: {reload: (filter?: {notebook: string}) => Promise<void>}, scheduleRefresh: () => void};
+                onDocSortModeChanged: (data: {scope: string, box: string}) => void;
                 element: {querySelector: () => never};
                 onRename: (data: {box: string, path: string, title: string}) => void;
                 onFiletreeSortChanged: (data: {notebook: string, parentPath: string}) => void;
             }} = {};
-            runInNewContext(compiled, {exports});
+            runInNewContext(compiled, {exports, updateFileTreeSortMode: () => {}, setNoteBook: () => {}});
             const handler = new exports.Handler();
             const requests: {notebook: string, parentID?: string}[] = [];
             handler.docTree = {reload: async filter => { requests.push(filter); }};
+            const pinnedRequests: unknown[] = [];
+            handler.pinnedDocs = {docTree: {reload: async filter => { pinnedRequests.push(filter); }}, scheduleRefresh: () => {}};
             handler.element = {querySelector: () => { throw new Error("An unmounted row has no DOM lookup"); }};
             handler.onRename({box: "notebook", path: `${parentPath}/document.sy`, title: "<new"});
             const expected = {notebook: "notebook", parentID: parentPath === "/" ? "" : "child"};
             assert.equal(JSON.stringify(requests), JSON.stringify([expected]));
             handler.onFiletreeSortChanged({notebook: "notebook", parentPath});
             assert.equal(JSON.stringify(requests), JSON.stringify([expected, expected]));
+            assert.equal(JSON.stringify(pinnedRequests), JSON.stringify([expected]));
+            for (const scope of ["document", "notebook", "global"]) {
+                handler.onDocSortModeChanged({scope, box: "notebook"});
+                assert.equal(JSON.stringify(pinnedRequests.at(-1)),
+                    JSON.stringify(scope === "global" ? undefined : {notebook: "notebook"}));
+            }
         });
     }
 }

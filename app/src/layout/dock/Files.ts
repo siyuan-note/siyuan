@@ -1124,6 +1124,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
 
     public onFiletreeSortChanged(data: {notebook: string, parentPath: string}) {
         const parentID = data.parentPath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "") || "";
+        void this.pinnedDocs?.docTree.reload({notebook: data.notebook, parentID});
         void this.docTree.reload({notebook: data.notebook, parentID});
     }
 
@@ -1135,6 +1136,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
         this.pinnedDocs?.scheduleRefresh();
+        void this.pinnedDocs?.docTree.reload(data.scope === "global" ? undefined : {notebook: data.box});
         updateFileTreeSortMode(data);
         void this.docTree.reload(data.scope === "global" ? undefined : {notebook: data.box});
         if (data.scope === "global") { setNoteBook(() => this.init(false)); }

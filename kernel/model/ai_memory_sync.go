@@ -181,19 +181,27 @@ func memoryOperationsExtend(previous, next []string) bool {
 // memorySyncSourcesChanged 仅通知真实变更的文档身份，模型整理不在仓库写锁内执行。
 func memorySyncSourcesChanged(result *dejavu.MergeResult) {
 	ids := []string{}
+	databaseIDs := []string{}
 	for _, file := range result.Upserts {
 		if strings.HasSuffix(file.Path, ".sy") {
 			ids = append(ids, strings.TrimSuffix(path.Base(file.Path), ".sy"))
+		}
+		if id := memoryDatabasePathID(file.Path); id != "" {
+			databaseIDs = append(databaseIDs, id)
 		}
 	}
 	for _, file := range result.Removes {
 		if strings.HasSuffix(file.Path, ".sy") {
 			ids = append(ids, strings.TrimSuffix(path.Base(file.Path), ".sy"))
 		}
+		if id := memoryDatabasePathID(file.Path); id != "" {
+			databaseIDs = append(databaseIDs, id)
+		}
 	}
 	if len(ids) > 0 {
 		QueueAIMemorySources(ids)
 	}
+	QueueAIMemoryDatabaseSources(databaseIDs)
 }
 
 // memoryCommittedSourcesChanged 在事务成功并释放资源后才安排复核，失败事务不产生候选。

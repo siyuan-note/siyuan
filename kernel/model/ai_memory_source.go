@@ -1,17 +1,203 @@
 package model
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func memoryDatabasePathID(name string) string {
+	const prefix = "/storage/av/"
+	if !strings.HasPrefix(name, prefix) || !strings.HasSuffix(name, ".json") {
+		return ""
+	}
+	id := strings.TrimSuffix(strings.TrimPrefix(name, prefix), ".json")
+	if !ast.IsNodeIDPattern(id) {
+		return ""
+	}
+	return id
+}
+
+// 只从已提交的数据库写入日志提取变化，读取和相同字节写入不产生整理任务。
+func (tx *Transaction) memoryChangedDatabaseIDs() []string {
+	ids := map[string]bool{}
+	collect := func(file *documentSourceFile) {
+		if file == nil || file.Kind != "database" || file.Box != "" || bytes.Equal(file.Before, file.After) {
+			return
+		}
+		if id := memoryDatabasePathID(file.Path); id != "" {
+			ids[id] = true
+		}
+	}
+	if tx.sourceJournal != nil {
+		for _, file := range tx.sourceJournal.Files {
+			collect(file)
+		}
+	}
+	for _, file := range tx.sourceDatabaseBefore {
+		collect(file)
+	}
+	result := make([]string, 0, len(ids))
+	for id := range ids {
+		result = append(result, id)
+	}
+	sort.Strings(result)
+	return result
+}
+
+var memoryDatabaseQueue = struct {
+	sync.Mutex
+	workspace string
+	ids       map[string]bool
+	timer     *time.Timer
+}{ids: map[string]bool{}}
+
+// 数据库文件变更只复核已有记忆引用的来源，不把整张表或所有笔记提交给模型。
+func QueueAIMemoryDatabaseSources(ids []string) {
+	if len(ids) == 0 || Conf == nil || util.ReadOnly || util.IsDisabledFeature("ai") {
+		return
+	}
+	workspace := util.DataDir
+	memoryDatabaseQueue.Lock()
+	defer memoryDatabaseQueue.Unlock()
+	if memoryDatabaseQueue.workspace != workspace {
+		memoryDatabaseQueue.workspace = workspace
+		memoryDatabaseQueue.ids = map[string]bool{}
+	}
+	for _, id := range ids {
+		if ast.IsNodeIDPattern(id) {
+			memoryDatabaseQueue.ids[id] = true
+		}
+	}
+	if len(memoryDatabaseQueue.ids) == 0 {
+		return
+	}
+	if memoryDatabaseQueue.timer != nil {
+		memoryDatabaseQueue.timer.Stop()
+	}
+	memoryDatabaseQueue.timer = time.AfterFunc(1500*time.Millisecond, func() {
+		memoryDatabaseQueue.Lock()
+		if memoryDatabaseQueue.workspace != workspace || util.DataDir != workspace {
+			memoryDatabaseQueue.Unlock()
+			return
+		}
+		pending := memoryDatabaseQueue.ids
+		memoryDatabaseQueue.ids = map[string]bool{}
+		memoryDatabaseQueue.Unlock()
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		sources, err := memoryDatabaseSourceIDs(ctx, workspace, pending)
+		if util.DataDir != workspace || Conf == nil {
+			return
+		}
+		if err != nil {
+			recordAIMemoryFailure("database-source-change:"+ast.NewNodeID(), err)
+			return
+		}
+		if len(sources) > 0 {
+			QueueAIMemorySources(sources)
+		}
+	})
+}
+
+func memoryDatabaseSourceIDs(ctx context.Context, workspace string, databaseIDs map[string]bool) ([]string, error) {
+	ids := map[string]bool{}
+	err := memoryExistingSources(ctx, workspace, func(source memo.Source) {
+		var evidence struct {
+			Databases []struct {
+				ID string `json:"id"`
+			} `json:"databases"`
+		}
+		if json.Unmarshal([]byte(source.Evidence), &evidence) != nil {
+			return
+		}
+		for _, database := range evidence.Databases {
+			if databaseIDs[database.ID] {
+				ids[source.ID] = true
+			}
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return memorySortedSourceIDs(ids), nil
+}
+
+// 文档变更保留原始事件，并补入该文档内已有记忆引用的小子树；不回扫笔记库。
+func memoryAffectedSourceIDs(ctx context.Context, workspace string, pending []string) ([]string, error) {
+	ids := map[string]bool{}
+	for _, id := range pending {
+		if ast.IsNodeIDPattern(id) {
+			ids[id] = true
+		}
+	}
+	roots := map[string]bool{}
+	for id := range ids {
+		roots[id] = true
+	}
+	err := memoryExistingSources(ctx, workspace, func(source memo.Source) {
+		bt := treenode.GetBlockTree(source.ID)
+		if bt != nil && roots[bt.RootID] && !IsEncryptedBox(bt.BoxID) {
+			ids[source.ID] = true
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return memorySortedSourceIDs(ids), nil
+}
+
+func memoryExistingSources(ctx context.Context, workspace string, visit func(memo.Source)) error {
+	store := memo.NewStore(workspace)
+	for offset := 0; ; {
+		page, err := store.Search(ctx, memo.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
+		if err != nil {
+			return err
+		}
+		if len(page.Errors) > 0 {
+			return memo.ErrIncomplete
+		}
+		for _, entry := range page.Entries {
+			for _, source := range entry.Record.Sources {
+				if source.Kind != "block" || !ast.IsNodeIDPattern(source.ID) {
+					continue
+				}
+				visit(source)
+			}
+		}
+		if !page.Incomplete {
+			break
+		}
+		if len(page.Entries) == 0 {
+			return memo.ErrIncomplete
+		}
+		offset += len(page.Entries)
+	}
+	return nil
+}
+
+func memorySortedSourceIDs(ids map[string]bool) []string {
+	result := make([]string, 0, len(ids))
+	for id := range ids {
+		result = append(result, id)
+	}
+	sort.Strings(result)
+	return result
+}
 
 type memoryNativeField struct {
 	ID       string     `json:"id"`
@@ -70,10 +256,14 @@ func memoryNativeEvidence(tree *parse.Tree, node *ast.Node) ([]byte, error) {
 		names = append(names, id)
 	}
 	sort.Strings(names)
+	// Node 的 Tokens/Type/FirstChild 不直接参与 JSON 编码；使用原生 .sy
+	// 渲染器投影当前 AST。渲染器会修改临时字段，因此只能操作独立子树副本。
+	engine := util.NewLute()
+	nativeNode := render.NewJSONRenderer(&parse.Tree{Root: cloneRenderNode(node)}, engine.RenderOptions, engine.ParseOptions).Render()
 	result := struct {
-		Node      *ast.Node              `json:"node"`
+		Node      json.RawMessage        `json:"node"`
 		Databases []memoryNativeDatabase `json:"databases"`
-	}{Node: node, Databases: []memoryNativeDatabase{}}
+	}{Node: nativeNode, Databases: []memoryNativeDatabase{}}
 	for _, id := range names {
 		if !ast.IsNodeIDPattern(id) {
 			return nil, errors.New("invalid memory database reference")

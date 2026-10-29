@@ -157,6 +157,13 @@ func ValidateWithdrawal(data []byte, id string) error {
 	if len(w.Sources) == 0 {
 		return ErrInvalid
 	}
+	seen := map[string]bool{}
+	for _, hash := range w.OperationHashes {
+		if !validHash(hash) || seen[hash] {
+			return ErrInvalid
+		}
+		seen[hash] = true
+	}
 	for _, source := range w.Sources {
 		if source.ID == "" || source.Kind == "" || source.Evidence != "" {
 			return ErrInvalid

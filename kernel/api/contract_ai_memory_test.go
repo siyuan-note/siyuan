@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAPIContractAIMemoryLifecycle(t *testing.T) {
@@ -37,6 +40,7 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 		return result.Data
 	}
 	q := apicontract.AIMemorySaveRequest{Revision: "missing", OperationID: "manual-1", Content: "I prefer concise explanations", Kind: "preference", Subject: "user", Scope: "workspace", State: "active"}
+	original := q
 	var saved apicontract.AIMemorySaveData
 	if err := json.Unmarshal(call("save", q, 0), &saved); err != nil {
 		t.Fatal(err)
@@ -59,5 +63,19 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	json.Unmarshal(call("list", apicontract.AIMemoryListRequest{}, 0), &listed)
 	if len(listed.Records) != 0 {
 		t.Fatal("withdrawn record still listed")
+	}
+	call("save", original, -1)
+	// 撤回标记已生效，但同步残留的目标暂时不能物理删除，响应仍保留成功状态。
+	blocked := filepath.Join(util.DataDir, "storage", "ai", "memos", "records", saved.ID+".md")
+	if err := os.Mkdir(blocked, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(blocked, "obstacle"), []byte("test"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	var forgotten apicontract.AIMemoryForgetData
+	json.Unmarshal(call("forget", apicontract.AIMemoryForgetRequest{ID: saved.ID, Revision: saved.Revision, OperationID: "forget-1"}, 0), &forgotten)
+	if !forgotten.Saved || !forgotten.CleanupPending {
+		t.Fatalf("partial cleanup response lost durable withdrawal: %+v", forgotten)
 	}
 }

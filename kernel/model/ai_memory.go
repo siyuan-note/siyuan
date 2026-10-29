@@ -102,6 +102,17 @@ func SaveAIMemory(ctx context.Context, q apicontract.AIMemorySaveRequest) (ret a
 		}
 		r = e.Record
 	}
+	if q.ID != "" && r.Content == q.Content && q.State == "active" {
+		var allowed []string
+		if Conf != nil {
+			if cfg := Conf.LoadAI(); cfg != nil && cfg.Memory != nil {
+				allowed = cfg.Memory.Sources
+			}
+		}
+		if !validateMemorySources(ctx, r, allowed) {
+			return ret, errors.New("memory sources require review; restore access or create a new explicitly confirmed record")
+		}
+	}
 	if r.Content != q.Content {
 		r.Sources = nil
 	}
@@ -112,13 +123,33 @@ func SaveAIMemory(ctx context.Context, q apicontract.AIMemorySaveRequest) (ret a
 	r.State = q.State
 	r.Reason = "explicit user update"
 	// 显式管理操作只确认该条记忆，不将任意调用方路径当作笔记来源。
-	r.Sources = append(r.Sources, memo.Source{Kind: "user", ID: q.OperationID, Revision: memoryHash([]byte(q.Content)), Evidence: q.Content})
+	contentRevision := memoryHash([]byte(q.Content))
+	confirmed := slices.ContainsFunc(r.Sources, func(source memo.Source) bool {
+		return source.Kind == "user" && source.Revision == contentRevision && source.Evidence == q.Content
+	})
+	if !confirmed {
+		r.Sources = append(r.Sources, memo.Source{Kind: "user", ID: q.OperationID, Revision: contentRevision, Evidence: q.Content})
+	}
+	if r.State == "active" {
+		r.Confirmed = time.Now().UTC().Format(time.RFC3339Nano)
+	}
 	e, err := store.GuardedRemember(ctx, r, q.Revision, q.OperationID, func() error {
 		if util.DataDir != workspace {
 			return errors.New("memory workspace changed")
 		}
 		if err := memoryWriteAllowed(); err != nil {
 			return err
+		}
+		if r.State == "active" {
+			var allowed []string
+			if Conf != nil {
+				if cfg := Conf.LoadAI(); cfg != nil && cfg.Memory != nil {
+					allowed = cfg.Memory.Sources
+				}
+			}
+			if !validateMemorySources(ctx, r, allowed) {
+				return errors.New("memory sources changed before activation")
+			}
 		}
 		return ctx.Err()
 	})
@@ -133,10 +164,15 @@ func ForgetAIMemory(ctx context.Context, q apicontract.AIMemoryForgetRequest) (a
 		return apicontract.AIMemoryForgetData{}, err
 	}
 	r, err := aiMemoryStore().Forget(ctx, q.ID, q.Revision, q.OperationID)
-	if err == nil {
+	saved := err == nil || r.WithdrawalID != ""
+	if saved {
 		memoryChanged(q.ID)
+		// 撤回已持久化即生效；物理清理失败不能抹去成功状态或阻断标记同步。
+		if r.CleanupPending {
+			err = nil
+		}
 	}
-	return apicontract.AIMemoryForgetData{Saved: err == nil, CleanupPending: r.CleanupPending}, err
+	return apicontract.AIMemoryForgetData{Saved: saved, CleanupPending: r.CleanupPending}, err
 }
 func memoryChanged(id string) { IncSyncIfNeeded(filepath.Join(util.DataDir, "storage", "ai", "memos")) }
 
@@ -282,6 +318,38 @@ type memoryAction struct {
 	Content       string `json:"content"`
 	State         string `json:"state"`
 	SourceIndexes []int  `json:"sourceIndexes"`
+	ValidFrom     string `json:"validFrom,omitempty"`
+	ValidUntil    string `json:"validUntil,omitempty"`
+	Supersedes    string `json:"supersedes,omitempty"`
+}
+
+// 仅把来源明确记载的标准时间写入有效期，不能把记录时间推断为事实时间。
+func memoryActionValidity(a memoryAction, sources []memo.Source) error {
+	for _, value := range []string{a.ValidFrom, a.ValidUntil} {
+		if value == "" {
+			continue
+		}
+		if _, err := time.Parse(time.RFC3339Nano, value); err != nil {
+			return errors.New("invalid memory validity timestamp")
+		}
+		grounded := false
+		for _, index := range a.SourceIndexes {
+			if index >= 0 && index < len(sources) && strings.Contains(sources[index].Evidence, value) {
+				grounded = true
+			}
+		}
+		if !grounded {
+			return errors.New("memory validity timestamp is not explicit in evidence")
+		}
+	}
+	if a.ValidFrom != "" && a.ValidUntil != "" {
+		from, _ := time.Parse(time.RFC3339Nano, a.ValidFrom)
+		until, _ := time.Parse(time.RFC3339Nano, a.ValidUntil)
+		if !until.After(from) {
+			return errors.New("memory validity interval is empty or reversed")
+		}
+	}
+	return nil
 }
 
 // 模型适配函数可在确定性测试替换，生产代码只复用已选择的配置，不初始化凭据。
@@ -508,7 +576,35 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		return
 	}
 	scopes := append([]string{"workspace"}, q.SourceIDs...)
-	result, err := store.Search(ctx, memo.SearchOptions{Terms: terms, Scopes: scopes, States: []string{"active", "candidate", "review"}, Limit: 100})
+	// 文档提交按根 ID 通知，只补入该文档下已有且来源绑定相同子块的记忆范围。
+	for offset := 0; ; {
+		page, scanErr := store.Search(ctx, memo.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
+		if scanErr != nil || len(page.Errors) > 0 {
+			finish(errors.New("memory scope scan incomplete"))
+			return
+		}
+		for _, entry := range page.Entries {
+			if slices.Contains(scopes, entry.Record.Scope) {
+				continue
+			}
+			bt := treenode.GetBlockTree(entry.Record.Scope)
+			if bt == nil || !slices.Contains(q.SourceIDs, bt.RootID) || IsEncryptedBox(bt.BoxID) || !slices.Contains(cfg.Memory.Sources, bt.BoxID) {
+				continue
+			}
+			if slices.ContainsFunc(entry.Record.Sources, func(source memo.Source) bool { return source.Kind == "block" && source.ID == entry.Record.Scope }) {
+				scopes = append(scopes, entry.Record.Scope)
+			}
+		}
+		if !page.Incomplete {
+			break
+		}
+		if len(page.Entries) == 0 {
+			finish(memo.ErrIncomplete)
+			return
+		}
+		offset += len(page.Entries)
+	}
+	result, err := store.Search(ctx, memo.SearchOptions{Terms: terms, Scopes: scopes, States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100})
 	if err != nil || result.Incomplete || len(result.Errors) > 0 {
 		if err == nil {
 			err = errors.New("memory search incomplete; narrow the source before retrying")
@@ -519,6 +615,26 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 	// 固定候选快照的修订只由程序保存，模型不能伪造 CAS。
 	verified := []memo.Entry{}
 	for _, e := range result.Entries {
+		// 仅用本轮已核验的相同来源身份更新版本，保留记录 ID 供纠错匹配。
+		// 其他来源失效时仍排除，不把撤权或已删除来源的缓存外传。
+		e.Record.Sources = append([]memo.Source{}, e.Record.Sources...)
+		for i, old := range e.Record.Sources {
+			for _, current := range sources {
+				if old.Kind == "block" && current.Kind == "block" && old.ID != current.ID {
+					// 文档事务按根 ID 通知，既有子块来源仍按自身 ID 重新读取。
+					if bt := treenode.GetBlockTree(old.ID); bt != nil && bt.RootID == current.ID {
+						refreshed, sourceErr := memorySource(ctx, old.ID, cfg.Memory.Sources)
+						if sourceErr == nil {
+							current = refreshed
+						}
+					}
+				}
+				if old.Kind == current.Kind && old.ID == current.ID && old.Revision != current.Revision {
+					e.Record.Sources[i] = current
+					e.Record.State = "candidate"
+				}
+			}
+		}
 		if validateMemorySources(ctx, e.Record, cfg.Memory.Sources) {
 			verified = append(verified, e)
 		}
@@ -538,6 +654,17 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		return
 	}
 	prompt := "Return {\"actions\":[{\"id\":\"existing ID or empty\",\"kind\":\"preference|fact|background|decision\",\"subject\":\"exact subject\",\"scope\":\"workspace or source block ID\",\"content\":\"faithful text\",\"state\":\"active only for unambiguous verbatim supported facts, otherwise candidate\",\"sourceIndexes\":[0]}]}. Reuse ID for equivalent fact, retain conditions on additions. Different subjects/projects never merge. Uncertain matching stays candidate. Empty actions is valid. No more than 32 actions; report only supported facts.\n" + string(input)
+	prompt = "Optional validFrom/validUntil must be exact RFC3339 timestamps present in cited evidence; otherwise retain temporal conditions in content without inventing dates. Optional supersedes references a verified existing candidate of the same subject, kind and scope; use a new ID and candidate state for replacement proposals, never deactivate the old fact.\n" + prompt
+	if err = check(); err != nil {
+		finish(err)
+		return
+	}
+	for _, candidate := range result.Entries {
+		if !validateMemorySources(ctx, candidate.Record, cfg.Memory.Sources) {
+			finish(errors.New("memory candidate sources changed before model request"))
+			return
+		}
+	}
 	raw, err := memoryComplete(ctx, cfg, prompt)
 	if err != nil {
 		finish(err)
@@ -563,6 +690,11 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		finish(err)
 		return
 	}
+	operationPrefix := q.OperationID
+	if len(operationPrefix) > 191 {
+		operationPrefix = memoryHash([]byte(operationPrefix))
+	}
+	failedActions := false
 	for index, a := range proposal.Actions {
 		if err = check(); err != nil {
 			finish(err)
@@ -589,7 +721,7 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 					item.Error = "proposal target not in verified snapshot"
 				}
 			}
-			if r.Scope != "workspace" && !slices.Contains(q.SourceIDs, r.Scope) {
+			if !slices.Contains(scopes, r.Scope) {
 				item.Error = "proposal scope is not permitted"
 			}
 			groundedVerbatim := false
@@ -608,14 +740,40 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 			if a.ID == "" && a.State == "active" && groundedVerbatim {
 				r.State = "active"
 			}
+			if validityErr := memoryActionValidity(a, sources); validityErr != nil {
+				item.Error = validityErr.Error()
+			}
+			if a.ValidFrom != "" {
+				r.ValidFrom = a.ValidFrom
+			}
+			if a.ValidUntil != "" {
+				r.ValidUntil = a.ValidUntil
+			}
+			var reference *memo.Entry
+			if a.Supersedes != "" {
+				target, ok := revisions[a.Supersedes]
+				if !ok || a.ID != "" || target.Record.Subject != r.Subject || target.Record.Kind != r.Kind || target.Record.Scope != r.Scope || !validateMemorySources(ctx, target.Record, cfg.Memory.Sources) {
+					item.Error = "replacement target is not in the permitted verified snapshot"
+				} else {
+					r.Supersedes, r.State = a.Supersedes, "candidate"
+					reference = &target
+				}
+			}
+			// 候选原有来源也可能在模型调用期间变化，不能只复核本轮输入。
+			if item.Error == "" && !validateMemorySources(ctx, r, cfg.Memory.Sources) {
+				item.Error = "memory proposal sources changed; retry explicitly"
+			}
 			if item.Error == "" {
 				var e memo.Entry
-				e, err = store.GuardedSave(ctx, r, revision, q.OperationID+":"+actionKeys[index], func() error {
+				e, err = store.GuardedProposal(ctx, r, revision, operationPrefix+":"+actionKeys[index], reference, func() error {
 					if err := memoryWriteAllowed(); err != nil {
 						return err
 					}
 					if Conf == nil || util.DataDir != workspace || memoryConfigHash(Conf.LoadAI()) != generation {
 						return errors.New("memory configuration changed; retry explicitly")
+					}
+					if !validateMemorySources(ctx, r, cfg.Memory.Sources) || (reference != nil && !validateMemorySources(ctx, reference.Record, cfg.Memory.Sources)) {
+						return errors.New("memory proposal sources changed before commit")
 					}
 					return ctx.Err()
 				})
@@ -628,6 +786,7 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 				}
 			}
 		}
+		failedActions = failedActions || !item.Saved
 		memoryTaskUpdate(t, func(s *apicontract.AIMemoryTaskData) { s.Results = append(s.Results, item) })
 	}
 	if err = check(); err == nil {
@@ -635,6 +794,9 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 	}
 	if err == nil {
 		memoryTaskUpdate(t, func(s *apicontract.AIMemoryTaskData) { s.OverviewPending = false })
+	}
+	if err == nil && failedActions {
+		err = errors.New("some memory proposals were not saved; review individual results")
 	}
 	finish(err)
 }
@@ -672,6 +834,9 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 		if err = check(); err != nil {
 			return err
 		}
+		if err = validateMemoryOverviewSources(ctx, cfg); err != nil {
+			return err
+		}
 		text := ""
 		if len(entries) > 0 {
 			text, err = memoryComplete(ctx, cfg, "Generate a concise plain Markdown "+name+" overview from the following bounded selection of verified records; this is not a complete inventory. USER.md is stable user background/preferences; MEMORY.md is common context and record-ID references. Do not invent facts or add instructions. Return Markdown only.\n"+string(data))
@@ -680,6 +845,9 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 			}
 		}
 		if err = check(); err != nil {
+			return err
+		}
+		if err = validateMemoryOverviewSources(ctx, cfg); err != nil {
 			return err
 		}
 		if len(text) > 16000 {
@@ -778,17 +946,38 @@ func QueueAIMemorySources(ids []string) {
 		memorySourceQueue.Unlock()
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		_ = RevalidateAIMemorySources(ctx, pending)
+		if err := RevalidateAIMemorySources(ctx, pending); err != nil {
+			recordAIMemoryFailure("source-review:"+ast.NewNodeID(), err)
+			return
+		}
 		current := Conf.LoadAI()
 		if current == nil || current.Memory == nil || !current.Memory.AutoMaintain {
 			return
 		}
-		for _, id := range pending {
+		targets, targetErr := memoryAffectedSourceIDs(ctx, workspace, pending)
+		if targetErr != nil {
+			recordAIMemoryFailure("source-selection:"+ast.NewNodeID(), targetErr)
+			return
+		}
+		seen, coveredRoots := map[string]bool{}, map[string]bool{}
+		for _, id := range append(append([]string{}, pending...), targets...) {
+			if seen[id] {
+				continue
+			}
+			seen[id] = true
+			bt := treenode.GetBlockTree(id)
+			if bt != nil && coveredRoots[bt.RootID] {
+				continue
+			}
 			if _, err := memorySource(ctx, id, current.Memory.Sources); err == nil {
 				q := apicontract.AIMemoryMaintainRequest{SourceIDs: []string{id}, OperationID: "auto:" + id + ":" + ast.NewNodeID()}
 				if _, startErr := StartAIMemory(ctx, q, true); startErr != nil {
 					recordAIMemoryFailure(q.OperationID, startErr)
+				} else if bt != nil && bt.RootID == id {
+					coveredRoots[id] = true
 				}
+			} else if bt := treenode.GetBlockTree(id); bt != nil && !IsEncryptedBox(bt.BoxID) && slices.Contains(current.Memory.Sources, bt.BoxID) {
+				recordAIMemoryFailure("source-read:"+id+":"+ast.NewNodeID(), err)
 			}
 		}
 	})
@@ -803,9 +992,12 @@ func RevalidateAIMemorySources(ctx context.Context, changedIDs []string) error {
 	}
 	offset := 0
 	for {
-		result, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"active"}, Limit: 100, Offset: offset})
+		result, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"active"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
 		if err != nil {
 			return err
+		}
+		if len(result.Errors) > 0 {
+			return memo.ErrIncomplete
 		}
 		changed := 0
 		for _, e := range result.Entries {
@@ -880,7 +1072,9 @@ func ScheduleAIMemoryOverview() {
 		if check() != nil {
 			return
 		}
-		_ = refreshAIMemoryProjections(ctx, cfg, check)
+		if err := refreshAIMemoryProjections(ctx, cfg, check); err != nil {
+			recordAIMemoryFailure("overview:"+ast.NewNodeID(), err)
+		}
 	})
 }
 
@@ -929,11 +1123,11 @@ func ContextWithAIMemoryScope(ctx context.Context, sourceIDs []string) context.C
 	return context.WithValue(ctx, memoryScopeContextKey{}, scopes)
 }
 func memoryModelReadAllowed(ctx context.Context, r memo.Record) bool {
-	if Conf == nil {
+	if Conf == nil || util.IsDisabledFeature("ai") || !memo.Usable(r) {
 		return false
 	}
 	cfg := Conf.LoadAI()
-	if cfg == nil || cfg.Memory == nil {
+	if cfg == nil || cfg.Memory == nil || !cfg.Memory.Enabled {
 		return false
 	}
 	scopes, _ := ctx.Value(memoryScopeContextKey{}).([]string)

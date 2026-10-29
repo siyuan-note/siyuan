@@ -84,6 +84,9 @@ type withdrawal struct {
 	Sources   []Source `yaml:"sources"`
 	Operation string   `yaml:"operation"`
 	Created   string   `yaml:"created"`
+	// 仅保存旧写入身份的摘要，阻止延迟重试被误当成新的显式授权。
+	// JSON 省略空值，保持旧撤回文件已有授权摘要兼容。
+	OperationHashes []string `yaml:"operationHashes,omitempty" json:",omitempty"`
 }
 
 func NewID() string {
@@ -143,7 +146,9 @@ func validateRecord(r Record) error {
 	}
 	return nil
 }
-func usable(r Record) bool {
+
+// Usable 校验事实状态与有效期；调用方仍需校验来源权限及撤回状态。
+func Usable(r Record) bool {
 	if r.State != "active" {
 		return false
 	}

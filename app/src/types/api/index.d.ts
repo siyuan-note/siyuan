@@ -3417,6 +3417,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。
+     */
     "/api/ai/memory/forget": {
         request: AIMemoryForgetRequestInput;
         response: { "code": 0; "data": AIMemoryForgetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

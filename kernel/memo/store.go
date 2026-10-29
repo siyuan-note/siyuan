@@ -334,7 +334,15 @@ func (s *Store) GuardedSave(ctx context.Context, r Record, expectedRevision, ope
 func (s *Store) GuardedRemember(ctx context.Context, r Record, expectedRevision, operationID string, guard func() error) (Entry, error) {
 	return s.save(ctx, r, expectedRevision, operationID, true, guard)
 }
-func (s *Store) save(ctx context.Context, r Record, expected, op string, explicit bool, guard func() error) (Entry, error) {
+
+// GuardedProposal 对替代提案的引用目标一起复核修订，不修改或自动停用该目标。
+func (s *Store) GuardedProposal(ctx context.Context, r Record, expectedRevision, operationID string, reference *Entry, guard func() error) (Entry, error) {
+	if reference == nil {
+		return s.save(ctx, r, expectedRevision, operationID, false, guard)
+	}
+	return s.save(ctx, r, expectedRevision, operationID, false, guard, *reference)
+}
+func (s *Store) save(ctx context.Context, r Record, expected, op string, explicit bool, guard func() error, references ...Entry) (Entry, error) {
 	if op == "" || len(op) > 256 {
 		return Entry{}, ErrInvalid
 	}
@@ -375,8 +383,14 @@ func (s *Store) save(ctx context.Context, r Record, expected, op string, explici
 		return Entry{}, e
 	}
 	for _, w := range ws {
-		if w.Operation == op {
+		if w.Operation == op || contains(w.OperationHashes, revision([]byte(op))) {
 			return Entry{}, ErrWithdrawn
+		}
+		// 旧版撤回没有操作摘要；显式用户来源仍保留其创建操作身份。
+		for _, source := range w.Sources {
+			if source.Kind == "user" && source.ID == op {
+				return Entry{}, ErrWithdrawn
+			}
 		}
 	}
 	if r.ID == "" {
@@ -461,6 +475,16 @@ func (s *Store) save(ctx context.Context, r Record, expected, op string, explici
 			return Entry{}, e
 		}
 	}
+	for _, reference := range references {
+		current, err := s.get(root, reference.Record.ID)
+		if err != nil || current.Revision != reference.Revision || withdrawn(current.Record, ws) {
+			return Entry{}, ErrConflict
+		}
+		conflicted, err := hasConflict(root, reference.Record.ID)
+		if err != nil || conflicted {
+			return Entry{}, ErrConflict
+		}
+	}
 	if e = checkContext(ctx); e != nil {
 		return Entry{}, e
 	}
@@ -502,6 +526,12 @@ func (s *Store) Forget(ctx context.Context, id, expected, op string) (ForgetResu
 		return ret, e
 	}
 	w := withdrawal{Schema: 1, ID: NewID(), Target: id, Operation: op, Created: time.Now().UTC().Format(time.RFC3339Nano)}
+	for _, operation := range entry.Record.Operations {
+		hash := revision([]byte(operation))
+		if !contains(w.OperationHashes, hash) {
+			w.OperationHashes = append(w.OperationHashes, hash)
+		}
+	}
 	for _, source := range entry.Record.Sources {
 		source.Evidence = ""
 		w.Sources = append(w.Sources, source)

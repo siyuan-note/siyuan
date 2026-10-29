@@ -1833,6 +1833,8 @@ var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/b
 var AIMemoryList = define[AIMemoryListRequest, AIMemoryListData]("listAIMemory", "/api/ai/memory/list", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryGet = define[AIMemoryGetRequest, AIMemoryGetData]("getAIMemory", "/api/ai/memory/get", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemorySave = define[AIMemorySaveRequest, AIMemorySaveData]("saveAIMemory", "/api/ai/memory/save", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。
 var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAIMemory", "/api/ai/memory/forget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

@@ -95,13 +95,13 @@ func (s *Store) search(ctx context.Context, root *os.Root, options SearchOptions
 				continue
 			}
 			if len(options.States) == 0 {
-				if !usable(r) {
+				if !Usable(r) {
 					continue
 				}
 			} else if !contains(options.States, r.State) {
 				continue
 			}
-			if r.State == "active" && !options.IncludeInactiveValidity && !usable(r) {
+			if r.State == "active" && !options.IncludeInactiveValidity && !Usable(r) {
 				continue
 			}
 			if len(options.Scopes) > 0 && !contains(options.Scopes, r.Scope) {

@@ -3210,6 +3210,7 @@ func (tx *Transaction) commit() (err error) {
 	}
 	IncSync()
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
+	memoryDatabaseIDs := tx.memoryChangedDatabaseIDs()
 	tx.appendAutomationBlockAttrs()
 	tx.state.Store(2)
 	committed = true
@@ -3219,6 +3220,7 @@ func (tx *Transaction) commit() (err error) {
 	tx.releaseCommittedResources()
 	tx.m.Unlock()
 	memoryCommittedSourcesChanged(tx.mutatedRootIDs)
+	QueueAIMemoryDatabaseSources(memoryDatabaseIDs)
 	if 0 < len(crossTreeMoveRefRefreshes) {
 		task.AppendAsyncTaskWithDelay(task.RefreshCrossTreeMoveRefs, util.SQLFlushInterval,
 			refreshCrossTreeMoveRefs, crossTreeMoveRefRefreshes)

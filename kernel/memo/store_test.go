@@ -2,6 +2,7 @@ package memo
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,6 +12,93 @@ import (
 	"testing"
 	"time"
 )
+
+func TestMemoryForgottenExplicitOperationCannotReplay(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+	first, err := s.Remember(ctx, sample(), "missing", "original-request")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := first.Record
+	r.Content += " for normal answers"
+	updated, err := s.Remember(ctx, r, first.Revision, "update-request")
+	if err != nil {
+		t.Fatal(err)
+	}
+	forgot, err := s.Forget(ctx, updated.Record.ID, updated.Revision, "forget-request")
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkRetries := func() {
+		t.Helper()
+		for _, op := range []string{"original-request", "update-request", "forget-request"} {
+			if _, retryErr := s.Remember(ctx, sample(), "missing", op); !errors.Is(retryErr, ErrWithdrawn) {
+				t.Fatalf("forgotten explicit operation %q revived: %v", op, retryErr)
+			}
+		}
+	}
+	checkRetries()
+	name := filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", forgot.WithdrawalID+".md")
+	data, err := os.ReadFile(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "original-request") || strings.Contains(string(data), "update-request") {
+		t.Fatal("prior operation identities were not hashed")
+	}
+	if _, err = s.PreserveWithdrawal(ctx, data, forgot.WithdrawalID); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Remove(name); err != nil {
+		t.Fatal(err)
+	}
+	checkRetries()
+	if _, err = s.Remember(ctx, sample(), "missing", "new-user-request"); err != nil {
+		t.Fatalf("fresh explicit remember rejected: %v", err)
+	}
+}
+
+func TestMemoryLegacyWithdrawalCompatibility(t *testing.T) {
+	w := withdrawal{Schema: 1, ID: NewID(), Target: NewID(), Sources: []Source{{Kind: "user", ID: "legacy-create", Revision: "r1"}}, Operation: "forget", Created: time.Now().UTC().Format(time.RFC3339Nano)}
+	// 与增加 operationHashes 前的结构保持完全相同，已有重新记住授权不能失效。
+	legacy := struct {
+		Schema    int
+		ID        string
+		Target    string
+		Sources   []Source
+		Operation string
+		Created   string
+	}{w.Schema, "", w.Target, w.Sources, w.Operation, w.Created}
+	oldBytes, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if withdrawalAuthorization(w) != revision(oldBytes) {
+		t.Fatal("legacy authorization fingerprint changed")
+	}
+	data, err := encode(w, "")
+	if err != nil || ValidateWithdrawal(data, w.ID) != nil {
+		t.Fatalf("legacy withdrawal rejected: %v", err)
+	}
+	s := newTestStore(t)
+	if _, err = s.PreserveWithdrawal(context.Background(), data, w.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Remember(context.Background(), sample(), "missing", "legacy-create"); !errors.Is(err, ErrWithdrawn) {
+		t.Fatalf("legacy user source operation replayed: %v", err)
+	}
+	for _, hashes := range [][]string{{"invalid"}, {revision([]byte("old")), revision([]byte("old"))}} {
+		w.OperationHashes = hashes
+		data, err = encode(w, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !errors.Is(ValidateWithdrawal(data, w.ID), ErrInvalid) {
+			t.Fatal("invalid operation hashes accepted")
+		}
+	}
+}
 
 func sample() Record {
 	return Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Sources: []Source{{Kind: "message", ID: "message-1", Revision: "r1", Evidence: "Please use concise replies"}}, Content: "User prefers concise replies"}

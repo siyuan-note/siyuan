@@ -2163,6 +2163,7 @@ func RemoveDoc(boxID, p string) error {
 
 	refreshParentDocInfo(tree)
 	refreshBoxDocInfo(tree)
+	memoryCommittedSourcesChanged([]string{tree.ID})
 	return nil
 }
 
@@ -2220,6 +2221,11 @@ func refreshRemovedDocInfo(trees []*parse.Tree) {
 	for boxID := range boxDocBoxes {
 		refreshBoxDocInfoByBoxID(boxID)
 	}
+	ids := make([]string, 0, len(trees))
+	for _, tree := range trees {
+		ids = append(ids, tree.ID)
+	}
+	memoryCommittedSourcesChanged(ids)
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
@@ -2502,6 +2508,7 @@ func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	}
 	if titleChanged || emptyAttrUpdated {
 		IncSync()
+		memoryCommittedSourcesChanged([]string{tree.ID})
 	}
 }
 

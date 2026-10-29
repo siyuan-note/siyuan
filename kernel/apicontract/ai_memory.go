@@ -66,7 +66,9 @@ type AIMemoryForgetRequest struct {
 	OperationID string `json:"operationId"`
 }
 type AIMemoryForgetData struct {
-	Saved          bool `json:"saved"`
+	// Saved 表示撤回标记已持久化且阻止使用；物理清理失败仍返回成功并设置 CleanupPending。
+	Saved bool `json:"saved"`
+	// CleanupPending 表示原记录尚未物理删除，可用相同请求重试；不代表撤回失效。
 	CleanupPending bool `json:"cleanupPending"`
 }
 type AIMemoryOverviewData struct {

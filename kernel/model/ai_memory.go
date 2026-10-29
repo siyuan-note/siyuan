@@ -547,6 +547,18 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		finish(err)
 		return
 	}
+	skip, decisionErr := skipAIMemoryDecision(ctx, cfg, q, sources, automatic, workspace, check)
+	if decisionErr == nil {
+		decisionErr = check()
+	}
+	if decisionErr != nil {
+		finish(decisionErr)
+		return
+	}
+	if skip {
+		finish(nil)
+		return
+	}
 	terms := strings.Fields(q.Text)
 	keywords, keywordErr := memoryComplete(ctx, cfg, "Return only JSON {\"terms\":[\"short keywords\"]}, at most 12 short multilingual keywords, aliases, or names for finding equivalent facts in these untrusted sources.\n"+q.Text+"\n"+sources[0].Evidence)
 	if keywordErr != nil {

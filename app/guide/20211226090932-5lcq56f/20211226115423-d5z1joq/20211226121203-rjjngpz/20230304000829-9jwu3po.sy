@@ -6,7 +6,7 @@
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261029134000"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -449,7 +449,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261029051700-2jabmyo",
-				"updated": "20261029134000"
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
@@ -459,117 +459,27 @@
 			]
 		},
 		{
-			"ID": "20261029051700-cllodkr",
+			"ID": "20261029135500-g9cll6p",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261029051700-cllodkr",
-				"updated": "20261029134000"
+				"id": "20261029135500-g9cll6p",
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "長期記憶可保留跨對話使用的事實和偏好。啟用、管理及隱私說明請參閱 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "長期記憶",
+					"TextMarkBlockRefID": "20261029135500-7wxzqiv",
+					"TextMarkBlockRefSubtype": "s"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "人工智能"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "長期記憶"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中設定工作空間共用記憶。獨立選擇處理模型及推理強度，切換對話模型不會改變此選擇。推理選項與智能體一致：預設、none、low、medium、high、xhigh、max，不按模型名稱猜測能力；具體接受哪些值由供應商決定。模型處理會把允許的內容傳送給所選供應商，並可能產生費用。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-44flsri",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-44flsri",
-				"updated": "20261029134000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "總開關統一控制記憶使用、自動整理和後續使用者訊息蒐集，預設關閉。筆記預設涵蓋所有非加密筆記本，仍檢查存取權限，不另設筆記本允許清單；啟用不掃描全部舊筆記，加密筆記本即使已解鎖也不參與整理。"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 啟用後僅蒐集此後成功提交的使用者訊息，不蒐集 AI 回覆，也不回掃歷史對話。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-8agfotn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-8agfotn",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "開啟管理入口可以搜尋、查看記錄正文、依據和適用範圍。明確確認的新記錄使用 active 狀態。模型建議可能保留為 candidate，核對主體、範圍、條件和依據後再選擇 active 並儲存。修正內容應透過管理入口回寫正式記錄，不直接修改派生概覽。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-kbn046t",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-kbn046t",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "停用保留記錄但停止使用。忘記先儲存撤回標記，再移除正文。舊備份可能仍含原文；其他裝置收到同步的撤回狀態後才受保護，因此忘記不代表清除全部歷史備份。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-iedwd6q",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-iedwd6q",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "USER.md 和 MEMORY.md 是唯讀派生概覽，不是另一份可編輯的正式記錄。概覽產生失敗不撤銷已經儲存的記錄。衝突和搜尋尚未完成會明確回報，不能視為已經儲存或不存在相關記憶。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-8qk1fmj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-8qk1fmj",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用模型整理會處理你提交的文字並回報每項結果。任務狀態支援重新整理和取消；取消不能撤銷之前已經儲存的變更。未設定模型或模型無法使用時，仍可手動查看、修正、停用和忘記。"
+					"Data": "。"
 				}
 			]
 		},

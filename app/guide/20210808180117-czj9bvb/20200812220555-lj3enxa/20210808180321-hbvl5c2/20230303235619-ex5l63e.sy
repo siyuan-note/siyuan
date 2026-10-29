@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261029134000"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -449,7 +449,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261029051700-uuq2yxs",
-				"updated": "20261029134000"
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
@@ -459,117 +459,27 @@
 			]
 		},
 		{
-			"ID": "20261029051700-denpcak",
+			"ID": "20261029135500-l46jymy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261029051700-denpcak",
-				"updated": "20261029134000"
+				"id": "20261029135500-l46jymy",
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "长期记忆可保留跨对话使用的事实和偏好。启用、管理及隐私说明请参阅 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "长期记忆",
+					"TextMarkBlockRefID": "20261029135500-4d2w42o",
+					"TextMarkBlockRefSubtype": "s"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "人工智能"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "长期记忆"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中配置工作空间共享记忆。独立选择处理模型及推理强度，切换对话模型不会改变此选择。推理选项与智能体一致：默认、none、low、medium、high、xhigh、max，不按模型名称猜测能力；具体接受哪些值由供应商决定。模型处理会把允许的内容发送给所选供应商，并可能产生费用。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-ebj3xpj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-ebj3xpj",
-				"updated": "20261029134000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "总开关统一控制记忆使用、自动整理和后续用户消息采集，初始关闭。笔记默认覆盖所有非加密笔记本，仍检查访问权限，不另设笔记本允许列表；启用不扫描全部旧笔记，加密笔记本即使已解锁也不参与整理。"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 启用后仅收集此后成功提交的用户消息，不收集 AI 回复，也不回扫历史对话。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-6o1rnm2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-6o1rnm2",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "打开管理入口可以搜索、查看记录正文、依据和适用范围。明确确认的新记录使用 active 状态。模型建议可能保留为 candidate，核对主体、范围、条件和依据后再选择 active 并保存。纠正内容应通过管理入口回写正式记录，不直接修改派生概览。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-vwe7mnz",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-vwe7mnz",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "停用保留记录但停止使用。忘记先保存撤回标记，再移除正文。旧备份可能仍含原文；其他设备收到同步的撤回状态后才受保护，因此忘记不代表擦除全部历史备份。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-swqpyjq",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-swqpyjq",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "USER.md 和 MEMORY.md 是只读派生概览，不是另一份可编辑的正式记录。概览生成失败不撤销已经保存的记录。冲突和搜索未完成会明确报告，不能视为已经保存或不存在相关记忆。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-c4zbgw2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-c4zbgw2",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用模型整理会处理你提交的文字并报告每项结果。任务状态支持刷新和取消；取消不能撤销之前已经保存的变更。未配置模型或模型不可用时，仍可手动查看、纠正、停用和忘记。"
+					"Data": "。"
 				}
 			]
 		},

@@ -1,0 +1,415 @@
+{
+	"ID": "20261029135500-sc9beol",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261029135500-sc9beol",
+		"title": "Long-term memory",
+		"type": "doc",
+		"updated": "20261029135900"
+	},
+	"Children": [
+		{
+			"ID": "20261029135500-o6zwzu7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-o6zwzu7",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-3w6vu14",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-3w6vu14",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Long-term memory organizes lasting facts, preferences, background and decisions into shared workspace records for future agent conversations. It is neither a backup of chat history nor a copy of every note."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-7kelad9",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-7kelad9",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable and configure"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-1na7hjs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-1na7hjs",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "First configure and enable a provider and model in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " . Then scroll to Long-term memory at the bottom of the AI settings, after the Rerank group. Turn on the master switch and choose the dedicated processing model and reasoning effort. Click Manage to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-5k5bwhb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-5k5bwhb",
+				"updated": "20261029134000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Long-term memory"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to configure shared workspace memory. Choose a separate processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-iknqk8t",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-iknqk8t",
+				"updated": "20261029135900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection scope"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-o1lc8ft",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-o1lc8ft",
+				"updated": "20261029134000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "One switch controls memory use, automatic maintenance, and future user-message capture, and starts off. Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-7s47asc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-7s47asc",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To record an explicit fact immediately, create and confirm it in the manager."
+				}
+			]
+		},
+		{
+			"ID": "20261029135900-gllgfcf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135900-gllgfcf",
+				"updated": "20261029135900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a decision model is enabled and configured, automatic maintenance of notes not already linked to memories can first screen for clearly empty or purely social content containing no facts, requests, directives or conditions. Only a high-confidence skip omits subsequent memory-model processing, without writing records or overviews. Uncertain or low-confidence results, timeouts, errors or missing configuration fall back to the selected memory model. User messages, manual organization and repairs to existing memory sources bypass this screening. Screening sends permitted source content to the configured decision service and may incur charges; it guarantees neither perfect decisions nor lower total costs."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-eyepamf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-eyepamf",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Review candidates and changed sources"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-vpy6gbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-vpy6gbc",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or create a new explicitly confirmed record rather than forcing the old record to become active."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-w46deg2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-w46deg2",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manage and correct records"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-mlne86v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-mlne86v",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open Manage to search and inspect records, evidence and scope. New explicitly confirmed records use active. Model suggestions may remain candidate; check their subject, scope, conditions and evidence before selecting active and saving. Correct a record through this manager rather than editing a derived overview."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-4mkva7o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-4mkva7o",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use Search and Refresh in the manager to find records, then click a record to read it in full. Click New, enter its content, and select Fact, Preference, Background or Decision and the appropriate state. Expand Details and sources to inspect the subject, scope, times, sources and evidence. The defaults user and workspace describe workspace-level user information; do not mistake someone else’s information or a project-specific rule for a global user preference. Click Save after editing."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-agntqax",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-agntqax",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, create “When writing project status reports, start with conclusions, then risks and next steps,” check its scope and conditions, and save it as Active (active). Preserve project restrictions on agreements that apply to only one project; do not rewrite them as preferences for every task."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-2hw0xe9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-2hw0xe9",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Disable preserves a record but stops using it. Forget creates a withdrawal marker before removing its content. Old backups may retain the original text; withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-oj02bkz",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-oj02bkz",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Model organization tasks"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-jksxqku",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-jksxqku",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Organize with model processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model does not prevent manual viewing, correction, disabling or forgetting."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-nyu2063",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-nyu2063",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local records, overviews and sync"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-lmw7mfc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-lmw7mfc",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Authoritative records live in data/storage/ai/memos/ within the current workspace, not in ordinary notebook documents. Records sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories. Check the reported issue and review the records."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-qf51204",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-qf51204",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "USER.md and MEMORY.md are read-only derived overviews, not a second editable source of truth. Saved records remain valid when overview generation fails. Conflicts and incomplete searches are reported rather than treated as successful saves or proof that no memory exists."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-n44lj73",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-n44lj73",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click Read-only overviews in the manager to read USER.md and MEMORY.md. The former summarizes stable user background and preferences; the latter summarizes common context and record references. Overviews use a selection of verified records, not a complete inventory, and their generation does not resend full source evidence. Return to the authoritative records to find or correct a specific fact."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-pxo4q07",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-pxo4q07",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Costs and privacy"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-hqao4c5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-hqao4c5",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local storage does not mean offline processing. Automatic maintenance, manual model organization and overview generation may send relevant text, source evidence and existing memories to the selected model provider and incur API charges. Using memory in a conversation may also send relevant memories to the conversation model. Review the provider’s data policy before enabling this feature and avoid submitting sensitive content you do not want sent out. Encrypted notebooks are excluded from automatic collection, but text you paste manually is still processed as part of your model organization request."
+				}
+			]
+		}
+	]
+}

@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20261029134000"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -451,7 +451,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261029051700-dcvcxii",
-				"updated": "20261029134000"
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
@@ -461,113 +461,27 @@
 			]
 		},
 		{
-			"ID": "20261029051700-411n6e4",
+			"ID": "20261029135500-68j96ae",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261029051700-411n6e4",
-				"updated": "20261029134000"
+				"id": "20261029135500-68j96ae",
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "長期記憶は、会話をまたいで事実や好みを保持します。設定、管理、プライバシーについては "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "AI を呼び出す"
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "長期記憶",
+					"TextMarkBlockRefID": "20261029135500-37lo555",
+					"TextMarkBlockRefSubtype": "s"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "長期記憶"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " でワークスペースの共有記憶を設定します。処理用モデルと推論強度を個別に選択します。会話モデルの切り替えではこの選択は変わりません。推論の選択肢はエージェントと共通で、デフォルト、none、low、medium、high、xhigh、max です。モデル名から対応状況を推測せず、受け付ける値は提供者によって異なります。許可された内容が選択した提供者に送信され、料金が発生する場合があります。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-r7h2tty",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-r7h2tty",
-				"updated": "20261029134000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "記憶の利用、自動整理、今後のユーザーメッセージの収集は、初期状態で無効の一つのスイッチで制御します。暗号化されていないすべてのノートブックを対象とし、アクセス権を確認します。別途ノートブックの許可リストを設定する必要はありません。有効化で過去の全ノートが走査されることはなく、暗号化されたノートブックはロック解除済みでも対象外です。"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 有効な間は、今後正常に確定したユーザーメッセージだけが収集されます。AI の返信や過去の会話履歴は対象外です。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-y2qvicf",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-y2qvicf",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "管理画面で記録の検索、本文、根拠、適用範囲の確認ができます。明示的に確認した新規記録は active 状態にします。モデルの提案は candidate のまま保存される場合があります。主体、範囲、条件、根拠を確認してから active を選択して保存してください。訂正は管理画面から正式な記録に反映し、派生した概要を直接編集しないでください。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-agak2u2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-agak2u2",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "無効化では記録を残したまま利用を停止します。忘れる操作では撤回情報を保存してから本文を削除します。過去のバックアップには原文が残る場合があります。他の端末は撤回情報を同期した後に保護されるため、忘れる操作はすべての過去のバックアップの消去を意味しません。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-lkk4iyn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-lkk4iyn",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "USER.md と MEMORY.md は読み取り専用の派生概要で、別の編集可能な正式記録ではありません。概要の生成失敗で保存済みの記録は取り消されません。競合や検索未完了は明示され、保存成功や関連記憶がない証拠として扱われません。"
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-6iyzw5m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-6iyzw5m",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "モデルで整理すると、入力した文章が処理され、各結果が表示されます。タスクの状態は更新やキャンセルができます。キャンセル前に保存された変更は取り消されません。モデルが未設定または利用不能でも、手動の閲覧、訂正、無効化、忘れる操作は可能です。"
+					"Data": " を参照してください。"
 				}
 			]
 		},

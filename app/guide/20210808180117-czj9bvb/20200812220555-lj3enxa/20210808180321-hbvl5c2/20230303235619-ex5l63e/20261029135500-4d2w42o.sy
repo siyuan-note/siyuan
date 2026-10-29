@@ -1,0 +1,415 @@
+{
+	"ID": "20261029135500-4d2w42o",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261029135500-4d2w42o",
+		"title": "长期记忆",
+		"type": "doc",
+		"updated": "20261029135900"
+	},
+	"Children": [
+		{
+			"ID": "20261029135500-kenv8di",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-kenv8di",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-8em4zib",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-8em4zib",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "长期记忆将适合长期保留的事实、偏好、背景和决策整理为工作空间共享记录，供后续智能体对话参考。它不是聊天历史备份，也不是对全部笔记的复制。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-vlsj4z0",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-vlsj4z0",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用与配置"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-jgxzkmx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-jgxzkmx",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API 提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置并启用提供商和模型，再滚动到人工智能设置底部、重排之后的长期记忆分组。打开总开关，选择专用处理模型及推理强度；点击管理可打开记忆管理器。关闭总开关会停止记忆使用、自动整理及新用户消息采集，但不会删除已有记录。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-denpcak",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-denpcak",
+				"updated": "20261029134000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "长期记忆"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置工作空间共享记忆。独立选择处理模型及推理强度，切换对话模型不会改变此选择。推理选项与智能体一致：默认、none、low、medium、high、xhigh、max，不按模型名称猜测能力；具体接受哪些值由供应商决定。模型处理会把允许的内容发送给所选供应商，并可能产生费用。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-aub89vy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-aub89vy",
+				"updated": "20261029135900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "采集范围"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-ebj3xpj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-ebj3xpj",
+				"updated": "20261029134000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "总开关统一控制记忆使用、自动整理和后续用户消息采集，初始关闭。笔记默认覆盖所有非加密笔记本，仍检查访问权限，不另设笔记本允许列表；启用不扫描全部旧笔记，加密笔记本即使已解锁也不参与整理。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 启用后仅收集此后成功提交的用户消息，不收集 AI 回复，也不回扫历史对话。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-137gqc5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-137gqc5",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自动整理针对后续笔记变更和成功提交的用户消息逐步处理，不保证每段文字都会形成记忆。临时问答、引用中的他人观点和带条件的陈述，不应直接当作你的长期偏好。需要立即记录的明确事实，可通过管理器新建并确认。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135900-h1c16jk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135900-h1c16jk",
+				"updated": "20261029135900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果已启用并配置决策模型，自动整理尚未关联记忆的笔记时，可先由决策模型筛选明显为空或纯寒暄且不含事实、请求、指令或条件的内容。只有高置信的跳过结果才省略后续记忆模型处理，且不写入记录或概览；不确定、低置信、超时、出错或未配置时，仍使用原来选择的记忆模型。用户消息、手动整理以及已有记忆来源的修复不经过这道筛选。筛选会把允许范围内的来源内容发送给已配置的决策服务，也可能收费；它不保证判断绝对正确，也不保证总费用降低。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-r4o7q21",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-r4o7q21",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "核对候选与来源变化"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-u6mau61",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-u6mau61",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "候选（candidate）和待复核（review）不是已确认的可用记忆。来源被修改、删除或无法访问时，相关记录需要重新核对，不能继续把旧依据当作当前事实。核对主体是谁、适用范围、时间和条件后再确认；若原来源仍不可用，应恢复访问，或新建一条由你明确确认的记录，而不是强行启用旧记录。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-s76lo8w",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-s76lo8w",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理与纠正"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-6o1rnm2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-6o1rnm2",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开管理入口可以搜索、查看记录正文、依据和适用范围。明确确认的新记录使用 active 状态。模型建议可能保留为 candidate，核对主体、范围、条件和依据后再选择 active 并保存。纠正内容应通过管理入口回写正式记录，不直接修改派生概览。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-pjb44nr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-pjb44nr",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在管理器中使用搜索和刷新查找记录，点击记录查看全文。点击新建，填写正文，选择事实、偏好、背景或决策，以及相应状态。展开详情与来源可查看主体、范围、时间、来源和依据。默认主体 user、范围 workspace 表示工作空间层面的用户信息；不要把他人或特定项目的信息误记为全局用户偏好。编辑后点击保存。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-s7yhyx0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-s7yhyx0",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，可新建“撰写项目周报时，先列结论，再列风险和下一步”，确认范围和条件后保存为生效（active）。只在某个项目成立的约定应保留项目限定，不能改写成适用于所有任务的偏好。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-vwe7mnz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-vwe7mnz",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "停用保留记录但停止使用。忘记先保存撤回标记，再移除正文。旧备份可能仍含原文；其他设备收到同步的撤回状态后才受保护，因此忘记不代表擦除全部历史备份。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-yo66svd",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-yo66svd",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模型整理任务"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-c4zbgw2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-c4zbgw2",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用模型整理会处理你提交的文字并报告每项结果。任务状态支持刷新和取消；取消不能撤销之前已经保存的变更。未配置模型或模型不可用时，仍可手动查看、纠正、停用和忘记。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-llgm5j6",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-llgm5j6",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地记录、概览与同步"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-g9h1j7o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-g9h1j7o",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正式记录保存在当前工作空间的 data/storage/ai/memos/ 中，而不是普通笔记本里的用户文档。记录随工作空间数据同步；其他设备需要完成同步才能看到最新记录、修正和撤回状态。同步冲突的记录不会被静默当作有效记忆使用，请检查提示并核对记录。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-swqpyjq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-swqpyjq",
+				"updated": "20261029051700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "USER.md 和 MEMORY.md 是只读派生概览，不是另一份可编辑的正式记录。概览生成失败不撤销已经保存的记录。冲突和搜索未完成会明确报告，不能视为已经保存或不存在相关记忆。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-a746kyf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-a746kyf",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在管理器中点击只读概览可查看 USER.md 和 MEMORY.md。前者归纳稳定的用户背景与偏好，后者归纳常用上下文和记录引用。概览只选取部分已验证记录，不是完整清单；生成概览不会再次发送整份来源依据。要查找或纠正具体事实，请回到正式记录。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-ceedu4o",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-ceedu4o",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "费用与隐私"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-mmjqf7z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-mmjqf7z",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地保存不等于离线处理：自动整理、手动模型整理和概览生成可能向所选模型提供商发送相关文字、来源依据及已有记忆，并产生 API 费用；在对话中使用记忆也可能将相关记忆发送给对话模型。启用前请确认提供商的数据政策，避免提交不希望外发的敏感内容。加密笔记本不参与自动采集，但你手动粘贴的文字仍会按模型整理请求处理。"
+				}
+			]
+		}
+	]
+}

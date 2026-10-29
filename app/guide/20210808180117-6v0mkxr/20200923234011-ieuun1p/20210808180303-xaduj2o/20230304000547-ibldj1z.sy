@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261029134000"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -455,7 +455,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261029051700-k3s9gxa",
-				"updated": "20261029134000"
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
@@ -465,117 +465,27 @@
 			]
 		},
 		{
-			"ID": "20261029051700-5k5bwhb",
+			"ID": "20261029135500-80jfq5t",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261029051700-5k5bwhb",
-				"updated": "20261029134000"
+				"id": "20261029135500-80jfq5t",
+				"updated": "20261029135500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open "
+					"Data": "Long-term memory retains facts and preferences across conversations. For setup, management and privacy, see "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Long-term memory",
+					"TextMarkBlockRefID": "20261029135500-sc9beol",
+					"TextMarkBlockRefSubtype": "s"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Artificial Intelligence"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Long-term memory"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to configure shared workspace memory. Choose a separate processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-o1lc8ft",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-o1lc8ft",
-				"updated": "20261029134000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "One switch controls memory use, automatic maintenance, and future user-message capture, and starts off. Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
-				},
-				{
-					"Type": "NodeText",
-					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-mlne86v",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-mlne86v",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Open Manage to search and inspect records, evidence and scope. New explicitly confirmed records use active. Model suggestions may remain candidate; check their subject, scope, conditions and evidence before selecting active and saving. Correct a record through this manager rather than editing a derived overview."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-2hw0xe9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-2hw0xe9",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Disable preserves a record but stops using it. Forget creates a withdrawal marker before removing its content. Old backups may retain the original text; withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-qf51204",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-qf51204",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "USER.md and MEMORY.md are read-only derived overviews, not a second editable source of truth. Saved records remain valid when overview generation fails. Conflicts and incomplete searches are reported rather than treated as successful saves or proof that no memory exists."
-				}
-			]
-		},
-		{
-			"ID": "20261029051700-jksxqku",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261029051700-jksxqku",
-				"updated": "20261029051700"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Organize with model processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model does not prevent manual viewing, correction, disabling or forgetting."
+					"Data": "."
 				}
 			]
 		},

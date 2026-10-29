@@ -643,6 +643,9 @@ const normalizeList = (list: HTMLElement, start: number) => {
 
 const getDestinationList = (model: ListMindmapModel, targetId: string, placement: ListMindmapPlacement,
                             createListId: () => string): HTMLElement | undefined => {
+    if (placement !== "child" && targetId === model.root.id) {
+        return;
+    }
     if (targetId === model.list.getAttribute("data-node-id")) {
         return placement === "child" ? model.list : undefined;
     }

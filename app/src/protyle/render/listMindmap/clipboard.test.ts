@@ -18,7 +18,7 @@ const browserCases = async (source: string, css: string) => {
         "readClipboard", "prepareExternalClipboardHTML", "removeZWJ", "getTabTask", "destroyTabsRender", "tabsRender",
         "genListItemElement", "disposeCustomBlocksInElement", "processRender", "highlightRender", "avRender", "blockRender",
         source + "; return {readListMindmap, retagMindmapBranch, writeListMindmapMetadata, copyMindmapBranches, " +
-        "readMindmapClipboard, pasteMindmapBranches, canCutMindmapBranches, removeMindmapBranches, " +
+        "readMindmapClipboard, pasteMindmapBranches, canCutMindmapBranches, removeMindmapBranches, moveListMindmapNode, " +
         "ListMindmapView, ClipboardController, assignListMindmapBranchColors, resolveListMindmapColors};")(
         constants, async () => {}, (owner: {disabled?: boolean}) => !owner.disabled,
         (message: string) => messages.push(message), () => write(), () => read(),
@@ -52,6 +52,13 @@ const browserCases = async (source: string, css: string) => {
         const list = makeList(native);
         const model = api.readListMindmap(list);
         const [a, b, c] = model.root.children;
+        const rootSnapshot = list.outerHTML;
+        const payloadForRoot = api.readMindmapClipboard(api.copyMindmapBranches(list, [a.id]));
+        for (const placement of ["before", "after"]) {
+            check.equal(api.moveListMindmapNode(list, a.id, model.root.id, placement), false);
+            check.equal(api.pasteMindmapBranches(list, payloadForRoot, model.root.id, placement, lute), undefined);
+            check.equal(list.outerHTML, rootSnapshot, "rejected root siblings preserve all source content");
+        }
         model.metadata.nodes[a.id] = {backgroundColor: "red"};
         model.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b", nodeStyle, backgroundColor: "#1e1e1e"};
         api.assignListMindmapBranchColors(model);

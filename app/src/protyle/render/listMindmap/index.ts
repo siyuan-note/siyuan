@@ -438,7 +438,7 @@ class ListMindmapController {
                     if (ids.length === 1 && canEdit(owner, list)) {
                         menu.addItem({label: window.siyuan.languages.mindmapPasteChild, icon: "iconPaste",
                             click: () => void this.pasteNodes(ids[0], "child")});
-                        if (!this.model.nodes.get(ids[0])?.virtual) {
+                        if (this.model.nodes.get(ids[0])?.parentId) {
                             menu.addItem({label: window.siyuan.languages.mindmapPasteSibling, icon: "iconPaste",
                                 click: () => void this.pasteNodes(ids[0], "sibling")});
                         }
@@ -847,6 +847,9 @@ class ListMindmapController {
     }
 
     private async pasteNodes(id: string, kind: "child" | "sibling", data?: IClipboardData) {
+        if (kind === "sibling" && !this.model.nodes.get(id)?.parentId) {
+            return;
+        }
         const rootID = this.owner.block.rootID;
         const before = cleanListMindmapHTML(this.list.outerHTML);
         const current = () => !this.disposed && canEdit(this.owner, this.list) &&

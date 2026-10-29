@@ -2964,6 +2964,9 @@ export class ListMindmapView {
         const node = this.model.nodes.get(targetId);
         let placement: PointerState["placement"] = blankPlacement || (node.virtual ? "child" :
             part < .25 ? "before" : part > .75 ? "after" : "child");
+        if (placement !== "child" && !node.parentId) {
+            return;
+        }
         // 同一个兄弟间隙统一显示在后一个节点之前，避免最近节点切换时插入线跳动。
         if (placement === "after" && node.parentId) {
             const siblings = this.model.nodes.get(node.parentId).children;
@@ -3525,7 +3528,7 @@ export class ListMindmapView {
         };
         const kind = this.pasteSibling ? "sibling" : "child";
         this.pasteSibling = false;
-        if (!node || node.virtual && kind === "sibling" ||
+        if (!node || !node.parentId && kind === "sibling" ||
             !data.files.length && !data.textPlain && !data.textHTML && !data.siyuanHTML) {
             return;
         }
@@ -3593,7 +3596,9 @@ export class ListMindmapView {
             if (event.shiftKey) {
                 event.preventDefault();
                 this.pasteSibling = false;
-                this.options.onPaste(this.selectedId, "sibling");
+                if (this.model.nodes.get(this.selectedId)?.parentId) {
+                    this.options.onPaste(this.selectedId, "sibling");
+                }
             }
             event.stopPropagation();
             return;

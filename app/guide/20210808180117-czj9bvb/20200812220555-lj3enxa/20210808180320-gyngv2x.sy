@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20261010225402"
+		"updated": "20261026182843"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-207nxog",
-				"updated": "20260613193351"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193351-96cq5gr",
-				"updated": "20260613193351"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "全局搜索支持查询语法进行高级搜索，包括 AND/OR/NOT 逻辑组合、类型过滤、字段筛选等。同时提供数据库表直查、忽略索引和忽略搜索等进阶功能，满足从简单关键词到复杂条件的各类搜索需求。以下子文档将逐一介绍这些功能的详细用法。"
+					"Data": "全局搜索用于查找工作空间中的内容块，支持关键字、查询语法、正则表达式和 SQL；配置语义索引后，还可使用语义搜索。打开搜索后，先选择搜索方式，再输入关键字或查询条件。本章介绍各方式的可用选项，以及索引和搜索范围的设置。"
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-ljls7op",
-				"updated": "20261010113646"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
@@ -59,12 +59,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009182324-wscenpu",
-				"updated": "20261009182324"
+				"updated": "20261026182843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "关键字与查询语法搜索支持块类型、笔记本和文档路径筛选、包含子文档，以及排序、分组和替换。按内容顺序排序仅在按文档分组时可用。"
+					"Data": "关键字与查询语法搜索支持块类型、笔记本和文档路径筛选、包含子文档，以及排序、分组和替换。按内容顺序排序仅在按文档分组时可用。直接输入块 ID 时，同样遵循笔记本、文档路径、块类型、子类型和忽略条件。关键字模式的多词搜索会按字面量匹配 %、_ 和反斜杠。按文档分组只整理当前页的结果，不改变当前搜索方式的分页单位；按块分页时，同一文档的命中块可能分布在多页。"
 				}
 			]
 		},
@@ -200,7 +200,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-4der7qg",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -214,7 +214,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193351-wl9s0lb",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -237,7 +237,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -246,7 +246,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中配置。默认关闭，即搜索 "
+					"Data": " 中配置。默认关闭，即搜索 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -274,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-ficr182",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -288,7 +288,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193351-bmbm91y",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -302,7 +302,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -311,7 +311,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -320,7 +320,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中配置。默认开启，即搜索\"经济\"不会匹配\"經濟\"。关闭后搜索\"经济\"将同时匹配\"经济\"和\"經濟\"。切换该选项后需等待索引重建完成方可生效。"
+					"Data": " 中配置。默认开启，即搜索\"经济\"不会匹配\"經濟\"。关闭后搜索\"经济\"将同时匹配\"经济\"和\"經濟\"。切换该选项后需等待索引重建完成方可生效。"
 				}
 			]
 		},
@@ -330,7 +330,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-plms286",
-				"updated": "20260809232000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -625,7 +625,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240507235528-oyyqh0l",
-				"updated": "20240507235528"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -633,7 +633,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20201222093044-rx4zjoy",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "数据库表"
+					"TextMarkTextContent": "SQL 索引表"
 				}
 			]
 		},

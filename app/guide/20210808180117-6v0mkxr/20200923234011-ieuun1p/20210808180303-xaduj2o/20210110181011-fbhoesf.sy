@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261027135536"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20261016202856"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-njydei7",
-				"updated": "20260809232000"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-y24gzqt",
-				"updated": "20260809232000"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -173,7 +173,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-4cz2avf",
-						"updated": "20260613180619"
+						"updated": "20261027135536"
 					},
 					"Children": [
 						{
@@ -181,17 +181,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180619-byb9lcr",
-								"updated": "20260613180619"
+								"updated": "20261027135536"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "strong",
-									"TextMarkTextContent": "First Open"
+									"TextMarkTextContent": "Opening behavior"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": When opening the diary for today, if a document for that date does not yet exist, the system creates one based on the configured save path and template; if it already exists, it opens directly"
+									"Data": ": The button and shortcut open the document at the name and location resolved from today's save path template, or create it if missing. They do not search by the daily note date attribute, so renaming or moving the original can cause another daily note to be created"
 								}
 							]
 						}
@@ -205,7 +205,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261008101708-b7c9jyj",
-				"updated": "20261008172530"
+				"updated": "20261027135536"
 			},
 			"Children": [
 				{
@@ -301,12 +301,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008101708-3n0qxms",
-				"updated": "20261008172530"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Candidates use the last selected daily note notebook. If none is selected or that notebook is unavailable, candidates show the full paths for available notebooks. Selecting a candidate saves its notebook as the daily note notebook. Leaving candidates unselected creates no document. Encrypted notebooks can reference daily notes only within the same notebook; ordinary notebooks cannot reference daily notes in encrypted notebooks."
+					"Data": "Candidates use the last selected daily note notebook. If none is selected or that notebook is unavailable, candidates show the full paths for available notebooks. Selecting a candidate saves its notebook as the daily note notebook."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-v6e0cgk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-v6e0cgk",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Leaving candidates unselected creates no document. Encrypted notebooks can reference daily notes only within the same notebook; ordinary notebooks cannot reference daily notes in encrypted notebooks."
 				}
 			]
 		},
@@ -315,12 +329,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008101708-yprxiyp",
-				"updated": "20261008172530"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Typing and viewing candidates create no document. Missing daily notes display New daily note and a calendar-plus icon. Moving the caret after a creation request does not cancel insertion at the original input position; modified or deleted input is not overwritten. Selecting a candidate reuses the daily note for that date in the target notebook, including moved or renamed documents that retain their daily note date attribute. If none exists, the daily note settings are used to create it and insert a reference. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
+					"Data": "Typing and viewing candidates create no document. Missing daily notes display New daily note and a calendar-plus icon. Moving the caret after a creation request does not cancel insertion at the original input position; modified or deleted input is not overwritten."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-ma3a2a1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-ma3a2a1",
+				"updated": "20261027135536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Selecting a candidate first searches the target notebook by the daily note date attribute, including moved or renamed documents that retain it. If several match, the document at the template name and location is preferred; otherwise, the one with the smallest ID is used. If the ordinary button creates another daily note at that location, date candidates will prefer it. Neither entry point reapplies the content template when reusing a document."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-m4mro3d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-m4mro3d",
+				"updated": "20261027135536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If no date attribute matches, the document at the template name and location is reused or created, and a reference is inserted. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
 				}
 			]
 		},
@@ -330,7 +372,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-9fh070b",
-				"updated": "20261016202856"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -368,7 +410,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-q2wvciq",
-				"updated": "20261016202856"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -585,7 +627,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-btjm9do",
-						"updated": "20260613180619"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -593,7 +635,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180619-2vcqs2g",
-								"updated": "20260613180619"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
@@ -603,7 +645,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " (optional): Select an existing document as a diary template. When a new diary is created, the template content is used as the initial content. Commonly used for preset daily to-do structures, daily report templates, etc."
+									"Data": " (optional): Select an existing document as a diary template. When a new diary is created, the template content is used as the initial content. Commonly used for preset daily to-do structures, daily report templates, etc"
 								}
 							]
 						}
@@ -617,7 +659,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-cvbtwrj",
-				"updated": "20260613180724"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -632,7 +674,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-55afgzj",
-				"updated": "20260613180619"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -644,7 +686,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-50gkpvz",
-						"updated": "20260613180619"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -652,7 +694,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180619-mlaw90y",
-								"updated": "20260613180715"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
@@ -669,7 +711,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20201117112518-dott91x",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "Embed Content Block"
+									"TextMarkTextContent": "Embed content blocks"
 								},
 								{
 									"Type": "NodeText",

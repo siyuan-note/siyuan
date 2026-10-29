@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package agent
 
@@ -13,6 +9,8 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -40,6 +38,126 @@ func marshalSession(t *testing.T, value any) []byte {
 		t.Fatal(err)
 	}
 	return data
+}
+
+func TestSessionPinPersistenceAndOrdering(t *testing.T) {
+	useTestDataDir(t)
+	ids := []string{"20261020120000-aaaaaaa", "20261020120000-bbbbbbb", "20261020120000-ccccccc"}
+	for i, id := range ids {
+		_, _, err := SaveSessionState(marshalSession(t, map[string]any{
+			"id": id, "title": "Session " + id, "createdAt": i + 1, "updatedAt": i + 10,
+			"future": map[string]any{"keep": true}, "entries": []any{map[string]any{"type": "user", "content": "keep"}},
+		}))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	checkOrder := func(want []string) {
+		t.Helper()
+		got := []string{}
+		for page := 1; page <= len(want); page++ {
+			result := ListSessions(page, 1, "Session")
+			if result.Total != len(want) || len(result.Sessions) != 1 {
+				t.Fatalf("pagination: %+v", result)
+			}
+			got = append(got, result.Sessions[0].ID)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("order: %v != %v", got, want)
+		}
+	}
+	checkOrder([]string{ids[2], ids[1], ids[0]})
+	first, err := SetSessionPinned(ids[0], true)
+	if err != nil || first <= 0 {
+		t.Fatalf("pin: %d %v", first, err)
+	}
+	again, err := SetSessionPinned(ids[0], true)
+	if err != nil || again != first {
+		t.Fatalf("repeated pin changed timestamp: %d %v", again, err)
+	}
+	// Both timestamps may be equal; the stable ID tie-breaker gives the same expected order.
+	if _, err = SetSessionPinned(ids[1], true); err != nil {
+		t.Fatal(err)
+	}
+	checkOrder([]string{ids[1], ids[0], ids[2]})
+	if err = os.Remove(sessionsIndexPath()); err != nil {
+		t.Fatal(err)
+	}
+	checkOrder([]string{ids[1], ids[0], ids[2]})
+	before, err := GetSession(ids[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if numberToInt64(before["revision"]) != 1 || numberToInt64(before["updatedAt"]) != 10 || before["future"] == nil {
+		t.Fatalf("pin changed conversation metadata: %#v", before)
+	}
+	// A client loaded before pinning must not clear it, even when it supplies a stale value explicitly.
+	before["pinnedAt"] = int64(0)
+	before["expectedRevision"] = int64(1)
+	revision, saved, err := SaveSessionState(marshalSession(t, before))
+	if err != nil || revision != 2 || numberToInt64(saved["pinnedAt"]) != first {
+		t.Fatalf("stale save overwrote pin: %#v %v", saved, err)
+	}
+	if unpinned, err := SetSessionPinned(ids[0], false); err != nil || unpinned != 0 {
+		t.Fatalf("unpin: %d %v", unpinned, err)
+	}
+	saved["expectedRevision"] = revision
+	saved["pinnedAt"] = first
+	_, saved, err = SaveSessionState(marshalSession(t, saved))
+	if err != nil || numberToInt64(saved["pinnedAt"]) != 0 {
+		t.Fatalf("stale save restored pin: %#v %v", saved, err)
+	}
+	checkOrder([]string{ids[1], ids[2], ids[0]})
+	if err = DeleteSession(ids[1]); err != nil {
+		t.Fatal(err)
+	}
+	checkOrder([]string{ids[2], ids[0]})
+}
+
+func TestSessionPinRejectsInvalidDataAndSurvivesConcurrentIndexReads(t *testing.T) {
+	useTestDataDir(t)
+	for _, id := range []string{"", "../outside", testSessionID} {
+		if _, err := SetSessionPinned(id, true); err == nil {
+			t.Fatalf("invalid or missing session accepted: %q", id)
+		}
+	}
+	sessionPath := filepath.Join(sessionsDir(), testSessionID, "session.json")
+	if err := os.MkdirAll(filepath.Dir(sessionPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []string{"{", "null", `{"id":"different"}`} {
+		if err := os.WriteFile(sessionPath, []byte(value), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := SetSessionPinned(testSessionID, true); err == nil {
+			t.Fatal("corrupt session accepted")
+		}
+		data, _ := os.ReadFile(sessionPath)
+		if string(data) != value {
+			t.Fatal("corrupt source overwritten")
+		}
+	}
+	if err := os.Remove(sessionPath); err != nil {
+		t.Fatal(err)
+	}
+	_, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "createdAt": 1}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var jobs sync.WaitGroup
+	for i := 0; i < 12; i++ {
+		jobs.Go(func() { ListSessions(1, 30, "") })
+		jobs.Go(func() {
+			if _, pinErr := SetSessionPinned(testSessionID, true); pinErr != nil {
+				t.Error(pinErr)
+			}
+		})
+	}
+	jobs.Wait()
+	result := ListSessions(1, 30, "")
+	if len(result.Sessions) != 1 || result.Sessions[0].PinnedAt <= 0 {
+		t.Fatalf("index lost pin: %+v", result)
+	}
 }
 
 func TestSaveSessionRevisionConflictAndUnknownFields(t *testing.T) {

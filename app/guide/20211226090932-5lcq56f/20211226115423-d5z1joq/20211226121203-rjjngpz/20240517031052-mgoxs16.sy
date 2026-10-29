@@ -6,7 +6,7 @@
 		"id": "20240517031052-mgoxs16",
 		"title": "發布服務",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160433-v2hgbex",
-				"updated": "20260918190000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160433-ubgzvn4",
-				"updated": "20260918190000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260315160433-m3d3qdm",
-						"updated": "20260803163402"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160433-qzryic8",
-								"updated": "20260803163402"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -93,7 +93,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -102,7 +102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 進入發布服務的設定面板"
+									"Data": " 進入發布服務的設定面板"
 								}
 							]
 						}

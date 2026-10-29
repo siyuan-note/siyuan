@@ -1459,7 +1459,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         });
         if (openRecentDocsDialog && openRecentDocsDialog.element.contains(event.target as Node) &&
             !openRecentDocsDialog.element.hasAttribute("data-dialog-closing")) {
-            if ((event.target as HTMLElement).closest("select")) {
+            // 下拉菜单和按钮需要自行处理按键，Enter 不能转发为打开当前选中文档
+            if ((event.target as HTMLElement).closest("select, button")) {
                 return;
             }
             event.preventDefault();

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
@@ -476,7 +464,8 @@ func databaseItemAdd(args map[string]any) (CallToolResult, error) {
 		src["content"] = content
 	}
 	srcs := []map[string]any{src}
-	if err := model.AddAttributeViewBlock(nil, srcs, id, "", viewID, groupID, previousID, ignoreFill); err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "insertAttrViewBlock", Srcs: srcs,
+		AvID: id, ViewID: viewID, GroupID: groupID, PreviousID: previousID, IgnoreDefaultFill: ignoreFill}}); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add item failed: " + err.Error()}}, IsError: true}, nil
 	}
 	model.ReloadAttrView(id)
@@ -511,10 +500,15 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	if id == "" || keyID == "" || itemID == "" || nil == valueData {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, keyID, itemID and value are required"}}, IsError: true}, nil
 	}
-	value, err := model.UpdateAttributeViewCell(nil, id, keyID, itemID, valueData)
-	if err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: id,
+		KeyID: keyID, RowID: itemID, Data: valueData}}); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "update cell failed: " + err.Error()}}, IsError: true}, nil
 	}
+	view, err := av.ParseAttributeView(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "read updated cell failed: " + err.Error()}}, IsError: true}, nil
+	}
+	value := view.GetValue(keyID, itemID)
 	model.ReloadAttrView(id)
 	return databaseSuccess("item_update", map[string]any{
 		"id":     id,

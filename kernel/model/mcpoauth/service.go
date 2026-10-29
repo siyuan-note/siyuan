@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Package mcpoauth 实现仅用于内置 MCP 的授权码、刷新和撤销，持久化文件只保存凭证摘要。
 package mcpoauth
 

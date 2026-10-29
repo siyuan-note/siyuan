@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package filesys
 
 import (
@@ -6,11 +10,105 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestTreeWritesValidateCurrentSourceBehindCache(t *testing.T) {
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+			box, root, _, _ := setupStalePathTest(t)
+			provider, acquire, release := DEKProvider, DEKLockAcquire, DEKLockRelease
+			DEKLockAcquire, DEKLockRelease = nil, nil
+			var dek []byte
+			if encrypted {
+				dek = bytes.Repeat([]byte{23}, 32)
+			}
+			DEKProvider = func(string) ([]byte, error) { return bytes.Clone(dek), nil }
+			t.Cleanup(func() { DEKProvider, DEKLockAcquire, DEKLockRelease = provider, acquire, release })
+			p := "/" + root + ".sy"
+			tree := treenode.NewTree(box, p, "/Legacy", "Legacy")
+			if _, err := WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			deadline := time.Now().Add(time.Second)
+			for {
+				if _, ok := cache.GetTreeDataInBox(root, box); ok {
+					break
+				}
+				if time.Now().After(deadline) {
+					t.Fatal("initial source was not cached")
+				}
+				time.Sleep(time.Millisecond)
+			}
+			tree.Root.SetIALAttr("title", "Edited from stale source")
+			for _, source := range []struct {
+				data string
+				err  error
+			}{
+				{`{"Spec":"999","Properties":{"title":"Future"}}`, treenode.ErrSpecTooNew},
+				{`{"Spec":"2","Properties":{"title":{"format":"future"}}}`, documentaddressing.ErrInvalidTitle},
+			} {
+				disk, err := encryptDataWithDEK(box, p, []byte(source.data), dek)
+				if err != nil {
+					t.Fatal(err)
+				}
+				abs := writeStalePathFixture(t, box, p, disk)
+				if _, err = WriteTree(tree); !errors.Is(err, source.err) {
+					t.Fatalf("stale tree overwrote unsupported source: %v", err)
+				}
+				if _, err = WriteTreeIfUnchanged(tree, disk); !errors.Is(err, source.err) {
+					t.Fatalf("conditional write erased unsupported source: %v", err)
+				}
+				retained, _ := os.ReadFile(abs)
+				if !bytes.Equal(retained, disk) {
+					t.Fatal("unsupported source changed")
+				}
+				if encrypted {
+					disk[len(disk)-1] ^= 1
+					writeStalePathFixture(t, box, p, disk)
+					if _, err = WriteTree(tree); err == nil || errors.Is(err, source.err) {
+						t.Fatal("ordinary save bypassed source authentication", err)
+					}
+					retained, _ = os.ReadFile(abs)
+					if !bytes.Equal(retained, disk) {
+						t.Fatal("ordinary save replaced unauthenticated ciphertext")
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestTreeRepairPreservesChangedSource(t *testing.T) {
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+			box, _, p, legacy := setupStalePathTest(t)
+			legacy = append([]byte("\xef\xbb\xbf"), legacy...)
+			var dek []byte
+			if encrypted {
+				dek = bytes.Repeat([]byte{23}, 32)
+			}
+			current, err := encryptDataWithDEK(box, p, []byte(`{"Spec":"999","Properties":{"title":"Future"}}`), dek)
+			if err != nil {
+				t.Fatal(err)
+			}
+			abs := writeStalePathFixture(t, box, p, current)
+			_, _, err = fixTreeJSONData(box, p, legacy, util.NewLute(), dek, encrypted, true)
+			if !errors.Is(err, util.ErrFileChanged) {
+				t.Fatal("repair did not reject a changed source", err)
+			}
+			retained, _ := os.ReadFile(abs)
+			if !bytes.Equal(retained, current) {
+				t.Fatal("repair overwrote a newer source")
+			}
+		})
+	}
+}
 
 func TestTreeSnapshotAndConditionalWrite(t *testing.T) {
 	for _, encrypted := range []bool{false, true} {

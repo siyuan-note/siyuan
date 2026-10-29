@@ -1,24 +1,17 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"io"
 	"path/filepath"
+	"reflect"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -27,9 +20,11 @@ import (
 )
 
 type encryptedBoxMetadata struct {
-	Icon     string `json:"icon"`
-	Sort     int    `json:"sort"`
-	SortMode int    `json:"sortMode"`
+	Version         int                   `json:"version,omitempty"`
+	DocumentTargets *conf.DocumentTargets `json:"documentTargets,omitempty"`
+	Icon            string                `json:"icon"`
+	Sort            int                   `json:"sort"`
+	SortMode        int                   `json:"sortMode"`
 }
 
 func encryptBoxMetadata(boxID string, boxConf *conf.BoxConf, dek []byte) error {
@@ -40,6 +35,15 @@ func encryptBoxMetadata(boxID string, boxConf *conf.BoxConf, dek []byte) error {
 		Icon:     filterBoxIcon(boxConf.Icon),
 		Sort:     boxConf.Sort,
 		SortMode: boxConf.SortMode,
+	}
+	targets := conf.DocumentTargets{Document: boxConf.DocCreateTarget,
+		Reference: boxConf.RefCreateTarget, DailyNote: boxConf.DailyNoteTarget}
+	if boxConf.MetadataVersion > 2 {
+		return errors.New("unsupported encrypted notebook metadata version")
+	}
+	if boxConf.MetadataVersion == 2 || !targets.Empty() {
+		metadata.Version = 2
+		metadata.DocumentTargets = &targets
 	}
 	plaintext, err := gulu.JSON.MarshalJSON(metadata)
 	if err != nil {
@@ -62,12 +66,46 @@ func decryptBoxMetadata(boxID string, boxConf *conf.BoxConf, dek []byte) error {
 		return err
 	}
 	metadata := &encryptedBoxMetadata{}
-	if err = gulu.JSON.UnmarshalJSON(plaintext, metadata); err != nil {
+	decoder := json.NewDecoder(bytes.NewReader(plaintext))
+	if token, err := decoder.Token(); err != nil || token != json.Delim('{') {
+		return errors.New("invalid encrypted notebook metadata")
+	}
+	seen := map[string]bool{}
+	for decoder.More() {
+		token, err := decoder.Token()
+		if err != nil {
+			return err
+		}
+		name := strings.ToLower(token.(string))
+		if seen[name] {
+			return errors.New("duplicate encrypted notebook metadata field")
+		}
+		seen[name] = true
+		if err = decoder.Decode(new(json.RawMessage)); err != nil {
+			return err
+		}
+	}
+	decoder = json.NewDecoder(bytes.NewReader(plaintext))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(metadata); err != nil {
 		return err
+	}
+	if decoder.Decode(new(json.RawMessage)) != io.EOF {
+		return errors.New("invalid encrypted notebook metadata suffix")
+	}
+	if metadata.Version != 0 && metadata.Version != 1 && metadata.Version != 2 ||
+		metadata.Version < 2 && metadata.DocumentTargets != nil {
+		return errors.New("unsupported encrypted notebook metadata version")
 	}
 	boxConf.Icon = filterBoxIcon(metadata.Icon)
 	boxConf.Sort = metadata.Sort
 	boxConf.SortMode = metadata.SortMode
+	boxConf.MetadataVersion = max(1, metadata.Version)
+	boxConf.DocCreateTarget, boxConf.RefCreateTarget, boxConf.DailyNoteTarget = nil, nil, nil
+	if metadata.DocumentTargets != nil {
+		boxConf.DocCreateTarget, boxConf.RefCreateTarget, boxConf.DailyNoteTarget =
+			metadata.DocumentTargets.Document, metadata.DocumentTargets.Reference, metadata.DocumentTargets.DailyNote
+	}
 	return nil
 }
 
@@ -113,6 +151,8 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 		if err := reuseBoxMetadataIfUnchanged(boxID, &persisted, dek); err != nil {
 			return nil, err
 		}
+	} else if persisted.DocCreateTarget != nil || persisted.RefCreateTarget != nil || persisted.DailyNoteTarget != nil {
+		return nil, errors.New("unlock the notebook before changing document targets")
 	} else if len(persisted.BoxCrypt.Metadata) == 0 {
 		existing, err := readRawBoxConf(boxID)
 		if err != nil {
@@ -137,9 +177,15 @@ func reuseBoxMetadataIfUnchanged(boxID string, boxConf *conf.BoxConf, dek []byte
 	}
 	if existing != nil && existing.Encrypted && existing.BoxCrypt != nil && len(existing.BoxCrypt.Metadata) > 0 {
 		decrypted := &conf.BoxConf{BoxCrypt: DeepCopyBoxEncryption(existing.BoxCrypt)}
-		if err = decryptBoxMetadata(boxID, decrypted, dek); err == nil &&
-			filterBoxIcon(decrypted.Icon) == filterBoxIcon(boxConf.Icon) &&
-			decrypted.Sort == boxConf.Sort && decrypted.SortMode == boxConf.SortMode {
+		if err = decryptBoxMetadata(boxID, decrypted, dek); err != nil {
+			return err
+		}
+		boxConf.MetadataVersion = max(boxConf.MetadataVersion, decrypted.MetadataVersion)
+		if filterBoxIcon(decrypted.Icon) == filterBoxIcon(boxConf.Icon) &&
+			decrypted.Sort == boxConf.Sort && decrypted.SortMode == boxConf.SortMode &&
+			reflect.DeepEqual(decrypted.DocCreateTarget, boxConf.DocCreateTarget) &&
+			reflect.DeepEqual(decrypted.RefCreateTarget, boxConf.RefCreateTarget) &&
+			reflect.DeepEqual(decrypted.DailyNoteTarget, boxConf.DailyNoteTarget) {
 			boxConf.BoxCrypt.Metadata = append([]byte(nil), existing.BoxCrypt.Metadata...)
 			return nil
 		}
@@ -148,6 +194,8 @@ func reuseBoxMetadataIfUnchanged(boxID string, boxConf *conf.BoxConf, dek []byte
 }
 
 func clearBoxMetadata(boxConf *conf.BoxConf) {
+	boxConf.DocCreateTarget, boxConf.RefCreateTarget, boxConf.DailyNoteTarget = nil, nil, nil
+	boxConf.MetadataVersion = 0
 	boxConf.Icon = ""
 	boxConf.Sort = 0
 	boxConf.SortMode = util.SortModeFileTree

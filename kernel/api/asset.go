@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -95,6 +83,7 @@ var statAsset = contractHandler(apicontract.StatAsset, func(c *gin.Context, requ
 
 var fullReindexAssetContent = contractHandler(apicontract.FullReindexAssetContent, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
+	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(441), 5000)
 	model.ReindexAssetContent()
 
 	return apicontract.Success(apicontract.Null{})
@@ -226,12 +215,25 @@ var setFileAnnotation = contractHandler(apicontract.SetFileAnnotation, func(c *g
 	if err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	boxID := model.ExtractBoxIDFromAssetsPath(writePath)
+	boxID := util.BoxIDFromDataPath(writePath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	fileAnnotationMu.Lock()
+	defer fileAnnotationMu.Unlock()
+	if request.BaseData != nil {
+		merged, mergeErr := mergeFileAnnotations(writePath, boxID, *request.BaseData, data)
+		if mergeErr != nil {
+			return apicontract.Failure[apicontract.Null](-1, mergeErr.Error())
+		}
+		normalized, marshalErr := json.Marshal(merged)
+		if marshalErr != nil {
+			return apicontract.Failure[apicontract.Null](-1, marshalErr.Error())
+		}
+		data = string(normalized)
+	}
 	if "{}" == data {
-		if err = filelock.Remove(writePath); err != nil {
+		if err = filelock.Remove(writePath); err != nil && !(request.BaseData != nil && os.IsNotExist(err)) {
 			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	} else {
@@ -284,12 +286,14 @@ var getFileAnnotation = contractHandler(apicontract.GetFileAnnotation, func(c *g
 			return apicontract.Failure[apicontract.AssetAnnotationData](http.StatusForbidden, http.StatusText(http.StatusForbidden))
 		}
 	}
-	if !filelock.IsExist(readPath) {
-		return apicontract.Failure[apicontract.AssetAnnotationData](1, "")
-	}
-	boxID := model.ExtractBoxIDFromAssetsPath(readPath)
+	boxID := util.BoxIDFromDataPath(readPath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 		return apicontract.Failure[apicontract.AssetAnnotationData](-1, err.Error())
+	}
+	fileAnnotationMu.Lock()
+	defer fileAnnotationMu.Unlock()
+	if !filelock.IsExist(readPath) {
+		return apicontract.Failure[apicontract.AssetAnnotationData](1, "")
 	}
 
 	data, err := filelock.ReadFile(readPath)
@@ -343,17 +347,26 @@ var removeUnusedAssets = contractHandler(apicontract.RemoveUnusedAssets, func(c 
 	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
 })
 
-var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
+var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.UnusedAssetsRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
 	unusedAssets, err := model.UnusedAssets(true)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
 	}
+	if keyword := strings.ToLower(strings.TrimSpace(request.Keyword)); keyword != "" {
+		filtered := make([]*model.UnusedItem, 0, len(unusedAssets))
+		for _, item := range unusedAssets {
+			if strings.Contains(strings.ToLower(item.Name), keyword) {
+				filtered = append(filtered, item)
+			}
+		}
+		unusedAssets = filtered
+	}
 	total := len(unusedAssets)
 
-	// 最多返回 512 个未引用资源。
+	// 默认最多返回 512 个未引用资源，完整清单由调用方分批展示。
 	const maxUnusedAssets = 512
-	if total > maxUnusedAssets {
+	if !request.All && total > maxUnusedAssets {
 		unusedAssets = unusedAssets[:maxUnusedAssets]
 		// 提示仅发送给发起查询的前端；未提供应用标识的调用保留广播行为。
 		util.PushMsgWithApp(resolveRequestAppID(c, ""), fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
@@ -380,7 +393,10 @@ var removeUnusedEncryptedBoxAssets = contractHandler(apicontract.RemoveUnusedEnc
 
 var getMissingAssets = contractHandler(apicontract.GetMissingAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
-	missingAssets := model.MissingAssets()
+	missingAssets, err := model.MissingAssets()
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
 	return apicontract.Success(assetUnusedItems(missingAssets))
 })
 
@@ -392,7 +408,7 @@ var resolveAssetPath = contractHandler(apicontract.ResolveAssetPath, func(c *gin
 		return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 	}
 	if model.IsEncryptedAssetPath(p) {
-		if err = holdEncryptedBoxRequest(c, model.ExtractBoxIDFromAssetsPath(p)); err != nil {
+		if err = holdEncryptedBoxRequest(c, util.BoxIDFromDataPath(p)); err != nil {
 			return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 		}
 		p, err = model.PrepareEncryptedAssetForExternalOpen(path)

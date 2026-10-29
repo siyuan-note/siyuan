@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -272,6 +276,84 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		readBack.Data.AV.Automations.Rules[0].BlockSource.TagTarget != "container" {
 		t.Fatalf("tag target contract round trip: %s %v", response.Body.String(), err)
 	}
+	for _, depth := range []*int{new(0), new(1), nil} {
+		collection.BlockSource.DocumentDepth = depth
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			Data: &av.AutomationConfig{Spec: 5, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+			t.Fatal(err)
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		readBack.Data.AV.Automations = av.AutomationConfig{}
+		if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		got := readBack.Data.AV.Automations.Rules[0].BlockSource.DocumentDepth
+		if readBack.Data.AV.Automations.Spec != 5 || (got == nil) != (depth == nil) || got != nil && *got != *depth {
+			t.Fatalf("document depth contract round trip: %s", response.Body.String())
+		}
+	}
+	previousAttributes := collection.BlockSource.Attributes
+	for _, include := range []*bool{nil, new(true), new(false)} {
+		collection.BlockSource.IncludeSelectedDocuments = include
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			Data: &av.AutomationConfig{Spec: 7, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+			t.Fatal(err)
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		readBack.Data.AV.Automations = av.AutomationConfig{}
+		if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		got := readBack.Data.AV.Automations.Rules[0].BlockSource.IncludeSelectedDocuments
+		if readBack.Data.AV.Automations.Spec != 7 || (got == nil) != (include == nil) || got != nil && *got != *include {
+			t.Fatalf("selected document inclusion contract round trip: %s", response.Body.String())
+		}
+	}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err == nil {
+		t.Fatal("scope exclusion saved without its required format")
+	}
+	collection.BlockSource.IncludeSelectedDocuments = nil
+	for _, mode := range []string{"equals", "contains", "regex"} {
+		attr := &av.AutomationBlockAttribute{Name: "custom-state", NameOperator: mode, Operator: "exists"}
+		if mode == "contains" {
+			attr.Name = "state"
+		}
+		if mode == "regex" {
+			attr.Name = "^custom-state$"
+		}
+		collection.BlockSource.Attributes = []*av.AutomationBlockAttribute{attr}
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+			t.Fatal(err)
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		readBack.Data.AV.Automations = av.AutomationConfig{}
+		if err = json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		got := readBack.Data.AV.Automations.Rules[0].BlockSource.Attributes[0]
+		if got.NameOperator != mode || got.Name != attr.Name || got.Operator != "exists" {
+			t.Fatalf("attribute name contract round trip: %s", response.Body.String())
+		}
+	}
+	collection.BlockSource.Attributes[0].Name = "["
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 6, Rules: []*av.AutomationRule{collection}}}}); err == nil {
+		t.Fatal("invalid attribute name expression was saved")
+	}
+	persisted, err := av.ParseAttributeView(database.ID)
+	if err != nil || persisted.Automations.Rules[0].BlockSource.Attributes[0].Name != "^custom-state$" {
+		t.Fatal("invalid expression changed the previous saved rule", err)
+	}
+	collection.BlockSource.Attributes = previousAttributes
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+		Data: &av.AutomationConfig{Spec: 5, Rules: []*av.AutomationRule{collection}}}}); err != nil {
+		t.Fatal(err)
+	}
 	call("/api/block/appendBlock", map[string]any{"parentID": tree.ID, "dataType": "markdown", "data": "> First #collect#\n>\n> Second #collect#"}, appendBlock)
 	stored, _ = av.ParseAttributeView(database.ID)
 	preview, err = model.PreviewAttributeViewCollection(database.ID, collection.ID, 1)
@@ -387,4 +469,31 @@ func TestAVContractAutomationWrites(t *testing.T) {
 	if _, err = model.LoadTreeByBlockID(quoteID); err != nil {
 		t.Fatal("cleanup removed original quote", err)
 	}
+	t.Run("reference collection contract", func(t *testing.T) {
+		collection.BlockSource.ReferenceID = tree.ID
+		collection.BlockSource.Tags = nil
+		collection.BlockSource.TagTarget = "block"
+		config := &av.AutomationConfig{Spec: 7, Rules: []*av.AutomationRule{collection}}
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, Data: config}}); err == nil {
+			t.Fatal("reference matching accepted an old automation format")
+		}
+		config.Spec = 8
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, Data: config}}); err != nil {
+			t.Fatal(err)
+		}
+		response := callAttributeViewContextFilterAPI(t, "/api/av/getAttributeView", map[string]any{"id": database.ID}, getAttributeView)
+		requireAPIContract(t, http.MethodPost, "/api/av/getAttributeView", response)
+		if err := json.Unmarshal(response.Body.Bytes(), &readBack); err != nil {
+			t.Fatal(err)
+		}
+		if readBack.Data.AV.Automations.Spec != 8 || readBack.Data.AV.Automations.Rules[0].BlockSource.ReferenceID != tree.ID {
+			t.Fatal("reference target did not survive the API contract round trip")
+		}
+		call("/api/block/updateBlock", map[string]any{"id": paragraphs[0], "dataType": "markdown", "data": "Source ((" + tree.ID + " 'Target'))"}, updateBlock)
+		call("/api/av/previewAttributeViewCollection", map[string]any{"avID": database.ID, "ruleID": collection.ID}, previewAttributeViewCollection)
+		stored, err := av.ParseAttributeView(database.ID)
+		if err != nil || stored.GetBlockValueByBoundID(quoteID) == nil {
+			t.Fatal("API reference edit did not collect the backlink parent", err)
+		}
+	})
 }

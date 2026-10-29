@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package util
 
 import (
@@ -118,6 +122,28 @@ var anthropicToolEvents = []string{
 }
 
 func TestAnthropicStreamAndNativeHistory(t *testing.T) {
+	t.Run("signed thinking", func(t *testing.T) {
+		testAnthropicStreamAndNativeHistory(t, anthropicToolEvents, "signed-opaque", true)
+	})
+	for _, signaturePresent := range []bool{true, false} {
+		t.Run(fmt.Sprintf("unsigned thinking/signature present=%v", signaturePresent), func(t *testing.T) {
+			var events []string
+			for _, event := range anthropicToolEvents {
+				if strings.Contains(event, `"type":"signature_delta"`) {
+					continue
+				}
+				if !signaturePresent {
+					event = strings.ReplaceAll(event, `,"signature":""`, "")
+				}
+				events = append(events, event)
+			}
+			testAnthropicStreamAndNativeHistory(t, events, "", signaturePresent)
+		})
+	}
+}
+
+func testAnthropicStreamAndNativeHistory(t *testing.T, events []string, signature string, signaturePresent bool) {
+	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/gateway/v1/messages" || r.Header.Get("x-api-key") != "override-key" ||
 			r.Header.Get("anthropic-version") != "2023-06-01" || r.Header.Get("X-Custom") != "custom" {
@@ -130,7 +156,7 @@ func TestAnthropicStreamAndNativeHistory(t *testing.T) {
 		if !request.Stream || request.MaxTokens != 4096 || request.Model != "test" {
 			t.Errorf("unexpected request: %+v", request)
 		}
-		writeAnthropicEvents(w, anthropicToolEvents...)
+		writeAnthropicEvents(w, events...)
 	}))
 	defer server.Close()
 	client := NewAIClientWithModel("key", server.URL+"/gateway", "test", map[string]string{
@@ -179,8 +205,15 @@ func TestAnthropicStreamAndNativeHistory(t *testing.T) {
 		t.Fatalf("cumulative usage was not merged: %+v", usages)
 	}
 	native := stream.NativeContent()
-	if native == nil || len(native.Blocks) != 5 || !strings.Contains(string(native.Blocks[0]), "signed-opaque") {
+	if native == nil || len(native.Blocks) != 5 {
 		t.Fatalf("missing native thinking: %+v", native)
+	}
+	var thinkingBlock map[string]string
+	if err := json.Unmarshal(native.Blocks[0], &thinkingBlock); err != nil {
+		t.Fatal(err)
+	}
+	if value, present := thinkingBlock["signature"]; value != signature || present != signaturePresent || thinkingBlock["thinking"] != "Think" {
+		t.Fatalf("native thinking or signature changed: %s", native.Blocks[0])
 	}
 	persisted, _ := json.Marshal(native)
 	var restored AIMessageContent
@@ -266,8 +299,7 @@ func TestAnthropicIncompleteStreams(t *testing.T) {
 			`{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"a","name":"search","input":{}}}`,
 			`{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{"}}`,
 			`{"type":"content_block_stop","index":0}`}},
-		{"unsigned thinking", []string{anthropicToolEvents[0], anthropicToolEvents[3], anthropicToolEvents[4], anthropicToolEvents[7],
-			`{"type":"message_delta","delta":{"stop_reason":"end_turn"}}`, `{"type":"message_stop"}`}},
+		{"unsigned thinking without stop", []string{anthropicToolEvents[0], anthropicToolEvents[3], anthropicToolEvents[4], anthropicToolEvents[7]}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -316,6 +348,33 @@ func TestAnthropicNonStreamingAndErrors(t *testing.T) {
 				if !errors.As(err, &apiErr) || apiErr.HTTPStatusCode != status || apiErr.Message != "try later" {
 					t.Fatalf("unexpected error: %v", err)
 				}
+			}
+		})
+	}
+}
+
+func TestAnthropicNonStreamingThinkingSignatures(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		signature string
+	}{
+		{"missing signature", ""},
+		{"empty signature", `,"signature":""`},
+		{"signed thinking", `,"signature":"signed-opaque"`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = fmt.Fprintf(w, `{"id":"msg","model":"test","content":[{"type":"thinking","thinking":"Think"%s},{"type":"text","text":"answer"}],"stop_reason":"end_turn"}`, tc.signature)
+			}))
+			defer server.Close()
+			response, err := CreateOpenAICompletion(context.Background(), NewAIClientWithModel("", server.URL, "test"),
+				AnthropicProtocolMessages, openai.ChatCompletionRequest{Model: "test", Messages: []openai.ChatCompletionMessage{{Role: "user", Content: "hello"}}}, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(response.Choices) != 1 || response.Choices[0].Message.Content != "answer" ||
+				response.Choices[0].Message.ReasoningContent != "Think" || response.Choices[0].FinishReason != openai.FinishReasonStop {
+				t.Fatalf("thinking or answer was lost: %+v", response)
 			}
 		})
 	}

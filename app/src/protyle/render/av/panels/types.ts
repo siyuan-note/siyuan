@@ -1,4 +1,5 @@
 import type {RenderAttributeViewRequestInput} from "../../../../types/api";
+import type {FilterEditorOptions} from "../filter";
 
 export interface IOpenAVPanelOptions {
     protyle: IProtyle;
@@ -11,7 +12,9 @@ export interface IOpenAVPanelOptions {
     cb?: (avPanelElement: Element) => void;
     destroyCallback?: () => void;
     keepMenuOpen?: boolean;
-    filterOperation?: IAVFilterOperation;
+    filterOperation?: FilterEditorOptions;
+    anchorElement?: HTMLElement;
+    anchorRect?: DOMRect;
     requireExplicitChange?: boolean;
 }
 

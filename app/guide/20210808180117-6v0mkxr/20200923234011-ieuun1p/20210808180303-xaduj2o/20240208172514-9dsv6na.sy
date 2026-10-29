@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261018144949"
+		"updated": "20261028120132"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-fnv59m7",
-				"updated": "20261012014930"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20251224101749-zd1sdj7",
-				"updated": "20260920225154"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, list view, calendar view, kanban view, and card view."
+					"Data": "Databases organize entries into fields. An entry can be bound to an existing content block or exist independently. Table, list, calendar, kanban, and gallery views present the same data with their own layout, filtering, and sorting settings."
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014537-bs9zanm",
-				"updated": "20261012014859"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -54,85 +54,24 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20261009034010-6kd9rk5",
+					"TextMarkBlockRefID": "20260613155453-sgecaav",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Location field"
+					"TextMarkTextContent": "Field types"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
-				}
-			]
-		},
-		{
-			"ID": "20260930175958-jgqkczm",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260930175958-jgqkczm",
-				"updated": "20261012014859"
-			},
-			"Children": [
+					"Data": " for field capabilities and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260617123409-cmygnqa",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Table calculation"
+				},
 				{
 					"Type": "NodeText",
-					"Data": "Database panel field visibility"
-				}
-			]
-		},
-		{
-			"ID": "20260930175958-sqtxjcl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260930175958-sqtxjcl",
-				"updated": "20261001060000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In a database attribute panel at the top of a document, on a database entry page, or in a block attribute dialog, click a field name to set Database panel field visibility to Always show, Hide when empty, or Always hide. Default preserves the panel's existing display settings; the panel at the top of a document follows the global setting for hiding empty fields. Rules apply to attribute panels of that database and do not change field visibility in its views. Click the panel's edit button to temporarily reveal hidden fields and edit their values or visibility rules."
-				}
-			]
-		},
-		{
-			"ID": "20260929105001-jav2qb7",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260929105001-jav2qb7",
-				"updated": "20260929105001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Entry icons"
-				}
-			]
-		},
-		{
-			"ID": "20260929105001-d3q9qik",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260929105001-d3q9qik",
-				"updated": "20260930140000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value, in the entry details, or in a relation field to change or remove it. Item templates can preset icons for both unbound and document entries. Unbound entries without a custom icon show a short horizontal line, and the view's icon visibility setting still applies."
-				}
-			]
-		},
-		{
-			"ID": "20260929105001-pdids8d",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260929105001-pdids8d",
-				"updated": "20260930140000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "When binding or rebinding to a regular block without a custom icon, the block inherits the entry's icon. If the block already has an icon, or is an existing document, its own icon is used. A document created during binding inherits the entry's custom icon; if none is set, the document template's icon is used. Bound entries share icons with their bound blocks. Unbinding preserves the last displayed icon, which can then be changed independently."
+					"Data": " for column statistics."
 				}
 			]
 		},
@@ -142,12 +81,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20261016191345"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Views"
+					"Data": "Create a database"
 				}
 			]
 		},
@@ -428,6 +367,21 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20261024161058-v4cp9kf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-v4cp9kf",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "View layouts"
+				}
+			],
+			"HeadingLevel": 2
 		},
 		{
 			"ID": "20260613162855-gkemixn",
@@ -819,7 +773,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260920225154-tz8a00o",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -848,7 +802,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260920225154-qqxdh7e",
-				"updated": "20260929123717"
+				"updated": "20261025011205"
 			},
 			"Children": [
 				{
@@ -1092,6 +1046,52 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20261025011205-dbums56",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261025011205-dbums56",
+						"updated": "20261025011205"
+					},
+					"Children": [
+						{
+							"ID": "20261025011205-5ibctn0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261025011205-5ibctn0",
+								"updated": "20261025011205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Field names: Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Field names appear beside non-primary field values; the primary key remains the entry title. This option is off by default and saved per calendar view. Turn it off to show only values"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
 				}
 			]
 		},
@@ -1101,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-cdeorum",
-				"updated": "20260613162855"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1115,12 +1115,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613162855-3g52lzy",
-				"updated": "20260613162855"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Displays data as cards in columns, where each column corresponds to a value of the grouping field."
+					"Data": "Displays entries as cards in columns, one column per group. Grouping depends on the field type. With select or multi-select fields, dragging a card between columns also changes its selected option."
 				}
 			]
 		},
@@ -1130,7 +1130,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-y67hk0x",
-				"updated": "20260613162855"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1175,7 +1175,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-p5m98a8",
-						"updated": "20260613162855"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1183,17 +1183,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-0ztjqmf",
-								"updated": "20260613162855"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Grouping Field"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Choose a select or multi-select field as the grouping basis. The system automatically organizes data into columns by the field's option values"
+									"Data": "Grouping field: Choose a supported field and grouping method in the grouping settings; see Grouping below"
 								}
 							]
 						}
@@ -1208,7 +1203,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-i1ifv63",
-						"updated": "20260613162855"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1216,7 +1211,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-q8b0pyo",
-								"updated": "20260613162855"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1227,6 +1222,28 @@
 								{
 									"Type": "NodeText",
 									"Data": ": Each card displays a summary of the content block bound to the primary key, along with the values of fields selected in that view"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
 								}
 							]
 						}
@@ -1241,7 +1258,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-q3krvr0",
-						"updated": "20260613162855"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -1249,17 +1266,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-mx33glu",
-								"updated": "20260613162855"
+								"updated": "20261024161058"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Drag and Drop"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Dragging a card from one column to another automatically updates that entry's grouping field value to match the target column's option. This is the core interaction of kanban——status transitions are completed via drag and drop"
+									"Data": "Dragging: With a select or multi-select grouping field, moving a card to another column changes its selected option"
 								}
 							]
 						}
@@ -1372,7 +1384,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-sxaxx5x",
-				"updated": "20260927112821"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1401,7 +1413,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-9yfcx0f",
-				"updated": "20260613162855"
+				"updated": "20261025011511"
 			},
 			"Children": [
 				{
@@ -1446,7 +1458,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-39vgry3",
-						"updated": "20260613162855"
+						"updated": "20261025011511"
 					},
 					"Children": [
 						{
@@ -1454,7 +1466,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-0c304fq",
-								"updated": "20260613162855"
+								"updated": "20261025011511"
 							},
 							"Children": [
 								{
@@ -1465,6 +1477,28 @@
 								{
 									"Type": "NodeText",
 									"Data": ": Each entry is rendered as a card showing a summary of the primary key block's content and the selected field values, making it ideal for quick browsing and content-first viewing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Open the view settings and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Layout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Display field name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
 								}
 							]
 						}
@@ -1682,15 +1716,15 @@
 		{
 			"ID": "20260613171129-edm1pru",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20261016191345"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Filter and Sort"
+					"Data": "Filtering, sorting, and grouping"
 				}
 			]
 		},
@@ -1711,10 +1745,10 @@
 		{
 			"ID": "20260613171129-5zjv62o",
 			"Type": "NodeHeading",
-			"HeadingLevel": 4,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20261016191345"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -2715,10 +2749,10 @@
 		{
 			"ID": "20260613171129-y8inb0t",
 			"Type": "NodeHeading",
-			"HeadingLevel": 4,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-y8inb0t",
-				"updated": "20261016191345"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -3075,6 +3109,284 @@
 			]
 		},
 		{
+			"ID": "20261028100554-5uvtrxl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028100554-5uvtrxl",
+				"updated": "20261028120132"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database panel layout and sorting"
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-vymrc6v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-vymrc6v",
+				"updated": "20261028120132"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Database"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+				}
+			]
+		},
+		{
+			"ID": "20261028100554-o8rd07g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028100554-o8rd07g",
+				"updated": "20261028110235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The row layout reads from left to right, then top to bottom. Drag a field by its left handle to another field’s grid position to preview the resulting order, then drop to save it. The column layout reads down the left column, then down the right column; visible fields are split by count, with one extra field on the left when the count is odd. Editing field content does not move fields between columns. Column and single-column layouts use horizontal indicators for insertion above or below a field. Canceling a drag restores the original order; sorting supports undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-jgqkczm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260930175958-jgqkczm",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database panel field visibility"
+				}
+			]
+		},
+		{
+			"ID": "20260930175958-sqtxjcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930175958-sqtxjcl",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a database attribute panel at the top of a document, on a database entry page, or in a block attribute dialog, click a field name to set Database panel field visibility to Always show, Hide when empty, or Always hide."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-45csjom",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-45csjom",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Default preserves the panel's existing display settings; the panel at the top of a document follows the global setting for hiding empty fields. Rules apply to attribute panels of that database and do not change field visibility in its views."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-go3brhp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-go3brhp",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click the panel's edit button to temporarily reveal hidden fields and edit their values or visibility rules."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-jav2qb7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260929105001-jav2qb7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entry icons"
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-d3q9qik",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-d3q9qik",
+				"updated": "20260930140000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unbound entries can have their own icons. Click the icon beside the primary-key value, in the entry details, or in a relation field to change or remove it. Item templates can preset icons for both unbound and document entries. Unbound entries without a custom icon show a short horizontal line, and the view's icon visibility setting still applies."
+				}
+			]
+		},
+		{
+			"ID": "20260929105001-pdids8d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260929105001-pdids8d",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When binding or rebinding to a regular block without a custom icon, the block inherits the entry's icon. If the block already has an icon, or is an existing document, its own icon is used. A document created during binding inherits the entry's custom icon; if none is set, the document template's icon is used."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-6ekhv2t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-6ekhv2t",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Bound entries share icons with their bound blocks. Unbinding preserves the last displayed icon, which can then be changed independently."
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-chl2v5q",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-chl2v5q",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entry templates"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024161058-7oa1v25",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-7oa1v25",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the dropdown beside the new-entry button and choose New template. Preset the entry type, icon, primary-key content, and field values. Document entries can also have a save location, content template, and document-tree visibility setting."
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-6pyggzm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-6pyggzm",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose a template from the same menu to create an entry with those settings. Its More menu lets you edit it, make it the default, or delete it. Normal creation uses the default template; you can also choose an empty entry. Changes to a template do not update entries already created."
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-evrw9nh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-evrw9nh",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entry templates fill content at creation time. Template fields calculate values for existing entries when a view is rendered. Date fields in an entry template can use a fixed time or the current time at creation."
+				}
+			]
+		},
+		{
+			"ID": "20261025205717-wu88xyc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025205717-wu88xyc",
+				"updated": "20261025205717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In an entry template, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open item in split view after creation"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open each new bound or unbound entry on the right after creating it from a database view. A bound document focuses its title when available; otherwise, the primary key is focused. Unbound entries focus the primary key. Mobile uses the existing page or dialog."
+				}
+			]
+		},
+		{
+			"ID": "20261025205717-d3xd5xk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025205717-d3xd5xk",
+				"updated": "20261025205717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New templates have this option off. Turn it off to stop automatic opening. Existing templates retain their previous behavior until you change this switch, including automatic opening in calendars. Empty entries created without a template keep the view’s existing behavior; to configure them, create an empty unbound-entry template and make it the default."
+				}
+			]
+		},
+		{
 			"ID": "20240208172555-x0jaxkf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -3109,26 +3421,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172555-hv2afdr",
-				"updated": "20261016202856"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Relation and Rollup"
-				}
-			]
-		},
-		{
-			"ID": "20261007101857-8yrn5q5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261007101857-8yrn5q5",
-				"updated": "20261016202856"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The desktop and mobile relation selection panels always offer a new-item action using the related database’s default template. When the input differs from the name generated by the primary key template, two actions show the actual names: create with the default template, or create with the input name. The input-name action overrides only the primary key; field defaults, icon, content template and save location still apply. Empty input, no primary key template, or identical names produce only one action. Without a default template, creation produces a detached item. Creating the item and updating the relation can be undone together."
 				}
 			]
 		},
@@ -3170,6 +3468,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20261007101857-8yrn5q5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261007101857-8yrn5q5",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The desktop and mobile relation selection panels always offer a new-item action using the related database’s default template. When the input differs from the name generated by the primary key template, two actions show the actual names: create with the default template, or create with the input name."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-8vcjcg4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-8vcjcg4",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The input-name action overrides only the primary key; field defaults, icon, content template and save location still apply. Empty input, no primary key template, or identical names produce only one action. Without a default template, creation produces a detached item. Creating the item and updating the relation can be undone together."
 				}
 			]
 		},
@@ -3250,7 +3576,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20260902120000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3730,7 +4056,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260830120000-a1dspen",
-				"updated": "20260902120000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3840,12 +4166,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830120004-e5dspen",
-				"updated": "20260902120000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
+					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-gdqa5ya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-gdqa5ya",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Clear the display template to restore the field's original display. Relation fields follow the display template of the target database's primary key, including empty results, while preserving the original primary key value and relation."
 				}
 			]
 		},
@@ -3855,7 +4195,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261016202856"
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
@@ -3865,11 +4205,26 @@
 			]
 		},
 		{
+			"ID": "20261024163013-narckt9",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-narckt9",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configure a rule"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
 			"ID": "20261002224707-5by05dc",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-5by05dc",
-				"updated": "20261016202856"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -3892,11 +4247,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to add a rule. Changes are saved automatically; text is saved when the field loses focus or Enter is pressed. New rules are disabled by default. Incomplete rules are automatically disabled and show what is missing; enable them manually after completing the configuration. Rules are shared by the entire database and can be triggered by item changes in any view or mirror"
+					"Data": " to add a rule. Changes are saved automatically; text is saved when the field loses focus or Enter is pressed. New rules are disabled by default. Incomplete rules are automatically disabled and show what is missing; enable them manually after completing the configuration."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-343hmt7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-343hmt7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rules are shared by the entire database and can be triggered by item changes in any view or mirror"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference. The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions."
+					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-qox2ysv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-qox2ysv",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions."
 				}
 			]
 		},
@@ -3905,14 +4288,43 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017202044-s3bkzez",
-				"updated": "20261018000619"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, or collections after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled. Updating several fields of one entry counts as one updated entry. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection or cleanup, undo, redo, and failed transactions do not produce success messages."
+					"Data": "Notify on success is enabled by default and can be set independently for each rule. It reports actual additions, updates, or collections after the entire transaction commits; several rules share one summary, counting only rules with notifications enabled."
 				}
 			]
+		},
+		{
+			"ID": "20261024164212-c61ag21",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-c61ag21",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Updating several fields of one entry counts as one updated entry. Turning notifications off does not stop execution or hide errors. Unmatched conditions, missing targets, unchanged values, repeated matches, manual collection or cleanup, undo, redo, and failed transactions do not produce success messages."
+				}
+			]
+		},
+		{
+			"ID": "20261024163013-y4ij593",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-y4ij593",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Triggers"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261002224707-ayryj7q",
@@ -3929,16 +4341,45 @@
 			]
 		},
 		{
-			"ID": "20261002224707-hrqksxn",
-			"Type": "NodeParagraph",
+			"ID": "20261024163013-29a3zep",
+			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261002224707-hrqksxn",
-				"updated": "20261016202856"
+				"id": "20261024163013-29a3zep",
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each rule can run several actions in order. Choose the operation and its target, then add the fields to set and their value sources. Editing supports the triggering item, related items, or items matching filters in a selected database. Conditions inside an action filter the items to modify, not the triggering item; empty target conditions match all items in that target. Adding creates an unbound item in this or another database."
+					"Data": "Actions and values"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261002224707-hrqksxn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-hrqksxn",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each rule can run several actions in order. Choose the operation and its target, then add the fields to set and their value sources. Editing supports the triggering item, related items, or items matching filters in a selected database."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-og3pxc9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-og3pxc9",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Conditions inside an action filter the items to modify, not the triggering item; empty target conditions match all items in that target. Adding creates an unbound item in this or another database."
 				}
 			]
 		},
@@ -3955,6 +4396,21 @@
 					"Data": "Action values can use a fixed value, a source field of a compatible type, the trigger time, a relation to the triggering item, or a calculated template. Trigger time applies to date fields; triggering-item relations require a relation field pointing to the source database. Editing primary text preserves the existing binding and icon."
 				}
 			]
+		},
+		{
+			"ID": "20261024163013-wiw3yku",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-wiw3yku",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Set values with templates"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261016165601-kcsjytv",
@@ -4112,68 +4568,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261016165601-tphvdoa",
-				"updated": "20261016202856"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Expand Data used for preview, select an actual example entry, and adjust the preview date or referenced fields before viewing the result. These inputs do not modify entries. Empty output clears the field; missing variables, empty source dates, invalid types, or invalid references roll back the triggering edit and all actions. Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+					"Data": "Expand Data used for preview, select an actual example entry, and adjust the preview date or referenced fields before viewing the result. These inputs do not modify entries. Empty output clears the field; missing variables, empty source dates, invalid types, or invalid references roll back the triggering edit and all actions."
 				}
 			]
 		},
 		{
-			"ID": "20261016113125-e9334a5",
+			"ID": "20261024161816-coesny2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261016113125-e9334a5",
-				"updated": "20261016202856"
+				"id": "20261024161816-coesny2",
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, to record the first completion time, watch changes to Status, require the triggering item's Status to be Done and Completion time to be empty, then edit the triggering item and set Completion time to Trigger time. After completing the configuration, enable the rule. Without the empty-time condition, completing the item again can overwrite its completion time."
-				}
-			]
-		},
-		{
-			"ID": "20261002224707-s9ne4gk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261002224707-s9ne4gk",
-				"updated": "20261016202856"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "For example, create a two-way relation between a task database and a time-log database. When a task status changes to In progress, add a log with its start date set to the trigger time and its relation set to the triggering task. When the status changes to Done, edit related logs whose end date is empty and set that date to the trigger time."
-				}
-			]
-		},
-		{
-			"ID": "20261002224707-ri3sf0d",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261002224707-ri3sf0d",
-				"updated": "20261016202856"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Automatic actions and the original edit are undone and redone together, and both roll back if execution fails. Redo retains the original item IDs and timestamps. Automatic actions do not trigger other rules. Imports, sync, history restoration, and undo replay do not trigger rules again; ordinary API writes trigger rules but do not create editor undo entries."
-				}
-			]
-		},
-		{
-			"ID": "20261002224707-cvkf5jx",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261002224707-cvkf5jx",
-				"updated": "20261016202856"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them."
+					"Data": "Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
 				}
 			]
 		},
@@ -4521,12 +4935,98 @@
 			]
 		},
 		{
+			"ID": "20261024164212-aksjfz7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024164212-aksjfz7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rule examples"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261016113125-e9334a5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261016113125-e9334a5",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, to record the first completion time, watch changes to Status, require the triggering item's Status to be Done and Completion time to be empty, then edit the triggering item and set Completion time to Trigger time. After completing the configuration, enable the rule. Without the empty-time condition, completing the item again can overwrite its completion time."
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-s9ne4gk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-s9ne4gk",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, create a two-way relation between a task database and a time-log database. When a task status changes to In progress, add a log with its start date set to the trigger time and its relation set to the triggering task. When the status changes to Done, edit related logs whose end date is empty and set that date to the trigger time."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-dnilvbf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024164212-dnilvbf",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Execution, undo, and compatibility"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261002224707-ri3sf0d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-ri3sf0d",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic actions and the original edit are undone and redone together, and both roll back if execution fails. Redo retains the original item IDs and timestamps. Automatic actions do not trigger other rules. Imports, sync, history restoration, and undo replay do not trigger rules again; ordinary API writes trigger rules but do not create editor undo entries."
+				}
+			]
+		},
+		{
+			"ID": "20261002224707-cvkf5jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224707-cvkf5jx",
+				"updated": "20261016202856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them."
+				}
+			]
+		},
+		{
 			"ID": "20261015141042-fm4qoja",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261016202856"
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
@@ -4536,30 +5036,284 @@
 			]
 		},
 		{
-			"ID": "20261015141042-nrq3k5z",
-			"Type": "NodeParagraph",
+			"ID": "20261024163013-6bomil1",
+			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261015141042-nrq3k5z",
-				"updated": "20261018120429"
+				"id": "20261024163013-6bomil1",
+				"updated": "20261026103001"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope (includes subdocuments) to select notebooks or documents. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined. Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them. Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction. Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+					"Data": "Watch scope and conditions"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20261015141042-nrq3k5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-nrq3k5z",
+				"updated": "20261027120633"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose the Block matches conditions trigger, then use the add button under Watch scope to select notebooks or documents. In the picker, check multiple notebooks or documents and confirm to add them together. Selections are retained while searching or expanding the tree. Duplicate selections are ignored; each rule can contain up to 32 notebooks or documents in total. Click a document title to preview it in a floating window while keeping automation settings open; its icon also supports hover preview. Notebook and document scopes are combined."
 				}
 			]
+		},
+		{
+			"ID": "20261024161816-3zxzd6e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-3zxzd6e",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block types, tags, and custom attributes use separate Chip groups; add conditions with each group's add button, and remove them with the Chip's close button. The block type picker supports search and repeated selections. Click a tag or attribute Chip to edit it; Enter confirms tags, while attribute changes remain drafts until confirmed, and Escape or Cancel discards them."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-xefugwl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-xefugwl",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tags are trimmed and deduplicated. Block types use OR. Tags and custom attributes each default to Match all; choose Match any separately when needed. The three groups still use AND, and an empty group adds no restriction."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-6ipky6d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-6ipky6d",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Custom attributes support equality, contains, exists, and does not exist; the last two do not need a value. Match any requires automation format 3, while existing rules keep their Match all behavior."
+				}
+			]
+		},
+		{
+			"ID": "20261020211145-1vqtmd6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020211145-1vqtmd6",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When document scopes are selected, Subdocument depth appears below Watch scope. Unlimited is the default and includes all descendant documents. Current document only includes each selected document itself. With Limit depth, enter a positive integer: 1 includes the selected document and its direct children, 2 also includes grandchildren, and so on."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-m178sgi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-m178sgi",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This setting is shared by all document scopes in the rule and does not limit notebook scopes; overlapping scopes are combined. Changing depth preserves existing entries and fields and does not collect existing content automatically."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-b0gk3r7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-b0gk3r7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use collection management to preview and collect matches or review and remove unmatched entries. Limited depth requires automation format 5; older clients reject it without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261022092813-uxiousu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022092813-uxiousu",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Include selected documents themselves is enabled by default. Disable it to skip each selected document and all blocks inside it while continuing to watch descendant documents up to the configured depth. For example, disable this option and set depth to 1 to watch only direct child documents; combined with Current document only, each document scope is empty."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-8sdv6tq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-8sdv6tq",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This option is shared by the rule’s document scopes. Notebook scopes and other overlapping document scopes can still include the document because scopes are combined by union. Changing this option preserves existing entries and fields and does not backfill or remove entries automatically; use collection management to preview, collect, or review and remove entries."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-8buyzmu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-8buyzmu",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Excluding selected documents requires automation format 7; existing formats 1–6 remain readable, and older clients reject format 7 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261026103001-3cdya4m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026103001-3cdya4m",
+				"updated": "20261026103001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To collect block references, select a reference target and paste its block ID or block link, or choose Current document. The target is saved as a fixed block ID shared by all database mirrors. A document target includes references to its internal content blocks, but not its child documents. Only body block references are included; ordinary links, embeds and references in database rich-text fields are excluded."
+				}
+			]
+		},
+		{
+			"ID": "20261026103001-47dxurt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026103001-47dxurt",
+				"updated": "20261026103001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Removing a reference preserves existing entries and fields; preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261021135332-1brkvpw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021135332-1brkvpw",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attribute name supports Equals (the default), Contains, and Regex, independently of the attribute value condition. Equals uses the full name, such as custom-state. Contains accepts a literal substring without the custom- prefix: dailynote matches custom-dailynote-20261021. Regex uses Go syntax against the full name, for example ^custom-dailynote-[0-9]{8}$."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-vktvb75",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-vktvb75",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Only custom attributes are checked. Names and values are case-sensitive and must match the same attribute; Exists requires any matching name, while Does not exist requires none and ignores the value. Invalid regular expressions cannot be saved, and patterns are limited to 256 bytes."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-b68s8sa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-b68s8sa",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Contains and Regex require automation format 6; existing formats 1–5 remain readable, while older clients reject format 6 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261024163013-jv7dnxb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-jv7dnxb",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose what to collect"
+				}
+			],
+			"HeadingLevel": 4
 		},
 		{
 			"ID": "20261017204817-jfdo45b",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017204817-jfdo45b",
-				"updated": "20261018144949"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The Collect menu above Block types offers Default, Block containing the tag, and Container block. Default prefers the enclosing list item when its first content block contains the tags and it meets the type and attribute conditions; otherwise it uses the eligible tagged block. Selecting both paragraph and list-item types still produces only one target for the same tag source. Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children. With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
+					"Data": "The Collect menu above Block types offers Default, Block containing the tag, and Container block. Default prefers the enclosing list item when its first content block contains the tags and it meets the type and attribute conditions; otherwise it uses the eligible tagged block. Selecting both paragraph and list-item types still produces only one target for the same tag source."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-pnx07n4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-pnx07n4",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block containing the tag filters and collects the actual tagged block by its type and attributes. Container block collects the nearest container meeting the selected type and attribute conditions, deduplicating by block ID; documents are eligible only when explicitly selected. All required tags must occur in the same source block, rather than being combined across children."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-aai6uo3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-aai6uo3",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "With no tag conditions, this option has no effect. Preview shows the final collection targets. Changing this option preserves existing entries and fields without converting their bound blocks. The two explicit modes require automation format 4; older formats remain readable, and older clients reject format 4 without rewriting the database."
 				}
 			]
 		},
@@ -4568,12 +5322,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261017195341-czg1ilm",
-				"updated": "20261018000619"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A main block type includes all its subtypes. You can instead select heading levels H1-H6, unordered/ordered/task lists or list items, and built-in or custom callout types. Lists and list items match independently; multiple choices use OR, and an empty selection allows every type. Selecting a main type replaces its selected subtypes. Changing a block subtype uses the same matching logic for automatic collection, cleanup review, and preview. Subtype filters require automation format 3; existing format 1 and 2 rules remain readable, and older clients reject format 3 without rewriting the database."
+					"Data": "A main block type includes all its subtypes. You can instead select heading levels H1-H6, unordered/ordered/task lists or list items, and built-in or custom callout types. Lists and list items match independently; multiple choices use OR, and an empty selection allows every type."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-r662vjh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-r662vjh",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Selecting a main type replaces its selected subtypes. Changing a block subtype uses the same matching logic for automatic collection, cleanup review, and preview. Subtype filters require automation format 3; existing format 1 and 2 rules remain readable, and older clients reject format 3 without rewriting the database."
 				}
 			]
 		},
@@ -4582,12 +5350,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-dmlyxmz",
-				"updated": "20261016202856"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Tags match the block itself, without collecting all ancestor containers. A list item uses the tags in its first paragraph; that paragraph is collected separately only when paragraph blocks are explicitly selected. Collection binds the original block to this database without copying or moving it. Initial fields support fixed values and the trigger time for date fields; the primary field retains its original block binding."
+					"Data": "Tags match the block itself, without collecting all ancestor containers. A list item uses the tags in its first paragraph; that paragraph is collected separately only when paragraph blocks are explicitly selected."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-hlq64ez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-hlq64ez",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection binds the original block to this database without copying or moving it. Initial fields support fixed values and the trigger time for date fields; the primary field retains its original block binding."
 				}
 			]
 		},
@@ -4606,11 +5388,26 @@
 			]
 		},
 		{
+			"ID": "20261024163013-4bgb3is",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-4bgb3is",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manage and collect existing blocks"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
 			"ID": "20261015141042-u9c28d4",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-u9c28d4",
-				"updated": "20261018122129"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -4633,7 +5430,35 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and select Database entries to check all existing entries against the union of enabled block collection rules. Manual and automatically collected entries are checked alike. Matches rules, Does not match rules, and Cannot determine have separate counts and pages; the first opening prioritizes entries that do not match. Unknown entries explain why they cannot be classified. Remove unmatched entries on this page confirms the count and rechecks rules, sources, and bindings before removing only entries still confirmed unmatched. Nonmatching and unknown entries also offer individual removal. Removal keeps source blocks and supports undo and redo of the original entry IDs, fields, and ordering. Missing source blocks are not recreated; read or authentication failures preserve the data and return an error. A later new match creates an initialized entry rather than recovering removed field values."
+					"Data": " and select Database entries to check all existing entries against the union of enabled block collection rules. Manual and automatically collected entries are checked alike. Matches rules, Does not match rules, and Cannot determine have separate counts and pages; the first opening prioritizes entries that do not match."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-zd3a5h8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-zd3a5h8",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unknown entries explain why they cannot be classified. Remove unmatched entries on this page confirms the count and rechecks rules, sources, and bindings before removing only entries still confirmed unmatched. Nonmatching and unknown entries also offer individual removal. Removal keeps source blocks and supports undo and redo of the original entry IDs, fields, and ordering."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-qq30r0i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-qq30r0i",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Missing source blocks are not recreated; read or authentication failures preserve the data and return an error. A later new match creates an initialized entry rather than recovering removed field values."
 				}
 			]
 		},
@@ -4642,7 +5467,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-1ymbtr0",
-				"updated": "20261018122129"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -4665,7 +5490,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " select Rule matches and choose an enabled collection rule to inspect matching source blocks and their collected or uncollected status. Collect matches on this page adds only the displayed uncollected matches. The page controls show the current page number. Each preview page contains at most 100 blocks and may be smaller when many fields are initialized."
+					"Data": " select Rule matches and choose an enabled collection rule to inspect matching source blocks and their collected or uncollected status."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-sjgygho",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-sjgygho",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collect matches on this page adds only the displayed uncollected matches. The page controls show the current page number. Each preview page contains at most 100 blocks and may be smaller when many fields are initialized."
 				}
 			]
 		},
@@ -4674,12 +5513,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015141042-cael6rr",
-				"updated": "20261016202856"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Collection is evaluated after block creation, content or attribute edits, and block moves. Moving an entire document in the document tree, imports, sync, and history restoration do not backfill matches; use the preview to collect existing content. Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
+					"Data": "Collection is evaluated after user creation, copying, content or attribute edits, content template application, global find and replace, and block or document moves into a watched scope. Document tree copies and moves include descendant documents. Existing rows keep their field values. Markdown and .sy imports, sync, history restoration, undo, and redo do not trigger new collection; use the preview to collect existing content explicitly."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-vg7p0z4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-vg7p0z4",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
 				}
 			]
 		},

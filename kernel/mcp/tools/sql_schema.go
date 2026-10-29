@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package tools
 
 // SQL 索引说明按需返回，不向每轮智能体系统提示词注入完整表结构。

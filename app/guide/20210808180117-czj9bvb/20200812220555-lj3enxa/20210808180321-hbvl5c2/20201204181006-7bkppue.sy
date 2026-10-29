@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024161058"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428214921-3rfhrt6",
-				"updated": "20210428214924"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -33,24 +33,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091309-h61sdjr",
-				"updated": "20210428230754"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "模板片段"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "用于在光标插入符位置快速插入之前设置好的文本内容，支持变量。"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "模板片段"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "使用 "
+					"Data": "模板片段用于在光标位置插入可重复使用的内容，支持变量和计算。模板以 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -59,7 +47,114 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后缀文件，存放在工作空间 data/templates 文件夹下。"
+					"Data": " 文件保存在工作空间的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹中。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-ondpuxv",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-ondpuxv",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建模板"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024161058-3p1qllh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-3p1qllh",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先在文档中编写要复用的内容，再通过文档菜单的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "导出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 保存，选择名称和保存位置。需要修改模板时，可从模板管理中编辑源码并预览；也可以返回源文档，修改后重新导出。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-h71ogwf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091309-h71ogwf",
+				"updated": "20250115153028"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "调用模板"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-l9wcdtk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-l9wcdtk",
+				"updated": "20250115153028"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在光标插入符位置，通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 选择模板来触发模板搜索，找到需要插入的模板后 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可。"
 				}
 			]
 		},
@@ -140,7 +235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -298,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -393,7 +488,7 @@
 					},
 					"Properties": {
 						"id": "20211213120720-ulwzg6f",
-						"updated": "20211213120720"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -401,13 +496,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211213120720-bm8xbwm",
-								"updated": "20211213120746"
+								"updated": "20261024161058"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
@@ -415,7 +506,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该变量用于插入当前文档命名"
+									"Data": "：插入当前文档块的命名属性，与文档标题 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 不同"
 								}
 							]
 						}
@@ -1748,57 +1848,6 @@
 			]
 		},
 		{
-			"ID": "20210104091309-h71ogwf",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091309-h71ogwf",
-				"updated": "20250115153028"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "调用模板"
-				}
-			]
-		},
-		{
-			"ID": "20210104091309-l9wcdtk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091309-l9wcdtk",
-				"updated": "20250115153028"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在光标插入符位置，通过 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 选择模板来触发模板搜索，找到需要插入的模板后 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "回车"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 即可。"
-				}
-			]
-		},
-		{
 			"ID": "20260904022100-7ay9g5b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1833,7 +1882,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tplcn01",
-				"updated": "20260830143000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1893,6 +1942,29 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-djqf5g2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-djqf5g2",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "运行此示例前，请在当前模板包中创建 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "children/material.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。它是示例引用的子文档内容模板；也可以将该路径改为已有的模板路径。"
 				}
 			]
 		},
@@ -1960,7 +2032,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tplcn07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1975,11 +2047,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 根据文档 ID 返回指向计划文档的静态块引用文本，不依赖标题或可读路径；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 返回指向计划文档的静态块引用文本。"
+					"Data": " 为按可读路径查询的兼容入口。"
 				}
 			]
 		},

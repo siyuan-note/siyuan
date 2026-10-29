@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -12,6 +16,33 @@ type ImportTokenRequest struct {
 
 type ImportDataRequest struct {
 	File *multipart.FileHeader `json:"file" api:"optional"`
+}
+
+type DataImportPlan struct {
+	ID        string   `json:"id"`
+	Conflicts []string `json:"conflicts"`
+	Encrypted []string `json:"encrypted"`
+}
+
+type DataImportRequest struct {
+	ID string `json:"id" api:"trim"`
+}
+
+type DataImportMode string
+
+const (
+	DataImportSkip      DataImportMode = "skip"
+	DataImportOverwrite DataImportMode = "overwrite"
+)
+
+type CommitDataImportRequest struct {
+	ID       string         `json:"id" api:"trim"`
+	Mode     DataImportMode `json:"mode" api:"enum=skip|overwrite"`
+	Password string         `json:"password" api:"optional,trim"`
+}
+
+type DataImportResult struct {
+	Skipped []string `json:"skipped"`
 }
 
 // ImportSYRequest 导入 .sy.zip，同名同内容的自定义表情复用；同名不同内容返回错误并保留已有文件。

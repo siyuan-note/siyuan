@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容區塊",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120744-k3bw3kf",
-				"updated": "20211225234425"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -29,12 +29,41 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120744-0dnr5d6",
-				"updated": "20260730184353"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "嵌入內容區塊主要用於匯總所需內容區塊，通過 "
+					"Data": "嵌入內容區塊依查詢在目前位置顯示所需內容區塊，適合彙整任務、整理主題或集中檢視分散的筆記。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-coroj4x",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-coroj4x",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入 SQL 嵌入"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-y1fb0xe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-y1fb0xe",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將 SQL 查詢放在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -52,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 將 SQL 腳本包裹起來並獨占一行："
+					"Data": " 之間，並獨占一行，例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -61,19 +90,29 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，資料庫表請參考"
+					"Data": "。可查詢的資料表和欄位見 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226121831-ppl9gr8",
+					"TextMarkBlockRefID": "20211226121808-fnxmngk",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "這裡"
+					"TextMarkTextContent": "SQL 索引資料表"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "。"
-				},
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-aotkvz8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-aotkvz8",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -585,7 +624,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202457-cgu87b8",
-				"updated": "20261016202635"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -964,7 +1003,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-zngmbbn",
-				"updated": "20261016202635"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1020,7 +1059,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-4h59iyd",
-				"updated": "20260612202457"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1033,7 +1072,48 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 非同步返回（Promise 會被自動 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
+					"Data": "//!js\n// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-90tdh0l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024162311-90tdh0l",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "也可以傳回 Promise。下面是另一種寫法，與上面的同步範例分別使用："
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-x9caqoi",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261024162311-x9caqoi",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "//!js\n// 非同步返回（Promise 會被自動 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package agent
 
@@ -36,6 +24,7 @@ const testGeminiThoughtSignatureFallback = "skip_thought_signature_validator"
 
 func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 	useTestDataDir(t)
+	useTestToolRoundLimitLanguage(t)
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
 	kernelModel.Conf.AI.Store(kernelConf.NewAI())
@@ -126,13 +115,20 @@ func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 		testSessionID, "user-1", 1,
 		"use both tools", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
+	limitSeen := false
 	for event := range events {
 		if event.Type == "error" {
-			t.Fatalf("agent turn failed: %s", event.Error)
+			limitSeen = true
+			if event.Error != testToolRoundLimitMessage {
+				t.Fatalf("agent turn failed: %s", event.Error)
+			}
+		}
+		if event.Type == "done" {
+			t.Fatal("round limit was reported as normal completion")
 		}
 	}
-	if requests.Load() != 2 || executed.Load() != 2 {
-		t.Fatalf("unexpected request or execution count: requests=%d, executed=%d", requests.Load(), executed.Load())
+	if requests.Load() != 2 || executed.Load() != 2 || !limitSeen {
+		t.Fatalf("unexpected request or execution count: requests=%d, executed=%d, limitSeen=%v", requests.Load(), executed.Load(), limitSeen)
 	}
 }
 

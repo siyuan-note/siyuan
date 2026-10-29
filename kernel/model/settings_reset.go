@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -87,6 +91,8 @@ func ResetSettings() error {
 	if util.ReadOnly {
 		return errors.New("read-only mode")
 	}
+	unlockTarget := lockDocumentTargetConfiguration()
+	defer unlockTarget()
 	Conf.m.Lock()
 	localStorageLock.Lock()
 	bootAppearanceConfLock.Lock()

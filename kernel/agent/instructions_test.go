@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package agent
 
 import (
@@ -7,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -21,8 +26,9 @@ import (
 
 func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 	setupCompactionAgentTest(t)
+	useTestToolRoundLimitLanguage(t)
 	kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds = 1
-	initial, err := util.SaveAgentInstructions("original-workspace-preference", "missing")
+	initial, _, err := util.SaveAgentInstructions("original-workspace-preference", "missing")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +38,7 @@ func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 		InputSchema:   tools.ToolSchema{Type: "object", Properties: map[string]tools.Property{}},
 		ActionEffects: map[string]tools.ToolEffects{"": {LocalRead: true}},
 		Handler: func(args map[string]any) (tools.CallToolResult, error) {
-			_, err := util.SaveAgentInstructions("changed-workspace-preference", initial.Revision)
+			_, _, err := util.SaveAgentInstructions("changed-workspace-preference", initial.Revision)
 			return tools.CallToolResult{Content: []tools.ContentItem{{Type: "text", Text: "done"}}}, err
 		},
 	})
@@ -63,19 +69,26 @@ func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 		writeAssistantContextStream(t, w, "", "done")
 	}))
 	defer server.Close()
-	for range 2 {
+	for turnIndex := range 2 {
 		sessionID := ast.NewNodeID()
 		session := map[string]any{"id": sessionID, "title": "instructions", "createdAt": 1, "updatedAt": 1,
 			"entries": []any{map[string]any{"id": "user-1", "type": "user", "content": "test preferences"}}}
 		if _, _, err := SaveSessionState(marshalSession(t, session)); err != nil {
 			t.Fatal(err)
 		}
+		limitSeen := false
 		for event := range AgentChat(context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0,
 			sessionID, "user-1", 1, "test preferences", nil, "English", nil, EditorContext{}, nil, false,
 			time.Second, 0, "", time.Second, time.Second) {
 			if event.Type == "error" {
-				t.Fatal(event.Error)
+				limitSeen = true
+				if event.Error != testToolRoundLimitMessage {
+					t.Fatal(event.Error)
+				}
 			}
+		}
+		if limitSeen != (turnIndex == 0) {
+			t.Fatalf("unexpected round limit notification on turn %d: %v", turnIndex, limitSeen)
 		}
 	}
 	if requests.Load() != 3 {
@@ -85,7 +98,7 @@ func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 
 func TestAgentInstructionsInvalidSourceStopsTurn(t *testing.T) {
 	setupCompactionAgentTest(t)
-	if _, err := util.SaveAgentInstructions("valid", "missing"); err != nil {
+	if _, _, err := util.SaveAgentInstructions("valid", "missing"); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(util.AgentInstructionsPath(), []byte{255}, 0644); err != nil {
@@ -121,5 +134,29 @@ func TestAgentInstructionsCompactionAndBudget(t *testing.T) {
 	}
 	if buildSystemPrompt("English", capabilities, " \n") != buildSystemPrompt("English", capabilities) {
 		t.Fatal("empty instructions changed prompt")
+	}
+}
+
+func TestAgentInstructionsConflictingLocationsStopTurn(t *testing.T) {
+	setupCompactionAgentTest(t)
+	if _, _, err := util.SaveAgentInstructions("canonical", "missing"); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(util.LegacyAgentInstructionsPath()), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(util.LegacyAgentInstructionsPath(), []byte("legacy"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	errorSeen := false
+	for event := range AgentChat(context.Background(), nil, "openai", "test-model", "", 0,
+		"", "", 0, "test", nil, "English", nil, EditorContext{}, nil, false,
+		time.Second, 0, "", time.Second, time.Second) {
+		if event.Type == "error" && strings.Contains(event.Error, "AGENTS.md") {
+			errorSeen = true
+		}
+	}
+	if !errorSeen {
+		t.Fatal("conflicting sources did not stop before provider access")
 	}
 }

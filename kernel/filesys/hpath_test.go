@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package filesys
 
 import (
@@ -6,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -51,5 +56,43 @@ func TestReadDocHPathDoesNotRepairSource(t *testing.T) {
 	after, _ := os.ReadFile(parentFile)
 	if string(before) != string(after) {
 		t.Fatal("failed recovery modified the source")
+	}
+}
+
+func TestDocumentMetadataReaderReauthenticatesEachSource(t *testing.T) {
+	box, parent, childPath, data := setupStalePathTest(t)
+	previousConf := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = previousConf })
+	childFile := writeStalePathFixture(t, box, childPath, data)
+	parentPath := "/" + parent + ".sy"
+	parentData, err := json.Marshal(map[string]any{"ID": parent, "Type": "NodeDocument",
+		"Properties": map[string]string{"id": parent, "title": "Parent"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	parentFile := writeStalePathFixture(t, box, parentPath, parentData)
+	reader := newDocumentMetadataReader()
+	tree, err := reader.tree(box, childPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hpath, err := reader.hpath(tree); err != nil || hpath != "/Parent/Child" {
+		t.Fatal(hpath, err)
+	}
+	if err = os.WriteFile(childFile, []byte(`{"ID":`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = reader.tree(box, childPath); err == nil {
+		t.Fatal("metadata recovery reused an earlier source instead of validating it")
+	}
+	if err = os.WriteFile(parentFile, []byte(`{"ID":`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = newDocumentMetadataReader().hpath(tree); err == nil {
+		t.Fatal("metadata recovery reused an ancestor from another operation")
+	}
+	if tree.Root.ID != util.GetTreeID(childPath) || treenode.ReadDocumentTitle(tree.Root).Text != "Child" {
+		t.Fatal("failed reread changed the authenticated snapshot")
 	}
 }

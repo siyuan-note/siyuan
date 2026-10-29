@@ -1,18 +1,44 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package av
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/88250/lute/ast"
 )
+
+func TestNewItemTemplateOpenAfterCreate(t *testing.T) {
+	for _, target := range []NewItemTargetType{NewItemTargetDetached, NewItemTargetDocument} {
+		for _, preference := range []*bool{nil, new(false), new(true)} {
+			view := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
+			template := &NewItemTemplate{ID: ast.NewNodeID(), Name: "Entry", TargetType: target, OpenAfterCreate: preference}
+			if err := view.SetNewItemTemplates(&NewItemTemplatesConfig{Templates: []*NewItemTemplate{template}}); err != nil {
+				t.Fatal(err)
+			}
+			stored := view.NewItemTemplates[0]
+			if preference != nil && (stored.OpenAfterCreate == preference || stored.OpenAfterCreate == nil || *stored.OpenAfterCreate != *preference) {
+				t.Fatalf("opening preference was lost or not cloned: %+v", stored)
+			}
+			raw, err := json.Marshal(stored)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var fields map[string]json.RawMessage
+			if err = json.Unmarshal(raw, &fields); err != nil || (fields["openAfterCreate"] != nil) != (preference != nil) {
+				t.Fatalf("opening preference presence changed: %s %v", raw, err)
+			}
+			var restored NewItemTemplate
+			if err = json.Unmarshal(raw, &restored); err != nil || (restored.OpenAfterCreate == nil) != (preference == nil) ||
+				preference != nil && *restored.OpenAfterCreate != *preference {
+				t.Fatalf("opening preference did not round-trip: %s %v", raw, err)
+			}
+		}
+	}
+}
 
 func TestSetNewItemTemplates(t *testing.T) {
 	attrView := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}

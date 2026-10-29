@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -360,7 +348,7 @@ func isCSSIdentifierByte(value byte) bool {
 		'a' <= value && value <= 'z' || 'A' <= value && value <= 'Z'
 }
 
-// 获取主题的样式变量映射表
+// getThemeStyleVar 读取主题 CSS 变量；第三方主题缺基础变量时以 daylight/midnight 兜底。
 func getThemeStyleVar(theme string, isDarkMode bool) (ret map[string]string) {
 	ret = map[string]string{}
 

@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -29,6 +29,7 @@ const markdownImportBatchBytes = 8 * 1024 * 1024
 
 type markdownImportEntry struct {
 	id, box, path, hpath string
+	sourcePath, title    string
 	rootType             string
 	hasRootType          bool
 	offset               int64
@@ -71,6 +72,11 @@ func markdownImportAAD(index int) []byte {
 }
 
 func (spool *markdownImportSpool) add(tree *parse.Tree) error {
+	return spool.addSource(tree, tree.HPath)
+}
+
+// addSource 将外部链接位置与文档显示标题分开，标题中的斜杠不参与相对文件定位。
+func (spool *markdownImportSpool) addSource(tree *parse.Tree, sourcePath string) error {
 	if err := treenode.SyncTableCellRichInlineChanges(tree.Root); err != nil {
 		return err
 	}
@@ -82,8 +88,9 @@ func (spool *markdownImportSpool) add(tree *parse.Tree) error {
 		spool.singleTree = tree
 		spool.entries = append(spool.entries, markdownImportEntry{
 			id: tree.ID, box: tree.Box, path: tree.Path, hpath: tree.HPath,
+			sourcePath: sourcePath, title: treenode.ReadDocumentTitle(tree.Root).Text,
 		})
-		addImportSearchLinks(tree, spool.searchLinks)
+		spool.addSourceLinks(tree, sourcePath)
 		return nil
 	}
 	luteEngine := util.NewLute()
@@ -103,6 +110,7 @@ func (spool *markdownImportSpool) add(tree *parse.Tree) error {
 	}
 	entry := markdownImportEntry{
 		id: tree.ID, box: tree.Box, path: tree.Path, hpath: tree.HPath,
+		sourcePath: sourcePath, title: treenode.ReadDocumentTitle(tree.Root).Text,
 		offset: offset, size: len(ciphertext), rawSize: len(raw),
 	}
 	for _, attribute := range tree.Root.KramdownIAL {
@@ -112,7 +120,49 @@ func (spool *markdownImportSpool) add(tree *parse.Tree) error {
 		}
 	}
 	spool.entries = append(spool.entries, entry)
-	addImportSearchLinks(tree, spool.searchLinks)
+	spool.addSourceLinks(tree, sourcePath)
+	return nil
+}
+
+func (spool *markdownImportSpool) addSourceLinks(tree *parse.Tree, sourcePath string) {
+	view := *tree
+	view.HPath = sourcePath
+	addImportSearchLinks(&view, spool.searchLinks)
+}
+
+// refreshDisplayPaths 使用暂存身份关系修正前置元数据标题，不从显示文本拆分父级。
+func (spool *markdownImportSpool) refreshDisplayPaths(basePath, baseHPath string) error {
+	entries := map[string]*markdownImportEntry{}
+	for i := range spool.entries {
+		entry := &spool.entries[i]
+		entries[strings.TrimSuffix(entry.path, ".sy")] = entry
+	}
+	resolved := map[string]string{basePath: baseHPath}
+	var resolve func(string) (string, error)
+	resolve = func(idPath string) (string, error) {
+		if display, ok := resolved[idPath]; ok {
+			return display, nil
+		}
+		entry := entries[idPath]
+		if entry == nil {
+			return "", fmt.Errorf("Markdown import parent identity is missing: %s", idPath)
+		}
+		parent, err := resolve(path.Dir(idPath))
+		if err != nil {
+			return "", err
+		}
+		entry.hpath = appendDocumentHPath(parent, entry.title)
+		resolved[idPath] = entry.hpath
+		return entry.hpath, nil
+	}
+	for idPath := range entries {
+		if _, err := resolve(idPath); err != nil {
+			return err
+		}
+	}
+	if spool.singleTree != nil {
+		spool.singleTree.HPath = spool.entries[0].hpath
+	}
 	return nil
 }
 
@@ -180,7 +230,12 @@ func (spool *markdownImportSpool) finish(write func(*parse.Tree) error, flush fu
 		if err != nil {
 			return fmt.Errorf("read Markdown import staging entry %d: %w", i, err)
 		}
-		if err = convertMarkdownImportTree(tree, spool.searchLinks, luteEngine); err != nil {
+		// 链接转换只借用外部文件位置；恢复显示路径后才交给文档写入器。
+		displayPath := tree.HPath
+		tree.HPath = entry.sourcePath
+		err = convertMarkdownImportTree(tree, spool.searchLinks, luteEngine)
+		tree.HPath = displayPath
+		if err != nil {
 			return err
 		}
 		if err = write(tree); err != nil {

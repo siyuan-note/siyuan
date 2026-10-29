@@ -5,6 +5,7 @@ import type {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {mountComposer, type AgentComposerData} from "./AgentComposer";
+import {bindAgentComposerResize} from "./AgentComposerResize";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
 import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./frontendCapabilities";
@@ -13,7 +14,8 @@ import {genAgentConfirmActionButtons} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
-import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
+import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
 import {setPosition} from "../../../util/setPosition";
 import {fetchPost} from "../../../util/fetch";
 import {confirmDialog} from "../../../dialog/confirmDialog";
@@ -197,6 +199,7 @@ export class AgentChat extends Model {
     private panelElement: HTMLElement;
     private messagesContainer: HTMLElement;
     private composerHost: HTMLElement;
+    private composerResize?: ReturnType<typeof bindAgentComposerResize>;
     private composer: ReturnType<typeof mountComposer> | null = null;
     private sendBtn: HTMLElement;
     private stopBtn: HTMLElement;
@@ -289,7 +292,6 @@ export class AgentChat extends Model {
     private settingDialogObserver: MutationObserver | null = null;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
-    private navExpandTimer = 0;
     // 镜像态：当前会话正由其他实例流式对话，本实例处于只读占位锁定，期间不重绘当前视图。
     // 由 ws 的 streamStart/streamEnd 事件驱动，与发起者的 isStreaming 互斥（发起者走 SSE）。
     private mirrorLocked = false;
@@ -343,6 +345,7 @@ export class AgentChat extends Model {
     }
 
     public destroy() {
+        this.composerResize?.destroy();
         this.welcomeObserver?.disconnect();
         super.destroy();
     }
@@ -430,6 +433,8 @@ export class AgentChat extends Model {
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
             "</div>" +
             '<div class="agent-chat__input-area">' +
+            '<div class="agent-chat__input-resize" data-prevent-swipe="true"><span class="protyle-block-resize" data-resize-axis="height" ' +
+            'role="separator" aria-orientation="horizontal" tabindex="0" aria-label="' + escapeAriaLabel(L.height) + '"></span></div>' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<div class="agent-chat__button-options">' +
@@ -466,6 +471,9 @@ export class AgentChat extends Model {
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;
         this.composerHost = panel.querySelector(".agent-chat__composer-host") as HTMLElement;
+        this.composerResize?.destroy();
+        this.composerResize = bindAgentComposerResize(panel, this.composerHost,
+            panel.querySelector(".agent-chat__input-resize .protyle-block-resize"));
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
         this.imageUploadButton = panel.querySelector(".agent-chat__image-upload") as HTMLButtonElement;
@@ -917,15 +925,17 @@ export class AgentChat extends Model {
         this.navRail = document.createElement("div");
         this.navRail.className = "agent-chat__nav-rail";
 
-        this.navRail.addEventListener("mouseenter", () => {
-            this.navExpandTimer = window.setTimeout(() => {
-                this.navRail.classList.add("agent-chat__nav-rail--expanded");
-            }, 200);
+        this.navRail.addEventListener("mouseover", (event: MouseEvent) => {
+            const marker = (event.target as HTMLElement).closest(".agent-chat__nav-rail-marker");
+            if (!marker) {
+                return;
+            }
+            // 单条消息预览复用提示框，不扩大导航的点击区域。
+            event.stopPropagation();
+            showTooltip(escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || ""), marker, "agent-nav", event);
         });
-        this.navRail.addEventListener("mouseleave", () => {
-            clearTimeout(this.navExpandTimer);
-            this.navRail.classList.remove("agent-chat__nav-rail--expanded");
-        });
+        this.navRail.addEventListener("mouseleave", hideTooltip);
+        this.navRail.addEventListener("scroll", hideTooltip, {passive: true});
         this.navRail.addEventListener("click", (e: MouseEvent) => {
             const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
             if (!marker) {
@@ -938,6 +948,9 @@ export class AgentChat extends Model {
     }
 
     private rebuildNavMarkers() {
+        if (this.navRail.childElementCount > 0 && this.navRail.matches(":hover")) {
+            hideTooltip();
+        }
         this.navRail.innerHTML = "";
         const userEntries = this.entries.filter((entry): entry is UserEntry => entry.type === "user");
         if (userEntries.length === 0) {
@@ -949,11 +962,10 @@ export class AgentChat extends Model {
 
         for (const entry of userEntries) {
             const marker = document.createElement("div");
-            marker.className = "agent-chat__nav-rail-marker ariaLabel";
+            marker.className = "agent-chat__nav-rail-marker";
             marker.dataset.messageId = entry.id || "";
             marker.setAttribute("data-position", "west");
-            marker.setAttribute("aria-label", escapeAriaLabel(escapeHtml(entry.content)));
-            marker.textContent = entry.content.slice(0, 120);
+            marker.setAttribute("aria-label", entry.content);
             this.navRail.appendChild(marker);
         }
         this.updateActiveMarker();
@@ -1102,7 +1114,7 @@ export class AgentChat extends Model {
                 return;
             }
             // 编辑器及浮层内的点击保留原有焦点和选区，避免聚焦到不可编辑的滚动容器。
-            if (t.closest(".protyle-util, .protyle-wysiwyg")) {
+            if (t.closest(".protyle-util, .protyle-wysiwyg, .agent-chat__input-resize")) {
                 return;
             }
             if (this.composer) {
@@ -1457,6 +1469,7 @@ export class AgentChat extends Model {
     // - streamEnd：后端 eventCh 关闭（流结束），只解除占位锁定；已提交内容由 saveSession 的 update
     //   同步，未提交内容由后端紧随其后的恢复 update 同步。
     // - permission：只刷新当前会话权限，不重绘正在流式生成的消息。
+    // - pin：只刷新列表，不影响当前对话或输入草稿。
     // - delete：当前会话被删除则清空视图。
     private onWsMessage(data: IWebSocketData) {
         if (!data || data.cmd !== "agentSessionChanged") {
@@ -1531,7 +1544,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--mirror";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--mirror">' +
-            '<span class="agent-chat__mirror-spinner"></span>' +
+            '<span class="b3-loading b3-loading--small agent-chat__mirror-spinner" aria-hidden="true"></span>' +
             "<span>" + escapeHtml(message) + "</span>" +
             "</div>";
         this.messagesContainer.appendChild(el);
@@ -2378,6 +2391,7 @@ export class AgentChat extends Model {
         this.hasInterveningCard = false;
         this.currentRoundID = "";
         this.composer.clear();
+        this.composerResize?.reset();
         const selectedModel = this.getSelectedModel();
         const reasoningEffort = this.selectedReasoningEffort;
 

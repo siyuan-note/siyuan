@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20261016200946"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223639-oaxmz7d",
-				"updated": "20261002211013"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185728-as165rt",
-				"updated": "20261002211013"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -44,12 +44,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223639-vfe5e6w",
-				"updated": "20220511190015"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan supports importing Markdown files. So if you need to import data from other note-taking software, please convert the data into Markdown files first."
+					"Data": "Import Markdown files or folders. When migrating from another application, you can export its data as Markdown or use a dedicated importer where available. Check asset paths and extended syntax before importing."
 				}
 			]
 		},
@@ -58,12 +58,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002211013-n0y2i86",
-				"updated": "20261002211013"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When importing Markdown, footnote definitions such as [^note]: become separate numbered list items, and references such as [^note] become superscript block references. Click a reference to open its definition, and use the definition’s backlinks to return to the referring blocks. Multiple paragraphs in a definition stay in the same list item. Undefined footnotes do not become block references. Code examples and escaped footnote syntax remain literal text."
+					"Data": "When importing Markdown, footnote definitions such as [^note]: become separate numbered list items, and references such as [^note] become superscript block references. Click a reference to open its definition, and use the definition’s backlinks to return to the referring blocks."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-a5zbefj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-a5zbefj",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Multiple paragraphs in a definition stay in the same list item. Undefined footnotes do not become block references. Code examples and escaped footnote syntax remain literal text."
 				}
 			]
 		},
@@ -133,7 +147,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184519-mwc558q",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -161,7 +175,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "#foo"
+					"TextMarkTextContent": "#foo#"
 				},
 				{
 					"Type": "NodeText",
@@ -183,7 +197,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -192,7 +206,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -201,7 +215,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ related switches."
+					"Data": " related switches."
 				}
 			]
 		},
@@ -211,7 +225,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185726-nlnhhsh",
-				"updated": "20260809232000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -408,6 +422,76 @@
 				{
 					"Type": "NodeText",
 					"Data": "​: Please pay attention before use, to avoid existing data being overwritten and unrecoverable."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-tsupjxf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-tsupjxf",
+				"updated": "20261020225315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data.zip can update the current workspace without creating another workspace. The archive is analyzed before importing. If encrypted notebooks conflict, choose Skip conflicts (the default), Overwrite conflicts or Cancel. The result lists skipped notebook IDs before the interface reloads. Cancel is available before submission; the dialog cannot be canceled or closed while the import is being committed."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-v98hoer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-v98hoer",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Importing encrypted content requires a compatible master password. A backup from before a password change can be read with compatible historical keys without reverting the current password. Notebooks with different encryption states or data keys cannot be merged directly."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-tqz2gh4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-tqz2gh4",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overwrite replaces matching paths and retains destination-only files; it does not propagate deletions. Imported encrypted notebooks remain locked until you unlock them again."
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-9jmeu5c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-9jmeu5c",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The import verifies selected content before writing and can roll back a failed or interrupted commit. The original archive, replaced files and key material remain in the workspace’s conf/data-imports/ directory."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-i079vnj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-i079vnj",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Keep these recovery files until you have verified the imported content and required history. If recovery fails, writes and sync remain paused until recovery succeeds. Unsubmitted preparations expire after 30 minutes and are reclaimed on startup or the next import; expired preparations can still be canceled. Committed recovery files remain available."
 				}
 			]
 		},

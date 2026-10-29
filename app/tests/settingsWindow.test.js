@@ -27,10 +27,14 @@ const rendererModules = (sources) => {
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
     });
     const context = {isSettingsWindow: () => document.body.classList.contains("body--settings")};
-    const {ipcRenderer} = require("electron");
+    const {ipcRenderer, webFrame} = require("electron");
+    const overlay = loadRendererModule(sources.overlay, {
+        "../util/color": loadRendererModule(sources.color, {}),
+        electron: {ipcRenderer, webFrame}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd"}}, "../layout/util": {},
+    });
     const controls = loadRendererModule(sources.controls, {
         electron: {ipcRenderer}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"}},
-        "../util/functions": {setToolbarLeftMac() {}},
+        "../util/functions": {setToolbarLeftMac() {}}, "./windowControlsOverlay": overlay,
     });
     document.body.classList.toggle("body--windows", process.platform !== "darwin");
     document.body.classList.toggle("body--win32", process.platform !== "darwin");
@@ -209,6 +213,7 @@ const runCases = async (sources) => {
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => false},
         "../bazaar/openPath": bazaarPath,
+        "../tabs/compactMode": {isCompactModeEnabled: () => false},
         "./interface": settingInterface,
     });
     const {Setting} = loadRendererModule(sources.setting, {
@@ -291,7 +296,21 @@ const runCases = async (sources) => {
     assert.notEqual(control.ownerDocument, document);
     assert.equal(setting.dialog.element.querySelector("input"), control);
     assert.equal(setting.dialog.element.querySelector(".toolbar #drag").textContent, "Plugin");
-    if (process.platform !== "darwin") {
+    const childDocument = control.ownerDocument;
+    const nativeControls = childDocument.documentElement.classList.contains("window-controls-overlay");
+    if (nativeControls) {
+        assert.ok(setting.dialog.element.querySelector("#windowControls.window-controls-overlay__placeholder"));
+        const area = childDocument.defaultView.navigator.windowControlsOverlay.getTitlebarAreaRect();
+        const childWindow = childDocument.defaultView;
+        const captionWidth = childWindow.innerWidth - area.right;
+        assert.ok(captionWidth > 0);
+        const points = [{x: (area.left + area.width / 2) / childWindow.innerWidth,
+            y: area.height / 2 / childWindow.innerHeight}, ...[1, 3, 5].map(part => ({
+            x: (area.right + captionWidth * part / 6) / childWindow.innerWidth,
+            y: area.height / 2 / childWindow.innerHeight,
+        }))];
+        assert.deepEqual(await ipcRenderer.invoke("test-settings-hit-test", points), [2, 8, 9, 20]);
+    } else if (process.platform !== "darwin") {
         assert.ok(setting.dialog.element.querySelector("#minWindow"));
         assert.ok(setting.dialog.element.querySelector("#maxWindow"));
         assert.ok(setting.dialog.element.querySelector("#closeWindow"));
@@ -303,8 +322,7 @@ const runCases = async (sources) => {
     }
     await ipcRenderer.invoke("test-settings-size", 493, 376);
     await wait();
-    const childDocument = control.ownerDocument;
-    if (process.platform === "win32") {
+    if (process.platform === "win32" && !nativeControls) {
         const points = ["#drag", "#minWindow", "#maxWindow", "#closeWindow"].map(selector => {
             const rect = childDocument.querySelector(selector).getBoundingClientRect();
             return {x: (rect.left + rect.right) / 2 / childDocument.defaultView.innerWidth,
@@ -352,7 +370,7 @@ const runCases = async (sources) => {
             range.selectNodeContents(toolbar.querySelector("#drag"));
             const caption = range.getBoundingClientRect();
             assert.ok(Math.abs((caption.left + caption.right) / 2 - childDocument.defaultView.innerWidth / 2) < 1);
-            if (process.platform !== "darwin") {
+            if (process.platform !== "darwin" && !nativeControls) {
                 for (const state of ["body--maximize", "body--fullscreen"]) {
                     childDocument.body.classList.add(state);
                     for (const id of ["minWindow", "maxWindow", "restoreWindow", "closeWindow"]) {
@@ -384,7 +402,8 @@ const runCases = async (sources) => {
 
     setting.open("Plugin");
     await ipcRenderer.invoke("test-settings-wait");
-    if (process.platform === "darwin") setting.close();
+    if (nativeControls) await ipcRenderer.invoke("test-settings-close");
+    else if (process.platform === "darwin") setting.close();
     else setting.dialog.element.querySelector("#closeWindow").click();
     await wait();
     assert.equal(confirmed, 1);
@@ -438,6 +457,7 @@ if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain, screen} = require("electron");
     const {createServer} = require("node:http");
     const {createSettingsWindows} = require("../electron/settingsWindows");
+    const {updateTitleBarOverlay} = require("../electron/windowControlsOverlay");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
         let owner;
@@ -458,9 +478,10 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
+            overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",
             settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
-            mount: "config/setting/mount.ts", collapse: "config/setting/collapse.ts",
+            mount: "config/setting/mount.ts",
             save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
@@ -519,6 +540,7 @@ if (process.versions.electron && process.type === "browser") {
                 {origin, mode: "local"} : undefined,
             getWindows: () => [...(owner ? [owner] : []), ...otherOwners],
             initialize: win => {
+                win.webContents.setBackgroundThrottling(false);
                 win.webContents.userAgent = "SiYuan/fixture Electron " + win.webContents.userAgent;
                 win.webContents.on("console-message", details => {
                     if (details.level === "error" && details.message.startsWith("Uncaught")) {
@@ -571,6 +593,10 @@ if (process.versions.electron && process.type === "browser") {
             return states.every(closed => closed === true);
         });
         ipcMain.on("siyuan-cmd", (event, command) => {
+            if (command?.cmd === "setTitleBarOverlay") {
+                assert.ok(updateTitleBarOverlay(BrowserWindow.fromWebContents(event.sender), command));
+                return;
+            }
             if (event.sender === owner.webContents) {
                 assert.equal(command, "show");
                 commands.push("show-owner");
@@ -580,6 +606,7 @@ if (process.versions.electron && process.type === "browser") {
             commands.push(command);
         });
         ipcMain.handle("test-settings-commands", () => commands);
+        ipcMain.handle("test-settings-close", () => [...children][0].close());
         ipcMain.handle("test-settings-pointer", (event, type, x, y) => {
             event.sender.sendInputEvent({type, x, y, button: "left", clickCount: 1});
         });
@@ -612,13 +639,16 @@ if (process.versions.electron && process.type === "browser") {
                 const buffer = child.getNativeWindowHandle();
                 const handle = buffer.length === 8 ? buffer.readBigUInt64LE().toString() : String(buffer.readUInt32LE());
                 const {stdout} = await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive",
-                    "-File", path.join(__dirname, "fixtures/windowHitTest.ps1"), handle, JSON.stringify(points)],
+                    "-File", path.join(__dirname, "fixtures/windowHitTest.ps1"), handle, JSON.stringify(points),
+                    "-AssemblyPath", path.join(process.argv[2], "WindowHitTest.dll")],
                 {windowsHide: true, timeout: 15000});
                 return JSON.parse(stdout);
             });
         }
         try {
-            owner = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+            owner = new BrowserWindow({show: false, webPreferences: {
+                nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
+            }});
             owner.webContents.userAgent = "SiYuan/fixture Electron " + owner.webContents.userAgent;
             owner.webContents.setWindowOpenHandler(details => {
                 const result = policy(owner.webContents, details);
@@ -661,11 +691,17 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 120000}, async () => {
+    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 180000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-window-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
+            if (process.platform === "win32") {
+                // 原生类型只编译一次，冷启动耗时不占用窗口消息探测的超时预算。
+                await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive", "-File",
+                    path.join(__dirname, "fixtures/windowHitTest.ps1"), "-Prepare",
+                    "-AssemblyPath", path.join(profile, "WindowHitTest.dll")], {windowsHide: true, timeout: 60000});
+            }
             // 两轮窗口生命周期包含多个原生命中测试子进程，为 CI 启动开销预留时间。
             await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 110000});
         } finally {

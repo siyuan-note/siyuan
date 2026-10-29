@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 //go:build fts5
 
@@ -18,6 +14,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -94,6 +91,30 @@ func TestPerformBlockOperationReturnsErrors(t *testing.T) {
 			t.Fatalf("expected failed operation without success data: %+v, %v", op, err)
 		}
 	}
+}
+
+func TestPerformBlockOperationRejectsBoundDocument(t *testing.T) {
+	fixture, before, _ := setupAttributeViewDeletedBlockTest(t, "container")
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	filename := filepath.Join(util.DataDir, tree.Box, tree.Path)
+	original, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if txs, err := PerformBlockOperation(&Operation{Action: "delete", ID: tree.ID}); err == nil || txs != nil {
+		t.Fatal("document root deletion was accepted")
+	}
+	if data, err := os.ReadFile(filename); err != nil || !bytes.Equal(data, original) {
+		t.Fatal("rejected deletion changed document data")
+	}
+	cache.ClearTreeCache()
+	if _, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute()); err != nil {
+		t.Fatal(err)
+	}
+	assertAttributeViewItemsEqual(t, before, readAttributeViewItemsTest(t, before.ID))
 }
 
 func TestInsertDocumentSiblingAnchorRollsBackEarlierOperations(t *testing.T) {

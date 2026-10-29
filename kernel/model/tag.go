@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -33,6 +21,10 @@ import (
 )
 
 func RemoveTag(label string) (err error) {
+	return removeTag(label, nil)
+}
+
+func removeTag(label string, beforeCommit func()) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 
@@ -55,7 +47,7 @@ func RemoveTag(label string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -63,6 +55,11 @@ func RemoveTag(label string) (err error) {
 
 		generateTreeHistory(tree, historyDir)
 
+		finishRich, richErr := treenode.MaterializeTableCellRich(tree.Root)
+		if richErr != nil {
+			return richErr
+		}
+		finishTitles := treenode.MaterializeInlineTitles(tree.Root)
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
@@ -99,8 +96,15 @@ func RemoveTag(label string) (err error) {
 		for _, n := range unlinks {
 			n.Unlink()
 		}
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		finishTitles()
+		if err = finishRich(); err != nil {
+			return err
+		}
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -124,6 +128,10 @@ func RemoveTag(label string) (err error) {
 }
 
 func RenameTag(oldLabel, newLabel string) (err error) {
+	return renameTag(oldLabel, newLabel, nil)
+}
+
+func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 	if invalidChar := treenode.ContainsMarker(newLabel); "" != invalidChar {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
@@ -162,7 +170,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockIDWithReindex(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -193,6 +201,11 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				continue
 			}
 
+			finishRich, richErr := treenode.MaterializeTableCellRich(node)
+			if richErr != nil {
+				return richErr
+			}
+			finishTitles := treenode.MaterializeInlineTitles(node)
 			nodeTags := node.ChildrenByType(ast.NodeTextMark)
 			for _, nodeTag := range nodeTags {
 				if nodeTag.IsTextMarkType("tag") {
@@ -202,10 +215,17 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				}
 			}
 
+			finishTitles()
+			if err = finishRich(); err != nil {
+				return err
+			}
 			updateNodes[node.ID] = node
 		}
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
+		if beforeCommit != nil {
+			beforeCommit()
+		}
+		if err = writeReplacementTree(tree, original, "", false); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -229,10 +249,6 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 }
 
 type TagBlocks []*Block
-
-func (s TagBlocks) Len() int           { return len(s) }
-func (s TagBlocks) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s TagBlocks) Less(i, j int) bool { return s[i].ID < s[j].ID }
 
 type Tag struct {
 	Name     string `json:"name"`

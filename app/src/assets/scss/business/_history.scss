@@ -143,6 +143,10 @@
       display: none;
     }
 
+    &:not(&--mobile) .history__snapshot-mobile-control {
+      display: none;
+    }
+
     &--mobile {
       .history__snapshot-mobile-control {
         display: inline-flex;
@@ -161,10 +165,6 @@
   }
 
   &__snapshot {
-    &-mobile-control {
-      display: none;
-    }
-
     &-date-controls {
       display: flex;
       align-items: center;
@@ -596,6 +596,7 @@
       &:first-child {
         [data-history-diff~="only"],
         [data-history-diff="inline"] {
+          background-color: var(--b3-card-error-background);
           background-color: color-mix(in srgb, var(--b3-theme-error) 18%, transparent);
         }
 
@@ -609,6 +610,7 @@
       &:last-child {
         [data-history-diff~="only"],
         [data-history-diff="inline"] {
+          background-color: var(--b3-card-success-background);
           background-color: color-mix(in srgb, var(--b3-theme-success) 18%, transparent);
         }
 

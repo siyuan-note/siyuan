@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package sql
 
@@ -28,6 +16,7 @@ import (
 // 标签候选条件使用确定性函数，部分索引不受搜索的 LIKE 大小写设置影响。
 const tagSpanIndexPredicate = "instr(lower(type), 'tag') > 0"
 const tagSpanPredicate = tagSpanIndexPredicate + " AND type LIKE '%tag%'"
+const spanSelectColumns = "id, block_id, root_id, box, path, content, markdown, type, ial"
 
 func escapeLikePattern(s string) string {
 	var b strings.Builder
@@ -71,18 +60,18 @@ func QueryImageSpanMarkdowns() (ret []string, err error) {
 }
 
 func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
-	return selectSpansRawStmt(stmt, limit, func(stmt string) (*sql.Rows, error) {
+	return selectSpansRawStmt(stmt, limit, "SelectSpansRawStmt", func(stmt string) (*sql.Rows, error) {
 		return query(stmt)
 	})
 }
 
 func SelectSpansRawStmtInBox(stmt string, limit int, boxID string) (ret []*Span) {
-	return selectSpansRawStmt(stmt, limit, func(stmt string) (*sql.Rows, error) {
+	return selectSpansRawStmt(stmt, limit, "SelectSpansRawStmtInBox", func(stmt string) (*sql.Rows, error) {
 		return queryForBox(boxID, stmt)
 	})
 }
 
-func selectSpansRawStmt(stmt string, limit int, queryFn func(string) (*sql.Rows, error)) (ret []*Span) {
+func selectSpansRawStmt(stmt string, limit int, source string, queryFn func(string) (*sql.Rows, error)) (ret []*Span) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		//logging.LogErrorf("select [%s] failed: %s", stmt, err)
@@ -116,34 +105,24 @@ func selectSpansRawStmt(stmt string, limit int, queryFn func(string) (*sql.Rows,
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
 		return
 	}
-	defer rows.Close()
-	for rows.Next() {
-		span := scanSpanRows(rows)
-		ret = append(ret, span)
-	}
-	return
+	return scanSpans(rows, source)
 }
 
 func QueryTagSpansByLabel(label string) (ret []*Span) {
 	var stmt string
 	var args []any
 	if "" != label {
-		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content LIKE ? ESCAPE '\\' GROUP BY block_id"
+		stmt = "SELECT " + spanSelectColumns + " FROM spans WHERE " + tagSpanPredicate + " AND content LIKE ? ESCAPE '\\' GROUP BY block_id"
 		args = append(args, "%"+escapeLikePattern(label)+"%")
 	} else {
-		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content = '' GROUP BY block_id"
+		stmt = "SELECT " + spanSelectColumns + " FROM spans WHERE " + tagSpanPredicate + " AND content = '' GROUP BY block_id"
 	}
 	rows, err := query(stmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
-	defer rows.Close()
-	for rows.Next() {
-		span := scanSpanRows(rows)
-		ret = append(ret, span)
-	}
-	return
+	return scanSpans(rows, "QueryTagSpansByLabel")
 }
 
 func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
@@ -152,30 +131,25 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 	var stmt string
 	var args []any
 	if len(keywords) == 0 {
-		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content != '' GROUP BY markdown LIMIT " + strconv.Itoa(limit)
+		stmt = "SELECT " + spanSelectColumns + " FROM spans WHERE " + tagSpanPredicate + " AND content != '' GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	} else {
 		var likes []string
 		for _, k := range keywords {
 			likes = append(likes, "content LIKE ? ESCAPE '\\'")
 			args = append(args, "%"+escapeLikePattern(k)+"%")
 		}
-		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND (" + strings.Join(likes, " AND ") + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
+		stmt = "SELECT " + spanSelectColumns + " FROM spans WHERE " + tagSpanPredicate + " AND (" + strings.Join(likes, " AND ") + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	}
 	rows, err := query(stmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
-	defer rows.Close()
-	for rows.Next() {
-		span := scanSpanRows(rows)
-		ret = append(ret, span)
-	}
-	return
+	return scanSpans(rows, "QueryTagSpansByKeyword")
 }
 
 func QueryTagSpans(p string) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE " + tagSpanPredicate
+	stmt := "SELECT " + spanSelectColumns + " FROM spans WHERE " + tagSpanPredicate
 	var args []any
 	if "" != p {
 		stmt += " AND path = ?"
@@ -186,20 +160,39 @@ func QueryTagSpans(p string) (ret []*Span) {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
-	defer rows.Close()
-	for rows.Next() {
-		span := scanSpanRows(rows)
-		ret = append(ret, span)
-	}
-	return
+	return scanSpans(rows, "QueryTagSpans")
 }
 
-func scanSpanRows(rows *sql.Rows) (ret *Span) {
-	var span Span
-	if err := rows.Scan(&span.ID, &span.BlockID, &span.RootID, &span.Box, &span.Path, &span.Content, &span.Markdown, &span.Type, &span.IAL); err != nil {
-		logging.LogErrorf("query scan field failed: %s", err)
+func scanSpans(rows *sql.Rows, source string) (ret []*Span) {
+	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		logging.LogErrorf("span query [%s] columns failed: %s", source, err)
 		return
 	}
-	ret = &span
+	// 自定义查询仍按 Span 的九个字段位置读取，不改写 SQL 或猜测字段映射。
+	if len(columns) != 9 {
+		logging.LogErrorf("span query [%s] expected 9 columns, got %d", source, len(columns))
+		return
+	}
+	var firstScanErr error
+	var skipped int
+	for rows.Next() {
+		var span Span
+		if err = rows.Scan(&span.ID, &span.BlockID, &span.RootID, &span.Box, &span.Path, &span.Content, &span.Markdown, &span.Type, &span.IAL); err != nil {
+			if firstScanErr == nil {
+				firstScanErr = err
+			}
+			skipped++
+			continue
+		}
+		ret = append(ret, &span)
+	}
+	if firstScanErr != nil {
+		logging.LogErrorf("span query [%s] skipped %d invalid rows: %s", source, skipped, firstScanErr)
+	}
+	if err = rows.Err(); err != nil {
+		logging.LogErrorf("span query [%s] iteration failed: %s", source, err)
+	}
 	return
 }

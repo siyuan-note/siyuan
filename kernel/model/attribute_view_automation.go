@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -151,6 +155,9 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 }
 
 func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID string) error {
+	if tx != nil {
+		tx.watchSourceDatabase(view)
+	}
 	if tx == nil || (tx.attributeViewAutomations == nil && !tx.attributeViewItemCreation) {
 		return nil
 	}
@@ -803,6 +810,20 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 			return fail(fmt.Errorf("invalid automation rule"))
 		}
 		seen[rule.ID] = true
+		if !tx.isReplay && rule.Trigger == "block" {
+			var previous *av.AutomationBlockSource
+			if view.Automations != nil {
+				for _, existing := range view.Automations.Rules {
+					if existing != nil && existing.ID == rule.ID && existing.Trigger == "block" {
+						previous = existing.BlockSource
+						break
+					}
+				}
+			}
+			if !blockCollectionScopeCanSave(rule.BlockSource, previous) {
+				return fail(fmt.Errorf("block collection scope exceeds 32 notebooks or documents"))
+			}
+		}
 		for _, action := range rule.Actions {
 			if action == nil {
 				continue

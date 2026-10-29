@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -44,7 +44,7 @@ func StartLivePhotoPreview(assetPath string, clientEncode bool) (livephoto.Sessi
 	if err != nil {
 		return livephoto.Session{}, errors.New("Live Photo asset not found")
 	}
-	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	scope := ""
 	if IsEncryptedBox(boxID) {
 		scope = boxID

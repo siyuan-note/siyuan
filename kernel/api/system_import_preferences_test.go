@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -71,6 +75,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 	appearance.ModeOS = false
 	appearance.Mode = 1
 	appearance.CompactMode = true
+	appearance.LockScreenWallpaper = true
 	appearance.MenuMouseScroll = true
 	appearance.OutlineKeepCurrentExpand = true
 	appearance.PDFTheme = &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "red"}
@@ -93,6 +98,9 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &exported); err != nil || exported.Code != 0 {
 		t.Fatalf("export failed: %s (%v)", recorder.Body.String(), err)
+	}
+	if !source.Appearance.Load().LockScreenWallpaper {
+		t.Fatal("export changed the current workspace wallpaper preference")
 	}
 	for _, ext := range []string{"", ".zip"} {
 		t.Run("archive"+ext, func(t *testing.T) {
@@ -124,6 +132,9 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 				t.Fatalf("import failed: %d", code)
 			}
 			actualAppearance := target.Appearance.Load()
+			if actualAppearance.LockScreenWallpaper {
+				t.Fatal("workspace wallpaper was included in portable preferences")
+			}
 			if !actualAppearance.CompactMode || !actualAppearance.MenuMouseScroll || !actualAppearance.OutlineKeepCurrentExpand ||
 				!reflect.DeepEqual(actualAppearance.PDFTheme, source.Appearance.Load().PDFTheme) ||
 				!reflect.DeepEqual(actualAppearance.MobileBars, source.Appearance.Load().MobileBars) ||

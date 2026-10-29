@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package treenode
 
 import (
@@ -12,6 +16,9 @@ import (
 var ErrHPathRefreshBusy = errors.New("blocktree writer is busy")
 
 const blockHPathBatchQuery = "SELECT rowid FROM blocktrees WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?"
+
+// 按身份路径更新单篇文档，避免类型索引在每次更新时扫描整个笔记本的文档行。
+const documentHPathUpdateQuery = "UPDATE blocktrees INDEXED BY idx_blocktrees_doc_path SET hpath = ? WHERE id = ? AND box_id = ? AND path = ? AND type = 'd' AND hpath != ?"
 
 func ensureHPathIndexes(database *sql.DB) error {
 	for _, stmt := range []string{
@@ -62,24 +69,62 @@ func RefreshDocHPaths(tree *parse.Tree) (err error) {
 		return err
 	}
 	defer tx.Rollback()
-	depth := strings.Count(tree.Path, "/")
+	if err = refreshDocumentHPathsInTx(tx, tree, docs); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// refreshDocumentHPathsInTx publishes document display paths with source metadata.
+// Content-block copies remain on the existing background refresh queue.
+func refreshDocumentHPathsInTx(tx *sql.Tx, tree *parse.Tree, docs []*BlockTree) (err error) {
+	if err = upsertDocumentMetadata(tx, tree); err != nil {
+		return err
+	}
+	prefix := strings.TrimSuffix(tree.Path, ".sy") + "/"
+	rows, err := tx.Query(`SELECT m.id, m.title_text FROM document_metadata m JOIN blocktrees b
+		ON b.box_id=m.box_id AND b.id=m.id AND b.type='d'
+		WHERE b.box_id=? AND (b.path=? OR (b.path>=? AND b.path<?))`, tree.Box, tree.Path, prefix, prefix+"\uffff")
+	if err != nil {
+		return err
+	}
+	titles := map[string]string{}
+	for rows.Next() {
+		var id, title string
+		if err = rows.Scan(&id, &title); err != nil {
+			rows.Close()
+			return err
+		}
+		titles[id] = title
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	paths := map[string]string{tree.Path: tree.HPath}
 	for _, doc := range docs {
 		hpath := tree.HPath
 		if doc.Path != tree.Path {
-			parts := strings.Split(doc.HPath, "/")
-			if len(parts) <= depth+1 {
-				return errors.New("invalid descendant document hpath")
+			parentHPath, found := paths[path.Dir(doc.Path)+".sy"]
+			if !found {
+				return ErrDocumentMetadataUnavailable
 			}
-			hpath += "/" + strings.Join(parts[depth+1:], "/")
+			title, found := titles[doc.ID]
+			if !found {
+				return ErrDocumentMetadataUnavailable
+			}
+			hpath = parentHPath + "/" + title
 		}
-		if _, err = tx.Exec("UPDATE blocktrees SET hpath = ? WHERE id = ? AND box_id = ? AND path = ? AND type = 'd' AND hpath != ?", hpath, doc.ID, tree.Box, doc.Path, hpath); err != nil {
+		paths[doc.Path] = hpath
+		if _, err = tx.Exec(documentHPathUpdateQuery, hpath, doc.ID, tree.Box, doc.Path, hpath); err != nil {
 			return err
 		}
 	}
 	if _, err = tx.Exec("UPDATE blocktrees SET updated = ? WHERE id = ? AND box_id = ? AND type = 'd'", tree.Root.IALAttr("updated"), tree.ID, tree.Box); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }
 
 // CurrentTreeHPath 使排队期间加载的树使用最新文档路径，避免旧索引操作写回重命名前的路径。
@@ -97,7 +142,7 @@ func CurrentParentHPath(tree *parse.Tree) string {
 		return tree.HPath
 	}
 	if doc := GetBlockTreeInBox(path.Base(parent), tree.Box); doc != nil && doc.BoxID == tree.Box && doc.Path == parent+".sy" {
-		return doc.HPath + "/" + tree.Root.IALAttr("title")
+		return doc.HPath + "/" + ReadDocumentTitle(tree.Root).Text
 	}
 	return tree.HPath
 }

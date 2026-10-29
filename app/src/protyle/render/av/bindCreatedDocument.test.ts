@@ -1,20 +1,16 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import * as binding from "./binding";
 
 const createHarness = (icon = "1f600", code = 0, invalidateDuringSave = false) => {
-    const api = {} as typeof import("./bindCreatedDocument");
     const events: Array<{path: string, data: unknown}> = [];
     let valid = true;
     const siyuan = {config: {readonly: false}, isPublish: false};
-    runInNewContext(transpileModule(readFileSync(join(__dirname, "bindCreatedDocument.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: api, window: {siyuan},
+    const api = loadModule<typeof import("./bindCreatedDocument")>(join(__dirname, "bindCreatedDocument.ts"), {
+        window: {siyuan},
         require: (name: string) => ({
             "./binding": binding,
             "../../../util/fetch": {fetchSyncPost: async (path: string, data: unknown) => {
@@ -26,7 +22,7 @@ const createHarness = (icon = "1f600", code = 0, invalidateDuringSave = false) =
                 events.push({path: "transaction", data});
             }},
         })[name] || {},
-    });
+    }, ScriptTarget.ES2022);
     const protyle = {id: "editor", options: {}} as IProtyle;
     return {events, siyuan, bind: () => api.bindCreatedAVDocument(protyle, {
         avID: "database", itemID: "entry", documentID: "new-document", blockID: "carrier",

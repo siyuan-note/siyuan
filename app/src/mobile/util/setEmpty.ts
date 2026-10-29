@@ -9,16 +9,11 @@ import {clearMobileBarsScroll} from "./mobileBars";
 import {updateMobileTopBarLayout} from "./mobileTopBar";
 import {invalidateTrackedRanges} from "../../protyle/util/trackedRange";
 import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
-
-export const finishMobileStartup = () => {
-    const loadingElement = document.getElementById("loading");
-    if (loadingElement && !loadingElement.classList.contains("startup-error")) {
-        loadingElement.remove();
-        document.body.style.removeProperty("background-color");
-    }
-};
+import {closeMobileBottomBacklinkPanel} from "./bottomBacklink";
+import {finishMobileStartup} from "./startup";
 
 export const setEmpty = (app: App) => {
+    void closeMobileBottomBacklinkPanel()?.catch(error => console.error(error));
     closeAVCellEditor();
     if (window.siyuan.mobile.editor?.protyle) {
         invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);

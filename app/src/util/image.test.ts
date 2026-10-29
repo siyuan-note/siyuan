@@ -17,6 +17,8 @@ describe("getCompressURL", () => {
         assert.equal(getCompressURL("assets/image.JPG"), "assets/image.JPG?style=thumb");
         assert.equal(getCompressURL("assets/image.HeIc"), "assets/image.HeIc?style=thumb");
         assert.equal(getCompressURL("assets/image.HEIF"), "assets/image.HEIF?style=thumb");
+        assert.equal(getCompressURL("assets/image.TIF"), "assets/image.TIF?style=thumb");
+        assert.equal(getCompressURL("assets/image.tiff?box=test#preview"), "assets/image.tiff?box=test&style=thumb#preview");
     });
 
     it("preserves existing queries and fragments", () => {
@@ -55,6 +57,7 @@ describe("removeCompressURL", () => {
             "assets/image.jpg?box=20260816000000-test#preview",
         );
         assert.equal(removeCompressURL("assets/image.heif?style=thumb#preview"), "assets/image.heif#preview");
+        assert.equal(removeCompressURL("assets/image.tiff?style=thumb&box=test#preview"), "assets/image.tiff?box=test#preview");
     });
 
     it("does not change URLs without a thumbnail style", () => {
@@ -84,6 +87,22 @@ describe("HEIF paths", () => {
 });
 
 describe("isBrowserRenderableImagePath", () => {
+    it("renders TIFF previews through the internal converter and keeps raw or external TIFFs as links", () => {
+        for (const extension of ["tif", "TIFF"]) {
+            for (const prefix of ["assets/", "/assets/", "./assets/", `${TEST_ORIGIN}/assets/`]) {
+                assert.equal(isBrowserRenderableImagePath(`${prefix}image.${extension}?box=test`, TEST_ORIGIN), true);
+            }
+            for (const url of [
+                `https://example.com/assets/image.${extension}`,
+                `file:///tmp/image.${extension}`,
+                `C:\\notes\\image.${extension}`,
+                `assets/image.${extension}?download=TRUE`,
+                `assets/image.${extension}?%64ownload=true`,
+            ]) {
+                assert.equal(isBrowserRenderableImagePath(url, TEST_ORIGIN), false);
+            }
+        }
+    });
     it("renders regular images and same-origin HEIF assets", () => {
         assert.equal(isBrowserRenderableImagePath("https://example.com/image.jpg", TEST_ORIGIN), true);
         assert.equal(isBrowserRenderableImagePath("assets/image.heic", TEST_ORIGIN), true);

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package conf
 
@@ -26,7 +14,7 @@ type Export struct {
 	//  （5：锚点哈希 https://github.com/siyuan-note/siyuan/issues/10265 已经废弃 https://github.com/siyuan-note/siyuan/issues/13331）
 	//  （0：使用原始文本，1：使用 Blockquote，都已经废弃 https://github.com/siyuan-note/siyuan/issues/3155）
 	BlockRefMode          int    `json:"blockRefMode"`
-	BlockEmbedMode        int    `json:"blockEmbedMode"`        // 内容块引用导出模式，0：使用原始文本，1：使用 Blockquote
+	BlockEmbedMode        int    `json:"blockEmbedMode"`        // 内容块嵌入导出模式，0：使用原始文本，1：使用引述块
 	BlockRefTextLeft      string `json:"blockRefTextLeft"`      // 内容块引用导出锚文本左侧符号，默认留空
 	BlockRefTextRight     string `json:"blockRefTextRight"`     // 内容块引用导出锚文本右侧符号，默认留空
 	TagOpenMarker         string `json:"tagOpenMarker"`         // 标签开始标记符，默认是 #

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -107,6 +111,88 @@ func TestMarkdownImportSpoolPreservesConversion(t *testing.T) {
 	}
 	if i != len(fixtures) {
 		t.Fatal("conversion omitted a document")
+	}
+}
+
+func TestMarkdownImportHeadingFragments(t *testing.T) {
+	setupMarkdownSpoolTest(t)
+	target := markdownSpoolFixture("# Section\n\nTarget", "two", 2)
+	headingID := target.Root.ChildrenByType(ast.NodeHeading)[0].ID
+	links := map[string]string{}
+	addImportSearchLinks(target, links)
+	for _, extension := range []string{".md", ".markdown"} {
+		t.Run(extension, func(t *testing.T) {
+			tree := markdownSpoolFixture("[document](two"+extension+") [section](two"+extension+"#Section) [empty](two"+extension+"#) [asset](assets/two"+extension+"#Section) [web](https://example.com/page.html#Section)", "one", 1)
+			if err := convertMarkdownImportTree(tree, links, NewLute()); err != nil {
+				t.Fatal(err)
+			}
+			refs, hrefs := map[string]string{}, map[string]string{}
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && treenode.IsBlockRef(n) {
+					refs[n.TextMarkTextContent] = n.TextMarkBlockRefID
+				}
+				if entering && n.IsTextMarkType("a") {
+					hrefs[n.TextMarkTextContent] = n.TextMarkAHref
+				}
+				return ast.WalkContinue
+			})
+			for label, want := range map[string]string{"document": target.ID, "section": headingID, "empty": target.ID} {
+				if refs[label] != want {
+					t.Errorf("%s target = %q, want %q", label, refs[label], want)
+				}
+			}
+			if hrefs["asset"] != "assets/two"+extension+"#Section" || hrefs["web"] != "https://example.com/page.html#Section" {
+				t.Fatalf("unrelated links changed: %v", hrefs)
+			}
+		})
+	}
+}
+
+func TestMarkdownImportSpoolSeparatesFilePathsFromTitles(t *testing.T) {
+	setupMarkdownSpoolTest(t)
+	spool, err := newMarkdownImportSpool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer spool.close()
+	parent := markdownSpoolFixture("[[folder/child|child]]", "Parent/../title", 1)
+	child := markdownSpoolFixture("[[../folder|parent]]", "Child//title", 2)
+	child.Path = "/" + parent.ID + "/" + child.ID + ".sy"
+	for _, fixture := range []struct {
+		tree   *parse.Tree
+		source string
+	}{
+		{parent, "/folder"}, {child, "/folder/child"},
+	} {
+		if err = spool.addSource(fixture.tree, fixture.source); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = spool.refreshDisplayPaths("/", "/"); err != nil {
+		t.Fatal(err)
+	}
+	expected := map[string]string{parent.ID: child.ID, child.ID: parent.ID}
+	if err = spool.finish(func(tree *parse.Tree) error {
+		got := ""
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && treenode.IsBlockRef(n) {
+				got = n.TextMarkBlockRefID
+			}
+			return ast.WalkContinue
+		})
+		if got != expected[tree.ID] {
+			t.Fatalf("file link resolved through title: %s => %s", tree.ID, got)
+		}
+		wantPath := "/Parent/../title"
+		if tree.ID == child.ID {
+			wantPath += "/Child//title"
+		}
+		if tree.HPath != wantPath {
+			t.Fatalf("display path: %q", tree.HPath)
+		}
+		return nil
+	}, func() {}); err != nil {
+		t.Fatal(err)
 	}
 }
 

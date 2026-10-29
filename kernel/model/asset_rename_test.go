@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -130,6 +134,63 @@ func TestRenameAssetReferences(t *testing.T) {
 			}
 		})
 	}
+	t.Run("late database failure preserves both reference targets", func(t *testing.T) {
+		const id = "20261026000001-abcdefg"
+		const oldPath = "assets/original-20261026000001-abcdefg.pdf"
+		writeAssetRelinkTestFile(t, oldPath, []byte("original PDF"))
+		writeAssetRelinkTestFile(t, oldPath+".sya", []byte("original annotation"))
+		tree := treenode.NewTree(fixture.box.ID, "/"+id+".sy", "/Partial", "Partial")
+		p := treenode.NewParagraph(ast.NewNodeID())
+		p.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: oldPath, TextMarkTextContent: "PDF"})
+		tree.Root.AppendChild(p)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		badAV := filepath.Join(util.DataDir, "storage", "av", id+".json")
+		if err := os.Mkdir(badAV, 0755); err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(badAV)
+		if newPath, err := RenameAsset(oldPath, "partial"); err == nil || newPath != "" {
+			t.Fatalf("database read failure must be returned: %s %v", newPath, err)
+		}
+		loaded, err := filesys.LoadTree(fixture.box.ID, tree.Path, util.NewLute())
+		if err != nil {
+			t.Fatal(err)
+		}
+		var updatedPath string
+		ast.Walk(loaded.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.IsTextMarkType("a") {
+				updatedPath = n.TextMarkAHref
+			}
+			return ast.WalkContinue
+		})
+		if updatedPath == "" || updatedPath == oldPath {
+			t.Fatalf("document was not updated before the failure: %s", updatedPath)
+		}
+		for _, assetPath := range []string{oldPath, updatedPath} {
+			for suffix, want := range map[string]string{"": "original PDF", ".sya": "original annotation"} {
+				got, err := os.ReadFile(filepath.Join(util.DataDir, assetPath) + suffix)
+				if err != nil || string(got) != want {
+					t.Fatalf("partial rename lost %s%s: %s %v", assetPath, suffix, got, err)
+				}
+			}
+		}
+	})
+	t.Run("annotation copy failure preserves source", func(t *testing.T) {
+		const oldPath = "assets/annotation-failure.pdf"
+		writeAssetRelinkTestFile(t, oldPath, []byte("PDF"))
+		if err := os.Mkdir(filepath.Join(util.DataDir, oldPath)+".sya", 0755); err != nil {
+			t.Fatal(err)
+		}
+		if newPath, err := RenameAsset(oldPath, "annotation-copy"); err == nil || newPath != "" {
+			t.Fatalf("annotation copy failure must be returned: %s %v", newPath, err)
+		}
+		got, err := os.ReadFile(filepath.Join(util.DataDir, oldPath))
+		if err != nil || string(got) != "PDF" {
+			t.Fatalf("annotation failure lost original PDF: %s %v", got, err)
+		}
+	})
 	const encryptedBox = "20261009000005-crypt00"
 	writeAssetRelinkTestFile(t, encryptedBox+"/.siyuan/conf.json", []byte(`{"encrypted":true}`))
 	writeAssetRelinkTestFile(t, encryptedBox+"/assets/secret.pdf", []byte("encrypted asset fixture"))

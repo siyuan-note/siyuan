@@ -129,6 +129,7 @@ const browserCases = async (sources: Record<string, string>) => {
     const {TableControl} = load("src/protyle/util/tableControl.ts") as typeof import("./tableControl");
     const context = load("src/protyle/util/tableCellRichContext.ts") as typeof import("./tableCellRichContext");
     const virtual = load("src/protyle/util/tableVirtualizationDOM.ts") as typeof import("./tableVirtualizationDOM");
+    const rowHeight = load("src/protyle/util/tableRowHeight.ts") as typeof import("./tableRowHeight");
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const frames = async (count: number) => {
         for (let frame = 0; frame < count; frame++) {
@@ -496,6 +497,23 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(transactions.length, count + 2, "dragging from a body row creates one width transaction");
         f.dispose();
     }
+    for (const columnWidth of [12, 16]) {
+        const f = fixture();
+        f.table.querySelector<HTMLTableColElement>("col").style.width = `${columnWidth}px`;
+        Array.from(f.table.rows).forEach(row => row.cells[0].textContent = "");
+        const cell = f.cell(1, 0);
+        const rect = cell.getBoundingClientRect();
+        const middle = new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: (rect.left + rect.right) / 2, clientY: (rect.top + rect.bottom) / 2});
+        cell.dispatchEvent(middle);
+        check.equal(middle.defaultPrevented, false, "narrow cell centers remain available for text editing");
+        check.equal(f.touch("[data-action='width']"), null);
+        cell.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+            clientX: rect.right, clientY: (rect.top + rect.bottom) / 2}));
+        f.render();
+        check.ok(f.touch("[data-action='width']"), "the narrow column divider can still be resized");
+        f.dispose();
+    }
     for (const kind of ["merged", "no-header", "disabled", "block", "link"]) {
         const f = fixture();
         const first = f.cell(0, 0);
@@ -793,6 +811,70 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
     }
     mobile = false;
+    {
+        const f = fixture();
+        await frames(2);
+        const query = f.editor.querySelectorAll.bind(f.editor);
+        f.editor.querySelectorAll = ((selector: string) => {
+            check.notEqual(selector, '[data-type="NodeTable"] table', "hover never scans the whole editor for tables");
+            return query(selector);
+        }) as typeof f.editor.querySelectorAll;
+        const rect = f.table.getBoundingClientRect();
+        const wrapper = f.table.parentElement.getBoundingClientRect();
+        for (const [x, y, type] of [
+            [rect.right + 5, rect.top + 20, "add-column"],
+            [rect.left + 20, wrapper.bottom + 5, "add-row"],
+            [rect.right + 5, wrapper.bottom + 5, "add-both"],
+        ] as const) {
+            Reflect.set(f.core, "hoverCell", undefined);
+            check.equal(f.invoke("getEdgeHover", x, y)?.type, type,
+                "edge controls can be approached directly from outside the table");
+        }
+        const paragraph = document.createElement("div");
+        paragraph.textContent = "Ordinary document text";
+        paragraph.style.height = "100px";
+        f.editor.append(paragraph);
+        Reflect.set(f.core, "hoverCell", undefined);
+        const originalRect = f.table.getBoundingClientRect.bind(f.table);
+        f.table.getBoundingClientRect = () => check.fail("ordinary text hover must not measure unrelated tables");
+        const p = paragraph.getBoundingClientRect();
+        check.equal(f.invoke("getEdgeHover", p.left + 100, p.top + 70), undefined);
+        f.table.getBoundingClientRect = originalRect;
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        const rightClick = (target: Element, shiftKey = false) => {
+            const event = new MouseEvent("contextmenu", {bubbles: true, cancelable: true, shiftKey});
+            target.dispatchEvent(event);
+            return event;
+        };
+        getSelection().removeAllRanges();
+        check.equal(rightClick(f.cell(1, 1)).defaultPrevented, true);
+        check.equal(menuElement.dataset.name, "table-cell");
+        check.deepEqual(f.core.getSelectedCells(), [f.cell(1, 1)], "right click selects a previously inactive cell");
+        f.core.selectCellRange(f.cell(1, 0), f.cell(2, 1));
+        rightClick(f.cell(2, 1));
+        check.equal(f.core.getSelectedCells().length, 4, "right click inside a selected range keeps the range");
+        rightClick(f.cell(1, 2));
+        check.deepEqual(f.core.getSelectedCells(), [f.cell(1, 2)], "right click outside the range selects the target");
+        check.equal(rightClick(f.table.parentElement).defaultPrevented, false, "table block padding retains the block menu");
+        check.equal(f.core.getSelectedCells().length, 0);
+        check.equal(rightClick(f.cell(1, 1), true).defaultPrevented, false, "Shift preserves the native menu");
+        f.setBlockMultiSelect(true);
+        check.equal(rightClick(f.cell(1, 1)).defaultPrevented, false, "block multiselection retains its menu");
+        f.setBlockMultiSelect(false);
+        const cell = f.cell(1, 1);
+        cell.innerHTML = '<div class="table__cell-editor"><div class="protyle-wysiwyg"><div contenteditable="true">Text</div></div></div>';
+        const editable = cell.querySelector('[contenteditable="true"]');
+        check.equal(rightClick(editable).defaultPrevented, false, "rich text editing retains its own context menu");
+        cell.textContent = "A2";
+        f.owner.disabled = true;
+        rightClick(cell);
+        check.ok(items.some(item => item.label === "copy" && !item.disabled));
+        check.ok(!items.some(item => item.label === "paste" && !item.disabled), "readonly cell menus cannot paste");
+        f.dispose();
+    }
     for (const mode of ["row", "column", "both"]) {
         const f = fixture();
         f.table.style.marginBottom = "0";
@@ -838,6 +920,106 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.rows[3].textContent, "A1A2A3", "desktop row dragging retains its existing behavior");
         f.dispose();
     }
+    for (const touchMode of [true, false]) {
+        mobile = touchMode;
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const row = f.table.rows[1];
+        row.style.backgroundColor = "red";
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.bottom;
+        if (touchMode) {
+            cell.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true, clientX: x, clientY: y}));
+            f.render();
+        } else {
+            pointer(cell, "pointermove", x, y);
+            f.render();
+        }
+        const handle = f.touch(touchMode ? '[data-action="height"]' : ".protyle-table-control__height");
+        check.ok(handle && !handle.classList.contains("fn__none"), "a horizontal boundary exposes the row height handle");
+        if (!touchMode) {
+            handle.parentElement.dispatchEvent(new PointerEvent("pointerleave", {relatedTarget: document.body}));
+            check.ok(handle.classList.contains("fn__none"), "leaving the controls hides the row divider");
+            pointer(cell, "pointermove", x, y);
+        }
+        const before = transactions.length;
+        const oldHeight = row.getBoundingClientRect().height;
+        pointer(handle, "pointerdown", x, y, 71);
+        pointer(document, "pointermove", x, y + 40, 72);
+        check.equal(row.style.height, "", "another pointer cannot resize the row");
+        pointer(document, "pointermove", x, y + 40, 71);
+        check.equal(row.style.height, `${Math.round(oldHeight + 40)}px`);
+        check.equal(transactions.length, before, "height preview does not create transactions");
+        pointer(document, "pointerup", x, y + 40, 71);
+        check.equal(transactions.length, before + 1, "a completed drag creates one undoable transaction");
+        check.equal(row.style.backgroundColor, "red");
+        for (const cancel of ["pointercancel", "Escape", "blur"]) {
+            const saved = row.getAttribute("style");
+            f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 73, clientY: y}), cell, row);
+            pointer(document, "pointermove", x, y + 90, 73);
+            if (cancel === "Escape") {
+                document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            } else if (cancel === "blur") {
+                window.dispatchEvent(new Event("blur"));
+            } else {
+                pointer(document, cancel, x, y + 90, 73);
+            }
+            check.equal(row.getAttribute("style"), saved, `${cancel} restores all original row styles`);
+            check.equal(transactions.length, before + 1);
+        }
+        f.invoke("selectFromCell", "row", cell, false, false);
+        f.invoke("openMenu", 0, 0);
+        const reset = items.find(item => item.id === "autoFitRowHeight");
+        check.ok(reset && !reset.disabled);
+        reset.click(undefined, undefined);
+        check.equal(row.style.height, "", "auto-fit clears explicit row height");
+        check.equal(row.style.backgroundColor, "red", "auto-fit preserves unrelated style");
+        const minimumHeight = row.getBoundingClientRect().height;
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 75, clientY: y}), cell, row);
+        pointer(document, "pointermove", x, y - 500, 75);
+        pointer(document, "pointerup", x, y - 500, 75);
+        check.equal(row.style.height, "1px");
+        check.ok(row.getBoundingClientRect().height >= minimumHeight, "content determines the minimum rendered height");
+        f.owner.disabled = true;
+        reset.click(undefined, undefined);
+        check.equal(row.style.height, "1px", "a menu opened before readonly mode cannot reset row height");
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 74, clientY: y}), cell, row);
+        pointer(document, "pointermove", x, y + 90, 74);
+        pointer(document, "pointerup", x, y + 90, 74);
+        check.equal(row.style.height, "1px", "readonly tables cannot change height");
+        f.dispose();
+    }
+    {
+        const f = fixture();
+        const merged = f.cell(1, 0);
+        merged.rowSpan = 2;
+        f.cell(2, 0).remove();
+        const rect = merged.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        check.equal(rowHeight.getTableRowBoundary(merged, x, f.table.rows[1].getBoundingClientRect().bottom, 4), undefined,
+            "a merged cell has no internal row divider");
+        check.equal(rowHeight.getTableRowBoundary(merged, x, rect.bottom, 4), f.table.rows[2],
+            "the merged cell bottom targets its last logical row");
+        check.equal(rowHeight.getTableRowBoundary(merged, rect.right, rect.bottom, 4), undefined,
+            "column corners retain their column resize hit area");
+        f.dispose();
+    }
+    {
+        mobile = false;
+        const f = fixture();
+        f.table.rows[1].style.height = "80px";
+        f.table.rows[3].style.height = "100px";
+        f.core.selectCellRange(f.cell(1, 0), f.cell(2, 2));
+        let copied = f.invoke("getSelectionClipboardContent");
+        check.match(copied.textSiyuan, /<tr style="height: 80px;">/, "rectangular clipboard retains row height");
+        f.invoke("selectFromCell", "row", f.cell(1, 0), false, false);
+        f.invoke("selectFromCell", "row", f.cell(3, 0), true, false);
+        copied = f.invoke("getSelectionClipboardContent");
+        check.match(copied.textSiyuan, /height: 80px/);
+        check.match(copied.textSiyuan, /height: 100px/, "noncontiguous row clipboard retains each source height");
+        f.dispose();
+    }
     menuElement.remove();
     menuScrim.remove();
     fixtureStyle.remove();
@@ -848,7 +1030,7 @@ test("mobile table selection, editing handoff, operations and gesture cancellati
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableColumnWidth", "tableGridCache",
+    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableColumnWidth", "tableGridCache",
         "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
         .map(file => "src/protyle/util/" + file + ".ts");
     files.push("src/mobile/util/multiSelectToolbar.ts");

@@ -23,12 +23,13 @@ async function sign(options, retry = true) {
             path.join(__dirname, "release-sign-windows.ps1")],
         {windowsHide: true, env, stdio: ["pipe", "pipe", "pipe"]});
         let output = "";
+        let diagnosticBuffer = "";
         const timeout = setTimeout(() => {
             child.kill();
             reject(new Error("Hardware signing timed out"));
         }, 120000);
         child.stdout.on("data", data => { output += data.toString("utf8"); });
-        child.stderr.on("data", () => {});
+        child.stderr.on("data", data => { diagnosticBuffer = (diagnosticBuffer + data.toString("utf8")).slice(-4096); });
         child.stdin.on("error", () => {});
         child.on("error", () => {
             clearTimeout(timeout);
@@ -42,7 +43,9 @@ async function sign(options, retry = true) {
             } else if (code === 20 && retry) {
                 setTimeout(() => { sign(options, false).then(resolve, reject); }, 1000);
             } else {
-                reject(new Error("Hardware signing failed; check the PIN, token, certificate and timestamp connection"));
+                const diagnostics = diagnosticBuffer.match(/SIGNING_DIAGNOSTIC:(?:request|certificate|authentication|signing|verification):(?:0x[0-9a-f]{8},?)+|SIGNING_STATUS:\d+:\d+/gi) || [];
+                reject(new Error("Hardware signing failed; check the PIN, token, certificate and timestamp connection" +
+                    (diagnostics.length ? "; " + diagnostics.join("; ") : "")));
             }
         });
         child.stdin.end(JSON.stringify({pin: signingPin, thumbprint, files: [options.path]}) + "\n");

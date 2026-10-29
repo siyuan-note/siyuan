@@ -28,6 +28,7 @@ import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 import {canBatchConvertHeadings, showHeadingBatchDialog} from "../../protyle/util/headingBatch";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
+import {getHeadingLevel} from "../../block/headingLevel";
 import {
     operationsMayChangeOutline,
     transactionsMayChangeRootHeadingNumberSetting
@@ -38,6 +39,7 @@ export class MobileOutline extends Model {
     public tree: Tree;
     public element: HTMLElement;
     public blockId: string;
+    private notebookId: string;
     public isPreview: boolean;
     private preFilterExpandIds: string[] | null = null;
     private reloadId = 0;
@@ -423,6 +425,17 @@ export class MobileOutline extends Model {
                         }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
+                case "closeBox":
+                case "removeBox":
+                    if (this.notebookId === data.data.box) {
+                        this.clear();
+                    }
+                    break;
+                case "removeDoc":
+                    if (data.data.ids.includes(this.blockId)) {
+                        this.clear();
+                    }
+                    break;
             }
         }
     }
@@ -531,17 +544,23 @@ export class MobileOutline extends Model {
         }
     }
 
+    private clear() {
+        // 关闭后清除隐藏面板的内容，并使在途响应失效。
+        this.reloadId++;
+        this.currentRequestID++;
+        this.blockId = "";
+        this.notebookId = "";
+        this.isPreview = false;
+        this.preFilterExpandIds = null;
+        this.tree.updateData(null);
+        this.tree.element.scrollTop = 0;
+        this.updateDocTitle();
+        this.element.removeAttribute("data-loading");
+    }
+
     public reload(callback?: () => void) {
         if (document.getElementById("editor").classList.contains("fn__none")) {
-            this.reloadId++;
-            this.currentRequestID++;
-            this.blockId = "";
-            this.isPreview = false;
-            this.preFilterExpandIds = null;
-            this.tree.updateData(null);
-            this.tree.element.scrollTop = 0;
-            this.updateDocTitle();
-            this.element.removeAttribute("data-loading");
+            this.clear();
             return;
         }
         const protyle = window.siyuan.mobile.editor?.protyle;
@@ -556,6 +575,7 @@ export class MobileOutline extends Model {
             this.tree.element.scrollTop = 0;
         }
         this.blockId = blockId;
+        this.notebookId = protyle?.notebookId || "";
         this.isPreview = isPreview;
         const reloadId = ++this.reloadId;
         const outlineParam: IObject = {
@@ -607,6 +627,8 @@ export class MobileOutline extends Model {
     private updateDocTitle(ial?: Record<string, string>, count?: number) {
         const docTitleElement = this.element.querySelector('[data-type="doc-title"]') as HTMLElement;
         if (this.isPreview || !ial) {
+            docTitleElement.innerHTML = "";
+            docTitleElement.removeAttribute("title");
             docTitleElement.classList.add("fn__none");
             return;
         }
@@ -725,15 +747,6 @@ export class MobileOutline extends Model {
     }
 
     /**
-     * 获取标题元素的实际标题级别（H1=1, H2=2, 等等）
-     * @param element li元素
-     * @returns 标题级别（1-6）
-     */
-    private getHeadingLevel(element: HTMLElement) {
-        return parseInt(element.getAttribute("data-subtype")?.replace("h", "") || "0");
-    }
-
-    /**
      * 展开到指定标题级别
      * @param targetLevel 目标标题级别，1-6级（H1-H6），6级表示全部展开
      */
@@ -744,7 +757,7 @@ export class MobileOutline extends Model {
         } else {
             // 展开到指定标题级别
             this.element.querySelectorAll("li.b3-list-item").forEach(item => {
-                const headingLevel = this.getHeadingLevel(item as HTMLElement);
+                const headingLevel = getHeadingLevel(item);
                 const arrowElement = item.querySelector(".b3-list-item__arrow");
                 if (item.nextElementSibling && item.nextElementSibling.tagName === "UL" && arrowElement) {
                     if (headingLevel > 0 && headingLevel < targetLevel) {
@@ -894,7 +907,7 @@ export class MobileOutline extends Model {
                 if (this.isPreview) {
                     return; // 预览模式下不显示右键菜单
                 }
-                const currentLevel = this.getHeadingLevel(element);
+                const currentLevel = getHeadingLevel(element);
 
                 window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_CONTEXT);
                 const id = element.getAttribute("data-node-id");

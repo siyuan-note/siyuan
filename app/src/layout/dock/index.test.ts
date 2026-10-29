@@ -5,6 +5,7 @@ import * as assert from "node:assert/strict";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {resolveDockPanelVisibility} from "./panelVisibility";
+import {resolveDockResponsiveLayout} from "./responsiveLayout";
 
 const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLayout: () => void,
                            resizeTabs: () => void, isTouchHoverInput = () => false,
@@ -33,13 +34,29 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
                 return {resolveDockPanelVisibility};
             }
             if (name.endsWith("/constants")) {
-                return {Constants: {TIMEOUT_TRANSITION: 200, TIMEOUT_DOCK_TOGGLE: 150}};
+                return {Constants: {TIMEOUT_TRANSITION: 200, TIMEOUT_DOCK_TOGGLE: 150,
+                    ATTRIBUTE_DOCK_WIDTH: "data-dock-width"}};
+            }
+            if (name.endsWith("/hasClosest")) {
+                return {hasClosestByClassName: (element: HTMLElement, className: string) => {
+                    for (let current = element; current; current = current.parentElement) {
+                        if (current.classList.contains(className)) {
+                            return current;
+                        }
+                    }
+                    return false;
+                }};
             }
             if (name.endsWith("/hoverInput")) {
                 return {isTouchHoverInput};
             }
             if (name.endsWith("/panelTransition")) {
                 return {bindPanelTransitionGuard() {}};
+            }
+            if (name.endsWith("/barVisibility")) {
+                return {syncDockBarVisibility() {}, setDockBarHover() {}, setDockBarPointerOver() {},
+                    isDockBarPointerOver: () => false,
+                    getDockBarWidth: (element: {clientWidth: number}) => element.clientWidth};
             }
             return {};
         },
@@ -71,7 +88,7 @@ describe("dock initialization", () => {
                     },
                 };
                 const active = {classList, getAttribute: () => "outline"};
-                const items = {clientWidth: 40, parentElement: {classList, addEventListener() {}},
+                const items = {clientWidth: 40, parentElement: {classList, clientWidth: 40, addEventListener() {}},
                     querySelector: () => active};
                 const layout = {element, children: [] as unknown[]};
                 const siyuan = {zIndex: 10, config: {uiLayout: {hideDock: false}},
@@ -156,6 +173,9 @@ describe("dock panel opening", () => {
         dock.panelVisible = false;
         dock.layout = {element: {
             classList: {toggle: () => {}},
+            style: {width: "260px"},
+            getAttribute: (): null => null,
+            querySelectorAll: (): unknown[] => [],
             querySelector: (): null => null,
             contains: () => false,
         }};
@@ -172,6 +192,158 @@ describe("dock panel opening", () => {
         assert.equal(shows, 1);
     });
 
+});
+
+const createWidthFixture = (position: "Left" | "Right" | "Bottom", pin = true) => {
+    const classList = (...initial: string[]) => {
+        const classes = new Set(initial);
+        return {
+            contains: (name: string) => classes.has(name),
+            add: (...names: string[]) => names.forEach(name => classes.add(name)),
+            remove: (...names: string[]) => names.forEach(name => classes.delete(name)),
+            toggle: (name: string, force: boolean) => force ? classes.add(name) : classes.delete(name),
+        };
+    };
+    const attributes: Record<string, string> = {};
+    const element = {
+        classList: classList(), style: {width: "232px", height: "232px", maxWidth: ""},
+        getAttribute: (name: string) => attributes[name] ?? null,
+        setAttribute: (name: string, value: string) => { attributes[name] = value; },
+        removeAttribute: (name: string) => { delete attributes[name]; },
+        querySelector: (): null => null, contains: () => false, addEventListener() {},
+    };
+    const panels: Array<{parentElement: object, classList: ReturnType<typeof classList>,
+        getAttribute(name: string): string}> = [];
+    const children = [0, 1].map(() => ({element: {
+        parentElement: element, classList: classList("fn__none"), style: {width: "", height: ""},
+        nextElementSibling: {classList: classList()}, previousElementSibling: {classList: classList()},
+        querySelector: () => ({children: panels}),
+    }}));
+    children.forEach(child => {
+        child.element.querySelector = () => ({children: panels.filter(panel => panel.parentElement === child.element)});
+    });
+    const items: Record<string, {classList: ReturnType<typeof classList>, getAttribute(name: string): string}> = {};
+    const elements = [0, 1].map(index => ({
+        parentElement: {classList: classList()},
+        querySelector: () => Object.values(items).find(item => item.getAttribute("data-index") === String(index) &&
+            item.classList.contains("dock__item--active")),
+        querySelectorAll: () => Object.values(items).filter(item => item.getAttribute("data-index") === String(index) &&
+            item.classList.contains("dock__item--active")),
+    }));
+    const document = {activeElement: null as HTMLElement | null,
+        querySelector: (selector: string) => items[/data-type="([^"]+)"/.exec(selector)?.[1]],
+    };
+    const prototype = loadDockPrototype([], document, () => {}, () => {});
+    const dock = Object.assign(Object.create(prototype), {
+        position, pin, panelVisible: true, responsiveManualOverride: true,
+        layout: {element: Object.assign(element, {querySelectorAll: () => panels}), children}, elements,
+        resizeElement: {classList: classList()}, data: {}, showDock() {}, hideDock() {},
+    }) as import("./index").Dock;
+    const add = (type: string, index: number, savedWidth = "232") => {
+        const attrs: Record<string, string> = {"data-type": type, "data-index": String(index),
+            "data-id": type + "-tab", "data-width": savedWidth};
+        items[type] = {classList: classList(), getAttribute: name => attrs[name] ?? null};
+        panels.push({parentElement: children[index].element,
+            classList: classList("file-tree", "sy__" + type, "fn__none"), getAttribute: name => attrs[name] ?? null});
+        Object.assign(dock.data, {[type]: {onGraph() {}, destroy() {}}});
+    };
+    const open = (type: string) => dock.toggleModel(type, true, false, false, false, false);
+    const close = (type: string) => dock.toggleModel(type, false, true, false, false, false);
+    return {dock, element, add, open, close};
+};
+
+describe("dock minimum width on panel changes", () => {
+    for (const position of ["Left", "Right"] as const) {
+        for (const pin of [false, true]) {
+            for (const index of [0, 1]) {
+                it(`${position} ${pin ? "fixed" : "floating"} grows when opening a wide panel in scope ${index}`, () => {
+                    const {dock, element, add, open, close} = createWidthFixture(position, pin);
+                    add("agentChat", 0);
+                    add("backlink", index);
+                    open("agentChat");
+                    assert.equal(element.style.width, "232px");
+                    open("backlink");
+                    assert.equal(element.style.width, "320px");
+                    assert.equal(dock.getResponsiveMinimumSize(), 320);
+                    assert.equal(dock.hasResponsiveManualOverride(), false);
+                    open("agentChat");
+                    if (index === 1) {
+                        close("backlink");
+                    }
+                    assert.equal(dock.getResponsiveMinimumSize(), 232);
+                    assert.equal(element.style.width, "320px");
+                });
+            }
+        }
+    }
+
+    for (const type of ["graph", "globalGraph", "backlink", "inbox"]) {
+        it(`restores an undersized saved ${type} panel at its minimum width`, () => {
+            const {element, add, open} = createWidthFixture("Right");
+            element.style.width = "0px";
+            add(type, 1);
+            open(type);
+            assert.equal(element.style.width, "320px");
+        });
+    }
+
+    it("keeps a larger preferred width while it is compressed by responsive layout", () => {
+        const {dock, element, add, open} = createWidthFixture("Left");
+        element.style.width = "240px";
+        element.style.maxWidth = "240px";
+        element.setAttribute("data-dock-width", "460");
+        add("backlink", 0);
+        open("backlink");
+        assert.equal(dock.getResponsivePreferredSize(), 460);
+        assert.equal(element.style.maxWidth, "240px");
+        assert.equal(dock.hasResponsiveManualOverride(), true);
+    });
+
+    it("keeps a user-selected width when opening and closing a wide panel", () => {
+        const {element, add, open, close} = createWidthFixture("Right");
+        element.style.width = "480px";
+        add("file", 0);
+        add("backlink", 1);
+        open("file");
+        open("backlink");
+        close("backlink");
+        assert.equal(element.style.width, "480px");
+    });
+
+    it("repairs the width when revealing a collapsed panel", () => {
+        const {dock, element, add, open} = createWidthFixture("Right");
+        add("backlink", 0);
+        open("backlink");
+        dock.togglePanel(false);
+        element.style.width = "232px";
+        dock.togglePanel(true);
+        assert.equal(element.style.width, "320px");
+    });
+
+    it("allows a newly widened panel to float when the window is too narrow", () => {
+        const {dock, add, open} = createWidthFixture("Right");
+        add("agentChat", 0);
+        add("backlink", 1);
+        open("agentChat");
+        open("backlink");
+        const result = resolveDockResponsiveLayout({
+            availableSize: 750, centerMinimumSize: 480, gapSize: 8, hysteresis: 32,
+            left: {preferredSize: 0, minimumSize: 232, participating: false, autoFloating: false, manualOverride: false},
+            right: {preferredSize: dock.getResponsivePreferredSize(), minimumSize: dock.getResponsiveMinimumSize(),
+                participating: true, autoFloating: false, manualOverride: dock.hasResponsiveManualOverride()},
+        });
+        assert.equal(result.right.autoFloating, true);
+    });
+
+    it("does not change bottom panel dimensions", () => {
+        const {element, add, open} = createWidthFixture("Bottom");
+        add("backlink", 0);
+        open("backlink");
+        assert.equal(element.style.width, "232px");
+        assert.equal(element.style.height, "232px");
+    });
+});
+describe("dock shortcut opening", () => {
     it("shows a dock item opened by shortcut after responsive layout changes", () => {
         const frames: Array<() => void> = [];
         let floating = false;
@@ -213,11 +385,14 @@ describe("dock panel opening", () => {
         };
         dock.panelVisible = true;
         dock.position = "Right";
-        dock.elements = [{querySelectorAll: () => activeClasses.has("dock__item--active") ? [target] : []},
+        dock.elements = [{querySelector: () => activeClasses.has("dock__item--active") ? target : null,
+            querySelectorAll: () => activeClasses.has("dock__item--active") ? [target] : []},
             {querySelectorAll: (): unknown[] => []}];
         dock.layout = {children: [wnd, otherWnd], element: {
             style: {width: "0px", marginLeft: "", opacity: ""},
             querySelector: (): null => null,
+            querySelectorAll: (): unknown[] => [],
+            getAttribute: (): null => null,
             addEventListener: () => {},
         }};
         dock.data = {};

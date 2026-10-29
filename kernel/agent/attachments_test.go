@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package agent
 
@@ -615,6 +611,7 @@ func TestAttachmentRequestSurfacesUpstreamError(t *testing.T) {
 
 func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 	useTestDataDir(t)
+	useTestToolRoundLimitLanguage(t)
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
 	kernelModel.Conf.AI.Store(kernelConf.NewAI())
@@ -708,16 +705,22 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 		context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0, testSessionID, "user-1", 1,
 		"look at the image", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
-	doneSeen := false
+	doneSeen, limitSeen := false, false
 	for event := range events {
 		if event.Type == "done" {
 			doneSeen = true
 		}
+		if event.Type == "error" {
+			limitSeen = true
+			if event.Error != testToolRoundLimitMessage {
+				t.Fatalf("unexpected final response error: %s", event.Error)
+			}
+		}
 	}
-	if requests.Load() != 2 || !attachmentSeen.Load() || !finalToolsOmitted.Load() || !doneSeen {
+	if requests.Load() != 2 || !attachmentSeen.Load() || !finalToolsOmitted.Load() || doneSeen || !limitSeen {
 		t.Fatalf(
-			"attachment did not reach final model round: requests=%d, attachmentSeen=%v, finalToolsOmitted=%v, doneSeen=%v",
-			requests.Load(), attachmentSeen.Load(), finalToolsOmitted.Load(), doneSeen,
+			"attachment did not reach final model round: requests=%d, attachmentSeen=%v, finalToolsOmitted=%v, doneSeen=%v, limitSeen=%v",
+			requests.Load(), attachmentSeen.Load(), finalToolsOmitted.Load(), doneSeen, limitSeen,
 		)
 	}
 }

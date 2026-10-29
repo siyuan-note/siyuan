@@ -3,7 +3,7 @@ import {runSettingsMaintenance} from "./setting/maintenance";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {SIYUAN_APP_ID_HEADER} from "../util/fetchAppId";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
@@ -21,6 +21,7 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import type {AssetUnusedItem} from "../types/api";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
 /// #else
@@ -36,6 +37,110 @@ export const collectAssetsTabSearchStrings = (): string[] => [
 ];
 
 const pendingAssetsMounts = new WeakMap<Element, object>();
+const createUnusedAssetsSearch = (panel: Element, clearPreview: () => void) => {
+    const list = panel.querySelector(".config-assets__list");
+    let items: AssetUnusedItem[] | undefined;
+    let visibleCount = 512;
+    let generation = 0;
+    let loading = false;
+    let disposed = false;
+    const removed = new Set<string>();
+    const active = () => !disposed && panel.isConnected;
+    const render = (limit = 512) => {
+        if (!active() || !items) {
+            return;
+        }
+        clearPreview();
+        visibleCount = limit;
+        const keyword = panel.querySelector<HTMLInputElement>('[data-type="search"]').value.trim().toLowerCase();
+        const matches = keyword ? items.filter(item => item.name.toLowerCase().includes(keyword)) : items;
+        assets._renderList(matches.slice(0, visibleCount), list, "unrefAssets");
+        if (matches.length > visibleCount) {
+            list.insertAdjacentHTML("beforeend", `<li class="fn__flex"><button type="button" data-type="moreUnusedAssets" class="b3-button b3-button--text fn__flex-1">${window.siyuan.languages.loadMore}</button></li>`);
+        }
+    };
+    return {
+        filter: () => render(),
+        more: () => render(visibleCount + 512),
+        remove: (item: string) => {
+            removed.add(item);
+            if (items) {
+                items = items.filter(asset => asset.item !== item);
+            }
+            render(visibleCount);
+        },
+        clear: () => {
+            generation++;
+            items = [];
+            render();
+        },
+        dispose: () => {
+            disposed = true;
+            items = undefined;
+            removed.clear();
+        },
+        load: async () => {
+            if (!active() || loading) {
+                return;
+            }
+            loading = true;
+            const current = ++generation;
+            items = undefined;
+            removed.clear();
+            clearPreview();
+            list.innerHTML = '<li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>';
+            try {
+                const response = await fetchSyncPost("/api/asset/getUnusedAssets", {all: true}, {
+                    [SIYUAN_APP_ID_HEADER]: Constants.SIYUAN_APPID,
+                });
+                if (!active() || current !== generation) {
+                    return;
+                }
+                if (response.code !== 0) {
+                    list.innerHTML = `<li class="b3-list--empty">${escapeHtml(response.msg)}</li>`;
+                    return;
+                }
+                items = (response.data || []).filter(item => item && !removed.has(item.item));
+                render();
+            } catch (error) {
+                if (!active() || current !== generation) {
+                    return;
+                }
+                const message = window.siyuan.languages._kernel[258];
+                list.innerHTML = `<li class="b3-list--empty">${escapeHtml(message)}</li>`;
+                showMessage(message, 0, "error");
+                console.error(error);
+            } finally {
+                loading = false;
+            }
+        },
+    };
+};
+
+const loadMissingAssets = async (panel: Element) => {
+    if (panel.getAttribute("data-loading")) {
+        return;
+    }
+    panel.setAttribute("data-loading", "true");
+    const list = panel.querySelector(".config-assets__list");
+    list.innerHTML = '<li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>';
+    try {
+        const response = await fetchSyncPost("/api/asset/getMissingAssets", {});
+        if (response.code !== 0) {
+            list.innerHTML = `<li class="b3-list--empty">${escapeHtml(response.msg)}</li>`;
+            return;
+        }
+        assets._renderList(response.data, list, "lostAssets");
+        panel.setAttribute("data-init", "true");
+    } catch (error) {
+        const message = window.siyuan.languages._kernel[258];
+        list.innerHTML = `<li class="b3-list--empty">${escapeHtml(message)}</li>`;
+        showMessage(message, 0, "error");
+        console.error(error);
+    } finally {
+        panel.removeAttribute("data-loading");
+    }
+};
 
 /** 资源 Tab 挂载（面板页，不走注册表渲染） */
 export const mountAssetsTab = async (root: HTMLElement, keywords?: string, app?: App) => {
@@ -121,12 +226,15 @@ const assets = {
                 <div class="fn__space"></div>
                 <button id="removeAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
                     <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
-                    ${window.siyuan.languages.delete}
+                    ${window.siyuan.languages.deleteAll}
                 </button>
+                <div class="fn__space"></div>
+                <input data-type="search" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.searchFileName}" aria-label="${window.siyuan.languages.searchFileName}" spellcheck="false">
+                <div class="fn__space"></div>
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none"></div>
         </div>
@@ -141,14 +249,14 @@ const assets = {
             </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="config-assets__preview fn__none" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
-                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+                <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
             </ul>
             <div class="fn__hr"></div>
         </div>
@@ -161,6 +269,8 @@ const assets = {
             return;
         }
         const assetsListElement = root.querySelector('.config-assets[data-type="remove"] .config-assets__list');
+        const assetsPanel = root.querySelector('.config-assets[data-type="remove"]');
+        const searchInput = assetsPanel.querySelector<HTMLInputElement>('[data-type="search"]');
         const avListElement = root.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
         const mobile = isMobile();
         const assetsPreviewElement = assetsListElement.nextElementSibling as HTMLElement;
@@ -176,6 +286,17 @@ const assets = {
             assetsListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             hidePreview(assetsListElement, assetsPreviewElement);
         };
+        const unusedSearch = createUnusedAssetsSearch(assetsPanel, clearAssetPreview);
+        const refreshUnusedAssets = () => {
+            void unusedSearch.load();
+        };
+        const searchUnusedAssets = (event: InputEvent) => {
+            if (!event.isComposing) {
+                unusedSearch.filter();
+            }
+        };
+        searchInput.addEventListener("input", searchUnusedAssets);
+        searchInput.addEventListener("compositionend", searchUnusedAssets);
         const visibilityObserver = new MutationObserver(() => {
             if (root.classList.contains("fn__none")) {
                 clearAssetPreview();
@@ -183,6 +304,7 @@ const assets = {
         });
         visibilityObserver.observe(root, {attributes: true, attributeFilter: ["class"]});
         assets.disposePreview = () => {
+            unusedSearch.dispose();
             visibilityObserver.disconnect();
             clearAssetPreview();
         };
@@ -204,7 +326,12 @@ const assets = {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(root)) {
                 const type = target.getAttribute("data-type");
-                if (target.id === "removeAll") {
+                if (type === "moreUnusedAssets") {
+                    unusedSearch.more();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "removeAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
                         void runSettingsMaintenance(() => fetchPost("/api/asset/removeUnusedAssets", {}, response => {
                             /// #if !MOBILE
@@ -214,8 +341,7 @@ const assets = {
                                 }
                             });
                             /// #endif
-                            assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            clearAssetPreview();
+                            unusedSearch.clear();
                         }));
                     }, undefined, true);
                     event.preventDefault();
@@ -243,20 +369,16 @@ const assets = {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
                             if (type === "remove") {
-                                fetchPost("/api/asset/getUnusedAssets", {}, response => {
-                                    assets._renderList(response.data, assetsListElement, "unrefAssets");
-                                }, {[SIYUAN_APP_ID_HEADER]: Constants.SIYUAN_APPID});
+                                refreshUnusedAssets();
                             } else if (!item.getAttribute("data-init")) {
                                 if (type === "removeAV") {
                                     fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
                                         assets._renderList(response.data, avListElement, "unRefAV");
                                     });
+                                    item.setAttribute("data-init", "true");
                                 } else {
-                                    fetchPost("/api/asset/getMissingAssets", {}, response => {
-                                        assets._renderList(response.data, item.querySelector(".config-assets__list"), "lostAssets");
-                                    });
+                                    void loadMissingAssets(item);
                                 }
-                                item.setAttribute("data-init", "true");
                             }
                         } else {
                             item.classList.add("fn__none");
@@ -387,12 +509,7 @@ const assets = {
                                     }
                                 });
                                 /// #endif
-                                if (liElement.parentElement.querySelectorAll("li").length === 1) {
-                                    liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                                } else {
-                                    liElement.remove();
-                                }
-                                clearAssetPreview();
+                                unusedSearch.remove(liElement.getAttribute("data-item"));
                             });
                         }
                     }, undefined, true);
@@ -417,9 +534,7 @@ const assets = {
                 }
             });
         }
-        fetchPost("/api/asset/getUnusedAssets", {}, response => {
-            assets._renderList(response.data, assetsListElement, "unrefAssets");
-        }, {[SIYUAN_APP_ID_HEADER]: Constants.SIYUAN_APPID});
+        refreshUnusedAssets();
     },
     _renderList: (data: {
         item: string,

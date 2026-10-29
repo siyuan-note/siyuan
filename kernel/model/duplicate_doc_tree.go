@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -185,11 +189,15 @@ func prepareDuplicateDocTree(boxID, rootPath string) (*duplicateDocTreePlan, err
 		tree.ID = tree.Root.ID
 		tree.Root.RemoveIALAttr("scroll")
 		if i == 0 {
-			title := tree.Root.IALAttr("title") + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+			parentHPath, pathErr := documentParentDisplayPath(tree.Box, originalPath)
+			if pathErr != nil {
+				return nil, pathErr
+			}
+			title := treenode.ReadDocumentTitle(tree.Root).Text + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
 			tree.Root.SetIALAttr("title", title)
-			tree.HPath = path.Join(path.Dir(tree.HPath), title)
+			tree.HPath = parentHPath + "/" + title
 		} else {
-			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + tree.Root.IALAttr("title")
+			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		}
 		hpaths[originalPath] = tree.HPath
 		parts := strings.Split(strings.TrimSuffix(originalPath, ".sy"), "/")
@@ -319,10 +327,14 @@ func (plan *duplicateDocTreePlan) commit(writeTree func(*parse.Tree) (uint64, er
 			cache.RemoveTreeDataInBox(tree.ID, tree.Box)
 			cache.RemoveDocIALInBox(tree.Path, tree.Box)
 			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+			sql.RemoveTreeQueue(tree.Box, tree.ID)
 			// 只删除空的副本目录，保留并发写入或无法清理的数据。
 			if i > 0 {
 				_ = os.Remove(filepath.Dir(abs))
 			}
+		}
+		for _, node := range plan.avNodes {
+			av.RemoveBlockRel(node.AttributeViewID, node.ID, func(string) bool { return true })
 		}
 	}()
 	for _, tree := range plan.trees {
@@ -369,5 +381,14 @@ func (plan *duplicateDocTreePlan) commit(writeTree func(*parse.Tree) (uint64, er
 		avBoxID = plan.boxID
 	}
 	err = av.AddCopiedBlockRels(avBoxID, plan.avNodes)
+	if err != nil {
+		return err
+	}
+	before := map[string]*parse.Tree{}
+	for _, tree := range plan.trees {
+		treenode.UpsertBlockTree(tree)
+		before[tree.ID] = nil
+	}
+	err = collectDocumentChanges(before, plan.trees)
 	return
 }

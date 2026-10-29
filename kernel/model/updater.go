@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -21,6 +9,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,7 +49,7 @@ var errUpdatePackageUnavailable = errors.New("update package is unavailable")
 func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	defer logging.Recover()
 
-	if skipNewVerInstallPkg() {
+	if skipNewVerInstallPkg() || !Conf.LoadSystem().DownloadInstallPkg {
 		return
 	}
 
@@ -79,6 +68,10 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
+	installUpdatePackage(pkg)
+}
+
+func installUpdatePackage(pkg *installPackageDownload) {
 	existingPkgPath, err := reuseInstallPackage(sharedInstallPackageDir(), &pkg.Metadata, Conf.CookieKey)
 	if err != nil {
 		logging.LogErrorf("prepare existing install package failed: %s", err)
@@ -90,25 +83,17 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
-	success := false
-	for _, downloadPkgURL := range pkg.URLs {
-		err = downloadInstallPkg(downloadPkgURL, &pkg.Metadata)
-		if err == nil {
-			pkgPath := filepath.Join(sharedInstallPackageDir(), pkg.Metadata.FileName)
-			clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(pkgPath)), pkgPath)
-			success = true
-			break
-		}
-		if errors.Is(err, errInstallPackageDownloadBusy) {
-			util.PushUpdateMsg("update-pkg-downloading", Conf.Language(421), 7000)
-			return
-		}
-	}
-	if success {
+	if err = downloadInstallPkgSources(pkg.URLs, &pkg.Metadata); err == nil {
+		pkgPath := filepath.Join(sharedInstallPackageDir(), pkg.Metadata.FileName)
+		clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(pkgPath)), pkgPath)
 		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
-	} else {
-		util.PushUpdateMsg("update-pkg-downloading", Conf.Language(104), 7000)
+		return
 	}
+	if errors.Is(err, errInstallPackageDownloadBusy) {
+		util.PushUpdateMsg("update-pkg-downloading", Conf.Language(421), 7000)
+		return
+	}
+	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(104), 7000)
 }
 
 func getUpdatePkg() (ret *installPackageDownload, err error) {
@@ -116,7 +101,10 @@ func getUpdatePkg() (ret *installPackageDownload, err error) {
 	if err != nil {
 		return
 	}
+	return getReleaseInstallPackage(release)
+}
 
+func getReleaseInstallPackage(release *updateRelease) (ret *installPackageDownload, err error) {
 	if isVersionUpToDate(release.Version) {
 		err = fmt.Errorf("version is up to date")
 		return
@@ -149,16 +137,59 @@ func getUpdatePkg() (ret *installPackageDownload, err error) {
 	return
 }
 
+// DownloadUpdate 只下载当前通道中与通知版本一致的安装包，不修改自动下载设置。
+func DownloadUpdate(version string) error {
+	if skipNewVerInstallPkg() || version == "" {
+		return errUpdatePackageUnavailable
+	}
+	release, err := getUpdateRelease(false)
+	if err != nil {
+		return err
+	}
+	if release.Version != version {
+		pushNewVersionNotification(release)
+		return errUpdatePackageUnavailable
+	}
+	pkg, err := getReleaseInstallPackage(release)
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer logging.Recover()
+		if !checkDownloadInstallPkgLock.TryLock() {
+			util.PushUpdateMsg("update-pkg-downloading", Conf.Language(421), 7000)
+			return
+		}
+		defer checkDownloadInstallPkgLock.Unlock()
+		installUpdatePackage(pkg)
+	}()
+	return nil
+}
+
 func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err error) {
-	if "" == pkgURL || !validInstallPackageMetadata(metadata) {
-		err = errors.New("update package URL or metadata is invalid")
+	return downloadInstallPkgSources([]string{pkgURL}, metadata)
+}
+
+// downloadInstallPkgSources 在下载锁保护下并发探测各源吞吐量，让最快的源在同一个连接上继续下载。
+// 探测即下载：各源都在真实读取，胜出源的探测字节直接落盘后继续读完，其余源立即断开。
+// 胜出源失败时按原顺序重新完整下载，保持原有的顺序回退能力。
+func downloadInstallPkgSources(urls []string, metadata *installPackageMetadata) (err error) {
+	if !validInstallPackageMetadata(metadata) {
+		err = errors.New("update package metadata is invalid")
 		return
 	}
+	if 1 > len(urls) {
+		err = errors.New("update package URL is invalid")
+		return
+	}
+	for _, pkgURL := range urls {
+		if "" == pkgURL {
+			err = errors.New("update package URL is invalid")
+			return
+		}
+	}
 
-	pkg := metadata.FileName
-	checksum := metadata.Checksum
 	installDir := sharedInstallPackageDir()
-	savePath := filepath.Join(installDir, pkg)
 	lock, err := tryInstallPackageDownloadLock(installDir)
 	if err != nil {
 		return err
@@ -173,6 +204,42 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 	if existingPath, reuseErr := reuseInstallPackage(installDir, metadata, Conf.CookieKey); reuseErr != nil || existingPath != "" {
 		return reuseErr
 	}
+
+	// 探测阶段也在真实下载，先提示用户，避免这段时间看起来没有反应
+	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 7000)
+	if 2 > len(urls) {
+		if err = downloadInstallPkgURL(urls[0], installDir, metadata); nil == err {
+			logging.LogInfof("downloaded install package [%s]", urls[0])
+			util.PushStatusBar(Conf.Language(62))
+		}
+		return
+	}
+
+	if probeErr := probeAndDownloadInstallPkg(installDir, urls, metadata); nil != probeErr {
+		logging.LogWarnf("download install package from the fastest source failed: %s", probeErr)
+		if errors.Is(probeErr, errNoUsableInstallPkgSource) {
+			// 探测阶段每个源都拿不到可用连接，逐个重试不会改善
+			err = probeErr
+			return
+		}
+		for _, pkgURL := range urls {
+			if err = downloadInstallPkgURL(pkgURL, installDir, metadata); nil == err {
+				logging.LogInfof("downloaded install package [%s]", pkgURL)
+				util.PushStatusBar(Conf.Language(62))
+				return nil
+			}
+			logging.LogErrorf("download install package [%s] failed: %s", pkgURL, err)
+		}
+		return
+	}
+	util.PushStatusBar(Conf.Language(62))
+	return nil
+}
+
+// downloadInstallPkgURL 从单个源完整下载并发布安装包，调用方需持有下载锁。
+func downloadInstallPkgURL(pkgURL, installDir string, metadata *installPackageMetadata) (err error) {
+	pkg := metadata.FileName
+	savePath := filepath.Join(installDir, pkg)
 	temporaryFile, err := os.CreateTemp(installDir, pkg+".*.part")
 	if err != nil {
 		logging.LogErrorf("create temporary install package failed: %s", err)
@@ -189,7 +256,6 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 7000)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute).DisableInsecureSkipVerify().SetUserAgent(util.UserAgent)
 	callback := func(info req.DownloadInfo) {
 		progress := fmt.Sprintf("%.2f%%", float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
@@ -202,18 +268,11 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 		return
 	}
 
-	localChecksum, _ := sha256Hash(temporaryPath)
-	if checksum != localChecksum {
-		err = fmt.Errorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, temporaryPath, localChecksum)
-		logging.LogError(err.Error())
-		return
-	}
-	if err = publishInstallPackage(temporaryPath, installDir, metadata, Conf.CookieKey); err != nil {
-		logging.LogErrorf("publish install package [%s] failed: %s", pkg, err)
+	if err = verifyAndPublishInstallPkg(installDir, temporaryPath, metadata); err != nil {
+		logging.LogErrorf("publish install package [%s] failed: %s", pkgURL, err)
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
-	util.PushStatusBar(Conf.Language(62))
 	return
 }
 
@@ -289,7 +348,14 @@ func CheckUpdate(showMsg bool) {
 
 func pushNewVersionNotification(release *updateRelease) {
 	releaseLink := "<a href=\"" + release.ReleaseURL + "\">" + release.ReleaseURL + "</a>"
-	util.PushUpdateMsg("update-notify", fmt.Sprintf(Conf.Language(9), releaseLink), 15000)
+	message := fmt.Sprintf(Conf.Language(9), releaseLink)
+	if !skipNewVerInstallPkg() {
+		if _, err := getReleaseInstallPackage(release); err == nil {
+			message += fmt.Sprintf(` <button type="button" class="b3-button b3-button--white" data-type="download-update" data-version="%s">%s</button>`,
+				html.EscapeString(release.Version), html.EscapeString(Conf.Language(437)))
+		}
+	}
+	util.PushUpdateMsg("update-notify", message, 15000)
 }
 
 func isVersionUpToDate(releaseVer string) bool {
@@ -317,7 +383,7 @@ func skipNewVerInstallPkg() bool {
 		}
 	}
 
-	if skipInstallPkgPlatformCached == 1 || !confSystemSnapshot.DownloadInstallPkg {
+	if skipInstallPkgPlatformCached == 1 {
 		return true
 	}
 	return false

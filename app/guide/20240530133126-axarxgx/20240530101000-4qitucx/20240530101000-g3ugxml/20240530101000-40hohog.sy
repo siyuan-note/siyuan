@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vn1tvf6",
 				"id": "20240530101000-yllodqo",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -92,7 +92,7 @@
 			"Properties": {
 				"ID": "20240530101000-ehzd9yn",
 				"id": "20240530101000-8fajyrp",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -144,7 +144,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を有効にして、アプリ終了後に SiYuan を開き直します。アドレスの "
+					"Data": " を有効にして、アプリ終了後に SiYuan を開き直します。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-x2i8slx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-x2i8slx",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アドレスの "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -300,7 +314,7 @@
 			"Properties": {
 				"ID": "20240530101000-zvy840s",
 				"id": "20240530101000-b6ssy52",
-				"updated": "20261016112115"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -363,6 +377,107 @@
 				"ID": "20240530101000-83ekc6g",
 				"id": "20240530101000-4ocdywp"
 			}
+		},
+		{
+			"ID": "20261022093855-2gm31el",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-2gm31el",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ログインとトークン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ロック画面の壁紙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で JPEG、PNG、WebP の画像を1枚アップロードすると（最大 10 MiB、1600万画素）、起動時やロック後の認証画面の背景を変更できます。「組み込み」から、カテゴリ別の題頭画像ギャラリーで画像を1枚選ぶこともできます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-rrelcdw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-rrelcdw",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "組み込み画像は横長で、画面全体を埋めるように中央で切り抜かれるため、縦画面では切り抜かれる範囲が広くなります。別の画像を選択またはアップロードすると置き換わります。「リセット」で既定の背景に戻せます。パスワードの設定後、または OIDC ログインを有効にすると、壁紙の設定項目が表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-iv63z4k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-iv63z4k",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カスタム壁紙を設定すると、認証ページに壁紙と端末の時刻が先に表示されます。クリック、タップ、キー操作でログインパネルを表示します。パスワードを直接入力すると、最初の文字も入力欄に入ります。壁紙が未設定の場合や画像の読み込みに失敗した場合は、通常のログイン画面を直接表示します。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "ログインパネルの表示中に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと壁紙と時刻の画面に戻り、入力済みのパスワードと画像認証コードは保持されます。表示と復帰には短いアニメーションが付き、システムで視差効果を減らす設定が有効な場合は直接切り替わります。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-jx42i28",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-jx42i28",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "壁紙は現在のワークスペースに保存され、ノートの同期や設定のエクスポートには含まれません。認証ページにアクセスできる人はログイン前でも画像を見られるため、機密情報を含む画像は選ばないでください。"
+				}
+			]
 		},
 		{
 			"ID": "20260804120301-oidclog",

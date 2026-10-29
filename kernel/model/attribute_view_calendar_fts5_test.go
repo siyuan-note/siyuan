@@ -1,8 +1,8 @@
-//go:build fts5
-
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
+
+//go:build fts5
 
 package model
 
@@ -31,6 +31,8 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 			if err := changeAttrViewLayout(original, original.Views[0], av.LayoutTypeCalendar); err != nil {
 				t.Fatal(err)
 			}
+			otherView := av.NewCalendarView()
+			original.Views = append(original.Views, otherView)
 			boxID := ""
 			plainPath := filepath.Join(util.DataDir, "storage", "av", original.ID+".json")
 			if encrypted {
@@ -58,8 +60,14 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 			settings := original.Views[0].Calendar.Settings
 			nextSettings := settings
 			nextSettings.RowLimit = 5
+			nextSettings.DisplayFieldName = true
+			beforeDisplaySettings := nextSettings
+			beforeDisplaySettings.DisplayFieldName = false
 			setRows := func(value av.CalendarSettings) *Operation {
 				return &Operation{Action: "setAttrViewCalendar", AvID: original.ID, ViewID: original.Views[0].ID, Data: value}
+			}
+			setNames := func(enabled bool) *Operation {
+				return &Operation{Action: "setAttrViewDisplayFieldName", AvID: original.ID, ViewID: original.Views[0].ID, Data: enabled}
 			}
 			key, _ := original.GetKeyValues(settings.DateKeyID)
 			value := key.Values[0]
@@ -71,8 +79,8 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 				return &Operation{Action: "updateAttrViewCell", AvID: original.ID, KeyID: key.Key.ID,
 					RowID: value.BlockID, ID: value.ID, Data: map[string]any{"type": "date", "date": date}}
 			}
-			tx := &Transaction{DoOperations: []*Operation{operation(after), setRows(nextSettings)},
-				UndoOperations: []*Operation{operation(before), setRows(settings)}, fromAPI: true}
+			tx := &Transaction{DoOperations: []*Operation{operation(after), setRows(beforeDisplaySettings), setNames(true)},
+				UndoOperations: []*Operation{operation(before), setRows(settings), setNames(false)}, fromAPI: true}
 			if err := PerformTxSync(tx); err != nil {
 				t.Fatal(err)
 			}
@@ -94,6 +102,10 @@ func TestAttributeViewCalendarDateUndoAndEncryptedReplay(t *testing.T) {
 				actual.FormattedContent = ""
 				if !reflect.DeepEqual(actual, replay.expected) || stored.Views[0].Calendar.Settings != replay.settings {
 					t.Fatalf("date replay: actual=%+v expected=%+v settings=%+v", actual, replay.expected, stored.Views[0].Calendar.Settings)
+				}
+				if stored.Views[len(stored.Views)-1].ID != otherView.ID ||
+					stored.Views[len(stored.Views)-1].Calendar.Settings.DisplayFieldName {
+					t.Fatal("field name setting changed another calendar view")
 				}
 			}
 			if encrypted {

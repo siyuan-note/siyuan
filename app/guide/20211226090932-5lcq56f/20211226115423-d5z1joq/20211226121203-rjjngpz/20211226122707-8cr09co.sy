@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20261016112108"
+		"updated": "20261024203645"
 	},
 	"Children": [
 		{
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120005-e50u8z7",
-				"updated": "20261016112108"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -509,10 +509,10 @@
 		{
 			"ID": "20220501135134-b9ixet3",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220501135134-b9ixet3",
-				"updated": "20250115153515"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -645,10 +645,10 @@
 		{
 			"ID": "20211226122720-u1qd8zw",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122720-u1qd8zw",
-				"updated": "20261016112108"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -1136,7 +1136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120134-cdqs2gt",
-				"updated": "20261016111710"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1350,7 +1350,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-165fbc0",
-				"updated": "20261016111431"
+				"updated": "20261024203645"
 			},
 			"Children": [
 				{
@@ -1523,6 +1523,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "填寫詳細備註方便日後辨識快照，但備註不會阻止清理。需要長期保留的快照應加上標記，並另行獨立備份。"
+				}
+			]
+		},
+		{
+			"ID": "20261024203645-v4jqas9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024203645-v4jqas9",
+				"updated": "20261024203645"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果外部程式修改內容卻保留檔案大小和修改時間，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "完整校驗"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中填寫備註並確認。此操作讀取快照範圍內所有已儲存於本機的檔案，發現變更時建立快照；未下載的資源保留原版本，不會為校驗主動下載。大型工作空間可能耗時較長。"
 				}
 			]
 		},

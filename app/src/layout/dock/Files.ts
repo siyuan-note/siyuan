@@ -1,5 +1,5 @@
 import {config as configApi} from "../../config/util/configApi";
-import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {genFileTreeDocAriaLabel} from "../../util/fileTreeTooltip";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -20,6 +20,8 @@ import {
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {restoreFileTreePaths} from "../../util/fileTreeRestore";
+import {saveOpenFileTreePaths} from "../../util/fileTreePaths";
+import {removeFileTreeItems} from "../../util/fileTreeRemove";
 import {openEmojiPanel} from "../../emoji";
 import {
     getFileTreeDefaultIconAttr,
@@ -1323,7 +1325,7 @@ export class Files extends Model {
         );
         if (liElement) {
             if (liElement.getAttribute("data-type") === "navigation-file") {
-                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", genFileTreeDocAriaLabel(data.data, escapeLessThans));
+                liElement.querySelector(".b3-list-item__text.ariaLabel")?.setAttribute("aria-label", genFileTreeDocAriaLabel(data.data));
             }
             this.updateSubFileCount(liElement as HTMLElement, subFileCount);
         }
@@ -1571,65 +1573,12 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private onRemove(data: IWebSocketData) {
-        // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
-        if (data.cmd === "closeBox" || data.cmd === "removeBox") {
-            setNoteBook((notebooks) => {
-                const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${"/"}"]`);
-                if (targetElement) {
-                    targetElement.parentElement.remove();
-                    if (data.cmd === "closeBox") {
-                        let closeHTML = "";
-                        notebooks.find(item => {
-                            if (item.closed) {
-                                closeHTML += this.genNotebook(item);
-                            }
-                        });
-                        this.closeElement.lastElementChild.innerHTML = closeHTML;
-                        const counterElement = this.closeElement.querySelector(".counter");
-                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
-                        this.closeElement.classList.remove("fn__none");
-                    }
-                }
-            });
-            if (data.cmd === "removeBox") {
-                const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
-                if (removeElement) {
-                    removeElement.remove();
-                    const counterElement = this.closeElement.querySelector(".counter");
-                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0") {
-                        this.closeElement.classList.add("fn__none");
-                    }
-                }
-            }
-            return;
-        }
-        data.data.ids.forEach((item: string) => {
-            const targetElement = this.element.querySelector(`li.b3-list-item[data-node-id="${item}"]`);
-            if (targetElement) {
-                // 子节点展开则删除
-                if (targetElement.nextElementSibling?.tagName === "UL") {
-                    targetElement.nextElementSibling.remove();
-                }
-                // 移除当前节点
-                const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
-                if (targetElement.parentElement.childElementCount === 1) {
-                    if (parentElement) {
-                        const iconElement = parentElement.querySelector("svg");
-                        iconElement.classList.remove("b3-list-item__arrow--open");
-                        if (parentElement.dataset.type !== "navigation-root" || parentElement.dataset.nodeId) {
-                            iconElement.parentElement.classList.add("fn__hidden");
-                        }
-                        parentElement.setAttribute("data-count", "0");
-                        this.updateDocActionElement(parentElement);
-                        syncFileTreeItemDefaultIcon(parentElement);
-                    }
-                    targetElement.parentElement.remove();
-                } else {
-                    targetElement.remove();
-                }
-            }
-        });
+        removeFileTreeItems({
+            element: this.element,
+            closeElement: this.closeElement,
+            genNotebook: (notebook) => this.genNotebook(notebook),
+            updateDocActionElement: (element) => this.updateDocActionElement(element),
+        }, data);
     }
 
     private onMount(data: IWebSocketData) {
@@ -1950,28 +1899,17 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private async onLsSelect(data: IFileTreeList, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
-        let fileHTML = "";
-        data.files.forEach((item: IFile) => {
-            fileHTML += this.genFileHTML(item);
-        });
-        if (fileHTML === "") {
+        if (data.files.length === 0) {
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
         if (!liElement) {
             return;
         }
-        if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
-            // 文件展开时，刷新
-            liElement.nextElementSibling.remove();
-        }
         const arrowElement = liElement.querySelector(".b3-list-item__arrow");
-        arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
         syncFileTreeItemDefaultIcon(liElement as HTMLElement);
-        const effectiveSortMode = getResponseEffectiveSortMode(data, data.box);
-        liElement.insertAdjacentHTML("afterend", `<ul ${FILE_TREE_EFFECTIVE_SORT_MODE}="${effectiveSortMode}">${fileHTML}</ul>`);
-        this.restoreMovedExpandedItems(liElement.nextElementSibling, data.box);
+        this.onLsHTML(data);
         let newLiElement;
         for (let i = 0; i < data.files.length; i++) {
             const item = data.files[i];
@@ -2116,38 +2054,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private getOpenPaths() {
-        const filesPaths: IFilesPath[] = [];
-        this.element.querySelectorAll(".b3-list[data-url]").forEach((item: HTMLElement) => {
-            const notebookPaths: IFilesPath = {
-                notebookId: item.getAttribute("data-url"),
-                openPaths: []
-            };
-            item.querySelectorAll(".b3-list-item__arrow--open").forEach((openItem) => {
-                const liElement = hasClosestByTag(openItem, "LI");
-                if (liElement) {
-                    notebookPaths.openPaths.push(liElement.getAttribute("data-path"));
-                }
-            });
-            if (notebookPaths.openPaths.length > 0) {
-                for (let i = 0; i < notebookPaths.openPaths.length; i++) {
-                    for (let j = i + 1; j < notebookPaths.openPaths.length; j++) {
-                        if (notebookPaths.openPaths[j].startsWith(notebookPaths.openPaths[i].replace(".sy", ""))) {
-                            notebookPaths.openPaths.splice(i, 1);
-                            j--;
-                        }
-                    }
-                }
-                notebookPaths.openPaths.forEach((openPath, index) => {
-                    const nextPath = this.element.querySelector(`[data-url="${notebookPaths.notebookId}"] li[data-path="${openPath}"]`)?.nextElementSibling?.firstElementChild?.getAttribute("data-path");
-                    if (nextPath) {
-                        notebookPaths.openPaths[index] = nextPath;
-                    }
-                });
-                filesPaths.push(notebookPaths);
-            }
-        });
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS] = filesPaths;
-        setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
+        saveOpenFileTreePaths(this.element);
     }
 
     private genFileHTML(item: IFile) {
@@ -2155,7 +2062,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = genFileTreeDocAriaLabel(item, escapeAriaLabel);
+        const ariaLabel = genFileTreeDocAriaLabel(item, true);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         const iconExpands = window.siyuan.config.fileTree.docIconClickMode === 1;
@@ -2174,7 +2081,7 @@ class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item
     </span>
     <span class="b3-list-item__icon${iconChanges ? " ariaLabel" : ""} popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="8east" data-id="${item.id}"${iconChanges ? ` aria-label="${window.siyuan.languages.changeIcon}"` : ""}>${getFileTreeIconHTML(item.icon, defaultIcon)}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
+    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE" data-tooltip-encoding="none"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     <span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
@@ -2216,7 +2123,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             if (getHostCapabilities().documentImportExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "importNotebook",
-                    icon: "iconDownload",
+                    icon: "iconUpload",
                     label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
                     bind: (element) => {
                         element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {

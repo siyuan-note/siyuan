@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -26,6 +14,7 @@ import (
 
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -149,8 +138,14 @@ func notebookCryptoConfigurationComplete(notebookCrypto *conf.NotebookCrypto) bo
 
 // AcquireEncryptedBoxOperation 为需要把明文结果保留到响应结束的操作取得准入租约。
 func AcquireEncryptedBoxOperation(boxID string) error {
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return nil
+	}
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
 	}
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()

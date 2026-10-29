@@ -97,7 +97,7 @@ if (!process.versions.electron) {
             vm.runInNewContext(source.slice(crashStart, crashEnd), {
                 app, workspaces, writeLog: () => {}, cleanupBlockDragSessions: () => {},
                 updateInstallPromise: undefined, systemShutdownState: 0, systemShutdownNone: 0,
-                expectedRendererExitIds: new Set(), handledCrashWebContents: new Set(), bootWindow: undefined,
+                expectedRendererExitIds: new Set(), handledCrashWebContents: new Set(), bootWindows: new Set(),
                 safeModeReasons: new Set(["crashed"]),
                 writeAppCrashMarker: workspace => markers.push(workspace.webContentsId),
                 requestKernelExit: port => kernelExits.push(port),

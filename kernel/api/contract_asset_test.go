@@ -1,8 +1,13 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +17,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -35,6 +41,64 @@ func setupAssetContractWorkspace(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+func TestMissingAssetsContract(t *testing.T) {
+	for _, mode := range []string{"empty", "missing", "unreadable document", "source failure", "panic"} {
+		t.Run(mode, func(t *testing.T) {
+			setupAssetContractWorkspace(t)
+			model.Conf.FileTree.Store(conf.NewFileTree())
+			if mode == "source failure" {
+				util.DataDir = filepath.Join(util.WorkspaceDir, "missing")
+			} else if mode == "panic" {
+				model.Conf = nil
+			} else if mode != "empty" {
+				boxID := "20260918000000-abcdefg"
+				boxConf := conf.NewBoxConf()
+				boxConf.Closed = false
+				if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+					t.Fatal(err)
+				}
+				data := `{"Type":"NodeDocument","ID":"20260918000001-abcdefg","Properties":{"title-img":"background-image: url(assets/missing.png)"}}`
+				if mode == "unreadable document" {
+					if err := os.WriteFile(filepath.Join(util.DataDir, boxID, "20260918000002-abcdefg.sy"), []byte(data), 0644); err != nil {
+						t.Fatal(err)
+					}
+					data = `{"Type":`
+				}
+				if err := os.WriteFile(filepath.Join(util.DataDir, boxID, "20260918000001-abcdefg.sy"), []byte(data), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			engine := gin.New()
+			engine.POST("/api/asset/getMissingAssets", getMissingAssets)
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/getMissingAssets", strings.NewReader(`{}`)))
+			requireAPIContract(t, "POST", "/api/asset/getMissingAssets", recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data []*apicontract.AssetUnusedItem
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			if mode == "empty" || mode == "missing" {
+				want := 0
+				if mode == "missing" {
+					want = 1
+				}
+				if response.Code != 0 || response.Data == nil || len(response.Data) != want {
+					t.Fatalf("invalid successful list: %s", recorder.Body.String())
+				}
+			} else if response.Code != -1 || response.Msg == "" || response.Data != nil {
+				t.Fatalf("failed scan must not publish a successful list: %s", recorder.Body.String())
+			}
+			if mode == "unreadable document" && !strings.Contains(response.Msg, "incomplete") {
+				t.Fatalf("skipped documents must be identified as an incomplete scan: %s", recorder.Body.String())
+			}
+		})
+	}
 }
 
 func TestAssetUploadContractAdapter(t *testing.T) {
@@ -238,7 +302,7 @@ func TestAssetUnusedScanFailureContract(t *testing.T) {
 		for _, endpoint := range []string{"getUnusedAssets", "removeUnusedAssets", "removeUnusedAsset"} {
 			url := "/api/asset/" + endpoint
 			recorder := httptest.NewRecorder()
-			engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(`{"path":"assets/protected.png"}`)))
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(`{"path":"assets/protected.png","keyword":"protected"}`)))
 			requireAPIContract(t, "POST", url, recorder)
 			var response struct {
 				Code int
@@ -265,6 +329,77 @@ func TestAssetUnusedScanFailureContract(t *testing.T) {
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != 1 || response.Data[0].Item != "assets/protected.png" {
 		t.Fatalf("successful scan changed response shape: %s, %v", recorder.Body.String(), err)
+	}
+}
+
+func TestUnusedAssetsFilenameSearchContract(t *testing.T) {
+	assets := setupAssetContractWorkspace(t)
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	for i := range 513 {
+		if err := os.WriteFile(filepath.Join(assets, fmt.Sprintf("unused-%04d.txt", i)), []byte("unused"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	const target = "Cover-报告-20261025000000-abcdefg.JPG"
+	for _, name := range []string{target, "literal[1]%.zip", "literalX1.zip", "referenced.JPG"} {
+		if err := os.WriteFile(filepath.Join(assets, name), []byte("unused"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.Chtimes(filepath.Join(assets, target), time.Unix(1, 0), time.Unix(1, 0)); err != nil {
+		t.Fatal(err)
+	}
+	box := &model.Box{ID: "20260918000000-abcdefg"}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	data := `{"Type":"NodeDocument","ID":"20260918000001-abcdefg","Properties":{"title-img":"background-image: url(assets/referenced.JPG)"}}`
+	if err := os.WriteFile(filepath.Join(util.DataDir, box.ID, "20260918000001-abcdefg.sy"), []byte(data), 0644); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/asset/getUnusedAssets", getUnusedAssets)
+	for _, test := range []struct {
+		body  string
+		count int
+		name  string
+	}{
+		{body: "", count: 512},
+		{body: `{}`, count: 512},
+		{body: `{"keyword":null}`, count: 512},
+		{body: `{"keyword":"  "}`, count: 512},
+		{body: `{"all":false}`, count: 512},
+		{body: `{"all":null}`, count: 512},
+		{body: `{"all":true}`, count: 516},
+		{body: `{"all":true,"keyword":"cover"}`, count: 1, name: target},
+		{body: `{"keyword":"  cOvEr  "}`, count: 1, name: target},
+		{body: `{"keyword":"报告"}`, count: 1, name: target},
+		{body: `{"keyword":"abcdefg.jpg"}`, count: 1, name: target},
+		{body: `{"keyword":"[1]%"}`, count: 1, name: "literal[1]%.zip"},
+		{body: `{"keyword":"referenced"}`},
+		{body: `{"keyword":"assets"}`},
+		{body: `{"keyword":"missing"}`},
+	} {
+		t.Run(test.body, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/getUnusedAssets", strings.NewReader(test.body)))
+			requireAPIContract(t, "POST", "/api/asset/getUnusedAssets", recorder)
+			var response struct {
+				Code int
+				Data []apicontract.AssetUnusedItem
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != test.count {
+				t.Fatalf("filename search failed: %s, %v", recorder.Body.String(), err)
+			}
+			if response.Data == nil {
+				t.Fatal("empty search result must remain an array")
+			}
+			for _, item := range response.Data {
+				if test.name != "" && item.Name != test.name || test.count == 512 && item.Name == target {
+					t.Fatalf("unexpected filename result: %+v", item)
+				}
+			}
+		})
 	}
 }
 

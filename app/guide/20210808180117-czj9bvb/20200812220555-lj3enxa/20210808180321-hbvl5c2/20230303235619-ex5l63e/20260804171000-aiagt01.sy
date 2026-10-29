@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261019222954"
+		"updated": "20261027140312"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-0kg9iaq",
-				"updated": "20261019222954"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-jwclkdq",
-				"updated": "20261019222954"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -232,12 +232,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-kr7adcx",
-				"updated": "20260926163337"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "指令保存在工作空间的 data/ai/AGENTS.md 中，支持最多 32 KiB 的 UTF-8 文本。启用数据同步且未被同步忽略规则排除时，该文件随工作空间同步。也可以使用文本编辑器直接编辑文件；文件不存在或为空时不添加自定义指令。"
+					"Data": "指令保存在工作空间的 data/storage/ai/AGENTS.md 中，支持最多 32 KiB 的 UTF-8 文本。启用数据同步且未被同步忽略规则排除时，该文件随工作空间同步。也可以使用文本编辑器直接编辑文件；文件不存在或为空时不添加自定义指令。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-nqu2pes",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-nqu2pes",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "旧路径 data/ai/AGENTS.md 仍可读取，在设置中保存时迁移到新位置；如有针对旧路径的同步忽略规则，请在保存前更新。若两处文件内容不同，请将内容合并到新文件并移除旧文件后再继续。"
 				}
 			]
 		},
@@ -275,7 +289,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20261016191345"
+				"updated": "20261027140312"
 			},
 			"Children": [
 				{
@@ -496,7 +510,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260820190627"
+				"updated": "20261027140312"
 			},
 			"Children": [
 				{
@@ -547,6 +561,79 @@
 				{
 					"Type": "NodeText",
 					"Data": "智能体运行时可以点击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-g6vs2ax",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-g6vs2ax",
+				"updated": "20261027140312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入框默认随文字和图片自动增高，达到面板可用高度上限后滚动。桌面端将鼠标移入输入区域后显示顶部的小把手，触屏设备上保持显示。拖动把手可为当前消息设置固定高度，空输入框也能拉高；最小高度可完整容纳一行文本，最大高度受面板可用空间限制。发送消息后，清空的输入框恢复初始高度，下一条消息重新自动增高。编辑过程中也可双击把手恢复自动增高。内容首尾保留滚动余量，便于完整查看首行和末行。"
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-hm91uco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-hm91uco",
+				"updated": "20261024153700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高度把手获得键盘焦点后，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 增大或减小高度，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至最小高度，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调至当前可用的最大高度；拖动过程中按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可取消调整。"
 				}
 			]
 		},
@@ -846,12 +933,26 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-w5eqebc",
-				"updated": "20260812170000"
+				"updated": "20261026182118"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "MCP 服务"
+				}
+			]
+		},
+		{
+			"ID": "20261026182118-hsjdn1t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026182118-hsjdn1t",
+				"updated": "20261026182118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外部 MCP 工具按需加载。智能体默认只接收服务清单，在需要时加载指定服务的工具定义，从下一轮模型请求开始可用；你也可以在消息中点明要使用的服务。加载状态仅保留在当前用户请求及其工具执行轮次中，发送下一条消息时重新开始；可同时加载多个服务，不设固定数量上限，模型可卸载不再需要的服务以节省上下文。已禁用的工具不会被加载，执行确认策略仍然生效。在智能体能力设置中禁用内置 mcp 工具可恢复全量发送外部工具定义，重新启用则恢复按需加载。"
 				}
 			]
 		},
@@ -916,12 +1017,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-3aqvrqh",
-				"updated": "20260812170000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "stdio 服务只会继承用户勾选的内核环境变量，并在每次启动时读取当前值；还可以在环境变量条目中引用密钥和变量。引用密钥会将其明文提供给该程序及其子进程，直接填写的值会以明文存储。需要授权的 HTTP 服务会引导完成 OAuth 授权。密钥和可复用参数可以在 "
+					"Data": "stdio 服务只会继承用户勾选的内核环境变量，并在每次启动时读取当前值；还可以在环境变量条目中引用密钥和变量。引用密钥会将其明文提供给该程序及其子进程，直接填写的值会以明文存储。需要授权的 HTTP 服务会引导完成 OAuth 授权。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-hpykagy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-hpykagy",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "密钥和可复用参数可以在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1063,187 +1178,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "渲染抓取需要桌面实例保持连接。浏览器端、移动端和外部 MCP 客户端使用配置的抓取服务。正文为空或超时时会返回错误，较长结果会截断至 50,000 个字符。需要登录、嵌入页面、工作线程或持续浏览器连接的网页仍可能无法读取。"
-				}
-			]
-		},
-		{
-			"ID": "20260804170057-2aewd90",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260804170057-2aewd90",
-				"updated": "20260804180000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用示例"
-				}
-			]
-		},
-		{
-			"ID": "20260804170058-liczbf7",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20260804170058-liczbf7",
-				"updated": "20260804180000"
-			},
-			"Children": [
-				{
-					"ID": "20260804170059-xb67h4s",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170059-xb67h4s",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170100-sop3vuk",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170100-sop3vuk",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "搜索最近的会议记录，归纳待办事项，并写入指定项目文档"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170101-kuagvvz",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170101-kuagvvz",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170102-cygloha",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170102-cygloha",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "根据当前选中的内容块整理一份结构化摘要，保留原文中的关键结论"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170103-lahek9m",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170103-lahek9m",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170104-oy07fuf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170104-oy07fuf",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "创建今天的日记，并加入今天需要完成的三项任务"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170105-lmfv7pg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170105-lmfv7pg",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170106-jp0j4v4",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170106-jp0j4v4",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "整理当前文档的图片内容，为每张图片生成简短说明"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170107-rj49y8d",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170107-rj49y8d",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170108-4wv0w0b",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170108-4wv0w0b",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "根据我的写作规范技能检查当前文档，并列出需要修改的内容"
-								}
-							]
-						}
-					]
 				}
 			]
 		},
@@ -1443,6 +1377,187 @@
 				{
 					"Type": "NodeText",
 					"Data": "可以同时搜索片段名称和代码内容，也可重命名或局部修改片段。如果管理对话框打开期间片段发生变化，保存会被拒绝并保留草稿；请复制当前修改，重新打开对话框后与最新片段合并。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170057-2aewd90",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170057-2aewd90",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用示例"
+				}
+			]
+		},
+		{
+			"ID": "20260804170058-liczbf7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170058-liczbf7",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170059-xb67h4s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170059-xb67h4s",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170100-sop3vuk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170100-sop3vuk",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "搜索最近的会议记录，归纳待办事项，并写入指定项目文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170101-kuagvvz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170101-kuagvvz",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170102-cygloha",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170102-cygloha",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根据当前选中的内容块整理一份结构化摘要，保留原文中的关键结论"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170103-lahek9m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170103-lahek9m",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170104-oy07fuf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170104-oy07fuf",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "创建今天的日记，并加入今天需要完成的三项任务"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170105-lmfv7pg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170105-lmfv7pg",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170106-jp0j4v4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170106-jp0j4v4",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "整理当前文档的图片内容，为每张图片生成简短说明"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170107-rj49y8d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170107-rj49y8d",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170108-4wv0w0b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170108-4wv0w0b",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根据我的写作规范技能检查当前文档，并列出需要修改的内容"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

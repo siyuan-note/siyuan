@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -433,15 +437,18 @@ func refreshHPathsTask(task *hpathRefreshTask) (done bool, err error) {
 	}
 	if task.docs == nil {
 		if task.recover {
-			hpath, properties, loadErr := filesys.ReadDocHPath(root.BoxID, root.Path)
+			if err = recoverDocumentMetadata(root.BoxID); err != nil {
+				return false, err
+			}
+			hpath, _, loadErr := filesys.ReadDocHPath(root.BoxID, root.Path)
 			if loadErr != nil {
 				return false, loadErr
 			}
-			tree := treenode.NewTree(root.BoxID, root.Path, hpath, properties["title"])
-			tree.Root.KramdownIAL = nil
-			for key, value := range properties {
-				tree.Root.SetIALAttr(key, value)
+			tree, loadErr := filesys.ReadDocumentMetadataTree(root.BoxID, root.Path)
+			if loadErr != nil {
+				return false, loadErr
 			}
+			tree.HPath = hpath
 			if err = treenode.RefreshDocHPaths(tree); err != nil {
 				return false, err
 			}

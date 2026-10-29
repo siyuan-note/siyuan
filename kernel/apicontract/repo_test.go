@@ -1,6 +1,11 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -65,6 +70,21 @@ func TestSnapshotContracts(t *testing.T) {
 	for _, body := range []string{`{}`, `{"memo":""}`, `{"memo":"note"}`} {
 		if _, err := CreateSnapshot.Decode(strings.NewReader(body)); err != nil {
 			t.Fatalf("optional memo rejected: %s %v", body, err)
+		}
+	}
+	for _, full := range []bool{false, true} {
+		body, err := json.Marshal(map[string]any{"memo": "note", "fullCheck": full})
+		if err != nil {
+			t.Fatal(err)
+		}
+		request, err := CreateSnapshot.Decode(bytes.NewReader(body))
+		if err != nil || request.FullCheck != full {
+			t.Fatalf("full check decoding: %+v %v", request, err)
+		}
+	}
+	for _, body := range []string{`{"fullCheck":null}`, `{"fullCheck":"true"}`, `{"fullCheck":1}`} {
+		if _, err := CreateSnapshot.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid full check accepted: %s", body)
 		}
 	}
 	for _, body := range []string{`{"memo":null}`, `{"memo":1}`, `[]`} {

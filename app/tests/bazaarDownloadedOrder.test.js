@@ -39,7 +39,7 @@ const setup = ({downloaded, downloadedType = "widgets", sort = "0", type = "widg
     };
     // 使用实际渲染回调及排序方法，隔离集市元数据、卡片样式和内核通信。
     const bazaar = new Function("dependencies", `
-        const {BAZAAR_PACKAGE_CONFIG, fetchPost, getFrontend, loadDownloadedRatings, loadDownloadedUserRatings} = dependencies;
+        const {BAZAAR_PACKAGE_CONFIG, fetchPost, getFrontend, loadDownloadedRatings, loadDownloadedUserRatings, renderBazaarInstall} = dependencies;
         ${code}
         return bazaar;
     `)({
@@ -47,6 +47,7 @@ const setup = ({downloaded, downloadedType = "widgets", sort = "0", type = "widg
         getFrontend: () => "desktop",
         loadDownloadedRatings() {},
         loadDownloadedUserRatings() {},
+        renderBazaarInstall() {},
         fetchPost: (_url, _data, callback) => new Promise(resolve => {request = {callback, resolve};}),
     });
     Object.assign(bazaar, {

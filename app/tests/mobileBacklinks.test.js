@@ -34,6 +34,7 @@ const runCases = async (sources) => {
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "editor/assetOpen": {normalizeAssetOpenConfig: value => value},
         "layout/dock/backlinkRefFilterMenu": {loadBacklinkRefFilterMenu: noop},
+        "layout/dock/backlinkDatabaseFilter": {loadBacklinkDatabaseFilterMenu: noop},
         "protyle/render/av/editorSession": {hasAVEditorSession: () => false},
         "layout/Model": {Model: class {constructor({app}) {this.app = app;} connect() {throw Error("mobile panel opened a desktop socket");}}},
         "util/Tree": {Tree: class {

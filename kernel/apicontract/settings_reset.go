@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 // ResetSettingsRequest 重置当前工作空间的普通偏好和内置布局。Exit 仅通知本地桌面前端在重载后正常退出，

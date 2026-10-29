@@ -1,7 +1,12 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,11 +17,162 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestOrdinaryAssetCleanupReferenceChanges(t *testing.T) {
+	for _, source := range []string{"document", "new document", "template", "database", "session", "runtime"} {
+		for _, stage := range []string{"after backup", "during removal"} {
+			t.Run(source+"/"+stage, func(t *testing.T) {
+				boxID, docPath := setupUnusedAssetWorkspace(t)
+				const asset = "assets/unused.png"
+				assetPath := filepath.Join(util.DataDir, asset)
+				if err := os.WriteFile(assetPath, []byte("original attachment"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				refPath, updated := docPath, []byte(`{"Type":"NodeDocument","Spec":"1","Children":[{"Type":"NodeLinkDest","Data":"assets/unused.png"}]}`)
+				switch source {
+				case "new document":
+					refPath = filepath.Join(util.DataDir, boxID, "20261026000001-abcdefg.sy")
+				case "template":
+					refPath, updated = filepath.Join(util.DataDir, "templates", "new.md"), []byte("![image](assets/unused.png)")
+				case "database":
+					refPath, updated = filepath.Join(util.DataDir, "storage", "av", "20261026000001-abcdefg.json"), []byte(`{"asset":"assets/unused.png"}`)
+				case "session", "runtime":
+					refPath = filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", "test", source+".json")
+					updated = []byte(`{"entries":[{"type":"user","content":"![image](assets/unused.png)"}]}`)
+				}
+				if err := os.MkdirAll(filepath.Dir(refPath), 0755); err != nil {
+					t.Fatal(err)
+				}
+				if source == "document" {
+					if err := os.WriteFile(refPath, []byte(`{"Type":"NodeDocument","Spec":"1"}`), 0644); err != nil {
+						t.Fatal(err)
+					}
+				}
+				verify, release, err := beginOrdinaryAssetCleanup()
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer release()
+				items, err := UnusedAssets(false)
+				if err != nil || len(items) != 1 || items[0].Item != asset {
+					t.Fatalf("initial candidates: %v %v", items, err)
+				}
+				history := t.TempDir()
+				if err := filelock.Copy(assetPath, filepath.Join(history, asset)); err != nil {
+					t.Fatal(err)
+				}
+				// A writer not using flushLock saves while cleanup is in progress.
+				start, done := make(chan struct{}), make(chan error, 1)
+				go func() {
+					<-start
+					done <- filelock.WriteFile(refPath, updated)
+				}()
+				writeReference := func() {
+					close(start)
+					if err := <-done; err != nil {
+						t.Fatal(err)
+					}
+				}
+				if stage == "after backup" {
+					writeReference()
+				}
+				removeCalls := 0
+				removed, _, err := removeOrdinaryUnusedAssets(items, history, verify, func(p string) error {
+					removeCalls++
+					if err := os.RemoveAll(p); err != nil {
+						return err
+					}
+					writeReference()
+					return nil
+				})
+				if err == nil || len(removed) != 0 || (stage == "after backup" && removeCalls != 0) {
+					t.Fatalf("stale scan admitted removal: %v, %v, calls=%d", removed, err, removeCalls)
+				}
+				if got, err := os.ReadFile(assetPath); err != nil || string(got) != "original attachment" {
+					t.Fatalf("newly referenced attachment lost: %s %v", got, err)
+				}
+				if got, err := os.ReadFile(refPath); err != nil || string(got) != string(updated) {
+					t.Fatalf("concurrent saved reference overwritten: %s %v", got, err)
+				}
+			})
+		}
+	}
+}
+
+func TestOrdinaryAssetCleanupEmptyResult(t *testing.T) {
+	for _, missing := range []bool{false, true} {
+		t.Run(fmt.Sprint("missing=", missing), func(t *testing.T) {
+			setupUnusedAssetWorkspace(t)
+			var items []*UnusedItem
+			if missing {
+				items = []*UnusedItem{{Item: "assets/missing.txt"}}
+			}
+			checks := 0
+			removed, size, err := removeOrdinaryUnusedAssets(items, t.TempDir(), func() error {
+				checks++
+				return nil
+			}, func(string) error {
+				t.Fatal("empty cleanup must not remove files")
+				return nil
+			})
+			if err != nil || removed == nil || len(removed) != 0 || size != 0 || checks != 2 {
+				t.Fatalf("unexpected empty cleanup result: %v %d %v, checks=%d", removed, size, err, checks)
+			}
+		})
+	}
+}
+
+func TestOrdinaryAssetCleanupRestoresPartialRemoval(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(fmt.Sprint("failure=", fail), func(t *testing.T) {
+			setupUnusedAssetWorkspace(t)
+			history := t.TempDir()
+			items := []*UnusedItem{{Item: "assets/file.txt"}, {Item: "assets/directory/"}}
+			for _, rel := range []string{"assets/file.txt", "assets/directory/nested.txt"} {
+				for _, root := range []string{util.DataDir, history} {
+					filename := filepath.Join(root, rel)
+					if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(filename, []byte(rel), 0644); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			injected := errors.New("remove failed after a partial deletion")
+			calls := 0
+			removed, size, err := removeOrdinaryUnusedAssets(items, history, func() error { return nil }, func(p string) error {
+				calls++
+				if err := os.RemoveAll(p); err != nil {
+					return err
+				}
+				if fail && calls == 2 {
+					return injected
+				}
+				return nil
+			})
+			if fail {
+				if !errors.Is(err, injected) || len(removed) != 0 || size != 0 {
+					t.Fatalf("partial failure: %v %d %v", removed, size, err)
+				}
+			} else if err != nil || len(removed) != 2 || size == 0 {
+				t.Fatalf("successful cleanup: %v %d %v", removed, size, err)
+			}
+			for _, rel := range []string{"assets/file.txt", "assets/directory/nested.txt"} {
+				got, readErr := os.ReadFile(filepath.Join(util.DataDir, rel))
+				if fail && (readErr != nil || string(got) != rel) || !fail && !os.IsNotExist(readErr) {
+					t.Fatalf("unexpected attachment state %s: %s %v", rel, got, readErr)
+				}
+			}
+		})
+	}
+}
 
 func TestUnusedAssetsPathPrefixes(t *testing.T) {
 	for _, prefix := range []string{"/", "./", "../", "../../", "%2e%2e/", "assets/../../"} {
@@ -53,15 +209,15 @@ func TestUnusedAssetsPathPrefixes(t *testing.T) {
 			if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
 				t.Fatalf("unused: %+v, %v", items, err)
 			}
-			if missing := MissingAssets(); len(missing) != 0 {
-				t.Fatalf("existing assets reported missing: %+v", missing)
+			if missing, err := MissingAssets(); err != nil || len(missing) != 0 {
+				t.Fatalf("existing assets reported missing: %+v, %v", missing, err)
 			}
 			if err := os.Remove(filepath.Join(util.DataDir, "assets", "sub", "image.png")); err != nil {
 				t.Fatal(err)
 			}
-			missing := MissingAssets()
-			if len(missing) != 1 || missing[0].Item != "assets/sub/image.png" || !reflect.DeepEqual(missing[0].BlockIDs, []string{"20260918000002-abcdefg"}) {
-				t.Fatalf("missing: %+v", missing)
+			missing, err := MissingAssets()
+			if err != nil || len(missing) != 1 || missing[0].Item != "assets/sub/image.png" || !reflect.DeepEqual(missing[0].BlockIDs, []string{"20260918000002-abcdefg"}) {
+				t.Fatalf("missing: %+v, %v", missing, err)
 			}
 		})
 	}

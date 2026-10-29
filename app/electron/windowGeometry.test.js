@@ -4,6 +4,7 @@ const {test} = require("node:test");
 const {readFileSync} = require("node:fs");
 const {runInNewContext} = require("node:vm");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
+const {getTitleBarOverlayOptions, getCaptionHeight} = require("./windowControlsOverlay");
 
 const state = (values = {}) => ({version: 1, x: 100, y: 80, width: 900, height: 700,
     maximized: false, fullscreen: false, ...values});
@@ -140,6 +141,8 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
     runInNewContext(source.slice(start, end), {
         ipcMain, initializedWindowIds,
         BrowserWindow: Window, URL, process: {platform: "win32"},
+        getTitleBarOverlayOptions: (platform, height) => getTitleBarOverlayOptions(platform, height),
+        getCaptionHeight: (compact, panel) => getCaptionHeight(compact, panel),
         getWindowKernelTarget: () => ({origin: "http://127.0.0.1:6806", mode}),
         getRemoteSession: () => ({}),
         windowWorkspaces: {get: () => windows[0], associate: () => {}},
@@ -174,6 +177,8 @@ test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖",
     assert.deepEqual([f.options.x, f.options.y, f.options.width, f.options.height], [100, 80, 900, 700]);
     // 首帧绘制（或短延迟）前不显示窗口，最大化也在那时才应用
     assert.equal(f.options.show, false);
+    // 独立文档窗口首帧按面板高度预留窗口按钮区，不落到系统的默认标题栏高度
+    assert.equal(f.options.titleBarOverlay.height, 42);
     assert.deepEqual(f.calls, []);
     f.win.emit("ready-to-show");
     assert.deepEqual(f.calls, ["maximize", "show"]);
@@ -184,6 +189,15 @@ test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖",
 test("旧窗口布局继续使用默认窗口位置", () => {
     const f = openWindow(undefined);
     assert.deepEqual(f.calls, ["center", f.workArea]);
+});
+
+// 独立文档窗口的首帧按钮区跟随界面密度，避免加载完成后再纠正一次高度。
+test("新窗口首帧按钮区跟随界面密度", () => {
+    assert.equal(openWindow(state()).options.titleBarOverlay.height, 42);
+    assert.equal(openWindow(state(), {compactMode: true}).options.titleBarOverlay.height, 34);
+    assert.equal(openWindow(state(), {compactMode: false}).options.titleBarOverlay.height, 42);
+    assert.equal(openWindow(state(), {compactMode: "true"}).options.titleBarOverlay.height, 42,
+        "非布尔输入按舒适密度处理");
 });
 
 test("新窗口首帧后显示，定时器先到也显示，重复打开激活已有窗口", () => {

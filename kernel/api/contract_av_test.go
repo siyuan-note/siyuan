@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -244,6 +248,15 @@ func assertAVContractJSONEqual(t *testing.T, want, got any) {
 }
 
 func TestAVContractTransportMapping(t *testing.T) {
+	for _, preference := range []*bool{nil, new(false), new(true)} {
+		for _, target := range []av.NewItemTargetType{av.NewItemTargetDetached, av.NewItemTargetDocument} {
+			template := &av.NewItemTemplate{ID: "template", Name: "Entry", TargetType: target, OpenAfterCreate: preference}
+			assertAVContractJSONEqual(t, template, toContractAVNewItemTemplate(template))
+			result := &model.CreateAttributeViewItemResult{ItemID: "item", BlockID: "block", Content: "Entry",
+				IsDetached: target == av.NewItemTargetDetached, OpenAfterCreate: preference}
+			assertAVContractJSONEqual(t, result, toContractAVCreateAttributeViewItemResult(result))
+		}
+	}
 	for _, visibility := range []string{"", "always", "hide-empty", "hide"} {
 		key := &av.Key{ID: "key", Type: av.KeyTypeText, AttributePanelVisibility: visibility}
 		assertAVContractJSONEqual(t, key, toContractAVKey(key))

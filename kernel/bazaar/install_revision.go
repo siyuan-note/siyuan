@@ -1,6 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-// Licensed under the GNU Affero General Public License, version 3 or later.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package bazaar
 
@@ -30,7 +30,6 @@ var (
 // PackageInstallOptions 只由宿主安装服务构造，回调在共用安装锁内执行。
 type PackageInstallOptions struct {
 	ExpectedInstalledRevision string
-	PrivateTemp               bool
 	BeforeReplace             func() error
 	Context                   context.Context
 	Recheck                   func() error
@@ -74,7 +73,11 @@ func validateInstalledRevision(revision string) error {
 
 // InstalledPackageRevision 在与安装、卸载相同的锁内读取完整代码目录摘要。
 func InstalledPackageRevision(installPath string) (string, error) {
-	if err := packageInstallLock.Acquire(context.Background(), 1); err != nil {
+	return lockedInstalledPackageRevision(context.Background(), installPath)
+}
+
+func lockedInstalledPackageRevision(ctx context.Context, installPath string) (string, error) {
+	if err := packageInstallLock.Acquire(ctx, 1); err != nil {
 		return "", err
 	}
 	defer packageInstallLock.Release(1)
@@ -258,11 +261,15 @@ func readInstallFileAt(root *os.Root, name string, expected fs.FileInfo, maxSize
 	return readInstallFile(file, expected, maxSize)
 }
 
-func copyInstallTree(sourcePath, destination string) (string, error) {
+// copyInstallTree 按 visitInstallTree 的遍历顺序写入目标目录，并在每个文件前后响应取消。
+func copyInstallTree(ctx context.Context, sourcePath, destination string) (string, error) {
 	if err := os.Mkdir(destination, 0700); err != nil {
 		return "", err
 	}
 	return visitInstallTree(sourcePath, func(name string, info fs.FileInfo, data []byte) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		target := filepath.Join(destination, filepath.FromSlash(name))
 		if info.IsDir() {
 			return os.Mkdir(target, 0755)

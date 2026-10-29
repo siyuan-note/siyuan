@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210111224435-y1fesd1",
-				"updated": "20260612202926"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -29,12 +29,41 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-1ros46z",
-				"updated": "20260612202926"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "嵌入内容块主要用于汇总所需内容块，通过 "
+					"Data": "嵌入内容块根据查询在当前位置展示所需内容块，适合汇总任务、整理主题或集中查看分散的笔记。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-zud01rx",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-zud01rx",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入 SQL 嵌入"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-w2n84jl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-w2n84jl",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将 SQL 查询放在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,7 +72,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 和 "
+					"Data": " 和 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -52,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 将 SQL 脚本包裹起来并独占一行："
+					"Data": " 之间，并独占一行，例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -61,27 +90,33 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，数据库表请参考"
+					"Data": "。可查询的表和字段见 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20201117103851-l9cahuc",
+					"TextMarkBlockRefID": "20201222093044-rx4zjoy",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "这里"
+					"TextMarkTextContent": "SQL 索引表"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "。"
-				},
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-3he7riq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-3he7riq",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "内容块/嵌入"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
 				}
 			]
 		},
@@ -639,7 +674,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260612202058-4nvpz56",
-				"updated": "20261016202635"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1018,7 +1053,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-8ljs229",
-				"updated": "20261016202635"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1074,7 +1109,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-2dobv32",
-				"updated": "20260612202058"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1087,7 +1122,48 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 异步返回（Promise 会被自动 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
+					"Data": "//!js\n// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-5z8dz71",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024162311-5z8dz71",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "也可以返回 Promise。下面是另一种写法，与上面的同步示例分别使用："
+				}
+			]
+		},
+		{
+			"ID": "20261024162311-uhu20nv",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261024162311-uhu20nv",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "//!js\n// 异步返回（Promise 会被自动 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

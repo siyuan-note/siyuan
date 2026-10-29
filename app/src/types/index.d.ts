@@ -561,6 +561,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
+    /** 当前内核的只读文档标题能力，普通构建默认为 2，不持久化为用户设置。 */
     zIndex: number
     isReady?: boolean
     storage?: {
@@ -1197,6 +1198,8 @@ interface IAVNewItemTemplate {
     saveLocation?: IAVNewItemSaveLocation;
     contentTemplatePath?: string;
     hideInFileTree?: boolean;
+    /** 创建后分屏打开条目；省略时保留旧行为（仅日历自动打开），false 表示不打开。 */
+    openAfterCreate?: boolean;
 }
 
 /** 单字段条件颜色规则按顺序匹配，默认背景同样占据优先级。 */
@@ -1267,6 +1270,8 @@ interface IAVCalendarSettings {
     weekStart: number;
     /** 月视图折叠前的条目行数：3、5、10 或 -1（全部）；省略或 0 使用 3，周视图显示全部，不影响查询范围。 */
     rowLimit?: number;
+    /** 在日历条目中显示非主键字段的名称，默认关闭；按视图保存，支持撤销和重做。 */
+    displayFieldName?: boolean;
 }
 
 /**

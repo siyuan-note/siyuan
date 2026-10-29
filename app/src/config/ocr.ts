@@ -70,7 +70,7 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         title: languages.ocrImportModelsTitle,
         desc: languages.ocrImportModelsTip,
         label: languages.import,
-        icon: "iconDownload",
+        icon: "iconUpload",
         keywords: ["ONNX", "YAML", "Tiny", languages.ocrDetector, languages.ocrRecognizer],
     }).slot({
         key: "ocrAIModel",

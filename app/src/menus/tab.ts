@@ -4,6 +4,7 @@ import {Editor} from "../editor";
 import {closeTabByType, copyTab, resizeTabs} from "../layout/tabUtil";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
+import {canMoveTabToMainWindow, moveTabToMainWindow} from "../window/moveTabToMainWindow";
 /// #endif
 import {copySubMenu} from "./commonMenuItem";
 import type {App} from "../index";
@@ -12,7 +13,7 @@ import {Wnd} from "../layout/Wnd";
 import {getAllWnds} from "../layout/getAll";
 import {Asset} from "../asset";
 import {writeText} from "../protyle/util/compatibility";
-import {getAssetName, pathPosix} from "../util/pathName";
+import {getAssetExtension, getAssetName} from "../util/pathName";
 import {Constants} from "../constants";
 
 const closeMenu = (tab: Tab) => {
@@ -206,7 +207,7 @@ export const initTabMenu = (app: App, tab: Tab) => {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
-                writeText(`[${getAssetName(model.parent.title)}${pathPosix().extname(model.path)}](${model.path})`);
+                writeText(`[${getAssetName(model.parent.title)}${getAssetExtension(model.path)}](${model.path})`);
             }
         }).element);
     }
@@ -239,6 +240,16 @@ export const initTabMenu = (app: App, tab: Tab) => {
             openNewWindow(tab);
         }
     }).element);
+    if (canMoveTabToMainWindow(tab)) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "tabToMainWindow",
+            label: window.siyuan.languages.tabToMainWindow,
+            icon: "iconMove",
+            click: () => {
+                void moveTabToMainWindow(tab).catch(error => console.error(error));
+            }
+        }).element);
+    }
     /// #endif
     return window.siyuan.menus.menu;
 };

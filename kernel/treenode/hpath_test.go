@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package treenode
 
 import (
@@ -83,5 +87,46 @@ func TestHPathRefreshYieldsToBlockTreeWriter(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("background waited for the blocktree writer")
+	}
+}
+
+func TestDocumentUpdatesUseIdentityIndexes(t *testing.T) {
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+			box := withDocumentMetadataDB(t, encrypted)
+			for _, update := range []struct {
+				name, query, index, lookup string
+				args                       []any
+			}{
+				{"display path", documentHPathUpdateQuery, "idx_blocktrees_doc_path", "box_id=? AND path=?",
+					[]any{"/Renamed", "doc", box, "/doc.sy", "/Renamed"}},
+				{"document metadata", documentBlockTreeUpdateQuery, "idx_blocktrees_id", "id=?",
+					[]any{"doc", "", "/doc.sy", "/Renamed", "20261023000000", box, "doc"}},
+			} {
+				t.Run(update.name, func(t *testing.T) {
+					rows, err := queryForBox(box, "EXPLAIN QUERY PLAN "+update.query, update.args...)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer rows.Close()
+					var plan strings.Builder
+					for rows.Next() {
+						var id, parent, unused int
+						var detail string
+						if err = rows.Scan(&id, &parent, &unused, &detail); err != nil {
+							t.Fatal(err)
+						}
+						plan.WriteString(detail + "\n")
+					}
+					if err = rows.Err(); err != nil {
+						t.Fatal(err)
+					}
+					if !strings.Contains(plan.String(), "SEARCH blocktrees USING INDEX "+update.index) ||
+						!strings.Contains(plan.String(), "("+update.lookup+")") {
+						t.Fatalf("document update does not locate its identity: %s", plan.String())
+					}
+				})
+			}
+		})
 	}
 }

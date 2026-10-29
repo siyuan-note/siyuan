@@ -68,7 +68,8 @@ import {
 } from "./dockOrder";
 
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image")
+    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image" ||
+    item.key === "editor.blockEmbed")
     .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
         children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
     item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
@@ -217,7 +218,7 @@ const profileCard = (
     <div class="b3-card__actions b3-card__actions--right">
         ${active ? "" : `<button class="b3-button b3-button--outline" data-action="activate">${window.siyuan.languages.use}</button>`}
         <button class="block__icon block__icon--show ariaLabel" data-action="duplicate" data-position="north" aria-label="${window.siyuan.languages.duplicateCopy}"><svg><use xlink:href="#iconCopy"></use></svg></button>
-        ${builtin || !getHostCapabilities().importExport ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconUpload"></use></svg></button>`}
+        ${builtin || !getHostCapabilities().importExport ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconDownload"></use></svg></button>`}
         <button class="block__icon block__icon--show${builtin ? " fn__none" : " block__icon--warning"} ariaLabel" data-action="delete" data-position="north" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
     </div>
 </div>`;
@@ -1045,9 +1046,9 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
     <div class="fn__flex">
         <div><div class="config-name">${window.siyuan.languages.entryVisibility}</div><div class="b3-label__text">${isMobile() ? window.siyuan.languages.mobileToolbarEntryTip : window.siyuan.languages.entryVisibilityTip}</div></div>
         <span class="fn__space fn__flex-1"></span>
-        ${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}</button>
+        ${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>
         <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline" data-action="export-all"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}</button>
+        <button class="b3-button b3-button--outline" data-action="export-all"><svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.export}</button>
         <span class="fn__space"></span>` : ""}
         <button class="b3-button b3-button--outline" data-action="create"><svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.entryCreateProfile}</button>
         <input class="fn__none" data-type="entry-import" type="file" accept="application/json,.json">

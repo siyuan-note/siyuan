@@ -1,6 +1,10 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
-// AVCalendarSettings 是 setAttrViewCalendar 事务的完整设置数据，也是日历布局的持久化字段设置。
+// AVCalendarSettings 是 setAttrViewCalendar 事务的完整设置数据，也是日历布局的持久化字段和显示设置。
 // 月周模式和当前浏览日期由各编辑器独立维护，不写入共享设置。
 // 切换布局保留其他布局及分组设置；日历渲染不应用分组。
 type AVCalendarSettings struct {
@@ -19,6 +23,8 @@ type AVCalendarSettings struct {
 	// 月视图折叠前显示的条目行数，可选 3、5、10；-1 表示全部，省略或 0 按 3 行显示。
 	// 仅控制客户端折叠，不限制查询结果；周视图始终显示全部条目。
 	RowLimit int `json:"rowLimit,omitempty" api:"optional"`
+	// 是否在日历条目中显示非主键字段的名称；省略时关闭，按视图保存，支持撤销和重做。
+	DisplayFieldName bool `json:"displayFieldName,omitempty" api:"optional"`
 }
 
 // AVCalendarRange 是本次渲染的毫秒时间戳半开区间 [start, end)，不持久化。

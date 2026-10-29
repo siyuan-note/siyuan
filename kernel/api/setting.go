@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -501,16 +489,7 @@ var logoutCloudUser = contractHandler(apicontract.LogoutCloudUser, func(c *gin.C
 })
 
 var login2faCloudUser = contractHandler(apicontract.Login2faCloudUser, func(c *gin.Context, request apicontract.SettingLogin2faRequest) apicontract.Response[apicontract.Login2faEnvelope] {
-	result := model.Login2fa(request.Token, request.Code)
-	encoded, err := gulu.JSON.MarshalJSON(result)
-	if err != nil {
-		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
-	}
-	var envelope apicontract.Login2faEnvelope
-	if err = gulu.JSON.UnmarshalJSON(encoded, &envelope); err != nil {
-		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
-	}
-	return apicontract.SuccessDirectJSON(envelope)
+	return apicontract.SuccessDirectJSON(*model.Login2fa(request.Token, request.Code))
 })
 
 var setEmoji = contractHandler(apicontract.SetEmoji, func(c *gin.Context, request apicontract.SettingEmojiRequest) apicontract.Response[apicontract.Null] {

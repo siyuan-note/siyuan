@@ -6,6 +6,25 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/asset/getUnusedAssets", {});
+fetchPost("/api/asset/getUnusedAssets", {keyword: null});
+fetchPost("/api/asset/getUnusedAssets", {all: true});
+fetchPost("/api/asset/getUnusedAssets", {all: null});
+// @ts-expect-error 完整清单开关必须是布尔值或 null。
+fetchPost("/api/asset/getUnusedAssets", {all: 1});
+fetchSyncPost("/api/asset/getUnusedAssets");
+fetchSyncPost("/api/asset/getUnusedAssets", {keyword: "Cover-20261025.JPG"});
+// @ts-expect-error 文件名关键词必须是字符串或 null。
+fetchPost("/api/asset/getUnusedAssets", {keyword: 123});
+// @ts-expect-error 文件名筛选字段不能拼错。
+fetchPost("/api/asset/getUnusedAssets", {keywords: "Cover"});
+
+fetchPost("/api/system/downloadUpdate", {version: "3.8.9-alpha.2"});
+// @ts-expect-error 按次下载必须指定通知中的版本。
+fetchPost("/api/system/downloadUpdate", {});
+// @ts-expect-error 按次下载不接受任意下载地址。
+fetchPost("/api/system/downloadUpdate", {version: "3.8.9", url: "https://example.com/update.exe"});
+
 // @ts-expect-error 地图未定位条目接口已移除。
 fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "retired-view"});
 // @ts-expect-error 在线地图运行时接口已移除。

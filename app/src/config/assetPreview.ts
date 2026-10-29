@@ -149,7 +149,7 @@ export class AssetPreview {
                     }
                     const content = document.createElement("div");
                     content.className = "config-assets__pdf" + (isMobile() ? " pdf-viewer--mobile" : "");
-                    content.innerHTML = getPdfViewerHTML();
+                    content.innerHTML = getPdfViewerHTML({maximize: false});
                     content.setAttribute("data-prevent-swipe", "true");
                     this.element.replaceChildren(content);
                     bindPdfTheme(content);

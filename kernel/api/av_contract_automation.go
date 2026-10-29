@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -76,11 +80,15 @@ func toContractAVAutomationBlockSource(source *av.AutomationBlockSource) *apicon
 		return nil
 	}
 	return &apicontract.AVAutomationBlockSource{NotebookIDs: source.NotebookIDs, DocumentIDs: source.DocumentIDs,
-		TagMatch: source.TagMatch, TagTarget: source.TagTarget, AttributeMatch: source.AttributeMatch,
+		DocumentDepth:            source.DocumentDepth,
+		IncludeSelectedDocuments: source.IncludeSelectedDocuments,
+		ReferenceID:              source.ReferenceID,
+		TagMatch:                 source.TagMatch, TagTarget: source.TagTarget, AttributeMatch: source.AttributeMatch,
 		Types: source.Types, Tags: source.Tags, Attributes: avContractSlice(source.Attributes, func(attr *av.AutomationBlockAttribute) *apicontract.AVAutomationBlockAttribute {
 			if attr == nil {
 				return nil
 			}
-			return &apicontract.AVAutomationBlockAttribute{Name: attr.Name, Operator: attr.Operator, Value: attr.Value}
+			return &apicontract.AVAutomationBlockAttribute{Name: attr.Name, NameOperator: attr.NameOperator,
+				Operator: attr.Operator, Value: attr.Value}
 		})}
 }

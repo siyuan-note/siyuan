@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
@@ -38,6 +26,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
 	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -57,7 +46,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	bindClientEvent(p, rt, client)
 
-	lo.Must0(ObjectFreeze(rt, client))
+	lo.Must0(gojaext.Freeze(rt, client))
 
 	lo.Must0(siyuan.Set("client", client))
 	return
@@ -491,7 +480,7 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 			argErr = fmt.Errorf("path must start with /")
 		}
 		if argErr == nil {
-			if proto := call.Argument(1); isJsValueNotNull(proto) {
+			if proto := call.Argument(1); gojaext.IsValueNotNull(proto) {
 				if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
 					if arr, ok := proto.Export().([]any); ok {
 						for _, v := range arr {
@@ -691,7 +680,7 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 
 				var messageData []byte
 				var opcode gws.Opcode
-				if data := sendCall.Argument(0); isJsValueNotNull(data) {
+				if data := sendCall.Argument(0); gojaext.IsValueNotNull(data) {
 					if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
 						opcode = gws.OpcodeBinary
 						b := arrayBuffer.Bytes()
@@ -756,7 +745,7 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 				pingPromise, pingResolve, pingReject := rt.NewPromise()
 
 				var pingData string
-				if isJsValueNotNull(pingCall.Argument(0)) {
+				if gojaext.IsValueNotNull(pingCall.Argument(0)) {
 					pingData = pingCall.Argument(0).String()
 				}
 
@@ -789,7 +778,7 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 				pongPromise, pongResolve, pongReject := rt.NewPromise()
 
 				var pongData string
-				if isJsValueNotNull(pongCall.Argument(0)) {
+				if gojaext.IsValueNotNull(pongCall.Argument(0)) {
 					pongData = pongCall.Argument(0).String()
 				}
 
@@ -823,10 +812,10 @@ func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 
 				code := uint16(1000)
 				var reason []byte
-				if isJsValueNotNull(closeCall.Argument(0)) {
+				if gojaext.IsValueNotNull(closeCall.Argument(0)) {
 					code = uint16(closeCall.Argument(0).ToInteger())
 				}
-				if isJsValueNotNull(closeCall.Argument(1)) {
+				if gojaext.IsValueNotNull(closeCall.Argument(1)) {
 					reason = []byte(closeCall.Argument(1).String())
 				}
 
@@ -1094,20 +1083,20 @@ func parseClientFetchRequest(call goja.FunctionCall, rt *goja.Runtime) (clientFe
 		argErr = fmt.Errorf("path must start with /")
 	}
 	if argErr == nil {
-		if init := call.Argument(1); isJsValueNotNull(init) {
+		if init := call.Argument(1); gojaext.IsValueNotNull(init) {
 			if initObj := init.ToObject(rt); initObj != nil {
 				if m := initObj.Get("method"); goja.IsString(m) {
 					method = m.String()
 				}
 
-				if h := initObj.Get("headers"); isJsValueNotNull(h) {
+				if h := initObj.Get("headers"); gojaext.IsValueNotNull(h) {
 					if exportErr := rt.ExportTo(h, &headers); exportErr != nil {
 						argErr = fmt.Errorf("failed to export headers: %w", exportErr)
 					}
 				}
 
 				if argErr == nil {
-					if b := initObj.Get("body"); isJsValueNotNull(b) {
+					if b := initObj.Get("body"); gojaext.IsValueNotNull(b) {
 						if goja.IsString(b) {
 							bodyString = new(b.String())
 						} else if formData, ok := formdata.StateOf(b); ok {
@@ -1126,13 +1115,13 @@ func parseClientFetchRequest(call goja.FunctionCall, rt *goja.Runtime) (clientFe
 				}
 
 				if argErr == nil {
-					if t := initObj.Get("timeout"); isJsValueNotNull(t) {
+					if t := initObj.Get("timeout"); gojaext.IsValueNotNull(t) {
 						timeout, argErr = fetchTimeoutOf(t)
 					}
 				}
 
 				if argErr == nil {
-					if s := initObj.Get("signal"); isJsValueNotNull(s) {
+					if s := initObj.Get("signal"); gojaext.IsValueNotNull(s) {
 						signal, argErr = abort.SignalOf(rt, s, "signal")
 					}
 				}

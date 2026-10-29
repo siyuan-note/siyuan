@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -101,7 +101,7 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 		} else {
 			resolvedBoxID := boxID
 			if resolvedBoxID == "" {
-				resolvedBoxID = ExtractBoxIDFromAssetsPath(absPath)
+				resolvedBoxID = util.BoxIDFromDataPath(absPath)
 			}
 			root, rootErr := ResolveAssetPathWithMissingLeaf(filepath.Join(util.DataDir, resolvedBoxID, "assets"))
 			resolved, resolveErr := ResolveAssetPathWithMissingLeaf(absPath)
@@ -127,7 +127,7 @@ func deferredAssetPathFromFiles(relativePath, boxID string, includeEncrypted boo
 
 // ensureReadableAssetLocal 先检查加密笔记本准入，再下载原始密文；实际读取仍须认证解密。
 func ensureReadableAssetLocal(absPath string) error {
-	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	if boxID != "" && IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return errors.New(Conf.Language(314))
 	}
@@ -275,12 +275,19 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			avBoxID = tree.Box
 		}
 		avIDs := hashset.New()
+		var relationErr error
 		treenode.WalkWithInlineTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if entering && node.Type == ast.NodeAttributeView && node.AttributeViewID != "" {
-				walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
+				relationErr = walkRelationAvs(node.AttributeViewID, avBoxID, avIDs)
+				if relationErr != nil {
+					return ast.WalkStop
+				}
 			}
 			return ast.WalkContinue
 		})
+		if relationErr != nil {
+			return relationErr
+		}
 		for _, id := range avIDs.Values() {
 			attrView, parseErr := av.ParseAttributeViewInBox(id.(string), avBoxID)
 			if parseErr != nil {

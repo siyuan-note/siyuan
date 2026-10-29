@@ -5,11 +5,96 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import type {AVAttributeViewData} from "../../../types/api";
+import type {AVAttributeViewData, AVAutomationBlockSourceInput} from "../../../types/api";
 
 const compiled = transpileModule(readFileSync("src/protyle/render/av/automation.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
 }).outputText;
+
+test("collection autosave versions document depth, attribute names, self exclusion and references with independent undo snapshots", async () => {
+    const transactions: Array<{perform: IOperation[], undo: IOperation[]}> = [];
+    let source: AVAutomationBlockSourceInput;
+    let save: () => void;
+    const child = {innerHTML: "", textContent: "", checked: true, classList: {toggle() {}},
+        querySelectorAll: (): HTMLElement[] => [], addEventListener() {}};
+    const body = {...child, isConnected: true, querySelector: () => child};
+    const panel = {isConnected: true, addEventListener() {}, querySelector: () => body};
+    const menu = {innerHTML: "", classList: {add() {}, remove() {}}, addEventListener() {}, querySelector: () => panel};
+    const database: Pick<AVAttributeViewData, "id" | "keyValues" | "automations"> = {id: "database", keyValues: [], automations: {spec: 1, rules: [{
+        id: "rule", name: "Collect", enabled: true, trigger: "block", blockSource: {documentIDs: ["doc"]},
+        actions: [{type: "collect", target: "current", fields: {}}],
+    }]}};
+    const methods = {} as typeof import("./automation");
+    runInNewContext(compiled, {
+        exports: methods, window: {siyuan: {config: {}, languages: {}}},
+        require: (name: string) => name === "./capabilities" ? capabilities : (({
+            "./blockCollection": {collectionSourceIncomplete: () => false,
+                mountBlockCollectionSource: (_host: HTMLElement, value: AVAutomationBlockSourceInput, _protyle: IProtyle, persist: () => void) => {
+                    source = value; save = persist;
+                }},
+            "../../../util/escape": {escapeAttr: String, escapeHtml: String},
+            "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {av: database}})},
+            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => transactions.push({perform, undo})},
+        })[name] || {}),
+    });
+    await methods.openAutomationMenu({protyle: {options: {}} as IProtyle,
+        blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement,
+        avID: "database", menuElement: menu as unknown as HTMLElement, onResize() {}});
+    assert.equal(transactions.length, 0);
+    source.documentDepth = 0;
+    save();
+    const first = JSON.parse(JSON.stringify(transactions[0]));
+    assert.equal(first.perform[0].data.spec, 5);
+    assert.equal(first.perform[0].data.rules[0].blockSource.documentDepth, 0);
+    assert.equal(first.undo[0].data.spec, 1);
+    assert.equal(first.undo[0].data.rules[0].blockSource.documentDepth, undefined);
+    source.documentDepth = 2;
+    save();
+    assert.deepEqual(JSON.parse(JSON.stringify(transactions[1].undo)), first.perform);
+    delete source.documentDepth;
+    save();
+    const last = JSON.parse(JSON.stringify(transactions[2].perform[0].data));
+    assert.equal(last.spec, 5);
+    assert.equal(last.rules[0].blockSource.documentDepth, undefined);
+    assert.equal(last.rules[0].enabled, true);
+    assert.equal(database.automations.spec, 1);
+    source.attributes = [{name: "dailynote", nameOperator: "contains", operator: "exists"}];
+    save();
+    const named = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(named.perform[0].data.spec, 6);
+    assert.equal(named.perform[0].data.rules[0].blockSource.attributes[0].nameOperator, "contains");
+    assert.equal(named.undo[0].data.spec, 5);
+    source.attributes[0] = {name: "^custom-dailynote-[0-9]{8}$", nameOperator: "regex", operator: "notExists"};
+    save();
+    assert.equal(JSON.parse(JSON.stringify(transactions.at(-1).perform[0].data)).spec, 6);
+    source.attributes = [];
+    save();
+    assert.equal(JSON.parse(JSON.stringify(transactions.at(-1).perform[0].data)).spec, 6);
+    source.includeSelectedDocuments = false;
+    save();
+    const excluded = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(excluded.perform[0].data.spec, 7);
+    assert.equal(excluded.perform[0].data.rules[0].blockSource.includeSelectedDocuments, false);
+    assert.equal(excluded.undo[0].data.spec, 6);
+    assert.equal(excluded.undo[0].data.rules[0].blockSource.includeSelectedDocuments, undefined);
+    delete source.includeSelectedDocuments;
+    save();
+    const included = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(included.perform[0].data.spec, 7);
+    assert.equal(included.perform[0].data.rules[0].blockSource.includeSelectedDocuments, undefined);
+    assert.deepEqual(included.undo, excluded.perform);
+    source.referenceID = "20261026000000-target1";
+    save();
+    const referenced = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(referenced.perform[0].data.spec, 8);
+    assert.equal(referenced.perform[0].data.rules[0].blockSource.referenceID, source.referenceID);
+    assert.deepEqual(referenced.undo, included.perform);
+    delete source.referenceID;
+    save();
+    const cleared = JSON.parse(JSON.stringify(transactions.at(-1)));
+    assert.equal(cleared.perform[0].data.spec, 8);
+    assert.equal(cleared.perform[0].data.rules[0].blockSource.referenceID, undefined);
+});
 
 test("automation settings reject readonly, publishing and historical editors before fetching data", async () => {
     for (const mode of ["disabled", "readonly", "publish", "created", "snapshot"]) {
@@ -172,7 +257,8 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement, avID: "source",
         menuElement: menu as unknown as HTMLElement, onResize() {}});
     assert.match(body.innerHTML, /data-action="rules"/);
-    assert.doesNotMatch(body.innerHTML, /data-name/);
+    assert.match(body.innerHTML, /data-action="rename-rule"/);
+    assert.doesNotMatch(body.innerHTML, /data-rule-name-input/);
     assert.match(body.innerHTML, /data-trigger/);
     assert.match(list.innerHTML, /data-action="add-field"/);
     assert.equal(transactions.length, 0);

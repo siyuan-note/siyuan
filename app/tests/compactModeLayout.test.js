@@ -19,7 +19,7 @@ const browserCases = ({css, desktop, community}) => {
     document.body.style.fontSize = "14px";
     const item = '<li class="b3-list-item"><span class="b3-list-item__text">Document title</span></li>';
     document.body.innerHTML = `
-        <div class="toolbar fn__flex"><div id="drag" class="fn__flex-1">SiYuan</div>
+        <div id="toolbar" class="toolbar fn__flex"><div id="drag" class="fn__flex-1">SiYuan</div>
             <div class="toolbar__item toolbar__item--close"><svg><use href="#iconClose"></use></svg></div></div>
         <div class="dock" id="dockLeft"><span class="dock__item"><svg><use href="#iconFiles"></use></svg></span></div>
         <div class="layout__dockl"><div class="block__icons">Files</div><ul class="b3-list" id="navigation">${item}</ul></div>
@@ -60,6 +60,25 @@ const browserCases = ({css, desktop, community}) => {
     const number = (selector, property) => parseFloat(getComputedStyle(find(selector))[property]);
     const near = (actual, expected, label) => check.ok(Math.abs(actual - expected) < 1,
         `${label}: ${actual} / ${expected}`);
+    const checkDialogAlignment = padding => {
+        const header = find(".b3-dialog__header");
+        const content = document.createRange();
+        content.selectNodeContents(find(".b3-dialog__content"));
+        for (const title of ["Dialog title", "📚 Dialog title"]) {
+            header.textContent = title;
+            const text = document.createRange();
+            text.selectNodeContents(header);
+            near(text.getBoundingClientRect().left, content.getBoundingClientRect().left,
+                `${title} aligns with dialog content`);
+            near(number(".b3-dialog__header", "paddingLeft"), padding, "dialog title left padding");
+            near(number(".b3-dialog__header", "paddingRight"), padding, "dialog title right padding");
+        }
+        for (const selector of [".b3-dialog__content", ".b3-dialog__action"]) {
+            near(number(selector, "paddingLeft"), padding, `${selector} left padding`);
+            near(number(selector, "paddingRight"), padding, `${selector} right padding`);
+        }
+        header.textContent = "Dialog title";
+    };
     const settle = () => document.getAnimations().filter(animation => animation instanceof CSSTransition)
         .forEach(animation => animation.finish());
     const checkTabEdge = () => {
@@ -87,6 +106,7 @@ const browserCases = ({css, desktop, community}) => {
     ].map(([key, selector]) => [key, {height: height(selector), font: getComputedStyle(find(selector)).fontSize}]));
     const normal = snapshot();
     if (desktop && !community) {
+        checkDialogAlignment(16);
         checkTabEdge();
         for (const [key, expected] of Object.entries({toolbar: 32, tabs: 42, panel: 42, breadcrumb: 42,
             list: 28, menu: 28, dialog: 43, status: 32})) {
@@ -105,6 +125,7 @@ const browserCases = ({css, desktop, community}) => {
     }
     for (const key of Object.keys(normal)) check.equal(compact[key].font, normal[key].font, `${key} keeps its font size`);
     if (!community) {
+        checkDialogAlignment(16);
         checkTabEdge();
         for (const key of ["toolbar", "tabs", "panel", "breadcrumb", "list", "menu", "dialog", "status"]) {
             check.ok(compact[key].height < normal[key].height, `${key} becomes smaller: ${JSON.stringify({normal, compact})}`);
@@ -120,14 +141,48 @@ const browserCases = ({css, desktop, community}) => {
         }
         near(height("#statusHelp svg"), 15.5, "status icon size is preserved");
         near(number(".status__counter", "fontSize"), 12, "status text size is preserved");
+        for (const platform of ["android", "harmony", "ios"]) {
+            document.body.classList.add(`body--${platform}`);
+            check.deepEqual(snapshot(), compact, `${platform} desktop interface uses compact density`);
+            document.body.classList.remove(`body--${platform}`);
+        }
+        document.body.classList.add("body--ios");
         document.documentElement.setAttribute("data-ios-window-controls", "");
+        document.documentElement.style.setProperty("--ios-window-controls-left", "80px");
+        document.documentElement.style.setProperty("--ios-window-controls-right", "60px");
+        document.documentElement.style.setProperty("--ios-window-controls-height", "50px");
+        document.documentElement.style.setProperty("--ios-window-safe-top", "24px");
         document.documentElement.style.setProperty("--ios-window-safe-bottom", "20px");
+        near(height("#toolbar"), 56, "separate iOS toolbar retains its safe top area");
+        near(number("#toolbar", "paddingTop"), 24, "iOS safe top padding");
+        document.documentElement.style.setProperty("--ios-window-safe-top", "0px");
+        near(height("#toolbar"), 50, "separate iOS toolbar retains the native control height");
+        document.documentElement.style.setProperty("--ios-window-safe-top", "24px");
+        for (const density of ["compact", "normal"]) {
+            if (density === "normal") document.documentElement.removeAttribute("data-ui-density");
+            document.body.classList.add("body--toolbar-hide");
+            settle();
+            const expected = density === "compact" ? 34 : 42;
+            near(height("#toolbar"), expected, `${density} fused iOS toolbar height`);
+            near(height("#tabs"), expected, `${density} fused iOS tabs align`);
+            near(number(".layout__dockl", "marginTop"), expected, `${density} iOS side panel offset`);
+            near(number("#dockLeft", "marginTop"), expected, `${density} iOS dock offset`);
+            near(number("#toolbar", "paddingLeft"), 85, `${density} native left controls remain reserved`);
+            near(number("#toolbar", "paddingRight"), 65, `${density} native right controls remain reserved`);
+            near(number("#toolbar", "paddingTop"), 0, `${density} fused toolbar keeps its vertical baseline`);
+            checkTabEdge();
+            document.body.classList.remove("body--toolbar-hide");
+        }
+        document.documentElement.setAttribute("data-ui-density", "compact");
         near(height("#status"), 48, "compact status bar retains the iOS safe area");
         document.documentElement.removeAttribute("data-ui-density");
         near(height("#status"), 52, "normal status bar retains the iOS safe area");
         document.documentElement.setAttribute("data-ui-density", "compact");
         document.documentElement.removeAttribute("data-ios-window-controls");
-        document.documentElement.style.removeProperty("--ios-window-safe-bottom");
+        for (const name of ["controls-left", "controls-right", "controls-height", "safe-top", "safe-bottom"]) {
+            document.documentElement.style.removeProperty(`--ios-window-${name}`);
+        }
+        document.body.classList.remove("body--ios");
         near(compact.panel.height, 34, "panel height");
         near(compact.list.height, 24, "list height");
         near(compact.menu.height, 26, "menu height");

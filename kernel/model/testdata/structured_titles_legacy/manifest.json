@@ -1,0 +1,52 @@
+{
+  "commit": "335d16ddc182606864d1b5b89c07f411c8a78636",
+  "documents": [
+    {
+      "notebook": "20261022000000-normal1",
+      "id": "20261023180037-3dh65i9",
+      "parentID": "",
+      "path": "/20261023180037-3dh65i9.sy",
+      "title": "Legacy ordinary",
+      "encrypted": false
+    },
+    {
+      "notebook": "20261022000000-normal1",
+      "id": "20261023180037-h6el7k4",
+      "parentID": "20261023180037-3dh65i9",
+      "path": "/20261023180037-3dh65i9/20261023180037-h6el7k4.sy",
+      "title": "Literal ／ %2F **text** 😀",
+      "encrypted": false
+    },
+    {
+      "notebook": "20261023180038-mbrj58v",
+      "id": "20261023180038-pwkjtsl",
+      "parentID": "",
+      "path": "/20261023180038-pwkjtsl.sy",
+      "title": "Private legacy",
+      "encrypted": true
+    },
+    {
+      "notebook": "20261023180038-mbrj58v",
+      "id": "20261023180038-h60kzb9",
+      "parentID": "20261023180038-pwkjtsl",
+      "path": "/20261023180038-pwkjtsl/20261023180038-h60kzb9.sy",
+      "title": "Private literal ／ %2F 😀",
+      "encrypted": true
+    }
+  ],
+  "password": "legacy-title-fixture-password",
+  "tag": "v3.8.9-alpha.4",
+  "sha256": {
+    "data/.siyuan/data-crypto-backup.json": "bc432727370cb113c5fde04a8d9430db53ea563f621d0adac15fa07b0854b0e1",
+    "data/.siyuan/indexignore": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/.siyuan/syncignore": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/20261022000000-normal1/.siyuan/conf.json": "560e724c45888a421b0f6bba0b792a1dbcf1d5ec99c26434499e23d7c161d602",
+    "data/20261022000000-normal1/20261023180037-3dh65i9/20261023180037-h6el7k4.sy": "b76cc8888ab7d8587e71b9b74541a8f2ee5cd73ffc4d18cbc850bc1c8b6ce278",
+    "data/20261022000000-normal1/20261023180037-3dh65i9.sy": "c163b651b5cbb8752c80b6bfb90764f58129bcd1012f21229f2b1d4e7368a32a",
+    "data/20261023180038-mbrj58v/.siyuan/conf.json": "b4f8aafbc343ecb0a89d2667cfdc967b6abfeb77cba4472501a3b586765ad789",
+    "data/20261023180038-mbrj58v/.siyuan/notebook-crypto-backup.json": "834bb8fe59b278855be053d565c015b078acbd023299336a7953bace48b72372",
+    "data/20261023180038-mbrj58v/20261023180038-pwkjtsl/20261023180038-h60kzb9.sy": "c3af4ee3c72daf10b3805e01d8c02ed4c2ff6a69d6d7f6f691423f3fff75575e",
+    "data/20261023180038-mbrj58v/20261023180038-pwkjtsl.sy": "4a12a2adfab616fdb6b96a02a2a443adea4d3a4dfc300dfe159c427020e9bab6",
+    "notebook-crypto.json": "af6fa2299127fb35f56a766b73d26e4535279ac3add6ca6253c17364a5f0e24a"
+  }
+}

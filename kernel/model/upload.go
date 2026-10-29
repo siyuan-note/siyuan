@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -376,7 +364,7 @@ func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, messag
 			return
 		}
 		// assetsDirPath 可能指向加密 box（调用方未传 id），反查 boxID 让文件名脱敏和内容加密生效
-		if pathBox := ExtractBoxIDFromAssetsPath(assetsDirPath); pathBox != "" && IsEncryptedBox(pathBox) {
+		if pathBox := util.BoxIDFromDataPath(assetsDirPath); pathBox != "" && IsEncryptedBox(pathBox) {
 			uploadBoxID = pathBox
 			boxAssetsDir := filepath.Join(util.DataDir, pathBox, "assets")
 			if rel, relErr := filepath.Rel(boxAssetsDir, assetsDirPath); relErr == nil && rel != ".." &&
@@ -595,7 +583,7 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 // 非加密笔记本按 reader 直接写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
 func writeAssetFile(writePath string, src io.Reader, boxID, originalName string) (err error) {
 	// 从 writePath 反查真实 boxID，与传入 boxID 交叉校验
-	pathBoxID := ExtractBoxIDFromAssetsPath(writePath)
+	pathBoxID := util.BoxIDFromDataPath(writePath)
 	// 传入 boxID 与路径 box 都非空但不一致：路径指向另一个 box，拒绝（防跨 box 写入）
 	if boxID != "" && pathBoxID != "" && boxID != pathBoxID {
 		return fmt.Errorf("boxID mismatch: param=%s, path=%s", boxID, pathBoxID)

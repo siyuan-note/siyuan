@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package av
 
@@ -99,25 +87,25 @@ func Calc(viewable Viewable, attrView *AttributeView) {
 func calcField(collection Collection, field Field, fieldIndex int, attrView *AttributeView) {
 	switch field.GetType() {
 	case KeyTypeBlock:
-		calcFieldBlock(collection, field, fieldIndex)
+		calcFieldByScalarContent(collection, field, fieldIndex, countBlockValues, countBlockUniqueValues)
 	case KeyTypeText:
-		calcFieldText(collection, field, fieldIndex)
+		calcFieldByScalarContent(collection, field, fieldIndex, countTextValues, countTextUniqueValues)
+	case KeyTypeURL:
+		calcFieldByScalarContent(collection, field, fieldIndex, countURLValues, countURLUniqueValues)
+	case KeyTypeEmail:
+		calcFieldByScalarContent(collection, field, fieldIndex, countEmailValues, countEmailUniqueValues)
+	case KeyTypePhone:
+		calcFieldByScalarContent(collection, field, fieldIndex, countPhoneValues, countPhoneUniqueValues)
+	case KeyTypeSelect:
+		calcFieldByScalarContent(collection, field, fieldIndex, countSelectValues, countSelectUniqueValues)
 	case KeyTypeNumber:
 		calcFieldNumber(collection, field, fieldIndex)
 	case KeyTypeDate:
 		calcFieldDate(collection, field, fieldIndex)
-	case KeyTypeSelect:
-		calcFieldSelect(collection, field, fieldIndex)
 	case KeyTypeMSelect:
 		calcFieldMSelect(collection, field, fieldIndex)
-	case KeyTypeURL:
-		calcFieldURL(collection, field, fieldIndex)
-	case KeyTypeEmail:
-		calcFieldEmail(collection, field, fieldIndex)
 	case KeyTypeLocation:
 		calcFieldLocation(collection, field, fieldIndex)
-	case KeyTypePhone:
-		calcFieldPhone(collection, field, fieldIndex)
 	case KeyTypeMAsset:
 		calcFieldMAsset(collection, field, fieldIndex)
 	case KeyTypeTemplate:
@@ -491,93 +479,6 @@ func calcFieldMSelect(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func calcFieldSelect(collection Collection, field Field, fieldIndex int) {
-	calc := field.GetCalc()
-	switch calc.Operator {
-	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].MSelect && 0 < len(values[fieldIndex].MSelect) && nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
-				countValues++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
-	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].MSelect && 0 < len(values[fieldIndex].MSelect) && nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
-				if _, ok := uniqueValues[values[fieldIndex].MSelect[0].Content]; !ok {
-					uniqueValues[values[fieldIndex].MSelect[0].Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
-	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].MSelect || 1 > len(values[fieldIndex].MSelect) || nil == values[fieldIndex].MSelect[0] || "" == values[fieldIndex].MSelect[0].Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].MSelect && 0 < len(values[fieldIndex].MSelect) && nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
-	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].MSelect || 1 > len(values[fieldIndex].MSelect) || nil == values[fieldIndex].MSelect[0] || "" == values[fieldIndex].MSelect[0].Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].MSelect && 0 < len(values[fieldIndex].MSelect) && nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].MSelect && 0 < len(values[fieldIndex].MSelect) && nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
-				if _, ok := uniqueValues[values[fieldIndex].MSelect[0].Content]; !ok {
-					uniqueValues[values[fieldIndex].MSelect[0].Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorTemplate:
-		calcFieldByTemplate(collection, field, fieldIndex)
-	}
-}
-
 func calcFieldDate(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
@@ -891,435 +792,181 @@ func calcFieldNumber(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func calcFieldText(collection Collection, field Field, fieldIndex int) {
-	calc := field.GetCalc()
-	switch calc.Operator {
-	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
-				countValues++
-			}
+// calcScalarContent 返回单值字段用于统计的内容，空串表示该条目没有值。
+// 单值内容字段都只有一处内容来源，集中在这里分派，新增类型只需要在这里登记。
+// countBlockValues 统计块引用字段有内容的条目数。
+func countBlockValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
+			count++
 		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
-	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
-				if !uniqueValues[values[fieldIndex].Text.Content] {
-					uniqueValues[values[fieldIndex].Text.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
-	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Text || "" == values[fieldIndex].Text.Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
-	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Text || "" == values[fieldIndex].Text.Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
-				if !uniqueValues[values[fieldIndex].Text.Content] {
-					uniqueValues[values[fieldIndex].Text.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorTemplate:
-		calcFieldByTemplate(collection, field, fieldIndex)
 	}
+	return count
 }
 
-func calcFieldURL(collection Collection, field Field, fieldIndex int) {
-	calc := field.GetCalc()
-	switch calc.Operator {
-	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
-				countValues++
-			}
+// countBlockUniqueValues 统计块引用字段不同内容的个数。
+func countBlockUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
+			unique[values[fieldIndex].Block.Content] = struct{}{}
 		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
-	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
-				if !uniqueValues[values[fieldIndex].URL.Content] {
-					uniqueValues[values[fieldIndex].URL.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
-	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].URL || "" == values[fieldIndex].URL.Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
-	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].URL || "" == values[fieldIndex].URL.Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
-				if !uniqueValues[values[fieldIndex].URL.Content] {
-					uniqueValues[values[fieldIndex].URL.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorTemplate:
-		calcFieldByTemplate(collection, field, fieldIndex)
 	}
+	return len(unique)
 }
 
-func calcFieldEmail(collection Collection, field Field, fieldIndex int) {
-	calc := field.GetCalc()
-	switch calc.Operator {
-	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
-				countValues++
-			}
+// countTextValues 统计文本字段有内容的条目数。
+func countTextValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
+			count++
 		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
-	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
-				if !uniqueValues[values[fieldIndex].Email.Content] {
-					uniqueValues[values[fieldIndex].Email.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
-	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Email || "" == values[fieldIndex].Email.Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
-	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Email || "" == values[fieldIndex].Email.Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
-				if !uniqueValues[values[fieldIndex].Email.Content] {
-					uniqueValues[values[fieldIndex].Email.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorTemplate:
-		calcFieldByTemplate(collection, field, fieldIndex)
 	}
+	return count
 }
 
-func calcFieldPhone(collection Collection, field Field, fieldIndex int) {
-	calc := field.GetCalc()
-	switch calc.Operator {
-	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
-				countValues++
-			}
+// countTextUniqueValues 统计文本字段不同内容的个数。
+func countTextUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Text && "" != values[fieldIndex].Text.Content {
+			unique[values[fieldIndex].Text.Content] = struct{}{}
 		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
-	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
-				if !uniqueValues[values[fieldIndex].Phone.Content] {
-					uniqueValues[values[fieldIndex].Phone.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
-	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Phone || "" == values[fieldIndex].Phone.Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
-	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Phone || "" == values[fieldIndex].Phone.Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
-				if !uniqueValues[values[fieldIndex].Phone.Content] {
-					uniqueValues[values[fieldIndex].Phone.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
-		}
-	case CalcOperatorTemplate:
-		calcFieldByTemplate(collection, field, fieldIndex)
 	}
+	return len(unique)
 }
 
-func calcFieldBlock(collection Collection, field Field, fieldIndex int) {
+// countURLValues 统计链接字段有内容的条目数。
+func countURLValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
+			count++
+		}
+	}
+	return count
+}
+
+// countURLUniqueValues 统计链接字段不同内容的个数。
+func countURLUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].URL && "" != values[fieldIndex].URL.Content {
+			unique[values[fieldIndex].URL.Content] = struct{}{}
+		}
+	}
+	return len(unique)
+}
+
+// countEmailValues 统计邮箱字段有内容的条目数。
+func countEmailValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
+			count++
+		}
+	}
+	return count
+}
+
+// countEmailUniqueValues 统计邮箱字段不同内容的个数。
+func countEmailUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Email && "" != values[fieldIndex].Email.Content {
+			unique[values[fieldIndex].Email.Content] = struct{}{}
+		}
+	}
+	return len(unique)
+}
+
+// countPhoneValues 统计电话字段有内容的条目数。
+func countPhoneValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
+			count++
+		}
+	}
+	return count
+}
+
+// countPhoneUniqueValues 统计电话字段不同内容的个数。
+func countPhoneUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if fieldIndex < len(values) && nil != values[fieldIndex] && nil != values[fieldIndex].Phone && "" != values[fieldIndex].Phone.Content {
+			unique[values[fieldIndex].Phone.Content] = struct{}{}
+		}
+	}
+	return len(unique)
+}
+
+// countSelectValues 统计单选字段有内容的条目数，内容取第一个选项。
+func countSelectValues(items []Item, fieldIndex int) int {
+	count := 0
+	for _, item := range items {
+		values := item.GetValues()
+		if 0 < len(values) && fieldIndex < len(values) && nil != values[fieldIndex] && 0 < len(values[fieldIndex].MSelect) &&
+			nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
+			count++
+		}
+	}
+	return count
+}
+
+// countSelectUniqueValues 统计单选字段不同内容的个数，内容取第一个选项。
+func countSelectUniqueValues(items []Item, fieldIndex int) int {
+	unique := map[string]struct{}{}
+	for _, item := range items {
+		values := item.GetValues()
+		if 0 < len(values) && fieldIndex < len(values) && nil != values[fieldIndex] && 0 < len(values[fieldIndex].MSelect) &&
+			nil != values[fieldIndex].MSelect[0] && "" != values[fieldIndex].MSelect[0].Content {
+			unique[values[fieldIndex].MSelect[0].Content] = struct{}{}
+		}
+	}
+	return len(unique)
+}
+
+// calcFieldByScalarContent 汇总单值内容字段。各类型的内容来源不同，由调用方给出计数函数，
+// 算子分派与占比分母在此统一；条目集合只取一次，避免占比算子重复构造条目列表。
+func calcFieldByScalarContent(collection Collection, field Field, fieldIndex int,
+	countValues, countUniqueValues func([]Item, int) int) {
 	calc := field.GetCalc()
+	items := collection.GetItems()
+	total := len(items)
 	switch calc.Operator {
 	case CalcOperatorCountAll:
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(collection.GetItems())), NumberFormatNone)}
-	case CalcOperatorCountValues:
-		countValues := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
-				countValues++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+		calc.Result = &Value{Number: NewFormattedValueNumber(float64(total), NumberFormatNone)}
+	case CalcOperatorCountValues, CalcOperatorCountNotEmpty:
+		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues(items, fieldIndex)), NumberFormatNone)}
 	case CalcOperatorCountUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
-				if !uniqueValues[values[fieldIndex].Block.Content] {
-					uniqueValues[values[fieldIndex].Block.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues(items, fieldIndex)), NumberFormatNone)}
 	case CalcOperatorCountEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Block || "" == values[fieldIndex].Block.Content {
-				countEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
-	case CalcOperatorCountNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
-				countNotEmpty++
-			}
-		}
-		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+		calc.Result = &Value{Number: NewFormattedValueNumber(float64(total-countValues(items, fieldIndex)), NumberFormatNone)}
 	case CalcOperatorPercentEmpty:
-		countEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil == values[fieldIndex] || nil == values[fieldIndex].Block || "" == values[fieldIndex].Block.Content {
-				countEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
+		if 0 < total {
+			calc.Result = &Value{Number: NewFormattedValueNumber(float64(total-countValues(items, fieldIndex))/float64(total), NumberFormatPercent)}
 		}
 	case CalcOperatorPercentNotEmpty:
-		countNotEmpty := 0
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
-				countNotEmpty++
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(collection.GetItems())), NumberFormatPercent)}
+		if 0 < total {
+			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues(items, fieldIndex))/float64(total), NumberFormatPercent)}
 		}
 	case CalcOperatorPercentUniqueValues:
-		countUniqueValues := 0
-		uniqueValues := map[string]bool{}
-		for _, item := range collection.GetItems() {
-			values := item.GetValues()
-			if nil != values[fieldIndex] && nil != values[fieldIndex].Block && "" != values[fieldIndex].Block.Content {
-				if !uniqueValues[values[fieldIndex].Block.Content] {
-					uniqueValues[values[fieldIndex].Block.Content] = true
-					countUniqueValues++
-				}
-			}
-		}
-		if 0 < len(collection.GetItems()) {
-			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
+		if 0 < total {
+			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues(items, fieldIndex))/float64(total), NumberFormatPercent)}
 		}
 	case CalcOperatorTemplate:
 		calcFieldByTemplate(collection, field, fieldIndex)

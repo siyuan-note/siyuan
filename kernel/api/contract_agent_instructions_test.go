@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -5,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -86,6 +91,71 @@ func TestAPIContractAIAgentInstructionsAuthorization(t *testing.T) {
 		}
 		if _, err := os.Stat(util.AgentInstructionsPath()); !os.IsNotExist(err) {
 			t.Fatalf("denied write touched file: %v", err)
+		}
+	}
+}
+
+func TestAPIContractAIAgentInstructionsLegacyMigration(t *testing.T) {
+	aiContractConfiguration(t)
+	model.Conf.Sync.Store(conf.NewSync())
+	legacy := util.LegacyAgentInstructionsPath()
+	if err := os.MkdirAll(filepath.Dir(legacy), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(legacy, []byte("legacy preferences\r\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	previousReadonly := util.ReadOnly
+	t.Cleanup(func() { util.ReadOnly = previousReadonly })
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator); c.Next() })
+	ServeAPI(engine)
+	call := func(name, body string, code int) apicontract.AIAgentInstructionsData {
+		t.Helper()
+		path := "/api/ai/agent/" + name
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(body)))
+		requireAPIContract(t, "POST", path, recorder)
+		var result struct {
+			Code int
+			Data apicontract.AIAgentInstructionsData
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != code {
+			t.Fatalf("%s: %s %v", name, recorder.Body.String(), err)
+		}
+		return result.Data
+	}
+	util.ReadOnly = true
+	read := call("getInstructions", "", 0)
+	if read.Content != "legacy preferences\r\n" || read.Revision == "missing" {
+		t.Fatalf("legacy read: %+v", read)
+	}
+	if _, err := os.Stat(util.AgentInstructionsPath()); !os.IsNotExist(err) {
+		t.Fatalf("read-only read migrated the file: %v", err)
+	}
+	body, _ := json.Marshal(apicontract.AIAgentInstructionsSaveRequest{Content: "edited", Revision: read.Revision})
+	call("setInstructions", string(body), -1)
+	if _, err := os.Stat(util.AgentInstructionsPath()); !os.IsNotExist(err) {
+		t.Fatalf("denied save migrated the file: %v", err)
+	}
+	util.ReadOnly = false
+	written := call("setInstructions", string(body), 0)
+	if written.Content != "edited" || call("getInstructions", "", 0) != written {
+		t.Fatalf("migrated save: %+v", written)
+	}
+	if _, err := os.Stat(legacy); !os.IsNotExist(err) {
+		t.Fatalf("legacy source remains: %v", err)
+	}
+	if err := os.WriteFile(legacy, []byte("old device update"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	call("getInstructions", "", -1)
+	body, _ = json.Marshal(apicontract.AIAgentInstructionsSaveRequest{Content: "replacement", Revision: written.Revision})
+	call("setInstructions", string(body), -1)
+	for path, want := range map[string]string{legacy: "old device update", util.AgentInstructionsPath(): "edited"} {
+		actual, err := os.ReadFile(path)
+		if err != nil || string(actual) != want {
+			t.Fatalf("conflict changed %s: %q %v", path, actual, err)
 		}
 	}
 }

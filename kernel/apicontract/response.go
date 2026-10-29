@@ -1,7 +1,12 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"mime"
 	"net/http"
@@ -185,6 +190,10 @@ func (e Endpoint[Request, Data]) WithHTTPStatus(response Response[Data], status 
 
 func Success[Data any](data Data) Response[Data] { return Response[Data]{data: data} }
 
+// SuccessWithoutData 返回不带数据的成功响应，data 序列化为 null。
+// 用于只做副作用、调用方不读取返回值的端点。
+func SuccessWithoutData[Data any]() Response[Data] { return Response[Data]{} }
+
 // SuccessWithMessage 保留成功响应中的提示，例如批量上传中部分文件未完成。
 func SuccessWithMessage[Data any](data Data, message string) Response[Data] {
 	return Response[Data]{data: data, msg: message}
@@ -203,6 +212,31 @@ func FailureWithTimeout[Data any](code int, msg string, milliseconds int) Respon
 	return Response[Data]{code: code, msg: msg, data: struct {
 		CloseTimeout int `json:"closeTimeout"`
 	}{milliseconds}}
+}
+
+// Rejection 是校验辅助函数产生的业务错误：线上错误码与消息。
+// 辅助函数返回它而不是往调用方持有的信封里写字段，校验只需判断，处理函数负责转成响应。
+type Rejection struct {
+	Code int
+	Msg  string
+}
+
+func (r *Rejection) Error() string { return r.Msg }
+
+// Reject 构造一次默认错误码 -1 的校验失败。
+func Reject(msg string) *Rejection { return &Rejection{Code: -1, Msg: msg} }
+
+// RejectWith 构造一次指定错误码的校验失败，用于 HTTP 状态码等既有约定。
+func RejectWith(code int, msg string) *Rejection { return &Rejection{Code: code, Msg: msg} }
+
+// FailureFrom 把校验错误转成失败响应，保留 Rejection 携带的错误码；
+// 其他错误按业务失败处理，使用 -1。
+func FailureFrom[Data any](err error) Response[Data] {
+	var rejection *Rejection
+	if errors.As(err, &rejection) {
+		return Failure[Data](rejection.Code, rejection.Msg)
+	}
+	return Failure[Data](-1, err.Error())
 }
 
 func (r Response[Data]) MarshalJSON() ([]byte, error) {

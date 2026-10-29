@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package av
 
 import (
@@ -27,22 +31,49 @@ type AutomationRule struct {
 	NotifyOnSuccess *bool                  `json:"notifyOnSuccess,omitempty"`
 }
 
-// AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。
+// AutomationBlockSource 的范围取并集，各类条件取交集；文档深度缺省不限，0 仅自身。
+// 所选文档自身缺省包含；显式关闭时跳过该文档及内部块，子文档仍按深度匹配。
 type AutomationBlockSource struct {
-	NotebookIDs    []string                    `json:"notebookIDs,omitempty"`
-	DocumentIDs    []string                    `json:"documentIDs,omitempty"`
-	Types          []string                    `json:"types,omitempty"`
-	Tags           []string                    `json:"tags,omitempty"`
-	Attributes     []*AutomationBlockAttribute `json:"attributes,omitempty"`
-	TagMatch       string                      `json:"tagMatch,omitempty"`
-	TagTarget      string                      `json:"tagTarget,omitempty"`
-	AttributeMatch string                      `json:"attributeMatch,omitempty"`
+	NotebookIDs              []string                    `json:"notebookIDs,omitempty"`
+	DocumentIDs              []string                    `json:"documentIDs,omitempty"`
+	DocumentDepth            *int                        `json:"documentDepth,omitempty"`
+	IncludeSelectedDocuments *bool                       `json:"includeSelectedDocuments,omitempty"`
+	Types                    []string                    `json:"types,omitempty"`
+	Tags                     []string                    `json:"tags,omitempty"`
+	ReferenceID              string                      `json:"referenceID,omitempty"`
+	Attributes               []*AutomationBlockAttribute `json:"attributes,omitempty"`
+	TagMatch                 string                      `json:"tagMatch,omitempty"`
+	TagTarget                string                      `json:"tagTarget,omitempty"`
+	AttributeMatch           string                      `json:"attributeMatch,omitempty"`
 }
 
 type AutomationBlockAttribute struct {
-	Name     string `json:"name"`
-	Operator string `json:"operator"`
-	Value    string `json:"value,omitempty"`
+	Name         string `json:"name"`
+	NameOperator string `json:"nameOperator,omitempty"`
+	Operator     string `json:"operator"`
+	Value        string `json:"value,omitempty"`
+}
+
+func (source *AutomationBlockSource) MatchesDocument(notebookID, documentID, documentPath string) bool {
+	if source == nil {
+		return false
+	}
+	if slices.Contains(source.NotebookIDs, notebookID) {
+		return true
+	}
+	for _, id := range source.DocumentIDs {
+		if documentID == id {
+			if source.IncludeSelectedDocuments == nil || *source.IncludeSelectedDocuments {
+				return true
+			}
+			continue
+		}
+		if _, suffix, found := strings.Cut(documentPath, "/"+id+"/"); found &&
+			(source.DocumentDepth == nil || strings.Count(suffix, "/")+1 <= *source.DocumentDepth) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsAutomationBlockType 校验主类型或主类型与子类型的组合，提示块允许自定义类型名称。
@@ -68,6 +99,20 @@ func IsAutomationBlockType(value string) bool {
 func (rule *AutomationRule) RequiredSpec() int {
 	ret := 1
 	if rule.BlockSource != nil {
+		if rule.BlockSource.ReferenceID != "" {
+			return 8
+		}
+		if rule.BlockSource.IncludeSelectedDocuments != nil && !*rule.BlockSource.IncludeSelectedDocuments {
+			return 7
+		}
+		for _, attr := range rule.BlockSource.Attributes {
+			if attr != nil && attr.NameOperator != "" && attr.NameOperator != "equals" {
+				return 6
+			}
+		}
+		if rule.BlockSource.DocumentDepth != nil {
+			return 5
+		}
 		if rule.BlockSource.TagTarget != "" {
 			return 4
 		}
@@ -97,7 +142,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 4 {
+	if config.Spec < 1 || config.Spec > 8 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

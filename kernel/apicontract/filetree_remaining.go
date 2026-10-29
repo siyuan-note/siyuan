@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 type FileTreeNotebookRequest struct {
@@ -85,7 +89,7 @@ type FileTreeCreateRequest struct {
 type FileTreeDailyNoteRequest struct {
 	Notebook string `json:"notebook"`
 	App      string `json:"app" api:"optional,nullable"`
-	// Date 为本地公历日期 YYYY-MM-DD；省略、空串或 null 时使用当天。
+	// Date 为本地公历日期 YYYY-MM-DD；省略、空串或 null 时按当天的命名及路径模板复用或创建，不按日期属性查找。
 	// 指定日期时复用同笔记本的日记日期属性，路径和正文模板中的 now 使用目标日期。
 	// 日期无效返回 -1；多个匹配优先选择模板路径对应的文档，否则按文档 ID 升序选择。
 	// 返回文档 ID，已有文档不重新应用正文模板；加密笔记本的响应保留解锁租约。
@@ -237,6 +241,7 @@ type FileTreeSortModeData struct {
 type FileTreeSearchDoc struct {
 	Path              string  `json:"path"`
 	HPath             string  `json:"hPath"`
+	Title             *string `json:"title,omitempty"`
 	Box               string  `json:"box"`
 	BoxIcon           string  `json:"boxIcon"`
 	Name              *string `json:"name,omitempty"`

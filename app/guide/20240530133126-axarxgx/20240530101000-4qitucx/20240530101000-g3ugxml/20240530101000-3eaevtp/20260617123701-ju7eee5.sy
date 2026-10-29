@@ -6,7 +6,7 @@
 		"id": "20260617123701-ju7eee5",
 		"title": "テーブル計算",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617123957-18l2dhx",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123957-f2rjl5x",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617123957-2ke0gnj",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -723,6 +723,43 @@
 						{
 							"Type": "NodeText",
 							"Data": "​ の要素数は列タイプによって異なります：空のセルは除外され、数値やテキストなどの単一値列では空でないセルごとに 1 つの値としてカウントされ、複数選択やアセットなどの複数値列は各オプションを個別にカウントします（ネイティブの「値をカウント」と同じ基準です）。"
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-d5ufpoy",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20261024161816-d5ufpoy",
+						"updated": "20261024161816"
+					},
+					"Children": [
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " には、フィールドを数値へ変換した結果が入ります。数値に変換できない空でないテキストなどは、0 として計算に含まれる場合があります。数値比較の例は数値列で使ってください。元のテキストや選択肢を比較する場合は "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".strings"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " または "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".raw"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " を使います。割合は 0 から 1 の値なので、パーセント形式で表示できます。"
 						}
 					]
 				}

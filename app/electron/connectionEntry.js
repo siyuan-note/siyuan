@@ -23,9 +23,16 @@
                 "utf8")).connectRemoteKernel;
         }
     };
-    button.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:1000;-webkit-app-region:no-drag;width:auto";
     button.addEventListener("click", () => ipcRenderer.send("siyuan-manage-connections", {lang: language()}));
     langSelect?.addEventListener("change", update);
     update();
-    document.body.append(button);
+    const crashActions = new URLSearchParams(location.search).get("crash") === "1" ?
+        document.querySelector(".crash-actions") : null;
+    if (crashActions) {
+        button.classList.add("b3-button--outline");
+        crashActions.append(button);
+    } else {
+        button.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:1000;-webkit-app-region:no-drag;width:auto";
+        document.body.append(button);
+    }
 })();

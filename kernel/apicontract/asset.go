@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -10,6 +14,11 @@ import (
 
 type AssetPathRequest struct {
 	Path string `json:"path"`
+}
+
+type UnusedAssetsRequest struct {
+	Keyword string `json:"keyword" api:"optional,nullable"`
+	All     bool   `json:"all" api:"optional,nullable"`
 }
 
 // EncryptedBoxAssetsRequest 只接受当前已解锁的加密笔记本，不回退到全局资源。
@@ -51,8 +60,9 @@ type AssetDocumentAssetsRequest struct {
 }
 
 type SetAssetAnnotationRequest struct {
-	Path string `json:"path"`
-	Data string `json:"data"`
+	Path     string  `json:"path"`
+	Data     string  `json:"data"`
+	BaseData *string `json:"baseData,omitempty" api:"optional"`
 }
 
 type AssetCloudUploadRequest struct {

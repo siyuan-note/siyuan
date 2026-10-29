@@ -175,51 +175,59 @@
 }
 
 .body--touch-resize {
-  // 扩大弹窗外侧的触摸把手，避免侵占内部按钮和滚动条。
-  .b3-dialog {
-    .resize__r {
-      width: 14px;
-      right: -14px;
-    }
+  // 扩大弹窗和块浮窗外侧的触摸把手，避免侵占内部按钮和滚动条。
+  .b3-dialog .resize__r,
+  .block__popover > .resize__r {
+    width: 14px;
+    right: -14px;
+  }
 
-    .resize__l {
-      width: 14px;
-      left: -14px;
-    }
+  .b3-dialog .resize__l,
+  .block__popover > .resize__l {
+    width: 14px;
+    left: -14px;
+  }
 
-    .resize__t {
-      height: 14px;
-      top: -14px;
-    }
+  .b3-dialog .resize__t,
+  .block__popover > .resize__t {
+    height: 14px;
+    top: -14px;
+  }
 
-    .resize__d {
-      height: 14px;
-      bottom: -14px;
-    }
+  .b3-dialog .resize__d,
+  .block__popover > .resize__d {
+    height: 14px;
+    bottom: -14px;
+  }
 
-    .resize__rd, .resize__ld, .resize__rt, .resize__lt {
-      width: 24px;
-      height: 24px;
-    }
+  .b3-dialog .resize__rd, .b3-dialog .resize__ld, .b3-dialog .resize__rt, .b3-dialog .resize__lt,
+  .block__popover > .resize__rd, .block__popover > .resize__ld,
+  .block__popover > .resize__rt, .block__popover > .resize__lt {
+    width: 24px;
+    height: 24px;
+  }
 
-    .resize__rd {
-      right: -16px;
-      bottom: -16px;
-    }
+  .b3-dialog .resize__rd,
+  .block__popover > .resize__rd {
+    right: -16px;
+    bottom: -16px;
+  }
 
-    .resize__ld {
-      left: -16px;
-      bottom: -16px;
-    }
+  .b3-dialog .resize__ld,
+  .block__popover > .resize__ld {
+    left: -16px;
+    bottom: -16px;
+  }
 
-    .resize__rt {
-      right: -16px;
-      top: -16px;
-    }
+  .b3-dialog .resize__rt,
+  .block__popover > .resize__rt {
+    right: -16px;
+    top: -16px;
+  }
 
-    .resize__lt {
-      left: -16px;
-      top: -16px;
-    }
+  .b3-dialog .resize__lt,
+  .block__popover > .resize__lt {
+    left: -16px;
+    top: -16px;
   }
 }

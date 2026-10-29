@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -12,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -27,18 +32,20 @@ func TestAPIContractPluginPublish(t *testing.T) {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, model.Conf = oldWorkspace, oldData, oldConfDir, oldConf
 	})
 	files := map[string]string{
-		"data/plugins/example/plugin.json":        `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt"],"data":["theme"]}}`,
-		"data/plugins/example/index.js":           "frontend",
-		"data/plugins/example/kernel.js":          "kernel secret",
-		"data/plugins/example/logo.txt":           "logo",
-		"data/plugins/example/private.json":       "secret",
-		"data/storage/petal/example/private.json": "private token",
-		"data/public/file.txt":                    "public",
-		"data/private.json":                       "private data root",
-		"conf/private.json":                       "conf secret",
-		"temp/private.json":                       "temp secret",
-		"repo/private.json":                       "repo secret",
-		"history/private.json":                    "history secret",
+		"data/plugins/example/plugin.json":                `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["logo.txt","credentials.json","resources/"],"data":["theme"]}}`,
+		"data/plugins/example/index.js":                   "frontend",
+		"data/plugins/example/kernel.js":                  "kernel secret",
+		"data/plugins/example/logo.txt":                   "logo",
+		"data/plugins/example/credentials.json":           "API_TOKEN=secret",
+		"data/plugins/example/resources/credentials.json": "API_TOKEN=nested-secret",
+		"data/plugins/example/private.json":               "secret",
+		"data/storage/petal/example/private.json":         "private token",
+		"data/public/file.txt":                            "public",
+		"data/private.json":                               "private data root",
+		"conf/private.json":                               "conf secret",
+		"temp/private.json":                               "temp secret",
+		"repo/private.json":                               "repo secret",
+		"history/private.json":                            "history secret",
 	}
 	for path, content := range files {
 		path = filepath.Join(util.WorkspaceDir, filepath.FromSlash(path))
@@ -109,13 +116,22 @@ func TestAPIContractPluginPublish(t *testing.T) {
 			t.Fatalf("allowed %s: %d %s", path, response.Code, response.Body)
 		}
 	}
-	for _, path := range []string{"data/plugins/example/kernel.js", "data/plugins/example/private.json", "data/storage/petal/example/private.json", "data/private.json", "conf/private.json", "temp/private.json", "repo/private.json", "history/private.json", "conf/plugin-publish/example.json", "data/public/../storage/petal/example/private.json", "data/plugins/example/%2e%2e/private.json"} {
+	for _, path := range []string{"data/plugins/example/kernel.js", "data/plugins/example/private.json", "data/plugins/example/credentials.json", "data/storage/petal/example/private.json", "data/private.json", "conf/private.json", "temp/private.json", "repo/private.json", "history/private.json", "conf/plugin-publish/example.json", "data/public/../storage/petal/example/private.json", "data/plugins/example/%2e%2e/private.json"} {
 		body, _ := json.Marshal(map[string]string{"path": path})
 		response := request(model.RoleReader, "/api/file/getFile", string(body))
 		if response.Code != 202 || code(response) != 403 {
 			t.Fatalf("denied %s: %d %s", path, response.Code, response.Body)
 		}
 	}
+	t.Run("short filename in declared directory", func(t *testing.T) {
+		path := filepath.Join(util.DataDir, "plugins", "example", "resources", "credentials.json")
+		short := filepath.Base(testutil.ShortPath(t, path))
+		body, _ := json.Marshal(map[string]string{"path": "data/plugins/example/resources/" + short})
+		response := request(model.RoleReader, "/api/file/getFile", string(body))
+		if response.Code != http.StatusAccepted || code(response) != http.StatusForbidden || strings.Contains(response.Body.String(), "nested-secret") {
+			t.Fatalf("sensitive plugin alias %s: %d %s", short, response.Code, response.Body)
+		}
+	})
 	response := request(model.RoleReader, "/api/petal/loadPetals", `{"frontend":"browser-desktop"}`)
 	if bytes.Contains(response.Body.Bytes(), []byte("kernel secret")) || !bytes.Contains(response.Body.Bytes(), []byte("frontend")) {
 		t.Fatal(response.Body)

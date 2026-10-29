@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -185,6 +189,7 @@ func collectGlobalBacklinks(query GlobalBacklinkQuery, accessible func(string) b
 			}
 		}
 	}
+	blocks = filterBacklinkDatabaseBlocks(blocks, query.Notebook, query.SourceFilter)
 	blocks = filterBacklinkSourcesInBox(blocks, definition.RootID, query.Notebook, query.SourceFilter)
 	byRoot := map[string]map[string]*Block{}
 	for _, block := range blocks {

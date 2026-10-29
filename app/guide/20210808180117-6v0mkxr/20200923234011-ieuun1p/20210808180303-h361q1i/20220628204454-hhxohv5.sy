@@ -6,7 +6,7 @@
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
 		"type": "doc",
-		"updated": "20260613191858"
+		"updated": "20261024161440"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628215200-ngjb7uu",
-				"updated": "20220628215200"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628215200-yi30jo7",
-				"updated": "20220628215227"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In order to record the content quickly, we often ignore some typographic details, such as the lack of spaces before and after inline codes or bolds, and the lack of spaces between Chinese and Western texts."
+					"Data": "Optimize typography adds spacing around inline elements and between CJK and Western text to make spacing consistent throughout a document."
 				}
 			]
 		},
@@ -43,12 +43,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628215200-o0bidjn",
-				"updated": "20220628215255"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "This will cause the content typography to look less refined, and there will be some visual distraction when browsing the content in the future. Of course, this is just our feeling, maybe this is not a problem, and even such a compact typesetting is needed in the first place."
+					"Data": "This operation changes document content. Use it when the spacing rules below suit your text; skip it when you need to preserve compact layouts or special spacing."
 				}
 			]
 		},

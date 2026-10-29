@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -13,12 +13,13 @@ import (
 	_ "time/tzdata"
 )
 
-// CalendarSettings 保存日历的字段绑定；浏览日期和月周切换由各编辑器独立维护。
+// CalendarSettings 保存日历的字段绑定和显示设置；浏览日期和月周切换由各编辑器独立维护。
 type CalendarSettings struct {
-	DateKeyID  string `json:"dateKeyID"`
-	ColorKeyID string `json:"colorKeyID"`
-	WeekStart  int    `json:"weekStart"`
-	RowLimit   int    `json:"rowLimit,omitempty"`
+	DateKeyID        string `json:"dateKeyID"`
+	ColorKeyID       string `json:"colorKeyID"`
+	WeekStart        int    `json:"weekStart"`
+	RowLimit         int    `json:"rowLimit,omitempty"`
+	DisplayFieldName bool   `json:"displayFieldName,omitempty"`
 }
 
 // ValidRowLimit 保留旧设置的零值默认值，负一表示展开全部条目行。

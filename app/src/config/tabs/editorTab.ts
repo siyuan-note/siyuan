@@ -67,6 +67,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,
     });
+    group.switch("editor.mathDelimiterCompatibility", {
+        title: window.siyuan.languages.mathDelimiterCompatibility,
+        desc: window.siyuan.languages.mathDelimiterCompatibilityTip,
+    });
     group.switch("editor.keepLoadedContent", {
         title: window.siyuan.languages.keepLazyLoad,
         desc: window.siyuan.languages.keepLazyLoadTip,
@@ -239,6 +243,10 @@ const registerEditorEmbedsGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.switch("editor.embedBlockBreadcrumbParentPath", {
+        title: window.siyuan.languages.embedBlockBreadcrumbParentPath,
+        desc: window.siyuan.languages.embedBlockBreadcrumbParentPathTip,
+    });
 };
 
 const registerEditorImagesGroup = (tab: SettingTabBuilder) => {
@@ -287,6 +295,15 @@ const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
         desc: window.siyuan.languages.databaseAttrUseTabsTip,
+    });
+    group.select("editor.databaseAttrLayout", {
+        title: window.siyuan.languages.databaseAttrLayout,
+        desc: window.siyuan.languages.databaseAttrLayoutTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.databaseAttrLayoutSingle},
+            {value: 1, label: window.siyuan.languages.databaseAttrLayoutRow},
+            {value: 2, label: window.siyuan.languages.databaseAttrLayoutColumn},
+        ],
     });
 };
 
@@ -353,12 +370,10 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.backlinkHideReference,
         desc: window.siyuan.languages.backlinkHideReferenceTip,
     });
-    if (!isMobile()) {
-        group.switch("editor.backlinkShowBottom", {
-            title: window.siyuan.languages.backlinkShowBottom,
-            desc: window.siyuan.languages.backlinkShowBottomTip,
-        });
-    }
+    group.switch("editor.backlinkShowBottom", {
+        title: window.siyuan.languages.backlinkShowBottom,
+        desc: window.siyuan.languages.backlinkShowBottomTip,
+    });
     group.number("editor.backlinkExpandCount", {
         title: window.siyuan.languages.backlinkExpand,
         desc: window.siyuan.languages.backlinkExpandTip,

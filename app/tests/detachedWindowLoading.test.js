@@ -18,7 +18,8 @@ const runRendererCase = async (sources, expected) => {
         menus: {menu: {element: document.createElement("div")}},
     };
     const assets = load(sources.assets);
-    const appearance = load(sources.appearance, {"../util/assets": assets});
+    const appearance = load(sources.appearance, {"../util/assets": assets,
+        "../config/tabs/compactMode": {isCompactModeEnabled: () => false}});
     const {waitForWindowPaint} = load(sources.paint);
     const {initWindowWithLoading} = load(sources.loading, {"../util/windowPaint": {waitForWindowPaint},
         "../constants": {Constants: {TIMEOUT_TRANSITION: 300}}});
@@ -38,7 +39,10 @@ const runRendererCase = async (sources, expected) => {
         webFrame: {setZoomFactor() {}}};
     const functions = {isWindow: () => true, setToolbarLeftMac() {}};
     const compatibility = {isMac: () => false, applyPlatformClasses() {}};
-    const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions});
+    const overlay = load(sources.overlay, {electron, "../constants": {Constants: constants},
+        "../util/color": load(sources.color)});
+    const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions,
+        "./windowControlsOverlay": overlay});
     const {initWindow} = load(sources.host, {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "../protyle/util/compatibility": compatibility, "./windowControls": controls,
@@ -101,12 +105,15 @@ const runRendererCase = async (sources, expected) => {
     assert.equal(getComputedStyle(loader).getPropertyValue("-webkit-app-region"), "drag");
     const rect = loader.getBoundingClientRect();
     assert.deepEqual([rect.x, rect.y, rect.width, rect.height], [0, 0, innerWidth, innerHeight]);
-    const image = loader.querySelector("img");
-    if (!image.complete) await new Promise(resolve => image.addEventListener("load", resolve, {once: true}));
-    assert.ok(image.naturalWidth > 0, "shared spinner loads");
-    const imgRect = image.getBoundingClientRect();
-    assert.ok(Math.abs(imgRect.x + imgRect.width / 2 - innerWidth / 2) < 1);
-    assert.ok(Math.abs(imgRect.y + imgRect.height / 2 - innerHeight / 2) < 1);
+    const spinner = loader.querySelector(".b3-loading");
+    assert.equal(spinner.childElementCount, 0, "shared spinner needs no icon library or image");
+    assert.equal(getComputedStyle(spinner).color, "rgb(171, 205, 239)", "startup foreground is available before the theme");
+    assert.match(getComputedStyle(spinner, "::before").backgroundImage, /conic-gradient/);
+    const spinnerRect = spinner.getBoundingClientRect();
+    assert.equal(spinnerRect.width, 48);
+    assert.equal(spinnerRect.height, 48);
+    assert.ok(Math.abs(spinnerRect.x + spinnerRect.width / 2 - innerWidth / 2) < 1);
+    assert.ok(Math.abs(spinnerRect.y + spinnerRect.height / 2 - innerHeight / 2) < 1);
     assert.equal(appearance.getWindowAppearance().backgroundColor, expected.hex);
     let done = false;
     let renderDone = false;
@@ -173,7 +180,8 @@ if (process.versions.electron && process.type === "browser") {
         const ts = require("typescript");
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
             paint: "util/windowPaint.ts", loading: "boot/loading.ts", init: "window/init.ts",
-            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", tabs: "layout/tabUtil.ts"})) {
+            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", overlay: "boot/windowControlsOverlay.ts",
+            tabs: "layout/tabUtil.ts", color: "util/color.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);
             sources[key] = ts.transpileModule(source, {
@@ -197,11 +205,6 @@ if (process.versions.electron && process.type === "browser") {
                 response.end(css);
                 return;
             }
-            if (pathname === "/stage/loading-pure.svg") {
-                response.setHeader("Content-Type", "image/svg+xml");
-                response.end(fs.readFileSync(path.join(__dirname, "../stage/loading-pure.svg")));
-                return;
-            }
             if (pathname === "/stage/build/app/window.html") {
                 response.setHeader("Content-Type", "text/html");
                 response.end(template);
@@ -221,13 +224,17 @@ if (process.versions.electron && process.type === "browser") {
                 {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state", document: "timeout"},
             ]) {
                 win = new BrowserWindow({show: false, backgroundColor: expected.hex, width: 640, height: 480,
-                    webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+                    webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
+                win.webContents.debugger.attach("1.3");
                 assert.equal(win.getBackgroundColor(), expected.hex.toUpperCase());
                 const url = new URL(`http://127.0.0.1:${server.address().port}/stage/build/app/window.html`);
                 url.searchParams.set("windowThemeMode", expected.mode);
                 url.searchParams.set("windowBackground", expected.hex);
                 url.searchParams.set("windowForeground", "#abcdef");
                 await win.loadURL(url.href);
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 await win.webContents.executeJavaScript(`(${runRendererCase.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(expected)})`);
                 const first = await win.webContents.capturePage();
                 const bitmap = first.toBitmap();

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package util
 
 import (
@@ -20,6 +24,7 @@ type decisionQuestionSpec struct {
 	ID, Kind, Instructions string
 	Choices                []decisionChoice
 	Levels                 []string
+	Images                 []DecisionImage
 }
 
 type decisionChoice struct {
@@ -39,7 +44,7 @@ func normalizeDecisionQuestions(questions map[string]DecisionQuestion) ([]decisi
 	ret := make([]decisionQuestionSpec, 0, len(ids))
 	for _, id := range ids {
 		question := questions[id]
-		spec := decisionQuestionSpec{ID: id, Kind: question.Type, Instructions: question.Instructions}
+		spec := decisionQuestionSpec{ID: id, Kind: question.Type, Instructions: question.Instructions, Images: question.Images}
 		switch question.Type {
 		case "choice":
 			var options map[string]string
@@ -79,8 +84,14 @@ func decisionProviderFor(provider string) (decisionProvider, error) {
 type typeSafeDecisionProvider struct{}
 
 func (typeSafeDecisionProvider) encode(model string, state DecisionState, specs []decisionQuestionSpec) ([]byte, error) {
+	if len(state.Data) != 0 || len(state.Images) != 0 {
+		return nil, errors.New("JSON and image decision inputs require the OpenAI provider")
+	}
 	questions := make(map[string]DecisionQuestion, len(specs))
 	for _, spec := range specs {
+		if len(spec.Images) != 0 {
+			return nil, errors.New("question images require the OpenAI provider")
+		}
 		question := DecisionQuestion{Type: spec.Kind, Instructions: spec.Instructions}
 		switch spec.Kind {
 		case "choice":
@@ -119,20 +130,26 @@ type openAIDecisionLevel struct {
 type openAIDecisionQuestion struct {
 	Type         string                `json:"type"`
 	Name         string                `json:"name"`
-	Instructions string                `json:"instructions"`
+	Instructions json.RawMessage       `json:"instructions"`
 	Choices      []decisionChoice      `json:"choices,omitempty"`
 	Levels       []openAIDecisionLevel `json:"levels,omitempty"`
 }
 
 func (openAIDecisionProvider) encode(model string, state DecisionState, specs []decisionQuestionSpec) ([]byte, error) {
-	// 将完整状态作为结构化文本证据传递，问题指令只放在 questions 中。
-	input, err := json.Marshal(state)
+	input, err := openAIDecisionInput(state)
 	if err != nil {
 		return nil, err
 	}
 	questions := make([]openAIDecisionQuestion, 0, len(specs))
+	imageCount := len(state.Images)
 	for _, spec := range specs {
-		question := openAIDecisionQuestion{Type: spec.Kind, Name: spec.ID, Instructions: spec.Instructions}
+		imageCount += len(spec.Images)
+		instructions, err := openAIDecisionInstructions(spec.Instructions, spec.Images)
+		if err != nil {
+			return nil, err
+		}
+		question := openAIDecisionQuestion{Type: spec.Kind, Name: spec.ID,
+			Instructions: instructions}
 		switch spec.Kind {
 		case "noul":
 			question.Type = "predicate"
@@ -145,11 +162,14 @@ func (openAIDecisionProvider) encode(model string, state DecisionState, specs []
 		}
 		questions = append(questions, question)
 	}
+	if imageCount > 128 {
+		return nil, errors.New("decision requires at most 128 images across input and questions")
+	}
 	return json.Marshal(struct {
 		Model     string                   `json:"model"`
-		Input     string                   `json:"input"`
+		Input     json.RawMessage          `json:"input"`
 		Questions []openAIDecisionQuestion `json:"questions"`
-	}{model, string(input), questions})
+	}{model, input, questions})
 }
 
 func (openAIDecisionProvider) decode(data []byte, specs []decisionQuestionSpec) (*DecisionResult, error) {
@@ -170,8 +190,9 @@ func (openAIDecisionProvider) decode(data []byte, specs []decisionQuestionSpec) 
 			} `json:"probabilities"`
 		} `json:"answers"`
 		Usage *struct {
-			InputTokens  *int `json:"input_tokens"`
-			OutputTokens *int `json:"output_tokens"`
+			InputTokens        *int                        `json:"input_tokens"`
+			OutputTokens       *int                        `json:"output_tokens"`
+			InputTokensDetails *DecisionInputTokensDetails `json:"input_tokens_details"`
 		} `json:"usage"`
 	}
 	if json.Unmarshal(data, &response) != nil || len(response.Answers) != len(specs) {
@@ -245,5 +266,6 @@ func (openAIDecisionProvider) decode(data []byte, specs []decisionQuestionSpec) 
 		return nil, invalid
 	}
 	result.Usage.InputTokens, result.Usage.OutputTokens = *response.Usage.InputTokens, *response.Usage.OutputTokens
+	result.Usage.InputTokensDetails = response.Usage.InputTokensDetails
 	return result, nil
 }

@@ -303,6 +303,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
+Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
+
 * `/api/notebook/getNotebookConf`
 * Parameters
 
@@ -333,6 +335,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
     }
   }
   ```
+
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 
@@ -374,6 +378,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 ## Documents
 
 ### Create a document with Markdown
+
+Legacy string creation checks every parent prefix before writing. Slash or empty-title ancestors return `code: -1` with `data.reason: "pathAmbiguous"`. Multiple clean parents require a valid matching `parentID`; otherwise they also return `pathAmbiguous`. Unready metadata returns `indexUnavailable`. Prefer `/api/filetree/createDocByParent` with a separate parent identity and title.
 
 * `/api/filetree/createDocWithMd`
 * Parameters
@@ -502,6 +508,8 @@ Remove a document by `id`:
   ```
 
 ### Move documents
+
+Both move endpoints evaluate block collection rules for moved documents and descendants entering a watched scope. Existing database rows and field values are preserved. If collection fails after a document has moved, the endpoint returns an error and that document remains at its new location.
 
 * `/api/filetree/moveDocs`
 * Parameters
@@ -756,6 +764,8 @@ Move documents by `id`:
   ```
 
 ### Get IDs based on human-readable path
+
+Legacy lookup checks each candidate ancestor chain. It returns all clean matches, `pathAmbiguous` for mixed clean and slash/empty-title candidates, `legacyPathUnsupported` for unsupported candidates only, and an empty array for no matches. Unready or inconsistent metadata returns `indexUnavailable`. Error candidate lists are `cleanIDs` and `unsupportedIDs` and retain access filtering. Prefer `/api/filetree/resolveDocPath` with explicit title segments.
 
 * `/api/filetree/getIDsByHPath`
 * Parameters
@@ -1297,6 +1307,9 @@ Move documents by `id`:
   ```
 
     * `stmt`: SQL statement
+    * `mode`: Optional mode; omitted, `null`, or `""` allows one read or write statement; `"readonly"` allows one read-only `SELECT` or `WITH` query; `"multiple"` executes statements in order and returns the last statement's results
+
+Statements without result columns, including `INSERT`, `UPDATE`, `DELETE`, and DDL, execute and return `data: []` on success. `RETURNING` preserves result rows. Validation failures return code `-1`; execution failures return code `1`. Multiple statements stop at the first failure; completed writes are not automatically rolled back. Direct SQL writes affect the derived index database and do not update source documents or maintain full-text indexes and block caches; use the block APIs to edit document content.
 
 Without an explicit outer `LIMIT`, results default to at most `search.limit` rows (the configured search result limit). Use explicit `LIMIT` and `OFFSET` clauses to paginate, with a stable, unique ordering such as `ORDER BY hpath, id`. However, an explicit outer `LIMIT` overrides the default, including values larger than `search.limit`.
 
@@ -1483,6 +1496,11 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Put file
 
 * `/api/file/putFile`
+
+For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or slash-containing titles without the required Spec 6 declaration return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
+
+An incoming title containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"` without rewriting the input. Existing lower-spec sources remain readable and can be replaced with valid versioned content.
+
 * The parameter is an HTTP Multipart form
 
     * `path`: the file path under the workspace path
@@ -1502,6 +1520,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Remove file
 
 * `/api/file/removeFile`
+
+Deletion retains canonical-path, sensitive-file and encrypted-notebook restrictions; validation failures return `code: -1`. Retired addressing-mode records do not control deletion.
 * Parameters
 
   ```json
@@ -1523,6 +1543,13 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Rename file
 
 * `/api/file/renameFile`
+
+The complete move is checked for canonical paths and destination document-source compatibility before creating the destination directory or moving files. Validation failures return `code: -1`; existing sensitive-path and encrypted-notebook restrictions still apply.
+
+When the destination includes `.sy` document paths composed of notebook and document IDs, all incoming documents are also checked. Unknown formats, invalid document sources, or conflicting titles return `code: -1` without creating the destination directory or moving the sources.
+
+Incoming titles containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"`, preserving the sources and destination.
+
 * Parameters
 
   ```json
@@ -2223,7 +2250,7 @@ The field types (`keyType`) are:
 
     * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
 
-    * `data.av.automations` optionally contains database-wide rules (`spec: 1` through `4`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. Main types include every subtype; format 3 supports `h:h1` through `h:h6`, `l:u/o/t`, `i:u/o/t`, and `callout:TYPE` (case-sensitive, including custom types). Empty types impose no restriction, and multiple types use OR. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Automatic collection only adds entries. Source changes and changes to rule conditions, scope, target, or activation preserve existing rows and fields; matching again keeps the same row. Explicit cleanup checks all enabled collection rules for manual and automatic bound entries alike, preserves matches and indeterminate entries, and rechecks before removing unmatched entries; undo restores the original row and all fields. `blockSource.tagMatch` and `attributeMatch` default to `and`; format 3 also supports `or` independently within each group. Groups remain ANDed, and empty groups add no restriction. Each rule's optional `notifyOnSuccess` defaults to `true` (including `null`); successful changes are summarized once after the transaction commits. Disabled notifications do not suppress errors. No-op actions, explicit collection, undo, redo, and rolled-back transactions do not generate success messages. Format 4 adds optional `blockSource.tagTarget`: omitted/empty uses default selection, preferring an eligible list item over its first content block, `block` collects the tagged block itself, and `container` collects the nearest container meeting type and attribute conditions, deduplicated by block ID. Documents require an explicit `d` type. AND tags must occur in one source block; without tag conditions this option has no effect. Preview and actual collection share the same targets; changing this option preserves existing rows and fields.
+    * `data.av.automations` optionally contains database-wide rules (`spec: 1` through `8`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. New scopes saved through `setAttrViewAutomations` allow at most 32 distinct notebooks/documents in total. Existing larger scopes remain readable and usable and may be retained or reduced; adding scopes while above the limit is rejected. Undo and redo preserve the original scope. Main types include every subtype; format 3 supports `h:h1` through `h:h6`, `l:u/o/t`, `i:u/o/t`, and `callout:TYPE` (case-sensitive, including custom types). Empty types impose no restriction, and multiple types use OR. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Automatic collection only adds entries. Source changes and changes to rule conditions, scope, target, or activation preserve existing rows and fields; matching again keeps the same row. Explicit cleanup checks all enabled collection rules for manual and automatic bound entries alike, preserves matches and indeterminate entries, and rechecks before removing unmatched entries; undo restores the original row and all fields. `blockSource.tagMatch` and `attributeMatch` default to `and`; format 3 also supports `or` independently within each group. Groups remain ANDed, and empty groups add no restriction. Each rule's optional `notifyOnSuccess` defaults to `true` (including `null`); successful changes are summarized once after the transaction commits. Disabled notifications do not suppress errors. No-op actions, explicit collection, undo, redo, and rolled-back transactions do not generate success messages. Format 4 adds optional `blockSource.tagTarget`: omitted/empty uses default selection, preferring an eligible list item over its first content block, `block` collects the tagged block itself, and `container` collects the nearest container meeting type and attribute conditions, deduplicated by block ID. Documents require an explicit `d` type. AND tags must occur in one source block; without tag conditions this option has no effect. Preview and actual collection share the same targets; changing this option preserves existing rows and fields. Format 5 adds optional `blockSource.documentDepth`: omitted or `null` means unlimited, `0` includes only each selected document itself, and `1` also includes its direct children. Other nonnegative integers set the maximum relative descendant depth. It applies uniformly to document scopes, not notebook scopes; scopes remain combined by union. Changing depth preserves existing rows and fields and does not backfill existing content. Format 6 adds each attribute condition's optional `nameOperator`: omitted/empty or `equals` retains exact full-name matching, `contains` matches a literal substring without requiring the `custom-` prefix, and `regex` uses Go regular expressions against the full name including that prefix. Only custom attributes are considered. Names and values are case-sensitive and must match on the same attribute; `exists` requires at least one name match and `notExists` requires none, ignoring the value. Name patterns are limited to 256 bytes; invalid expressions are rejected on save. Existing formats 1–5 retain their behavior; older readers reject format 6 without rewriting the database. Format 7 adds optional `blockSource.includeSelectedDocuments`: omitted, `null`, or `true` includes each selected document itself; `false` excludes it and all blocks inside it while descendants still follow `documentDepth`. This option is shared by document scopes and does not affect notebook scopes or other overlapping document scopes; scopes remain combined by union. With `false` and depth `0`, the corresponding document scope is empty. Changing it preserves existing rows and fields without automatic backfill or removal. Formats 1–6 remain readable; older readers reject format 7 without rewriting the database. Format 8 adds optional `blockSource.referenceID`: body block references must point to this block; a document target also includes its internal content blocks, excluding child documents. Embeds, ordinary links and references in database rich-text fields are excluded. Tags constrain the same reference source; sources are grouped using backlink parent rules before type and attribute filtering, and `tagTarget` is ignored. The target must be in the same encryption boundary. Existing rows and fields are preserved when references are removed or the target changes; older matches require explicit preview and collection. Formats 1–7 remain readable; older readers reject format 8 without rewriting the database.
 
 ### Get primary key values
 

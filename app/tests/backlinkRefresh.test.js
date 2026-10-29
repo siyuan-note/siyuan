@@ -33,6 +33,7 @@ const setup = (type = "local") => {
     Object.assign(panel, {
         type, blockId: "target", dirty: false, destroyed: false, requesting: false,
         pendingFull: false, pendingRootIDs: new Set(), itemRecords: [new Map(), new Map()], indexChangeVersion: 0,
+        sourceFilter: {},
         element: {contains: () => focused, isConnected: true, getClientRects: () => visible ? [{}] : []},
         ownerProtyle: {element: {getClientRects: () => visible ? [{}] : []}}, empty: true,
         searchBacklinks() { this.requesting = true; requests.push(this.indexChangeVersion); },
@@ -55,6 +56,12 @@ const setup = (type = "local") => {
 };
 
 for (const type of ["local", "bottom"]) {
+    test(`${type} database field changes invalidate all filtered contexts`, () => {
+        const {panel, change} = setup(type);
+        panel.sourceFilter.database = {avID: "tasks", filters: []};
+        change("database-carrier-document");
+        assert.equal(panel.pendingFull, true);
+    });
     test(`${type} backlink refresh coalesces edits and retains every changed document`, () => {
         const {panel, requests, advance, change} = setup(type);
         change("one");

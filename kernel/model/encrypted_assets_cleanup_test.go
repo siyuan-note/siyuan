@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -517,6 +521,99 @@ func TestEncryptedAssetCleanupLockWaits(t *testing.T) {
 		t.Fatal("cleanup leaked operation lease")
 	}
 	<-done
+}
+
+func TestEncryptedAssetCleanupWaitDoesNotBlockExit(t *testing.T) {
+	boxID, docPath, _ := setupEncryptedCleanupTest(t)
+	before, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := lockSyncForExit(context.Background(), false); err != nil {
+		t.Fatal(err)
+	}
+	held := true
+	defer func() {
+		if held {
+			unlockSync()
+		}
+	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ctx, releaseScope := WithEncryptedBoxOperationScope(ctx)
+	defer releaseScope()
+	started, done := make(chan struct{}), make(chan error, 1)
+	go func() {
+		close(started)
+		done <- withEncryptedAssetCleanup(ctx, boxID, func([]byte) error {
+			return errors.New("cleanup must not start after exit")
+		})
+	}()
+	<-started
+	lifecycle := getEncryptedBoxLifecycle(boxID)
+	deadline := time.Now().Add(100 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		lifecycle.lock.Lock()
+		leases := lifecycle.activeOperations
+		lifecycle.lock.Unlock()
+		if leases != 0 {
+			t.Fatal("cleanup held a notebook lease while waiting for the exit sync lock")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	locked := make(chan struct{})
+	go func() {
+		beginEncryptedBoxLock(boxID)
+		close(locked)
+	}()
+	select {
+	case <-locked:
+	case <-time.After(time.Second):
+		t.Fatal("exit could not close notebook admission while cleanup waited for sync")
+	}
+	previousExiting := util.IsExiting.Swap(true)
+	defer util.IsExiting.Store(previousExiting)
+	unlockSync()
+	held = false
+	select {
+	case err := <-done:
+		if err == nil || err.Error() != Conf.Language(239) {
+			t.Fatalf("cleanup entered the exiting workspace: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("queued cleanup did not finish after exit released the sync lock")
+	}
+	after, err := os.ReadFile(docPath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("waiting cleanup changed source ciphertext: %v", err)
+	}
+}
+
+func TestEncryptedAssetCleanupCancelsBeforeNotebookLease(t *testing.T) {
+	boxID, _, _ := setupEncryptedCleanupTest(t)
+	lockSync()
+	defer unlockSync()
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() {
+		_, err := UnusedEncryptedBoxAssets(ctx, boxID)
+		done <- err
+	}()
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("sync lock wait did not preserve cancellation: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("canceled cleanup remained blocked on the sync lock")
+	}
+	lifecycle := getEncryptedBoxLifecycle(boxID)
+	lifecycle.lock.Lock()
+	defer lifecycle.lock.Unlock()
+	if lifecycle.activeOperations != 0 {
+		t.Fatal("canceled cleanup retained a notebook lease")
+	}
 }
 
 func TestEncryptedAssetCleanupPausesNewOperations(t *testing.T) {

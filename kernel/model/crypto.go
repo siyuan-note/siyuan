@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -41,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -984,6 +973,12 @@ func EnableEncryptedNotebookWithSync(password string) error {
 	if err := SyncDataBeforeEnableEncryptedNotebook(); err != nil {
 		return err
 	}
+	// 同步准备需独占写接口；完成同步后再为密钥配置操作取得导入读租约。
+	dataImportAccess.RLock()
+	defer dataImportAccess.RUnlock()
+	if err := checkDataImportRecovery(); err != nil {
+		return err
+	}
 
 	// 同步可能已经从其他设备恢复了完整配置。此时校验用户输入的是原主密码，不能再创建新的密钥体系。
 	if NotebookCryptoEnabled() {
@@ -1237,6 +1232,9 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
+	if err := checkDataImportRecovery(); err != nil {
+		return nil, err
+	}
 	if err := checkPendingNotebookArchives(); err != nil {
 		return nil, err
 	}
@@ -1340,6 +1338,9 @@ func deriveKEK(password string) ([]byte, error) {
 // 返回解密后的 DEK 和实际使用的 BoxCrypt（可能来自 backup）。
 // 若 backup 被使用会自动修复 conf.json 和刷新 backup。
 func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEncryption, err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return nil, nil, err
+	}
 	boxCrypt, err = GetBoxEncryption(boxID)
 	if err != nil || boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 		return nil, nil, fmt.Errorf("no encrypted key material for box [%s]", boxID)
@@ -1417,6 +1418,9 @@ func UnlockAndMountBox(boxID, password string, boxEnc *conf.BoxEncryption) (alre
 }
 
 func unlockBoxHeld(boxID string, password string, boxEnc *conf.BoxEncryption) (err error) {
+	if err = filesys.CheckDocumentAddressing(boxID); err != nil {
+		return
+	}
 	if _, busy := boxLock.Load(boxID); busy {
 		return errors.New(Conf.language(239))
 	}
@@ -1565,6 +1569,7 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	av.ClearBlockCollectionIndex(boxID)
 	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
 	heif.ClearMemoryCache(boxID)
 	LivePhotoPreviews.Clear(boxID)
@@ -1732,9 +1737,16 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if len(newPassword) == 0 {
 		return errors.New("new password must not be empty")
 	}
+	// Serialize the complete multi-file change with snapshot readers and all sync modes.
+	// Acquire these locks before notebookCryptoMu, as sync refresh also uses that mutex.
+	release := lockAssetSourceChange()
+	defer release()
 
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if err := checkPendingNotebookArchives(); err != nil {
+		return err
+	}
 
 	// 改密期间不能有已 Mount 的加密笔记本（DEK 在内存），否则新旧 KEK 切换会让缓存与磁盘不一致
 	cachedDEKsLock.RLock()
@@ -1742,6 +1754,15 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	cachedDEKsLock.RUnlock()
 	if dekCount > 0 {
 		return errors.New("cannot change master password while encrypted notebooks are unlocked (DEKs in memory), lock them first")
+	}
+	encBoxIDs, listErr := listAllEncryptedBoxIDs()
+	if listErr != nil {
+		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
+	}
+	for _, id := range encBoxIDs {
+		if err := filesys.CheckDocumentAddressing(id); err != nil {
+			return err
+		}
 	}
 
 	oldKEK, err := deriveKEK(oldPassword)
@@ -1769,10 +1790,6 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 
 	// Phase 0: 遍历所有加密笔记本（含 conf 损坏但存在备份的），预计算新 WrappedDEK（内存操作）
 	// 允许 entries 为空：用户可能已启用加密功能但尚未创建加密笔记本，此时仍需更新全局 verifier 和 backup。
-	encBoxIDs, listErr := listAllEncryptedBoxIDs()
-	if listErr != nil {
-		return fmt.Errorf("list encrypted notebooks failed: %w", listErr)
-	}
 	var entries []migrationBoxEntry
 	for _, id := range encBoxIDs {
 		dek, boxCrypt, dErr := decryptBoxCrypt(id, oldKEK)
@@ -2153,7 +2170,7 @@ func normalBoxBlockRefCrossesBoundary(bt *treenode.BlockTree) bool {
 // IsEncryptedAssetPath 判断给定 asset 绝对路径是否属于加密笔记本。
 // 供 server 层在缩略图等场景判断是否需跳过密文文件的处理。
 func IsEncryptedAssetPath(absPath string) bool {
-	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	boxID := util.BoxIDFromDataPath(absPath)
 	return boxID != "" && IsEncryptedBox(boxID)
 }
 
@@ -2202,35 +2219,6 @@ func HoldBoxReadLock(boxID string) {
 // ReleaseBoxReadLock 释放 HoldBoxReadLock 获取的 box 读锁。
 func ReleaseBoxReadLock(boxID string) {
 	releaseBoxReadLock(boxID)
-}
-
-// extractBoxIDFromPath 从 data 目录下的绝对路径反推 boxID。
-// 路径形如 <DataDir>/<boxID>/...，切出紧跟在 DataDir 后的一段。
-// 若路径不在 DataDir 下或格式不符，返回空字符串。
-func extractBoxIDFromPath(absPath string) string {
-	return ExtractBoxIDFromAssetsPath(absPath)
-}
-
-// ExtractBoxIDFromAssetsPath 从 data 目录下的绝对路径（.sy 或 assets）反推 boxID。
-// 供 server/api 层判断 asset 是否属于加密笔记本。路径形如 <DataDir>/<boxID>/...；
-// 若不在 DataDir 下或 boxID 非合法 ID 模式，返回空串。
-func ExtractBoxIDFromAssetsPath(absPath string) string {
-	absPath = filepath.ToSlash(absPath)
-	dataDir := filepath.ToSlash(util.DataDir)
-	rel, err := filepath.Rel(dataDir, absPath)
-	if err != nil {
-		return ""
-	}
-	rel = filepath.ToSlash(rel)
-	if strings.HasPrefix(rel, "..") || rel == "." || rel == "" {
-		return ""
-	}
-	parts := strings.SplitN(rel, "/", 2)
-	boxID := parts[0]
-	if !ast.IsNodeIDPattern(boxID) {
-		return ""
-	}
-	return boxID
 }
 
 // ExtractBoxIDFromHistoryPath 从历史目录下的绝对路径反推 boxID。
@@ -2568,6 +2556,9 @@ func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
 	if !ast.IsNodeIDPattern(boxID) {
 		return errors.New("invalid notebook ID")
 	}
+	if err := filesys.CheckDocumentAddressing(boxID); err != nil {
+		return err
+	}
 	if err := validateBoxEncryption(crypt); err != nil {
 		return err
 	}
@@ -2621,7 +2612,7 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 		return err
 	}
 
-	boxID := ExtractBoxIDFromAssetsPath(srcPath)
+	boxID := util.BoxIDFromDataPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {
 		HoldBoxReadLock(boxID)
 		defer ReleaseBoxReadLock(boxID)
@@ -2738,6 +2729,9 @@ func createEncryptedBox(name, password string, initializeBoxDoc func(string) (st
 
 	if _, err = initializeBoxDoc(id); err != nil {
 		return "", fmt.Errorf("initialize encrypted notebook document failed: %w", err)
+	}
+	if err = treenode.SetDocumentMetadataState(id, "ready"); err != nil {
+		return "", fmt.Errorf("initialize encrypted notebook document metadata failed: %w", err)
 	}
 
 	setEncryptedBoxState(id, EncryptedBoxStateUnlocked)

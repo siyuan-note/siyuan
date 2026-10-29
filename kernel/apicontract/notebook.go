@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import "mime/multipart"
@@ -28,26 +32,38 @@ type NotebookEncryption struct {
 }
 
 type NotebookConf struct {
-	Name                  string              `json:"name"`
-	Sort                  int                 `json:"sort"`
-	Icon                  string              `json:"icon"`
-	Closed                bool                `json:"closed"`
-	RefCreateSaveBox      string              `json:"refCreateSaveBox"`
-	RefCreateSavePath     string              `json:"refCreateSavePath"`
-	DocCreateSaveBox      string              `json:"docCreateSaveBox"`
-	DocCreateSavePath     string              `json:"docCreateSavePath"`
-	DocCreateTemplatePath string              `json:"docCreateTemplatePath"`
-	DailyNoteSavePath     string              `json:"dailyNoteSavePath"`
-	DailyNoteTemplatePath string              `json:"dailyNoteTemplatePath"`
-	SortMode              int                 `json:"sortMode"`
-	Encrypted             bool                `json:"encrypted"`
-	BoxCrypt              *NotebookEncryption `json:"boxCrypt"`
+	DocCreateTarget       *StructuredDocumentTarget `json:"docCreateTarget,omitempty"`
+	RefCreateTarget       *StructuredDocumentTarget `json:"refCreateTarget,omitempty"`
+	DailyNoteTarget       *StructuredDocumentTarget `json:"dailyNoteTarget,omitempty"`
+	Name                  string                    `json:"name"`
+	Sort                  int                       `json:"sort"`
+	Icon                  string                    `json:"icon"`
+	Closed                bool                      `json:"closed"`
+	RefCreateSaveBox      string                    `json:"refCreateSaveBox"`
+	RefCreateSavePath     string                    `json:"refCreateSavePath"`
+	DocCreateSaveBox      string                    `json:"docCreateSaveBox"`
+	DocCreateSavePath     string                    `json:"docCreateSavePath"`
+	DocCreateTemplatePath string                    `json:"docCreateTemplatePath"`
+	DailyNoteSavePath     string                    `json:"dailyNoteSavePath"`
+	DailyNoteTemplatePath string                    `json:"dailyNoteTemplatePath"`
+	SortMode              int                       `json:"sortMode"`
+	Encrypted             bool                      `json:"encrypted"`
+	BoxCrypt              *NotebookEncryption       `json:"boxCrypt"`
 }
 
 type NotebookConfData struct {
-	Box  string        `json:"box"`
-	Name string        `json:"name"`
-	Conf *NotebookConf `json:"conf"`
+	Box                  string                `json:"box"`
+	Name                 string                `json:"name"`
+	Conf                 *NotebookConf         `json:"conf"`
+	DocumentCapabilities *DocumentCapabilities `json:"documentCapabilities,omitempty"`
+}
+
+type DocumentCapabilities struct {
+	StructuredPaths bool     `json:"structuredPaths"`
+	LiteralSlash    bool     `json:"literalSlash"`
+	TitleFormats    []string `json:"titleFormats"`
+	IndexState      string   `json:"indexState" api:"enum=missing|building|ready|error"`
+	Revision        string   `json:"revision"`
 }
 
 type ImportNotebookCryptoBackupRequest struct {

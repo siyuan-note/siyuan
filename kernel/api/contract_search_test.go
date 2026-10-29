@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -172,6 +176,12 @@ func TestAPIContractSearchEmbedConversion(t *testing.T) {
 			t.Fatalf("embed serialization changed: %s != %s, %v", actual, expected, err)
 		}
 	}
+	value := []*model.EmbedBlock{{Block: &model.Block{ID: "child", RootID: "document"},
+		BlockPaths: []*model.BlockPath{{ID: "document", Name: "Notebook/Parent/Title / Section", DocumentTitle: "Title / Section"}}}}
+	converted := embedBlockContracts(value)
+	if converted[0].BlockPaths[0].DocumentTitle != "Title / Section" || converted[0].BlockPaths[0].Name != value[0].BlockPaths[0].Name {
+		t.Fatalf("embed document title conversion lost data: %+v", converted[0].BlockPaths[0])
+	}
 }
 
 func TestAPIContractSearchPathAndSubtypeCompatibility(t *testing.T) {
@@ -189,6 +199,7 @@ func TestAPIContractSearchPathAndSubtypeCompatibility(t *testing.T) {
 // 搜索查询在契约测试的独立进程内访问临时数据库。
 func testSearchQueryContracts(t *testing.T, docID string) {
 	t.Helper()
+	testAssetContentPreviewContract(t)
 	testSearchAssetMetadataContract(t)
 	testExactRefDocTitleContract(t, docID)
 	for _, entry := range []struct {
@@ -221,6 +232,45 @@ func testSearchQueryContracts(t *testing.T, docID string) {
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
 			t.Fatalf("search query failed: %s: %s, %v", path, recorder.Body.String(), err)
 		}
+	}
+}
+
+func testAssetContentPreviewContract(t *testing.T) {
+	t.Helper()
+	const id = "20261026000001-preview"
+	sql.IndexAssetContentsQueue([]*sql.AssetContent{{ID: id, Name: "preview.txt", Path: "assets/preview.txt", Ext: ".txt", Content: "PTFE <oxide>\nnext"}})
+	if err := sql.FlushAssetContentQueue(); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.Use(boxLeaseMiddleware, func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	engine.POST("/api/search/getAssetContent", getAssetContent)
+	for _, test := range []struct {
+		query, want string
+		method      int
+	}{
+		{"PTFE.*oxide", "<mark>PTFE &lt;oxide</mark>&gt;<br>next", 3},
+		{"SELECT * FROM asset_contents_fts_case_insensitive", "PTFE &lt;oxide&gt;<br>next", 2},
+		{"PTFE", "<mark>PTFE</mark> &lt;oxide&gt;<br>next", 0},
+	} {
+		body, err := json.Marshal(map[string]any{"id": id, "query": test.query, "queryMethod": test.method})
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/search/getAssetContent", strings.NewReader(string(body))))
+		requireAPIContract(t, "POST", "/api/search/getAssetContent", recorder)
+		var response struct {
+			Code int                          `json:"code"`
+			Data apicontract.AssetContentData `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || response.Data.AssetContent == nil || response.Data.AssetContent.Content != test.want {
+			t.Fatalf("method=%d: unexpected preview contract: %s, err=%v", test.method, recorder.Body.String(), err)
+		}
+	}
+	sql.DeleteAssetContentsByPathQueue("assets/preview.txt")
+	if err := sql.FlushAssetContentQueue(); err != nil {
+		t.Fatal(err)
 	}
 }
 

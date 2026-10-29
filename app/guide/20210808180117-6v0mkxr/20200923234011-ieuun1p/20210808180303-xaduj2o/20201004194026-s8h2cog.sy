@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091447-8iiuxlt",
-				"updated": "20261016112115"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091447-dluat0m",
-				"updated": "20261016112115"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -346,6 +346,111 @@
 			"Properties": {
 				"id": "20210117211053-tq2km4f"
 			}
+		},
+		{
+			"ID": "20261022093855-9vgq1sq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-9vgq1sq",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Login and tokens"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Lock screen wallpaper"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", upload one JPEG, PNG or WebP image (up to 10 MiB and 16 megapixels) to customize the authentication page shown at startup and after locking. Click Built-in to choose a picture from the categorized document cover gallery. Built-in pictures are wide and are centered and cropped to fill the screen; portrait screens crop more of the picture."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-v5madqo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-v5madqo",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Selecting or uploading another image replaces it; click Reset to restore the default background. The wallpaper setting is shown when a password is configured or OIDC sign-in is enabled. With a custom wallpaper, the authentication page first shows the wallpaper and local time. Click, tap, or press a key to reveal the login panel; typing your password also keeps the first character."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-q3h5bbu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-q3h5bbu",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Without a wallpaper, or if the image fails to load, the usual login page appears directly."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to return from the login panel to the wallpaper and clock. Your password and captcha input are kept. Both directions use a short transition; the system preference to reduce motion is respected."
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-vbzdq85",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-vbzdq85",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The wallpaper belongs to the current workspace, is not synced with notes, and is not included in settings exports. Anyone who can access the authentication page can see it before login, so avoid images containing sensitive information."
+				}
+			]
 		},
 		{
 			"ID": "20260804120101-oidclog",

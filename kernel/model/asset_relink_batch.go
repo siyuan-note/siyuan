@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -127,7 +126,7 @@ func runAssetRelinks(ctx context.Context, mappings []apicontract.AssetRelinkMapp
 	return p.response(err)
 }
 
-func lockAssetRelink(ctx context.Context, lock *sync.Mutex) error {
+func lockAssetRelink(ctx context.Context, lock interface{ TryLock() bool }) error {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 	for {

@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261018221152"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -128,7 +128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20261016013311"
+				"updated": "20261021003402"
 			},
 			"Children": [
 				{
@@ -489,6 +489,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "滑鼠懸停圖片可查看檔名、格式、已載入圖片的原始尺寸、標題和提示文字，無標題的圖片也會顯示這些資訊。本機工作空間圖片還會顯示可取得的檔案大小。網路圖片和加密筆記本圖片不顯示檔案大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-8jtd6hy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261021003402-8jtd6hy",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF 圖片"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261021003402-pq0fz6d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-pq0fz6d",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "作為資源檔案插入的 TIFF 圖片（.tif/.tiff）顯示第一幀，下載時仍保留原始檔案，暫不支援切換幀。16 位元灰階圖片的預覽亮度優先採用有效的 ImageJ 顯示範圍，未提供顯示範圍時依第一幀的實際灰階範圍調整。"
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-aalgaoz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-aalgaoz",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "預覽支援不超過 64 MiB 的檔案，單幀上限為桌面端 5000 萬像素、行動端 1250 萬像素。暫不支援 BigTIFF、浮點、CMYK 和 JPEG 壓縮的 TIFF 圖片。不支援預覽的檔案仍可下載並使用外部應用程式開啟。"
 				}
 			]
 		},
@@ -859,7 +902,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604120454-cxz64oc",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -873,7 +916,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-k7wee90",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -887,7 +930,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -896,7 +939,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
+					"Data": " 中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
 				}
 			]
 		},
@@ -905,7 +948,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-m6jtopr",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -928,7 +971,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -937,7 +980,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -946,7 +989,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -955,7 +998,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": "。"
 				}
 			]
 		},
@@ -1148,7 +1191,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003901-ze4mbzz",
-				"updated": "20261016202635"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1194,12 +1237,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-w0zyvyj",
-				"updated": "20261003234011"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR 僅內建 PP-OCRv6 Tiny 模型，無需下載即可離線使用，桌面端和行動端均預設選擇 Tiny。Small、Medium 等其他相容的 PP-OCRv6 模型可自行匯入：分別選取偵測、辨識 ONNX 檔案及對應的 inference.yml。匯入模型隨工作空間同步，提供者和目前模型的選擇依裝置儲存。新使用者預設使用 PaddleOCR，自動 OCR 預設關閉。既有使用者保留原提供者、自動 OCR 和閾值設定；舊的內建 Small 選擇移轉為 Tiny，自行匯入的模型不受影響。從尚無 OCR 提供者設定的版本升級時，繼續使用 Tesseract。"
+					"Data": "PaddleOCR 僅內建 PP-OCRv6 Tiny 模型，無需下載即可離線使用，桌面端和行動端均預設選擇 Tiny。Small、Medium 等其他相容的 PP-OCRv6 模型可自行匯入：分別選取偵測、辨識 ONNX 檔案及對應的 inference.yml。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-2f2qemf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-2f2qemf",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "匯入模型隨工作空間同步，提供者和目前模型的選擇依裝置儲存。新使用者預設使用 PaddleOCR，自動 OCR 預設關閉。既有使用者保留原提供者、自動 OCR 和閾值設定；舊的內建 Small 選擇移轉為 Tiny，自行匯入的模型不受影響。從尚無 OCR 提供者設定的版本升級時，繼續使用 Tesseract。"
 				}
 			]
 		},
@@ -1208,12 +1265,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003073646-hpqqxqx",
-				"updated": "20261006114009"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "選擇 PaddleOCR 後，可以在辨識閾值群組中直接調整偵測閾值、文字框信心閾值和辨識信心閾值，編輯完成後自動儲存。偵測與文字框閾值須大於 0 且小於 1，辨識閾值為 0 到 1。留空時，偵測使用目前模型參數，辨識使用預設值 0.5。無效輸入會保留在原處供修改，不會儲存。提高閾值可以減少圖示誤判，但也可能遺漏模糊或較淡的文字。閾值按裝置儲存，適用於手動與自動辨識；不會重新處理已有結果，可透過圖片選單重新辨識。"
+					"Data": "選擇 PaddleOCR 後，可以在辨識閾值群組中直接調整偵測閾值、文字框信心閾值和辨識信心閾值，編輯完成後自動儲存。偵測與文字框閾值須大於 0 且小於 1，辨識閾值為 0 到 1。留空時，偵測使用目前模型參數，辨識使用預設值 0.5。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-k1wbndq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-k1wbndq",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無效輸入會保留在原處供修改，不會儲存。提高閾值可以減少圖示誤判，但也可能遺漏模糊或較淡的文字。閾值按裝置儲存，適用於手動與自動辨識；不會重新處理已有結果，可透過圖片選單重新辨識。"
 				}
 			]
 		},
@@ -1648,7 +1719,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261016202635"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1816,7 +1887,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-ffpq13r",
-				"updated": "20261014140201"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1852,11 +1923,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 設定顯示或隱藏。也可繼續透過圖片選單複製和編輯 OCR 文字。"
+					"Data": " 設定顯示或隱藏。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-47pgnrc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-47pgnrc",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "也可繼續透過圖片選單複製和編輯 OCR 文字。"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "懸浮在本機圖片上可依設定查看 OCR 文字和辨識提示。文字辨識圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。在自訂外觀方案中，可透過 "
+					"Data": "懸浮在本機圖片上可依設定查看 OCR 文字和辨識提示。文字辨識圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-0gahqcp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-0gahqcp",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在自訂外觀方案中，可透過 "
 				},
 				{
 					"Type": "NodeTextMark",

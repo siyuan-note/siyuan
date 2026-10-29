@@ -271,11 +271,8 @@ export const genConfigGroup = (itemsHtml: string, title?: string, attrs?: Record
     const attrsHtml = attrs
         ? Object.entries(attrs).map(([key, value]) => ` ${key}="${escapeAttr(value)}"`).join("")
         : "";
-    const toggle = title && attrs?.["data-config-group-id"]
-        ? `<button type="button" class="block__icon block__icon--show block__icon--tap" data-action="toggle-config-group" aria-expanded="true" aria-label="${escapeAttr(window.siyuan.languages.collapse + " - " + title)}"><svg><use xlink:href="#iconDown"></use></svg></button>`
-        : "";
     const titleHtml = title
-        ? `<div class="config-title${toggle ? " config-title--action" : ""}">${toggle ? `<span class="fn__flex-1">${title}</span>${toggle}` : title}</div>`
+        ? `<div class="config-title">${title}</div>`
         : "";
     return `<div class="config-group"${attrsHtml}>${titleHtml}<div class="config-items">${itemsHtml}</div></div>`;
 };

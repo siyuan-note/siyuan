@@ -1,6 +1,8 @@
 export const observeFontPreview = (listElement: HTMLElement,
-                                   applyFont: (label: HTMLElement, item: HTMLElement) => void) => {
+                                   applyFont: (label: HTMLElement, item: HTMLElement) => void,
+                                   onLoadingChange?: (loading: boolean) => void) => {
     let closed = false;
+    let pending = 0;
     let observer: IntersectionObserver;
     const prepared = new WeakSet<HTMLElement>();
     const prepare = async (item: HTMLElement) => {
@@ -10,17 +12,26 @@ export const observeFontPreview = (listElement: HTMLElement,
         }
         prepared.add(item);
         observer?.unobserve(item);
+        if (pending++ === 0) {
+            onLoadingChange?.(true);
+        }
         try {
             applyFont(label, item);
             const style = getComputedStyle(label);
             await document.fonts?.load(`${style.fontWeight} ${style.fontSize} ${style.fontFamily}`, label.textContent);
         } catch (error) {
             // 字体加载失败时使用界面字体，确保名称仍可阅读和选择。
-            label.style.removeProperty("font-family");
-            label.style.removeProperty("font-weight");
+            if (!closed) {
+                label.style.removeProperty("font-family");
+                label.style.removeProperty("font-weight");
+            }
         } finally {
+            pending--;
             if (!closed) {
                 label.style.removeProperty("visibility");
+                if (pending === 0) {
+                    onLoadingChange?.(false);
+                }
             }
         }
     };

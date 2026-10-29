@@ -1,9 +1,14 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"net/http/httptest"
@@ -47,7 +52,7 @@ func TestAPIContractPetalSettingsWindow(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
-	util.DataDir = t.TempDir()
+	util.DataDir = testutil.PublicDataDir(t)
 	t.Cleanup(func() { model.Conf, util.DataDir = originalConf, originalDataDir })
 	for _, name := range []string{"opted", "legacy"} {
 		dir := filepath.Join(util.DataDir, "plugins", name)

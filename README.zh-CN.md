@@ -11,7 +11,7 @@
 <a title="Docker Image Size" target="_blank" href="https://hub.docker.com/r/b3log/siyuan"><img src="https://img.shields.io/docker/image-size/b3log/siyuan.svg?style=flat-square&color=ff96b4"></a>
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 <br>
-<a title="AGPLv3" target="_blank" href="https://www.gnu.org/licenses/agpl-3.0.txt"><img src="http://img.shields.io/badge/license-AGPLv3-orange.svg?style=flat-square"></a>
+<a title="AGPLv3" target="_blank" href="https://www.gnu.org/licenses/agpl-3.0.txt"><img src="https://img.shields.io/badge/license-AGPLv3-orange.svg?style=flat-square"></a>
 <a title="Code Size" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://img.shields.io/github/languages/code-size/siyuan-note/siyuan.svg?style=flat-square&color=yellow"></a>
 <a title="GitHub Pull Requests" target="_blank" href="https://github.com/siyuan-note/siyuan/pulls"><img src="https://img.shields.io/github/issues-pr-closed/siyuan-note/siyuan.svg?style=flat-square&color=FF9966"></a>
 <br>
@@ -28,6 +28,7 @@
 | <b>中文</b>
 | <a href="README.ja.md">日本語</a>
 | <a href="README.tr.md">Türkçe</a>
+| <a href="README.pt-BR.md">Português</a>
 </p>
 
 ---
@@ -202,6 +203,8 @@
 
 更多的参数可参考 `--help`。下面是一条启动命令示例：
 
+请先将 `AuthCode` 设置为你自己的强密码（Bash 中使用 `export AuthCode='你的强密码'`，Compose 也可从同目录的 `.env` 文件读取）。未设置或为空时，示例会报错并停止。
+
 ```bash
 docker run -d \
   -v workspace_dir_host:workspace_dir_container \
@@ -211,7 +214,7 @@ docker run -d \
   b3log/siyuan \
   serve \
   --workspace=workspace_dir_container \
-  --accessAuthCode=xxx
+  --accessAuthCode="${AuthCode:?Set AuthCode}"
 ```
 
 - `PUID`: 自定义用户 ID（可选，如果未提供，默认为 `1000`）
@@ -235,6 +238,8 @@ docker run -d \
 
 为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 `workspace_dir_host` 和 `workspace_dir_container` 都配置为 `/siyuan/workspace`，对应的启动命令示例：
 
+请先将 `AuthCode` 设置为你自己的强密码（Bash 中使用 `export AuthCode='你的强密码'`，Compose 也可从同目录的 `.env` 文件读取）。未设置或为空时，示例会报错并停止。
+
 ```bash
 docker run -d \
   -v /siyuan/workspace:/siyuan/workspace \
@@ -244,19 +249,21 @@ docker run -d \
   b3log/siyuan \
   serve \
   --workspace=/siyuan/workspace/ \
-  --accessAuthCode=xxx
+  --accessAuthCode="${AuthCode:?Set AuthCode}"
 ```
 
 #### Docker Compose
 
 对于使用 Docker Compose 运行思源的用户，可以通过环境变量 `PUID` 和 `PGID` 来自定义用户和组的 ID。下面是一个 Docker Compose 配置示例：
 
+请先将 `AuthCode` 设置为你自己的强密码（Bash 中使用 `export AuthCode='你的强密码'`，Compose 也可从同目录的 `.env` 文件读取）。未设置或为空时，示例会报错并停止。
+
 ```yaml
 version: "3.9"
 services:
   main:
     image: b3log/siyuan
-    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode:?Set AuthCode}']
     ports:
       - 6806:6806
     volumes:
@@ -271,14 +278,14 @@ services:
 
 在此设置中：
 
-- PUID “和 ”PGID "是动态设置并传递给容器的
+- `PUID` 和 `PGID` 是动态设置并传递给容器的
 - 如果没有提供这些变量，则使用默认的 `1000`
 
 在环境中指定 `PUID` 和 `PGID` 后，就无需在 compose 文件中明确设置 `user` 指令（`user: '1000:1000'`）。容器将在启动时根据这些环境变量动态调整用户和组。
 
 #### 用户权限
 
-在镜像中，“entrypoint.sh ”脚本确保以指定的 “PUID ”和 “PGID ”创建 “siyuan ”用户和组。因此，当主机创建工作区文件夹时，请注意设置文件夹的用户和组所有权，使其与计划使用的 `PUID` 和 `PGID` 匹配。例如
+在镜像中，`entrypoint.sh` 脚本确保以指定的 `PUID` 和 `PGID` 创建 `siyuan` 用户和组。因此，当主机创建工作区文件夹时，请注意设置文件夹的用户和组所有权，使其与计划使用的 `PUID` 和 `PGID` 匹配。例如：
 
 ```bash
 chown -R 1001:1002 /siyuan/workspace
@@ -347,7 +354,7 @@ Docker 部署的限制同样适用：仅支持浏览器访问，不支持桌面�
 ```
 Web UI: 6806
 Container Port: 6806
-Container Path: /home/siyuan
+Container Path: /siyuan/workspace
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
@@ -374,18 +381,21 @@ chmod 755 /mnt/Pool_1/Apps_Data/siyuan
 
 模板参考：
 
+部署前，请将下面的 `SIYUAN_ACCESS_AUTH_CODE=` 补全为你自己的强密码；不要留空。
+
 ```yaml
 services:
   siyuan:
     image: b3log/siyuan
     container_name: siyuan
-    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    command: ['serve', '--workspace=/siyuan/workspace/']
     ports:
       - 6806:6806
     volumes:
       - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
     restart: unless-stopped
     environment:
+      - SIYUAN_ACCESS_AUTH_CODE=
       - TZ=Asia/Shanghai  # 按需替换为你的时区
       - PUID=1001
       - PGID=1002
@@ -422,7 +432,7 @@ services:
 #### 访问思源笔记
 
 - 如果你填写了域名，请在浏览器输入域名访问
-- 如你选择了 `IP+端口`，请在浏览器地输入 `http://<宝塔面板IP>:6806` 访问
+- 如你选择了 `IP+端口`，请在浏览器中输入 `http://<宝塔面板IP>:6806` 访问
 
 </details>
 
@@ -481,7 +491,7 @@ services:
 #### 访问思源笔记
 
 - 如果你通过`OpenResty`反向代理反代了网站，并且填写了域名，请在浏览器输入`域名`访问
-- 如你选择了 `端口外部访问`，请在浏览器地输入 `http://<1Panel面板IP>:6806` 访问
+- 如你选择了 `端口外部访问`，请在浏览器中输入 `http://<1Panel面板IP>:6806` 访问
 
 </details>
 
@@ -492,6 +502,8 @@ services:
 ## ⌨️ 命令行接口
 
 内置 CLI，直接访问工作空间数据，无需启动内核服务。
+
+CLI 不支持操作加密笔记本；请通过应用内的专用流程解锁和操作。
 
 ### 快速开始
 
@@ -576,7 +588,7 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
 - `widgets` 用于保存挂件
 - `plugins` 用于保存插件
 - `public` 用于保存公开的数据
-- 其余文件夹就是用户自己创建的笔记本文件夹，笔记本文件夹下 `.sy` 后缀的文件用于保存文档数据，数据格式为 JSON
+- 其余笔记本文件夹用于保存文档数据。普通笔记本的 `.sy` 文档以 JSON 保存，加密笔记本的 `.sy` 文档以密文保存。
 
 ### 支持通过第三方同步盘进行数据同步吗？
 
@@ -612,14 +624,18 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
 
 ### 数据仓库密钥遗失怎么办？
 
-- 如果之前在多个设备上正确初始化过数据仓库密钥的话，那么该密钥在所有设备上都是相同的，可以在 <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>本地数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>复制密钥字符串</kbd> 找回
+数据仓库密钥用于快照和同步，与加密笔记本的主密码及密钥备份不同。重置数据仓库不能恢复遗失的加密笔记本主密码，也不能替代匹配的加密密钥备份。
+
+重置前，请先正常退出思源并备份完整工作空间；如有加密笔记本，还应单独保存匹配的加密密钥备份，并确认主密码可用。完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧同步目录和云端快照。
+
+- 如果之前在多个设备上正确初始化过数据仓库密钥的话，那么该密钥在所有设备上都是相同的，可以在 <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>复制密钥字符串</kbd> 找回
 - 如果之前没有正确配置（比如多个设备上密钥不一致）或者所有设备均不可用，已经无法获得密钥字符串，则可通过如下步骤重置密钥：
 
-  1. 手动备份好数据，可通过 <kbd>导出 Data</kbd> 或者直接在文件系统上复制 <kbd>工作空间/data/</kbd> 文件夹
-  2. <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>本地数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>重置数据仓库</kbd>
+  1. 正常退出思源后，备份完整工作空间；如有加密笔记本，同时保留匹配的加密密钥备份和主密码
+  2. <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>重置数据仓库</kbd>
   3. 重新初始化数据仓库密钥，在一台设备上初始化密钥以后，其他设备导入密钥
-  4. 云端使用新的同步目录，旧的同步目录已经无法使用，可以删除
-  5. 已有的云端快照已经无法使用，可以删除
+  4. 云端改用新的同步目录；完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧同步目录
+  5. 完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧云端快照
 
 ### 使用需要付费吗？
 

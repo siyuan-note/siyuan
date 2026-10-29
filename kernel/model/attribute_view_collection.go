@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -6,9 +10,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -24,6 +30,7 @@ import (
 )
 
 type attributeViewCollectionState struct {
+	indexes   map[string]*av.BlockCollectionIndex
 	checked   map[string]bool
 	before    map[string]*parse.Tree
 	views     map[string]*av.AttributeView
@@ -33,21 +40,10 @@ type attributeViewCollectionState struct {
 }
 
 func collectionScopeMatches(source *av.AutomationBlockSource, tree *parse.Tree) bool {
-	if source == nil || tree == nil {
-		return false
-	}
-	if slices.Contains(source.NotebookIDs, tree.Box) {
-		return true
-	}
-	for _, id := range source.DocumentIDs {
-		if tree.ID == id || strings.Contains(tree.Path, "/"+id+"/") {
-			return true
-		}
-	}
-	return false
+	return tree != nil && source.MatchesDocument(tree.Box, tree.ID, tree.Path)
 }
 
-func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node) bool {
+func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.Node, attributes []func(*ast.Node) bool) bool {
 	if len(source.Types) > 0 {
 		typ := treenode.TypeAbbr(node.Type.String())
 		matched := slices.Contains(source.Types, typ)
@@ -58,8 +54,8 @@ func collectionBlockConditionsMatch(source *av.AutomationBlockSource, node *ast.
 			return false
 		}
 	}
-	return collectionConditionsMatch(source.Attributes, source.AttributeMatch, func(attr *av.AutomationBlockAttribute) bool {
-		return collectionAttributeMatches(attr, node)
+	return collectionConditionsMatch(attributes, source.AttributeMatch, func(matches func(*ast.Node) bool) bool {
+		return matches(node)
 	})
 }
 
@@ -96,6 +92,13 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 	if !collectionScopeMatches(source, tree) {
 		return ret
 	}
+	attributes := make([]func(*ast.Node) bool, 0, len(source.Attributes))
+	for _, attr := range source.Attributes {
+		attributes = append(attributes, collectionAttributeMatcher(attr))
+	}
+	if source.ReferenceID != "" {
+		return collectionReferenceMatches(source, tree, attributes)
+	}
 	var containers []*ast.Node
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -108,14 +111,14 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 			return ast.WalkContinue
 		}
 		if len(source.Tags) == 0 {
-			if collectionBlockConditionsMatch(source, node) {
+			if collectionBlockConditionsMatch(source, node, attributes) {
 				ret[node.ID] = true
 			}
 			return ast.WalkContinue
 		}
 		if source.TagTarget == "container" && node.IsContainerBlock() &&
 			(node.Type != ast.NodeDocument || slices.Contains(source.Types, "d")) &&
-			collectionBlockConditionsMatch(source, node) {
+			collectionBlockConditionsMatch(source, node, attributes) {
 			containers = append(containers, node)
 		}
 		if !collectionTagsMatch(source, node) {
@@ -128,15 +131,15 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 				target = containers[len(containers)-1]
 			}
 		case "block":
-			if collectionBlockConditionsMatch(source, node) {
+			if collectionBlockConditionsMatch(source, node, attributes) {
 				target = node
 			}
 		default:
 			parent := node.Parent
 			if parent != nil && parent.Type == ast.NodeListItem && treenode.FirstLeafBlock(parent) == node &&
-				collectionBlockConditionsMatch(source, parent) {
+				collectionBlockConditionsMatch(source, parent, attributes) {
 				target = parent
-			} else if collectionBlockConditionsMatch(source, node) {
+			} else if collectionBlockConditionsMatch(source, node, attributes) {
 				target = node
 			}
 		}
@@ -159,28 +162,96 @@ func collectionConditionsMatch[T any](values []T, mode string, matches func(T) b
 	return !slices.ContainsFunc(values, func(value T) bool { return !matches(value) })
 }
 
-func collectionAttributeMatches(attr *av.AutomationBlockAttribute, node *ast.Node) bool {
-	if attr == nil {
-		return false
+// 每次扫描文档前编译名称条件，避免按块重复编译正则；非法条件始终不匹配。
+func collectionAttributeMatcher(attr *av.AutomationBlockAttribute) func(*ast.Node) bool {
+	invalid := func(*ast.Node) bool { return false }
+	pattern, err := validateCollectionAttribute(attr)
+	if err != nil {
+		return invalid
 	}
-	value, present := "", false
-	for _, pair := range node.KramdownIAL {
-		if len(pair) == 2 && pair[0] == attr.Name {
-			value, present = util.UnescapeHTML(pair[1]), true
-			break
+	matchesName := func(name string) bool { return name == attr.Name }
+	switch attr.NameOperator {
+	case "contains":
+		matchesName = func(name string) bool { return strings.Contains(name, attr.Name) }
+	case "regex":
+		matchesName = pattern.MatchString
+	}
+	return func(node *ast.Node) bool {
+		for _, pair := range node.KramdownIAL {
+			if len(pair) != 2 || !strings.HasPrefix(pair[0], "custom-") || !matchesName(pair[0]) {
+				continue
+			}
+			value := util.UnescapeHTML(pair[1])
+			switch attr.Operator {
+			case "equals":
+				if value == attr.Value {
+					return true
+				}
+			case "contains":
+				if strings.Contains(value, attr.Value) {
+					return true
+				}
+			case "exists":
+				return true
+			case "notExists":
+				return false
+			}
+		}
+		return attr.Operator == "notExists"
+	}
+}
+
+func validateCollectionAttribute(attr *av.AutomationBlockAttribute) (*regexp.Regexp, error) {
+	if attr == nil || attr.Name == "" || len(attr.Name) > 256 ||
+		!slices.Contains([]string{"equals", "contains", "exists", "notExists"}, attr.Operator) {
+		return nil, fmt.Errorf("invalid collection attribute")
+	}
+	switch attr.NameOperator {
+	case "", "equals":
+		if !strings.HasPrefix(attr.Name, "custom-") || len(attr.Name) <= len("custom-") || !isValidAttrName(attr.Name) {
+			return nil, fmt.Errorf("invalid collection attribute name")
+		}
+	case "contains":
+		if !validateChars(attr.Name, 0, len(attr.Name)) {
+			return nil, fmt.Errorf("invalid collection attribute name")
+		}
+	case "regex":
+		pattern, err := regexp.Compile(attr.Name)
+		if err != nil {
+			return nil, fmt.Errorf("invalid collection attribute name expression: %w", err)
+		}
+		return pattern, nil
+	default:
+		return nil, fmt.Errorf("invalid collection attribute name operator")
+	}
+	return nil, nil
+}
+
+// 新增范围最多包含 32 项；既有超限规则可保留或删减，读取和事务重放继续使用原校验。
+func blockCollectionScopeCanSave(source, previous *av.AutomationBlockSource) bool {
+	keys := func(source *av.AutomationBlockSource) map[string]bool {
+		ret := map[string]bool{}
+		if source != nil {
+			for _, id := range source.NotebookIDs {
+				ret["notebook:"+id] = true
+			}
+			for _, id := range source.DocumentIDs {
+				ret["document:"+id] = true
+			}
+		}
+		return ret
+	}
+	current := keys(source)
+	if len(current) <= 32 {
+		return true
+	}
+	old := keys(previous)
+	for key := range current {
+		if !old[key] {
+			return false
 		}
 	}
-	switch attr.Operator {
-	case "equals":
-		return present && value == attr.Value
-	case "contains":
-		return present && strings.Contains(value, attr.Value)
-	case "exists":
-		return present
-	case "notExists":
-		return !present
-	}
-	return false
+	return true
 }
 
 func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule *av.AutomationRule, boxID string) error {
@@ -189,6 +260,9 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		len(source.NotebookIDs)+len(source.DocumentIDs) > 100 || len(source.Tags) > 20 || len(source.Attributes) > 20 ||
 		len(rule.Conditions) != 0 || rule.KeyID != "" || len(rule.Actions) != 1 {
 		return fmt.Errorf("invalid block collection source")
+	}
+	if source.DocumentDepth != nil && *source.DocumentDepth < 0 {
+		return fmt.Errorf("invalid block collection document depth")
 	}
 	if !slices.Contains([]string{"", "and", "or"}, source.TagMatch) ||
 		!slices.Contains([]string{"", "and", "or"}, source.AttributeMatch) ||
@@ -206,6 +280,15 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 			return fmt.Errorf("invalid block collection document [%s]", id)
 		}
 	}
+	if source.ReferenceID != "" {
+		if !ast.IsNodeIDPattern(source.ReferenceID) {
+			return fmt.Errorf("invalid block collection reference [%s]", source.ReferenceID)
+		}
+		if attributeViewBindingBlockTree(source.ReferenceID, boxID) == nil {
+			return unavailableAutomationReference("automationCollectionReference", source.ReferenceID,
+				fmt.Sprintf("unavailable block collection reference [%s]", source.ReferenceID))
+		}
+	}
 	for _, typ := range source.Types {
 		if !av.IsAutomationBlockType(typ) {
 			return fmt.Errorf("invalid block collection type [%s]", typ)
@@ -217,10 +300,8 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		}
 	}
 	for _, attr := range source.Attributes {
-		if attr == nil || !strings.HasPrefix(attr.Name, "custom-") || len(attr.Name) <= len("custom-") ||
-			len(attr.Name) > 256 || !isValidAttrName(attr.Name) ||
-			!slices.Contains([]string{"equals", "contains", "exists", "notExists"}, attr.Operator) {
-			return fmt.Errorf("invalid collection attribute")
+		if _, err := validateCollectionAttribute(attr); err != nil {
+			return err
 		}
 	}
 	action := rule.Actions[0]
@@ -251,7 +332,7 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 func (tx *Transaction) collectionState() *attributeViewCollectionState {
 	if tx.attributeViewCollections == nil {
 		tx.attributeViewCollections = &attributeViewCollectionState{checked: map[string]bool{}, before: map[string]*parse.Tree{},
-			views: map[string]*av.AttributeView{}, requested: map[string]map[string][]string{}}
+			views: map[string]*av.AttributeView{}, requested: map[string]map[string][]string{}, indexes: map[string]*av.BlockCollectionIndex{}}
 	}
 	return tx.attributeViewCollections
 }
@@ -272,19 +353,33 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 	if !observesBlocks {
 		return nil
 	}
-	state := tx.collectionState()
+	return tx.captureDocumentCollectionTree(tree)
+}
+
+// Non-editor document replacements use the same before/after collection capture.
+func (tx *Transaction) captureDocumentCollectionTree(tree *parse.Tree) (captureErr error) {
+	if !tx.fromAPI || tx.isReplay || tree == nil {
+		return nil
+	}
 	defer func() {
 		if captureErr != nil {
-			state.err = captureErr
+			tx.collectionState().err = captureErr
 		}
 	}()
-	if state.running || state.checked[tree.ID] {
+	state := tx.attributeViewCollections
+	if state != nil && (state.running || state.checked[tree.ID] || state.err != nil) {
 		return state.err
 	}
-	state.checked[tree.ID] = true
 	boxID := ""
 	if IsEncryptedBox(tree.Box) {
 		boxID = tree.Box
+	}
+	var index *av.BlockCollectionIndex
+	if state != nil {
+		index = state.indexes[boxID]
+	}
+	if index == nil && av.BlockCollectionIndexKnownEmpty(boxID) {
+		return nil
 	}
 	if boxID != "" {
 		if tx.attributeViewRollback == nil {
@@ -297,14 +392,27 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 			tx.attributeViewRollback.leases[boxID] = true
 		}
 	}
-	ids, err := av.BlockCollectionViewIDsInBox(boxID)
-	if err != nil {
-		return err
+	if index == nil || !index.Current() {
+		var err error
+		index, err = av.BlockCollectionIndexInBox(boxID)
+		if err != nil {
+			return err
+		}
+		if index.Empty() {
+			return nil
+		}
+		state = tx.collectionState()
+		state.indexes[boxID] = index
+	}
+	state.checked[tree.ID] = true
+	if !index.MatchesDocument(tree.Box, tree.ID, tree.Path) {
+		return nil
 	}
 	matched := false
-	for _, id := range ids {
+	for id := range index.ViewIDsForDocument(tree.Box, tree.ID, tree.Path) {
 		view := state.views[boxID+"/"+id]
 		if view == nil {
+			var err error
 			view, err = av.ParseAttributeViewForIndexInBox(id, boxID)
 			if errors.Is(err, av.ErrViewNotFound) {
 				continue
@@ -333,7 +441,7 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 	if tx.attributeViewRollback == nil {
 		tx.attributeViewRollback = &attributeViewRollback{views: map[string]*av.AttributeView{}, trees: map[string]*parse.Tree{}, leases: map[string]bool{}}
 	}
-	original, err := filesys.LoadTree(tree.Box, tree.Path, tx.luteEngine)
+	original, _, err := filesys.LoadTreeSnapshot(tree.Box, tree.Path, tx.luteEngine)
 	if err != nil {
 		if _, statErr := os.Stat(filepath.Join(util.DataDir, tree.Box, tree.Path)); !os.IsNotExist(statErr) {
 			return err
@@ -345,6 +453,85 @@ func (tx *Transaction) captureCollectionTree(tree *parse.Tree) (captureErr error
 		tx.attributeViewRollback.trees[tree.ID] = original
 	}
 	return nil
+}
+
+// Caller holds flushLock and has checked the replacement's source bytes.
+func writeDocumentWithCollections(tree *parse.Tree, write func(*parse.Tree) error) (handled bool, err error) {
+	return writeDocumentsWithCollections([]*parse.Tree{tree}, nil, write)
+}
+
+// collectDocumentChanges observes committed user-created or moved documents. An explicit
+// nil before snapshot represents creation; import, sync and recovery never call this entry.
+// Rollback snapshots come from the committed after locations, not the old matching scope.
+// Caller holds flushLock until collection and its document writes finish.
+func collectDocumentChanges(before map[string]*parse.Tree, after []*parse.Tree) error {
+	_, err := writeDocumentsWithCollections(after, before, nil)
+	return err
+}
+
+func documentCollectionIndex(boxID string) (*av.BlockCollectionIndex, error) {
+	boundary := ""
+	if IsEncryptedBox(boxID) {
+		boundary = boxID
+	}
+	if av.BlockCollectionIndexKnownEmpty(boundary) {
+		return nil, nil
+	}
+	return av.BlockCollectionIndexInBox(boundary)
+}
+
+func writeDocumentsWithCollections(after []*parse.Tree, before map[string]*parse.Tree,
+	write func(*parse.Tree) error) (handled bool, err error) {
+	tx := &Transaction{fromAPI: true, m: &sync.Mutex{}}
+	if err = tx.begin(); err != nil {
+		return false, err
+	}
+	defer func() {
+		if tx.state.Load() == 1 {
+			tx.rollback()
+		}
+	}()
+	for _, tree := range after {
+		if err = tx.captureDocumentCollectionTree(tree); err != nil {
+			return true, err
+		}
+	}
+	if tx.attributeViewCollections == nil || len(tx.attributeViewCollections.before) == 0 {
+		return false, nil
+	}
+	sources := map[string]bool{}
+	for _, tree := range after {
+		if _, captured := tx.attributeViewCollections.before[tree.ID]; !captured {
+			continue
+		}
+		if before != nil {
+			tx.attributeViewCollections.before[tree.ID] = before[tree.ID]
+		}
+		sources[tree.ID] = true
+		tx.trees[tree.ID] = tree
+		if write != nil {
+			// Content templates may introduce blocks that collection must resolve before commit.
+			treenode.UpsertBlockTreePending(tree)
+		}
+	}
+	if err = tx.runAttributeViewCollections(); err != nil {
+		return true, err
+	}
+	if write == nil {
+		// The file operation already committed its sources; persist only new binding changes.
+		for id := range tx.trees {
+			if tx.indexChanges[id] == nil {
+				delete(tx.trees, id)
+			}
+		}
+	}
+	tx.writeTransactionTree = func(changed *parse.Tree) error {
+		if write != nil && sources[changed.ID] {
+			return write(changed)
+		}
+		return writeTreeUpsertQueue(changed)
+	}
+	return true, tx.commit()
 }
 
 func collectionNodes(tree *parse.Tree) map[string]*ast.Node {
@@ -658,6 +845,13 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 		if before != nil {
 			continue
 		}
+		if tree := tx.trees[id]; tree != nil && tx.documentSource(tree) != nil {
+			continue
+		}
+		if tx.attributeViewRollback != nil && tx.attributeViewRollback.trees[id] != nil {
+			// A committed copy has a rollback baseline even though its matching "before" is empty.
+			continue
+		}
 		tree := tx.trees[id]
 		if tree == nil {
 			continue
@@ -678,6 +872,7 @@ func (tx *Transaction) rollbackCollectionCreatedTrees() {
 // 属性 API 仍不生成编辑器撤销记录，但与自动收集共同提交；没有收集规则时沿用普通属性路径。
 func performCollectionAttributeOperations(attrs []map[string]any, batch bool) (bool, error) {
 	before := map[string]*parse.Tree{}
+	indexes := map[string]*av.BlockCollectionIndex{}
 	active := false
 	for _, item := range attrs {
 		id := item["id"].(string)
@@ -690,11 +885,18 @@ func performCollectionAttributeOperations(attrs []map[string]any, batch bool) (b
 		if IsEncryptedBox(tree.Box) {
 			boxID = tree.Box
 		}
-		ids, err := av.BlockCollectionViewIDsInBox(boxID)
-		if err != nil {
-			return false, err
+		index := indexes[boxID]
+		if index == nil && av.BlockCollectionIndexKnownEmpty(boxID) {
+			continue
 		}
-		active = active || len(ids) > 0
+		if index == nil || !index.Current() {
+			index, err = av.BlockCollectionIndexInBox(boxID)
+			if err != nil {
+				return false, err
+			}
+			indexes[boxID] = index
+		}
+		active = active || index.MatchesDocument(tree.Box, tree.ID, tree.Path)
 	}
 	if !active {
 		return false, nil

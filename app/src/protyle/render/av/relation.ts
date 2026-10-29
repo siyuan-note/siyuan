@@ -55,7 +55,7 @@ interface IOpenSearchAVOptions {
 const RELATION_PAGE_SIZE = 16;
 const relationItemPreviews = new WeakMap<HTMLElement, {keyword: string, preview: AVRelationItemPreview}>();
 
-const SEARCH_AV_LOADING_HTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">';
+const SEARCH_AV_LOADING_HTML = '<div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
 
 const genSearchList = (element: Element, keyword: string, options: IOpenSearchAVOptions, signal: AbortSignal,
                        cb?: () => void) => {
@@ -524,7 +524,7 @@ ${!preview || preview.error || creating ? "disabled" : ""} title="${escapeAttr(p
 };
 
 const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
-    return `<img data-relation-type="loader" class="${loading ? "" : "fn__none"}" style="${visible ? "" : "visibility: hidden;"}margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">`;
+    return `<div data-relation-type="loader" class="fn__flex${loading ? "" : " fn__none"}" style="${visible ? "" : "visibility: hidden;"}height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>`;
 };
 
 export const bindRelationEvent = (options: {

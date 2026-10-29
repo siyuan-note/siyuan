@@ -15,7 +15,7 @@ import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 
-interface FilterEditorOptions {
+export interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
     keyID?: string;
     save?: (filters: IAVFilter[]) => void;
@@ -196,12 +196,16 @@ export const addFilter = (options: {
                     targetGroupFilters.push(filter);
                     const blockID = options.blockElement.getAttribute("data-node-id");
                     // 保存新增的占位条件，inline 控件立即可编辑（无需弹层）
-                    transaction(options.protyle, [
-                        getSetFiltersOperation(options.avId, blockID,
-                            JSON.parse(JSON.stringify(options.data.view.filters)), options.filterOperation)
-                    ], [
-                        getSetFiltersOperation(options.avId, blockID, oldFilters, options.filterOperation)
-                    ]);
+                    if (options.filterOperation?.save) {
+                        options.filterOperation.save(options.data.view.filters);
+                    } else {
+                        transaction(options.protyle, [
+                            getSetFiltersOperation(options.avId, blockID,
+                                JSON.parse(JSON.stringify(options.data.view.filters)), options.filterOperation)
+                        ], [
+                            getSetFiltersOperation(options.avId, blockID, oldFilters, options.filterOperation)
+                        ]);
+                    }
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height, 0, true);
                 }
@@ -773,7 +777,7 @@ ${genRelationFilterTriggerContent(avID, selectedBlockIDs, path)}<svg class="av__
 };
 
 // readInlineValue 从叶子行内 DOM 读取值，按类型返回 { value, relativeDate, relativeDate2 }。
-// 修正点①：date 用 data-type 精确定位，废弃全局 textElements 索引。
+// date 值按 data-type 定位，不依赖全局 textElements 索引。
 const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: string, filter: IAVFilter, menuElement: HTMLElement): { newValue: IAVCellValue, relativeDate: IAVRelativeDate, relativeDate2: IAVRelativeDate } => {
     let newValue: IAVCellValue = filter.value;
     let relativeDate: IAVRelativeDate = filter.relativeDate;
@@ -808,7 +812,7 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
         const val = input?.value || "";
         newValue = val ? genCellValue(valueType, val) : genEmptyCellValue(valueType);
     } else if (isAVDateType(valueType)) {
-        // 修正点①：用 data-type 精确定位绝对日期 input
+        // 绝对日期 input 按 data-type 定位
         const dateTypeSel = rowElement.querySelector('[data-type="dateType"]') as HTMLSelectElement;
         const isRelative = dateTypeSel?.value === "custom";
         if (isRelative) {

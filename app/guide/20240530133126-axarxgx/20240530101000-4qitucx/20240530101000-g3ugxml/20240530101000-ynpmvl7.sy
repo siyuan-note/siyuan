@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20261009153000"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-abyxmop",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -31,12 +31,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-xzu9gq7",
-				"updated": "20260809232000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "コンテンツブロックをフラッシュカードとして設定すると、システムは間隔反復アルゴリズムFSRS（GitHub repo: open-spaced-repetition/go-fsrs）によって自動的に復習をスケジュールし、忘却の臨界点で復習を促して短期記憶を長期記憶に変換します。"
+					"Data": "ブロックをフラッシュカードにすると、間隔反復でノートを復習できます。SiYuan は FSRS を使い、復習時の評価に応じて次回の日時を決めます。既存のノートをそのまま使えるため、別のカードへ書き直す必要はありません。"
 				}
 			]
 		},
@@ -46,7 +46,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-wa0impz",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -61,7 +61,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194342-ubj6k3j",
-				"updated": "20261009153000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -277,7 +277,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-j0b2uqb",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -291,7 +291,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -300,7 +300,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ で調整できます。"
+					"Data": " で調整できます。"
 				}
 			]
 		},
@@ -850,7 +850,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194342-lme1lzb",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -864,7 +864,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194342-ym036b7",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -874,7 +874,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -883,7 +883,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ では、フラッシュカードのグローバル設定を調整できます。"
+					"Data": " では、フラッシュカードのグローバル設定を調整できます。"
 				},
 				{
 					"Type": "NodeTextMark",

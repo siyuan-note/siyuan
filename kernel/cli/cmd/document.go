@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cmd
 
@@ -225,7 +213,7 @@ var documentMoveCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		targetPath, err := resolveDocumentMovePath(toNotebook, toPath, hpath, tree.HPath)
+		targetPath, err := resolveDocumentMovePath(toNotebook, toPath, hpath, treenode.ReadDocumentTitle(tree.Root).Text)
 		if err != nil {
 			return err
 		}
@@ -262,7 +250,9 @@ var documentDuplicateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		model.DuplicateDoc(tree)
+		if err = model.DuplicateDoc(tree); err != nil {
+			return err
+		}
 		model.AppendPushReloadFiletreeEntry()
 		fmt.Println(tree.ID)
 		return nil
@@ -297,13 +287,19 @@ var documentInfoCmd = &cobra.Command{
 }
 
 func resolvePath(boxID, userPath, hpath string) (string, error) {
-	return resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
-		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
-		if nil == bt {
+	var lookupErr error
+	result, err := resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
+		var bt *treenode.BlockTree
+		bt, lookupErr = model.ResolveLegacyDocumentPath(boxID, targetHPath, false)
+		if lookupErr != nil || bt == nil {
 			return "", false
 		}
 		return bt.Path, true
 	})
+	if lookupErr != nil {
+		return "", lookupErr
+	}
+	return result, err
 }
 
 func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, bool)) (string, error) {
@@ -324,18 +320,24 @@ func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, 
 	return "", fmt.Errorf("target human-readable path not found: %s", targetHPath)
 }
 
-func resolveDocumentMovePath(boxID, userPath, hpath, sourceHPath string) (string, error) {
-	return resolveDocumentMovePathWithLookup(userPath, hpath, sourceHPath, func(targetHPath string) (string, bool) {
-		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
-		if nil == bt {
+func resolveDocumentMovePath(boxID, userPath, hpath, sourceTitle string) (string, error) {
+	var lookupErr error
+	result, err := resolveDocumentMovePathWithLookup(userPath, hpath, sourceTitle, func(targetHPath string) (string, bool) {
+		var bt *treenode.BlockTree
+		bt, lookupErr = model.ResolveLegacyDocumentPath(boxID, targetHPath, true)
+		if lookupErr != nil || bt == nil {
 			return "", false
 		}
 		return bt.Path, true
 	})
+	if lookupErr != nil {
+		return "", lookupErr
+	}
+	return result, err
 }
 
 func resolveDocumentMovePathWithLookup(
-	userPath, hpath, sourceHPath string,
+	userPath, hpath, sourceTitle string,
 	lookup func(string) (string, bool),
 ) (string, error) {
 	if "" != userPath {
@@ -350,7 +352,6 @@ func resolveDocumentMovePathWithLookup(
 		return "/", nil
 	}
 
-	sourceTitle := path.Base(path.Clean(sourceHPath))
 	if sourceTitle == path.Base(targetHPath) {
 		targetHPath = path.Dir(targetHPath)
 		if "/" == targetHPath {
@@ -386,7 +387,7 @@ var documentSearchCmd = &cobra.Command{
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "TYPE\tID\tNAME\tHPATH")
 			for _, d := range docs {
-				typ, id, name := documentSearchDisplayFields(d)
+				typ, id, name := model.SearchDocDisplayFields(d)
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", typ, id, name, d["hPath"])
 			}
 			w.Flush()
@@ -394,14 +395,6 @@ var documentSearchCmd = &cobra.Command{
 		}
 		return nil
 	},
-}
-
-func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
-	hPath := strings.TrimSuffix(doc["hPath"], "/")
-	if "/" == doc["path"] {
-		return "NOTEBOOK", doc["box"], path.Base(hPath)
-	}
-	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), path.Base(hPath)
 }
 
 func printDocumentTable(files []*model.File) {

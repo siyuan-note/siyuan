@@ -24,24 +24,21 @@ export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLEleme
         return block ? (isInEmbedBlock(block) || block) as HTMLElement : undefined;
     };
     return bindBlockDragSelectionGesture(element, () => protyle.contentElement, {
-        canStart: source => !!protyle.gutter && !protyle.disabled &&
+        canStart: () => !!protyle.gutter && !protyle.disabled &&
             !window.siyuan.touchDragActive && !element.closest(".sy__backlink--bottom") &&
             !element.classList.contains("fn__pointer-none") &&
             // iPad 保留可跨块编辑的正文宿主，鼠标继续使用其原生文字选区。
-            (source === "touch" || element.getAttribute("contenteditable") === "false"),
-        isMultiSelectMode: () => protyle.toolbar.isMultiSelectMode(),
-        getStartBlock: (target, source) => {
+            element.getAttribute("contenteditable") === "false",
+        getStartBlock: target => {
             if (target.closest("input, textarea, select, button, a, audio, video, iframe, protyle-html, " +
                 ".protyle-action, .protyle-attr, .protyle-action__drag, .sb__resize, .protyle-custom, " +
                 ".av, .table, .protyle-wysiwyg__embed, [data-type='NodeBlockQueryEmbed'], [data-prevent-swipe]")) {
                 return undefined;
             }
-            if (source === "mouse" || !protyle.toolbar.isMultiSelectMode()) {
-                const editable = target.closest('[contenteditable="true"]');
-                if (!editable || !element.contains(editable) ||
-                    target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "true") {
-                    return undefined;
-                }
+            const editable = target.closest('[contenteditable="true"]');
+            if (!editable || !element.contains(editable) ||
+                target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "true") {
+                return undefined;
             }
             return getBlock(target);
         },
@@ -84,7 +81,7 @@ export const bindBoundedBlockDragSelect = (protyle: IProtyle, element: HTMLEleme
                 stopScrollAnimation();
             }
         },
-        finish: (_source, cancelled) => {
+        finish: cancelled => {
             selecting = false;
             element.classList.remove("protyle-wysiwyg--hiderange");
             if (!activeBlock || !element.contains(activeBlock)) {

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 //go:build fts5
 
@@ -316,22 +304,23 @@ func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
 	}
 
 	docID := "20260728000001-abcdefg"
-	arg := map[string]any{"docCreateTemplatePath": "/indexed.md"}
-	createdID, err := CreateWithMarkdown("", box.ID, "/Default template", "", "", docID, false, "", arg)
+	created, err := CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ID: docID,
+		TitleFormat: "plain", Title: "Default template", DocCreateTemplatePath: "/indexed.md"})
 	if nil != err {
 		t.Fatalf("create document with default template failed: %v", err)
 	}
-	if docID != createdID {
-		t.Fatalf("unexpected created document ID: got %s, want %s", createdID, docID)
+	if docID != created.ID {
+		t.Fatalf("unexpected created document ID: got %s, want %s", created.ID, docID)
 	}
 	assertTemplateOutputIndexed(t, docID)
 
 	attributeViewDocID := "20260728000002-abcdefg"
-	createdID, err = CreateWithMarkdown("", box.ID, "/Attribute view template", "", "", attributeViewDocID, false, "", nil)
+	created, err = CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ID: attributeViewDocID,
+		TitleFormat: "plain", Title: "Attribute view template"})
 	if nil != err {
 		t.Fatalf("create attribute view item document failed: %v", err)
 	}
-	if err = applyNewItemContentTemplate("/indexed.md", createdID); nil != err {
+	if err = applyNewItemContentTemplate("/indexed.md", created.ID); nil != err {
 		t.Fatalf("apply attribute view item content template failed: %v", err)
 	}
 	assertTemplateOutputIndexed(t, attributeViewDocID)

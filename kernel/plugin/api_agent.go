@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
@@ -27,6 +15,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -59,7 +48,7 @@ func injectAgent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 	// siyuan.agent.unregisterCapability(name) 返回 Promise<void>。
 	bindAgentUnregisterCapability(p, rt, agentAPI)
 
-	lo.Must0(ObjectFreeze(rt, agentAPI))
+	lo.Must0(gojaext.Freeze(rt, agentAPI))
 	lo.Must0(siyuan.Set("agent", agentAPI))
 	return
 }
@@ -145,7 +134,7 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 					return
 				}
 
-				if c := call.Argument(1); isJsValueNotNull(c) {
+				if c := call.Argument(1); gojaext.IsValueNotNull(c) {
 					configObj := c.ToObject(rt)
 					if configObj != nil {
 						if titleValue := configObj.Get("title"); goja.IsString(titleValue) {
@@ -161,7 +150,7 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 							err = fmt.Errorf("config.description is required and must be a string")
 							return
 						}
-						if inputSchemaValue := configObj.Get("inputSchema"); isJsValueNotNull(inputSchemaValue) {
+						if inputSchemaValue := configObj.Get("inputSchema"); gojaext.IsValueNotNull(inputSchemaValue) {
 							if inputSchema, err = jsCapabilitySchemaToGoSchema(rt, inputSchemaValue); err != nil {
 								return
 							}
@@ -169,17 +158,17 @@ func bindAgentRegisterCapability(p *KernelPlugin, rt *goja.Runtime, agentAPI *go
 							err = fmt.Errorf("config.inputSchema is required")
 							return
 						}
-						if outputSchemaValue := configObj.Get("outputSchema"); isJsValueNotNull(outputSchemaValue) {
+						if outputSchemaValue := configObj.Get("outputSchema"); gojaext.IsValueNotNull(outputSchemaValue) {
 							if outputSchema, err = jsCapabilitySchemaToGoSchema(rt, outputSchemaValue); err != nil {
 								return
 							}
 						}
-						if effectsValue := configObj.Get("effects"); isJsValueNotNull(effectsValue) {
+						if effectsValue := configObj.Get("effects"); gojaext.IsValueNotNull(effectsValue) {
 							if effects, err = jsCapabilityEffectsToGoEffects(rt, effectsValue); err != nil {
 								return
 							}
 						}
-						if actionEffectsValue := configObj.Get("actionEffects"); isJsValueNotNull(actionEffectsValue) {
+						if actionEffectsValue := configObj.Get("actionEffects"); gojaext.IsValueNotNull(actionEffectsValue) {
 							if actionEffects, err = jsCapabilityActionEffectsToGoEffects(rt, actionEffectsValue); err != nil {
 								return
 							}

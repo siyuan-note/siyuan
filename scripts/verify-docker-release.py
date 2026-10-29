@@ -65,6 +65,12 @@ def validate_rows(output, expected):
         raise ValueError(f"Expected OCR text {expected!r}, received {rows!r}")
 
 
+class KernelAPIError(ValueError):
+    def __init__(self, endpoint, result):
+        super().__init__(f"Kernel API failed: {endpoint}: {result}")
+        self.result = result
+
+
 def request(base, endpoint, token, payload=None):
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(base + endpoint, data=data,
@@ -72,8 +78,25 @@ def request(base, endpoint, token, payload=None):
     with urllib.request.urlopen(req, timeout=10) as response:
         result = json.load(response)
     if result.get("code") != 0:
-        raise ValueError(f"Kernel API failed: {endpoint}: {result}")
+        raise KernelAPIError(endpoint, result)
     return result["data"]
+
+
+def wait_notebook_ready(base, token, notebook, timeout):
+    # 创建笔记本会异步重建索引；只轮询只读接口，不重试可能已提交的文档写入。
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            request(base, "/api/filetree/getDocPaths", token, {"notebook": notebook, "ids": [notebook]})
+            return
+        except KernelAPIError as error:
+            data = error.result.get("data")
+            if not isinstance(data, dict) or data.get("reason") != "indexUnavailable":
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(f"Notebook index did not become ready: {notebook}; last response: {error}") from error
+            time.sleep(min(1, remaining))
 
 
 def verify_notebook(image, platform, version, timeout, fail_ocr, diagnostics=None):
@@ -111,9 +134,12 @@ def verify_notebook(image, platform, version, timeout, fail_ocr, diagnostics=Non
             raise ValueError("HTTP kernel version differs from release version")
         fail_ocr()
         notebook = request(base, "/api/notebook/createNotebook", token, {"name": "Docker OCR smoke"})
-        block = request(base, "/api/filetree/createDocWithMd", token,
-                        {"notebook": notebook["notebook"]["id"], "path": "/Docker smoke", "markdown": "Docker OCR smoke 123"})
-        data = request(base, "/api/block/getBlockKramdown", token, {"id": block})
+        wait_notebook_ready(base, token, notebook["notebook"]["id"], timeout)
+        block = request(base, "/api/filetree/createDocByParent", token,
+                        {"notebook": notebook["notebook"]["id"], "parentID": None,
+                         "id": time.strftime("%Y%m%d%H%M%S") + "-" + uuid.uuid4().hex[:7],
+                         "title": {"format": "plain", "text": "Docker smoke"}, "markdown": "Docker OCR smoke 123"})
+        data = request(base, "/api/block/getBlockKramdown", token, {"id": block["id"]})
         if "Docker OCR smoke 123" not in data["kramdown"]:
             raise ValueError("Notebook write/read verification failed")
     except Exception:

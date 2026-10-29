@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
@@ -27,6 +15,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -54,7 +43,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	// siyuan.storage.watcher.remove(path) -> void
 	bindStorageWatcherRemove(p, rt, watcher, resolvePath)
 
-	lo.Must0(ObjectFreeze(rt, watcher))
+	lo.Must0(gojaext.Freeze(rt, watcher))
 
 	storage := rt.NewObject()
 
@@ -73,7 +62,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	// siyuan.storage.watcher
 	lo.Must0(storage.Set("watcher", watcher))
 
-	lo.Must0(ObjectFreeze(rt, storage))
+	lo.Must0(gojaext.Freeze(rt, storage))
 
 	lo.Must0(siyuan.Set("storage", storage))
 	return
@@ -291,7 +280,12 @@ func bindStoragePut(p *KernelPlugin, rt *goja.Runtime, storage *goja.Object, res
 				return
 			}
 
+			done, admissionErr := p.beginStorageWrite()
+			if admissionErr != nil {
+				return nil, admissionErr
+			}
 			go func() (result any, err error) {
+				defer done()
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.put: %v", r)
@@ -375,7 +369,12 @@ func bindStorageRemove(p *KernelPlugin, rt *goja.Runtime, storage *goja.Object, 
 				return
 			}
 
+			done, admissionErr := p.beginStorageWrite()
+			if admissionErr != nil {
+				return nil, admissionErr
+			}
 			go func() (result any, err error) {
+				defer done()
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.remove: %v", r)

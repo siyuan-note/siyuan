@@ -30,7 +30,9 @@
     --b3-font-family-protyle: var(--b3-font-family);
     --b3-font-family-code: var(--b3-font-family-emoji-reset), "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", var(--b3-font-family), monospace;
     --b3-font-family-graph: arial;
-    --b3-font-family-emoji: "Emojis Additional", emojis;
+    /* 图标位统一使用按字形墨迹对齐的度量："Emojis Icon" 仅在 Windows 11 声明，其他平台回退到 emojis。
+       正文用的 --b3-font-family-default 仍以 emojis 兜底，保持行内表情原有的基线位置 */
+    --b3-font-family-emoji: "Emojis Additional", "Emojis Icon", emojis;
     --b3-font-family-math: KaTeX_Math;
     --b3-font-family-kbd: var(--b3-font-family-protyle);
     --b3-font-size: 14px;
@@ -265,6 +267,6 @@
     --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
 }
 
-.b3-typography .code-block, .protyle-wysiwyg .code-block {
+.b3-typography .code-block, .protyle-wysiwyg .code-block, .mindmap-view__content .code-block {
     background-color: rgba(27, 31, 35, .05);
 }

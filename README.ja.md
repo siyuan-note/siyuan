@@ -11,7 +11,7 @@
 <a title="Docker Image Size" target="_blank" href="https://hub.docker.com/r/b3log/siyuan"><img src="https://img.shields.io/docker/image-size/b3log/siyuan.svg?style=flat-square&color=ff96b4"></a>
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 <br>
-<a title="AGPLv3" target="_blank" href="https://www.gnu.org/licenses/agpl-3.0.txt"><img src="http://img.shields.io/badge/license-AGPLv3-orange.svg?style=flat-square"></a>
+<a title="AGPLv3" target="_blank" href="https://www.gnu.org/licenses/agpl-3.0.txt"><img src="https://img.shields.io/badge/license-AGPLv3-orange.svg?style=flat-square"></a>
 <a title="Code Size" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://img.shields.io/github/languages/code-size/siyuan-note/siyuan.svg?style=flat-square&color=yellow"></a>
 <a title="GitHub Pull Requests" target="_blank" href="https://github.com/siyuan-note/siyuan/pulls"><img src="https://img.shields.io/github/issues-pr-closed/siyuan-note/siyuan.svg?style=flat-square&color=FF9966"></a>
 <br>
@@ -28,6 +28,7 @@
 | <a href="README.zh-CN.md">中文</a>
 | <b>日本語</b>
 | <a href="README.tr.md">Türkçe</a>
+| <a href="README.pt-BR.md">Português</a>
 </p>
 
 ---
@@ -197,6 +198,8 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 詳細なパラメータは `--help` を参照してください。以下は新しい環境変数を使用した起動コマンドの例です：
 
+先に `AuthCode` に自分の強力なパスワードを設定してください（Bash では `export AuthCode='自分の強力なパスワード'` を使用し、Compose では同じディレクトリの `.env` ファイルからも読み込めます）。未設定または空の場合、例はエラーで停止します。
+
 ```bash
 docker run -d \
   -v workspace_dir_host:workspace_dir_container \
@@ -206,7 +209,7 @@ docker run -d \
   b3log/siyuan \
   serve \
   --workspace=workspace_dir_container \
-  --accessAuthCode=xxx
+  --accessAuthCode="${AuthCode:?Set AuthCode}"
 ```
 
 - `PUID`: カスタムユーザーID（オプション、指定しない場合はデフォルトで `1000`）
@@ -230,6 +233,8 @@ docker run -d \
 
 簡略化するために、ホストとコンテナでワークスペースフォルダーのパスを一致させることをお勧めします。たとえば、`workspace_dir_host` と `workspace_dir_container` の両方を `/siyuan/workspace` に設定します。対応する起動コマンドは次のようになります：
 
+先に `AuthCode` に自分の強力なパスワードを設定してください（Bash では `export AuthCode='自分の強力なパスワード'` を使用し、Compose では同じディレクトリの `.env` ファイルからも読み込めます）。未設定または空の場合、例はエラーで停止します。
+
 ```bash
 docker run -d \
   -v /siyuan/workspace:/siyuan/workspace \
@@ -239,19 +244,21 @@ docker run -d \
   b3log/siyuan \
   serve \
   --workspace=/siyuan/workspace/ \
-  --accessAuthCode=xxx
+  --accessAuthCode="${AuthCode:?Set AuthCode}"
 ```
 
 #### Docker Compose
 
 Docker Composeを使用してSiYuanを実行するユーザー向けに、環境変数 `PUID` と `PGID` を使用してユーザーとグループのIDをカスタマイズできます。以下はDocker Composeの設定例です：
 
+先に `AuthCode` に自分の強力なパスワードを設定してください（Bash では `export AuthCode='自分の強力なパスワード'` を使用し、Compose では同じディレクトリの `.env` ファイルからも読み込めます）。未設定または空の場合、例はエラーで停止します。
+
 ```yaml
 version: "3.9"
 services:
   main:
     image: b3log/siyuan
-    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode:?Set AuthCode}']
     ports:
       - 6806:6806
     volumes:
@@ -343,7 +350,7 @@ Docker ホスティングの制限も適用されます。ブラウザーでの�
 ```
 Web UI: 6806
 Container Port: 6806
-Container Path: /home/siyuan
+Container Path: /siyuan/workspace
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
@@ -370,18 +377,21 @@ Apps - DiscoverApps - More Options（右上、Custom App を除く）- YAML で�
 
 テンプレート例：
 
+デプロイ前に、以下の `SIYUAN_ACCESS_AUTH_CODE=` の後に自分の強力なパスワードを入力してください。空のままにしないでください。
+
 ```yaml
 services:
   siyuan:
     image: b3log/siyuan
     container_name: siyuan
-    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    command: ['serve', '--workspace=/siyuan/workspace/']
     ports:
       - 6806:6806
     volumes:
       - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
     restart: unless-stopped
     environment:
+      - SIYUAN_ACCESS_AUTH_CODE=
       - TZ=Asia/Tokyo  # 必要に応じてタイムゾーンに置き換えてください
       - PUID=1001
       - PGID=1002
@@ -397,6 +407,8 @@ services:
 ## ⌨️ コマンドラインインターフェース
 
 組み込み CLI で、サーバー起動なしにワークスペースデータへ直接アクセスできます。
+
+CLI は暗号化ノートブックの操作をサポートしていません。アプリ内の専用手順でロックを解除して操作してください。
 
 ### クイックスタート
 
@@ -465,7 +477,7 @@ ln -s /インストール先/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bi
 - `widgets` はウィジェットを保存するために使用されます
 - `plugins` はプラグインを保存するために使用されます
 - `public` は公開データを保存するために使用されます
-- 残りのフォルダーはユーザーが作成したノートブックフォルダーであり、ノートブックフォルダー内の `.sy` サフィックスのファイルはドキュメントデータを保存するために使用され、データ形式はJSONです
+- ノートブックフォルダーには文書データが保存されます。通常のノートブックの `.sy` 文書は JSON で保存され、暗号化ノートブックの `.sy` 文書は暗号文で保存されます。
 
 ### サードパーティの同期ディスクを介したデータ同期をサポートしていますか？
 
@@ -493,20 +505,26 @@ SiYuanは完全にオープンソースであり、貢献を歓迎します：
 
 <kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>現在のバージョン</kbd> で <kbd>更新を確認</kbd> できます。また、[公式ダウンロード](https://b3log.org/siyuan/en/download.html) または [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) をフォローして新しいバージョンを入手することもできます。
 
+**注意：** ワークスペースをインストール先に置かないでください。更新時にインストール先のファイルが削除されます。
+
 ### 一部のブロック（リスト項目内の段落ブロックなど）がブロックアイコンを見つけられない場合はどうすればよいですか？
 
 リスト項目の最初のサブブロックはブロックアイコンが省略されています。このブロックにカーソルを移動し、<kbd>Ctrl+/</kbd> を使用してそのブロックメニューをトリガーできます。
 
 ### データリポジトリキーを紛失した場合はどうすればよいですか？
 
-- データリポジトリキーが以前に複数のデバイスで正しく初期化されている場合、キーはすべてのデバイスで同じであり、<kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>ローカルデータリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>キー文字列をコピー</kbd> で見つけることができます
+データリポジトリキーはスナップショットと同期データを保護するもので、暗号化ノートブックのマスターパスワードやキーバックアップとは別のものです。データリポジトリをリセットしても、紛失したマスターパスワードを復元したり、対応する暗号化キーのバックアップを代替したりすることはできません。
+
+リセット前に思源を正常に終了し、ワークスペース全体をバックアップしてください。暗号化ノートブックがある場合は、対応する暗号化キーのバックアップを別途保存し、マスターパスワードが使えることを確認してください。古い同期ディレクトリとクラウドスナップショットは、新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて削除してください。
+
+- データリポジトリキーが以前に複数のデバイスで正しく初期化されている場合、キーはすべてのデバイスで同じであり、<kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>データリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>キー文字列をコピー</kbd> で見つけることができます
 - 以前に正しく構成されていない場合（たとえば、複数のデバイスでキーが一致しない場合）またはすべてのデバイスが使用できず、キー文字列を取得できない場合は、以下の手順でキーをリセットできます：
 
-  1. データを手動でバックアップします。<kbd>データのエクスポート</kbd> を使用するか、ファイルシステム上で <kbd>ワークスペース/data/</kbd> フォルダーをコピーします
-  2. <kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>ローカルデータリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>データリポジトリをリセット</kbd>
+  1. 思源を正常に終了してワークスペース全体をバックアップし、暗号化ノートブックがある場合は対応する暗号化キーのバックアップとマスターパスワードも保管する
+  2. <kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>データリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>データリポジトリのリセット</kbd>
   3. データリポジトリキーを再初期化します。1台のデバイスでキーを初期化した後、他のデバイスでキーをインポートします
-  4. クラウドは新しい同期ディレクトリを使用します。古い同期ディレクトリは使用できなくなり、削除できます
-  5. 既存のクラウドスナップショットは使用できなくなり、削除できます
+  4. クラウドで新しい同期ディレクトリを使用し、新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて古いディレクトリを削除する
+  5. 新しい同期の完了、データの完全性、復元に必要な情報の保管を確認してから、必要に応じて古いクラウドスナップショットを削除する
 
 ### 支払いが必要ですか？
 

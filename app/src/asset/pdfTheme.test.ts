@@ -1,8 +1,6 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 
 test("PDF theme changes patch only the selected mode and never mutate a stale captured configuration", () => {
     const captured = {light: "light", dark: "dark", annoColor: "red"};
@@ -14,12 +12,10 @@ test("PDF theme changes patch only the selected mode and never mutate a stale ca
     const light = button();
     const dark = button();
     const outer = {classList: {toggle() {}}};
-    const exports = {} as typeof import("./pdfViewer");
-    runInNewContext(transpileModule(readFileSync("src/asset/pdfViewer.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {exports, window: {siyuan}, require: () => ({
-        patchAppearancePreference: (...args: unknown[]) => {saved.push(args);},
-    })});
+    const exports = loadModule<typeof import("./pdfViewer")>("src/asset/pdfViewer.ts", {
+        window: {siyuan},
+        require: () => ({patchAppearancePreference: (...args: unknown[]) => {saved.push(args);}}),
+    });
     exports.bindPdfTheme({firstElementChild: outer, querySelector: (selector: string) =>
         selector === "#pdfLight" ? light : dark} as unknown as HTMLElement);
     appearance.pdfTheme = {light: "light", dark: "light", annoColor: "blue"};

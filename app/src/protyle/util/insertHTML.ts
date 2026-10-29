@@ -1317,7 +1317,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     let innerHTML = unSpinHTML || // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
-        html;   // 空格会被 Spin 不再，需要使用原文
+        html;   // 空格会被 Spin 丢失，需要使用原文
     // 粘贴纯文本时会进行内部转义，这里需要进行反转义 https://github.com/siyuan-note/siyuan/issues/10620
     innerHTML = innerHTML.replace(/;;;lt;;;/g, "&lt;").replace(/;;;gt;;;/g, "&gt;");
     tempElement.innerHTML = innerHTML;

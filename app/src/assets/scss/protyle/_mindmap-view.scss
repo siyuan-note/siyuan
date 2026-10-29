@@ -26,6 +26,9 @@
 }
 
 .mindmap-view {
+  --mindmap-node-text-color: initial;
+  --mindmap-node-semantic-color: initial;
+  --b3-task-completed-color: initial;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -46,6 +49,16 @@
 
   &--active {
     outline: 1px solid var(--b3-theme-primary);
+  }
+
+  &__selection-input {
+    position: absolute;
+    z-index: 3;
+    min-height: 28px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    opacity: 0;
   }
 
   &--nested {
@@ -93,6 +106,8 @@
   }
 
   &.fullscreen &__toolbar,
+  &--locked &__toolbar,
+  &--pan &__toolbar,
   &--active &__toolbar,
   &:hover &__toolbar,
   &__toolbar:focus-within {
@@ -100,10 +115,14 @@
   }
 
   &.fullscreen &__toolbar .block__icon,
+  &--locked &__toolbar .block__icon,
+  &--pan &__toolbar .block__icon,
   &--active &__toolbar .block__icon,
   &:hover &__toolbar .block__icon,
   &__toolbar:focus-within .block__icon,
   &.fullscreen &__toolbar-group,
+  &--locked &__toolbar-group,
+  &--pan &__toolbar-group,
   &--active &__toolbar-group,
   &:hover &__toolbar-group,
   &__toolbar:focus-within &__toolbar-group {
@@ -112,6 +131,7 @@
 
   &__toolbar-group {
     @include protyle-toolbar-surface($shadow: none);
+    position: relative;
     align-items: center;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -174,9 +194,9 @@
   }
 
   &__zoom-control {
-    position: relative;
     display: flex;
     align-items: center;
+    align-self: stretch;
     flex-shrink: 0;
     pointer-events: auto;
 
@@ -189,8 +209,8 @@
   &__zoom-actions {
     @include protyle-toolbar-surface;
     position: absolute;
-    top: 100%;
-    right: 0;
+    top: calc(100% - 4px);
+    right: 4px;
     display: none;
     align-items: center;
     gap: 8px;
@@ -217,6 +237,11 @@
     touch-action: pan-y;
     user-select: none;
 
+    @media screen {
+      // 画布独立参与绘制，编辑菜单和工具栏位于视口外侧。
+      contain: paint;
+    }
+
     &--dragging {
       cursor: grabbing;
     }
@@ -239,20 +264,47 @@
     pointer-events: none;
   }
 
-  &__document-frame {
+  &__document-viewport {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
-    border: 2px dashed var(--b3-theme-primary);
-    color: var(--b3-theme-primary);
+    top: 0;
+    left: 0;
     pointer-events: none;
+    color: var(--b3-theme-primary);
+    border: 1px solid currentColor;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px),
+    radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px),
+    radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px);
+    // 横纵点线组成 96px 大格，每 12px 一点；网格固定于取景框，不随导图缩放。
+    background-size: 12px 96px, 96px 12px;
+    background-position: center;
+    box-sizing: border-box;
     z-index: 4;
-  }
 
-  &__viewport--summary {
-    cursor: crosshair;
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      opacity: .5;
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      border-left: 1px dashed currentColor;
+      transform: translateX(-50%);
+    }
+
+    &::after {
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px dashed currentColor;
+      transform: translateY(-50%);
+    }
   }
 
   &__selection-box {
@@ -262,26 +314,6 @@
     background: var(--b3-theme-primary-lightest);
     box-sizing: border-box;
     z-index: 5;
-  }
-
-  &__summary-controls {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    > span {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-  }
-
-  &__summary-actions {
-    display: flex;
-    flex-shrink: 0;
-    gap: 8px;
-    margin-left: auto;
   }
 
   &__viewport--pan {
@@ -385,6 +417,11 @@
       box-shadow: inset 0 0 0 2px var(--b3-theme-primary);
     }
 
+    &--drag-ready {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: 2px;
+    }
+
     &--dragging {
       opacity: .35;
       cursor: grabbing;
@@ -426,9 +463,30 @@
   &__content {
     @include inline.interactive-marks;
 
+    // 有独立底色的组合标记保留自身配色，普通链接和标签沿用所在内容的前景。
+    span[data-type~="a"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-link-color));
+    }
+
+    span[data-type~="tag"]:not([data-type~="mark"], [data-type~="search-mark"], [data-type~="kbd"]) {
+      color: var(--mindmap-node-semantic-color, var(--b3-protyle-inline-tag-color));
+    }
+
     min-width: 0;
     min-height: 24px;
     overflow-wrap: anywhere;
+
+    // 公式整体换行，节点加宽后可恢复为一行，不拆开 KaTeX 内部的排版单元。
+    .mindmap-view & span[data-type~="inline-math"] {
+      display: inline-block;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
 
     .mindmap-view__node:not(.mindmap-view__node--editing) > &--empty:not(.mindmap-view__editor) {
       > * {
@@ -437,7 +495,7 @@
 
       &::before {
         content: attr(data-placeholder);
-        color: var(--b3-theme-on-surface-light);
+        color: var(--mindmap-node-text-color, var(--b3-theme-on-surface-light));
       }
     }
 
@@ -493,6 +551,38 @@
     }
   }
 
+  &__node--colored {
+    --b3-task-completed-color: var(--mindmap-node-text-color);
+    --mindmap-node-semantic-color: currentColor;
+  }
+
+  &__node--colored > .mindmap-view__content {
+    // 默认的列表正文和删除线沿用节点前景，手动行内颜色仍由正文自身决定。
+    .li,
+    s,
+    span[data-type~="s"] {
+      color: var(--mindmap-node-text-color);
+    }
+
+    .bq,
+    .callout {
+      color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
+    }
+
+    .protyle-wysiwyg--empty:empty::before {
+      color: var(--mindmap-node-text-color, var(--b3-empty-color));
+    }
+  }
+
+  &__theme-preview {
+    width: 48px;
+    flex-basis: 48px;
+  }
+
+  &__theme-menu .b3-menu__label {
+    min-width: 0;
+  }
+
   &__node[data-task] {
     display: grid;
     // 空任务正文也保留输入宽度，确保光标能落入编辑器。
@@ -519,7 +609,7 @@
     border: 0;
     border-radius: var(--b3-border-radius);
     background: transparent;
-    color: var(--b3-theme-on-surface);
+    color: var(--mindmap-node-text-color, var(--b3-theme-on-surface));
     font: inherit;
     cursor: pointer;
     transition: var(--b3-transition);
@@ -852,13 +942,20 @@
     transform: translateX(-50%);
     bottom: 8px;
     z-index: 6;
-    width: max-content;
+    width: 244px;
     min-width: 0;
     max-width: calc(100% - 16px);
     padding: 4px;
     box-sizing: border-box;
     overflow-x: auto;
     overflow-y: hidden;
+    align-items: center;
+    flex-wrap: nowrap;
+
+    > button,
+    > select {
+      flex-shrink: 0;
+    }
   }
 
   &__relation-editor {
@@ -870,9 +967,9 @@
   }
 
   &__inspector--node {
-    .color__square {
-      flex-shrink: 0;
-    }
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    justify-items: center;
   }
 
   &__inspector--line {
@@ -882,13 +979,25 @@
 
     .mindmap-view__palette {
       margin: 0;
-      flex-shrink: 0;
     }
 
-    > button,
-    > select {
+    > .b3-select {
+      max-width: 100px;
+      min-width: 0;
+    }
+  }
+
+  &__inspector--relation {
+    width: max-content;
+
+    .mindmap-view__palette-row {
+      width: 176px;
       flex-shrink: 0;
     }
+  }
+
+  &__node-more {
+    order: 2;
   }
 
   &__tooltip {
@@ -908,9 +1017,100 @@
     pointer-events: none;
   }
 
+  &__palette-row {
+    display: grid;
+    grid-template-columns: repeat(var(--mindmap-toolbar-columns, 8), minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    min-width: 0;
+    width: 100%;
+
+    .mindmap-view__palette {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: calc(100% / var(--mindmap-palette-columns));
+      grid-column: span var(--mindmap-palette-columns);
+      justify-items: center;
+      width: 100%;
+      order: 0;
+      scrollbar-width: none;
+      overscroll-behavior: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: max(0px, calc((100% / var(--mindmap-palette-columns) - 26px) / 2));
+
+      &[data-scrolling] {
+        scroll-snap-type: none;
+      }
+
+      > .color__square {
+        scroll-snap-align: start;
+      }
+    }
+  }
+
   &__palette {
     display: flex;
     flex-wrap: nowrap;
+    order: 1;
+    min-width: 0;
+    overflow-x: auto;
+    flex-shrink: 1;
+
+    .color__square {
+      flex-shrink: 0;
+    }
+  }
+
+  &__node-width {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+    flex-shrink: 0;
+
+    .b3-text-field {
+      grid-column: span 2;
+      // 两侧控件按相同外边界排列，滑块左右留白随列宽保持一致。
+      width: calc(50% + 26px);
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .b3-slider {
+      grid-column: span 4;
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .color__square {
+      flex-shrink: 0;
+    }
+  }
+
+  &__inspector-popover {
+    @include protyle-toolbar-surface;
+    position: absolute;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    max-width: calc(100% - 16px);
+    gap: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+
+    .mindmap-view__palette {
+      max-width: 100%;
+    }
+
+    .mindmap-view__node-width {
+      min-width: 0;
+      flex-shrink: 1;
+    }
   }
 
 }
@@ -931,13 +1131,15 @@
     min-height: 0;
 
     &__toolbar,
-    &__document-frame,
     &__resize,
     &__inspector,
     &__tooltip,
     &__route-handle,
     &__route-status,
     &__selection-box,
+    &__selection-input,
+    &__document-viewport,
+    &__inspector-popover,
     &__add-bridge,
     &__fold,
     &__add-child {

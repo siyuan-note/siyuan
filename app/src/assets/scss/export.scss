@@ -1,5 +1,6 @@
 @use "util/mixin" as *;
 @use "component/tooltips" as *;
+@use "component/loading" as *;
 @use "protyle/wysiwyg" as * with ($block-rtl-selector: '[style*="direction: rtl"]');
 @use "component/typography" as *;
 @use "protyle/attr" as *;
@@ -51,12 +52,24 @@ svg {
   }
 }
 
-.exporting .protyle-wysiwyg [data-node-id] {
-  // 使用普通块布局以确保列表跨页后保持内容流顺序
-  &.list,
-  &.li {
-    display: block;
+.exporting .protyle-wysiwyg {
+  // 使用普通块布局以确保图片和列表跨页后保持内容流顺序。
+  display: block;
+
+  [data-node-id] {
+    &.list,
+    &.li {
+      display: block;
+    }
   }
+}
+
+// 按纸张高度等比限制图片，预览和打印使用相同的尺寸约束。
+#preview .img img[data-export-image-fit="true"] {
+  max-height: var(--export-image-max-height);
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 @media print {

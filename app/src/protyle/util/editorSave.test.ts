@@ -1,19 +1,12 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {readFileSync} from "node:fs";
-import {join} from "node:path";
-import {runInNewContext} from "node:vm";
-import * as ts from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import {registerEditorSave, trackEditorSaveRequest} from "./editorSave";
 
-const source = (path: string) => ts.transpileModule(readFileSync(join(__dirname, path), "utf8"), {
-    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-}).outputText;
-
 const loadFetch = (fetchImplementation: typeof fetch) => {
-    const exports: {fetchPost?: (...args: any[]) => Promise<void>, fetchSyncPost?: (...args: any[]) => Promise<unknown>} = {};
-    runInNewContext(source("../../util/fetch.ts"), {
-        exports,
+    const exports = loadModule<{fetchPost?: (...args: any[]) => Promise<void>, fetchSyncPost?: (...args: any[]) => Promise<unknown>}>(
+        "src/util/fetch.ts", {
         require: (name: string) => {
             switch (name) {
                 case "./fetchWithAppId": return {fetchWithAppId: fetchImplementation};
@@ -31,7 +24,7 @@ const loadFetch = (fetchImplementation: typeof fetch) => {
         FormData,
         window: {siyuan: {languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
         console: {warn: () => {}},
-    });
+    }, ScriptTarget.ES2020);
     return exports;
 };
 
@@ -45,6 +38,122 @@ const request = (session = "drawer", action = "update", id = "block") => ({
 });
 const success = {code: 0, data: [{doOperations: [{action: "update"}]}]};
 const response = (data: unknown) => new Response(JSON.stringify(data), {headers: {"Content-Type": "application/json"}});
+
+const loadSyncSaves = () => loadModule<Pick<typeof import("./editorSave"),
+    "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion" |
+    "registerSyncEditorSave" | "disposeSyncEditorSave">>("src/protyle/util/editorSave.ts", {
+        window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}},
+    }, ScriptTarget.ES2020);
+
+test("sync preparation waits for ordinary unregistered editor requests and rejects earlier unconfirmed saves", async () => {
+    const saves = loadSyncSaves();
+    let complete: (value: unknown) => void;
+    saves.trackEditorSaveRequest("/api/transactions", request("main"), new Promise(resolve => complete = resolve));
+    let flushed = false;
+    const flushing = saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()).then(() => flushed = true);
+    await Promise.resolve();
+    assert.equal(flushed, false);
+    complete(success);
+    await flushing;
+    await saves.trackEditorSaveRequest("/api/transactions", request("main"), Promise.resolve({code: -1}));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("other"), Promise.resolve(success));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("main"), Promise.resolve(success));
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
+
+test("sync save confirmation preserves structural failures and ignores superseded text failures", async () => {
+    const saves = loadSyncSaves();
+    let finishOld: (value: unknown) => void;
+    const old = saves.trackEditorSaveRequest("/api/transactions", request(), new Promise(resolve => finishOld = resolve));
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    finishOld({code: -1});
+    await old;
+    await Promise.resolve();
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+    await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "move"), Promise.resolve({code: -1}));
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+});
+
+test("closing an editor clears only its failed text and structural saves, including late responses", async () => {
+    for (const action of ["update", "move"]) {
+        const saves = loadSyncSaves();
+        const closed = {id: "closed"} as IProtyle;
+        const open = {id: "open"} as IProtyle;
+        saves.registerSyncEditorSave(closed);
+        saves.registerSyncEditorSave(open);
+        await saves.trackEditorSaveRequest("/api/transactions", request(closed.id, action), Promise.resolve({code: -1}));
+        await saves.trackEditorSaveRequest("/api/transactions", request(open.id), Promise.resolve({code: -1}));
+        saves.disposeSyncEditorSave(closed);
+        await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+        await saves.trackEditorSaveRequest("/api/transactions", request(open.id), Promise.resolve(success));
+        await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+
+        let finish: (value: unknown) => void;
+        const pending = saves.trackEditorSaveRequest("/api/transactions", request(open.id, action), new Promise(resolve => finish = resolve));
+        const failureVersion = saves.getEditorSaveFailureVersion();
+        saves.disposeSyncEditorSave(open);
+        finish({code: -1});
+        await pending;
+        await saves.flushPendingEditorSaves(failureVersion);
+
+        const reopened = {id: "reopened"} as IProtyle;
+        saves.registerSyncEditorSave(reopened);
+        await saves.trackEditorSaveRequest("/api/transactions", request(reopened.id), Promise.resolve(success));
+        await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+    }
+});
+
+test("failed title saves remain protected until the final editor for that document is destroyed", async () => {
+    const saves = loadSyncSaves();
+    const first = {id: "first", notebookId: "box", path: "/root.sy"} as IProtyle;
+    const second = {...first, id: "second"};
+    const other = {...first, id: "other", path: "/other.sy"};
+    [first, second, other].forEach(saves.registerSyncEditorSave);
+    const title = {notebook: "box", path: "/root.sy", title: "unconfirmed"};
+    await saves.trackEditorSaveRequest("/api/filetree/renameDoc", title, Promise.resolve({code: -1}));
+    saves.disposeSyncEditorSave(first);
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    let finish: (value: unknown) => void;
+    const pending = saves.trackEditorSaveRequest("/api/filetree/renameDoc", title, new Promise(resolve => finish = resolve));
+    const failureVersion = saves.getEditorSaveFailureVersion();
+    saves.disposeSyncEditorSave(second);
+    finish({code: -1});
+    await pending;
+    await saves.flushPendingEditorSaves(failureVersion);
+});
+
+test("destroying a moved editor clears title failures associated with its previous path", async () => {
+    const saves = loadSyncSaves();
+    const protyle = {id: "moved", notebookId: "box", path: "/before.sy"} as IProtyle;
+    saves.registerSyncEditorSave(protyle);
+    await saves.trackEditorSaveRequest("/api/filetree/renameDoc",
+        {notebook: "box", path: protyle.path, title: "unconfirmed"}, Promise.resolve({code: -1}));
+    protyle.path = "/parent/before.sy";
+    saves.disposeSyncEditorSave(protyle);
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
+
+test("editor destruction cancels pending title input and removes its sync save failures", async () => {
+    const saves = loadSyncSaves();
+    let cancelled = false;
+    const noop = () => {};
+    const protyle = {id: "destroyed", notebookId: "box", path: "/root.sy",
+        title: {cancelPendingInput: () => cancelled = true},
+        element: {classList: {remove: noop}, removeAttribute: noop},
+    } as unknown as IProtyle;
+    saves.registerSyncEditorSave(protyle);
+    await saves.trackEditorSaveRequest("/api/transactions", request(protyle.id), Promise.resolve({code: -1}));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    const exports = loadModule<Pick<typeof import("./destroy"), "destroy">>("src/protyle/util/destroy.ts", {
+        require: (name: string) => name === "./editorSave" ? saves : new Proxy({}, {get: () => noop}),
+    }, ScriptTarget.ES2020);
+    exports.destroy(protyle);
+    assert.equal(cancelled, true);
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
 
 test("tracks actual fetchPost business, network, HTTP and malformed save failures despite swallowed errors", async () => {
     for (const failure of ["negative", "positive", "network", "http", "missing-result", "missing-operations"]) {
@@ -179,19 +288,17 @@ test("Title flushes debounce once, captures composition, and can cancel pending 
     let nextTimer = 0;
     const timers = new Map<number, () => void>();
     const requests: unknown[] = [];
-    const exports: {Title?: {prototype: any}} = {};
-    runInNewContext(source("../header/Title.ts"), {
-        exports,
+    const exports = loadModule<{Title?: {prototype: any}}>("src/protyle/header/Title.ts", {
         require: (name: string) => {
             if (name === "../../util/fetch") return {fetchPost: (_url: string, data: unknown) => requests.push(data)};
-            if (name === "../../editor/rename") return {validateName: () => true, replaceFileName: (name: string) => name};
+            if (name === "../../editor/rename") return {validateName: () => true, normalizeDocumentTitle: (name: string) => name};
             if (name === "../../dialog/tooltip") return {hideTooltip: () => {}};
             if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 400}};
             return {};
         },
         window: {setTimeout: (callback: () => void) => {timers.set(++nextTimer, callback); return nextTimer;}},
         clearTimeout: (timer: number) => timers.delete(timer),
-    });
+    }, ScriptTarget.ES2020);
     const title = Object.create(exports.Title.prototype);
     const protyle = editor();
     title.protyle = protyle;

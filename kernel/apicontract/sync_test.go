@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -5,6 +9,67 @@ import (
 	"strings"
 	"testing"
 )
+
+func TestSyncProviderProbeContracts(t *testing.T) {
+	for _, body := range []string{`{"webdav":{}}`, `{"webdav":{"endpoint":"https://example.com","skipTlsVerify":true},"cloudName":"main"}`} {
+		if _, err := TestSyncProviderWebDAV.Decode(strings.NewReader(body)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, body := range []string{`{}`, `{"webdav":null}`, `{"webdav":{"timeout":"wrong"}}`, `{"webdav":{},"cloudName":1}`} {
+		if _, err := TestSyncProviderWebDAV.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid WebDAV probe accepted: %s", body)
+		}
+	}
+	if _, err := TestSyncProviderLocal.Decode(strings.NewReader(`{"local":{"endpoint":"draft","timeout":7}}`)); err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{`{}`, `{"local":null}`, `{"local":{"endpoint":1}}`} {
+		if _, err := TestSyncProviderLocal.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid local probe accepted: %s", body)
+		}
+	}
+	if TestSyncProviderWebDAV.definition.Authorization != AuthenticatedAccess|AdminAccess || TestSyncProviderLocal.definition.Authorization != AuthenticatedAccess|AdminAccess {
+		t.Fatal("probe authorization changed")
+	}
+}
+
+func TestSyncCheckoutCancellationContract(t *testing.T) {
+	request, err := CancelSyncCheckout.Decode(strings.NewReader(`{"taskID":" current "}`))
+	if err != nil || request.TaskID != "current" {
+		t.Fatalf("task ID not bound: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"taskID":null}`, `{"taskID":123}`, `{"taskID":" "}`} {
+		if _, err := CancelSyncCheckout.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid ID accepted: %s", body)
+		}
+	}
+	if CancelSyncCheckout.definition.Authorization != AuthenticatedAccess|AdminAccess {
+		t.Fatal("cancel requires authentication and administrator access")
+	}
+}
+
+func TestSyncCheckoutPreparationContracts(t *testing.T) {
+	request, err := ConfirmSyncCheckout.Decode(strings.NewReader(`{"taskID":" current ","token":" window ","saved":false}`))
+	if err != nil || request.TaskID != "current" || request.Token != "window" || request.Saved {
+		t.Fatalf("preparation fields not bound: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"taskID":"task","token":"window"}`, `{"taskID":"task","token":" ","saved":true}`,
+		`{"taskID":"task","token":"window","saved":"true"}`} {
+		if _, err := ConfirmSyncCheckout.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid preparation accepted: %s", body)
+		}
+	}
+	if _, err := GetSyncCheckout.Decode(strings.NewReader(`{}`)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := GetSyncCheckout.Decode(strings.NewReader(`{"clientID":1}`)); err == nil {
+		t.Fatal("invalid client ID accepted")
+	}
+	if GetSyncCheckout.definition.Authorization != AuthenticatedAccess || ConfirmSyncCheckout.definition.Authorization != AuthenticatedAccess {
+		t.Fatal("read-only clients must also prepare and reconcile their windows")
+	}
+}
 
 func TestSyncConditionalDirection(t *testing.T) {
 	for _, body := range []string{`{}`, `null`, `{"upload":null}`, `{"upload":"wrong"}`, `{"upload":[]}`} {

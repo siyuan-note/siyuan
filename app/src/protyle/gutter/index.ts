@@ -1,5 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
-import {copyBlockSelection} from "../util/blockClipboard";
+import {copyBlockSelection, cutBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -46,6 +46,8 @@ import {hideElements} from "../ui/hideElements";
 import {isGutterTouchDragging, markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {embedBreadcrumbMenu} from "./embedBreadcrumbMenu";
+import {embedOpenMenu} from "./embedOpenMenu";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -864,7 +866,7 @@ export class Gutter {
 
     public isMatchNode(item: Element) {
         const itemRect = item.getBoundingClientRect();
-        // 原本为4，由于 https://github.com/siyuan-note/siyuan/issues/12166 改为 6
+        // 命中偏移 6px，见 https://github.com/siyuan-note/siyuan/issues/12166
         let gutterTop = this.element.getBoundingClientRect().top + 6;
         if (itemRect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8) {
             gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2;
@@ -1390,7 +1392,7 @@ export class Gutter {
                 icon: "iconCut",
                 click: () => {
                     focusBlock(selectsElement[0]);
-                    document.execCommand("cut");
+                    cutBlockSelection(selectsElement[0]);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2049,7 +2051,7 @@ export class Gutter {
                 accelerator: "⌘X",
                 click: () => {
                     focusBlock(nodeElement);
-                    document.execCommand("cut");
+                    cutBlockSelection(nodeElement);
                 }
             }).element);
         }
@@ -2498,15 +2500,14 @@ export class Gutter {
                     protyle.toolbar.showRender(protyle, nodeElement);
                 }
             }).element);
-        } else if (type === "NodeBlockQueryEmbed" && !protyle.disabled) {
+        } else if (type === "NodeBlockQueryEmbed") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_blockEmbed", type: "separator"}).element);
-            const breadcrumb = nodeElement.getAttribute("breadcrumb");
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "blockEmbed",
                 type: "submenu",
                 icon: "iconSQL",
                 label: window.siyuan.languages.blockEmbed,
-                submenu: [{
+                submenu: protyle.disabled ? [embedOpenMenu(protyle, nodeElement)] : [{
                     id: "refresh",
                     icon: "iconRefresh",
                     label: `${window.siyuan.languages.refresh} SQL`,
@@ -2521,32 +2522,13 @@ export class Gutter {
                     click() {
                         protyle.toolbar.showRender(protyle, nodeElement);
                     }
-                }, {
+                }, embedOpenMenu(protyle, nodeElement), {
                     id: "separator_breadcrumb",
                     type: "separator"
-                }, {
-                    id: "embedBlockBreadcrumb",
-                    label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.embedBlockBreadcrumb}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${breadcrumb === "true" ? " checked" : ((window.siyuan.config.editor.embedBlockBreadcrumb && breadcrumb !== "false") ? " checked" : "")}></div>`,
-                    bind(element) {
-                        element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-                            const inputElement = element.querySelector("input");
-                            if (event.target.tagName !== "INPUT") {
-                                inputElement.checked = !inputElement.checked;
-                            }
-                            nodeElement.setAttribute("breadcrumb", inputElement.checked.toString());
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id,
-                                attrs: {breadcrumb: inputElement.checked.toString()}
-                            });
-                            nodeElement.removeAttribute("data-render");
-                            blockRender(protyle, nodeElement);
-                            window.siyuan.menus.menu.remove();
-                        });
-                    }
-                }, {
+                }, ...embedBreadcrumbMenu(protyle, nodeElement), {
                     id: "headingEmbedMode",
                     label: window.siyuan.languages.headingEmbedMode,
+                    iconHTML: "",
                     type: "submenu",
                     submenu: [{
                         id: "showHeadingWithBlocks",
@@ -3959,6 +3941,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const wasCompressed = this.element.style.width === "24px";
         const previousScrollTop = this.element.scrollTop;
         this.element.classList.toggle("protyle-gutters--full", fullGutter);
+        this.element.style.flexDirection = "";
         this.element.style.maxHeight = "";
         this.element.style.overflowY = "";
         delete this.element.dataset.scrollable;
@@ -4006,8 +3989,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 horizontalAnchorLeft = action.getBoundingClientRect().left;
                 space = 0;
             }
-        }
-        if (listItem && element.classList.contains("protyle-action") &&
+        } else if (listItem && element.classList.contains("protyle-action") &&
             element.parentElement.getAttribute("data-type") === "NodeListItem") {
             const listItemElement = element.parentElement;
             const contentElement = listItemElement.querySelector<HTMLElement>(":scope > [data-node-id]");
@@ -4065,11 +4047,13 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const viewportRight = Math.min(viewportRect.right, paneRect.right);
         const viewportBottom = Math.min(viewportRect.bottom, paneRect.bottom);
         if (fullGutter) {
-            // 完整层级按左侧可用宽度换行，超出视口的层级可滚动访问。
+            // 完整层级在空间不足时整列排列，超出视口的层级可滚动访问。
             const buttons = Array.from(this.element.querySelectorAll<HTMLElement>("button[data-node-id], button[data-type='fold']"));
             const buttonWidth = Math.max(24, ...buttons.map(button => button.getBoundingClientRect().width));
             const availableWidth = Math.max(buttonWidth, horizontalAnchorLeft - space - gutterGap - viewportLeft);
-            this.element.style.width = `${Math.min(this.naturalWidth, availableWidth, viewportRight - viewportLeft)}px`;
+            const vertical = this.naturalWidth > availableWidth;
+            this.element.style.flexDirection = vertical ? "column" : "";
+            this.element.style.width = `${Math.min(vertical ? buttonWidth : this.naturalWidth, viewportRight - viewportLeft)}px`;
             this.element.style.maxHeight = `${Math.max(0, viewportBottom - Math.max(contentTop, paneRect.top))}px`;
             if (this.element.scrollHeight > this.element.clientHeight) {
                 this.element.style.overflowY = "auto";
@@ -4080,8 +4064,9 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             }
         }
         if (!element.classList.contains("av__row")) {
+            const firstButtonHeight = fullGutter ? (this.element.firstElementChild as HTMLElement)?.offsetHeight : 0;
             const gutterMarginHeight = getGutterMarginHeight(
-                rect.height, this.element.clientHeight, fullGutter ? this.element.clientHeight : this.naturalHeight,
+                rect.height, firstButtonHeight || this.element.clientHeight, fullGutter ? firstButtonHeight : this.naturalHeight,
                 window.siyuan.config.editor.fontSize);
             if (typeof gutterMarginHeight === "number") {
                 marginHeight = gutterMarginHeight;

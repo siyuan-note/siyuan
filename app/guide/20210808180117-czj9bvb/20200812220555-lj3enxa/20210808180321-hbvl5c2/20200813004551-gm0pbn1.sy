@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261018200107"
+		"updated": "20261026090134"
 	},
 	"Children": [
 		{
@@ -16,12 +16,26 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-w9nonqj",
-				"updated": "20261015193140"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20261024161440-mb672hv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161440-mb672hv",
+				"updated": "20261024161440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "下表列出默认快捷键；设置过自定义快捷键后，请以设置界面为准。斜线两侧分别表示 Windows/Linux 和 macOS 按键，移动端使用外接键盘时以支持的操作为准。"
 				}
 			]
 		},
@@ -213,7 +227,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20261016111305"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -233,7 +247,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20261016111305"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -405,6 +419,65 @@
 									"Data": "{: colspan=\"1\"}"
 								}
 							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "命令面板"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⇧P"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": []
 						}
 					]
 				},
@@ -1752,7 +1825,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1761,7 +1834,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1806,7 +1879,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1815,7 +1888,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1860,7 +1933,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1869,7 +1942,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1914,7 +1987,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1923,7 +1996,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -1968,7 +2041,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1977,7 +2050,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -2022,7 +2095,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2031,7 +2104,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -2076,7 +2149,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2085,7 +2158,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中分别配置"
+									"Data": " 中分别配置"
 								}
 							]
 						}
@@ -3195,7 +3268,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3204,7 +3277,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3249,7 +3322,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3258,7 +3331,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3303,7 +3376,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3312,7 +3385,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -3530,7 +3603,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -3550,7 +3623,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183308-gok25ug",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4286,7 +4359,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4295,7 +4368,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -4340,7 +4413,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4349,7 +4422,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -4363,7 +4436,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261018200107"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4378,7 +4451,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20261009184321"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -4402,7 +4475,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20261009181520"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -9172,7 +9245,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9181,7 +9254,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置，光标需停留在引用元素内"
+									"Data": " 中配置，光标需停留在引用元素内"
 								}
 							]
 						}
@@ -9226,7 +9299,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9235,7 +9308,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9280,7 +9353,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9289,7 +9362,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9334,7 +9407,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9343,7 +9416,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9388,7 +9461,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9397,7 +9470,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9442,7 +9515,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9451,7 +9524,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9496,7 +9569,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9505,7 +9578,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9550,7 +9623,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9559,7 +9632,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9613,7 +9686,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9622,7 +9695,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9667,7 +9740,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9676,7 +9749,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9721,7 +9794,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9730,7 +9803,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9775,7 +9848,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9784,7 +9857,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9829,7 +9902,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9838,7 +9911,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9883,7 +9956,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9892,7 +9965,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9937,7 +10010,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9946,7 +10019,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -9991,7 +10064,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10000,7 +10073,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10045,7 +10118,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10054,7 +10127,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10099,7 +10172,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10108,7 +10181,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10153,7 +10226,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10162,7 +10235,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -10207,7 +10280,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10216,7 +10289,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -11867,7 +11940,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20260926131843"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -11886,7 +11959,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201227133317-fikse1i",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12394,7 +12467,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12403,7 +12476,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12412,7 +12485,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -12447,7 +12520,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12456,7 +12529,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -12465,7 +12538,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -12540,7 +12613,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260924173802-r3fq7uc",
-				"updated": "20260926131843"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12572,7 +12645,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（或其他标题级别），会移除所选列表项的项目符号或复选框，并将首块转换为独立标题。后续段落和子列表保持顺序，未选项仍保留为列表。选择整个列表时只处理直属列表项。要将首块转换为普通段落，请使用段落快捷键，或选择 "
+					"Data": " （或其他标题级别），会移除所选列表项的项目符号或复选框，并将首块转换为独立标题。后续段落和子列表保持顺序，未选项仍保留为列表。选择整个列表时只处理直属列表项。要将首块转换为普通段落，请使用段落快捷键，或选择 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -12640,7 +12713,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260923083553"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12660,7 +12733,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260923221935"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -12820,17 +12893,9 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Delete"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"TextMarkTextContent": "Backspace"
 								}
 							]
 						},
@@ -13097,7 +13162,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-hmrchvc",
-				"updated": "20261018200107"
+				"updated": "20261026090134"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13111,12 +13176,13 @@
 			"ID": "20261018163000-7w2zbxu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-7w2zbxu"
+				"id": "20261018163000-7w2zbxu",
+				"updated": "20261022132551"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在画布上按 Esc 可恢复阅读，让滚轮滚动文档。如果正在编辑节点、选择概括范围或拖动关系线，Esc 会先结束或取消当前操作；全屏时按 Esc 退出全屏。"
+					"Data": "在画布上按 Esc 可恢复阅读，让滚轮滚动文档。如果正在编辑节点或拖动关系线，Esc 会先结束或取消当前操作；Esc 也可退出多选模式；全屏时按 Esc 退出全屏。"
 				}
 			]
 		},
@@ -13125,12 +13191,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018200107-yv270lj",
-				"updated": "20261018200107"
+				"updated": "20261020181700"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "按住 Ctrl（macOS 为 Command）并用鼠标右键拖动画布可临时平移，不会改变键盘焦点或激活阅读中的画布，之后普通滚轮仍滚动文档。视图锁定时此手势不可用。普通模式下空白区域的左键拖动不会平移画布；启用手形工具后可用左键拖动平移。"
+					"Data": "也可直接按住鼠标中键拖动进行临时平移，松开即结束，无需切换手型工具。按住 Ctrl（macOS 为 Command）并用鼠标右键拖动画布可临时平移，不会改变键盘焦点或激活阅读中的画布，之后普通滚轮仍滚动文档。视图锁定时此手势不可用。普通模式下，空白区域的鼠标左键拖动用于框选节点。需要左键平移时，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手形工具"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中启用手形，启用后会显示可直接退出该模式的按钮。触屏上先轻点导图激活画布，之后从节点或空白处快速单指拖动会平移画布；要移动节点，请长按节点，待边框提示出现后再拖动。未激活时单指滑动仍滚动文档，双指缩放和平移、双击节点编辑，以及多选、概括和连接模式保持原有操作。"
 				}
 			]
 		},
@@ -13139,7 +13223,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-fr0uxw6",
-				"updated": "20261017003000",
+				"updated": "20261026090134",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13305,6 +13389,168 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在首段光标处拆分并新建同级节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将正在编辑的分支缩进到前一个同级节点下"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将正在编辑的分支反缩进"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "编辑时插入段内换行"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在首段开头将正文合并到前一个同级节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Backspace"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在末段结尾将后一个同级节点的正文合并到当前节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete"
 								}
 							]
 						}
@@ -13750,6 +13996,214 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "复制选中的节点分支"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+C"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘C"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "剪切选中的节点分支"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+X"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘X"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "粘贴为子节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘V"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "粘贴为同级节点"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘V"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261026090134-rkj6fmc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026090134-rkj6fmc",
+				"updated": "20261026090134"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑节点时，在首段按 Enter 会新建同级节点并继续编辑，光标后的文字和后续内容块移入新节点；在非空首段开头按 Enter 会在当前节点之前插入空节点。Tab 和 Shift+Tab 调整整个分支的缩进，保留子节点。可在节点开头按 Backspace，或在节点结尾按 Delete 合并相邻节点的正文，在一个节点中保留多个段落。其他内容块的 Enter 沿用普通编辑行为，代码块、表格、输入法和候选菜单保留各自的编辑操作；已有的自定义编辑器快捷键优先。"
+				}
+			]
+		},
+		{
+			"ID": "20261020162345-u2w43bx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020162345-u2w43bx",
+				"updated": "20261020162345"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在画布空白处按住鼠标左键拖动可框选多个节点；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）点击节点可切换其选中状态。触屏上先选中节点，再启用底部的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "多选"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可逐个点选；再次点击该按钮或按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 退出多选模式。复制和剪切包含选中节点的完整子树，父子同时选中时只复制一次；副本保留节点样式、分支内部的连接和完整概括。根节点不能剪切；剪贴板写入失败或仅支持纯文本时，原节点会保留。"
 				}
 			]
 		},
@@ -13758,21 +14212,57 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930234403-6bw63i6",
-				"updated": "20260930234403"
+				"updated": "20261020162345"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "编辑节点时可按 "
+					"Data": "选中一个节点后，"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+V / ⌘V"
+					"TextMarkTextContent": "Ctrl+V"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 粘贴图片；仅选中节点时粘贴，图片追加到当前可见正文末尾。上传进行中需等待完成后再退出节点编辑。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将剪贴板内容粘贴为子节点，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 粘贴为同级节点。也可使用底部的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单执行复制、剪切和这两种粘贴。导图节点保留原有层级，普通文本、图片和内容块则通过新节点的编辑器插入。编辑节点文字时，粘贴沿用正文编辑行为；上传图片期间需等待上传完成再退出节点编辑。"
 				}
 			]
 		},
@@ -13781,12 +14271,25 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926152753-tamny2o",
-				"updated": "20260926152753"
+				"updated": "20261024124323"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "批量概要预览中，Enter 一次创建所有分组概要，Esc 取消，创建后可一次撤销。选择概要范围时，使用上下方向键选择末端同级节点，Enter 确认，Esc 取消。编辑概要文字时，Enter 保存，Esc 取消。选中概要后，Delete 或 Backspace 删除概要。"
+					"Data": "选中一个或多个节点后，激活底部节点菜单中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "概要"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可一次创建所有有效分组，并可一次撤销，随后编辑第一个新概要。在画布上按 Esc 退出多选模式。编辑概要文字时，Enter 保存，Esc 取消文字编辑。选中概要后，Delete 或 Backspace 删除概要。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "颜色或宽度面板打开时，按 Esc 关闭面板，并取消尚未保存的宽度预览。"
 				}
 			]
 		},
@@ -13828,7 +14331,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20261010201951"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -13888,7 +14391,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201227133317-v7clw0j",
-				"updated": "20261008221006"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -13952,7 +14455,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -13961,7 +14464,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -13996,7 +14499,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -14005,7 +14508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -14040,7 +14543,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -14049,7 +14552,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -14084,7 +14587,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -14093,7 +14596,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 中配置"
+									"Data": " 中配置"
 								}
 							]
 						}
@@ -16655,7 +17158,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220618235609-cuv0am5",
-				"updated": "20261016202635"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -17584,7 +18087,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000226-0pq4qe4",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -17604,7 +18107,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619000401-peit222",
-				"updated": "20260811122156"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -17698,7 +18201,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "静默打开"
+									"Data": "块引用：后台页签；关系图节点：浮窗预览"
 								}
 							]
 						},

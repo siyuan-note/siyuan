@@ -52,7 +52,9 @@ const runCases = async (sources, css, mobile) => {
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
-        menus: {menu: {element: document.createElement("div"), remove() {}}}};
+        menus: {menu: {element: document.createElement("div"), remove() {
+            document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
+        }}}};
     const mocks = {
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
         "plugin/Menu": {Menu: class {
@@ -196,17 +198,84 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(latest().enabled, false, "notification settings do not enable a rule");
     get("[data-notify-success]").click();
     assert.equal(latest().notifyOnSuccess, true);
-    const nameRect = get('[data-action="rules"]').getBoundingClientRect();
+    const nameRect = get('[data-action="rename-rule"]').getBoundingClientRect();
     const enabledRect = get("[data-enabled]").getBoundingClientRect();
     assert.ok(Math.abs((nameRect.top + nameRect.bottom) / 2 - (enabledRect.top + enabledRect.bottom) / 2) <= 1,
         `the enable switch aligns with the rule name: ${JSON.stringify({mobile, width: window.innerWidth,
             nameRect, enabledRect, font: getComputedStyle(menu).font, rowGap: getComputedStyle(get("[data-enabled]").parentElement).rowGap})}`);
     const ruleRect = nameRect;
-    for (const action of ["add-rule"]) {
+    for (const action of ["rules", "add-rule"]) {
         const button = get(`[data-action="${action}"]`).getBoundingClientRect();
         assert.ok(Math.abs((ruleRect.top + ruleRect.bottom) / 2 - (button.top + button.bottom) / 2) <= 1,
             "rule actions align with the selector rather than its label");
     }
+    for (const property of ["width", "height", "padding", "color", "borderRadius"]) {
+        assert.equal(getComputedStyle(get('[data-action="rules"]'))[property],
+            getComputedStyle(get('[data-action="add-rule"]'))[property],
+            `the rule arrow uses the same ${property} as the adjacent add icon`);
+    }
+    assert.equal(get('[data-action="rename-rule"]').getAttribute("aria-label"), lang.rename);
+    assert.equal(get('[data-action="rules"]').contains(get("[data-rule-name]")), false,
+        "name editing and rule switching have independent buttons");
+    get("[data-enabled]").click();
+    assert.equal(latest().enabled, true);
+    await require("electron").ipcRenderer.invoke("automation-focus");
+    const beginRename = async () => {
+        await click('[data-action="rename-rule"]');
+        const input = get("[data-rule-name-input]");
+        assert.equal(document.activeElement, input);
+        assert.equal(input.selectionStart, 0);
+        assert.equal(input.selectionEnd, input.value.length);
+        assert.equal(menu.querySelector('[data-action="rename-rule"]'), null);
+        assert.ok(get('[data-action="rules"]'), "the rule switcher stays accessible while editing");
+        return input;
+    };
+    const nameKey = (input, key, options = {}) => {
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true, ...options});
+        input.dispatchEvent(event);
+        return event;
+    };
+    const writesBeforeInlineRename = transactions.length;
+    const cancelledName = await beginRename();
+    cancelledName.value = "Cancelled name";
+    assert.equal(nameKey(cancelledName, "Escape").defaultPrevented, true);
+    cancelledName.dispatchEvent(new Event("blur"));
+    assert.equal(transactions.length, writesBeforeInlineRename, "Escape and the following blur do not save");
+    assert.equal(get("[data-rule-name]").textContent, "Record completion time");
+    assert.equal(document.activeElement, get('[data-action="rename-rule"]'), "cancelling restores keyboard focus");
+    for (const value of ["   ", "Record completion time"]) {
+        const input = await beginRename();
+        input.value = value;
+        input.blur();
+        assert.equal(input.isConnected, false, "blur closes name editing");
+        assert.equal(transactions.length, writesBeforeInlineRename, "blank and unchanged names do not save");
+        assert.equal(get("[data-rule-name]").textContent, "Record completion time");
+    }
+    get('[data-action="rename-rule"]').focus();
+    await require("electron").ipcRenderer.invoke("automation-enter");
+    await tick();
+    const composedName = get("[data-rule-name-input]");
+    composedName.value = '  <completion> & "time"  ';
+    assert.equal(nameKey(composedName, "Enter", {isComposing: true}).defaultPrevented, false);
+    assert.equal(nameKey(composedName, "Escape", {isComposing: true}).defaultPrevented, false);
+    assert.equal(nameKey(composedName, "Enter", {keyCode: 229}).defaultPrevented, false);
+    assert.equal(composedName.isConnected, true, "IME keys keep the editor open");
+    assert.equal(transactions.length, writesBeforeInlineRename);
+    nameKey(composedName, "Enter");
+    composedName.dispatchEvent(new Event("blur"));
+    assert.equal(transactions.length, writesBeforeInlineRename + 1, "Enter and blur submit one transaction");
+    assert.equal(latest().name, '<completion> & "time"');
+    assert.equal(latest().enabled, true, "renaming preserves an enabled rule");
+    assert.equal(get("[data-rule-name]").textContent, '<completion> & "time"', "names render as text");
+    assert.equal(get("[data-rule-name]").children.length, 0);
+    assert.equal(transactions.at(-1).undo[0].data.rules[0].name, "Record completion time");
+    assert.equal(database.automations.rules[0].name, "Record completion time", "the loaded snapshot is untouched");
+    const restoredName = await beginRename();
+    restoredName.value = "Record completion time";
+    restoredName.blur();
+    assert.equal(transactions.length, writesBeforeInlineRename + 2, "blur saves a changed name");
+    assert.equal(transactions.at(-1).undo[0].data.rules[0].name, '<completion> & "time"');
+    get("[data-enabled]").click();
     await click('[data-action="rules"]');
     const rulePopup = fieldMenu.element;
     assertSearchAlignment(rulePopup, "[data-search]", "[data-rules]");
@@ -482,6 +551,9 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(templatePreviews.at(-1).inputs.finished, "2026-10-14");
     assert.equal(transactions.length, writesBeforeInputPreview, "editing sample dates never saves a rule or entry");
     document.head.append(theme);
+    const longRuleName = await beginRename();
+    longRuleName.value = "Long automation name ".repeat(12).trim();
+    nameKey(longRuleName, "Enter");
     for (const width of mobile ? [360, 740] : [560, 1000]) {
         await require("electron").ipcRenderer.invoke("automation-size", width, 900);
         for (const fontSize of ["", "28px"]) {
@@ -497,12 +569,25 @@ const runCases = async (sources, css, mobile) => {
             for (const element of [menu, get(".av__automation-body"), ...menu.querySelectorAll("section, [data-index]")]) {
                 assert.ok(element.scrollWidth <= element.clientWidth + 1, `${mobile}/${width}/${fontSize}: content overflows`);
             }
+            const nameInput = await beginRename();
+            const inputRect = nameInput.getBoundingClientRect();
+            const switchRect = get('[data-action="rules"]').getBoundingClientRect();
+            assert.ok(inputRect.width > 0 && inputRect.right <= switchRect.left,
+                "long names keep the editor and rule switcher on the same row");
+            nameKey(nameInput, "Escape");
         }
         menu.style.fontSize = "";
         for (const name of ["daylight", "midnight"]) {
             theme.textContent = sources[name];
             get(".b3-menu__items").scrollTop = 0;
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}`);
+            const nameInput = await beginRename();
+            const visibleRect = nameInput.getBoundingClientRect();
+            const panelRect = menu.getBoundingClientRect();
+            assert.ok(visibleRect.top >= panelRect.top && visibleRect.bottom <= panelRect.bottom,
+                `name editing stays visible inside its panel: ${JSON.stringify({mobile, visibleRect, panelRect, itemsRect: get(".b3-menu__items").getBoundingClientRect()})}`);
+            await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-rename`);
+            nameKey(nameInput, "Escape");
             get('[data-action="add-action"]').scrollIntoView({block: "nearest"});
             await tick();
             assert.ok(get('[data-action="add-action"]').getBoundingClientRect().bottom <= window.innerHeight + 1,
@@ -510,6 +595,9 @@ const runCases = async (sources, css, mobile) => {
             await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-actions`);
         }
     }
+    const shortRuleName = await beginRename();
+    shortRuleName.value = "Renamed completion";
+    nameKey(shortRuleName, "Enter");
     await change("[data-trigger]", "block");
     assert.ok(!get("[data-source-conditions]").textContent.includes("undefined"), "collection controls use defined localized labels");
     assert.equal(get("[data-collection-removal-tip]").textContent, lang.automationCollectionTip);
@@ -675,6 +763,23 @@ const runCases = async (sources, css, mobile) => {
     assert.deepEqual(latest().blockSource.attributes, [{name: "custom-status", operator: "equals", value: "ready"}]);
     await click('[data-remove-filter="attribute"]');
     assert.equal(latest().blockSource.attributes.length, 0);
+    for (const [nameOperator, label, name] of [
+        ["contains", lang.filterOperatorContains, "dailynote"],
+        ["regex", lang.regex, "^custom-\\D+-[0-9]{8}$"],
+    ]) {
+        await click("[data-add-attribute]");
+        await click("[data-attr-name-operator]");
+        assert.equal(fieldMenu.items.find(item => item.label === lang.filterOperatorIs).checked, true);
+        fieldMenu.items.find(item => item.label === label).click();
+        await change("[data-attr-name]", name);
+        await click("[data-confirm-attribute]");
+        assert.deepEqual(latest().blockSource.attributes, [{name, nameOperator, operator: "exists"}]);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
+        await click("[data-edit-attribute]");
+        assert.equal(get("[data-attr-name]").value, name, "regex escapes retain their case");
+        await click("[data-cancel-attribute]");
+        await click('[data-remove-filter="attribute"]');
+    }
     await click('[data-match="tagMatch"]');
     fieldMenu.items.find(item => item.label === lang.filterMatchAny).click();
     assert.equal(latest().blockSource.tagMatch, "or");
@@ -689,7 +794,7 @@ const runCases = async (sources, css, mobile) => {
         assert.equal(targetOption.checked, true, "the current target is checked in the shared menu");
         fieldMenu.items.find(item => item.label === label).click();
         assert.equal(latest().blockSource.tagTarget, value || undefined);
-        assert.equal(transactions.at(-1).perform[0].data.spec, 4);
+        assert.equal(transactions.at(-1).perform[0].data.spec, 6);
         assert.equal(get("[data-tag-target] span").textContent, label);
         assert.ok(get("[data-tag-target]").scrollWidth <= get("[data-tag-target]").clientWidth + 1, "all target labels wrap at narrow widths and large fonts");
         assert.equal(get("[data-tag-target-change-tip]").classList.contains("fn__none"), false);
@@ -721,6 +826,15 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(window.siyuan.dialogs.length, 1, "collection review uses the shared dialog on desktop and mobile");
     const reviewDialog = window.siyuan.dialogs[0];
     await waitForDialogLayout(reviewDialog);
+    const reviewBody = reviewDialog.element.querySelector(".b3-dialog__body");
+    const reviewContent = reviewDialog.element.querySelector(".av__collection-manager");
+    const reviewTabs = reviewDialog.element.querySelector("[data-collection-view]").parentElement;
+    assert.equal(reviewTabs.parentElement, reviewBody, "view navigation sits above the padded scrolling content");
+    reviewTabs.style.setProperty("--b3-ui-tab-min-height", "35px");
+    await Promise.all(reviewTabs.firstElementChild.getAnimations().map(animation => animation.finished));
+    assert.equal(getComputedStyle(reviewTabs.firstElementChild).minHeight, "35px", "view tabs respect shared tab sizing");
+    reviewTabs.style.removeProperty("--b3-ui-tab-min-height");
+    await Promise.all(reviewTabs.firstElementChild.getAnimations().map(animation => animation.finished));
     assert.equal(reviewDialog.element.querySelectorAll("[data-results] img").length, 0, "source text is escaped");
     assert.equal(transactions.length, writesBeforeReview, "reviewing entries does not mutate the database");
     const reviewTheme = document.createElement("style");
@@ -733,12 +847,20 @@ const runCases = async (sources, css, mobile) => {
                 reviewTheme.textContent = sources[name];
                 await tick();
                 await require("electron").ipcRenderer.invoke("automation-capture", `${mobile ? "mobile" : "desktop"}-${width}-${name}-review`);
-                for (const element of reviewDialog.element.querySelectorAll(".b3-dialog__body, .b3-dialog__action, [data-results], button")) {
+                for (const element of reviewDialog.element.querySelectorAll(".b3-dialog__body, .b3-dialog__action, .av__collection-tabs, .item__text, [data-results], button")) {
                     assert.ok(element.scrollWidth <= element.clientWidth + 1,
                         `${mobile}/${width}/${fontSize}: review content overflows ${element.className}: ${element.scrollWidth}/${element.clientWidth}`);
                     const rect = element.getBoundingClientRect();
                     assert.ok(rect.left >= -1 && rect.right <= window.innerWidth + 1, "review controls stay within the viewport");
                 }
+                const tabsRect = reviewTabs.getBoundingClientRect();
+                const bodyRect = reviewBody.getBoundingClientRect();
+                assert.ok(Math.abs(tabsRect.left - bodyRect.left) < 1 && Math.abs(tabsRect.right - bodyRect.right) < 1,
+                    "view navigation spans the dialog without a padded inset");
+                reviewContent.scrollTop = reviewContent.scrollHeight;
+                assert.equal(reviewTabs.getBoundingClientRect().top, tabsRect.top, "scrolling results keeps view navigation in place");
+                assert.equal(reviewBody.scrollTop, 0, "content scrolling does not scroll the dialog body");
+                reviewContent.scrollTop = 0;
                 const previous = reviewDialog.element.querySelector("[data-prev]").getBoundingClientRect();
                 const cleanup = reviewDialog.element.querySelector("[data-cleanup]").getBoundingClientRect();
                 if (cleanup.top > previous.bottom) {
@@ -807,6 +929,24 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     await click('[data-action="add-rule"]');
     const secondID = transactions.at(-1).perform[0].data.rules[1].id;
+    const newRuleName = await beginRename();
+    assert.equal(newRuleName.value, lang.databaseAutomations, "new rules can be named in the editor");
+    newRuleName.value = "New collection";
+    get('[data-action="rules"]').focus();
+    assert.equal(transactions.at(-1).perform[0].data.rules[1].name, "New collection");
+    assert.equal(transactions.at(-1).perform[0].data.rules[1].enabled, false, "naming an incomplete rule keeps it disabled");
+    assert.equal(transactions.at(-1).undo[0].data.rules[1].name, lang.databaseAutomations);
+    assert.equal(transactions.at(-1).perform[0].data.rules[0].name, "Renamed completion");
+    get('[data-action="rules"]').focus();
+    await require("electron").ipcRenderer.invoke("automation-enter");
+    await tick();
+    fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text').click();
+    await tick();
+    assert.equal(get("[data-rule-name]").textContent, "Renamed completion");
+    await click('[data-action="rules"]');
+    fieldMenu.element.querySelector(`[data-id="${secondID}"] .b3-list-item__text`).click();
+    await tick();
+    assert.equal(get("[data-rule-name]").textContent, "New collection", "switching rules retains the committed name");
     await click('[data-action="rules"]');
     fieldMenu.element.querySelector('[data-id="rule"] [data-more]').click();
     const deletionTip = fieldMenu.element.querySelector('[data-id="rule"] [data-rule-change-tip]');
@@ -824,6 +964,12 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.at(-1).perform[0].data.rules.length, 0);
     assert.ok(get('[data-action="rules"]'), "deleting the current rule opens a fresh disabled draft");
     assert.equal(get("[data-enabled]").checked, false);
+    const draftName = await beginRename();
+    draftName.value = "Named draft";
+    nameKey(draftName, "Enter");
+    assert.equal(latest().name, "Named draft", "an empty database's draft can be named directly");
+    assert.equal(latest().enabled, false);
+    assert.deepEqual(transactions.at(-1).undo[0].data.rules, []);
     window.removeEventListener("resize", resizeMenu);
 };
 
@@ -837,6 +983,7 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             ipcMain.handle("automation-size", (_event, width, height) => win.setContentSize(width, height));
+            ipcMain.handle("automation-focus", () => win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true}));
             ipcMain.handle("automation-enter", () => {
                 win.webContents.focus();
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "ENTER"});
@@ -846,7 +993,7 @@ if (process.versions.electron && process.type === "browser") {
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
-                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types|-types-large)?$/);
+                assert.match(name, /^(desktop|mobile)-\d+-(daylight|midnight)(-rename|-actions|-conditions|-collection|-review|-review-confirm|-review-unknown|-review-rules|-types|-types-large)?$/);
                 win.webContents.invalidate();
                 await new Promise(resolve => setTimeout(resolve, 150));
                 fs.writeFileSync(path.join(process.env.SIYUAN_AUTOMATION_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -855,7 +1002,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReview", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReference", "collectionReview", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
@@ -896,7 +1043,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("automation guidance preserves source and target filters, explicit activation, collection and responsive layout", async () => {
+    test("automation guidance preserves inline naming, source and target filters, explicit activation, collection and responsive layout", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-automation-panel-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

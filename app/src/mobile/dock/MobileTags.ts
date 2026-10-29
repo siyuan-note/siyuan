@@ -40,7 +40,7 @@ export class MobileTags {
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
 <div class="fn__flex-1 tagList"></div>
-<img style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 30vw;box-sizing: border-box;" src="/stage/loading-pure.svg">`;
+<div class="fn__loading" style="left:0"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         bindPanelSearch(inputElement,
             this.element.querySelector('[data-type="search"]'), () => this.filter(), {

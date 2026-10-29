@@ -1,6 +1,7 @@
 import {isMobile} from "../util/functions";
 import {emitToPlugins, forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {initHoverInput, isTouchHoverInput} from "../util/hoverInput";
+import type {IWindowControlsOverlay} from "../boot/windowControlsOverlay";
 
 const INTERACTIVE_TOOLTIP_SELECTOR = "a, button, input, select, textarea, [contenteditable='true'], [tabindex], [role='button']";
 
@@ -21,10 +22,12 @@ export const initTooltips = () => {
         const target = (event.target as Element).closest(".ariaLabel");
         if (target && !target.classList.contains("b3-tooltips")) {
             let message = target.getAttribute("aria-label") || "";
-            try {
-                message = decodeURIComponent(message);
-            } catch (error) {
-                // 保留包含不完整 URI 转义的提示文本。
+            if (target.getAttribute("data-tooltip-encoding") !== "none") {
+                try {
+                    message = decodeURIComponent(message);
+                } catch (error) {
+                    // 保留包含不完整 URI 转义的提示文本。
+                }
             }
             if (message) {
                 showTooltip(message, target, undefined, event);
@@ -187,6 +190,20 @@ export const showTooltip = (
         }
         if (left + messageElement.clientWidth > window.innerWidth) {
             left = window.innerWidth - messageElement.clientWidth;
+        }
+    }
+    // 原生窗口按钮显示在页面之上，提示框进入其区域时向下避让。
+    if (document.documentElement.classList.contains("window-controls-overlay") &&
+        !document.body.classList.contains("body--fullscreen")) {
+        const overlay = (navigator as Navigator & {windowControlsOverlay?: IWindowControlsOverlay}).windowControlsOverlay;
+        if (overlay?.visible) {
+            const safe = overlay.getTitlebarAreaRect();
+            if (top < safe.bottom && (Math.max(0, left) + messageElement.clientWidth > safe.right || left < safe.left)) {
+                top = safe.bottom + 4;
+                const available = Math.max(0, window.innerHeight - top - 4);
+                const maxHeight = parseFloat(getComputedStyle(messageElement).maxHeight);
+                messageElement.style.maxHeight = Math.min(Number.isFinite(maxHeight) ? maxHeight : available, available) + "px";
+            }
         }
     }
     messageElement.style.top = top + "px";

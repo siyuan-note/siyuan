@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261018221152"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261016013311"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -497,6 +497,49 @@
 			]
 		},
 		{
+			"ID": "20261021003402-19jkwn2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261021003402-19jkwn2",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF images"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261021003402-g6tlloh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-g6tlloh",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF images (.tif/.tiff) inserted as assets display the first frame. The original file is preserved for download; switching frames is not currently supported. Preview brightness for 16-bit grayscale images follows a valid ImageJ display range, or the actual grayscale range of the first frame when no display range is available."
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-up66rhq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-up66rhq",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Previews accept files up to 64 MiB and frames up to 50 million pixels on desktop or 12.5 million pixels on mobile. BigTIFF, floating-point, CMYK, and JPEG-compressed TIFF images are not supported. Unsupported files remain available for download and can be opened in an external application."
+				}
+			]
+		},
+		{
 			"ID": "20261018221152-70wtkp3",
 			"Type": "NodeHeading",
 			"Properties": {
@@ -567,7 +610,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010134815-v9k29uo",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -582,7 +625,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010134815-bb1k769",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -605,7 +648,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to start editing. While editing, press "
+					"Data": " to start editing."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-ikstowk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-ikstowk",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing, press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -873,7 +930,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604120616-qjigoyt",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -887,7 +944,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120616-95dv931",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -901,7 +958,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -910,7 +967,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, and you can find the references in the global search after copying the path."
+					"Data": ", and you can find the references in the global search after copying the path."
 				}
 			]
 		},
@@ -919,7 +976,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120616-tjs4mx0",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -942,7 +999,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -951,7 +1008,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -960,7 +1017,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -969,7 +1026,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": "."
 				}
 			]
 		},
@@ -1150,7 +1207,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261016202856"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1196,12 +1253,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-e9wid3h",
-				"updated": "20261003234011"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR bundles only PP-OCRv6 Tiny, available offline without downloading and selected by default on desktop and mobile. Other compatible PP-OCRv6 models, such as Small and Medium, can be imported by selecting their detection and recognition ONNX files and corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device. New users default to PaddleOCR with automatic OCR disabled. Existing provider, automatic OCR, and threshold settings are preserved. The former built-in Small selection migrates to Tiny; imported models are unaffected. Upgrading from a version without OCR provider settings keeps Tesseract."
+					"Data": "PaddleOCR bundles only PP-OCRv6 Tiny, available offline without downloading and selected by default on desktop and mobile. Other compatible PP-OCRv6 models, such as Small and Medium, can be imported by selecting their detection and recognition ONNX files and corresponding inference.yml files. Imported models sync with the workspace; the provider and selected model are saved per device."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-4qc5uyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-4qc5uyi",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New users default to PaddleOCR with automatic OCR disabled. Existing provider, automatic OCR, and threshold settings are preserved. The former built-in Small selection migrates to Tiny; imported models are unaffected. Upgrading from a version without OCR provider settings keeps Tesseract."
 				}
 			]
 		},
@@ -1210,12 +1281,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003073646-xagh51u",
-				"updated": "20261006114009"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "With PaddleOCR selected, edit the detection, text box confidence, and recognition confidence thresholds directly in the Recognition thresholds group. Changes are saved automatically when you finish editing a field. Detection and box thresholds must be greater than 0 and less than 1; recognition accepts 0 through 1. Leave a field blank to use the current model’s detection parameters or the default recognition threshold of 0.5. Invalid input stays editable and is not saved. Higher thresholds can reduce icons mistaken for text, but may miss blurry or faint text. Thresholds are saved per device and apply to manual and automatic recognition. Existing results remain unchanged; rerun recognition from the image menu when needed."
+					"Data": "With PaddleOCR selected, edit the detection, text box confidence, and recognition confidence thresholds directly in the Recognition thresholds group. Changes are saved automatically when you finish editing a field. Detection and box thresholds must be greater than 0 and less than 1; recognition accepts 0 through 1."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-djp2v4q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-djp2v4q",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Leave a field blank to use the current model’s detection parameters or the default recognition threshold of 0.5. Invalid input stays editable and is not saved. Higher thresholds can reduce icons mistaken for text, but may miss blurry or faint text. Thresholds are saved per device and apply to manual and automatic recognition. Existing results remain unchanged; rerun recognition from the image menu when needed."
 				}
 			]
 		},
@@ -1537,7 +1622,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-r2lk28b",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1602,12 +1687,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014737-rvuxtck",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Switching from a local provider to AI disables automatic recognition; enable it explicitly to send unprocessed, unencrypted notebook images to the provider in the background, which may incur charges. Disabling or deleting the selected model does not choose another model or provider. When a local provider is selected and no independent AI model is configured, the separate manual AI action retains the agent model for compatibility. Results share the existing OCR text, editing, copying, and search index; failures preserve the previous result. Encrypted notebook images are not supported. "
+					"Data": "Switching from a local provider to AI disables automatic recognition; enable it explicitly to send unprocessed, unencrypted notebook images to the provider in the background, which may incur charges. Disabling or deleting the selected model does not choose another model or provider."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-hq3vjo9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-hq3vjo9",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a local provider is selected and no independent AI model is configured, the separate manual AI action retains the agent model for compatibility. Results share the existing OCR text, editing, copying, and search index; failures preserve the previous result. Encrypted notebook images are not supported. "
 				}
 			]
 		},
@@ -1616,12 +1715,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014737-4angbwj",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PNG, JPEG, GIF, and WebP are supported directly; BMP and TIFF are converted to PNG, and HEIC/HEIF to JPEG without reducing resolution. The original and converted images must each be within 20 MiB, and the converted image within 40 million pixels. Recognition actions are hidden for network images, and the OCR menu is hidden for encrypted notebook images. Unsupported formats such as AVIF, SVG, and ICO do not show the AI OCR action."
+					"Data": "PNG, JPEG, GIF, and WebP are supported directly; BMP and TIFF are converted to PNG, and HEIC/HEIF to JPEG without reducing resolution. The original and converted images must each be within 20 MiB, and the converted image within 40 million pixels."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-wu0iopj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-wu0iopj",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Recognition actions are hidden for network images, and the OCR menu is hidden for encrypted notebook images. Unsupported formats such as AVIF, SVG, and ICO do not show the AI OCR action."
 				},
 				{
 					"Type": "NodeText",
@@ -1658,7 +1771,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261016202856"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1826,7 +1939,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-3zn8sf9",
-				"updated": "20261014140201"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1835,7 +1948,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " The button appears only when OCR text is available and the appearance profile allows it. It is hidden in the Simple profile; in a custom appearance profile, use "
+					"Data": " The button appears only when OCR text is available and the appearance profile allows it."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-nvr7nbe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-nvr7nbe",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It is hidden in the Simple profile; in a custom appearance profile, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1866,7 +1993,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Hover over a local image to view OCR text and recognition hints according to your settings. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
+					"Data": " Hover over a local image to view OCR text and recognition hints according to your settings. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-c3jdhod",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-c3jdhod",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a custom appearance profile, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1906,7 +2047,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014140201-g0z2wp6",
-				"updated": "20261014140201"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1938,7 +2079,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " independently choose whether image tooltips show saved OCR text, a hint when no OCR text is available, and a recognition failure hint. Text previews are enabled by default; the other two hints are disabled. These choices are saved per device and work independently of automatic OCR. Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
+					"Data": " independently choose whether image tooltips show saved OCR text, a hint when no OCR text is available, and a recognition failure hint. Text previews are enabled by default; the other two hints are disabled. These choices are saved per device and work independently of automatic OCR."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-s7pamdn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-s7pamdn",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
 				}
 			]
 		}

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -41,6 +45,55 @@ func TestAPIContractRiffSerialization(t *testing.T) {
 		}
 		if err = bundle.ValidateResponse("POST", "/api/riff/getRiffDueCards", payload); err != nil {
 			t.Fatal(err)
+		}
+	}
+}
+
+// Runs in the isolated, initialized document workspace of the heading contract test.
+func testAPIContractRiffMutations(t *testing.T, blockID string) {
+	t.Helper()
+	previousDecks, previousQueue := model.Decks, util.QueueDir
+	previousFlashcard := model.Conf.LoadFlashcard()
+	model.Decks = map[string]*riff.Deck{}
+	model.Conf.Flashcard.Store(conf.NewFlashcard())
+	defer func() {
+		model.Decks, util.QueueDir = previousDecks, previousQueue
+		model.Conf.Flashcard.Store(previousFlashcard)
+	}()
+	deck, err := model.CreateDeck("contract persistence")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := `{"deckID":"` + deck.ID + `","blockIDs":["` + blockID + `"]}`
+	blockedQueue := filepath.Join(t.TempDir(), "blocked-queue")
+	if err := os.WriteFile(blockedQueue, []byte("blocked"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, step := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		fail    bool
+		cards   int
+	}{
+		{"addRiffCards", addRiffCards, true, 0},
+		{"addRiffCards", addRiffCards, false, 1},
+		{"removeRiffCards", removeRiffCards, true, 1},
+		{"removeRiffCards", removeRiffCards, false, 0},
+	} {
+		util.QueueDir = previousQueue
+		if step.fail {
+			util.QueueDir = blockedQueue
+		}
+		code, msg, data := riffContractRequest(t, step.name, step.handler, body)
+		if step.fail {
+			if code != -1 || msg == "" || string(data) != "null" {
+				t.Fatalf("%s transaction failure was reported as success: %d %q %s", step.name, code, msg, data)
+			}
+		} else if code != 0 || string(data) == "null" {
+			t.Fatalf("%s successful mutation failed: %d %q %s", step.name, code, msg, data)
+		}
+		if deck.CountCards() != step.cards {
+			t.Fatalf("%s changed the deck despite failure: %d, want %d", step.name, deck.CountCards(), step.cards)
 		}
 	}
 }

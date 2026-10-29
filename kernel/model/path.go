@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -40,7 +28,7 @@ func createDocsByHPathSync(boxID, hPath, content, parentID, id string, titleEmpt
 }
 
 func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty bool,
-	createDocFn func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error)) (retID string, err error) {
+	createDocFn func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error), checkedParents ...map[string]*treenode.BlockTree) (retID string, err error) {
 	if "" == id {
 		id = ast.NewNodeID()
 	}
@@ -52,7 +40,7 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 		// 笔记本顶层文档是用户可见的逻辑根，完整路径应从笔记本根目录解析。
 		parentID = ""
 	}
-	if "" != parentID {
+	if "" != parentID && len(checkedParents) == 0 {
 		// 存在同名文档时通过父文档 ID 精确定位 https://github.com/siyuan-note/siyuan/issues/8138
 		parentHPath, name := path.Split(hPath)
 		parentHPath = strings.TrimSuffix(parentHPath, "/")
@@ -72,20 +60,24 @@ func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty b
 	parts := strings.Split(hPath, "/")[1:]
 	// The subdoc creation path is unstable when a parent doc with the same name exists https://github.com/siyuan-note/siyuan/issues/9322
 	// 存在同名父文档时子文档创建路径不稳定，这里需要按照完整的 hpath 映射，不能在下面的循环中边构建 hpath 边构建 path，否则虽然 hpath 相同，但是会导致 path 组装错位
-	for i, part := range parts {
-		if i == len(parts)-1 {
-			break
-		}
+	if len(checkedParents) > 0 {
+		hpathBtMap = checkedParents[0]
+	} else {
+		for i, part := range parts {
+			if i == len(parts)-1 {
+				break
+			}
 
-		hPathBuilder.WriteString("/")
-		hPathBuilder.WriteString(part)
-		hp := hPathBuilder.String()
-		root := treenode.GetBlockTreeRootByHPath(boxID, hp)
-		if nil == root {
-			break
-		}
+			hPathBuilder.WriteString("/")
+			hPathBuilder.WriteString(part)
+			hp := hPathBuilder.String()
+			root := treenode.GetBlockTreeRootByHPath(boxID, hp)
+			if nil == root {
+				break
+			}
 
-		hpathBtMap[hp] = root
+			hpathBtMap[hp] = root
+		}
 	}
 
 	pathBuilder := bytes.Buffer{}
@@ -162,7 +154,7 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (r
 		treeNode := &Path{
 			ID:       root.ID,
 			Box:      root.Box,
-			Name:     path.Base(root.HPath),
+			Name:     documentTitleText(root.Box, root.RootID),
 			NodeType: root.Type,
 			Type:     typ,
 			SubType:  root.SubType,

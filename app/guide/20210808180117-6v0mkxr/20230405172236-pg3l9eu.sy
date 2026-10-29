@@ -7,7 +7,7 @@
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-x56gmi0",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -30,22 +30,22 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230405172238-38se2u5",
-				"updated": "20230405172238"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The performance on different hardware configurations and different operating system platforms is different. In addition, as the data increases, performance degradation is unavoidable. So we may need to change the way of use and adjust some configuration items to improve performance for a smoother experience."
+					"Data": "Performance depends on hardware, system load, data volume, and content structure. If an operation is slow, first identify whether it involves startup, search, editing, or network access, then check the relevant settings below."
 				}
 			]
 		},
 		{
 			"ID": "20230405172238-lknsx9c",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-lknsx9c",
-				"updated": "20260426180046"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-3rel2m1",
-				"updated": "20260426180046"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 					},
 					"Properties": {
 						"id": "20230405172238-3vv1mxu",
-						"updated": "20260426180046"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
@@ -80,12 +80,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405172238-pew1c0t",
-								"updated": "20260426180046"
+								"updated": "20261024161440"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Number of content blocks: The number of content blocks has a large impact on performance, such as expanding the document panel, searching, and writing data. But don't worry too much, usually the number of content blocks in the order of millions will not have much impact, unless the size of each block is large"
+									"Data": "Block count and size: Affect document loading, search, and writes; the impact also depends on hardware and content structure, so block count alone is not a reliable measure"
 								}
 							]
 						}
@@ -178,7 +178,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-rcjs6d7",
-				"updated": "20230405172644"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -352,7 +352,7 @@
 					},
 					"Properties": {
 						"id": "20230405172238-aur9ljz",
-						"updated": "20230405172238"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -360,12 +360,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405172238-hrrkysd",
-								"updated": "20230405172238"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Upgrade hardware, this is the fastest way to improve performance"
+									"Data": "If hardware resources are insufficient, consider upgrading memory, the processor, or storage according to the bottleneck"
 								}
 							]
 						}
@@ -376,10 +376,10 @@
 		{
 			"ID": "20230405172238-v4hbjbe",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-v4hbjbe",
-				"updated": "20260916173158"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -531,7 +531,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-udux4az",
-				"updated": "20260916173158"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -608,7 +608,7 @@
 					},
 					"Properties": {
 						"id": "20230406155545-rireqb6",
-						"updated": "20230406155555"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -616,21 +616,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406155545-33xx41r",
-								"updated": "20230406155555"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Improve editor performance by reducing elements with "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Focus"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "Focus on a content block to reduce how much content the editor displays at once"
 								}
 							]
 						}
@@ -705,10 +696,10 @@
 		{
 			"ID": "20250825114750-j9t49j2",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250825114750-j9t49j2",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package util
 
@@ -46,7 +34,7 @@ var Mode = "prod"
 // SystemTempDir 保存工作空间初始化重定向之前的系统临时目录。
 var SystemTempDir = os.TempDir()
 
-const Ver = "3.8.8"
+const Ver = "3.8.9"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
@@ -163,6 +151,7 @@ func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, 
 
 	// 工作空间仅允许被一个内核进程伺服
 	tryLockWorkspace()
+	clearWorkspaceStartupTemp()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
 	logging.LogInfo("\n" + bootBanner.String())
@@ -359,15 +348,10 @@ func initWorkspaceDir(workspaceArg string) {
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	QueueDir = filepath.Join(TempDir, "queue")
 	osTmpDir := filepath.Join(TempDir, "os")
-	os.RemoveAll(osTmpDir)
 	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
 		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
-	os.RemoveAll(filepath.Join(TempDir, "repo"))
-	// export 目录只保存临时文件，启动时统一清理；插件不得依赖其中的文件跨进程存续。
-	os.RemoveAll(filepath.Join(TempDir, "export"))
-	os.RemoveAll(filepath.Join(TempDir, "clipboard"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)
@@ -377,6 +361,18 @@ func initWorkspaceDir(workspaceArg string) {
 	BlockTreeDBPath = filepath.Join(TempDir, "blocktree.db")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
 	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
+}
+
+// Only the kernel holding the workspace lock may discard previous-session files.
+func clearWorkspaceStartupTemp() {
+	for _, dir := range []string{"os", "repo", "export", "clipboard"} {
+		os.RemoveAll(filepath.Join(TempDir, dir))
+	}
+	osTmpDir := filepath.Join(TempDir, "os")
+	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
+		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
+	}
 }
 
 func DeduplicateWorkspacePaths(paths []string) []string {
@@ -659,10 +655,8 @@ func UnlockWorkspace() {
 		return
 	}
 
-	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); err != nil {
-		logging.LogErrorf("remove workspace lock failed: %s", err)
-		return
-	}
+	// Keep the lock file identity stable: a new kernel may already hold this file.
+	// Unlinking it would let another kernel create and lock a different file.
 }
 
 func LogDatabaseSize(dbPath string) {

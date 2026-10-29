@@ -54,6 +54,7 @@ import {TableTouchControl, type ITableTouchState} from "./tableTouch";
 import {finishTableCellEditing} from "./tableCellRichContext";
 import {buildBlockDOMClipboardRichData} from "./blockDOMClipboard";
 import {showMessage} from "../../dialog/message";
+import {getTableRowBoundary, getTableRowOpeningHTML, startTableRowResize} from "./tableRowHeight";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -368,6 +369,9 @@ export class TableControl {
     private touch: TableTouchControl;
     private dragCleanup?: () => void;
     private columnResizeCleanup?: () => void;
+    private rowResizeCleanup?: () => void;
+    private rowResizeHandle: HTMLButtonElement;
+    private rowBoundary?: {cell: HTMLTableCellElement, row: HTMLTableRowElement};
 
     constructor(protyle: IProtyle, wysiwygElement: HTMLElement) {
         this.protyle = protyle;
@@ -403,6 +407,18 @@ export class TableControl {
         this.addBothButton = this.element.querySelector('[data-type="add-both"]');
         this.resizeLabel = this.element.querySelector(".protyle-table-control__size");
         this.dropIndicator = this.element.querySelector(".protyle-table-control__drop");
+        this.rowResizeHandle = document.createElement("button");
+        this.rowResizeHandle.type = "button";
+        this.rowResizeHandle.className = "protyle-table-control__handle protyle-table-control__height fn__none";
+        this.rowResizeHandle.setAttribute("aria-label", window.siyuan.languages.height);
+        this.element.append(this.rowResizeHandle);
+        this.rowResizeHandle.addEventListener("pointerdown", event => {
+            if (this.rowBoundary && event.button === 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.startRowResize(event, this.rowBoundary.cell, this.rowBoundary.row);
+            }
+        });
         protyle.element.append(this.element);
         this.bindEvents();
         if (isMobile()) {
@@ -436,6 +452,7 @@ export class TableControl {
                     }
                 },
                 width: (event, cell, column) => this.startColumnResize(event, cell, column),
+                height: (event, cell, row) => this.startRowResize(event, cell, row),
                 menu: () => this.openMenu(0, 0),
                 selectAll: () => {
                     const state = this.getTouchState();
@@ -499,6 +516,7 @@ export class TableControl {
     }
 
     public destroy() {
+        this.rowResizeCleanup?.();
         this.touch?.destroy();
         this.dragCleanup?.();
         this.columnResizeCleanup?.();
@@ -514,6 +532,8 @@ export class TableControl {
     }
 
     public clear() {
+        this.rowResizeCleanup?.();
+        this.rowBoundary = undefined;
         this.touch?.reset();
         this.dragCleanup?.();
         this.columnResizeCleanup?.();
@@ -590,6 +610,25 @@ export class TableControl {
                 indexes: this.selection.indexes,
                 rectangle: this.isRectangle(),
             } : undefined};
+    }
+
+    private startRowResize(event: PointerEvent, cell: HTMLTableCellElement, row: HTMLTableRowElement) {
+        this.rowResizeCleanup?.();
+        this.columnResizeCleanup?.();
+        this.rowResizeCleanup = startTableRowResize(this.protyle, cell, row, event, (height, x, y) => {
+            this.resizeLabel.textContent = `${height}px`;
+            this.setPosition(this.resizeLabel, x + 12, y + 12);
+            this.resizeLabel.classList.remove("fn__none");
+            this.scheduleRender();
+        }, () => {
+            this.rowResizeCleanup = undefined;
+            this.rowBoundary = undefined;
+            this.resizeLabel.classList.add("fn__none");
+            this.scheduleRender();
+        });
+        if (this.rowResizeCleanup && this.touch) {
+            this.blurTouchEditor();
+        }
     }
 
     private startColumnResize(event: PointerEvent, cell: HTMLTableCellElement, index: number) {
@@ -726,6 +765,10 @@ export class TableControl {
         // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
         this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
+            if (!this.rowResizeCleanup && !this.element.contains(event.relatedTarget as Node)) {
+                this.rowBoundary = undefined;
+                this.rowResizeHandle.classList.add("fn__none");
+            }
             if (this.dragState || this.resizeState || this.element.contains(event.relatedTarget as Node)) {
                 return;
             }
@@ -743,15 +786,23 @@ export class TableControl {
             }
         }, {capture: true, signal});
         this.wysiwygElement.addEventListener("contextmenu", event => {
-            if (!this.selection) {
+            if (event.shiftKey || this.protyle.toolbar.isMultiSelectMode()) {
                 return;
             }
             const cell = getCell(event.target);
-            if (!cell || getTableNode(cell) !== this.selection.node) {
+            if (!cell || !getTableNode(cell) || cell.closest(".protyle-wysiwyg") !== this.wysiwygElement) {
                 this.clear();
                 return;
             }
-            if (!this.isCellInSelection(cell)) {
+            if (!this.selection || getTableNode(cell) !== this.selection.node) {
+                // 保留触屏长按和内嵌编辑器的文字菜单；未进入编辑的单元格可直接右键操作。
+                if (this.touch || (event.target as Element).closest(".table__cell-editor") ||
+                    !finishTableCellEditing(cell)) {
+                    return;
+                }
+                restoreTableVirtualizationDOM(cell.closest("table"));
+                this.selectFromCell("cell", cell, false, false);
+            } else if (!this.isCellInSelection(cell)) {
                 this.selectFromCell(this.selection.mode, cell, false, false);
             }
             event.preventDefault();
@@ -895,6 +946,10 @@ export class TableControl {
             if (this.dragState || this.wysiwygElement.contains(event.relatedTarget as Node)) {
                 return;
             }
+            if (!this.rowResizeCleanup) {
+                this.rowBoundary = undefined;
+                this.rowResizeHandle.classList.add("fn__none");
+            }
             this.hoverCell = undefined;
             this.hoverType = undefined;
             this.scheduleRender();
@@ -972,6 +1027,14 @@ export class TableControl {
         const eventCell = getCell(event.target);
         // 内嵌编辑器只处理自身表格，避免将外层单元格识别为自己的内容。
         const targetCell = eventCell && this.wysiwygElement.contains(eventCell) ? eventCell : undefined;
+        if (!this.rowResizeCleanup && !fromControl) {
+            const row = targetCell && !this.protyle.disabled && getTableNode(targetCell) ?
+                getTableRowBoundary(targetCell, event.clientX, event.clientY, 4) : undefined;
+            if (row !== this.rowBoundary?.row || targetCell !== this.rowBoundary?.cell && row) {
+                this.rowBoundary = row ? {cell: targetCell, row} : undefined;
+                this.scheduleRender();
+            }
+        }
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
@@ -1383,7 +1446,23 @@ export class TableControl {
 
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
-        this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
+        const tables = new Set<HTMLTableElement>();
+        const addTables = (element: Element) => {
+            const node = element?.closest('[data-type="NodeTable"]');
+            if (node && this.wysiwygElement.contains(node)) {
+                node.querySelectorAll<HTMLTableElement>("table").forEach(table => tables.add(table));
+            }
+        };
+        // 添加按钮位于表格右侧和下方，命中范围向内探测即可定位候选表格，避免扫描整篇文档。
+        const reach = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS + 1;
+        for (const dx of [0, reach]) {
+            for (const dy of [0, reach]) {
+                addTables(this.wysiwygElement.ownerDocument.elementFromPoint(clientX - dx, clientY - dy));
+            }
+        }
+        addTables(this.hoverCell);
+        const contentRect = tables.size ? (this.protyle.contentElement || this.protyle.element).getBoundingClientRect() : undefined;
+        tables.forEach(table => {
             if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
@@ -1391,7 +1470,6 @@ export class TableControl {
             const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
             const addRowEdge = this.getTableAddRowEdge(table);
-            const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
                 isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
                     TABLE_ADD_CONTROL_GAP);
@@ -1584,8 +1662,26 @@ export class TableControl {
         this.pinnedTableActions = actions;
     }
 
+    private renderRowBoundary() {
+        const boundary = this.rowBoundary;
+        this.rowResizeHandle.classList.add("fn__none");
+        if (this.touch || this.protyle.disabled || !boundary?.row.isConnected || this.dragState || this.resizeState) {
+            return;
+        }
+        const table = boundary.cell.closest("table");
+        const viewport = this.getTableGridViewportRect(table);
+        const rect = boundary.row.getBoundingClientRect();
+        if (rect.bottom <= viewport.top || rect.bottom > viewport.bottom + 1 || viewport.right <= viewport.left) {
+            return;
+        }
+        this.setPosition(this.rowResizeHandle, (viewport.left + viewport.right) / 2, rect.bottom);
+        this.rowResizeHandle.style.width = `${viewport.right - viewport.left}px`;
+        this.rowResizeHandle.classList.remove("fn__none");
+    }
+
     private render() {
         this.renderPinnedTableFrames();
+        this.renderRowBoundary();
         this.touch?.render();
         if (this.resizeState?.dragging && this.resizeState.table.isConnected) {
             this.renderResize();
@@ -1604,7 +1700,7 @@ export class TableControl {
             item.classList.add("fn__none");
             item.classList.remove("protyle-table-control__add--active");
         });
-        if (!this.columnResizeCleanup) {
+        if (!this.columnResizeCleanup && !this.rowResizeCleanup) {
             this.resizeLabel.classList.add("fn__none");
         }
         if (visible && !this.touch) {
@@ -1805,6 +1901,16 @@ export class TableControl {
                         },
                     }).element);
                 }
+                if (!this.protyle.disabled && this.selection.mode !== "cell") {
+                    menu.append(new MenuItem({
+                        icon: "iconCopy",
+                        label: window.siyuan.languages.duplicateCopy,
+                        disabled: merged,
+                        action: merged ? "iconInfo" : undefined,
+                        actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
+                        click: () => this.duplicateRowsOrColumns(),
+                    }).element);
+                }
                 menu.append(new MenuItem({
                     icon: "iconCut",
                     label: window.siyuan.languages.cut,
@@ -1831,14 +1937,6 @@ export class TableControl {
                     menu.append(new MenuItem({type: "separator"}).element);
                     this.appendInsertMenus();
                     if (this.selection.mode !== "cell") {
-                        menu.append(new MenuItem({
-                            icon: "iconCopy",
-                            label: window.siyuan.languages.duplicateCopy,
-                            disabled: merged,
-                            action: merged ? "iconInfo" : undefined,
-                            actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
-                            click: () => this.duplicateRowsOrColumns(),
-                        }).element);
                         if (this.selection.indexes.size === 1 && this.selection.indexes.has(0)) {
                             const headerType = this.selection.mode === "row" ? "row" : "column";
                             menu.append(new MenuItem({
@@ -1870,6 +1968,28 @@ export class TableControl {
                                 disabled: columns.length === 0 || columns.every(column =>
                                     isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
                                 click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
+                            }).element);
+                        } else {
+                            const node = this.selection.node;
+                            const rows = Array.from(this.selection.indexes).map(index => this.selection.table.rows[index]);
+                            menu.append(new MenuItem({
+                                id: "autoFitRowHeight",
+                                label: window.siyuan.languages.autoFitRowHeight,
+                                disabled: rows.every(row => !row.style.height),
+                                click: () => {
+                                    if (this.protyle.disabled || !node.isConnected || rows.some(row => !row.isConnected)) {
+                                        return;
+                                    }
+                                    const oldHTML = node.outerHTML;
+                                    rows.forEach(row => {
+                                        row.style.removeProperty("height");
+                                        if (!row.getAttribute("style")) {
+                                            row.removeAttribute("style");
+                                        }
+                                    });
+                                    updateTransaction(this.protyle, node, oldHTML);
+                                    this.scheduleRender();
+                                },
                             }).element);
                         }
                         menu.append(new MenuItem({type: "separator"}).element);
@@ -3164,7 +3284,7 @@ export class TableControl {
                 html += `<${nextSection}>`;
                 section = nextSection;
             }
-            html += "<tr>";
+            html += getTableRowOpeningHTML(selection.table.rows[rows[row]]);
             for (let column = 0; column < columns.length; column++) {
                 const item = outputGrid[row][column];
                 const tag = nextSection === "thead" ? "th" : "td";

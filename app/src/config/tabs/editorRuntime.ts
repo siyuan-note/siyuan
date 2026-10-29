@@ -11,6 +11,7 @@ import {lineNumberRender} from "../../protyle/render/highlightRender";
 import {updatePageScrollButtons} from "../../protyle/scroll/pageButtons";
 /// #if MOBILE
 import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
+import {updateMobileBottomBacklinkPanel} from "../../mobile/util/bottomBacklink";
 /// #endif
 
 const runtime = createSectionRuntime<Config.IEditor>({
@@ -25,7 +26,11 @@ const runtime = createSectionRuntime<Config.IEditor>({
         name: "backlink-panel",
         changed: () => true,
         apply: (old, next) => {
+            /// #if MOBILE
+            return updateMobileBottomBacklinkPanel(undefined, shouldResetBottomBacklinkPanel(old, next));
+            /// #else
             getAllModels().editor.forEach(item => item.updateBacklinkPanel(shouldResetBottomBacklinkPanel(old, next)));
+            /// #endif
         },
     }, {
         name: "database-row-layout",

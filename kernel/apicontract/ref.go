@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -37,10 +41,32 @@ type BacklinkDocumentRequest struct {
 }
 
 type BacklinkSourceFilter struct {
-	DailyNote           string   `json:"dailyNote" api:"optional,nullable,ignoretype"`
-	ExcludeSelf         bool     `json:"excludeSelf" api:"optional,nullable"`
-	ExcludedRefDefIDs   []string `json:"excludedRefDefIDs" api:"optional,nullable,filterstrings"`
-	ExcludedNotebookIDs []string `json:"excludedNotebookIDs" api:"optional,nullable,filterstrings"`
+	DailyNote           string                  `json:"dailyNote" api:"optional,nullable,ignoretype"`
+	ExcludeSelf         bool                    `json:"excludeSelf" api:"optional,nullable"`
+	ExcludedRefDefIDs   []string                `json:"excludedRefDefIDs" api:"optional,nullable,filterstrings"`
+	ExcludedNotebookIDs []string                `json:"excludedNotebookIDs" api:"optional,nullable,filterstrings"`
+	Database            *BacklinkDatabaseFilter `json:"database" api:"optional,nullable"`
+}
+
+// 数据库字段按 avID 隔离。空条件仅限制数据库成员；失效数据库或条件不放宽为全部结果。
+// 条件不修改数据库原视图，不影响提及；列表、正文及全局分页使用相同条件。
+type BacklinkDatabaseFilter struct {
+	AvID    string          `json:"avID"`
+	Filters []*AVViewFilter `json:"filters"`
+}
+
+type BacklinkDatabasesRequest struct {
+	ID              string                `json:"id"`
+	Notebook        string                `json:"notebook" api:"optional"`
+	Keyword         string                `json:"keyword" api:"optional"`
+	ContainChildren *bool                 `json:"containChildren" api:"optional"`
+	SourceFilter    *BacklinkSourceFilter `json:"sourceFilter" api:"optional"`
+}
+
+type BacklinkDatabase struct {
+	ID   string   `json:"id"`
+	Name string   `json:"name"`
+	Keys []*AVKey `json:"keys"`
 }
 
 type BacklinkAttributeViewTarget struct {
@@ -131,6 +157,11 @@ func decodeBacklinkSourceFilter(raw json.RawMessage) *BacklinkSourceFilter {
 		return nil
 	}
 	filter := &BacklinkSourceFilter{}
+	if raw, exists := fields["database"]; exists && !bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		filter.Database = &BacklinkDatabaseFilter{}
+		// 非法数据库条件仍保留启用状态，由模型拒绝匹配，避免静默退回全部反链。
+		_ = json.Unmarshal(raw, filter.Database)
+	}
 	_ = json.Unmarshal(fields["dailyNote"], &filter.DailyNote)
 	_ = json.Unmarshal(fields["excludeSelf"], &filter.ExcludeSelf)
 	for _, field := range []struct {

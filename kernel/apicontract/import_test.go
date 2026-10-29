@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -18,6 +22,20 @@ func TestStagedImportRequestCompatibility(t *testing.T) {
 	for _, body := range []string{`{"token":"token"}`, `{"token":"token","notebook":null}`, `{"token":"token","notebook":" "}`} {
 		if _, err := ContinueImportSY.Decode(strings.NewReader(body)); err == nil {
 			t.Fatalf("invalid notebook accepted: %s", body)
+		}
+	}
+}
+
+func TestDataImportContractRequiresExplicitConflictChoice(t *testing.T) {
+	for _, mode := range []string{"skip", "overwrite"} {
+		request, err := CommitDataImport.Decode(strings.NewReader(`{"id":" plan ","mode":"` + mode + `","password":" secret "}`))
+		if err != nil || request.ID != "plan" || string(request.Mode) != mode || request.Password != "secret" {
+			t.Fatalf("invalid commit decoding: %+v %v", request, err)
+		}
+	}
+	for _, body := range []string{`{}`, `{"id":"plan"}`, `{"id":"plan","mode":"silent"}`, `{"id":"plan","mode":null}`, `{"id":"plan","mode":"skip","password":true}`} {
+		if _, err := CommitDataImport.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid import choice accepted: %s", body)
 		}
 	}
 }

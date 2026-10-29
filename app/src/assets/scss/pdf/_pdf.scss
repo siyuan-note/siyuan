@@ -38,6 +38,15 @@
     height: 100%;
     position: relative;
 
+    &--maximized {
+      position: fixed;
+      inset: var(--pdf-maximized-top, 0px) 0 0;
+      width: auto;
+      height: auto;
+      z-index: 8;
+      background-color: var(--b3-theme-background);
+    }
+
     .textLayer {
       /* dark 蓝色、紫色背景显示不清楚，文档位于 https://github.com/siyuan-note/siyuan/issues/5351 */
       mix-blend-mode: multiply;
@@ -183,7 +192,12 @@
     }
 
     &:not([data-type="border"]) > div {
+      background-color: var(--pdf-annotation-color);
       background-color: color-mix(in srgb, var(--pdf-annotation-color) 35%, transparent);
+
+      @supports not (background-color: color-mix(in srgb, red, transparent)) {
+        opacity: .35;
+      }
     }
   }
 

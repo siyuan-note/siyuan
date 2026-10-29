@@ -90,6 +90,21 @@ test("未登记内核目标的窗口既不能发送也不能接收", () => {
     assert.deepEqual(registered.deliveries.map(item => item.id), [1102]);
 });
 
+test("document tab transfers retain workspace isolation and reject malformed editor payloads", () => {
+    const f = createFixture(1101);
+    const data = {id: "source", children: {instance: "Editor", blockId: "block", notebookId: "box"}};
+    assert.equal(f.dispatch({cmd: "moveTabToMainWindow", data}), true);
+    assert.deepEqual(f.deliveries.map(item => item.id), [1102]);
+    for (const invalid of [undefined, "source", {}, {...data, id: ""},
+        {...data, children: {instance: "Custom", blockId: "block"}},
+        {...data, children: {instance: "Editor", blockId: 1}},
+        {...data, children: {instance: "Editor", blockId: "block", notebookId: {}}}]) {
+        assert.equal(f.dispatch({cmd: "moveTabToMainWindow", data: invalid}), false);
+    }
+    const unregistered = createFixture(3201);
+    assert.equal(unregistered.dispatch({cmd: "moveTabToMainWindow", data}), false);
+});
+
 test("主进程 handler 按发送方与内核目标接线到 dispatchWindowMessage", () => {
     const source = fs.readFileSync(path.join(__dirname, "main.js"), "utf8").replace(/\r\n/g, "\n");
     const marker = "ipcMain.on(\"siyuan-send-windows\", (event, data) => {";

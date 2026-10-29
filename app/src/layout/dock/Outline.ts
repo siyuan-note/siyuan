@@ -31,6 +31,7 @@ import {isEncryptedBox} from "../../util/pathName";
 import type {Editor} from "../../editor";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
+import {getHeadingLevel} from "../../block/headingLevel";
 import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {getDocDisplayName} from "../../util/pathName";
@@ -504,6 +505,8 @@ export class Outline extends Model {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (!ial && typeof count === "undefined") {
+                docTitleElement.innerHTML = "";
+                docTitleElement.removeAttribute("title");
                 docTitleElement.classList.add("fn__none");
                 return;
             }
@@ -859,15 +862,6 @@ export class Outline extends Model {
     }
 
     /**
-     * 获取标题元素的实际标题级别（H1=1, H2=2, 等等）
-     * @param element li元素
-     * @returns 标题级别（1-6）
-     */
-    private getHeadingLevel(element: HTMLElement) {
-        return parseInt(element.getAttribute("data-subtype")?.replace("h", "") || "0");
-    }
-
-    /**
      * 展开到指定标题级别
      * @param targetLevel 目标标题级别，1-6级（H1-H6），6级表示全部展开
      */
@@ -878,7 +872,7 @@ export class Outline extends Model {
         } else {
             // 展开到指定标题级别
             this.element.querySelectorAll("li.b3-list-item").forEach(item => {
-                const headingLevel = this.getHeadingLevel(item as HTMLElement);
+                const headingLevel = getHeadingLevel(item);
                 const arrowElement = item.querySelector(".b3-list-item__arrow");
                 if (item.nextElementSibling && item.nextElementSibling.tagName === "UL" && arrowElement) {
                     if (headingLevel > 0 && headingLevel < targetLevel) {
@@ -1012,7 +1006,7 @@ export class Outline extends Model {
                 if (this.isPreview) {
                     return; // 预览模式下不显示右键菜单
                 }
-                const currentLevel = this.getHeadingLevel(element);
+                const currentLevel = getHeadingLevel(element);
 
                 window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_CONTEXT);
                 const id = element.getAttribute("data-node-id");

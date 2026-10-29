@@ -8,8 +8,9 @@ const source = createSourceFile("index.ts", readFileSync("src/protyle/render/lis
     ScriptTarget.ES2021, true);
 const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
-const methods = controller.members.filter(item => item.name && ["add", "change", "undo", "focusNode", "edit"].includes(item.name.getText(source)));
-assert.equal(methods.length, 5);
+const methods = controller.members.filter(item => item.name &&
+    ["add", "deleteNode", "change", "undo", "focusNode", "edit"].includes(item.name.getText(source)));
+assert.equal(methods.length, 6);
 let editorUndo = "";
 const visit = (item: import("typescript").Node) => {
     if (isPropertyAssignment(item) && item.name.getText(source) === "onUndo" &&
@@ -20,19 +21,23 @@ const visit = (item: import("typescript").Node) => {
 };
 visit(controller);
 assert.ok(editorUndo);
-const compiled = transpileModule(`class Controller {
+const compiled = transpileModule(readFileSync("src/protyle/undo/viewport.ts", "utf8").replace(/^export /gm, "") + `
+class Controller {
     ${methods.map(item => item.getText(source)).join("\n")}
     makeEditorUndo(id) { return ${editorUndo}; }
 }
-globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+globalThis.Controller = Controller;
+globalThis.isUndoViewportPreserved = isUndoViewportPreserved;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-test("new mind map nodes become selected before editing", async () => {
+test("explicit mind map additions stay selected while clipboard additions still open the editor", async () => {
     const steps: string[] = [];
-    const item = {dataset: {nodeId: "new"}, classList: {replace: () => {}}};
+    const item = {dataset: {nodeId: "new"}, classList: {replace: () => {}}, outerHTML: "new node"};
+    const clipboard = {textPlain: "Pasted content"};
     const context: any = {
         canEdit: () => true,
         genListItemElement: () => item,
         addListMindmapNode: () => true,
+        cleanListMindmapHTML: (html: string) => html,
     };
     runInNewContext(compiled, context);
     const target = new context.Controller();
@@ -43,16 +48,116 @@ test("new mind map nodes become selected before editing", async () => {
         view: {focusNode: (id: string) => steps.push(`focus:${id}`),
             getContentHost: () => ({}),
         },
-        edit: async (id: string) => { steps.push(`edit:${id}`); },
+        edit: async (id: string, _host: unknown, replace: unknown, data: unknown) => {
+            assert.equal(replace, undefined);
+            assert.equal(data, clipboard);
+            steps.push(`edit:${id}`);
+        },
     });
+    for (const type of ["NodeList", "NodeMindmap"]) {
+        target.list.dataset.type = type;
+        for (const kind of ["child", "sibling"]) {
+            steps.length = 0;
+            await target.add("root", kind);
+            assert.deepEqual(steps, ["focus:new"], `${type} ${kind} keeps node selection without opening the editor`);
+            steps.length = 0;
+            await target.add("root", kind, clipboard);
+            assert.deepEqual(steps, ["focus:new", "edit:new"], `${type} ${kind} imports clipboard content through the editor`);
+        }
+    }
+    target.change = async () => false;
+    steps.length = 0;
     await target.add("root", "child");
-    assert.deepEqual(steps, ["focus:new", "edit:new"]);
+    await target.add("root", "sibling", clipboard);
+    assert.deepEqual(steps, [], "failed additions neither move focus nor open the editor");
+});
+
+test("canceling new nodes restores their origin without overriding changed content, failed deletes or newer selection", async () => {
+    for (const scenario of ["new", "changed", "replaced", "missing origin", "ordinary", "failed", "newer selection"]) {
+        const original = {outerHTML: "new node"};
+        const element = scenario === "replaced" ? {...original} : original;
+        if (scenario === "changed") {
+            element.outerHTML = "changed content";
+        }
+        const nodes = new Map([["new", {element}], ["origin", {}], ["other", {}]]);
+        if (scenario === "missing origin") {
+            nodes.delete("origin");
+        }
+        let selected: string = "new";
+        let focusID: string;
+        const origins = new WeakMap();
+        if (scenario !== "ordinary") {
+            origins.set(original, {id: "origin", html: "new node"});
+        }
+        const context: any = {cleanListMindmapHTML: (html: string) => html,
+            deleteListMindmapNode: (_list: unknown, id: string) => scenario !== "failed" && nodes.delete(id)};
+        runInNewContext(compiled, context);
+        const target = Object.assign(new context.Controller(), {
+            list: {contains: (node: unknown) => node === element}, model: {nodes}, newNodeOrigins: origins,
+            view: {getSelectedId: () => selected, focusNode: (id: string) => { selected = id; }},
+            change: async (action: () => boolean, _editing: boolean, nextID: string) => {
+                focusID = nextID;
+                const changed = action();
+                if (changed) {
+                    selected = scenario === "newer selection" ? "other" : undefined;
+                }
+                return changed;
+            },
+        });
+        assert.equal(await target.deleteNode("new"), scenario !== "failed", scenario);
+        const special = ["new", "failed", "newer selection"].includes(scenario);
+        assert.equal(focusID, special ? "origin" : undefined, `${scenario}: transaction uses the same destination`);
+        assert.equal(selected, scenario === "new" ? "origin" : scenario === "failed" ? "new" :
+            scenario === "newer selection" ? "other" : undefined, `${scenario}: focus follows the current interaction`);
+        assert.equal(origins.has(element), scenario === "failed", `${scenario}: successful deletion clears creation state`);
+    }
+});
+
+test("entering a new node editor permanently cancels its creation-origin shortcut", async () => {
+    const element = {};
+    const origins = new WeakMap([[element, {id: "origin", html: "new node"}]]);
+    const context: any = {roots: new WeakMap(), canEdit: () => true, openListMindmapEditor: () => ({})};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {
+        owner: {}, list: {closest: (): null => null}, model: {nodes: new Map([["new", {element}]])},
+        newNodeOrigins: origins, view: {setEditing: () => {}}, editRequest: 0,
+    });
+    await target.edit("new", {isConnected: true});
+    assert.equal(origins.has(element), false, "even an editor closed without text changes counts as entering editing");
+});
+
+test("canvas undo and redo preserve the viewport throughout replay and release it on errors", async () => {
+    const editor = {isConnected: true};
+    let fail = false;
+    const history = async () => {
+        assert.equal(context.isUndoViewportPreserved(editor), true);
+        await Promise.resolve();
+        assert.equal(context.isUndoViewportPreserved(editor), true);
+        if (fail) { throw new Error("history failed"); }
+    };
+    const owner = {block: {rootID: "doc"}, wysiwyg: {element: editor}, undo: {undo: history, redo: history}};
+    const roots = new WeakMap([[owner, {focusRevision: 0, restoreFocus() {}}]]);
+    const context: any = {roots, canEdit: () => true, cleanListMindmapHTML: (html: string) => html,
+        hasMindmapFocusOverlay: () => false};
+    runInNewContext(compiled, context);
+    const target = Object.assign(new context.Controller(), {owner,
+        list: {dataset: {nodeId: "map"}, outerHTML: "map", isConnected: true, closest: (): null => null},
+        model: {nodes: new Map()}, view: {getSelectedId: (): undefined => undefined},
+    });
+    for (const redo of [false, true]) {
+        await target.undo(redo);
+        assert.equal(context.isUndoViewportPreserved(editor), false);
+        fail = true;
+        await assert.rejects(target.undo(redo), /history failed/);
+        assert.equal(context.isUndoViewportPreserved(editor), false);
+        fail = false;
+    }
 });
 
 test("embedded history uses the source document and transaction owner without depending on the selection", async () => {
     for (const lite of [false, true]) {
         const submitted: unknown[] = [];
-        const mainOwner = {lite: false};
+        const mainOwner = {lite: false, wysiwyg: {element: {}}};
         const owner = {lite, block: {rootID: "host-document"}, wysiwyg: {element: {isConnected: true}},
             undo: {undo: assert.fail, redo: assert.fail}};
         const embed = {dataset: {rootId: "source-document"}};
@@ -101,7 +206,10 @@ test("undo from a node editor restores that node or its previous sibling", async
     const target = new context.Controller();
     Object.assign(target, {
         owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map", closest: (): null => null}, model: {nodes, root},
-        view: {getSelectedId: () => "root", focusNode: (id: string) => selected.push(id)},
+        view: {getSelectedId: () => "root", focusNode: (id: string, reveal: boolean) => {
+            assert.equal(reveal, false, "history selection must not reveal or pan to the node");
+            selected.push(id);
+        }},
     });
     roots.set(owner, {restoreFocus: (_listID: string, ids: string[]) => target.focusNode(ids)});
     const onEditorUndo = target.makeEditorUndo("new");
@@ -118,7 +226,8 @@ test("text history records the edited node even when selection changes before it
     const list = {isConnected: true, dataset: {nodeId: "map"}, outerHTML: "before", closest: (): null => null};
     const operations: {undo: Record<string, string>, redo: Record<string, string>}[] = [];
     const context: any = {
-        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root")}),
+        canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root"),
+            metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         cleanListMindmapHTML: (html: string) => html, getListMindmapSiblingIDs: () => new Map(),
         normalizeListMindmapSummaryMetadata: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, _before: string, undo: Record<string, string>,
@@ -156,7 +265,7 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
                 return child;
             });
         });
-        return {nodes, root: nodes.get("root")};
+        return {nodes, root: nodes.get("root"), metadata: {version: 1, nodes: {}, relations: [] as unknown[]}};
     };
     const list = {isConnected: true, dataset: {nodeId: "map"}, closest: (): null => null,
         get outerHTML() { return JSON.stringify(state); }};

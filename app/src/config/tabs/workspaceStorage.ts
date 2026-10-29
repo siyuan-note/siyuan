@@ -24,7 +24,7 @@ export const genWorkspaceStorageHtml = () => `<div class="b3-label config-item w
     </div>
     <div class="b3-label__text workspace-storage__status" data-storage-status role="status"></div>
     <div class="workspace-storage__placeholder fn__none" data-storage-loading role="status" aria-label="${window.siyuan.languages.loading}">
-        <div class="fn__loading"><img width="64" src="/stage/loading-pure.svg" alt=""></div>
+        <div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
     <div class="workspace-storage__content fn__none" data-storage-content>
         <div class="workspace-storage__figure">

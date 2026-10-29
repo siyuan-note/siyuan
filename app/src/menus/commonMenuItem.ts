@@ -1,7 +1,7 @@
 import {toggleMenu} from "./menuToggle";
 import type {BlockQueryRequestInput} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
+import {isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
@@ -627,7 +627,7 @@ export const exportMd = (id: string) => {
         id: "export",
         label: window.siyuan.languages.export,
         type: "submenu",
-        icon: "iconUpload",
+        icon: "iconDownload",
         submenu: [{
             id: "exportTemplate",
             ignore: !getHostCapabilities().importExport,
@@ -1000,6 +1000,8 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
             }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])).join(" / ");
         };
+        // 与链接点击一致：PDF 去掉片段并单独取出页码或标注 ID，其他资源保留原始地址（如视频的 #t=）
+        const {linkAddress: assetPath, pdfParams} = resolvePdfAssetLink(src.trim());
         if (previewable) {
             submenu.push({
                 id: "openBy",
@@ -1007,7 +1009,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 icon: "iconOpen",
                 accelerator: getAccelerator("current"),
                 click() {
-                    openAsset(app, src.trim(), parseInt(getSearch("page", src)));
+                    openAsset(app, assetPath, pdfParams);
                 }
             });
             submenu.push({
@@ -1016,7 +1018,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 label: window.siyuan.languages.insertRight,
                 accelerator: getAccelerator("right"),
                 click() {
-                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
+                    openAsset(app, assetPath, pdfParams, "right");
                 }
             });
             submenu.push({
@@ -1025,7 +1027,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 label: window.siyuan.languages.insertBottom,
                 accelerator: getAccelerator("bottom"),
                 click() {
-                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "bottom");
+                    openAsset(app, assetPath, pdfParams, "bottom");
                 }
             });
             submenu.push({
@@ -1034,7 +1036,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 icon: "iconEyeoff",
                 accelerator: getAccelerator("background"),
                 click() {
-                    openAssetInBackground(app, src.trim(), parseInt(getSearch("page", src)));
+                    openAssetInBackground(app, assetPath, pdfParams);
                 }
             });
             /// #if !BROWSER
@@ -1044,7 +1046,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 icon: "iconOpenWindow",
                 accelerator: getAccelerator("new-window"),
                 click() {
-                    openAssetNewWindow(src.trim());
+                    openAssetNewWindow(assetPath, {}, pdfParams);
                 }
             });
             if (getHostCapabilities().localFileSystem) {

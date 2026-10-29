@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261018221152"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-lr6v0s2",
-				"updated": "20261016013311"
+				"updated": "20261021003402"
 			},
 			"Children": [
 				{
@@ -497,6 +497,49 @@
 			]
 		},
 		{
+			"ID": "20261021003402-yv0wj4m",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261021003402-yv0wj4m",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TIFF 图片"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261021003402-jm550cy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-jm550cy",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "作为资源文件插入的 TIFF 图片（.tif/.tiff）显示第一帧，下载时仍保留原文件，暂不支持切换帧。16 位灰度图片的预览亮度优先采用有效的 ImageJ 显示范围，未提供显示范围时按第一帧的实际灰度范围调整。"
+				}
+			]
+		},
+		{
+			"ID": "20261021003402-g9phpj1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021003402-g9phpj1",
+				"updated": "20261021003402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "预览支持不超过 64 MiB 的文件，单帧上限为桌面端 5000 万像素、移动端 1250 万像素。暂不支持 BigTIFF、浮点、CMYK 和 JPEG 压缩的 TIFF 图片。不支持预览的文件仍可下载并使用外部应用打开。"
+				}
+			]
+		},
+		{
 			"ID": "20261018221152-tpxbk0c",
 			"Type": "NodeHeading",
 			"Properties": {
@@ -642,7 +685,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210115222011-bzsftun",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -806,7 +849,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210115223610-ffnxstf",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -820,7 +863,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -829,7 +872,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
+					"Data": " 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -873,7 +916,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604115545-plxx5iu",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -887,7 +930,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604115552-qqg9s4j",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -901,7 +944,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -910,7 +953,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中可以查看丢失的资源，复制路径后可以在全局搜索中找到引用处。"
+					"Data": " 中可以查看丢失的资源，复制路径后可以在全局搜索中找到引用处。"
 				}
 			]
 		},
@@ -919,7 +962,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604115950-hru51yy",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -942,7 +985,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -951,7 +994,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -960,7 +1003,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -969,7 +1012,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": "。"
 				}
 			]
 		},
@@ -1162,7 +1205,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20261016202635"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1208,12 +1251,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-4enj18s",
-				"updated": "20261003234011"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PaddleOCR 仅内置 PP-OCRv6 Tiny 模型，无需下载即可离线使用，桌面端和移动端均默认选择 Tiny。Small、Medium 等其他兼容的 PP-OCRv6 模型可自行导入：分别选择检测、识别 ONNX 文件及对应的 inference.yml。导入模型随工作空间同步，提供商和当前模型的选择按设备保存。新用户默认使用 PaddleOCR，自动 OCR 默认关闭。已有用户保留原提供商、自动 OCR 和阈值配置；旧的内置 Small 选择迁移为 Tiny，自行导入的模型不受影响。从尚无 OCR 提供商设置的版本升级时，继续使用 Tesseract。"
+					"Data": "PaddleOCR 仅内置 PP-OCRv6 Tiny 模型，无需下载即可离线使用，桌面端和移动端均默认选择 Tiny。Small、Medium 等其他兼容的 PP-OCRv6 模型可自行导入：分别选择检测、识别 ONNX 文件及对应的 inference.yml。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-g1auy8e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-g1auy8e",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入模型随工作空间同步，提供商和当前模型的选择按设备保存。新用户默认使用 PaddleOCR，自动 OCR 默认关闭。已有用户保留原提供商、自动 OCR 和阈值配置；旧的内置 Small 选择迁移为 Tiny，自行导入的模型不受影响。从尚无 OCR 提供商设置的版本升级时，继续使用 Tesseract。"
 				}
 			]
 		},
@@ -1222,12 +1279,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003073646-yye710a",
-				"updated": "20261006114009"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选择 PaddleOCR 后，可以在识别阈值分组中直接调整检测阈值、文本框置信度阈值和识别置信度阈值，编辑完成后自动保存。检测与文本框阈值须大于 0 且小于 1，识别阈值为 0 到 1。留空时，检测使用当前模型参数，识别使用默认值 0.5。无效输入会保留在原处供修改，不会保存。提高阈值可以减少图标误识别，但也可能漏掉模糊或较淡的文字。阈值按设备保存，适用于手动和自动识别；不会重新处理已有结果，可通过图片菜单重新识别。"
+					"Data": "选择 PaddleOCR 后，可以在识别阈值分组中直接调整检测阈值、文本框置信度阈值和识别置信度阈值，编辑完成后自动保存。检测与文本框阈值须大于 0 且小于 1，识别阈值为 0 到 1。留空时，检测使用当前模型参数，识别使用默认值 0.5。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-7ff50je",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-7ff50je",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "无效输入会保留在原处供修改，不会保存。提高阈值可以减少图标误识别，但也可能漏掉模糊或较淡的文字。阈值按设备保存，适用于手动和自动识别；不会重新处理已有结果，可通过图片菜单重新识别。"
 				}
 			]
 		},
@@ -1662,7 +1733,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261016202635"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1830,7 +1901,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-qkecuzx",
-				"updated": "20261014140201"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1839,7 +1910,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 图片有 OCR 文本且外观方案允许显示时，才会显示 OCR 按钮。简洁方案默认隐藏此按钮，自定义外观方案中可通过 "
+					"Data": " 图片有 OCR 文本且外观方案允许显示时，才会显示 OCR 按钮。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-2ty201r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-2ty201r",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "简洁方案默认隐藏此按钮，自定义外观方案中可通过 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1870,7 +1955,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "悬浮在本地图片上可按设置查看 OCR 文本和识别提示。文字识别图标表示 OCR 操作，图片图标则将图片复制为 PNG，无 OCR 文字时也可复制图片。在自定义外观方案中，可通过 "
+					"Data": "悬浮在本地图片上可按设置查看 OCR 文本和识别提示。文字识别图标表示 OCR 操作，图片图标则将图片复制为 PNG，无 OCR 文字时也可复制图片。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-utv1str",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-utv1str",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在自定义外观方案中，可通过 "
 				},
 				{
 					"Type": "NodeTextMark",

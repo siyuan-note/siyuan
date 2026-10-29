@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -30,8 +18,13 @@ import (
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcListItemID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcListItemID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -46,10 +39,10 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 
 	box := Conf.Box(targetBoxID)
 	listItemText := sql.GetContainerText(listItemNode)
-	listItemText = util.FilterFileName(listItemText)
+	listItemText = normalizeDocumentTitle(listItemText)
 
 	moveToRoot := "/" == targetPath
-	toHP := path.Join("/", listItemText)
+	toHP := "/" + listItemText
 	toFolder := "/"
 
 	if "" != previousPath {
@@ -66,7 +59,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, listItemText)
+			toHP = parentDoc.HPath + "/" + listItemText
 			toFolder = path.Join(path.Dir(parentPath), parentDoc.ID)
 		}
 	} else {
@@ -76,7 +69,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, listItemText)
+			toHP = parentDoc.HPath + "/" + listItemText
 			toFolder = path.Join(path.Dir(targetPath), parentDoc.ID)
 		}
 	}
@@ -97,23 +90,18 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
-		return "", "", err
-	}
-
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	newTree.Root.Spec = treenode.CurrentSpec
+	newTree.Root.Spec = treenode.BaseSpec
+	if err = commitDocumentConversion(srcTree, newTree, sourceBefore, nil, false, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
+	}
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {
 		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	} else {
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
-	}
-	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
-		return "", "", err
 	}
 	IncSync()
 	go func() {

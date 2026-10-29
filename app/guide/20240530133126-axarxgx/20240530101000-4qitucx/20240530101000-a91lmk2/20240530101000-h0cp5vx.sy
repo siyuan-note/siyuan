@@ -7,7 +7,7 @@
 		"id": "20240530101000-h0cp5vx",
 		"title": "検索から除外",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024162311"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-r7bkwtd",
 				"id": "20240530101000-62fpa7t",
-				"updated": "20261016202856"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -193,7 +193,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20240530101000-p9cdnfi",
-				"updated": "20241001011918"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -205,7 +205,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
+					"Data": "path NOT LIKE '/20200923234011-ieuun1p%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -219,7 +219,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20241001012056-yh11ojl",
-				"updated": "20261016202856"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -231,7 +231,7 @@
 					},
 					"Properties": {
 						"id": "20241001012056-sy6m197",
-						"updated": "20261016202856"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -239,21 +239,26 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241001012056-om1aeg6",
-								"updated": "20261016202856"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20200923234011-ieuun1p%'"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": ": そのドキュメントと子ドキュメント内のブロックを除外します。"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+									"TextMarkTextContent": "path"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: ドキュメント パスが /20210808180117-6v0mkxr で始まるコンテンツ ブロック検索を無視します"
+									"Data": " はドキュメント ID のパスで、ノートブック ID は含みません。実際のドキュメントのパスに置き換えてください"
 								}
 							]
 						}

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -59,9 +47,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/tiffpreview"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
@@ -263,7 +253,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	FlushTxQueue()
-	_, err = IndexRepo("Backup before checkout")
+	_, _, err = CreateRepoSnapshotWithFullCheck("Backup before checkout", true)
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
 		util.PushClearProgress()
@@ -289,6 +279,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 	if strings.HasSuffix(file.Path, ".sy") {
 		boxID := strings.TrimPrefix(file.Path, "/")
+		flushLock.Lock()
+		defer flushLock.Unlock()
 		boxID = strings.Split(boxID, "/")[0]
 		origBoxID := boxID // 保留原始 boxID 用于加密边界校验
 
@@ -332,12 +324,18 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 		tree.Box = boxID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
-		tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+		tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		if needResetTree {
 			resetTree(tree, "", true)
 		}
 
-		if nil != workingDoc && "d" == workingDoc.Type {
+		// Publish the restored source before removing the working document or
+		// its derived indexes. A failed write must leave the current version intact.
+		if _, err = filesys.WriteTree(tree); err != nil {
+			return
+		}
+		invalidateDocumentHistory(tree.ID)
+		if nil != workingDoc && "d" == workingDoc.Type && workingDoc.Path != tree.Path {
 			workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
 			if err = filelock.Remove(workingDocPath); err != nil {
 				return
@@ -349,13 +347,12 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		}
 
 		sql.RemoveTreeQueue(boxID, rootID)
-		if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
-			return
-		}
+		treenode.IndexBlockTree(tree)
+		sql.IndexTreeQueue(tree)
 		ReloadFiletree()
 		ReloadProtyle(rootID)
 
-		msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+		msg := fmt.Sprintf(Conf.Language(286), box.Name+tree.HPath)
 		util.PushMsg(msg, 7000)
 	} else {
 		to := filepath.Join(util.DataDir, file.Path)
@@ -416,7 +413,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
-		title = snapshotTree.Root.IALAttr("title")
+		title = treenode.ReadDocumentTitle(snapshotTree.Root).Text
 
 		if !displayInText {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
@@ -483,8 +480,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 			content = gulu.Str.FromBytes(data)
 		} else {
 			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
-				// 加密 notebook 的 asset 在仓库里是密文，不解密直接写临时目录会泄漏密文
-				// 先用原始 path 检测是否加密 box，再裁剪 file.Path 到 assets/ 前缀
+				// 先按原始路径确定加密笔记本身份并认证，再整理资源路径用于预览。
 				repoBoxID := ""
 				origPath := strings.TrimPrefix(file.Path, "/")
 				if parts := strings.SplitN(origPath, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) {
@@ -503,7 +499,12 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 						plainData, decErr := DecryptAsset(repoBoxID, diskName, dek, data)
 						clear(dek)
 						if decErr == nil {
-							data = plainData
+							if tiffpreview.IsPath(file.Path) {
+								// TIFF 快照经认证后仍暂存原密文，HTTP 预览和下载在请求内存中解密。
+								clear(plainData)
+							} else {
+								data = plainData
+							}
 						} else {
 							logging.LogWarnf("decrypt repo snapshot asset [%s] failed: %s", file.Path, decErr)
 							err = decErr
@@ -704,7 +705,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 			return
 		}
 
-		title = tree.Root.IALAttr("title")
+		title = treenode.ReadDocumentTitle(tree.Root).Text
 		rootID = tree.Root.ID
 	}
 	return
@@ -916,7 +917,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 			return
 		}
 
-		docTitle = util.FilterFileName(tree.Root.IALAttr("title"))
+		docTitle = util.FilterFileName(treenode.ReadDocumentTitle(tree.Root).Text)
 		if docTitle == "" {
 			docTitle = strings.TrimSuffix(name, ".sy")
 		}
@@ -1415,7 +1416,12 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 	FlushTxQueue()
-	release := lockAssetSourceChange()
+	// Keep synchronization serialized until the write guard and UI state are released.
+	lockSync()
+	defer unlockSync()
+	assetDownloadSourceMu.Lock()
+	var releaseSource sync.Once
+	release := func() { releaseSource.Do(assetDownloadSourceMu.Unlock) }
 	defer release()
 
 	repo, err := newRepositoryWithAssetSourceLocked()
@@ -1431,6 +1437,12 @@ func checkoutRepo(id string) (err error) {
 		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
+	checkoutTask, err := prepareRepoCheckout(repo)
+	if err != nil {
+		util.PushErrMsg(err.Error(), 7000)
+		return err
+	}
+	defer checkoutTask.finish(repo, &err)
 
 	util.PushEndlessProgress(Conf.Language(63))
 
@@ -1456,24 +1468,15 @@ func checkoutRepo(id string) (err error) {
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
 		return
 	}
-	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	if err != nil {
-		logging.LogErrorf("index repository failed: %s", err)
-		util.PushClearProgress()
-		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), err), 0)
-		return
-	}
-
 	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
 		release()
-		FullReindexDirect()
+		fullReindexWithTxFlush(false)
 		if checkoutErr != nil {
 			util.ReloadUI()
 			return
 		}
 		appendAgentRollbackEntries()
 		time.Sleep(time.Second)
-		FlushTxQueue()
 		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	})
 	if err != nil {
@@ -1486,8 +1489,34 @@ func checkoutRepo(id string) (err error) {
 	return
 }
 
+// prepareRepoCheckout saves every window before the backup and retains both write
+// admission and transaction exclusion until the caller finishes its full reindex.
+func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
+	checkout := startSyncCheckout(repo)
+	if checkout == nil {
+		return nil, checkoutPrepareRetry()
+	}
+	// A full restore refreshes all indexes as one operation. Do not release the
+	// guard through incremental sync Applied callbacks or repeat a partial refresh.
+	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
+		Context: checkout.ctx, Apply: checkout.prepareApply, Before: checkCheckoutSpace,
+		Preflight: documentAddressingPreflight(repo),
+	})
+	if err := checkout.prepareApply(); err != nil {
+		checkout.finish(repo, &err)
+		return nil, err
+	}
+	return checkout, nil
+}
+
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	// 恢复会核对实际内容，备份也必须完整校验，保留随后可能被覆盖的当前数据。
+	if _, err := repo.IndexWithOptions("Backup before checkout", false,
+		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},
+		dejavu.IndexOptions{FullCheck: true}); err != nil {
+		return err
+	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	refreshAppearancePackages(themes, icons)
@@ -1718,7 +1747,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		}
 	}
 
-	logs, err := repo.GetCloudRepoTagLogs(map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	logs, err := repo.GetCloudRepoTagLogsCached(&cloudRepoSnapshotCache, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if err != nil {
 		return
 	}
@@ -1766,7 +1795,11 @@ func GetCloudRepoSnapshotsByTime(page int, startTime, endTime int64) (ret []*dej
 		page = 1
 	}
 
-	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, repo.GetCloudRepoLogs)
+	load, err := repo.NewCloudRepoLogLoader(&cloudRepoSnapshotCache)
+	if err != nil {
+		return
+	}
+	logs, pageCount, totalCount, err := cloudRepoSnapshotsByTime(page, startTime, endTime, load)
 	if err != nil {
 		return
 	}
@@ -1875,6 +1908,14 @@ func normalizeSnapshotMemo(memo string) string {
 }
 
 func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
+	return CreateRepoSnapshotWithFullCheck(memo, false)
+}
+
+// CreateRepoSnapshotWithFullCheck 允许本次快照核对所有本地已落盘文件的内容。
+func CreateRepoSnapshotWithFullCheck(memo string, fullCheck bool) (id string, created bool, err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -1885,6 +1926,9 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 
+	if err = checkRepositoryPasswordMigration(); err != nil {
+		return
+	}
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
@@ -1906,10 +1950,10 @@ func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	if err = processAssetDownloadRecovery(repo, true); err != nil {
 		return
 	}
-	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
+	index, created, err := repo.IndexWithResultOptions(memo, true, map[string]any{
 		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
 		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
-	})
+	}, dejavu.IndexOptions{FullCheck: fullCheck})
 	if err != nil {
 		util.PushStatusBar("Index data repo failed: " + html.EscapeString(err.Error()))
 		return
@@ -1962,7 +2006,6 @@ func SetRepoSnapshotMemo(id, memo string) error {
 }
 
 var syncingFiles = sync.Map{}
-var syncingStorages = atomic.Bool{}
 
 func waitForSyncingStorages() {
 	for isSyncingStorages() {
@@ -1971,7 +2014,7 @@ func waitForSyncingStorages() {
 }
 
 func isSyncingStorages() bool {
-	return syncingStorages.Load() || isBootSyncing.Load()
+	return isBootSyncing.Load()
 }
 
 func IsSyncingFile(rootID string) (ret bool) {
@@ -1999,6 +2042,9 @@ func newSyncContext() map[string]any {
 }
 
 func formatSyncRepoErrorMsg(err error) string {
+	if errors.Is(err, context.Canceled) {
+		return Conf.Language(433)
+	}
 	if conf.ProviderSiYuan == Conf.Sync.Load().Provider && errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 		u := Conf.GetUser()
 		if 2 == u.UserSiYuanSubscriptionPlan {
@@ -2010,6 +2056,9 @@ func formatSyncRepoErrorMsg(err error) string {
 }
 
 func syncRepoDownload() (err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		planSyncAfter(fixSyncInterval)
 
@@ -2034,10 +2083,16 @@ func syncRepoDownload() (err error) {
 	}
 
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "d", true)
+	passwordRecovery, err := preparePasswordRecoveryDownload(repo)
+	if err != nil {
+		return err
+	}
+	checkoutTask := startSyncCheckout(repo)
+	defer checkoutTask.finish(repo, &err)
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync0(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2079,12 +2134,22 @@ func syncRepoDownload() (err error) {
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
 	err = processAssetSyncMergeResult(repo, false, true, mergeResult, trafficStat, "d", elapsed)
+	if passwordRecovery {
+		// Reapply the retained envelopes to notebooks brought back by download.
+		// Final backup authentication still requires the user's new password.
+		notebookCryptoMu.Lock()
+		recoverMasterPasswordMigration()
+		notebookCryptoMu.Unlock()
+	}
 	logging.LogInfof("download data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
 }
 
 func syncRepoUpload() (err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		planSyncAfter(fixSyncInterval)
 
@@ -2109,6 +2174,8 @@ func syncRepoUpload() (err error) {
 	}
 
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "u", true)
+	checkoutTask := startSyncCheckout(repo)
+	defer checkoutTask.finish(repo, &err)
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
@@ -2121,7 +2188,9 @@ func syncRepoUpload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		if !errors.Is(err, context.Canceled) {
+			util.PushErrMsg(msg, 0)
+		}
 		return
 	}
 
@@ -2137,7 +2206,9 @@ func syncRepoUpload() (err error) {
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		if !errors.Is(err, context.Canceled) {
+			util.PushErrMsg(msg, 0)
+		}
 		return
 	}
 
@@ -2159,7 +2230,10 @@ func syncRepoUpload() (err error) {
 
 var isBootSyncing = atomic.Bool{}
 
-func bootSyncRepo() (err error) {
+func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
@@ -2175,7 +2249,7 @@ func bootSyncRepo() (err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", html.EscapeString(err.Error()))
@@ -2191,6 +2265,7 @@ func bootSyncRepo() (err error) {
 	preparedSourceScope := assetDownloadScope(Conf.Sync.Load().Provider, preparedSourceConf, Conf.Repo.Load().Key)
 
 	isBootSyncing.Store(true)
+	defer isBootSyncing.Store(false)
 
 	waitGroup := sync.WaitGroup{}
 	var indexErr error
@@ -2232,7 +2307,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
@@ -2241,36 +2316,31 @@ func bootSyncRepo() (err error) {
 		pushSyncStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		BootSyncSucc.Store(1)
-		isBootSyncing.Store(false)
 		return
 	}
 
-	syncingFiles = sync.Map{}
-	syncingStorages.Store(false)
 	if 1 > len(fetchedFiles) {
 		cleanupSyncedBoxResiduals(nil)
 	}
-	for _, fetchedFile := range fetchedFiles {
-		name := path.Base(fetchedFile.Path)
-		if strings.HasSuffix(name, ".sy") {
-			id := name[:len(name)-3]
-			syncingFiles.Store(id, true)
-			continue
-		}
-		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
-			syncingStorages.Store(true)
-		}
-	}
 
 	if 0 < len(fetchedFiles) {
+		scheduled = true
 		go func() {
-			confSyncSnapshot := Conf.LoadSync()
-
 			defer logging.Recover()
-			defer isBootSyncing.Store(false)
+			// 预取结束后不再用文件标记阻塞初始化，实际应用由 checkout 的保存确认和写保护负责。
+			if waitErr := waitForSyncUI(context.Background(), false, true); waitErr != nil {
+				complete(waitErr)
+				return
+			}
 
 			lockSync()
 			defer unlockSync()
+			syncErr := errSyncRemoteRequestSkipped
+			defer func() { complete(syncErr) }()
+			if !checkSync(true, false, false) {
+				return
+			}
+			confSyncSnapshot := Conf.LoadSync()
 			currentSourceConf, sourceErr := buildCloudConf()
 			if sourceErr != nil || preparedSourceScope != assetDownloadScope(confSyncSnapshot.Provider, currentSourceConf, Conf.Repo.Load().Key) {
 				logging.LogInfof("skip prepared boot sync after repository source changed")
@@ -2278,6 +2348,7 @@ func bootSyncRepo() (err error) {
 			}
 			repo, repoErr := newSyncRepository()
 			if repoErr != nil {
+				syncErr = repoErr
 				logging.LogErrorf("reopen prepared boot repository failed: %s", repoErr)
 				return
 			}
@@ -2285,7 +2356,7 @@ func bootSyncRepo() (err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.Load().ID, KernelID, confSyncSnapshot.Provider)
 			syncStart := time.Now()
 			indexStart := time.Now()
-			_, _, syncErr := indexRepoBeforeCloudSync(repo)
+			_, _, syncErr = indexRepoBeforeCloudSync(repo)
 			indexElapsed := time.Since(indexStart)
 			if nil == syncErr {
 				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, syncStart, indexElapsed, prefetchTraffic)
@@ -2295,13 +2366,21 @@ func bootSyncRepo() (err error) {
 				return
 			}
 		}()
-	} else {
-		isBootSyncing.Store(false)
 	}
 	return
 }
 
 func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
+	return syncRepoWithContext(context.Background(), exit, byHand)
+}
+
+func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished bool, err error) {
+	if err = ctx.Err(); err != nil {
+		return
+	}
+	if err = checkDataImportRecovery(); err != nil {
+		return
+	}
 	if 1 > len(Conf.Repo.Load().Key) {
 		autoSyncErrCount.Add(1)
 		planSyncAfter(fixSyncInterval)
@@ -2317,7 +2396,7 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	defer func() { handleCloudError(err) }()
 	repo, err := newSyncRepository()
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
@@ -2328,19 +2407,27 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 	}
 
 	logging.LogInfof("syncing data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "a", byHand)
+	if !exit {
+		checkoutTask := startSyncCheckout(repo)
+		defer checkoutTask.finish(repo, &err)
+	} else {
+		hooks, finish := exitSyncHooks(repo, ctx)
+		repo.SetCheckoutHooks(hooks)
+		defer finish(&err)
+	}
 	start := time.Now()
 	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount.Load() || byHand {
+		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2354,6 +2441,8 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
 	if !exit {
+		checkoutTask := startSyncCheckout(repo)
+		defer checkoutTask.finish(repo, &err)
 		defer finishAssetDownloadRecovery(repo, &err)
 	}
 	beforeSyncPetals := getPetals()
@@ -2368,14 +2457,14 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
 	if err != nil {
-		autoSyncErrCount.Add(1)
+		recordAutoSyncFailure(err)
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		if 1 > autoSyncErrCount.Load() || byHand {
+		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
 			util.PushErrMsg(msg, 0)
 		}
 		return
@@ -2449,6 +2538,7 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
+	reloadSyncedDAV(mergeResult, &calendars, &contacts)
 	confSyncSnapshot := Conf.LoadSync()
 
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
@@ -2755,7 +2845,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	removeEmptyPackageDirs(filepath.Join(util.DataDir, "widgets"), removeWidgetDirSet)
 
 	syncingFiles = sync.Map{}
-	syncingStorages.Store(false)
 	if needReloadInlineStyles && !exit {
 		invalidateWorkspaceAVPaletteCache()
 		util.BroadcastByType("main", "reloadInlineStyles", 0, "", nil)
@@ -2792,7 +2881,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	for boxID := range needUnindexBoxes {
-		(&Box{ID: boxID}).Unindex()
+		if len(immediateIndex) != 0 && immediateIndex[0] {
+			unindex(boxID)
+		} else {
+			(&Box{ID: boxID}).Unindex()
+		}
 	}
 	for boxID := range needIndexBoxes {
 		if box := Conf.GetBox(boxID); nil != box {
@@ -2802,11 +2895,23 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			if _, err := EnsureBoxDoc(boxID); nil != err {
 				logging.LogErrorf("ensure box document [%s] after sync failed: %s", boxID, err)
 			}
-			box.Index()
+			if len(immediateIndex) != 0 && immediateIndex[0] {
+				removeBoxRefs(boxID)
+				indexBox(boxID)
+			} else {
+				box.Index()
+			}
 		}
 	}
 
 	needReloadUI := 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes)
+	if needReloadUI && len(immediateIndex) != 0 && immediateIndex[0] {
+		// 应用保护内完成笔记本和引用索引，不将这些任务留到恢复编辑之后。
+		sql.FlushQueue()
+		IndexRefs()
+		sql.FlushQueue()
+		ResetVirtualBlockRefCache()
+	}
 	if needReloadUI {
 		util.ReloadUI()
 	}
@@ -2823,16 +2928,18 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		ReloadFiletree()
 	}
 
+	// 先通知编辑器刷新，再发送任务结束；前端会等待实际渲染完成才恢复输入。
+	if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
+		util.BroadcastByType("main", "syncMergeResult", 0, "",
+			map[string]any{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+	}
 	go func() {
 		util.WaitForUILoaded()
 
-		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
-			util.BroadcastByType("main", "syncMergeResult", 0, "",
-				map[string]any{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
-		}
-
 		time.Sleep(2 * time.Second)
-		pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+		if mode != "c" {
+			pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+		}
 
 		if 0 < mergeResult.ConflictCount() {
 			syConflict := false
@@ -2968,6 +3075,14 @@ func needFullReindex(upsertTrees int) bool {
 var promotedPurgeDataRepo bool
 
 func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+	if err = checkRepositoryPasswordMigration(); err != nil {
+		return
+	}
+	return indexRepoBeforeCloudSync0(repo)
+}
+
+// Download-only recovery keeps the existing local safety index, without publishing it.
+func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
 
 	beforeIndex, _ = repo.Latest()
@@ -3078,6 +3193,7 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.WebDAV.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
+		logging.LogInfof("WebDAV sync endpoint [%s], directory [%q]", safeWebDAVEndpoint(cloudConf.WebDAV.Endpoint), cloudConf.Dir)
 		a := cloudConf.WebDAV.Username + ":" + cloudConf.WebDAV.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
@@ -3121,6 +3237,7 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 			scope = stored
 		}
 	}
+	ret.SetCheckoutHooks(documentAddressingCheckoutHooks(ret))
 	err = ret.ConfigureAssetDownloads(confSyncSnapshot.AssetDownloadMode == 1, assetDownloadStatePath(), scope)
 	return
 }
@@ -3176,42 +3293,35 @@ func subscribeRepoEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	coWalkDataCount := 0
 	eventbus.Subscribe(eventbus.EvtCheckoutWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
-		if 0 == coWalkDataCount%512 {
+		if repoProgressDue("checkout-walk", false) {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
-		coWalkDataCount++
 	})
-	var bootProgressPart int32
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
-	coUpsertFileCount := 0
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), count, total)
-		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == coUpsertFileCount%32 {
+		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		if repoProgressDue("checkout-upsert", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
-		coUpsertFileCount++
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), count, total)
-		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == count%64 {
+		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		if repoProgressDue("checkout-remove", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
@@ -3225,27 +3335,25 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), count, total)
-		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == count%8 {
+		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		if repoProgressDue("download-files", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunk, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), count, total)
-		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == count%8 {
+		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		if repoProgressDue("download-chunks", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})

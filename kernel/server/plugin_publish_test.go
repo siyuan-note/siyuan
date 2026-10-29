@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package server
 
 import (
@@ -9,13 +13,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestPluginPublishStaticBoundaries(t *testing.T) {
 	oldData, oldConf := util.DataDir, model.Conf
-	util.DataDir = t.TempDir()
+	util.DataDir = testutil.PublicDataDir(t)
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})

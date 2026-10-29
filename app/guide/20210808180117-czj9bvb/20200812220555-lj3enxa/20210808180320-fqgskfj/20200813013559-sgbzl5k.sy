@@ -6,7 +6,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200817123136-in6y5m1",
-				"updated": "20261015221015"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -33,12 +33,41 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090557-575kpbp",
-				"updated": "20220623200602"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "输入 "
+					"Data": "内容块引用用于链接到已有内容，让同一段笔记可以在不同上下文中使用。引用显示为可点击的锚文本，鼠标悬浮时可以预览被引用的内容块。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-jmzh0ft",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-jmzh0ft",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入引用"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-zqubvif",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-zqubvif",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器中输入 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -47,14 +76,48 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后将触发内容块引用搜索，继续输入作为搜索关键字，在搜索结果中使用上下键选定后回车就可以完成内容块的引用了。建立好内容块引用后，鼠标悬浮在锚文本上后将弹出预览浮层，展现被引用的内容块（定义块）。"
+					"Data": "，继续输入关键词搜索内容块。使用上下方向键选择候选项，按 "
 				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 插入引用。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-569q4wm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-569q4wm",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "内容块/引用"
 				}
 			]
+		},
+		{
+			"ID": "20261024163828-z2ohzpj",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-z2ohzpj",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新建文档并引用"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20260927091603-ca0ts26",
@@ -96,6 +159,21 @@
 					"Data": "，指定笔记本根目录或父文档。确认后将在该位置创建文档，并在原位置插入引用。所选位置仅对本次创建生效，不会修改默认保存路径；取消不会创建文档。桌面端和移动端均支持此操作。数据库条目绑定或重新绑定文档时也可使用此操作。文档创建成功后才会绑定到该条目；取消或创建失败不会改变原有绑定。"
 				}
 			]
+		},
+		{
+			"ID": "20261024163828-kskidea",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-kskidea",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自动闭合与补全"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261014130425-cikkb9k",
@@ -167,7 +245,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090557-841hf2w",
-				"updated": "20210512154248"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -191,7 +269,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210104090557-jjkb0dx"
+				"id": "20210104090557-jjkb0dx",
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -236,19 +315,21 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210104090557-v1h50ji"
+						"id": "20210104090557-v1h50ji",
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
 							"ID": "20210302223302-0o8gbmc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223302-0o8gbmc"
+								"id": "20210302223302-0o8gbmc",
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "反向链接（Backlink），即当前内容块被那些其他内容块使用了"
+									"Data": "反向链接（Backlink），即当前内容块被哪些其他内容块使用了"
 								}
 							]
 						}
@@ -260,12 +341,13 @@
 			"ID": "20210104090557-gyj2den",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090557-gyj2den"
+				"id": "20210104090557-gyj2den",
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "正向链接包含在当前块的内容中，我们可以很直观的看到。反向链接需要在其他文档中搜索才能知道，而恰恰是这些信息对我们比较有价值。我们可以通过以下两种方式来帮助我们更好的掌握知识点或者发散思路："
+					"Data": "正向链接直接显示在当前内容中；反向链接则用于回看哪些内容引用了当前块。可以通过以下两种方式查看这些关系："
 				}
 			]
 		},
@@ -373,6 +455,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-njjdkzb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-njjdkzb",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按数据库字段筛选反链"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-yn53f3z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-yn53f3z",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在反链面板或底部反链中，打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "筛选反链来源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据库字段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，选择来源块已加入的数据库，再设置字段组合条件。只显示绑定到所选数据库且满足条件的反链来源；不设置字段条件时，显示所有绑定到该库的反链来源。此操作不会修改数据库原视图的筛选，也不影响提及。桌面端和移动端均支持此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-p6btymk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-p6btymk",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在数据库菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除数据库条件，其他来源筛选保持不变。"
 				}
 			]
 		},
@@ -799,7 +951,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230420122954-zw10k6f",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -813,7 +965,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230518100357-4wadf96",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -827,7 +979,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -836,7 +988,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中启用 "
+					"Data": " 中启用 "
 				},
 				{
 					"Type": "NodeTextMark",

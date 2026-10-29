@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import (
@@ -136,6 +140,9 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 		return schema, err
 	}
 	if schema, err := avPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
+	if schema, err := documentAddressingSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}
 	if t == reflect.TypeFor[PluginRPCMessage]() {

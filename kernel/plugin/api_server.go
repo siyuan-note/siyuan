@@ -1,23 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package plugin
 
 import (
 	"fmt"
+
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
@@ -49,13 +39,13 @@ func injectServer(_ *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(private.Set(string(RequestTypeWS), ws))
 	lo.Must0(private.Set(string(RequestTypeSSE), es))
 
-	lo.Must0(ObjectFreeze(rt, private))
+	lo.Must0(gojaext.Freeze(rt, private))
 
 	server := rt.NewObject()
 
 	lo.Must0(server.Set("private", private))
 
-	lo.Must0(ObjectFreeze(rt, server))
+	lo.Must0(gojaext.Freeze(rt, server))
 
 	lo.Must0(siyuan.Set("server", server))
 	return

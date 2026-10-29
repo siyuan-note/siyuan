@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package av
 
 import (
@@ -115,7 +119,11 @@ func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret
 	defer AttributeViewBlocksLock.Unlock()
 
 	_, boxID := FindAttributeViewPath(avID)
-	avBlocks := readMirrorBlocks(boxID)
+	avBlocks, err := readMirrorBlocksWithErr(boxID)
+	if err != nil {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+		return
+	}
 
 	blockIDs := avBlocks[avID]
 	if nil == blockIDs {
@@ -170,7 +178,12 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 		boxID := avBoxID
 		avBlocks, ok := boxAvBlocks[boxID]
 		if !ok {
-			avBlocks = readMirrorBlocks(boxID)
+			var err error
+			avBlocks, err = readMirrorBlocksWithErr(boxID)
+			if err != nil {
+				logging.LogErrorf("read attribute view blocks failed: %s", err)
+				return
+			}
 			boxAvBlocks[boxID] = avBlocks
 		}
 
@@ -202,7 +215,11 @@ func UpsertBlockRel(avID, blockID string) (ret bool) {
 		}
 	}
 	boxID := avBoxID
-	avBlocks := readMirrorBlocks(boxID)
+	avBlocks, err := readMirrorBlocksWithErr(boxID)
+	if err != nil {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+		return
+	}
 
 	blockIDs := avBlocks[avID]
 	oldLen := len(blockIDs)

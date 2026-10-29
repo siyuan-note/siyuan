@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -290,6 +278,10 @@ func InitConf() {
 	}
 
 	Conf = NewAppConf()
+	if err := recoverDataImports(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover Data.zip import failed: %s", err)
+		return
+	}
 	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
 	if err := recoverNotebookArchiveOperations(); err != nil {
 		logging.LogErrorf("recover notebook archive operations failed: %s", err)
@@ -298,10 +290,17 @@ func InitConf() {
 		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover incremental sort conf failed: %s", err)
 		return
 	}
+	if err := recoverDocumentSources(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover document sources failed: %s", err)
+		return
+	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
 	if err := CleanupRetiredInstallResources(); err != nil {
 		logging.LogWarnf("clean up retired install resources failed: %s", err)
+	}
+	if err := cleanupRetiredDocumentAddressing(); err != nil {
+		logging.LogWarnf("clean up retired document addressing records failed: %s", err)
 	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
@@ -576,7 +575,7 @@ func InitConf() {
 	}
 
 	// CLI 子命令通过 --log-level 显式指定日志级别时（util.CLILogLevel 非空），优先使用命令行级别，
-	// 不再用 conf.json 的 system.logLevel 覆盖，使命令行参数在初始化早期即生效。
+	// 使命令行参数在初始化早期即生效。
 	if "" == util.CLILogLevel {
 		logging.SetLogLevel(Conf.LogLevel)
 	}
@@ -715,12 +714,17 @@ var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑�
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
-	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
+	return CloseWithContext(context.Background(), force, setCurrentWorkspace, execInstallPkg)
+}
+
+// CloseWithContext 允许请求取消退出同步，数据清理仍等待仓库操作收尾后完整执行。
+func CloseWithContext(ctx context.Context, force, setCurrentWorkspace bool, execInstallPkg int) (int, string) {
+	return closeKernel(ctx, force, setCurrentWorkspace, execInstallPkg, nil)
 }
 
 // RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，允许用户确认后跳过同步，不触发安装更新。
 func RecoverWorkspaceExit(pid int, startedAt int64, force bool) (int, string) {
-	return closeKernel(force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+	return closeKernel(context.Background(), force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
 }
 
 func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
@@ -742,7 +746,7 @@ func markPendingWorkspaceExit() {
 	}
 }
 
-func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
+func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
 	diagnostic := util.WatchOperation("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
@@ -764,9 +768,15 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	}()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
+	pluginsStopped, shutdownStarted := false, false
 	defer func() {
-		diagnostic.Stage("stop LAN sync manager")
-		stopLANSyncManager()
+		if shutdownStarted {
+			diagnostic.Stage("stop LAN sync manager")
+			stopLANSyncManager()
+		} else if pluginsStopped && OnKernelPluginsStart != nil {
+			diagnostic.Stage("resume kernel plugins after abandoned exit")
+			OnKernelPluginsStart()
+		}
 	}()
 
 	diagnostic.Stage("flush editing transactions")
@@ -780,17 +790,28 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 		if OnKernelPluginsStop != nil {
 			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
+			pluginsStopped = true
 		}
+	}
 
+	diagnostic.Stage("wait for sync operations")
+	if err := lockSyncForExit(ctx, force); err != nil {
+		exitCode = 1
+		return
+	}
+	defer unlockSync()
+	if !force {
 		if confSyncSnapshot.Enabled && 3 != confSyncSnapshot.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == confSyncSnapshot.Provider) || conf.ProviderSiYuan != confSyncSnapshot.Provider) {
 			diagnostic.Stage("exit sync")
-			if err := syncData(true, false); err != nil {
-				exitCode = 1
-				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
-					installPkgPath = getNewVerInstallPkgPath(false)
+			if checkSync(false, true, false) {
+				if err := syncDataLockedContext(ctx, true, false); err != nil {
+					exitCode = 1
+					if 1 != execInstallPkg && !skipNewVerInstallPkg() {
+						installPkgPath = getNewVerInstallPkgPath(false)
+					}
+					return
 				}
-				return
 			}
 		}
 	}
@@ -800,6 +821,10 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 		return 3, ""
 	}
 
+	// 等待同步期间可能有其他窗口提交编辑，关闭数据前再次排空事务。
+	diagnostic.Stage("flush editing transactions after sync")
+	FlushTxQueue()
+
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
 	diagnostic.Stage("close user guide")
 	closeUserGuide()
@@ -808,7 +833,6 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	diagnostic.Stage("flush database index")
 	sql.FlushQueue()
 
-	util.IsExiting.Store(true)
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
 	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
@@ -831,6 +855,8 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 		}
 	}
 
+	shutdownStarted = true
+	util.IsExiting.Store(true)
 	diagnostic.Stage("save configuration")
 	Conf.Close()
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
@@ -1149,6 +1175,7 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
+	cleanupInterruptedCheckout()
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {
@@ -1157,11 +1184,12 @@ func InitBoxes() {
 		}
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
-		if !initialized {
+		if !initialized || hasDocumentSourceRecovery(box.ID) {
 			indexBox(box.ID)
 		}
 	}
 
+	recoverOpenedDocumentMetadata()
 	recoverDocHPaths()
 	logging.LogInfof("tree/block count [%d/%d]", treenode.CountTrees(), blockCount)
 }
@@ -1265,6 +1293,7 @@ func HideConfSecret(c *AppConf) {
 func HideBoxConfSecret(c *conf.BoxConf) {
 	if nil != c {
 		c.BoxCrypt = nil
+		c.DocCreateTarget, c.RefCreateTarget, c.DailyNoteTarget = nil, nil, nil
 	}
 }
 

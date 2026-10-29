@@ -45,10 +45,12 @@ const rendererModules = () => {
         'import {focusBlock} from "./selection";\n' + extract("util/tableCellRichNavigation", ["leaveRichTableCell"]);
     modules["../util/highlightById"] = "export const scrollCenter = () => {};";
     modules["util/codeScrollCenter"] = 'import {hasClosestBlock} from "./hasClosest";\n' +
+        'import {isUndoViewportPreserved} from "../undo/viewport";\n' +
         'import {getEditorRange} from "./selection";\n' +
         'import {focusByRange} from "./selectionOffsets";\n' +
         "const resolveVisibleListMindmapBlock = () => undefined, revealTabsForTarget = () => {};\n" +
         "const isMobile = () => false;\n" + extract("../util/highlightById", ["scrollCenter"]);
+    modules["undo/viewport"] = readFileSync(path.join(root, "undo/viewport.ts"), "utf8");
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
         'import {isTableLikeView} from "./viewType";\n' +
         'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +
@@ -197,11 +199,14 @@ const rendererModules = () => {
     };
     visitTrim(onGet);
     assert.ok(trimBranch?.elseStatement && ts.isIfStatement(trimBranch.elseStatement));
+    modules["util/renderContent"] = extract("util/renderContent", ["getInsertedRenderRoots"]);
     modules["util/navigationTrim"] = `import {containsCurrentSelection} from "./documentRange";
+        import {getInsertedRenderRoots} from "./renderContent";
         import {Constants} from "../../constants";
         const invalidateTrackedRangesInElement = () => {}, disposeCustomBlocksInElement = () => {}, hideElements = () => {};
         export const run = (protyle, content, before) => {
             const options = {content, action: [before ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND]};
+            let renderRoots;
             const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
             if (${trimBranch.expression.getText(onGet)}) ${trimBranch.thenStatement.getText(onGet)}
             else ${trimBranch.elseStatement.thenStatement.getText(onGet)}

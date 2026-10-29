@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -53,5 +57,33 @@ func TestParseStdMdValidFrontMatterCompatibility(t *testing.T) {
 	if tree.Root.FirstChild.Type != ast.NodeCodeBlock ||
 		!strings.Contains(tree.Root.FirstChild.ChildByType(ast.NodeCodeBlockCode).TokensStr(), "title: Note") {
 		t.Fatal("valid front matter was not preserved as YAML code")
+	}
+}
+
+func TestParseStdMdTagsTypes(t *testing.T) {
+	for _, tc := range []struct {
+		name, yaml, tags string
+	}{
+		{"string", "tags: ' book, note '", "book, note"},
+		{"list", "tags: [note, 1111]", "note,1111"},
+		{"empty", "tags:", ""},
+		{"integer", "tags: 2026", ""},
+		{"boolean", "tags: true", ""},
+		{"mapping", "tags: {name: note}", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			source := "---\ntitle: Note\n" + tc.yaml + "\n---\n\nBody\n"
+			tree, _, title, _ := parseStdMd([]byte(source), false)
+			if title != "Note" || tree.Root.IALAttr("tags") != tc.tags {
+				t.Fatalf("unexpected metadata: title=%q, tags=%q", title, tree.Root.IALAttr("tags"))
+			}
+			code := tree.Root.FirstChild.ChildByType(ast.NodeCodeBlockCode)
+			if code == nil || !strings.Contains(code.TokensStr(), tc.yaml) {
+				t.Fatal("original metadata was not preserved")
+			}
+			if body := tree.Root.ChildByType(ast.NodeParagraph); body == nil || body.Text() != "Body" {
+				t.Fatalf("body was not preserved: %v", body)
+			}
+		})
 	}
 }

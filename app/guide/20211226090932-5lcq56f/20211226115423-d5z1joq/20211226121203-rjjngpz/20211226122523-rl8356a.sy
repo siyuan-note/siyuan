@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122545-a65v8e1",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -273,7 +273,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122545-lsv6dhu",
-				"updated": "20261016112115"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -329,6 +329,111 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中設定鎖屏密碼。留空表示不啟用密碼登入；一般的非本機存取仍需要密碼或有效的 OIDC 設定。請先完成鑑權設定，再將核心開放給其他裝置。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-oc11gow",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-oc11gow",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "登入與權杖"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鎖定畫面桌布"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中上傳一張 JPEG、PNG 或 WebP 圖片（最大 10 MiB、1600 萬像素），即可自訂啟動及鎖定後的驗證頁面背景。也可點擊「內置」，從分類圖庫中選擇一張題頭圖。內置圖片為寬圖，填滿螢幕時會置中裁切，直向螢幕的裁切範圍更大。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-8xazzbt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-8xazzbt",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇或上傳新圖片會取代舊圖片，點擊「重置」恢復預設背景。設定密碼或啟用 OIDC 登入後顯示桌布設定項目。使用自訂桌布時，驗證頁面先顯示桌布與本機時間；點擊、觸控畫面或按鍵後顯示登入面板。直接輸入密碼時，第一個字元也會進入密碼欄位。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-dwepj9w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-dwepj9w",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未設定桌布或圖片載入失敗時，直接顯示原有登入介面。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "登入面板顯示後，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 返回桌布與時間，已輸入的密碼及驗證碼會保留。進入與返回均有簡短過渡動畫；系統開啟減少動態效果時直接切換。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-0dyhgkq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-0dyhgkq",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌布儲存在目前工作空間，不參與筆記同步，也不包含在設定匯出中。登入前任何能夠存取驗證頁面的人都能看到這張圖片，請勿選擇含敏感資訊的圖片。"
 				}
 			]
 		},

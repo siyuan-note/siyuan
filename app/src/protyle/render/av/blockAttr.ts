@@ -1,3 +1,5 @@
+import {clearAVAttributeDropTarget, getAVAttributeDropTarget, getAVAttributePreviousID, getAVAttributeSort, IAVAttributeDropTarget} from "./attributePanelDrag";
+import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePanelLayout";
 import {isAVTextType} from "./capabilities";
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
@@ -195,16 +197,57 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         });
         if (element.innerHTML === "") {
             let dragBlockElement: HTMLElement;
+            let dropTarget: IAVAttributeDropTarget;
+            let draggedElement: HTMLElement;
+            let dragPreviousElement: Element;
+            let dragNextElement: Element;
+            let undoPreviousID: string;
             let removeEditorRange: Range | undefined;
+            const finishDrag = (restore: boolean) => {
+                if (draggedElement) {
+                    if (restore && dragBlockElement?.isConnected && draggedElement.parentElement === dragBlockElement) {
+                        if (dragNextElement?.parentElement === dragBlockElement) {
+                            dragNextElement.before(draggedElement);
+                        } else if (dragPreviousElement?.parentElement === dragBlockElement) {
+                            dragPreviousElement.after(draggedElement);
+                        }
+                        updateAVAttributeLayout(dragBlockElement);
+                    }
+                    draggedElement.style.opacity = "";
+                    delete draggedElement.dataset.avDragPreview;
+                    if (window.siyuan.dragElement === draggedElement) window.siyuan.dragElement = undefined;
+                }
+                draggedElement = undefined;
+                dragBlockElement = undefined;
+                dropTarget = undefined;
+                counter = 0;
+                clearAVAttributeDropTarget(element);
+            };
+            const insertDragged = (target: IAVAttributeDropTarget) => {
+                if (getAVAttributeSort(draggedElement, target)) {
+                    if (target.before) target.element.before(draggedElement);
+                    else target.element.after(draggedElement);
+                    updateAVAttributeLayout(dragBlockElement);
+                }
+            };
             element.addEventListener("dragstart", (event: DragEvent) => {
                 if (protyle.disabled) {
                     event.preventDefault();
                     return;
                 }
-                const target = event.target as HTMLElement;
-                window.siyuan.dragElement = target.parentElement;
-                window.siyuan.dragElement.style.opacity = ".38";
-                dragBlockElement = hasClosestBlock(window.siyuan.dragElement) as HTMLElement;
+                const target = (event.target as HTMLElement).closest<HTMLElement>('.av__row > [draggable="true"]');
+                if (!target || !element.contains(target)) {
+                    return;
+                }
+                finishDrag(true);
+                draggedElement = target.parentElement;
+                window.siyuan.dragElement = draggedElement;
+                draggedElement.style.opacity = ".38";
+                dragBlockElement = hasClosestBlock(draggedElement) as HTMLElement;
+                dragPreviousElement = draggedElement.previousElementSibling;
+                dragNextElement = draggedElement.nextElementSibling;
+                undoPreviousID = getAVAttributePreviousID(draggedElement);
+                target.addEventListener("dragend", () => finishDrag(true), {once: true});
 
                 const ghostElement = document.createElement("div");
                 ghostElement.className = "block__icons";
@@ -218,35 +261,30 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             });
             element.addEventListener("drop", (event) => {
                 counter = 0;
+                clearAVAttributeDropTarget(element);
                 if (protyle.disabled) {
+                    finishDrag(true);
                     event.preventDefault();
                     event.stopPropagation();
                     return;
                 }
-                const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
-                if (targetElement && dragBlockElement) {
-                    const isBottom = targetElement.classList.contains("dragover__bottom");
-                    const previousID = isBottom ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id");
-                    const undoPreviousID = window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id");
-                    if (previousID !== undoPreviousID && previousID !== window.siyuan.dragElement.dataset.colId) {
+                dropTarget = dragBlockElement && draggedElement && hasClosestBlock(event.target as HTMLElement) === dragBlockElement ?
+                    getAVAttributeDropTarget(dragBlockElement, draggedElement, event.clientX, event.clientY,
+                        (event.target as HTMLElement).closest<HTMLElement>(".av__row")) : undefined;
+                if (dropTarget) {
+                    insertDragged(dropTarget);
+                    const previousID = getAVAttributePreviousID(draggedElement);
+                    if (previousID !== undoPreviousID) {
+                        const id = draggedElement.dataset.colId;
                         transaction(protyle, [{
-                            action: "sortAttrViewKey",
-                            avID: dragBlockElement.dataset.avId,
-                            previousID,
-                            id: window.siyuan.dragElement.dataset.colId,
+                            action: "sortAttrViewKey", avID: dragBlockElement.dataset.avId, previousID, id,
                         }], [{
-                            action: "sortAttrViewKey",
-                            avID: dragBlockElement.dataset.avId,
-                            previousID: undoPreviousID,
-                            id,
+                            action: "sortAttrViewKey", avID: dragBlockElement.dataset.avId, previousID: undoPreviousID, id,
                         }]);
-                        if (isBottom) {
-                            targetElement.after(window.siyuan.dragElement);
-                        } else {
-                            targetElement.before(window.siyuan.dragElement);
-                        }
                     }
-                    targetElement.classList.remove("dragover__bottom", "dragover__top");
+                    finishDrag(false);
+                    event.preventDefault();
+                    event.stopPropagation();
                 } else if (!window.siyuan.dragElement && hasDataTransferFiles(event.dataTransfer.types)) {
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
@@ -266,12 +304,11 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }
                     }
                 }
-                if (window.siyuan.dragElement) {
-                    window.siyuan.dragElement.style.opacity = "";
-                    window.siyuan.dragElement = undefined;
-                }
+                finishDrag(true);
             });
             element.addEventListener("dragover", (event: DragEvent) => {
+                clearAVAttributeDropTarget(element);
+                dropTarget = undefined;
                 if (protyle.disabled) {
                     return;
                 }
@@ -288,47 +325,36 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     }
                     return;
                 }
-                targetElement = hasClosestByClassName(target, "av__row");
-                if (!targetElement) {
-                    targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 1), "av__row");
-                }
-                if (!targetElement || targetElement === window.siyuan.dragElement || !dragBlockElement) {
+                if (!dragBlockElement || !draggedElement || hasClosestBlock(target) !== dragBlockElement) {
                     return;
                 }
-                const targetBlockElement = hasClosestBlock(targetElement);
-                if (!targetBlockElement || targetBlockElement !== dragBlockElement) {
+                dropTarget = getAVAttributeDropTarget(dragBlockElement, draggedElement, event.clientX, event.clientY,
+                    target.closest<HTMLElement>(".av__row"));
+                if (!dropTarget) {
                     return;
                 }
                 event.preventDefault();
-                const nodeRect = targetElement.getBoundingClientRect();
-                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__bottom", "dragover__top");
-                });
-                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom");
-                } else {
-                    targetElement.classList.add("dragover__top");
+                if (dropTarget.horizontal) {
+                    insertDragged(dropTarget);
+                    draggedElement.dataset.avDragPreview = "true";
+                } else if (getAVAttributeSort(draggedElement, dropTarget)) {
+                    dropTarget.element.classList.add(dropTarget.before ? "dragover__top" : "dragover__bottom");
                 }
             });
             let counter = 0;
             element.addEventListener("dragleave", () => {
                 counter--;
-                if (counter === 0) {
-                    element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                        item.classList.remove("dragover__bottom", "dragover__top");
-                    });
+                if (counter <= 0) {
+                    counter = 0;
+                    clearAVAttributeDropTarget(element);
+                    dropTarget = undefined;
                 }
             });
             element.addEventListener("dragenter", (event) => {
                 event.preventDefault();
                 counter++;
             });
-            element.addEventListener("dragend", () => {
-                if (window.siyuan.dragElement) {
-                    window.siyuan.dragElement.style.opacity = "";
-                    window.siyuan.dragElement = undefined;
-                }
-            });
+            element.addEventListener("dragend", () => finishDrag(true));
             element.addEventListener("paste", (event) => {
                 if (protyle.disabled) {
                     return;
@@ -610,7 +636,11 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
             });
         }
-        renderAttributeViewBacklinks(element, id, renderID, row, cb);
+        observeAVAttributeLayout(element);
+        renderAttributeViewBacklinks(element, id, renderID, row, rendered => {
+            cb?.(rendered);
+            updateAVAttributeLayout(element);
+        });
     });
 };
 

@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -42,11 +42,50 @@
 			]
 		},
 		{
+			"ID": "20261024162311-ovu0u7w",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024162311-ovu0u7w",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "インストールと更新"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024162311-zkftric",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024162311-zkftric",
+				"updated": "20261024162311"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "公式の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/download.html",
+					"TextMarkTextContent": "ダウンロードページ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、端末に対応する入手方法と更新方法を確認してください。"
+				}
+			]
+		},
+		{
 			"ID": "20261012014537-e3i64fc",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-e3i64fc",
-				"updated": "20261012014859"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -102,12 +141,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010114821-jcdqygo",
-				"updated": "20261010114821"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Android でデスクトップレイアウトを使用する場合、システムの戻るボタンは最上位のダイアログ、メニュー、編集用の浮動画面、画像プレビューまたはフローティングドロワーを先に閉じます。1 回の操作で 1 つの画面だけを閉じ、背後の閲覧状態を保持します。閉じられる浮動画面がない場合に、従来のページ移動を行います。"
+					"Data": "Android でデスクトップレイアウトを使用する場合、システムの戻るボタンは最上位のダイアログ、メニュー、編集用の浮動画面、画像プレビューまたはフローティングドロワーを先に閉じます。1 回の操作で 1 つの画面だけを閉じ、背後の閲覧状態を保持します。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-yd5qz4c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-yd5qz4c",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "閉じられる浮動画面がない場合は、画面全体を再読み込みせず、アプリ内のドキュメント履歴を戻ります。履歴の先頭では確認メッセージが表示され、表示中にもう一度戻るボタンを押すとシステムのホーム画面に戻ります。"
 				}
 			]
 		},
@@ -182,7 +235,7 @@
 			"Properties": {
 				"ID": "20240530101000-yx7xlm6",
 				"id": "20240530101000-zx8lkgl",
-				"updated": "20261016202856"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -207,7 +260,7 @@
 			"Properties": {
 				"ID": "20240530101000-355qyas",
 				"id": "20240530101000-vg6rjty",
-				"updated": "20261016202856"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -220,7 +273,7 @@
 					"Properties": {
 						"ID": "20240530101000-60p9bne",
 						"id": "20240530101000-502th4f",
-						"updated": "20261016202856"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -229,12 +282,12 @@
 							"Properties": {
 								"ID": "20240530101000-4ca3l4l",
 								"id": "20240530101000-gf939t8",
-								"updated": "20261016202856"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "アプリをアンインストールするとローカルデータが完全に削除され、復旧できなくなります"
+									"Data": "アプリをアンインストールするとローカルデータが削除されます。事前に同期を完了し、アプリの外に復元可能なバックアップを保存してください。バックアップのないデータは復元できなくなる可能性があります"
 								}
 							]
 						}
@@ -250,7 +303,7 @@
 					"Properties": {
 						"ID": "20240530101000-2vsx7me",
 						"id": "20240530101000-286lfpp",
-						"updated": "20261016202856"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -259,7 +312,7 @@
 							"Properties": {
 								"ID": "20240530101000-8e3p06k",
 								"id": "20240530101000-w6mhqnc",
-								"updated": "20261016202856"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -282,7 +335,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ から終了してください。スワイプして終了するとデータの同期が行われません"
+									"Data": " から終了してください。スワイプして終了するとデータの同期が行われません"
 								}
 							]
 						}
@@ -557,7 +610,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174259-xwu9036",
-				"updated": "20261004052629"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -586,7 +639,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174259-djgqfrn",
-				"updated": "20261004052629"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -601,7 +654,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613174259-qbktiw5",
-				"updated": "20260613174259"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -646,7 +699,7 @@
 					},
 					"Properties": {
 						"id": "20260613174259-dxhkf5f",
-						"updated": "20260613174259"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -654,17 +707,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613174259-s1isw3o",
-								"updated": "20260613174259"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "自動取り込み"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：ショートハンド作成後、システムは7秒ごとにローカルのショートハンドディレクトリをチェックし、新しいショートハンドをドキュメントパネル内の設定された保存先に自動的に移動"
+									"Data": "自動取り込み：SiYuan の動作中は 7 秒ごとにローカルのクイックメモフォルダを確認し、新しいメモを設定された保存先に取り込みます"
 								}
 							]
 						}
@@ -751,7 +799,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174259-9bcdyay",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -765,7 +813,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174259-etenqd8",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -775,7 +823,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -784,7 +832,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -793,7 +841,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -802,7 +850,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ でショートハンドの保存先を設定します："
+					"Data": " でショートハンドの保存先を設定します："
 				}
 			]
 		},

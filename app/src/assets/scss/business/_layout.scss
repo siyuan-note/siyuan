@@ -435,6 +435,53 @@
   overscroll-behavior-y: contain;
   scrollbar-width: none;
 
+  &--float {
+    position: fixed;
+    left: 0;
+    height: auto;
+
+    &#dockRight {
+      left: auto;
+      right: 0;
+    }
+  }
+
+  &--closing {
+    pointer-events: none;
+  }
+
+  // 背景独立于可滚动的图标栏，内圆角可以伸入编辑区而不被滚动容器裁剪。
+  &__backdrop {
+    position: fixed;
+    left: 0;
+    // 隐藏顶栏时窗口按钮仍位于背景之上，浮动面板和全屏内容也可覆盖背景。
+    z-index: 6;
+    pointer-events: none;
+    width: calc(var(--b3-ui-dock-width, 42px) + var(--b3-border-radius-b));
+    background-color: var(--b3-body-background);
+    background-image: var(--b3-window-background-image);
+    background-size: 100vw 100vh;
+    background-position: left var(--b3-dock-background-y);
+    background-repeat: no-repeat;
+    mask-image: linear-gradient(#000, #000),
+      radial-gradient(circle at 100% 100%, transparent calc(var(--b3-border-radius-b) - .5px), #000 var(--b3-border-radius-b)),
+      radial-gradient(circle at 100% 0, transparent calc(var(--b3-border-radius-b) - .5px), #000 var(--b3-border-radius-b));
+    mask-size: calc(100% - var(--b3-border-radius-b)) 100%,
+      var(--b3-border-radius-b) var(--b3-border-radius-b), var(--b3-border-radius-b) var(--b3-border-radius-b);
+    mask-position: left top, right top, right bottom;
+    mask-repeat: no-repeat;
+
+    &--right {
+      left: auto;
+      right: 0;
+      background-position-x: right;
+      mask-image: linear-gradient(#000, #000),
+        radial-gradient(circle at 0 100%, transparent calc(var(--b3-border-radius-b) - .5px), #000 var(--b3-border-radius-b)),
+        radial-gradient(circle at 0 0, transparent calc(var(--b3-border-radius-b) - .5px), #000 var(--b3-border-radius-b));
+      mask-position: right top, left top, left bottom;
+    }
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }

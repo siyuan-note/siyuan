@@ -14,6 +14,8 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     let readonly = false;
     let fonts = Array.from({length: 60}, (_, index) => ({family: `Font ${index}`, displayName: `Font ${index}`, weight: 400}));
     let pendingFonts: Promise<{fontItems: typeof fonts}>;
+    let pendingPreviews: Promise<FontFace[]>;
+    Object.defineProperty(document.fonts, "load", {value: () => pendingPreviews || Promise.resolve([])});
     const modules: Record<string, {exports: any}> = {};
     const externals = {
         "util/functions": {isMobile: () => mobile},
@@ -28,7 +30,6 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
         "block/popoverLifecycle": {setPopoverMenuOpen() {}},
         "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
         "util/availableFont": {loadAvailableFonts: () => pendingFonts || Promise.resolve({fontItems: fonts})},
-        "util/fontPreview": {observeFontPreview: () => () => {}},
         "protyle/util/selection": {},
     };
     const load = (name: string): any => {
@@ -89,7 +90,6 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     const dependencies = {
         getCurrentEditor: () => ({protyle: current}),
         getFontNodeElements: () => [editor],
-        getFontFamilyState: () => ({disabled: false, mixed: false, family: undefined as string | undefined}),
         preventKeyboardToolbarRender() {},
         ...api,
         fontEvent: (_owner: unknown, _nodes: unknown, _style: string, value: string) => applied.push(value),
@@ -119,6 +119,11 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
         await settle();
     };
     const search = () => menuElement.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
+    const swipeDown = async () => {
+        const rect = menuElement.firstElementChild.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("font-swipe", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        await settle();
+    };
     for (const theme of themes) {
         themeStyle.textContent = theme;
         for (const size of [320, 420]) {
@@ -133,15 +138,31 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     }
     toolbar.style.fontSize = "";
     util.style.width = "";
+    let finishPreviews: (fonts: FontFace[]) => void;
+    pendingPreviews = new Promise(resolve => { finishPreviews = resolve; });
     await tap(button);
+    const previewLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    const previewLabel = menuElement.querySelector<HTMLElement>('[data-family="Font 0"] .b3-menu__label');
+    check.ok(!previewLoading.classList.contains("fn__none"), "font preview waiting shows a spinner beside search");
+    check.equal(previewLoading.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh");
+    check.equal(previewLabel.style.visibility, "hidden");
+    check.equal(menuElement.querySelector<HTMLElement>('[data-family=""] .b3-menu__label').style.visibility, "");
+    finishPreviews([]);
+    await settle();
+    check.ok(previewLoading.classList.contains("fn__none"));
+    check.equal(previewLabel.style.visibility, "");
+    pendingPreviews = undefined;
     check.ok(menuElement.classList.contains("b3-menu--sheet"));
     check.equal(button.getAttribute("aria-expanded"), "true");
     check.equal(menuElement.querySelector('[data-action="fontFamilyBack"]'), null);
+    check.equal(menuElement.querySelector('[data-type="sheet-expand"]'), null, "font sheet has no fullscreen button");
+    check.equal(menuElement.querySelector('[data-type="sheet-close"]'), null, "font sheet has no close button");
+    check.equal(menuElement.getAttribute("data-sheet-expandable"), "true", "gesture and viewport behavior remain enabled");
     check.ok(util.contains(button), "font list opens outside the original appearance panel");
     check.notEqual(document.activeElement, search(), "opening does not summon the search keyboard");
     check.ok(menuElement.getBoundingClientRect().top > 100, "font sheet opens from the bottom");
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
-    check.ok(menuElement.classList.contains("fn__none"), "a real touch closes the sheet");
+    await swipeDown();
+    check.ok(menuElement.classList.contains("fn__none"), "a downward touch gesture closes the font sheet");
     check.ok(util.contains(button));
     check.equal(button.getAttribute("aria-expanded"), "false");
     await tap(button);
@@ -149,6 +170,13 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.equal(document.activeElement, search());
     controls.showKeyboardToolbarElement();
     controls.hideKeyboardToolbarUtilOnEditorClick();
+    await require("electron").ipcRenderer.invoke("font-resize", 350);
+    await settle();
+    // 断言跟随本次 resize 传入的高度，不是与 innerHeight 自比；设备像素取整会差 1px。
+    check.ok(Math.abs(parseFloat(menuElement.style.height) - 350) <= 1,
+        "font sheet still tracks the available viewport while searching");
+    check.ok(search().getBoundingClientRect().top >= menuElement.getBoundingClientRect().top);
+    check.ok(search().getBoundingClientRect().bottom <= innerHeight);
     search().value = "Font 12";
     search().dispatchEvent(new InputEvent("input", {bubbles: true}));
     const visible = menuElement.querySelectorAll('[role="option"]:not(.fn__none)');
@@ -159,6 +187,8 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.match(applied[0], /Font 12/);
     check.equal(restored, 0, "appearance selection does not reopen the editor keyboard");
     check.equal(button.querySelector("span").textContent, "Font 12");
+    await require("electron").ipcRenderer.invoke("font-resize", 850);
+    await settle();
     await tap(button);
     search().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     await settle();
@@ -166,11 +196,35 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     await tap(button);
     await tap(scrim);
     check.ok(menuElement.classList.contains("fn__none"));
+    let failPreviews: (error: Error) => void;
+    pendingPreviews = new Promise((_resolve, reject) => { failPreviews = reject; });
+    await tap(button);
+    const failedLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    check.ok(!failedLoading.classList.contains("fn__none"));
+    failPreviews(new Error("Font unavailable"));
+    await settle();
+    check.ok(failedLoading.classList.contains("fn__none"), "failed previews also finish loading");
+    const failedLabel = menuElement.querySelector<HTMLElement>('[data-family="Font 0"] .b3-menu__label');
+    check.equal(failedLabel.style.visibility, "");
+    check.equal(failedLabel.style.fontFamily, "", "font failures retain readable fallback labels");
+    await tap(scrim);
+    pendingPreviews = new Promise(resolve => { finishPreviews = resolve; });
+    await tap(button);
+    const closedLoading = menuElement.querySelector<HTMLElement>('[data-type="font-loading"]');
+    check.ok(!closedLoading.classList.contains("fn__none"));
+    await tap(scrim);
+    const closedHTML = closedLoading.outerHTML;
+    finishPreviews([]);
+    await settle();
+    check.equal(closedLoading.outerHTML, closedHTML, "late preview completion does not update a closed picker");
+    check.ok(menuElement.classList.contains("fn__none"));
+    pendingPreviews = undefined;
     let resolve: (value: {fontItems: typeof fonts}) => void;
     pendingFonts = new Promise(done => { resolve = done; });
     const opening = api.openFontFamilyMenu(button, {disabled: false, mixed: false, onSelect() {}});
     await settle();
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    check.equal(menuElement.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh", "font list requests show the spinner too");
+    await tap(scrim);
     resolve({fontItems: fonts});
     await opening;
     check.ok(menuElement.classList.contains("fn__none"));
@@ -197,7 +251,9 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     toolbar.addEventListener("click", controls.handler);
     await tap(button);
     check.ok(menuElement.classList.contains("b3-menu--sheet"), "click-based mobile entry opens the same font sheet");
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    menuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+    await settle();
+    check.ok(menuElement.classList.contains("fn__none"), "system back closes the font sheet without action buttons");
     toolbar.removeEventListener("click", controls.handler);
     mobile = false;
     fonts = [];
@@ -207,13 +263,22 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     search().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     check.equal(document.activeElement, button, "desktop Escape returns focus to the dropdown");
     check.ok(menuElement.classList.contains("fn__none"));
+    check.equal(menuElement.hasAttribute("data-sheet-actions"), false, "closing clears the font-only action preference");
+    mobile = true;
+    menuElement.setAttribute("data-sheet-expandable", "true");
+    menu.addItem({label: "Other menu"});
+    menu.fullscreen("bottom");
+    await settle();
+    check.ok(menuElement.querySelector('[data-type="sheet-expand"]'), "other expandable menus keep their fullscreen button");
+    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    check.ok(menuElement.classList.contains("fn__none"));
     return "Font menu touch and layout cases passed";
 };
 
-test("font menus preserve the mobile appearance panel and support real touch dismissal, search and selection", {timeout: 45000}, async () => {
+test("font menus show loading for list requests and previews while retaining mobile and desktop interactions", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
         "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
-        "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/escape", "util/upDownHint"];
+        "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/fontPreview", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(path.join(__dirname, "../..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
@@ -250,6 +315,12 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
     });
+    ipcMain.handle("font-swipe", async (_event, x, y) => {
+        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
+        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchMove", touchPoints:[{x,y:y+150}]});
+        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
+    });
+    ipcMain.handle("font-resize", (_event, height) => win.setContentSize(420, height));
     try {
         await win.loadURL("about:blank");
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:true, maxTouchPoints:1});

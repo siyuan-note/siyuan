@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -177,8 +165,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	}
 
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -205,7 +198,10 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
-	targetTree, _ := LoadTreeByBlockID(targetID)
+	targetTree, targetBefore, loadErr := loadBatchMutationTree(targetID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == targetTree {
 		// 目标块不存在时忽略处理
 		return
@@ -260,7 +256,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	srcTree.Root.RemoveIALAttr("tags")
 	heading := &ast.Node{ID: srcTree.Root.ID, Type: ast.NodeHeading, HeadingLevel: headingLevel, KramdownIAL: srcTree.Root.KramdownIAL}
 	heading.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(srcTree.Root.IALAttr("title"))})
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(treenode.ReadDocumentTitle(srcTree.Root).Text)})
 	heading.RemoveIALAttr("title")
 	heading.Box, heading.Path = targetTree.Box, targetTree.Path
 	if "" != tagIAL && 0 < len(tags) {
@@ -314,10 +310,11 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		pivot.InsertAfter(heading)
 	}
 
-	box := Conf.Box(srcTree.Box)
-	if removeErr := box.Remove(srcTree.Path); nil != removeErr {
-		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)
+	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	if err = commitDocumentConversion(srcTree, targetTree, sourceBefore, targetBefore, true, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
 	}
+	box := Conf.Box(srcTree.Box)
 	box.removeSort([]string{srcTree.ID})
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
@@ -326,10 +323,6 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	util.PushEvent(evt)
 
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
-	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	treenode.RemoveBlockTreesByRootID(targetTree.Box, targetTree.ID)
-	err = indexWriteTreeUpsertQueue(targetTree)
 	IncSync()
 	go func() {
 		time.Sleep(util.SQLFlushInterval)
@@ -343,8 +336,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
 
-	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
+	srcTree, sourceBefore, loadErr := loadBatchMutationTree(srcHeadingID)
+	if loadErr != nil {
+		return "", "", loadErr
+	}
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -367,13 +365,10 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 
 	box := Conf.Box(targetBoxID)
 	headingText := getNodeRefText0(headingNode, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen, true)
-	if strings.Contains(headingText, "/") {
-		headingText = strings.ReplaceAll(headingText, "/", "_")
-		util.PushMsg(Conf.language(246), 7000)
-	}
+	headingText = normalizeDocumentTitle(headingText)
 
 	moveToRoot := "/" == targetPath
-	toHP := path.Join("/", headingText)
+	toHP := "/" + headingText
 	toFolder := "/"
 	if "" != previousPath {
 		previousDoc := treenode.GetBlockTreeRootByPath(targetBoxID, previousPath)
@@ -389,7 +384,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, headingText)
+			toHP = parentDoc.HPath + "/" + headingText
 			toFolder = path.Join(path.Dir(parentPath), parentDoc.ID)
 		}
 	} else {
@@ -399,7 +394,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 				err = ErrBlockNotFound
 				return
 			}
-			toHP = path.Join(parentDoc.HPath, headingText)
+			toHP = parentDoc.HPath + "/" + headingText
 			toFolder = path.Join(path.Dir(targetPath), parentDoc.ID)
 		}
 	}
@@ -454,23 +449,18 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
-	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
-		return "", "", err
-	}
-
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	newTree.Root.Spec = treenode.CurrentSpec
+	newTree.Root.Spec = treenode.BaseSpec
+	if err = commitDocumentConversion(srcTree, newTree, sourceBefore, nil, false, indexWriteTreeUpsertQueue); err != nil {
+		return "", "", err
+	}
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else if toTop {
 		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	} else {
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
-	}
-	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
-		return "", "", err
 	}
 	IncSync()
 	go func() {

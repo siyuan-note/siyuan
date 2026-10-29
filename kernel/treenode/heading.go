@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package treenode
 
@@ -70,11 +58,15 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 
 	// 将原来所有折叠标题对应的下方节点移动到新节点下
 	var updateFoldHeadings []*ast.Node
+	updatedBlocks := map[string]*ast.Node{}
 	ast.Walk(updateNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
+		if n.IsBlock() && n.ID != "" {
+			updatedBlocks[n.ID] = n
+		}
 		if ast.NodeHeading == n.Type && IsSelfFolded(n) {
 			updateFoldHeadings = append(updateFoldHeadings, n)
 		}
@@ -82,8 +74,35 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 	})
 	for _, h := range updateFoldHeadings {
 		children := foldHeadings[h.ID]
-		for i := len(children) - 1; 0 <= i; i-- {
-			h.Next.InsertAfter(children[i]) // Next 是 Block IAL
+		anchor := h
+		if h.Next != nil && h.Next.Type == ast.NodeKramdownBlockIAL {
+			anchor = h.Next
+		}
+		skipIAL := false
+		for _, child := range children {
+			if child.Type == ast.NodeKramdownBlockIAL && skipIAL {
+				continue
+			}
+			skipIAL = false
+			if existing := updatedBlocks[child.ID]; child.ID != "" && existing != nil {
+				// Complete DOM already carries this block, including edits to hidden content.
+				skipIAL = true
+				if existing.Parent == h.Parent {
+					anchor = existing
+					if existing.Next != nil && existing.Next.Type == ast.NodeKramdownBlockIAL {
+						anchor = existing.Next
+					}
+				}
+				continue
+			}
+			anchor.InsertAfter(child)
+			anchor = child
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.IsBlock() && n.ID != "" {
+					updatedBlocks[n.ID] = n
+				}
+				return ast.WalkContinue
+			})
 		}
 	}
 }

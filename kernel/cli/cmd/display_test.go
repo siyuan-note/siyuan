@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cmd
 
@@ -74,7 +70,7 @@ func TestResolveDocumentMovePath(t *testing.T) {
 		name        string
 		userPath    string
 		hPath       string
-		sourceHPath string
+		sourceTitle string
 		want        string
 		wantErr     bool
 	}{
@@ -82,48 +78,48 @@ func TestResolveDocumentMovePath(t *testing.T) {
 			name:        "explicit internal path",
 			userPath:    "/20260726000000-parent1.sy",
 			hPath:       "/missing",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
-		{name: "default root", sourceHPath: "/child", want: "/"},
-		{name: "root hpath", hPath: "/", sourceHPath: "/child", want: "/"},
+		{name: "default root", sourceTitle: "child", want: "/"},
+		{name: "root hpath", hPath: "/", sourceTitle: "child", want: "/"},
 		{
 			name:        "parent hpath",
 			hPath:       "/parent",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "parent hpath with trailing slash",
 			hPath:       "/parent/",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "full destination hpath",
 			hPath:       "/parent/child",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-parent1.sy",
 		},
 		{
 			name:        "nested full destination hpath",
 			hPath:       "/grand/parent/child",
-			sourceHPath: "/child",
+			sourceTitle: "child",
 			want:        "/20260726000000-grand01/20260726000001-parent1.sy",
 		},
 		{
 			name:        "existing target with different source title",
 			hPath:       "/existing/child",
-			sourceHPath: "/source",
+			sourceTitle: "source",
 			want:        "/20260726000002-existin/20260726000003-child01.sy",
 		},
-		{name: "missing target", hPath: "/missing", sourceHPath: "/child", wantErr: true},
-		{name: "missing destination parent", hPath: "/missing/child", sourceHPath: "/child", wantErr: true},
+		{name: "missing target", hPath: "/missing", sourceTitle: "child", wantErr: true},
+		{name: "missing destination parent", hPath: "/missing/child", sourceTitle: "child", wantErr: true},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := resolveDocumentMovePathWithLookup(test.userPath, test.hPath, test.sourceHPath, lookup)
+			got, err := resolveDocumentMovePathWithLookup(test.userPath, test.hPath, test.sourceTitle, lookup)
 			if test.wantErr {
 				if nil == err {
 					t.Fatalf("expected an error, got path %q", got)
@@ -161,48 +157,6 @@ func TestNormalizeDocumentCreateParentPath(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := normalizeDocumentCreateParentPath(test.path); got != test.want {
 				t.Fatalf("normalizeDocumentCreateParentPath(%q) = %q, want %q", test.path, got, test.want)
-			}
-		})
-	}
-}
-
-func TestDocumentSearchDisplayFields(t *testing.T) {
-	tests := []struct {
-		name     string
-		doc      map[string]string
-		wantType string
-		wantID   string
-		wantName string
-	}{
-		{
-			name: "document",
-			doc: map[string]string{
-				"path":  "/20260722120000-parent1/20260722123000-child01.sy",
-				"hPath": "Notebook/Parent/Document",
-				"box":   "20260722110000-boxid01",
-			},
-			wantType: "DOCUMENT",
-			wantID:   "20260722123000-child01",
-			wantName: "Document",
-		},
-		{
-			name: "notebook",
-			doc: map[string]string{
-				"path":  "/",
-				"hPath": "Notebook/",
-				"box":   "20260722110000-boxid01",
-			},
-			wantType: "NOTEBOOK",
-			wantID:   "20260722110000-boxid01",
-			wantName: "Notebook",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			typ, id, name := documentSearchDisplayFields(test.doc)
-			if typ != test.wantType || id != test.wantID || name != test.wantName {
-				t.Fatalf("documentSearchDisplayFields() = (%q, %q, %q), want (%q, %q, %q)", typ, id, name, test.wantType, test.wantID, test.wantName)
 			}
 		})
 	}

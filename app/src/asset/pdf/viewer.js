@@ -21,6 +21,7 @@ import { PDFViewerApplication } from "./app.js";
 import {Constants} from "../../constants";
 import {destroyAnno, initAnno} from "../anno";
 import {registerPdfInstance} from "../annoRuntime";
+import {bindPdfMaximize} from "../pdfMaximize";
 import {AnnotationEditorType} from "./pdfjs";
 
 /* eslint-disable-next-line no-unused-vars */
@@ -241,7 +242,7 @@ function getViewerConfiguration(element) {
 function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
   // SiYuan 通过 AppOptions.set 显式配置 viewer,禁用从 localStorage 读取的 Preferences,
   AppOptions.set("disablePreferences", true);
-  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.1`);
+  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.2`);
   AppOptions.set("defaultUrl", file);
   AppOptions.set("cMapUrl", `${Constants.PROTYLE_CDN}/js/pdf/cmaps/`);
   AppOptions.set("iccUrl", `${Constants.PROTYLE_CDN}/js/pdf/iccs/`);
@@ -284,6 +285,7 @@ function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
     }
   }
   const runPromise = pdf.run(config);
+  const disposeMaximize = bindPdfMaximize(element, pdf, previewOnly);
   if (previewOnly) {
     // 未引用资源仅用于预览，不读取或写入批注文件。
     registerPdfInstance(element, pdf);
@@ -299,6 +301,7 @@ function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
     }
     isDestroyed = true;
     pdf._destroyed = true;
+    disposeMaximize();
     destroyAnno(element);
     try {
       await runPromise;

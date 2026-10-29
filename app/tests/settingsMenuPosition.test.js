@@ -15,16 +15,19 @@ for (const [width, height] of [[1000, 760], [493, 376]]) {
                 const exports = {};
                 runInNewContext(transpileModule(readFileSync(file, "utf8"), {
                     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-                }).outputText, {exports, window, document, require: name => modules[name] || {}});
+                }).outputText, {exports, window, document, getComputedStyle: () => ({getPropertyValue: () => ""}),
+                    require: name => modules[name] || {}});
                 return exports;
             };
-            const topBar = load("src/layout/getTopBarHeight.ts");
+            // 该用例验证桌面端布局，getTopBarHeight 与 Menu 共用同一个平台判定桩
+            const functions = {isMobile: () => false};
+            const topBar = load("src/layout/getTopBarHeight.ts", {"../util/functions": functions});
             const position = load("src/util/setPosition.ts", {"../layout/getTopBarHeight": topBar});
             const {Menu} = load("src/menus/Menu.ts", {
                 "../layout/getTopBarHeight": topBar,
                 "../util/setPosition": position,
                 "./menuPosition": load("src/menus/menuPosition.ts"),
-                "../util/functions": {isMobile: () => false},
+                "../util/functions": functions,
                 "../config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
                 "./menuGroup": {updateMenuItemGroupClasses() {}},
                 "../plugin/EventBusCore": {forEachPluginSubscriber() {}},

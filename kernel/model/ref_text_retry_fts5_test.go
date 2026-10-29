@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -5,6 +9,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"os/exec"
@@ -133,6 +138,11 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	if len(dynamicRefTextRetries.pending) != 1 {
 		t.Fatalf("write failure was not queued once: %v", dynamicRefTextRetries.pending)
 	}
+	journalPath := filepath.Join(util.QueueDir, "ref-text-retry.json")
+	journalData, err := os.ReadFile(journalPath)
+	if err != nil || bytes.Contains(journalData, []byte("saved edit")) || !bytes.Contains(journalData, []byte(def.ID)) {
+		t.Fatalf("retry journal is missing or leaked document text: %s, %v", journalData, err)
+	}
 	// 后续编辑保存在磁盘，重试必须重新读取定义与引用文档。
 	def.SetIALAttr("name", "latest edit")
 	save(definition)
@@ -141,6 +151,16 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	reference.Root.AppendChild(laterEdit)
 	save(reference)
 	sql.FlushQueue()
+	// Simulate process restart: discard every in-memory retry, then recover
+	// identifiers from disk before continuing the ordinary/encrypted lifecycle.
+	dynamicRefTextRetries.pending = map[dynamicRefTextRetryKey]time.Time{}
+	dynamicRefTextRetries.loadedPath = ""
+	dynamicRefTextRetries.Lock()
+	err = loadDynamicRefTextRetriesLocked()
+	dynamicRefTextRetries.Unlock()
+	if err != nil || len(dynamicRefTextRetries.pending) != 1 {
+		t.Fatalf("retry did not survive restart: %v", err)
+	}
 	if IsEncryptedBox(box.ID) {
 		boxEncryption, err := GetBoxEncryption(box.ID)
 		if err != nil {
@@ -176,6 +196,11 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	sql.FlushQueue()
 	if len(dynamicRefTextRetries.pending) != 0 {
 		t.Fatalf("successful retry remains queued: %v", dynamicRefTextRetries.pending)
+	}
+	journalData, err = os.ReadFile(journalPath)
+	var completed dynamicRefTextRetryJournal
+	if err != nil || json.Unmarshal(journalData, &completed) != nil || len(completed.Pending) != 0 {
+		t.Fatalf("completed retries were not checkpointed: %s, %v", journalData, err)
 	}
 	for _, tree := range []*parse.Tree{reference, other, chained} {
 		loaded, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
@@ -223,7 +248,9 @@ func testDynamicRefTextWriteFailureRetry(t *testing.T, boxID string) {
 	originalPath := definition.Path
 	definition.Path = "/../invalid.sy"
 	definition.Root.SetIALAttr("updated", "")
-	reindexTree0(definition, 0, 1)
+	if err := reindexTree0(definition, 0, 1); err == nil {
+		t.Fatal("failed timestamp repair did not report its error")
+	}
 	if got := treenode.GetBlockTreeInBox(definition.ID, box.ID); got == nil || got.Path != originalPath {
 		t.Fatalf("failed timestamp repair changed the block tree: %+v", got)
 	}

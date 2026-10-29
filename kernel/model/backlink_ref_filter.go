@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -125,7 +129,7 @@ func GetBacklinkRefDefs(id, keyword string, containChildren bool, boxID string, 
 	if keyword = strings.TrimSpace(keyword); "" != keyword {
 		keywords = strings.Split(keyword, " ")
 	}
-	entries, _, _, _ := buildLinkRefsInBox(block.RootID, refs, keywords, boxID)
+	entries, _, _, _ := buildLinkRefsInBox(block.RootID, refs, keywords, boxID, filter)
 	entries = filterBacklinkSourcesInBox(entries, block.RootID, boxID, filter)
 	entryRefs, err := backlinkEntryRefDefs(entries, boxID)
 	if nil != err {

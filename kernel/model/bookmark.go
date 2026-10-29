@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -25,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -36,6 +23,10 @@ import (
 )
 
 func RemoveBookmark(bookmark string) (err error) {
+	return removeBookmark(bookmark, nil)
+}
+
+func removeBookmark(bookmark string, beforeCommit func()) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 
@@ -56,7 +47,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			return e
 		}
@@ -71,17 +62,22 @@ func RemoveBookmark(bookmark string) (err error) {
 			// 前端按纯文本回传标签，存储态为转义形态，比较前统一还原
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(bookmark) {
 				node.RemoveIALAttr("bookmark")
-				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
 
 		if changed {
 			generateTreeHistory(tree, historyDir)
-			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-			if err = writeTreeUpsertQueue(tree); err != nil {
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
+			if beforeCommit != nil {
+				beforeCommit()
+			}
+			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
+			}
+			for _, blockID := range blocks {
+				cache.RemoveBlockIAL(blockID)
 			}
 		}
 
@@ -96,6 +92,10 @@ func RemoveBookmark(bookmark string) (err error) {
 }
 
 func RenameBookmark(oldBookmark, newBookmark string) (err error) {
+	return renameBookmark(oldBookmark, newBookmark, nil)
+}
+
+func renameBookmark(oldBookmark, newBookmark string, beforeCommit func()) (err error) {
 	if invalidChar := treenode.ContainsMarker(newBookmark); "" != invalidChar {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
@@ -129,7 +129,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, original, e := loadBatchMutationTree(treeID)
 		if nil != e {
 			return e
 		}
@@ -144,17 +144,22 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 			// 前端按纯文本回传旧标签，存储态为转义形态，比较前统一还原
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(oldBookmark) {
 				node.SetIALAttr("bookmark", newBookmark)
-				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
 
 		if changed {
 			generateTreeHistory(tree, historyDir)
-			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-			if err = writeTreeUpsertQueue(tree); err != nil {
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
+			if beforeCommit != nil {
+				beforeCommit()
+			}
+			if err = writeReplacementTree(tree, original, "", false); err != nil {
 				util.ClearPushProgress(100)
 				return
+			}
+			for _, blockID := range blocks {
+				cache.RemoveBlockIAL(blockID)
 			}
 		}
 

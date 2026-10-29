@@ -922,8 +922,8 @@ export const openEmojiPanel = (
         <div data-type="tab-custom" class="ariaLabel block__icon block__icon--show${options?.custom ? " fn__none" : ""}" aria-label="${escapeAttr(escapeHtml(customEmojiLabel))}"><svg><use xlink:href="#iconStar"></use></svg></div>
         <div class="fn__space"></div>
         <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show${options?.dynamic ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
-        <div class="fn__space${type === "av" ? " fn__none" : ""}"></div>
-        <div data-type="tab-link" class="ariaLabel block__icon block__icon--show${type === "av" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.upload} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconUpload"></use></svg></div>
+        <div class="fn__space"></div>
+        <div data-type="tab-link" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.upload} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconUpload"></use></svg></div>
         <div class="fn__flex-1"></div>
         <span class="block__icon block__icon--show fn__flex-center ariaLabel${type === "insert" ? " fn__none" : ""}" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>

@@ -14,13 +14,17 @@ import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {invalidateFocusFoldRequests} from "./focusFold";
 import {unregisterViewFoldContext} from "./viewFold";
 import {destroyAutoDirection} from "../render/autoDirection";
+import {disposeSyncEditorSave} from "./editorSave";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    protyle.title?.cancelPendingInput();
+    disposeSyncEditorSave(protyle);
     destroyFoldedRender(protyle);
     destroyListMindmaps(protyle);
+    protyle.breadcrumb?.destroy();
     cancelLegacyMindmapMigration(protyle);
     invalidateFocusFoldRequests(protyle);
     unregisterViewFoldContext(protyle);

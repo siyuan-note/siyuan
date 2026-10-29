@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../util/pathName";
@@ -412,7 +413,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             <div class="fn__flex">
                 <input spellcheck="false" class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
                 ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
-                ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconDownload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
+                ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconUpload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
             </div>
             ${customFontSupported ? `<div class="b3-label__text ft__on-surface" style="margin-top: 8px">${escapeHtml(window.siyuan.languages.fontFileTip)}</div>` : ""}
             ${canManageCustomFonts ? '<input class="fn__none" data-type="font-file" type="file" accept=".ttf,.otf,font/ttf,font/otf">' : ""}
@@ -576,9 +577,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     }
                 });
                 const rect = fontFamiliesElement.getBoundingClientRect();
-                session.show(() => fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height}));
                 // 内部列表自行滚动，搜索框保持固定
-                fontMenu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+                markMenuInnerScroll(fontMenu.element);
+                session.show(() => fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height}));
                 if (!isMobile()) {
                     fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
                 }

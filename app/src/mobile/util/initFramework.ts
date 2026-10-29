@@ -4,12 +4,13 @@ import {openStandaloneDatabaseItemByURI} from "../../protyle/render/av/openStand
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
-import {validateName} from "../../editor/rename";
+import {truncateDocumentTitle, validateName} from "../../editor/rename";
 import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
-import {finishMobileStartup, setEmpty} from "./setEmpty";
+import {setEmpty} from "./setEmpty";
+import {finishMobileStartup} from "./startup";
 import {getOpenNotebookCount, parseSiYuanUriInfo, parseUriInfo} from "../../util/pathName";
 import {processMobileSystemUri} from "./systemUri";
 import {popMenu} from "../menu";
@@ -457,9 +458,13 @@ const initEditorName = () => {
         if (inputElement.getAttribute("readonly") === "readonly") {
             return titleSavePromise;
         }
-        if (!validateName(inputElement.value)) {
-            inputElement.value = inputElement.value.substring(0, Constants.SIZE_TITLE);
-            return titleSavePromise;
+        if (!validateName(inputElement.value, undefined, true)) {
+            const original = inputElement.value;
+            inputElement.value = truncateDocumentTitle(inputElement.value);
+            if (inputElement.value === original ||
+                !validateName(inputElement.value, undefined, true)) {
+                return titleSavePromise;
+            }
         }
 
         titleSavePromise = fetchPost("/api/filetree/renameDoc", {

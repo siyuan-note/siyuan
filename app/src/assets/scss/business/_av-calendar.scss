@@ -226,6 +226,7 @@
     cursor: pointer;
     font-size: 12px;
     line-height: 20px;
+    background: var(--b3-av-calendar-background, var(--b3-theme-primary-lightest));
     background: color-mix(in srgb, var(--b3-av-calendar-background, var(--b3-theme-primary-lightest)) 50%, var(--b3-theme-background));
     color: var(--b3-theme-on-background);
     border: 1px solid transparent;
@@ -256,6 +257,22 @@
     min-width: 0;
     overflow: hidden;
     pointer-events: none;
+  }
+
+  .av__calendar-field-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    > .av__calendar-field {
+      flex: 1;
+    }
+  }
+
+  .av__calendar-field-name {
+    max-width: 40%;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .av__calendar-field {
@@ -291,6 +308,7 @@
     }
 
     .av__celltext--ref {
+      pointer-events: auto;
       border-bottom: 0;
       text-decoration: underline .5px var(--b3-border-color);
     }
@@ -397,6 +415,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
+    background: var(--b3-theme-primary-lightest);
     background: color-mix(in srgb, var(--b3-theme-primary) 12%, transparent);
   }
 

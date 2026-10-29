@@ -10,9 +10,9 @@ import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
 import {notifyOCRChanged} from "../ocrRuntime";
 import {refreshMountedBazaar} from "../bazaarTab";
+import {remountOpenSettingTab} from "./mount";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
-import {remountOpenSettingTab} from "./mount";
 import {getSettingTabDefs, type TSettingTab} from "./tabs";
 /// #endif
 
@@ -135,6 +135,8 @@ const applySettingConfig = async (next: Config.IConf, namespaces: Set<string>) =
     }
     if (accessChanged) remountTabs.add("access");
     remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });
+    /// #else
+    if (accessChanged) void remountOpenSettingTab("access");
     /// #endif
 };
 

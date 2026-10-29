@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -20,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"net/http"
 	"os"
@@ -112,6 +101,7 @@ func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
 // ParseAddressPath parses address path to address book path and address ID
 func ParseAddressPath(addressPath string) (addressBookPath string, addressID string, err error) {
 	addressBookPath, addressFileName := path.Split(addressPath)
+	addressBookPath = PathCleanWithSlash(addressBookPath)
 	addressID = path.Base(addressFileName)
 	addressFileExt := util.Ext(addressFileName)
 
@@ -189,6 +179,7 @@ type Contacts struct {
 
 // load all contacts
 func (c *Contacts) load() error {
+	c.loaded = false
 	c.books.Clear()
 
 	// load address books meta data
@@ -210,7 +201,7 @@ func (c *Contacts) load() error {
 	}
 
 	// load vCard files (*.vcf)
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, addressBookMetaData := range c.booksMetaData {
 		addressBook := &AddressBook{
 			Changed:       false,
@@ -219,11 +210,13 @@ func (c *Contacts) load() error {
 			Addresses:     sync.Map{},
 		}
 		c.books.Store(addressBookMetaData.Path, addressBook)
-		wg.Go(func() {
-			addressBook.load()
+		wg.Go(func() error {
+			return addressBook.load()
 		})
 	}
-	wg.Wait()
+	if err := wg.Wait(); err != nil {
+		return err
+	}
 
 	c.loaded = true
 	c.changed = false
@@ -283,7 +276,7 @@ func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, 
 		return
 	}
 
-	if value, loaded := addressBook.Addresses.LoadAndDelete(addressID); loaded {
+	if value, loaded := addressBook.Addresses.Load(addressID); loaded {
 		addressObject = value.(*AddressObject)
 	} else {
 		err = ErrorCardDavAddressNotFound
@@ -291,9 +284,11 @@ func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, 
 	}
 
 	if err = os.Remove(addressObject.FilePath); err != nil {
+		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", addressObject.FilePath, err)
 		return
 	}
+	addressBook.Addresses.Delete(addressID)
 
 	return
 }
@@ -494,31 +489,35 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 		return
 	}
 
-	// TODO: 处理 opts.IfNoneMatch (If-None-Match) 与 opts.IfMatch (If-Match)
-
-	var address *AddressObject
-	if value, ok := addressBook.Addresses.Load(addressID); ok {
-		address = value.(*AddressObject)
-		address.Data.Card = card
-		address.Changed = true
-	} else {
-		address = &AddressObject{
-			Changed:  true,
-			FilePath: DavPath2DirectoryPath(addressPath),
-			BookPath: bookPath,
-			Data: &carddav.AddressObject{
-				Card: card,
-			},
+	if opts != nil {
+		etag := ""
+		if value, ok := addressBook.Addresses.Load(addressID); ok {
+			etag = value.(*AddressObject).Data.ETag
 		}
+		if err = checkDAVConditions(etag, opts.IfMatch, opts.IfNoneMatch); err != nil {
+			return
+		}
+	}
+
+	// Do not mutate a cached object until its replacement is persisted.
+	address := &AddressObject{
+		Changed:  true,
+		FilePath: DavPath2DirectoryPath(addressPath),
+		BookPath: bookPath,
+		Data: &carddav.AddressObject{
+			Card: card,
+		},
 	}
 
 	err = address.save(true)
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
 	err = address.update()
 	if err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -559,22 +558,23 @@ func (b *AddressBook) load() error {
 		return err
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := &errgroup.Group{}
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == VCardFileExt {
-				wg.Go(func() {
+				wg.Go(func() error {
 					// load cards
 					addressFilePath := path.Join(b.DirectoryPath, filename)
 					vCards, err := LoadCards(addressFilePath)
 					if err != nil {
-						return
+						return err
 					}
 
 					switch len(vCards) {
 					case 0: // invalid file
+						return errors.New("CardDAV: no card in persisted file")
 					case 1: // file contain 1 card
 						address := &AddressObject{
 							FilePath: addressFilePath,
@@ -584,16 +584,16 @@ func (b *AddressBook) load() error {
 							},
 						}
 						if err := address.update(); err != nil {
-							return
+							return err
 						}
 
 						id := path.Base(filename)
 						b.Addresses.Store(id, address)
 					default: // file contain multiple cards
 						// Create a file for each card
-						addressesWaitGroup := &sync.WaitGroup{}
+						addressesWaitGroup := &errgroup.Group{}
 						for _, vCard := range vCards {
-							addressesWaitGroup.Go(func() {
+							addressesWaitGroup.Go(func() error {
 								filename_ := util.AssetName(filename, ast.NewNodeID())
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
@@ -603,30 +603,33 @@ func (b *AddressBook) load() error {
 									},
 								}
 								if err := address.save(true); err != nil {
-									return
+									return err
 								}
 								if err := address.update(); err != nil {
-									return
+									return err
 								}
 
 								id := path.Base(filename)
 								b.Addresses.Store(id, address)
+								return nil
 							})
 						}
 
-						addressesWaitGroup.Wait()
+						if err := addressesWaitGroup.Wait(); err != nil {
+							return err
+						}
 						// Delete original file with multiple cards
 						if err := os.Remove(addressFilePath); err != nil {
 							logging.LogErrorf("remove file [%s] failed: %s", addressFilePath, err)
-							return
+							return err
 						}
 					}
+					return nil
 				})
 			}
 		}
 	}
-	wg.Wait()
-	return nil
+	return wg.Wait()
 }
 
 type AddressObject struct {
@@ -656,7 +659,7 @@ func (o *AddressObject) save(force bool) error {
 		}
 
 		// write file
-		if err := os.WriteFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
+		if err := writeDAVFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
 			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
 			return err
 		}
@@ -674,10 +677,14 @@ func (o *AddressObject) update() error {
 		return err
 	}
 
+	etag, err := FileETag(o.FilePath)
+	if err != nil {
+		return err
+	}
 	o.Data.Path = PathJoinWithSlash(o.BookPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
-	o.Data.ETag = FileETag(addressFileInfo)
+	o.Data.ETag = etag
 
 	return nil
 }

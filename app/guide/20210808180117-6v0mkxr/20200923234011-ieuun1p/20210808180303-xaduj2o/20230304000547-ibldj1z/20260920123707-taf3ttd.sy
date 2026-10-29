@@ -6,7 +6,7 @@
 		"id": "20260920123707-taf3ttd",
 		"title": "Decision model",
 		"type": "doc",
-		"updated": "20261007050953"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260920122941-wpyglnt",
-				"updated": "20261007020517"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -29,12 +29,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-y6ady6p",
-				"updated": "20261007020517"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The agent uses the selected decision service for repetitive classification, filtering and scoring with explicit criteria. Choose TypeSafe System One (Jev) or OpenAI Decisions API (Beta). For example, ask it to rate selected documents against a research question using a defined rubric. It can pass block IDs for the kernel to read the full content, reducing repeated text generation by the main model. Embedding and reranking models are not required. Inputs remain text or blocks; this feature does not replace chat or process images."
+					"Data": "The agent uses the selected decision service for repetitive classification, filtering and scoring with explicit criteria. Choose TypeSafe System One (Jev) or OpenAI Decisions API. For example, ask it to rate selected documents against a research question using a defined rubric."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-qfhlnyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-qfhlnyn",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It can pass block IDs for the kernel to read the full content, reducing repeated text generation by the main model. Embedding and reranking models are not required. This feature does not replace chat."
 				}
 			]
 		},
@@ -43,7 +57,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-gv610zn",
-				"updated": "20261007050953"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -58,7 +72,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-omz7px3",
-				"updated": "20261007050953"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -90,7 +104,92 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", first turn on the global switch, then open a provider card to edit its API endpoint, API key, model name and request timeout. Opening a card does not change the active provider. Save keeps that provider’s settings; Save and use also selects it for new requests. Each provider retains its own settings and key when you switch. The global switch is off by default. When it is off, only the switch is shown; provider cards and configuration details are hidden, and the decision model cannot be called. Both saved configurations, their keys and the active provider selection are retained. TypeSafe defaults to https://api.typesafe.ai/v1/systemone with jev-latest; OpenAI defaults to https://api.openai.com/v1/decisions with gpt-6-luna. Both default to a 30-second timeout. A chat-compatible endpoint does not necessarily support Decisions. Existing TypeSafe settings are retained after upgrading."
+					"Data": ", first turn on the global switch, then open a provider card to edit its API endpoint, API key, model name and request timeout. Opening a card does not change the active provider. Save keeps that provider’s settings; Save and use also selects it for new requests."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-1u39xqw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-1u39xqw",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each provider retains its own settings and key when you switch. The global switch is off by default. When it is off, only the switch is shown; provider cards and configuration details are hidden, and the decision model cannot be called. Both saved configurations, their keys and the active provider selection are retained."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-bgj99vl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-bgj99vl",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "TypeSafe defaults to https://api.typesafe.ai/v1/systemone with jev-latest; OpenAI defaults to https://api.openai.com/v1/decisions with gpt-6-luna. Both default to a 30-second timeout. A chat-compatible endpoint does not necessarily support Decisions. Existing TypeSafe settings are retained after upgrading."
+				}
+			]
+		},
+		{
+			"ID": "20261023110951-npg7ag9",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261023110951-npg7ag9",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Inputs and limits"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261023110951-2reof0v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023110951-2reof0v",
+				"updated": "20261023110951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI accepts text, blocks, native JSON evidence and explicitly selected images. Tell the agent which images to evaluate; images may be shared evidence or specific to a question. Local assets, including those in unlocked encrypted notebooks, and publicly accessible HTTP(S) image URLs are supported. Image links in Markdown or JSON are not attached automatically. TypeSafe continues to accept text and blocks only."
+				}
+			]
+		},
+		{
+			"ID": "20261023110951-c2kh7gu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023110951-c2kh7gu",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each batch contains 1–32 independent items, evaluated sequentially. Each item shares the questions: OpenAI accepts up to 400 questions and 128 images across shared input and questions; TypeSafe accepts up to 32 questions."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-0uoaq1a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-0uoaq1a",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Native JSON is limited to 256 KiB, 32 container levels and 10,000 values. The entire encoded request, including images and questions, must fit within 1 MiB. Oversized requests return an error; reduce the selected evidence without silently truncating the source."
 				}
 			]
 		},
@@ -99,7 +198,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-nuj8zg2",
-				"updated": "20261007020517"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -114,12 +213,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-falzyb0",
-				"updated": "20261007020517"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The main model still understands the request, handles complex reasoning and tool selection, and prepares the final answer. Scores may fall between rubric levels, and probabilities or confidence do not guarantee correctness. Failed and unprocessed items are reported separately; completed items are retained and requests are not automatically retried. Switching providers affects new requests; a batch already in progress keeps its original provider settings. Errors or refusals are not treated as zero scores or negative answers, and failures never silently switch to another provider."
+					"Data": "The main model still understands the request, handles complex reasoning and tool selection, and prepares the final answer. Scores may fall between rubric levels, and probabilities or confidence do not guarantee correctness. Failed and unprocessed items are reported separately; completed items are retained and requests are not automatically retried."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-tupybu0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-tupybu0",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Switching providers affects new requests; a batch already in progress keeps its original provider settings. Errors or refusals are not treated as zero scores or negative answers, and failures never silently switch to another provider. OpenAI automatically caches eligible identical shared input prefixes of at least 1,024 tokens; question content does not count toward this threshold."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-vs1zr3e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-vs1zr3e",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cache reads and writes are already included in the returned input token usage and must not be added again. Cache writes may incur charges, and reuse is not guaranteed."
 				}
 			]
 		},
@@ -128,7 +255,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-5yw9ara",
-				"updated": "20261007050953"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -143,12 +270,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-fvzl2j1",
-				"updated": "20261007050953"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Turning on the switch alone does not send requests or incur usage charges. Requests are sent to the selected decision service only when you manually run a connection test or use a decision tool, and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID, and their selected content is sent in readable form. After enabling the feature, you can manually run a connection test using the complete draft settings and a fixed sample; it does not read notes. Testing does not save settings or change the active provider. A successful test checks the connection and basic protocol, not answer quality."
+					"Data": "Turning on the switch alone does not send requests or incur usage charges. Requests are sent to the selected decision service only when you manually run a connection test or use a decision tool, and charges may apply."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-9nilhhu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-9nilhhu",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID, and their selected content is sent in readable form."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-daiwg5v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-daiwg5v",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After enabling the feature, you can manually run a connection test using the complete draft settings and a fixed sample; it does not read notes. Testing does not save settings or change the active provider. A successful test checks the connection and basic protocol, not answer quality."
 				}
 			]
 		},

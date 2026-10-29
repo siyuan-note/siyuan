@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package util
 
@@ -53,6 +41,8 @@ var (
 	// map[string]map[string]*melody.Session{}
 	sessions     = sync.Map{} // {appId, {sessionId, session}}
 	authSessions = sync.Map{}
+	// 注册与清理必须串行，避免最后一个旧连接断开时删掉并发注册的新连接。
+	pushChanLock sync.Mutex
 
 	// ReloadDocInfoGuard 由 model 层注入，在广播 docInfo 前检查 box 是否仍处于可广播状态。
 	// 加密笔记本锁定后返回 false，防止 500ms 延迟任务在锁定后泄漏明文元数据。
@@ -122,6 +112,12 @@ func SessionsByType(typ string) (ret []*melody.Session) {
 	return sessionsByType(typ, false)
 }
 
+// IsSessionReady 未声明就绪协议的旧客户端沿用连接后即可接收控制消息的行为。
+func IsSessionReady(session *melody.Session) bool {
+	ready, exists := session.Get("uiReady")
+	return !exists || ready == true
+}
+
 func publishSessionsByType(typ string) (ret []*melody.Session) {
 	return sessionsByType(typ, true)
 }
@@ -172,7 +168,12 @@ func AddPushChan(session *melody.Session) {
 		return
 	}
 	session.Set("type", typ)
+	if typ == "main" && session.Request.URL.Query().Get("ready") == "false" {
+		session.Set("uiReady", false)
+	}
 
+	pushChanLock.Lock()
+	defer pushChanLock.Unlock()
 	if IsAuthSession(session) {
 		if appSessions, ok := authSessions.Load(appID); !ok {
 			appSess := &sync.Map{}
@@ -233,11 +234,15 @@ func RemovePushChan(session *melody.Session) {
 		return
 	}
 
+	pushChanLock.Lock()
+	defer pushChanLock.Unlock()
 	if IsAuthSession(session) {
 		appSess, _ := authSessions.Load(app)
 		if nil != appSess {
 			appSessions := appSess.(*sync.Map)
-			appSessions.Delete(id)
+			if !appSessions.CompareAndDelete(id, session) {
+				return
+			}
 			if 1 > lenOfSyncMap(appSessions) {
 				authSessions.Delete(app)
 			}
@@ -246,7 +251,9 @@ func RemovePushChan(session *melody.Session) {
 		appSess, _ := sessions.Load(app)
 		if nil != appSess {
 			appSessions := appSess.(*sync.Map)
-			appSessions.Delete(id)
+			if !appSessions.CompareAndDelete(id, session) {
+				return
+			}
 			if 1 > lenOfSyncMap(appSessions) {
 				sessions.Delete(app)
 			}
@@ -703,9 +710,9 @@ func CloseOIDCSessions() {
 
 var (
 	// lastActivityNs 记录最近一次用户写操作（前端发送 /api/transactions* 请求）的纳秒时间戳。
-	lastActivityNs atomic.Int64
-	// indexFixDirty 标记索引可能已脏（上次订正后用户又有新的写操作），需要再次订正。
-	indexFixDirty atomic.Bool
+	lastActivityNs       atomic.Int64
+	indexFixVersion      atomic.Uint64
+	indexFixCleanVersion atomic.Uint64
 )
 
 func init() {
@@ -717,12 +724,18 @@ func init() {
 // 在 model.Activity 中间件中，对 /api/transactions* 写操作请求调用。
 func RefreshActivity() {
 	lastActivityNs.Store(time.Now().UnixNano())
-	indexFixDirty.Store(true)
+	MarkIndexFixDirty()
 }
 
-// MarkIndexClean 标记索引已订正完成，清除脏标志。订正流水线结束后调用。
-func MarkIndexClean() {
-	indexFixDirty.Store(false)
+// MarkIndexFixDirty records a change without treating background writes as user activity.
+func MarkIndexFixDirty() { indexFixVersion.Add(1) }
+
+func IndexFixVersion() uint64 { return indexFixVersion.Load() }
+
+// MarkIndexClean acknowledges only the generation captured before a successful repair.
+func MarkIndexClean(version uint64) bool {
+	indexFixCleanVersion.Store(version)
+	return indexFixVersion.Load() == version
 }
 
 // IsIdle 自上次用户活动以来是否已超过 idleThreshold。
@@ -732,5 +745,5 @@ func IsIdle(idleThreshold time.Duration) bool {
 
 // IsIndexFixDirty 返回是否存在未订正的变更（上次订正后有新用户活动）。
 func IsIndexFixDirty() bool {
-	return indexFixDirty.Load()
+	return indexFixVersion.Load() != indexFixCleanVersion.Load()
 }

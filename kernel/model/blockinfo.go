@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -77,7 +65,7 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 
 func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 	boxID := tree.Box
-	title := tree.Root.IALAttr("title")
+	title := treenode.ReadDocumentTitle(tree.Root).Text
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 	scrollData := ret.IAL["scroll"]
@@ -195,7 +183,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		if nil == tree {
 			continue
 		}
-		title := tree.Root.IALAttr("title")
+		title := treenode.ReadDocumentTitle(tree.Root).Text
 		ret := &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 		scrollData := ret.IAL["scroll"]
@@ -307,18 +295,6 @@ func GetBlockRefText(id string) string {
 		return ErrBlockNotFound.Error()
 	}
 
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if n.IsTextMarkType("inline-memo") {
-			// Block ref anchor text no longer contains contents of inline-level memos https://github.com/siyuan-note/siyuan/issues/9363
-			n.TextMarkInlineMemoContent = ""
-			return ast.WalkContinue
-		}
-		return ast.WalkContinue
-	})
 	return getNodeRefText(node)
 }
 
@@ -408,11 +384,7 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 		return "Audio..."
 	case ast.NodeTabItem:
 		if title := treenode.TabTitleParagraph(node); nil != title {
-			ret := renderBlockText(title, nil, removeLineBreak)
-			if maxLen < utf8.RuneCountInString(ret) {
-				ret = gulu.Str.SubStr(ret, maxLen) + "..."
-			}
-			return ret
+			return getNodeRefText0(title, maxLen, removeLineBreak)
 		}
 	case ast.NodeAttributeView:
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
@@ -424,6 +396,26 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
+	}
+	if nil != node && ast.NodeDocument != node.Type {
+		hasMemo := false
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.IsTextMarkType("inline-memo") && "" != n.TextMarkInlineMemoContent {
+				hasMemo = true
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+		if hasMemo {
+			// 锚文本只保留可见文字，在副本上过滤备注以保留源块内容。
+			node = cloneRenderNode(node)
+			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && n.IsTextMarkType("inline-memo") {
+					n.TextMarkInlineMemoContent = ""
+				}
+				return ast.WalkContinue
+			})
+		}
 	}
 	ret := renderBlockText(node, nil, removeLineBreak)
 	if maxLen < utf8.RuneCountInString(ret) {
@@ -487,10 +479,6 @@ func queryBlockRefDefsInBox(bt *treenode.BlockTree, boxID string) (refDefs []*Re
 
 func GetBlockRefIDsByFileAnnotationIDInBox(id, boxID string) []string {
 	return sql.QueryRefIDsByAnnotationIDInBox(id, boxID)
-}
-
-func GetBlockDefIDsByRefText(refText string) (ret []string) {
-	return GetBlockDefIDsByRefTextInBox(refText, "")
 }
 
 func GetBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
@@ -607,12 +595,13 @@ func getDocBlocksOrdersInTree(tree *parse.Tree) (ret []string) {
 }
 
 type BlockPath struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Type        string       `json:"type"`
-	SubType     string       `json:"subType"`
-	Children    []*BlockPath `json:"children"`
-	HasChildren bool         `json:"hasChildren,omitempty"`
+	ID            string       `json:"id"`
+	Name          string       `json:"name"`
+	DocumentTitle string       `json:"documentTitle,omitempty"`
+	Type          string       `json:"type"`
+	SubType       string       `json:"subType"`
+	Children      []*BlockPath `json:"children"`
+	HasChildren   bool         `json:"hasChildren,omitempty"`
 }
 
 type BlockBreadcrumbChildren struct {
@@ -639,10 +628,6 @@ func BuildBlockBreadcrumbInBox(id string, excludeTypes []string, boxID string) (
 
 	ret = buildBlockBreadcrumb(node, excludeTypes, false)
 	return
-}
-
-func GetBlockBreadcrumbChildren(id string, excludeTypes []string, offset, limit int) (ret *BlockBreadcrumbChildren, err error) {
-	return GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, "")
 }
 
 func GetBlockBreadcrumbChildrenInBox(id string, excludeTypes []string, offset, limit int, boxID string) (
@@ -877,11 +862,16 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 
 		if add {
+			documentTitle := ""
+			if isEmbedBlock && ast.NodeDocument == parent.Type {
+				documentTitle = util.EscapeHTML(strings.ReplaceAll(treenode.ReadDocumentTitle(parent).Text, editor.Caret, ""))
+			}
 			ret = append([]*BlockPath{{
-				ID:      id,
-				Name:    name,
-				Type:    parent.Type.String(),
-				SubType: treenode.SubTypeAbbr(parent),
+				ID:            id,
+				Name:          name,
+				DocumentTitle: documentTitle,
+				Type:          parent.Type.String(),
+				SubType:       treenode.SubTypeAbbr(parent),
 			}}, ret...)
 		}
 

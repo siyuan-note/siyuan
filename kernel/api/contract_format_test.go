@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -8,7 +12,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAPIContractFormatInputCompatibility(t *testing.T) {
@@ -17,10 +20,10 @@ func TestAPIContractFormatInputCompatibility(t *testing.T) {
 			legacy := gulu.Ret.NewResult()
 			context, _ := gin.CreateTestContext(httptest.NewRecorder())
 			context.Request = httptest.NewRequest("POST", "/api/format/netImg2LocalAssets", strings.NewReader(body))
-			args, ok := util.JsonArg(context, legacy)
+			args, ok := legacyJSONArg(context, legacy)
 			var id, url string
 			if ok {
-				ok = util.ParseJsonArgs(args, legacy, util.BindJsonArg("id", &id, true, true), util.BindJsonArg("url", &url, false, false))
+				ok = legacyParseArgs(args, legacy, legacyBind("id", &id, true, true), legacyBind("url", &url, false, false))
 			}
 			request, err := apicontract.NetImg2LocalAssets.Decode(strings.NewReader(body))
 			if ok != (err == nil) {

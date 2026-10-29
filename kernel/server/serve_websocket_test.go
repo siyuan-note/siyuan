@@ -1,12 +1,20 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package server
 
 import (
+	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
+	ginSessions "github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/olahol/melody"
@@ -14,6 +22,56 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestWebSocketDesktopSessionAuthentication(t *testing.T) {
+	oldStore, oldDir, oldContainer := sessionStore, util.WorkspaceDir, util.Container
+	t.Cleanup(func() { sessionStore, util.WorkspaceDir, util.Container = oldStore, oldDir, oldContainer })
+	sessionStore = cookie.NewStore([]byte("desktop-websocket-session-test-key"))
+	util.WorkspaceDir, util.Container = "Note1", util.ContainerStd
+	srv := newWebSocketTestServer(t)
+	model.Conf.AccessAuthCode = "desktop-password"
+	for _, state := range []string{"current", "remembered", "expired"} {
+		t.Run(state, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(ginSessions.Sessions("siyuan", sessionStore))
+			engine.GET("/login", func(c *gin.Context) {
+				session := util.GetSession(c)
+				ws := util.GetWorkspaceSession(session)
+				ws.AccessAuthCode = model.Conf.AccessAuthCode
+				model.BindDesktopSession(c, ws, state == "remembered")
+				if state == "expired" {
+					ws.DesktopSessionID = "previous-kernel-boot"
+				}
+				if err := session.Save(c); err != nil {
+					t.Fatal(err)
+				}
+			})
+			r := httptest.NewRequest("GET", "http://127.0.0.1/login", nil)
+			r.RemoteAddr = "127.0.0.1:1234"
+			r.Header.Set("User-Agent", "SiYuan/3.8.9 https://b3log.org/siyuan Electron Chrome/140")
+			w := httptest.NewRecorder()
+			engine.ServeHTTP(w, r)
+			cookies := w.Result().Cookies()
+			if len(cookies) != 1 {
+				t.Fatal("missing fixture cookie")
+			}
+			header := http.Header{"Cookie": []string{cookies[0].Name + "=" + cookies[0].Value}}
+			connection := dialWebSocket(t, srv, state, header)
+			if state != "expired" {
+				waitWebSocketSession(t, connection, state)
+				return
+			}
+			if err := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+				t.Fatal(err)
+			}
+			_, _, err := connection.ReadMessage()
+			var networkErr net.Error
+			if err == nil || (errors.As(err, &networkErr) && networkErr.Timeout()) {
+				t.Fatalf("expired session was not closed by authentication: %v", err)
+			}
+		})
+	}
+}
 
 func TestWebSocketRejectsMalformedMessages(t *testing.T) {
 	server := melody.New()
@@ -100,18 +158,28 @@ func dialWebSocket(t *testing.T, srv *httptest.Server, name string, header http.
 	return conn
 }
 
-func waitWebSocketSession(t *testing.T, id string) {
+func waitWebSocketSession(t *testing.T, connection *websocket.Conn, id string) {
 	t.Helper()
 
-	deadline := time.Now().Add(2 * time.Second)
-	for time.Now().Before(deadline) {
-		sessions, _ := util.WebSocketServer.Sessions()
-		for _, session := range sessions {
-			if value, _ := session.Get("id"); value == id {
-				return
-			}
+	// 消息处理在连接回调返回后启动，往返响应保证认证及推送通道注册均已完成。
+	if err := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if err := connection.WriteMessage(websocket.TextMessage, []byte(`{"cmd":"unknown","reqId":1,"param":{}}`)); err != nil {
+		t.Fatal(err)
+	}
+	var result util.Result
+	if err := connection.ReadJSON(&result); err != nil {
+		t.Fatalf("wait for websocket session %q: %v", id, err)
+	}
+	if result.Code != -1 || result.Msg != "can not find command [unknown]" {
+		t.Fatalf("unexpected registration response: %#v", result)
+	}
+	sessions, _ := util.WebSocketServer.Sessions()
+	for _, session := range sessions {
+		if value, _ := session.Get("id"); value == id {
+			return
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatalf("websocket session %q is not registered", id)
 }
@@ -154,7 +222,7 @@ func TestWebSocketAdmitsOnlyLocalClientWithoutAccessAuth(t *testing.T) {
 	srv := newWebSocketTestServer(t)
 
 	local := dialWebSocket(t, srv, "local", nil)
-	waitWebSocketSession(t, "local")
+	waitWebSocketSession(t, local, "local")
 	util.BroadcastByType("main", "admission", 0, "", nil)
 	if err := local.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
 		t.Fatal(err)
@@ -192,7 +260,7 @@ func TestWebSocketAdmitsPublishReaderWithForwardedAddress(t *testing.T) {
 		model.XAuthTokenKey: []string{token},
 		"X-Forwarded-For":   []string{"203.0.113.9"},
 	})
-	waitWebSocketSession(t, "reader")
+	waitWebSocketSession(t, reader, "reader")
 
 	sessions, _ := util.WebSocketServer.Sessions()
 	for _, session := range sessions {

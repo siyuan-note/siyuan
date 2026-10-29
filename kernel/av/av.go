@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Package av 包含了属性视图（Attribute View）相关的实现。
 package av
@@ -59,6 +47,17 @@ type AttributeView struct {
 	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
 
 	cardCoverPositionsChanged bool
+	sourceVersion             uint64
+	sourceGeneration          uint64
+	liveOrdinarySource        bool
+}
+
+// RenderSourceVersion 只标识当前工作区普通数据库的已认证源版本，临时副本不参与跨请求复用。
+func (attrView *AttributeView) RenderSourceVersion() (version, generation uint64) {
+	if attrView != nil && attrView.liveOrdinarySource {
+		return attrView.sourceVersion, attrView.sourceGeneration
+	}
+	return 0, 0
 }
 
 // CustomColorRenderContext 为历史和仓库快照渲染解析关联数据库当时的调色板。
@@ -106,6 +105,8 @@ type NewItemTemplate struct {
 	SaveLocation        *NewItemSaveLocation          `json:"saveLocation,omitempty"`
 	ContentTemplatePath string                        `json:"contentTemplatePath,omitempty"`
 	HideInFileTree      bool                          `json:"hideInFileTree,omitempty"`
+	// nil 保留旧客户端行为；false 不自动打开，true 创建后由交互客户端分屏打开。
+	OpenAfterCreate *bool `json:"openAfterCreate,omitempty"`
 }
 
 // NewItemTemplatesConfig 描述一次完整的新增条目模板配置修改。
@@ -618,6 +619,7 @@ func cacheAttributeViewData(attrView *AttributeView, boxID string, data []byte) 
 }
 
 func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, err error) {
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeViewSearchInfo{}
 	if err = json.Unmarshal(data, ret); err != nil {
 		return
@@ -686,7 +688,7 @@ func loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID string) (ret *At
 
 		if ret, err = parseAttributeViewSearchInfo(data); err != nil {
 			logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
-			return nil, err
+			return nil, fmt.Errorf("parse attribute view search info [%s] failed: %w", avJSONPath, err)
 		}
 		if cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret) {
 			return ret, nil
@@ -835,6 +837,12 @@ func ReadAttributeViewCustomColorUsageByPath(avJSONPath string) (avID string, in
 }
 
 func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveColors bool) (ret *AttributeView, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("load attribute view [%s] failed: %w", avJSONPath, err)
+		}
+	}()
+	generation := cache.GetAVCacheGeneration()
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
@@ -855,6 +863,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = version
 	} else {
 		var readErr error
+		readVersion := cache.AVDataReadVersion()
 		data, readErr = filelock.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
@@ -872,7 +881,7 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
 			return nil, nil
 		}
-		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
+		dataVersion = cache.SetAVDataFromReadInBox(avID, boxID, data, readVersion)
 	}
 
 	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {
@@ -886,6 +895,8 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		}
 	}
 	if nil == err {
+		ret.sourceVersion, ret.sourceGeneration = dataVersion, generation
+		ret.liveOrdinarySource = boxID == "" && filepath.Clean(avJSONPath) == filepath.Join(util.DataDir, "storage", "av", avID+".json")
 		if resolveColors {
 			ret.ResolveDirectColors()
 			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
@@ -900,6 +911,8 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 }
 
 func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
+	// 仅处理已认证明文的开头 BOM；缓存和条件写入保留原始字节以检测外部修改。
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -1085,6 +1098,53 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
 		avJSONPath = GetAttributeViewDataPath(av.ID)
 	}
+	if value, recorded := sourceWriteRecorders.Load(avBoxID + "/" + av.ID); recorded && value.(*sourceWriteRecord).active() {
+		before, readErr := filelock.ReadFile(avJSONPath)
+		if os.IsNotExist(readErr) {
+			before, readErr = nil, nil
+		}
+		if readErr != nil {
+			return readErr
+		}
+		if original != nil {
+			if avBoxID != "" {
+				return errors.New("conditional replacement of encrypted attribute views is not supported")
+			}
+			if !bytes.Equal(before, original) {
+				return util.ErrFileChanged
+			}
+		}
+		if before != nil {
+			plain := before
+			if avBoxID != "" {
+				plain, readErr = decryptAVDataLocked(avBoxID, av.ID, before)
+			}
+			if readErr != nil {
+				return readErr
+			}
+			if _, readErr = ParseAttributeViewData(av.ID, plain); readErr != nil {
+				return readErr
+			}
+		}
+		writeData := data
+		if avBoxID != "" {
+			if writeData, err = encryptAVDataLocked(avBoxID, av.ID, data); err != nil {
+				return err
+			}
+		}
+		if err = value.(*sourceWriteRecord).record(avBoxID, before, writeData); err != nil {
+			return err
+		}
+		if err = os.MkdirAll(filepath.Dir(avJSONPath), 0755); err != nil {
+			return err
+		}
+		if err = util.WriteFileIfUnchanged(avJSONPath, before, writeData); err != nil {
+			return err
+		}
+		cacheAttributeViewData(av, avBoxID, data)
+		NotifyAttributeViewSaved(av.ID, avBoxID)
+		return nil
+	}
 	if original != nil {
 		if avBoxID != "" {
 			return errors.New("conditional replacement of encrypted attribute views is not supported")
@@ -1093,9 +1153,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 			return err
 		}
 		cacheAttributeViewData(av, avBoxID, data)
-		if RichTextSpec <= av.Spec {
-			NotifyAttributeViewSaved(av.ID, avBoxID)
-		}
+		NotifyAttributeViewSaved(av.ID, avBoxID)
 		return nil
 	}
 	if cachedData, version, ok := cache.GetAVDataWithVersionInBox(av.ID, avBoxID); ok {
@@ -1144,9 +1202,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	cacheAttributeViewData(av, avBoxID, data)
-	if RichTextSpec <= av.Spec {
-		NotifyAttributeViewSaved(av.ID, avBoxID)
-	}
+	NotifyAttributeViewSaved(av.ID, avBoxID)
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
 		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize.Load())

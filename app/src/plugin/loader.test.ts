@@ -236,6 +236,7 @@ test("removing a dock preserves its open state for re-enabling while explicitly 
         const dependencies = {
             resizeTabs: (): void => undefined,
             adjustDockPadding: (): void => undefined,
+            syncDockBarVisibility: (): boolean => false,
             updatePluginDockShowStates,
             setStorageVal: (): void => undefined,
             Constants: {LOCAL_PLUGIN_DOCKS: "local-plugin-docks"},

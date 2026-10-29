@@ -3,6 +3,7 @@ import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
+import {genFileTreeDocAriaLabel} from "./fileTreeTooltip";
 import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
@@ -161,15 +162,20 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     if (titleEmpty) {
         return window.siyuan.languages["_kernel"][16];
     }
-    const displayName = getDisplayName(name, true, true);
+    // 文档接口返回原始标题，斜杠和 .sy 都是标题内容，不能按文件路径处理。
     if (escape) {
-        return escapeHtmlTextAndAttr(displayName);
+        return escapeHtmlTextAndAttr(name);
     }
-    return displayName;
+    return name;
 };
 
 export const getAssetPathWithoutQuery = (assetPath: string) => {
-    return assetPath.split("?", 1)[0];
+    return assetPath.split(/[?#]/, 1)[0];
+};
+
+// 只去掉片段，保留查询：内核依赖 box 等查询参数定位资源，但不处理片段。
+export const getAssetPathWithoutFragment = (assetPath: string) => {
+    return assetPath.split("#", 1)[0];
 };
 
 export const getAssetExtension = (assetPath: string) => {
@@ -262,6 +268,7 @@ export const movePathTo = (options: {
     flashcard: boolean
     rootIDs?: string[],
     sourceNotebookIds?: string[],
+    multiple?: boolean,
 }) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
@@ -310,6 +317,52 @@ export const movePathTo = (options: {
     }
     const searchListElement = dialog.element.querySelector("#foldList");
     const searchTreeElement = dialog.element.querySelector("#foldTree");
+    const confirmElement = dialog.element.querySelector<HTMLButtonElement>(".b3-button--text");
+    const selected = new Map<string, {path: string, notebook: string}>();
+    const selectionKey = (row: HTMLElement) => `${row.dataset.box}:${row.dataset.path}`;
+    const renderSelection = (root: Element) => {
+        if (!options.multiple) { return; }
+        root.querySelectorAll<HTMLElement>(".b3-list-item").forEach(row => {
+            let checkbox = row.querySelector<HTMLInputElement>("[data-path-select]");
+            if (!checkbox) {
+                checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "b3-switch fn__flex-center";
+                checkbox.setAttribute("data-path-select", "true");
+                checkbox.setAttribute("aria-label", row.querySelector(".b3-list-item__text, .b3-list-item__showall").textContent);
+                row.append(checkbox);
+                checkbox.addEventListener("click", event => event.stopPropagation());
+                checkbox.addEventListener("change", () => {
+                    const key = selectionKey(row);
+                    if (checkbox.checked) {
+                        selected.set(key, {path: row.dataset.path, notebook: row.dataset.box});
+                    } else {
+                        selected.delete(key);
+                    }
+                    renderSelection(searchTreeElement);
+                    renderSelection(searchListElement);
+                });
+            }
+            checkbox.checked = selected.has(selectionKey(row));
+        });
+        confirmElement.textContent = `${window.siyuan.languages.confirm} (${selected.size})`;
+        confirmElement.disabled = selected.size === 0;
+    };
+    const expand = (row: HTMLElement) => getLeaf(row, options.flashcard, renderSelection);
+    const submit = () => {
+        const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
+        const items = options.multiple ? Array.from(selected.values()) :
+            Array.from(currentPanelElement.querySelectorAll<HTMLElement>(".b3-list-item--focus"))
+                .map(row => ({path: row.dataset.path, notebook: row.dataset.box}));
+        if (!items.length) { return; }
+        const paths = items.map(item => item.path);
+        const notebooks = items.map(item => item.notebook);
+        if (!options.validate || options.validate(paths, notebooks)) {
+            options.cb(paths, notebooks);
+            dialog.destroy();
+        }
+    };
+    renderSelection(searchTreeElement);
     setNoteBook((notebooks) => {
         let html = "";
         notebooks.forEach((item) => {
@@ -332,6 +385,7 @@ export const movePathTo = (options: {
             }
         });
         searchTreeElement.innerHTML = html;
+        renderSelection(searchTreeElement);
     }, options.flashcard);
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
@@ -398,6 +452,7 @@ export const movePathTo = (options: {
 </li>`;
             });
             searchListElement.innerHTML = fileHTML;
+            renderSelection(searchListElement);
         });
     };
 
@@ -519,6 +574,11 @@ export const movePathTo = (options: {
         if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_MOVE_PATH_HISTORY) {
             return;
         }
+        if (event.key === "Enter") {
+            submit();
+            event.preventDefault();
+            return;
+        }
         const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
         const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
         if (currentItemElements.length === 0) {
@@ -535,7 +595,7 @@ export const movePathTo = (options: {
         if (searchListElement.classList.contains("fn__none")) {
             if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
                 (event.key === "ArrowLeft" && currentItemElement.querySelector(".b3-list-item__arrow--open"))) {
-                getLeaf(currentItemElement, options.flashcard);
+                expand(currentItemElement);
                 event.preventDefault();
                 return;
             }
@@ -657,29 +717,12 @@ export const movePathTo = (options: {
                 return;
             }
         }
-        if (event.key === "Enter") {
-            const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
-            if (currentItemElements.length === 0) {
-                return;
-            }
-            const pathList: string[] = [];
-            const notebookIdList: string[] = [];
-            currentItemElements.forEach(item => {
-                pathList.push(item.getAttribute("data-path"));
-                notebookIdList.push(item.getAttribute("data-box"));
-            });
-            if (!options.validate || options.validate(pathList, notebookIdList)) {
-                options.cb(pathList, notebookIdList);
-                dialog.destroy();
-            }
-            event.preventDefault();
-        }
     });
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
             if (target.classList.contains("b3-list-item__toggle")) {
-                getLeaf(target.parentElement, options.flashcard);
+                expand(target.parentElement);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -689,21 +732,7 @@ export const movePathTo = (options: {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-button--text")) {
-                const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
-                const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
-                if (currentItemElements.length === 0) {
-                    return;
-                }
-                const pathList: string[] = [];
-                const notebookIdList: string[] = [];
-                currentItemElements.forEach(item => {
-                    pathList.push(item.getAttribute("data-path"));
-                    notebookIdList.push(item.getAttribute("data-box"));
-                });
-                if (!options.validate || options.validate(pathList, notebookIdList)) {
-                    options.cb(pathList, notebookIdList);
-                    dialog.destroy();
-                }
+                submit();
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -713,6 +742,14 @@ export const movePathTo = (options: {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-list-item")) {
+                if (options.multiple) {
+                    dialog.element.querySelectorAll(".b3-list-item--focus").forEach(item => item.classList.remove("b3-list-item--focus"));
+                    target.classList.add("b3-list-item--focus");
+                    target.querySelector<HTMLInputElement>("[data-path-select]").click();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                }
                 const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
                 const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
                 if (currentItemElements.length === 0) {
@@ -729,7 +766,7 @@ export const movePathTo = (options: {
                     target.classList.add("b3-list-item--focus");
                 }
                 if (target.getAttribute("data-path") === "/") {
-                    getLeaf(target, options.flashcard);
+                    expand(target);
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -743,7 +780,7 @@ export const movePathTo = (options: {
     });
 };
 
-const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
+const getLeaf = (liElement: HTMLElement, flashcard: boolean, onRender?: (root: Element) => void) => {
     const toggleElement = liElement.querySelector(".b3-list-item__arrow");
     if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
         toggleElement.classList.remove("b3-list-item__arrow--open");
@@ -789,7 +826,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${getFileTreeIconHTML(item.icon, defaultIcon, "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDocDisplayName(item.name, item.titleEmpty, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + escapeAriaLabel(item.bookmark) : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + escapeAriaLabel(item.name1) : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + escapeAriaLabel(item.alias) : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + escapeAriaLabel(item.memo) : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" data-tooltip-encoding="none" aria-label="${genFileTreeDocAriaLabel(item, true)}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     ${countHTML}
 </li>`;
         });
@@ -798,6 +835,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         }
         toggleElement.classList.add("b3-list-item__arrow--open");
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        onRender?.(liElement.nextElementSibling);
         expandFileTree(liElement.nextElementSibling as HTMLElement);
     });
 };
@@ -877,10 +915,10 @@ export const isEncryptedBox = (boxId: string): boolean => {
 /**
  * 规范化并校验相对路径：允许子目录，但禁止通过 ".." 穿越到根外。
  * 用于插件存储，确保路径不逃出指定根目录。
- * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径
+ * @returns 规范化后的相对路径（使用 /）；不含有效文件段（如 ".."、"."、空串）时返回 null，避免指向根目录自身或其上级
  */
 export const normalizeStoragePath = (storageName: string): string | null => {
     const segments = storageName.replace(/\\/g, "/").split("/");
     const merged = mergePathSegments([], segments);
-    return merged.length > 0 ? merged.join("/") : storageName.replace(/[\/\\]+/g, "");
+    return merged.length > 0 ? merged.join("/") : null;
 };

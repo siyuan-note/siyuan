@@ -1,6 +1,7 @@
 import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
+import {clearDocumentCreationPlans} from "./util/configuredDocument";
 import {closeNotebookLivePhotos} from "./protyle/preview/livePhoto";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
@@ -40,6 +41,7 @@ import {
     transactionError
 } from "./dialog/processSystem";
 import {progressLoading} from "./dialog/progress";
+import {syncCheckoutProgress} from "./sync/checkoutProgress";
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./protyle/util/compatibility";
@@ -175,6 +177,9 @@ export class App {
                                 });
                             }
                             break;
+                        case "syncProgress":
+                            syncCheckoutProgress(data);
+                            break;
                         case "progress":
                             progressLoading(data);
                             break;
@@ -212,6 +217,7 @@ export class App {
                         case "closeBox":
                         case "removeBox":
                             closeNotebookHistoryDialogs(data.data.box);
+                            clearDocumentCreationPlans(data.data.box);
                             closeNotebookLivePhotos(data.data.box);
                             removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
@@ -348,12 +354,15 @@ export class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
-                    bootSync();
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
                         await initWindowWithLoading(() => onGetConfig(response.data.start, this), setTabPosition);
+                        /// #if !BROWSER
+                        // 加载遮罩移除后再显示主窗口，避免原生窗口按钮出现在启动界面上。
+                        ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
+                        /// #endif
                         onSetaccount();
                         setTitle("", true);
                         initMessage();
@@ -366,6 +375,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        bootSync();
                         exitAfterSettingsReset();
                         fetchPost("/api/setting/getCloudUser", {});
                     });
@@ -411,7 +421,7 @@ window.openFileByURL = (openURL) => {
 };
 
 /// #if BROWSER
-registerDesktopBackNavigation();
+registerDesktopBackNavigation(siyuanApp);
 window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };
@@ -428,6 +438,4 @@ if (window.JSAndroid?.setWebViewFocusable) {
 } else if (window.JSHarmony?.setWebViewFocusable) {
     window.JSHarmony.setWebViewFocusable(true);
 }
-/// #else
-ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
 /// #endif

@@ -6,7 +6,7 @@
 		"id": "20211226120802-77aj0is",
 		"title": "内容區塊屬性",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-vqd5cic",
-				"updated": "20211226000642"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120833-clw47h2",
-				"updated": "20260730184353"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "屬性以鍵值對（key-value）的形式存在，我們可以通過對內容區塊設置屬性來豐富內容區塊的內涵。屬性分為內置屬性和自定義屬性。"
+					"Data": "屬性以鍵值對（key-value）的形式儲存內容區塊的附加資訊，便於命名、分類和查詢。屬性分為內建屬性和自訂屬性。"
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-wzobna4",
-				"updated": "20261012014930"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -214,7 +214,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261012014537-rxy3yih",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -229,12 +229,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261012014537-90xrgx0",
-				"updated": "20261012014859"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在屬性面板中，多個別名分別顯示為標籤。點擊「新增別名」新增，點擊既有別名編輯，點擊其關閉圖示刪除。輸入時可用英文逗號分隔，批次新增多個別名。按 "
+					"Data": "在屬性面板中，多個別名分別顯示為標籤。點擊「新增別名」新增，點擊既有別名編輯，點擊其關閉圖示刪除。輸入時可用英文逗號分隔，批次新增多個別名。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-2hgk3un",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-2hgk3un",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -253,7 +267,17 @@
 				{
 					"Type": "NodeText",
 					"Data": " 取消本次輸入。新輸入會移除前後空白、過濾空項和完全相同的重複項。"
-				},
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-km0u42c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-km0u42c",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "拖曳別名可調整順序，放開後儲存；觸控螢幕也支援拖曳。拖曳時按 "
@@ -275,7 +299,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-347kbz5",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -289,30 +313,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120833-a02rthr",
-				"updated": "20261016111305"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自定義屬性由用戶通過 "
+					"Data": "透過 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "區塊標菜單"
+					"TextMarkTextContent": "區塊標選單"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code kbd",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "屬性"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 進行設置，屬性名稱須以小寫英文字母開頭，可包含小寫英文字母、數字和連字號（-）；輸入的大寫字母會自動轉為小寫（例如 "
+					"Data": " 設定自訂屬性。屬性名稱須以小寫英文字母開頭，可包含小寫英文字母、數字和連字號（-），例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -321,7 +345,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -339,7 +363,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）。設置後，思源會自動在屬性名前加上前綴 "
+					"Data": "。輸入的大寫字母會自動轉為小寫。儲存後，思源會在屬性名稱前自動加上 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -348,7 +372,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，以區分內置屬性和自定義屬性。"
+					"Data": " 前綴，以區別於內建屬性。"
 				}
 			]
 		},

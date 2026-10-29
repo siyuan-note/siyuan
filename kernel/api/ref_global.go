@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -21,6 +25,9 @@ func globalBacklinkQuery(c *gin.Context, request apicontract.GlobalBacklinkQuery
 		query.Notebook = ""
 	}
 	if err := holdEncryptedBoxRequest(c, query.Notebook); err != nil {
+		return query, err
+	}
+	if err := validateBacklinkDatabaseRequest(c, query.SourceFilter, query.Notebook); err != nil {
 		return query, err
 	}
 	return query, nil

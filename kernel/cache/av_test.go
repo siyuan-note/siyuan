@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cache
 
@@ -22,6 +10,40 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 )
+
+func TestAVCacheRejectsStaleDiskRead(t *testing.T) {
+	defer ClearAVCache()
+	for name, mutate := range map[string]func(){
+		"write":      func() { SetAVDataInBox("database", "box", []byte("new")) },
+		"remove":     func() { RemoveAVData("database") },
+		"remove box": func() { RemoveAVDataInBox("database", "box") },
+		"clear":      ClearAVCache,
+	} {
+		t.Run(name, func(t *testing.T) {
+			ClearAVCache()
+			version := AVDataReadVersion()
+			mutate()
+			if got := SetAVDataFromReadInBox("database", "box", []byte("old disk bytes"), version); got != 0 {
+				t.Fatal("stale disk read was admitted after a cache mutation")
+			}
+			avCache.Wait()
+			if data, ok := GetAVDataInBox("database", "box"); ok && string(data) != "new" {
+				t.Fatalf("stale disk read replaced current cache: %q", data)
+			}
+			if SetAVSearchDataInBox("database", "box", 0, "stale derived state") {
+				t.Fatal("rejected source must not admit derived search data")
+			}
+			version = AVDataReadVersion()
+			if got := SetAVDataFromReadInBox("database", "box", []byte("fresh disk bytes"), version); got == 0 {
+				t.Fatal("unchanged source read was rejected")
+			}
+			avCache.Wait()
+			if data, ok := GetAVDataInBox("database", "box"); !ok || string(data) != "fresh disk bytes" {
+				t.Fatalf("fresh source was not cached: %q, %v", data, ok)
+			}
+		})
+	}
+}
 
 func TestAVSearchDataInvalidation(t *testing.T) {
 	const avID = "20260728120000-search"

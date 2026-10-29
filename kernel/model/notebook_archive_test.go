@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -188,7 +192,7 @@ func TestNotebookArchivePartialRemovalAndAuthenticatedRecovery(t *testing.T) {
 	})
 }
 
-func TestNotebookArchiveRejectsChangedSourcesAndRollsBackInterruptedMove(t *testing.T) {
+func TestStructuredTitlesArchiveInterruptedMove(t *testing.T) {
 	notebookArchiveTestWorkspace(t)
 	if err := EnableEncryptedNotebook("archive-password"); err != nil {
 		t.Fatal(err)
@@ -226,8 +230,30 @@ func TestNotebookArchiveRejectsChangedSourcesAndRollsBackInterruptedMove(t *test
 	if err = checkPendingNotebookArchives(); !errors.Is(err, ErrNotebookArchiveBusy) {
 		t.Fatalf("pending transaction allowed key changes: %v", err)
 	}
-	if err = ChangeMasterPassword("archive-password", "new-password"); !errors.Is(err, ErrNotebookArchiveBusy) {
-		t.Fatalf("pending transaction allowed password changes: %v", err)
+	beforeKeys, _ := json.Marshal(currentNotebookCrypto())
+	beforeFiles, err := archiveDirectoryFiles(removed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changeErr := ChangeMasterPassword("archive-password", "new-password")
+	afterKeys, _ := json.Marshal(currentNotebookCrypto())
+	if !bytes.Equal(beforeKeys, afterKeys) {
+		t.Fatal("pending archive changed encryption keys")
+	}
+	afterFiles, err := archiveDirectoryFiles(removed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	beforeJSON, _ := json.Marshal(beforeFiles)
+	afterJSON, _ := json.Marshal(afterFiles)
+	if !bytes.Equal(beforeJSON, afterJSON) {
+		t.Fatal("pending archive changed ciphertext or recovery files")
+	}
+	if _, err = os.Stat(masterPasswordMigrationPath()); !os.IsNotExist(err) {
+		t.Fatalf("pending archive wrote a password migration: %v", err)
+	}
+	if !errors.Is(changeErr, ErrNotebookArchiveBusy) {
+		t.Fatalf("password change did not report pending archive: %v", changeErr)
 	}
 	if err = recoverNotebookArchiveOperations(); err != nil {
 		t.Fatal(err)

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -15,12 +19,14 @@ import (
 )
 
 func TestAPIContractPluginDevelopmentRawGuards(t *testing.T) {
-	origWorkspace, origData, origConfDir, origConf := util.WorkspaceDir, util.DataDir, util.ConfDir, model.Conf
+	origWorkspace, origData, origConfDir, origTemp, origConf := util.WorkspaceDir, util.DataDir, util.ConfDir, util.TempDir, model.Conf
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir, util.ConfDir = filepath.Join(util.WorkspaceDir, "data"), filepath.Join(util.WorkspaceDir, "conf")
+	util.TempDir = filepath.Join(util.WorkspaceDir, "temp")
 	model.Conf = model.NewAppConf()
 	t.Cleanup(func() {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, model.Conf = origWorkspace, origData, origConfDir, origConf
+		util.TempDir = origTemp
 	})
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
@@ -33,6 +39,8 @@ func TestAPIContractPluginDevelopmentRawGuards(t *testing.T) {
 		"data/storage/ai/agent/sessions/task/runtime.json",
 		"data/storage/ai/agent/sessions/task/runtime.jsona1b2c3d.tmp",
 		"data/plugins/.siyuan-package-install-abcdef/staging/index.js",
+		"temp/bazaar/local/extract-abcdef/index.js",
+		"temp/bazaar/package/online-abcdef/index.js",
 	}
 	for _, path := range protected {
 		abs := filepath.Join(util.WorkspaceDir, filepath.FromSlash(path))
@@ -68,7 +76,14 @@ func TestAPIContractPluginDevelopmentRawGuards(t *testing.T) {
 			})
 		}
 	}
-	for _, path := range []string{"data/storage/ai/agent", "data/storage/ai/agent/sessions/task", "conf"} {
+	for _, path := range []string{"temp/bazaar/local", "temp/bazaar/package"} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/file/readDir", strings.NewReader(`{"path":"`+path+`"}`)))
+		if !strings.Contains(recorder.Body.String(), "managed plugin development") {
+			t.Fatalf("extracted packages were listed: %s", recorder.Body.String())
+		}
+	}
+	for _, path := range []string{"data/storage/ai/agent", "data/storage/ai/agent/sessions/task", "conf", "temp/bazaar", "temp/bazaar/local", "temp/bazaar/package"} {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/file/removeFile", strings.NewReader(`{"path":"`+path+`"}`)))
 		if !strings.Contains(recorder.Body.String(), "managed plugin development") {

@@ -31,6 +31,8 @@ import {bindLiteCodeActions} from "../lite/codeActions";
 import {setTaskListItemMarker} from "../wysiwyg/list";
 import {nextTaskListMarker} from "../wysiwyg/taskListMarker";
 import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
+import {isIOSDevice} from "../util/compatibility";
+import {isNativeTextSelectionHandleTouch} from "../wysiwyg/nativeTextMenu";
 
 let activeEditor: {cell: Element, finish: () => void, prepareSwitch: () => boolean} | undefined;
 let openingEditor: object | undefined;
@@ -173,7 +175,6 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     let source: string;
     try {
         initialBlockHTML = getTableCellRichBlockDOM(cell);
-        source = serializeTableCellRich(initialBlockHTML).markdown;
     } catch (error) {
         console.error(error);
         showMessage(window.siyuan.languages.tableCellRichInvalid);
@@ -279,13 +280,23 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     fragment.protyle.block.rootID = owner.block.rootID;
     fragment.protyle.block.parentID = table.dataset.nodeId;
     fragment.protyle.path = owner.path;
+    // 进入和离开未修改的单元格无需经过 Markdown 往返转换。
+    let savedBlockHTML = fragment.getBlockHTML();
+    const getSource = () => source ??= serializeTableCellRich(initialBlockHTML).markdown;
     const commit = () => {
         if (!cell.isConnected || !table.isConnected || !host.isConnected || owner.disabled || composing) {
             return;
         }
         try {
-            const serialized = serializeTableCellRich(fragment.getBlockHTML());
-            if (serialized.markdown === source) {
+            const blockHTML = fragment.getBlockHTML();
+            if (blockHTML === savedBlockHTML) {
+                contentChanged = false;
+                return;
+            }
+            const previousSource = getSource();
+            const serialized = serializeTableCellRich(blockHTML);
+            if (serialized.markdown === previousSource) {
+                savedBlockHTML = blockHTML;
                 contentChanged = false;
                 return;
             }
@@ -309,6 +320,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
             updateTransaction(owner, table, oldHTML, focusContext(undoSelection), {
                 doOperations: [], undoOperations: [], context: focusContext(redoSelection),
             });
+            savedBlockHTML = blockHTML;
             undoSelection = redoSelection;
             contentChanged = false;
         } catch (error) {
@@ -380,7 +392,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
         target => openTableCellRichEditor(owner, target));
     const captureBeforeChange = () => {
-        if (!contentChanged || serializeTableCellRich(fragment.getBlockHTML()).markdown === source) {
+        if (!contentChanged || serializeTableCellRich(fragment.getBlockHTML()).markdown === getSource()) {
             undoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection());
         }
     };
@@ -433,7 +445,8 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#keyboardToolbar, #commonMenu, .b3-dialog"));
     document.addEventListener("pointerdown", event => {
-        if (belongsToEditor(event.target as Node)) {
+        if (belongsToEditor(event.target as Node) ||
+            (isIOSDevice() && isNativeTextSelectionHandleTouch(event, fragment.wysiwyg))) {
             return;
         }
         const target = event.target instanceof Element ? event.target : undefined;

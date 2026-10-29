@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../../menus/menuToggle";
+import {markMenuInnerScroll} from "../../../menus/Menu";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
@@ -361,8 +362,8 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], 
                 },
             });
             const rect = modelInput.getBoundingClientRect();
+            markMenuInnerScroll(menu.element);
             session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput}));
-            menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
 
         },
     });

@@ -2,6 +2,7 @@
 
 import hashlib
 import itertools
+import json
 import os
 from pathlib import Path
 import re
@@ -206,14 +207,16 @@ class EditorWorkflowTests(unittest.TestCase):
             check = job(name)
             self.assertRegex(check, r"(?m)^    needs: prepare$")
             self.assertIn("contents: read", check)
-            self.assertIn("uses: actions/checkout@v6", check)
-            self.assertIn("uses: actions/setup-node@v6", check)
+            self.assertIn("uses: actions/checkout@v7", check)
+            self.assertIn("uses: actions/setup-node@v7", check)
             self.assertNotRegex(check, r"(?m)^    continue-on-error:")
         for name in ["kernel-tests-linux", "kernel-tests-windows"]:
             check = job(name)
-            self.assertIn("uses: actions/setup-go@v6", check)
+            self.assertIn("uses: actions/setup-go@v7", check)
             self.assertIn("go-version-file: kernel/go.mod", check)
-            self.assertIn("cache-dependency-path: kernel/go.sum", check)
+            self.assertIn("cache: false", check)
+            self.assertIn("uses: actions/cache/restore@v6", check)
+            self.assertIn("run: node scripts/go-cache.mjs", check)
         linux = job("kernel-tests-linux")
         self.assertIn("runs-on: ubuntu-24.04", linux)
         self.assertIn("sudo apt-get install -y strace", linux)
@@ -249,11 +252,72 @@ class EditorWorkflowTests(unittest.TestCase):
             header, steps = build.split("    steps:\n", 1)
             self.assertIn("      GOPATH: ${{ github.workspace }}/go", header)
             self.assertNotIn("GOPATH:", steps)
-            setup = steps.split("uses: actions/setup-go@v6", 1)[1].split("      - ", 1)[0]
-            self.assertIn("cache: true", setup)
-            self.assertIn("cache-dependency-path:", setup)
+            setup = steps.split("uses: actions/setup-go@v7", 1)[1].split("      - ", 1)[0]
+            self.assertIn("cache: false", setup)
+            self.assertNotIn("cache-dependency-path:", setup)
+            self.assertIn("run: node scripts/go-cache.mjs", steps)
+            self.assertIn("${{ steps.go-cache.outputs.modules }}", steps)
+            self.assertIn("${{ steps.go-cache.outputs.build }}", steps)
+        self.assertIn("  GOMODCACHE: ${{ github.workspace }}/go/pkg/mod", CD.split("jobs:", 1)[0])
+        self.assertIn("      GOMODCACHE: ${{ github.workspace }}/go/pkg/mod", DESKTOP)
         self.assertIn('"$GOPATH/bin/gomobile" init', job("build_android"))
         self.assertIn("${{ github.workspace }}\\go\\${{ fromJSON(inputs.config).gobin }}\\goversioninfo", DESKTOP)
+
+    def test_parallel_jobs_have_one_writer_per_shared_cache(self):
+        desktop_configs = []
+        for section in job("build").split("          - os: ")[1:]:
+            desktop_configs.append({key: re.search(rf"^            {key}: (\S+)", section, re.M)[1].strip('"')
+                                    for key in ["goos", "goarch"]})
+        desktop_configs.append(json.loads(re.search(r"config: >-\n\s*(\{[^\n]+\})", job("build_macos_arm64"))[1]))
+
+        def saves(workflow, name, config, hit):
+            matches = re.findall(rf"- name: {name}\n(.*?)(?=      - |\Z)", workflow, re.S)
+            if not matches:
+                return False
+            self.assertEqual(len(matches), 1)
+            step = matches[0]
+            self.assertIn("uses: actions/cache/save@v6", step)
+            expression = re.search(r"if: \$\{\{ (.*?) \}\}", step)[1]
+            expression = re.sub(r"steps\.[\w-]+\.outputs\.cache-hit", repr(str(hit).lower()), expression)
+            expression = expression.replace("fromJSON(inputs.config).goos", repr(config.get("goos")))
+            expression = expression.replace("fromJSON(inputs.config).goarch", repr(config.get("goarch")))
+            expression = expression.replace("&&", " and ").replace("||", " or ")
+            expression = re.sub(r"!(?!=)", "not ", expression)
+            return eval(expression, {"__builtins__": {}}, {})
+
+        readers = [("linux", job("contracts"), {}), ("linux", job("kernel-tests-linux"), {}),
+                   ("windows", job("kernel-tests-windows"), {}), ("linux", job("build_android"), {})]
+        readers += [(config["goos"], DESKTOP, config) for config in desktop_configs]
+        for cache in ["Go cache", "pnpm store"]:
+            for host in ["linux", "windows", "darwin"]:
+                with self.subTest(cache=cache, host=host):
+                    candidates = [(workflow, config) for os_name, workflow, config in readers if os_name == host]
+                    self.assertEqual(sum(saves(workflow, "Save " + cache, config, False)
+                                         for workflow, config in candidates), 1)
+                    self.assertFalse(any(saves(workflow, "Save " + cache, config, True)
+                                         for workflow, config in candidates))
+        for workflow, config in [(workflow, config) for _, workflow, config in readers]:
+            self.assertNotIn("uses: actions/cache@", workflow)
+            if "uses: actions/cache/save@v6" in workflow:
+                self.assertIn("uses: actions/cache/restore@v6", workflow)
+
+    def test_global_pnpm_installations_allow_only_the_pnpm_script(self):
+        for workflow in [CD, DESKTOP]:
+            installs = re.findall(r"\bnpm install[^\n]+", workflow)
+            self.assertTrue(installs)
+            for command in installs:
+                self.assertIn("--global --allow-scripts=pnpm", command)
+                self.assertNotIn("dangerously-allow-all-scripts", command)
+                self.assertIn("packageManager", command)
+        self.assertIn("scripts/go-cache.test.mjs", CD)
+
+    def test_android_build_verification_preserves_pinned_legacy_checkouts(self):
+        build = job("build_android")
+        step = build.split("- name: Building Android App\n", 1)[1].split("      - ", 1)[0]
+        self.assertIn("if [ -f scripts/verify-build.gradle ]; then", step)
+        self.assertIn("./gradlew --init-script scripts/verify-build.gradle :app:verifyBuildConfiguration", step)
+        self.assertLess(step.index(":app:verifyBuildConfiguration"), step.index("./gradlew assembleOfficialRelease"))
+        self.assertIn("mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk", step)
 
     def test_independent_editor_runners_and_serial_workers(self):
         editor = job("editor_e2e")

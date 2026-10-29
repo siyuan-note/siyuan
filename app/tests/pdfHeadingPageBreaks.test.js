@@ -71,6 +71,19 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     });
     ui.openHeadingPageBreakDialog(() => confirmed++);
     check.equal(activeDialog.element.querySelector("#titleImage").checked, true);
+    for (const width of [280, 360]) {
+        activeDialog.element.style.width = `${width}px`;
+        for (const fontSize of [16, 24]) {
+            activeDialog.element.style.fontSize = `${fontSize}px`;
+            const titleImage = activeDialog.element.querySelector("#titleImage").getBoundingClientRect();
+            const headingSwitch = activeDialog.element.querySelector('input[value="1"]').getBoundingClientRect();
+            const imageLabel = activeDialog.element.querySelector("#titleImage").closest("label");
+            const headingLabel = activeDialog.element.querySelector('input[value="1"]').closest("label");
+            check.equal(imageLabel.getBoundingClientRect().left, headingLabel.getBoundingClientRect().left);
+            check.equal(titleImage.right, headingSwitch.right, "Mobile print switches align at narrow widths and large fonts");
+            check.equal(getComputedStyle(imageLabel).paddingLeft, "0px");
+        }
+    }
     check.ok(parseFloat(getComputedStyle(activeDialog.element.querySelector(".ft__smaller")).fontSize) <
         parseFloat(getComputedStyle(activeDialog.element.querySelector(".b3-dialog__content > div")).fontSize),
         "Mobile print descriptions use a smaller font than their titles");

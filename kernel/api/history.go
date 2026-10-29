@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -21,7 +9,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -94,14 +81,13 @@ var clearWorkspaceHistory = contractHandler(apicontract.ClearWorkspaceHistory, f
 })
 
 var getDocHistoryContent = contractHandler(apicontract.GetDocHistoryContent, func(c *gin.Context, request apicontract.DocHistoryContentRequest) apicontract.Response[apicontract.DocHistoryContentData] {
-	ret := gulu.Ret.NewResult()
 	historyPath, keyword := request.HistoryPath, request.K
 	highlight := true
 	if request.Highlight != nil {
 		highlight = *request.Highlight
 	}
-	if !holdHistoryRequest(c, historyPath, ret) {
-		return contractFailure[apicontract.DocHistoryContentData](ret)
+	if err := holdHistoryRequest(c, historyPath); err != nil {
+		return apicontract.FailureFrom[apicontract.DocHistoryContentData](err)
 	}
 	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword, highlight)
 	if err != nil {
@@ -141,9 +127,8 @@ var diffDocVersions = contractHandler(apicontract.DiffDocVersions, func(c *gin.C
 })
 
 var rollbackDocHistory = contractHandler(apicontract.RollbackDocHistory, func(c *gin.Context, request apicontract.HistoryPathRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if !holdHistoryRequest(c, request.HistoryPath, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := holdHistoryRequest(c, request.HistoryPath); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := model.RollbackDocHistory(request.HistoryPath); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -152,9 +137,8 @@ var rollbackDocHistory = contractHandler(apicontract.RollbackDocHistory, func(c 
 })
 
 var rollbackAssetsHistory = contractHandler(apicontract.RollbackAssetsHistory, func(c *gin.Context, request apicontract.HistoryPathRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if !holdHistoryRequest(c, request.HistoryPath, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := holdHistoryRequest(c, request.HistoryPath); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := model.RollbackAssetsHistory(request.HistoryPath); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -170,9 +154,8 @@ var rollbackNotebookHistory = contractHandler(apicontract.RollbackNotebookHistor
 })
 
 var rollbackAttributeViewHistory = contractHandler(apicontract.RollbackAttributeViewHistory, func(c *gin.Context, request apicontract.HistoryPathRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if !holdHistoryRequest(c, request.HistoryPath, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := holdHistoryRequest(c, request.HistoryPath); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := model.RollbackAttributeViewHistory(request.HistoryPath); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -180,15 +163,14 @@ var rollbackAttributeViewHistory = contractHandler(apicontract.RollbackAttribute
 	return apicontract.Success(apicontract.Null{})
 })
 
-func holdHistoryRequest(c *gin.Context, historyPath string, ret *gulu.Result) bool {
+// holdHistoryRequest 在读取加密笔记本的历史前取得租约，返回 nil 表示可以继续。
+func holdHistoryRequest(c *gin.Context, historyPath string) error {
 	absolutePath := filepath.Join(util.WorkspaceDir, historyPath)
 	boxID := model.ExtractBoxIDFromHistoryPath(absolutePath)
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return false
+		return apicontract.Reject(model.Conf.Language(314))
 	}
-	return true
+	return nil
 }
 
 var createDocHistory = contractHandler(apicontract.CreateDocHistory, func(c *gin.Context, request apicontract.CreateDocHistoryRequest) apicontract.Response[apicontract.Null] {

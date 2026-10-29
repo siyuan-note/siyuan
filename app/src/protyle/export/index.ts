@@ -224,6 +224,9 @@ const renderPDF = async (id: string) => {
         cmd: "getContentsId",
     });
     const defaultExportPath = await getAvailableExportPath();
+    // 开发编译不会改变版本号，预览页需刷新导出样式和渲染脚本，避免沿用编译前的缓存。
+    const exportResourceVersion = Constants.NODE_ENV === "development" ?
+        `${Constants.SIYUAN_VERSION}-${Date.now()}` : Constants.SIYUAN_VERSION;
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
@@ -234,7 +237,7 @@ const renderPDF = async (id: string) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}stage/build/export/base.css?v=${exportResourceVersion}"/>
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}appearance/themes/daylight/theme.css?v=${Constants.SIYUAN_VERSION}"/>
     <script src="${servePath}stage/protyle/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}"></script>
     ${themeStyle}
@@ -540,11 +543,11 @@ const renderPDF = async (id: string) => {
 </div>
 <div id="previewContainer">
     <div style="zoom:${localData.scale || 1}" id="preview">
-        <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+        <div class="fn__loading" style="left:0;height:100vh"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>
     </div>
 </div>
 ${getIconScript(servePath)}
-<script src="${servePath}stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
+<script src="${servePath}stage/build/export/protyle-method.js?${exportResourceVersion}"></script>
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     const previewElement = document.getElementById('preview');
@@ -626,6 +629,30 @@ ${getIconScript(servePath)}
                 item.parentElement.style.overflow = "hidden";
             }
         })
+        const images = Array.from(previewElement.querySelectorAll(".img img"));
+        // 先恢复用户设置的尺寸，再按当前纸张、边距和缩放计算，避免重复调整时只能缩小。
+        images.forEach(image => image.removeAttribute("data-export-image-fit"));
+        if (document.querySelector("#paged").checked) {
+            images.forEach(image => {
+                const block = image.closest("[data-node-id]") || image.parentElement;
+                const style = getComputedStyle(block);
+                const blockSpacing = [style.paddingTop, style.paddingBottom, style.marginTop, style.marginBottom]
+                    .reduce((sum, value) => sum + (parseFloat(value) || 0), 0);
+                let maxHeight = height;
+                // 图片缩窄后说明文字可能增加行数，逐步收紧高度以保留说明、段落间距和行盒的空间。
+                while (true) {
+                    const extraHeight = Math.max(0, image.parentElement.offsetHeight - image.offsetHeight) +
+                        (parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.625) + blockSpacing;
+                    const nextHeight = Math.max(1, Math.floor(height - extraHeight - 1));
+                    if (image.clientHeight <= nextHeight || nextHeight >= maxHeight) {
+                        break;
+                    }
+                    maxHeight = nextHeight;
+                    image.style.setProperty("--export-image-max-height", maxHeight + "px");
+                    image.setAttribute("data-export-image-fit", "true");
+                }
+            });
+        }
     }
     const setPadding = () => {
         const isLandscape = document.querySelector("#landscape").checked;
@@ -691,6 +718,23 @@ ${getIconScript(servePath)}
             }
         })
     }
+    const waitForImages = () => Promise.all(Array.from(previewElement.querySelectorAll("img")).map((image) => {
+        image.loading = "eager";
+        if (image.complete) {
+            return Promise.resolve();
+        }
+        return new Promise((resolve) => {
+            const finish = () => {
+                clearTimeout(timeout);
+                image.removeEventListener("load", finish);
+                image.removeEventListener("error", finish);
+                resolve();
+            };
+            const timeout = setTimeout(finish, 30000);
+            image.addEventListener("load", finish, {once: true});
+            image.addEventListener("error", finish, {once: true});
+        });
+    }));
     let previewReady = Promise.resolve();
     let previewRevision = 0;
     const renderPreview = async (data) => {
@@ -730,6 +774,7 @@ ${getIconScript(servePath)}
         Protyle.htmlRender(wysElement);
         Protyle.plantumlRender(wysElement, "${servePath}stage/protyle");
         updateHeadingPageBreaks();
+        await waitForImages();
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
@@ -840,7 +885,7 @@ ${getIconScript(servePath)}
         const refreshPreview = () => {
             const revision = ++previewRevision;
             actionElement.querySelector('.b3-button--text').disabled = true;
-            previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>'
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepJSEmbed: true,
@@ -904,6 +949,9 @@ ${getIconScript(servePath)}
         actionElement.querySelector("#landscape").addEventListener('change', (e) => {
             setPadding();
         });
+        actionElement.querySelector("#paged").addEventListener('change', () => {
+            fixBlockWidth();
+        });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
@@ -961,23 +1009,6 @@ ${getIconScript(servePath)}
         removeAssetsElement.addEventListener("change", () => {
             reserveEmbeddedAssetSpace(removeAssetsElement.checked);
         });
-        const waitForImages = () => Promise.all(Array.from(previewElement.querySelectorAll("img")).map((image) => {
-            image.loading = "eager";
-            if (image.complete) {
-                return Promise.resolve();
-            }
-            return new Promise((resolve) => {
-                const finish = () => {
-                    clearTimeout(timeout);
-                    image.removeEventListener("load", finish);
-                    image.removeEventListener("error", finish);
-                    resolve();
-                };
-                const timeout = setTimeout(finish, 30000);
-                image.addEventListener("load", finish, {once: true});
-                image.addEventListener("error", finish, {once: true});
-            });
-        }));
         actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             await previewReady;
             const {ipcRenderer}  = require("electron");
@@ -1007,7 +1038,7 @@ ${getIconScript(servePath)}
                 previewElement.style.margin = "0";
                 previewElement.style.minHeight = "0";
             }
-            await fixBlockWidth(!isPaged);
+            await fixBlockWidth(true);
             await document.fonts.ready;
             await waitForImages();
             let exportConfig;
@@ -1169,7 +1200,11 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     const mobileHtml = isInMobile ? {
         js: exportOption.type === "pdf" ? "" : `document.body.style.minWidth = "${getScreenWidth()}px";`,
         css: `@page { size: A4; margin: 10mm; background-color: var(--b3-theme-background); }
-@media print { body { margin: 0; } }
+@media print {
+    body { margin: 0; }
+    .protyle-wysiwyg { display: block; }
+    #preview .img img { max-height: calc(277mm - 32px); object-fit: contain; }
+}
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>

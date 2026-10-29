@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -299,7 +303,10 @@ func (tx *Transaction) finishBlockSwap(from, to []blockSwapFragment, trees []*pa
 		for _, id := range fragment.node.BlockIDs() {
 			origins[id] = fragment.rootID
 		}
-		treenode.RemoveBlockTreesByIDs(fragment.boxID, fragment.node.BlockIDs())
+		if err := treenode.RemoveBlockTreesByIDsWithError(fragment.boxID, fragment.node.BlockIDs()); err != nil {
+			tx.sourceErr = err
+			return
+		}
 	}
 	for _, tree := range trees {
 		treenode.RefreshUpdated(tree.Root)

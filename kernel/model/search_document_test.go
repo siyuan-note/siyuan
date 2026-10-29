@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -22,7 +26,55 @@ func TestDocumentTypeFilterFromSettings(t *testing.T) {
 	}
 }
 
-func documentSearchRows(t *testing.T, database *gosql.DB, statement string, args []any) [][]any {
+func TestDocumentSearchLiteralSpecialCharacters(t *testing.T) {
+	for _, sensitive := range []bool{false, true} {
+		for _, tc := range []struct{ name, query, other string }{
+			{"percent", "100% efficiency", "100X efficiency"},
+			{"underscore", "snake_case token", "snakeXcase token"},
+			{"backslash", `C:\notes token`, "C:notes token"},
+			{"quote", "reader's choice", "readers choice"},
+			{"consecutive quotes", "reader''s choice", "reader's choice"},
+		} {
+			for _, pathOnly := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%s/case=%t/path=%t", tc.name, sensitive, pathOnly), func(t *testing.T) {
+					setSearchCaseSensitive(t, sensitive)
+					database := newSearchHPathTestDB(t)
+					setting := "OFF"
+					if sensitive {
+						setting = "ON"
+					}
+					if _, err := database.Exec("PRAGMA case_sensitive_like = " + setting); err != nil {
+						t.Fatal(err)
+					}
+					for _, doc := range []struct{ id, content string }{{"literal", tc.query}, {"wildcard", tc.other}} {
+						content, hpath := doc.content, "/Unrelated"
+						if pathOnly {
+							content, hpath = "Unrelated", "/"+doc.content
+						}
+						insertSearchHPathTestBlock(t, database, doc.id, doc.id, hpath, content, "d")
+					}
+					keywords := strings.Split(strings.ReplaceAll(tc.query, "'", "''"), " ")
+					statement := buildDocumentSearchStatement(tc.query, keywords, "type = 'd'", "", "", "", 0, 1, 32, pathOnly)
+					rows := documentSearchRows(t, database, statement, nil)
+					if len(rows) != 1 || rows[0][0] != "literal" {
+						t.Fatalf("expected only literal match, got %v", rows)
+					}
+					if !pathOnly {
+						var score int
+						if err := database.QueryRow("SELECT " + buildDocumentMatchScore("content", keywords) + " FROM blocks WHERE id = 'wildcard'").Scan(&score); err != nil {
+							t.Fatal(err)
+						}
+						if score != 1 {
+							t.Fatalf("nonliteral keyword affected relevance score: %d", score)
+						}
+					}
+				})
+			}
+		}
+	}
+}
+
+func documentSearchRows(t testing.TB, database *gosql.DB, statement string, args []any) [][]any {
 	t.Helper()
 	rows, err := database.Query(statement, args...)
 	if err != nil {
@@ -54,6 +106,57 @@ func documentSearchRows(t *testing.T, database *gosql.DB, statement string, args
 		t.Fatal(err)
 	}
 	return result
+}
+
+// BenchmarkDocumentSearch 固定每篇 100 块、跨块双词命中和 50 篇分页，测量热内存库查询及精确计数。
+func BenchmarkDocumentSearch(b *testing.B) {
+	setSearchCaseSensitive(b, false)
+	for _, size := range []int{10000, 100000, 1000000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			database := newSearchHPathTestDB(b)
+			if _, err := database.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)"); err != nil {
+				b.Fatal(err)
+			}
+			tx, err := database.Begin()
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer tx.Rollback()
+			insert, err := tx.Prepare("INSERT INTO blocks VALUES (?, '', ?, '', '20261019000000-box0001', ?, '', '', '', '', '', ?, '', '', 32, ?, '', '', 0, '20261019000000', '20261019000000')")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer insert.Close()
+			for i := range size {
+				rootID := fmt.Sprintf("20261019000000-%07d", (i/100)*100)
+				content, typ := "common text repeated for baseline", "p"
+				switch i % 100 {
+				case 0:
+					typ = "d"
+				case 1:
+					content = "alpha content across blocks"
+				case 2:
+					content = "beta content across blocks"
+				}
+				if _, err = insert.Exec(fmt.Sprintf("20261019000000-%07d", i), rootID, "/"+rootID+".sy", content, typ); err != nil {
+					b.Fatal(err)
+				}
+			}
+			if err = tx.Commit(); err != nil {
+				b.Fatal(err)
+			}
+			statement := buildDocumentSearchStatement("alpha beta", []string{"alpha", "beta"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				rows := documentSearchRows(b, database, statement, nil)
+				if len(rows) != 50 {
+					b.Fatalf("expected 50 documents matching keywords across blocks, got %d", len(rows))
+				}
+			}
+			b.ReportMetric(float64(size), "blocks/op")
+		})
+	}
 }
 
 func TestDocumentSearchPartialIndexResults(t *testing.T) {

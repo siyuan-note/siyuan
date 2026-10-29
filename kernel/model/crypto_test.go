@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -27,6 +15,8 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -36,6 +26,31 @@ func setDEKForTest(boxID string, dek []byte) {
 	cachedDEKsLock.Lock()
 	defer cachedDEKsLock.Unlock()
 	cachedDEKs[boxID] = dek
+}
+
+// encryptDocumentTestSources 将已有普通夹具显式转换成密文，普通文档保存不能替代此准备步骤。
+func encryptDocumentTestSources(t *testing.T, dek []byte, trees ...*parse.Tree) {
+	t.Helper()
+	seen := map[string]bool{}
+	for _, tree := range trees {
+		name := filepath.Join(util.DataDir, tree.Box, tree.Path)
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		plain, err := os.ReadFile(name)
+		if err != nil || util.IsCiphertext(plain) {
+			t.Fatal("expected a plaintext fixture before encryption", err)
+		}
+		ciphertext, err := EncryptFile(tree.Box, tree.Path, dek, plain)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(name, ciphertext, 0600); err != nil {
+			t.Fatal(err)
+		}
+		cache.RemoveTreeDataInBox(tree.ID, tree.Box)
+	}
 }
 
 // prepareUnlockedEncryptedBoxTest 为数据读写测试设置加密身份、密钥和已完成初始化的生命周期。
@@ -1166,6 +1181,38 @@ func TestListEncryptedNotebooksReturnsScanError(t *testing.T) {
 
 	if _, err := listAllEncryptedBoxIDs(); err == nil {
 		t.Fatal("invalid data directory should return a scan error")
+	}
+}
+
+func TestEnableEncryptedNotebookWithSyncRetainsDataImportProtection(t *testing.T) {
+	prepareSyncDirectoryTest(t)
+	Conf.Sync.Load().Enabled = false
+	previous := dataImportRecoveryRequired.Load()
+	dataImportRecoveryRequired.Store(true)
+	t.Cleanup(func() { dataImportRecoveryRequired.Store(previous) })
+	dataImportAccess.Lock()
+	locked := true
+	defer func() {
+		if locked {
+			dataImportAccess.Unlock()
+		}
+	}()
+	done := make(chan error, 1)
+	go func() { done <- EnableEncryptedNotebookWithSync("password") }()
+	select {
+	case err := <-done:
+		t.Fatalf("key configuration bypassed an active import: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+	dataImportAccess.Unlock()
+	locked = false
+	select {
+	case err := <-done:
+		if err == nil || Conf.NotebookCrypto != nil && len(Conf.NotebookCrypto.MasterSalt) != 0 {
+			t.Fatalf("unrecovered import allowed a new key configuration: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("key configuration did not resume after import admission was released")
 	}
 }
 

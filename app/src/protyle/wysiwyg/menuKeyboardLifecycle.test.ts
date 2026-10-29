@@ -88,7 +88,7 @@ const keyboardEvent = (key: string, overrides: Record<string, unknown> = {}) => 
     ...overrides,
 });
 
-const menuFixture = (initiallyHidden = false) => {
+const menuFixture = (initiallyHidden = false, bindMenuKeydown: (event: KeyboardEvent) => void = () => {}) => {
     let hidden = initiallyHidden;
     const calls: string[] = [];
     const menu = {
@@ -105,6 +105,7 @@ const menuFixture = (initiallyHidden = false) => {
         window: {siyuan: {menus: {menu}}},
         Constants: {KEYCODELIST: {13: "↩", 37: "←", 38: "↑", 39: "→", 40: "↓"}},
         isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
+        bindMenuKeydown,
     });
     return {menu, calls, handleMenu};
 };
@@ -138,14 +139,82 @@ test("the action key still closes the menu with or without held modifiers", () =
     }
 });
 
-test("unmodified arrows and Enter retain menu navigation and global bubbling", () => {
+test("unmodified arrows and Enter navigate the menu once without global bubbling", () => {
     for (const key of ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown", "Enter"]) {
-        const {calls, handleMenu} = menuFixture();
+        const navigated: KeyboardEvent[] = [];
+        const {calls, handleMenu} = menuFixture(false, event => { navigated.push(event); });
         const event = keyboardEvent(key);
         assert.equal(handleMenu(event), undefined, key);
         assert.deepEqual(calls, [], key);
+        assert.deepEqual(navigated, [event], key);
         assert.equal(event.defaultPrevented, true, key);
-        assert.equal(event.propagationStopped, false, key);
+        assert.equal(event.propagationStopped, true, key);
+    }
+});
+
+test("editor menu navigation selects, wraps, skips unavailable items and activates the selected action", () => {
+    for (const firstKey of ["ArrowDown", "ArrowUp"]) {
+        const {menu, calls, handleMenu} = menuFixture(false, event => { bindMenuKeydown(event); });
+        const activated: string[] = [];
+        const items = ["first", "separator", "readonly", "hidden", "last"].map(id => {
+            const classes = new Set([id === "separator" ? "b3-menu__separator" : "b3-menu__item"]);
+            if (id === "readonly") {
+                classes.add("b3-menu__item--readonly");
+            }
+            return {
+                id,
+                classList: {
+                    contains: (name: string) => classes.has(name),
+                    add: (...names: string[]) => names.forEach(name => classes.add(name)),
+                    remove: (...names: string[]) => names.forEach(name => classes.delete(name)),
+                },
+                getBoundingClientRect: () => ({top: 0, bottom: 20, height: id === "hidden" ? 0 : 20}),
+                querySelector: (): Element => null,
+                dispatchEvent: () => { activated.push(id); },
+            };
+        });
+        const container = {
+            firstElementChild: items[0], lastElementChild: items.at(-1),
+            getBoundingClientRect: () => ({top: 0, bottom: 100}),
+        };
+        items.forEach((item, index) => Object.assign(item, {
+            parentElement: container, previousElementSibling: items[index - 1], nextElementSibling: items[index + 1],
+        }));
+        const current = () => items.find(item => item.classList.contains("b3-menu__item--current"));
+        Object.assign(menu.element, {
+            contains: (target: unknown) => items.includes(target as typeof items[number]),
+            lastElementChild: container,
+            querySelector: current,
+        });
+        const bindMenuKeydown = loadFunction("src/menus/Menu.ts", "bindMenuKeydown", {
+            window: {siyuan: {menus: {menu}}},
+            Constants: {KEYCODELIST: {13: "↩", 38: "↑", 40: "↓"}},
+            getActionMenu: loadFunction("src/menus/Menu.ts", "getActionMenu", {}),
+            getEventName: () => "click",
+            CustomEvent: class {},
+        });
+        const press = (key: string) => {
+            const event = keyboardEvent(key);
+            handleMenu(event);
+            assert.equal(event.defaultPrevented, true);
+            assert.equal(event.propagationStopped, true);
+        };
+        press("Enter");
+        assert.equal(current(), undefined);
+        assert.deepEqual(activated, []);
+        const first = firstKey === "ArrowDown" ? "first" : "last";
+        const second = firstKey === "ArrowDown" ? "last" : "first";
+        press(firstKey);
+        assert.equal(current()?.id, first);
+        press(firstKey);
+        assert.equal(current()?.id, second);
+        press(firstKey);
+        assert.equal(current()?.id, first);
+        press(firstKey === "ArrowDown" ? "ArrowUp" : "ArrowDown");
+        assert.equal(current()?.id, second);
+        press("Enter");
+        assert.deepEqual(activated, [second]);
+        assert.deepEqual(calls, ["remove"]);
     }
 });
 

@@ -1,6 +1,9 @@
-param([string]$WindowHandle, [string]$Points)
+param([string]$WindowHandle, [string]$Points, [string]$AssemblyPath, [switch]$Prepare)
 
-Add-Type -TypeDefinition @'
+$ErrorActionPreference = "Stop"
+
+if ($Prepare) {
+    Add-Type -OutputAssembly $AssemblyPath -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 public static class SettingsHitTest {
@@ -30,6 +33,10 @@ public static class SettingsHitTest {
     }
 }
 '@
+    exit
+}
+
+Add-Type -Path $AssemblyPath
 
 $results = @()
 foreach ($point in ($Points | ConvertFrom-Json)) {

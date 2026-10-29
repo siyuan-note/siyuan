@@ -31,7 +31,7 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
     const copied: string[] = [];
     const copiedFiles: string[] = [];
     let supportsFiles = true;
-    const sourceElement = new EventTarget();
+    const sourceElement = Object.assign(new EventTarget(), {childElementCount: 2});
     class TestViewer {
         public viewed = true;
         public viewer = {
@@ -46,8 +46,9 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
         };
 
         constructor(element: EventTarget, public options: {
+            title: [number, (image: {alt: string}, data: {naturalWidth: number, naturalHeight: number}) => string],
             ready: EventListener,
-            view: () => void,
+            view: (event?: {detail: {index: number}}) => void,
             viewed: () => void,
             toolbar: {copy: () => void, copyFile: () => void},
         }) {
@@ -88,6 +89,13 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
     exports.previewImages(["blob:first", "blob:second"]);
     await Promise.resolve();
     const instance = previewWindow.siyuan.viewer;
+    const title = () => instance.options.title[1]({alt: "photo.png"}, {naturalWidth: 640, naturalHeight: 480});
+    assert.equal(title(), "1/2 photo [640 × 480]");
+    instance.options.view({detail: {index: 1}});
+    assert.equal(title(), "2/2 photo [640 × 480]");
+    instance.options.view({detail: {index: 0}});
+    sourceElement.childElementCount = 1;
+    assert.equal(title(), "1/1 photo [640 × 480]");
     assert.match(buttons.get(".viewer-copy").innerHTML, /#iconImage/);
     assert.match(buttons.get(".viewer-copy-file").innerHTML, /#iconFile/);
     assert.equal(buttons.get(".viewer-copy").attributes.get("aria-label"), "Copy as PNG");

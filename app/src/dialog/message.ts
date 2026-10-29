@@ -2,6 +2,7 @@ import {genUUID} from "../util/genID";
 import {Constants} from "../constants";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 import {progressLoading} from "./progress";
+import {fetchPost} from "../util/fetch";
 
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
@@ -12,6 +13,21 @@ export const initMessage = () => {
             if (target.classList.contains("b3-snackbar__close")) {
                 hideMessage(target.parentElement.getAttribute("data-id"));
                 event.preventDefault();
+                break;
+            } else if (target.tagName === "BUTTON" && target.dataset.type === "download-update") {
+                event.preventDefault();
+                const button = target as HTMLButtonElement;
+                if (!button.disabled && getHostCapabilities().ownsKernel &&
+                    button.closest('.b3-snackbar[data-id="update-notify"]')) {
+                    button.disabled = true;
+                    void fetchPost("/api/system/downloadUpdate", {version: button.dataset.version}, () => {
+                        hideMessage("update-notify");
+                    }).catch((error: Error) => {
+                        showMessage(error.message, 7000, "error");
+                    }).finally(() => {
+                        button.disabled = false;
+                    });
+                }
                 break;
             } else if (target.tagName === "A" || target.tagName === "BUTTON") {
                 break;
@@ -52,14 +68,20 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
         timeout = Number.isFinite(timeout) ? Math.max(-1, Math.min(Math.trunc(timeout), 2147483647)) : 6000;
         type = type === "error" ? "error" : "info";
     }
-    const safeMessage = sanitizeKernelHTML(message);
+    let safeMessage = sanitizeKernelHTML(message);
+    if (messageId === "update-notify" && !getHostCapabilities().ownsKernel) {
+        const template = document.createElement("template");
+        template.innerHTML = safeMessage;
+        template.content.querySelectorAll('[data-type="download-update"]').forEach(button => button.remove());
+        safeMessage = template.innerHTML;
+    }
     const safeMessageId = remoteKernel && messageId && !/^[\w-]+$/.test(messageId) ? undefined : messageId;
 
     const messagesElement = document.getElementById("message").firstElementChild;
     if (!messagesElement) {
         let tempMessages = document.getElementById("tempMessage");
         if (!tempMessages) {
-            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: 22px;position: fixed;z-index: 100;right: 30px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
+            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: var(--b3-snackbar-top, 48px);position: fixed;z-index: 100;right: var(--b3-snackbar-right, 16px);line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;"
 id="tempMessage"></div>`);
             tempMessages = document.getElementById("tempMessage");
         }
@@ -86,7 +108,8 @@ data-message-id="${safeMessageId || ""}">${safeMessage}</div>`);
             }, timeout);
             existElement.setAttribute("data-timeoutid", timeoutId.toString());
         }
-        return;
+        // 复用已有通知时同样返回 id，调用方才能按 id 关闭它
+        return id;
     }
     let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div data-type="textMenu" class="b3-snackbar__content${timeout === 0 ? " b3-snackbar__content--close" : ""}">${messageVersion}</div>`;
     if (timeout === 0) {

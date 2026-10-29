@@ -40,7 +40,7 @@ jobs:
       source_commit: ${{ steps.release.outputs.source_commit }}
     steps:
       - name: Checkout release source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # 手动重建使用正式版标签的源码，避免混入工作流分支上的后续开发内容。
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.sha }}
@@ -48,7 +48,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout Docker build configuration and tests
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           path: docker-config
@@ -126,7 +126,7 @@ jobs:
         working-directory: source
     steps:
       - name: Checkout pinned release source and submodules
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.source_commit }}
           path: source
@@ -134,7 +134,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout pinned Docker build configuration
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           path: docker-config
@@ -287,7 +287,7 @@ jobs:
             emulate: true
     steps:
       - name: Checkout pinned cache verification configuration
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           sparse-checkout: |
@@ -346,7 +346,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout pinned release verification
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           sparse-checkout: scripts/verify-docker-release.py
@@ -407,7 +407,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout pinned tag cleanup
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           sparse-checkout: scripts/cleanup-docker-tags.py

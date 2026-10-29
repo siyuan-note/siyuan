@@ -1,5 +1,5 @@
 ARG ALPINE_IMAGE=alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
-ARG GO_IMAGE=golang:1.26-alpine@sha256:3082400e369fa24d5fc60bca20edab3f6d604e0c5a690ec66b295eff4dd87ade
+ARG GO_IMAGE=golang:1.26-alpine@sha256:9ce231b28998b32e116927c61aa5c406183061d4f3f2d61b292c88e7f6bdf7ca
 ARG ONNX_VERSION=1.24.3
 ARG ONNX_IMAGE=onnx-artifact
 
@@ -150,7 +150,7 @@ COPY --from=onnx-runtime /onnx-artifacts/ /ocr/linux-${TARGETARCH}/
 FROM ${ALPINE_IMAGE}
 LABEL maintainer="Liang Ding<845765@qq.com>"
 
-RUN apk add --no-cache ca-certificates tzdata su-exec libstdc++
+RUN apk add --no-cache 'ca-certificates>=20261020-r0' tzdata su-exec libstdc++
 
 ENV TZ=Asia/Shanghai
 ENV HOME=/home/siyuan

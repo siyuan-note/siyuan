@@ -1,6 +1,9 @@
 import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "../../protyle/render/av/cellEditor";
 import {getZIndex} from "../../util/zIndex";
+import type {App} from "../../index";
+import {goBack, hasBackHistory} from "../../util/backForward";
+import {hideMessage, showMessage} from "../../dialog/message";
 
 // Android 桌面布局按实际层级关闭一个浮层，保留底层文档和面板的浏览状态。
 export const closeDesktopBackLayer = () => {
@@ -41,6 +44,9 @@ export const closeDesktopBackLayer = () => {
     document.querySelectorAll<HTMLElement>(".protyle-img").forEach(element => {
         addLayer(element, () => element.remove());
     });
+    document.querySelectorAll<HTMLElement>(".pdf__outer--maximized").forEach(element => {
+        addLayer(element, () => element.querySelector<HTMLButtonElement>("#pdfMaximize")?.click());
+    });
     document.querySelectorAll<HTMLElement>(".av__panel").forEach(element => {
         addLayer(element, () => {
             if ((element.querySelector('[data-type="goSearchRollupCol"]') && !element.querySelector(".b3-text-field")) ||
@@ -77,11 +83,38 @@ export const closeDesktopBackLayer = () => {
     return siyuan.dialogs?.some(dialog => dialog.element.dataset.dialogClosing === "true") ?? false;
 };
 
-export const registerDesktopBackNavigation = () => {
+export const registerDesktopBackNavigation = (app: App) => {
     if (window.JSAndroid) {
+        let navigating = false;
+        let exitTipArmed = false;
+        const resetExitTip = () => {
+            if (exitTipArmed) {
+                exitTipArmed = false;
+                hideMessage("exitTip");
+            }
+        };
         window.goBack = () => {
-            if (!closeDesktopBackLayer()) {
-                window.history.back();
+            if (closeDesktopBackLayer()) {
+                resetExitTip();
+                return;
+            }
+            if (navigating || !window.siyuan.isReady) {
+                return;
+            }
+            if (hasBackHistory()) {
+                resetExitTip();
+                navigating = true;
+                void goBack(app).catch(console.error).finally(() => {
+                    navigating = false;
+                });
+                return;
+            }
+            if (exitTipArmed && document.querySelector('#message [data-id="exitTip"]:not(.b3-snackbar--hide)')) {
+                resetExitTip();
+                window.JSAndroid.returnDesktop();
+            } else {
+                exitTipArmed = true;
+                showMessage(window.siyuan.languages.returnDesktop, 3000, "info", "exitTip");
             }
         };
     }

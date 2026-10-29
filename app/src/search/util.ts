@@ -9,7 +9,7 @@ import {getAllModels} from "../layout/getAll";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {escapeAriaLabel, escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr, escapeTooltipTextAttr} from "../util/escape";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -157,7 +157,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
-        <span id="searchPathInput" data-position="9south" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(escapeHtml(config.hPath)))}">
+        <span id="searchPathInput" data-position="9south" data-tooltip-encoding="none" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeTooltipTextAttr(config.hPath)}">
             ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
@@ -284,7 +284,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
-<div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>`;
+<div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`;
 
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
@@ -549,7 +549,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             config.hPath = hPathList.join(" ");
                             config.page = 1;
                             searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-                            searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
+                            searchPathInputElement.setAttribute("aria-label", escapeHtmlTextAndAttr(config.hPath));
                             const includeElement = element.querySelector("#searchInclude");
                             includeElement.firstElementChild.classList.add("ft__primary");
                             if (enableIncludeChild) {
@@ -1174,7 +1174,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (runtimeConfig.hPath) {
         searchPathInputElement.innerHTML = `${escapeHtml(runtimeConfig.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        searchPathInputElement.setAttribute("aria-label", escapeHtml(runtimeConfig.hPath));
+        searchPathInputElement.setAttribute("aria-label", escapeHtmlTextAndAttr(runtimeConfig.hPath));
     } else {
         searchPathInputElement.innerHTML = "";
         searchPathInputElement.setAttribute("aria-label", "");
@@ -1568,7 +1568,6 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             const searchResultElement = element.querySelector("#searchResult");
             if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
                 return {
-                    method: requestConfig.method,
                     version,
                     run(signal: AbortSignal, isCurrent: () => boolean) {
                         return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
@@ -1600,8 +1599,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 }
             }
             return {
-                method: requestConfig.method,
                 version,
+                abortable: requestConfig.method !== 4,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
                     return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {
@@ -1649,7 +1648,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__graphic", true)}
-<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(escapeHtml(title))}">${title}</span>
+<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" data-tooltip-encoding="none" aria-label="${escapeHtmlTextAndAttr(title)}">${title}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -1691,7 +1690,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text${item.type === "NodeAttributeView" ? " search__av-content" : ""}">${item.content}</span>
 ${getAttr(item)}
 ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span>` : ""}
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(title))}">${title}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" data-tooltip-encoding="none" aria-label="${escapeHtmlTextAndAttr(title)}">${title}</span>
 ${countHTML}
 </div>`;
         }

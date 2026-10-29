@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import "strings"
@@ -45,6 +49,15 @@ type AISessionsRequest struct {
 
 type AISessionIDRequest struct {
 	ID string `json:"id" api:"optional,nullable"`
+}
+
+type AISessionPinnedRequest struct {
+	ID     string `json:"id"`
+	Pinned bool   `json:"pinned"`
+}
+
+type AISessionPinnedData struct {
+	PinnedAt int64 `json:"pinnedAt"`
 }
 
 type AISkillNameRequest struct {
@@ -133,6 +146,7 @@ type AISessionIndex struct {
 	Title        string `json:"title"`
 	CreatedAt    int64  `json:"createdAt"`
 	UpdatedAt    int64  `json:"updatedAt"`
+	PinnedAt     int64  `json:"pinnedAt,omitempty"`
 	AgentRunning bool   `json:"agentRunning,omitempty"`
 }
 

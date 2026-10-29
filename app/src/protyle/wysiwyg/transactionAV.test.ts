@@ -1,14 +1,9 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import {queueTransaction, queueTransactionBatch, waitForPendingTransactions} from "../util/transactionQueue";
 import {getEditorTransaction} from "../util/transactionContract";
-
-const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/transaction.ts", "utf8"), {
-    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-}).outputText;
 
 const fixture = () => {
     const rendered: Element[] = [];
@@ -17,7 +12,6 @@ const fixture = () => {
         {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
     ];
     let finish: (success: boolean) => void;
-    const exports: any = {};
     const dependencies = {
         getEditorTransaction,
         Constants: {},
@@ -53,12 +47,11 @@ const fixture = () => {
                 };
             }),
     };
-    runInNewContext(compiled, {
-        exports,
+    const exports = loadModule<any>("src/protyle/wysiwyg/transaction.ts", {
         require: () => dependencies,
         window: {siyuan: {config: {sync: {provider: 0}}}},
         getSelection: () => ({rangeCount: 0}),
-    });
+    }, ScriptTarget.ES2021);
     const element = {
         childElementCount: 1,
         querySelectorAll: (selector: string) => selector === '[data-node-id="carrier"]' ?

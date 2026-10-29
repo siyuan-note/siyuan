@@ -31,6 +31,18 @@ class BaseTreeViewer {
     this._l10n = options.l10n;
 
     this.reset();
+    this.container.addEventListener("click", e => {
+      const target = e.target.closest(".treeItemToggler");
+      if (!target || !this.container.contains(target)) {
+        return;
+      }
+      stopEvent(e);
+      target.classList.toggle("treeItemsHidden");
+      if (e.shiftKey) {
+        const shouldShowAll = !target.classList.contains("treeItemsHidden");
+        this._toggleTreeItem(target.parentNode, shouldShowAll);
+      }
+    });
   }
 
   reset() {
@@ -81,7 +93,7 @@ class BaseTreeViewer {
   _addToggleButton(div, hidden = false) {
     const toggler = document.createElement("div");
     // NOTE
-    toggler.innerHTML = `<svg><use xlink:href="#iconDown"></use></svg>`
+    toggler.innerHTML = `<svg><use xlink:href="#iconDown"></use></svg>`;
     toggler.className = "treeItemToggler";
     if (hidden) {
       toggler.classList.add("treeItemsHidden");
@@ -122,18 +134,6 @@ class BaseTreeViewer {
     if (hasAnyNesting) {
       this.container.classList.add("withNesting");
       this._lastToggleIsShow = !fragment.querySelector(".treeItemsHidden");
-      this.container.addEventListener("click", e => {
-        const { target } = e;
-        if (!target.classList.contains("treeItemToggler")) {
-          return;
-        }
-        stopEvent(e);
-        target.classList.toggle("treeItemsHidden");
-        if (e.shiftKey) {
-          const shouldShowAll = !target.classList.contains("treeItemsHidden");
-          this._toggleTreeItem(target.parentNode, shouldShowAll);
-        }
-      });
     }
     // Pause translation when inserting the tree into the DOM.
     this._l10n.pause();

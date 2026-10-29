@@ -13,6 +13,7 @@ export class Dialog {
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
+    private closeGuard: () => boolean;
     public editors: { [key: string]: Protyle };
     public data: any;
     private resizeCallback: (type: string) => void;
@@ -65,6 +66,8 @@ export class Dialog {
         width?: string,
         height?: string,
         destroyCallback?: (options?: IObject) => void,
+        // 返回 false 时保留对话框，覆盖按钮、键盘、移动端返回和直接销毁调用。
+        beforeClose?: () => boolean,
         disableClose?: boolean,
         hideCloseIcon?: boolean,
         disableAnimation?: boolean,
@@ -82,6 +85,7 @@ export class Dialog {
         }
         this.resizeCallback = options.resizeCallback;
         this.disableClose = options.disableClose;
+        this.closeGuard = options.beforeClose;
         this.id = genUUID();
         window.siyuan.dialogs.push(this);
         this.destroyCallback = options.destroyCallback;
@@ -102,7 +106,7 @@ export class Dialog {
         }
         this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">
 <div class="b3-dialog__scrim"${options.transparent ? ' style="background-color:transparent"' : ""}></div>
-<div role="dialog" aria-modal="true" ${options.title ? `aria-labelledby="dialog-title-${this.id}" ` : ""}tabindex="-1" class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height || "auto"};
+<div role="dialog" aria-modal="true" ${options.title ? `aria-labelledby="dialog-title-${this.id}" ` : ""}tabindex="-1" class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height?.replace(/dvh/g, "vh") || "auto"};height:${options.height || "auto"};
 left:${left || "auto"};top:${top || "auto"}">
   <svg class="b3-dialog__close${(!isMobile() || this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
   <div id="dialog-title-${this.id}" class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" ${(isMobile() &&options.title) ? 'style="padding-right: 38px;"' : ""} onselectstart="return false;">${options.title || ""}</div>
@@ -149,7 +153,7 @@ left:${left || "auto"};top:${top || "auto"}">
     }
 
     public destroy(options?: IObject) {
-        if (this.destroying) {
+        if (this.destroying || this.closeGuard?.() === false) {
             return;
         }
         this.destroying = true;

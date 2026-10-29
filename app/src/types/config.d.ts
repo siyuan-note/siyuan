@@ -1,20 +1,3 @@
-/**
- * Copyright (C) 2023 SiYuan Community
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 declare namespace Config {
 
     /**
@@ -339,6 +322,8 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 使用当前工作空间的单张锁屏壁纸；图片独立存储，登录前可见，不参与同步或设置导出 */
+        lockScreenWallpaper: boolean;
         /** 用户偏好保存在 conf.json；升级不读取旧 local.json 键，外观重置时恢复默认值 */
         compactMode: boolean;
         /** 默认关闭；新建空工作空间默认开启 */
@@ -703,6 +688,8 @@ declare namespace Config {
          * Whether to use tabs for database attributes
          */
         databaseAttrUseTabs: boolean;
+        /** 数据库字段布局：0 单栏，1 双栏按行（默认），2 双栏按列，空间不足时使用单栏 */
+        databaseAttrLayout: number;
         /**
          * Whether to retain dynamically loaded content blocks
          */
@@ -717,6 +704,7 @@ declare namespace Config {
          * Whether the embedded block displays breadcrumbs
          */
         embedBlockBreadcrumb: boolean;
+        embedBlockBreadcrumbParentPath: boolean;
         /**
          * Whether to display automatic heading numbers
          */
@@ -819,6 +807,8 @@ declare namespace Config {
          * Whether to auto-convert pasted URLs to links
          */
         pasteURLAutoConvert: boolean;
+        /** Recognize alternate LaTeX math delimiters in pasted and imported content; defaults to true */
+        mathDelimiterCompatibility: boolean;
         /**
          * Whether to embed dragged HTML files as IFrame blocks
          */
@@ -1029,6 +1019,11 @@ declare namespace Config {
          * Whether to close tabs by double-clicking
          */
         closeTabOnDoubleClick: boolean;
+        /**
+         * Close a detached desktop window after its last tab is closed or moved out.
+         * Defaults to true; does not affect the main window.
+         */
+        closeWindowOnLastTabClosed: boolean;
         /**
          * The storage path of the new document created using block references
          */

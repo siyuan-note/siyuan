@@ -53,6 +53,7 @@ let preventSwipe = false;
 // 长按进入多选的定时器
 let longPressTimer: number;
 let longPressTriggered = false;
+let nativeTextEditing = false;
 let previousNativeTextTouch: {editorElement: HTMLElement, x: number, y: number, time: number};
 let longPressBlockElement: HTMLElement;
 let longPressTouchRange: Range;
@@ -163,11 +164,20 @@ export const handleTouchUp = () => {
     blankTouchFocus = undefined;
 };
 
+export const handleTouchEditing = () => {
+    // 输入、粘贴或系统菜单接管后，只结束块长按状态，不改写正在编辑的选区。
+    clearLongPress();
+    longPressBlockElement = undefined;
+    longPressTouchRange = undefined;
+    blankTouchFocus = undefined;
+    nativeTextEditing = isIOSDevice();
+};
+
 export const handleTouchContextMenu = (event: MouseEvent) => {
     const editor = getCurrentEditor();
     if (isIOSDevice() && editor && usesNativeTextMenu(event.target as HTMLElement, editor.protyle.wysiwyg.element)) {
         // 系统接管文字菜单后，本轮触摸不再升级为块多选。
-        clearLongPress();
+        handleTouchEditing();
     }
     const saved = blankTouchFocus;
     if (!saved || event.target !== saved.editorElement ||
@@ -203,7 +213,11 @@ export const handleTouchSelectionChange = () => {
             editor.protyle.wysiwyg.element.contains(range.endContainer) &&
             hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range))) {
             // 选词或拖动选择手柄后，即使选区随后折叠，也不恢复这一轮的块多选计时。
-            clearLongPress();
+            if (isIOSDevice()) {
+                handleTouchEditing();
+            } else {
+                clearLongPress();
+            }
         }
     }
     if (longPressBlockElement && !restoreInvisibleLongPressSelection()) {
@@ -228,6 +242,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const editor = getCurrentEditor();
     if (!isInHarmony() && !isInAndroid()) {
         handleTouchUp();
+    }
+    if (nativeTextEditing && !editor?.protyle.toolbar.isMultiSelectMode()) {
+        return;
     }
     if (Math.abs(clientX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
         Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
@@ -384,6 +401,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 
 const resetTouchGesture = () => {
     longPressTriggered = false;
+    nativeTextEditing = false;
     blankTouchFocus = undefined;
     isFirstMove = true;
     clientX = null;
@@ -456,6 +474,9 @@ export const handleTouchStart = (event: TouchEvent) => {
     let repeatedNativeTextTouch = false;
     if (event.touches.length === 1 && editor && isIOSDevice() &&
         usesNativeTextMenu(target, editor.protyle.wysiwyg.element)) {
+        // 编辑状态下的长按用于移动光标或粘贴，键盘收起后仍可长按进入块多选。
+        nativeTextEditing = activeElement?.isContentEditable && editor.protyle.wysiwyg.element.contains(activeElement) &&
+            document.getElementById("keyboardToolbar")?.classList.contains("fn__none") === false;
         const point = event.touches[0];
         const touchTime = Number.isFinite(event.timeStamp) ? event.timeStamp : time;
         repeatedNativeTextTouch = previousTextTouch?.editorElement === editor.protyle.wysiwyg.element &&
@@ -492,7 +513,8 @@ export const handleTouchStart = (event: TouchEvent) => {
     }
     // 长按编辑器内块达到阈值时直接进入多选模式，无需抬手
     // 系统双击选词可能不再派发第二次 touchend，连续短按不启动块多选计时。
-    if (clientX && clientY && editor && !repeatedNativeTextTouch && !editor.protyle.toolbar.isMultiSelectMode()) {
+    if (clientX && clientY && editor && !nativeTextEditing && !repeatedNativeTextTouch &&
+        !editor.protyle.toolbar.isMultiSelectMode()) {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement) &&
             shouldStartLongPressMultiSelect(

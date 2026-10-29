@@ -183,12 +183,6 @@
             background-color: var(--b3-protyle-code-background);
         }
 
-        .ft__on-surface {
-            color: var(--b3-theme-on-surface);
-            font-size: 12px;
-            margin: 16px 0;
-        }
-
         .auth-actions {
             display: flex;
             flex-direction: column;
@@ -198,33 +192,227 @@
         .auth-actions > .b3-button {
             margin: 16px 0 0;
         }
+
+        #lockScreenWallpaper {
+            height: 100%;
+            inset: 0;
+            object-fit: cover;
+            pointer-events: none;
+            position: fixed;
+            width: 100%;
+            z-index: 1;
+        }
+
+        body.has-wallpaper #authPanel {
+            background-color: var(--b3-theme-background);
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 40px 16px 16px;
+            max-height: calc(100% - 56px);
+            max-width: calc(100% - 32px);
+            overflow: auto;
+            overflow-wrap: anywhere;
+            padding: 24px;
+            width: 480px;
+        }
+
+        @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+            body.has-wallpaper #authPanel {
+                --auth-text-outline: #000;
+                --auth-panel-text: #fff;
+                --auth-panel-secondary: #f4f6fa;
+                background-color: rgba(255, 255, 255, .08);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, .16), inset 0 0 0 1px rgba(255, 255, 255, .4);
+                -webkit-backdrop-filter: blur(8px) saturate(105%);
+                backdrop-filter: blur(8px) saturate(105%);
+            }
+
+            .dark body.has-wallpaper #authPanel {
+                background-color: rgba(0, 0, 0, .06);
+            }
+
+            body.has-wallpaper #authPanel h1,
+            body.has-wallpaper #authPanel label {
+                text-shadow: 0 1px 3px var(--auth-text-outline);
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+            body.has-wallpaper #authPanel,
+            .dark body.has-wallpaper #authPanel {
+                --auth-text-outline: transparent;
+                --auth-panel-text: var(--b3-theme-on-background);
+                --auth-panel-secondary: var(--b3-theme-on-surface);
+                background-color: var(--b3-theme-background);
+                box-shadow: none;
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+            }
+        }
+
+        #lockScreenCover {
+            align-items: center;
+            background: transparent;
+            border: 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            font: inherit;
+            height: 100%;
+            justify-content: center;
+            left: 0;
+            margin: 0;
+            padding: 32px 24px;
+            pointer-events: none;
+            position: fixed;
+            text-align: center;
+            text-shadow: 0 2px 8px #000, 0 0 24px #000;
+            top: 0;
+            width: 100%;
+            z-index: 2;
+        }
+
+        #lockScreenCover[hidden] {
+            display: none;
+        }
+
+        #lockScreenCover:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: -8px;
+        }
+
+        #lockScreenClock {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            opacity: var(--auth-clock-open-opacity, 0);
+            transform: translateY(var(--auth-clock-open-y, -24px)) scale(.65);
+        }
+
+        #lockScreenTime {
+            font-size: clamp(48px, 9vw, 112px);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.15;
+        }
+
+        #lockScreenDate {
+            font-size: clamp(18px, 2.5vw, 28px);
+            margin-top: 8px;
+        }
+
+        #lockScreenHint {
+            bottom: clamp(16px, 6vh, 48px);
+            font-size: 14px;
+            left: 16px;
+            position: absolute;
+            right: 16px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #authPanel h1 {
+            margin-bottom: 48px;
+        }
+
+        body.wallpaper-cover #authPanel {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+
+        body.has-wallpaper {
+            --auth-motion-duration: 200ms;
+            overflow: hidden;
+        }
+
+        body.wallpaper-cover #lockScreenCover {
+            pointer-events: auto;
+        }
+
+        body.wallpaper-cover #lockScreenClock {
+            opacity: 1;
+            transform: none;
+        }
+
+        body.wallpaper-cover #lockScreenHint {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body.wallpaper-transition #authPanel {
+            transition: opacity var(--auth-motion-duration) ease, transform var(--auth-motion-duration) ease;
+        }
+
+        body.wallpaper-transition #lockScreenClock {
+            transition: opacity var(--auth-motion-duration) cubic-bezier(.16, 1, .3, 1),
+                transform var(--auth-motion-duration) cubic-bezier(.16, 1, .3, 1);
+        }
+
+        body.wallpaper-transition.wallpaper-cover #lockScreenClock {
+            transition-timing-function: cubic-bezier(.7, 0, .84, 0);
+        }
+
+        body.wallpaper-transition #lockScreenHint {
+            transition: opacity var(--auth-motion-duration) ease, visibility 0s var(--auth-motion-duration);
+        }
+
+        body.wallpaper-transition.wallpaper-cover #lockScreenHint {
+            transition-delay: 0s, 0s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body.has-wallpaper {
+                --auth-motion-duration: 0ms;
+            }
+        }
+
+        body.has-wallpaper #authPanel h1 {
+            font-size: 24px;
+            margin: 0 0 16px;
+        }
+
+        body.has-wallpaper .auth-actions > .b3-button {
+            margin-top: 8px;
+        }
+
     </style>
 </head>
 <body>
-<div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
-<div style="position: relative;z-index: 2;text-align: center">
-    <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.workspace}}</h1>
-    <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
-        <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
-        <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
-            <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
-            <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
+<img id="lockScreenWallpaper" alt="" hidden>
+<button id="lockScreenCover" type="button" aria-labelledby="lockScreenHint" hidden>
+    <span id="lockScreenClock">
+        <time id="lockScreenTime" aria-live="off"></time>
+        <span id="lockScreenDate"></span>
+    </span>
+    <span id="lockScreenHint">{{.lockScreenReveal}}</span>
+</button>
+<div data-auth-drag style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;z-index: 3;"></div>
+<div id="authPanel" style="position: relative;z-index: 2;text-align: center">
+    <h1 style="color:var(--auth-panel-text, var(--b3-theme-on-background))">{{.workspace}}</h1>
+    <form id="authForm" method="post" action="/check-auth">
+        <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
+            <input class="b3-text-field" id="authCode" name="password" type="password"
+                   autocomplete="current-password" aria-label="{{.l0}}" placeholder="{{.l0}}"/><br>
+            <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
+                <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
+                <input id="captcha" class="b3-text-field" autocomplete="off" placeholder="{{.l3}}">
+            </div>
         </div>
-    </div>
-    <div class="auth-actions">
-        {{if .accessAuthCodeEnabled}}<button class="b3-button" onclick="submitAuth()">{{.l1}}</button>{{end}}
-        {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" onclick="startOIDC()">{{.l12}}</button>{{end}}
-        <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
-            <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
-            <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
+        <div class="auth-actions">
+            {{if .accessAuthCodeEnabled}}<button class="b3-button" id="authSubmit" type="submit">{{.l1}}</button>{{end}}
+            {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" type="button" onclick="startOIDC()">{{.l12}}</button>{{end}}
+            <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
+                <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
+                <label for="rememberMe" style="color: var(--auth-panel-secondary, var(--b3-theme-on-surface)); font-size: 14px;">{{.l10}}</label>
+            </div>
+            <button class="b3-button b3-button--white" type="button" onclick="exitSiYuan()">{{.l5}}</button>
         </div>
-        <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
-    </div>
-    <div class="ft__on-surface">
-        {{.l7}}
-    </div>
+    </form>
 </div>
-<div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
+<div id="authDefaultBackground" style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
     <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;"
          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
          viewBox="0 0 2769 1602" width="2769">
@@ -442,6 +630,147 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
+    const loadLockScreenWallpaper = () => {
+        const wallpaper = document.getElementById("lockScreenWallpaper");
+        const cover = document.getElementById("lockScreenCover");
+        const clock = document.getElementById("lockScreenClock");
+        const panel = document.getElementById("authPanel") || document.querySelector("main");
+        let pending = true;
+        let interacted = false;
+        let covered = false;
+        let composing = false;
+        let clockShown = false;
+        let resumeTarget;
+        let clockTimer;
+        const focusInput = () => {
+            const candidates = [resumeTarget, document.getElementById("authCode"),
+                ...panel.querySelectorAll("button:not(:disabled), a[href]")];
+            const target = candidates.find(item => item && !item.disabled && item.getClientRects().length);
+            target?.focus({preventScroll: true});
+            return target;
+        };
+        const stopClock = () => {
+            clearInterval(clockTimer);
+            clockTimer = undefined;
+        };
+        const positionClock = () => {
+            const height = clock.offsetHeight * .65;
+            const top = panel.offsetTop - 16 - height;
+            clockShown = top >= 40;
+            cover.style.setProperty("--auth-clock-open-y", `${clockShown ? top + height / 2 - window.innerHeight / 2 : -24}px`);
+            cover.style.setProperty("--auth-clock-open-opacity", clockShown ? "1" : "0");
+        };
+        const updateClock = () => {
+            const now = new Date();
+            const time = document.getElementById("lockScreenTime");
+            time.textContent = now.toLocaleTimeString(undefined, {hour: "2-digit", minute: "2-digit"});
+            time.dateTime = now.toISOString();
+            document.getElementById("lockScreenDate").textContent = now.toLocaleDateString(undefined,
+                {weekday: "long", month: "long", day: "numeric"});
+            positionClock();
+        };
+        const refreshClock = () => {
+            stopClock();
+            if (!wallpaper.hidden && !document.hidden) {
+                updateClock();
+                if (covered || clockShown) clockTimer = setInterval(updateClock, 1000);
+            }
+        };
+        const setCovered = show => {
+            covered = show;
+            cover.inert = !show;
+            cover.setAttribute("aria-hidden", String(!show));
+            panel.inert = show;
+            document.body.classList[show ? "add" : "remove"]("wallpaper-cover");
+            refreshClock();
+        };
+        const reveal = () => {
+            interacted = true;
+            if (!covered) return pending ? focusInput() : undefined;
+            document.body.classList.add("wallpaper-transition");
+            setCovered(false);
+            return focusInput();
+        };
+        const conceal = () => {
+            if (wallpaper.hidden || covered) return false;
+            const active = document.activeElement;
+            resumeTarget = panel.contains(active) ? active : undefined;
+            document.body.classList.add("wallpaper-transition");
+            setCovered(true);
+            cover.focus({preventScroll: true});
+            return true;
+        };
+        cover.addEventListener("click", reveal);
+        document.addEventListener("pointerdown", event => {
+            if (event.target.closest("#windowBar, [data-auth-drag]")) return;
+            if (covered) event.preventDefault();
+            reveal();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                if (event.isComposing || composing || event.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
+                if (conceal()) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                return;
+            }
+            if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "v") {
+                reveal();
+                return;
+            }
+            const altGraph = event.getModifierState?.("AltGraph");
+            if ((event.ctrlKey || event.metaKey || event.altKey) && !altGraph) return;
+            const wasCovered = covered;
+            const target = reveal();
+            if (!wasCovered || event.isComposing || event.key === "Process" || event.key === "Dead") return;
+            // 唤起按键不触发登录；可直接输入的首字符只写入当前输入框一次。
+            if ((target?.type === "password" || target?.type === "text") && Array.from(event.key).length === 1 && event.key !== " ") {
+                target.setRangeText(event.key, target.selectionStart, target.selectionEnd, "end");
+                target.dispatchEvent(new Event("input", {bubbles: true}));
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+        document.addEventListener("compositionstart", () => { composing = true; reveal(); }, true);
+        document.addEventListener("compositionend", () => { composing = false; }, true);
+        document.addEventListener("visibilitychange", refreshClock);
+        window.addEventListener("resize", refreshClock);
+        window.addEventListener("pagehide", stopClock);
+        window.addEventListener("pageshow", refreshClock);
+        wallpaper.onload = () => {
+            pending = false;
+            wallpaper.hidden = false;
+            cover.hidden = false;
+            document.body.classList.add("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = true;
+            // 慢加载不打断已经开始的输入，也不遮住密码管理器填入的内容。
+            setCovered(!interacted && !document.getElementById("authCode")?.value);
+            if (covered) cover.focus({preventScroll: true});
+            else if (!interacted) focusInput();
+        };
+        wallpaper.onerror = () => {
+            pending = false;
+            const shouldFocus = !interacted || covered;
+            wallpaper.hidden = true;
+            cover.hidden = true;
+            setCovered(false);
+            document.body.classList.remove("has-wallpaper", "wallpaper-transition");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = false;
+            if (shouldFocus) focusInput();
+        };
+        wallpaper.src = "/api/system/getLockScreenWallpaper";
+        return {focus: () => {
+            if (pending) return;
+            refreshClock();
+            if (covered) cover.focus({preventScroll: true});
+            else focusInput();
+        }};
+    };
+    const lockScreenWallpaperState = loadLockScreenWallpaper();
+
     window.showKeyboardToolbar = function () {}
     window.hideKeyboardToolbar = function () {}
 
@@ -681,6 +1010,13 @@
         })
     }
 
+    // 认证走前端 fetch，须阻止表单默认提交（内核不接收 POST /check-auth）；监听在同步阶段挂载，
+    // 让回车与提交按钮统一走 submit 事件，密码管理器也依赖标准表单结构识别登录表单
+    document.getElementById('authForm').addEventListener('submit', (event) => {
+        event.preventDefault()
+        submitAuth()
+    })
+
     const init = async () => {
         const isDark = document.documentElement.classList.contains('dark')
         // 同步外观到原生壳：让 iOS 顶/底条与认证页背景一致
@@ -724,14 +1060,8 @@
             }
         }
 
-        const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
-        inputElement.focus()
-        inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                submitAuth()
-            }
-        })
+        lockScreenWallpaperState.focus();
 
         captchaElement.previousElementSibling.addEventListener('click', function () {
             this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`

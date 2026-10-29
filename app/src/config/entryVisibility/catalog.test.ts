@@ -103,9 +103,20 @@ test("document tree duplication follows single-document duplication in the confi
 test("embedded heading levels follow display modes and expose all levels in Simple", () => {
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
-        "refresh", "update", "separator_breadcrumb", "embedBlockBreadcrumb", "headingEmbedMode", "embedHeadingLevel",
+        "refresh", "update", "refPopover", "separator_breadcrumb", "embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath",
+        "headingEmbedMode", "embedHeadingLevel",
     ]);
     const levelPath = `${path}.embedHeadingLevel`;
+    assert.equal(getEntryCatalogNode(`${path}.embedBlockBreadcrumbParentPath`)?.simple, true);
+    assert.equal(getEntryParentPath(`${path}.embedBlockBreadcrumbParentPath`), path);
+    for (const key of ["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"]) {
+        const parent = `${path}.${key}`;
+        assert.deepEqual(getEntryCatalogChildren(parent).map(item => item.key), ["enable", "disable", "default"]);
+        getEntryCatalogChildren(parent).forEach(item => {
+            assert.equal(item.simple, true);
+            assert.equal(getEntryParentPath(`${parent}.${item.key}`), parent);
+        });
+    }
     assert.equal(getEntryCatalogNode(levelPath)?.simple, true);
     assert.deepEqual(getEntryCatalogChildren(levelPath).map(entry => entry.key), [
         "auto", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6",
@@ -114,6 +125,20 @@ test("embedded heading levels follow display modes and expose all levels in Simp
         assert.equal(entry.type, "entry");
         assert.equal(entry.simple, true);
     });
+});
+
+test("embed toolbars and popover menus remain visible by default and have independent configuration", () => {
+    const toolbar = getEntryCatalogNode("editor.blockEmbed.toolbar");
+    assert.equal(toolbar.type, "entry");
+    assert.equal(toolbar.simple, true);
+    assert.equal(toolbar.sortable, false);
+    assert.equal(getEntryParentPath("editor.blockEmbed.toolbar"), "editor.blockEmbed");
+    assert.equal(getEntryCatalogDefaultVisibility("editor.blockEmbed.toolbar"), true);
+    assert.equal(getEntryCatalogCustomDefaultVisibility("editor.blockEmbed.toolbar"), true);
+    const popover = getEntryCatalogNode("gutter.single.blockEmbed.refPopover");
+    assert.equal(popover.type, "entry");
+    assert.equal(popover.simple, true);
+    assert.equal(getEntryParentPath("gutter.single.blockEmbed.refPopover"), "gutter.single.blockEmbed");
 });
 
 const slashMenuBuiltinOrder = [
@@ -1124,6 +1149,7 @@ test("tab menu catalog follows its conditional menu declarations", () => {
         "pin",
         "unpin",
         "tabToWindow",
+        "tabToMainWindow",
     ]);
     assert.deepEqual(getEntryCatalogChildren("tab.split").map((item) => item.key), [
         "splitLR",

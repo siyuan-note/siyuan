@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -956,8 +944,7 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 }
 
 func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
-	deckLock.Lock()
-	defer deckLock.Unlock()
+	tx.lockFlashcardMutation()
 
 	if isSyncingStorages() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
@@ -976,10 +963,14 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 
 	if "" == deckID { // 支持在 All 卡包中移除闪卡 https://github.com/siyuan-note/siyuan/issues/7425
 		for _, deck := range Decks {
-			removeFlashcardsByBlockIDs(blockIDs, deck)
+			if err := tx.removeFlashcardsByBlockIDs(blockIDs, deck); err != nil {
+				return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deck.ID}
+			}
 		}
 	} else {
-		removeFlashcardsByBlockIDs(blockIDs, Decks[deckID])
+		if err := tx.removeFlashcardsByBlockIDs(blockIDs, Decks[deckID]); err != nil {
+			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
+		}
 	}
 	return
 }
@@ -1052,29 +1043,28 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 	return
 }
 
-func removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) {
+func (tx *Transaction) removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) error {
 	if nil == deck {
 		logging.LogErrorf("deck is nil")
-		return
+		return nil
 	}
 
 	cards := deck.GetCardsByBlockIDs(blockIDs)
 	if 1 > len(cards) {
-		return
+		return nil
+	}
+	if err := tx.rememberFlashcardDeck(deck.ID); err != nil {
+		return err
 	}
 
 	for _, card := range cards {
 		deck.RemoveCard(card.ID())
 	}
-	err := deck.Save()
-	if err != nil {
-		logging.LogErrorf("save deck [%s] failed: %s", deck.ID, err)
-	}
+	return nil
 }
 
 func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
-	deckLock.Lock()
-	defer deckLock.Unlock()
+	tx.lockFlashcardMutation()
 
 	if isSyncingStorages() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
@@ -1095,10 +1085,16 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if !foundDeck {
-		deck, createErr := createDeck0("Built-in Deck", builtinDeckID)
-		if nil == createErr {
-			Decks[deck.ID] = deck
+		if err := tx.rememberFlashcardDeck(builtinDeckID); err != nil {
+			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: builtinDeckID}
 		}
+		config := Conf.LoadFlashcard()
+		deck, err := riff.LoadDeck(getRiffDir(), builtinDeckID, config.RequestRetention, config.MaximumInterval, config.Weights)
+		if err != nil {
+			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: builtinDeckID}
+		}
+		deck.Name = "Built-in Deck"
+		Decks[deck.ID] = deck
 	}
 
 	blockRoots := map[string]string{}
@@ -1157,6 +1153,9 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		logging.LogWarnf("deck [%s] not found", deckID)
 		return
 	}
+	if err := tx.rememberFlashcardDeck(deckID); err != nil {
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
+	}
 
 	for _, blockID := range eligibleBlockIDs {
 		cards := deck.GetCardsByBlockID(blockID)
@@ -1168,10 +1167,6 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		deck.AddCard(ast.NewNodeID(), blockID)
 	}
 
-	if err := deck.Save(); err != nil {
-		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
-		return
-	}
 	return
 }
 
@@ -1185,6 +1180,10 @@ func LoadFlashcards() {
 	}
 
 	Decks = map[string]*riff.Deck{}
+	// Reloaded decks start a new scheduling generation; undo/skip state from the
+	// old generation must not overwrite schedules received through synchronization.
+	reviewCardCache = map[string]riff.Card{}
+	skipCardCache = map[string]riff.Card{}
 
 	entries, err := os.ReadDir(riffSavePath)
 	if err != nil {

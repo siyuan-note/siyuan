@@ -1,23 +1,12 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,6 +31,56 @@ func TestCreateAssetsHistorySkipsRemovedSource(t *testing.T) {
 	}
 	if err := CreateAssetHistory("assets/removed.png"); !os.IsNotExist(err) {
 		t.Fatalf("explicit history request should report missing source, got %v", err)
+	}
+}
+
+func TestRollbackAssetsHistoryPreservesRelativePaths(t *testing.T) {
+	_, boxID := setupNotebookHistoryRollbackTest(t)
+	boxDir := filepath.Join(util.DataDir, boxID, ".siyuan")
+	if err := os.MkdirAll(boxDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(boxDir, "conf.json"), []byte(`{"name":"Assets"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{"assets/report.pdf", "assets/projects/2026/report.pdf",
+		boxID + "/assets/report.pdf", boxID + "/20261026000000-parent1/assets/sub/report.pdf"} {
+		t.Run(rel, func(t *testing.T) {
+			rootAsset := filepath.Join(util.DataDir, "assets", "report.pdf")
+			if err := os.MkdirAll(filepath.Dir(rootAsset), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(rootAsset, []byte("unrelated global asset"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			historyRel := filepath.Join("history", "2026-10-26-120000-clean", filepath.FromSlash(rel))
+			historyFile := filepath.Join(util.WorkspaceDir, historyRel)
+			if err := os.MkdirAll(filepath.Dir(historyFile), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(historyFile, []byte("restored version"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if err := RollbackAssetsHistory(filepath.ToSlash(historyRel)); err != nil {
+				t.Fatal(err)
+			}
+			destination := filepath.Join(util.DataDir, filepath.FromSlash(rel))
+			if data, err := os.ReadFile(destination); err != nil || string(data) != "restored version" {
+				t.Fatalf("asset restored to wrong location: %q, %v", data, err)
+			}
+			if destination != rootAsset {
+				if data, err := os.ReadFile(rootAsset); err != nil || string(data) != "unrelated global asset" {
+					t.Fatalf("unrelated asset overwritten: %q, %v", data, err)
+				}
+			}
+		})
+	}
+	for _, parts := range [][]string{{"snapshot", "storage", "av/view.json"},
+		{"snapshot", "assets", "../outside"}, {"snapshot", boxID, "file.sy"},
+		{"snapshot", "20261026000000-absent1", "assets/file.pdf"}} {
+		if _, err := ordinaryAssetHistoryDestination(parts); err == nil {
+			t.Fatalf("accepted invalid or unavailable asset location: %v", parts)
+		}
 	}
 }
 
@@ -160,6 +199,54 @@ func TestRollbackNotebookHistoryRejectsExistingNotebook(t *testing.T) {
 	}
 	if string(data) != "existing" {
 		t.Fatalf("existing notebook was modified: %q", data)
+	}
+}
+
+func TestRollbackNotebookHistoryCopyFailureAllowsRetry(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	destination := filepath.Join(util.DataDir, boxID)
+	failure := errors.New("injected partial notebook copy failure")
+	err := rollbackNotebookHistory(historyPath, func(from, staging string) error {
+		if err := os.WriteFile(filepath.Join(staging, "partial.sy"), []byte("partial copy"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		return failure
+	})
+	if !errors.Is(err, failure) {
+		t.Fatalf("copy failure was not returned: %v", err)
+	}
+	if _, err := os.Stat(destination); !os.IsNotExist(err) {
+		t.Fatalf("failed restore published an incomplete notebook: %v", err)
+	}
+	if paths, err := filepath.Glob(filepath.Join(util.DataDir, ".notebook-history-*")); err != nil || len(paths) != 0 {
+		t.Fatalf("failed restore left staging directories: %v, %v", paths, err)
+	}
+	if err := RollbackNotebookHistory(historyPath); err != nil {
+		t.Fatalf("restoration could not be retried: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(destination, "20260807000001-abcdefg.sy")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRollbackNotebookHistoryPreservesNewDestination(t *testing.T) {
+	historyPath, boxID := setupNotebookHistoryRollbackTest(t)
+	destination := filepath.Join(util.DataDir, boxID)
+	marker := filepath.Join(destination, "preserved.txt")
+	err := rollbackNotebookHistory(historyPath, func(from, staging string) error {
+		if err := filelock.CopyNewtimes(from, staging); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(destination, 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(marker, []byte("concurrent destination"), 0600)
+	})
+	if err == nil {
+		t.Fatal("restore replaced a destination created during copying")
+	}
+	if data, err := os.ReadFile(marker); err != nil || string(data) != "concurrent destination" {
+		t.Fatal("restore modified an existing destination")
 	}
 }
 

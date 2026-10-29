@@ -20,9 +20,10 @@ jobs:
     env:
       # 缓存恢复、保存与编译共用模块目录。
       GOPATH: ${{ github.workspace }}/go
+      GOMODCACHE: ${{ github.workspace }}/go/pkg/mod
       SIYUAN_E2E_SHARDS: ${{ fromJSON(inputs.config).e2e_shards }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
@@ -34,11 +35,28 @@ jobs:
           install: p7zip mingw-w64-ucrt-x86_64-lua
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
-          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: true
+          cache: false
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - run: go version
 
       - name: Set up Linux musl compiler
@@ -74,13 +92,8 @@ jobs:
           GOOS: ${{ fromJSON(inputs.config).goos }}
           GOARCH: ${{ fromJSON(inputs.config).goarch }}
 
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
       - name: Install Node pnpm
-        run: npm install -g ${{ inputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ inputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Get pnpm store path
@@ -91,12 +104,13 @@ jobs:
           echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Cache pnpm store
-        uses: actions/cache@v5
+      - name: Restore pnpm store
+        id: restore-pnpm-cache
+        uses: actions/cache/restore@v6
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
-          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
+          key: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ inputs.packageManager }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ inputs.packageManager }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -199,7 +213,7 @@ jobs:
         id: checkout_siyuan_testing
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-testing
           ref: main
@@ -422,6 +436,23 @@ jobs:
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
+
+      # 同一平台只有指定作业保存缓存，其他并行作业只恢复。
+      - name: Save Go cache
+        if: ${{ steps.restore-go-cache.outputs.cache-hit != 'true' && fromJSON(inputs.config).goos == 'darwin' && fromJSON(inputs.config).goarch == 'arm64' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
+      - name: Save pnpm store
+        if: ${{ steps.restore-pnpm-cache.outputs.cache-hit != 'true' && !(fromJSON(inputs.config).goos == 'darwin' && fromJSON(inputs.config).goarch == 'amd64') }}
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ steps.restore-pnpm-cache.outputs.cache-primary-key }}
 
       - name: Report non-blocking step outcomes
         if: always()

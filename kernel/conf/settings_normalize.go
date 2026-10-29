@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package conf
 
 import (
@@ -12,6 +16,9 @@ import (
 func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree == nil {
 		fileTree = NewFileTree()
+	}
+	if fileTree.CloseWindowOnLastTabClosed == nil {
+		fileTree.CloseWindowOnLastTabClosed = NewFileTree().CloseWindowOnLastTabClosed
 	}
 	if fileTree.MaxListCount < 1 {
 		fileTree.MaxListCount = 512
@@ -78,8 +85,17 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.DatabaseAttrUseTabs == nil {
 		editor.DatabaseAttrUseTabs = defaults.DatabaseAttrUseTabs
 	}
+	if editor.DatabaseAttrLayout == nil || *editor.DatabaseAttrLayout < 0 || *editor.DatabaseAttrLayout > 2 {
+		editor.DatabaseAttrLayout = defaults.DatabaseAttrLayout
+	}
 	if editor.CheckBlockRef == nil {
 		editor.CheckBlockRef = defaults.CheckBlockRef
+	}
+	if editor.EmbedBlockBreadcrumbParentPath == nil {
+		editor.EmbedBlockBreadcrumbParentPath = defaults.EmbedBlockBreadcrumbParentPath
+	}
+	if editor.MathDelimiterCompatibility == nil {
+		editor.MathDelimiterCompatibility = defaults.MathDelimiterCompatibility
 	}
 	if editor.HashTagSearch == nil {
 		editor.HashTagSearch = defaults.HashTagSearch

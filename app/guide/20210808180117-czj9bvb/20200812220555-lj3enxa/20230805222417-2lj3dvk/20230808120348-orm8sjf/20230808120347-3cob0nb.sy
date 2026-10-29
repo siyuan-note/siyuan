@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20261016111950"
+		"updated": "20261026115057"
 	},
 	"Children": [
 		{
@@ -44,6 +44,445 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 文件夹中的数据在逻辑上保持一致，包括资源文件、自定义图标、第三方主题和图标包、插件、代码片段、模板、挂件和文档数据。按需下载模式允许资源文件的内容暂不保存到本机。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-qbr56bx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120347-qbr56bx",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-2p4bc49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120347-2p4bc49",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220615113758-i2279ot",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "初始化数据仓库密钥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，再选择云端存储、配置同步目标并启用同步。不熟悉配置时，可点击同步按钮打开向导，按提示完成设置。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-n3vxtba",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120347-n3vxtba",
+				"updated": "20220708101339"
+			},
+			"Children": [
+				{
+					"ID": "20230808120347-kmv8g3m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-kmv8g3m",
+						"updated": "20220708101329"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-mthf707",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-mthf707",
+								"updated": "20220708101330"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果需要暂停同步，可关闭选项 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "账号与同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "启用云端同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-2m0pkdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-2m0pkdb",
+						"updated": "20220708101339"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-cslq6vc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-cslq6vc",
+								"updated": "20220708101339"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210928094544-vg2c2ts",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "忽略文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-qytpdxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120347-qytpdxh",
+				"updated": "20220831004438"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​​："
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-y41kxh2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120347-y41kxh2",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"ID": "20230808120347-xthfmk7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-xthfmk7",
+						"updated": "20230220103623"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-p3dn7n3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-p3dn7n3",
+								"updated": "20230220103623"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "启用同步前，请确保参与同步的所有设备系统时间一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-3l72g5v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-3l72g5v",
+						"updated": "20261024163013"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-4mlag9e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-4mlag9e",
+								"updated": "20261024163013"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果数据量较大，建议通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "应用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导出 Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 导出数据包，传输到新设备后，在该设备的同一设置页面使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导入 Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，最后再配置同步"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-be59rg9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261011151543-be59rg9",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置第三方同步"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-x2jg56f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-x2jg56f",
+				"updated": "20261016111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "账号与同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择 S3、WebDAV 或本地文件系统，再点击同步服务配置一行的设置按钮。本地文件系统支持桌面标准内核和 Docker 内核，移动内核不提供此选项；路径属于内核所在机器或容器，不是浏览器所在设备的目录。填写完整后点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。输入过程中不会保存，关闭有修改的表单时会询问是否放弃草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261020224352-ftr760i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020224352-ftr760i",
+				"updated": "20261020224352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存前可点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "测试连接"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 检查当前 S3、WebDAV 或本地文件系统配置草稿，测试不会保存配置。WebDAV 会检查建目录和探针读写权限，本地文件系统会检查目录读写权限，结束后尽力清理探针。测试失败时可根据提示修改后重试，已保存的配置会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-p38jv4a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-p38jv4a",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "停止使用某个服务时，可在其配置弹窗中点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 并确认。这会删除已保存的地址和凭据；如果它是当前同步服务，还会关闭同步。本地笔记和云端数据会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-986cazk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-986cazk",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果当前来源的资源或历史快照尚未补齐，修改来源或清除配置会被阻止。请恢复原同步源的访问并完成全部下载后重试。保存或清除失败时，生效配置和草稿都会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-gzbucu8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-gzbucu8",
+				"updated": "20261021104922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自动同步通常在后台进行，不会弹出面板或打断编辑。点击同步图标可查看当前文件、已写入字节数、速度和预计剩余时间。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "收起详情"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可收起进度详情，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可重新展开。仅在应用本地改动、恢复索引及刷新相关文档期间暂停编辑；取消后的恢复也需完成后才能继续编辑。点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可请求取消准备、网络传输或文件恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-obrohrp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-obrohrp",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "取消后会保留已完成的文件并清理当前临时文件，可以再次同步以完成剩余内容。空间不足时，请释放空间后重试。启动或恢复文件前会清理可确认归属的中断同步临时文件，并提示释放的容量。"
 				}
 			]
 		},
@@ -203,290 +642,26 @@
 			]
 		},
 		{
-			"ID": "20230808120347-qbr56bx",
+			"ID": "20230808120347-buiv5yn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230808120347-qbr56bx",
-				"updated": "20261016111950"
+				"id": "20230808120347-buiv5yn",
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使用方式"
+					"Data": "同步模式"
 				}
 			]
 		},
 		{
-			"ID": "20230808120347-2p4bc49",
+			"ID": "20230808120347-fwrmpx3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230808120347-2p4bc49",
-				"updated": "20220821170632"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20220615113758-i2279ot",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "初始化数据仓库密钥"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "后如果一切正常就已经配置好同步了。如果你不太熟悉同步配置，建议通过点击同步按钮打开同步配置向导，通过向导进行配置会更简便一些。"
-				}
-			]
-		},
-		{
-			"ID": "20230808120347-n3vxtba",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20230808120347-n3vxtba",
-				"updated": "20220708101339"
-			},
-			"Children": [
-				{
-					"ID": "20230808120347-kmv8g3m",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230808120347-kmv8g3m",
-						"updated": "20220708101329"
-					},
-					"Children": [
-						{
-							"ID": "20230808120347-mthf707",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230808120347-mthf707",
-								"updated": "20220708101330"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "如果需要暂停同步，可关闭选项 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "账号与同步"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "启用云端同步"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230808120347-2m0pkdb",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230808120347-2m0pkdb",
-						"updated": "20220708101339"
-					},
-					"Children": [
-						{
-							"ID": "20230808120347-cslq6vc",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230808120347-cslq6vc",
-								"updated": "20220708101339"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20210928094544-vg2c2ts",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "忽略文件"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20230808120347-qytpdxh",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20230808120347-qytpdxh",
-				"updated": "20220831004438"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​："
-				}
-			]
-		},
-		{
-			"ID": "20230808120347-y41kxh2",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20230808120347-y41kxh2",
-				"updated": "20261016111950"
-			},
-			"Children": [
-				{
-					"ID": "20230808120347-xthfmk7",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230808120347-xthfmk7",
-						"updated": "20230220103623"
-					},
-					"Children": [
-						{
-							"ID": "20230808120347-p3dn7n3",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230808120347-p3dn7n3",
-								"updated": "20230220103623"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "启用同步前，请确保参与同步的所有设备系统时间一致"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230808120347-3l72g5v",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230808120347-3l72g5v",
-						"updated": "20261016111950"
-					},
-					"Children": [
-						{
-							"ID": "20230808120347-4mlag9e",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230808120347-4mlag9e",
-								"updated": "20261016111950"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "如果数据量较大，建议通过 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "应用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "数据"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "导出 Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 导出数据包，传输到新设备后，在该设备的同一设置页面使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "导入 Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​，最后再配置同步"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-be59rg9",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20261011151543-be59rg9",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "配置第三方同步"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-x2jg56f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-x2jg56f",
-				"updated": "20261016111431"
+				"id": "20230808120347-fwrmpx3",
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -509,100 +684,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中选择 S3、WebDAV 或本地文件系统，再点击同步服务配置一行的设置按钮。本地文件系统支持桌面标准内核和 Docker 内核，移动内核不提供此选项；路径属于内核所在机器或容器，不是浏览器所在设备的目录。填写完整后点击 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "保存"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。输入过程中不会保存，关闭有修改的表单时会询问是否放弃草稿。"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-p38jv4a",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-p38jv4a",
-				"updated": "20261011151543"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "停止使用某个服务时，可在其配置弹窗中点击 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "清除配置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 并确认。这会删除已保存的地址和凭据；如果它是当前同步服务，还会关闭同步。本地笔记和云端数据会保留。"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-986cazk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-986cazk",
-				"updated": "20261011151543"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果当前来源的资源或历史快照尚未补齐，修改来源或清除配置会被阻止。请恢复原同步源的访问并完成全部下载后重试。保存或清除失败时，生效配置和草稿都会保留。"
-				}
-			]
-		},
-		{
-			"ID": "20230808120347-buiv5yn",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20230808120347-buiv5yn",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "同步模式"
-				}
-			]
-		},
-		{
-			"ID": "20230808120347-fwrmpx3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20230808120347-fwrmpx3",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "账号与同步"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -611,7 +693,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中支持三种同步模式："
+					"Data": " 中支持三种同步模式："
 				}
 			]
 		},
@@ -839,6 +921,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261026111206-4b3zwsx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026111206-4b3zwsx",
+				"updated": "20261026115057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "退出等待超过 12 秒时，可以选择「跳过同步并退出」，确认后取消同步并完成退出。未同步的更改会保留在本机；取消确认则继续等待同步完成。"
 				}
 			]
 		},

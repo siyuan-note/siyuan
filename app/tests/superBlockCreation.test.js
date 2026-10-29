@@ -19,6 +19,7 @@ const sources = () => {
     return {
         functions: [
             extract("block/util.ts", ["genEmptyElement", "genSBElement", "refreshSbResize", "rebalanceSbWidth", "refreshSbAndPersistWidth"]),
+            extract("block/headingLevel.ts", ["getHeadingLevel"]),
             extract("block/superBlock.ts", ["getSuperBlockCommand", "getSuperBlockCommandLayout", "getSuperBlockTailHeadings"]),
             extract("block/insertSuperBlock.ts", ["genEmptySuperBlock", "focusInsertedBlock", "insertSuperBlockChild", "createSuperBlockColumn"]),
             extract("protyle/wysiwyg/transaction.ts", ["turnsIntoOneTransaction"]),

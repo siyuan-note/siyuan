@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20261016200946"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223850-m1y2b2z",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185953-vjaca7x",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -44,12 +44,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-jevugyb",
-				"updated": "20220511190009"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持導入 Markdown 文件。所以如果你需要導入其他筆記軟體的資料，請先將資料轉換為 Markdown 文件。"
+					"Data": "可匯入 Markdown 檔案或資料夾。遷移其他軟體的資料時，可先匯出為 Markdown；對於提供專用匯入入口的來源，也可使用對應入口。匯入前請核對資源檔案路徑和擴充語法。"
 				}
 			]
 		},
@@ -133,7 +133,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184604-4ldk0w4",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -161,7 +161,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "#foo"
+					"TextMarkTextContent": "#foo#"
 				},
 				{
 					"Type": "NodeText",
@@ -183,7 +183,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -192,7 +192,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -201,7 +201,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 相關開關。"
+					"Data": " 相關開關。"
 				}
 			]
 		},
@@ -404,6 +404,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "​：使用前請務必留意，避免已有資料被覆蓋無法恢復。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-4t0tff0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-4t0tff0",
+				"updated": "20261020225315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data.zip 可以直接更新目前的工作空間，無須建立另一個工作空間。匯入前會先分析壓縮檔，加密筆記本發生衝突時，可選擇預設的「略過衝突」、「覆寫衝突」或取消。匯入結果會在介面重新載入前列出已略過的筆記本 ID。提交前可以取消；提交期間無法取消或關閉匯入對話框。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-6s2mbpe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-6s2mbpe",
+				"updated": "20261020220502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "匯入加密內容需要輸入相容的主密碼。變更密碼前的備份可透過相容的歷史金鑰讀取，不會還原目前密碼。加密狀態或資料金鑰不同的筆記本無法直接合併。覆寫只取代相同路徑，保留目標獨有的檔案，不會傳播刪除；匯入後的加密筆記本保持鎖定，需要重新解鎖。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-s7xahw4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-s7xahw4",
+				"updated": "20261020225315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "匯入先驗證選取內容，再寫入資料，失敗或中斷時可以回復。上傳原件、被覆寫檔案及金鑰材料保存在工作空間的 conf/data-imports/ 目錄；核對匯入內容及所需歷史之前，請保留這些復原檔案。復原失敗時暫停寫入和同步，直到復原成功。尚未提交的預檢在 30 分鐘後過期，並在啟動或下一次匯入時清理，過期後仍可取消；已提交批次的復原檔案會繼續保留。"
 				}
 			]
 		},

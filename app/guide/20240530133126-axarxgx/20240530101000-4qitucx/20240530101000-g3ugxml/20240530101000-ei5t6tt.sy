@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-bsl73zy",
-				"updated": "20261015225720"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015225720-y3mi68c",
-				"updated": "20261015225720"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -62,11 +62,25 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "AI"
+					"TextMarkTextContent": "AI を呼び出す"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で ChatGPT プロバイダーの設定を開き、この端末のワークスペースで使用するアカウントを選択して保存してください。ログイン認証情報とアカウントの関連付けは端末内に保存され、conf.json や設定のエクスポートファイルには含まれません。各端末で個別にログインし、一度アカウントを選択してください。その後に設定をコピーしても、既存のプロバイダーはコピー先の端末の関連付けを使用します。プロバイダーの追加やワークスペースディレクトリの移動後は、再度アカウントを選択してください。アップグレード後も再選択が必要ですが、既存のログイン認証情報は保持されます。"
+					"Data": " で ChatGPT プロバイダーの設定を開き、この端末のワークスペースで使用するアカウントを選択して保存してください。ログイン認証情報とアカウントの関連付けは端末内に保存され、conf.json や設定のエクスポートファイルには含まれません。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-osxf10i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-osxf10i",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各端末で個別にログインし、一度アカウントを選択してください。その後に設定をコピーしても、既存のプロバイダーはコピー先の端末の関連付けを使用します。プロバイダーの追加やワークスペースディレクトリの移動後は、再度アカウントを選択してください。アップグレード後も再選択が必要ですが、既存のログイン認証情報は保持されます。"
 				}
 			]
 		},
@@ -356,7 +370,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-ejudvzu",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
@@ -371,12 +385,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920123707-x2ixv5y",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "エージェントは TypeSafe System One（Jev）または OpenAI Decisions API（Beta）を使って分類、絞り込み、評価を行えます。設定と使い方は "
+					"Data": "エージェントは TypeSafe System One（Jev）または OpenAI Decisions API を使って分類、絞り込み、評価を行えます。設定と使い方は "
 				},
 				{
 					"Type": "NodeTextMark",

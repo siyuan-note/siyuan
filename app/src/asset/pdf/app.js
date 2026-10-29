@@ -290,7 +290,7 @@ class PDFViewerApplication {
 
                 if (typeof PDFJSDev === "undefined") {
                     // NOTE
-                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.1`);
+                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.2`);
                 } else {
                     await __non_webpack_import__(PDFWorker.workerSrc);
                 }

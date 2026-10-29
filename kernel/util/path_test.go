@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package util
 
@@ -45,10 +33,23 @@ func TestIsPossiblyImageWithQueryAndFragment(t *testing.T) {
 		"assets/photo.heic",
 		"assets/photo.HEIF?box=20260816000000-abcdefg",
 		"assets/photo.heic?box=20260816000000-abcdefg#preview",
+		"assets/photo.tif",
+		"assets/photo.TIFF?box=20260816000000-abcdefg#preview",
 	} {
 		if !IsPossiblyImage(assetPath) {
-			t.Fatalf("HEIF asset was not recognized as an image: %s", assetPath)
+			t.Fatalf("asset was not recognized as an image: %s", assetPath)
 		}
+	}
+}
+
+func TestIsDisplayableAssetTIFF(t *testing.T) {
+	for _, path := range []string{"assets/photo.tif", "assets/photo.TIFF", "20261021000000-tiffbox/assets/photo.tiff"} {
+		if !IsDisplayableAsset(path) {
+			t.Fatalf("TIFF snapshot asset was not displayable: %s", path)
+		}
+	}
+	if IsDisplayableAsset("assets/photo.tiff.txt") {
+		t.Fatal("a TIFF name without a TIFF extension was displayable")
 	}
 }
 

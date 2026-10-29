@@ -1,24 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package mcp
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -53,6 +42,70 @@ func newTestHTTPServer(t *testing.T) (*mcpsdk.Server, *httptest.Server) {
 	httpServer := httptest.NewServer(withEncryptedBoxOperationScope(newHTTPHandler(server)))
 	t.Cleanup(httpServer.Close)
 	return server, httpServer
+}
+
+func TestPrivateCacheMiddleware(t *testing.T) {
+	discover := &mcpsdk.DiscoverResult{}
+	tools := &mcpsdk.ListToolsResult{}
+	prompts := &mcpsdk.ListPromptsResult{}
+	resources := &mcpsdk.ListResourcesResult{}
+	templates := &mcpsdk.ListResourceTemplatesResult{}
+	resource := &mcpsdk.ReadResourceResult{}
+	tests := []struct {
+		name       string
+		result     mcpsdk.Result
+		nilResult  mcpsdk.Result
+		cacheScope *string
+	}{
+		{"discover", discover, (*mcpsdk.DiscoverResult)(nil), &discover.CacheScope},
+		{"tools", tools, (*mcpsdk.ListToolsResult)(nil), &tools.CacheScope},
+		{"prompts", prompts, (*mcpsdk.ListPromptsResult)(nil), &prompts.CacheScope},
+		{"resources", resources, (*mcpsdk.ListResourcesResult)(nil), &resources.CacheScope},
+		{"templates", templates, (*mcpsdk.ListResourceTemplatesResult)(nil), &templates.CacheScope},
+		{"resource", resource, (*mcpsdk.ReadResourceResult)(nil), &resource.CacheScope},
+	}
+	handlerErr := errors.New("handler failed")
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for _, outcome := range []struct {
+				name   string
+				result mcpsdk.Result
+				err    error
+			}{
+				{"success", test.result, nil},
+				{"error", test.result, handlerErr},
+				{"typed_nil_error", test.nilResult, handlerErr},
+				{"typed_nil_success", test.nilResult, nil},
+			} {
+				t.Run(outcome.name, func(t *testing.T) {
+					*test.cacheScope = "public"
+					handler := privateCacheMiddleware()(func(context.Context, string, mcpsdk.Request) (mcpsdk.Result, error) {
+						return outcome.result, outcome.err
+					})
+					result, err := handler(t.Context(), "test", nil)
+					if result != outcome.result || err != outcome.err {
+						t.Fatalf("handler result was not preserved: %v, %v", result, err)
+					}
+					wantScope := "public"
+					if outcome.result == test.result && outcome.err == nil {
+						wantScope = "private"
+					}
+					if *test.cacheScope != wantScope {
+						t.Fatalf("unexpected cache scope: got %q, want %q", *test.cacheScope, wantScope)
+					}
+				})
+			}
+		})
+	}
+	for _, result := range []mcpsdk.Result{nil, &mcpsdk.CallToolResult{}} {
+		handler := privateCacheMiddleware()(func(context.Context, string, mcpsdk.Request) (mcpsdk.Result, error) {
+			return result, nil
+		})
+		got, err := handler(t.Context(), "test", nil)
+		if got != result || err != nil {
+			t.Fatalf("uncacheable result was not preserved: %v, %v", got, err)
+		}
+	}
 }
 
 func TestModernProtocolClient(t *testing.T) {
@@ -550,6 +603,87 @@ func TestExplicitNullStructuredContent(t *testing.T) {
 	structured, ok := callResponse.Result["structuredContent"]
 	if !ok || string(structured) != "null" {
 		t.Fatalf("explicit null was not returned: %#v", callResponse.Result)
+	}
+}
+
+func TestReadMissingResourceDoesNotCrashServer(t *testing.T) {
+	for _, protocolVersion := range []string{protocolVersion20260728, "2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"} {
+		t.Run(protocolVersion, func(t *testing.T) {
+			_, httpServer := newTestHTTPServer(t)
+			headers := map[string]string{"MCP-Protocol-Version": protocolVersion}
+			modern := protocolVersion == protocolVersion20260728
+			if !modern {
+				initialize := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"` + protocolVersion + `","capabilities":{},"clientInfo":{"name":"missing-resource","version":"1.0.0"}}}`
+				response := postMCP(t, httpServer.URL, initialize, nil)
+				sessionID := response.Header.Get("Mcp-Session-Id")
+				response.Body.Close()
+				if response.StatusCode != http.StatusOK || sessionID == "" {
+					t.Fatalf("unexpected initialize response: %d, session %q", response.StatusCode, sessionID)
+				}
+				headers["Mcp-Session-Id"] = sessionID
+				response = postMCP(t, httpServer.URL, `{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`, headers)
+				response.Body.Close()
+				if response.StatusCode != http.StatusAccepted {
+					t.Fatalf("unexpected initialized status: %d", response.StatusCode)
+				}
+			}
+
+			send := func(id int, method string, params map[string]any) *http.Response {
+				t.Helper()
+				if modern {
+					params["_meta"] = map[string]any{
+						"io.modelcontextprotocol/protocolVersion":    protocolVersion,
+						"io.modelcontextprotocol/clientCapabilities": map[string]any{},
+					}
+					headers["Mcp-Method"] = method
+					delete(headers, "Mcp-Name")
+					if uri, ok := params["uri"].(string); ok {
+						headers["Mcp-Name"] = uri
+					}
+				}
+				body, err := json.Marshal(map[string]any{"jsonrpc": "2.0", "id": id, "method": method, "params": params})
+				if err != nil {
+					t.Fatal(err)
+				}
+				return postMCP(t, httpServer.URL, string(body), headers)
+			}
+			// Modern requests are stateless and must also be safe without initialize.
+			response := send(2, "resources/read", map[string]any{"uri": "siyuan://doc/missing"})
+			wantStatus := http.StatusOK
+			if modern {
+				wantStatus = http.StatusBadRequest
+			}
+			if response.StatusCode != wantStatus {
+				response.Body.Close()
+				t.Fatalf("unexpected resources/read status: %d", response.StatusCode)
+			}
+			var errorResponse struct {
+				Error struct {
+					Code    int64  `json:"code"`
+					Message string `json:"message"`
+				} `json:"error"`
+			}
+			decodeResponse(t, response, &errorResponse)
+			if errorResponse.Error.Code != mcpsdk.CodeResourceNotFound || errorResponse.Error.Message != "Resource not found" {
+				t.Fatalf("unexpected resources/read error: %#v", errorResponse.Error)
+			}
+
+			response = send(3, "tools/list", map[string]any{})
+			if response.StatusCode != http.StatusOK {
+				response.Body.Close()
+				t.Fatalf("unexpected subsequent tools/list status: %d", response.StatusCode)
+			}
+			var listResponse struct {
+				Result struct {
+					Tools      []*mcpsdk.Tool `json:"tools"`
+					CacheScope string         `json:"cacheScope"`
+				} `json:"result"`
+			}
+			decodeResponse(t, response, &listResponse)
+			if !toolListContains(listResponse.Result.Tools, "echo") || listResponse.Result.CacheScope != "private" {
+				t.Fatalf("unexpected subsequent tools/list result: %#v", listResponse.Result)
+			}
+		})
 	}
 }
 

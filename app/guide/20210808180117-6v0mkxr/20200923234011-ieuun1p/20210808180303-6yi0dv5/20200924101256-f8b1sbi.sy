@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20200924101256-f8b1sbi",
-		"title": "Ref Content Block",
+		"title": "Reference content blocks",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20261015221015"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -33,12 +33,41 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220623200920-67ob14v",
-				"updated": "20220623201408"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After entering "
+					"Data": "Block references link to existing content so that the same note can be used in different contexts. A reference appears as clickable anchor text; hovering over it previews the referenced block."
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-2skrjys",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-2skrjys",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Insert a reference"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-j5aiqzx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-j5aiqzx",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Type "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -47,8 +76,27 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the content block reference search will be triggered. Continue to input as the search keyword. In the search results, use the up and down keys to select and press Enter to complete the content block reference. After the content block reference is established, hover the mouse. After the anchor text is placed, the preview layer will pop up, showing the referenced content block (definition block). "
+					"Data": " in the editor, then enter keywords to find a block. Use the up and down arrow keys to select a result and press "
 				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to insert the reference."
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-375t61d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-375t61d",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -57,11 +105,26 @@
 			]
 		},
 		{
+			"ID": "20261024163828-lzw145z",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-lzw145z",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Create and reference a document"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
 			"ID": "20260927091603-y3kej6k",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927091603-y3kej6k",
-				"updated": "20260927183214"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -93,16 +156,45 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the reference suggestions to select a notebook root or a parent document. Confirm to create the document there and insert its reference at the original position. This location applies only to this creation and does not change the default save path. Canceling creates no document. This is available on desktop and mobile. This action is also available when binding or rebinding a database entry. The entry is bound to the new document only after the document has been created successfully; canceling or a creation failure leaves the original binding unchanged."
+					"Data": " in the reference suggestions to select a notebook root or a parent document. Confirm to create the document there and insert its reference at the original position. This location applies only to this creation and does not change the default save path."
 				}
 			]
+		},
+		{
+			"ID": "20261024161816-s5676uo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-s5676uo",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Canceling creates no document. This is available on desktop and mobile. This action is also available when binding or rebinding a database entry. The entry is bound to the new document only after the document has been created successfully; canceling or a creation failure leaves the original binding unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-szunoty",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-szunoty",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic closing and completion"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261014130425-k3pzlyv",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-k3pzlyv",
-				"updated": "20261015221015"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -143,7 +235,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " enables automatic closing, which is off by default. When enabled, typing [[ or 【【 inserts the matching ]] or 】】 after the caret. Typing the two closing brackets skips them and completes the reference. Selecting a candidate with Enter also replaces the closing brackets; Backspace inside an empty [[]] or 【【】】 deletes the entire pair."
+					"Data": " enables automatic closing, which is off by default. When enabled, typing [[ or 【【 inserts the matching ]] or 】】 after the caret."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-9kl4yx2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-9kl4yx2",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Typing the two closing brackets skips them and completes the reference. Selecting a candidate with Enter also replaces the closing brackets; Backspace inside an empty [[]] or 【【】】 deletes the entire pair."
 				}
 			]
 		},
@@ -152,12 +258,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-jqqpiql",
-				"updated": "20261014223520"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Completing a reference with ]] or 】】 first looks for a document with an exactly matching title, then a title matching without regard to case, then a matching daily note. If none match, a document is created at the configured location for reference creation. This does not apply in inline code, code blocks or inline math. Input method text is handled after it is committed, and closing brackets already supplied by the input method are preserved."
+					"Data": "Completing a reference with ]] or 】】 first looks for a document with an exactly matching title, then a title matching without regard to case, then a matching daily note. If none match, a document is created at the configured location for reference creation."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-a6pp30k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-a6pp30k",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This does not apply in inline code, code blocks or inline math. Input method text is handled after it is committed, and closing brackets already supplied by the input method are preserved."
 				}
 			]
 		},
@@ -167,7 +287,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091542-v1yca4p",
-				"updated": "20210512154424"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -260,12 +380,13 @@
 			"ID": "20210104091542-hbzfsn5",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091542-hbzfsn5"
+				"id": "20210104091542-hbzfsn5",
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The forward link is included in the content of the current block, which we can see intuitively. Backlinks need to be searched in other documents to know, and it is precisely this information that is more valuable to us. We can use the following two ways to help us better grasp the knowledge points or diverge ideas:"
+					"Data": "Forward links appear in the current content. Backlinks let you see which other content refers to the current block. You can explore these connections in two ways:"
 				}
 			]
 		},
@@ -357,6 +478,90 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-4f7jodf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-4f7jodf",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filter backlinks by database fields"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-rl5m4fh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-rl5m4fh",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the backlink panel or bottom backlinks, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Filter backlink sources"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Database fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to select a database containing the source blocks and configure combined field conditions. Only sources bound to that database and matching the conditions are shown."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-bsi0cti",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-bsi0cti",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "With no field conditions, all backlink sources bound to the selected database are shown. The database view filters and mentions remain unchanged. This is available on desktop and mobile."
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-hnpzneg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-hnpzneg",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To clear only the database conditions, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reset"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the database menu. Other source filters remain active."
 				}
 			]
 		},
@@ -751,7 +956,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230420123242-xsz318y",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -765,7 +970,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230518100549-bu599ue",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -788,7 +993,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -797,7 +1002,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​: "
+					"Data": ": "
 				}
 			]
 		},

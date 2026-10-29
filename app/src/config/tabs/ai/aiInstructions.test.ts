@@ -1,8 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import test from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 const setup = () => {
     const button = {disabled: false};
@@ -16,11 +15,7 @@ const setup = () => {
     const requests: {content: string, revision: string}[] = [];
     const messages: string[] = [];
     let finish: (success: boolean) => void;
-    const exports = {} as {openAgentInstructions: () => void};
-    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiInstructions.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-    }).outputText, {
-        exports,
+    const exports = loadModule<{openAgentInstructions: () => void}>("src/config/tabs/ai/aiInstructions.ts", {
         TextEncoder,
         window: {siyuan: {languages: {agentInstructionsTooLarge: "too large"}}},
         require: (name: string) => {
@@ -44,7 +39,7 @@ const setup = () => {
             }
             throw new Error(name);
         },
-    });
+    }, ScriptTarget.ES2020);
     exports.openAgentInstructions();
     return {button, input, requests, messages, options: () => options, closed: () => closed,
         save: (content: string) => options.onConfirm(content, dialog), finish: (success: boolean) => finish(success)};

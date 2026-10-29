@@ -54,6 +54,8 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
     const presentation: string[] = [];
     const attributes: Array<(ready: boolean) => void> = [];
     const toolbar = {value: "Document"};
+    const bottomBacklink = {close: (): Promise<void> | undefined => undefined, updates: 0};
+    let clearedSearchHighlights = 0;
     const window: any = {siyuan: {
         storage: {positions: {root: clone(legacy)}},
         config: {editor: {dynamicLoadBlocks: 128, databaseAttrShow: true}, fileTree: {}}, mobile: {},
@@ -138,6 +140,9 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "./util/mobileTopBar": {restoreMobileTopBarLayout: noop},
         "./util/MobileEditorDialog": {closeMobileEditorSheets: noop},
         "./util/openReference": {invalidateMobileReferenceOpen: noop},
+        "./menu/searchHighlight": {clearMobileSearchHighlight: () => { clearedSearchHighlights++; }},
+        "./util/bottomBacklink": {closeMobileBottomBacklinkPanel: () => bottomBacklink.close(),
+            updateMobileBottomBacklinkPanel: () => { bottomBacklink.updates++; return Promise.resolve(); }},
     });
     const load = (scrollAttr?: IScrollAttr) => new Promise<any>((resolve, reject) => {
         loader.loadMobileFileById({}, "root", [constants.CB_GET_SCROLL], undefined, notebookID, resolve,
@@ -151,9 +156,25 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
                 resolve(false);
             }, false, true);
     });
-    return {load, switchRow, requests, rendered, constructed, window, presentation, attributes,
+    return {load, switchRow, requests, rendered, constructed, window, presentation, attributes, bottomBacklink,
+        get clearedSearchHighlights() { return clearedSearchHighlights; },
         get docRequest() { return requests.filter(item => item.url === "/api/filetree/getDoc").at(-1)?.data; }};
 };
+
+test("mobile document loading waits for bottom backlink input before reusing the editor", async () => {
+    const state = setup();
+    let saved: () => void;
+    const pending = new Promise<void>(resolve => { saved = resolve; });
+    state.bottomBacklink.close = () => pending;
+    const loading = state.load();
+    assert.equal(state.clearedSearchHighlights, 1);
+    assert.equal(state.requests.length, 0);
+    state.bottomBacklink.close = () => undefined;
+    saved();
+    await loading;
+    assert.ok(state.requests.length > 0);
+    assert.equal(state.bottomBacklink.updates, 1);
+});
 
 test("cold mobile loading restores the tab's top instead of the document's old bottom", async () => {
     const state = setup(position(8000, {startId: "old-first", endId: "old-last"}));

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -6,6 +10,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,6 +20,52 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+type assetRelinkTryLockFunc func() bool
+
+func (try assetRelinkTryLockFunc) TryLock() bool { return try() }
+
+func TestAssetRelinkLockCancelsWhileDocumentReadIsActive(t *testing.T) {
+	var lock sync.RWMutex
+	lock.RLock()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	attempted := make(chan struct{}, 1)
+	go func() {
+		done <- lockAssetRelink(ctx, assetRelinkTryLockFunc(func() bool {
+			acquired := lock.TryLock()
+			if !acquired {
+				select {
+				case attempted <- struct{}{}:
+				default:
+				}
+			}
+			return acquired
+		}))
+	}()
+	select {
+	case <-attempted:
+	case <-time.After(5 * time.Second):
+		t.Fatal("write lock was not attempted while the document read was active")
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("read-blocked write ignored cancellation: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("read-blocked write did not cancel")
+	}
+	lock.RUnlock()
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := lockAssetRelink(ctx, &lock); err != nil {
+		t.Fatalf("write lock was not available after the document read: %v", err)
+	}
+	lock.Unlock()
+}
 
 func TestAssetRelinkBatchPreflight(t *testing.T) {
 	setupAssetRelinkTest(t)

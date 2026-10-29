@@ -2,11 +2,11 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const {compileAnchoredInputRuntime} = require("./fixtures/anchoredInputRuntime.cjs");
 
 const runCases = async (source, css) => {
     const assert = require("node:assert/strict");
-    const exports = {};
-    new Function("exports", source)(exports);
+    const exports = new Function("return " + source)();
     const style = document.createElement("style");
     style.textContent = css;
     document.head.append(style);
@@ -86,10 +86,7 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             await win.loadURL("data:text/html,<html><body></body></html>");
-            const ts = require("typescript");
-            const source = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog/anchoredInputPosition.ts"), "utf8"), {
-                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-            }).outputText;
+            const source = compileAnchoredInputRuntime("./anchoredInputPosition");
             const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/component/_text-field.scss")).css;
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`);
         } catch (error) {

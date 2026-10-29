@@ -556,6 +556,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         max-width: 100%;
         padding: 2px 4px;
 
+        & > .protyle-icons[data-entry-hidden="true"],
+        & > .protyle-wysiwyg__embed > .protyle-icons[data-entry-hidden="true"] {
+          display: none;
+        }
+
         /* 选中块的高亮覆盖 border */
         &.protyle-wysiwyg--select::after,
         &.protyle-wysiwyg--select-mode::after,

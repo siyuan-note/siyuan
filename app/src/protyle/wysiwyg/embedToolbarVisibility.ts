@@ -1,6 +1,32 @@
+import {isEntryVisible} from "../../config/entryVisibility/runtime";
+import {genRenderFrame} from "../render/util";
+
 const EMBED_SELECTOR = '[data-type="NodeBlockQueryEmbed"]';
 const HIDDEN_CLASS = "protyle-icons--editing-obscured";
 const PROXIMITY = 12;
+
+export const genEmbedRenderFrame = (element: Element) => {
+    genRenderFrame(element);
+    renderEmbedToolbarVisibility(element);
+};
+
+export const renderEmbedToolbarVisibility = (root: Element) => {
+    const visible = window.siyuan.isPublish || isEntryVisible("editor.blockEmbed.toolbar");
+    const embeds = Array.from(root.querySelectorAll(EMBED_SELECTOR));
+    if (root.matches(EMBED_SELECTOR)) {
+        embeds.unshift(root);
+    }
+    embeds.forEach(embed => {
+        embed.querySelectorAll(":scope > .protyle-icons, :scope > .protyle-wysiwyg__embed > .protyle-icons")
+            .forEach(toolbar => {
+                if (visible) {
+                    toolbar.removeAttribute("data-entry-hidden");
+                } else {
+                    toolbar.setAttribute("data-entry-hidden", "true");
+                }
+            });
+    });
+};
 
 const getToolbar = (element: Element | null): HTMLElement | null => {
     const embed = element?.closest(EMBED_SELECTOR);
@@ -15,6 +41,8 @@ const isNearToolbar = (rect: DOMRect, toolbar: HTMLElement): boolean => {
 
 export const bindEmbedToolbarVisibility = (root: HTMLElement): (() => void) => {
     let caretToolbar: HTMLElement | null = null;
+    const onEntryVisibility = () => renderEmbedToolbarVisibility(root);
+    onEntryVisibility();
 
     const onSelectionChange = () => {
         const previous = caretToolbar;
@@ -47,9 +75,11 @@ export const bindEmbedToolbarVisibility = (root: HTMLElement): (() => void) => {
 
     document.addEventListener("selectionchange", onSelectionChange);
     root.addEventListener("focusout", onFocusOut);
+    window.addEventListener("siyuan-entry-visibility", onEntryVisibility);
     return () => {
         document.removeEventListener("selectionchange", onSelectionChange);
         root.removeEventListener("focusout", onFocusOut);
+        window.removeEventListener("siyuan-entry-visibility", onEntryVisibility);
         caretToolbar?.classList.remove(HIDDEN_CLASS);
     };
 };

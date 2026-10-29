@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 type SettingSnpt struct {
@@ -249,11 +253,13 @@ type SettingEditor struct {
 	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
 	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
 	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
-	ListLogicalOutdent              bool                 `json:"listLogicalOutdent" api:"optional,nullable"`
-	ListItemDotNumberClickFocus     bool                 `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
-	FloatWindowMode                 int                  `json:"floatWindowMode" api:"optional,nullable"`
-	FloatWindowDelay                *int                 `json:"floatWindowDelay" api:"optional,nullable"`
-	KeepLoadedContent               bool                 `json:"keepLoadedContent" api:"optional,nullable"`
+	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
+	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`
+	ListLogicalOutdent             bool  `json:"listLogicalOutdent" api:"optional,nullable"`
+	ListItemDotNumberClickFocus    bool  `json:"listItemDotNumberClickFocus" api:"optional,nullable"`
+	FloatWindowMode                int   `json:"floatWindowMode" api:"optional,nullable"`
+	FloatWindowDelay               *int  `json:"floatWindowDelay" api:"optional,nullable"`
+	KeepLoadedContent              bool  `json:"keepLoadedContent" api:"optional,nullable"`
 	// PageScrollButtons 控制翻屏按钮，默认关闭，不迁移旧的本地偏好。
 	PageScrollButtons bool `json:"pageScrollButtons" api:"optional,nullable"`
 	DynamicLoadBlocks int  `json:"dynamicLoadBlocks" api:"optional,nullable"`
@@ -267,23 +273,30 @@ type SettingEditor struct {
 	HashTagSearch       *bool    `json:"hashTagSearch" api:"optional,nullable"`
 	OnlySearchForDoc    bool     `json:"onlySearchForDoc" api:"optional,nullable"`
 	// AutoCloseRefBrackets 默认关闭；启用后输入 [[ 自动补全 ]]，输入 ]] 时引用同名文档、日记或新建文档。
-	AutoCloseRefBrackets    bool             `json:"autoCloseRefBrackets" api:"optional,nullable"`
-	BacklinkExpandCount     int              `json:"backlinkExpandCount" api:"optional,nullable"`
-	BackmentionExpandCount  int              `json:"backmentionExpandCount" api:"optional,nullable"`
-	BacklinkMentionExclude  string           `json:"backlinkMentionExclude" api:"optional,nullable"`
-	BacklinkContainChildren bool             `json:"backlinkContainChildren" api:"optional,nullable"`
-	BacklinkHideReference   bool             `json:"backlinkHideReference" api:"optional,nullable"`
-	BacklinkShowBottom      bool             `json:"backlinkShowBottom" api:"optional,nullable"`
-	BacklinkSort            *int             `json:"backlinkSort" api:"optional,nullable"`
-	BacklinkGlobalSort      int              `json:"backlinkGlobalSort" api:"optional,nullable"`
-	BacklinkBlockSort       int              `json:"backlinkBlockSort" api:"optional,nullable"`
-	BackmentionSort         *int             `json:"backmentionSort" api:"optional,nullable"`
-	HeadingNumber           bool             `json:"headingNumber" api:"optional,nullable"`
-	HeadingNumberFormat     string           `json:"headingNumberFormat" api:"optional,nullable"`
-	HeadingEmbedMode        int              `json:"headingEmbedMode" api:"optional,nullable"`
-	PasteURLAutoConvert     bool             `json:"pasteURLAutoConvert" api:"optional,nullable"`
-	DragHTMLFileToIframe    bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
-	Markdown                *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+	AutoCloseRefBrackets    bool   `json:"autoCloseRefBrackets" api:"optional,nullable"`
+	BacklinkExpandCount     int    `json:"backlinkExpandCount" api:"optional,nullable"`
+	BackmentionExpandCount  int    `json:"backmentionExpandCount" api:"optional,nullable"`
+	BacklinkMentionExclude  string `json:"backlinkMentionExclude" api:"optional,nullable"`
+	BacklinkContainChildren bool   `json:"backlinkContainChildren" api:"optional,nullable"`
+	BacklinkHideReference   bool   `json:"backlinkHideReference" api:"optional,nullable"`
+	BacklinkShowBottom      bool   `json:"backlinkShowBottom" api:"optional,nullable"`
+	BacklinkSort            *int   `json:"backlinkSort" api:"optional,nullable"`
+	BacklinkGlobalSort      int    `json:"backlinkGlobalSort" api:"optional,nullable"`
+	BacklinkBlockSort       int    `json:"backlinkBlockSort" api:"optional,nullable"`
+	BackmentionSort         *int   `json:"backmentionSort" api:"optional,nullable"`
+	HeadingNumber           bool   `json:"headingNumber" api:"optional,nullable"`
+	HeadingNumberFormat     string `json:"headingNumberFormat" api:"optional,nullable"`
+	HeadingEmbedMode        int    `json:"headingEmbedMode" api:"optional,nullable"`
+	PasteURLAutoConvert     bool   `json:"pasteURLAutoConvert" api:"optional,nullable"`
+	// MathDelimiterCompatibility defaults to true, including existing configurations without this field.
+	// Only pasted HTML/Markdown and imported Markdown recognize \(...\) and \[...\]; editing and exports retain the existing syntax.
+	MathDelimiterCompatibility *bool            `json:"mathDelimiterCompatibility" api:"optional,nullable"`
+	DragHTMLFileToIframe       bool             `json:"dragHTMLFileToIframe" api:"optional,nullable"`
+	Markdown                   *SettingMarkdown `json:"markdown" api:"optional,nullable"`
+
+	// 文档顶部与独立条目面板的字段布局：0 单栏，1 双栏按行（默认），2 双栏按列；空间不足时使用单栏。
+	// 省略保留当前值，null 或越界整数恢复默认，按列时按可见字段数量均分，奇数时左栏多一个。
+	DatabaseAttrLayout *int `json:"databaseAttrLayout" api:"optional,nullable"`
 }
 
 type SettingEditorFont struct {
@@ -343,6 +356,8 @@ type SettingFileTree struct {
 	AlwaysSelectOpenedFile bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
 	OpenFilesUseCurrentTab bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
 	CloseTabOnDoubleClick  bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	// 默认 true；关闭或移走独立桌面窗口的最后一个页签后关闭该窗口，不影响主窗口。省略时保留现值，null 恢复默认。
+	CloseWindowOnLastTabClosed *bool `json:"closeWindowOnLastTabClosed" api:"optional,nullable"`
 	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
 	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
 	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
@@ -418,6 +433,8 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
+	// LockScreenWallpaper 默认关闭；图片单独保存在 conf/lockscreen/wallpaper.jpg，不进入设置导出或笔记同步。
+	LockScreenWallpaper bool `json:"lockScreenWallpaper" api:"optional,nullable"`
 	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。
 	// 重置外观设置时恢复默认；紧凑模式与菜单鼠标滚动默认关闭，新建空工作空间的菜单鼠标滚动默认开启。
 	CompactMode              bool                      `json:"compactMode" api:"optional,nullable"`

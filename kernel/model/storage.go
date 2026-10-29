@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -20,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -60,7 +47,10 @@ func SetLocalStorageVals(keyVals map[string]any) (setKeyVals map[string]any, err
 	defer localStorageLock.Unlock()
 
 	setKeyVals = make(map[string]any, len(keyVals))
-	localStorage := getLocalStorage()
+	localStorage, err := readLocalStorage()
+	if err != nil {
+		return nil, err
+	}
 	for k, v := range keyVals {
 		if v == nil {
 			err = fmt.Errorf("local storage value for key [%s] must not be empty", k)
@@ -77,16 +67,14 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
-	localStorage := getLocalStorage()
+	localStorage, err := readLocalStorage()
+	if err != nil {
+		return err
+	}
 	for _, key := range keys {
 		delete(localStorage, key)
 	}
 	return setLocalStorage(localStorage)
-}
-
-func getLocalStorage() (ret map[string]any) {
-	ret, _ = readLocalStorage()
-	return
 }
 
 func readLocalStorage() (ret map[string]any, err error) {
@@ -333,6 +321,13 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	return getRecentDocs(sortBy)
 }
 
+// ClearRecentDocs 清空当前工作区的浏览、打开和关闭记录，后续访问继续记录。
+func ClearRecentDocs() error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return setRecentDocs([]*RecentDoc{})
+}
+
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
 	if !canPersistRecentDoc(rootID) {
@@ -547,7 +542,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		}
 
 		if merged, ok := mergedDocs[bt.RootID]; !ok {
-			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
+			doc.Title = documentTitleText(bt.BoxID, bt.RootID)
 			mergedDocs[bt.RootID] = doc
 			rootIDs = append(rootIDs, bt.RootID)
 		} else {
@@ -631,7 +626,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				}
 			}
 			// 获取文档标题
-			title := path.Base(bt.HPath)
+			title := documentTitleText(bt.BoxID, bt.RootID)
 			doc := &RecentDoc{
 				RootID: sqlBlock.ID,
 				Icon:   icon,

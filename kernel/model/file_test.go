@@ -1,24 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
 	"errors"
 	"maps"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -44,10 +33,11 @@ type fileOperationTestFixture struct {
 	childID    string
 }
 
-func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
+func setupFileOperationTest(t testing.TB) *fileOperationTestFixture {
 	originalConf := Conf
 	originalDataDir := util.DataDir
 	originalBlockTreeDBPath := util.BlockTreeDBPath
+	originalQueueDir := util.QueueDir
 	const testLang = "file-operation-test"
 	originalTimeLang, hadTimeLang := util.TimeLangs[testLang]
 	util.TimeLangs[testLang] = map[string]any{
@@ -59,6 +49,7 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	tempDir := t.TempDir()
 	util.DataDir = filepath.Join(tempDir, "data")
 	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
+	util.QueueDir = t.TempDir()
 	Conf = NewAppConf()
 	Conf.Lang = testLang
 	Conf.FileTree.Store(conf.NewFileTree())
@@ -103,6 +94,7 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 		Conf = originalConf
 		util.DataDir = originalDataDir
 		util.BlockTreeDBPath = originalBlockTreeDBPath
+		util.QueueDir = originalQueueDir
 		if "" != originalBlockTreeDBPath {
 			treenode.InitBlockTree(false)
 		}
@@ -179,6 +171,39 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 			}
 			t.Fatalf("document [%s] was not listed", fixture.sourceID)
 		})
+	}
+}
+
+func TestDocIALPreservesUnsupportedSpec(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	originalWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	for _, source := range []string{
+		`{"Spec":"999","Properties":{"title":"Future"}}`,
+		`{"Properties":{"title":"Future"},"Spec":"999"}`,
+		`{"Spec":"999","Properties":{}}`,
+		`{"Properties":{"title":{"text":"Future"}},"Spec":"999"}`,
+		`{"Properties":{"title":"Invalid version"},"Spec":{}}`,
+	} {
+		cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+		if err := os.WriteFile(absPath, []byte(source), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if properties := fixture.box.docIAL(fixture.sourcePath); properties != nil {
+			t.Fatalf("unsupported source returned properties: %v", properties)
+		}
+		retained, err := os.ReadFile(absPath)
+		if err != nil || string(retained) != source {
+			t.Fatalf("unsupported source was changed or quarantined: %v", err)
+		}
+		if properties := cache.GetDocIALInBox(fixture.sourcePath, fixture.box.ID); properties != nil {
+			t.Fatalf("unsupported source published cached properties: %v", properties)
+		}
+		if _, err = os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(err) {
+			t.Fatalf("version error entered corruption recovery: %v", err)
+		}
 	}
 }
 

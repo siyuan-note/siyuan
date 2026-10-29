@@ -47,7 +47,7 @@ export const openMobilePDF = (path: string, pdfParams?: number | string) => {
 
     openModel({
         title,
-        html: getPdfViewerHTML(),
+        html: getPdfViewerHTML({maximize: false}),
         bindEvent: (element) => {
             modelElement = element;
             element.classList.add("pdf-viewer--mobile");

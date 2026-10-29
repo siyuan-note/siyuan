@@ -1,22 +1,17 @@
 import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 
 test("selection conditions with the same path read only their own editor options", () => {
-    const methods = {} as typeof import("./filter");
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/filter.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
         document: {querySelector: () => assert.fail("must not read another condition's options")},
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./view": {getFieldsByData: () => [{id: "choice", type: "mSelect"}]},
             "./cell": {genCellValue: (type: string, mSelect: IAVCellSelectValue[]) => ({type, mSelect})},
         })[name] || {}),
-    });
+    }, ScriptTarget.ES2022);
     for (const selected of [[], ["own option"]]) {
         const listeners = new Map<string, (event: unknown) => void>();
         const row = {dataset: {path: "0"}, querySelector: (selector: string) =>
@@ -43,14 +38,10 @@ test("selection conditions with the same path read only their own editor options
 });
 
 test("nested color conditions do not change the parent view filter, including capture events", () => {
-    const methods = {} as typeof import("./filter");
     const fields = [{id: "text", type: "text"}];
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/filter.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {
-        exports: methods,
+    const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "./view" ? {getFieldsByData: () => fields} : {}),
-    });
+    }, ScriptTarget.ES2022);
     const createEditor = () => {
         const listeners = new Map<string, Array<(event: unknown) => void>>();
         const panel = {

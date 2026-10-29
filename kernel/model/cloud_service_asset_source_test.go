@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -116,9 +120,9 @@ func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout f
 	if err = checkAssetDownloadAccess(); err == nil {
 		t.Fatal("cloud asset downloads accepted without a cloud session")
 	}
-	result := Login("different-owner", "unused-password", "", 1)
-	if result.Code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
-		t.Fatalf("cross-region login changed the source: result=%v, region=%d", result, util.CurrentCloudRegion)
+	_, code, _ := Login("different-owner", "unused-password", "", 1)
+	if code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
+		t.Fatalf("cross-region login changed the source: code=%d, region=%d", code, util.CurrentCloudRegion)
 	}
 	if err = DeactivateUser(); err == nil {
 		t.Fatal("account deactivation accepted despite undownloaded data")
@@ -129,9 +133,9 @@ func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout f
 	if err = validateCloudUserAssetSource(owner); !IsCloudAssetSourceChange(err) {
 		t.Fatalf("missing asset state was accepted during authentication: %v", err)
 	}
-	result = Login("different-owner", "unused-password", "", 1)
-	if result.Code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
-		t.Fatalf("cross-region login discarded a source with missing state: %v", result)
+	_, code, _ = Login("different-owner", "unused-password", "", 1)
+	if code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
+		t.Fatalf("cross-region login discarded a source with missing state: code=%d", code)
 	}
 	if _, err = os.Stat(filepath.Join(util.RepoDir, "asset-downloads-v1")); err != nil {
 		t.Fatalf("missing-state protection removed the repository marker: %v", err)

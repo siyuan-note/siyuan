@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261018104335"
+		"updated": "20261027140312"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170025-2kdbnc8",
-				"updated": "20260926163337"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260926163337-6d5c7t2",
-				"updated": "20260926163337"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -232,12 +232,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-lzrrvoq",
-				"updated": "20260926163337"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Instructions are stored in data/ai/AGENTS.md inside the workspace as UTF-8 text, up to 32 KiB. The file syncs with the workspace when data sync is enabled and no sync ignore rule excludes it. You can also edit the file directly with a text editor. A missing or empty file adds no custom instructions."
+					"Data": "Instructions are stored in data/storage/ai/AGENTS.md inside the workspace as UTF-8 text, up to 32 KiB. The file syncs with the workspace when data sync is enabled and no sync ignore rule excludes it. You can also edit the file directly with a text editor."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-vhlrtdj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-vhlrtdj",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A missing or empty file adds no custom instructions. The old data/ai/AGENTS.md remains readable and moves to the new location when you save in settings. Update any sync ignore rules for the old path before saving."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-kjec0ei",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-kjec0ei",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If both files exist with different contents, merge them into the new file and remove the old file before continuing."
 				}
 			]
 		},
@@ -246,12 +274,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260926163337-5cpn50j",
-				"updated": "20260926163337"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Saved changes take effect on the next conversation turn. Tool calls and context compaction in an ongoing turn keep the snapshot read at the start of that turn. Instructions count toward the model context. Your current message can override general preferences, but instructions cannot bypass tool permissions, approvals, or access controls. Notebook and document inheritance are not supported, and notes or attachments with the same name are not loaded automatically."
+					"Data": "Saved changes take effect on the next conversation turn. Tool calls and context compaction in an ongoing turn keep the snapshot read at the start of that turn. Instructions count toward the model context."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-4h9t814",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-4h9t814",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Your current message can override general preferences, but instructions cannot bypass tool permissions, approvals, or access controls. Notebook and document inheritance are not supported, and notes or attachments with the same name are not loaded automatically."
 				}
 			]
 		},
@@ -275,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261016191345"
+				"updated": "20261027140312"
 			},
 			"Children": [
 				{
@@ -496,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20260816114944"
+				"updated": "20261027140312"
 			},
 			"Children": [
 				{
@@ -551,12 +593,99 @@
 			]
 		},
 		{
+			"ID": "20261022182404-71cve53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-71cve53",
+				"updated": "20261027140312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The input grows automatically as you add text and images, then scrolls when it reaches the height available in the panel. On desktop, hover over the input to reveal the small handle at the top; it remains visible on touch screens."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-w2e9juj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-w2e9juj",
+				"updated": "20261027140312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the handle upward or downward to set a fixed height for the current message, even when the input is empty. The minimum height fits a complete line of text, and the maximum depends on the available panel space. Sending a message returns the cleared input to its initial height and restores automatic sizing for the next message. Double-click the handle to restore automatic sizing while composing. Space above and below the content makes the first and last lines easier to inspect."
+				}
+			]
+		},
+		{
+			"ID": "20261022182404-jbp15g8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022182404-jbp15g8",
+				"updated": "20261024153700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "With the height handle focused, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to increase or decrease the height, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Home"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for the minimum, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "End"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for the maximum available height. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " during a drag to cancel it."
+				}
+			]
+		},
+		{
 			"ID": "20260804170041-m6wpz84",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170041-m6wpz84",
-				"updated": "20261016191345"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -570,12 +699,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170042-d73n5cg",
-				"updated": "20261016191345"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Read and search operations usually run immediately. Operations that create, modify, move, delete, or import data display a confirmation card that identifies possible local writes, data egress, and external charges. You can approve, reject, or select "
+					"Data": "Read and search operations usually run immediately. Operations that create, modify, move, delete, or import data display a confirmation card that identifies possible local writes, data egress, and external charges."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-ks250n7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-ks250n7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can approve, reject, or select "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -846,12 +989,26 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-1c4wqjk",
-				"updated": "20260812170000"
+				"updated": "20261026182137"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "MCP services"
+				}
+			]
+		},
+		{
+			"ID": "20261026182137-wjxw9c7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026182137-wjxw9c7",
+				"updated": "20261026182137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "External MCP tools load on demand. The agent initially receives only a service list and loads a service's tool definitions when needed; those tools become available in the next model request. You can name the service you want to use in your message. Loading lasts only for the current user request and its tool rounds; the next user message starts unloaded. Multiple services can be loaded without a fixed count limit, and the model can unload services it no longer needs to save context. Disabled tools stay unavailable and execution approval policies still apply. Disable the built-in mcp tool in agent capability settings to send all external tool definitions again; re-enable it to restore on-demand loading."
 				}
 			]
 		},
@@ -916,12 +1073,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-8tp1qi0",
-				"updated": "20260812170000"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A stdio service inherits only the kernel environment variables selected by the user and reads their current values whenever it starts. Its environment variable entries can also reference secrets and variables. Referencing a secret provides its plaintext value to the program and its child processes; directly entered values are stored in plaintext. HTTP services that require authorization guide you through OAuth. Store reusable secrets and parameters in "
+					"Data": "A stdio service inherits only the kernel environment variables selected by the user and reads their current values whenever it starts. Its environment variable entries can also reference secrets and variables. Referencing a secret provides its plaintext value to the program and its child processes; directly entered values are stored in plaintext."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-avnc48c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-avnc48c",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTTP services that require authorization guide you through OAuth. Store reusable secrets and parameters in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -959,7 +1130,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261018102417-6nqgr74",
-				"updated": "20261018104335"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -988,7 +1159,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018104335-58saaee",
-				"updated": "20261018104335"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1020,7 +1191,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", choose the search and fetch providers separately. The defaults are Exa search and direct fetching. To use DeepSeek, enter a DeepSeek API Key shared by Search and Fetch; this setting is independent of your chat model. DeepSeek Search requests 5 results without page bodies, and limits each summary to 800 characters and total output to 8,000 characters. Fetch pages only when you need the full content."
+					"Data": ", choose the search and fetch providers separately. The defaults are Exa search and direct fetching. To use DeepSeek, enter a DeepSeek API Key shared by Search and Fetch; this setting is independent of your chat model."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-p3pr7o6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-p3pr7o6",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "DeepSeek Search requests 5 results without page bodies, and limits each summary to 800 characters and total output to 8,000 characters. Fetch pages only when you need the full content."
 				}
 			]
 		},
@@ -1029,12 +1214,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018104335-3wpzxw1",
-				"updated": "20261018104335"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "DeepSeek Search sends the query and DeepSeek Fetch sends the target URL to DeepSeek, without browser cookies or login state. These requests may incur charges. DeepSeek Fetch retrieves page content only; select direct fetching to download files. Invalid credentials, insufficient balance, rate limits and unavailable pages return errors without automatically switching providers. Review external requests according to your tool permission settings."
+					"Data": "DeepSeek Search sends the query and DeepSeek Fetch sends the target URL to DeepSeek, without browser cookies or login state. These requests may incur charges. DeepSeek Fetch retrieves page content only; select direct fetching to download files."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-s6brc0q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-s6brc0q",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Invalid credentials, insufficient balance, rate limits and unavailable pages return errors without automatically switching providers. Review external requests according to your tool permission settings."
 				}
 			]
 		},
@@ -1063,187 +1262,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "Rendered fetching requires the desktop instance to remain connected. Browser, mobile, and external MCP clients use the configured fetch provider. Empty pages and timeouts return errors; long results are truncated to 50,000 characters. Pages requiring login, embedded frames, workers, or persistent browser connections may still be unavailable."
-				}
-			]
-		},
-		{
-			"ID": "20260804170057-8amo72d",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20260804170057-8amo72d",
-				"updated": "20260804180000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Examples"
-				}
-			]
-		},
-		{
-			"ID": "20260804170058-j5x2ifw",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20260804170058-j5x2ifw",
-				"updated": "20260804180000"
-			},
-			"Children": [
-				{
-					"ID": "20260804170059-3y3lb5z",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170059-3y3lb5z",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170100-bj6cr8i",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170100-bj6cr8i",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Search recent meeting notes, summarize the action items, and write them to the specified project document"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170101-miajwkl",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170101-miajwkl",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170102-q3nbeyq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170102-q3nbeyq",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Create a structured summary from the selected blocks while preserving the key conclusions"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170103-61f1wna",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170103-61f1wna",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170104-vjgg5qe",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170104-vjgg5qe",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Create today's daily note and add three tasks for today"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170105-t9vxrzb",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170105-t9vxrzb",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170106-657jrfr",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170106-657jrfr",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Review the images in the current document and write a short description for each one"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804170107-7eio0wk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20260804170107-7eio0wk",
-						"updated": "20260804180000"
-					},
-					"Children": [
-						{
-							"ID": "20260804170108-8j31k9r",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804170108-8j31k9r",
-								"updated": "20260804180000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Check the current document using my writing-guidelines skill and list the required changes"
-								}
-							]
-						}
-					]
 				}
 			]
 		},
@@ -1443,6 +1461,187 @@
 				{
 					"Type": "NodeText",
 					"Data": "You can search snippet names and code, rename snippets, or request changes to part of a snippet. If snippets change while the management dialog is open, saving is rejected and your draft is retained; copy your edits, reopen the dialog, and merge them with the latest snippets."
+				}
+			]
+		},
+		{
+			"ID": "20260804170057-8amo72d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170057-8amo72d",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Examples"
+				}
+			]
+		},
+		{
+			"ID": "20260804170058-j5x2ifw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170058-j5x2ifw",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170059-3y3lb5z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170059-3y3lb5z",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170100-bj6cr8i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170100-bj6cr8i",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Search recent meeting notes, summarize the action items, and write them to the specified project document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170101-miajwkl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170101-miajwkl",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170102-q3nbeyq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170102-q3nbeyq",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a structured summary from the selected blocks while preserving the key conclusions"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170103-61f1wna",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170103-61f1wna",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170104-vjgg5qe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170104-vjgg5qe",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create today's daily note and add three tasks for today"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170105-t9vxrzb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170105-t9vxrzb",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170106-657jrfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170106-657jrfr",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Review the images in the current document and write a short description for each one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170107-7eio0wk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170107-7eio0wk",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170108-8j31k9r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170108-8j31k9r",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Check the current document using my writing-guidelines skill and list the required changes"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

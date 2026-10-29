@@ -1,6 +1,7 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // 本文件为加密笔记本的 AV 定义提供笔记本级存储与 DEK 加解密支持。
 // 与 filesys/crypto_hook.go 同模式：av 包不直接 import model（避免循环依赖），
 // 由 model 层在 init 时注入回调函数。
@@ -222,7 +223,9 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 func readMirrorBlocksWithErr(boxID string) (ret map[string][]string, err error) {
 	ret = map[string][]string{}
 	p := mirrorBlocksPath(boxID)
-	if !filelock.IsExist(p) {
+	if _, err = os.Stat(p); os.IsNotExist(err) {
+		return ret, nil
+	} else if err != nil {
 		return
 	}
 	data, err := filelock.ReadFile(p)
@@ -240,6 +243,9 @@ func readMirrorBlocksWithErr(boxID string) (ret map[string][]string, err error) 
 	}
 	if err = msgpack.Unmarshal(data, &ret); err != nil {
 		return
+	}
+	if ret == nil {
+		err = errors.New("invalid database mirror index")
 	}
 	return
 }

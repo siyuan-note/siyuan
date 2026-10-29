@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -8,6 +12,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -90,6 +95,21 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			source.Root.SetIALAttr(av.NodeAttrNameAvs, avID)
 			writeExportRelatedTestTree(t, source)
 			attrView := av.NewAttributeView(avID)
+			relationTargets := []*av.AttributeView{av.NewAttributeView(ast.NewNodeID()), av.NewAttributeView(ast.NewNodeID())}
+			archiveEntries := map[string][]byte{}
+			for _, target := range relationTargets {
+				key := av.NewKey(ast.NewNodeID(), "Related", "", av.KeyTypeRelation)
+				key.Relation = &av.Relation{AvID: target.ID}
+				attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
+				if err := av.SaveAttributeView(target); err != nil {
+					t.Fatal(err)
+				}
+				data, err := json.Marshal(target)
+				if err != nil {
+					t.Fatal(err)
+				}
+				archiveEntries["Daily/storage/av/"+target.ID+".json"] = data
+			}
 			values := attrView.GetBlockKeyValues()
 			for i, id := range []string{externalID, docID} {
 				itemID := ast.NewNodeID()
@@ -114,7 +134,9 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 				t.Fatal(err)
 			}
 			writer := zip.NewWriter(archive)
-			for path, data := range map[string][]byte{"Daily/" + docID + ".sy": docData, "Daily/storage/av/" + avID + ".json": avData} {
+			archiveEntries["Daily/"+docID+".sy"] = docData
+			archiveEntries["Daily/storage/av/"+avID+".json"] = avData
+			for path, data := range archiveEntries {
 				entry, createErr := writer.Create(path)
 				if createErr != nil {
 					t.Fatal(createErr)
@@ -158,6 +180,27 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			imported, err := av.ParseAttributeViewInBox(newAvID, avBoxID)
 			if err != nil {
 				t.Fatal(err)
+			}
+			relationCount := 0
+			for _, kv := range imported.KeyValues {
+				if kv.Key.Type != av.KeyTypeRelation {
+					continue
+				}
+				relationCount++
+				targetID := kv.Key.Relation.AvID
+				t.Cleanup(func() { av.SetAVBoxID(targetID, "") })
+				if targetID == relationTargets[0].ID || targetID == relationTargets[1].ID {
+					t.Fatal("relation target ID was not remapped")
+				}
+				if _, err := av.ParseAttributeViewInBox(targetID, avBoxID); err != nil {
+					t.Fatal(err)
+				}
+				if !slices.Contains(av.GetSrcAvIDs(targetID), newAvID) {
+					t.Fatalf("import omitted relation dependency %s -> %s", newAvID, targetID)
+				}
+			}
+			if relationCount != 2 {
+				t.Fatalf("imported %d relation fields, want 2", relationCount)
 			}
 			rows := imported.GetBlockKeyValues().Values
 			if len(rows) != 2 || rows[0].IsDetached != encrypted || rows[1].IsDetached || rows[1].Block.ID != newDocID ||

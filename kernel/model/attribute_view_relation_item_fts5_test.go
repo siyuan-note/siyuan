@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -97,7 +101,7 @@ func TestAttributeViewRelationItemCreation(t *testing.T) {
 		{"document", "Task document", "Task A", "Task document", av.NewItemTargetDocument, false},
 		{"input name", "Task from template", "  Task A  ", "Task A", av.NewItemTargetDetached, true},
 		{"document input name", "Task document", "Task A", "Task A", av.NewItemTargetDocument, true},
-		{"normalized document input", "Task document", "Task /A", "Task A", av.NewItemTargetDocument, true},
+		{"literal slash document input", "Task document", "Task /A", "Task /A", av.NewItemTargetDocument, true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var template *av.NewItemTemplate
@@ -128,7 +132,7 @@ func TestAttributeViewRelationItemCreation(t *testing.T) {
 			}
 			wantInput := strings.TrimSpace(test.keyword)
 			if test.target == av.NewItemTargetDocument {
-				wantInput = normalizeDocTitle(wantInput)
+				wantInput = normalizeDocumentTitle(wantInput)
 			}
 			if preview.InputPrimaryKey != wantInput {
 				t.Fatalf("input preview: got %q, want %q", preview.InputPrimaryKey, wantInput)

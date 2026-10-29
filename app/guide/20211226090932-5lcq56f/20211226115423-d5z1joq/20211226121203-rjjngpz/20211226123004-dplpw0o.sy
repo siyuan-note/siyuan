@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024161058"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-6aiti1c",
-				"updated": "20211225221841"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123024-sv70lot",
-				"updated": "20211228135113"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "範本片段用於在游標插入符位置快速插入之前設置好的文本內容，支援變量。範本片段使用 "
+					"Data": "範本片段用於在游標位置插入可重複使用的內容，支援變數和計算。範本以 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,7 +43,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後綴文件，存放在工作空間 data/templates 文件夾下。"
+					"Data": " 檔案儲存在工作空間的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 資料夾中。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-f1zrm53",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-f1zrm53",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立範本"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024161058-jn3vt2e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-jn3vt2e",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先在文檔中撰寫要重複使用的內容，再透過文檔選單的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "範本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 儲存，選擇名稱和儲存位置。需要修改範本時，可從範本管理中編輯原始碼並預覽；也可以返回來源文檔，修改後重新匯出。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-3wiifft",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-3wiifft",
+				"updated": "20250115153115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "調用範本"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-wtjurrr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-wtjurrr",
+				"updated": "20250115153115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在游標插入符位置，通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 選擇範本來觸發範本搜索，找到需要插入的範本後 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可。"
 				}
 			]
 		},
@@ -124,7 +227,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -279,7 +382,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -374,7 +477,7 @@
 					},
 					"Properties": {
 						"id": "20211226123024-l1jz2w8",
-						"updated": "20211226123024"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -382,13 +485,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123024-xx9l8ku",
-								"updated": "20211226123024"
+								"updated": "20261024161058"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
@@ -396,7 +495,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該變量用於插入當前文檔命名"
+									"Data": "：插入目前文檔區塊的命名屬性，與文檔標題 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 不同"
 								}
 							]
 						}
@@ -1729,53 +1837,6 @@
 			]
 		},
 		{
-			"ID": "20211226123024-3wiifft",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226123024-3wiifft",
-				"updated": "20250115153115"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "調用範本"
-				}
-			]
-		},
-		{
-			"ID": "20211226123024-wtjurrr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226123024-wtjurrr",
-				"updated": "20250115153115"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在游標插入符位置，通過 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 選擇範本來觸發範本搜索，找到需要插入的範本後 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "回車"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 即可。"
-				}
-			]
-		},
-		{
 			"ID": "20260904022100-yzmze6l",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1810,7 +1871,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tpltw01",
-				"updated": "20260830143000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1866,6 +1927,29 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-wcmkzp7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-wcmkzp7",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "執行此範例前，請在目前範本套件中建立 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "children/material.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。它是範例引用的子文檔內容範本；也可以將該路徑改為既有的範本路徑。"
 				}
 			]
 		},
@@ -1933,7 +2017,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tpltw07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1943,7 +2027,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 回傳建立計劃中的靜態子文檔描述清單；"
+					"Data": " 傳回建立計畫中的靜態子文件描述清單；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 根據文件 ID 傳回指向計畫文件的靜態區塊引用文字，不依賴標題或可讀路徑；"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1952,7 +2045,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 回傳指向計劃文檔的靜態區塊引用文字。"
+					"Data": " 為依可讀路徑查詢的相容入口。"
 				}
 			]
 		},

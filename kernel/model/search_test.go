@@ -1,23 +1,13 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
+	"context"
 	gosql "database/sql"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -27,8 +17,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestFullTextSearchRejectsCanceledRequest(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	for _, method := range []int{0, 1, 2, 3} {
+		blocks, matched, roots, pages, docMode := FullTextSearchBlock(BlockSearchOptions{
+			Context: ctx, Query: "alpha beta", Method: method, GroupBy: 1, Page: 1, PageSize: 1,
+		})
+		if len(blocks) != 0 || matched != 0 || roots != 0 || pages != 0 || docMode {
+			t.Fatalf("method %d returned a canceled result: %v %d %d %d %t", method, blocks, matched, roots, pages, docMode)
+		}
+	}
+	blocks := []*sql.Block{{ID: "must-not-format"}}
+	if got := fromSQLBlocksContext(ctx, &blocks, "alpha", 36); len(got) != 0 {
+		t.Fatalf("canceled result formatting returned %v", got)
+	}
+}
 
 func TestFromSQLBlockMapsTimestamps(t *testing.T) {
 	previousConf := Conf
@@ -586,9 +594,39 @@ func TestFromFTSAndHPathMatchSQLBlockMarksMatchSource(t *testing.T) {
 	}
 }
 
+func TestTrimDocumentTitleHPath(t *testing.T) {
+	for _, test := range []struct{ path, title, want string }{
+		{"Notebook/A/B", "A/B", "Notebook/"},
+		{"Notebook/Parent//A//B/", "A//B/", "Notebook/Parent//"},
+		{"Notebook/<mark>Parent/A</mark>/B", "A/B", "Notebook/<mark>Parent/</mark>"},
+		{"Notebook/<mark>Parent</mark>/A/<mark>B</mark>", "A/B", "Notebook/<mark>Parent</mark>/"},
+		{"Notebook/Parent/A&amp;B/&lt;C&gt;", "A&B/<C>", "Notebook/Parent/"},
+	} {
+		if got := trimDocumentTitleHPath(test.path, test.title); got != test.want {
+			t.Errorf("%q with %q: got %q, want %q", test.path, test.title, got, test.want)
+		}
+	}
+}
+
 func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	setSearchCaseSensitive(t, true)
+	previousPath := util.BlockTreeDBPath
+	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = previousPath
+	})
+	const boxID = "20260731120000-hpath00"
+	for id, title := range map[string]string{
+		"20260731120000-hpath01": "会员特权",
+		"20260731120001-hpath02": "会员特权",
+		"20260731120002-hpath03": "会员/特权",
+	} {
+		treenode.UpsertBlockTree(treenode.NewTree(boxID, "/"+id+".sy", "/"+title, title))
+	}
 	multipleKeywords := fromHPathSearchSQLBlock(&sql.Block{
+		Box:     boxID,
 		ID:      "20260731120000-hpath01",
 		RootID:  "20260731120000-hpath01",
 		HPath:   "/思源笔记用户指南/请/从这里开始/会员特权",
@@ -596,6 +634,7 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 		Type:    "d",
 	}, "从这里"+search.TermSep+"会员", 36)
 	singleKeyword := fromHPathSearchSQLBlock(&sql.Block{
+		Box:     boxID,
 		ID:      "20260731120001-hpath02",
 		RootID:  "20260731120001-hpath02",
 		HPath:   "/会员特权",
@@ -609,6 +648,10 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 			Type:  "NodeParagraph",
 			HPath: "/思源笔记用户指南/<mark>会员</mark>特权",
 		},
+		fromHPathSearchSQLBlock(&sql.Block{
+			Box: boxID, ID: "20260731120002-hpath03", RootID: "20260731120002-hpath03",
+			HPath: "/用户指南/会员/特权", Content: "会员/特权", Type: "d",
+		}, "会员", 36),
 	}
 
 	filterSelfHPath(blocks)
@@ -621,6 +664,9 @@ func TestFilterSelfHPathPreservesHighlight(t *testing.T) {
 	}
 	if expected := "/思源笔记用户指南/<mark>会员</mark>特权"; expected != blocks[2].HPath {
 		t.Fatalf("非文档块路径不应变化：got %q, want %q", blocks[2].HPath, expected)
+	}
+	if expected := "/用户指南/"; expected != blocks[3].HPath {
+		t.Fatalf("标题中的斜杠不应成为父路径：got %q, want %q", blocks[3].HPath, expected)
 	}
 }
 
@@ -850,7 +896,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 	}
 }
 
-func newSearchHPathTestDB(t *testing.T) *gosql.DB {
+func newSearchHPathTestDB(t testing.TB) *gosql.DB {
 	t.Helper()
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
 	if err != nil {
@@ -875,7 +921,7 @@ func insertSearchHPathTestBlock(t *testing.T, testDB *gosql.DB, id, rootID, hPat
 	}
 }
 
-func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
+func setSearchCaseSensitive(t testing.TB, caseSensitive bool) {
 	t.Helper()
 	previousConf := Conf
 	Conf = NewAppConf()

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -60,28 +48,17 @@ func getPackageInstallPath(pkgType, packageName string) (string, string, error) 
 		return "", "", errors.New("invalid package name")
 	}
 
-	var baseDir, jsonFileName string
-	switch pkgType {
-	case "plugins":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "plugins"), "plugin.json"
-	case "themes":
-		baseDir, jsonFileName = util.ThemesPath, "theme.json"
-	case "icons":
-		baseDir, jsonFileName = util.IconsPath, "icon.json"
-	case "templates":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "templates"), "template.json"
-	case "widgets":
-		baseDir, jsonFileName = filepath.Join(util.DataDir, "widgets"), "widget.json"
-	default:
+	layout, ok := bazaar.GetPackageLayout(pkgType)
+	if !ok {
 		logging.LogErrorf("invalid package type: %s", pkgType)
 		return "", "", errors.New("invalid package type")
 	}
 
-	installPath := filepath.Join(baseDir, packageName)
-	if !gulu.File.IsSubPath(baseDir, installPath) {
+	installPath := filepath.Join(layout.BasePath, packageName)
+	if !gulu.File.IsSubPath(layout.BasePath, installPath) {
 		return "", "", errors.New("invalid package name")
 	}
-	return installPath, jsonFileName, nil
+	return installPath, layout.Manifest, nil
 }
 
 // installMeta 记录安装前后的状态，供安装后处理使用
@@ -126,13 +103,22 @@ var (
 	localBazaarInstallLock            = semaphore.NewWeighted(1)
 )
 
-// updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
-func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, failedCount *int, planned int) {
+var installBazaarUpdate = installBazaarPackageContext
+
+// updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次。
+func updatePackages(ctx context.Context, packages []*UpdatedPackage, pkgType string, successCount, failedCount *int, planned int) error {
 	items := make([]batchInstallItem, 0, len(packages))
+	defer func() { finishInstall(pkgType, items, nil, true) }()
 	for _, updated := range packages {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		pkg := updated.Available
-		meta, err := installBazaarPackage(pkgType, pkg.RepoURL, pkg.RepoHash, pkg.RepoRef, pkg.Name)
+		meta, err := installBazaarUpdate(ctx, pkgType, pkg.RepoURL, pkg.RepoHash, pkg.RepoRef, pkg.Name)
 		if err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
 			logging.LogErrorf("update %s [%s] failed: %s", pkgType, pkg.Name, err)
 			util.PushErrMsg(fmt.Sprintf(Conf.language(238), pkg.Name), 5000)
 			*failedCount++
@@ -142,7 +128,7 @@ func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, fa
 		*successCount++
 		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount+*failedCount, planned, pkg.Name))
 	}
-	finishInstall(pkgType, items, nil, true)
+	return ctx.Err()
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
@@ -158,8 +144,11 @@ func filterUpdatableBazaarPackages(packages []*UpdatedPackage) (updatable []*Upd
 	return
 }
 
-// BatchUpdatePackages 更新所有集市包
-func BatchUpdatePackages(frontend string) error {
+// BatchUpdatePackagesContext 取消时保留已提交的包，并停止当前下载和后续更新。
+func BatchUpdatePackagesContext(ctx context.Context, frontend string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	plugins, widgets, icons, themes, templates, err := GetUpdatedPackages(frontend)
 	if err != nil {
 		return err
@@ -185,11 +174,14 @@ func BatchUpdatePackages(frontend string) error {
 	defer util.PushClearProgress()
 	successCount := 0
 	failedCount := 0
-	updatePackages(plugins, "plugins", &successCount, &failedCount, planned)
-	updatePackages(themes, "themes", &successCount, &failedCount, planned)
-	updatePackages(icons, "icons", &successCount, &failedCount, planned)
-	updatePackages(templates, "templates", &successCount, &failedCount, planned)
-	updatePackages(widgets, "widgets", &successCount, &failedCount, planned)
+	for _, group := range []struct {
+		packages []*UpdatedPackage
+		typeName string
+	}{{plugins, "plugins"}, {themes, "themes"}, {icons, "icons"}, {templates, "templates"}, {widgets, "widgets"}} {
+		if err = updatePackages(ctx, group.packages, group.typeName, &successCount, &failedCount, planned); err != nil {
+			return err
+		}
+	}
 
 	util.PushMsg(fmt.Sprintf(Conf.language(237), successCount, failedCount, unmetRequirementCount), 5000)
 	return nil
@@ -263,23 +255,14 @@ func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap
 
 // GetInstalledPackageInfos 获取本地集市包信息，并返回路径相关字段供调用方复用
 func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installedPackageInfo, basePath, baseURLPathPrefix string, err error) {
-	var jsonFileName string
-	switch pkgType {
-	case "plugins":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "plugins"), "plugin.json", "/plugins/"
-	case "themes":
-		basePath, jsonFileName, baseURLPathPrefix = util.ThemesPath, "theme.json", "/appearance/themes/"
-	case "icons":
-		basePath, jsonFileName, baseURLPathPrefix = util.IconsPath, "icon.json", "/appearance/icons/"
-	case "templates":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "templates"), "template.json", "/templates/"
-	case "widgets":
-		basePath, jsonFileName, baseURLPathPrefix = filepath.Join(util.DataDir, "widgets"), "widget.json", "/widgets/"
-	default:
+	layout, ok := bazaar.GetPackageLayout(pkgType)
+	if !ok {
 		logging.LogErrorf("invalid package type: %s", pkgType)
 		err = errors.New("invalid package type")
 		return
 	}
+	basePath, baseURLPathPrefix = layout.BasePath, layout.URLPath
+	jsonFileName := layout.Manifest
 
 	dirs, err := bazaar.ReadInstalledPackageDirs(basePath)
 	if err != nil {
@@ -546,11 +529,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
-// installBazaarPackage 下载并安装集市包
-func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
-	return installBazaarPackageContext(context.Background(), pkgType, repoURL, repoHash, repoRef, packageName)
-}
-
+// installBazaarPackageContext 下载并安装集市包，在提交前响应取消。
 func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
 	installPath, jsonFileName, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
@@ -560,7 +539,7 @@ func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins", Context: ctx}
+	options := bazaar.PackageInstallOptions{Context: ctx}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
@@ -761,6 +740,14 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 
 // UpdateBazaarPackage 使用在线集市数据更新本地集市包
 func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
+	return UpdateBazaarPackageContext(context.Background(), pkgType, packageName, frontend)
+}
+
+// UpdateBazaarPackageContext 保留在线索引的更新限制，并传递取消信号到安装提交前。
+func UpdateBazaarPackageContext(ctx context.Context, pkgType, packageName, frontend string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if _, _, err := getPackageInstallPath(pkgType, packageName); err != nil {
 		return err
 	}
@@ -775,7 +762,7 @@ func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
 		if updated.Available.DisallowUpdate {
 			return errors.New("marketplace package update is not allowed")
 		}
-		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash,
+		return InstallBazaarPackageContext(ctx, pkgType, updated.Available.RepoURL, updated.Available.RepoHash,
 			updated.Available.RepoRef, packageName, nil)
 	}
 	return errors.New("marketplace package update not found")

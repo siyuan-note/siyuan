@@ -182,7 +182,9 @@ test("missing table and image actions merge into saved orders while preserving p
         {path: "inline.text.more", added: ["cancelMerged"]},
         {path: "inline.image", added: ["openBy"]},
         {path: "gutter.single.copy", added: ["copyMirror"]},
-        {path: "gutter.single.blockEmbed", added: ["embedHeadingLevel"]},
+        {path: "gutter.single.blockEmbed", added: ["refPopover", "embedHeadingLevel", "embedBlockBreadcrumbParentPath"]},
+        {path: "gutter.single.blockEmbed.embedBlockBreadcrumb", added: ["enable", "disable", "default"]},
+        {path: "gutter.single.blockEmbed.embedBlockBreadcrumbParentPath", added: ["enable", "disable", "default"]},
     ].forEach(({path, added}) => {
         const entries = getEntryCatalogChildren(path);
         const defaults = entries.map(item => item.key);

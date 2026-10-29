@@ -26,6 +26,7 @@ import {
     handleTouchSelectionChange,
     handleTouchStart,
     handleTouchUp,
+    handleTouchEditing,
     handleTouchFocusOut,
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
@@ -82,6 +83,7 @@ import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
 import {scrollInputIntoView} from "./util/visibleViewport";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
+import {initMobileWithLoading} from "./util/startup";
 
 const startupRequestFailed = (response: IWebSocketData) => reportStartupError(new Error(response.msg || String(response.code)));
 
@@ -241,10 +243,7 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     initMobileSelect();
                     document.title = window.siyuan.languages.siyuanNote;
-                    bootSync();
-                    void Promise.resolve(appearanceConfigApi.apply(window.siyuan.config.appearance)).catch(reportStartupError);
                     initMessage();
-                    initAssets(true);
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
@@ -264,12 +263,17 @@ class App {
                         fetchPost("/api/system/getEmojiConf", {}, guardStartup<IWebSocketData>(async emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             await setNoteBook();
-                            await initFramework(this, confResponse.data.start);
-                            initRightMenu(this);
-                            openChangelog();
+                            await initMobileWithLoading(async () => {
+                                await appearanceConfigApi.apply(window.siyuan.config.appearance);
+                                initAssets(true);
+                                await initFramework(this, confResponse.data.start);
+                                initRightMenu(this);
+                                openChangelog();
+                            });
                             window.siyuan.isReady = true;
                             finishMobileSystemUris(this);
                             mainWs.flushMainMessages();
+                            bootSync();
                             completeStartup();
                             fetchPost("/api/setting/getCloudUser", {});
                         }), undefined, startupRequestFailed);
@@ -284,6 +288,9 @@ class App {
             document.addEventListener("focusout", handleTouchFocusOut, true);
             document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
+            window.addEventListener("nativeTextMenuWillPresent", handleTouchEditing, false);
+            document.addEventListener("beforeinput", handleTouchEditing, true);
+            document.addEventListener("paste", handleTouchEditing, true);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -39,6 +43,9 @@ func validListMindmapMetadata(data map[string]any) bool {
 	if summaries, exists := data["summaries"]; exists && !validListMindmapSummaries(summaries, data["version"] == float64(2)) {
 		return false
 	}
+	if appearance, exists := data["appearance"]; exists && !validListMindmapAppearance(appearance) {
+		return false
+	}
 	validFields := func(value map[string]any, strings, numbers, booleans []string) bool {
 		for _, key := range strings {
 			if field, exists := value[key]; exists {
@@ -70,6 +77,12 @@ func validListMindmapMetadata(data map[string]any) bool {
 			[]string{"textColor", "backgroundColor", "borderColor", "lineColor"},
 			[]string{"fontSize", "borderWidth", "borderRadius", "lineWidth"}, []string{"bold", "italic", "lineDash"}) {
 			return false
+		}
+		if value, exists := style["branchColor"]; exists {
+			slot, ok := value.(float64)
+			if !ok || math.IsNaN(slot) || math.IsInf(slot, 0) || slot < 0 || slot > 9007199254740991 || math.Trunc(slot) != slot {
+				return false
+			}
 		}
 	}
 	seen := map[string]bool{}

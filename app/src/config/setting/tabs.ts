@@ -96,7 +96,7 @@ const createSettingTabs = () => {
         }, registerOCRTab),
         export: setting.tab({
             id: "export",
-            icon: "iconUpload",
+            icon: "iconDownload",
             title: () => window.siyuan.languages.export,
             hidden: () => !getHostCapabilities().documentImportExport,
             defaultSave: exportConfigApi.patch,

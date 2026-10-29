@@ -3,7 +3,7 @@ const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
-const runCases = async (sources, platform) => {
+const runCases = async (sources, platform, topBarHTML) => {
     const assert = require("node:assert/strict");
     const path = require("node:path");
     const cache = {};
@@ -202,6 +202,63 @@ const runCases = async (sources, platform) => {
     assert.equal(undoCalls, 1);
     action("heading1");
     assert.equal(inserts[0], "# ‸");
+    // 编辑导图节点时保留键盘工具栏历史入口，切换编辑器和刷新配置时均遵循显隐设置。
+    const nodeEditor = document.createElement("div");
+    nodeEditor.className = "mindmap-view__editor";
+    const nodeProtyle = document.createElement("div");
+    nodeProtyle.className = "protyle-wysiwyg";
+    nodeProtyle.setAttribute("contenteditable", "false");
+    nodeProtyle.setAttribute("data-readonly", "false");
+    const nodeBlock = document.createElement("div");
+    nodeBlock.dataset.nodeId = "node-paragraph";
+    nodeBlock.dataset.type = "NodeParagraph";
+    const nodeEditable = document.createElement("div");
+    nodeEditable.contentEditable = "true";
+    nodeEditable.textContent = "Node text";
+    nodeBlock.append(nodeEditable); nodeProtyle.append(nodeBlock); nodeEditor.append(nodeProtyle);
+    document.body.append(nodeEditor);
+    const documentEditor = current;
+    current = {...current, element: nodeEditor, editable: nodeEditable,
+        wysiwyg: {element: nodeProtyle}, lite: true};
+    nodeEditable.focus();
+    const nodeRange = document.createRange();
+    nodeRange.setStart(nodeEditable.firstChild, 0); nodeRange.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(nodeRange);
+    await settle();
+    assert.equal(hidden("undo"), false);
+    assert.equal(hidden("redo"), false);
+    assert.equal(toolbar.classList.contains("fn__none"), false, "other keyboard actions stay available");
+    assert.equal(hidden("block"), false);
+    const nodeActions = [...toolbar.querySelector(".keyboard__dynamic").children]
+        .filter(item => !item.classList.contains("fn__none"));
+    assert.equal(nodeActions[0].classList.contains("keyboard__split"), false);
+    assert.equal(nodeActions.at(-1).classList.contains("keyboard__split"), false);
+    assert.equal(nodeActions.some((item, index) => item.classList.contains("keyboard__split") &&
+        nodeActions[index + 1]?.classList.contains("keyboard__split")), false);
+    window.dispatchEvent(new Event("siyuan-entry-visibility"));
+    await settle();
+    assert.equal(hidden("undo"), false, "configuration refresh retains node editing history controls");
+    assert.equal(hidden("redo"), false);
+    visible.delete("mobile-redo");
+    window.dispatchEvent(new Event("siyuan-entry-visibility"));
+    await settle();
+    assert.equal(hidden("undo"), false);
+    assert.equal(hidden("redo"), true, "node editing respects explicitly hidden history entries");
+    visible.add("mobile-redo");
+    nodeEditor.className = "table__cell-editor";
+    await settle();
+    assert.equal(hidden("undo"), false, "standalone cell editors retain their own history controls");
+    assert.equal(hidden("redo"), false);
+    visible.delete("mobile-redo");
+    current = documentEditor;
+    editable.focus(); select(0);
+    await settle();
+    assert.equal(hidden("undo"), false, "ordinary document history remains available after node editing");
+    assert.equal(hidden("redo"), true, "returning to a document preserves explicitly hidden entries");
+    visible.add("mobile-redo");
+    await settle();
+    assert.equal(hidden("redo"), false);
+    nodeEditor.remove();
     // 显隐变化和编辑器切换不得恢复隐藏项，也不得向受限的字段编辑器插入文档块。
     visible.delete("mobile-undo");
     window.dispatchEvent(new Event("siyuan-entry-visibility"));
@@ -306,6 +363,55 @@ const runCases = async (sources, platform) => {
     editable.click();
     assert.equal(keyboardShows, showsBeforeReadonly);
     assert.equal(editable.getAttribute("inputmode"), "text");
+
+    // 只读和预览标题在独立顶栏及横屏面包屑中均可选字，且不会请求键盘输入。
+    document.body.insertAdjacentHTML("afterbegin", topBarHTML);
+    const topBar = document.getElementById("mobileTopBar");
+    const titleInput = document.getElementById("toolbarName");
+    const readonlyTitle = document.getElementById("toolbarNameReadonly");
+    const breadcrumb = document.createElement("div");
+    breadcrumb.className = "protyle-breadcrumb";
+    breadcrumb.innerHTML = '<span class="protyle-breadcrumb__space protyle-breadcrumb__space--mobile-title"></span>';
+    current.element.prepend(breadcrumb);
+    titleInput.classList.remove("fn__hidden");
+    readonlyTitle.classList.remove("fn__hidden");
+    titleInput.value = "Alpha beta gamma";
+    window.siyuan.mobile.editor = {protyle: current};
+    const {updateMobileTitleReadonly} = load("protyle/util/setEditMode");
+    for (const container of [topBar, breadcrumb.firstElementChild]) {
+        container.append(titleInput, readonlyTitle);
+        for (const mode of ["readonly", "preview", "edit"]) {
+            current.disabled = mode === "readonly";
+            preview.classList.toggle("fn__none", mode !== "preview");
+            updateMobileTitleReadonly(current);
+            assert.equal(titleInput.readOnly, mode !== "edit");
+            assert.equal(getComputedStyle(titleInput).display === "none", mode !== "edit");
+            assert.equal(getComputedStyle(readonlyTitle).display === "none", mode === "edit");
+            if (mode === "edit") {
+                titleInput.focus();
+                titleInput.setSelectionRange(0, 5);
+                assert.equal(titleInput.value.slice(titleInput.selectionStart, titleInput.selectionEnd), "Alpha");
+                titleInput.blur();
+                continue;
+            }
+            const keyboardShowsBeforeTitle = keyboardShows;
+            const focusRequestsBeforeTitle = focusRequests.length;
+            const range = document.createRange();
+            range.selectNodeContents(readonlyTitle);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            assert.equal(getSelection().toString(), titleInput.value);
+            readonlyTitle.dispatchEvent(new Event("touchstart", {bubbles: true}));
+            readonlyTitle.click();
+            readonlyTitle.focus();
+            assert.equal(readonlyTitle.isContentEditable, false);
+            assert.notEqual(document.activeElement, readonlyTitle);
+            assert.equal(keyboardShows, keyboardShowsBeforeTitle);
+            assert.equal(focusRequests.length, focusRequestsBeforeTitle);
+            assert.equal(document.execCommand("insertText", false, "Changed"), false);
+            assert.equal(readonlyTitle.textContent, titleInput.value);
+        }
+    }
 };
 
 const runElectron = async () => {
@@ -323,7 +429,7 @@ const runElectron = async () => {
             "mobile/util/toolbarEntries", "mobile/util/mobileAppUtil", "mobile/util/mobileKeyboardChange",
             "mobile/util/touchSelection", "mobile/util/visibleViewport", "protyle/util/hasClosest",
             "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order",
-            "config/entryVisibility/mobileToolbarContext"];
+            "config/entryVisibility/mobileToolbarContext", "protyle/util/setEditMode"];
         const sources = Object.fromEntries(modules.map(name => [name, ts.transpileModule(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
@@ -348,10 +454,12 @@ const runElectron = async () => {
             ${focusBinding.getText(appSource)}
         `, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"), {logger: {warn() {}}}).css;
+        const topBarHTML = readFileSync(path.join(__dirname, "../src/assets/template/mobile/index.tpl"), "utf8")
+            .match(/<div id="mobileTopBar"[\s\S]*?<\/div>/)[0];
         for (const platform of ["android", "harmony", "ios", "browser"]) {
             await win.loadURL("data:text/html,<html><body></body></html>");
             await win.webContents.insertCSS(css);
-            await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(platform)})`);
+            await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(platform)}, ${JSON.stringify(topBarHTML)})`);
         }
         console.log("Mobile editing toolbar cases passed");
     } catch (error) {

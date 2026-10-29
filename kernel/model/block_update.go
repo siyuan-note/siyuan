@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -26,6 +14,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	htmlparser "golang.org/x/net/html"
 )
 
 // BlockUpdateInput 描述一个外部块更新请求。
@@ -158,7 +147,11 @@ func buildBlockUpdateOperations(inputs []BlockUpdateInput, resolveTree blockUpda
 		}
 
 		updatedNode.SetIALAttr("id", input.ID)
-		pinDescendantBlockIDs(oldNode, updatedNode)
+		var explicitIDs map[string]bool
+		if input.DataType == "dom" {
+			explicitIDs = explicitBlockUpdateDOMIDs(input.Data)
+		}
+		pinDescendantBlockIDs(oldNode, updatedNode, explicitIDs)
 		data = luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		operations = append(operations, &Operation{
 			Action:   "update",
@@ -261,30 +254,70 @@ func resolveBlockUpdateNode(oldNode, root *ast.Node) (updatedNode *ast.Node, err
 // 子块 ID，导致指向子块的块引用、反链、闪卡等失效。
 // 匹配规则：按同级内容块顺序对齐，类型一致才沿用旧 ID；类型不一致时向后查找同类型的旧子块重新
 // 对齐，这样插入或删除子块后其余子块仍能匹配上旧 ID，新增的子块保持新生成的 ID。
-func pinDescendantBlockIDs(oldNode, updatedNode *ast.Node) {
-	oldChildren := blockChildrenOf(oldNode)
-	oldIndex := 0
-	for _, newChild := range blockChildrenOf(updatedNode) {
-		if oldIndex >= len(oldChildren) {
-			break
+// DOM 显式提供的身份优先保留，位置回退不能占用这些身份。
+func pinDescendantBlockIDs(oldNode, updatedNode *ast.Node, explicitIDs map[string]bool) {
+	oldByID := map[string]*ast.Node{}
+	ast.Walk(oldNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() && n.ID != "" {
+			oldByID[n.ID] = n
 		}
-		if oldChildren[oldIndex].Type != newChild.Type {
-			if aligned := alignBlockUpdateChild(oldChildren, oldIndex, newChild.Type); 0 > aligned {
+		return ast.WalkContinue
+	})
+	var pin func(*ast.Node, *ast.Node)
+	pin = func(oldNode, updatedNode *ast.Node) {
+		oldChildren := blockChildrenOf(oldNode)
+		oldIndex := 0
+		for _, newChild := range blockChildrenOf(updatedNode) {
+			// Explicit DOM identities take precedence, even when reordered or newly inserted.
+			if explicitIDs[newChild.ID] {
+				if oldChild := oldByID[newChild.ID]; oldChild != nil {
+					pin(oldChild, newChild)
+				}
 				continue
-			} else {
-				oldIndex = aligned
+			}
+			// Do not assign an ID already reserved by another explicitly identified block.
+			for oldIndex < len(oldChildren) && explicitIDs[oldChildren[oldIndex].ID] {
+				oldIndex++
+			}
+			if oldIndex >= len(oldChildren) {
+				continue
+			}
+			if oldChildren[oldIndex].Type != newChild.Type {
+				if aligned := alignBlockUpdateChild(oldChildren, oldIndex, newChild.Type, explicitIDs); 0 > aligned {
+					continue
+				} else {
+					oldIndex = aligned
+				}
+			}
+			newChild.SetIALAttr("id", oldChildren[oldIndex].ID)
+			pin(oldChildren[oldIndex], newChild)
+			oldIndex++
+		}
+	}
+	pin(oldNode, updatedNode)
+}
+
+func explicitBlockUpdateDOMIDs(dom string) map[string]bool {
+	ids := map[string]bool{}
+	tokens := htmlparser.NewTokenizer(strings.NewReader(dom))
+	for {
+		switch tokens.Next() {
+		case htmlparser.ErrorToken:
+			return ids
+		case htmlparser.StartTagToken, htmlparser.SelfClosingTagToken:
+			for _, attr := range tokens.Token().Attr {
+				if attr.Key == "data-node-id" && ast.IsNodeIDPattern(attr.Val) {
+					ids[attr.Val] = true
+				}
 			}
 		}
-		newChild.SetIALAttr("id", oldChildren[oldIndex].ID)
-		pinDescendantBlockIDs(oldChildren[oldIndex], newChild)
-		oldIndex++
 	}
 }
 
 // alignBlockUpdateChild 从 start 起向后查找第一个指定类型的旧子块，返回其下标；找不到返回 -1。
-func alignBlockUpdateChild(oldChildren []*ast.Node, start int, childType ast.NodeType) int {
+func alignBlockUpdateChild(oldChildren []*ast.Node, start int, childType ast.NodeType, reserved map[string]bool) int {
 	for i := start; i < len(oldChildren); i++ {
-		if oldChildren[i].Type == childType {
+		if oldChildren[i].Type == childType && !reserved[oldChildren[i].ID] {
 			return i
 		}
 	}

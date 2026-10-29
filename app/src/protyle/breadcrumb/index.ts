@@ -49,6 +49,7 @@ import {bindMobileMenuKeyboard} from "../../mobile/util/keyboardToolbar";
 /// #if MOBILE
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {getEditorFocusRange} from "../util/editorFocus";
+import {DocumentHistory} from "./history";
 /// #endif
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
@@ -71,6 +72,21 @@ export class Breadcrumb {
     private menuRequestID = 0;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
+    /// #if MOBILE
+    private history: DocumentHistory;
+    /// #endif
+
+    public refreshHistory(rootID: string) {
+        /// #if MOBILE
+        this.history?.refresh(rootID);
+        /// #endif
+    }
+
+    public destroy() {
+        /// #if MOBILE
+        this.history?.destroy();
+        /// #endif
+    }
 
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
@@ -97,6 +113,10 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
 <button class="block__icon fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
+        /// #if MOBILE
+        this.history = new DocumentHistory(protyle);
+        element.querySelector('[data-type="command-panel"]').before(this.history.element);
+        /// #endif
         mountBreadcrumbButtons(protyle, element.querySelector(".protyle-breadcrumb__plugin"));
         const takeMenuKeyboard = bindMobileMenuKeyboard(element,
             'button[data-type="mobile-menu"], button[data-type="doc"], button[data-type="more"], button[data-type="command-panel"]',
@@ -807,7 +827,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         }
                         const uploadMenu = new MenuItem({
                             id: "insertAsset",
-                            icon: "iconDownload",
+                            icon: "iconUpload",
                             label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                         }).element;
                         uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {

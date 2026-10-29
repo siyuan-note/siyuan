@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -54,76 +54,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
-				}
-			]
-		},
-		{
-			"ID": "20261012014537-ygn9gm0",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261012014537-ygn9gm0",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "界面导航"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20260921090531-bcyyegw",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260921090531-bcyyegw",
-				"updated": "20260921210136"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在编辑器中向右滑动可打开左侧栏，向左滑动可打开右侧栏。应用启动后，首次打开侧栏时显示该侧首个可见功能，之后再次打开会恢复该侧上次使用的功能。可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "外观"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "左右布局"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中调整功能顺序。"
-				}
-			]
-		},
-		{
-			"ID": "20261010114821-9zssb7v",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261010114821-9zssb7v",
-				"updated": "20261010114821"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在 Android 上使用桌面布局时，系统返回键会先关闭当前最上层的弹窗、菜单、编辑浮层、图片预览或浮动抽屉，每次只关闭一层并保留底层浏览状态。没有可关闭的浮层时，才执行原有的页面返回行为。"
 				}
 			]
 		},
@@ -412,6 +342,76 @@
 			]
 		},
 		{
+			"ID": "20261012014537-ygn9gm0",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-ygn9gm0",
+				"updated": "20261020133924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "界面导航"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260921090531-bcyyegw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921090531-bcyyegw",
+				"updated": "20260921210136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器中向右滑动可打开左侧栏，向左滑动可打开右侧栏。应用启动后，首次打开侧栏时显示该侧首个可见功能，之后再次打开会恢复该侧上次使用的功能。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "左右布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中调整功能顺序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-9zssb7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-9zssb7v",
+				"updated": "20261020133924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面布局时，系统返回键会先关闭当前最上层的弹窗、菜单、编辑浮层、图片预览或浮动抽屉，每次只关闭一层并保留底层浏览状态。没有可关闭的浮层时，沿应用内文档历史返回，不会重新加载整个界面。到达历史起点后会提示再次返回，提示显示期间再按一次返回键即可回到系统桌面。"
+				}
+			]
+		},
+		{
 			"ID": "20240113104101-rz1z8en",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -478,7 +478,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113103753-6tsixvt",
-				"updated": "20260829104731"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -498,7 +498,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113104525-jtaztd5",
-				"updated": "20260829104731"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 					},
 					"Properties": {
 						"id": "20240113104818-gc1i41e",
-						"updated": "20240113104818"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -518,12 +518,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113104818-pxt6yql",
-								"updated": "20240113104831"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "卸载 App 会导致本地数据被完全删除且无法恢复"
+									"Data": "卸载 App 会删除本地数据。卸载前请完成同步，并在应用之外保存可恢复的备份；没有备份的数据可能无法恢复"
 								}
 							]
 						}
@@ -538,7 +538,7 @@
 					},
 					"Properties": {
 						"id": "20240113104832-8e6vs9t",
-						"updated": "20260829104731"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -546,7 +546,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113104832-2hvn950",
-								"updated": "20260829104731"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -569,7 +569,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 进行正常退出，直接划走会强制结束应用，导致数据同步未被执行"
+									"Data": " 进行正常退出，直接划走会强制结束应用，导致数据同步未被执行"
 								}
 							]
 						}
@@ -852,7 +852,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174109-kf9rdvq",
-				"updated": "20261004052629"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -881,7 +881,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174109-bccohoq",
-				"updated": "20261004052629"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -896,7 +896,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613174109-6e5twqf",
-				"updated": "20260613174109"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -941,7 +941,7 @@
 					},
 					"Properties": {
 						"id": "20260613174109-wuyfmvn",
-						"updated": "20260613174109"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -949,17 +949,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613174109-0vtxbwq",
-								"updated": "20260613174109"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "自动转入"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：速记创建后，系统每 7 秒自动检查本地速记目录，将新速记转入文档面板中配置的目标位置"
+									"Data": "自动转入：思源运行时每 7 秒检查本地速记目录，将新速记转入文档面板中配置的目标位置"
 								}
 							]
 						}
@@ -1046,7 +1041,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174109-f6x4sin",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1060,7 +1055,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174109-mq2h4ye",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1074,7 +1069,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1083,7 +1078,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1092,7 +1087,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1101,7 +1096,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中配置闪念速记的存放位置："
+					"Data": " 中配置闪念速记的存放位置："
 				}
 			]
 		},

@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package abort
 
@@ -20,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/plugin/gojaext"
 
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
@@ -185,13 +175,13 @@ func newAbortEvent(rt *goja.Runtime, target *goja.Object) *goja.Object {
 	lo.Must0(event.Set("stopPropagation", noop))
 	lo.Must0(event.Set("stopImmediatePropagation", noop))
 
-	lo.Must0(objectFreeze(rt, event))
+	lo.Must0(gojaext.Freeze(rt, event))
 	return event
 }
 
 // SignalOf 从 JS 值取出 AbortSignal 的宿主状态，只接受由本包创建的 AbortSignal 对象。
 func SignalOf(rt *goja.Runtime, value goja.Value, name string) (*SignalState, error) {
-	if !isJsValueNotNull(value) {
+	if !gojaext.IsValueNotNull(value) {
 		return nil, fmt.Errorf("%s must be an AbortSignal", name)
 	}
 	object := value.ToObject(rt)

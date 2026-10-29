@@ -6,7 +6,7 @@ import {
 } from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {fetchPost} from "../../util/fetch";
-import {replaceFileName, validateName} from "../../editor/rename";
+import {normalizeDocumentTitle, truncateDocumentTitle, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
 import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -72,7 +72,7 @@ export class Title {
                 }
                 // 阻止右键复制菜单报错
                 setTimeout(function () {
-                    document.execCommand("insertText", false, replaceFileName(text));
+                    document.execCommand("insertText", false, normalizeDocumentTitle(text));
                 }, 0);
                 this.rename(protyle);
             });
@@ -124,7 +124,7 @@ export class Title {
                         restoreLuteMarkdownSyntax(protyle);
                         // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
                         content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
-                        document.execCommand("insertText", false, replaceFileName(content));
+                        document.execCommand("insertText", false, normalizeDocumentTitle(content));
                         this.rename(protyle);
                     }
                     return;
@@ -284,7 +284,7 @@ export class Title {
                         } else {
                             try {
                                 const text = await readText() || "";
-                                document.execCommand("insertText", false, replaceFileName(text));
+                                document.execCommand("insertText", false, normalizeDocumentTitle(text));
                                 this.rename(protyle);
                             } catch (e) {
                                 console.log(e);
@@ -306,7 +306,7 @@ export class Title {
                         restoreLuteMarkdownSyntax(protyle);
                         // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
                         content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
-                        document.execCommand("insertText", false, replaceFileName(content));
+                        document.execCommand("insertText", false, normalizeDocumentTitle(content));
                         this.rename(protyle);
                     }
                 }).element);
@@ -347,18 +347,22 @@ export class Title {
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
         this.pendingRename = undefined;
-        if (!validateName(this.editElement.textContent, this.editElement)) {
+        if (!validateName(this.editElement.textContent, this.editElement, true)) {
+            const original = this.editElement.textContent;
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
-            this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
+            this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
-            return false;
+            if (this.editElement.textContent === original ||
+                !validateName(this.editElement.textContent, this.editElement, true)) {
+                return false;
+            }
         }
         hideTooltip();
         this.pendingRename = () => {
             this.pendingRename = undefined;
             this.timeout = undefined;
-            const fileName = replaceFileName(this.editElement.textContent);
+            const fileName = normalizeDocumentTitle(this.editElement.textContent);
             fetchPost("/api/filetree/renameDoc", {
                 notebook: protyle.notebookId,
                 path: protyle.path,

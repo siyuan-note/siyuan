@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 type BlockTreeInfo struct {
@@ -15,12 +19,14 @@ type BlockTreeInfo struct {
 }
 
 type BlockPath struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Type        string       `json:"type"`
-	SubType     string       `json:"subType"`
-	Children    []*BlockPath `json:"children"`
-	HasChildren bool         `json:"hasChildren,omitempty"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// 嵌入块的文档项提供独立标题，name 仍保留完整路径；旧响应可省略此字段。
+	DocumentTitle string       `json:"documentTitle,omitempty"`
+	Type          string       `json:"type"`
+	SubType       string       `json:"subType"`
+	Children      []*BlockPath `json:"children"`
+	HasChildren   bool         `json:"hasChildren,omitempty"`
 }
 
 type BlockBreadcrumbChildren struct {

@@ -1,13 +1,15 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"mime/multipart"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	goccyJSON "github.com/goccy/go-json"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -21,7 +23,10 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 		return nil
 	}
 	result := &apicontract.NotebookConf{
-		Name: value.Name, Sort: value.Sort, Icon: value.Icon, Closed: value.Closed,
+		DocCreateTarget: documentTargetContract(value.DocCreateTarget),
+		RefCreateTarget: documentTargetContract(value.RefCreateTarget),
+		DailyNoteTarget: documentTargetContract(value.DailyNoteTarget),
+		Name:            value.Name, Sort: value.Sort, Icon: value.Icon, Closed: value.Closed,
 		RefCreateSaveBox: value.RefCreateSaveBox, RefCreateSavePath: value.RefCreateSavePath,
 		DocCreateSaveBox: value.DocCreateSaveBox, DocCreateSavePath: value.DocCreateSavePath,
 		DocCreateTemplatePath: value.DocCreateTemplatePath, DailyNoteSavePath: value.DailyNoteSavePath,
@@ -173,18 +178,6 @@ func mergeSettingBody(namespace string, body []byte) []byte {
 		return merged
 	}
 	return body
-}
-
-// contractFailure 保留既有业务校验的错误码和消息，并限制其错误载荷形态。
-func contractFailure[Data any](result *gulu.Result) apicontract.Response[Data] {
-	switch data := result.Data.(type) {
-	case nil:
-		return apicontract.Failure[Data](result.Code, result.Msg)
-	case string:
-		return apicontract.FailureWithText[Data](result.Code, result.Msg, data)
-	default:
-		panic(fmt.Sprintf("unsupported API error data %T", result.Data))
-	}
 }
 
 func notebookContract(box *model.Box) *apicontract.Notebook {

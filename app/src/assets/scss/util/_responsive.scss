@@ -3,6 +3,14 @@
     order: -1;
   }
 
+  #networkProxyManual {
+    flex-wrap: wrap;
+
+    > .fn__space {
+      display: none;
+    }
+  }
+
   #encryptedNotebookEnabledActions {
     flex: 1 1 100%;
     flex-wrap: wrap;

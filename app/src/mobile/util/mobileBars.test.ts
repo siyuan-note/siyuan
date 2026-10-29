@@ -1,9 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import {bindMobileBarsScroll, clearMobileBarsScroll} from "./mobileBars";
 import * as mobileBarsState from "./mobileBarsState";
 
@@ -95,10 +92,7 @@ describe("mobile bars", () => {
                 querySelector: () => breadcrumbElement,
                 addEventListener: (name: string, callback: () => void) => documentListeners.set(name, callback),
             };
-            const moduleExports: Partial<typeof import("./mobileBars")> = {};
-            const source = readFileSync(resolve(process.cwd(), "src/mobile/util/mobileBars.ts"), "utf8");
-            runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
-                exports: moduleExports,
+            const moduleExports = loadModule<Partial<typeof import("./mobileBars")>>("src/mobile/util/mobileBars.ts", {
                 require: (name: string) => name === "./mobileBarsState" ? mobileBarsState :
                     {isMobileBarsAutoHide: () => true},
                 document: mockDocument,

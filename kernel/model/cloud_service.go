@@ -1,23 +1,12 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -32,6 +21,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -826,16 +816,15 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 	return
 }
 
-func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Result) {
+// Login 登录思源云端账号。code 沿用云端约定：0 成功，1 需要输入验证码，其他值为失败；
+// 请求本身失败时使用 -1 并给出本地提示。data 为对应的账号载荷，失败时为 nil。
+func Login(userName, password, captcha string, cloudRegion int) (data *apicontract.AccountLoginData, code int, msg string) {
 	release := lockAssetSourceChange()
 	defer release()
 	previousCloudRegion := util.CurrentCloudRegion
 	if Conf.Sync.Load().Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
 		if err := requireCompleteAssetDownloads(); err != nil {
-			ret = gulu.Ret.NewResult()
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return nil, -1, err.Error()
 		}
 	}
 	cloudAccountMu.Lock()
@@ -856,35 +845,48 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 		Post(util.GetCloudServer() + "/apis/siyuan/login")
 	if err != nil {
 		logging.LogErrorf("login failed: %s", err)
-		ret = gulu.Ret.NewResult()
-		ret.Code = -1
-		ret.Msg = Conf.Language(18) + ": " + err.Error()
-		return
+		return nil, -1, Conf.Language(18) + ": " + err.Error()
 	}
 	if http.StatusOK != resp.StatusCode {
 		logging.LogErrorf("login failed: %d", resp.StatusCode)
-		ret = gulu.Ret.NewResult()
-		ret.Code = -1
-		ret.Msg = Conf.Language(18)
-		return
+		return nil, -1, Conf.Language(18)
 	}
 
-	ret = &gulu.Result{
-		Code: int(result["code"].(float64)),
-		Msg:  result["msg"].(string),
-		Data: map[string]any{
-			"userName":    result["userName"],
-			"token":       result["token"],
-			"needCaptcha": result["needCaptcha"], // 值为 user id
-		},
+	cloudCode, codeOK := result["code"].(float64)
+	cloudMsg, msgOK := result["msg"].(string)
+	if !codeOK || !msgOK {
+		logging.LogErrorf("login failed: invalid cloud response")
+		return nil, -1, Conf.Language(18)
 	}
-	if -1 == ret.Code {
-		ret.Code = 1
+
+	data = &apicontract.AccountLoginData{}
+	for key, target := range map[string]**string{
+		"userName":    &data.UserName,
+		"token":       &data.Token,
+		"needCaptcha": &data.NeedCaptcha,
+	} {
+		value, exists := result[key]
+		if !exists || nil == value {
+			continue
+		}
+		text, isString := value.(string)
+		if !isString {
+			logging.LogErrorf("login failed: invalid cloud response field [%s]", key)
+			return nil, -1, Conf.Language(18)
+		}
+		*target = &text
 	}
-	return
+
+	code = int(cloudCode)
+	if -1 == code {
+		code = 1
+	}
+	return data, code, cloudMsg
 }
 
-func Login2fa(token, code string) (ret *gulu.Result) {
+// Login2fa 提交双因素认证码，返回直接输出的响应信封。
+// 云端结果的 code 会重映射：失败（-1）转为 1，以免与本地错误码混淆。
+func Login2fa(token, code string) *apicontract.Login2faEnvelope {
 	result := map[string]any{}
 	// 两步验证登录不是幂等操作，关闭自动重试以避免重复登录。
 	request := httpclient.NewCloudRequest30s().SetRetryCount(0)
@@ -895,46 +897,40 @@ func Login2fa(token, code string) (ret *gulu.Result) {
 		Post(util.GetCloudServer() + "/apis/siyuan/login/2fa")
 	if err != nil {
 		logging.LogErrorf("login 2fa failed: %s", err)
-		return failedLogin2faResult()
+		return failedLogin2faEnvelope()
 	}
 	if http.StatusOK != resp.StatusCode {
 		logging.LogErrorf("login 2fa failed: %d", resp.StatusCode)
-		return failedLogin2faResult()
+		return failedLogin2faEnvelope()
 	}
 
-	ret, ok := parseLogin2faResult(result)
+	envelope, ok := parseLogin2faEnvelope(result)
 	if !ok {
 		logging.LogErrorf("login 2fa failed: invalid cloud response")
-		return failedLogin2faResult()
+		return failedLogin2faEnvelope()
 	}
-	return
+	return envelope
 }
 
-func failedLogin2faResult() *gulu.Result {
-	ret := gulu.Ret.NewResult()
-	ret.Code = -1
-	ret.Msg = Conf.Language(18)
-	return ret
+func failedLogin2faEnvelope() *apicontract.Login2faEnvelope {
+	return &apicontract.Login2faEnvelope{Code: -1, Msg: Conf.Language(18)}
 }
 
-func parseLogin2faResult(result map[string]any) (ret *gulu.Result, ok bool) {
-	code, codeOK := result["code"].(float64)
-	msg, msgOK := result["msg"].(string)
-	if !codeOK || !msgOK {
+// parseLogin2faEnvelope 按契约声明校验云端结果，并把其余字段保留为协议扩展字段。
+func parseLogin2faEnvelope(result map[string]any) (envelope *apicontract.Login2faEnvelope, ok bool) {
+	raw, err := json.Marshal(result)
+	if err != nil {
 		return nil, false
 	}
-	if 0 == code {
-		token, tokenOK := result["token"].(string)
-		if !tokenOK || "" == token {
-			return nil, false
-		}
+	data := &apicontract.CloudLogin2faData{}
+	if err = json.Unmarshal(raw, data); err != nil {
+		return nil, false
 	}
-
-	ret = &gulu.Result{Code: int(code), Msg: msg, Data: result}
-	if -1 == ret.Code {
-		ret.Code = 1
+	code := int(data.Code)
+	if -1 == code {
+		code = 1
 	}
-	return ret, true
+	return &apicontract.Login2faEnvelope{Code: code, Msg: data.Msg, Data: data}, true
 }
 
 func LogoutUser() {

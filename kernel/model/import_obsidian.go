@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -772,7 +760,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 			dirDoc := dirDocs[obsidianPathKey(dir)]
 			dirDoc.Title = uniqueObsidianTitle(parentTarget, dirDoc.Title, titleUses, vault.Analysis)
 			dirDoc.TargetPath = path.Join(parentTarget, dirDoc.ID+".sy")
-			dirDoc.HPath = path.Join(parentHPath, dirDoc.Title)
+			dirDoc.HPath = appendDocumentHPath(parentHPath, dirDoc.Title)
 			contentTarget = path.Join(parentTarget, dirDoc.ID)
 			contentHPath = dirDoc.HPath
 		}
@@ -797,7 +785,7 @@ func planObsidianDocuments(ctx context.Context, vault *obsidianVaultContext) err
 		for _, doc := range directDocs {
 			doc.Title = uniqueObsidianTitle(contentTarget, doc.Title, titleUses, vault.Analysis)
 			doc.TargetPath = path.Join(contentTarget, doc.ID+".sy")
-			doc.HPath = path.Join(contentHPath, doc.Title)
+			doc.HPath = appendDocumentHPath(contentHPath, doc.Title)
 		}
 
 		var childDirs []string
@@ -1311,6 +1299,7 @@ func resolveObsidianMarkdownDestination(vault *obsidianVaultContext, current *ob
 
 func scanObsidianSource(data []byte) *obsidianScanResult {
 	ret := &obsidianScanResult{Duplicates: map[string]bool{}}
+	mathCompatible := MathDelimiterCompatibilityEnabled()
 	protected := make([]bool, len(data))
 	markProtected := func(start, end int) {
 		if start < 0 {
@@ -1392,6 +1381,14 @@ func scanObsidianSource(data []byte) *obsidianScanResult {
 			continue
 		}
 		if data[i] == '\\' {
+			if mathCompatible && i+1 < len(data) && (data[i+1] == '(' || data[i+1] == '[') {
+				if _, consumed := parse.MatchLatexMath(data[i:], data[i+1] == '['); consumed > 0 {
+					// 公式内容不参与双链、注释、脚注和块 ID 的转换。
+					markProtected(i, i+consumed)
+					i += consumed
+					continue
+				}
+			}
 			i += 2
 			continue
 		}
@@ -2196,6 +2193,7 @@ func maskObsidianProtected(data []byte, spans []obsidianSpan) []byte {
 
 func parseObsidianMd(markdown []byte, vault *obsidianVaultContext, doc *obsidianDocPlan, stats *obsidianTransformStats) (*parse.Tree, error) {
 	luteEngine := util.NewStdLute()
+	setImportMathDelimiters(luteEngine)
 	luteEngine.SetYamlFrontMatter(true)
 	luteEngine.SetBlockRef(true)
 	luteEngine.SetKramdownIAL(true)
@@ -2344,7 +2342,8 @@ func assignObsidianTreeIDs(tree *parse.Tree, doc *obsidianDocPlan, reservedIDs m
 	tree.HPath = doc.HPath
 	tree.Root.Box = ""
 	tree.Root.Path = doc.TargetPath
-	tree.Root.Spec = treenode.CurrentSpec
+	tree.Root.Spec = treenode.BaseSpec
+	treenode.UpgradeSpec(tree)
 	tree.Root.SetIALAttr("id", doc.ID)
 	tree.Root.SetIALAttr("title", doc.Title)
 	tree.Root.SetIALAttr("updated", util.TimeFromID(doc.ID))

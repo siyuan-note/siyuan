@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cmd
 
@@ -383,19 +371,17 @@ var blockDeleteCmd = &cobra.Command{
 		if bt == nil {
 			return fmt.Errorf("block not found: %s", id)
 		}
+		if bt.Type == "d" {
+			return fmt.Errorf("document cannot be deleted as a block [%s]", id)
+		}
 		if dryRun {
 			fmt.Printf("[dry-run] Would delete block %s\n", id)
 			return nil
 		}
 
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action: "delete",
-				ID:     id,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.WaitForTransactions(transactions)
+		if _, err := model.PerformBlockOperation(&model.Operation{Action: "delete", ID: id}); err != nil {
+			return err
+		}
 
 		if bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 type AIReference struct {
@@ -22,15 +26,24 @@ type AIAgentGoogleToolCallProviderData struct {
 	ThoughtSignature string `json:"thoughtSignature,omitempty" api:"optional,nullable"`
 }
 
+// AIPDFImageSelection 记录预览图的来源版本和对象位置；恢复时认证读取原 PDF，版本变化则拒绝复用。
+type AIPDFImageSelection struct {
+	Revision string `json:"revision" api:"optional,nullable"`
+	Page     int    `json:"page" api:"optional,nullable"`
+	Object   int    `json:"object" api:"optional,nullable"`
+}
+
 type AIAgentAttachment struct {
-	Type       string `json:"type" api:"optional,nullable"`
-	Data       []byte `json:"-" api:"optional,nullable"`
-	MIMEType   string `json:"mimeType,omitempty" api:"optional,nullable"`
-	Path       string `json:"path" api:"optional,nullable"`
-	DocumentID string `json:"documentId" api:"optional,nullable"`
-	Detail     string `json:"detail,omitempty" api:"optional,nullable"`
-	Width      int    `json:"width,omitempty" api:"optional,nullable"`
-	Height     int    `json:"height,omitempty" api:"optional,nullable"`
+	// PDFImage 非空时 Path 指向源 PDF，图片由来源文档、版本、页码和对象编号重新提取。
+	PDFImage   *AIPDFImageSelection `json:"pdfImage,omitempty" api:"optional,nullable"`
+	Type       string               `json:"type" api:"optional,nullable"`
+	Data       []byte               `json:"-" api:"optional,nullable"`
+	MIMEType   string               `json:"mimeType,omitempty" api:"optional,nullable"`
+	Path       string               `json:"path" api:"optional,nullable"`
+	DocumentID string               `json:"documentId" api:"optional,nullable"`
+	Detail     string               `json:"detail,omitempty" api:"optional,nullable"`
+	Width      int                  `json:"width,omitempty" api:"optional,nullable"`
+	Height     int                  `json:"height,omitempty" api:"optional,nullable"`
 }
 
 type AISessionEntryStep struct {
@@ -144,14 +157,16 @@ type AISessionFields struct {
 	MessageHistory        []string         `json:"messageHistory,omitempty" api:"optional,nullable"`
 	CreatedAt             int64            `json:"createdAt,omitempty" api:"optional,nullable"`
 	UpdatedAt             int64            `json:"updatedAt,omitempty" api:"optional,nullable"`
-	Revision              int64            `json:"revision,omitempty" api:"optional,nullable"`
-	ExpectedRevision      *int64           `json:"expectedRevision,omitempty" api:"optional,nullable"`
-	CommitTurnID          string           `json:"commitTurnID,omitempty" api:"optional,nullable"`
-	LastCommittedTurnID   string           `json:"lastCommittedTurnID,omitempty" api:"optional,nullable"`
-	RecoveryTurnID        string           `json:"recoveryTurnID,omitempty" api:"optional,nullable"`
-	RecoveryState         string           `json:"recoveryState,omitempty" api:"optional,nullable"`
-	RecoveryRevision      int64            `json:"recoveryRevision,omitempty" api:"optional,nullable"`
-	AgentRunning          bool             `json:"agentRunning,omitempty" api:"optional,nullable"`
+	// PinnedAt is server-managed list metadata. Use setPinned to change it; saveSession preserves the stored value.
+	PinnedAt            int64  `json:"pinnedAt,omitempty" api:"optional,nullable"`
+	Revision            int64  `json:"revision,omitempty" api:"optional,nullable"`
+	ExpectedRevision    *int64 `json:"expectedRevision,omitempty" api:"optional,nullable"`
+	CommitTurnID        string `json:"commitTurnID,omitempty" api:"optional,nullable"`
+	LastCommittedTurnID string `json:"lastCommittedTurnID,omitempty" api:"optional,nullable"`
+	RecoveryTurnID      string `json:"recoveryTurnID,omitempty" api:"optional,nullable"`
+	RecoveryState       string `json:"recoveryState,omitempty" api:"optional,nullable"`
+	RecoveryRevision    int64  `json:"recoveryRevision,omitempty" api:"optional,nullable"`
+	AgentRunning        bool   `json:"agentRunning,omitempty" api:"optional,nullable"`
 }
 type AISessionSaveData struct {
 	Revision int64      `json:"revision"`

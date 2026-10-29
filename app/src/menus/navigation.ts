@@ -219,7 +219,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 id: "export",
                 label: window.siyuan.languages.export,
                 type: "submenu",
-                icon: "iconUpload",
+                icon: "iconDownload",
                 ignore: ignoreExport,
                 submenu: [{
                     id: "exportSiYuanZip",
@@ -398,7 +398,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             id: "export",
             label: window.siyuan.languages.export,
             type: "submenu",
-            icon: "iconUpload",
+            icon: "iconDownload",
             submenu: [{
                 id: "exportSiYuanZip",
                 label: "SiYuan .sy.zip",
@@ -702,7 +702,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             id: "export",
             label: window.siyuan.languages.export,
             type: "submenu",
-            icon: "iconUpload",
+            icon: "iconDownload",
             submenu: [{
                 id: "exportSiYuanZip",
                 label: "SiYuan .sy.zip",
@@ -1137,7 +1137,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         id: "import",
-        icon: "iconDownload",
+        icon: "iconUpload",
         label: window.siyuan.languages.import,
         submenu: [
             {

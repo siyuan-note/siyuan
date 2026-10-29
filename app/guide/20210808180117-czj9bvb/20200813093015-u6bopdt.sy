@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20261018005815"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -865,7 +865,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909095627-1vhq1bl",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -999,7 +999,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100742-liorixq",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1013,7 +1013,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1022,7 +1022,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1031,7 +1031,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中 "
+					"Data": " 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1288,7 +1288,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211222010224-qmstv96",
-				"updated": "20250115163009"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
@@ -1298,12 +1298,40 @@
 			]
 		},
 		{
+			"ID": "20261021111316-1f48qy9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-1f48qy9",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据仓库密钥用于快照和同步，与加密笔记本的主密码及密钥备份不同。重置数据仓库不能恢复遗失的加密笔记本主密码，也不能替代匹配的加密密钥备份。"
+				}
+			]
+		},
+		{
+			"ID": "20261021111316-2xzo53c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-2xzo53c",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重置前，请先正常退出思源并备份完整工作空间；如有加密笔记本，还应单独保存匹配的加密密钥备份，并确认主密码可用。完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧同步目录和云端快照。"
+				}
+			]
+		},
+		{
 			"ID": "20220708110122-ygojquy",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20220708110122-ygojquy",
-				"updated": "20250115163009"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
@@ -1315,7 +1343,7 @@
 					},
 					"Properties": {
 						"id": "20220708110317-qinyreu",
-						"updated": "20220708110317"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1323,7 +1351,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708110317-bm72kaa",
-								"updated": "20220708110319"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1343,6 +1371,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "账号与同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据仓库"
 								},
 								{
 									"Type": "NodeText",
@@ -1379,7 +1416,7 @@
 					},
 					"Properties": {
 						"id": "20220708110319-8i1b89v",
-						"updated": "20250115163009"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1387,7 +1424,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708110319-t01rvor",
-								"updated": "20220708110411"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1404,7 +1441,7 @@
 							},
 							"Properties": {
 								"id": "20211222010251-cxpfurj",
-								"updated": "20250115163009"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1418,7 +1455,7 @@
 									},
 									"Properties": {
 										"id": "20220708105959-z16oh3d",
-										"updated": "20250115163009"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1426,30 +1463,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708105959-rehb5y0",
-												"updated": "20250115163009"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "手动备份好数据，可通过 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "导出 Data"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ 或者直接在文件系统上复制 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "工作空间/data/"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ 文件夹"
+													"Data": "正常退出思源后，备份完整工作空间；如有加密笔记本，同时保留匹配的加密密钥备份和主密码"
 												}
 											]
 										}
@@ -1465,7 +1484,8 @@
 										"Num": 2
 									},
 									"Properties": {
-										"id": "20220708105945-eha9x8j"
+										"id": "20220708105945-eha9x8j",
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1473,7 +1493,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708105945-vphvmxv",
-												"updated": "20220708105947"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1489,6 +1509,15 @@
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
 													"TextMarkTextContent": "账号与同步"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "数据仓库"
 												},
 												{
 													"Type": "NodeText",
@@ -1522,7 +1551,8 @@
 										"Num": 3
 									},
 									"Properties": {
-										"id": "20211222010407-ze0dmor"
+										"id": "20211222010407-ze0dmor",
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1530,7 +1560,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211222010407-cc9eipr",
-												"updated": "20220708110523"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1552,7 +1582,7 @@
 									},
 									"Properties": {
 										"id": "20211222010438-yululiy",
-										"updated": "20220708111112"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1560,12 +1590,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211222010438-jpbst6x",
-												"updated": "20220708111112"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "云端使用新的同步目录，旧的同步目录已经无法使用，可以删除"
+													"Data": "云端改用新的同步目录；完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧同步目录"
 												}
 											]
 										}
@@ -1582,7 +1612,7 @@
 									},
 									"Properties": {
 										"id": "20220708111036-jlcjqa1",
-										"updated": "20220708111119"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1590,12 +1620,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111036-9ly6dz0",
-												"updated": "20220708111119"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "已有的云端快照已经无法使用，可以删除"
+													"Data": "完成新同步并确认数据完整、恢复材料已妥善保存后，再按需删除旧云端快照"
 												}
 											]
 										}

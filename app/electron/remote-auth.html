@@ -28,6 +28,7 @@
             position: absolute;
             right: 0;
             top: 0;
+            z-index: 3;
         }
 
         #closeWindow {
@@ -53,6 +54,95 @@
         main {
             text-align: center;
             width: 280px;
+            position: relative;
+            z-index: 2;
+        }
+
+        #lockScreenWallpaper {
+            height: 100%;
+            inset: 0;
+            object-fit: cover;
+            pointer-events: none;
+            position: fixed;
+            width: 100%;
+            z-index: 1;
+        }
+
+        body.has-wallpaper main {
+            background: #fff;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 40px 16px 16px;
+            max-height: calc(100% - 56px);
+            max-width: calc(100% - 32px);
+            overflow: auto;
+            overflow-wrap: anywhere;
+            padding: 16px 24px;
+            width: 480px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body.has-wallpaper main {
+                background: #1e1e1e;
+            }
+        }
+
+        @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+            body.has-wallpaper main {
+                --auth-text-outline: #000;
+                background: rgba(255, 255, 255, .08);
+                color: #fff;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, .16), inset 0 0 0 1px rgba(255, 255, 255, .4);
+                -webkit-backdrop-filter: blur(8px) saturate(105%);
+                backdrop-filter: blur(8px) saturate(105%);
+            }
+
+            body.has-wallpaper #origin {
+                color: #f4f6fa;
+                opacity: 1;
+            }
+
+            body.has-wallpaper main h1,
+            body.has-wallpaper main label,
+            body.has-wallpaper #origin {
+                text-shadow: 0 1px 3px var(--auth-text-outline);
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body.has-wallpaper main {
+                    --auth-text-outline: #000;
+                    background: rgba(0, 0, 0, .06);
+                    color: #fff;
+                }
+
+                body.has-wallpaper #origin {
+                    color: #f4f6fa;
+                }
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+            body.has-wallpaper main {
+                --auth-text-outline: transparent;
+                background: #fff;
+                color: inherit;
+                box-shadow: none;
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+            }
+
+            body.has-wallpaper #origin {
+                color: inherit;
+                opacity: .7;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body.has-wallpaper main {
+                    background: #1e1e1e;
+                    -webkit-backdrop-filter: none;
+                    backdrop-filter: none;
+                }
+            }
         }
 
         #origin {
@@ -106,9 +196,137 @@
             font-size: 12px;
             min-height: 18px;
         }
+
+        #lockScreenCover {
+            align-items: center;
+            background: transparent;
+            border: 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            font: inherit;
+            height: 100%;
+            justify-content: center;
+            left: 0;
+            margin: 0;
+            padding: 32px 24px;
+            pointer-events: none;
+            position: fixed;
+            text-align: center;
+            text-shadow: 0 2px 8px #000, 0 0 24px #000;
+            top: 0;
+            width: 100%;
+            z-index: 2;
+        }
+
+        #lockScreenCover[hidden] {
+            display: none;
+        }
+
+        #lockScreenCover:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: -8px;
+        }
+
+        #lockScreenClock {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            opacity: var(--auth-clock-open-opacity, 0);
+            transform: translateY(var(--auth-clock-open-y, -24px)) scale(.65);
+        }
+
+        #lockScreenTime {
+            font-size: clamp(48px, 9vw, 112px);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.15;
+        }
+
+        #lockScreenDate {
+            font-size: clamp(18px, 2.5vw, 28px);
+            margin-top: 8px;
+        }
+
+        #lockScreenHint {
+            bottom: clamp(16px, 6vh, 48px);
+            font-size: 14px;
+            left: 16px;
+            position: absolute;
+            right: 16px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        body.wallpaper-cover main {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+
+        body.has-wallpaper {
+            --auth-motion-duration: 200ms;
+            overflow: hidden;
+        }
+
+        body.wallpaper-cover #lockScreenCover {
+            pointer-events: auto;
+        }
+
+        body.wallpaper-cover #lockScreenClock {
+            opacity: 1;
+            transform: none;
+        }
+
+        body.wallpaper-cover #lockScreenHint {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body.wallpaper-transition main {
+            transition: opacity var(--auth-motion-duration) ease, transform var(--auth-motion-duration) ease;
+        }
+
+        body.wallpaper-transition #lockScreenClock {
+            transition: opacity var(--auth-motion-duration) cubic-bezier(.16, 1, .3, 1),
+                transform var(--auth-motion-duration) cubic-bezier(.16, 1, .3, 1);
+        }
+
+        body.wallpaper-transition.wallpaper-cover #lockScreenClock {
+            transition-timing-function: cubic-bezier(.7, 0, .84, 0);
+        }
+
+        body.wallpaper-transition #lockScreenHint {
+            transition: opacity var(--auth-motion-duration) ease, visibility 0s var(--auth-motion-duration);
+        }
+
+        body.wallpaper-transition.wallpaper-cover #lockScreenHint {
+            transition-delay: 0s, 0s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body.has-wallpaper {
+                --auth-motion-duration: 0ms;
+            }
+        }
+
+        body.has-wallpaper h1 {
+            margin: 0 0 12px;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
+<img id="lockScreenWallpaper" alt="" hidden>
+<button id="lockScreenCover" type="button" aria-labelledby="lockScreenHint" hidden>
+    <span id="lockScreenClock">
+        <time id="lockScreenTime" aria-live="off"></time>
+        <span id="lockScreenDate"></span>
+    </span>
+    <span id="lockScreenHint"></span>
+</button>
 <div id="windowBar"><button id="closeWindow" type="button">×</button></div>
 <main hidden>
     <h1 id="title">SiYuan</h1>
@@ -126,6 +344,147 @@
     <button id="connections" type="button"></button>
 </main>
 <script>
+    const loadLockScreenWallpaper = () => {
+        const wallpaper = document.getElementById("lockScreenWallpaper");
+        const cover = document.getElementById("lockScreenCover");
+        const clock = document.getElementById("lockScreenClock");
+        const panel = document.getElementById("authPanel") || document.querySelector("main");
+        let pending = true;
+        let interacted = false;
+        let covered = false;
+        let composing = false;
+        let clockShown = false;
+        let resumeTarget;
+        let clockTimer;
+        const focusInput = () => {
+            const candidates = [resumeTarget, document.getElementById("authCode"),
+                ...panel.querySelectorAll("button:not(:disabled), a[href]")];
+            const target = candidates.find(item => item && !item.disabled && item.getClientRects().length);
+            target?.focus({preventScroll: true});
+            return target;
+        };
+        const stopClock = () => {
+            clearInterval(clockTimer);
+            clockTimer = undefined;
+        };
+        const positionClock = () => {
+            const height = clock.offsetHeight * .65;
+            const top = panel.offsetTop - 16 - height;
+            clockShown = top >= 40;
+            cover.style.setProperty("--auth-clock-open-y", `${clockShown ? top + height / 2 - window.innerHeight / 2 : -24}px`);
+            cover.style.setProperty("--auth-clock-open-opacity", clockShown ? "1" : "0");
+        };
+        const updateClock = () => {
+            const now = new Date();
+            const time = document.getElementById("lockScreenTime");
+            time.textContent = now.toLocaleTimeString(undefined, {hour: "2-digit", minute: "2-digit"});
+            time.dateTime = now.toISOString();
+            document.getElementById("lockScreenDate").textContent = now.toLocaleDateString(undefined,
+                {weekday: "long", month: "long", day: "numeric"});
+            positionClock();
+        };
+        const refreshClock = () => {
+            stopClock();
+            if (!wallpaper.hidden && !document.hidden) {
+                updateClock();
+                if (covered || clockShown) clockTimer = setInterval(updateClock, 1000);
+            }
+        };
+        const setCovered = show => {
+            covered = show;
+            cover.inert = !show;
+            cover.setAttribute("aria-hidden", String(!show));
+            panel.inert = show;
+            document.body.classList[show ? "add" : "remove"]("wallpaper-cover");
+            refreshClock();
+        };
+        const reveal = () => {
+            interacted = true;
+            if (!covered) return pending ? focusInput() : undefined;
+            document.body.classList.add("wallpaper-transition");
+            setCovered(false);
+            return focusInput();
+        };
+        const conceal = () => {
+            if (wallpaper.hidden || covered) return false;
+            const active = document.activeElement;
+            resumeTarget = panel.contains(active) ? active : undefined;
+            document.body.classList.add("wallpaper-transition");
+            setCovered(true);
+            cover.focus({preventScroll: true});
+            return true;
+        };
+        cover.addEventListener("click", reveal);
+        document.addEventListener("pointerdown", event => {
+            if (event.target.closest("#windowBar, [data-auth-drag]")) return;
+            if (covered) event.preventDefault();
+            reveal();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                if (event.isComposing || composing || event.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
+                if (conceal()) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                return;
+            }
+            if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "v") {
+                reveal();
+                return;
+            }
+            const altGraph = event.getModifierState?.("AltGraph");
+            if ((event.ctrlKey || event.metaKey || event.altKey) && !altGraph) return;
+            const wasCovered = covered;
+            const target = reveal();
+            if (!wasCovered || event.isComposing || event.key === "Process" || event.key === "Dead") return;
+            // 唤起按键不触发登录；可直接输入的首字符只写入当前输入框一次。
+            if ((target?.type === "password" || target?.type === "text") && Array.from(event.key).length === 1 && event.key !== " ") {
+                target.setRangeText(event.key, target.selectionStart, target.selectionEnd, "end");
+                target.dispatchEvent(new Event("input", {bubbles: true}));
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+        document.addEventListener("compositionstart", () => { composing = true; reveal(); }, true);
+        document.addEventListener("compositionend", () => { composing = false; }, true);
+        document.addEventListener("visibilitychange", refreshClock);
+        window.addEventListener("resize", refreshClock);
+        window.addEventListener("pagehide", stopClock);
+        window.addEventListener("pageshow", refreshClock);
+        wallpaper.onload = () => {
+            pending = false;
+            wallpaper.hidden = false;
+            cover.hidden = false;
+            document.body.classList.add("has-wallpaper");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = true;
+            // 慢加载不打断已经开始的输入，也不遮住密码管理器填入的内容。
+            setCovered(!interacted && !document.getElementById("authCode")?.value);
+            if (covered) cover.focus({preventScroll: true});
+            else if (!interacted) focusInput();
+        };
+        wallpaper.onerror = () => {
+            pending = false;
+            const shouldFocus = !interacted || covered;
+            wallpaper.hidden = true;
+            cover.hidden = true;
+            setCovered(false);
+            document.body.classList.remove("has-wallpaper", "wallpaper-transition");
+            const background = document.getElementById("authDefaultBackground");
+            if (background) background.hidden = false;
+            if (shouldFocus) focusInput();
+        };
+        wallpaper.src = "/api/system/getLockScreenWallpaper";
+        return {focus: () => {
+            if (pending) return;
+            refreshClock();
+            if (covered) cover.focus({preventScroll: true});
+            else focusInput();
+        }};
+    };
+    const lockScreenWallpaperState = loadLockScreenWallpaper();
+
     (() => {
         const params = new URLSearchParams(window.location.search);
         const allowedPaths = ["/stage/build/app/", "/stage/build/app/window.html"];
@@ -247,8 +606,9 @@
                 captchaElement.placeholder = languages._kernel["175"];
                 document.getElementById("rememberLabel").textContent = languages._kernel["257"];
                 submitElement.textContent = languages._kernel["174"];
+                document.getElementById("lockScreenHint").textContent = languages.lockScreenReveal;
                 document.querySelector("main").hidden = false;
-                authCodeElement.focus();
+                lockScreenWallpaperState.focus();
             });
     })();
 </script>

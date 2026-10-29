@@ -8,7 +8,7 @@ import {test} from "node:test";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {WorkspaceStorageData} from "../../types/api";
 
-const browserCases = async (source: string, sharedSource: string, echartsPath: string, locales: Record<string, Record<string, string>>, loadingImage: string) => {
+const browserCases = async (source: string, sharedSource: string, echartsPath: string, locales: Record<string, Record<string, string>>) => {
     const languages = locales.en;
     const check = require("node:assert/strict");
     const shared = {} as typeof import("../render/fragments") & Pick<typeof import("../render/render"), "genButtonHtml" | "genButtonRowHtml" | "genConfigGroup">;
@@ -83,9 +83,10 @@ const browserCases = async (source: string, sharedSource: string, echartsPath: s
             shared.genButtonRowHtml("storageReferenceControl", window.siyuan.languages.reloadUI,
                 window.siyuan.languages.reloadUITip, window.siyuan.languages.reloadUI, "iconRefresh"), window.siyuan.languages.configGroupMaintenance);
         exports.mountWorkspaceStorage(root);
-        const image = root.querySelector<HTMLImageElement>("[data-storage-loading] img");
-        check.equal(image.getAttribute("src"), "/stage/loading-pure.svg");
-        image.src = loadingImage;
+        const spinner = root.querySelector<HTMLElement>("[data-storage-loading] .b3-loading");
+        check.equal(spinner.childElementCount, 0);
+        check.equal(spinner.getAttribute("aria-hidden"), "true");
+        check.match(getComputedStyle(spinner, "::before").backgroundImage, /conic-gradient/);
     };
     mount();
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
@@ -310,9 +311,8 @@ test("workspace storage rendering, refresh, theme, mobile layout and lifecycle",
     const theme = readFileSync(path.resolve("appearance/themes/daylight/theme.css"), "utf8");
     const darkTheme = readFileSync(path.resolve("appearance/themes/midnight/theme.css"), "utf8");
     const icons = readFileSync(path.resolve("appearance/icons/litheness/icon.js"), "utf8");
-    const loadingImage = "data:image/svg+xml;base64," + readFileSync(path.resolve("stage/loading-pure.svg")).toString("base64");
     const commonCSS = theme + darkTheme.replace(/:root/g, ':root[data-theme-mode="dark"]') + "\nbody{margin:0;font:16px sans-serif;color:var(--b3-theme-on-background);background:var(--b3-theme-background)}";
-    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(sharedSource)}, ${JSON.stringify(path.resolve("stage/protyle/js/echarts/echarts.min.js"))}, ${JSON.stringify(locales)}, ${JSON.stringify(loadingImage)})`;
+    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(sharedSource)}, ${JSON.stringify(path.resolve("stage/protyle/js/echarts/echarts.min.js"))}, ${JSON.stringify(locales)})`;
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");

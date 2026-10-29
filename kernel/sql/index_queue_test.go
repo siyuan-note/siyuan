@@ -1,24 +1,14 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package sql
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -201,6 +191,144 @@ func TestClearIndexQueuePreservesRawTail(t *testing.T) {
 	got, err := os.ReadFile(queuePath)
 	if err != nil || !bytes.Equal(got, tail) || indexQueueSize.Load() != int64(len(tail)) {
 		t.Fatalf("checkpoint changed pending bytes: %v", err)
+	}
+}
+
+func TestIndexQueueRecoversLargeAndMalformedRecords(t *testing.T) {
+	prepareIndexQueueTest(t)
+	ids := make([]string, 5000)
+	for i := range ids {
+		ids[i] = "20261026000000-large01"
+	}
+	BatchRemoveTreeQueue(ids)
+	queuePath := filepath.Join(util.QueueDir, "index.queue")
+	f, err := os.OpenFile(queuePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A malformed record must not hide the valid records following it, and an
+	// interrupted final append must not prevent recovery of earlier records.
+	if _, err = f.WriteString("{invalid}\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err = f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	BatchRemoveAssetsQueue([]string{strings.Repeat("a", 70000)})
+	DeleteBoxQueue("last-valid-box")
+	f, err = os.OpenFile(queuePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = f.WriteString(`{"action":`); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	before, err := os.ReadFile(queuePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	operationQueue = nil
+	initIndexQueue()
+	recoverIndexQueue()
+	if len(operationQueue) != 3 {
+		t.Fatalf("large or malformed record stopped recovery: %d operations", len(operationQueue))
+	}
+	first, second, last := operationQueue[0].recoveryEntry, operationQueue[1].recoveryEntry, operationQueue[2].recoveryEntry
+	if first == nil || first.Action != "delete_ids" || len(first.IDs) != len(ids) ||
+		second == nil || second.Action != "delete_assets" || len(second.Hashes[0]) != 70000 ||
+		last == nil || last.Box != "last-valid-box" {
+		t.Fatalf("recovery changed record contents: %#v", operationQueue)
+	}
+	after, err := os.ReadFile(queuePath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("loading changed original recovery bytes: %v", err)
+	}
+}
+
+func TestIndexQueueCoalescedLocationsArePersisted(t *testing.T) {
+	for name, enqueue := range map[string]func(*parse.Tree){
+		"index": IndexTreeQueue, "move": MoveTreeQueue, "rename": RenameDocQueue,
+		"update_refs": UpdateRefsTreeQueue, "delete_refs": DeleteRefsTreeQueue,
+	} {
+		t.Run(name, func(t *testing.T) {
+			prepareIndexQueueTest(t)
+			first := &parse.Tree{ID: "20261026000000-move001", Box: "20261026000000-box0001", Path: "/first.sy"}
+			latest := *first
+			latest.Path = "/latest.sy"
+			enqueue(first)
+			enqueue(&latest)
+			enqueue(&latest)
+			if len(operationQueue) != 1 || len(loadIndexQueue()) != 2 {
+				t.Fatal("coalescing lost a new location or duplicated an unchanged descriptor")
+			}
+			operationQueue = nil
+			recoverIndexQueue()
+			if len(operationQueue) != 2 || operationQueue[1].recoveryEntry.Path != latest.Path {
+				t.Fatal("restart did not retain latest coalesced location")
+			}
+		})
+	}
+}
+
+type indexQueueFailingWriter struct {
+	bytes.Buffer
+	writeErr, closeErr error
+	short, closed      bool
+}
+
+func (w *indexQueueFailingWriter) Write(data []byte) (int, error) {
+	if w.short {
+		return len(data) - 1, w.writeErr
+	}
+	if w.writeErr != nil {
+		return 0, w.writeErr
+	}
+	return w.Buffer.Write(data)
+}
+
+func (w *indexQueueFailingWriter) Close() error {
+	w.closed = true
+	return w.closeErr
+}
+
+func TestIndexQueueRecordReportsWriteAndCloseFailures(t *testing.T) {
+	writeErr, closeErr := errors.New("write failed"), errors.New("close failed")
+	for _, writer := range []*indexQueueFailingWriter{{writeErr: writeErr}, {closeErr: closeErr},
+		{writeErr: writeErr, closeErr: closeErr}, {short: true}, {}} {
+		err := writeIndexQueueRecord(writer, []byte("record\n"))
+		if !writer.closed || !errors.Is(err, writer.writeErr) && writer.writeErr != nil ||
+			!errors.Is(err, writer.closeErr) && writer.closeErr != nil || writer.short && !errors.Is(err, io.ErrShortWrite) {
+			t.Fatalf("write/close failure was lost: %+v, %v", writer, err)
+		}
+		if writer.writeErr == nil && writer.closeErr == nil && !writer.short && err != nil {
+			t.Fatalf("successful append failed: %v", err)
+		}
+	}
+}
+
+func TestIndexQueueAppendFailureKeepsLiveOperation(t *testing.T) {
+	prepareIndexQueueTest(t)
+	previousFailure := indexQueueWriteFailed.Load()
+	t.Cleanup(func() { indexQueueWriteFailed.Store(previousFailure) })
+	queuePath := filepath.Join(util.QueueDir, "index.queue")
+	if err := os.Mkdir(queuePath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	op := &dbQueueOperation{action: "delete_box", box: "retained"}
+	if err := appendToIndexQueue(op); err == nil {
+		t.Fatal("journal open failure was not returned")
+	}
+	appendOperation(op)
+	if len(operationQueue) != 1 || operationQueue[0] != op || !indexQueueWriteFailed.Load() {
+		t.Fatal("journal failure lost live operation or warning state")
+	}
+	if err := os.Remove(queuePath); err != nil {
+		t.Fatal(err)
+	}
+	appendOperation(&dbQueueOperation{action: "delete_box", box: "next"})
+	if indexQueueWriteFailed.Load() || len(loadIndexQueue()) != 1 || len(operationQueue) != 2 {
+		t.Fatal("journal recovery did not reset warning or preserve memory work")
 	}
 }
 

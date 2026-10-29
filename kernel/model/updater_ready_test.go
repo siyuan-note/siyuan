@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -224,7 +228,7 @@ func TestExitInstallPackageCheckDoesNotWaitForDownload(t *testing.T) {
 	}
 	Conf.System.Load().DownloadInstallPkg = false
 	if got := getNewVerInstallPkgPath(false); got != "" {
-		t.Fatalf("disabled automatic installation returned a package: %s", got)
+		t.Fatalf("disabling automatic download bypassed package authentication: %s", got)
 	}
 }
 

@@ -1,3 +1,5 @@
+import {getHeadingLevel} from "./headingLevel";
+
 export const getSuperBlockCommand = (layout: "col" | "row") => `superblock:${layout}`;
 
 export const getSuperBlockCommandLayout = (value: string): "col" | "row" | undefined => {
@@ -16,8 +18,8 @@ export const getSuperBlockTailHeadings = (element: Element) => {
         if (child.getAttribute("data-type") !== "NodeHeading") {
             return;
         }
-        const level = Number(child.getAttribute("data-subtype")?.substring(1));
-        while (headings.length > 0 && Number(headings[headings.length - 1].getAttribute("data-subtype")?.substring(1)) >= level) {
+        const level = getHeadingLevel(child);
+        while (headings.length > 0 && getHeadingLevel(headings[headings.length - 1]) >= level) {
             headings.pop();
         }
         headings.push(child);

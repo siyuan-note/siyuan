@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package agent
 
 import (
@@ -52,6 +56,109 @@ func writeAnthropicAgentResponse(t *testing.T, w http.ResponseWriter, signature,
 
 func TestAnthropicAgentToolHistoryRecovery(t *testing.T) {
 	testNativeAgentToolHistoryRecovery(t, util.AnthropicProtocolMessages, "/v1/messages", "messages", "tool_result", writeAnthropicAgentResponse)
+}
+
+func TestAnthropicAgentUnsignedToolHistoryRecovery(t *testing.T) {
+	setupCompactionAgentTest(t)
+	const toolName = "test_anthropic_unsigned_history"
+	var executions atomic.Int32
+	tools.SetTool(toolName, &tools.Tool{Name: toolName, Source: "native", ReadOnlyHint: true,
+		InputSchema:   tools.ToolSchema{Type: "object", Properties: map[string]tools.Property{"action": {Type: "string"}}},
+		ActionEffects: map[string]tools.ToolEffects{"list": {LocalRead: true}},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			executions.Add(1)
+			return tools.CallToolResult{Content: []tools.ContentItem{{Type: "text", Text: "found"}}}, nil
+		}})
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "entries": []SessionEntry{
+		{ID: "user-1", Type: "user", Content: "use tool"},
+	}})); err != nil {
+		t.Fatal(err)
+	}
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload struct {
+			Messages []struct {
+				Role    string            `json:"role"`
+				Content []json.RawMessage `json:"content"`
+			} `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Error(err)
+		}
+		n := requests.Add(1)
+		if n >= 2 {
+			var thinkingBlocks, toolResults int
+			for _, message := range payload.Messages {
+				for _, raw := range message.Content {
+					var block map[string]any
+					if err := json.Unmarshal(raw, &block); err != nil {
+						t.Error(err)
+					}
+					if block["type"] == "thinking" {
+						thinkingBlocks++
+						if message.Role != "assistant" || block["thinking"] != "reasoning" || block["signature"] != "" {
+							t.Errorf("unsigned thinking changed: %s", raw)
+						}
+					}
+					if block["type"] == "tool_result" {
+						toolResults++
+						content, ok := block["content"].(string)
+						if message.Role != "user" || block["tool_use_id"] != "native_tool" || !ok || !strings.Contains(content, "found") {
+							t.Errorf("tool result changed: %s", raw)
+						}
+					}
+				}
+			}
+			if thinkingBlocks != int(n)-1 || toolResults != 1 {
+				t.Errorf("native history was lost: thinking=%d tool results=%d request=%d", thinkingBlocks, toolResults, n)
+			}
+		}
+		if n == 1 {
+			writeAnthropicAgentResponse(t, w, "", "", toolName, true)
+		} else {
+			writeAnthropicAgentResponse(t, w, "", "answer", "", true)
+		}
+	}))
+	defer server.Close()
+	client := util.NewAIClientWithModel("key", server.URL, "test")
+	run := func(userID string, revision int64, message string) string {
+		t.Helper()
+		turnID := ""
+		for event := range AgentChat(context.Background(), client, util.AnthropicProtocolMessages, "test", "", 0,
+			testSessionID, userID, revision, message, nil, "English", nil, EditorContext{}, nil, false,
+			time.Second, 0, "", time.Second, time.Second) {
+			if event.Type == "error" {
+				t.Fatalf("unsigned thinking failed: %s", event.Error)
+			}
+			if event.Type == "turn" {
+				turnID = event.TurnID
+			}
+		}
+		if turnID == "" {
+			t.Fatal("turn was not created")
+		}
+		return turnID
+	}
+	turnID := run("user-1", 1, "use tool")
+	recovered, err := GetSession(testSessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	recovered["expectedRevision"], recovered["commitTurnID"] = int64(1), turnID
+	if _, canonical, err := SaveSessionState(marshalSession(t, recovered)); err != nil {
+		t.Fatal(err)
+	} else {
+		canonical["entries"] = append(canonical["entries"].([]any), map[string]any{"id": "user-2", "type": "user", "content": "continue"})
+		canonical["expectedRevision"] = int64(2)
+		if _, _, err := SaveSessionState(marshalSession(t, canonical)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	run("user-2", 3, "continue")
+	if executions.Load() != 1 || requests.Load() != 3 {
+		t.Fatalf("tool was repeated: executions=%d requests=%d", executions.Load(), requests.Load())
+	}
 }
 
 func testNativeAgentToolHistoryRecovery(t *testing.T, protocol, path, inputKey, resultType string,

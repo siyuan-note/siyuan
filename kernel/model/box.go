@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -127,6 +115,12 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
+		if addressingErr := filesys.CheckDocumentAddressing(id); addressingErr != nil {
+			// 只展示关闭的笔记本；不能进入配置修复、解密元数据或索引流程。
+			logging.LogWarnf("notebook [%s] is unavailable: %s", id, addressingErr)
+			ret = append(ret, &Box{ID: id, Name: id, Closed: true, Encrypted: IsEncryptedBox(id)})
+			continue
+		}
 		isExistConf := filelock.IsExist(boxConfPath)
 		missingEncryptedIdentity := false
 		if !isExistConf {
@@ -183,9 +177,9 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
 				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-				// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
+				// 检查备份及加密身份，保留损坏配置中的恢复材料，不能按普通配置删除。
 				backup, backupErr := readNotebookCryptBackup(id)
-				if backupErr != nil || backup != nil {
+				if backupErr != nil || backup != nil || IsEncryptedBox(id) {
 					markRuntimeEncryptedBox(id)
 					continue
 				}
@@ -344,6 +338,9 @@ func (box *Box) SaveConfAndSync(conf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf(conf *conf.BoxConf, syncChange bool) error {
+	if err := filesys.CheckDocumentAddressing(box.ID); err != nil {
+		return err
+	}
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	persisted, err := prepareBoxConfForSave(box.ID, conf)
 	if err != nil {
@@ -389,8 +386,13 @@ func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf0(data []byte) error {
+	unlock := filesys.LockDocumentConfiguration()
+	defer unlock()
 	if !ast.IsNodeIDPattern(box.ID) {
 		return fmt.Errorf("invalid box ID [%s]", box.ID)
+	}
+	if err := checkDocumentAddressingConf(box.ID, data); err != nil {
+		return err
 	}
 
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
@@ -407,7 +409,11 @@ func (box *Box) saveConf0(data []byte) error {
 
 // validateBoxPath 校验 box 内相对路径，拒绝 .. 和绝对路径，确保最终路径在 <DataDir>/<boxID>/ 内。
 func (box *Box) validateBoxPath(p string) (string, error) {
-	return filesys.ValidateBoxRelativePath(box.ID, p)
+	rel, err := filesys.ValidateBoxRelativePath(box.ID, p)
+	if err != nil {
+		return "", err
+	}
+	return rel, filesys.CheckDocumentAddressing(box.ID)
 }
 
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
@@ -577,6 +583,25 @@ func (box *Box) ListFiles(path string) (ret []*FileInfo) {
 	return
 }
 
+// listFilesForIndex 传播任一目录的枚举失败，避免将不完整扫描发布为已就绪索引。
+func (box *Box) listFilesForIndex(directory string) (ret []*FileInfo, err error) {
+	files, _, err := box.Ls(directory)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		if file.isdir {
+			children, walkErr := box.listFilesForIndex(file.path)
+			if walkErr != nil {
+				return nil, walkErr
+			}
+			ret = append(ret, children...)
+		}
+		ret = append(ret, file)
+	}
+	return
+}
+
 func (box *Box) listFiles(files, ret *[]*FileInfo) {
 	for _, file := range *files {
 		if file.isdir {
@@ -675,30 +700,16 @@ func isSkipFile(filename string) bool {
 	return strings.HasPrefix(filename, ".") || "node_modules" == filename || "dist" == filename || "target" == filename
 }
 
-func moveTree(tree *parse.Tree) {
-	treenode.SetBlockTreePath(tree)
-	sql.MoveTreeQueue(tree)
-
-	box := Conf.Box(tree.Box)
-	subFiles := box.ListFiles(tree.Path)
-	luteEngine := util.NewLute()
-	for _, subFile := range subFiles {
-		if !strings.HasSuffix(subFile.path, ".sy") {
-			continue
-		}
-
-		subTree, err := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
-		if err != nil {
-			continue
-		}
-
-		treenode.SetBlockTreePath(subTree)
-		sql.MoveTreeQueue(subTree)
-		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
-		util.PushStatusBar(msg)
+func moveTree(trees []*parse.Tree) (err error) {
+	for _, tree := range trees {
+		// Continue publishing every physically moved document after an index error.
+		// The durable move record forces authenticated index recovery on restart.
+		err = errors.Join(err, treenode.ReplaceBlockTree(tree))
+		sql.MoveTreeQueue(tree)
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(107), html.EscapeString(tree.HPath)))
 	}
-
-	refreshDocInfoWithoutParent(tree)
+	refreshDocInfoWithoutParent(trees[0])
+	return
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
@@ -818,7 +829,12 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 						continue
 					}
 
-					for _, tag := range attrV.([]any) {
+					values, ok := attrV.([]any)
+					if !ok {
+						logging.LogWarnf("unsupported YAML tags type [%T] in [%s]", attrV, n.ID)
+						continue
+					}
+					for _, tag := range values {
 						tagStr := fmt.Sprintf("%v", tag)
 						if "" == tag {
 							continue
@@ -1020,6 +1036,11 @@ func ReindexFTS() {
 }
 
 func fullReindex() {
+	fullReindexWithTxFlush(true)
+}
+
+// Snapshot checkout already drained transactions while holding flushLock.
+func fullReindexWithTxFlush(flushTransactions bool) {
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1031,7 +1052,9 @@ func fullReindex() {
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
-	FlushTxQueue()
+	if flushTransactions {
+		FlushTxQueue()
+	}
 
 	sql.InitDatabase(true)
 

@@ -1,19 +1,25 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cmd
 
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/spf13/cobra"
 )
 
@@ -63,5 +69,55 @@ func TestBlockDeleteRejectsMissingBlock(t *testing.T) {
 		if err := blockDeleteCmd.RunE(command, nil); err == nil || !strings.Contains(err.Error(), "block not found") {
 			t.Fatalf("missing block accepted (dry-run=%v): %v", dry, err)
 		}
+	}
+}
+
+func TestBlockDeleteRejectsDocumentAndReadFailure(t *testing.T) {
+	previousData, previousDB, previousConf, previousDryRun := util.DataDir, util.BlockTreeDBPath, model.Conf, dryRun
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		cache.ClearTreeCache()
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath, model.Conf, dryRun = previousData, previousDB, previousConf, previousDryRun
+		if previousDB != "" {
+			treenode.InitBlockTree(false)
+		}
+	})
+	boxID, rootID, avID := ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()
+	tree := treenode.NewTree(boxID, "/"+rootID+".sy", "/Document", "Document")
+	tree.Root.FirstChild.SetIALAttr(av.NodeAttrNameAvs, avID)
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	docPath := filepath.Join(util.DataDir, boxID, tree.Path)
+	before, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	command := &cobra.Command{}
+	command.Flags().String("id", rootID, "")
+	for _, dry := range []bool{false, true} {
+		dryRun = dry
+		if err := blockDeleteCmd.RunE(command, nil); err == nil || !strings.Contains(err.Error(), "document cannot be deleted") {
+			t.Fatalf("document deletion accepted (dry=%v): %v", dry, err)
+		}
+		if after, err := os.ReadFile(docPath); err != nil || !bytes.Equal(before, after) {
+			t.Fatal("rejected deletion changed the document and its bindings")
+		}
+	}
+	// An indexed body block whose source cannot be read must return a failure.
+	dryRun = false
+	_ = command.Flags().Set("id", tree.Root.FirstChild.ID)
+	if err := os.WriteFile(docPath, []byte("invalid document"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.ClearTreeCache()
+	if err := blockDeleteCmd.RunE(command, nil); err == nil {
+		t.Fatal("failed body-block deletion was reported as successful")
 	}
 }

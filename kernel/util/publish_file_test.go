@@ -1,7 +1,13 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package util
 
 import (
+	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,4 +55,44 @@ func TestPublishFileBoundary(t *testing.T) {
 			t.Fatal("directory link accepted")
 		}
 	})
+}
+
+// TestOpenPublishReaderFileSensitiveNames 验证读者可见的包资源在打开前按文件名策略拒绝敏感文件。
+func TestOpenPublishReaderFileSensitiveNames(t *testing.T) {
+	root := t.TempDir()
+	previousWorkspace := WorkspaceDir
+	WorkspaceDir = root
+	t.Cleanup(func() { WorkspaceDir = previousWorkspace })
+
+	dir := filepath.Join(root, "widgets", "example")
+	if err := os.MkdirAll(filepath.Join(dir, "sub"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range map[string]string{
+		"index.html":          "ok",
+		"my-credentials.json": "ok",
+		"credentials.json":    "secret",
+		"id_rsa":              "secret",
+		"sub/id_token":        "secret",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, filepath.FromSlash(name)), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for _, name := range []string{"widgets/example/credentials.json", "widgets/example/id_rsa", "widgets/example/sub/id_token"} {
+		if file, err := OpenPublishReaderFile(root, name); !errors.Is(err, fs.ErrPermission) {
+			if file != nil {
+				file.Close()
+			}
+			t.Fatalf("sensitive file %q: err = %v, want permission denied", name, err)
+		}
+	}
+	for _, name := range []string{"widgets/example/index.html", "widgets/example/my-credentials.json"} {
+		file, err := OpenPublishReaderFile(root, name)
+		if err != nil {
+			t.Fatalf("ordinary file %q rejected: %v", name, err)
+		}
+		file.Close()
+	}
 }

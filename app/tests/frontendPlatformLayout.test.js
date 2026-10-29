@@ -39,7 +39,7 @@ const browserCases = ({css, mobile}) => {
                     <span class="fn__space"></span><span class="block__icon">X</span></div></div>`;
             const input = document.querySelector("input");
             const padding = frontend === "browser-desktop" ? 8 :
-                (frontend === "desktop-window" ? (platform === "mac" ? 42 : 168) : (platform === "mac" ? 8 : 126));
+                (frontend === "desktop-window" ? (platform === "mac" ? 42 : 168) : (platform === "mac" ? 8 : 136.5));
             check.equal(getComputedStyle(input).right, (frontend === "browser-desktop" || platform === "mac" ? 8 : 108) + "px", label);
             check.equal(getComputedStyle(document.querySelector(".block__icons")).paddingRight, padding + "px", label);
             if (frontend === "browser-desktop") {
@@ -50,6 +50,38 @@ const browserCases = ({css, mobile}) => {
                 check.equal(toolbar.paddingRight, "5px", label);
             }
         }
+    }
+    if (!mobile) {
+        document.documentElement.setAttribute("data-frontend", "desktop");
+        for (const platform of ["windows", "linux"]) {
+            for (const density of ["default", "compact"]) {
+                document.documentElement.setAttribute("data-ui-density", density);
+                for (const fused of [false, true]) {
+                    document.body.className = `body--${platform}${fused ? " body--toolbar-hide" : ""}`;
+                    for (const headerClass of ["block__icons", "protyle-breadcrumb"]) {
+                        const label = `${platform}/${density}/${fused}/${headerClass}`;
+                        document.body.innerHTML = `<div id="toolbar" class="toolbar fn__flex"><div class="fn__flex-1"></div>
+                            <div id="windowControls" class="fn__flex">${["win", "win", "close"].map(type =>
+                            `<div class="toolbar__item toolbar__item--${type}"><svg></svg></div>`).join("")}</div></div>
+                            <div class="fullscreen"><div class="${headerClass}"><div class="fn__flex-1"></div>
+                                <span class="block__icon"><svg></svg></span></div></div>`;
+                        const controls = document.querySelector("#windowControls").getBoundingClientRect();
+                        const header = document.querySelector(`.${headerClass}`).getBoundingClientRect();
+                        const button = document.querySelector(".block__icon").getBoundingClientRect();
+                        check.ok(button.right <= controls.left - 4, `${label} functional and window buttons do not overlap`);
+                        check.ok(Math.abs((header.top + header.bottom - controls.top - controls.bottom) / 2) <= .5,
+                            `${label} header and window controls share their vertical center`);
+                        const icon = document.querySelector(".block__icon svg").getBoundingClientRect();
+                        for (const nativeIcon of document.querySelectorAll("#windowControls svg")) {
+                            const rect = nativeIcon.getBoundingClientRect();
+                            check.ok(Math.abs((icon.top + icon.bottom - rect.top - rect.bottom) / 2) < .1,
+                                `${label} functional and native SVG icons share their vertical center`);
+                        }
+                    }
+                }
+            }
+        }
+        document.documentElement.removeAttribute("data-ui-density");
     }
 };
 

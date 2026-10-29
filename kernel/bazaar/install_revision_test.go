@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package bazaar
 
 import (
@@ -34,7 +38,7 @@ func useInstallRevisionFixture(t *testing.T) (source, target string) {
 
 func installRevisionOptions(target string) PackageInstallOptions {
 	revision, _ := InstalledPackageRevision(target)
-	return PackageInstallOptions{ExpectedInstalledRevision: revision, PrivateTemp: true}
+	return PackageInstallOptions{ExpectedInstalledRevision: revision}
 }
 
 func TestInstallRevisionConflictHasNoReplacement(t *testing.T) {
@@ -54,6 +58,55 @@ func TestInstallRevisionConflictHasNoReplacement(t *testing.T) {
 	entries, _ := os.ReadDir(filepath.Dir(target))
 	if len(entries) != 1 {
 		t.Fatalf("stale install left staging: %v", entries)
+	}
+}
+
+func TestInstallRevisionRejectsTargetChangeDuringStaging(t *testing.T) {
+	for _, change := range []string{"edit", "create", "delete", "empty directory"} {
+		t.Run(change, func(t *testing.T) {
+			source, target := useInstallRevisionFixture(t)
+			update := change == "edit" || change == "delete"
+			if !update {
+				if err := os.RemoveAll(target); err != nil {
+					t.Fatal(err)
+				}
+			}
+			changedRevision := ""
+			// 在线安装未显式绑定版本；在 staging 完成后模拟另一个写入方修改目标。
+			options := PackageInstallOptions{Recheck: func() error {
+				staged, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*", "staging", "index.js"))
+				if err != nil || len(staged) == 0 || changedRevision != "" {
+					return err
+				}
+				switch change {
+				case "delete":
+					err = os.RemoveAll(target)
+				case "empty directory":
+					err = os.MkdirAll(target, 0755)
+				default:
+					if err = os.MkdirAll(target, 0755); err == nil {
+						err = os.WriteFile(filepath.Join(target, "index.js"), []byte("concurrent edit"), 0644)
+					}
+				}
+				if err != nil {
+					return err
+				}
+				changedRevision, err = installedPackageRevision(target)
+				return err
+			}}
+			if _, err := replacePackageDirectoryWithOptions(source, target, update, options); !errors.Is(err, ErrInstalledRevisionConflict) {
+				t.Fatalf("target change was not rejected: %v", err)
+			}
+			if changedRevision == "" {
+				t.Fatal("target was not changed during staging")
+			}
+			if revision, err := InstalledPackageRevision(target); err != nil || revision != changedRevision {
+				t.Fatalf("concurrent change was lost: %s, %v", revision, err)
+			}
+			if paths, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*")); err != nil || len(paths) != 0 {
+				t.Fatalf("conflicting installation left staging: %v, %v", paths, err)
+			}
+		})
 	}
 }
 
@@ -149,19 +202,27 @@ func TestInstallArchiveHashConsumesVerifiedSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	hash := fmt.Sprintf("%x", sha256.Sum256(data))
+	// 解压统一落在 temp，哈希不符时不应在其中留下任何内容
+	if err := os.MkdirAll(util.TempDir, 0755); err != nil {
+		t.Fatal(err)
+	}
 	_, _, _, _, cleanup, err := ExtractLocalPackageWithHash(archivePath, strings.Repeat("0", 64))
 	cleanup()
 	if !errors.Is(err, ErrPackageHashConflict) {
 		t.Fatalf("wrong archive hash was accepted: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(installPrivateRoot(), "install-operations")); !os.IsNotExist(err) {
-		t.Fatal("hash failure created extraction directory")
+	if entries, err := os.ReadDir(util.TempDir); err != nil || len(entries) != 0 {
+		t.Fatalf("hash failure created extraction directory: %#v, %v", entries, err)
 	}
 	_, _, source, gotHash, cleanup, err := ExtractLocalPackageWithHash(archivePath, hash)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cleanup()
+	if !util.IsForbiddenAbsPath(filepath.Join(source, "index.js")) ||
+		!util.IsPluginDevelopmentRawPathForbidden(source, true) {
+		t.Fatal("hash-bound extraction is accessible through raw file APIs")
+	}
 	if gotHash != hash {
 		t.Fatal("incorrect archive hash")
 	}

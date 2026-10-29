@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
@@ -15,14 +11,18 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func databaseKeyTestWorkspace(t *testing.T) {
 	t.Helper()
-	originalDataDir := util.DataDir
-	util.DataDir = t.TempDir()
-	t.Cleanup(func() { util.DataDir = originalDataDir })
+	originalDataDir, originalQueueDir, originalConf := util.DataDir, util.QueueDir, model.Conf
+	util.DataDir, util.QueueDir = t.TempDir(), t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	t.Cleanup(func() { util.DataDir, util.QueueDir, model.Conf = originalDataDir, originalQueueDir, originalConf })
 }
 
 func databaseKeyTestFixture(t *testing.T, keys ...*av.KeyValues) *av.AttributeView {

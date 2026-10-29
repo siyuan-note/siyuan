@@ -1,9 +1,13 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 // 写入时在同一 SQL 中验证内容及更新时间，避免查询与写入之间发生编辑而产生过期索引。
 const stmtStoreEmbedding = "INSERT OR REPLACE INTO block_embeddings " +
-	"(id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) " +
-	"SELECT id, root_id, box, path, ?, ?, ?, updated, 0, 0, 0 FROM blocks " +
+	"(id, root_id, box, path, embedding, model, space, content_len, updated, fail_count, last_tried, ignored_type) " +
+	"SELECT id, root_id, box, path, ?, ?, ?, ?, updated, 0, 0, 0 FROM blocks " +
 	"WHERE id = ? AND updated = ? AND content = ?"
 
 // 失败仅累加空向量记录，成功结果不受迟到的失败影响。

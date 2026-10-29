@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-fdf0e30",
-				"updated": "20261016111305"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -543,7 +543,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-buhhsds",
-				"updated": "20260809232000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -572,7 +572,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204526-wdd1lbj",
-				"updated": "20260803161608"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -650,7 +650,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-swad9qh",
-						"updated": "20260803161608"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -658,7 +658,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-d85bynq",
-								"updated": "20260803161608"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -677,7 +677,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -821,7 +821,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-zq7j067",
-				"updated": "20260930224728"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -835,12 +835,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-he816jm",
-				"updated": "20260930224728"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. Saving or updating a main window layout also records its size, position, and maximized or fullscreen state. Named new windows save this information automatically. Opening a layout restores these window settings; if the display configuration has changed, the window is adjusted to an available display. Older layouts without window settings remain usable. Window positioning and resizing depend on the operating system and may be restricted on Wayland. Select up to one main window layout and multiple new window layouts, then click Open above the list to open them together. This selection is not saved. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
+					"Data": "A new window layout saves the tabs, splits, and reading positions of a named window. Main window layouts and new window layouts are grouped in the same layout menu and saved separately. Saving or updating a main window layout also records its size, position, and maximized or fullscreen state. Named new windows save this information automatically."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-0yw0td3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-0yw0td3",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Opening a layout restores these window settings; if the display configuration has changed, the window is adjusted to an available display. Older layouts without window settings remain usable. Window positioning and resizing depend on the operating system and may be restricted on Wayland. Select up to one main window layout and multiple new window layouts, then click Open above the list to open them together."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-fn0is6d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-fn0is6d",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This selection is not saved. This feature is available in the desktop client; tabs from encrypted notebooks are excluded."
 				},
 				{
 					"Type": "NodeText",
@@ -944,7 +972,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-ikklk4b",
-				"updated": "20260930224728"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1021,7 +1049,35 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to save the current main window into that entry. New window layouts save automatically. Both types show the latest save time at the bottom of the submenu. You can also rename a new window layout using the layout icon beside the \"Keep window on top\" button. Rename dialogs are titled "
+					"Data": " to save the current main window into that entry."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-bwtvov0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-bwtvov0",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New window layouts save automatically. Both types show the latest save time at the bottom of the submenu. You can also rename a new window layout using the layout icon beside the \"Keep window on top\" button."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-ayx85bi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-ayx85bi",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rename dialogs are titled "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1049,7 +1105,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-tboolrb",
-				"updated": "20260810212846"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1264,12 +1320,54 @@
 			]
 		},
 		{
+			"ID": "20261021161724-4je25jy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021161724-4je25jy",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the desktop recent documents list, select recently viewed, opened, or closed documents and click Clear at the bottom to clear all three types of records after confirmation; on mobile, use the trash button at the top of the list."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-nfpsyef",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-nfpsyef",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This clears only the local records in the current workspace; documents, recent creation and modification lists, and tab navigation history are kept, and the clear action is unavailable in those two lists."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-gzf6c6h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-gzf6c6h",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New browsing, opening, or closing activity will be recorded again, including closing a tab that was already open."
+				}
+			]
+		},
+		{
 			"ID": "20260930192450-5l394sc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260930192450-5l394sc",
-				"updated": "20261007101500"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1287,7 +1385,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930192450-jc5b7ix",
-				"updated": "20261007101500"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -1319,7 +1417,35 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", turn this switch on to open settings in an independent window that can be moved, resized, and minimized; the change applies the next time settings are opened. You can also open settings with the configured shortcut from a detached document window. You can keep it open while scrolling, switching, and editing documents. Opening settings again focuses the existing window. Setting changes synchronize with other windows in the same workspace. Bulk cleanup of unreferenced assets or databases and settings import temporarily block interaction while they run. The browser uses a settings dialog, and mobile uses a settings page. Legacy plugin settings open in their owning window and bring it to the foreground; plugins that opt in open in an independent window. In an independent settings window, press "
+					"Data": ", turn this switch on to open settings in an independent window that can be moved, resized, and minimized; the change applies the next time settings are opened. You can also open settings with the configured shortcut from a detached document window."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-nodswvz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-nodswvz",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can keep it open while scrolling, switching, and editing documents. Opening settings again focuses the existing window. Setting changes synchronize with other windows in the same workspace. Bulk cleanup of unreferenced assets or databases and settings import temporarily block interaction while they run."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-ltq1lyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-ltq1lyn",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The browser uses a settings dialog, and mobile uses a settings page. Legacy plugin settings open in their owning window and bring it to the foreground; plugins that opt in open in an independent window. In an independent settings window, press "
 				},
 				{
 					"Type": "NodeTextMark",

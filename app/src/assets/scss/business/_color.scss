@@ -29,4 +29,32 @@
   &--current {
     box-shadow: 0 0 0 2px var(--b3-menu-background) inset, 0 0 0 3px var(--b3-list-hover);
   }
+
+  &--compact {
+    margin: 0;
+    position: relative;
+
+    // 细边框和角标保留色块大小，并避免反馈被滚动边界或相邻色卡遮挡。
+    &:hover:not(.color__square--list):not(.color__square--current) {
+      box-shadow: 0 0 0 1px var(--b3-theme-primary) inset;
+    }
+
+    &.color__square--current {
+      box-shadow: 0 0 0 1px var(--b3-list-hover) inset;
+    }
+
+    > .color__square-mark {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      padding: 1px;
+      box-sizing: border-box;
+      border-radius: var(--b3-border-radius) 0;
+      background-color: var(--b3-theme-primary);
+      color: var(--b3-theme-on-primary);
+      pointer-events: none;
+    }
+  }
 }

@@ -6,7 +6,7 @@
 		"id": "20200813125307-pxsjela",
 		"title": "导入和导出",
 		"type": "doc",
-		"updated": "20261016200946"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201229120428-dgzkno8",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511184321-um53ppo",
-				"updated": "20261002211013"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -44,12 +44,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210120161018-1mdw4fy",
-				"updated": "20220511190018"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持导入 Markdown 文件。所以如果你需要导入其他笔记软件的数据，请先将数据转换为 Markdown 文件。"
+					"Data": "可导入 Markdown 文件或文件夹。迁移其他软件的数据时，可先导出为 Markdown；对于提供专用导入入口的来源，也可使用对应入口。导入前请核对资源文件路径和扩展语法。"
 				}
 			]
 		},
@@ -133,7 +133,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184018-e8mz594",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -161,7 +161,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "#foo"
+					"TextMarkTextContent": "#foo#"
 				},
 				{
 					"Type": "NodeText",
@@ -183,7 +183,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -192,7 +192,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -201,7 +201,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 相关开关。"
+					"Data": " 相关开关。"
 				}
 			]
 		},
@@ -404,6 +404,48 @@
 				{
 					"Type": "NodeText",
 					"Data": "​：使用前请务必留意，避免已有数据被覆盖无法恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-6qiv57v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-6qiv57v",
+				"updated": "20261020225315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data.zip 可以直接更新当前工作空间，无需新建工作空间。导入前会先分析压缩包，加密笔记本发生冲突时，可选择默认的“跳过冲突”、“覆盖冲突”或取消。导入结果会在界面重载前列出已跳过的笔记本 ID。提交前可以取消；提交期间无法取消或关闭导入对话框。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-gnmpswl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-gnmpswl",
+				"updated": "20261020220502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入加密内容需要输入兼容的主密码。改密前的备份可通过兼容的历史密钥读取，不会回退当前密码。加密状态或数据密钥不同的笔记本不能直接合并。覆盖只替换相同路径，保留目标独有的文件，不会传播删除；导入后的加密笔记本保持锁定，需要重新解锁。"
+				}
+			]
+		},
+		{
+			"ID": "20261020220502-l5uc6wm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020220502-l5uc6wm",
+				"updated": "20261020225315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入先验证选中内容，再写入数据，失败或中断时可以回滚。上传原件、被覆盖文件和密钥材料保存在工作空间的 conf/data-imports/ 目录；在核对导入内容及所需历史之前，请保留这些恢复文件。恢复失败时暂停写入和同步，直到恢复成功。未提交的预检在 30 分钟后过期，并在启动或下一次导入时清理，过期后仍可取消；已提交批次的恢复文件继续保留。"
 				}
 			]
 		},

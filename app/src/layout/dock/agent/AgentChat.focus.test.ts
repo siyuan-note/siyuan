@@ -43,6 +43,10 @@ test("clicking an editor utility preserves its input focus", () => {
     assert.equal(clickPanel(".protyle-util"), 0);
 });
 
+test("clicking the composer resize handle preserves keyboard access without opening the editor", () => {
+    assert.equal(clickPanel(".agent-chat__input-resize"), 0);
+});
+
 test("clicking empty panel space still focuses the composer", () => {
     assert.equal(clickPanel(), 1);
 });

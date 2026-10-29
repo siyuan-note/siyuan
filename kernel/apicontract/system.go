@@ -1,9 +1,22 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package apicontract
 
 import "mime/multipart"
 
+type SystemWallpaperUploadRequest struct {
+	File *multipart.FileHeader `json:"file"`
+}
+
 // SystemRuntimeInfoData 提供可复制的运行诊断文本，不包含工作空间路径或设备标识。
 type SystemRuntimeInfoData struct {
+	Text string `json:"text"`
+}
+
+// SystemFileTraversalData contains a bounded JSON-lines metadata diagnostic.
+type SystemFileTraversalData struct {
 	Text string `json:"text"`
 }
 
@@ -27,6 +40,10 @@ type SystemChangelogData struct {
 }
 type SystemCheckUpdateRequest struct {
 	ShowMsg bool `json:"showMsg"`
+}
+
+type SystemDownloadUpdateRequest struct {
+	Version string `json:"version"`
 }
 type SystemZipData struct {
 	Zip string `json:"zip"`

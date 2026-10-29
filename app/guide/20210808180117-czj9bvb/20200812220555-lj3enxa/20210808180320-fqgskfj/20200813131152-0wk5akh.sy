@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20260909204559"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -229,7 +229,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090757-xwom8ia",
-				"updated": "20260820190627"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -261,21 +261,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428225151-3kj13k3",
-				"updated": "20260820190627"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "按住 "
+					"Data": "点击节点可打开对应内容块；按住 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 点击节点：跳转到该节点。"
+					"Data": "（macOS 为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）点击可打开浮窗预览。"
 				}
 			]
 		},
@@ -285,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200920194146-psjundj",
-				"updated": "20260909204559"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -516,7 +525,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106201736-oyu11fw",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -534,7 +543,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106201743-z1iz0ce",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -548,7 +557,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -557,7 +566,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -566,7 +575,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
+					"Data": " 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
 				}
 			]
 		},

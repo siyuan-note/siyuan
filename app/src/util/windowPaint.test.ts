@@ -1,8 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 
 const fixture = () => {
     let id = 0;
@@ -11,10 +10,8 @@ const fixture = () => {
     const timers = new Map<number, () => void>();
     const listeners = new Map<string, () => void>();
     const styles: unknown[] = [];
-    const exports = {} as typeof import("./windowPaint");
-    runInNewContext(transpileModule(readFileSync("src/util/windowPaint.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports, document: {head: {querySelectorAll: () => styles}},
+    const exports = loadModule<typeof import("./windowPaint")>("src/util/windowPaint.ts", {
+        document: {head: {querySelectorAll: () => styles}},
         MutationObserver: class {observe() {} disconnect() { disconnected = true; }},
         window: {
             setTimeout: (callback: () => void, delay: number) => {
@@ -25,7 +22,7 @@ const fixture = () => {
         },
         requestAnimationFrame: (callback: () => void) => { frames.set(++id, callback); return id; },
         cancelAnimationFrame: (frame: number) => frames.delete(frame),
-    });
+    }, ScriptTarget.ES2021);
     const addStyle = () => styles.push({isConnected: true, disabled: false, sheet: null,
         addEventListener: (name: string, callback: () => void) => listeners.set(name, callback),
         removeEventListener: (name: string) => listeners.delete(name),

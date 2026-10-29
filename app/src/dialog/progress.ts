@@ -1,6 +1,25 @@
-import {escapeHtml} from "../util/escape";
+export const getProgressContentHTML = () => `<div class="b3-dialog__progress-label"></div>
+<div class="b3-dialog__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="b3-dialog__progressbar"></div></div>
+<div data-type="message" class="ft__breakword" role="status"></div>`;
 
-export const progressLoading = (data: IWebSocketData, id = "progress") => {
+export const updateProgressContent = (element: Element, message: string, current?: number, total?: number,
+                                      label: "count" | "percent" = "count") => {
+    const safeCurrent = Number.isFinite(Number(current)) ? Math.max(0, Number(current)) : 0;
+    const safeTotal = Number(total);
+    const determinate = Number.isFinite(safeTotal) && safeTotal > 0;
+    const percent = determinate ? Math.max(0, Math.min(100, safeCurrent / safeTotal * 100)) : 0;
+    const counter = element.querySelector(".b3-dialog__progress-label");
+    counter.classList.toggle("fn__none", !determinate);
+    counter.textContent = determinate ? label === "percent" ? `${Math.floor(percent)}%` : `${safeCurrent}/${safeTotal}` : "";
+    const progress = element.querySelector<HTMLElement>(".b3-dialog__progress");
+    progress.classList.toggle("b3-dialog__progress--indeterminate", !determinate);
+    if (determinate) progress.setAttribute("aria-valuenow", String(percent));
+    else progress.removeAttribute("aria-valuenow");
+    progress.querySelector<HTMLElement>(".b3-dialog__progressbar").style.width = determinate ? `${percent}%` : "100%";
+    element.querySelector('[data-type="message"]').textContent = message;
+};
+
+export const progressLoading = (data: IWebSocketData, id = "progress", action?: {label: string, callback: () => void}) => {
     let progressElement = document.getElementById(id);
     // 关闭时只移除对应任务的遮罩。
     if (data.code === 2) {
@@ -15,25 +34,27 @@ export const progressLoading = (data: IWebSocketData, id = "progress") => {
     }
     // code 0: 有进度；1: 无进度；2: 关闭
     if (data.code === 0) {
-        const current = Number(data.data.current);
-        const total = Number(data.data.total);
-        const safeCurrent = Number.isFinite(current) ? current : 0;
-        const safeTotal = Number.isFinite(total) && total > 0 ? total : 1;
-        progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
-<div class="b3-dialog__loading">
-    <div style="text-align: right">${safeCurrent}/${safeTotal}</div>
-    <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="width: ${safeCurrent / safeTotal * 100}%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div></div>
-    <div class="ft__breakword">${escapeHtml(data.msg)}</div>
-</div>`;
+        progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
+<div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
+        updateProgressContent(progressElement.lastElementChild, data.msg, data.data.current, data.data.total);
     } else if (data.code === 1) {
         if (progressElement.lastElementChild) {
-            progressElement.lastElementChild.lastElementChild.innerHTML = escapeHtml(data.msg);
+            progressElement.querySelector('[data-type="message"]').textContent = data.msg;
         } else {
-            progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
-<div class="b3-dialog__loading">
-    <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
-    <div class="ft__breakword">${escapeHtml(data.msg)}</div>
-</div>`;
+            progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
+<div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
+            updateProgressContent(progressElement.lastElementChild, data.msg);
         }
+    }
+    if (action && !progressElement.querySelector("button")) {
+        const footer = document.createElement("div");
+        footer.className = "b3-dialog__action";
+        const button = document.createElement("button");
+        button.className = "b3-button b3-button--text b3-button--wrap";
+        button.textContent = action.label;
+        button.addEventListener("click", action.callback);
+        footer.appendChild(button);
+        progressElement.lastElementChild.appendChild(footer);
+        button.focus({preventScroll: true});
     }
 };

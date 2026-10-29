@@ -1,6 +1,11 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,7 +45,7 @@ func TestAssetContentFullIndexWritesBoundedBatches(t *testing.T) {
 			searcher := NewAssetsSearcher()
 			searcher.parsers = map[string]AssetParser{".txt": parser}
 			total, batches, firstParsed := 0, 0, 0
-			searcher.fullIndex(func(batch []*sql.AssetContent) {
+			err := searcher.fullIndex(func(batch []*sql.AssetContent) error {
 				if batches == 0 {
 					firstParsed = parser.parsed
 				}
@@ -54,10 +59,38 @@ func TestAssetContentFullIndexWritesBoundedBatches(t *testing.T) {
 						t.Fatalf("lost asset metadata: %+v", asset)
 					}
 				}
+				return nil
 			})
+			if err != nil {
+				t.Fatal(err)
+			}
 			if total != test.count || test.count > 2 && firstParsed >= test.count || test.count == 0 && batches != 0 {
 				t.Fatalf("total=%d, first parsed=%d, batches=%d", total, firstParsed, batches)
 			}
 		})
+	}
+}
+
+func TestAssetContentFullIndexStopsOnWriteFailure(t *testing.T) {
+	oldData := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldData })
+	dir := util.GetDataAssetsAbsPath()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 260; i++ {
+		if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%04d.txt", i)), []byte("file"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	parser := &batchTestAssetParser{content: "text"}
+	searcher := NewAssetsSearcher()
+	searcher.parsers = map[string]AssetParser{".txt": parser}
+	want := errors.New("batch write failed")
+	writes := 0
+	err := searcher.fullIndex(func([]*sql.AssetContent) error { writes++; return want })
+	if !errors.Is(err, want) || writes != 1 || parser.parsed != 128 {
+		t.Fatalf("failed batch was ignored or retried: error=%v writes=%d parsed=%d", err, writes, parser.parsed)
 	}
 }

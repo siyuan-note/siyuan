@@ -3,12 +3,13 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import {compileModule, evaluateModule} from "../../testSupport/loadModule";
 
 const storageKey = "local-tabs-reading";
 const compile = (source: string) => ts.transpileModule(source, {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
 }).outputText;
-const readingSource = compile(readFileSync("src/protyle/wysiwyg/tabsReading.ts", "utf8"));
+const readingSource = compileModule("src/protyle/wysiwyg/tabsReading.ts", ts.ScriptTarget.ES2021);
 const renderer = ts.createSourceFile("tabsRender.ts", readFileSync("src/protyle/render/tabsRender.ts", "utf8"),
     ts.ScriptTarget.ES2021, true);
 let selectSource: string;
@@ -29,7 +30,6 @@ assert.ok(restoreSource);
 const fixture = (storage: Record<string, any> = {}) => {
     const writes: Record<string, string>[] = [];
     const siyuan = {storage, config: {readonly: false, editor: {readOnly: false}}, isPublish: false};
-    const api = {} as typeof import("./tabsReading");
     const root = {};
     const protyle = {disabled: true, lite: false, notebookId: "ordinary", options: {action: [] as string[]},
         wysiwyg: {element: root}};
@@ -39,7 +39,7 @@ const fixture = (storage: Record<string, any> = {}) => {
         closest: (selector: string) => selector === ".protyle-wysiwyg" ? (inside ? root : null) : excluded ? root : null});
     const read = (tabs = block()) => api.getTabReadingID(protyle as IProtyle, tabs as unknown as HTMLElement);
     const save = (id: string, tabs = block()) => api.saveTabReadingID(protyle as IProtyle, tabs as unknown as HTMLElement, id);
-    runInNewContext(readingSource, {exports: api, window: {siyuan}, require: (id: string) => {
+    const api = evaluateModule<typeof import("./tabsReading")>(readingSource, {window: {siyuan}, require: (id: string) => {
         if (id === "../../constants") {
             return {Constants: {LOCAL_TABS_READING: storageKey, CB_GET_HISTORY: "history"}};
         }
@@ -51,8 +51,7 @@ const fixture = (storage: Record<string, any> = {}) => {
             assert.equal(key, storageKey);
             writes.push(JSON.parse(JSON.stringify(selections)));
         }};
-    }});
-    return {siyuan, protyle, writes, block, read, save,
+    }});    return {siyuan, protyle, writes, block, read, save,
         exclude: () => { excluded = true; }, outside: () => { inside = false; }};
 };
 

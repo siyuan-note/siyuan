@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -12,6 +16,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -160,11 +165,13 @@ func TestAttributeViewNotebookHistoryRestoresBindings(t *testing.T) {
 	for _, scenario := range []struct {
 		name            string
 		cleanup, oneWay bool
+		publishFailure  bool
 	}{
-		{"bound rows", false, false},
-		{"cleaned embedded database", true, false},
-		{"one-way relations", false, true},
-		{"cleaned embedded one-way relations", true, true},
+		{"bound rows", false, false, false},
+		{"cleaned embedded database", true, false, false},
+		{"one-way relations", false, true, false},
+		{"cleaned embedded one-way relations", true, true, false},
+		{"publication failure", false, true, true},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			cleanup := scenario.cleanup
@@ -230,6 +237,25 @@ func TestAttributeViewNotebookHistoryRestoresBindings(t *testing.T) {
 			relative, err := filepath.Rel(util.WorkspaceDir, paths[0])
 			if err != nil {
 				t.Fatal(err)
+			}
+			if scenario.publishFailure {
+				current := readAttributeViewItemsTest(t, before.ID)
+				currentDest := readAttributeViewItemsTest(t, dest.ID)
+				destination := filepath.Join(util.DataDir, fixture.box.ID)
+				err = rollbackNotebookHistory(relative, func(from, staging string) error {
+					if err := filelock.CopyNewtimes(from, staging); err != nil {
+						return err
+					}
+					return os.MkdirAll(destination, 0755)
+				})
+				if err == nil {
+					t.Fatal("notebook publication collision was accepted")
+				}
+				assertAttributeViewFieldsTest(t, current, readAttributeViewItemsTest(t, before.ID))
+				assertAttributeViewFieldsTest(t, currentDest, readAttributeViewItemsTest(t, dest.ID))
+				if err = os.Remove(destination); err != nil {
+					t.Fatal(err)
+				}
 			}
 			if err = RollbackNotebookHistory(relative); err != nil {
 				t.Fatal(err)

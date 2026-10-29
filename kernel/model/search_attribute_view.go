@@ -1,6 +1,11 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"html"
 	"strings"
@@ -26,13 +31,18 @@ type attributeViewSearchPart struct {
 	ranges []attributeViewSearchRange
 }
 
-// compactAttributeViewSearchResults 只精简已命中的数据库块，不改变索引、结果数量和排序。
-func compactAttributeViewSearchResults(blocks []*Block) {
+func compactAttributeViewSearchResultsContext(ctx context.Context, blocks []*Block) {
 	for _, block := range blocks {
+		if ctx.Err() != nil {
+			return
+		}
 		if "NodeAttributeView" != block.Type || !strings.Contains(block.Content, "<mark>") {
 			continue
 		}
 		tree, err := LoadTreeByBlockIDInExactBox(block.ID, block.Box)
+		if ctx.Err() != nil {
+			return
+		}
 		if nil != err || nil == tree {
 			continue
 		}
@@ -45,14 +55,21 @@ func compactAttributeViewSearchResults(blocks []*Block) {
 			avBox = tree.Box
 		}
 		attrView, err := av.ParseAttributeViewForIndexInBox(node.AttributeViewID, avBox)
+		if ctx.Err() != nil {
+			return
+		}
 		if nil != err || nil == attrView {
 			continue
 		}
-		block.Content = compactAttributeViewSearchContent(attrView, block.Content)
+		block.Content = compactAttributeViewSearchContentContext(ctx, attrView, block.Content)
 	}
 }
 
 func compactAttributeViewSearchContent(attrView *av.AttributeView, fallback string) string {
+	return compactAttributeViewSearchContentContext(context.Background(), attrView, fallback)
+}
+
+func compactAttributeViewSearchContentContext(ctx context.Context, attrView *av.AttributeView, fallback string) string {
 	// 按索引内容的顺序记录字段边界，将现有高亮映射回原文，不重新匹配关键词。
 	var source strings.Builder
 	var parts []*attributeViewSearchPart
@@ -69,11 +86,17 @@ func compactAttributeViewSearchContent(attrView *av.AttributeView, fallback stri
 		appendPart(view.Name, nil, nil, true)
 	}
 	for _, keyValues := range attrView.KeyValues {
+		if ctx.Err() != nil {
+			return fallback
+		}
 		if nil == keyValues || nil == keyValues.Key {
 			return fallback
 		}
 		appendPart(keyValues.Key.Name, keyValues.Key, nil, false)
 		for _, value := range keyValues.Values {
+			if ctx.Err() != nil {
+				return fallback
+			}
 			if nil != value {
 				appendPart(value.String(true), keyValues.Key, value, false)
 			}
@@ -84,6 +107,9 @@ func compactAttributeViewSearchContent(attrView *av.AttributeView, fallback stri
 		return fallback
 	}
 	for _, match := range ranges {
+		if ctx.Err() != nil {
+			return fallback
+		}
 		found := false
 		for _, part := range parts {
 			if part.start <= match.start && match.end <= part.start+len(part.text) {
@@ -102,6 +128,9 @@ func compactAttributeViewSearchContent(attrView *av.AttributeView, fallback stri
 	}
 	rowTitles := map[string]string{}
 	for _, part := range parts {
+		if ctx.Err() != nil {
+			return fallback
+		}
 		if nil != part.value && av.KeyTypeBlock == part.key.Type {
 			rowTitles[part.value.BlockID] = part.text
 		}

@@ -10,12 +10,25 @@ html {
 }
 
 // 声明当前配色方案，用于修正 iOS 深色模式下输入法候选词高亮项背景丢失等问题 https://github.com/siyuan-note/siyuan/issues/17894
+:root {
+  --b3-legacy-light-color: initial;
+  --b3-legacy-dark-color: ;
+}
+
 :root[data-theme-mode="dark"] {
   color-scheme: dark;
+  --b3-legacy-light-color: ;
+  --b3-legacy-dark-color: initial;
 }
 
 :root[data-theme-mode="light"] {
   color-scheme: light;
+  --b3-legacy-light-color: initial;
+  --b3-legacy-dark-color: ;
+}
+
+[inert] {
+  pointer-events: none;
 }
 
 // iOS 使用固定蓝色光标，改善系统与应用明暗模式不同组合下的输入法候选字对比度。
@@ -87,6 +100,11 @@ body {
   &.body--windows,
   &.body--linux {
     --b3-toolbar-left-mac: 8px;
+    --b3-fullscreen-controls-width: 128.5px;
+
+    &.body--toolbar-hide {
+      --b3-fullscreen-controls-width: calc(46.5px + 6 * var(--b3-ui-window-control-padding, 13.25px));
+    }
 
     .toolbar:not(.toolbar--browser) {
       padding: 0 0 0 5px;
@@ -98,7 +116,7 @@ body {
       .fullscreen {
         & > .protyle-breadcrumb,
         & > .block__icons {
-          padding-right: 126px;
+          padding-right: calc(var(--b3-fullscreen-controls-width) + 8px);
         }
 
         & > .block__icons > .search__label {
@@ -146,15 +164,18 @@ body {
   &:not(.body--toolbar-hide):not(.body--window) {
     .fullscreen > .protyle-breadcrumb,
     .fullscreen > .block__icons {
-      min-height: 32px;
+      min-height: var(--b3-ui-toolbar-height, 32px);
     }
   }
 
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      height: calc(100% - var(--b3-ui-panel-height, 42px));
       margin-top: var(--b3-ui-panel-height, 42px);
+
+      &:not(.dock--float) {
+        height: calc(100% - var(--b3-ui-panel-height, 42px));
+      }
     }
 
     .toolbar {

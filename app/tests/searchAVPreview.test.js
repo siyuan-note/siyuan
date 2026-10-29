@@ -6,7 +6,7 @@ const os = require("node:os");
 const sources = () => {
     const ts = require("typescript");
     return Object.fromEntries(["search/util", "search/avPreview", "boot/globalEvent/searchKeydown",
-        "protyle/util/onGet", "protyle/render/searchMarkRender"]
+        "protyle/util/onGet", "protyle/util/renderContent", "protyle/render/searchMarkRender"]
         .map(name => [name, ts.transpileModule(readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
         }).outputText]));

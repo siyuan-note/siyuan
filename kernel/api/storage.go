@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -22,7 +10,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -76,7 +63,6 @@ var getLocalStorageVals = contractHandler(apicontract.GetLocalStorageVals, func(
 })
 
 var setLocalStorageVal = contractHandler(apicontract.SetLocalStorageVal, func(c *gin.Context, request apicontract.StorageSetRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	key, app := request.Key, request.App
 	input, err := storageModelValues(map[string]apicontract.JSONValue{key: request.Val})
@@ -86,9 +72,7 @@ var setLocalStorageVal = contractHandler(apicontract.SetLocalStorageVal, func(c 
 	val := input[key]
 	setKeyVals, err := model.SetLocalStorageVals(map[string]any{key: val})
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	evt := util.NewCmdResult("setLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
@@ -100,7 +84,6 @@ var setLocalStorageVal = contractHandler(apicontract.SetLocalStorageVal, func(c 
 })
 
 var setLocalStorageVals = contractHandler(apicontract.SetLocalStorageVals, func(c *gin.Context, request apicontract.StorageSetKeysRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	app := request.App
 	if len(request.KeyVals) == 0 {
@@ -112,9 +95,7 @@ var setLocalStorageVals = contractHandler(apicontract.SetLocalStorageVals, func(
 	}
 	setKeyVals, err := model.SetLocalStorageVals(keyVals)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	evtSet := util.NewCmdResult("setLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
@@ -126,14 +107,11 @@ var setLocalStorageVals = contractHandler(apicontract.SetLocalStorageVals, func(
 })
 
 var removeLocalStorageVal = contractHandler(apicontract.RemoveLocalStorageVal, func(c *gin.Context, request apicontract.StorageRemoveRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	key, app := request.Key, request.App
 	err := model.RemoveLocalStorageVals([]string{key})
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	evt := util.NewCmdResult("removeLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
@@ -145,7 +123,6 @@ var removeLocalStorageVal = contractHandler(apicontract.RemoveLocalStorageVal, f
 })
 
 var removeLocalStorageVals = contractHandler(apicontract.RemoveLocalStorageVals, func(c *gin.Context, request apicontract.StorageRemoveKeysRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	keys := request.Keys
 	if len(keys) == 0 {
@@ -157,9 +134,7 @@ var removeLocalStorageVals = contractHandler(apicontract.RemoveLocalStorageVals,
 	app := request.App
 	err := model.RemoveLocalStorageVals(keys)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	evt := util.NewCmdResult("removeLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
@@ -181,7 +156,6 @@ var getCriteria = contractHandler(apicontract.GetCriteria, func(c *gin.Context, 
 })
 
 var setCriterion = contractHandler(apicontract.SetCriterion, func(c *gin.Context, request apicontract.SetCriterionRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	if request.Criterion == nil {
 		return apicontract.Failure[apicontract.Null](-1, "Field [criterion] is required")
@@ -189,37 +163,29 @@ var setCriterion = contractHandler(apicontract.SetCriterion, func(c *gin.Context
 	criterion := criterionModel(*request.Criterion)
 	err := model.SetCriterion(criterion)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var removeCriterion = contractHandler(apicontract.RemoveCriterion, func(c *gin.Context, request apicontract.RemoveCriterionRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	name := request.Name
 	err := model.RemoveCriterion(name)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var getRecentDocs = contractHandler(apicontract.GetRecentDocs, func(c *gin.Context, request apicontract.RecentDocsRequest) apicontract.Response[[]*apicontract.RecentDoc] {
-	ret := gulu.Ret.NewResult()
 
 	sortBy := request.SortBy
 	data, err := model.GetRecentDocs(sortBy)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[[]*apicontract.RecentDoc](ret)
+		return apicontract.Failure[[]*apicontract.RecentDoc](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -228,94 +194,81 @@ var getRecentDocs = contractHandler(apicontract.GetRecentDocs, func(c *gin.Conte
 	return apicontract.Success(recentDocContracts(data))
 })
 
-var updateRecentDocOpenTime = contractHandler(apicontract.UpdateRecentDocOpenTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
+var clearRecentDocs = contractHandler(apicontract.ClearRecentDocs, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ClearRecentDocs(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
 
+var updateRecentDocOpenTime = contractHandler(apicontract.UpdateRecentDocOpenTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
 	rootID := request.RootID
 	if "" == rootID {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.SuccessWithoutData[apicontract.Null]()
 	}
 
 	err := model.UpdateRecentDocOpenTime(rootID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 }, skipReadonlyStorageMutation)
 
 var updateRecentDocViewTime = contractHandler(apicontract.UpdateRecentDocViewTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	rootID := request.RootID
 	if "" == rootID {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.SuccessWithoutData[apicontract.Null]()
 	}
 
 	err := model.UpdateRecentDocViewTime(rootID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 }, skipReadonlyStorageMutation)
 
 var updateRecentDocCloseTime = contractHandler(apicontract.UpdateRecentDocCloseTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	rootID := request.RootID
 	if "" == rootID {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.SuccessWithoutData[apicontract.Null]()
 	}
 
 	err := model.UpdateRecentDocCloseTime(rootID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 }, skipReadonlyStorageMutation)
 
 var batchUpdateRecentDocCloseTime = contractHandler(apicontract.BatchUpdateRecentDocCloseTime, func(c *gin.Context, request apicontract.RecentDocsUpdateRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	rootIDs := request.RootIDs
 	if 0 == len(rootIDs) {
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.SuccessWithoutData[apicontract.Null]()
 	}
 
 	err := model.BatchUpdateRecentDocCloseTime(rootIDs)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 }, skipReadonlyStorageMutation)
 
 var getOutlineStorage = contractHandler(apicontract.GetOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageRequest) apicontract.Response[map[string]apicontract.JSONValue] {
-	ret := gulu.Ret.NewResult()
 
 	docID := request.DocID
 
 	data, err := model.GetOutlineStorage(docID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[map[string]apicontract.JSONValue](ret)
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, err.Error())
 	}
 	return storageContract(data)
 })
 
 var setOutlineStorage = contractHandler(apicontract.SetOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageSetRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	docID := request.DocID
 	val, err := storageModelValues(request.Val)
@@ -324,44 +277,35 @@ var setOutlineStorage = contractHandler(apicontract.SetOutlineStorage, func(c *g
 	}
 	err = model.SetOutlineStorage(docID, val)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var removeOutlineStorage = contractHandler(apicontract.RemoveOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	docID := request.DocID
 
 	err := model.RemoveOutlineStorage(docID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var getViewState = contractHandler(apicontract.GetViewState, func(c *gin.Context, request apicontract.StorageKeyRequest) apicontract.Response[map[string]apicontract.JSONValue] {
-	ret := gulu.Ret.NewResult()
 
 	key := request.Key
 	data, err := model.GetViewState(key)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[map[string]apicontract.JSONValue](ret)
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, err.Error())
 	}
 	return storageContract(data)
 })
 
 var patchViewState = contractHandler(apicontract.PatchViewState, func(c *gin.Context, request apicontract.ViewStatePatchRequest) apicontract.Response[map[string]apicontract.JSONValue] {
-	ret := gulu.Ret.NewResult()
 
 	key, removeKeys := request.Key, request.RemoveKeys
 	for _, key := range removeKeys {
@@ -375,21 +319,16 @@ var patchViewState = contractHandler(apicontract.PatchViewState, func(c *gin.Con
 	}
 	data, err := model.PatchViewState(key, values, removeKeys)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[map[string]apicontract.JSONValue](ret)
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, err.Error())
 	}
 	return storageContract(data)
 })
 
 var removeViewState = contractHandler(apicontract.RemoveViewState, func(c *gin.Context, request apicontract.StorageKeyRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-
 	key := request.Key
 	if err := model.RemoveViewState(key); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
-	return contractFailure[apicontract.Null](ret)
+	return apicontract.Success(apicontract.Null{})
 })

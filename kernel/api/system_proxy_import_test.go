@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -19,11 +23,12 @@ import (
 
 func TestConfTransferPreservesLocalNetworkProxy(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	previousConf, previousTemp, previousReadOnly := model.Conf, util.TempDir, util.ReadOnly
+	previousConf, previousTemp, previousReadOnly, previousConfDir := model.Conf, util.TempDir, util.ReadOnly, util.ConfDir
 	t.Cleanup(func() {
 		model.Conf, util.TempDir, util.ReadOnly = previousConf, previousTemp, previousReadOnly
+		util.ConfDir = previousConfDir
 	})
-	util.TempDir, util.ReadOnly = t.TempDir(), true
+	util.TempDir, util.ConfDir, util.ReadOnly = t.TempDir(), t.TempDir(), true
 	engine := gin.New()
 	engine.POST("/export", exportConf)
 	engine.POST("/import", importConf)

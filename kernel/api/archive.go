@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -20,7 +8,6 @@ import (
 	archivezip "archive/zip"
 	"fmt"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -87,38 +74,27 @@ func resolveArchivePath(path string) (string, error) {
 }
 
 var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontract.ZipRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	entryPath, zipFilePath := request.Path, request.ZipPath
 
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	// 在创建归档前检查全部源条目，避免通过父目录打包加密笔记本。
 	resolvedEntryPath, err := resolveArchivePath(entryAbsPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = filepath.WalkDir(resolvedEntryPath, func(path string, _ fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -126,31 +102,26 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 		}
 		return rejectEncryptedArchivePath(path)
 	}); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	resolvedZipPath, err := resolveArchivePath(zipAbsFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if util.IsPluginDevelopmentRawWriteForbidden(resolvedZipPath) {
 		return apicontract.Failure[apicontract.Null](-1, "managed plugin development files require their dedicated tools")
 	}
 	if err = rejectEncryptedArchivePath(resolvedZipPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	if err = model.CheckDocumentAddressingFileWrite(resolvedZipPath, nil, false); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	zipFile, err := gulu.Zip.Create(resolvedZipPath)
 	if err != nil {
 		logging.LogErrorf("create zip [%s] failed: %s", zipAbsFilePath, err)
-		ret.Code = -1
-		ret.Msg = "create zip file failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "create zip file failed"+errMsgSeeKernelLog)
 	}
 
 	base := filepath.Base(entryAbsPath)
@@ -161,60 +132,43 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 	}
 	if err != nil {
 		logging.LogErrorf("zip add entry [%s] failed: %s", entryAbsPath, err)
-		ret.Code = -1
-		ret.Msg = "zip failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "zip failed"+errMsgSeeKernelLog)
 	}
 
 	if err = zipFile.Close(); err != nil {
 		logging.LogErrorf("close zip [%s] failed: %s", zipAbsFilePath, err)
-		ret.Code = -1
-		ret.Msg = "close zip file failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "close zip file failed"+errMsgSeeKernelLog)
 	}
 
 	return apicontract.Success(apicontract.Null{})
 })
 
 var unzip = contractHandler(apicontract.Unzip, func(c *gin.Context, request apicontract.UnzipRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 
 	entryPath, zipFilePath := request.Path, request.ZipPath
 
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	if !gulu.File.IsExist(zipAbsFilePath) {
-		ret.Code = -1
-		ret.Msg = "zip file does not exist"
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "zip file does not exist")
 	}
 
 	if err := unzipWorkspaceArchive(zipAbsFilePath, entryAbsPath); err != nil {
 		logging.LogErrorf("unzip [%s] -> [%s] failed: %s", zipAbsFilePath, entryAbsPath, err)
-		ret.Code = -1
-		ret.Msg = "unzip failed" + errMsgSeeKernelLog
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "unzip failed"+errMsgSeeKernelLog)
 	}
 
 	return apicontract.Success(apicontract.Null{})
@@ -244,13 +198,53 @@ func unzipWorkspaceArchive(zipPath, destination string) error {
 		if err = validateArchiveEntryPath(destination, paths[i]); err != nil {
 			return err
 		}
+		if entry.FileInfo().IsDir() {
+			if err = model.CheckDocumentAddressingFileWrite(paths[i], nil, true); err != nil {
+				return err
+			}
+		}
+	}
+	// 解压到隔离目录后预检整个写入集合，拒绝未知模式或源格式时不创建目标目录。
+	staging, err := os.MkdirTemp("", "siyuan-archive-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(staging)
+	sources := make([]string, len(reader.File))
+	var copySources, copyDestinations []string
+	for i, entry := range reader.File {
+		if entry.FileInfo().IsDir() {
+			continue
+		}
+		sources[i] = filepath.Join(staging, fmt.Sprint(i))
+		if err = util.ExtractArchiveEntry(entry, sources[i]); err != nil {
+			return err
+		}
+		copySources = append(copySources, sources[i])
+		copyDestinations = append(copyDestinations, paths[i])
+	}
+	if err = model.CheckDocumentAddressingFileCopies(copySources, copyDestinations); err != nil {
+		return err
 	}
 	for i, entry := range reader.File {
 		// 解压前再次检查已有符号链接和加密身份，不复用预检阶段的路径判定结果。
 		if err = validateArchiveEntryPath(destination, paths[i]); err != nil {
 			return err
 		}
-		if err = extractWorkspaceArchiveEntry(entry, paths[i]); err != nil {
+		if entry.FileInfo().IsDir() {
+			err = model.CheckDocumentAddressingFileWrite(paths[i], nil, true)
+			if err == nil {
+				err = os.MkdirAll(paths[i], 0755)
+			}
+		} else {
+			if err = model.CheckDocumentAddressingFileCopies([]string{sources[i]}, []string{paths[i]}); err == nil {
+				err = os.MkdirAll(filepath.Dir(paths[i]), 0755)
+			}
+			if err == nil {
+				err = model.CopyFileWithDocumentAddressing(sources[i], paths[i])
+			}
+		}
+		if err != nil {
 			return err
 		}
 	}
@@ -278,31 +272,4 @@ func validateArchiveEntryPath(destination, entryPath string) error {
 		return fmt.Errorf("archive entry resolves outside destination [%s]", entryPath)
 	}
 	return rejectEncryptedArchivePath(entryPath)
-}
-
-func extractWorkspaceArchiveEntry(entry *archivezip.File, destination string) error {
-	if entry.FileInfo().IsDir() {
-		return os.MkdirAll(destination, 0755)
-	}
-	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
-		return err
-	}
-	source, err := entry.Open()
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-	target, err := os.Create(destination)
-	if err != nil {
-		return err
-	}
-	_, copyErr := io.Copy(target, source)
-	closeErr := target.Close()
-	if copyErr != nil {
-		return copyErr
-	}
-	if closeErr != nil {
-		return closeErr
-	}
-	return os.Chtimes(destination, entry.Modified, entry.Modified)
 }

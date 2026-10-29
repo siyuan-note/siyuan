@@ -15,7 +15,8 @@ import {
     isIPad,
     isIPhone,
     isMac,
-    isWin11
+    isWin11,
+    resolvePlatformClass
 } from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
 import {refreshMermaidTheme} from "../protyle/render/mermaidRender";
@@ -339,7 +340,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../", export
     if (set && allowCustomAppearance) {
         await ensureSelectedCustomFonts([...globalFonts, ...editorFonts, ...codeFonts]);
     }
-    const emojiPlatform = isMac() || isIPad() || isIPhone() ? "apple" : await isWin11() ? "windows11" : "other";
+    const emojiPlatform = isMac() || isIPad() || isIPhone() ? "apple" : await isWin11() ? "windows11" :
+        resolvePlatformClass() === "body--windows" ? "windows" : "other";
     let style = getEmojiFontStyle(emojiPlatform, servePath);
     style += getGlobalFontStyle(globalFonts);
     if (!set) {
@@ -353,7 +355,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../", export
         `var(--b3-font-family-emoji-reset), ${codeFontFamilies}, var(--b3-font-family-code)` :
         "var(--b3-font-family-code)";
     const codeFontWeight = codeFonts[0]?.weight || 400;
-    style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px; --b3-font-family-editor: ${editorFontFamilies || "var(--b3-font-family-protyle)"}; --b3-font-family-editor-code: ${codeFontFamily}; --b3-font-weight-editor-code: ${codeFontWeight} }
+    style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px; --b3-font-family-editor: ${editorFontFamilies || "var(--b3-font-family-protyle)"}; --b3-font-family-editor-code: ${codeFontFamily}; --b3-font-weight-editor-code: ${codeFontWeight}; --b3-database-attr-columns: ${window.siyuan.config.editor.databaseAttrLayout === 0 ? 1 : 2}; --b3-database-attr-column-flow: ${window.siyuan.config.editor.databaseAttrLayout === 2 ? 1 : 0} }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .b3-typography:not(.b3-typography--default) code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-family: var(--b3-font-family-editor-code); font-weight: var(--b3-font-weight-editor-code) }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (editorFontFamilies) {

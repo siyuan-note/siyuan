@@ -26,7 +26,7 @@ export const exportAsset = (src: string) => {
     return {
         id: "export",
         label: window.siyuan.languages.export,
-        icon: "iconUpload",
+        icon: "iconDownload",
         async click() {
             /// #if BROWSER
             saveExportFile(getDownloadURL(src));

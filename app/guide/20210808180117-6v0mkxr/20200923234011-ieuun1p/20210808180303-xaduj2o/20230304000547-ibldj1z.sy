@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-qss2syl",
-				"updated": "20261015225720"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015225720-okoj5kh",
-				"updated": "20261015225720"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -62,11 +62,25 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "AI"
+					"TextMarkTextContent": "Artificial Intelligence"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and select and save an account for this workspace on the current device. Credentials and account bindings stay on this device and are excluded from conf.json and settings exports. Sign in and select an account separately on each device. Copying configuration then preserves the destination device’s bindings for existing providers. Select an account again after adding a provider or moving the workspace directory. After upgrading, select an account once more; existing sign-in credentials are retained."
+					"Data": " and select and save an account for this workspace on the current device. Credentials and account bindings stay on this device and are excluded from conf.json and settings exports."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-mi8ljln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-mi8ljln",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sign in and select an account separately on each device. Copying configuration then preserves the destination device’s bindings for existing providers. Select an account again after adding a provider or moving the workspace directory. After upgrading, select an account once more; existing sign-in credentials are retained."
 				}
 			]
 		},
@@ -360,7 +374,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-bayhe2r",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
@@ -375,12 +389,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920123707-dn6uk2y",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The agent can use TypeSafe System One (Jev) or OpenAI Decisions API (Beta) for classification, filtering and scoring. See "
+					"Data": "The agent can use TypeSafe System One (Jev) or OpenAI Decisions API for classification, filtering and scoring. See "
 				},
 				{
 					"Type": "NodeTextMark",

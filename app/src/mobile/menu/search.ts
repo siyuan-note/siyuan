@@ -15,7 +15,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
-import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
+import {getKeyByLiElement, getKeysByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {isDisabledFeature, isInIOS, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
@@ -45,6 +45,32 @@ import {
     toggleSearchHistory
 } from "../../search/toggleHistory";
 import {cancelSearchRequest, scheduleSearchRequest} from "../../search/request";
+import {highlightMobileSearchResult} from "./searchHighlight";
+
+let searchOpenVersion = 0;
+
+const openSearchResult = (app: App, target: HTMLElement) => {
+    const id = target.dataset.nodeId;
+    const keywords = getKeysByLiElement(target);
+    const notebookId = target.dataset.notebookId;
+    const version = ++searchOpenVersion;
+    if (window.siyuan.mobile.editor?.protyle) {
+        preventScroll(window.siyuan.mobile.editor.protyle);
+    }
+    checkFold(id, zoomIn => {
+        if (version !== searchOpenVersion) {
+            return;
+        }
+        void openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] :
+            [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start", notebookId,
+            protyle => {
+                if (version === searchOpenVersion) {
+                    highlightMobileSearchResult(protyle, id, keywords);
+                }
+            });
+    });
+    closePanel();
+};
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
     if (window.siyuan.isPublish) {
@@ -207,7 +233,7 @@ ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__grap
                         newData = childItem;
                     }
                 }
-                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}">
+                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-notebook-id="${childItem.box}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text${childItem.type === "NodeAttributeView" ? " search__av-content" : ""}">${childItem.content}</span>
@@ -225,7 +251,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
                     newData = item;
                 }
             }
-            resultHTML += `<div class="b3-list-item b3-list-item--two" data-type="search-item" data-node-id="${item.id}">
+            resultHTML += `<div class="b3-list-item b3-list-item--two" data-type="search-item" data-node-id="${item.id}" data-notebook-id="${item.box}">
     <div class="b3-list-item__first">
         <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
         ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
@@ -313,7 +339,6 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
             const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;
             if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
                 return {
-                    method: requestConfig.method,
                     version,
                     run(signal: AbortSignal, isCurrent: () => boolean) {
                         return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
@@ -343,8 +368,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 }
             }
             return {
-                method: requestConfig.method,
                 version,
+                abortable: requestConfig.method !== 4,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
                     return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {
@@ -754,13 +779,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
                     if (id) {
-                        if (window.siyuan.mobile.editor?.protyle) {
-                            preventScroll(window.siyuan.mobile.editor.protyle);
-                        }
-                        checkFold(id, (zoomIn) => {
-                            openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
-                        });
-                        closePanel();
+                        openSearchResult(app, target);
                     } else {
                         if (!target.classList.contains("b3-list-item--focus")) {
                             element.querySelector("#searchAssetList .b3-list-item--focus").classList.remove("b3-list-item--focus");
@@ -921,7 +940,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <span class="fn__flex-1"></span>
          </div>
     </div>
-     <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
+     <div class="fn__loading"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>
 </div>`,
         destroyCallback() {
             destroyed = true;

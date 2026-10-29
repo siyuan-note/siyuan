@@ -248,6 +248,7 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
+      background-color: var(--b3-theme-background);
       background-color: color-mix(in srgb, var(--b3-theme-background) 80%, transparent);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -794,6 +795,7 @@
     &__drop {
       align-items: center;
       backdrop-filter: blur(8px);
+      background-color: var(--b3-theme-background);
       background-color: color-mix(in srgb, var(--b3-theme-background) 88%, transparent);
       color: var(--b3-theme-primary);
       display: flex;
@@ -1915,4 +1917,13 @@
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+.config-lock-screen-wallpaper {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  margin: 8px 0;
 }

@@ -2,10 +2,10 @@ import {Constants} from "../../constants";
 import {focusByRange} from "../util/selectionOffsets";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindTouchNavigation} from "./touchNavigation";
-import {bindNativeTextMenu, cancelNativeTextMenu, requestNativeTextMenu} from "./nativeTextMenu";
+import {bindNativeTextMenu, requestNativeTextMenu} from "./nativeTextMenu";
 
 const TOUCH_CARET_EXCLUDED = "input, textarea, select, button, a, img, audio, video, iframe, " +
-    ".protyle-action, .protyle-attr, .table, .av, .protyle-custom, [data-prevent-swipe], " +
+    ".protyle-action, .protyle-attr, .av, .protyle-custom, [data-prevent-swipe], " +
     "[data-type~='block-ref'], [data-type~='virtual-block-ref'], [data-type~='file-annotation-ref'], " +
     "[data-type~='a'], [data-type~='tag'], [data-type~='inline-memo'], [data-type~='inline-math']";
 
@@ -30,7 +30,8 @@ const getTouchCharacterRange = (range: Range, point: {x: number, y: number}) => 
     }
 };
 
-export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boolean) => {
+export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boolean,
+                                 onTap?: (target: HTMLElement, point: {x: number, y: number}) => boolean) => {
     const ownerDocument = element.ownerDocument;
     const ownerWindow = ownerDocument.defaultView;
     const disposeNativeMenu = bindNativeTextMenu(element);
@@ -48,7 +49,6 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
     };
     const cancel = () => {
         cancelFrame();
-        cancelNativeTextMenu(element);
         pendingTap = undefined;
     };
     const schedule = () => {
@@ -235,10 +235,18 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             return;
         }
         const editable = target.closest<HTMLElement>("[contenteditable]");
-        if (!editable || editable.getAttribute("contenteditable") !== "true" || !element.contains(editable)) {
+        if (!editable || editable.getAttribute("contenteditable") !== "true" ||
+            editable.closest(".protyle-wysiwyg") !== element) {
             return;
         }
-        const range = ownerDocument.caretRangeFromPoint(point.x, point.y);
+        let range = ownerDocument.caretRangeFromPoint(point.x, point.y);
+        const cell = target.closest("td, th");
+        if (cell && element.contains(cell) && (!range || !cell.contains(range.startContainer))) {
+            // 窄单元格和空单元格的坐标可能命中相邻格，保留本次实际点击的单元格。
+            range = ownerDocument.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+        }
         const rangeElement = range && (range.startContainer.nodeType === Node.ELEMENT_NODE ?
             range.startContainer as Element : range.startContainer.parentElement);
         if (!rangeElement || rangeElement.closest("[contenteditable]") !== editable ||
@@ -258,13 +266,16 @@ export const bindIOSTouchCaret = (element: HTMLElement, canPlaceCaret: () => boo
             startedUnfocused, time: Date.now(), touchTime, selection: savedSelection};
         rememberTouchStart(point);
     };
-    const disposeNavigation = bindTouchNavigation(element, () => {
+    const disposeNavigation = bindTouchNavigation(element, (target, point) => {
         cancel();
         const caret = touchCaret;
         touchCaret = undefined;
         if (!caret || composing || !canPlaceCaret() || !caret.range.startContainer.isConnected ||
             !element.contains(caret.editable)) {
             return;
+        }
+        if (onTap?.(target, point)) {
+            return true;
         }
         previousTap.time = Date.now();
         // 三击及更多次连续点击保留系统的整段选择行为。

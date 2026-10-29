@@ -82,6 +82,7 @@ export abstract class Constants {
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
+    public static readonly CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: string = "custom-sy-embed-breadcrumb-parent-path";
     public static readonly CUSTOM_SY_SUBDOC_SORT_MODE: string = "custom-sy-subdoc-sort-mode";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
     public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
@@ -225,10 +226,7 @@ export abstract class Constants {
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
-    /** @deprecated 内置偏好改用 config.appearance.compactMode，不再读取此旧键 */
-    public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
-    /** @deprecated 内置偏好改用 config.appearance.menuMouseScroll，不再读取此旧键 */
-    public static readonly LOCAL_MENU_MOUSE_SCROLL = "local-menu-mouse-scroll";
+    public static readonly LOCAL_MINDMAP_VIEWPORTS = "local-mindmap-viewports";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";

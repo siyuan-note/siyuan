@@ -1986,12 +1986,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    // 列表块横向拖拽或在横排超级块内重排时，目标列表本身是列单元，需保留完整列表。
+                    // 完整列表的边界指示表示块间插入；列表项的同级、子级指示才表示合并到列表内。
                     const isColSbChildList = targetElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement?.getAttribute("data-sb-layout") === "col";
-                    const isHorizontalDrop = targetClass.includes("dragover__left") ||
-                        targetClass.includes("dragover__right");
-                    const keepListBlockTarget = shouldKeepListBlockDragTarget(gutterTypes[0], isHorizontalDrop,
+                    const keepListBlockTarget = shouldKeepListBlockDragTarget(gutterTypes[0], targetClass,
                         isColSbChildList);
                     if (isListItemSource && targetElement.classList.contains("list") &&
                         !keepListBlockTarget) {
@@ -2178,7 +2176,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             data: newUpdated,
                         }], [{
                             action: "removeAttrViewBlock",
-                            srcIDs: ids,
+                            srcIDs: srcs.map(src => src.itemID),
                             avID,
                         }, {
                             action: "doUpdateUpdated",
@@ -2253,7 +2251,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // https://github.com/siyuan-note/siyuan/issues/9544
             const avElement = hasClosestByClassName(event.target, "av");
             if (!avElement) {
-                focusByRange(getRangeByPoint(event.clientX, event.clientY));
+                const range = getRangeByPoint(event.clientX, event.clientY);
+                protyle.toolbar.range = range;
+                focusByRange(range);
                 if (event.dataTransfer.types.includes("Files") && !isBrowser() &&
                     getHostCapabilities().localFileSystem) {
                     const files = getLocalDropFiles(event.dataTransfer.files, file => webUtils.getPathForFile(file));
@@ -2503,7 +2503,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
             } else if (event.altKey || (event.shiftKey && protyle.lite)) {
-                // Alt=引用；lite 模式 Shift 也为引用（原嵌入块改为引用）
+                // Alt=引用；lite 模式 Shift 也为引用
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;

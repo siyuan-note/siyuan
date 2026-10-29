@@ -63,13 +63,11 @@ const settle = () => new Promise<void>(resolve => setImmediate(resolve));
 const entries = [{key: "code"}, {key: "heading1"}];
 const getKey = (entry: {key: string}) => entry.key;
 
-test("frequent slash follows the active profile and ignores the legacy global preference", () => {
-    for (const enabled of [undefined, null, true, false, "false", 0, {}, []]) {
-        const f = fixture({enabled});
-        for (const active of ["full", "simple", "custom-on", "custom-off"]) {
-            f.config.active = active;
-            assert.equal(f.isFrequentSlashEnabled(), active === "full" || active === "custom-on");
-        }
+test("frequent slash follows the active profile", () => {
+    const f = fixture();
+    for (const active of ["full", "simple", "custom-on", "custom-off"]) {
+        f.config.active = active;
+        assert.equal(f.isFrequentSlashEnabled(), active === "full" || active === "custom-on");
     }
 });
 

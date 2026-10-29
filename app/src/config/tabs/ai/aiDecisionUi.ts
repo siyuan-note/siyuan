@@ -27,7 +27,7 @@ const PROVIDER_DETAILS: Record<DecisionProvider, {title: string; icon: string; e
         ],
     },
     openai: {
-        title: "OpenAI Decisions API (Beta)",
+        title: "OpenAI Decisions API",
         icon: "/stage/images/ai-providers/openai.svg",
         endpointTip: "decisionOpenAIEndpointTip",
         defaults: {endpoint: "https://api.openai.com/v1/decisions", apiKey: "", name: "gpt-6-luna", timeout: 30},

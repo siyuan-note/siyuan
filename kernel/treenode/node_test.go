@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package treenode
 
@@ -23,7 +11,29 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestExportNodeStdMdListSpacing(t *testing.T) {
+	for _, test := range []struct {
+		name, source, expected string
+	}{
+		{"tight nested list", "- parent\n\n  - child\n- sibling\n", "- parent\n  - child\n- sibling"},
+		{"multiple paragraphs", "- first\n\n  second\n- sibling\n", "- first\n\n  second\n\n- sibling"},
+		{"thematic break", "- text\n\n  ---\n- sibling\n", "- text\n\n  ---\n\n- sibling"},
+		{"non-one ordered sublist", "- parent\n\n  2. child\n- sibling\n", "- parent\n\n  2. child\n\n- sibling"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			engine := util.NewLute()
+			tree := engine.BlockDOM2Tree(engine.Md2BlockDOM(test.source, true))
+			// 标准 Markdown 导出使用文档树，但不输出块属性。
+			engine.SetKramdownIAL(false)
+			if got := ExportNodeStdMd(tree.Root, engine); got != test.expected {
+				t.Fatalf("expected %q, got %q", test.expected, got)
+			}
+		})
+	}
+}
 
 func TestCustomBlockTypeAbbr(t *testing.T) {
 	if actual := TypeAbbr(ast.NodeCustomBlock.String()); "custom" != actual {

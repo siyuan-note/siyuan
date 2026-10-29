@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20261016111950"
+		"updated": "20261026115057"
 	},
 	"Children": [
 		{
@@ -46,6 +46,472 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ フォルダのデータを論理的に一致させることです。リソースファイル、カスタムアイコン、サードパーティのテーマとアイコンパッケージ、プラグイン、コードスニペット、テンプレート、ウィジェット、ドキュメントデータが含まれます。必要時にダウンロードするモードでは、一部のリソースファイルの内容が端末にまだ保存されていない場合があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0goc24t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-a9tnmh8",
+				"id": "20240530101000-0goc24t",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1e3aivv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-hohtqwq",
+				"id": "20240530101000-1e3aivv",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "まず"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-0fn4grk",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "データリポジトリの鍵を初期化"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "し、ストレージの選択、同期先の設定、同期の有効化を行います。設定に不慣れな場合は、同期ボタンからウィザードを開いて手順に従ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-i91y7b2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ib4zmc2",
+				"id": "20240530101000-i91y7b2",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-k0qwuca",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-tgo0voe",
+						"id": "20240530101000-k0qwuca",
+						"updated": "20261024163013"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ouo791x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0lkjgdt",
+								"id": "20240530101000-ouo791x",
+								"updated": "20261024163013"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期を一時停止する場合は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アカウントと同期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウド同期を有効にする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " オプションをオフにします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-9aziyhu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ysglapz",
+						"id": "20240530101000-9aziyhu",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-00v4r4s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-201peg6",
+								"id": "20240530101000-00v4r4s",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-nvr8ti7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ファイルを無視する"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sotxylv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-gkwbso0",
+				"id": "20240530101000-sotxylv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tj09nja",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ha2h5uo",
+				"id": "20240530101000-tj09nja",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-vg416pf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lg1yq5q",
+						"id": "20240530101000-vg416pf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4tc1a28",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zl21nv3",
+								"id": "20240530101000-4tc1a28",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期を有効にする前に、同期に参加するすべてのデバイスのシステム時刻が一致していることを確認してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-v679ihj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-16g7gcd",
+						"id": "20240530101000-v679ihj",
+						"updated": "20261024163013"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-s7kb83y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dg237pl",
+								"id": "20240530101000-s7kb83y",
+								"updated": "20261024163013"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ量が多い場合は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " でデータをエクスポートし、新しいデバイスに転送してください。そのデバイスの同じ設定ページで "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を使ってインポートしてから同期を設定します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-f2vsvp5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261011151543-f2vsvp5",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティ同期の設定"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-94ddrfk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-94ddrfk",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アカウントと同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で S3、WebDAV、またはローカルファイルシステムを選び、同期サービスの設定欄にある設定ボタンを押します。ローカルファイルシステムはデスクトップ標準カーネルと Docker カーネルで利用でき、モバイルカーネルにはありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-45see8h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-45see8h",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "指定するのはカーネルが動作するマシンまたはコンテナ内のパスであり、ブラウザーを開いている端末のパスではありません。入力後に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押してください。入力中は保存されず、変更したフォームを閉じると下書きを破棄するか確認されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020224352-291guwm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020224352-291guwm",
+				"updated": "20261020224352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存前に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続テスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、S3、WebDAV、ローカルファイルシステムの現在の下書きを保存せずに確認できます。WebDAV ではディレクトリ作成とテストデータの読み書き権限を、ローカルファイルシステムではディレクトリの読み書き権限を確認し、終了時にテストデータの削除を試みます。失敗した場合は診断に従って修正し、再試行してください。保存済みの設定は保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-pf8uunp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-pf8uunp",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サービスの利用をやめる場合は、設定ダイアログで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定を消去"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押して確認します。保存されたアドレスと認証情報が削除され、現在の同期サービスの場合は同期も無効になります。ローカルのノートとクラウド上のデータは残ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-ykfoii4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-ykfoii4",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在の同期元のリソースや履歴スナップショットが完全にダウンロードされていない場合、同期元の変更や設定の消去はできません。元の同期先へのアクセスを復旧し、すべてのリソースをダウンロードしてから再試行してください。保存や消去に失敗しても、有効な設定と下書きは保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-1j1jsub",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-1j1jsub",
+				"updated": "20261021104922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動同期は通常バックグラウンドで実行され、パネルを開いたり編集を中断したりしません。同期アイコンを押すと、現在のファイル、書き込み済みバイト数、速度、推定残り時間を確認できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細を閉じる"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で詳細を閉じ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で再度開けます。ローカルの変更適用、索引の復元、関連文書の更新中のみ編集が一時停止されます。キャンセル後も復元が完了するまで待つ必要があります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "キャンセル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で準備、ネットワーク転送、ファイル復元のキャンセルを要求できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261020231029-f8dbg1y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020231029-f8dbg1y",
+				"updated": "20261020231029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンセル後も完了したファイルは保持され、現在の一時ファイルは削除されます。残りを完了するには再度同期してください。空き容量が不足している場合は、容量を確保して再試行してください。起動時またはファイル復元前に、所有を確認できる中断した同期の一時ファイルを削除し、解放した容量を表示します。"
 				}
 			]
 		},
@@ -205,309 +671,34 @@
 			]
 		},
 		{
-			"ID": "20240530101000-0goc24t",
+			"ID": "20240530101000-01df0kh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-a9tnmh8",
-				"id": "20240530101000-0goc24t",
-				"updated": "20261016111950"
+				"ID": "20240530101000-sa83wf1",
+				"id": "20240530101000-01df0kh",
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使い方"
+					"Data": "同期モード"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-1e3aivv",
+			"ID": "20240530101000-lmow4gl",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-hohtqwq",
-				"id": "20240530101000-1e3aivv",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240530101000-0fn4grk",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "データリポジトリキーの初期化"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "が済んでいればすでに同期設定は完了しています。初めて同期設定を行う場合は、同期ボタンをクリックして同期設定ウィザードを利用することをおすすめします。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-i91y7b2",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"ID": "20240530101000-ib4zmc2",
-				"id": "20240530101000-i91y7b2",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"ID": "20240530101000-k0qwuca",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-tgo0voe",
-						"id": "20240530101000-k0qwuca",
-						"updated": "20261016111431"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-ouo791x",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-0lkjgdt",
-								"id": "20240530101000-ouo791x",
-								"updated": "20261016111431"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "同期を一時停止する場合は "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "アカウントと同期"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "クラウド同期を有効にする"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ オプションをオフにします"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-9aziyhu",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-ysglapz",
-						"id": "20240530101000-9aziyhu",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-00v4r4s",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-201peg6",
-								"id": "20240530101000-00v4r4s",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20240530101000-nvr8ti7",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "ファイルを無視する"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-sotxylv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-gkwbso0",
-				"id": "20240530101000-sotxylv",
-				"updated": "20240530101000"
+				"ID": "20240530101000-frum6h7",
+				"id": "20240530101000-lmow4gl",
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": ""
 				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意事項"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​:"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-tj09nja",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"ID": "20240530101000-ha2h5uo",
-				"id": "20240530101000-tj09nja",
-				"updated": "20261016111950"
-			},
-			"Children": [
-				{
-					"ID": "20240530101000-vg416pf",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-lg1yq5q",
-						"id": "20240530101000-vg416pf",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-4tc1a28",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-zl21nv3",
-								"id": "20240530101000-4tc1a28",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "同期を有効にする前に、同期に参加するすべてのデバイスのシステム時刻が一致していることを確認してください"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-v679ihj",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-16g7gcd",
-						"id": "20240530101000-v679ihj",
-						"updated": "20261016111950"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-s7kb83y",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-dg237pl",
-								"id": "20240530101000-s7kb83y",
-								"updated": "20261016111950"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "データ量が多い場合は、"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "アプリ"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "データ"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "エクスポート Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ でデータをエクスポートし、新しいデバイスに転送してください。そのデバイスの同じ設定ページで "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "インポート Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ を使ってインポートしてから同期を設定します"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-f2vsvp5",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20261011151543-f2vsvp5",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "サードパーティ同期の設定"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-94ddrfk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-94ddrfk",
-				"updated": "20261016111431"
-			},
-			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
@@ -524,102 +715,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で S3、WebDAV、またはローカルファイルシステムを選び、同期サービスの設定欄にある設定ボタンを押します。ローカルファイルシステムはデスクトップ標準カーネルと Docker カーネルで利用でき、モバイルカーネルにはありません。指定するのはカーネルが動作するマシンまたはコンテナ内のパスであり、ブラウザーを開いている端末のパスではありません。入力後に "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "保存"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押してください。入力中は保存されず、変更したフォームを閉じると下書きを破棄するか確認されます。"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-pf8uunp",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-pf8uunp",
-				"updated": "20261011151543"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "サービスの利用をやめる場合は、設定ダイアログで "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定を消去"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押して確認します。保存されたアドレスと認証情報が削除され、現在の同期サービスの場合は同期も無効になります。ローカルのノートとクラウド上のデータは残ります。"
-				}
-			]
-		},
-		{
-			"ID": "20261011151543-ykfoii4",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261011151543-ykfoii4",
-				"updated": "20261011151543"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "現在の同期元のリソースや履歴スナップショットが完全にダウンロードされていない場合、同期元の変更や設定の消去はできません。元の同期先へのアクセスを復旧し、すべてのリソースをダウンロードしてから再試行してください。保存や消去に失敗しても、有効な設定と下書きは保持されます。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-01df0kh",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"ID": "20240530101000-sa83wf1",
-				"id": "20240530101000-01df0kh",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "同期モード"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-lmow4gl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-frum6h7",
-				"id": "20240530101000-lmow4gl",
-				"updated": "20261016111431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "アカウントと同期"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -628,7 +724,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ では 3 つの同期モードがサポートされています:"
+					"Data": " では 3 つの同期モードがサポートされています:"
 				}
 			]
 		},
@@ -875,6 +971,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261026111206-tjmen09",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026111206-tjmen09",
+				"updated": "20261026115057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "終了時の待機が 12 秒を超えた場合は、「同期をスキップして終了」を選択して確認すると、同期をキャンセルして終了できます。未同期の変更はこの端末に保存されたままになります。確認をキャンセルすると、同期の完了を引き続き待ちます。"
 				}
 			]
 		},
@@ -1193,7 +1303,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261016111431-ku2g3co",
-				"updated": "20261016111710"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1244,7 +1354,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261016111431-myut6e6",
-				"updated": "20261016111431"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1272,7 +1382,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " は、同じリポジトリキーとクラウド同期先を使う到達可能な LAN 内の端末から、暗号化データオブジェクトを優先して取得します。クラウドが引き続き同期の正規データ源であり、LAN 転送が利用できない場合はクラウドへ切り替わるため、完全オフラインの端末間同期の代わりにはなりません。Docker カーネルでは LAN 同期アクセラレーションを利用できません。LAN 通知による同期開始は自動モードに限られます。"
+					"Data": " は、同じリポジトリキーとクラウド同期先を使う到達可能な LAN 内の端末から、暗号化データオブジェクトを優先して取得します。クラウドが引き続き同期の正規データ源であり、LAN 転送が利用できない場合はクラウドへ切り替わるため、完全オフラインの端末間同期の代わりにはなりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-tgebx9s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-tgebx9s",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker カーネルでは LAN 同期アクセラレーションを利用できません。LAN 通知による同期開始は自動モードに限られます。"
 				}
 			]
 		},

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261019201307"
+		"updated": "20261028111611"
 	},
 	"Children": [
 		{
@@ -1025,7 +1025,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604225457-7lq09oe",
-				"updated": "20220312123239"
+				"updated": "20261024171608"
 			},
 			"Children": [
 				{
@@ -1061,12 +1061,103 @@
 			]
 		},
 		{
+			"ID": "20261024171608-ctwgnun",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171608-ctwgnun",
+				"updated": "20261024171608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", choose whether embedded blocks show breadcrumbs and include the path above the document. Hiding the parent path keeps the document title and its internal structure."
+				}
+			]
+		},
+		{
+			"ID": "20261024171608-9eg0kvq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024171608-9eg0kvq",
+				"updated": "20261024171608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The block menu entries "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed Block Breadcrumb"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show parent path in breadcrumbs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " each offer Enable, Disable and Default. Default removes the block override and follows the global setting."
+				}
+			]
+		},
+		{
 			"ID": "20210604225720-p4ywemu",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604225720-p4ywemu",
-				"updated": "20260809232000"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1130,7 +1221,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260730103436-r4m7z1k",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1144,7 +1235,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1153,7 +1244,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1162,7 +1253,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": "."
 				}
 			]
 		},
@@ -1961,7 +2052,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261019201307"
+				"updated": "20261028111611"
 			},
 			"Children": [
 				{
@@ -1996,16 +2087,150 @@
 			]
 		},
 		{
-			"ID": "20261018163000-gjcy3xw",
+			"ID": "20261023003049-1oqzzuq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261018163000-gjcy3xw",
-				"updated": "20261019201307"
+				"id": "20261023003049-1oqzzuq",
+				"updated": "20261023003049"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. Click the map on desktop or tap it once on mobile to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes. An active canvas has a highlighted border. Use the wheel or drag with the right mouse button to pan; the Hand Tool also allows left-button panning. Ordinary left dragging on blank canvas does not pan. Active one-finger gestures pan the canvas on touch screens. At the pan boundary, input stays with the canvas instead of scrolling the document. Click outside the map, move keyboard focus outside it, or press Esc on the canvas to return to reading. Full-screen maps stay active until you exit full screen."
+					"Data": "The bottom node menu provides "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cut"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Paste"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " directly. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Paste"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " adds child nodes; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " retains the sibling paste option. Hover over or tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Color"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open the styles and style management panel above the bar. Unsupported actions are disabled."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-f51bzy4",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-f51bzy4",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Canvas navigation"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261018163000-gjcy3xw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261018163000-gjcy3xw",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mind maps initially leave the mouse wheel and one-finger swipes to document scrolling. Click the map on desktop or tap it once on mobile to activate canvas interaction. On mobile, use the Hand Tool for one-finger panning, or double-tap a node to edit it. Turn off the Hand Tool to select or drag nodes."
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-1147a49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-1147a49",
+				"updated": "20261028111611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, use Undo and Redo in the document breadcrumb bar, even when the keyboard is closed or a mind map is full screen. These actions use the document history and can also undo changes outside the mind map. The buttons are hidden when both histories are empty or the document is read-only."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-m2f0ujc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-m2f0ujc",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An active canvas has a highlighted border. Use the wheel or drag with the right mouse button to pan; the Hand Tool also allows left-button panning. Ordinary left dragging on blank canvas does not pan. Active one-finger gestures pan the canvas on touch screens. At the pan boundary, input stays with the canvas instead of scrolling the document."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-82afeip",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-82afeip",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click outside the map, move keyboard focus outside it, or press Esc on the canvas to return to reading. Full-screen maps stay active until you exit full screen."
 				}
 			]
 		},
@@ -2014,21 +2239,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261019142953-4rt40w7",
-				"updated": "20261019142953"
+				"updated": "20261024212002"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Switching between the document and full screen preserves the map's center and zoom. Use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Toggle Fullscreen"
-				},
+					"Data": "Resizing the document canvas preserves its center and zoom. Full-screen entry keeps the zoom and centers the view when the document canvas is shorter than the full-screen viewport; otherwise it preserves the visible top edge, accounting for document scrolling. By default, leaving fullscreen restores the document view and reading position saved on entry; node content edits are retained."
+				}
+			]
+		},
+		{
+			"ID": "20261024194010-0bhyie7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024194010-0bhyie7",
+				"updated": "20261025114801"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "In fullscreen, click "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2037,7 +2267,53 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the toolbar to show a centered frame matching the map viewport in the document. Pan and zoom while viewing this frame to preview the area that will appear after leaving full screen. Click the button again to hide the frame. The frame does not change the block's width or height."
+					"Data": " to edit the document view. The solid frame includes dashed horizontal and vertical center guides and a faint dot grid to help judge position and scale. The fixed frame has the same size as the document viewport on entry. It is centered when the fullscreen viewport is taller, or aligned to the top center otherwise, and follows window resizing. Pan and zoom the map beneath the frame, then exit fullscreen with this mode still enabled to apply the framed view to the document. Click the button again to cancel the pending view change. Locking the canvas also cancels an unapplied view change."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-37ywd8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-37ywd8s",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The alignment updates as the window height changes. Full-screen panning and zooming remain temporary; exiting restores the previous document view and reading position. Node edits still take effect."
+				}
+			]
+		},
+		{
+			"ID": "20261020165811-dthghbx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261020165811-dthghbx",
+				"updated": "20261020165811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over or tap the zoom percentage in the toolbar to open the zoom panel. Use the slider to adjust zoom. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reset"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to restore 100%, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Fit to canvas"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to adjust the zoom and center the whole map."
 				}
 			]
 		},
@@ -2046,12 +2322,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261018163000-cvdncjc",
-				"updated": "20261018200107"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Without activating the canvas, hold Ctrl (Command on macOS) while using the mouse wheel to zoom around the pointer, or hold the same key and drag with the right mouse button to pan temporarily. Temporary panning preserves keyboard focus and node selection. On a touch screen, use two fingers to zoom and pan. These gestures preserve the current reading or active state. A saved view lock still disables editing, zooming, and panning; activate the canvas after unlocking when needed."
+					"Data": "Without activating the canvas, hold Ctrl (Command on macOS) while using the mouse wheel to zoom around the pointer, or hold the same key and drag with the right mouse button to pan temporarily. You can also hold the middle mouse button and drag to pan temporarily without switching to the hand tool; release it to stop."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-jcc2o9a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-jcc2o9a",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Temporary panning preserves keyboard focus and node selection. On a touch screen, use two fingers to zoom and pan. These gestures preserve the current reading or active state. A saved view lock still disables editing, zooming, and panning; activate the canvas after unlocking when needed."
 				}
 			]
 		},
@@ -2060,76 +2350,110 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260928143000-4j2cxng",
-				"updated": "20260928143000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block. When directly embedding a complete mind map block or a document containing it, unlock the map to edit its nodes and styles. Changes update the source block and other embedded copies. Read-only and history previews remain non-editable."
+					"Data": "Use Lock view in the mind map toolbar to prevent editing, zooming and panning. Swiping or using the mouse wheel over the map then scrolls the document. Use Unlock view to resume interaction. The lock state is saved with the block."
 				}
 			]
 		},
 		{
-			"ID": "20261017110432-mq248cg",
+			"ID": "20261024164212-4szpxtc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261017110432-mq248cg",
-				"updated": "20261017113835"
+				"id": "20261024164212-4szpxtc",
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the mind map toolbar, use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Connectors"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Connector style"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to select Curved fork, Orthogonal, Curved fan, or Rounded orthogonal. The choice applies to the whole map, is saved with the document, and supports undo and redo. It changes parent-child connectors without moving nodes or changing relationship lines. Orthogonal styles use a shared vertical trunk in the default line color; the trunk cannot be selected separately, while horizontal branches can still be selected and colored individually. SiYuan-format HTML and PDF previews use the saved style."
+					"Data": "When directly embedding a complete mind map block or a document containing it, unlock the map to edit its nodes and styles. Changes update the source block and other embedded copies. Read-only and history previews remain non-editable."
 				}
 			]
 		},
 		{
-			"ID": "20261017113512-rxzvh9f",
-			"Type": "NodeParagraph",
+			"ID": "20261024161816-00aln26",
+			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261017113512-rxzvh9f",
-				"updated": "20261017113835"
+				"id": "20261024161816-00aln26",
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In "
+					"Data": "Edit nodes"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261022181804-c0rm54w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022181804-c0rm54w",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes and hover over or tap "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Connectors"
+					"TextMarkTextContent": "Width"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": " in the bottom node menu. The panel opens above the bar. The slider starts centered on the current width; move left to narrow or right to widen the selected nodes."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-vrnts6z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-vrnts6z",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Dragging previews the result, and releasing saves one undoable change. You can also enter a pixel width. "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Default connector style for new maps"
+					"TextMarkTextContent": "Restore original widths"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " you can choose the style used when creating a map or converting a list or tabs to a map for the first time. This preference is saved locally in the current workspace and is not included in cloud sync. Changing it does not affect existing maps. Copies, imports, and maps converted to lists or tabs and back retain their original style."
+					"Data": " returns each selected node to its width when this panel was opened, including automatic widths. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or clearing the number field, fits the width to the content."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-tllgy59",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-tllgy59",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Widening a node can keep a long inline formula on one line. Widths are saved with the document and support undo and redo."
 				}
 			]
 		},
@@ -2138,7 +2462,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003225941-mxlfdrn",
-				"updated": "20261003225941"
+				"updated": "20261024133605"
 			},
 			"Children": [
 				{
@@ -2161,9 +2485,664 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node."
+					"Data": " on macOS) and click a node's fold button to fold or expand sibling branches under the same parent. If any sibling branch is expanded, all are folded; otherwise, all are expanded. Deeper folding states are preserved. A normal click only toggles the current node. Expansion and folding use a short transition for nodes and lines. The animation follows the system's reduced motion preference."
 				}
 			]
+		},
+		{
+			"ID": "20260930234403-jmgkoqd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-jmgkoqd",
+				"updated": "20261017003253"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While editing a node, type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and choose “Insert image or file” to upload a local image. You can also paste clipboard images. Images are stored as document attachments. The virtual center title used for multiple top-level nodes remains plain text. Double-click an image in a node to preview it at a larger size without entering node editing first."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-kuq9j6z",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-kuq9j6z",
+				"updated": "20261024195223"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Appearance and connectors"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261017110432-mq248cg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017110432-mq248cg",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the mind map toolbar, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Connector style"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to select Curved fork, Orthogonal, Curved fan, or Rounded orthogonal. The choice applies to the whole map, is saved with the document, and supports undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-wf4frxv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-wf4frxv",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It changes parent-child connectors without moving nodes or changing relationship lines. Shared trunks cannot be selected separately; with a palette enabled, they follow their parent branch color. Horizontal branches can still be selected and colored individually. SiYuan-format HTML and PDF previews use the saved style."
+				}
+			]
+		},
+		{
+			"ID": "20261017113512-rxzvh9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261017113512-rxzvh9f",
+				"updated": "20261022102848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default connector style for new maps"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " you can choose the style used when creating a map or converting a list or tabs to a map for the first time. This preference is saved locally in the current workspace and is not included in cloud sync. Changing it does not affect existing maps. Copies, imports, and maps converted to lists or tabs and back retain their original style."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-11epv5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-11epv5y",
+				"updated": "20261024195223"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Theme"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose from 47 color themes for the current map. Root and first-level nodes use colored backgrounds with white text; deeper nodes use transparent backgrounds, with black or white text chosen automatically for the canvas color. Branch lines inherit their first-level color and use a consistent width. In orthogonal and rounded styles, overlapping root trunk segments are painted in node order, with later branches covering earlier ones."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-gukhw19",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-gukhw19",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Theme text and lines adapt to the canvas brightness. Reordering branches preserves their assigned colors. New nodes follow the map's palette automatically. Manual colors, font sizes, and font weights take precedence. Choosing Default removes the palette while preserving manual colors and the canvas background."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-89rv8gd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-89rv8gd",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Existing maps keep their saved colors; select the theme again to apply the new layered style. The theme does not change node content, structure, or folding states."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-3decujr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-3decujr",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Canvas background"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose a solid canvas background, or Default to follow the application theme. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear manual colors"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to remove manual colors from nodes, hierarchy lines, relationship lines, and summaries so that palette or default colors apply again."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-colf627",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-colf627",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This does not reset the canvas background or other formatting. Appearance changes are saved with the document, support undo and redo, and are included in SiYuan-format HTML and PDF previews."
+				}
+			]
+		},
+		{
+			"ID": "20261022102848-5nohuq1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022102848-5nohuq1",
+				"updated": "20261022132341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select multiple nodes, then use the bottom palette to change their text and background colors together. The branch line palette changes the incoming hierarchy lines of the selected nodes. Each batch change can be undone in one step. Choose Default in a palette to restore the theme or default colors. On touch screens, use the Multi-select button in the top toolbar to select the nodes."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-b13pkc3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-b13pkc3",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Relationship lines"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024161816-gm84aoo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-gm84aoo",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a starting node, click the connect button in the bottom node menu, then choose a target node to create a relationship line. Use it for connections outside the parent-child hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-my9v7og",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-my9v7og",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a relation line and use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrow direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom settings to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Forward arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (start to end, the default), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse arrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (end to start), "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Arrows at both ends"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "No arrows"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Changing direction preserves the connected nodes, label, and manual path, supports undo and redo, and does not affect parent-child lines."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-yca6fy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-yca6fy3",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag either circle along any of its node’s four edges to position the connection point, or onto another valid node to reconnect. Mouse and touch dragging are supported. Releasing saves one undoable change."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-fcd022g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-fcd022g",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ow14bv7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ow14bv7",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the bottom relation settings, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore automatic connection points"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261001051950-ue75z7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001051950-ue75z7f",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-87uvr34",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-87uvr34",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A notice identifies which setting cannot be used. Saved settings are retained and restored when the layout permits. Read-only views and exports use the same drawing rules without adjustment handles; read-only views also show fallback notices."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-udolwsg",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-udolwsg",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Canvas size"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261001015635-3w0f58c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-3w0f58c",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-c0l62ko",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-c0l62ko",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or cancel the touch gesture to restore the original size. The block menu’s width and height settings remain available."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-8tls0r0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-8tls0r0",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Resize handles are hidden in read-only, locked, and full-screen views. A mind map directly inside a super block has only the bottom height handle; use the super block’s column divider to change its width."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-xo714c2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-xo714c2",
+				"updated": "20261027231810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Summaries"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260926151827-kkcg79g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-kkcg79g",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes, then click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Summary"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom node menu to create summaries immediately, without selecting again or confirming. Selecting nodes alone does not preview or create summaries. On desktop, drag on blank canvas or Ctrl/Command-click nodes; on touch screens, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Multi-select"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the top toolbar, then tap nodes."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-x08ucs7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-x08ucs7",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Consecutive selected siblings form one summary; separate ranges and different parents form separate summaries, without including unselected nodes. Selected ancestors take precedence over their descendants. Groups may contain a single node, and nested summaries are supported. Existing identical summaries are skipped; crossing ranges disable creation, with the reason available on the button."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-t1o8rer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-t1o8rer",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The bracket encloses the visible subtree and inner summaries. All groups are created in one undoable operation, then the first new summary is revealed and its text is focused for editing. Unavailable node actions are disabled. Esc on the canvas leaves multi-select mode."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-2f033n1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-2f033n1",
+				"updated": "20261027231810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Double-click the summary text to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20260926151827-z49ph4y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260926151827-z49ph4y",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-c5yttu1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-c5yttu1",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan-format HTML and PDF previews display summaries. Deleting an inner summary preserves the nodes and the outer summary. Nested configurations require a newer client; older clients preserve the configuration and display the source list instead of the mind map."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-udkldmt",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161816-udkldmt",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Example"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20210104091509-ilh76fd",
@@ -3326,227 +4305,6 @@
 			]
 		},
 		{
-			"ID": "20260930234403-jmgkoqd",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260930234403-jmgkoqd",
-				"updated": "20261017003253"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "While editing a node, type "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " and choose “Insert image or file” to upload a local image. You can also paste clipboard images. Images are stored as document attachments. The virtual center title used for multiple top-level nodes remains plain text. Double-click an image in a node to preview it at a larger size without entering node editing first."
-				}
-			]
-		},
-		{
-			"ID": "20261001015635-my9v7og",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001015635-my9v7og",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Select a relation line and use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Arrow direction"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " in the bottom settings to choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Forward arrow"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " (start to end, the default), "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Reverse arrow"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " (end to start), "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Arrows at both ends"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "No arrows"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ". Changing direction preserves the connected nodes, label, and manual path, supports undo and redo, and does not affect parent-child lines."
-				}
-			]
-		},
-		{
-			"ID": "20261001015635-yca6fy3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001015635-yca6fy3",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "On a selected relation, the hollow circle marks the start and the filled circle marks the end, regardless of arrow direction. Drag either circle along any of its node’s four edges to position the connection point, or onto another valid node to reconnect. Mouse and touch dragging are supported. Releasing saves one undoable change. Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
-				}
-			]
-		},
-		{
-			"ID": "20261001051950-ow14bv7",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001051950-ow14bv7",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In the bottom relation settings, choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Restore automatic connection points"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
-				}
-			]
-		},
-		{
-			"ID": "20261001051950-ue75z7f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001051950-ue75z7f",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points. A notice identifies which setting cannot be used. Saved settings are retained and restored when the layout permits. Read-only views and exports use the same drawing rules without adjustment handles; read-only views also show fallback notices."
-				}
-			]
-		},
-		{
-			"ID": "20261001015635-3w0f58c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001015635-3w0f58c",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly. This changes the block size in the document, not the canvas zoom. Releasing saves one undoable change; press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or cancel the touch gesture to restore the original size. The block menu’s width and height settings remain available."
-				}
-			]
-		},
-		{
-			"ID": "20261001015635-8tls0r0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261001015635-8tls0r0",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Resize handles are hidden in read-only, locked, and full-screen views. A mind map directly inside a super block has only the bottom height handle; use the super block’s column divider to change its width."
-				}
-			]
-		},
-		{
-			"ID": "20260926151827-kkcg79g",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260926151827-kkcg79g",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Select the first node in a range, click "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Summary"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " in the mind map toolbar, then select the last sibling node to add a bracket and summary text. The range must be contiguous. Single-node summaries and nested ranges are supported; ranges may contain each other but must not cross. The bracket encloses the visible subtree and any inner summaries. To create several summaries, activate Summary and drag a selection on blank canvas. You can also tap blank canvas, then tap nodes individually. The preview groups consecutive selected siblings by parent; selected ancestors take precedence over their descendants. Existing identical summaries are skipped, and crossing ranges prevent creation. Use the confirm button or Enter to create all previewed groups in one undoable operation; Esc cancels. Document updates cancel a pending selection. These steps also work on mobile. You can also use the up and down arrow keys to select the last node, Enter to confirm the range, and Esc to cancel."
-				}
-			]
-		},
-		{
-			"ID": "20260926151827-2f033n1",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260926151827-2f033n1",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Double-click the summary text, or select the summary and use the edit button at the bottom, to edit it. Enter saves and Esc cancels. You can change its color or delete it using the bottom toolbar; Delete also removes the selected summary. These changes support undo and redo."
-				}
-			]
-		},
-		{
-			"ID": "20260926151827-z49ph4y",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260926151827-z49ph4y",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Converting to a list hides the summary but preserves its data; converting back restores it. Nodes inserted inside the range are included automatically. Removing or moving members out shrinks the range; one remaining member keeps the summary, while removing all members removes it. Summary text is an annotation, not an independently searchable or referenceable block. SiYuan-format HTML and PDF previews display summaries. Deleting an inner summary preserves the nodes and the outer summary. Nested configurations require a newer client; older clients preserve the configuration and display the source list instead of the mind map."
-				}
-			]
-		},
-		{
 			"ID": "20210604230145-zsjeri5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -3744,7 +4502,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-top2oxl",
-				"updated": "20261003234156"
+				"updated": "20261024164212"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -3773,12 +4531,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-zh5dvu9",
-				"updated": "20260905124213"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. In a locked document, the last tab viewed is saved in the local workspace without changing the document default. Published pages, read-only kernels and encrypted notebooks keep this position only for the current session. Removing the tab layout preserves every title and its content in order."
+					"Data": "Use the menu beside the tabs to add, duplicate, delete or reorder tabs and choose a top or left layout. The active tab and layout are saved and synced with the document. In a locked document, the last tab viewed is saved in the local workspace without changing the document default."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-k8zan0u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-k8zan0u",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Published pages, read-only kernels and encrypted notebooks keep this position only for the current session. Removing the tab layout preserves every title and its content in order."
 				}
 			]
 		},
@@ -3919,7 +4691,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-606oli4",
-				"updated": "20210415200916"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -3932,12 +4704,13 @@
 			"ID": "20210104091509-wae7knn",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091509-wae7knn"
+				"id": "20210104091509-wae7knn",
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If the language name is followed by ```, it can have the effect of syntax highlighting, for example:"
+					"Data": "Write the language name immediately after the opening ``` fence to enable syntax highlighting, for example:"
 				}
 			]
 		},
@@ -3999,7 +4772,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091509-yzs0dlz",
-				"updated": "20260809232000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -4050,7 +4823,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210104091509-3a5p9xt",
-				"updated": "20260616221442"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -4062,7 +4835,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20210104091509-ozjt2fc",
-						"updated": "20210104091509"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -4162,7 +4935,7 @@
 						{
 							"Type": "NodeTextMark",
 							"TextMarkType": "code",
-							"TextMarkTextContent": " xml"
+							"TextMarkTextContent": "xml"
 						},
 						{
 							"Type": "NodeText",
@@ -4221,7 +4994,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20261008221006"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -4249,7 +5022,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0008",
-				"updated": "20261008221006"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -4290,7 +5063,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " switch cells; lists and code blocks retain their indentation and outdent behavior. Close suggestions, then press "
+					"Data": " switch cells; lists and code blocks retain their indentation and outdent behavior."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-etaou6w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-etaou6w",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Close suggestions, then press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4308,12 +5095,49 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0009",
-				"updated": "20260909090723"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported. If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
+					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-4j6syup",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-4j6syup",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
+				}
+			]
+		},
+		{
+			"ID": "20261022190543-c7n71wx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022190543-c7n71wx",
+				"updated": "20261022190543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the lower edge of a row to adjust its height. On mobile, tap a horizontal cell boundary first, then drag the handle. The height is a minimum: content can still expand the row. Select the row and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Auto-fit row height"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained."
 				}
 			]
 		},
@@ -4525,6 +5349,97 @@
 				{
 					"Type": "NodeText",
 					"Data": "Mathematical formula"
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-6hnjkr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-6hnjkr0",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When pasting or importing Markdown, SiYuan recognizes "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\(...\\)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as inline math and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\[...\\]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in a separate paragraph as block math by default. Pasted HTML supports the same delimiters. Code is preserved, and Markdown exports continue to use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261027172226-neji60s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261027172226-neji60s",
+				"updated": "20261027172226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can disable this in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with “Recognize LaTeX math delimiters when pasting and importing”. Disabling it affects subsequent pastes and imports; formulas already converted remain unchanged."
 				}
 			]
 		},
@@ -5907,7 +6822,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928090424-08cios0",
-				"updated": "20260928090424"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -5921,7 +6836,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260928090424-voiqqta",
-				"updated": "20260929221400"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -5953,7 +6868,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " below Right to Left (RTL). This option is off by default. Paragraphs and headings use their first strong directional character to choose RTL or LTR; numbers, punctuation, and emoji at the beginning do not decide the direction. Manual block and inline directions take priority. Each list item, including nested items, independently follows the direction of its own first text block: checkboxes, bullets, numbers, and indentation move to the corresponding side. Manual list directions take priority. Table column order keeps its existing setting. Preview and HTML/PDF export also use automatic text direction."
+					"Data": " below Right to Left (RTL). This option is off by default. Paragraphs and headings use their first strong directional character to choose RTL or LTR; numbers, punctuation, and emoji at the beginning do not decide the direction."
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-sdzy54w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-sdzy54w",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual block and inline directions take priority. Each list item, including nested items, independently follows the direction of its own first text block: checkboxes, bullets, numbers, and indentation move to the corresponding side. Manual list directions take priority. Table column order keeps its existing setting. Preview and HTML/PDF export also use automatic text direction."
 				}
 			]
 		}

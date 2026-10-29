@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -42,6 +42,7 @@ type markdownExportOptions struct {
 	DefBlockIDs                                                        []string
 	References                                                         *markdownExportReferences
 	BoxPaths                                                           map[string]string
+	DocumentPaths                                                      exportDocumentPaths
 	AVPublishFilter                                                    AVExportPublishFilter
 	AccessCheckers                                                     []EmbedBlockAccessChecker
 }
@@ -56,10 +57,6 @@ type archiveExportOptions struct {
 
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
 	return ExportPandocConvertZipWithOptions(ids, pandocTo, ext, nil)
-}
-
-func ExportNotebookMarkdown(boxID string) (zipPath string) {
-	return ExportNotebookMarkdownWithOptions(boxID, nil)
 }
 
 func ExportNotebooksMarkdown(boxIDs []string) (zipPath string) {

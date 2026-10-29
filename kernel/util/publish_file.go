@@ -1,8 +1,13 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package util
 
 import (
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -67,6 +72,26 @@ func OpenPublishFile(rootPath, name string) (*os.File, error) {
 	if err != nil || !actual.Mode().IsRegular() || !os.SameFile(info, actual) {
 		file.Close()
 		return nil, fs.ErrPermission
+	}
+	return file, nil
+}
+
+// OpenPublishReaderFile 打开读者可见的包资源，并在读取前检查请求路径和已打开文件的敏感性。
+// data/public 按设计公开，仍直接使用 OpenPublishFile，不经过本函数。
+func OpenPublishReaderFile(rootPath, name string) (*os.File, error) {
+	if !IsPublishRelativePath(name) {
+		return nil, fs.ErrPermission
+	}
+	if IsSensitivePath(filepath.Join(rootPath, filepath.FromSlash(name))) {
+		return nil, fs.ErrPermission
+	}
+	file, err := OpenPublishFile(rootPath, name)
+	if err != nil {
+		return nil, err
+	}
+	if err = checkPublishReaderFile(file); err != nil {
+		file.Close()
+		return nil, err
 	}
 	return file, nil
 }

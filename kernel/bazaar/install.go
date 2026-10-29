@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package bazaar
 
@@ -98,16 +86,6 @@ func incPackageDownloads(repoURL, packageName, systemID string) {
 		}).Post(u)
 }
 
-// packageManifestNames 各类型集市包清单文件名
-var packageManifestNames = func() map[string]string {
-	// localPackageManifests 是清单文件名到包类型的映射，这里反转出包类型到清单文件名的映射
-	names := make(map[string]string, len(localPackageManifests))
-	for manifest, pkgType := range localPackageManifests {
-		names[pkgType] = manifest
-	}
-	return names
-}()
-
 // InstallPackageWithOptions 将在线包替换也纳入目标版本校验。
 func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool, options PackageInstallOptions) (*PackageInstallResult, error) {
 	if err := options.check(); err != nil {
@@ -160,6 +138,10 @@ func installPackageWithOptions(data []byte, installPath, pkgType, packageName st
 	if err = options.check(); err != nil {
 		return
 	}
+	layout, ok := GetPackageLayout(pkgType)
+	if !ok {
+		return nil, errors.New("invalid marketplace package type")
+	}
 	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	if !update {
@@ -171,61 +153,45 @@ func installPackageWithOptions(data []byte, installPath, pkgType, packageName st
 			return nil, errors.New("marketplace package install path already exists")
 		}
 	}
-
-	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
-	if options.PrivateTemp {
-		tmpPackage = filepath.Join(installPrivateRoot(), "install-operations")
-		if err = makePrivateInstallDir(tmpPackage); err != nil {
-			return
-		}
-	} else if err = os.MkdirAll(tmpPackage, 0755); err != nil {
-		return
-	}
-	unzipPath, err := os.MkdirTemp(tmpPackage, "online-")
-	if err != nil {
-		return
-	}
-	defer os.RemoveAll(unzipPath)
 	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return
 	}
-	if err = extractLocalPackageReaderContext(options.context(), reader, unzipPath); err != nil {
-		return
-	}
-
-	dirs, err := os.ReadDir(unzipPath)
+	// 先在 temp 中解压并完成归档、路径和包名校验，data 下只接收已通过校验的内容
+	unpackPath, err := makePackageExtractionDir("package", "online-")
 	if err != nil {
 		return
 	}
-
-	srcPath := unzipPath
-	if 1 == len(dirs) && dirs[0].IsDir() {
-		srcPath = filepath.Join(unzipPath, dirs[0].Name())
-	}
-
-	// 校验下载包自身声明的名称与请求安装的包名一致，防止把其他包的内容写入指定目录
-	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
-	jsonFileName, ok := packageManifestNames[pkgType]
-	if !ok {
-		return nil, errors.New("invalid marketplace package type")
-	}
-	manifestData, readErr := os.ReadFile(filepath.Join(srcPath, jsonFileName))
-	if readErr != nil {
-		return nil, errors.New("marketplace package manifest not found or invalid")
-	}
-	pkg, parseErr := parseInstallPackageManifest(manifestData)
-	if parseErr != nil || nil == pkg {
-		return nil, errors.New("marketplace package manifest not found or invalid")
-	}
-	if packageName != pkg.Name {
-		return nil, fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
-	}
-
-	if result, err = replacePackageDirectoryWithOptions(srcPath, installPath, update, options); err != nil {
+	defer os.RemoveAll(unpackPath)
+	if err = extractLocalPackageReaderContext(options.context(), reader, unpackPath); err != nil {
 		return
 	}
-	return
+	sourcePath, err := localPackageRoot(unpackPath)
+	if err != nil {
+		return
+	}
+	// 校验下载包自身声明的名称与请求安装的包名一致，防止把其他包的内容写入指定目录
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
+	if err = validateInstallPackageManifest(sourcePath, layout.Manifest, packageName); err != nil {
+		return
+	}
+	return replacePackageDirectoryWithOptions(sourcePath, installPath, update, options)
+}
+
+// validateInstallPackageManifest 校验包目录的清单声明与请求安装的包名一致。
+func validateInstallPackageManifest(sourcePath, manifestName, packageName string) error {
+	manifestData, err := os.ReadFile(filepath.Join(sourcePath, manifestName))
+	if err != nil {
+		return errors.New("marketplace package manifest not found or invalid")
+	}
+	pkg, err := parseInstallPackageManifest(manifestData)
+	if err != nil || nil == pkg {
+		return errors.New("marketplace package manifest not found or invalid")
+	}
+	if packageName != pkg.Name {
+		return fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
+	}
+	return nil
 }
 
 // replacePackageDirectory 将 sourcePath 整目录替换到 installPath。
@@ -236,7 +202,56 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) error 
 	return err
 }
 
+// replacePackageDirectoryWithOptions 在安装锁外复制并核对 staging，锁内只做目标摘要校验与提交替换。
 func replacePackageDirectoryWithOptions(sourcePath, installPath string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
+	if err = options.check(); err != nil {
+		return nil, err
+	}
+	if err = validateInstalledRevision(options.ExpectedInstalledRevision); err != nil {
+		return
+	}
+	// 复制前固定目标版本；即使调用方未显式绑定版本，也不能覆盖复制期间发生的编辑或安装。
+	previousRevision, err := lockedInstalledPackageRevision(options.context(), installPath)
+	if err != nil {
+		return nil, err
+	}
+	if options.ExpectedInstalledRevision != "" && previousRevision != options.ExpectedInstalledRevision {
+		return nil, ErrInstalledRevisionConflict
+	}
+	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
+		return
+	}
+	operationPath, err := os.MkdirTemp(filepath.Dir(installPath), ".siyuan-package-install-")
+	if err != nil {
+		return nil, err
+	}
+	stagingPath := filepath.Join(operationPath, "staging")
+	backupPath := filepath.Join(operationPath, "backup")
+	preserveOperationPath := false
+	defer func() {
+		if !preserveOperationPath {
+			_ = os.RemoveAll(operationPath)
+		}
+	}()
+	copiedRevision, err := copyInstallTree(options.context(), sourcePath, stagingPath)
+	if err != nil {
+		return nil, err
+	}
+	// staging 位于本次操作独有的目录，锁外即可核对复制结果，失败也在进入临界区前返回
+	stagingRevision, err := installedPackageRevision(stagingPath)
+	if err != nil {
+		return nil, err
+	}
+	if stagingRevision == MissingInstalledRevision {
+		return nil, errors.New("marketplace package staging content is missing")
+	}
+	if copiedRevision != stagingRevision {
+		return nil, ErrInstalledRevisionConflict
+	}
+	if err = options.check(); err != nil {
+		return nil, err
+	}
+
 	if err = packageInstallLock.Acquire(options.context(), 1); err != nil {
 		return nil, err
 	}
@@ -244,17 +259,14 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	if err = options.check(); err != nil {
 		return nil, err
 	}
-	if err = validateInstalledRevision(options.ExpectedInstalledRevision); err != nil {
-		return
-	}
 	if err = rejectInstallPathLinks(installPath); err != nil {
-		return
+		return nil, err
 	}
-	previousRevision, err := installedPackageRevision(installPath)
+	currentRevision, err := installedPackageRevision(installPath)
 	if err != nil {
 		return nil, err
 	}
-	if options.ExpectedInstalledRevision != "" && previousRevision != options.ExpectedInstalledRevision {
+	if currentRevision != previousRevision {
 		return nil, ErrInstalledRevisionConflict
 	}
 	containsFile, statErr := PackageDirContainsFile(installPath)
@@ -269,75 +281,39 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 		return nil, os.ErrNotExist
 	}
 	result = &PackageInstallResult{PreviousRevision: previousRevision}
-	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
-		return
-	}
-	operationPath, err := os.MkdirTemp(filepath.Dir(installPath), ".siyuan-package-install-")
-	if err != nil {
-		return result, err
-	}
-	stagingPath := filepath.Join(operationPath, "staging")
-	backupPath := filepath.Join(operationPath, "backup")
-	preserveOperationPath := false
-	defer func() {
-		if !preserveOperationPath {
-			_ = os.RemoveAll(operationPath)
-		}
-	}()
-	copiedRevision, err := copyInstallTree(sourcePath, stagingPath)
-	if err != nil {
-		return result, err
-	}
-	sourceRevision, err := installedPackageRevision(sourcePath)
-	if err != nil {
-		return result, err
-	}
-	stagingRevision, err := installedPackageRevision(stagingPath)
-	if err != nil {
-		return result, err
-	}
-	if sourceRevision != copiedRevision || stagingRevision != copiedRevision {
-		return result, ErrInstalledRevisionConflict
-	}
-	currentRevision, err := installedPackageRevision(installPath)
-	if err != nil {
-		return result, err
-	}
-	if currentRevision != previousRevision {
-		return result, ErrInstalledRevisionConflict
-	}
 	if options.BeforeReplace != nil {
 		if err = options.BeforeReplace(); err != nil {
-			return
+			return result, err
 		}
-	}
-	// 回调和复制均结束后再复核，线上与本地安装共享这一个实际替换段。
-	currentRevision, err = installedPackageRevision(installPath)
-	if err != nil {
-		return result, err
-	}
-	if currentRevision != previousRevision {
-		return result, ErrInstalledRevisionConflict
-	}
-	finalStagingRevision, err := installedPackageRevision(stagingPath)
-	if err != nil {
-		return result, err
-	}
-	if finalStagingRevision != stagingRevision {
-		return result, ErrInstalledRevisionConflict
+		// 回调是锁内唯一执行外部代码的位置，只有存在回调时才复核两侧内容未被改动
+		if err = verifyInstallRevisions(installPath, previousRevision, stagingPath, stagingRevision); err != nil {
+			return result, err
+		}
 	}
 	// 最后一次取消和授权检查紧邻提交点；开始替换后必须完成提交或回滚并返回真实结果。
 	if err = options.check(); err != nil {
 		return result, err
 	}
 	if targetExists {
-		if err = os.Rename(installPath, backupPath); err != nil {
+		retrying := false
+		if err = renamePackageDirectoryWithRetry(installPath, backupPath, func(source, target string) error {
+			if retrying {
+				if checkErr := options.check(); checkErr != nil {
+					return checkErr
+				}
+				if checkErr := verifyInstallRevisions(installPath, previousRevision, stagingPath, stagingRevision); checkErr != nil {
+					return checkErr
+				}
+			}
+			retrying = true
+			return os.Rename(source, target)
+		}); err != nil {
 			return
 		}
 	}
-	if err = os.Rename(stagingPath, installPath); err != nil {
+	if err = renamePackageDirectory(stagingPath, installPath); err != nil {
 		if targetExists {
-			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
+			if rollbackErr := renamePackageDirectory(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
 				return result, util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr))
 			}
@@ -350,6 +326,25 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 		return result, util.NewTextFileError(util.TextFileResultUnknown, errors.New("installed package changed after replacement; recovery copy preserved"))
 	}
 	return
+}
+
+// verifyInstallRevisions 复核回调前后安装目标与 staging 的摘要都未变化。
+func verifyInstallRevisions(installPath, installRevision, stagingPath, stagingRevision string) error {
+	current, err := installedPackageRevision(installPath)
+	if err != nil {
+		return err
+	}
+	if current != installRevision {
+		return ErrInstalledRevisionConflict
+	}
+	current, err = installedPackageRevision(stagingPath)
+	if err != nil {
+		return err
+	}
+	if current != stagingRevision {
+		return ErrInstalledRevisionConflict
+	}
+	return nil
 }
 
 // InstallLocalPackage 从已解压并验证的目录安装本地集市包。

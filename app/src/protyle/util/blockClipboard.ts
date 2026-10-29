@@ -1,9 +1,25 @@
 import {isIOSPlatform} from "./browserCompatibility";
 
+const isMindmapBlock = (element: Element) =>
+    element.matches('[data-type="NodeMindmap"], [data-type="NodeList"][data-mindmap-view-rendered="true"]');
+
+export const cutBlockSelection = (element: Element) => {
+    if (isMindmapBlock(element)) {
+        // 隐藏源节点的脑图没有原生可剪切区域，交给正文编辑器写入剪贴板成功后删除。
+        copyBlockSelection(element, () => element.closest(".protyle-wysiwyg")?.dispatchEvent(new ClipboardEvent("cut", {
+            bubbles: true,
+            cancelable: true,
+            clipboardData: new DataTransfer(),
+        })));
+        return;
+    }
+    copyBlockSelection(element, () => document.execCommand("cut"));
+};
+
 export const copyBlockSelection = (element: Element, copy: () => void = () => document.execCommand("copy")) => {
     const avCursor = element.matches('[data-type="NodeAttributeView"]') ?
         element.querySelector<HTMLElement>(".av__cursor") : null;
-    const mindmap = element.matches('[data-type="NodeMindmap"], [data-type="NodeList"][data-mindmap-view-rendered="true"]');
+    const mindmap = isMindmapBlock(element);
     if (!isIOSPlatform(navigator) && !avCursor && !mindmap) {
         copy();
         return;

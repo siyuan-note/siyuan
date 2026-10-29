@@ -8,7 +8,7 @@
 		"id": "20240530101000-flot1gj",
 		"title": "パフォーマンスの最適化",
 		"type": "doc",
-		"updated": "20261016191102"
+		"updated": "20261024163429"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"Properties": {
 				"ID": "20240530101000-rdwwuy5",
 				"id": "20240530101000-33iniao",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -33,23 +33,23 @@
 			"Properties": {
 				"ID": "20240530101000-welsm8e",
 				"id": "20240530101000-5lretw9",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "コンピュータの性能やオペレーティングシステムが異なればパフォーマンスも異なります。さらに、データ量が増えるにつれてパフォーマンスの低下は避けられません。スムーズな動作を維持するためには、使用方法を変更したり一部の設定項目を調整したりする必要があるかもしれません。"
+					"Data": "パフォーマンスは、ハードウェア、システム負荷、データ量、内容の構造によって変わります。動作が遅い場合は、起動、検索、編集、ネットワークアクセスのどこで起きているかを確認し、以下の該当する項目を調整してください。"
 				}
 			]
 		},
 		{
 			"ID": "20240530101000-1ht2qc6",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-l7shq15",
 				"id": "20240530101000-1ht2qc6",
-				"updated": "20240530101000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -65,7 +65,7 @@
 			"Properties": {
 				"ID": "20240530101000-bls5xxg",
 				"id": "20240530101000-8cxvj0b",
-				"updated": "20240530101000"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{
@@ -78,7 +78,7 @@
 					"Properties": {
 						"ID": "20240530101000-nj2xqr3",
 						"id": "20240530101000-q7y9d0x",
-						"updated": "20240530101000"
+						"updated": "20261024161440"
 					},
 					"Children": [
 						{
@@ -87,17 +87,12 @@
 							"Properties": {
 								"ID": "20240530101000-agxgc7j",
 								"id": "20240530101000-g44ruta",
-								"updated": "20240530101000"
+								"updated": "20261024161440"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "コンテンツブロックの数"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": ドキュメントツリーの展開、検索、データ書き込みなどのパフォーマンスに影響を与える可能性があります。ただし、各ブロックのサイズが大きくなければ、通常は数百万個のコンテンツブロックでも大きな影響はありません"
+									"Data": "ブロックの数とサイズ：ドキュメントの読み込み、検索、書き込みに影響します。ハードウェアや構造にも左右されるため、ブロック数だけで判断しないでください"
 								}
 							]
 						}
@@ -197,7 +192,7 @@
 			"Properties": {
 				"ID": "20240530101000-wywh0hr",
 				"id": "20240530101000-cbfx25d",
-				"updated": "20240530101000"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -387,7 +382,7 @@
 					"Properties": {
 						"ID": "20240530101000-u7zziem",
 						"id": "20240530101000-r3q228b",
-						"updated": "20240530101000"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -396,17 +391,12 @@
 							"Properties": {
 								"ID": "20240530101000-4wk4uei",
 								"id": "20240530101000-rl65h11",
-								"updated": "20240530101000"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "ハードウェアをアップグレードする"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": これがパフォーマンスを向上させる最速の方法です"
+									"Data": "ハードウェアのリソースが不足している場合は、ボトルネックに応じてメモリ、CPU、ストレージの増強を検討してください"
 								}
 							]
 						}
@@ -417,16 +407,16 @@
 		{
 			"ID": "20240530101000-9doivgv",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-utjkzhs",
 				"id": "20240530101000-9doivgv",
-				"updated": "20250825114907"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "エディタのフォーマンス"
+					"Data": "エディタのパフォーマンス"
 				}
 			]
 		},
@@ -604,7 +594,7 @@
 			"Properties": {
 				"ID": "20240530101000-a31p89i",
 				"id": "20240530101000-1jefsa2",
-				"updated": "20250115145306"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -727,7 +717,7 @@
 					"Properties": {
 						"ID": "20240530101000-qp9rpgz",
 						"id": "20240530101000-hnpa58k",
-						"updated": "20240530101000"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -736,17 +726,62 @@
 							"Properties": {
 								"ID": "20240530101000-3yt3nig",
 								"id": "20240530101000-8bqp0z2",
-								"updated": "20240530101000"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "ブロックにフォーカスして、エディタに同時に表示する内容を減らしてください"
+								}
+							]
+						},
+						{
+							"ID": "20261024163429-a80aqdi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261024163429-a80aqdi",
+								"updated": "20261024163429"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップ版では、長文の編集や貼り付けが遅くなる環境への対策として、アクセシビリティ対応が既定で無効です。スクリーンリーダーなどを使う場合は "
+								},
+								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "フォーカス可能な要素を減らす"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": 入力フィールドやドロップダウンリストなどの要素を減らすことで、レンダリングにかかる負荷を軽減できます"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "一般"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アクセシビリティ対応"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で有効にできます。この端末の全ワークスペースに適用され、変更後は SiYuan を完全に終了して再起動する必要があります。有効にして遅くなった場合は、無効にして再起動し、動作を比較してください"
 								}
 							]
 						}
@@ -757,10 +792,10 @@
 		{
 			"ID": "20250825114907-tkuwv3h",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250825114907-tkuwv3h",
-				"updated": "20261016191102"
+				"updated": "20261024161440"
 			},
 			"Children": [
 				{

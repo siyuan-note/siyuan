@@ -149,7 +149,6 @@
 
   &--full {
     display: flex;
-    flex-wrap: wrap;
     width: max-content;
     scrollbar-width: none;
     overscroll-behavior: contain;
@@ -220,6 +219,7 @@
     height: calc(var(--b3-font-size-editor) * 1.625);
     width: 16px;
     float: left;
+    pointer-events: none;
     transition: var(--b3-color-transition);
   }
 }
@@ -1455,7 +1455,8 @@ table + .protyle-action__table {
   }
 
   &__drop,
-  &__width-guide {
+  &__width-guide,
+  &__height-guide {
     position: fixed;
     z-index: 3;
     background-color: var(--b3-theme-primary);
@@ -1465,6 +1466,23 @@ table + .protyle-action__table {
   &__width-guide {
     width: 2px;
     transform: translateX(-50%);
+  }
+
+  &__height-guide {
+    height: 2px;
+    transform: translateY(-50%);
+  }
+
+  &__height {
+    height: 8px;
+    cursor: row-resize;
+    touch-action: none;
+
+    &::before {
+      width: 100%;
+      height: 2px;
+      background-color: var(--b3-theme-primary);
+    }
   }
 
   &__width {
@@ -1484,6 +1502,10 @@ table + .protyle-action__table {
   }
 
   &--touch {
+    .protyle-table-control__height {
+      height: 28px;
+    }
+
     > .protyle-table-control__handle,
     > .protyle-table-control__add {
       display: none;

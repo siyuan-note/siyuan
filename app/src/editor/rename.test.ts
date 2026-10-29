@@ -4,6 +4,26 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {ScriptTarget, transpileModule} from "typescript";
 
+test("document titles preserve slash characters while notebook and file names retain their rules", () => {
+    const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const runtime = {siyuan: {languages: {fileNameRule: "Invalid filename", _kernel: {106: "Title too long"}}}};
+    let messages = 0;
+    const methods = new Function("window", "Constants", "showMessage", source + "\nreturn {normalizeDocumentTitle, replaceFileName, validateName};")(
+        runtime, {SIZE_TITLE: 512}, () => messages++);
+    for (const title of ["A/B", "../Title/", "A／B/%2F", "**text**/`code`", "&amp;/literal"]) {
+        assert.equal(methods.normalizeDocumentTitle(title), title);
+    }
+    assert.equal(messages, 0);
+    assert.equal(methods.replaceFileName("Notebook/name"), "Notebook／name");
+    assert.equal(methods.normalizeDocumentTitle("First\nSecond/third"), "FirstSecond/third");
+    assert.equal(methods.normalizeDocumentTitle("😀".repeat(513)), "😀".repeat(512));
+    assert.equal(methods.validateName("😀".repeat(512), undefined, true), true);
+    assert.equal(methods.validateName("😀".repeat(513), undefined, true), false);
+    assert.equal(methods.validateName("😀".repeat(512)), false);
+});
+
 test("failed asset rename keeps the dialog open and does not update or reload editors", async () => {
     const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),

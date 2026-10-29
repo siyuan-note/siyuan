@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -21,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -35,13 +22,12 @@ import (
 )
 
 var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Context, request apicontract.CheckBlockRefRequest) apicontract.Response[bool] {
-	ret := gulu.Ret.NewResult()
 	switch request.Scope {
 	case "blocks":
 		ids, exactIDs, deletedIDs := request.IDs, request.ExactIDs, request.DeletedIDs
 		for _, id := range ids {
-			if util.InvalidIDPattern(id, ret) {
-				return contractFailure[bool](ret)
+			if err := util.ValidateID(id); err != nil {
+				return apicontract.FailureFrom[bool](err)
 			}
 		}
 		idSet := map[string]struct{}{}
@@ -49,28 +35,24 @@ var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Conte
 			idSet[id] = struct{}{}
 		}
 		for _, id := range exactIDs {
-			if util.InvalidIDPattern(id, ret) {
-				return contractFailure[bool](ret)
+			if err := util.ValidateID(id); err != nil {
+				return apicontract.FailureFrom[bool](err)
 			}
 			if _, exists := idSet[id]; !exists {
-				ret.Code = -1
-				ret.Msg = "Field [exactIDs] should be a subset of field [ids]"
-				return contractFailure[bool](ret)
+				return apicontract.Failure[bool](-1, "Field [exactIDs] should be a subset of field [ids]")
 			}
 		}
 		for _, id := range deletedIDs {
-			if util.InvalidIDPattern(id, ret) {
-				return contractFailure[bool](ret)
+			if err := util.ValidateID(id); err != nil {
+				return apicontract.FailureFrom[bool](err)
 			}
 			if _, exists := idSet[id]; !exists {
-				ret.Code = -1
-				ret.Msg = "Field [deletedIDs] should be a subset of field [ids]"
-				return contractFailure[bool](ret)
+				return apicontract.Failure[bool](-1, "Field [deletedIDs] should be a subset of field [ids]")
 			}
 		}
 		notebook := request.Notebook
-		if "" != notebook && util.InvalidIDPattern(notebook, ret) {
-			return contractFailure[bool](ret)
+		if err := util.ValidateOptionalID(notebook); err != nil {
+			return apicontract.FailureFrom[bool](err)
 		}
 		if err := holdEncryptedBlockRequests(c, notebook, append([]string{request.ID}, request.IDs...), true); err != nil {
 			return apicontract.Failure[bool](-1, err.Error())
@@ -105,8 +87,8 @@ var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Conte
 		return apicontract.Success(data)
 	case "notebook":
 		notebook := request.Notebook
-		if util.InvalidIDPattern(notebook, ret) {
-			return contractFailure[bool](ret)
+		if err := util.ValidateID(notebook); err != nil {
+			return apicontract.FailureFrom[bool](err)
 		}
 		if err := holdEncryptedBlockRequests(c, notebook, append([]string{request.ID}, request.IDs...), false); err != nil {
 			return apicontract.Failure[bool](-1, err.Error())
@@ -130,10 +112,8 @@ var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Conte
 		}
 		return apicontract.Success(data)
 	default:
-		ret.Code = -1
-		ret.Msg = "invalid block ref check scope"
+		return apicontract.Failure[bool](-1, "invalid block ref check scope")
 	}
-	return contractFailure[bool](ret)
 })
 
 var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]*apicontract.BlockTreeInfo] {
@@ -173,9 +153,11 @@ var getBlockRelevantIDs = contractHandler(apicontract.GetBlockRelevantIDs, func(
 })
 
 var transferBlockRef = contractHandler(apicontract.TransferBlockRef, func(c *gin.Context, request apicontract.TransferBlockRefRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.FromID, ret) || util.InvalidIDPattern(request.ToID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(request.FromID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	}
+	if err := util.ValidateID(request.ToID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	var refIDs []string
 	refIDs = append(refIDs, request.RefIDs...)
@@ -196,9 +178,8 @@ var swapBlockRef = contractHandler(apicontract.SwapBlockRef, func(c *gin.Context
 })
 
 var getHeadingChildrenIDs = contractHandler(apicontract.GetHeadingChildrenIDs, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[[]string] {
-	ret := gulu.Ret.NewResult()
-	if !checkBlockPublishAccess(c, request.ID, ret) {
-		return contractFailure[[]string](ret)
+	if err := checkBlockPublishAccess(c, request.ID); err != nil {
+		return apicontract.FailureFrom[[]string](err)
 	}
 	return apicontract.Success(model.GetHeadingChildrenIDs(request.ID))
 })
@@ -209,9 +190,8 @@ var appendHeadingChildren = contractHandler(apicontract.AppendHeadingChildren, f
 })
 
 var getHeadingChildrenDOM = contractHandler(apicontract.GetHeadingChildrenDOM, func(c *gin.Context, request apicontract.HeadingChildrenRequest) apicontract.Response[string] {
-	ret := gulu.Ret.NewResult()
-	if !checkBlockPublishAccess(c, request.ID, ret) {
-		return contractFailure[string](ret)
+	if err := checkBlockPublishAccess(c, request.ID); err != nil {
+		return apicontract.FailureFrom[string](err)
 	}
 	removeFoldAttr := true
 	if request.RemoveFoldAttr != nil {
@@ -359,15 +339,14 @@ var checkBlocksExist = contractHandler(apicontract.CheckBlocksExist, func(c *gin
 })
 
 var getDocInfo = contractHandler(apicontract.GetDocInfo, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[*apicontract.DocInfo] {
-	ret := gulu.Ret.NewResult()
 
 	id := request.ID
 	boxID, leaseErr := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
 	if leaseErr != nil {
 		return apicontract.Failure[*apicontract.DocInfo](-1, leaseErr.Error())
 	}
-	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
-		return contractFailure[*apicontract.DocInfo](ret)
+	if err := checkBlockPublishAccessInBox(c, id, boxID); err != nil {
+		return apicontract.FailureFrom[*apicontract.DocInfo](err)
 	}
 
 	var info *model.BlockInfo
@@ -378,15 +357,13 @@ var getDocInfo = contractHandler(apicontract.GetDocInfo, func(c *gin.Context, re
 		info, err = model.GetDocInfo(id)
 	}
 	if nil == info {
-		ret.Code = -1
+		msg := fmt.Sprintf(model.Conf.Language(15), id)
 		if errors.Is(err, model.ErrIndexing) {
-			ret.Msg = model.Conf.Language(56)
+			msg = model.Conf.Language(56)
 		} else if err != nil && !errors.Is(err, model.ErrTreeNotFound) {
-			ret.Msg = err.Error()
-		} else {
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+			msg = err.Error()
 		}
-		return contractFailure[*apicontract.DocInfo](ret)
+		return apicontract.Failure[*apicontract.DocInfo](-1, msg)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -396,7 +373,6 @@ var getDocInfo = contractHandler(apicontract.GetDocInfo, func(c *gin.Context, re
 })
 
 var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, request apicontract.DocsInfoRequest) apicontract.Response[[]*apicontract.DocInfo] {
-	ret := gulu.Ret.NewResult()
 
 	idsArg := request.IDs
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
@@ -419,9 +395,7 @@ var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, 
 	queryAv := request.AV
 	info := model.GetDocsInfo(ids, queryRefCount, queryAv)
 	if nil == info {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(15), ids)
-		return contractFailure[[]*apicontract.DocInfo](ret)
+		return apicontract.Failure[[]*apicontract.DocInfo](-1, fmt.Sprintf(model.Conf.Language(15), ids))
 	}
 	if isReadOnlyRole {
 		for i, docinfo := range info {
@@ -454,13 +428,12 @@ var getBlocksWordCount = contractHandler(apicontract.GetBlocksWordCount, func(c 
 })
 
 var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, request apicontract.TreeStatRequest) apicontract.Response[apicontract.TreeStatData] {
-	ret := gulu.Ret.NewResult()
 	id, includeEmbed := strings.TrimSpace(request.ID), request.IncludeEmbed
 	if id == "" {
 		return apicontract.Failure[apicontract.TreeStatData](-1, "Field [id] must not be empty")
 	}
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.TreeStatData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.TreeStatData](err)
 	}
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
 	if err != nil {
@@ -485,10 +458,9 @@ var getDOMText = contractHandler(apicontract.GetDOMText, func(c *gin.Context, re
 })
 
 var getRefText = contractHandler(apicontract.GetRefText, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[string] {
-	ret := gulu.Ret.NewResult()
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[string](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[string](err)
 	}
 
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
@@ -574,7 +546,6 @@ var getBlockDefIDsByRefText = contractHandler(apicontract.GetBlockDefIDsByRefTex
 })
 
 var getBlockBreadcrumb = contractHandler(apicontract.GetBlockBreadcrumb, func(c *gin.Context, request apicontract.BlockBreadcrumbRequest) apicontract.Response[[]*apicontract.BlockPath] {
-	ret := gulu.Ret.NewResult()
 	id, excludeTypes := request.ID, request.ExcludeTypes
 	boxID := request.Notebook
 	if err := holdEncryptedBlockRequests(c, boxID, append([]string{request.ID}, request.IDs...), false); err != nil {
@@ -592,19 +563,16 @@ var getBlockBreadcrumb = contractHandler(apicontract.GetBlockBreadcrumb, func(c 
 		blockPath, err = model.BuildBlockBreadcrumb(id, excludeTypes)
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[[]*apicontract.BlockPath](ret)
+		return apicontract.Failure[[]*apicontract.BlockPath](-1, err.Error())
 	}
 
 	return apicontract.Success(blockPathContracts(blockPath))
 })
 
 var getBlockBreadcrumbChildren = contractHandler(apicontract.GetBlockBreadcrumbChildren, func(c *gin.Context, request apicontract.BlockBreadcrumbChildrenRequest) apicontract.Response[*apicontract.BlockBreadcrumbChildren] {
-	ret := gulu.Ret.NewResult()
 	id, excludeTypes := request.ID, request.ExcludeTypes
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[*apicontract.BlockBreadcrumbChildren](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[*apicontract.BlockBreadcrumbChildren](err)
 	}
 	offset, limit := 0, 64
 	if request.Offset != nil {
@@ -623,9 +591,7 @@ var getBlockBreadcrumbChildren = contractHandler(apicontract.GetBlockBreadcrumbC
 
 	children, err := model.GetBlockBreadcrumbChildrenInBox(id, excludeTypes, offset, limit, boxID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[*apicontract.BlockBreadcrumbChildren](ret)
+		return apicontract.Failure[*apicontract.BlockBreadcrumbChildren](-1, err.Error())
 	}
 	if children == nil {
 		return apicontract.Success[*apicontract.BlockBreadcrumbChildren](nil)
@@ -654,9 +620,11 @@ var getBlocksIndexes = contractHandler(apicontract.GetBlocksIndexes, func(c *gin
 })
 
 var getDocBlocksOrders = contractHandler(apicontract.GetDocBlocksOrders, func(c *gin.Context, request apicontract.DocOrdersRequest) apicontract.Response[[]string] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.ID, ret) || !checkBlockPublishAccess(c, request.ID, ret) {
-		return contractFailure[[]string](ret)
+	if err := util.ValidateID(request.ID); err != nil {
+		return apicontract.FailureFrom[[]string](err)
+	}
+	if err := checkBlockPublishAccess(c, request.ID); err != nil {
+		return apicontract.FailureFrom[[]string](err)
 	}
 	orders, err := model.GetDocBlocksOrders(request.ID)
 	if err != nil {
@@ -666,11 +634,9 @@ var getDocBlocksOrders = contractHandler(apicontract.GetDocBlocksOrders, func(c 
 })
 
 var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context, request apicontract.BlockInfoRequest) apicontract.Response[apicontract.BlockInfoData] {
-	ret := gulu.Ret.NewResult()
-
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.BlockInfoData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.BlockInfoData](err)
 	}
 	boxID := ""
 	if request.Notebook != "" && model.IsEncryptedBox(request.Notebook) {
@@ -678,20 +644,17 @@ var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context
 	}
 	// 普通文档的索引可能尚未就绪，先恢复索引，再按实际归属取得响应租约。
 	if boxID == "" && !model.IsReadOnlyRoleContext(c) && treenode.GetBlockTree(id) == nil {
-		if err := model.ReindexMissingNormalBlock(id); setGetBlockInfoError(ret, id, err) {
-			return contractFailure[apicontract.BlockInfoData](ret)
+		if err := model.ReindexMissingNormalBlock(id); err != nil {
+			return apicontract.FailureFrom[apicontract.BlockInfoData](blockInfoLoadError(id, err))
 		}
 	}
 	ids := append([]string{id}, request.IDs...)
 	if err := holdEncryptedBlockRequests(c, boxID, ids, false); err != nil {
-		ret.Code, ret.Msg = -1, err.Error()
-		return contractFailure[apicontract.BlockInfoData](ret)
+		return apicontract.Failure[apicontract.BlockInfoData](-1, err.Error())
 	}
 	blockTree, publishAccessRequired, publishMetadataVisible, publishAccessible := getBlockInfoPublishAccess(c, id, boxID)
 	if !publishAccessible {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-		return contractFailure[apicontract.BlockInfoData](ret)
+		return apicontract.Failure[apicontract.BlockInfoData](-1, fmt.Sprintf(model.Conf.Language(15), id))
 	}
 	if publishAccessRequired && !publishMetadataVisible {
 		return apicontract.Success[apicontract.BlockInfoData](apicontract.PublishedBlockInfo{
@@ -708,23 +671,20 @@ var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context
 	} else {
 		tree, err = model.LoadTreeByBlockIDWithReindex(id)
 	}
-	if setGetBlockInfoError(ret, id, err) {
-		return contractFailure[apicontract.BlockInfoData](ret)
+	if err := blockInfoLoadError(id, err); err != nil {
+		return apicontract.FailureFrom[apicontract.BlockInfoData](err)
 	}
 
 	block, _ := model.GetBlock(id, tree)
 	if nil == block {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-		return contractFailure[apicontract.BlockInfoData](ret)
+		return apicontract.Failure[apicontract.BlockInfoData](-1, fmt.Sprintf(model.Conf.Language(15), id))
 	}
 
 	root, err := model.GetBlock(block.RootID, tree)
 	if errors.Is(err, model.ErrIndexing) {
-		return apicontract.FailureWithText[apicontract.BlockInfoData](3, ret.Msg, model.Conf.Language(56))
+		return apicontract.FailureWithText[apicontract.BlockInfoData](3, "", model.Conf.Language(56))
 	}
-	rootTitle := root.IAL["title"]
-	rootTitle = html.UnescapeString(rootTitle)
+	rootTitle := treenode.ReadDocumentTitle(tree.Root).Text
 	icon := html.UnescapeString(root.IAL["icon"])
 	if publishAccessRequired {
 		return apicontract.Success[apicontract.BlockInfoData](apicontract.PublishedBlockInfo{
@@ -757,25 +717,25 @@ var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context
 	})
 })
 
-func setGetBlockInfoError(ret *gulu.Result, id string, err error) bool {
+// blockInfoLoadError 把加载块时的错误转为响应错误，返回 nil 表示没有错误。
+// 索引未就绪使用错误码 3，其余沿用 -1。
+func blockInfoLoadError(id string, err error) error {
 	if err == nil {
-		return false
+		return nil
 	}
-	ret.Code = -1
 	switch {
 	case errors.Is(err, model.ErrIndexing):
-		ret.Code = 3
-		ret.Msg = model.Conf.Language(56)
+		return apicontract.RejectWith(3, model.Conf.Language(56))
 	case errors.Is(err, treenode.ErrSpecTooNew):
-		ret.Msg = model.Conf.Language(275)
+		return apicontract.Reject(model.Conf.Language(275))
 	case errors.Is(err, model.ErrBoxUnindexed):
-		ret.Msg = "" // 加载时已经推送提示。
+		// 加载时已经推送过提示。
+		return apicontract.Reject("")
 	case errors.Is(err, model.ErrTreeNotFound):
-		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		return apicontract.Reject(fmt.Sprintf(model.Conf.Language(15), id))
 	default:
-		ret.Msg = err.Error()
+		return apicontract.Reject(err.Error())
 	}
-	return true
 }
 
 func getBlockInfoPublishAccess(c *gin.Context, id, boxID string) (blockTree *treenode.BlockTree, passwordRequired, metadataVisible, accessible bool) {
@@ -797,18 +757,17 @@ func getBlockInfoPublishAccess(c *gin.Context, id, boxID string) (blockTree *tre
 	return blockTree, false, false, false
 }
 
-func checkBlockPublishAccess(c *gin.Context, id string, ret *gulu.Result) bool {
-	return checkBlockPublishAccessInBox(c, id, "", ret)
+// checkBlockPublishAccess 检查发布访问权限，返回 nil 表示允许读取。
+func checkBlockPublishAccess(c *gin.Context, id string) error {
+	return checkBlockPublishAccessInBox(c, id, "")
 }
 
-func checkBlockPublishAccessInBox(c *gin.Context, id, boxID string, ret *gulu.Result) bool {
+// checkBlockPublishAccessInBox 同上，并显式指定所属笔记本。
+func checkBlockPublishAccessInBox(c *gin.Context, id, boxID string) error {
 	if isBlockPublishAccessible(c, id, boxID) {
-		return true
+		return nil
 	}
-
-	ret.Code = -1
-	ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-	return false
+	return apicontract.Reject(fmt.Sprintf(model.Conf.Language(15), id))
 }
 
 func isBlockPublishAccessible(c *gin.Context, id, boxID string) bool {
@@ -864,13 +823,12 @@ var getBlockDOM = contractHandler(apicontract.GetBlockDOM, func(c *gin.Context, 
 })
 
 var getOrderedListContinueStart = contractHandler(apicontract.GetOrderedListContinueStart, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.OrderedListStartData] {
-	ret := gulu.Ret.NewResult()
 	id := strings.TrimSpace(request.ID)
 	if id == "" {
 		return apicontract.Failure[apicontract.OrderedListStartData](-1, "Field [id] must not be empty")
 	}
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.OrderedListStartData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.OrderedListStartData](err)
 	}
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
 	if err != nil {
@@ -896,7 +854,7 @@ var getBlockDOMs = contractHandler(apicontract.GetBlockDOMs, func(c *gin.Context
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockDOMsByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(doms)
@@ -963,7 +921,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockDOMsByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, doms, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(doms)
@@ -973,28 +931,35 @@ func isEncryptedNotebookDeniedForPublish(c *gin.Context, notebook string) bool {
 	return notebook != "" && model.IsReadOnlyRoleContext(c) && model.IsEncryptedBoxDeniedByPublishAccess(notebook)
 }
 
-func filterBlockDOMsByPublishAccess(c *gin.Context, doms map[string]string, ids []string, boxID string, publishAccess model.PublishAccess, publishIgnore model.PublishAccess) {
+// blockPublishDenied 判断块在当前会话下是否应被发布访问控制屏蔽。
+// 块树缺失时视为不可访问，与路径密码、发布忽略规则判定一致。
+func blockPublishDenied(c *gin.Context, id, boxID string, publishAccess, publishIgnore model.PublishAccess) bool {
+	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt {
+		return true
+	}
+	passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	return (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) ||
+		!model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore)
+}
+
+// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块内容置空，保留原有键位。
+func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids []string, boxID string,
+	publishAccess, publishIgnore model.PublishAccess) {
 	for _, id := range ids {
-		if _, ok := doms[id]; !ok {
+		if _, ok := contents[id]; !ok {
 			continue
 		}
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
-			doms[id] = ""
-			continue
-		}
-		passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			doms[id] = ""
+		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
+			contents[id] = ""
 		}
 	}
 }
 
 var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin.Context, request apicontract.BlockKramdownRequest) apicontract.Response[apicontract.BlockKramdownData] {
-	ret := gulu.Ret.NewResult()
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.BlockKramdownData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.BlockKramdownData](err)
 	}
 
 	// md：Markdown 标记符模式，使用标记符导出
@@ -1004,9 +969,7 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if request.Mode != nil {
 		mode = *request.Mode
 		if "md" != mode && "textmark" != mode {
-			ret.Code = -1
-			ret.Msg = "Invalid mode"
-			return contractFailure[apicontract.BlockKramdownData](ret)
+			return apicontract.Failure[apicontract.BlockKramdownData](-1, "Invalid mode")
 		}
 	}
 
@@ -1028,14 +991,8 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
+		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
 			kramdown = ""
-		} else {
-			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-				kramdown = ""
-			}
 		}
 	}
 
@@ -1043,10 +1000,9 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 })
 
 var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *gin.Context, request apicontract.BlocksKramdownRequest) apicontract.Response[map[string]string] {
-	ret := gulu.Ret.NewResult()
 	var ids []string
 	for _, id := range request.IDs {
-		if !util.InvalidIDPattern(id, nil) {
+		if err := util.ValidateID(id); err == nil {
 			ids = append(ids, id)
 		}
 	}
@@ -1058,9 +1014,7 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if request.Mode != nil {
 		mode = *request.Mode
 		if "md" != mode && "textmark" != mode {
-			ret.Code = -1
-			ret.Msg = "Invalid mode"
-			return contractFailure[map[string]string](ret)
+			return apicontract.Failure[map[string]string](-1, "Invalid mode")
 		}
 	}
 
@@ -1082,34 +1036,16 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
-		filterBlockKramdownsByPublishAccess(c, kramdowns, ids, boxID, publishAccess, publishIgnore)
+		filterBlocksByPublishAccess(c, kramdowns, ids, boxID, publishAccess, publishIgnore)
 	}
 
 	return apicontract.Success(kramdowns)
 })
 
-func filterBlockKramdownsByPublishAccess(c *gin.Context, kramdowns map[string]string, ids []string, boxID string, publishAccess model.PublishAccess, publishIgnore model.PublishAccess) {
-	for _, id := range ids {
-		if _, ok := kramdowns[id]; !ok {
-			continue
-		}
-		bt := treenode.GetBlockTreeInBox(id, boxID)
-		if nil == bt {
-			kramdowns[id] = ""
-			continue
-		}
-		passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-			kramdowns[id] = ""
-		}
-	}
-}
-
 var getChildBlocks = contractHandler(apicontract.GetChildBlocks, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[[]*apicontract.ChildBlock] {
-	ret := gulu.Ret.NewResult()
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[[]*apicontract.ChildBlock](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[[]*apicontract.ChildBlock](err)
 	}
 
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
@@ -1120,10 +1056,9 @@ var getChildBlocks = contractHandler(apicontract.GetChildBlocks, func(c *gin.Con
 })
 
 var getTailChildBlocks = contractHandler(apicontract.GetTailChildBlocks, func(c *gin.Context, request apicontract.TailChildBlocksRequest) apicontract.Response[[]*apicontract.ChildBlock] {
-	ret := gulu.Ret.NewResult()
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[[]*apicontract.ChildBlock](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[[]*apicontract.ChildBlock](err)
 	}
 
 	var n int
@@ -1198,7 +1133,7 @@ func blockPathContracts(values []*model.BlockPath) []*apicontract.BlockPath {
 	result := make([]*apicontract.BlockPath, len(values))
 	for i, value := range values {
 		if value != nil {
-			result[i] = &apicontract.BlockPath{ID: value.ID, Name: value.Name, Type: value.Type, SubType: value.SubType, Children: blockPathContracts(value.Children), HasChildren: value.HasChildren}
+			result[i] = &apicontract.BlockPath{ID: value.ID, Name: value.Name, DocumentTitle: value.DocumentTitle, Type: value.Type, SubType: value.SubType, Children: blockPathContracts(value.Children), HasChildren: value.HasChildren}
 		}
 	}
 	return result

@@ -21,10 +21,10 @@ Electron 44 要求 macOS 13 或更高版本，Windows 和 Linux 仅支持 64 位
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.9.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.10.0 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@44.9.0 -D`
+  * `pnpm install electron@44.10.0 -D`
 
 NPM 镜像：
 
@@ -34,7 +34,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@44.9.0 -D`
+* `pnpm install electron@44.10.0 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`
@@ -85,6 +85,10 @@ NPM 镜像：
 * `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
+Windows 下可在思源仓库根目录执行 `node scripts/android-dev-run.mjs`，构建移动端前端、打包资源、构建 `kernel.aar` 和调试 APK，然后通过 ADB 安装并启动独立调试包，默认使用 `official` 渠道。需准备 Node.js、pnpm、Go、gomobile、JDK、Android SDK 和 NDK，以及支持 ZIP 的 bsdtar（Windows 自带的 `tar`）。在 Android 工程的 `local.properties` 中配置 `sdk.dir`，或设置 `ANDROID_HOME`；脚本会选择 SDK 目录下版本最高的 NDK。设备需开启并授权调试连接。
+
+Android 工程默认位于思源仓库同级，可用 `--android-dir=<路径>` 或 `SIYUAN_ANDROID_DIR` 指定；使用 `--device=<序列号>` 选择 ADB 连接。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复用并复制现有 `kernel/kernel.aar`，`--skip-gradle` 仅跳过 APK 构建，仍会执行前面的资源打包和内核处理。仅重新安装已有 APK 时同时传入这三个参数；SDK 和 NDK 仍需可用。更多参数见 `node scripts/android-dev-run.mjs --help`。
+
 ### Harmony
 
 仅支持在 Linux 下编译，需要安装鸿蒙 SDK，并且需要修改 Go 源码。
@@ -93,7 +97,15 @@ NPM 镜像：
 * `./build.sh` （Windows 模拟器使用 `./build-win.sh`）
 * https://github.com/siyuan-note/siyuan-harmony
 
-修改 Go 源码：
+ARM64 真机可在思源仓库根目录执行 `node scripts/harmony-dev-run.mjs`，构建移动端前端、打包资源、构建内核和已签名的调试 HAP，然后通过 HDC 安装并启动独立调试包。先在 DevEco Studio 为设备配置鸿蒙工程的 `debug` 签名，并准备原生 OCR 运行库和模型（参考鸿蒙仓库 README）。Windows 通过 WSL 在当前检出目录中执行内核构建，WSL 内需具备鸿蒙 SDK、Go 和 Python 3.10+。脚本使用支持 ZIP 的 bsdtar（Windows 自带的 `tar`），不会自动卸载应用。
+
+通过 `--deveco=<路径>`、`--harmony-dir=<路径>`、`--device=<连接标识>` 指定工具、工程和设备。`--skip-ui` 复用现有前端产物（需包含 mobile、desktop、export），`--skip-kernel` 复制现有 `kernel/harmony/libkernel.so` 和 `libkernel.h`，`--skip-hvigor` 则仅重新安装并启动已有的调试 HAP，跳过所有构建及资源复制。更多参数见 `node scripts/harmony-dev-run.mjs --help`。运行脚本测试：`node --test app/scripts/harmony-dev-run.test.js`。
+
+Windows 下，部署脚本会在临时工作区中将当前 `go.work` 的模块路径和本地替换路径转换为 WSL 路径，保留本地依赖覆盖，不修改原始工作区文件。如果已禁用工作区模式，WSL 构建同样使用 `GOWORK=off`。
+
+部署脚本通过 `scripts/prepare-harmony-go.py` 将实际选中的 Go 工具链复制到 Linux 用户缓存（默认 `~/.cache/siyuan-harmony/go`），在副本中应用下面三处鸿蒙适配，再通过 `GOTOOLCHAIN=local` 固定使用该副本。系统 Go 和自动下载的共享工具链均保持不变；版本或适配输入变化时创建另一份缓存，不识别的源码或损坏的缓存会报错。工具链准备测试：`python3 -m unittest scripts/test_prepare_harmony_go.py`；Linux 下还会验证构建包装脚本的工具链选择流程，测试不编译内核。
+
+直接运行 `kernel/harmony/build.sh` 时，需自行修改实际使用的 Go 源码：
 
 1. go/src/runtime/tls_arm64.s
 

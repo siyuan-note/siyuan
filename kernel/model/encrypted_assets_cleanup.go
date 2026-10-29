@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -126,20 +130,24 @@ func encryptedCleanupSourceDigest(ctx context.Context, boxID string) (string, er
 }
 
 // withEncryptedAssetCleanup 排空已提交编辑，并串行化同步、事务和目标笔记本的持久化读写。
+// 等待同步锁期间不持有笔记本租约，退出清理开始后不再接纳新的清理操作。
 // 先取得密钥副本，再持笔记本写锁；锁内只解析磁盘快照，不重入读锁或发布明文缓存。
 func withEncryptedAssetCleanup(ctx context.Context, boxID string, operation func([]byte) error) (err error) {
 	if !ast.IsNodeIDPattern(boxID) || !IsEncryptedBox(boxID) {
 		return errors.New("an encrypted notebook ID is required")
+	}
+	if err := lockAssetRelink(ctx, &syncLock); err != nil {
+		return err
+	}
+	defer syncLock.Unlock()
+	if util.IsExiting.Load() {
+		return errors.New(Conf.Language(239))
 	}
 	release, err := AcquireEncryptedBoxOperations(ctx, []string{boxID})
 	if err != nil {
 		return errors.New(Conf.Language(314))
 	}
 	defer release()
-	if err := lockAssetRelink(ctx, &syncLock); err != nil {
-		return err
-	}
-	defer syncLock.Unlock()
 	FlushTxQueue()
 	if err := lockAssetRelink(ctx, &flushLock); err != nil {
 		return err

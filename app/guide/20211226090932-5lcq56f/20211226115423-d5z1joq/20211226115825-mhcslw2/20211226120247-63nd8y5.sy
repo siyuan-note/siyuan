@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261024163828"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-x5qwass",
-				"updated": "20261015221015"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -29,12 +29,41 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220623200737-sx458du",
-				"updated": "20260730184353"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "輸入 "
+					"Data": "區塊引用用於連結到既有內容，讓同一段筆記可以在不同情境中使用。引用顯示為可點擊的錨文字，滑鼠懸停時可以預覽被引用的內容區塊。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-9fltrh3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-9fltrh3",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入引用"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-qflzhzm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-qflzhzm",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在編輯器中輸入 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,18 +72,48 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後將觸發內容區塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容區塊的引用了。建立好內容區塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容區塊（定義區塊）。"
+					"Data": "，繼續輸入關鍵字搜尋內容區塊。使用上下方向鍵選擇候選項，按 "
 				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 插入引用。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-b4usmnr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-b4usmnr",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "內容區塊/引用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
 				}
 			]
+		},
+		{
+			"ID": "20261024163828-f2xfhww",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-f2xfhww",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增文檔並引用"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20260927091603-savpene",
@@ -96,6 +155,21 @@
 					"Data": "，指定筆記本根目錄或父文件。確認後將在該位置建立文件，並在原位置插入區塊引用。所選位置僅對本次建立生效，不會修改預設儲存路徑；取消不會建立文件。桌面端和行動端均支援此操作。資料庫項目綁定或重新綁定文件時也可使用此操作。文件建立成功後才會綁定到該項目；取消或建立失敗不會改變原有綁定。"
 				}
 			]
+		},
+		{
+			"ID": "20261024163828-4cro9g3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-4cro9g3",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動閉合與補全"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261014130425-brzvwem",
@@ -167,7 +241,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-nfx8mlg",
-				"updated": "20230630092034"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -182,7 +256,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120337-vc0412c",
-				"updated": "20211226153324"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -222,7 +296,7 @@
 					},
 					"Properties": {
 						"id": "20211226120337-y5w0fua",
-						"updated": "20211226153324"
+						"updated": "20261024163828"
 					},
 					"Children": [
 						{
@@ -230,12 +304,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120337-1ss1org",
-								"updated": "20260730184353"
+								"updated": "20261024163828"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "反向連結（Backlink），即當前內容區塊被那些其他內容區塊使用了"
+									"Data": "反向連結（Backlink），即當前內容區塊被哪些其他內容區塊使用了"
 								}
 							]
 						}
@@ -248,12 +322,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120337-toyoo9f",
-				"updated": "20260730184353"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "正向連結包含在當前區塊的內容中，我們可以很直觀的看到。反向連結需要在其他文檔中搜索才能知道，而恰恰是這些訊息對我們比較有價值。我們可以通過以下兩種方式來幫助我們更好的掌握知識點或者發散思路："
+					"Data": "正向連結直接顯示在目前內容中；反向連結則用於回看哪些內容引用了目前區塊。可以透過以下兩種方式檢視這些關係："
 				}
 			]
 		},
@@ -335,6 +409,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-ng7mw26",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-ng7mw26",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "依資料庫欄位篩選反向連結"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-9qfgdrg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-9qfgdrg",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在反向連結面板或底部反向連結中，開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "篩選反向連結來源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料庫欄位"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，選擇來源區塊已加入的資料庫，再設定欄位組合條件。只顯示綁定到所選資料庫且符合條件的反向連結來源；未設定欄位條件時，顯示所有綁定到該資料庫的反向連結來源。此操作不會修改資料庫原檢視的篩選，也不影響提及。桌面端和行動端均支援此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-ws4lowq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-ws4lowq",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在資料庫選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除資料庫條件，其他來源篩選保持不變。"
 				}
 			]
 		},
@@ -761,7 +905,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230420123224-22gd6st",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -775,7 +919,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230518100654-6zhp6jh",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -789,7 +933,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -798,7 +942,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中啟用 "
+					"Data": " 中啟用 "
 				},
 				{
 					"Type": "NodeTextMark",

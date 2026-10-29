@@ -1,6 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-// Licensed under the GNU Affero General Public License, version 3 or later.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package util
 
@@ -14,10 +14,13 @@ import (
 )
 
 func TestPluginDevelopmentRawPathGuard(t *testing.T) {
-	originalWorkspace, originalData, originalConf := WorkspaceDir, DataDir, ConfDir
+	originalWorkspace, originalData, originalConf, originalTemp := WorkspaceDir, DataDir, ConfDir, TempDir
 	WorkspaceDir = t.TempDir()
 	DataDir, ConfDir = filepath.Join(WorkspaceDir, "data"), filepath.Join(WorkspaceDir, "conf")
-	t.Cleanup(func() { WorkspaceDir, DataDir, ConfDir = originalWorkspace, originalData, originalConf })
+	TempDir = filepath.Join(WorkspaceDir, "temp")
+	t.Cleanup(func() {
+		WorkspaceDir, DataDir, ConfDir, TempDir = originalWorkspace, originalData, originalConf, originalTemp
+	})
 	for _, rel := range []string{
 		"data/storage/ai/agent/plugin-projects/task/source/index.js",
 		"data/storage/ai/agent/plugin-projects/task/artifacts/package.zip",
@@ -30,6 +33,10 @@ func TestPluginDevelopmentRawPathGuard(t *testing.T) {
 		"data/storage/ai/agent/plugin-projects. /task/source/index.js",
 		"conf/plugin-development::$INDEX_ALLOCATION/task/control.json",
 		"data/plugins/.siyuan-package-install-abcdef/staging/index.js",
+		"temp/bazaar/local/extract-abcdef/index.js",
+		"temp/bazaar/package/online-abcdef/index.js",
+		"temp/bazaar/local. /extract-abcdef/index.js",
+		"temp/bazaar/package::$INDEX_ALLOCATION/online-abcdef/index.js",
 	} {
 		path := filepath.Join(WorkspaceDir, filepath.FromSlash(rel))
 		if !IsPluginDevelopmentRawPathForbidden(path, false) || !IsForbiddenAbsPath(path) {
@@ -46,12 +53,12 @@ func TestPluginDevelopmentRawPathGuard(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, rel := range []string{".", "data", "data/plugins", "data/storage", "data/storage/ai/agent", "data/storage/ai/agent/sessions/task", "conf"} {
+	for _, rel := range []string{".", "data", "data/plugins", "data/storage", "data/storage/ai/agent", "data/storage/ai/agent/sessions/task", "conf", "temp", "temp/bazaar", "temp/bazaar/local", "temp/bazaar/package"} {
 		if !IsPluginDevelopmentRawPathForbidden(filepath.Join(WorkspaceDir, rel), true) {
 			t.Errorf("protected ancestor mutation accepted: %s", rel)
 		}
 	}
-	for _, rel := range []string{"data/storage/ai/agent/sessions/task/output/full.txt", "data/storage/ai/agent/sessions/task/session.json", "data/plugins/example/index.js", "temp/scratch.js"} {
+	for _, rel := range []string{"data/storage/ai/agent/sessions/task/output/full.txt", "data/storage/ai/agent/sessions/task/session.json", "data/plugins/example/index.js", "temp/scratch.js", "temp/bazaar/local-package.zip"} {
 		if IsPluginDevelopmentRawPathForbidden(filepath.Join(WorkspaceDir, rel), false) {
 			t.Errorf("ordinary read rejected: %s", rel)
 		}
@@ -60,6 +67,14 @@ func TestPluginDevelopmentRawPathGuard(t *testing.T) {
 	if err := os.Symlink(PluginProjectsDir(), link); err == nil {
 		if !IsPluginDevelopmentRawPathForbidden(filepath.Join(link, "task", "source", "new.js"), false) {
 			t.Fatal("missing-leaf symlink alias bypassed protection")
+		}
+	}
+	for _, kind := range []string{"local", "package"} {
+		alias := filepath.Join(WorkspaceDir, "alias-"+kind)
+		if err := os.Symlink(filepath.Join(TempDir, "bazaar", kind), alias); err == nil {
+			if !IsPluginDevelopmentRawPathForbidden(filepath.Join(alias, "new", "index.js"), true) {
+				t.Fatalf("extraction symlink alias bypassed protection: %s", kind)
+			}
 		}
 	}
 	for _, rel := range []string{"storage/ai/agent/plugin-projects/task/source/index.js", "storage/ai/agent/sessions/task/runtime.json", "storage/ai/agent/sessions/task/runtime.jsona1b2c3d.tmp", "plugins/.siyuan-package-install-abc/staging/index.js"} {

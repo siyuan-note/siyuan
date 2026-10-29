@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 //go:build sqlcipher || libsqlcipher
 
@@ -27,9 +15,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -77,6 +67,12 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	Conf.FileTree.Load().BoxDocEnabled = true
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	Conf.Sync.Store(conf.NewSync())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Lang, util.Lang = "en", "en"
+	util.WorkingDir, _ = filepath.Abs(filepath.Join("..", "..", "app"))
+	initLang()
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
@@ -107,6 +103,39 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	if tree.ID != boxID {
 		t.Fatalf("unexpected encrypted notebook document ID: %s", tree.ID)
 	}
+	for _, enabled := range []bool{true, false} {
+		Conf.FileTree.Load().BoxDocEnabled = enabled
+		if !enabled {
+			if boxID, err = CreateEncryptedBox("Encrypted without notebook document", password); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if state := treenode.DocumentMetadataState(boxID); state != "ready" {
+			t.Fatalf("new encrypted notebook metadata state = %q, want ready (notebook document: %v)", state, enabled)
+		}
+		if _, err = Mount(boxID); err != nil {
+			t.Fatalf("mount new encrypted notebook: %v", err)
+		}
+		if state := treenode.DocumentMetadataState(boxID); state != "building" {
+			t.Fatalf("queued encrypted notebook index state = %q, want building", state)
+		}
+		for task.ContainIndexTask() {
+			task.ExecTaskJob()
+		}
+		documentID := ast.NewNodeID()
+		if _, err = CreateDocByParent(DocumentCreateRequest{Notebook: boxID, ID: documentID,
+			TitleFormat: "plain", Title: "Encrypted document", Markdown: "Encrypted notebook creation"}); err != nil {
+			t.Fatalf("create document immediately after encrypted notebook creation: %v", err)
+		}
+		if tree, err = filesys.LoadTree(boxID, "/"+documentID+".sy", util.NewLute()); err != nil || tree.ID != documentID {
+			t.Fatalf("read new encrypted document: %+v, %v", tree, err)
+		}
+		data, readErr := os.ReadFile(filepath.Join(util.DataDir, boxID, documentID+".sy"))
+		if readErr != nil || !util.IsCiphertext(data) {
+			t.Fatalf("new encrypted document was not stored as ciphertext: %v", readErr)
+		}
+	}
+	Conf.FileTree.Load().BoxDocEnabled = true
 
 	if _, err = CreateBox("Normal"); err != nil {
 		t.Fatalf("create normal notebook after encrypted notebook failed: %v", err)

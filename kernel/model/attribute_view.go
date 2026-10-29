@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -223,7 +211,14 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 
 	checkedAvIDs := map[string]bool{}
 	for _, id := range allAvIDs {
-		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
+		if docReferencedAvIDs[id] {
+			continue
+		}
+		referenced, scanErr := isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		if !referenced {
 			name, _ := av.GetAttributeViewName(id)
 
 			var modTime time.Time
@@ -249,34 +244,38 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
 	return
 }
 
-func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) bool {
+func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) (bool, error) {
 	if checkedAvIDs[destAvID] {
 		if docReferencedAvIDs[destAvID] {
-			return true
+			return true, nil
 		}
-		return false
+		return false, nil
 	}
 	checkedAvIDs[destAvID] = true
 
-	srcAvIDs := av.GetSrcAvIDs(destAvID)
+	srcAvIDs, err := av.GetSrcAvIDsWithErr(destAvID)
+	if err != nil {
+		return false, fmt.Errorf("read database relations [%s] failed: %w", destAvID, err)
+	}
 	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID) // 忽略自身关联
 	if 1 > len(srcAvIDs) {
-		return false
+		return false, nil
 	}
 
 	for _, srcAvID := range srcAvIDs {
 		if docReferencedAvIDs[srcAvID] {
-			return true
+			return true, nil
 		}
 	}
 
 	// 递归检查间接关联的 av
 	for _, srcAvID := range srcAvIDs {
-		if isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs) {
-			return true
+		referenced, err := isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs)
+		if err != nil || referenced {
+			return referenced, err
 		}
 	}
-	return false
+	return false, nil
 }
 
 func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {
@@ -652,7 +651,7 @@ func firstAttributeViewFilterContext(contexts []*av.FilterContext) *av.FilterCon
 
 // applyFilterDefaultValues 递归遍历过滤节点树，对叶子节点计算新增行的默认值。
 // AND 分组合并后验证所有子节点，OR 分组采用首个可满足的分支；无法满足时不生成默认值。
-// 返回 true 表示遇到 mAsset 过滤，调用方应立即结束全部默认值计算（保留原外层 return 语义）。
+// 返回 true 表示遇到 mAsset 过滤，调用方应立即终止全部默认值计算并丢弃已累积结果。
 func applyFilterDefaultValues(filters []*av.ViewFilter, attrView *av.AttributeView, addingItemID string, nearItem av.Item,
 	templateRelevantKeys map[string][]*av.Key, rollupRelevantKeys map[string]*av.Key,
 	ret map[string]*av.Value, filterKeyIDs map[string]bool) (stop bool) {
@@ -1331,16 +1330,12 @@ func setAttrViewCardAspectRatio(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CardAspectRatio = ratio
-		view.Gallery.CardAspectRatioValue = av.CardAspectRatioValueByPreset(ratio)
-	case av.LayoutTypeKanban:
-		view.Kanban.CardAspectRatio = ratio
-		view.Kanban.CardAspectRatioValue = av.CardAspectRatioValueByPreset(ratio)
 	}
+	cards.CardAspectRatio = ratio
+	cards.CardAspectRatioValue = av.CardAspectRatioValueByPreset(ratio)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1372,14 +1367,11 @@ func setAttrViewCardAspectRatioValue(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CardAspectRatioValue = ratio
-	case av.LayoutTypeKanban:
-		view.Kanban.CardAspectRatioValue = ratio
 	}
+	cards.CardAspectRatioValue = ratio
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1575,19 +1567,8 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 		}
 
 		view.Table = av.NewLayoutTable()
-		switch oldLayout {
-		case av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, id := range oldFields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: id}})
-			}
-		case av.LayoutTypeGallery:
-			for _, field := range view.Gallery.CardFields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
-			}
-		case av.LayoutTypeKanban:
-			for _, field := range view.Kanban.Fields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
-			}
+		for _, id := range oldFields {
+			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: id}})
 		}
 	case av.LayoutTypeGallery:
 		if oldLayout == av.LayoutTypeList && view.Name == av.GetAttributeViewI18n("list") || view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("kanban") {
@@ -1599,15 +1580,8 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 		}
 
 		view.Gallery = av.NewLayoutGallery()
-		switch oldLayout {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, id := range oldFields {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: id}})
-			}
-		case av.LayoutTypeKanban:
-			for _, field := range view.Kanban.Fields {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
-			}
+		for _, id := range oldFields {
+			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: id}})
 		}
 	case av.LayoutTypeKanban:
 		if oldLayout == av.LayoutTypeList && view.Name == av.GetAttributeViewI18n("list") || view.Name == av.GetAttributeViewI18n("table") || view.Name == av.GetAttributeViewI18n("gallery") {
@@ -1619,15 +1593,8 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 		}
 
 		view.Kanban = av.NewLayoutKanban()
-		switch oldLayout {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, id := range oldFields {
-				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: id}})
-			}
-		case av.LayoutTypeGallery:
-			for _, field := range view.Gallery.CardFields {
-				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
-			}
+		for _, id := range oldFields {
+			view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: id}})
 		}
 
 		if !view.IsGroupView() {
@@ -1700,14 +1667,11 @@ func setAttrViewShowIcon(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-		view.GetTableLayout().ShowIcon = operation.Data.(bool)
-	case av.LayoutTypeGallery:
-		view.Gallery.ShowIcon = operation.Data.(bool)
-	case av.LayoutTypeKanban:
-		view.Kanban.ShowIcon = operation.Data.(bool)
+	base := view.GetBaseLayout()
+	if nil == base {
+		return
 	}
+	base.ShowIcon = operation.Data.(bool)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1732,14 +1696,11 @@ func setAttrViewFitImage(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.FitImage = operation.Data.(bool)
-	case av.LayoutTypeKanban:
-		view.Kanban.FitImage = operation.Data.(bool)
 	}
+	cards.FitImage = operation.Data.(bool)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1780,13 +1741,12 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	if cards := view.GetCardSettings(); nil != cards {
+		cards.DisplayFieldName = operation.Data.(bool)
+	} else if av.LayoutTypeCalendar == view.LayoutType {
+		view.Calendar.Settings.DisplayFieldName = operation.Data.(bool)
+	} else {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.DisplayFieldName = operation.Data.(bool)
-	case av.LayoutTypeKanban:
-		view.Kanban.DisplayFieldName = operation.Data.(bool)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1804,14 +1764,11 @@ func setAttrViewDisplayEmptyFields(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.DisplayEmptyFields = operation.Data.(bool)
-	case av.LayoutTypeKanban:
-		view.Kanban.DisplayEmptyFields = operation.Data.(bool)
 	}
+	cards.DisplayEmptyFields = operation.Data.(bool)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1828,14 +1785,10 @@ func setAttrViewFillColBackgroundColor(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	if av.LayoutTypeKanban != view.LayoutType || nil == view.Kanban {
 		return
-	case av.LayoutTypeGallery:
-		return
-	case av.LayoutTypeKanban:
-		view.Kanban.FillColBackgroundColor = operation.Data.(bool)
 	}
+	view.Kanban.FillColBackgroundColor = operation.Data.(bool)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1869,16 +1822,12 @@ func setAttrViewCardSize(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CardSize = size
-		view.Gallery.CardWidth = av.CardWidthBySize(size)
-	case av.LayoutTypeKanban:
-		view.Kanban.CardSize = size
-		view.Kanban.CardWidth = av.CardWidthBySize(size)
 	}
+	cards.CardSize = size
+	cards.CardWidth = av.CardWidthBySize(size)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1911,14 +1860,11 @@ func setAttrViewCardWidth(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CardWidth = width
-	case av.LayoutTypeKanban:
-		view.Kanban.CardWidth = width
 	}
+	cards.CardWidth = width
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -1950,14 +1896,11 @@ func setAttrViewCardLayout(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeGallery:
-		view.Gallery.CardLayout = layout
-	case av.LayoutTypeKanban:
-		view.Kanban.CardLayout = layout
-	default:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return av.ErrWrongLayoutType
 	}
+	cards.CardLayout = layout
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -2052,14 +1995,11 @@ func setAttrViewCoverFromAssetKeyID(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CoverFromAssetKeyID = operation.KeyID
-	case av.LayoutTypeKanban:
-		view.Kanban.CoverFromAssetKeyID = operation.KeyID
 	}
+	cards.CoverFromAssetKeyID = operation.KeyID
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -2084,14 +2024,11 @@ func setAttrViewCoverFrom(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	cards := view.GetCardSettings()
+	if nil == cards {
 		return
-	case av.LayoutTypeGallery:
-		view.Gallery.CoverFrom = av.CoverFrom(operation.Data.(float64))
-	case av.LayoutTypeKanban:
-		view.Kanban.CoverFrom = av.CoverFrom(operation.Data.(float64))
 	}
+	cards.CoverFrom = av.CoverFrom(operation.Data.(float64))
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -4275,15 +4212,8 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
 			if groupView.LayoutType == state.LayoutType && state.LayoutID != "" {
-				switch groupView.LayoutType {
-				case av.LayoutTypeTable:
-					groupView.Table.ID = state.LayoutID
-				case av.LayoutTypeList:
-					groupView.List.ID = state.LayoutID
-				case av.LayoutTypeGallery:
-					groupView.Gallery.ID = state.LayoutID
-				case av.LayoutTypeKanban:
-					groupView.Kanban.ID = state.LayoutID
+				if layout := groupView.GetBaseLayout(); nil != layout {
+					layout.ID = state.LayoutID
 				}
 			}
 
@@ -4327,23 +4257,12 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 	}
 }
 
+// attrViewGroupLayoutID 返回可分组的布局 ID，日历不参与分组。
 func attrViewGroupLayoutID(view *av.View) string {
 	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		if view.Table != nil {
-			return view.Table.ID
-		}
-	case av.LayoutTypeList:
-		if view.List != nil {
-			return view.List.ID
-		}
-	case av.LayoutTypeGallery:
-		if view.Gallery != nil {
-			return view.Gallery.ID
-		}
-	case av.LayoutTypeKanban:
-		if view.Kanban != nil {
-			return view.Kanban.ID
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeGallery, av.LayoutTypeKanban:
+		if layout := view.GetBaseLayout(); nil != layout {
+			return layout.ID
 		}
 	}
 	return ""
@@ -4655,6 +4574,9 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	if err := tx.prepareRelationSourceJournal(operation); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := updateAttributeViewColRelation(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -4718,8 +4640,6 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 				}
 			}
-
-			av.RemoveAvRel(srcAv.ID, srcRel.AvID)
 		}
 
 		var candidateFilters []*av.ViewFilter
@@ -4827,12 +4747,33 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	if !isSameAv {
 		regenAttrViewGroups(destAv)
 		err = av.SaveAttributeView(destAv)
+		if err != nil {
+			return
+		}
 		ReloadAttrView(destAv.ID)
 	}
 
-	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
+	if oldDestAvID != "" && oldDestAvID != destAv.ID {
+		stillRelated := false
+		for _, kv := range srcAv.KeyValues {
+			if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID == oldDestAvID {
+				stillRelated = true
+				break
+			}
+		}
+		if !stillRelated {
+			if err = av.RemoveAvRelWithErr(srcAv.ID, oldDestAvID); err != nil {
+				return
+			}
+		}
+	}
+	if err = av.UpsertAvBackRelWithErr(srcAv.ID, destAv.ID); err != nil {
+		return
+	}
 	if operation.IsTwoWay && !isSameAv {
-		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
+		if err = av.UpsertAvBackRelWithErr(destAv.ID, srcAv.ID); err != nil {
+			return
+		}
 	}
 	if "" != oldDestAvID && oldDestAvID != operation.ID && oldDestAvID != srcAv.ID {
 		ReloadAttrView(oldDestAvID)
@@ -5207,63 +5148,42 @@ func addAttrViewViewNamed(avID, viewID, blockID, name string, layout av.LayoutTy
 		layout = av.LayoutTypeTable
 	}
 
+	fieldIDs := attributeViewFieldIDs(firstView)
+	// 表格类布局之间复制字段时保留列宽和对齐，其他来源只带字段顺序。
+	var tableColumns []*av.ViewTableColumn
+	switch firstView.LayoutType {
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+		if table := firstView.GetTableLayout(); nil != table {
+			tableColumns = table.Columns
+		}
+	}
+
 	var view *av.View
 	switch layout {
 	case av.LayoutTypeCalendar:
 		view = av.NewCalendarView()
-		view.Calendar = newAttributeViewCalendarLayout(attrView, attributeViewFieldIDs(firstView))
+		view.Calendar = newAttributeViewCalendarLayout(attrView, fieldIDs)
 	case av.LayoutTypeList:
 		view = av.NewListView()
-		view.List = newAttributeViewListLayout(attrView, attributeViewFieldIDs(firstView))
+		view.List = newAttributeViewListLayout(attrView, fieldIDs)
 	case av.LayoutTypeTable:
 		view = av.NewTableView()
-		switch firstView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, col := range firstView.GetTableLayout().Columns {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
-					BaseField: &av.BaseField{ID: col.ID}, Width: col.Width, Align: col.Align,
-				})
+		for i, id := range fieldIDs {
+			column := &av.ViewTableColumn{BaseField: &av.BaseField{ID: id}}
+			if i < len(tableColumns) && nil != tableColumns[i] {
+				column.Width, column.Align = tableColumns[i].Width, tableColumns[i].Align
 			}
-		case av.LayoutTypeGallery:
-			for _, field := range firstView.Gallery.CardFields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
-			}
-		case av.LayoutTypeKanban:
-			for _, field := range firstView.Kanban.Fields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
-			}
+			view.Table.Columns = append(view.Table.Columns, column)
 		}
 	case av.LayoutTypeGallery:
 		view = av.NewGalleryView()
-		switch firstView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, col := range firstView.GetTableLayout().Columns {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: col.ID}})
-			}
-		case av.LayoutTypeGallery:
-			for _, field := range firstView.Gallery.CardFields {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
-			}
-		case av.LayoutTypeKanban:
-			for _, field := range firstView.Kanban.Fields {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
-			}
+		for _, id := range fieldIDs {
+			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: id}})
 		}
 	case av.LayoutTypeKanban:
 		view = av.NewKanbanView()
-		switch firstView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-			for _, col := range firstView.GetTableLayout().Columns {
-				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: col.ID}})
-			}
-		case av.LayoutTypeGallery:
-			for _, field := range firstView.Gallery.CardFields {
-				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
-			}
-		case av.LayoutTypeKanban:
-			for _, field := range firstView.Kanban.Fields {
-				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
-			}
+		for _, id := range fieldIDs {
+			view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: id}})
 		}
 	default:
 		err = av.ErrWrongLayoutType
@@ -5328,8 +5248,9 @@ func getKanbanPreferredGroupKey(attrView *av.AttributeView) (ret *av.Key) {
 	return
 }
 
-func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
-	var err error
+// setAttrViewViewField 读取视图并应用 apply 修改后保存，供视图名称、图标、描述的写入共用。
+// 视图不存在时按视图 ID 报错，不再沿用上层解析留下的 err，避免打印 "failed: <nil>"。
+func (tx *Transaction) setAttrViewViewField(operation *Operation, apply func(view *av.View)) (ret *TxErr) {
 	avID := operation.AvID
 	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
@@ -5340,11 +5261,11 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 	viewID := operation.ID
 	view := attrView.GetView(viewID)
 	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		logging.LogErrorf("attribute view [%s] has no view [%s]", avID, viewID)
 		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
 	}
 
-	view.Name = strings.TrimSpace(operation.Data.(string))
+	apply(view)
 	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
@@ -5352,28 +5273,16 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Name = strings.TrimSpace(operation.Data.(string))
+	})
+}
+
 func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := avParseView(avID, operation.BlockID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: avID}
-	}
-
-	viewID := operation.ID
-	view := attrView.GetView(viewID)
-	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
-	}
-
-	view.Icon = filterAttrViewIconValue(operation.Data.(string))
-	if err = avSaveView(attrView, operation.BlockID); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
-	}
-	return
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Icon = filterAttrViewIconValue(operation.Data.(string))
+	})
 }
 
 // filterAttrViewIconValue 过滤属性视图图标值，非法值置空，防止存储可执行标记
@@ -5386,27 +5295,9 @@ func filterAttrViewIconValue(icon string) string {
 }
 
 func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := avParseView(avID, operation.BlockID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: avID}
-	}
-
-	viewID := operation.ID
-	view := attrView.GetView(viewID)
-	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
-		return &TxErr{code: TxErrHandleAttributeView, id: viewID}
-	}
-
-	view.Desc = strings.TrimSpace(operation.Data.(string))
-	if err = avSaveView(attrView, operation.BlockID); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
-	}
-	return
+	return tx.setAttrViewViewField(operation, func(view *av.View) {
+		view.Desc = strings.TrimSpace(operation.Data.(string))
+	})
 }
 
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {

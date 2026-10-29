@@ -1,29 +1,28 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
-func TestParseLogin2faResult(t *testing.T) {
+// mustMarshal 把测试数据编码为 JSON，失败即终止用例。
+func mustMarshal(t *testing.T, value any) []byte {
+	t.Helper()
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return encoded
+}
+
+func TestParseLogin2faEnvelope(t *testing.T) {
 	tests := []struct {
 		name         string
 		result       map[string]any
@@ -56,21 +55,33 @@ func TestParseLogin2faResult(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, ok := parseLogin2faResult(test.result)
+			envelope, ok := parseLogin2faEnvelope(test.result)
 			if test.ok != ok {
 				t.Fatalf("unexpected parse status [expected=%t, actual=%t]", test.ok, ok)
 			}
 			if !test.ok {
-				if nil != result {
-					t.Fatalf("unexpected result [%+v]", result)
+				if nil != envelope {
+					t.Fatalf("unexpected envelope [%+v]", envelope)
 				}
 				return
 			}
-			if test.expectedCode != result.Code {
-				t.Fatalf("unexpected code [expected=%d, actual=%d]", test.expectedCode, result.Code)
+			if test.expectedCode != envelope.Code {
+				t.Fatalf("unexpected code [expected=%d, actual=%d]", test.expectedCode, envelope.Code)
 			}
-			if !reflect.DeepEqual(result.Data, test.result) {
-				t.Fatalf("response data was not preserved")
+			// 载荷必须原样保留云端结果的全部字段（含协议扩展字段），以便直接输出。
+			encoded, err := json.Marshal(envelope.Data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got, want map[string]any
+			if err = json.Unmarshal(encoded, &got); err != nil {
+				t.Fatal(err)
+			}
+			if err = json.Unmarshal(mustMarshal(t, test.result), &want); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(want, got) {
+				t.Fatalf("response data was not preserved: %s", encoded)
 			}
 		})
 	}

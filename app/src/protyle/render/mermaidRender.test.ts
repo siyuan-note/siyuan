@@ -22,7 +22,8 @@ test("Mermaid follows both theme directions and discards renders superseded by a
         set innerHTML(_value: string) { this.lastElementChild = {}; },
     };
     const block = {
-        firstElementChild: {clientWidth: 100, classList: {contains: () => true}, nextElementSibling: container},
+        firstElementChild: {classList: {contains: () => true}, nextElementSibling: container},
+        getClientRects: () => [{}],
         getAttribute: (name: string) => attributes.get(name),
         setAttribute: (name: string, value: string) => attributes.set(name, value),
         removeAttribute: (name: string) => attributes.delete(name),
@@ -54,6 +55,7 @@ test("Mermaid follows both theme directions and discards renders superseded by a
         },
         require: () => ({
             Constants: {PROTYLE_CDN: "", ZWSP: ""}, addScript: async () => {},
+            ensureBrowserCompatibility: async () => {},
             isFoldedRenderContent: () => false, isZenumlDiagram: () => false,
             getMermaidLayout: () => "", applyMermaidLayout: (value: string) => value,
             hasClosestByClassName: (): Element => null, getHostCapabilities: () => ({remoteKernel: false}),

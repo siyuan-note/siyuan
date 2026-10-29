@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-jvxb09n",
-				"updated": "20261015225720"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261015225720-x7zbbw0",
-				"updated": "20261015225720"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -62,7 +62,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "AI"
+					"TextMarkTextContent": "人工智能"
 				},
 				{
 					"Type": "NodeText",
@@ -368,7 +368,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-u8b0czt",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
@@ -383,12 +383,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920123707-h982ktj",
-				"updated": "20261007020517"
+				"updated": "20261023110951"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "智能体可以使用 TypeSafe System One（Jev）或 OpenAI Decisions API（Beta）完成分类、筛选和评分。配置和使用方式请参阅 "
+					"Data": "智能体可以使用 TypeSafe System One（Jev）或 OpenAI Decisions API 完成分类、筛选和评分。配置和使用方式请参阅 "
 				},
 				{
 					"Type": "NodeTextMark",

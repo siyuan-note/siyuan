@@ -72,6 +72,36 @@ const cases = async (moduleURL, runtimeURL, configSource, mobile) => {
     check.equal(sidebar.active, SidebarView.THUMBS, "a document without an outline falls back to thumbnails");
     check.equal(visible(), false);
     check.equal(button.disabled, true);
+    const nestedOutline = [{title: "Chapter", dest: [0], count: -1, items: [
+        {title: "Section", dest: [1], count: -1, items: [
+            {title: "Subsection", dest: [2], items: []},
+        ]},
+    ]}];
+    const destinations = [];
+    outlineViewer.linkService.goToDestination = dest => destinations.push(dest);
+    for (let render = 0; render < 2; render++) {
+        outlineViewer.render({outline: nestedOutline, pdfDocument: {loadingParams: {disableAutoFetch: false}}});
+        const togglers = [...content.querySelectorAll(".treeItemToggler")];
+        const [chapter, section] = togglers;
+        const children = chapter.parentNode.querySelector(".treeItems");
+        const click = (element, shiftKey = false) => element.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true, shiftKey}));
+        check.equal(children.checkVisibility(), false);
+        click(chapter.querySelector("svg"));
+        check.equal(children.checkVisibility(), true, "clicking the SVG expands the chapter");
+        check.ok(section.classList.contains("treeItemsHidden"), "a normal click preserves nested state");
+        click(chapter.querySelector("use"));
+        check.equal(children.checkVisibility(), false, "clicking the SVG use element collapses the chapter");
+        click(chapter);
+        check.equal(children.checkVisibility(), true, "clicking the surrounding button toggles exactly once after rendering");
+        click(chapter, true);
+        check.ok(togglers.every(el => el.classList.contains("treeItemsHidden")), "shift-click collapses the subtree");
+        click(chapter.querySelector("svg"), true);
+        check.ok(togglers.every(el => !el.classList.contains("treeItemsHidden")), "shift-click on the icon expands the subtree");
+        check.equal(destinations.length, render, "expanding the tree does not navigate");
+        click(chapter.parentNode.querySelector("a"));
+        check.deepEqual(destinations.at(-1), [0], "clicking the title still navigates");
+        check.ok(togglers.every(el => !el.classList.contains("treeItemsHidden")), "navigation preserves expanded items");
+    }
     return "PDF outline button cases passed";
 };
 

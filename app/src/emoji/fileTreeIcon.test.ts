@@ -133,4 +133,22 @@ describe("file tree icon", () => {
         refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
         assert.equal(iconElement.innerHTML, "🔒️");
     });
+
+    it("switches between bare emoji, images and SVG icons", () => {
+        const iconElement = {classList: {contains: (value: string) => value === "b3-list-item__icon"}, innerHTML: ""};
+        const liElement = {
+            children: [iconElement],
+            dataset: {} as Record<string, string>,
+        } as unknown as HTMLElement;
+        updateFileTreeItemIcon(liElement, "1f4c4", "file");
+        assert.equal(iconElement.innerHTML, "📄");
+        updateFileTreeItemIcon(liElement, "custom.png", "file");
+        assert.equal(iconElement.innerHTML, '<img class="" src="/emojis/custom.png"/>');
+        window.siyuan.config.fileTree.useSVGDefaultIcon = true;
+        updateFileTreeItemIcon(liElement, "", "file");
+        assert.equal(iconElement.innerHTML, '<svg><use xlink:href="#iconFile"></use></svg>');
+        window.siyuan.config.fileTree.useSVGDefaultIcon = false;
+        refreshDefaultFileTreeIcons({querySelectorAll: () => [liElement]} as unknown as ParentNode);
+        assert.equal(iconElement.innerHTML, "📄");
+    });
 });

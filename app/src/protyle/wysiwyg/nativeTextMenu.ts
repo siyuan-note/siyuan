@@ -1,12 +1,14 @@
 // 正文使用系统文字菜单，块控件和语义元素仍由各自的菜单处理。
 export const usesNativeTextMenu = (target: HTMLElement, editor: HTMLElement) => {
     const editable = target.closest('[contenteditable="true"]');
-    return !!editable && editor.contains(editable) && !target.closest(
-        "input, textarea, button, a, img, audio, video, iframe, [contenteditable='false']:not(.protyle-wysiwyg), " +
-        ".protyle-action, .protyle-attr, .table, .av, .protyle-custom, [data-prevent-swipe], " +
+    const excluded = target.closest(
+        "input, textarea, select, button, a, img, audio, video, iframe, [contenteditable='false']:not(.protyle-wysiwyg), " +
+        ".protyle-action, .protyle-attr, .av, .protyle-custom, [data-prevent-swipe], " +
         "[data-type~='block-ref'], [data-type~='virtual-block-ref'], [data-type~='file-annotation-ref'], " +
         "[data-type~='a'], [data-type~='tag'], [data-type~='inline-memo'], [data-type~='inline-math']",
     );
+    return !!editable && editable.closest(".protyle-wysiwyg") === editor &&
+        (!excluded || !editable.contains(excluded));
 };
 
 type NativeTextMenuState = {range: Range, timer?: number, requested?: boolean};
@@ -16,6 +18,37 @@ const nativeMenus = new WeakMap<HTMLElement, NativeTextMenuState>();
 const sameRange = (current: Range, saved: Range) => current && !current.collapsed &&
     current.startContainer === saved.startContainer && current.startOffset === saved.startOffset &&
     current.endContainer === saved.endContainer && current.endOffset === saved.endOffset;
+
+export const isNativeTextSelectionHandleTouch = (event: Event, editor: HTMLElement) => {
+    let point: {clientX: number, clientY: number};
+    if (event instanceof PointerEvent && event.pointerType === "touch") {
+        point = event;
+    } else if (event instanceof TouchEvent && event.touches.length === 1) {
+        point = event.touches[0];
+    } else {
+        return false;
+    }
+    if (event.target instanceof Element && event.target.closest(
+        ".protyle-table-control, .protyle-toolbar, .protyle-action, button, a, input, textarea, select")) {
+        return false;
+    }
+    const ownerDocument = editor.ownerDocument;
+    const selection = ownerDocument.getSelection();
+    const range = selection?.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    if (!editor.contains(ownerDocument.activeElement) || !range || range.collapsed ||
+        !editor.contains(range.startContainer) || !editor.contains(range.endContainer)) {
+        return false;
+    }
+    const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+    if (!rects.length) {
+        return false;
+    }
+    const first = rects[0];
+    const last = rects[rects.length - 1];
+    // 系统手柄位于选区端点外，触摸目标可能是内嵌编辑器之外的单元格留白。
+    return Math.hypot(point.clientX - first.left, point.clientY - first.top + 5) <= 20 ||
+        Math.hypot(point.clientX - last.right, point.clientY - last.bottom - 5) <= 20;
+};
 
 export const cancelNativeTextMenu = (editor: HTMLElement) => {
     const state = nativeMenus.get(editor);
@@ -39,10 +72,31 @@ export const bindNativeTextMenu = (editor: HTMLElement) => {
     const selectionChange = () => {
         const state = nativeMenus.get(editor);
         const selection = ownerDocument.getSelection();
-        if (state && (!editor.contains(ownerDocument.activeElement) || !selection?.rangeCount ||
-            !sameRange(selection.getRangeAt(0), state.range))) {
-            cancel();
+        if (!state) {
+            return;
         }
+        const range = selection?.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+        if (!editor.contains(ownerDocument.activeElement) || !range || range.collapsed ||
+            !editor.contains(range.startContainer) || !editor.contains(range.endContainer)) {
+            cancel();
+        } else if (!sameRange(range, state.range)) {
+            if (state.requested && state.timer === undefined) {
+                // 系统手柄扩选时沿用新选区，不在拖动过程中关闭文字菜单。
+                nativeMenus.set(editor, {range: range.cloneRange(), requested: true});
+            } else {
+                cancel();
+            }
+        }
+    };
+    const pointerDown = (event: Event) => {
+        const state = nativeMenus.get(editor);
+        const target = event.target;
+        if (state?.requested && state.timer === undefined &&
+            ((target instanceof Element && target.closest(".protyle-wysiwyg") === editor) ||
+                isNativeTextSelectionHandleTouch(event, editor))) {
+            return;
+        }
+        cancel();
     };
     const scroll = (event: Event) => {
         const target = event.target;
@@ -58,14 +112,16 @@ export const bindNativeTextMenu = (editor: HTMLElement) => {
     ownerDocument.addEventListener("selectionchange", selectionChange);
     ownerDocument.addEventListener("scroll", scroll, true);
     ownerDocument.addEventListener("focusout", focusOut, true);
-    const cancelEvents = ["pointerdown", "touchstart", "beforeinput"];
-    cancelEvents.forEach(type => ownerDocument.addEventListener(type, cancel, {capture: true, passive: true}));
+    const pointerEvents = ["pointerdown", "touchstart"];
+    pointerEvents.forEach(type => ownerDocument.addEventListener(type, pointerDown, {capture: true, passive: true}));
+    ownerDocument.addEventListener("beforeinput", cancel, true);
     return () => {
         cancel();
         ownerDocument.removeEventListener("selectionchange", selectionChange);
         ownerDocument.removeEventListener("scroll", scroll, true);
         ownerDocument.removeEventListener("focusout", focusOut, true);
-        cancelEvents.forEach(type => ownerDocument.removeEventListener(type, cancel, true));
+        pointerEvents.forEach(type => ownerDocument.removeEventListener(type, pointerDown, true));
+        ownerDocument.removeEventListener("beforeinput", cancel, true);
     };
 };
 

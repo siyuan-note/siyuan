@@ -401,6 +401,30 @@
   &__items {
     overflow: auto;
     padding: 0 8px;
+    max-height: var(--b3-menu-items-max-height, none);
+  }
+
+  // 由 markMenuInnerScroll() 标记的菜单：搜索框固定，滚动交给内层列表。
+  // items 不再作为滚动容器，让 popup() 按锚点位置写入的可用高度生效（filter 的 50vh 会提前截断它，
+  // 导致窗口还有余量也出现滚动条）；放不下时由内层列表滚动。
+  & > &__items--inner-scroll {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    // 全屏 sheet 中 items 由 flex 分配高度，需允许收缩到内容以下
+    min-height: 0;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .b3-menu__filter {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+    }
   }
 
   &__item {
@@ -569,6 +593,11 @@
     flex-shrink: 0;
     color: var(--b3-menu-icon-color);
     font-variant-emoji: emoji;
+
+    &--color {
+      border-radius: var(--b3-border-radius);
+      box-shadow: 0 0 0 1px var(--b3-list-hover) inset;
+    }
 
     &--custom {
       align-items: center;

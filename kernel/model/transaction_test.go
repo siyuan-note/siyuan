@@ -1,33 +1,89 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestTransactionTreeLoadErrors(t *testing.T) {
+	for _, action := range []string{"update", "move", "append", "prependInsert", "appendInsert", "insert", "delete", "doUpdateUpdated", "setAttrs", "largeInsert", "largeDelete"} {
+		t.Run(action, func(t *testing.T) {
+			fixture := setupStructureTransactionTest(t)
+			path := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+			corrupt := []byte(`{"Spec":`)
+			if err := os.WriteFile(path, corrupt, 0600); err != nil {
+				t.Fatal(err)
+			}
+			cache.RemoveTreeDataInBox(fixture.sourceID, fixture.box.ID)
+			tx := &Transaction{trees: map[string]*parse.Tree{}, luteEngine: util.NewLute()}
+			op := &Operation{ID: fixture.childID, ParentID: fixture.sourceID, Data: "<div>update</div>"}
+			var txErr *TxErr
+			switch action {
+			case "update":
+				txErr = tx.doUpdate(op)
+			case "move":
+				txErr = tx.doMove(op)
+			case "append":
+				txErr = tx.doAppend(op)
+			case "prependInsert":
+				txErr = tx.doPrependInsert(op)
+			case "appendInsert":
+				txErr = tx.doAppendInsert(op)
+			case "insert":
+				txErr = tx.doInsert(op)
+			case "delete":
+				txErr = tx.doDelete(op)
+			case "doUpdateUpdated":
+				txErr = tx.doUpdateUpdated(op)
+			case "setAttrs":
+				txErr = tx.doSetAttrs(op)
+			case "largeInsert":
+				op.ID = "20261020000000-new0001"
+				txErr = tx.doLargeInsert([]*Operation{op})
+			case "largeDelete":
+				for i := 0; i < 32; i++ {
+					tx.DoOperations = append(tx.DoOperations, &Operation{Action: "delete", ID: fixture.childID})
+				}
+				var handled bool
+				handled, txErr = tx.processLargeDelete()
+				if !handled {
+					t.Fatal("bulk delete did not run")
+				}
+			}
+			if txErr == nil || txErr.Code() != TxErrCodePushMsg || !strings.Contains(txErr.msg, "unexpected end of JSON input") || !strings.Contains(txErr.msg, "load tree [") {
+				t.Fatalf("parse failure lost its cause: %v", txErr)
+			}
+			retained, err := os.ReadFile(path)
+			if err != nil || string(retained) != string(corrupt) {
+				t.Fatalf("failed transaction changed source: %v", err)
+			}
+		})
+	}
+}
+
+func TestTransactionMissingBlockLoadError(t *testing.T) {
+	for _, cause := range []error{ErrBlockNotFound, fmt.Errorf("wrapped: %w", ErrBlockNotFound)} {
+		txErr := loadTreeTxErr("20261020000000-missing", cause)
+		if txErr.Code() != TxErrCodeBlockNotFound || !strings.Contains(txErr.msg, cause.Error()) {
+			t.Fatalf("missing block misclassified: %v", txErr)
+		}
+	}
+}
 
 func TestDoUpdateRejectsInvalidData(t *testing.T) {
 	tests := []any{nil, 1, ""}
@@ -124,7 +180,11 @@ func TestCreateOperationTreeNotExposedInJSON(t *testing.T) {
 }
 
 func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
-	tree := &parse.Tree{ID: "20260912000000-doc0001", Root: &ast.Node{Type: ast.NodeDocument}}
+	fixture := setupFileOperationTest(t)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	preservedTree := &parse.Tree{ID: "20260912000001-doc0002"}
 	newOperations := func() []*Operation {
 		return []*Operation{
@@ -135,6 +195,7 @@ func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
 		}
 	}
 	tx := &Transaction{
+		luteEngine:     util.NewLute(),
 		trees:          map[string]*parse.Tree{tree.ID: tree},
 		DoOperations:   newOperations(),
 		UndoOperations: newOperations(),
@@ -161,7 +222,7 @@ func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
 		if nil != err {
 			t.Fatal(err)
 		}
-		if strings.Contains(string(data), "doc000") {
+		if strings.Contains(string(data), tree.ID) || strings.Contains(string(data), preservedTree.ID) {
 			t.Fatalf("AST leaked into transaction JSON: %s", data)
 		}
 		return stop

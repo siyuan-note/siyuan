@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -22,36 +10,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var getNotebookInfo = contractHandler(apicontract.GetNotebookInfo, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.NotebookInfoData] {
-	ret := gulu.Ret.NewResult()
 	boxID := request.Notebook
-	if util.InvalidIDPattern(boxID, ret) {
-		return contractFailure[apicontract.NotebookInfoData](ret)
+	if err := util.ValidateID(boxID); err != nil {
+		return apicontract.FailureFrom[apicontract.NotebookInfoData](err)
 	}
 
 	box := model.Conf.Box(boxID)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "notebook [" + boxID + "] not found"
-		return contractFailure[apicontract.NotebookInfoData](ret)
+		return apicontract.Failure[apicontract.NotebookInfoData](-1, "notebook ["+boxID+"] not found")
 	}
 	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
-		ret.Code = -1
-		ret.Msg = "notebook [" + boxID + "] not found"
-		return contractFailure[apicontract.NotebookInfoData](ret)
+		return apicontract.Failure[apicontract.NotebookInfoData](-1, "notebook ["+boxID+"] not found")
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.NotebookInfoData](ret)
+		return apicontract.Failure[apicontract.NotebookInfoData](-1, model.Conf.Language(314))
 	}
 
 	var boxInfo *model.BoxInfo
@@ -65,30 +46,24 @@ var getNotebookInfo = contractHandler(apicontract.GetNotebookInfo, func(c *gin.C
 })
 
 var setNotebookIcon = contractHandler(apicontract.SetNotebookIcon, func(c *gin.Context, request apicontract.SetNotebookIconRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	boxID, icon := request.Notebook, request.Icon
 
-	if util.InvalidIDPattern(boxID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(boxID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 	}
 	model.SetBoxIcon(boxID, icon)
 	return apicontract.Success(apicontract.Null{})
 })
 
 var changeSortNotebook = contractHandler(apicontract.ChangeSortNotebook, func(c *gin.Context, request apicontract.ChangeSortNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	ids := request.Notebooks
 
 	for _, id := range ids {
 		if err := holdEncryptedBoxRequest(c, id); err != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			return contractFailure[apicontract.Null](ret)
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 		}
 	}
 	model.ChangeBoxSort(ids)
@@ -96,9 +71,8 @@ var changeSortNotebook = contractHandler(apicontract.ChangeSortNotebook, func(c 
 })
 
 var reorderNotebooks = contractHandler(apicontract.ReorderNotebooks, func(c *gin.Context, request apicontract.ReorderNotebooksRequest) apicontract.Response[*apicontract.ReorderData] {
-	ret := gulu.Ret.NewResult()
-	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
-		return contractFailure[*apicontract.ReorderData](ret)
+	if err := validateReorderRequest(request.SourceIDs, request.TargetID, request.Position); err != nil {
+		return apicontract.FailureFrom[*apicontract.ReorderData](err)
 	}
 
 	result, err := model.ReorderNotebooks(request.SourceIDs, request.TargetID, request.Position)
@@ -113,22 +87,17 @@ var reorderNotebooks = contractHandler(apicontract.ReorderNotebooks, func(c *gin
 })
 
 var renameNotebook = contractHandler(apicontract.RenameNotebook, func(c *gin.Context, request apicontract.RenameNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook, name := request.Notebook, request.Name
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 	}
 	err := model.RenameBox(notebook, name)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
 
 	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
@@ -141,24 +110,19 @@ var renameNotebook = contractHandler(apicontract.RenameNotebook, func(c *gin.Con
 })
 
 var removeNotebook = contractHandler(apicontract.RemoveNotebook, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	if util.ReadOnly && !model.IsUserGuide(notebook) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(34)
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(34), 5000)
 	}
 
 	err := model.RemoveBox(notebook)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
@@ -171,28 +135,21 @@ var removeNotebook = contractHandler(apicontract.RemoveNotebook, func(c *gin.Con
 })
 
 var createNotebook = contractHandler(apicontract.CreateNotebook, func(c *gin.Context, request apicontract.CreateNotebookRequest) apicontract.Response[apicontract.CreateNotebookData] {
-	ret := gulu.Ret.NewResult()
 	name := request.Name
 
 	id, err := model.CreateBox(name)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, err.Error())
 	}
 
 	existed, err := model.Mount(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, err.Error())
 	}
 
 	box := model.Conf.Box(id)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "opened notebook [" + id + "] not found"
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, "opened notebook ["+id+"] not found")
 	}
 
 	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
@@ -205,39 +162,30 @@ var createNotebook = contractHandler(apicontract.CreateNotebook, func(c *gin.Con
 })
 
 var openNotebook = contractHandler(apicontract.OpenNotebook, func(c *gin.Context, request apicontract.OpenNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	isUserGuide := model.IsUserGuide(notebook)
 	if util.ReadOnly && !isUserGuide {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(34)
-		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(34), 5000)
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 	}
 
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
 	existed, err := model.Mount(notebook)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	box := model.Conf.Box(notebook)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "opened notebook [" + notebook + "] not found"
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "opened notebook ["+notebook+"] not found")
 	}
 
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
@@ -275,75 +223,76 @@ var openNotebook = contractHandler(apicontract.OpenNotebook, func(c *gin.Context
 })
 
 var closeNotebook = contractHandler(apicontract.CloseNotebook, func(c *gin.Context, request apicontract.CloseNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	model.Unmount(notebook)
 	return apicontract.Success(apicontract.Null{})
 })
 
 var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.Context, request apicontract.CloseNotebookRequest) apicontract.Response[apicontract.NotebookConfData] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.NotebookConfData](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.NotebookConfData](err)
 	}
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "notebook [" + notebook + "] not found"
-		return contractFailure[apicontract.NotebookConfData](ret)
+		return apicontract.Failure[apicontract.NotebookConfData](-1, "notebook ["+notebook+"] not found")
 	}
 	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
-		ret.Code = -1
-		ret.Msg = "notebook [" + notebook + "] not found"
-		return contractFailure[apicontract.NotebookConfData](ret)
+		return apicontract.Failure[apicontract.NotebookConfData](-1, "notebook ["+notebook+"] not found")
 	}
 	if model.IsBoxUnlocked(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			return contractFailure[apicontract.NotebookConfData](ret)
+			return apicontract.Failure[apicontract.NotebookConfData](-1, model.Conf.Language(314))
 		}
 	}
 
 	boxConf := box.GetConf()
+	var capabilities *apicontract.DocumentCapabilities
 	if !model.IsAdminRoleContext(c) {
 		model.HideBoxConfSecret(boxConf)
+	} else {
+		snapshot, err := documentaddressing.InspectBox(notebook)
+		if err != nil {
+			return apicontract.Failure[apicontract.NotebookConfData](-1, err.Error())
+		}
+		indexState := treenode.DocumentMetadataState(notebook)
+		capabilities = &apicontract.DocumentCapabilities{StructuredPaths: true,
+			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain"},
+			IndexState: indexState, Revision: snapshot.Revision}
 	}
 
-	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name, Conf: notebookConfContract(boxConf)})
+	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name,
+		Conf: notebookConfContract(boxConf), DocumentCapabilities: capabilities})
 })
 
 var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.Context, request apicontract.SetNotebookConfRequest) apicontract.Response[*apicontract.NotebookConf] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[*apicontract.NotebookConf](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[*apicontract.NotebookConf](err)
 	}
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "notebook [" + notebook + "] not found"
-		return contractFailure[*apicontract.NotebookConf](ret)
+		return apicontract.Failure[*apicontract.NotebookConf](-1, "notebook ["+notebook+"] not found")
 	}
 	if model.IsBoxUnlocked(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			return contractFailure[*apicontract.NotebookConf](ret)
+			return apicontract.Failure[*apicontract.NotebookConf](-1, model.Conf.Language(314))
 		}
 	}
 
 	boxConf := box.GetConf()
 	oldSortMode := boxConf.SortMode
+	if err := applyNotebookDocumentTargetPatch(notebook, boxConf, request.Conf); err != nil {
+		return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())
+	}
 	applyNotebookConfPatch(boxConf, request.Conf)
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
@@ -358,17 +307,13 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 		}
 	}
 	if "/" == boxConf.DailyNoteSavePath {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(49)
-		return contractFailure[*apicontract.NotebookConf](ret)
+		return apicontract.Failure[*apicontract.NotebookConf](-1, model.Conf.Language(49))
 	}
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
 
 	if err := box.SaveConfAndSync(boxConf); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[*apicontract.NotebookConf](ret)
+		return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())
 	}
 	if oldSortMode != boxConf.SortMode {
 		model.PushDocSortModeChanged("notebook", notebook, "", "/", &boxConf.SortMode)
@@ -377,7 +322,6 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 })
 
 var lsNotebooks = contractHandler(apicontract.ListNotebooks, func(c *gin.Context, request apicontract.ListNotebooksRequest) apicontract.Response[*apicontract.ListNotebooksData] {
-	ret := gulu.Ret.NewResult()
 
 	flashcard := request.Flashcard
 
@@ -392,9 +336,7 @@ var lsNotebooks = contractHandler(apicontract.ListNotebooks, func(c *gin.Context
 				continue
 			}
 			if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-				ret.Code = -1
-				ret.Msg = model.Conf.Language(314)
-				return contractFailure[*apicontract.ListNotebooksData](ret)
+				return apicontract.Failure[*apicontract.ListNotebooksData](-1, model.Conf.Language(314))
 			}
 		}
 		var err error
@@ -467,24 +409,18 @@ func isNotebookVisibleByPublishAccess(notebook *model.Box, publishAccess model.P
 
 // enableEncryptedNotebooks 先同步数据，再恢复既有配置或启用加密笔记本并设置主密码。
 var enableEncryptedNotebooks = contractHandler(apicontract.EnableEncryptedNotebooks, func(c *gin.Context, request apicontract.NotebookPasswordRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	password := request.Password
 
 	if err := model.EnableEncryptedNotebookWithSync(password); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.Null{})
 })
 
 // disableEncryptedNotebooks 关闭加密笔记本功能。前置：没有加密笔记本存在。
 var disableEncryptedNotebooks = contractHandler(apicontract.DisableEncryptedNotebooks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	if err := model.DisableEncryptedNotebook(); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.Null{})
 })
@@ -492,19 +428,14 @@ var disableEncryptedNotebooks = contractHandler(apicontract.DisableEncryptedNote
 // createEncryptedNotebook 创建一个新的加密笔记本。前置：加密功能已启用。
 // 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建成功后内核已原子完成挂载。
 var createEncryptedNotebook = contractHandler(apicontract.CreateEncryptedNotebook, func(c *gin.Context, request apicontract.CreateEncryptedNotebookRequest) apicontract.Response[apicontract.CreateNotebookData] {
-	ret := gulu.Ret.NewResult()
 	name, password := request.Name, request.Password
 
 	id, err := model.CreateEncryptedBox(name, password)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, err.Error())
 	}
 	if err = holdEncryptedBoxRequest(c, id); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, model.Conf.Language(314))
 	}
 
 	// 创建时 DEK 已缓存 + 加密 db 已打开，此处直接挂载；失败则锁定回滚，避免 DEK 残留
@@ -512,9 +443,7 @@ var createEncryptedNotebook = contractHandler(apicontract.CreateEncryptedNoteboo
 	if err != nil {
 		releaseEncryptedBoxRequest(c, id)
 		model.LockBox(id)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.CreateNotebookData](ret)
+		return apicontract.Failure[apicontract.CreateNotebookData](-1, err.Error())
 	}
 
 	box := model.Conf.Box(id)
@@ -531,80 +460,60 @@ var createEncryptedNotebook = contractHandler(apicontract.CreateEncryptedNoteboo
 // unlockNotebook 用主密码派生 KEK 并解出指定加密笔记本的 DEK，缓存到内存。
 // 解锁后该笔记本即可被 Mount。每次调用跑一次 Argon2id（约 1 秒）。
 var unlockNotebook = contractHandler(apicontract.UnlockNotebook, func(c *gin.Context, request apicontract.UnlockNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook, password := request.Notebook, request.Password
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	boxCrypt, err := model.GetBoxEncryption(notebook)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(318)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(318))
 	}
 	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(319)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(319))
 	}
 
 	if err := model.UnlockBox(notebook, password, boxCrypt); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 	}
 	return apicontract.Success(apicontract.Null{})
 })
 
 // unlockAndOpenNotebook 原子化解锁并挂载加密笔记本，挂载失败时由模型层在同一转换锁内回滚本次解锁。
 var unlockAndOpenNotebook = contractHandler(apicontract.UnlockAndOpenNotebook, func(c *gin.Context, request apicontract.UnlockNotebookRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook, password := request.Notebook, request.Password
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	boxCrypt, err := model.GetBoxEncryption(notebook)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(318)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(318))
 	}
 	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(319)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(319))
 	}
 
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
 	existed, err := model.UnlockAndMountBox(notebook, password, boxCrypt)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
 	}
 
 	box := model.Conf.Box(notebook)
 	if nil == box {
 		releaseEncryptedBoxRequest(c, notebook)
 		model.LockBox(notebook)
-		ret.Code = -1
-		ret.Msg = "opened notebook [" + notebook + "] not found"
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, "opened notebook ["+notebook+"] not found")
 	}
 
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
@@ -618,17 +527,14 @@ var unlockAndOpenNotebook = contractHandler(apicontract.UnlockAndOpenNotebook, f
 
 // lockNotebook 锁定指定加密笔记本：清除其 DEK 缓存并 Unmount。
 var lockNotebook = contractHandler(apicontract.LockNotebook, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	notebook := request.Notebook
 
-	if util.InvalidIDPattern(notebook, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(notebook); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 
 	if !model.IsEncryptedBox(notebook) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(319)
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(319))
 	}
 
 	// Unmount 内部的 unmount0 会清 DEK + 关闭加密 db，无需单独 LockBox。
@@ -658,13 +564,10 @@ var touchEncryptedNotebooks = contractHandler(apicontract.TouchEncryptedNotebook
 // 用旧密码校验后，用新密码派生新 KEK，重新加密 verifier 和所有加密笔记本的 WrappedDEK。
 // 必须在所有加密笔记本都已锁定（DEK 不在内存）的状态下调用。
 var changeMasterPassword = contractHandler(apicontract.ChangeMasterPassword, func(c *gin.Context, request apicontract.ChangeMasterPasswordRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	oldPassword, newPassword := request.OldPassword, request.NewPassword
 
 	if err := model.ChangeMasterPassword(oldPassword, newPassword); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.Null{})
 })
@@ -699,12 +602,9 @@ var getEncryptedNotebookStatus = contractHandler(apicontract.GetEncryptedNoteboo
 // exportNotebookCryptoBackup 导出密钥备份文件到 export 目录供下载。
 // 备份文件不含主密码（salt 不保密、verifier 是密文），用户主动保存作为同步之外的独立恢复途径。
 var exportNotebookCryptoBackup = contractHandler(apicontract.ExportNotebookCryptoBackup, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.NotebookCryptoBackupData] {
-	ret := gulu.Ret.NewResult()
 	downloadPath, err := model.ExportNotebookCryptoBackup()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.NotebookCryptoBackupData](ret)
+		return apicontract.Failure[apicontract.NotebookCryptoBackupData](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.NotebookCryptoBackupData{File: downloadPath})
 })
@@ -712,26 +612,19 @@ var exportNotebookCryptoBackup = contractHandler(apicontract.ExportNotebookCrypt
 // importNotebookCryptoBackup 导入密钥备份文件，恢复加密配置。
 // 用于新设备、重装或 RecoveryRequired 状态下手动恢复；完整且已启用的配置拒绝覆盖。
 var importNotebookCryptoBackup = contractHandler(apicontract.ImportNotebookCryptoBackup, func(c *gin.Context, request apicontract.ImportNotebookCryptoBackupRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
 	fh := request.File
 	f, err := fh.Open()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	defer f.Close()
 	data, err := io.ReadAll(f)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	password := request.Password
 	if err := model.ImportNotebookCryptoBackup(data, password); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return apicontract.Success(apicontract.Null{})
 })

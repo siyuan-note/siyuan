@@ -5,8 +5,12 @@ import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMin
 import type {ListMindmapSummary} from "./summary";
 import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
 import type {ListMindmapConnectorStyle} from "./connectors";
+import {isListMindmapAppearance} from "./appearance";
+import type {ListMindmapAppearance} from "./appearance";
 
 export interface ListMindmapNodeStyle {
+    width?: number;
+    branchColor?: number;
     textColor?: string;
     backgroundColor?: string;
     borderColor?: string;
@@ -39,6 +43,7 @@ export interface ListMindmapMetadata {
     rootTitle?: string;
     viewLocked?: boolean;
     connectorStyle?: ListMindmapConnectorStyle;
+    appearance?: ListMindmapAppearance;
     nodes: Record<string, ListMindmapNodeStyle>;
     relations: ListMindmapRelation[];
     summaries?: ListMindmapSummary[];
@@ -111,10 +116,14 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
     if ("connectorStyle" in data && !LIST_MINDMAP_CONNECTOR_STYLES.some(style => style === data.connectorStyle)) {
         throw invalidMetadata();
     }
-    const numberKeys = ["fontSize", "borderWidth", "borderRadius", "lineWidth"];
+    const numberKeys = ["width", "fontSize", "borderWidth", "borderRadius", "lineWidth"];
+    if ("appearance" in data && !isListMindmapAppearance(data.appearance)) {
+        throw invalidMetadata();
+    }
     const booleanKeys = ["bold", "italic", "lineDash"];
     for (const [id, style] of Object.entries(data.nodes)) {
         if (!id || !isRecord(style) ||
+            ("branchColor" in style && (!Number.isSafeInteger(style.branchColor) || Number(style.branchColor) < 0)) ||
             stringKeys.some(key => key in style && typeof style[key] !== "string") ||
             numberKeys.some(key => key in style && (typeof style[key] !== "number" ||
                 !Number.isFinite(style[key]) || Number(style[key]) < 0)) ||

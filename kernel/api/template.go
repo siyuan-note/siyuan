@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -47,10 +35,9 @@ var docSaveAsTemplate = contractHandler(apicontract.DocSaveAsTemplate, func(c *g
 })
 
 var getDocSaveAsTemplateInfo = contractHandler(apicontract.GetDocSaveAsTemplateInfo, func(c *gin.Context, request apicontract.TemplateDocumentRequest) apicontract.Response[apicontract.TemplateDocumentInfo] {
-	ret := gulu.Ret.NewResult()
 	id := request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.TemplateDocumentInfo](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.TemplateDocumentInfo](err)
 	}
 	info, err := model.GetDocSaveAsTemplateInfo(id)
 	if nil != err {
@@ -60,23 +47,18 @@ var getDocSaveAsTemplateInfo = contractHandler(apicontract.GetDocSaveAsTemplateI
 })
 
 var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Context, request apicontract.RenderTemplateRequest) apicontract.Response[apicontract.RenderTemplateData] {
-	ret := gulu.Ret.NewResult()
 	p, id := request.Path, request.ID
-	if util.InvalidIDPattern(id, ret) {
-		return contractFailure[apicontract.RenderTemplateData](ret)
+	if err := util.ValidateID(id); err != nil {
+		return apicontract.FailureFrom[apicontract.RenderTemplateData](err)
 	}
 
 	if !util.IsAbsPathInWorkspace(p) {
-		ret.Code = -1
-		ret.Msg = "Path [" + p + "] is not in workspace"
-		return contractFailure[apicontract.RenderTemplateData](ret)
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, "Path ["+p+"] is not in workspace")
 	}
 
 	// 模板路径必须限定在 <data>/templates/ 目录内，防止通过工作空间内任意路径读取敏感文件（如 conf/conf.json）
 	if !isPathInTemplatesDir(p) {
-		ret.Code = -1
-		ret.Msg = "Path [" + p + "] is not in templates directory"
-		return contractFailure[apicontract.RenderTemplateData](ret)
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, "Path ["+p+"] is not in templates directory")
 	}
 
 	modeValue, modeErr := request.RenderMode()
@@ -98,9 +80,7 @@ var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Con
 		_, content, docTreePlan, err = model.RenderTemplateWithMode(p, id, mode)
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = util.EscapeHTML(err.Error())
-		return contractFailure[apicontract.RenderTemplateData](ret)
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, util.EscapeHTML(err.Error()))
 	}
 
 	data := apicontract.RenderTemplateData{Path: p, Content: content}

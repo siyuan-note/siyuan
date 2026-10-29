@@ -22,7 +22,7 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         timeout: 30, pathStyle: true, skipTlsVerify: false, concurrentReqs: 4};
     const webdav = {endpoint: "dav.example.com", username: "user", password: "password", timeout: 30, skipTlsVerify: false, concurrentReqs: 4};
     const local = {endpoint: "/cloud", timeout: 30, concurrentReqs: 4};
-    const sync = {provider, enabled: true, s3, webdav, local};
+    const sync = {provider, enabled: true, s3, webdav, local, cloudName: "main"};
     const config = {sync, readonly: false, system: {container: "std"}};
     const template = provider === 2 ? s3 : provider === 3 ? webdav : local;
     const events: Record<string, (event: unknown) => void> = {};
@@ -326,6 +326,33 @@ test("test connection reports success and clears the result when the draft chang
     ui.input();
     assert.equal(ui.status.textContent, "");
 });
+
+for (const mobile of [false,true]) {
+    for (const provider of [3,4]) {
+        test(`WebDAV and local probes use their draft without saving (provider=${provider}, mobile=${mobile})`, async () => {
+            const ui = setup(provider,mobile);
+            const configKey = provider === 3 ? "webdav" : "local";
+            const endpoint = ui.sync[configKey].endpoint;
+            assert.match(ui.options().content,/data-action="test"/);
+            ui.inputs.endpoint.value = "draft-endpoint";
+            ui.sync.provider = 2;
+            ui.sync.cloudName = "changed";
+            ui.click("test");
+            await settle();
+            assert.equal(ui.requests.length,1);
+            assert.equal(ui.requests[0].url, provider === 3 ? "/api/sync/testSyncProviderWebDAV" : "/api/sync/testSyncProviderLocal");
+            assert.equal(ui.requests[0].data[configKey].endpoint,"draft-endpoint");
+            if (provider === 3) assert.equal(ui.requests[0].data.cloudName,"main");
+            assert.equal(ui.sync[configKey].endpoint,endpoint);
+            assert.equal(ui.buttons.save.disabled,true);
+            ui.requests[0].resolve({code:0,data:{kind:"ok",msg:""}});
+            await settle();
+            assert.equal(ui.status.textContent,"Connection successful");
+            assert.equal(ui.buttons.save.disabled,false);
+            assert.equal(ui.closed(),0);
+        });
+    }
+}
 
 test("test connection waits for kernel rules before validating the draft", async () => {
     const ui = setup(2, false, true);

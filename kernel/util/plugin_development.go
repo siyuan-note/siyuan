@@ -1,6 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-// Licensed under the GNU Affero General Public License, version 3 or later.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package util
 
@@ -157,7 +157,9 @@ func IsPluginDevelopmentRawPathForbidden(abs string, ancestors bool) bool {
 				return true
 			}
 		}
-		for _, root := range []string{PluginProjectsDir(), filepath.Join(ConfDir, "plugin-development")} {
+		// 解压后的包仍属于已核验归档的私有快照，禁止原始文件入口读写及移动其祖先目录。
+		for _, root := range []string{PluginProjectsDir(), filepath.Join(ConfDir, "plugin-development"),
+			filepath.Join(TempDir, "bazaar", "local"), filepath.Join(TempDir, "bazaar", "package")} {
 			if pluginDevelopmentContains(root, candidate) || ancestors && pluginDevelopmentContains(candidate, root) {
 				return true
 			}

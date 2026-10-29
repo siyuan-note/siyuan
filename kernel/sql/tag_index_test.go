@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package sql
 
 import (
@@ -70,7 +74,7 @@ func TestTagSpanIndexPreservesQueries(t *testing.T) {
 			t.Fatalf("%s: unexpected query results: %v", setting, after)
 		}
 		for _, suffix := range []string{"", " AND path = '/one.sy'", " AND content = '' GROUP BY block_id", " AND content != '' GROUP BY markdown LIMIT 16"} {
-			plan := queryPlanDetails(t, database, "SELECT * FROM spans WHERE "+tagSpanPredicate+suffix)
+			plan := queryPlanDetails(t, database, "SELECT "+spanSelectColumns+" FROM spans WHERE "+tagSpanPredicate+suffix)
 			if !strings.Contains(plan, "idx_spans_tag_path") {
 				t.Fatalf("tag query does not use partial index: %s", plan)
 			}

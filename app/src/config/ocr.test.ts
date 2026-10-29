@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 import type {OCRThresholds, SettingOCR} from "../types/api";
 import {getReasoningEffortOptions} from "../ai/reasoningEffort";
 import type {SettingBuilder} from "./setting/builder";
@@ -197,17 +198,13 @@ const createOCRPanel = async (initial?: {config?: Partial<SettingOCR>}) => {
     })});
     const close = exports.mountOCRSettings(root);
     await new Promise(setImmediate);
-    const searchRuntime = {} as {
+    const searchRuntime = loadModule<{
         applySettingTabSearchVisibility: typeof applySettingTabSearchVisibility;
         clearSettingTabSearch: typeof clearSettingTabSearch;
-    };
-    runInNewContext(transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports: searchRuntime, require: () => ({syncSettingGroupCollapse() {}})});
-    const builderRuntime = {} as {SettingBuilder: typeof SettingBuilder};
-    runInNewContext(transpileModule(readFileSync("src/config/setting/builder.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports: builderRuntime, require: (name: string) => name === "./mount" ? searchRuntime : {}});
+    }>("src/config/setting/mount.ts", {require: () => ({})}, ScriptTarget.ES2021);
+    const builderRuntime = loadModule<{SettingBuilder: typeof SettingBuilder}>("src/config/setting/builder.ts", {
+        require: (name: string) => name === "./mount" ? searchRuntime : {},
+    }, ScriptTarget.ES2021);
     const tab = new builderRuntime.SettingBuilder().tab({
         id: "ocr", icon: "iconOCR", title: () => "OCR", onShow: exports.updateOCRTabBorders,
     }, () => {});

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -71,7 +75,8 @@ func fileTreeSearchContracts(values []map[string]string) []*apicontract.FileTree
 		}
 		result[i] = &apicontract.FileTreeSearchDoc{
 			Path: value["path"], HPath: value["hPath"], Box: value["box"], BoxIcon: value["boxIcon"],
-			Name: optional("name"), Alias: optional("alias"), NewFlashcardCount: optional("newFlashcardCount"),
+			Title: optional("title"),
+			Name:  optional("name"), Alias: optional("alias"), NewFlashcardCount: optional("newFlashcardCount"),
 			DueFlashcardCount: optional("dueFlashcardCount"), FlashcardCount: optional("flashcardCount"),
 		}
 	}

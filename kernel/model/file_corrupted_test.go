@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -79,5 +83,60 @@ func TestDocIALReadFailureDoesNotMoveData(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(err) {
 		t.Fatalf("read failure created a corruption backup: %v", err)
+	}
+}
+
+func TestCorruptedBackupsPreserveSameNamedFiles(t *testing.T) {
+	previousWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = previousWorkspace })
+	box := &Box{ID: "20261026000000-box0001"}
+	sources := t.TempDir()
+	want := map[string]bool{"first original": true, "second original": true, "recreated original": true}
+	for i, content := range []string{"first original", "second original", "recreated original"} {
+		dir := filepath.Join(sources, "a")
+		if i == 1 {
+			dir = filepath.Join(sources, "b")
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		source := filepath.Join(dir, "invalid.sy")
+		if err := os.WriteFile(source, []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
+		box.moveCorruptedData(source)
+		if _, err := os.Stat(source); !os.IsNotExist(err) {
+			t.Fatalf("backed-up source was not removed: %v", err)
+		}
+	}
+	backups, err := filepath.Glob(filepath.Join(util.WorkspaceDir, "corrupted", "*", box.ID, "invalid.sy"))
+	if err != nil || len(backups) != len(want) {
+		t.Fatalf("expected independent backups: %v, %v", backups, err)
+	}
+	for _, backup := range backups {
+		data, err := os.ReadFile(backup)
+		if err != nil || !want[string(data)] {
+			t.Fatalf("lost or overwritten recovery bytes: %q, %v", data, err)
+		}
+		delete(want, string(data))
+	}
+}
+
+func TestCorruptedBackupFailureKeepsSource(t *testing.T) {
+	previousWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = previousWorkspace })
+	if err := os.WriteFile(filepath.Join(util.WorkspaceDir, "corrupted"), []byte("blocked"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(t.TempDir(), "invalid.sy")
+	const original = "original bytes"
+	if err := os.WriteFile(source, []byte(original), 0600); err != nil {
+		t.Fatal(err)
+	}
+	(&Box{ID: "20261026000000-box0001"}).moveCorruptedData(source)
+	if data, err := os.ReadFile(source); err != nil || string(data) != original {
+		t.Fatalf("failed quarantine changed its source: %q, %v", data, err)
 	}
 }

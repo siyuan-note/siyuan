@@ -1,24 +1,11 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package treenode
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -32,10 +19,16 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
+	return NodeHashWithHeadingParent(node, tree, luteEngine, HeadingParent(node))
+}
+
+// NodeHashWithHeadingParent 复用本次投影已解析的语义父级，避免重复查找前面的标题。
+func NodeHashWithHeadingParent(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute, headingParent *ast.Node) string {
 	var ialArray [][]string
 	if 0 < len(node.KramdownIAL) {
 		ialArray = make([][]string, len(node.KramdownIAL))
@@ -55,8 +48,8 @@ func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
 	if nil != node.Parent {
 		parentID = node.Parent.ID
 	}
-	if h := HeadingParent(node); nil != h {
-		parentID = h.ID
+	if headingParent != nil {
+		parentID = headingParent.ID
 	}
 	data += parentID
 	return fmt.Sprintf("%x", sha256.Sum256(gulu.Str.ToBytes(data)))[:7]
@@ -147,25 +140,24 @@ func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
 
 const BaseSpec = "2"
 
-var CurrentSpec = "5"
+const DocumentTitleSpec = "6"
+
+var CurrentSpec = DocumentTitleSpec
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
-// CheckSpecJSON 在解析节点之前检查文档规范，避免未知节点被容错解析后覆盖原始内容。
+// CheckSpecJSON 按当前发行版能力校验独立源（如导入和历史），不能代替授权与认证预检。
+// 在解析节点之前检查，避免未知节点被容错解析后覆盖原始内容。
 func CheckSpecJSON(data []byte) error {
-	var root struct {
-		Spec string
-	}
-	if err := json.Unmarshal(data, &root); nil != err {
+	spec, err := checkDocumentSourceJSON(data)
+	if err != nil {
 		return err
 	}
-	if err := CheckSpec(&parse.Tree{Root: &ast.Node{Spec: root.Spec}}); nil != err {
-		return err
-	}
-	return checkDocumentSpecJSON(data, root.Spec)
+	return checkDocumentSpecJSON(data, spec)
 }
 
 func CheckSpec(tree *parse.Tree) (err error) {
+	err = nil
 	if err = ValidateTableCellRich(tree.Root); nil != err {
 		return
 	}
@@ -220,6 +212,10 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 			}
 			return ast.WalkContinue
 		})
+	}
+	if documentTitleSpecUpgradeRequired(tree.Root.Spec) &&
+		documentaddressing.TitleRequiresSpec(tree.Root.IALAttr("title")) {
+		tree.Root.Spec = DocumentTitleSpec
 	}
 	return oldSpec != tree.Root.Spec
 }

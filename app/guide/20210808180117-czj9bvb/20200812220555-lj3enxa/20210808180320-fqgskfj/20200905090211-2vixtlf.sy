@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20261017174053"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -1507,7 +1507,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20261017174053"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1595,7 +1595,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-zdi6qkg",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1646,7 +1646,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240513100725-fefiba9",
-				"updated": "20260803163440"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1660,7 +1660,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1669,7 +1669,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1678,7 +1678,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 后，整体的标题层级在导出时才符合正常逻辑。"
+					"Data": " 后，整体的标题层级在导出时才符合正常逻辑。"
 				}
 			]
 		},
@@ -1782,7 +1782,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20261017174053"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1969,12 +1969,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260222161831-2ijwkjg",
-				"updated": "20260222162357"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果表格包含合并的单元格或标题，则会以 HTML 形式复制或导出为 Markdown。"
+					"Data": "表格包含合并单元格或多行表头时，复制和导出的 Markdown 会使用 HTML 表格保留结构。"
 				}
 			]
 		},
@@ -2066,7 +2066,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115141-c7omuyq",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -2113,7 +2113,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427230507-yeaxqbs",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -2125,7 +2125,7 @@
 					},
 					"Properties": {
 						"id": "20240427230507-x75u8vb",
-						"updated": "20260803171606"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -2133,7 +2133,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230507-i73h3ru",
-								"updated": "20260803171606"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -2163,7 +2163,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2172,7 +2172,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2181,7 +2181,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，但请确认代码安全后再开启，以免遭遇跨站脚本攻击（XSS）"
+									"Data": "，但请确认代码安全后再开启，以免遭遇跨站脚本攻击（XSS）"
 								}
 							]
 						}
@@ -3380,7 +3380,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-5abfwla",
-				"updated": "20260425180524"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3410,6 +3410,102 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-3dui2fu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-3dui2fu",
+				"updated": "20261023133001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档标题默认允许包含半角斜杠 /，无需设置开关。例如，A/B 可以是一篇文档的标题，与 A 下的子文档 B 不同。已有标题和文档链接保持不变，／ 和 %2F 仍按原文字面显示。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-qkbgw0v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-qkbgw0v",
+				"updated": "20261023112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "显示路径用于阅读；需要定位某篇文档时，请使用文档链接或块引用。依赖拆分标题路径定位文档的插件需要适配结构化寻址。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-q33vi92",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-q33vi92",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用新版打开工作空间前，请先退出所有设备上的旧版思源，并将访问同一工作空间或同步其数据的所有设备统一升级到支持新版标题格式的版本，同时确认插件兼容。全部设备升级完成前，请勿打开工作空间或恢复同步；暂时离线的设备也必须先升级，再访问或同步这些数据。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-m3x0226",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-m3x0226",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "迁移自动完成，中断后会继续恢复。升级后，请勿再用旧版本打开、编辑、恢复或同步同一数据。旧版本可能拒绝打开采用新版标题格式（Spec 6）的文档，但仍可能读写保留旧格式的文档，也可能将已打开页面中的旧编辑缓存写回，覆盖新标题或内容，并通过同步传播到其他设备。不能因为部分文档无法打开，就认为数据已受到保护。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163013-5ujjlqb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-5ujjlqb",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定义块"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163013-obic6od",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163013-obic6od",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件可提供自定义内容块的显示和交互。使用时需安装并启用对应的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506210010-houyyvy",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "插件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "；插件不可用或当前环境不支持其渲染时，会显示保存的原始内容。停用插件不会自动删除这些内容。"
 				}
 			]
 		},

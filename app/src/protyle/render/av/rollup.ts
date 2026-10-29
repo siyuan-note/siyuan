@@ -1,4 +1,5 @@
 import {Menu} from "../../../plugin/Menu";
+import {markMenuInnerScroll} from "../../../menus/Menu";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
@@ -144,7 +145,7 @@ export const goSearchRollupCol = (options: {
     <input spellcheck="false" class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
-        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+        <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>
 </div>`,
         bind(element) {
@@ -188,7 +189,7 @@ export const goSearchRollupCol = (options: {
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+    markMenuInnerScroll(menu.element);
 };
 
 export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[], colData?: IAVColumn }) => {

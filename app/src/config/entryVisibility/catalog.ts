@@ -450,8 +450,13 @@ const gutterSingle = () => [
     node("blockEmbed", lang("blockEmbed"), true, [
         node("refresh", lang("refresh")),
         node("update", lang("update")),
+        node("refPopover", lang("refPopover")),
         separator("separator_breadcrumb"),
-        node("embedBlockBreadcrumb", lang("embedBlockBreadcrumb")),
+        ...["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"].map(key => node(key, lang(key), true, [
+            node("enable", lang("enable")),
+            node("disable", lang("disable")),
+            node("default", lang("default")),
+        ])),
         node("headingEmbedMode", lang("headingEmbedMode"), true, [
             node("showHeadingWithBlocks", lang("showHeadingWithBlocks")),
             node("showHeadingOnlyTitle", lang("showHeadingOnlyTitle")),
@@ -821,6 +826,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("pin", lang("pin")),
             node("unpin", lang("unpin")),
             node("tabToWindow", lang("tabToWindow")),
+            node("tabToMainWindow", lang("tabToMainWindow")),
         ],
     },
     {
@@ -897,6 +903,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
         ],
     },
     toolbarCatalogSection,
+    {
+        key: "editor.blockEmbed",
+        label: location(lang("editor"), lang("blockEmbed")),
+        sortable: false,
+        children: [node("toolbar", lang("entryToolbar"), true, undefined, false)],
+    },
     {
         key: "editor.image",
         label: location(lang("editor"), lang("image")),

@@ -6,7 +6,7 @@
 		"id": "20260617122823-56cr2zv",
 		"title": "表格计算",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617123133-yfcvt0u",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617123133-jv887ic",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -696,12 +696,12 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617123133-cr7ylh4",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20260617123133-qqnng8v",
@@ -723,6 +723,43 @@
 						{
 							"Type": "NodeText",
 							"Data": "​ 的元素个数取决于列类型：空单元格会被跳过，数字、文本等单值列每个非空单元格算一个值；多选、资源等多值列每个选项单独算一个值（与原生「计算值数量」口径一致）。"
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-sst11kg",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20261024161816-sst11kg",
+						"updated": "20261024161816"
+					},
+					"Children": [
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " 中的数值来自字段的数字转换；无法转成数字的非空文本等值可能以 0 参与计算。因此，数值比较示例应当用于数字列。需要比较原文或判断选项时，使用 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".strings"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " 或 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".raw"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "。占比结果为 0 到 1，可配合百分比格式显示。"
 						}
 					]
 				}

@@ -1,25 +1,12 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
 import (
 	"errors"
 	"fmt"
-	"path"
 	"strings"
 	"sync"
 	"time"
@@ -38,17 +25,18 @@ type NewItemTemplatePreview struct {
 	HPath      string   `json:"hPath,omitempty"`
 	Warnings   []string `json:"warnings,omitempty"`
 
-	parentID string
+	plan *DocumentCreatePlan
 }
 
 // CreateAttributeViewItemResult 描述按模板创建数据库条目的结果。
 type CreateAttributeViewItemResult struct {
-	ItemID      string       `json:"itemID"`
-	BlockID     string       `json:"blockID"`
-	Content     string       `json:"content"`
-	IsDetached  bool         `json:"isDetached"`
-	Warnings    []string     `json:"warnings,omitempty"`
-	Transaction *Transaction `json:"-"`
+	ItemID          string       `json:"itemID"`
+	BlockID         string       `json:"blockID"`
+	Content         string       `json:"content"`
+	IsDetached      bool         `json:"isDetached"`
+	Warnings        []string     `json:"warnings,omitempty"`
+	OpenAfterCreate *bool        `json:"openAfterCreate,omitempty"`
+	Transaction     *Transaction `json:"-"`
 }
 
 // CreateAttributeViewItemMarkdown 描述通过数据库条目模板创建文档时使用的 Markdown 内容。
@@ -244,12 +232,13 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	content := preview.PrimaryKey
 	if !isDetached {
 		if blockTree := treenode.GetBlockTree(boundBlockID); nil != blockTree {
-			content = path.Base(blockTree.HPath)
+			content = documentTitleText(blockTree.BoxID, blockTree.RootID)
 		}
 	}
 	return &CreateAttributeViewItemResult{
 		ItemID: itemID, BlockID: boundBlockID, Content: content, IsDetached: isDetached,
 		Warnings: preview.Warnings, Transaction: tx,
+		OpenAfterCreate: itemTemplate.OpenAfterCreate,
 	}, nil
 }
 
@@ -311,6 +300,11 @@ func CreateAttributeViewItemDocs(avID, blockID, saveMode string, itemIDs []strin
 	if 0 == len(items) {
 		return ret, nil
 	}
+	plans := make([]*DocumentCreatePlan, 0, len(items))
+	for _, item := range items {
+		plans = append(plans, item.preview.plan)
+	}
+	coalesceDocumentPlanAncestors(plans)
 
 	cleanupCreatedDocs := func() error {
 		var cleanupErr error
@@ -464,56 +458,27 @@ func resolveAttributeViewItemDocument(blockID, primary string, itemTemplate *av.
 	if nil == blockTree {
 		return nil, ErrBlockNotFound
 	}
-	primary = normalizeDocTitle(primary)
+	primary = normalizeDocumentTitle(primary)
 
-	boxID, pathTemplate, inherited, err := resolveNewItemSaveConfig(blockTree.BoxID, itemTemplate.SaveLocation)
-	if nil != err {
+	target, err := resolveNewItemDocumentTarget(blockTree.BoxID, itemTemplate.SaveLocation)
+	if err != nil {
 		return nil, err
 	}
-	renderedPath, err := RenderGoTemplateAtInBox(pathTemplate, createdAt, boxID)
-	if nil != err {
+	if treenode.DocumentMetadataState(target.Notebook) != "ready" {
+		if err = recoverDocumentMetadata(target.Notebook); err != nil {
+			return nil, err
+		}
+	}
+	request := DocumentPlanRequest{Notebook: blockTree.BoxID, Purpose: "document", ContextID: &blockTree.RootID,
+		ID: ast.NewNodeID(), Now: createdAt, Target: target, SkipContentTemplateCheck: true}
+	if primary != "" {
+		request.Title = &primary
+	}
+	plan, err := PlanDocumentCreation(request)
+	if err != nil {
 		return nil, err
 	}
-	renderedPath = util.TrimSpaceInPath(strings.TrimSpace(renderedPath))
-	return newItemDocumentPreview(blockTree, boxID, renderedPath, primary, inherited), nil
-}
-
-func newItemDocumentPreview(blockTree *treenode.BlockTree, boxID, renderedPath, primary string, inherited bool) *NewItemTemplatePreview {
-	preview := &NewItemTemplatePreview{PrimaryKey: primary, BoxID: boxID}
-	if boxID != blockTree.BoxID && "" != renderedPath && !strings.HasPrefix(renderedPath, "/") {
-		renderedPath = "/" + renderedPath
-	}
-	if "" == primary {
-		primary = newItemTitleFromPath(renderedPath)
-		preview.PrimaryKey = primary
-	}
-	parentTemplate := newItemParentPathTemplate(renderedPath)
-	baseHPath := "/"
-	if boxID == blockTree.BoxID && !strings.HasPrefix(parentTemplate, "/") {
-		if !IsBoxDoc(blockTree.BoxID, blockTree.RootID) {
-			baseHPath = blockTree.HPath
-			preview.parentID = blockTree.RootID
-		}
-	}
-	parentHPath := path.Clean(path.Join(baseHPath, parentTemplate))
-	if "." == parentHPath || "" == parentHPath {
-		parentHPath = "/"
-	}
-	if !strings.HasPrefix(parentHPath, "/") {
-		parentHPath = "/" + parentHPath
-	}
-	if "" == primary {
-		preview.HPath = strings.TrimSuffix(parentHPath, "/") + "/"
-		if "/" == parentHPath {
-			preview.HPath = "/"
-		}
-	} else {
-		preview.HPath = path.Join(parentHPath, primary)
-	}
-	if inherited && boxID != blockTree.BoxID {
-		preview.parentID = ""
-	}
-	return preview
+	return &NewItemTemplatePreview{PrimaryKey: plan.Title, BoxID: plan.Notebook, HPath: plan.DisplayPath, plan: plan}, nil
 }
 
 func createAttributeViewItemDocument(preview *NewItemTemplatePreview, itemTemplate *av.NewItemTemplate) (docID string, tree *parse.Tree, err error) {
@@ -522,19 +487,22 @@ func createAttributeViewItemDocument(preview *NewItemTemplatePreview, itemTempla
 
 func createAttributeViewItemDocumentWithMarkdown(preview *NewItemTemplatePreview, itemTemplate *av.NewItemTemplate,
 	document *CreateAttributeViewItemMarkdown) (docID string, tree *parse.Tree, err error) {
-	docID = ast.NewNodeID()
-	arg := map[string]any{"titleEmpty": "" == preview.PrimaryKey}
-	tags, markdown, clippingHref := "", "", ""
-	withMath := false
-	if nil != document {
-		tags, markdown, clippingHref = document.Tags, document.Markdown, document.ClippingHref
-		withMath = document.WithMath
-		arg["listDocTree"] = document.ListDocTree && !itemTemplate.HideInFileTree
+	if preview.plan == nil || len(preview.plan.Steps) == 0 {
+		return "", nil, errors.New("attribute view document creation plan is missing")
 	}
-	docID, err = CreateWithMarkdown(tags, preview.BoxID, preview.HPath, markdown, preview.parentID, docID, withMath, clippingHref, arg)
+	step := &preview.plan.Steps[len(preview.plan.Steps)-1]
+	// 数据库正文模板由下方既有流程处理，避免同时应用普通新建模板。
+	step.DocCreateTemplatePath = ""
+	if nil != document {
+		step.Tags, step.Markdown, step.ClippingHref = document.Tags, document.Markdown, document.ClippingHref
+		step.WithMath = document.WithMath
+		step.ListDocTree = document.ListDocTree && !itemTemplate.HideInFileTree
+	}
+	_, err = executeDocumentCreationPlan(preview.plan, false)
 	if nil != err {
 		return
 	}
+	docID = step.ID
 	if nil == document && "" != itemTemplate.ContentTemplatePath {
 		if err = applyNewItemContentTemplate(itemTemplate.ContentTemplatePath, docID); nil != err {
 			err = newItemCreationError(err, removeCreatedNewItemDoc(docID))
@@ -573,25 +541,28 @@ func applyNewItemDocumentAttrs(tree *parse.Tree, itemTemplate *av.NewItemTemplat
 	return
 }
 
-func resolveNewItemSaveConfig(currentBoxID string, location *av.NewItemSaveLocation) (boxID, pathTemplate string, inherited bool, err error) {
-	if nil != location {
-		boxID = location.BoxID
-		if "" == boxID {
+func resolveNewItemDocumentTarget(currentBoxID string, location *av.NewItemSaveLocation) (*EffectiveDocumentTarget, error) {
+	var target *EffectiveDocumentTarget
+	var err error
+	if location == nil {
+		target, err = GetDocCreateTarget(currentBoxID, "document")
+	} else {
+		boxID := location.BoxID
+		if boxID == "" {
 			boxID = currentBoxID
 		}
-		if nil == Conf.Box(boxID) {
-			return "", "", false, ErrBoxNotFound
+		if Conf.Box(boxID) == nil {
+			return nil, ErrBoxNotFound
 		}
-		if err = validateNewItemSaveBox(currentBoxID, boxID); nil != err {
-			return "", "", false, err
-		}
-		return boxID, location.PathTemplate, false, nil
+		target = &EffectiveDocumentTarget{Notebook: boxID, Path: location.PathTemplate}
 	}
-
-	inherited = true
-	boxID, pathTemplate = ResolveDocCreateSaveLocation(currentBoxID)
-	err = validateNewItemSaveBox(currentBoxID, boxID)
-	return
+	if err != nil {
+		return nil, err
+	}
+	if err = validateNewItemSaveBox(currentBoxID, target.Notebook); err != nil {
+		return nil, err
+	}
+	return target, nil
 }
 
 func validateNewItemSaveBox(currentBoxID, targetBoxID string) error {
@@ -599,32 +570,6 @@ func validateNewItemSaveBox(currentBoxID, targetBoxID string) error {
 		return errors.New("new attribute view item document in an encrypted notebook must be saved in the current notebook")
 	}
 	return nil
-}
-
-func newItemParentPathTemplate(renderedPath string) string {
-	if "" == renderedPath || strings.HasSuffix(renderedPath, "/") {
-		return renderedPath
-	}
-	isAbsolute := strings.HasPrefix(renderedPath, "/")
-	segments := strings.FieldsFunc(renderedPath, func(r rune) bool { return '/' == r })
-	if 1 >= len(segments) {
-		if isAbsolute {
-			return "/"
-		}
-		return ""
-	}
-	parent := strings.Join(segments[:len(segments)-1], "/")
-	if isAbsolute {
-		parent = "/" + parent
-	}
-	return parent
-}
-
-func newItemTitleFromPath(renderedPath string) string {
-	if "" == renderedPath || strings.HasSuffix(renderedPath, "/") {
-		return ""
-	}
-	return normalizeDocTitle(path.Base(renderedPath))
 }
 
 func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewItemTemplate, createdAt time.Time,

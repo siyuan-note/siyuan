@@ -1,4 +1,4 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -88,6 +88,13 @@ func TestEncryptedHistoryAndIndexRecovery(t *testing.T) {
 	dek = bytes.Clone(dek)
 	defer clear(dek)
 	rootID := "20260907100000-history"
+	previousUndoLog := GlobalUndoLog
+	defer func() { GlobalUndoLog = previousUndoLog }()
+	seedHistory := func() {
+		GlobalUndoLog = newUndoLog(64)
+		entry := &UndoEntry{id: rootID, mutatedRootIDs: []string{rootID}}
+		GlobalUndoLog.stacks[rootID] = &undoStack{undoStack: []*UndoEntry{entry}, redoStack: []*UndoEntry{entry}}
+	}
 	tree := treenode.NewTree(boxID, "/"+rootID+".sy", "/History", "History")
 	if _, err = filesys.WriteTree(tree); err != nil {
 		t.Fatal(err)
@@ -139,6 +146,7 @@ func TestEncryptedHistoryAndIndexRecovery(t *testing.T) {
 	})
 
 	t.Run("write failure preserves current document and index", func(t *testing.T) {
+		seedHistory()
 		provider := filesys.DEKProvider
 		defer func() { filesys.DEKProvider = provider }()
 		failure := errors.New("injected history write failure")
@@ -147,12 +155,16 @@ func TestEncryptedHistoryAndIndexRecovery(t *testing.T) {
 			t.Fatalf("write failure was not propagated: %v", err)
 		}
 		assertEncryptedFileBytes(t, sourcePath, currentData)
+		if undo, redo, _ := GlobalUndoLog.State(rootID); !undo || !redo {
+			t.Fatal("failed encrypted restore discarded document history")
+		}
 		if treenode.GetBlockTree(rootID) == nil {
 			t.Fatal("failed rollback removed the current index")
 		}
 	})
 
 	t.Run("rollback finishes while lock waits", func(t *testing.T) {
+		seedHistory()
 		acquire := filesys.DEKLockAcquire
 		defer func() { filesys.DEKLockAcquire = acquire }()
 		var once sync.Once
@@ -175,6 +187,9 @@ func TestEncryptedHistoryAndIndexRecovery(t *testing.T) {
 		}
 		if err := RollbackDocHistory(relHistory); err != nil {
 			t.Fatal(err)
+		}
+		if undo, redo, _ := GlobalUndoLog.State(rootID); undo || redo {
+			t.Fatal("encrypted restore retained stale document history")
 		}
 		select {
 		case <-locked:

@@ -29,6 +29,7 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
         "dialog/message": {showMessage: unexpected},
         "util/fetch": {fetchPost: unexpected},
         "plugin/Menu": {Menu: unexpected},
+        "menus/Menu": {markMenuInnerScroll: unexpected},
         "util/upDownHint": {upDownHint: unexpected},
         "config/tabs/ai/chatGPTAccount": {genChatGPTAccountHTML: unexpected, mountChatGPTAccount: unexpected},
     };
@@ -176,7 +177,7 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
                 for (const row of groups[0].querySelectorAll(".config-item")) {
                     assert.equal(row.querySelector(".b3-label__text"), null, "Provider rows keep the original compact layout");
                 }
-                assert.ok(groups[0].textContent.includes(provider === "typesafe" ? "TypeSafe System One" : "OpenAI Decisions API (Beta)"));
+                assert.ok(groups[0].textContent.includes(provider === "typesafe" ? "TypeSafe System One" : "OpenAI Decisions API"));
                 assert.ok(groups[0].textContent.includes(provider === "typesafe" ? languages.decisionEndpointTip : languages.decisionOpenAIEndpointTip));
                 const modelRow = groups[1].querySelector(".config-items > .config-ai-provider__model");
                 const modelInput = modelRow.querySelector("[data-decision-field='name']");

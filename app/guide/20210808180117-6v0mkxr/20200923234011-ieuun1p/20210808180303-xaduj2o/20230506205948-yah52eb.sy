@@ -6,7 +6,7 @@
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024160716"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210937-ubi5da4",
-				"updated": "20230506210937"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-bt48731",
-				"updated": "20230512195419"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Plugins are mainly used to expand the overall functions of SiYuan."
+					"Data": "Plugins extend menus, panels, editor interactions, and other SiYuan features. They can also provide custom block rendering."
 				}
 			]
 		},
@@ -43,12 +43,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230512195420-9550ilh",
-				"updated": "20230512195433"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Compared with "
+					"Data": "Use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -59,7 +59,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the plugin is mainly for program function extension, not for content block extension."
+					"Data": " for self-contained tools embedded in a document. Choose a suitable plugin for features that integrate with SiYuan’s interface and workflows."
 				}
 			]
 		},

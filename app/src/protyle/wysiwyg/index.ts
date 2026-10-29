@@ -4,6 +4,7 @@ import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
+import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
@@ -199,7 +200,6 @@ import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold, toggleListFold} from "../util/blockFold";
 import {bindHeadingFoldIndicators} from "../util/headingFoldIndicator";
-import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
@@ -410,7 +410,10 @@ export class WYSIWYG {
     private copyAsRichText = false;
     private mouseDownTarget: EventTarget | null = null;
     private inputTimeout: number;
-    private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
+    private pendingInputTimeouts = new Map<number, {
+        callback: () => void | Promise<void>;
+        compositionBlock?: HTMLElement;
+    }>();
     private runningInputTasks = new Set<Promise<void>>();
     private persistComposition?: () => void;
     public tableControl: TableControl;
@@ -426,7 +429,8 @@ export class WYSIWYG {
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
     private disposeImageResize?: () => void;
 
-    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
+    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true,
+                          compositionBlock?: HTMLElement) {
         if (replace && this.inputTimeout) {
             clearTimeout(this.inputTimeout);
             this.pendingInputTimeouts.delete(this.inputTimeout);
@@ -438,7 +442,7 @@ export class WYSIWYG {
             }
             void this.runInput(callback);
         }, delay);
-        this.pendingInputTimeouts.set(timeout, callback);
+        this.pendingInputTimeouts.set(timeout, {callback, compositionBlock});
         if (replace) {
             this.inputTimeout = timeout;
         }
@@ -459,7 +463,7 @@ export class WYSIWYG {
         this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
-            const callbacks = Array.from(this.pendingInputTimeouts.values());
+            const callbacks = Array.from(this.pendingInputTimeouts.values(), task => task.callback);
             this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
             this.pendingInputTimeouts.clear();
             this.inputTimeout = undefined;
@@ -577,7 +581,16 @@ export class WYSIWYG {
         if (isIOSDevice()) {
             this.disposeTouchCaret = bindIOSTouchCaret(this.element, () => !protyle.disabled &&
                 !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
-                !getBlockSelectionModeElement(this.element));
+                !getBlockSelectionModeElement(this.element), (target, point) => {
+                const cell = target.closest("td, th");
+                if (!cell || cell.closest(".protyle-wysiwyg") !== this.element) {
+                    return false;
+                }
+                // 在短按结束时进入单元格编辑，避免键盘动画后的延迟点击重新命中其他内容。
+                target.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true,
+                    clientX: point.x, clientY: point.y, button: 0, detail: 1}));
+                return true;
+            });
         }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
@@ -4307,6 +4320,18 @@ export class WYSIWYG {
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
+            let pendingDeletion = false;
+            this.pendingInputTimeouts.forEach((task, timeout) => {
+                if (range.collapsed && nodeElement && task.compositionBlock === nodeElement) {
+                    // 原生补全先删词再组合输入，将删除并入本次组合，保留删除前快照并停用旧选区。
+                    clearTimeout(timeout);
+                    this.pendingInputTimeouts.delete(timeout);
+                    if (this.inputTimeout === timeout) {
+                        this.inputTimeout = undefined;
+                    }
+                    pendingDeletion = true;
+                }
+            });
             const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
             if (selectionModeElement) {
                 clearBlockSelectionMode(protyle.wysiwyg.element, true);
@@ -4333,7 +4358,7 @@ export class WYSIWYG {
                 crossBlockComposition = prepareCrossBlockComposition(
                     protyle, range, nodeElement, endElement);
             }
-            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
+            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition && !pendingDeletion) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             if (nodeElement && !crossBlockComposition) {
@@ -4658,7 +4683,8 @@ export class WYSIWYG {
                         Constants.TIMEOUT_INPUT, false);
                 } else {
                     this.scheduleInput(() => input(protyle, blockElement, range, true, event,
-                        inputOperations));
+                        inputOperations), 0, true,
+                    event.inputType === "deleteContentBackward" ? blockElement : undefined);
                 }
             }
             event.stopPropagation();
@@ -4957,10 +4983,15 @@ export class WYSIWYG {
                 if (item.tagName !== "DIV") {
                     return;
                 }
-                if (!tableElement || item !== tableElement) {
-                    item.querySelector(".table__select").removeAttribute("style");
+                // 脑图等只读预览中的表格不携带选区控件。
+                const tableSelectElement = item.querySelector(".table__select");
+                if (!tableSelectElement) {
+                    return;
                 }
-                if (tableElement && tableElement === item && item.querySelector(".table__select").getAttribute("style")) {
+                if (!tableElement || item !== tableElement) {
+                    tableSelectElement.removeAttribute("style");
+                }
+                if (tableElement && tableElement === item && tableSelectElement.getAttribute("style")) {
                     // 防止合并单元格的菜单消失
                     event.stopPropagation();
                 }
@@ -5283,16 +5314,7 @@ export class WYSIWYG {
             const openFloatElement = hasClosestByAttribute(event.target, "data-action", "openFloat");
             if (openFloatElement) {
                 const id = openFloatElement.getAttribute("data-id");
-                /// #if MOBILE
-                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
-                /// #else
-                window.siyuan.blockPanels.push(new BlockPanel({
-                    app: protyle.app,
-                    isBacklink: false,
-                    targetElement: openFloatElement,
-                    refDefs: [{refID: id}]
-                }));
-                /// #endif
+                openEmbedBlock(protyle, openFloatElement, id);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

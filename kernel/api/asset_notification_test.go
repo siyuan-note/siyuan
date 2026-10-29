@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -38,6 +42,7 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 		name  string
 		count int
 		app   string
+		all   bool
 		want  []int
 	}{
 		{name: "below limit", count: 511, app: "first", want: []int{0, 0, 0, 0}},
@@ -46,7 +51,11 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 		{name: "second frontend", count: 513, app: "second", want: []int{0, 1, 0, 0}},
 		{name: "legacy caller", count: 513, want: []int{1, 1, 0, 0}},
 		{name: "absent frontend", count: 513, app: "closed", want: []int{0, 0, 0, 0}},
+		{name: "complete asset list", count: 513, app: "first", all: true, want: []int{0, 0, 0, 0}},
 	} {
+		if attributeViews && test.all {
+			continue
+		}
 		t.Run(test.name, func(t *testing.T) {
 			assets := setupAssetContractWorkspace(t)
 			model.Conf.FileTree.Store(conf.NewFileTree())
@@ -103,7 +112,11 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 				}
 				connections = append(connections, connection)
 			}
-			request := httptest.NewRequest("POST", endpoint, strings.NewReader(`{}`))
+			body := `{}`
+			if test.all {
+				body = `{"all":true}`
+			}
+			request := httptest.NewRequest("POST", endpoint, strings.NewReader(body))
 			if test.app != "" {
 				request.Header.Set("X-SiYuan-App-ID", appPrefix+test.app)
 			}
@@ -114,7 +127,11 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 				Code int
 				Data []apicontract.AssetUnusedItem
 			}
-			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != min(test.count, 512) {
+			expectedCount := min(test.count, 512)
+			if test.all {
+				expectedCount = test.count
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != expectedCount {
 				t.Fatalf("unexpected query response: %s, %v", recorder.Body.String(), err)
 			}
 			// 屏障与提示使用同一连接队列，验证未收到提示时无需等待超时。

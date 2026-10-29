@@ -41,14 +41,14 @@ const destroyRepoPanel = (root: Element) => {
     });
 };
 
-const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
+const openSnapshotMemo = (repoElement: Element, id?: string, memo = "", fullCheck = false) => {
     const dialog = openInputDialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         value: memo,
         multiline: true,
         resize: "vertical",
         placeholder: window.siyuan.languages.snapshotMemoTip,
-        description: id ? window.siyuan.languages.snapshotMemoLocalTip : undefined,
+        description: id ? window.siyuan.languages.snapshotMemoLocalTip : fullCheck ? window.siyuan.languages.fullCheckSnapshotTip : undefined,
         onConfirm: async (value, dialog) => {
             const textarea = dialog.element.querySelector("textarea");
             const button = dialog.element.querySelector<HTMLButtonElement>(".b3-button--text");
@@ -64,9 +64,11 @@ const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
                         renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
                     });
                 } else {
-                    await fetchPost("/api/repo/createSnapshot", {memo: value}, (response) => {
-                        if (response.data.created) {
+                    await fetchPost("/api/repo/createSnapshot", {memo: value, fullCheck}, (response) => {
+                        if (response.data.created || fullCheck) {
                             dialog.destroy();
+                        }
+                        if (response.data.created) {
                             renderRepo(repoElement, 1);
                         }
                     });
@@ -314,7 +316,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
     const nextElement = element.querySelector('[data-type="next"]');
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
     const searchButton = searchInputElement.nextElementSibling as HTMLButtonElement;
-    listElement.innerHTML = '<li class="history__snapshot-loading"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    listElement.innerHTML = '<li class="history__snapshot-loading"><div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div></li>';
     updateRepoSelection(element);
     element.setAttribute("data-page", String(currentPage));
     pageBtn.textContent = String(currentPage);
@@ -524,6 +526,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
                     <button class="b3-button b3-button--outline" data-type="genRepo">
                         <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                     </button>
+                    <button class="b3-button b3-button--outline" data-type="fullCheckRepo">${window.siyuan.languages.fullCheckSnapshot}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -956,6 +959,13 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
             } else if (type === "editSnapshotMemo" && !window.siyuan.config.readonly) {
                 const id = target.closest("[data-id]").getAttribute("data-id");
                 openSnapshotMemo(repoElement, id, snapshotMemos.get(repoElement)?.get(id) || "");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "fullCheckRepo") {
+                if (!window.siyuan.config.readonly && !target.hasAttribute("disabled")) {
+                    openSnapshotMemo(repoElement, undefined, "", true);
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;

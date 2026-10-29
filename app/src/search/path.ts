@@ -1,5 +1,5 @@
 import {fetchSyncPost} from "../util/fetch";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {
     getSearchPathID,
     isCurrentSearchPath,
@@ -52,8 +52,8 @@ const renderSearchPath = (element: Element, hPath: string) => {
     const pathElement = element.querySelector("#searchPathInput");
     if (pathElement) {
         pathElement.innerHTML = `${escapeHtml(hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        // Tooltip 会将 aria-label 作为 HTML 渲染，动态赋值时需要保留一层实体转义。
-        pathElement.setAttribute("aria-label", escapeHtml(hPath));
+        // 搜索范围接口返回纯文本，动态赋值仅需保护提示框的 HTML 解析。
+        pathElement.setAttribute("aria-label", escapeHtmlTextAndAttr(hPath));
     }
 };
 

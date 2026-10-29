@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5 && (sqlcipher || libsqlcipher)
 
 package model
@@ -25,18 +29,20 @@ import (
 
 func TestDuplicateDocHPath(t *testing.T) {
 	const helper = "SIYUAN_TEST_DUPLICATE_DOC_HPATH"
-	if os.Getenv(helper) != "1" {
+	workspace := os.Getenv(helper)
+	if workspace == "" {
 		// 隔离数据库、密钥和异步任务，使用临时工作空间验证路径寻址。
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
 		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestDuplicateDocHPath$", "-test.v")
-		command.Env = append(os.Environ(), helper+"=1")
+		// 子进程退出后由父测试删除工作空间，避免临时目录清理与后台写入竞争。
+		command.Env = append(os.Environ(), helper+"="+t.TempDir())
 		if output, err := command.CombinedOutput(); err != nil {
 			t.Fatalf("duplicate hpath subprocess failed: %v\n%s", err, output)
 		}
 		return
 	}
-	prepareHPathRefreshTest(t)
+	prepareHPathRefreshTestAt(t, workspace)
 	Conf.Flashcard.Store(conf.NewFlashcard())
 	const password = "duplicate-hpath-test-password"
 	if err := EnableEncryptedNotebook(password); err != nil {
@@ -78,7 +84,9 @@ func TestDuplicateDocHPath(t *testing.T) {
 			if err != nil || util.IsCiphertext(before) != encrypted {
 				t.Fatalf("invalid source fixture: encrypted=%v, %v", encrypted, err)
 			}
-			DuplicateDoc(source)
+			if err := DuplicateDoc(source); err != nil {
+				t.Fatal(err)
+			}
 			title := source.Root.IALAttr("title")
 			wantHPath := parentHPath + "/" + title
 			if source.HPath != wantHPath || !strings.HasPrefix(title, "Example  Document (Duplicated ") {
@@ -88,20 +96,28 @@ func TestDuplicateDocHPath(t *testing.T) {
 			if err != nil || hpath != wantHPath {
 				t.Fatalf("path by ID disagrees: %q, %v", hpath, err)
 			}
-			ids, err := GetIDsByHPath(wantHPath, boxID)
-			if err != nil || len(ids) != 1 || ids[0] != source.ID {
-				t.Fatalf("duplicate is not addressable: %v, %v", ids, err)
+			if err = treenode.SetDocumentMetadataState(boxID, "ready"); err != nil {
+				t.Fatal(err)
+			}
+			segments := []string{title}
+			if nested {
+				segments = append([]string{"Parent"}, segments...)
+			}
+			resolved, err := ResolveDocPath(boxID, "root", nil, segments)
+			if err != nil || resolved.Status != "resolved" || resolved.Resolved == nil || resolved.Resolved.ID != source.ID {
+				t.Fatalf("duplicate is not addressable: %+v, %v", resolved, err)
 			}
 			sql.FlushQueue()
 			block := sql.GetBlockInBox(source.ID, boxID)
 			if block == nil || block.Content != title || block.HPath != wantHPath {
 				t.Fatalf("SQL title and path disagree: %#v", block)
 			}
-			childID, err := CreateWithMarkdown("", boxID, wantHPath+"/Child", "Child content", "", "", false, "", nil)
+			created, err := CreateDocByParent(DocumentCreateRequest{Notebook: boxID, ParentID: &source.ID, ID: ast.NewNodeID(),
+				TitleFormat: "plain", Title: "Child", Markdown: "Child content"})
 			if err != nil {
 				t.Fatal(err)
 			}
-			child := treenode.GetBlockTreeInBox(childID, boxID)
+			child := treenode.GetBlockTreeInBox(created.ID, boxID)
 			if child == nil || path.Dir(child.Path) != strings.TrimSuffix(source.Path, ".sy") {
 				t.Fatalf("child created under a different parent: %#v", child)
 			}

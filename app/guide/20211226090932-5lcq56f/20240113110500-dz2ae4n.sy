@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -54,76 +54,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
-				}
-			]
-		},
-		{
-			"ID": "20261012014537-f76dj41",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261012014537-f76dj41",
-				"updated": "20261012014859"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "介面導覽"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20260921090531-u48uhj6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260921090531-u48uhj6",
-				"updated": "20260921210136"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在編輯器中向右滑動可開啟左側欄，向左滑動可開啟右側欄。應用程式啟動後，首次開啟側欄時顯示該側第一個可見功能，之後再次開啟會恢復該側上次使用的功能。可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "外觀"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "左右佈局"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中調整功能順序。"
-				}
-			]
-		},
-		{
-			"ID": "20261010114821-z8mdm4l",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261010114821-z8mdm4l",
-				"updated": "20261010114821"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在 Android 上使用桌面佈局時，系統返回鍵會先關閉目前最上層的對話框、選單、編輯浮層、圖片預覽或浮動抽屜，每次只關閉一層並保留底層瀏覽狀態。沒有可關閉的浮層時，才執行原有的頁面返回行為。"
 				}
 			]
 		},
@@ -412,6 +342,76 @@
 			]
 		},
 		{
+			"ID": "20261012014537-f76dj41",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-f76dj41",
+				"updated": "20261020133924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "介面導覽"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260921090531-u48uhj6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260921090531-u48uhj6",
+				"updated": "20260921210136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在編輯器中向右滑動可開啟左側欄，向左滑動可開啟右側欄。應用程式啟動後，首次開啟側欄時顯示該側第一個可見功能，之後再次開啟會恢復該側上次使用的功能。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "左右佈局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中調整功能順序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-z8mdm4l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-z8mdm4l",
+				"updated": "20261020133924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面佈局時，系統返回鍵會先關閉目前最上層的對話框、選單、編輯浮層、圖片預覽或浮動抽屜，每次只關閉一層並保留底層瀏覽狀態。沒有可關閉的浮層時，沿應用程式內的文件歷史返回，不會重新載入整個介面。到達歷史起點後會提示再次返回，提示顯示期間再按一次返回鍵即可回到系統桌面。"
+				}
+			]
+		},
+		{
 			"ID": "20240113110513-f0ouee1",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -478,7 +478,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-pxc89dc",
-				"updated": "20260829104731"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -498,7 +498,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110513-hrvrjsj",
-				"updated": "20260829104731"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 					},
 					"Properties": {
 						"id": "20240113110513-cvue0bs",
-						"updated": "20240113110513"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -518,12 +518,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113110513-cfsoofb",
-								"updated": "20240113110513"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "卸載 App 會導致本機資料完全刪除且無法復原"
+									"Data": "解除安裝 App 會刪除本機資料。解除安裝前請完成同步，並在應用程式之外儲存可復原的備份；沒有備份的資料可能無法復原"
 								}
 							]
 						}
@@ -538,7 +538,7 @@
 					},
 					"Properties": {
 						"id": "20240113110513-2q984od",
-						"updated": "20260829104731"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -546,7 +546,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113110513-4xcnhoh",
-								"updated": "20260829104731"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -569,7 +569,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 進行正常退出，直接劃走會強制結束應用，導致資料同步未執行"
+									"Data": " 進行正常退出，直接劃走會強制結束應用，導致資料同步未執行"
 								}
 							]
 						}
@@ -853,7 +853,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174315-dz9gat0",
-				"updated": "20261004052629"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -882,7 +882,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174315-symmh66",
-				"updated": "20261004052629"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -897,7 +897,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613174315-jrdwpsv",
-				"updated": "20260613174315"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -942,7 +942,7 @@
 					},
 					"Properties": {
 						"id": "20260613174315-vu6cm45",
-						"updated": "20260613174315"
+						"updated": "20261024162311"
 					},
 					"Children": [
 						{
@@ -950,17 +950,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613174315-9lhuhx6",
-								"updated": "20260613174315"
+								"updated": "20261024162311"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "自動轉入"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：速記創建後，系統每 7 秒自動檢查本機速記目錄，將新速記轉入文件面板中設定的目標位置"
+									"Data": "自動轉入：思源執行時每 7 秒檢查本機速記目錄，將新速記轉入文檔面板中設定的目標位置"
 								}
 							]
 						}
@@ -1047,7 +1042,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174315-uerjb05",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1061,7 +1056,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174315-nlwy3go",
-				"updated": "20260803163243"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1075,7 +1070,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1084,7 +1079,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1093,7 +1088,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1102,7 +1097,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中設定速記的存放位置："
+					"Data": " 中設定速記的存放位置："
 				}
 			]
 		},

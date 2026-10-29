@@ -1,6 +1,11 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -14,6 +19,64 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestFailedExitRestoresBackgroundServices(t *testing.T) {
+	for _, failure := range []string{"sync-lock", "sync-data"} {
+		t.Run(failure, func(t *testing.T) {
+			prepareSyncDirectoryTest(t)
+			previousExit, previousPending, previousExiting := exitFinished, pendingWorkspaceExit, util.IsExiting.Load()
+			previousStop, previousStart := OnKernelPluginsStop, OnKernelPluginsStart
+			previousShutdown, previousTimer := lanSyncShuttingDown, lanSyncRetryTimer
+			exitFinished, pendingWorkspaceExit = false, nil
+			util.IsExiting.Store(false)
+			lanSyncShuttingDown = false
+			timer := time.NewTimer(time.Hour)
+			lanSyncRetryTimer = timer
+			t.Cleanup(func() {
+				timer.Stop()
+				lanSyncShuttingDown, lanSyncRetryTimer = previousShutdown, previousTimer
+				OnKernelPluginsStop, OnKernelPluginsStart = previousStop, previousStart
+				exitFinished, pendingWorkspaceExit = previousExit, previousPending
+				util.IsExiting.Store(previousExiting)
+			})
+			stopped, resumed := 0, 0
+			OnKernelPluginsStop = func() { stopped++ }
+			OnKernelPluginsStart = func() {
+				if !syncLock.TryLock() {
+					t.Error("plugins resumed while the exit sync lock was held")
+				} else {
+					syncLock.Unlock()
+				}
+				resumed++
+			}
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			if failure == "sync-lock" {
+				lockSync()
+				cancel()
+				// Another operation owns this lock, so the resume callback cannot probe it.
+				OnKernelPluginsStart = func() { resumed++ }
+				defer unlockSync()
+			} else {
+				Conf.Sync.Load().Enabled, Conf.Sync.Load().Mode, Conf.Sync.Load().Perception = true, 1, false
+				Conf.SetUser(&conf.User{UserId: "exit-service-test", UserSiYuanOneTimePayStatus: 1})
+				Conf.Repo.Load().Key = nil
+			}
+			for attempt := 0; attempt < 2; attempt++ {
+				code, _ := CloseWithContext(ctx, false, false, 1)
+				if code != 1 {
+					t.Fatalf("expected retryable exit failure, got %d", code)
+				}
+				if stopped != attempt+1 || resumed != stopped {
+					t.Fatalf("plugin lifecycle lost after retry: stopped=%d resumed=%d", stopped, resumed)
+				}
+				if lanSyncShuttingDown || lanSyncRetryTimer != timer || util.IsExiting.Load() || exitFinished {
+					t.Fatal("failed exit left the running session shut down")
+				}
+			}
+		})
+	}
+}
 
 func TestWorkspaceExitRetryPreservesBatch(t *testing.T) {
 	previous, temp := pendingWorkspaceExit, util.TempDir
@@ -40,6 +103,9 @@ func TestWorkspaceExitRetryPreservesBatch(t *testing.T) {
 
 func TestExitSyncSkippedAndFailed(t *testing.T) {
 	prepareSyncDirectoryTest(t)
+	previousStatus := util.StatusBarCfg.Load()
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	t.Cleanup(func() { util.StatusBarCfg.Store(previousStatus) })
 	previousErrors := autoSyncErrCount.Load()
 	t.Cleanup(func() { autoSyncErrCount.Store(previousErrors) })
 	for _, mode := range []int{0, 3} {

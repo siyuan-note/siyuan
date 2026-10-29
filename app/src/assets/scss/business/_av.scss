@@ -697,11 +697,13 @@
 
       &:hover,
       &:focus {
+        background-color: var(--b3-theme-primary);
         background-color: color-mix(in srgb, var(--b3-theme-primary) 88%, black);
         box-shadow: none;
       }
 
       &:active {
+        background-color: var(--b3-theme-primary);
         background-color: color-mix(in srgb, var(--b3-theme-primary) 80%, black);
         box-shadow: none;
       }
@@ -1703,7 +1705,8 @@
         align-items: center;
         justify-content: center;
         object-fit: contain;
-        line-height: 1;
+        // 与相邻的单元格文字使用同一行高模型，字形才不会相对文字偏高
+        line-height: inherit;
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;
@@ -2211,14 +2214,17 @@
         border: 1px solid var(--b3-theme-surface-lighter);
 
         &--depth1 {
+          background-color: var(--b3-theme-surface);
           background-color: color-mix(in srgb, var(--b3-theme-on-background) 1%, transparent);
         }
 
         &--depth2 {
+          background-color: var(--b3-theme-surface);
           background-color: color-mix(in srgb, var(--b3-theme-on-background) 2%, transparent);
         }
 
         &--depth3 {
+          background-color: var(--b3-theme-surface);
           background-color: color-mix(in srgb, var(--b3-theme-on-background) 3%, transparent);
         }
       }
@@ -3369,15 +3375,13 @@ img.av__cellassetimg {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
 
-  .layout-tab-bar {
-    flex-shrink: 0;
-  }
+.av__collection-tabs {
+  flex-shrink: 0;
 
   .item {
     min-width: 0;
-    height: auto;
-    min-height: 40px;
 
     .item__text {
       white-space: normal;

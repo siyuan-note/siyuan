@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20261015221015"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-3mutq27",
 				"id": "20240530101000-ggy8jav",
-				"updated": "20261015221015"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -32,12 +32,41 @@
 			"Properties": {
 				"ID": "20240530101000-dfzn09m",
 				"id": "20240530101000-l17d6vk",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "ブロック参照は既存の内容へのリンクで、同じノートを異なる文脈から利用できます。クリックできるアンカーテキストとして表示され、マウスカーソルを合わせると参照先のブロックをプレビューできます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-8mhlmac",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-8mhlmac",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "参照の挿入"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163828-rxliabj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-rxliabj",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタで "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -46,34 +75,55 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ と入力すると、コンテンツブロックの検索が開始され、続けて入力する文字が検索キーワードになります。検索結果から上下キーで選択し、"
+					"Data": " を入力し、キーワードでブロックを検索します。上下の矢印キーで候補を選び、"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ キーを押すと選択したコンテンツブロックの参照が挿入されます。参照されたコンテンツブロックのアンカーテキストにマウスカーソルを合わせると、プレビューウィンドウにその内容が表示されます。"
-				},
+					"Data": " で参照を挿入します。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-bjdywve",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163828-bjdywve",
+				"updated": "20261024163828"
+			},
+			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "コンテンツブロック/参照"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
 				}
 			]
+		},
+		{
+			"ID": "20261024163828-k0wtv5i",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-k0wtv5i",
+				"updated": "20261024163828"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントの作成と参照"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20260927091603-uttae8i",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927091603-uttae8i",
-				"updated": "20260927183214"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -101,16 +151,45 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を選ぶと、ノートブックのルートまたは親ドキュメントを指定できます。確定すると、その場所にドキュメントを作成し、元の位置に参照を挿入します。選択した保存先は今回の作成にのみ適用され、既定の保存先は変更されません。キャンセルするとドキュメントは作成されません。デスクトップ版とモバイル版の両方で利用できます。データベースの項目にドキュメントをバインドまたは再バインドするときも、この操作を利用できます。ドキュメントの作成が成功した後にのみ項目をバインドします。キャンセルした場合や作成に失敗した場合、元のバインドは変更されません。"
+					"Data": " を選ぶと、ノートブックのルートまたは親ドキュメントを指定できます。確定すると、その場所にドキュメントを作成し、元の位置に参照を挿入します。選択した保存先は今回の作成にのみ適用され、既定の保存先は変更されません。"
 				}
 			]
+		},
+		{
+			"ID": "20261024161816-3ay8ok6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-3ay8ok6",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キャンセルするとドキュメントは作成されません。デスクトップ版とモバイル版の両方で利用できます。データベースの項目にドキュメントをバインドまたは再バインドするときも、この操作を利用できます。ドキュメントの作成が成功した後にのみ項目をバインドします。キャンセルした場合や作成に失敗した場合、元のバインドは変更されません。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163828-9lzz6r7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163828-9lzz6r7",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動で閉じる括弧と補完"
+				}
+			],
+			"HeadingLevel": 3
 		},
 		{
 			"ID": "20261014130425-0xqno1c",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-0xqno1c",
-				"updated": "20261015221015"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -147,7 +226,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で自動補完を有効にできます。初期状態では無効です。有効にすると、[[ または 【【 を入力した際にカーソルの後ろへ対応する ]] または 】】 が挿入されます。閉じ括弧を2回入力すると閉じ括弧を飛び越えて参照を確定します。Enter で候補を選択した場合も閉じ括弧が置き換えられます。空の [[]] または 【【】】 内で Backspace を押すと括弧全体が削除されます。"
+					"Data": " で自動補完を有効にできます。初期状態では無効です。有効にすると、[[ または 【【 を入力した際にカーソルの後ろへ対応する ]] または 】】 が挿入されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-6vyazgj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-6vyazgj",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "閉じ括弧を2回入力すると閉じ括弧を飛び越えて参照を確定します。Enter で候補を選択した場合も閉じ括弧が置き換えられます。空の [[]] または 【【】】 内で Backspace を押すと括弧全体が削除されます。"
 				}
 			]
 		},
@@ -172,7 +265,7 @@
 			"Properties": {
 				"ID": "20240530101000-at31i2r",
 				"id": "20240530101000-avpxozm",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
@@ -269,12 +362,12 @@
 			"Properties": {
 				"ID": "20240530101000-g3aca9j",
 				"id": "20240530101000-zxan094",
-				"updated": "20240530101000"
+				"updated": "20261024163828"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "フォワードリンクは現在のブロックに含まれているため簡単に確認できます。一方、バックリンクは他のドキュメントに散在しているため見つけることは容易ではありませんが、そこに価値が潜んでいます。以下の 2 つの方法でバックリンクを活用することで、新たな視点で多角的に思考できます:"
+					"Data": "フォワードリンクは現在の内容に直接表示されます。バックリンクでは、現在のブロックをどの内容が参照しているかを確認できます。次の 2 通りの方法で関係を調べられます。"
 				}
 			]
 		},
@@ -365,13 +458,97 @@
 			]
 		},
 		{
+			"ID": "20261022133332-0jxmx6d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261022133332-0jxmx6d",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースのフィールドでバックリンクを絞り込む"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-do55tkp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-do55tkp",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バックリンクパネルまたは下部のバックリンクで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "バックリンク元を絞り込む"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データベースのフィールド"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、参照元ブロックが登録されているデータベースを選択して、フィールド条件を組み合わせます。選択したデータベースにバインドされ、条件を満たす参照元のみが表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-bvzggba",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-bvzggba",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フィールド条件を設定しない場合は、そのデータベースにバインドされた参照元がすべて表示されます。データベースの元のビューのフィルタやメンションは変更されません。デスクトップ版とモバイル版の両方で利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261022133332-68vgkre",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022133332-68vgkre",
+				"updated": "20261022133332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースのメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "リセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、データベースの条件だけを解除できます。他の参照元フィルタは保持されます。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-k5rp4xa",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"ID": "20240530101000-j9s9jy7",
 				"id": "20240530101000-k5rp4xa",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -402,7 +579,7 @@
 			"Properties": {
 				"ID": "20240530101000-8aawvbp",
 				"id": "20240530101000-1g2xgik",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -450,7 +627,7 @@
 					"Properties": {
 						"ID": "20240530101000-rtfyrw5",
 						"id": "20240530101000-wv6tqfe",
-						"updated": "20260803163402"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -459,7 +636,7 @@
 							"Properties": {
 								"ID": "20240530101000-icz4tux",
 								"id": "20240530101000-o9hcbto",
-								"updated": "20260803163402"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -478,7 +655,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -487,7 +664,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -496,7 +673,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ で設定できます (最大 "
+									"Data": " で設定できます (最大 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -786,7 +963,7 @@
 			"Properties": {
 				"ID": "20240530101000-mhi5yzq",
 				"id": "20240530101000-ycwkmzo",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -801,12 +978,12 @@
 			"Properties": {
 				"ID": "20240530101000-7gm83g3",
 				"id": "20240530101000-trz1fni",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​ "
+					"Data": ""
 				},
 				{
 					"Type": "NodeTextMark",
@@ -815,7 +992,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -824,7 +1001,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ で "
+					"Data": " で "
 				},
 				{
 					"Type": "NodeTextMark",

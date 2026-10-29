@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
@@ -21,6 +9,8 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
 // BuildCapabilityID 构造由来源、执行侧和提供方局部名称组成的稳定能力 ID。
@@ -168,14 +158,15 @@ type CallToolResult struct {
 // ModelAttachment 描述工具希望在下一轮模型请求中附加的多模态输入。
 // Data 只在当前运行期内存中传递，持久化时仅保存可重新解析资源的元数据。
 type ModelAttachment struct {
-	Type       string `json:"type"`
-	Data       []byte `json:"-"`
-	MIMEType   string `json:"mimeType,omitempty"`
-	Path       string `json:"path,omitempty"`
-	DocumentID string `json:"documentId,omitempty"`
-	Detail     string `json:"detail,omitempty"`
-	Width      int    `json:"width,omitempty"`
-	Height     int    `json:"height,omitempty"`
+	PDFImage   *model.PDFImageSelection `json:"pdfImage,omitempty"`
+	Type       string                   `json:"type"`
+	Data       []byte                   `json:"-"`
+	MIMEType   string                   `json:"mimeType,omitempty"`
+	Path       string                   `json:"path,omitempty"`
+	DocumentID string                   `json:"documentId,omitempty"`
+	Detail     string                   `json:"detail,omitempty"`
+	Width      int                      `json:"width,omitempty"`
+	Height     int                      `json:"height,omitempty"`
 }
 
 func (r CallToolResult) HasStructuredContent() bool {

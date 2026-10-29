@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -166,4 +170,51 @@ func testAPIContractTransactionCompletion(t *testing.T, engine *gin.Engine, docI
 		t.Fatalf("editing response preceded persisted content: %v", err)
 	}
 	t.Logf("isolated editing request Server-Timing: %s", recorder.Header().Get("Server-Timing"))
+}
+
+func testAPIContractHistoryQueueOrder(t *testing.T, engine *gin.Engine, docID, paragraphID string) {
+	t.Helper()
+	model.FlushTxQueue()
+	model.GlobalUndoLog.Clear("")
+	defer model.GlobalUndoLog.Clear("")
+	engine.POST("/api/transactions/undo", performUndo)
+	engine.POST("/api/transactions/redo", performRedo)
+	dom := func(content string) string {
+		return fmt.Sprintf(`<div data-node-id="%s" data-type="NodeParagraph"><div contenteditable="true">%s</div></div>`, paragraphID, content)
+	}
+	first := &model.Transaction{
+		DoOperations:   []*model.Operation{{Action: "update", ID: paragraphID, Data: dom("First")}},
+		UndoOperations: []*model.Operation{{Action: "update", ID: paragraphID, Data: dom("Original")}},
+	}
+	first.MarkFromAPI()
+	if err := model.PerformTxSync(first); err != nil {
+		t.Fatal(err)
+	}
+	second := &model.Transaction{
+		DoOperations:   []*model.Operation{{Action: "update", ID: paragraphID, Data: dom("Second")}},
+		UndoOperations: []*model.Operation{{Action: "update", ID: paragraphID, Data: dom("First")}},
+	}
+	second.MarkFromAPI()
+	queued := []*model.Transaction{second}
+	model.PerformTransactions(&queued)
+	for _, replay := range []struct{ action, want string }{{"undo", "First"}, {"redo", "Second"}} {
+		path := "/api/transactions/" + replay.action
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, path,
+			strings.NewReader(`{"rootID":"`+docID+`","app":"contract","session":"contract"}`)))
+		requireAPIContract(t, http.MethodPost, path, recorder)
+		var result struct {
+			Code int `json:"code"`
+			Data struct {
+				Failed bool `json:"failed"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != 0 || result.Data.Failed {
+			t.Fatalf("history action failed: %s %v", recorder.Body.String(), err)
+		}
+		tree, err := model.LoadTreeByBlockID(paragraphID)
+		if err != nil || treenode.GetNodeInTree(tree, paragraphID).Text() != replay.want {
+			t.Fatalf("%s selected history before the queued edit: %v", replay.action, err)
+		}
+	}
 }

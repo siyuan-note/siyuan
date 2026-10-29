@@ -1,4 +1,6 @@
 const {normalizeWindowGeometry, captureWindowGeometry} = require("./windowGeometry");
+const {getCaptionHeight, getTitleBarOverlayOptions} = require("./windowControlsOverlay");
+const {toggleDevTools} = require("./devToolsDock");
 
 const settingsPath = "/stage/build/app/settings.html";
 
@@ -213,7 +215,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, getWindows, initiali
                     input.control && input.shift && !input.meta && !input.alt;
                 if (input.type === "keyDown" && !input.isAutoRepeat && input.key.toLowerCase() === "i" && modifiers) {
                     event.preventDefault();
-                    win.webContents.toggleDevTools();
+                    toggleDevTools(win.webContents, platform);
                 }
             });
             win.once("closed", () => finish(approved));
@@ -260,6 +262,7 @@ const createSettingsWindows = ({ipcMain, screen, getTarget, getWindows, initiali
                 title: approved.data.title || "SiYuan",
                 frame: platform === "darwin",
                 titleBarStyle: "hidden",
+                titleBarOverlay: getTitleBarOverlayOptions(platform, getCaptionHeight(approved.data.compactMode, false)),
                 trafficLightPosition: {x: 8, y: 8},
                 autoHideMenuBar: true,
                 fullscreenable: true,

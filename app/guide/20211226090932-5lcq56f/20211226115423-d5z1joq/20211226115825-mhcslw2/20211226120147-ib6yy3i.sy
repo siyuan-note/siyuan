@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20261017174053"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -1503,7 +1503,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20261017174053"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1589,7 +1589,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-itzspnv",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1640,7 +1640,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240513102059-ttfrx4f",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1654,7 +1654,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1663,7 +1663,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1672,7 +1672,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 後，整體的標題層級在匯出時才符合正常邏輯。"
+					"Data": " 後，整體的標題層級在匯出時才符合正常邏輯。"
 				}
 			]
 		},
@@ -1767,7 +1767,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-fe8klj7",
-				"updated": "20261017174053"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
@@ -1956,12 +1956,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260222162012-6uewwvk",
-				"updated": "20260222162331"
+				"updated": "20261024162311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果表格包含合併的儲存格或標題，則會以 HTML 形式複製或導出為 Markdown。"
+					"Data": "表格包含合併儲存格或多列表頭時，複製和匯出的 Markdown 會使用 HTML 表格保留結構。"
 				}
 			]
 		},
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429114938-37kksd9",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -2100,7 +2100,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427230732-snprakd",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -2112,7 +2112,7 @@
 					},
 					"Properties": {
 						"id": "20240427230732-tgvmt21",
-						"updated": "20260803171606"
+						"updated": "20261024163013"
 					},
 					"Children": [
 						{
@@ -2120,7 +2120,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-p75fah5",
-								"updated": "20260803171606"
+								"updated": "20261024163013"
 							},
 							"Children": [
 								{
@@ -2134,7 +2134,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2143,7 +2143,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2152,7 +2152,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
+									"Data": "，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
 								}
 							]
 						}
@@ -3298,7 +3298,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ub34qwj",
-				"updated": "20260730184353"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -3329,6 +3329,102 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-fwzt0ts",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-fwzt0ts",
+				"updated": "20261023133001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文檔標題預設允許包含半形斜線 /，無需設定開關。例如，A/B 可以是一篇文檔的標題，與 A 下的子文檔 B 不同。既有標題和文檔連結保持不變，／ 和 %2F 仍按原文字面顯示。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-2wpc8r5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-2wpc8r5",
+				"updated": "20261023112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "顯示路徑用於閱讀；需要定位某篇文檔時，請使用文檔連結或區塊引用。依賴拆分標題路徑定位文檔的外掛需要支援結構化定址。"
+				}
+			]
+		},
+		{
+			"ID": "20261023112115-6k97ybe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261023112115-6k97ybe",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用新版開啟工作空間前，請先結束所有裝置上的舊版思源，並將存取同一工作空間或同步其資料的所有裝置統一升級至支援新版標題格式的版本，同時確認外掛相容。所有裝置升級完成前，請勿開啟工作空間或恢復同步；暫時離線的裝置也必須先升級，再存取或同步這些資料。"
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-ddvm3sb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-ddvm3sb",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移轉自動完成，中斷後會繼續復原。升級後，請勿再用舊版本開啟、編輯、還原或同步同一資料。舊版本可能拒絕開啟採用新版標題格式（Spec 6）的文檔，但仍可能讀寫保留舊格式的文檔，也可能將已開啟頁面中的舊編輯快取寫回，覆蓋新標題或內容，並透過同步傳播到其他裝置。不能因為部分文檔無法開啟，就認為資料已受到保護。"
+				}
+			]
+		},
+		{
+			"ID": "20261024163013-ax3rq0f",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024163013-ax3rq0f",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自訂區塊"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261024163013-3rno2to",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024163013-3rno2to",
+				"updated": "20261024163013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件可提供自訂內容區塊的顯示和互動。使用時需安裝並啟用對應的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506211210-1roopyo",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "插件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "；插件無法使用或目前環境不支援其渲染時，會顯示已儲存的原始內容。停用插件不會自動刪除這些內容。"
 				}
 			]
 		},

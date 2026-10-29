@@ -1,23 +1,10 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
 import (
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -129,9 +116,9 @@ var removeRiffCards = contractHandler(apicontract.RemoveRiffCards, func(c *gin.C
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "removeFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
-	model.PerformTransactions(&transactions)
-	model.WaitForTransactions(transactions)
+	if err := performRiffCardsTransaction("removeFlashcards", request.DeckID, blockIDs); err != nil {
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
 	if request.DeckID != "" {
 		return apicontract.Success(deckData(model.Decks[request.DeckID]))
 	}
@@ -143,11 +130,19 @@ var addRiffCards = contractHandler(apicontract.AddRiffCards, func(c *gin.Context
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "addFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
-	model.PerformTransactions(&transactions)
-	model.WaitForTransactions(transactions)
+	if err := performRiffCardsTransaction("addFlashcards", request.DeckID, blockIDs); err != nil {
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
 	return apicontract.Success(deckData(model.Decks[request.DeckID]))
 })
+
+func performRiffCardsTransaction(action, deckID string, blockIDs []string) error {
+	// Drain earlier edits under the execution lock, retaining queue order while
+	// returning the actual persistence/rollback result to this HTTP request.
+	return model.WithTransactionHistory(func(execute func(*model.Transaction) error) error {
+		return execute(&model.Transaction{DoOperations: []*model.Operation{{Action: action, DeckID: deckID, BlockIDs: blockIDs}}})
+	})
+}
 
 var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Context, request apicontract.RenameRiffDeckRequest) apicontract.Response[apicontract.Null] {
 	if err := model.RenameDeck(request.DeckID, request.Name); err != nil {
@@ -157,9 +152,8 @@ var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Con
 })
 
 var removeRiffDeck = contractHandler(apicontract.RemoveRiffDeck, func(c *gin.Context, request apicontract.RiffDeckRequest) apicontract.Response[apicontract.Null] {
-	ret := gulu.Ret.NewResult()
-	if util.InvalidIDPattern(request.DeckID, ret) {
-		return contractFailure[apicontract.Null](ret)
+	if err := util.ValidateID(request.DeckID); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
 	}
 	if err := model.RemoveDeck(request.DeckID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())

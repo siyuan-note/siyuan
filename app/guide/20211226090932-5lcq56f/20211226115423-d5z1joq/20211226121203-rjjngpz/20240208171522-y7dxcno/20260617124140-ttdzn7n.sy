@@ -6,7 +6,7 @@
 		"id": "20260617124140-ttdzn7n",
 		"title": "表格計算",
 		"type": "doc",
-		"updated": "20261016191345"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260617124141-vlyd6cy",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -320,7 +320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260617124141-w29q59c",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20260617124141-dvkk167",
-				"updated": "20261016191345"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -723,6 +723,43 @@
 						{
 							"Type": "NodeText",
 							"Data": "​ 的元素個數取決於列型別：空白儲存格會被略過，數字、文字等單值欄每個非空白儲存格算一個值；多選、資源等多值列每個選項單獨算一個值（與原生「計算值數量」口徑一致）。"
+						}
+					]
+				},
+				{
+					"ID": "20261024161816-0pnr0vm",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20261024161816-0pnr0vm",
+						"updated": "20261024161816"
+					},
+					"Children": [
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " 中的數值來自欄位的數字轉換；無法轉成數字的非空文字等值可能以 0 參與計算。因此，數值比較範例應用於數字欄。需要比較原文或判斷選項時，使用 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".strings"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " 或 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".raw"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "。占比結果為 0 到 1，可搭配百分比格式顯示。"
 						}
 					]
 				}

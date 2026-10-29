@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -22,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -59,6 +48,60 @@ func TestGetUpdatePackageURLsPreservesReleaseAssetURL(t *testing.T) {
 	}
 	if got := getUpdatePackageURLs(pkgName, githubURL); !slices.Equal(got, want) {
 		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
+// Beta 和 Alpha 通道同样使用全部下载源，保证并发探测对三个通道一致生效。
+func TestGitHubUpdateReleaseUsesAllSourcesForBetaAndAlpha(t *testing.T) {
+	suffix := currentInstallPackageSuffix()
+	if "" == suffix {
+		t.Skip("automatic installation is desktop-only")
+	}
+	const checksum = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+	// 两个通道使用不同基础版本，保证各自选中自己的 Release
+	tests := map[string]string{
+		conf.UpdateChannelBeta:  "v99.0.0-beta.2",
+		conf.UpdateChannelAlpha: "v99.1.0-alpha.5",
+	}
+	releases := make([]*githubRelease, 0, len(tests))
+	for _, tag := range tests {
+		version := strings.TrimPrefix(tag, "v")
+		pkgName := "siyuan-" + version + "-" + suffix
+		releases = append(releases, &githubRelease{TagName: tag, HTMLURL: "https://example.invalid/" + version,
+			Assets: []*githubReleaseAsset{{
+				Name: pkgName, BrowserDownloadURL: "https://github.com/siyuan-note/siyuan/releases/download/" + tag + "/" + pkgName,
+				Digest: "sha256:" + checksum, State: "uploaded",
+			}}})
+	}
+	githubReleasesLock.Lock()
+	originalReleases, originalCacheTime := cachedGitHubReleases, githubReleasesCacheTime
+	cachedGitHubReleases, githubReleasesCacheTime = releases, time.Now().Unix()
+	githubReleasesLock.Unlock()
+	t.Cleanup(func() {
+		githubReleasesLock.Lock()
+		cachedGitHubReleases, githubReleasesCacheTime = originalReleases, originalCacheTime
+		githubReleasesLock.Unlock()
+	})
+
+	for channel, tag := range tests {
+		release, err := getGitHubUpdateRelease(channel, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		version := strings.TrimPrefix(tag, "v")
+		pkgName := "siyuan-" + version + "-" + suffix
+		pkg := release.Packages[pkgName]
+		if nil == pkg {
+			t.Fatalf("channel [%s] has no package [%s]", channel, pkgName)
+		}
+		want := []string{
+			"https://release.b3log.org/siyuan/" + pkgName,
+			"https://release.liuyun.io/siyuan/" + pkgName,
+			"https://github.com/siyuan-note/siyuan/releases/download/" + tag + "/" + pkgName,
+		}
+		if !slices.Equal(pkg.URLs, want) {
+			t.Fatalf("channel [%s]: got %v, want %v", channel, pkg.URLs, want)
+		}
 	}
 }
 

@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20261016111305"
+		"updated": "20261024161058"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-tozyly3",
 				"id": "20240530101000-3ihd6qh",
-				"updated": "20240530101000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -32,12 +32,21 @@
 			"Properties": {
 				"ID": "20240530101000-975g92o",
 				"id": "20240530101000-ig1ly4b",
-				"updated": "20240530101000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "テンプレートスニペットは、事前に設定した定型文をカーソル位置にすばやく挿入するためのものです。これは変数をサポートしており、拡張子が "
+					"Data": "テンプレートスニペットは、変数や計算を含む再利用可能な内容をカーソル位置に挿入します。テンプレートはワークスペースの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " フォルダに "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -46,16 +55,103 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ のファイルをワークスペースの "
+					"Data": " ファイルとして保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-xi49soa",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-xi49soa",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートの保存"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024161058-00chqab",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-00chqab",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "再利用する内容をドキュメントに書き、ドキュメントメニューの "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "data/templates"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エクスポート"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ フォルダに保存して使用します。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "テンプレート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " から名前と保存先を指定して保存します。更新するには、テンプレート管理でソースを編集してプレビューするか、元のドキュメントを編集して再度エクスポートします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ud82uol",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-f4c1izj",
+				"id": "20240530101000-ud82uol",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートの呼び出し"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-28u2ufi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2pcv6i6",
+				"id": "20240530101000-28u2ufi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カーソル位置で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を入力してテンプレート検索を起動し、挿入したいテンプレートを選んで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ キーを押します。"
 				}
 			]
 		},
@@ -137,7 +233,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -297,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -392,7 +488,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-k46zytu",
-						"updated": "20240530101000"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -400,13 +496,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-v63d69b",
-								"updated": "20240530101000"
+								"updated": "20261024161058"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
@@ -414,7 +506,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この変数は現在のドキュメント名を挿入します"
+									"Data": ": 現在のドキュメントブロックの名前属性を挿入します。ドキュメントのタイトル "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " とは別の属性です"
 								}
 							]
 						}
@@ -1747,55 +1848,6 @@
 			]
 		},
 		{
-			"ID": "20240530101000-ud82uol",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"ID": "20240530101000-f4c1izj",
-				"id": "20240530101000-ud82uol",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "テンプレートの呼び出し"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-28u2ufi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-2pcv6i6",
-				"id": "20240530101000-28u2ufi",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "カーソル位置で "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ を入力してテンプレート検索を起動し、挿入したいテンプレートを選んで "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ キーを押します。"
-				}
-			]
-		},
-		{
 			"ID": "20260904022100-cvnck64",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1836,7 +1888,7 @@
 			"ID": "20261012014537-2ursx4t",
 			"Properties": {
 				"id": "20261012014537-2ursx4t",
-				"updated": "20261012014859"
+				"updated": "20261024161058"
 			}
 		},
 		{
@@ -1884,6 +1936,29 @@
 				"id": "20261012014537-9zcms5z",
 				"updated": "20261012014859"
 			}
+		},
+		{
+			"ID": "20261024161058-c8a2amg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-c8a2amg",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この例を実行する前に、現在のテンプレートパッケージ内に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "children/material.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を作成してください。子ドキュメントの内容に使うテンプレートです。既存のテンプレートへのパスに変更しても構いません。"
+				}
+			]
 		},
 		{
 			"Type": "NodeParagraph",
@@ -1954,7 +2029,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " は作成計画に含まれるサブドキュメントの情報を静的なリストとして返し、"
+					"Data": " は作成計画内の静的な子ドキュメント記述の一覧を返します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はドキュメント ID を使って計画内のドキュメントへの静的なブロック参照を返すため、タイトルや可読パスに依存しません。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1963,13 +2047,13 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " は作成予定のドキュメントを指す静的なブロック参照テキストを返します。"
+					"Data": " は可読パスで検索する互換用の入口です。"
 				}
 			],
 			"ID": "20261012014537-eegumh4",
 			"Properties": {
 				"id": "20261012014537-eegumh4",
-				"updated": "20261012014859"
+				"updated": "20261023030419"
 			}
 		},
 		{

@@ -88,6 +88,7 @@ describe("mobile top bar layout", () => {
             value: {
                 body: bodyElement,
                 getElementById: (id: string) => elements.get(id),
+                querySelector: () => breadcrumbSpace,
             },
         });
         Object.defineProperty(globalThis, "window", {
@@ -99,6 +100,12 @@ describe("mobile top bar layout", () => {
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), true);
             assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), true);
+            assert.deepEqual(breadcrumbSpace.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
+
+            editorElement.breadcrumbSpace = undefined;
+            updateMobileTopBarLayout();
+            assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), true,
+                "fullscreen mind maps keep title controls in the document breadcrumb");
             assert.deepEqual(breadcrumbSpace.children, [toolbarSidebarLeft, toolbarName, toolbarNameReadonly, toolbarSync, toolbarSidebarRight]);
 
             restoreMobileTopBarLayout();

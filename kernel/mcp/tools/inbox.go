@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package tools
 
@@ -21,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/88250/lute/ast"
@@ -31,7 +18,7 @@ import (
 // 收集箱数据存放在思源云端，需要订阅会员；底层复用 model 层的云端 shorthand 读写函数。
 var InboxTool = &Tool{
 	Name:        "inbox",
-	Description: "Inbox management (cloud-clipped web pages, messages, and audio/video/file attachments; requires subscription). Actions: list(page=1), get(id), convert(ids, notebook, path=/, remove_after=true) — converts one or more shorthands into local documents under the target notebook, deleting the cloud originals on success.",
+	Description: "Inbox management (cloud-clipped web pages, messages, and audio/video/file attachments; requires subscription). Actions: list(page=1), get(id), convert(ids, notebook, parentID=notebook root by default, remove_after=true) — converts one or more shorthands into local documents, deleting the cloud originals on success. Use parentID=\"\" for root. Legacy path requires a unique ancestor chain with non-empty titles and no literal slash; conflicts or unavailable indexes return explicit errors.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -40,7 +27,8 @@ var InboxTool = &Tool{
 			"id":           {Type: "string", Description: "Shorthand ID (for get)"},
 			"ids":          {Type: "string", Description: "Comma-separated shorthand IDs (for convert), e.g. \"1700000000000,1700000000001\""},
 			"notebook":     {Type: "string", Description: "Target non-encrypted notebook ID (for convert)"},
-			"path":         {Type: "string", Description: "Target hPath in the notebook for the new documents (default \"/\", the notebook root). Parent path must already exist."},
+			"parentID":     DocumentTool.InputSchema.Properties["parentID"],
+			"path":         {Type: "string", Description: "Legacy hPath whose target parent must already exist. Requires a unique ancestor chain with non-empty titles and no literal slash. Conflicts return pathAmbiguous or legacyPathUnsupported; unavailable metadata returns indexUnavailable. Do not combine with parentID."},
 			"remove_after": {Type: "boolean", Description: "Whether to delete the cloud shorthand after a successful conversion (default true)"},
 		},
 		Required: []string{"action"},
@@ -162,9 +150,9 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required"}}, IsError: true}, nil
 	}
 
-	hPath, _ := args["path"].(string)
-	if hPath == "" {
-		hPath = "/"
+	target, err := resolveDocumentTarget(notebook, args, true, true)
+	if err != nil {
+		return documentTargetFailure(err), nil
 	}
 	removeAfter := true
 	if v, ok := args["remove_after"]; ok {
@@ -173,19 +161,8 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	// 解析目标父路径（与 document.create 保持一致的 hPath→fsPath 解析逻辑）。
-	parentPath := "/"
-	parentDir := parentDir(hPath)
-	if parentDir != "/" {
-		bt := treenode.GetBlockTreeRootByHPath(notebook, parentDir)
-		if bt == nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parent path not found: " + parentDir}}, IsError: true}, nil
-		}
-		parentPath = strings.TrimSuffix(bt.Path, ".sy")
-	}
-
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Converting %d shorthand(s) -> notebook %s (hPath: %s):\n\n", len(ids), notebook, hPath)
+	fmt.Fprintf(&sb, "Converting %d shorthand(s) -> notebook %s (hPath: %s):\n\n", len(ids), notebook, target.hPath)
 
 	successIDs := make([]string, 0, len(ids))
 	failed := 0
@@ -212,15 +189,20 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 		}
 
 		docID := ast.NewNodeID()
-		docPath := strings.TrimRight(parentPath, "/") + "/" + docID + ".sy"
-		tree, err := model.CreateDocByMdSync(notebook, docPath, title, md, nil, nil)
+		if target.structured {
+			_, err = model.CreateDocByParent(model.DocumentCreateRequest{Notebook: notebook, ParentID: target.id,
+				ID: docID, TitleFormat: "plain", Title: title, Markdown: md})
+		} else {
+			docPath := strings.TrimSuffix(strings.TrimRight(target.path, "/"), ".sy") + "/" + docID + ".sy"
+			_, err = model.CreateDocByMdSync(notebook, docPath, title, md, nil, nil)
+		}
 		if err != nil {
 			fmt.Fprintf(&sb, "- [%s] %s -> FAILED: %s\n", id, title, err.Error())
 			failed++
 			continue
 		}
 		successIDs = append(successIDs, id)
-		fmt.Fprintf(&sb, "- [%s] %s -> created %s\n", id, title, tree.Root.ID)
+		fmt.Fprintf(&sb, "- [%s] %s -> created %s\n", id, title, docID)
 	}
 
 	// 仅在全部转换成功的条目上清理云端原件；失败条目保留以便重试。

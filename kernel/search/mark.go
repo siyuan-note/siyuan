@@ -1,22 +1,11 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package search
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -34,6 +23,18 @@ func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (p
 	}
 	keywords := SplitKeyword(keyword)
 	pos, marked, _ = encloseHighlightingRaw(text, keywords, "<mark>", "</mark>", caseSensitive, false, beforeLen)
+	return
+}
+
+// MarkTextContext 在匹配和生成高亮期间检查请求取消，不返回未完成的高亮片段。
+func MarkTextContext(ctx context.Context, text, keyword string, beforeLen int, caseSensitive bool) (pos int, marked string) {
+	if ctx.Err() != nil {
+		return -1, ""
+	}
+	if keyword == "" {
+		return -1, text
+	}
+	pos, marked, _ = encloseHighlightingRawContext(ctx, text, SplitKeyword(keyword), "<mark>", "</mark>", caseSensitive, false, beforeLen)
 	return
 }
 
@@ -75,14 +76,32 @@ func EncloseHighlightingRaw(text string, keywords []string, openMark, closeMark 
 
 // encloseHighlightingRaw 在原始文本上完成上下文截取和高亮，beforeLen 小于零时保留全部前文。
 func encloseHighlightingRaw(text string, keywords []string, openMark, closeMark string, caseSensitive, splitWords bool, beforeLen int) (pos int, ret string, matched bool) {
+	return encloseHighlightingRawContext(context.Background(), text, keywords, openMark, closeMark, caseSensitive, splitWords, beforeLen)
+}
+
+func encloseHighlightingRawContext(ctx context.Context, text string, keywords []string, openMark, closeMark string, caseSensitive, splitWords bool, beforeLen int) (pos int, ret string, matched bool) {
 	pos = -1
+	if ctx.Err() != nil {
+		return
+	}
 	reg, err := compileHighlightingRegexp(keywords, caseSensitive, splitWords)
+	if ctx.Err() != nil {
+		return
+	}
 	if err != nil {
 		ret = html.EscapeString(text)
 		return
 	}
 
-	indexes := reg.FindAllStringIndex(text, -1)
+	var indexes [][]int
+	if len(text) <= 4096 || ctx.Done() == nil || splitWords {
+		indexes = reg.FindAllStringIndex(text, -1)
+	} else {
+		indexes = findHighlightingMatchesContext(ctx, reg, text, keywords)
+	}
+	if ctx.Err() != nil {
+		return
+	}
 	if 1 > len(indexes) {
 		ret = html.EscapeString(text)
 		return
@@ -94,6 +113,9 @@ func encloseHighlightingRaw(text string, keywords []string, openMark, closeMark 
 		start = indexes[0][0]
 		var count int
 		for 0 < start { // 关键字前面太长的话缩短一些
+			if ctx.Err() != nil {
+				return -1, "", false
+			}
 			_, size := utf8.DecodeLastRuneInString(text[:start])
 			start -= size
 			count++
@@ -111,6 +133,9 @@ func encloseHighlightingRaw(text string, keywords []string, openMark, closeMark 
 	}
 	last := start
 	for _, index := range indexes {
+		if ctx.Err() != nil {
+			return -1, "", false
+		}
 		buf.WriteString(html.EscapeString(text[last:index[0]]))
 		if !matched {
 			pos = buf.Len()
@@ -126,6 +151,9 @@ func encloseHighlightingRaw(text string, keywords []string, openMark, closeMark 
 
 	// 避免反斜杠转义生成的高亮标签 https://github.com/siyuan-note/siyuan/issues/9790
 	ret = strings.ReplaceAll(ret, "\\<span", "\\\\<span")
+	if ctx.Err() != nil {
+		return -1, "", false
+	}
 	return
 }
 

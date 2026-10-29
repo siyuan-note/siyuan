@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5
 
 package model
@@ -67,6 +71,9 @@ func TestCompletedTransactionBatchReleasesDocumentTrees(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	for _, tx := range transactions {
+		if tx.indexChanges != nil {
+			t.Fatal("completed transaction retained its index change set")
+		}
 		if tx.state.Load() != 2 || !slices.Equal(tx.GetChangedRootIDs(), []string{fixture.sourceID}) ||
 			!slices.Equal(tx.GetMutatedRootIDs(), []string{fixture.sourceID}) {
 			t.Fatal("releasing document trees changed committed transaction metadata")

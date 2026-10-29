@@ -1,20 +1,16 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, transpileModule} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import {createSectionRuntime} from "../../util/sectionRuntime";
 
 test("streaming Markdown uses confirmed AI preferences and preserves readonly protection", async () => {
     const siyuan = {config: {ai: {agent: {streamingMarkdown: false}}, readonly: false}, isPublish: false,
         storage: {"siyuan-agent-streaming-markdown": true}};
     const saved: unknown[][] = [];
-    const exports = {} as typeof import("./agentStreamingMarkdown");
-    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/agentStreamingMarkdown.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {exports, window: {siyuan}, require: () => ({aiConfigApi: {
-        patch: async (...args: unknown[]) => {saved.push(args);},
-    }})});
+    const exports = loadModule<typeof import("./agentStreamingMarkdown")>("src/config/tabs/ai/agentStreamingMarkdown.ts", {
+        window: {siyuan}, require: () => ({aiConfigApi: {
+            patch: async (...args: unknown[]) => {saved.push(args);},
+        }})});
     assert.equal(exports.isAgentStreamingMarkdownEnabled(), false);
     await exports.setAgentStreamingMarkdownEnabled(true);
     assert.deepEqual(saved, [["agent.streamingMarkdown", true]]);
@@ -32,11 +28,8 @@ test("streaming Markdown uses confirmed AI preferences and preserves readonly pr
 test("confirmed AI updates notify streaming renderers once per changed preference", async () => {
     const config = {ai: {agent: {streamingMarkdown: false}}};
     const events: string[] = [];
-    const exports = {} as typeof import("./aiRuntime");
-    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiRuntime.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {
-        exports, window: {siyuan: {config}, dispatchEvent: (event: Event) => events.push(event.type)},
+    const exports = loadModule<typeof import("./aiRuntime")>("src/config/tabs/ai/aiRuntime.ts", {
+        window: {siyuan: {config}, dispatchEvent: (event: Event) => events.push(event.type)},
         CustomEvent: class { constructor(public type: string) {} },
         require: () => ({
             AGENT_STREAMING_MARKDOWN_CHANGED_EVENT: "siyuan-agent-streaming-markdown-changed",

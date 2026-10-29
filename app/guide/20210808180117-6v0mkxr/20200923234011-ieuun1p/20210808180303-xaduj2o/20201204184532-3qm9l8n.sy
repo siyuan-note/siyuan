@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261024161058"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428223009-x6fyksm",
-				"updated": "20210428223012"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -33,12 +33,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-bu1zdhb",
-				"updated": "20210428232129"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The template snippet is used to quickly insert the previously set text content at the cursor caret position, and it supports variables. Template snippets use "
+					"Data": "Template snippets insert reusable content at the cursor and support variables and calculations. Templates are stored as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -47,7 +47,114 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " suffix files and are stored in the data/templates folder of the workspace."
+					"Data": " files in the workspace’s "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder."
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-7td9kf1",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261024161058-7td9kf1",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Create a template"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261024161058-cs2bvgk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-cs2bvgk",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Write the content you want to reuse in a document, then choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from the document menu and select a name and location. To update it, edit and preview its source in template management, or edit the original document and export it again."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-4re70bp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091444-4re70bp",
+				"updated": "20250115153127"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Invoke template"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-gfccosk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-gfccosk",
+				"updated": "20250115153127"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "At the cursor caret position, select the template via "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ to trigger the template search, find the template that needs to be inserted and press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
@@ -128,7 +235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20261016202856"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -221,7 +328,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-i618qd8",
-				"updated": "20210428223421"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -249,7 +356,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "2006-01-02 15:04: 05"
+					"TextMarkTextContent": "2006-01-02 15:04:05"
 				},
 				{
 					"Type": "NodeText",
@@ -286,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20261016111305"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -381,7 +488,7 @@
 					},
 					"Properties": {
 						"id": "20211213121001-86hu9ws",
-						"updated": "20211213121001"
+						"updated": "20261024161058"
 					},
 					"Children": [
 						{
@@ -389,13 +496,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211213121001-qg2k19v",
-								"updated": "20211213121022"
+								"updated": "20261024161058"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
@@ -403,7 +506,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Use this variable to insert the current document name"
+									"Data": ": Inserts the document block’s name attribute, which is separate from its "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
 								}
 							]
 						}
@@ -1736,57 +1844,6 @@
 			]
 		},
 		{
-			"ID": "20210104091444-4re70bp",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091444-4re70bp",
-				"updated": "20250115153127"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "Invoke template"
-				}
-			]
-		},
-		{
-			"ID": "20210104091444-gfccosk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091444-gfccosk",
-				"updated": "20250115153127"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "At the cursor caret position, select the template via "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ to trigger the template search, find the template that needs to be inserted and press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​."
-				}
-			]
-		},
-		{
 			"ID": "20260904022100-kqbyhrl",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1821,7 +1878,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830143000-tplen01",
-				"updated": "20260830143000"
+				"updated": "20261024161058"
 			},
 			"Children": [
 				{
@@ -1877,6 +1934,29 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261024161058-ouz4oh0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161058-ouz4oh0",
+				"updated": "20261024161058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before running this example, create "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "children/material.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the current template package. It supplies the content for the child document; alternatively, change the path to an existing template."
 				}
 			]
 		},
@@ -1944,7 +2024,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260830143000-tplen07",
-				"updated": "20260830143000"
+				"updated": "20261023030419"
 			},
 			"Children": [
 				{
@@ -1954,7 +2034,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " returns a static list of planned child document descriptions; "
+					"Data": " returns the static child-document descriptors in the creation plan; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " returns a static block reference to a planned document by its ID, independent of its title or readable path; "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1963,7 +2052,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " returns static block-reference text that points to a planned document."
+					"Data": " is the legacy query by readable path."
 				}
 			]
 		},

@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -156,6 +160,8 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	testAPIContractMindmapMigration(t, engine, box.ID, docID)
 	testAPIContractListConversion(t, engine, docID)
 	testAPIContractTransactionCompletion(t, engine, docID, paragraphID)
+	testAPIContractHistoryQueueOrder(t, engine, docID, paragraphID)
+	testAPIContractRiffMutations(t, paragraphID)
 	for _, entry := range []struct {
 		path, id, scope string
 		code            int

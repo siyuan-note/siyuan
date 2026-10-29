@@ -3,7 +3,8 @@ import {openInputDialog} from "../dialog/inputDialog";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
-import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
+import {getAssetName, setNotebookName} from "../util/pathName";
+import {documentCreateRequest} from "../util/documentCreate";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {showTooltip} from "../dialog/tooltip";
@@ -12,7 +13,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 
-export const validateName = (name: string, targetElement?: HTMLElement) => {
+export const validateName = (name: string, targetElement?: HTMLElement, documentTitle = false) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t/.test(name)) {
         if (targetElement) {
             showTooltip(window.siyuan.languages.fileNameRule, targetElement, "error");
@@ -21,7 +22,8 @@ export const validateName = (name: string, targetElement?: HTMLElement) => {
         }
         return false;
     }
-    if (name.length > Constants.SIZE_TITLE) {
+    const length = documentTitle ? Array.from(name).length : name.length;
+    if (length > Constants.SIZE_TITLE) {
         if (targetElement) {
             showTooltip(window.siyuan.languages["_kernel"]["106"], targetElement, "error");
         } else {
@@ -38,6 +40,15 @@ export const replaceFileName = (name: string) => {
         name = name.replace(/\//g, "／");
     }
     return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|/g, "").substring(0, Constants.SIZE_TITLE);
+};
+
+export const truncateDocumentTitle = (name: string) => {
+    return Array.from(name).slice(0, Constants.SIZE_TITLE).join("");
+};
+
+// 文档标题按 Unicode 字符计数，保留字面斜杠。
+export const normalizeDocumentTitle = (name: string) => {
+    return truncateDocumentTitle(name.replace(/\r\n|\r|\n|\u2028|\u2029|\t/g, ""));
 };
 
 export const replaceLocalPath = (name: string) => {
@@ -65,7 +76,7 @@ export const rename = (options: {
             }
         },
         onConfirm: (value, dialog) => {
-            if (!validateName(value)) {
+            if (!validateName(value, undefined, options.type === "file")) {
                 return;
             }
             let name = value.trim();
@@ -73,7 +84,7 @@ export const rename = (options: {
                 dialog.destroy();
                 return;
             }
-            name = replaceFileName(name);
+            name = options.type === "notebook" ? replaceFileName(name) : normalizeDocumentTitle(name);
             if (options.type === "notebook") {
                 if (!name) {
                     name = window.siyuan.languages.untitled;
@@ -164,11 +175,7 @@ export const newFileContentBySelect = (protyle: IProtyle) => {
     if (fileNameShort.length > 10) {
         fileNameShort = fileNameShort.substr(0, 10) + "...";
     }
-    fileNameShort = replaceFileName(fileNameShort);
-    fetchPost("/api/filetree/createDoc", {
-        notebook: protyle.notebookId,
-        path: pathPosix().join(getDisplayName(protyle.path, false, true), Lute.NewNodeID() + ".sy"),
-        title: fileNameShort,
-        md: protyle.lute.BlockDOM2StdMd(html)
-    });
+    fileNameShort = normalizeDocumentTitle(fileNameShort);
+    fetchPost("/api/filetree/createDocByParent", documentCreateRequest(protyle.notebookId, protyle.path,
+        Lute.NewNodeID(), fileNameShort, protyle.lute.BlockDOM2StdMd(html)));
 };

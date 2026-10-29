@@ -10,6 +10,7 @@ on:
 
 env:
   package_json: "app/package.json"
+  GOMODCACHE: ${{ github.workspace }}/go/pkg/mod
 
 jobs:
   prepare:
@@ -24,7 +25,7 @@ jobs:
       release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Resolve editor testing revision
         id: testing_ref
@@ -37,7 +38,7 @@ jobs:
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: pip install PyGithub
@@ -55,7 +56,7 @@ jobs:
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Checkout siyuan-android
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-android
           ref: main
@@ -129,8 +130,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.x'
       - name: Test language validation
@@ -147,7 +148,30 @@ jobs:
       - name: Test workflow outcome reporting
         id: workflow_report_tests
         continue-on-error: true
-        run: node --test scripts/test-report-workflow-outcomes.mjs
+        run: node --test scripts/test-report-workflow-outcomes.mjs scripts/go-cache.test.mjs
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
+
+  headers:
+    name: Source file headers
+    needs: prepare
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Check project source file headers
+        id: check_source_file_headers
+        # 文件头只是格式约定，偏离不阻塞发布，按其他非阻塞检查的方式记录结果。
+        continue-on-error: true
+        run: node scripts/check-license-headers.mjs
 
       - name: Report non-blocking step outcomes
         if: always()
@@ -162,18 +186,30 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
-      - uses: actions/setup-node@v6
+          cache: false
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install repository pnpm version
-        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: app
@@ -192,14 +228,26 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
-      - uses: actions/setup-node@v6
+          cache: false
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install filesystem fault injection dependency
         run: |
           sudo apt-get update
@@ -217,6 +265,11 @@ jobs:
         env:
           SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
           SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so
+      - name: Test default structured title migration
+        id: test_default_structured_title_migration
+        continue-on-error: true
+        run: go test -tags "fts5 sqlcipher" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1
+        working-directory: kernel
       - name: Test path fixtures with custom temporary directories
         id: test_path_fixtures_with_custom_temporary_directories
         # 测试失败只记录结果，不阻塞后续发布构建。
@@ -235,6 +288,16 @@ jobs:
           path: ${{ runner.temp }}/kernel-test-results
           if-no-files-found: ignore
 
+      # 同一平台只有指定作业保存缓存，其他并行作业只恢复。
+      - name: Save Go cache
+        if: ${{ steps.restore-go-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Report non-blocking step outcomes
         if: always()
         env:
@@ -250,14 +313,26 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: kernel/go.mod
-          cache-dependency-path: kernel/go.sum
+          cache: false
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Set up Windows kernel test compiler
         uses: msys2/setup-msys2@v2
         with:
@@ -277,6 +352,16 @@ jobs:
           CGO_ENABLED: 1
           CC: gcc
 
+      - name: Test Windows default structured title migration
+        id: test_windows_default_structured_title_migration
+        continue-on-error: true
+        shell: msys2 {0}
+        run: go test -tags "fts5 sqlcipher" ./documentaddressing ./filesys ./model ./api ./cli/cmd -run '^TestStructuredTitles' -count=1
+        working-directory: kernel
+        env:
+          CGO_ENABLED: 1
+          CC: gcc
+
       - name: Upload kernel test logs
         if: always()
         uses: actions/upload-artifact@v7
@@ -284,6 +369,16 @@ jobs:
           name: kernel-tests-windows
           path: ${{ runner.temp }}/kernel-test-results
           if-no-files-found: ignore
+
+      # 同一平台只有指定作业保存缓存，其他并行作业只恢复。
+      - name: Save Go cache
+        if: ${{ steps.restore-go-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
 
       - name: Report non-blocking step outcomes
         if: always()
@@ -299,12 +394,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Install repository pnpm version
-        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: app
@@ -405,7 +500,7 @@ jobs:
       PLAYWRIGHT_JSON_OUTPUT_FILE: editor-results-${{ matrix.group }}.json
     steps:
       - name: Checkout test orchestration
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: source
 
@@ -420,21 +515,21 @@ jobs:
           test "$(uname -m)" = arm64
 
       - name: Checkout pinned siyuan-testing
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-testing
           ref: ${{ needs.prepare.outputs.testing_ref }}
           path: siyuan-testing
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
       - name: Install test dependencies
         id: dependencies
         run: |
-          npm install --global ${{ needs.prepare.outputs.packageManager }}
+          npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
           pnpm install --frozen-lockfile
         working-directory: siyuan-testing
 
@@ -582,25 +677,37 @@ jobs:
     needs: [prepare, languages, contracts]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
-          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: true
+          cache: false
       - run: go version
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
+      - name: Prepare Go cache
+        id: go-cache
+        run: node scripts/go-cache.mjs
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+      - name: Restore Go cache
+        id: restore-go-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ${{ steps.go-cache.outputs.modules }}
+            ${{ steps.go-cache.outputs.build }}
+          key: ${{ steps.go-cache.outputs.key }}
+
       - name: Install Node pnpm
-        run: npm install -g ${{ needs.prepare.outputs.packageManager }}
+        run: npm install --global --allow-scripts=pnpm ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Get pnpm store path
@@ -611,12 +718,13 @@ jobs:
           echo "path=$STORE_PATH" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Cache pnpm store
-        uses: actions/cache@v5
+      - name: Restore pnpm store
+        id: restore-pnpm-cache
+        uses: actions/cache/restore@v6
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
-          restore-keys: pnpm-${{ runner.os }}-${{ runner.arch }}-
+          key: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ needs.prepare.outputs.packageManager }}-${{ hashFiles(format('go/src/github.com/{0}/app/pnpm-lock.yaml', github.repository)) }}
+          restore-keys: pnpm-v2-${{ runner.os }}-${{ runner.arch }}-${{ needs.prepare.outputs.packageManager }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -627,7 +735,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
@@ -670,7 +778,7 @@ jobs:
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
 
       - name: Checkout siyuan-android
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: siyuan-note/siyuan-android
           ref: ${{ needs.prepare.outputs.android_ref }}
@@ -728,6 +836,10 @@ jobs:
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x ./gradlew
+          # 新版 Android 工程验证所有渠道；固定到旧提交的构建仍可使用原有流程。
+          if [ -f scripts/verify-build.gradle ]; then
+            ./gradlew --init-script scripts/verify-build.gradle :app:verifyBuildConfiguration
+          fi
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
           mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk

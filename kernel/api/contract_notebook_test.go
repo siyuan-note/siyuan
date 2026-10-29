@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -18,7 +22,8 @@ func TestAPIContractNotebookConfConversion(t *testing.T) {
 	for _, bytes := range [][]byte{nil, {}, {0, 1, 254, 255}} {
 		value := conf.NewBoxConf()
 		value.BoxCrypt = &conf.BoxEncryption{Spec: 2, WrappedDEK: bytes, WrapNonce: bytes, Metadata: bytes, CreatedAt: 1234567890}
-		before, err := json.Marshal(value)
+		publicFields := *value
+		before, err := json.Marshal(&publicFields)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -28,7 +33,8 @@ func TestAPIContractNotebookConfConversion(t *testing.T) {
 		}
 	}
 	value := conf.NewBoxConf()
-	before, _ := json.Marshal(value)
+	publicFields := *value
+	before, _ := json.Marshal(&publicFields)
 	after, err := json.Marshal(notebookConfContract(value))
 	if err != nil || string(before) != string(after) {
 		t.Fatalf("unencrypted configuration serialization changed: %v", err)

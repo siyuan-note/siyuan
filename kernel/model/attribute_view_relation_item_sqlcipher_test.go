@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build fts5 && (sqlcipher || libsqlcipher)
 
 package model
@@ -34,6 +38,7 @@ func TestAttributeViewRelationItemEncrypted(t *testing.T) {
 	markRuntimeEncryptedBox(boxID)
 	key := bytes.Repeat([]byte{0x64}, 32)
 	prepareUnlockedEncryptedBoxTest(t, boxID, key)
+	encryptDocumentTestSources(t, key, trees...)
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = &conf.BoxEncryption{Spec: boxEncryptionSpec}

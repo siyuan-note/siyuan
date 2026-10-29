@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package bazaar
 
@@ -29,7 +17,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const (
@@ -60,7 +47,7 @@ func IsValidPackageType(pkgType string) bool {
 
 // ExtractLocalPackage 将本地集市包解压到临时目录并识别包类型。
 func ExtractLocalPackage(archivePath string) (pkgType string, pkg *Package, packagePath string, cleanup func(), err error) {
-	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "", false)
+	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "")
 	return
 }
 
@@ -70,11 +57,12 @@ func ExtractLocalPackageWithHash(archivePath, expectedHash string) (pkgType stri
 }
 
 // ExtractLocalPackageWithHashContext 在核验与解压期间响应取消，未提交的临时内容会清理。
+// 解压始终落在 temp，校验通过后才由安装流程拷入 data。
 func ExtractLocalPackageWithHashContext(ctx context.Context, archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
-	return extractLocalPackageWithHash(ctx, archivePath, expectedHash, true)
+	return extractLocalPackageWithHash(ctx, archivePath, expectedHash)
 }
 
-func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash string, private bool) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
+func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
 	cleanup = func() {}
 	if err = ctx.Err(); err != nil {
 		return
@@ -95,16 +83,9 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 	if err = ctx.Err(); err != nil {
 		return
 	}
-	tempPath := filepath.Join(util.TempDir, "bazaar", "local", gulu.Rand.String(7))
-	if private {
-		root := filepath.Join(installPrivateRoot(), "install-operations")
-		if err = makePrivateInstallDir(root); err != nil {
-			return
-		}
-		tempPath, err = os.MkdirTemp(root, "extract-")
-		if err != nil {
-			return
-		}
+	tempPath, err := makePackageExtractionDir("local", "extract-")
+	if err != nil {
+		return
 	}
 	cleanup = func() { _ = os.RemoveAll(tempPath) }
 	reader, readerErr := zip.NewReader(bytes.NewReader(data), int64(len(data)))
@@ -155,10 +136,6 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 		cleanup()
 	}
 	return
-}
-
-func extractLocalPackageReader(reader *zip.Reader, destination string) error {
-	return extractLocalPackageReaderContext(context.Background(), reader, destination)
 }
 
 func extractLocalPackageReaderContext(ctx context.Context, reader *zip.Reader, destination string) error {

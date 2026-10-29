@@ -5,6 +5,7 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {escapeMarkdownPlainText} from "../../util/escape";
+import {documentCreateRequest} from "../../util/documentCreate";
 
 const loadInbox = (responses: {code: number; data?: Record<string, string>}[]) => {
     const calls: {url: string; data: Record<string, string>}[] = [];
@@ -81,4 +82,71 @@ test("inbox insertion keeps Markdown punctuation in the title as plain text", as
     await inbox.insertToCurrentDoc(["entry"], "doc-id");
     assert.equal(calls[1].data.data, "# A \\*bold\\* \\[note\\] \\$x\\$ \\=\\=mark\\=\\= \\&amp; \\#tag\\# 1+2 50%? continued\n\nBody");
     assert.deepEqual(removed, [["entry"]]);
+});
+
+const loadMoveInbox = (fetchEntry: (id: string) => Promise<void> = async () => {}) => {
+    const removed: string[][] = [];
+    const created: string[] = [];
+    let picker: {cb: (paths: string[], notebooks: string[]) => Promise<void>};
+    const exports: {Inbox?: {prototype: object}} = {};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "Inbox.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText, {
+        exports, Lute: {NewNodeID: () => `20261023030000-${String(created.length).padStart(7, "0")}`},
+        window: {siyuan: {languages: {documentCreationLimit: "Limit", documentCreationRecovery: "Review"}}},
+        require: (name: string) => ({
+            "../Model": {Model: class {}},
+            "../../util/pathName": {movePathTo: (options: typeof picker) => { picker = options; }},
+            "../../util/documentCreate": {documentCreateRequest},
+            "../../util/fetch": {fetchSyncPost: async (_url: string, data: {id: string}) => {
+                await fetchEntry(data.id);
+                return {code: 0, data: {oId: data.id, shorthandTitle: data.id, shorthandMd: "Body"}};
+            }},
+            "../../util/configuredDocument": {createConfiguredDocument: async (input: {id: string}, options: {onCreated: () => void}) => {
+                created.push(input.id);
+                options.onCreated();
+            }},
+            "../../editor/rename": {normalizeDocumentTitle: (value: string) => value},
+            "../../util/escape": {escapeHtml: (value: string) => value},
+            "../../dialog/message": {showMessage() {}},
+        })[name] || {},
+    });
+    const inbox = Object.assign(Object.create(exports.Inbox.prototype), {
+        data: {}, moving: false, moveTargets: new Map(), remove: (ids: string[]) => removed.push(Array.from(ids)),
+    }) as {move(ids: string[]): void};
+    return {inbox, removed, created, select: () => picker.cb(["/"], ["box"])};
+};
+
+test("inbox document batches consume only confirmed entries after a later network failure", async () => {
+    const f = loadMoveInbox(async id => { if (id === "second") { throw new Error("offline"); } });
+    f.inbox.move(["first", "second"]);
+    await f.select();
+    assert.equal(f.created.length, 1);
+    assert.deepEqual(f.removed, [["first"]]);
+});
+
+test("confirmed inbox batches can exceed the unresolved-plan bound and removal retries do not recreate documents", async () => {
+    const f = loadMoveInbox();
+    const ids = Array.from({length: 64}, (_, i) => `entry-${i}`);
+    f.inbox.move(ids);
+    await f.select();
+    assert.equal(f.created.length, 64);
+    assert.deepEqual(f.removed, [ids]);
+    f.inbox.move(ids);
+    await f.select();
+    assert.equal(f.created.length, 64);
+    assert.deepEqual(f.removed, [ids, ids]);
+});
+
+test("concurrent inbox move callbacks cannot allocate different identities for one source", async () => {
+    let resolve: () => void;
+    const wait = new Promise<void>(done => { resolve = done; });
+    const f = loadMoveInbox(async () => wait);
+    f.inbox.move(["first"]);
+    const first = f.select();
+    await f.select();
+    resolve();
+    await first;
+    assert.equal(f.created.length, 1);
+    assert.deepEqual(f.removed, [["first"]]);
 });

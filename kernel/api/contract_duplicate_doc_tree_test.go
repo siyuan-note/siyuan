@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //go:build (sqlcipher || libsqlcipher) && cgo
 
 package api
@@ -94,7 +98,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 	engine := gin.New()
 	engine.Use(sessions.Sessions("duplicate-tree-test", cookie.NewStore([]byte("duplicate-tree-session-test-key"))))
 	ServeAPI(engine)
-	const endpoint = "/api/filetree/duplicateDocTree"
+	endpoint := "/api/filetree/duplicateDocTree"
 	request := func(id string) *http.Request {
 		ret := httptest.NewRequest("POST", endpoint, strings.NewReader(`{"id":"`+id+`"}`))
 		ret.Header.Set("Authorization", "Token duplicate-tree-test")
@@ -165,6 +169,40 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 	if recorder.Code != http.StatusUnauthorized {
 		t.Fatalf("unauthenticated copy admitted: %s", recorder.Body.String())
 	}
+	t.Run("collection-failure", func(t *testing.T) {
+		originalEndpoint := endpoint
+		defer func() { endpoint = originalEndpoint }()
+		view := av.NewAttributeView(ast.NewNodeID())
+		keyID := ast.NewNodeID()
+		view.KeyValues = append(view.KeyValues, &av.KeyValues{Key: &av.Key{ID: keyID, Name: "Date", Type: av.KeyTypeDate}})
+		view.Automations = &av.AutomationConfig{Spec: 2, Rules: []*av.AutomationRule{{
+			ID: ast.NewNodeID(), Name: "Invalid date", Trigger: "block", Enabled: true,
+			BlockSource: &av.AutomationBlockSource{NotebookIDs: []string{box.ID}, Types: []string{"d"}, Tags: []string{"todo"}},
+			Actions: []*av.AutomationAction{{Type: "collect", Target: "current", Fields: map[string]*av.AutomationValue{
+				keyID: {Mode: "template", Template: "invalid date"},
+			}}},
+		}}}
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+		source.Root.SetIALAttr("tags", "todo")
+		if _, err := filesys.WriteTree(source); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(source)
+		before := len(treenode.GetBlockTreesByTypeInBox("d", box.ID))
+		for _, name := range []string{"duplicateDoc", "duplicateDocTree"} {
+			endpoint = "/api/filetree/" + name
+			post(source.ID, false)
+			if got := len(treenode.GetBlockTreesByTypeInBox("d", box.ID)); got != before {
+				t.Fatalf("%s left a failed copy in the index: %d != %d", name, got, before)
+			}
+		}
+		view.Automations.Rules[0].Enabled = false
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	const password = "duplicate-password"
 	if err = model.EnableEncryptedNotebook(password); err != nil {

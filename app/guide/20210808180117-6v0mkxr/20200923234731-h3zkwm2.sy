@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261018005815"
+		"updated": "20261024164212"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428222532-nfvnq4d",
-				"updated": "20261016191102"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -167,7 +167,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20261016191102"
+				"updated": "20261024163429"
 			},
 			"Children": [
 				{
@@ -297,7 +297,7 @@
 					},
 					"Properties": {
 						"id": "20221202214811-2s26txl",
-						"updated": "20230622164122"
+						"updated": "20261024163429"
 					},
 					"Children": [
 						{
@@ -305,7 +305,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214811-p1eevpi",
-								"updated": "20230622164122"
+								"updated": "20261024163429"
 							},
 							"Children": [
 								{
@@ -330,7 +330,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", etc."
+									"Data": ", etc"
 								}
 							]
 						}
@@ -871,7 +871,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909100946-x94gyft",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1007,7 +1007,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20260803171606"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -1030,7 +1030,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1039,7 +1039,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1048,7 +1048,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, or pay attention to "
+					"Data": ", or pay attention to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1201,7 +1201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260807094000-a1s2e3n",
-				"updated": "20260807094000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
@@ -1229,12 +1229,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260807094000-faqen02",
-				"updated": "20260807094000"
+				"updated": "20261024164212"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Determining whether an asset is completely unused requires scanning the entire workspace. Performing this check every time a reference is deleted would affect editing performance. Automatically deleting assets would also make undo and multi-device synchronization unreliable and could cause accidental data loss. Therefore, SiYuan does not automatically delete assets when content references are removed and does not provide an option to enable this behavior."
+					"Data": "Determining whether an asset is completely unused requires scanning the entire workspace. Performing this check every time a reference is deleted would affect editing performance. Automatically deleting assets would also make undo and multi-device synchronization unreliable and could cause accidental data loss."
+				}
+			]
+		},
+		{
+			"ID": "20261024164212-67csx38",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024164212-67csx38",
+				"updated": "20261024164212"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Therefore, SiYuan does not automatically delete assets when content references are removed and does not provide an option to enable this behavior."
 				}
 			]
 		},
@@ -1296,7 +1310,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708111435-xmj42q4",
-				"updated": "20250115163037"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
@@ -1306,12 +1320,40 @@
 			]
 		},
 		{
+			"ID": "20261021111316-pu0s77m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-pu0s77m",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The data repo key protects snapshots and sync data. It is separate from the encrypted-notebook master password and key backups. Resetting the data repo cannot recover a lost master password or replace matching encryption key backups."
+				}
+			]
+		},
+		{
+			"ID": "20261021111316-rfqpx3c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021111316-rfqpx3c",
+				"updated": "20261021111316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before resetting, exit SiYuan normally and back up the complete workspace. If you have encrypted notebooks, also keep separate, matching encryption key backups and confirm that the master password works. Delete old cloud sync directories and snapshots only after the new sync completes, data is verified, and recovery materials are safely preserved."
+				}
+			]
+		},
+		{
 			"ID": "20220708111435-a2z4tpd",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20220708111435-a2z4tpd",
-				"updated": "20250115163037"
+				"updated": "20261021111316"
 			},
 			"Children": [
 				{
@@ -1323,7 +1365,7 @@
 					},
 					"Properties": {
 						"id": "20220708111435-kw4fp2b",
-						"updated": "20220708111614"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1331,7 +1373,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708111435-2ozs1pt",
-								"updated": "20220708111614"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1351,6 +1393,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Account & Sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data repo"
 								},
 								{
 									"Type": "NodeText",
@@ -1387,7 +1438,7 @@
 					},
 					"Properties": {
 						"id": "20220708111435-ptoqng0",
-						"updated": "20250115163037"
+						"updated": "20261021111316"
 					},
 					"Children": [
 						{
@@ -1395,7 +1446,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708111435-vqcxyea",
-								"updated": "20220708111435"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1412,7 +1463,7 @@
 							},
 							"Properties": {
 								"id": "20220708111435-w2hbl28",
-								"updated": "20250115163037"
+								"updated": "20261021111316"
 							},
 							"Children": [
 								{
@@ -1426,7 +1477,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-nev43mp",
-										"updated": "20250115163037"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1434,30 +1485,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-zrahxh3",
-												"updated": "20250115163037"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Manually back up the data, you can use "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Export Data"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ or directly copy the "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "workspace/data/"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ folder on the file system"
+													"Data": "Exit SiYuan normally and back up the complete workspace; for encrypted notebooks, also preserve matching encryption key backups and the master password"
 												}
 											]
 										}
@@ -1474,7 +1507,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-extloil",
-										"updated": "20220708111603"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1482,7 +1515,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-cjteir8",
-												"updated": "20220708111603"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1506,7 +1539,16 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Data rep key"
+													"TextMarkTextContent": "Data repo"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Data repo key"
 												},
 												{
 													"Type": "NodeText",
@@ -1532,7 +1574,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-29zhnwl",
-										"updated": "20220708111456"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1540,7 +1582,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-pfbzbnj",
-												"updated": "20220708111456"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
@@ -1562,7 +1604,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-rsas3a7",
-										"updated": "20220708111435"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1570,12 +1612,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-i8ykkah",
-												"updated": "20220708111435"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted"
+													"Data": "Use a new cloud sync directory; delete the old directory only after the new sync completes, data is verified, and recovery materials are safely preserved"
 												}
 											]
 										}
@@ -1592,7 +1634,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-jjdh23m",
-										"updated": "20220708111435"
+										"updated": "20261021111316"
 									},
 									"Children": [
 										{
@@ -1600,12 +1642,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-yrc4wlj",
-												"updated": "20220708111435"
+												"updated": "20261021111316"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "The existing cloud snapshots are no longer available and can be deleted"
+													"Data": "Delete old cloud snapshots only after the new sync completes, data is verified, and recovery materials are safely preserved"
 												}
 											]
 										}

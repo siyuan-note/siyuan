@@ -1,6 +1,7 @@
 import {openMobileFileById} from "../editor";
 import {refreshSettingConfig} from "../../config/setting/sync";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
+import {clearDocumentCreationPlans} from "../../util/configuredDocument";
 import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {
     downloadProgress,
@@ -12,6 +13,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
+import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import type {App} from "../../index";
 import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
 import {reloadEmoji} from "../../emoji";
@@ -130,6 +132,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "closeBox":
             case "removeBox": {
                 closeNotebookHistoryDialogs(data.data.box);
+                clearDocumentCreationPlans(data.data.box);
                 closeNotebookLivePhotos(data.data.box);
                 removeMobileBacklinkContent({notebookId: data.data.box});
                 removeMobileReferenceSheet({notebookId: data.data.box});
@@ -190,6 +193,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "downloadProgress":
                 downloadProgress(data.data);
+                break;
+            case "syncProgress":
+                syncCheckoutProgress(data);
                 break;
             case"progress":
                 progressLoading(data);

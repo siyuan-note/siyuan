@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package api
 
 import (
@@ -192,6 +196,47 @@ func TestAPIContractAISessionExtensions(t *testing.T) {
 	got, _ := json.Marshal(response.Data)
 	if string(want) != string(got) {
 		t.Fatalf("stored session wire changed:\n%s\n%s", want, got)
+	}
+	bundle, err := apicontract.BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = bundle.ValidateHTTPResponse("POST", "/api/ai/agent/getSession", 200, recorder.Header().Get("Content-Type"), recorder.Body.Bytes()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAPIContractAIPDFImageAttachment(t *testing.T) {
+	aiContractConfiguration(t)
+	engine := gin.New()
+	engine.POST("/api/ai/agent/saveSession", saveSession)
+	engine.POST("/api/ai/agent/getSession", getSession)
+	body := `{"id":"20261028120000-pdfsess","entries":[{"type":"assistant","toolCalls":[{"name":"pdf","arguments":{"action":"preview"},"attachments":[{"type":"image","path":"assets/figures.pdf","documentId":"20261028120001-pdfdoc1","pdfImage":{"revision":"digest","page":2,"object":10}}]}]}]}`
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/ai/agent/saveSession", strings.NewReader(body)))
+	if recorder.Code != 200 || !strings.Contains(recorder.Body.String(), `"code":0`) {
+		t.Fatalf("save PDF session: %s", recorder.Body.String())
+	}
+	recorder = httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/ai/agent/getSession", strings.NewReader(`{"id":"20261028120000-pdfsess"}`)))
+	var response struct {
+		Data struct {
+			Entries []struct {
+				ToolCalls []struct {
+					Attachments []apicontract.AIAgentAttachment
+				}
+			}
+		}
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+		t.Fatal(err)
+	}
+	if len(response.Data.Entries) != 1 || len(response.Data.Entries[0].ToolCalls) != 1 || len(response.Data.Entries[0].ToolCalls[0].Attachments) != 1 {
+		t.Fatalf("PDF attachments lost: %s", recorder.Body.String())
+	}
+	source := response.Data.Entries[0].ToolCalls[0].Attachments[0].PDFImage
+	if source == nil || source.Revision != "digest" || source.Page != 2 || source.Object != 10 {
+		t.Fatalf("PDF source metadata lost: %s", recorder.Body.String())
 	}
 	bundle, err := apicontract.BuildBundle()
 	if err != nil {

@@ -2,7 +2,7 @@ import {getIconByType} from "../editor/getIcon";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/render/mathRender";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "./escape";
+import {escapeHtmlTextAndAttr, escapeTooltipTextAttr, escapeAttr, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {headingNumberNeedsLeadingTrim, headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
 import {getTreeItemTailHTML} from "./treeItemTail";
@@ -95,10 +95,10 @@ export class Tree {
             } else if (item.type === "tag") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTag"></use></svg>';
             } else if (item.type === "backlink") {
-                titleTip = ` aria-label="${escapeAriaLabel(item.hPath)}"`;
+                titleTip = ` data-tooltip-encoding="none" aria-label="${escapeHtmlTextAndAttr(item.hPath || "")}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
-                titleTip = ` aria-label="${escapeAriaLabel(Lute.BlockDOM2Content(item.name))}"`;
+                titleTip = ` data-tooltip-encoding="none" aria-label="${escapeTooltipTextAttr(Lute.BlockDOM2Content(item.name))}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: ${isM ? 16 : 22}px;width: 16px;"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
@@ -191,7 +191,7 @@ data-def-path="${item.defPath}">
     </span>
     ${iconHTML}
     ${numberHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}" ${type === "outline" ? ' data-tooltip-encoding="none" aria-label="' + escapeTooltipTextAttr(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
     ${getTreeItemTailHTML(countHTML, this.blockExtHTML || "", isM)}
 </li>`;
             if (item.children && item.children.length > 0) {

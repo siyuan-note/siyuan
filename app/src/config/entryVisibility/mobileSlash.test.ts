@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 import * as catalog from "./catalog";
 import * as profile from "./profile";
 import {resolveSlashMenuItems} from "../../protyle/hint/slashMenu";
@@ -16,11 +16,7 @@ test("slash visibility shares profile settings and only platform defaults differ
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {configurable: true, value: runtimeWindow});
     try {
-        const api = {} as typeof import("./runtime");
-        runInNewContext(transpileModule(readFileSync("src/config/entryVisibility/runtime.ts", "utf8"), {
-            compilerOptions: {module: ModuleKind.CommonJS},
-        }).outputText, {
-            exports: api,
+        const api = loadModule<typeof import("./runtime")>("src/config/entryVisibility/runtime.ts", {
             window: runtimeWindow,
             require: () => ({...catalog, ...profile, TOOLBAR_ENTRY_ROOT_PATH: "editor.toolbar"}),
         });
@@ -50,6 +46,16 @@ test("slash visibility shares profile settings and only platform defaults differ
                 assert.equal(api.isEntryVisible("editor.image.ocrText"), visible);
             }
             delete custom.entries["editor.image.ocrText"];
+            for (const active of ["simple", "full", "custom"]) {
+                config.active = active;
+                assert.equal(api.isEntryVisible("editor.blockEmbed.toolbar"), true);
+            }
+            config.active = "custom";
+            for (const visible of [false, true]) {
+                custom.entries["editor.blockEmbed.toolbar"] = visible;
+                assert.equal(api.isEntryVisible("editor.blockEmbed.toolbar"), visible);
+            }
+            delete custom.entries["editor.blockEmbed.toolbar"];
             assert.equal(catalog.getEntryCatalogDefaultVisibility(root), !mobile);
             assert.equal(catalog.getEntryCatalogCustomDefaultVisibility(root), !mobile);
             for (const active of ["simple", "full", "custom"]) {

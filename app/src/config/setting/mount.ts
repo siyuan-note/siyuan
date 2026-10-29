@@ -4,7 +4,6 @@ import {Constants} from "../../constants";
 import type {SettingSearchUnavailableItem, SettingTabMountContext} from "./builder";
 import {getSettingTab, type TSettingTab} from "./tabs";
 import {getSettingsOwnerApp} from "./windowContext";
-import {initSettingGroupCollapse, syncSettingGroupCollapse} from "./collapse";
 
 const deferredTabs = new Set<TSettingTab>();
 let watchingFocus = false;
@@ -37,7 +36,6 @@ export const watchSettingTabInteractions = () => {
 export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
     const {html, items} = buildGroupedItemsView(tabId);
     root.innerHTML = html;
-    initSettingGroupCollapse(root);
 
     for (const item of items) {
         await item.afterMount?.(root);
@@ -47,10 +45,8 @@ export const mountSettingTab = async (tabId: string, root: HTMLElement) => {
 /** 设置面板已打开且对应 Tab 已挂载时，重新 register 并整页替换 */
 export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     const dialogElement = window.siyuan.dialogs.find((d) => d.element.getAttribute("data-key") === Constants.DIALOG_SETTING)?.element;
-    if (!dialogElement) {
-        return;
-    }
-    const root = dialogElement.querySelector(`.config__tab-container[data-name="${tabId}"]`) as HTMLElement | null;
+    const root = (dialogElement?.querySelector(`.config__tab-container[data-name="${tabId}"]`) ||
+        document.querySelector(`#modelMain > .config[data-setting-tab="${tabId}"]`)) as HTMLElement | null;
     if (!root?.innerHTML) {
         return;
     }
@@ -69,7 +65,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     }
     deferredTabs.delete(tabId);
     const search: Partial<SettingTabMountContext> = {};
-    const keywords = getSearchKeywordsLower(dialogElement);
+    const keywords = dialogElement ? getSearchKeywordsLower(dialogElement) : "";
     const tab = getSettingTab(tabId);
     if (keywords) {
         const result = tab.scanSearch(keywords);
@@ -130,7 +126,6 @@ export const applySettingTabSearchVisibility = (
         // 标记每组最后一个未隐藏条目，不显示 border-bottom
         lastVisibleItem?.classList.add("config-item--last-visible");
     });
-    syncSettingGroupCollapse(root, true);
 };
 
 export const clearSettingTabSearch = (root: HTMLElement) => {
@@ -138,7 +133,6 @@ export const clearSettingTabSearch = (root: HTMLElement) => {
     root.querySelectorAll("[data-config-group-id], [data-config-item-id]").forEach((el) => {
         el.classList.remove("config-search-hidden", "config-item--last-visible");
     });
-    syncSettingGroupCollapse(root, false);
 };
 
 /** 面板型 SettingTab：根据全局搜索关键词切换 layout-tab-bar 子 Tab */

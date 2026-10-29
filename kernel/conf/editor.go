@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package conf
 
@@ -68,6 +56,7 @@ type Editor struct {
 	DatabaseAttrViewMode            int            `json:"databaseAttrViewMode"`            // 数据库属性默认展开状态，0：展开，1：折叠
 	DatabaseAttrHideEmpty           bool           `json:"databaseAttrHideEmpty"`           // 是否隐藏数据库空属性
 	DatabaseAttrUseTabs             *bool          `json:"databaseAttrUseTabs"`             // 数据库属性是否使用页签
+	DatabaseAttrLayout              *int           `json:"databaseAttrLayout"`              // 数据库字段布局，0：单栏，1：双栏按行，2：双栏按列
 	GenerateHistoryInterval         int            `json:"generateHistoryInterval"`         // 生成历史时间间隔，单位：分钟
 	HistoryRetentionDays            int            `json:"historyRetentionDays"`            // 历史保留天数
 	Emoji                           []string       `json:"emoji"`                           // 常用表情
@@ -82,6 +71,7 @@ type Editor struct {
 	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
 	ReadOnly                        bool           `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool           `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
+	EmbedBlockBreadcrumbParentPath  *bool          `json:"embedBlockBreadcrumbParentPath"`  // 嵌入块面包屑是否显示文档上层路径
 	ListLogicalOutdent              bool           `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
@@ -111,6 +101,7 @@ type Editor struct {
 	HeadingNumberFormat             string         `json:"headingNumberFormat"`             // 标题编号格式
 	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`             // 粘贴网址时自动转为链接
+	MathDelimiterCompatibility      *bool          `json:"mathDelimiterCompatibility"`      // 粘贴和导入时兼容 LaTeX 公式分隔符，默认开启
 	DragHTMLFileToIframe            bool           `json:"dragHTMLFileToIframe"`            // 是否将拖拽的 HTML 文件嵌入为 IFrame 块
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
@@ -216,6 +207,7 @@ func NewEditor() *Editor {
 		DatabaseAttrViewMode:            0,
 		DatabaseAttrHideEmpty:           false,
 		DatabaseAttrUseTabs:             new(true),
+		DatabaseAttrLayout:              new(1),
 		GenerateHistoryInterval:         10,
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},
@@ -228,6 +220,7 @@ func NewEditor() *Editor {
 		KaTexMacros:                     "{}",
 		ReadOnly:                        false,
 		EmbedBlockBreadcrumb:            false,
+		EmbedBlockBreadcrumbParentPath:  new(true),
 		ListLogicalOutdent:              false,
 		ListItemDotNumberClickFocus:     true,
 		FloatWindowMode:                 0,
@@ -250,6 +243,7 @@ func NewEditor() *Editor {
 		HeadingNumberFormat:             DefaultHeadingNumberFormat,
 		HeadingEmbedMode:                0,
 		PasteURLAutoConvert:             false,
+		MathDelimiterCompatibility:      new(true),
 		DragHTMLFileToIframe:            false,
 		Markdown:                        util.NewMarkdown(),
 	}

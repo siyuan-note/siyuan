@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package filesys
 
@@ -114,6 +110,30 @@ func TestLoadTreePreservesInvalidParent(t *testing.T) {
 			got, err := os.ReadFile(parentAbs)
 			if err != nil || string(got) != invalid {
 				t.Fatalf("invalid parent was overwritten: %v", err)
+			}
+		})
+	}
+}
+
+func TestLoadTreePreservesUnsupportedParent(t *testing.T) {
+	for _, cached := range []bool{false, true} {
+		t.Run(map[bool]string{false: "disk", true: "cache"}[cached], func(t *testing.T) {
+			box, parent, p, data := setupStalePathTest(t)
+			childAbs := writeStalePathFixture(t, box, p, data)
+			future := []byte(`{"Spec":"999","Properties":{"title":"Future parent"}}`)
+			parentAbs := writeStalePathFixture(t, box, parent+".sy", future)
+			if cached {
+				cache.SetTreeDataInBox(util.GetTreeID(p), box, data)
+				waitForCachedSource(t, box, util.GetTreeID(p))
+			}
+			if _, err := LoadTree(box, p, util.NewLute()); !errors.Is(err, treenode.ErrSpecTooNew) {
+				t.Fatalf("unsupported parent did not stop child loading: %v", err)
+			}
+			for path, expected := range map[string][]byte{parentAbs: future, childAbs: data} {
+				got, err := os.ReadFile(path)
+				if err != nil || !bytes.Equal(got, expected) {
+					t.Fatalf("version rejection changed source %s: %v", path, err)
+				}
 			}
 		})
 	}

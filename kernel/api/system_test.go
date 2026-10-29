@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -22,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -30,6 +19,68 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
+	oldConf, oldReadonly, oldContainer, oldDir := model.Conf, util.ReadOnly, util.Container, util.WorkspaceDir
+	t.Cleanup(func() {
+		// 等待设置接口发出的延迟界面刷新，避免其读取后续测试的全局配置。
+		time.Sleep(250 * time.Millisecond)
+		model.Conf, util.ReadOnly, util.Container, util.WorkspaceDir = oldConf, oldReadonly, oldContainer, oldDir
+	})
+	util.ReadOnly, util.Container, util.WorkspaceDir = true, util.ContainerStd, "desktop-session-setting"
+	for _, mode := range []string{"new", "bound", "remembered", "expired"} {
+		t.Run(mode, func(t *testing.T) {
+			model.Conf = model.NewAppConf()
+			model.Conf.AccessAuthCode = "old-password"
+			engine := gin.New()
+			engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("desktop-setting-test-key"))))
+			engine.GET("/seed", func(c *gin.Context) {
+				session := util.GetSession(c)
+				ws := util.GetWorkspaceSession(session)
+				if mode != "new" {
+					ws.AccessAuthCode = model.Conf.AccessAuthCode
+					model.BindDesktopSession(c, ws, mode == "remembered")
+					if mode == "expired" {
+						ws.DesktopSessionID = "previous-boot"
+					}
+				}
+				if err := session.Save(c); err != nil {
+					t.Fatal(err)
+				}
+			})
+			engine.POST("/api/system/setAccessAuthCode", setAccessAuthCode)
+			engine.GET("/session", func(c *gin.Context) { c.JSON(200, util.GetWorkspaceSession(util.GetSession(c))) })
+			call := func(method, path, body string, cookies []*http.Cookie) *httptest.ResponseRecorder {
+				r := httptest.NewRequest(method, "http://127.0.0.1:6806"+path, strings.NewReader(body))
+				r.RemoteAddr = "127.0.0.1:1234"
+				r.Header.Set("User-Agent", "SiYuan/3.8.9 https://b3log.org/siyuan Electron Chrome/140")
+				r.Header.Set("Content-Type", "application/json")
+				for _, value := range cookies {
+					r.AddCookie(value)
+				}
+				w := httptest.NewRecorder()
+				engine.ServeHTTP(w, r)
+				return w
+			}
+			seed := call("GET", "/seed", "", nil).Result().Cookies()
+			if mode == "new" {
+				model.Conf.AccessAuthCode = ""
+			}
+			result := call("POST", "/api/system/setAccessAuthCode", `{"accessAuthCode":"new-password"}`, seed)
+			var response struct{ Code int }
+			if err := json.Unmarshal(result.Body.Bytes(), &response); err != nil || response.Code != 0 {
+				t.Fatalf("setting password failed: %s, %v", result.Body.String(), err)
+			}
+			var ws util.WorkspaceSession
+			if err := json.Unmarshal(call("GET", "/session", "", result.Result().Cookies()).Body.Bytes(), &ws); err != nil {
+				t.Fatal(err)
+			}
+			if (ws.DesktopSessionID != "") != (mode != "remembered") || !model.IsAccessCodeSessionAuthenticated(&ws) {
+				t.Fatalf("password setting lost session policy: %+v", ws)
+			}
+		})
+	}
+}
 
 func TestSetOIDCRejectsUnverifiedEnabledConfiguration(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -263,6 +314,9 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 			}
 			if response.Code != 0 {
 				t.Fatalf("getConf failed: %s", recorder.Body.String())
+			}
+			if strings.Contains(recorder.Body.String(), `"documentAddressingVersion"`) {
+				t.Fatal("getConf retained the retired addressing switch")
 			}
 
 			for _, sentinel := range sentinels {

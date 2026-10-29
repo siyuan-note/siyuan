@@ -28,7 +28,6 @@ const runCases = async (sources) => {
             callback({code: 0, data: {newDoc: true, k: "New document", blocks: []}});
         },
         Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
-        replaceFileName: value => value,
         getDailyNoteHints: async () => [],
         Constants: {ZWSP: "\u200b"},
     };

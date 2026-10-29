@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20260909204559"
+		"updated": "20261024163013"
 	},
 	"Children": [
 		{
@@ -206,7 +206,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-akhb2fd",
-				"updated": "20250115164121"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
@@ -234,21 +234,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-p7ccdta",
-				"updated": "20250115164121"
+				"updated": "20261024160716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "按住 "
+					"Data": "點擊節點可開啟對應內容區塊；按住 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 單擊節點：跳轉到該節點。"
+					"Data": "（macOS 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）點擊可開啟浮窗預覽。"
 				}
 			]
 		},
@@ -258,7 +267,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-p3ajlx2",
-				"updated": "20260909204559"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -467,7 +476,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120415-kqk522d",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -481,7 +490,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-k8yvb62",
-				"updated": "20260803163402"
+				"updated": "20261024163013"
 			},
 			"Children": [
 				{
@@ -495,7 +504,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -504,7 +513,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -513,7 +522,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ​ 中設置搜索範圍），搜索結果為包含這些關鍵字的內容區塊。"
+					"Data": " 中設置搜索範圍），搜索結果為包含這些關鍵字的內容區塊。"
 				}
 			]
 		},

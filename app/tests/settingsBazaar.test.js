@@ -13,6 +13,34 @@ const compiled = ts.transpileModule(`export const bazaar = {${render.getText(sou
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
 }).outputText;
 
+test("update cards keep rating before funding and updating as the final action", () => {
+    const method = object.properties.find(property => property.name?.getText(source) === "_genUpdateItemHTML");
+    const code = ts.transpileModule(`export const bazaar = {${method.getText(source)}};`, {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+    }).outputText;
+    for (const type of ["plugins", "themes", "icons", "templates", "widgets"]) {
+        for (const localFileSystem of [false, true]) {
+            const exports = {};
+            runInNewContext(code, {exports, escapeAttr: value => value, escapeHtml: value => value,
+                getRatingKey: () => "package", isBazaarPackageRatingLoaded: () => true,
+                genRatePackageActionHTML: () => '<span data-type="rate-package"></span>',
+                isBrowser: () => !localFileSystem, getHostCapabilities: () => ({localFileSystem}),
+                window: {siyuan: {languages: {showInFolder: "Show in folder"}}},
+            });
+            Object.assign(exports.bazaar, {
+                _data: {downloadedRatingKeys: new Set(), userRatings: new Map()},
+                _genPackageIconHTML: () => "", _genIncompatibleChipHTML: () => "", _genDeprecatedChipHTML: () => "",
+                _genFundingHTML: () => '<span data-type="funding"></span>',
+                _genOpenStorageHTML: () => '<span data-type="open-storage"></span>',
+                _genUpdateButtonHTML: () => '<span data-type="install-t"></span>',
+            });
+            const html = exports.bazaar._genUpdateItemHTML({installed: {name: "package"}, available: {}}, type);
+            assert.deepEqual(Array.from(html.matchAll(/data-type="([^"]+)"/g), match => match[1]),
+                ["rate-package", "funding", "open", "open-storage", "install-t"]);
+        }
+    }
+});
+
 test("directory actions delegate to the owner and preserve installed-package and storage eligibility", () => {
     const events = ts.createSourceFile("events.ts", readFileSync("src/config/bazaar/events.ts", "utf8"), ts.ScriptTarget.ES2021, true);
     const handlers = events.statements.find(statement => ts.isVariableStatement(statement) &&
@@ -80,7 +108,7 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
             },
             isBazaarPluginEnabledInPublish: () => false, getRatingKey: (_type, name) => name,
             escapeHtml: value => value, escapeAttr: value => value, genRatePackageActionHTML: () => "",
-            loadDownloadedRatings() {}, loadDownloadedUserRatings() {},
+            loadDownloadedRatings() {}, loadDownloadedUserRatings() {}, renderBazaarInstall() {},
             window: {siyuan: {config: {publish: {enable: false}, bazaar: {petalDisabled: false}},
                 languages: {config: "Settings", uninstall: "Uninstall", disable: "Disable", enable: "Enable"}}},
         });

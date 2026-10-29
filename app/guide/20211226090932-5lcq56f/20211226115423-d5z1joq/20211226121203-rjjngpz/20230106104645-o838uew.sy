@@ -6,7 +6,7 @@
 		"id": "20230106104645-o838uew",
 		"title": "工作空間",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261021005205"
 	},
 	"Children": [
 		{
@@ -270,6 +270,251 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-n8bw375",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261021005120-n8bw375",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重新命名工作空間"
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-9cvvpgt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-9cvvpgt",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端的工作空間名稱與資料夾名稱相同，需要退出思源後在檔案管理員中修改。只需重新命名整個工作空間資料夾，無需清空其中的內容或遷移資料。"
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-jbju9db",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46
+			},
+			"Properties": {
+				"id": "20261021005120-jbju9db",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"ID": "20261021005120-1uxhs63",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261021005120-1uxhs63",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-s9pvy3z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-s9pvy3z",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在頂欄左側選單的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "工作空間"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中找到目標工作空間，選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "在資料夾中顯示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 定位資料夾"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-2hga3xi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261021005120-2hga3xi",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-lz1tk7m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-lz1tk7m",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "透過頂欄左側選單的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "退出應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 安全退出思源，並等待對應核心程序退出"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-rhvlea7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261021005120-rhvlea7",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-s56i55m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-s56i55m",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在檔案管理員中修改工作空間資料夾的名稱，保留其中所有檔案和子資料夾"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261021005120-06fwxg3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261021005120-06fwxg3",
+						"updated": "20261021005205"
+					},
+					"Children": [
+						{
+							"ID": "20261021005120-t5xb1oy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261021005120-t5xb1oy",
+								"updated": "20261021005205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重新啟動思源，在工作空間選擇視窗中選擇改名後的資料夾；如果已進入其他工作空間，可透過頂欄左側選單的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "工作空間"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新建 / 打開"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 選擇該資料夾"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261021005120-kt4ceyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261021005120-kt4ceyn",
+				"updated": "20261021005205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "僅關閉視窗或開啟另一個工作空間，不一定會退出原工作空間。如果使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 參數指定了工作空間，請在重新啟動前將啟動命令或捷徑中的路徑更新為改名後的路徑。"
 				}
 			]
 		},

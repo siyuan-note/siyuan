@@ -31,6 +31,15 @@ const applyMenuConfig = (menuElement: HTMLElement) => {
     /// #endif
 };
 
+// 标记「搜索框固定、内容由内层列表滚动」的菜单。标记写在内容容器上，样式见 component/_menu.scss
+// 的 .b3-menu__items--inner-scroll：容器不再自行滚动，保留 popup() 按锚点位置写入的可用高度，
+// 放不下时由内层列表滚动。返回内容容器，供调用方继续调整内层结构。
+export const markMenuInnerScroll = (menuElement: HTMLElement): HTMLElement => {
+    const itemsElement = menuElement.lastElementChild as HTMLElement;
+    itemsElement.classList.add("b3-menu__items--inner-scroll");
+    return itemsElement;
+};
+
 export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
@@ -529,7 +538,9 @@ export class Menu {
         // 按实际边框和内边距扣除菜单外壳高度，兼容主题及字号调整。
         const rect = menuElement.getBoundingClientRect();
         const chromeHeight = rect.height - itemsMenuElement.getBoundingClientRect().height;
-        itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - rect.top - chromeHeight, 0) + "px";
+        const availableHeight = Math.max(window.innerHeight - rect.top - chromeHeight, 0) + "px";
+        const preferredHeight = getComputedStyle(itemsMenuElement).getPropertyValue("--b3-menu-items-max-height").trim();
+        itemsMenuElement.style.maxHeight = preferredHeight ? `min(${availableHeight}, ${preferredHeight})` : availableHeight;
         // 滚动条可能改变菜单宽度，限高后再按最终尺寸校正窗口边界。
         setPosition(menuElement, rect.left, rect.top);
     }
@@ -616,12 +627,13 @@ export class Menu {
         (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
             window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
-        this.element.lastElementChild.classList.remove("b3-menu__items--menu");
+        this.element.lastElementChild.classList.remove("b3-menu__items--menu", "b3-menu__items--inner-scroll");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
         setPopoverMenuOpen(this.element, false);
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit", "b3-menu--expanded");
         this.element.removeAttribute("data-sheet-expandable");
+        this.element.removeAttribute("data-sheet-actions");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
@@ -789,7 +801,8 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-        if (this.element.getAttribute("data-sheet-expandable") === "true") {
+        if (this.element.getAttribute("data-sheet-expandable") === "true" &&
+            this.element.getAttribute("data-sheet-actions") !== "false") {
             this.element.firstElementChild.classList.add("b3-menu__title--actions");
             if (!this.element.firstElementChild.querySelector(".b3-menu__actions")) {
                 this.element.firstElementChild.insertAdjacentHTML("beforeend", getSheetActionsHTML());

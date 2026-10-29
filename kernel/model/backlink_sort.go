@@ -1,3 +1,7 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 package model
 
 import (
@@ -14,7 +18,7 @@ import (
 
 // 将通过来源过滤的整篇文档条目展开为可独立排序的引用，保留列表项和标题等局部上下文。
 func expandBacklinkDocumentEntries(blocks []*Block, refs []*sql.Ref, defRootID string, keywords []string,
-	boxID string, originalRefBlockIDs map[string]string, mode int) []*Block {
+	boxID string, originalRefBlockIDs map[string]string, mode int, filters ...*BacklinkSourceFilter) []*Block {
 	if mode != 1 && mode != 2 {
 		return blocks
 	}
@@ -30,7 +34,7 @@ func expandBacklinkDocumentEntries(blocks []*Block, refs []*sql.Ref, defRootID s
 				documentRefs = append(documentRefs, ref)
 			}
 		}
-		entries, _, _, mappings := buildLinkRefsInBoxWithDocumentGrouping(defRootID, removeDuplicatedRefs(documentRefs), keywords, boxID, false)
+		entries, _, _, mappings := buildLinkRefsInBoxWithDocumentGrouping(defRootID, removeDuplicatedRefs(documentRefs), keywords, boxID, false, filters...)
 		maps.Copy(originalRefBlockIDs, mappings)
 		result = append(result, entries...)
 	}

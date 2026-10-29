@@ -1,8 +1,7 @@
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {runInNewContext} from "node:vm";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ScriptTarget} from "typescript";
+import {loadModule} from "../../testSupport/loadModule";
 
 const fixture = () => {
     const calls: unknown[][] = [];
@@ -21,21 +20,17 @@ const fixture = () => {
         preventDefault() { this.prevented = true; }, stopPropagation() { this.stopped = true; },
     };
     const selection = {rangeCount: 1, getRangeAt: () => range};
-    const code = transpileModule(readFileSync("src/protyle/util/attributeHotkey.ts", "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText;
-    const exports: {handleReadonlyAttributeHotkey?: (protyle: object, event: object) => boolean} = {};
-    runInNewContext(code, {
-        exports,
-        require: (name: string) => ({
-            "../../menus/commonMenuItem": {openAttr: (...args: unknown[]) => calls.push(args)},
-            "./hasClosest": {hasClosestBlock: () => block},
-            "../wysiwyg/getBlock": {getTopAloneElement: () => top},
-            "./hotKey": {matchHotKey: (_keymap: unknown, item: {key: string}) => item.key === "attr"},
-        }[name]),
-        window: {siyuan: {config: {keymap: {editor: {general: {attr: "attr"}}}}}},
-        getSelection: () => selection,
-    });
+    const exports = loadModule<{handleReadonlyAttributeHotkey?: (protyle: object, event: object) => boolean}>(
+        "src/protyle/util/attributeHotkey.ts", {
+            require: (name: string) => ({
+                "../../menus/commonMenuItem": {openAttr: (...args: unknown[]) => calls.push(args)},
+                "./hasClosest": {hasClosestBlock: () => block},
+                "../wysiwyg/getBlock": {getTopAloneElement: () => top},
+                "./hotKey": {matchHotKey: (_keymap: unknown, item: {key: string}) => item.key === "attr"},
+            }[name]),
+            window: {siyuan: {config: {keymap: {editor: {general: {attr: "attr"}}}}}},
+            getSelection: () => selection,
+        }, ScriptTarget.ES2021);
     return {calls, protyle, event, range, selected, selection, target, foreign, block, top,
         run: () => exports.handleReadonlyAttributeHotkey(protyle, event)};
 };

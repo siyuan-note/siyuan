@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package api
 
@@ -103,6 +91,7 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
+	luteEngine.SetLatexMath(model.MathDelimiterCompatibilityEnabled())
 	dom, useHTML := prepareHTMLClipboardContent(luteEngine, dom, text, mathML, office, officeMathHTML, wps,
 		preserveSourceFormat, preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
 	if !useHTML {
@@ -263,6 +252,8 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 
 	// 中间格式已经对 HTML 文本编码，重解析时保留实体，避免将正文中的标签当作 DOM 渲染。
 	luteEngine.ParseOptions.KeepEscaped = true
+	// HTML 入口已完成公式归一化，避免再次解释链接等受保护区域中的替代分隔符。
+	luteEngine.SetLatexMath(false)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && ast.NodeIFrame == n.Type {
@@ -454,14 +445,11 @@ func msWordCommentID(anchor *goquery.Selection, style string) string {
 }
 
 var spinBlockDOM = contractHandler(apicontract.SpinBlockDOM, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[apicontract.DOMData] {
-	ret := gulu.Ret.NewResult()
 
 	dom := request.DOM
 	if len(dom) > maxSpinBlockDOMBytes {
 		// 限制输入大小，避免解析超大 DOM 导致资源消耗
-		ret.Code = http.StatusRequestEntityTooLarge
-		ret.Msg = "dom input exceeds the maximum permitted size"
-		return contractFailure[apicontract.DOMData](ret)
+		return apicontract.Failure[apicontract.DOMData](http.StatusRequestEntityTooLarge, "dom input exceeds the maximum permitted size")
 	}
 	luteEngine := model.NewLute()
 
@@ -471,7 +459,6 @@ var spinBlockDOM = contractHandler(apicontract.SpinBlockDOM, func(c *gin.Context
 
 // md2HTML 将 Markdown 转换为 HTML。
 var md2HTML = contractHandler(apicontract.Md2HTML, func(c *gin.Context, request apicontract.MarkdownHTMLRequest) apicontract.Response[apicontract.HTMLData] {
-	ret := gulu.Ret.NewResult()
 
 	markdown, mode := request.Markdown, request.Mode
 
@@ -482,9 +469,7 @@ var md2HTML = contractHandler(apicontract.Md2HTML, func(c *gin.Context, request 
 	case "":
 		html = model.MarkdownToMarkdownStrHTML(markdown)
 	default:
-		ret.Code = -1
-		ret.Msg = "unknown [mode]"
-		return contractFailure[apicontract.HTMLData](ret)
+		return apicontract.Failure[apicontract.HTMLData](-1, "unknown [mode]")
 	}
 
 	return apicontract.Success(apicontract.HTMLData{HTML: html})

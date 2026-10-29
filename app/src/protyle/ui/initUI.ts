@@ -1,6 +1,7 @@
 import {setEditMode} from "../util/setEditMode";
 import {isTabGutterBridge} from "../gutter/tabs";
 import {isContainerGutterBridge} from "../gutter/container";
+import {cancelGutterHover, renderGutterOnHover} from "../gutter/hover";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -213,6 +214,7 @@ export const initUI = (protyle: IProtyle) => {
         }
     });
     let overAttr = false;
+    protyle.element.addEventListener("mouseleave", () => cancelGutterHover(protyle.gutter?.element));
     protyle.element.addEventListener(isMobile() ? "pointerover" : "mouseover", (event: PointerEvent & {
         target: HTMLElement
     }) => {
@@ -223,6 +225,7 @@ export const initUI = (protyle: IProtyle) => {
         if (isMobile() && event.pointerType !== "mouse") {
             return;
         }
+        cancelGutterHover(protyle.gutter?.element);
         if (hasClosestByClassName(event.target, "protyle-db-attr")) {
             return;
         }
@@ -270,11 +273,11 @@ export const initUI = (protyle: IProtyle) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                protyle.gutter.render(protyle,
+                renderGutterOnHover(protyle,
                     getEmbedGutterOperationContext(nodeElement) ? nodeElement : embedElement, event.target);
                 return;
             }
-            protyle.gutter.render(protyle, nodeElement, event.target);
+            renderGutterOnHover(protyle, nodeElement, event.target);
             return;
         }
 
@@ -353,7 +356,7 @@ export const addLoading = (protyle: IProtyle, msg?: string) => {
     setTimeout(() => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
             protyle.element.insertAdjacentHTML("beforeend", `<div style="background-color: var(--b3-theme-background);flex-direction: column;" class="fn__loading wysiwygLoading">
-    <img width="48px" src="/stage/loading-pure.svg">
+    <span class="b3-loading b3-loading--large" aria-hidden="true"></span>
     <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${sanitizeKernelHTML(msg || "")}</div>
 </div>`);
         }

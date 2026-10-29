@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20261016112115"
+		"updated": "20261024161816"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090909-6pyfjgx",
-				"updated": "20261016112115"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -284,7 +284,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090909-9x9sqe8",
-				"updated": "20261016112115"
+				"updated": "20261024161816"
 			},
 			"Children": [
 				{
@@ -344,6 +344,97 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中配置锁屏密码。留空表示不启用密码登录；正常的非本地访问仍需要密码或有效的 OIDC 配置。请先完成鉴权配置，再将内核开放给其他设备。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-t2z1xoy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-t2z1xoy",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "登录与令牌"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "锁屏壁纸"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中上传一张 JPEG、PNG 或 WebP 图片（最大 10 MiB、1600 万像素），即可自定义启动和锁屏后的认证页背景。也可点击“内置”，从分类图库中选择一张题头图。内置图片为宽图，铺满屏幕时会居中裁切，竖屏裁切范围更大。选择或上传新图片会替换旧图片，点击“重置”恢复默认背景。"
+				}
+			]
+		},
+		{
+			"ID": "20261024161816-pf6xli4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261024161816-pf6xli4",
+				"updated": "20261024161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "设置密码或启用 OIDC 登录后显示壁纸设置项。使用自定义壁纸时，认证页先显示壁纸和本机时间；点击、触摸屏幕或按键后显示登录面板。直接键入密码时，首个字符也会进入密码框。未设置壁纸或图片加载失败时，直接显示原有登录界面。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "登录面板显示后，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 返回壁纸和时间，已输入的密码与验证码会保留。进入和返回均有简短过渡动画；系统开启减少动态效果时直接切换。"
+				}
+			]
+		},
+		{
+			"ID": "20261022093855-9wxe3u5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261022093855-9wxe3u5",
+				"updated": "20261022093855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "壁纸保存在当前工作空间，不参与笔记同步，也不包含在设置导出中。登录前任何能够访问认证页的人都能看到这张图片，请勿选择含敏感信息的图片。"
 				}
 			]
 		},

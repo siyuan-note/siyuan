@@ -172,7 +172,11 @@ export const getLayoutHTML = (data: IAV) => {
 </label>`;
     }
     if (data.viewType === "calendar") {
-        return html + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
+        return html + `<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.displayFieldName}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="toggle-gallery-name" type="checkbox" class="b3-switch b3-switch--menu" ${(data.view as IAVTable).calendar.displayFieldName ? "checked" : ""}>
+</label>` + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -286,6 +290,28 @@ export const bindLayoutEvent = (options: {
         });
         options.data.view.wrapField = checked;
     });
+    const toggleNameElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-name"]') as HTMLInputElement;
+    toggleNameElement?.addEventListener("change", () => {
+        const checked = toggleNameElement.checked;
+        const view = options.data.viewType === "calendar" ? (options.data.view as IAVTable).calendar :
+            options.data.view as IAVGallery | IAVKanban;
+        const previous = !!view.displayFieldName;
+        transaction(options.protyle, [{
+            action: "setAttrViewDisplayFieldName",
+            avID,
+            blockID,
+            data: checked,
+            viewID
+        }], [{
+            action: "setAttrViewDisplayFieldName",
+            avID,
+            blockID,
+            data: previous,
+            viewID
+        }]);
+        view.displayFieldName = checked;
+        rerender();
+    });
     if (options.data.viewType === "calendar") {
         bindCalendarSettings({...options, onChange: rerender});
         return;
@@ -362,25 +388,6 @@ export const bindLayoutEvent = (options: {
             viewID
         }]);
         (options.data.view as IAVGallery).fitImage = checked;
-    });
-    const toggleNameElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-name"]') as HTMLInputElement;
-    toggleNameElement.addEventListener("change", () => {
-        const checked = toggleNameElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewDisplayFieldName",
-            avID,
-            blockID,
-            data: checked,
-            viewID
-        }], [{
-            action: "setAttrViewDisplayFieldName",
-            avID,
-            blockID,
-            data: !checked,
-            viewID
-        }]);
-        (options.data.view as IAVGallery | IAVKanban).displayFieldName = checked;
-        rerender();
     });
     const toggleEmptyElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-empty"]') as HTMLInputElement;
     toggleEmptyElement.addEventListener("change", () => {

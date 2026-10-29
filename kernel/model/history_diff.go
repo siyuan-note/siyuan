@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -273,7 +261,7 @@ func loadDocVersion(ref *DocVersionRef) (ret *loadedDocVersion, err error) {
 		ret.rootID = ret.tree.Root.ID
 	}
 	if nil != ret.tree && "" == ret.title {
-		ret.title = ret.tree.Root.IALAttr("title")
+		ret.title = treenode.ReadDocumentTitle(ret.tree.Root).Text
 	}
 	if "" == ret.title {
 		ret.title = ret.rootID
@@ -301,7 +289,7 @@ func loadCurrentDocVersion(id string) (ret *loadedDocVersion, err error) {
 	if nil != ret.parseErr {
 		return ret, nil
 	}
-	ret.title = ret.tree.Root.IALAttr("title")
+	ret.title = treenode.ReadDocumentTitle(ret.tree.Root).Text
 	ret.rootID = ret.tree.Root.ID
 	return
 }
@@ -385,7 +373,7 @@ func loadHistoryDocVersion(historyPath string) (ret *loadedDocVersion, err error
 	}
 	return &loadedDocVersion{
 		tree:    tree,
-		title:   tree.Root.IALAttr("title"),
+		title:   treenode.ReadDocumentTitle(tree.Root).Text,
 		rootID:  tree.Root.ID,
 		raw:     data,
 		large:   1024*1024 <= len(data),
@@ -454,7 +442,7 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	}
 	return &loadedDocVersion{
 		tree:   tree,
-		title:  tree.Root.IALAttr("title"),
+		title:  treenode.ReadDocumentTitle(tree.Root).Text,
 		rootID: tree.Root.ID,
 		raw:    data,
 		large:  1024*1024 <= len(data),

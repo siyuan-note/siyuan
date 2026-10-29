@@ -1,10 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package model
 
@@ -19,29 +15,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestNewItemParentPathTemplate(t *testing.T) {
-	tests := map[string]string{
-		"":                   "",
-		"/":                  "/",
-		"relative":           "",
-		"/Document":          "/",
-		"folder/Document":    "folder",
-		"/folder/Document":   "/folder",
-		"/folder/subfolder/": "/folder/subfolder/",
-	}
-	for input, expected := range tests {
-		if actual := newItemParentPathTemplate(input); expected != actual {
-			t.Fatalf("newItemParentPathTemplate(%q): expected %q, got %q", input, expected, actual)
+func TestNewItemDocumentTargetSegments(t *testing.T) {
+	for _, test := range []struct {
+		input, title string
+		parents      int
+	}{
+		{"", "", 0}, {"/", "", 0}, {"relative", "relative", 0},
+		{"/Document", "Document", 0}, {"folder/Document", "Document", 1},
+		{"/folder/Document", "Document", 1}, {"/folder/subfolder/", "", 2},
+		{"/Daily Notes/2026-07-18", "2026-07-18", 1}, {"/Daily Notes/", "", 1},
+	} {
+		rendered, err := renderDocumentTarget(&EffectiveDocumentTarget{Notebook: ast.NewNodeID(), Path: test.input}, DocumentPlanRequest{})
+		if err != nil || rendered.title != test.title || len(rendered.parents) != test.parents {
+			t.Fatalf("target %q: %+v, %v", test.input, rendered, err)
 		}
-	}
-}
-
-func TestNewItemPathTitleFallback(t *testing.T) {
-	if expected := "2026-07-18"; expected != newItemTitleFromPath("/Daily Notes/"+expected) {
-		t.Fatal("the last save path segment should be available as the document title")
-	}
-	if "" != newItemTitleFromPath("/Daily Notes/") {
-		t.Fatal("a save path ending with a slash should not provide a document title")
 	}
 }
 
@@ -73,13 +60,11 @@ func TestNewItemDocumentPreviewUsesCurrentDatabaseInstance(t *testing.T) {
 		"original": {ID: ast.NewNodeID(), RootID: ast.NewNodeID(), BoxID: boxID, HPath: "/Original"},
 		"mirror":   {ID: ast.NewNodeID(), RootID: ast.NewNodeID(), BoxID: boxID, HPath: "/Mirror"},
 	} {
-		preview := newItemDocumentPreview(blockTree, boxID, template.SaveLocation.PathTemplate, "Child", false)
-		expectedHPath := "/Original/Child"
-		if "mirror" == name {
-			expectedHPath = "/Mirror/Child"
-		}
-		if expectedHPath != preview.HPath || blockTree.RootID != preview.parentID {
-			t.Fatalf("%s database instance resolved to unexpected parent: %+v", name, preview)
+		title := "Child"
+		rendered, err := renderDocumentTarget(&EffectiveDocumentTarget{Notebook: boxID, Path: template.SaveLocation.PathTemplate},
+			DocumentPlanRequest{Notebook: boxID, ContextID: &blockTree.RootID, Title: &title})
+		if err != nil || rendered.parentID == nil || *rendered.parentID != blockTree.RootID || rendered.title != title {
+			t.Fatalf("%s database instance resolved to unexpected parent: %+v, %v", name, rendered, err)
 		}
 	}
 }
@@ -93,12 +78,12 @@ func TestNewItemDocumentPreviewUsesBoxDocAsLogicalRoot(t *testing.T) {
 		HPath:  "/File operation test",
 	}
 
-	preview := newItemDocumentPreview(blockTree, fixture.box.ID, "2026/202608/", "Reference", false)
-	if "/2026/202608/Reference" != preview.HPath {
-		t.Fatalf("notebook document resolved to unexpected path: %+v", preview)
-	}
-	if "" != preview.parentID {
-		t.Fatalf("notebook document was used as a physical parent: %+v", preview)
+	title := "Reference"
+	rendered, err := renderDocumentTarget(&EffectiveDocumentTarget{Notebook: fixture.box.ID, Path: "2026/202608/"},
+		DocumentPlanRequest{Notebook: fixture.box.ID, ContextID: &blockTree.RootID, Title: &title})
+	if err != nil || len(rendered.parents) != 2 || rendered.parents[0] != "2026" || rendered.parents[1] != "202608" ||
+		rendered.parentID != nil || rendered.title != title {
+		t.Fatalf("notebook document was used as a physical parent: %+v, %v", rendered, err)
 	}
 }
 

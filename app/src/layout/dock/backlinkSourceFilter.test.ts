@@ -7,6 +7,15 @@ import {
 } from "./backlinkSourceFilter";
 
 describe("backlink source filter", () => {
+    it("keeps membership-only database filters active and clones their conditions", () => {
+        const source = {...createBacklinkSourceFilter(), database: {avID: "database", filters: [] as IAVFilter[]}};
+        const normalized = getBacklinkSourceFilterParam(source);
+        assert.equal(normalized.database.avID, "database");
+        normalized.database.filters.push({column: "field", operator: "Is empty", value: {type: "text"}});
+        assert.equal(source.database.filters.length, 0);
+        delete source.database;
+        assert.equal(getBacklinkSourceFilterParam(source), undefined);
+    });
     it("omits the default filter", () => {
         assert.equal(getBacklinkSourceFilterParam(createBacklinkSourceFilter()), undefined);
     });

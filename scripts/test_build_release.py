@@ -35,6 +35,7 @@ class BuildTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.args = build.parser().parse_args([])
+        self.args.kernel_jobs = 1
         self.args.android_dir = self.root / "android"
         self.args.harmony_dir = self.root / "harmony"
         self.args.output = self.root / "output"
@@ -47,6 +48,52 @@ class BuildTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
         return path
+
+    def test_kernel_queue_overlaps_two_compilers_and_preserves_logs(self):
+        script = self.write(self.root / "compiler.py", b"import time\nprint(time.time(), flush=True)\ntime.sleep(0.4)\nprint(time.time(), flush=True)\n")
+        commands = [(str(n), [sys.executable, script], self.root, dict(build.os.environ)) for n in range(3)]
+        build.compile_kernels(commands, self.root / "logs")
+        spans = [list(map(float, (self.root / "logs" / f"{n}.log").read_text().split())) for n in range(3)]
+        self.assertLess(max(spans[0][0], spans[1][0]), min(spans[0][1], spans[1][1]))
+        self.assertGreaterEqual(spans[2][0], min(spans[0][1], spans[1][1]))
+
+    def test_kernel_queue_failure_reaps_running_compiler_and_skips_queued(self):
+        processes = []
+        original = build.subprocess.Popen
+        def launch(*args, **kwargs):
+            process = original(*args, **kwargs)
+            processes.append(process)
+            return process
+        commands = [("fail", [sys.executable, "-c", "raise SystemExit(9)"], self.root, None),
+                    ("wait", [sys.executable, "-c", "import time; time.sleep(30)"], self.root, None),
+                    ("queued", [sys.executable, "-c", "print('unexpected')"], self.root, None)]
+        with patch.object(build.subprocess, "Popen", side_effect=launch):
+            with self.assertRaises(build.BuildError):
+                build.compile_kernels(commands, self.root / "logs")
+        self.assertTrue(all(process.poll() is not None for process in processes))
+        self.assertFalse((self.root / "logs/queued.log").exists())
+
+    def test_windows_queue_includes_android_and_serializes_packaging(self):
+        self.args.kernel_jobs = 3
+        packed = []
+        def compile(commands, directory, jobs, on_complete):
+            self.assertEqual(jobs, 3)
+            self.assertEqual([item[0] for item in commands], ["amd64", "android", "arm64"])
+            self.assertEqual(len({str(item[1][item[1].index("-o") + 1]) for item in commands}), 3)
+            on_complete("amd64")
+            self.assertEqual(packed, ["amd64"])
+            self.assertFalse(getattr(self.builder, "android_prebuilt", False))
+            on_complete("arm64")
+            self.assertEqual(packed, ["amd64", "arm64"])
+            on_complete("android")
+        with patch.object(self.builder, "windows_tools"), patch.object(self.builder, "check_kernel"), \
+                patch.object(self.builder, "android_kernel", return_value=(self.root / "kernel.aar", {},
+                             ["gomobile", "bind", "-o", self.root / "kernel.aar"])), \
+                patch.object(build, "compile_kernels", side_effect=compile), \
+                patch.object(self.builder, "windows_arch", side_effect=lambda arch, config: packed.append(arch)):
+            self.builder.windows()
+        self.assertEqual(packed, ["amd64", "arm64"])
+        self.assertTrue(self.builder.android_prebuilt)
 
     def test_signing_pin_uses_hidden_input_or_supplied_value(self):
         with patch.object(build.getpass, "getpass", return_value="hidden-pin") as prompt:
@@ -76,6 +123,45 @@ class BuildTests(unittest.TestCase):
         self.assertNotIn("SIYUAN_SIGNING_PIN", run.call_args.kwargs["env"])
         self.assertNotIn("PSModulePath", run.call_args.kwargs["env"])
 
+    def test_preflight_signs_and_verifies_temporary_copy(self):
+        self.args.platforms = ["windows"]
+        self.builder.signing_pin = "private-pin"
+        original = self.write(self.root / "app/elevator/elevator-amd64.exe", b"original executable")
+        probes = []
+        def sign(pin, thumbprint, files):
+            self.assertEqual(pin, "private-pin")
+            probe = files[0]
+            probes.append(probe)
+            self.assertNotEqual(probe, original)
+            self.assertEqual(probe.read_bytes(), original.read_bytes())
+            probe.write_bytes(b"signed executable")
+        def verify(path, thumbprint):
+            self.assertEqual(path.read_bytes(), b"signed executable")
+        with patch.object(build, "ROOT", self.root), patch.object(build, "source_preflight"), \
+                patch.object(build, "certificate_thumbprint", return_value="A" * 40), \
+                patch.object(build, "check_signing_pin", side_effect=sign), \
+                patch.object(build, "verify_signature", side_effect=verify):
+            self.builder.preflight()
+        self.assertEqual(original.read_bytes(), b"original executable")
+        self.assertFalse(probes[0].exists())
+
+    def test_preflight_signing_failure_is_propagated_and_copy_removed(self):
+        self.args.platforms = ["windows"]
+        self.builder.signing_pin = "private-pin"
+        self.write(self.root / "app/elevator/elevator-amd64.exe")
+        probes = []
+        def fail(pin, thumbprint, files):
+            probes.extend(files)
+            raise build.BuildError("signing probe failed")
+        with patch.object(build, "ROOT", self.root), patch.object(build, "source_preflight"), \
+                patch.object(build, "certificate_thumbprint", return_value="A" * 40), \
+                patch.object(build, "check_signing_pin", side_effect=fail), \
+                patch.object(build, "verify_signature") as verify:
+            with self.assertRaisesRegex(build.BuildError, "signing probe failed"):
+                self.builder.preflight()
+        verify.assert_not_called()
+        self.assertFalse(probes[0].exists())
+
     def test_signing_preflight_retries_only_device_communication(self):
         for codes in ((20, 0), (20, 20), (1,)):
             results = [subprocess.CompletedProcess([], code, stdout="secret", stderr="secret") for code in codes]
@@ -88,6 +174,35 @@ class BuildTests(unittest.TestCase):
                         build.check_signing_pin("secret", "A" * 40)
                     self.assertNotIn("secret", str(error.exception))
             self.assertEqual(run.call_count, len(codes))
+
+    def test_signing_diagnostic_does_not_echo_raw_stderr(self):
+        result = subprocess.CompletedProcess([], 1, stdout="secret", stderr=
+            "secret SIGNING_DIAGNOSTIC:authentication:0x8010006b,0x80131500 secret")
+        output = io.StringIO()
+        with patch.object(build.subprocess, "run", return_value=result), contextlib.redirect_stdout(output):
+            with self.assertRaises(build.BuildError):
+                build.check_signing_pin("secret", "A" * 40)
+        self.assertEqual(output.getvalue().strip(),
+                         "SIGNING_DIAGNOSTIC:authentication:0x8010006b,0x80131500")
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows certificate provider")
+    def test_signing_certificate_provider_loads_without_module_path(self):
+        source = Path(__file__).with_name("release-sign-windows.ps1").read_text(encoding="utf-8")
+        load = next(line.strip() for line in source.splitlines() if "Import-Module" in line and "Microsoft.PowerShell.Security" in line)
+        env = dict(build.os.environ)
+        env.pop("PSModulePath", None)
+        result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                                 "$ErrorActionPreference='Stop'; " + load +
+                                 "; Get-PSDrive -Name Cert -ErrorAction Stop | Out-Null"],
+                                env=env, capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows file replacement semantics")
+    def test_staged_signing_preserves_original_on_failure(self):
+        result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+                                 "-File", str(Path(__file__).with_name("test_release_sign_windows.ps1"))],
+                                capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     @unittest.skipUnless(sys.platform == "win32", "需要 Windows 批处理")
     def test_batch_restores_missing_windows_environment_marker(self):
@@ -201,6 +316,30 @@ class BuildTests(unittest.TestCase):
         with self.assertRaises(build.BuildError):
             self.builder.collect([self.root / "missing.apk"], "Android", time.time())
 
+    def test_windows_resource_tool_reuses_matching_version_and_pins_install(self):
+        for current in (build.GOVERSIONINFO_VERSION, "v0.0.0", None):
+            tool = self.root / "bin/goversioninfo.exe"
+            tool.unlink(missing_ok=True)
+            version = [current]
+            if current:
+                self.write(tool)
+            commands = []
+            def run(command, cwd, env=None, capture=False):
+                commands.append(command)
+                if command == ["go", "env", "GOBIN"]:
+                    return str(tool.parent)
+                if command[:3] == ["go", "version", "-m"]:
+                    return "mod " + build.GOVERSIONINFO_MODULE + " " + version[0]
+                if command[:2] == ["go", "install"]:
+                    self.assertEqual(command[2], build.GOVERSIONINFO_MODULE + "/cmd/goversioninfo@" + build.GOVERSIONINFO_VERSION)
+                    self.write(tool)
+                    version[0] = build.GOVERSIONINFO_VERSION
+                return ""
+            with self.subTest(current=current), patch.object(build, "run", side_effect=run):
+                self.builder.windows_tools()
+            self.assertEqual(sum(command[:2] == ["go", "install"] for command in commands),
+                             0 if current == build.GOVERSIONINFO_VERSION else 1)
+
     def test_old_kernel_version_is_rejected(self):
         path = self.write(self.root / "libkernel.so", kernel("3.8.3"))
         with self.assertRaises(build.BuildError):
@@ -223,6 +362,10 @@ class BuildTests(unittest.TestCase):
             commands.append(command)
             if command[:3] in (["go", "env", "GOBIN"], ["go", "env", "GOPATH"]):
                 return str(self.root / "go-bin")
+            if command[:2] == ["go", "install"]:
+                self.write(self.root / "go-bin/goversioninfo.exe")
+            if command[:3] == ["go", "version", "-m"]:
+                return "mod " + build.GOVERSIONINFO_MODULE + " " + build.GOVERSIONINFO_VERSION
             if command[:2] == ["go", "build"]:
                 self.write(command[command.index("-o") + 1])
             if command[0] == "node":
@@ -305,7 +448,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(config["win"]["signtoolOptions"]["sign"], str(hook))
         self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
 
-    def test_harmony_copies_each_architecture_before_next_build(self):
+    def test_harmony_builds_only_arm64(self):
         remote = self.root / "wsl"
         self.builder.wsl_root = remote
         assets = self.write(self.root / "app.zip", b"current assets")
@@ -313,7 +456,8 @@ class BuildTests(unittest.TestCase):
                                   b"stale kernel")
 
         def fake_wsl(command, directory=None, capture=False):
-            architecture = "arm64" if command[-1] == "build.sh" else "amd64"
+            self.assertEqual(command[-1], "../../scripts/harmony-kernel-build.sh")
+            architecture = "arm64"
             self.write(remote / "kernel/harmony/libkernel.so", kernel(architecture=architecture))
             self.write(remote / "kernel/harmony/libkernel.h", architecture.encode())
             self.write(remote / "kernel/harmony/lan_sync_bridge.h", b"bridge")
@@ -334,14 +478,125 @@ class BuildTests(unittest.TestCase):
         arm = self.args.harmony_dir / "entry/libs/arm64-v8a/libkernel.so"
         amd = self.args.harmony_dir / "entry/libs/x86_64/libkernel.so"
         self.assertEqual(arm.read_bytes(), kernel(architecture="arm64"))
-        self.assertEqual(amd.read_bytes(), kernel(architecture="amd64"))
+        self.assertFalse(amd.exists())
         self.assertEqual([path.name for path in self.builder.artifacts], ["siyuan-harmony-default-signed.app"])
         self.assertEqual(self.builder.artifacts[0].read_bytes(), b"signed app")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/libkernel.h").read_bytes(), b"arm64")
         self.assertEqual((self.args.harmony_dir / "entry/src/main/cpp/include/lan_sync_bridge.h").read_bytes(), b"bridge")
-        for abi in ("arm64-v8a", "x86_64"):
+        for abi in ("arm64-v8a",):
             self.assertEqual({path.name for path in (self.args.harmony_dir / "entry/libs" / abi).iterdir()},
                              {"libkernel.so"})
+
+    def test_harmony_reuses_kernel_compiled_during_linux_packaging(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.builder.harmony_prebuilt_started = time.time() - 1
+        self.write(self.builder.wsl_root / "kernel/harmony/libkernel.so", kernel())
+        self.write(self.builder.wsl_root / "kernel/harmony/libkernel.h")
+        self.write(self.builder.wsl_root / "kernel/harmony/lan_sync_bridge.h")
+        assets = self.write(self.root / "app.zip")
+        def run(command, cwd, env=None, capture=False):
+            if command[-1] == "assembleApp":
+                self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app")
+        with patch.object(self.builder, "wsl") as wsl, patch.object(build, "run", side_effect=run):
+            self.builder.harmony(assets)
+        wsl.assert_not_called()
+
+    def test_linux_requests_harmony_kernel_only_when_selected(self):
+        self.builder.wsl_root = self.root / "wsl"
+        for selected in (True, False):
+            self.args.platforms = ["linux", "harmony"] if selected else ["linux"]
+            with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
+                self.builder.linux()
+            self.assertEqual("--with-harmony-kernel" in wsl.call_args.args[0], selected)
+
+    def test_mobile_packaging_overlaps_linux_and_harmony_waits_for_ready(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android", "harmony"]
+        android_started, harmony_started = threading.Event(), threading.Event()
+        def linux():
+            self.assertTrue(android_started.wait(3))
+            self.assertFalse(harmony_started.is_set())
+            Path(str(self.builder.parallel_marker) + ".ready").touch()
+            self.assertTrue(harmony_started.wait(3))
+        def android(assets):
+            android_started.set()
+            self.assertTrue(harmony_started.wait(3))
+        with patch.object(self.builder, "linux", side_effect=linux), \
+                patch.object(self.builder, "android", side_effect=android), \
+                patch.object(self.builder, "harmony", side_effect=lambda assets: harmony_started.set()):
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        self.assertIsNone(build.BUILD_CANCEL)
+        self.assertFalse(Path(str(self.builder.parallel_marker) + ".ready").exists())
+
+    def test_parallel_failure_cancels_running_process_and_waiting_harmony(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android", "harmony"]
+        started = threading.Event()
+        def linux():
+            started.set()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+        def android(assets):
+            self.assertTrue(started.wait(3))
+            raise build.BuildError("android failed")
+        process = unittest.mock.Mock()
+        with patch.object(self.builder, "linux", side_effect=linux), \
+                patch.object(self.builder, "android", side_effect=android), \
+                patch.object(self.builder, "harmony") as harmony, \
+                patch.object(build, "stop_build_process") as stop:
+            build.BUILD_PROCESSES.add(process)
+            try:
+                with self.assertRaisesRegex(build.BuildError, "android failed"):
+                    self.builder.parallel_platforms(self.root / "assets.zip")
+            finally:
+                build.BUILD_PROCESSES.discard(process)
+        stop.assert_called_once_with(process)
+        harmony.assert_not_called()
+        self.assertIsNone(build.BUILD_CANCEL)
+
+    def test_parallel_harmony_rejects_missing_readiness_marker(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "harmony"]
+        with patch.object(self.builder, "linux"), patch.object(self.builder, "harmony") as harmony:
+            with self.assertRaisesRegex(build.BuildError, "就绪标记"):
+                self.builder.parallel_platforms(self.root / "assets.zip")
+        harmony.assert_not_called()
+
+    def test_parallel_harmony_reports_kernel_failure_before_linux_finishes(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "harmony"]
+        def linux():
+            Path(str(self.builder.parallel_marker) + ".ready.failed").touch()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+        with patch.object(self.builder, "linux", side_effect=linux), patch.object(self.builder, "harmony") as harmony:
+            with self.assertRaisesRegex(build.BuildError, "内核编译失败"):
+                self.builder.parallel_platforms(self.root / "assets.zip")
+        harmony.assert_not_called()
+
+    def test_parallel_progress_keeps_artifacts_in_their_own_stages(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android"]
+        directory = self.root / "records"
+        directory.mkdir()
+        record = build.BuildRecord(directory, self.args, "3.8.4")
+        self.builder.record = record
+        barrier = threading.Barrier(2)
+        def package(name):
+            barrier.wait(timeout=3)
+            path = self.write(self.builder.work / (name + ".pkg"))
+            self.builder.collect([path], name, time.time())
+        with patch.object(self.builder, "linux", side_effect=lambda: package("linux")), \
+                patch.object(self.builder, "android", side_effect=lambda assets: package("android")), \
+                contextlib.redirect_stdout(io.StringIO()), record.session():
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        progress = json.loads((directory / "progress.json").read_text())
+        for name in self.args.platforms:
+            stage = next(s for s in progress["stages"] if s["id"] == name)
+            self.assertEqual(stage["status"], "succeeded")
+            self.assertEqual(stage["artifacts"], [str(self.args.output / (name + ".pkg"))])
+        self.assertEqual(progress["current_stages"], [])
 
     def test_harmony_rejects_unsigned_only_output(self):
         self.builder.wsl_root = self.root / "wsl"
@@ -461,6 +716,7 @@ class RecordTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
         self.args = build.parser().parse_args([])
+        self.args.kernel_jobs = 1
         self.args.platforms = ["windows", "linux"]
         self.args.output = self.root / "output"
         self.args.android_dir = self.root / "android"

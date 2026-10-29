@@ -8,7 +8,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
+const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "closeInspectorPanel", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View { ${methods.map(item => item.getText(source)).join("\n")} }
@@ -25,16 +25,18 @@ const setup = () => {
     const host = {focus: () => focus = "canvas", contains: () => true};
     const target = Object.assign(new context.View(), {
         options: {host}, editingId: "new", model: {nodes: new Map([["new", {}]])},
-        selectedId: "new", tooltip: {}, inspector: {hidden: true}, summaryControls: {hidden: true},
+        selectedId: "new", tooltip: {}, inspector: {hidden: true},
+        inspectorPopover: {hidden: true, contains: () => false},
         toolbar: {hidden: false, querySelectorAll: (): unknown[] => []},
         world: {querySelectorAll: (): HTMLElement[] => []},
-        nodeElements: new Map(), offsetX: 0, offsetY: 0,
+        nodeElements: new Map(), summaryElements: new Map(), offsetX: 0, offsetY: 0,
         interactionActive: true, setInteractionActive: (value: boolean) => target.interactionActive = value,
         buttons: new Map(),
         viewport: {contains: (element: unknown) => !!element, setPointerCapture: () => {},
             offsetWidth: 400, offsetHeight: 300,
             getBoundingClientRect: () => ({left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300})},
-        selectNode: () => {}, findLine: (): unknown => undefined, selectLine: () => {},
+        selectNode: () => {}, queueInspectorLayout: () => {}, findLine: (): unknown => undefined, selectLine: () => {},
+        focusSelectionInput: () => {},
         clearSelection: () => { target.selectedId = undefined; },
         boundedPan: (x: number, y: number) => ({x, y}), draw: () => drawn++,
         finishThen: (action: () => void) => { finished++; target.editingId = undefined; action(); },
@@ -46,7 +48,7 @@ const setup = () => {
             if (selector === ".mindmap-view") {
                 return host;
             }
-            return kind !== "background" && selector.includes(kind) ? element() : null;
+            return kind !== "background" && selector.split(",").some(item => item.trim() === kind) ? element() : null;
         },
     });
     const event = (kind = "background", overrides: Record<string, unknown> = {}) => ({
@@ -82,22 +84,30 @@ test("focusing visible, missing or removed nodes does not pan", () => {
     assert.equal(drawn(), 0);
 });
 
+test("new summary labels are revealed even though they are not source nodes", () => {
+    const {target, drawn} = setup();
+    target.summaryElements.set("summary", {getBoundingClientRect: () =>
+        ({left: 420, top: 320, right: 500, bottom: 360, width: 80, height: 40})});
+    target.revealNode("summary");
+    assert.equal(target.offsetX, -116);
+    assert.equal(target.offsetY, -76);
+    assert.equal(drawn(), 1);
+});
+
 test("node focus avoids the actual bottom panel bounds after the pending layout", () => {
-    for (const panel of ["inspector", "summaryControls"]) {
-        for (const top of [250, 210]) {
-            const {target, frames, drawn} = setup();
-            target.frame = 1;
-            target[panel] = {hidden: false, getBoundingClientRect: () =>
-                ({left: 80, right: 320, top, bottom: 292, width: 240, height: 292 - top})};
-            target.nodeElements.set("new", {getBoundingClientRect: () =>
-                ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
-            target.focusNode("new");
-            assert.equal(drawn(), 0);
-            frames.forEach(action => action());
-            assert.equal(280 + target.offsetY, top - 16);
-            assert.equal(target.offsetX, 0);
-            assert.equal(drawn(), 1);
-        }
+    for (const top of [250, 210]) {
+        const {target, frames, drawn} = setup();
+        target.frame = 1;
+        target.inspector = {hidden: false, getBoundingClientRect: () =>
+            ({left: 80, right: 320, top, bottom: 292, width: 240, height: 292 - top})};
+        target.nodeElements.set("new", {getBoundingClientRect: () =>
+            ({left: 100, top: 240, right: 180, bottom: 280, width: 80, height: 40})});
+        target.focusNode("new");
+        assert.equal(drawn(), 0);
+        frames.forEach(action => action());
+        assert.equal(280 + target.offsetY, top - 16);
+        assert.equal(target.offsetX, 0);
+        assert.equal(drawn(), 1);
     }
 });
 
@@ -221,8 +231,8 @@ test("bottom clearance preserves the node top below the toolbar when the node is
     assert.equal(100 + target.offsetY, 64);
 });
 
-test("hand-tool, right-button and primary touch panning preserve the editing focus", () => {
-    for (const overrides of [{}, {button: 2}, {pointerType: "touch"}]) {
+test("hand-tool, middle-button, right-button and primary touch panning preserve the editing focus", () => {
+    for (const overrides of [{}, {button: 1}, {button: 2}, {pointerType: "touch"}]) {
         const {target, event, focus, finished} = setup();
         target.panning = !Object.keys(overrides).length;
         const down = event("background", overrides);
@@ -259,12 +269,12 @@ test("touch activation waits for a click and ignores an unfinished pinch or a ne
     assert.equal(target.interactionActive, false);
 });
 
-test("Ctrl and Meta right dragging preserves reading state, node selection and editor focus", () => {
-    for (const key of ["ctrlKey", "metaKey"]) {
+test("middle dragging and Ctrl or Meta right dragging preserve reading state, node selection and editor focus", () => {
+    for (const overrides of [{button: 1}, {button: 2, ctrlKey: true}, {button: 2, metaKey: true}]) {
         for (const interactionActive of [false, true]) {
             const {target, event, focus, finished} = setup();
             target.interactionActive = interactionActive;
-            const down = event("background", {button: 2, [key]: true});
+            const down = event("background", overrides);
             target.dismissControls(down);
             target.activatePointer(down);
             target.pointerDown(down);
@@ -282,16 +292,16 @@ test("Ctrl and Meta right dragging preserves reading state, node selection and e
         const {target, event, finished} = setup();
         target.locked = true;
         target.interactionActive = false;
-        const down = event("background", {button: 2, [key]: true});
+        const down = event("background", overrides);
         target.activatePointer(down);
         target.pointerDown(down);
         assert.equal(target.pointer, undefined, "temporary gestures cannot bypass a saved view lock");
         assert.equal(target.interactionActive, false);
         assert.equal(finished(), 0);
-        for (const mode of ["relationFrom", "summarySelecting"]) {
+        for (const mode of ["relationFrom", "multiSelect"]) {
             const {target, event, finished} = setup();
             target[mode] = mode === "relationFrom" ? "new" : true;
-            const down = event("background", {button: 2, [key]: true});
+            const down = event("background", overrides);
             target.dismissControls(down);
             target.activatePointer(down);
             target.pointerDown(down);
@@ -301,6 +311,43 @@ test("Ctrl and Meta right dragging preserves reading state, node selection and e
             assert.equal(finished(), 0, "temporary panning does not finish a pending annotation");
         }
     }
+});
+
+test("middle clicks preserve selection and editing without moving or finishing annotations", () => {
+    for (const kind of ["background", ".mindmap-view__node", ".mindmap-view__summary"]) {
+        for (const mode of ["normal", "readOnly", "relationFrom"]) {
+            const {target, event, finished, focus} = setup();
+            if (mode !== "normal") {
+                target[mode] = mode === "relationFrom" ? "new" : true;
+            }
+            const down = event(kind, {button: 1});
+            target.dismissControls(down);
+            target.activatePointer(down);
+            target.pointerDown(down);
+            assert.equal(target.pointer.pan, true);
+            assert.equal(target.pointer.id, undefined);
+            assert.equal(target.pointer.selection, undefined);
+            target.pointerUp(down);
+            assert.equal(target.selectedId, "new");
+            assert.equal(target.editingId, "new");
+            assert.equal(finished(), 0);
+            assert.equal(focus(), "editor");
+        }
+    }
+});
+
+test("middle panning excludes controls, node editors, nested maps and pinches", () => {
+    const {target, event} = setup();
+    for (const kind of ["button", "input", "select", "textarea", "audio", "video", "iframe", ".mindmap-view__node--editing"]) {
+        const down = event(kind, {button: 1});
+        assert.equal(target.isPanTarget(down), false, kind);
+        target.pointerDown(down);
+        assert.equal(target.pointer, undefined, kind);
+    }
+    assert.equal(target.isPanTarget(event("background", {button: 1, target: {closest: () => ({})}})), false);
+    target.pinching = true;
+    target.pointerDown(event("background", {button: 1}));
+    assert.equal(target.pointer, undefined);
 });
 
 test("a background click still finishes editing while a canceled drag leaves it active", () => {
@@ -330,7 +377,7 @@ test("nodes, controls, nested maps, lines and non-pan modes retain their own int
     target.findLine = () => ({relation: true});
     assert.equal(target.isPanTarget(event()), false);
     target.findLine = (): unknown => undefined;
-    for (const key of ["locked", "pinching", "summarySelecting", "relationFrom"]) {
+    for (const key of ["locked", "pinching", "relationFrom"]) {
         target[key] = true;
         assert.equal(target.isPanTarget(event()), false, key);
         target[key] = false;

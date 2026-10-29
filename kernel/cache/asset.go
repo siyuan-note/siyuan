@@ -1,18 +1,6 @@
-// SiYuan - From thought to insight, with agents
+// SiYuan - https://github.com/siyuan-note/siyuan
 // Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 package cache
 
@@ -50,6 +38,26 @@ func RemoveAssetHash(hash string) {
 	}
 }
 
+// RemoveAssetHashByPath 按资源路径清理缓存，不读取可能已删除的文件。
+func RemoveAssetHashByPath(path string) {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	removeAssetHashByPath(path)
+}
+
+func removeAssetHashByPath(path string) {
+	asset := assetPathHashCache[path]
+	if asset == nil {
+		return
+	}
+	delete(assetPathHashCache, path)
+	// 相同内容可能对应多个路径，保留指向其他资源的去重记录。
+	if cached := assetHashCache[asset.Hash]; cached != nil && cached.Path == path {
+		delete(assetHashCache, asset.Hash)
+	}
+}
+
 func SetAssetHash(hash, path string) {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
@@ -59,6 +67,7 @@ func SetAssetHash(hash, path string) {
 		return
 	}
 
+	removeAssetHashByPath(path)
 	assetHashCache[hash] = &AssetHash{Hash: hash, Path: path}
 	assetPathHashCache[path] = &AssetHash{Hash: hash, Path: path}
 }
@@ -73,8 +82,7 @@ func GetAssetHashByPath(path string) *AssetHash {
 			return asset
 		}
 
-		delete(assetHashCache, asset.Hash)
-		delete(assetPathHashCache, path)
+		removeAssetHashByPath(path)
 		return nil
 	}
 	return nil
@@ -90,7 +98,6 @@ func GetAssetHash(hash string) *AssetHash {
 		return nil
 	}
 
-	// 验证文件是否存在
 	if !filelock.IsExist(filepath.Join(util.DataDir, asset.Path)) {
 		// 文件不存在，清理缓存
 		delete(assetHashCache, hash)

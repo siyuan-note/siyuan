@@ -98,7 +98,9 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
         const checkbox = field.type === "checkbox" && !field.renderTemplate?.trim() ?
             ` role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="${!!cell.value.checkbox?.checked}" aria-disabled="${!editable}" aria-label="${escapeAttr(field.name)}"` : "";
-        return `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        const value = `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        return view.calendar.displayFieldName && field.type !== "block" ?
+            `<div class="av__calendar-field-row"><span class="av__calendar-field-name fn__ellipsis" title="${escapeAttr(field.name)}">${escapeHtml(field.name)}</span>${value}</div>` : value;
     }).join("");
     return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${background ? `--b3-av-calendar-background:${background}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
@@ -222,8 +224,11 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
         };
     };
     root.addEventListener("pointerdown", event => {
-        event.stopPropagation();
         const target = event.target as HTMLElement;
+        if (target.closest(".av__celltext--ref[data-id]")) {
+            return;
+        }
+        event.stopPropagation();
         const item = target.closest<HTMLElement>("[data-calendar-item]");
         const entry = item && events.get(item.dataset.calendarItem);
         const endpoint = target.closest<HTMLElement>("[data-calendar-resize]")?.dataset.calendarResize as "start" | "end" | undefined;
@@ -278,7 +283,7 @@ const bindCalendarDrag = (root: HTMLElement, protyle: IProtyle, blockElement: HT
             return;
         }
         const target = event.target as HTMLElement;
-        if (target.closest('[data-calendar-resize], [role="checkbox"]')) {
+        if (target.closest('[data-calendar-resize], [role="checkbox"], .av__celltext--ref[data-id]')) {
             return;
         }
         const item = target.closest<HTMLElement>("[data-calendar-item]");
@@ -506,9 +511,13 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
         return true;
     };
     root.addEventListener("click", event => {
+        const target = event.target as HTMLElement;
+        // 主键引用交给编辑器处理，保留普通跳转、分屏修饰键和移动端的引用交互。
+        if (target.closest(".av__celltext--ref[data-id]")) {
+            return;
+        }
         event.stopPropagation();
         window.siyuan.menus.menu.remove();
-        const target = event.target as HTMLElement;
         if (toggleCheckbox(target)) {
             return;
         }

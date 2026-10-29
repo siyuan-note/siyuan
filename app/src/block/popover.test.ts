@@ -13,6 +13,7 @@ const browserCases = async (source: string, keyboardSource: string) => {
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
+    const notebookRequests: {id: string, receive: (response: unknown) => void}[] = [];
     const ocrRequests: ((text: string | undefined | {text: string, failed: boolean}) => void)[] = [];
     class Panel {
         element = document.createElement("div");
@@ -43,8 +44,12 @@ const browserCases = async (source: string, keyboardSource: string) => {
             resolve(typeof result === "string" ? {text: result, failed: false} : result))),
         hideTooltip: () => { tooltip = ""; },
         showTooltip: (text: string) => { tooltip = text; },
-        fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
+        fetchPost: (url: string, body: {path: string, notebook?: string}, receive: (response: unknown) => void,
                     _before: unknown, _after: unknown, signal: AbortSignal) => {
+            if (url === "/api/notebook/getNotebookInfo") {
+                notebookRequests.push({id: body.notebook, receive});
+                return;
+            }
             assetRequests.push({path: body.path, receive, signal});
         },
         isLocalPath: (value: string) => value.startsWith("assets/"),
@@ -294,6 +299,23 @@ const browserCases = async (source: string, keyboardSource: string) => {
     document.body.append(url);
     url.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tooltip, '<span style="word-break: break-all">https://example.com/</span><br><span>Column title</span>');
+
+    const notebookRow = document.createElement("li");
+    notebookRow.dataset.type = "navigation-root";
+    notebookRow.dataset.url = "notebook-id";
+    notebookRow.innerHTML = '<span class="b3-list-item__text ariaLabel">Notebook</span>';
+    document.body.append(notebookRow);
+    notebookRow.firstElementChild.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(notebookRequests.at(-1).id, "notebook-id", "flat virtual rows supply notebook identity");
+    notebookRequests.at(-1).receive({code: 0, data: {boxInfo: {
+        name: "Notebook", hSize: "1 KiB", docCount: 0, hMtime: "Now", hCtime: "Before",
+    }}});
+    check.match(tooltip, /^Notebook /);
+    notebookRow.firstElementChild.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    notebookRow.remove();
+    tooltip = "";
+    notebookRequests.at(-1).receive({code: 0, data: {boxInfo: {name: "Detached notebook"}}});
+    check.equal(tooltip, "", "late responses cannot reopen tooltips for unmounted rows");
 
     const editor = document.createElement("div");
     editor.className = "protyle";

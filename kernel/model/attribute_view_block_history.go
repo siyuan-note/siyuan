@@ -96,6 +96,9 @@ func (tx *Transaction) restoreEmbeddedAttributeViewHistory(filename, boxID, avID
 	if err != nil {
 		return err
 	}
+	if current.Spec >= av.SubItemsSpec && historical.Spec < current.Spec {
+		historical.Spec = current.Spec
+	}
 	return tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID},
 		map[string]*av.AttributeView{avID: current}, map[string]*av.AttributeView{avID: historical})
 }
@@ -301,12 +304,40 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				}
 			}
 		}
+		var orderIndex *av.SubItemsIndex
 		for _, view := range current.Views {
+			var fallbackRanks map[string]int
 			if old := historical.GetView(view.ID); old != nil {
 				view.ItemIDs = restoreAttributeViewItemOrder(view.ItemIDs, old.ItemIDs, itemIDs)
 				for _, group := range view.Groups {
 					if oldGroup := old.GetGroupByID(group.ID); oldGroup != nil {
 						group.GroupItemIDs = restoreAttributeViewItemOrder(group.GroupItemIDs, oldGroup.GroupItemIDs, itemIDs)
+						if len(oldGroup.SubItemsItemIDs) > 0 {
+							order := group.SubItemsItemIDs
+							if len(order) == 0 {
+								// 当前组已回到缺省顺序时，先保留现有成员的有效顺序，再插回历史条目。
+								original := before[id]
+								if original.HasSubItems() {
+									if orderIndex == nil {
+										var indexErr error
+										orderIndex, indexErr = original.BuildSubItemsIndex()
+										if indexErr != nil {
+											return indexErr
+										}
+									}
+									if originalView := original.GetView(view.ID); originalView != nil {
+										if fallbackRanks == nil {
+											fallbackRanks = map[string]int{}
+											for position, itemID := range originalView.ItemIDs {
+												fallbackRanks[itemID] = position
+											}
+										}
+										order = boundHistorySubItemsFallbackOrder(group, orderIndex, fallbackRanks)
+									}
+								}
+							}
+							group.SubItemsItemIDs = restoreAttributeViewItemOrder(order, oldGroup.SubItemsItemIDs, itemIDs)
+						}
 					}
 				}
 			}
@@ -319,11 +350,42 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				current.CardCoverPositions[itemID] = covers
 			}
 		}
+		if current.HasSubItems() {
+			index, graphErr := historical.BuildSubItemsIndex()
+			if graphErr != nil {
+				return graphErr
+			}
+			parents, _ := current.GetKeyValues(current.SubItems.ParentKeyID)
+			changes := map[string]string{}
+			for child, parent := range index.Parents {
+				if !slices.Contains(itemIDs, parent) || current.GetBlockValue(child) == nil {
+					continue
+				}
+				expected := index.Parents[parent]
+				for slices.Contains(itemIDs, expected) {
+					expected = index.Parents[expected]
+				}
+				actual := ""
+				if value := parents.GetValue(child); value != nil && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
+					actual = value.Relation.BlockIDs[0]
+				}
+				if actual != expected && actual != parent {
+					return fmt.Errorf("database parent entry [%s] changed since document deletion", child)
+				}
+				changes[child] = parent
+			}
+			if err = current.RestoreSubItemsParents(changes); err != nil {
+				return err
+			}
+		}
 		restoredItems[id] = append(restoredItems[id], itemIDs...)
 	}
 	// 先合并所有主键，再恢复双向关联，允许同一文档内的条目互相关联。
 	for id, itemIDs := range restoredItems {
 		for _, kv := range after[id].KeyValues {
+			if after[id].IsSubItemsKey(kv.Key.ID) {
+				continue
+			}
 			relation := kv.Key.Relation
 			if relation == nil || !relation.IsTwoWay {
 				continue
@@ -376,6 +438,9 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				return err
 			}
 			for _, oldField := range historical.KeyValues {
+				if source.IsSubItemsKey(oldField.Key.ID) {
+					continue
+				}
 				if oldField.Key.Type != av.KeyTypeRelation || oldField.Key.Relation == nil || oldField.Key.Relation.AvID != id {
 					continue
 				}
@@ -418,6 +483,38 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 		regenAttrViewGroups(view)
 	}
 	return tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID}, before, after)
+}
+
+// 按缺省优先级补齐当前树形组，遍历实际成员而非为每组扫描全库。
+func boundHistorySubItemsFallbackOrder(group *av.View, index *av.SubItemsIndex, viewRanks map[string]int) []string {
+	flatRanks := map[string]int{}
+	order := []string{}
+	for position, id := range group.GroupItemIDs {
+		flatRanks[id] = position
+		if parent, exists := index.Parents[id]; !exists || parent != "" {
+			continue
+		}
+		pending := []string{id}
+		for len(pending) > 0 {
+			id = pending[len(pending)-1]
+			pending = pending[:len(pending)-1]
+			order = append(order, id)
+			for child := len(index.Children[id]) - 1; child >= 0; child-- {
+				pending = append(pending, index.Children[id][child])
+			}
+		}
+	}
+	rank := func(id string) int {
+		if position, found := flatRanks[id]; found {
+			return position
+		}
+		if position, found := viewRanks[id]; found {
+			return len(group.GroupItemIDs) + position
+		}
+		return len(group.GroupItemIDs) + len(viewRanks)
+	}
+	slices.SortStableFunc(order, func(left, right string) int { return rank(left) - rank(right) })
+	return order
 }
 
 // 仅将同一条目从历史列表的首块还原到外壳，不覆盖无关换绑或后续字段编辑。

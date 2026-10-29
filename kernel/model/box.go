@@ -388,6 +388,8 @@ func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
 func (box *Box) saveConf0(data []byte) error {
 	unlock := filesys.LockDocumentConfiguration()
 	defer unlock()
+	finishDocTreeChange := cache.BeginDocTreeMutation(box.ID)
+	defer finishDocTreeChange()
 	if !ast.IsNodeIDPattern(box.ID) {
 		return fmt.Errorf("invalid box ID [%s]", box.ID)
 	}
@@ -532,6 +534,8 @@ func (box *Box) MkdirAll(path string) error {
 }
 
 func (box *Box) Move(oldPath, newPath string) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation(box.ID)
+	defer finishDocTreeChange()
 	if _, err := box.validateBoxPath(oldPath); err != nil {
 		return err
 	}
@@ -559,6 +563,8 @@ func (box *Box) Move(oldPath, newPath string) error {
 }
 
 func (box *Box) Remove(path string) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation(box.ID)
+	defer finishDocTreeChange()
 	if _, err := box.validateBoxPath(path); err != nil {
 		return err
 	}

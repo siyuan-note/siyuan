@@ -23,6 +23,31 @@ const languages = {
     newItemTemplateUnavailableNotebookTip: "Notebook unavailable",
 };
 
+it("parent relation editing replaces the parent atomically without optimistically merging multiple parents", async () => {
+    for (const selected of [false, true]) {
+        const calls: unknown[][] = [];
+        let closed = false;
+        const menu = {querySelector: (selector: string) => selector === ".av__relation" ?
+            {dataset: {subItemsParent: "true"}} : undefined,
+        closest: () => ({remove: () => { closed = true; }})};
+        const node = {contains: () => true, getAttribute: () => "list"};
+        const target = {classList: {contains: () => true}, getAttribute: () => "new-parent",
+            dataset: {relationType: selected ? "selected" : "candidate"}};
+        const {setRelationCell} = load(["setRelationCell"], {
+            hasClosestByClassName: () => menu,
+            getFieldIdByCellElement: (cell: {rowID: string}) => cell.rowID,
+            reparentSubItems: (...args: unknown[]) => calls.push(args),
+        });
+        await setRelationCell({}, node, target, ["a", "b"].map(rowID =>
+            ({rowID, closest: () => ({dataset: {groupId: "selected-group"}})})));
+        assert.equal(calls.length, 1);
+        assert.deepEqual(calls[0][2], ["a", "b"]);
+        assert.equal(calls[0][3], selected ? "" : "new-parent");
+        assert.equal(calls[0][6], "selected-group");
+        assert.equal(closed, true);
+    }
+});
+
 it("always offers creation, previews the template name, and escapes database names and titles", () => {
     const previews = new WeakMap();
     const menu = {querySelector: (selector: string) => selector === ".av__relation" ? {dataset: {}} :

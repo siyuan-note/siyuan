@@ -59,12 +59,14 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "util/genID": {genUUID: () => "new"},
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
-                "protyle/util/compatibility": {isInMobileApp: () => true},
+                "protyle/util/compatibility": {isInMobileApp: () => true,
+                    isIPad: () => false, isInAndroid: () => false, isInHarmony: () => false},
                 "protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: (): [] => []},
                 "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
                     getSettingsOwnerApp: () => window.siyuan.ws?.app,
                     getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; },
-                        getEditorToolbarCatalogSnapshot: (): [] => []})},
+                        getEditorToolbarCatalogSnapshot: (): [] => [],
+                        getBreadcrumbButtonCatalogSnapshot: () => load("plugin/breadcrumbButtonRegistry").getBreadcrumbButtonCatalogSnapshot()})},
             };
             check(id in mocks, `Missing module ${id}`);
             return mocks[id];
@@ -132,6 +134,56 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         check(JSON.stringify(config()) === saved, "Navigating levels must preserve saved profiles and unknown order slots");
     };
+    if (!narrow) {
+        const registry = load("plugin/breadcrumbButtonRegistry");
+        const breadcrumbRoot = "editor.breadcrumb";
+        const pluginKey = registry.getPluginBreadcrumbEntryKey("test.plugin", "test.button");
+        registry.breadcrumbButtonRegistry.set("test.plugin", {id: "test.button", icon: "iconFile", title: "Plugin button", callback: noop});
+        config().profiles[0].orders[breadcrumbRoot] = [pluginKey, "plugin:unavailable:button", "command-panel", "readonly", "doc", "more"];
+        let editor = open();
+        const selectBreadcrumb = () => {
+            const select = editor.querySelector<HTMLSelectElement>("[data-type='entry-section']");
+            select.value = breadcrumbRoot;
+            select.dispatchEvent(new Event("change", {bubbles: true}));
+        };
+        selectBreadcrumb();
+        const browser = editor.querySelector<HTMLElement>("[data-type='entry-browser']");
+        const row = (key: string) => browser.querySelector<HTMLElement>(`[data-entry-key='${key}']`);
+        check(row("command-panel") && row("readonly") && row("doc") && row("more") && row(pluginKey),
+            "Mobile breadcrumb settings must expose native and registered plugin buttons");
+        check(!row("exit-focus") && !row("context") && !row("undo"), "State and desktop tablet actions are not configurable mobile entries");
+        row(pluginKey).querySelector<HTMLInputElement>("input").click();
+        check(config().profiles[0].entries[`${breadcrumbRoot}.${pluginKey}`] === undefined,
+            "Breadcrumb visibility edits must remain a draft");
+        let captured = false;
+        browser.setPointerCapture = () => { captured = true; };
+        browser.hasPointerCapture = () => captured;
+        browser.releasePointerCapture = () => { captured = false; };
+        const point = (element: Element) => {
+            const rect = element.getBoundingClientRect();
+            return {clientX: rect.left + rect.width / 2, clientY: rect.bottom - 3};
+        };
+        const send = (target: Element, type: string, element: Element) => target.dispatchEvent(new PointerEvent(type,
+            {bubbles: true, cancelable: true, pointerId: 2, isPrimary: true, button: 0, pointerType: "touch", ...point(element)}));
+        const handle = row(pluginKey).querySelector<HTMLElement>(".config-entry-visibility__drag");
+        send(handle, "pointerdown", handle);
+        send(browser, "pointermove", row("doc"));
+        check(browser.querySelector(".config-entry-visibility__row--drop-after"), "Breadcrumb touch drag must resolve a mixed-order target");
+        send(browser, "pointerup", row("doc"));
+        check(row("doc").compareDocumentPosition(row(pluginKey)) & Node.DOCUMENT_POSITION_FOLLOWING,
+            "Plugin breadcrumb buttons must move past built-in buttons");
+        editor.querySelector<HTMLElement>("[data-action='confirm']").click();
+        const saved = config().profiles[0];
+        check(saved.entries[`${breadcrumbRoot}.${pluginKey}`] === false && saved.orders[breadcrumbRoot].includes("plugin:unavailable:button") &&
+            saved.orders[breadcrumbRoot].indexOf("doc") < saved.orders[breadcrumbRoot].indexOf(pluginKey),
+            "Confirm must save breadcrumb visibility, mixed order, and unavailable plugin slots");
+        editor = open();
+        selectBreadcrumb();
+        check(!editor.querySelector<HTMLInputElement>(`[data-entry-path='${breadcrumbRoot}.${pluginKey}']`).checked,
+            "Reopening must restore hidden breadcrumb preferences");
+        editor.querySelector<HTMLElement>("[data-action='cancel']").click();
+        registry.breadcrumbButtonRegistry.removePlugin("test.plugin");
+    }
     if (mobileBuild) {
         root.innerHTML = ui.genEntryVisibilityHtml();
         ui.mountEntryVisibility(root);
@@ -182,7 +234,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.dispatchEvent(new Event("change", {bubbles: true}));
         check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
         check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
-        check(select.options.length === 4, "Mobile must offer toolbar, embed, slash, and image categories");
+        check(select.options.length === 5, "Mobile must offer toolbar, breadcrumb, embed, slash, and image categories");
         select.value = "editor.blockEmbed";
         select.dispatchEvent(new Event("change", {bubbles: true}));
         const embedToolbar = view.querySelector<HTMLInputElement>("[data-entry-path='editor.blockEmbed.toolbar']");
@@ -484,6 +536,7 @@ const runEntryUiCases = async (mobileBuild: boolean) => {
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
         "protyle/wysiwyg/calloutType",
         "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
+    modules.push("plugin/breadcrumbButtonRegistry");
     if (mobileBuild) {
         modules.push("config/setting/windowContext");
     }

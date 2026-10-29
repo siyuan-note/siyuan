@@ -89,6 +89,7 @@ func RemoveDocIALInBox(p, boxID string) {
 }
 
 func ClearDocsIAL() {
+	InvalidateDocTree("")
 	docIALCacheKeysMu.Lock()
 	docIALCacheKeys = map[string]map[string]struct{}{}
 	docIALCacheKeysMu.Unlock()

@@ -67,6 +67,7 @@ import {
 } from "./tabDrag";
 import {parseDocumentTreeDragData} from "../util/fileTreeMove";
 import {pathPosix} from "../util/pathName";
+import {flushDocumentTitleBeforeClose} from "../protyle/header/documentTitleClose";
 
 interface IDocumentTabMoveTarget {
     element: HTMLElement;
@@ -998,7 +999,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true) => {
+    private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true, sourceRemoved = false) => {
         let removedTab = false;
         this.children.find((item, index) => {
             if (item.id !== id) {
@@ -1006,7 +1007,7 @@ export class Wnd {
             }
             removedTab = !!item.headElement;
             /// #if !BROWSER
-            if (removedTab && item.model instanceof Editor && item.model.editor) {
+            if (!sourceRemoved && removedTab && item.model instanceof Editor && item.model.editor) {
                 flushClosingWindowTab(item.model.editor);
             }
             /// #endif
@@ -1024,7 +1025,7 @@ export class Wnd {
             if (item.model instanceof Custom && item.model.beforeDestroy) {
                 item.model.beforeDestroy();
             }
-            if (item.model instanceof Editor) {
+            if (!sourceRemoved && item.model instanceof Editor) {
                 saveBackScroll(item.model.editor.protyle);
                 saveScroll(item.model.editor.protyle);
                 // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
@@ -1121,13 +1122,24 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, isBatchClose = false, animate = true, isSaveLayout = true) {
+    // 源已关闭或删除时立即清理明文，不能再等待该源上的保存和上传。
+    public removeTab(id: string, isBatchClose = false, animate = true, isSaveLayout = true, sourceRemoved = false) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
+                if (sourceRemoved) {
+                    this.removeTabAction(id, isBatchClose, false, isSaveLayout, true);
+                    return;
+                }
                 if ((item.model instanceof Editor) && item.model.editor?.protyle) {
-                    if (item.model.editor.protyle.upload.isUploading) {
+                    if (item.model.editor.isUploading()) {
                         showMessage(window.siyuan.languages.uploading);
+                        return;
+                    }
+                    const model = item.model;
+                    if (flushDocumentTitleBeforeClose(model.editor,
+                        () => this.removeTabAction(id, isBatchClose, animate, isSaveLayout),
+                        () => this.children.includes(item) && item.model === model)) {
                         return;
                     }
                     this.removeTabAction(id, isBatchClose, animate, isSaveLayout);

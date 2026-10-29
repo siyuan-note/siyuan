@@ -82,7 +82,11 @@ describe("command context core", () => {
             block: {id: "block", element: blockElement},
             selectedBlocks: [{id: "selected", element: blockElement}],
             tableCell: {element: tableCellElement, row: 2, column: 3},
-            fileTree: {model: {}, elements: [fileElement], ids: ["file"], paths: ["/file.sy"]},
+            fileTree: {model: {}, elements: [fileElement], ids: ["file"], paths: ["/file.sy"], items: [{
+                id: "file", notebookId: "notebook", path: "/file.sy", name: "file", kind: "document",
+                occurrenceKey: "notebook/file", parentID: "", childrenSortMode: null, effectiveSortMode: 6,
+                depth: 1, index: 0, setSize: 1, subFileCount: 0,
+            }]},
             activeTab: {id: "tab", model: {}, element: dockElement},
             dock: {type: "outline", element: dockElement},
         };
@@ -91,9 +95,11 @@ describe("command context core", () => {
         source.document.id = "changed";
         source.selectedBlocks.length = 0;
         source.fileTree.ids.length = 0;
+        source.fileTree.items[0].path = "/moved/file.sy";
         assert.equal(snapshot.document?.id, "document");
         assert.deepEqual(snapshot.selectedBlocks.map(item => item.id), ["selected"]);
         assert.deepEqual(snapshot.fileTree?.ids, ["file"]);
+        assert.equal(snapshot.fileTree?.items[0].path, "/file.sy");
         assert.equal(snapshot.tableCell?.row, 2);
         assert.equal(snapshot.activeTab?.id, "tab");
         assert.equal(snapshot.dock?.type, "outline");

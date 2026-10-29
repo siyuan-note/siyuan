@@ -19,7 +19,7 @@ export const updateMobileTitleReadonly = (protyle: IProtyle) => {
     if (readonly && !inputElement.readOnly && document.activeElement === inputElement) {
         inputElement.blur();
     }
-    inputElement.readOnly = readonly;
+    inputElement.readOnly = readonly || (protyle.block.rootID !== protyle.notebookId);
     readonlyElement.textContent = inputElement.value;
     inputElement.classList.toggle("fn__none", readonly);
     readonlyElement.classList.toggle("fn__none", !readonly);

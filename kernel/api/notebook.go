@@ -263,7 +263,7 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 		}
 		indexState := treenode.DocumentMetadataState(notebook)
 		capabilities = &apicontract.DocumentCapabilities{StructuredPaths: true,
-			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain"},
+			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain", "inline-ast"},
 			IndexState: indexState, Revision: snapshot.Revision}
 	}
 

@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -699,7 +698,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		if err = treenode.CheckSpecJSON(data); nil != err {
 			return
 		}
-		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 			return
@@ -771,7 +770,7 @@ func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, t
 	if err = treenode.CheckSpecJSON(data); nil != err {
 		return
 	}
-	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
 	}
@@ -911,7 +910,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 		if err = treenode.CheckSpecJSON(data); nil != err {
 			return
 		}
-		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", id, err)
 			return
@@ -1511,6 +1510,8 @@ func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
 
 // checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
 func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	// 恢复会核对实际内容，备份也必须完整校验，保留随后可能被覆盖的当前数据。
 	if _, err := repo.IndexWithOptions("Backup before checkout", false,
 		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},
@@ -1518,6 +1519,7 @@ func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) err
 		return err
 	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	refreshAppearancePackages(themes, icons)
 	refresh(err)
@@ -2538,6 +2540,7 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
+	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
 	confSyncSnapshot := Conf.LoadSync()
 

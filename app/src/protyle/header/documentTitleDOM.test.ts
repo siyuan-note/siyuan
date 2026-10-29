@@ -1,0 +1,129 @@
+import * as assert from "node:assert/strict";
+import {execFile} from "node:child_process";
+import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import * as path from "node:path";
+import {test} from "node:test";
+import {promisify} from "node:util";
+import {ScriptTarget, transpileModule} from "typescript";
+
+const browserCases = (sources: string[], lutePath: string) => {
+    const check: typeof assert = require("node:assert/strict");
+    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only"}}});
+    const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
+    const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
+    const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+        getDocumentTitleDOMFingerprint: fingerprint, getDocumentTitleLute: wrap} =
+        new Function("restoreInlineElementBoundaries", sources[2] +
+            "\nreturn {prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
+    const paragraph = (content: string, id = "20260101000000-abcdefg") =>
+        `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true" spellcheck="false">${content}</div></div>`;
+    const source = paragraph(`<span data-type="strong em" style="color: red" data-custom="retained">Styled</span>
+<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="d">Dynamic</span>
+<span data-type="block-ref" data-id="20260101000002-abcdefg" data-subtype="s">Static</span>
+<span data-type="a" data-href="https://example.org" data-title="Link title">Link</span>
+<span data-type="tag">Tag</span><span data-type="inline-memo" data-inline-memo-content="memo &amp; text">Memo</span>
+<span data-type="file-annotation-ref" data-id="assets/a.pdf/annotation">Annotation</span>
+<span class="render-node" data-type="inline-math" data-subtype="math" data-content="x^2" contenteditable="false"></span>
+<span class="img" contenteditable="false"><span><img src="assets/p.png" alt="Picture" style="width: 42px" title="Image title"></span></span>
+<span data-type="kbd">Ctrl</span><span data-type="code">code</span><span data-type="u s mark sup sub">More styles</span>`);
+    const rendered = prepare(source, "20260101000003-abcdefg");
+    check.equal(unsupported(rendered).length, 0);
+    const template = document.createElement("template");
+    template.innerHTML = rendered;
+    check.equal(template.content.firstElementChild.getAttribute("data-node-id"), "20260101000003-abcdefg");
+    check.equal(template.content.querySelector('[data-custom="retained"]').textContent, "Styled");
+    check.equal(template.content.querySelector("img").getAttribute("src"), "assets/p.png");
+    check.equal(template.content.querySelector("img").style.width, "42px");
+    check.equal(template.content.querySelector('[data-type="inline-memo"]').getAttribute("data-inline-memo-content"), "memo & text");
+    check.equal(template.content.querySelector('[data-type="file-annotation-ref"]').getAttribute("data-id"), "assets/a.pdf/annotation");
+    for (const invalid of [source + paragraph("Another"), '<div data-type="NodeHeading"><div contenteditable="true">Heading</div></div>',
+        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>']) {
+        check.equal(unsupported(invalid).length, 1);
+        check.throws(() => prepare(invalid), /Inline only/);
+    }
+    const originalFingerprint = fingerprint(source);
+    const math = template.content.querySelector('[data-type="inline-math"]');
+    math.setAttribute("data-render", "true");
+    math.innerHTML = '<span class="katex"><span>Rendered equation</span></span>';
+    template.content.querySelector('[contenteditable="true"]').classList.add("protyle-title__input");
+    template.content.querySelectorAll("[contenteditable]").forEach(item => item.setAttribute("contenteditable", "false"));
+    template.content.querySelector(".img").classList.add("img--select");
+    template.content.querySelector(".img").insertAdjacentHTML("beforeend", '<span class="img__alt">Picture</span>');
+    check.equal(fingerprint(template.innerHTML), originalFingerprint, "render caches and readonly switching do not save source");
+    template.content.querySelector<HTMLElement>('[data-custom="retained"]').style.color = "blue";
+    check.notEqual(fingerprint(template.innerHTML), originalFingerprint, "format-only changes are source edits");
+    check.notEqual(fingerprint(paragraph('<span data-type="block-ref" data-id="other" data-subtype="d">Dynamic</span>')),
+        fingerprint(paragraph('<span data-type="block-ref" data-id="original" data-subtype="d">Dynamic</span>')),
+        "reference identity remains significant");
+
+    require(lutePath);
+    const lute = wrap(Lute.New());
+    lute.SetTextMark(true);
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetTag(true);
+    lute.SetInlineMath(true);
+    lute.SetKramdownIAL(true);
+    for (const text of ["# Heading", "- List", "1. Ordered", "> Quote", "```code", "---", "first\nsecond", "line\n\nline"]) {
+        const spun = lute.SpinBlockDOM(paragraph(text));
+        template.innerHTML = spun;
+        check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1, text);
+        check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph", text);
+        check.equal(template.content.querySelector("[contenteditable]").textContent, text, text);
+    }
+    template.innerHTML = lute.SpinBlockDOM(paragraph("**Bold** and `code`"));
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "Bold");
+    check.equal(template.content.querySelector('[data-type~="code"]').textContent.replaceAll("\u2060", ""), "code");
+    const legacyText = "**literal** [link](https://example.org) $x$ #tag# ((20260101000000-abcdefg)) \\path";
+    template.innerHTML = initial(paragraph(legacyText), "20260101000000-abcdefg");
+    template.content.querySelector("[contenteditable]").append(document.createTextNode(" and **new bold**"));
+    template.innerHTML = lute.SpinBlockDOM(template.innerHTML);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, legacyText + " and new bold");
+    check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 1);
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "new bold");
+    check.equal(template.content.querySelectorAll('[data-type~="a"], [data-type~="tag"], [data-type~="inline-math"], [data-type~="block-ref"]').length, 0,
+        "ordinary edits must not reinterpret legacy literal syntax");
+    template.innerHTML = lute.SpinBlockDOM(paragraph('<span data-type="strong" style="color: red">**literal** [link](url) $x$</span> and **new**'));
+    check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 2);
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "**literal** [link](url) $x$");
+    check.equal(template.content.querySelector('[data-type~="strong"]').getAttribute("style"), "color: red");
+    return "Document title DOM cases passed";
+};
+
+test("native document title DOM preserves every inline family, format edits and paragraph-only parsing", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 30000,
+}, async () => {
+    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts"].map(file =>
+        transpileModule(readFileSync(path.join(__dirname, file), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
+    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
+    const script = path.join(temporary, "run.cjs");
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," +
+        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + ")";
+    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
+app.commandLine.appendSwitch("disable-gpu");
+app.whenReady().then(async () => {
+    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    win.webContents.on("console-message", event => console.error(event.message));
+    try {
+        await win.loadURL("data:text/html,<html><body></body></html>");
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        win.destroy(); app.exit(0);
+    } catch (error) { console.error(error); win.destroy(); app.exit(1); }
+});`, "utf8");
+    const env = {...process.env};
+    delete env.ELECTRON_RUN_AS_NODE;
+    try {
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+            {env, windowsHide: true, timeout: 25000});
+        assert.match(result.stdout, /Document title DOM cases passed/);
+    } finally {
+        if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&
+            path.basename(temporary).startsWith("siyuan-title-dom-test-")) {
+            rmSync(temporary, {recursive: true, force: true});
+        }
+    }
+});

@@ -12,6 +12,7 @@ import {resolveAVSelectedCell} from "./selectionState";
 // 使用实际行渲染与字段定位函数，检查列表沿用行列交互时的字段映射。
 const loadModule = (name: string) => {
     const mocks: Record<string, unknown> = {
+        "./subItemsState": name === "row" ? loadModule("subItemsState") : {},
         "./viewType": viewType,
         "./conditionalColor": conditionalColor,
         "./cell": {renderCell: (value: IAVCellValue) => value?.text?.content || value?.block?.content || ""},
@@ -68,6 +69,20 @@ describe("database list view", () => {
         assert.match(html, /width: 360px/);
         assert.match(html, /av__colsticky--freeze/);
         assert.match(html, /av__freeze-drag/);
+    });
+
+    it("renders the same tree controls and context metadata in table and list primary fields", () => {
+        for (const type of ["table", "list"] as TAVView[]) {
+            const data = createView();
+            data.rows[0].hierarchy = {parentID: "parent", depth: 2, childCount: 3, context: true, expanded: false};
+            const html = getRowHTML({data, row: data.rows[0], rowIndex: 4, pinIndex: 0, type});
+            assert.match(html, /data-index="4" data-id="row" data-parent-id="parent" data-depth="2"/);
+            assert.match(html, /av__row--context/);
+            assert.match(html, /padding-left:40px/);
+            assert.match(html, /data-type="av-sub-items-toggle" aria-expanded="false"/);
+            assert.equal((html.match(/data-type="av-sub-items-toggle"/g) || []).length, 1);
+            assert.doesNotMatch(html, /data-col-id="tag"/);
+        }
     });
 
     it("resolves list edit targets from row IDs and column IDs", () => {

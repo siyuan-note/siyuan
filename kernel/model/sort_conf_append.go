@@ -19,6 +19,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -158,6 +159,8 @@ func writeSortConfAppendTail(file *os.File, record *sortConfAppendRecord) error 
 
 // appendSortConfMap 保持标准 JSON 对象，只有新增条目使用可恢复的尾部写入。
 func appendSortConfMap(confPath string, data []byte, additions map[string]int) (err error) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	if err = recoverSortConfAppend(confPath); err != nil {
 		return
 	}
@@ -281,6 +284,8 @@ func recoverSortConfAppend(confPath string) (err error) {
 	if err = json.Unmarshal(data, &record); err != nil {
 		return
 	}
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	if err = applySortConfAppend(file, &record); err != nil {
 		return
 	}

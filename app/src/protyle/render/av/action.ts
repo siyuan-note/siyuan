@@ -1,4 +1,8 @@
 import {isTableLikeView} from "./viewType";
+import {navigateSubItems} from "./subItemsNavigation";
+import {locateRequests} from "./locateState";
+import {clearSubItemsViewportAnchor} from "./subItemsState";
+import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
@@ -371,6 +375,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
         const type = target.getAttribute("data-type");
+        if (type?.startsWith("av-sub-items-") && navigateSubItems(target, blockElement as HTMLElement, protyle)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         if (type === "av-selection-edit" && !protyle.disabled) {
             openAVEditFieldMenu(protyle, blockElement as HTMLElement, target);
             event.preventDefault();
@@ -1150,6 +1159,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     });
     if (editable) {
         const detachedItemIDs = selectedItems.filter(item => item.isDetached).map(item => item.itemID);
+        addSubItemsMenu(menu, protyle, blockElement, selectedItemInfos.map(item => item.itemID), selectedItemInfos[0]?.groupID);
         if (detachedItemIDs.length > 0) {
             menu.addItem({
                 id: "createDocAndBind",
@@ -1473,7 +1483,8 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             cellElement.parentElement.setAttribute("data-empty",
                 cellValueIsEmpty(value, true, renderTemplate).toString());
         } else {
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            const treeControls = cellElement.querySelector(".av__sub-items")?.outerHTML || "";
+            cellElement.innerHTML = treeControls + renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
                 undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
         }
         if (hasDragFill) {
@@ -1532,6 +1543,9 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
 };
 
 export const switchAVView = (protyle: IProtyle, blockElement: HTMLElement, target: HTMLElement) => {
+    locateRequests.delete(blockElement);
+    clearSubItemsViewportAnchor(blockElement);
+    blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
     clearSelect(["row", "galleryItem"], blockElement);
     if (protyle.disabled || window.siyuan.isPublish || protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         if (window.siyuan.isPublish) {

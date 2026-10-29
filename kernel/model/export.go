@@ -649,10 +649,7 @@ func exportNotebooksBaseName(boxes []*Box) string {
 	if len(boxes) < 1 {
 		return "notebooks"
 	}
-	name := util.FilterFileName(boxes[0].Name)
-	if name == "" {
-		name = boxes[0].ID
-	}
+	name := exportDocumentFileName(boxes[0].Name, boxes[0].ID)
 	if len(boxes) > 1 {
 		name += "-" + strconv.Itoa(len(boxes))
 	}
@@ -2632,16 +2629,16 @@ func exportNotebookMarkdownPaths(boxes []*Box, trees map[string]*parse.Tree) map
 			name = boxID
 		}
 		candidate := name
-		if _, ok := used[strings.ToLower(candidate)]; ok {
+		if _, ok := used[exportPathComparison(candidate)]; ok {
 			candidate = name + "-" + boxID
 		}
 		for index := 2; ; index++ {
-			if _, ok := used[strings.ToLower(candidate)]; !ok {
+			if _, ok := used[exportPathComparison(candidate)]; !ok {
 				break
 			}
 			candidate = name + "-" + boxID + "-" + strconv.Itoa(index)
 		}
-		used[strings.ToLower(candidate)] = struct{}{}
+		used[exportPathComparison(candidate)] = struct{}{}
 		ret[boxID] = candidate
 	}
 	for _, box := range boxes {
@@ -2787,14 +2784,7 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		return
 	}
 
-	dir, name := path.Split(baseFolderName)
-	name = util.FilterFileName(name)
-	if strings.HasSuffix(name, "..") {
-		// 文档标题以 `..` 结尾时无法导出 Markdown https://github.com/siyuan-note/siyuan/issues/4698
-		// 似乎是 os.MkdirAll 的 bug，以 .. 结尾的路径无法创建，所以这里加上 _ 结尾
-		name += "_"
-	}
-	baseFolderName = path.Join(dir, name)
+	baseFolderName = exportDocumentFileName(baseFolderName, boxID)
 	box := Conf.Box(boxID)
 
 	// 加密笔记本的导出全程持读锁，并把明文中间目录与产物写到 temp/export/<boxID>/sy/<exportID>/ 受控目录下，
@@ -3065,7 +3055,7 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		exportStorageRiffDir := filepath.Join(exportDir, "storage", "riff")
 		deck, loadErr := riff.LoadDeck(exportStorageRiffDir, builtinDeckID, confFlashcardSnapshot.RequestRetention, confFlashcardSnapshot.MaximumInterval, confFlashcardSnapshot.Weights)
 		if nil != loadErr {
-			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
+			logging.LogErrorf("load deck [%s] failed: %s", baseFolderName, loadErr)
 		} else {
 			for _, tree := range trees {
 				cards := getTreeFlashcards(tree.ID)
@@ -3076,7 +3066,7 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 			}
 			if 0 < deck.CountCards() {
 				if saveErr := deck.Save(); nil != saveErr {
-					logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+					logging.LogErrorf("save deck [%s] failed: %s", baseFolderName, saveErr)
 				}
 			}
 		}
@@ -3588,8 +3578,21 @@ func exportMarkdownRelativePath(currentDocDir, href string) string {
 
 func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
-	ret = tree
+	cloned := *tree
+	cloned.Root = cloneRenderNode(tree.Root)
+	ret = &cloned
 	id := tree.Root.ID
+	// 标题成为导出副本中的真实标题块，随后与正文一起转换引用、附件和脚注。
+	// 不把转换后的脚注节点写回持久化标题源，也不让临时标题片段重复出现在正文。
+	if exportOpts.Config.AddTitle {
+		title, titleErr := exportDocumentHeading(ret.Root, 1, exportOpts.CustomTitle)
+		if titleErr != nil {
+			return nil, titleErr
+		}
+		ret.Root.PrependChild(title)
+		title.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(title.KramdownIAL)})
+	}
+	ret.Root.DocumentTitle = nil
 
 	// 解析查询嵌入节点
 	depth := 0
@@ -3736,29 +3739,11 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 		}
 	}
 
-	if exportOpts.Config.AddTitle {
-		if root, _ := getBlock(id, tree); nil != root {
-			root.IAL["type"] = "doc"
-			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
-			for k, v := range root.IAL {
-				if "type" == k || "style" == k {
-					continue
-				}
-				title.SetIALAttr(k, v)
-			}
-			title.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(title.KramdownIAL)})
-			content := exportOpts.CustomTitle
-			if "" == content {
-				content = html.UnescapeString(root.Content)
-			}
-			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
-			ret.Root.PrependChild(title)
-		}
-	} else {
+	if !exportOpts.Config.AddTitle {
 		if 4 == exportOpts.Config.BlockRefMode { // 脚注+锚点哈希
 			refRoot := slices.Contains(refFootnoteOrder, id)
 
-			footnotesDefs := tree.Root.ChildrenByType(ast.NodeFootnotesDef)
+			footnotesDefs := ret.Root.ChildrenByType(ast.NodeFootnotesDef)
 			for _, footnotesDef := range footnotesDefs {
 				ast.Walk(footnotesDef, func(n *ast.Node, entering bool) ast.WalkStatus {
 					if !entering {
@@ -4342,8 +4327,10 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 				nodes = append(nodes, children...)
 			}
 		} else if ast.NodeDocument == defNode.Type {
-			docTitle := &ast.Node{ID: defNode.ID, Type: ast.NodeHeading, HeadingLevel: 1}
-			docTitle.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(treenode.ReadDocumentTitle(defNode).Text)})
+			docTitle, titleErr := exportDocumentHeading(defNode, 1, "")
+			if titleErr != nil {
+				return nil, titleErr
+			}
 			nodes = append(nodes, docTitle)
 			for c := defNode.FirstChild; nil != c; c = c.Next {
 				nodes = append(nodes, c)
@@ -4700,14 +4687,7 @@ func exportPandocConvertZip0(exportOpts archiveExportOptions) (zipPath string) {
 		return
 	}
 
-	dir, name := path.Split(exportOpts.BaseFolderName)
-	name = util.FilterFileName(name)
-	if strings.HasSuffix(name, "..") {
-		// 文档标题以 `..` 结尾时无法导出 Markdown https://github.com/siyuan-note/siyuan/issues/4698
-		// 似乎是 os.MkdirAll 的 bug，以 .. 结尾的路径无法创建，所以这里加上 _ 结尾
-		name += "_"
-	}
-	exportOpts.BaseFolderName = path.Join(dir, name)
+	exportOpts.BaseFolderName = exportDocumentFileName(exportOpts.BaseFolderName, exportOpts.BoxID)
 
 	// 加密笔记本的导出全程持读锁，并把明文中间目录与产物写到 temp/export/<boxID>/markdown/<exportID>/ 受控目录下，
 	// 以便 LockBox 清理与托管下载校验。普通笔记本保持既有以 baseFolderName 为名的导出路径，行为不变。
@@ -4842,7 +4822,7 @@ func exportPandocConvertZip0(exportOpts archiveExportOptions) (zipPath string) {
 			continue
 		}
 
-		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(exportOpts.DocPaths), name)))
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(exportOpts.DocPaths), exportOpts.BaseFolderName)))
 	}
 
 	// 加密笔记本先写 .partial 再原子 rename，并把产物登记为托管下载令牌；普通笔记本保持原行为。

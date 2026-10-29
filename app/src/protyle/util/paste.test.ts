@@ -257,6 +257,7 @@ describe("restricted cell selected text paste", () => {
                 getProtyleBlockDOMSanitizer: () => (html: string) => html,
                 isProtyleRichHTMLPasteEnabled: () => false,
                 getProtyleUnsupportedPasteBlocks: () => () => options.unsupported ? ["Table"] : [],
+                getProtyleUnsupportedPasteMessage: (): undefined => undefined,
                 getProtyleRestrictedPlainTextHTML: (text: string) => "plain:" + text,
                 isProtyleUploadDisabled: () => true,
                 areProtylePluginExtensionsEnabled: () => false,

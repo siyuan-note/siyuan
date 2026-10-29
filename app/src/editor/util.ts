@@ -764,9 +764,9 @@ export const updatePanelByEditor = (options: {
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && options.protyle) {
             const fileModel = getDockByType("file")?.data.file;
             if (fileModel instanceof Files) {
-                const target = fileModel.element.querySelector(`li[data-path="${options.protyle.path}"]`);
-                if (!target || (target && !target.classList.contains("b3-list-item--focus"))) {
-                    fileModel.selectItem(options.protyle.notebookId, options.protyle.path);
+                const selected = fileModel.docTree.getSelectedItems();
+                if (!selected.some(item => item.notebookId === options.protyle.notebookId && item.path === options.protyle.path)) {
+                    void fileModel.selectItem(options.protyle.notebookId, options.protyle.path);
                 }
             }
         }

@@ -127,6 +127,7 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
+        memory: IMemory;
         web: IAIWeb;
         providers: IProvider[];
         editing: IEditing;
@@ -138,13 +139,27 @@ declare namespace Config {
         decision: IDecision;
     }
 
+    /** 工作空间长期记忆；模型选择独立且不自动回退，配置不随记忆 Markdown 同步。 */
+    export interface IMemory {
+        /** 允许整理成功会话的用户原话，默认关闭；不采集助手输出。 */
+        conversations: boolean;
+        enabled: boolean;
+        autoMaintain: boolean;
+        modelId: string;
+        reasoningEffort: string;
+        /** 用户明确允许自动整理的普通笔记本 ID；默认空，不自动扫描全库。 */
+        sources: string[];
+    }
+
     /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */
     export interface IAIWeb {
         searchProvider: string;
         fetchProvider: string;
         /** DeepSeek Search 与 Fetch 共用的凭证，由内核加密保存。 */
         apiKey: string;
-        /** DeepSeek 请求超时秒数，默认 30，范围 1–600。 */
+        /** 独立 Exa 凭据，由内核加密保存；空值使用匿名模式，非空可能产生费用。 */
+        exaApiKey: string;
+        /** 网页请求超时秒数，默认 30，范围 1–600。 */
         timeout: number;
     }
 
@@ -1003,10 +1018,15 @@ declare namespace Config {
          */
         docCreateTemplatePath: string;
         /**
-         * The maximum number of documents listed
+         * 标签列表、包含子文档的导出及旧版列表接口的数量上限，不限制文档树浏览。
          * 有效范围为 1–10240；小于 1 回退 512，大于 10240 截断至 10240
          */
         maxListCount: number;
+        /**
+         * 文档树单次按需加载数量，默认 512，有效范围为 1–10240。
+         * 首次升级继承原最大列出数量；设置为 null 时恢复默认值，不重新继承。
+         */
+        docTreeBatchSize: number;
         /**
          * The maximum number of open tabs
          */

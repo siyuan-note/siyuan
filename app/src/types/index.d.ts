@@ -392,7 +392,10 @@ interface IRefDefs {
 
 interface IFilesPath {
     notebookId: string,
-    openPaths: string[]
+    openPaths: string[],
+    version?: 2,
+    expandedIDs?: {id: string, kind: "document" | "notebook"}[],
+    scrollAnchor?: {id: string, offset: number},
 }
 
 interface IPosition {
@@ -778,6 +781,7 @@ interface ICommand {
     execute?: (context: ICommandContext) => void | Promise<void>
     callback?: (context?: ICommandContext) => void   // 其余回调存在时将不会触发
     globalCallback?: (context?: ICommandContext) => void // 焦点不在应用内时执行的回调
+    /** 文档树命令接收 Files 实例；通过 getSelectedItems() 获取完整选择，避免通过可视区 DOM 枚举。 */
     fileTreeCallback?: (
         file: import("../layout/dock/Files").Files,
         context?: ICommandContext
@@ -1132,7 +1136,31 @@ interface IAVCustomColor extends IAVColor {
     hidden?: boolean;
 }
 
+interface IAVSubItemsConfig {
+    enabled: boolean;
+    parentKeyID: string;
+    childrenKeyID: string;
+}
+
+interface IAVNestedResult {
+    page: number;
+    pageSize: number;
+    rootCount: number;
+    rootLoaded: number;
+    matchedCount: number;
+    childPaging: Record<string, {page: number; pageSize: number; total: number; loaded: number}>;
+}
+
+interface IAVItemHierarchy {
+    parentID?: string;
+    depth: number;
+    childCount: number;
+    context: boolean;
+    expanded: boolean;
+}
+
 interface IAV {
+    subItems?: IAVSubItemsConfig;
     id: string;
     name: string;
     view: IAVTable | IAVGallery;
@@ -1166,6 +1194,7 @@ interface IAVContextFilterField {
 }
 
 interface IAVRenderTarget {
+    ancestorIDs?: string[];
     status: "visible" | "filtered" | "itemNotFound" | "groupHidden";
     itemID: string;
     groupID?: string;
@@ -1218,6 +1247,8 @@ interface IAVItemConditionalColors {
 }
 
 interface IAVView {
+    subItemsDisplay?: "flat" | "nested";
+    nested?: IAVNestedResult;
     conditionalColors?: IAVConditionalColorRule[];
     name?: string;
     desc?: string;
@@ -1431,6 +1462,7 @@ interface IAVColumn {
 }
 
 interface IAVRow {
+    hierarchy?: IAVItemHierarchy;
     conditionalColors?: IAVItemConditionalColors;
     id: string,
     cells: IAVCell[]

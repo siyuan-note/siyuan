@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025133233"
 	},
 	"Children": [
 		{
@@ -3312,7 +3312,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-clx67q4",
-				"updated": "20261024161816"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
@@ -3360,6 +3360,108 @@
 			]
 		},
 		{
+			"ID": "20261025133233-2qcn948",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-2qcn948",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the full title above the document; on mobile, tap the compact title to open its editor. File trees, tabs, and breadcrumbs show a plain-text summary."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-906zkkq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-906zkkq",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "References inside a title belong to the document block. They appear in the target’s backlinks; opening a title backlink locates the title editor. Dynamic reference text follows its target. Cyclic references use stable local text so the title does not grow repeatedly."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-qe3qpaf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-qe3qpaf",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting a heading to a document preserves its inline content in the document title. Converting it back restores that content to the heading. Existing body paragraphs are kept even when their text matches the title."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-9zbidaj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-9zbidaj",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notebook names can also contain literal / and remain plain text. A slash in the name does not create a hierarchy; exported names are made safe for the filesystem without changing the saved name."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-8tt9np8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-8tt9np8",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If another editor changes the title, your draft is kept. Review the latest title before saving your draft over it, or copy your draft and load the latest title when rich clipboard copying is available."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-izaioat",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-izaioat",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the title editor, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " enters the document body and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts a line break. Existing inline formatting shortcuts also work here; block conversion shortcuts are unavailable."
+				}
+			]
+		},
+		{
 			"ID": "20261023112115-ntigpv2",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -3392,12 +3494,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-y5ag66f",
-				"updated": "20261024161816"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Devices that are temporarily offline must also be upgraded before accessing or syncing this data. Migration runs automatically and resumes after interruption. After upgrading, do not use older versions to open, edit, restore, or sync the same data. An older version may reject documents using the new title format (Spec 6) but still read and write documents that retain an earlier format."
+					"Data": "Devices that are temporarily offline must also be upgraded before accessing or syncing this data. Migration runs automatically and resumes after interruption. After upgrading, do not use older versions to open, edit, restore, or sync the same data. An older version may reject documents using the new title format (Spec 6 / Spec 7) but still read and write documents that retain an earlier format."
 				}
 			]
 		},

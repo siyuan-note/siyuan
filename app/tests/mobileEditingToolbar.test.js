@@ -105,6 +105,7 @@ const runCases = async (sources, platform, topBarHTML) => {
     });
     window.Lute = {Caret: "‸"};
     current = {element: document.getElementById("editor"), editable, contentElement: root.parentElement,
+        block: {rootID: "notebook"}, notebookId: "notebook",
         wysiwyg: {element: root}, preview: {element: preview},
         options: {toolbar: load("protyle/toolbar/defaults").getDefaultToolbar(true)},
         toolbar: {isMultiSelectMode: () => false, getCurrentToolbarType: () => [], setInlineMark: () => editable.focus()},
@@ -412,6 +413,11 @@ const runCases = async (sources, platform, topBarHTML) => {
             assert.equal(readonlyTitle.textContent, titleInput.value);
         }
     }
+    current.block.rootID = "document";
+    current.disabled = false;
+    preview.classList.add("fn__none");
+    updateMobileTitleReadonly(current);
+    assert.equal(titleInput.readOnly, true, "document title summaries stay readonly while the rich title editor owns editing");
 };
 
 const runElectron = async () => {

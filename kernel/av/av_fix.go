@@ -5,6 +5,7 @@
 package av
 
 import (
+	"fmt"
 	"slices"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	CurrentSpec   = 13
+	CurrentSpec   = 14
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 	// 单一 WGS84 位置使用独立版本，防止其他格式的内核重写坐标含义。
@@ -43,6 +44,9 @@ func UpgradeSpec(av *AttributeView) {
 	if av.Spec < LocationSpec && av.HasLocation() {
 		av.Spec = LocationSpec
 	}
+	if av.HasSubItems() && av.Spec < SubItemsSpec {
+		av.Spec = SubItemsSpec
+	}
 }
 
 // upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
@@ -67,6 +71,9 @@ func upgradeSpec10(av *AttributeView) {
 }
 
 func CheckSpec(av *AttributeView) (err error) {
+	if av.HasSubItems() && av.Spec < SubItemsSpec {
+		return fmt.Errorf("database sub-items require format %d", SubItemsSpec)
+	}
 	if CurrentSpec < av.Spec {
 		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew

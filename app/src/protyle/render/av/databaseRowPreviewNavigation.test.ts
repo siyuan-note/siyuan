@@ -57,7 +57,7 @@ test("row navigation replaces only its original desktop preview across bound and
     class Editor {
         public app = app;
         public parent: ReturnType<typeof makeTab>;
-        public editor = {resize() {}, protyle: {element: element(), contentElement: {scrollTop: 20}, upload: {isUploading: false},
+        public editor = {resize() {}, isUploading() { return this.protyle.upload.isUploading; }, protyle: {element: element(), contentElement: {scrollTop: 20}, upload: {isUploading: false},
             databaseAttributePanel: {expand() {}, afterRender(callback: (element: unknown) => void) { attributesLoaded = callback; }}}};
         public destroy() {}
         public send() {}

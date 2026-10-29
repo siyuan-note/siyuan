@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {BreadcrumbButtonRegistry, type IBreadcrumbButtonOptions} from "./breadcrumbButtonRegistry";
+import {BreadcrumbButtonRegistry, type IBreadcrumbButtonOptions, breadcrumbButtonRegistry,
+    getBreadcrumbButtonCatalogSnapshot, getPluginBreadcrumbEntryKey} from "./breadcrumbButtonRegistry";
 
 const button = (id: string, title = id) => ({
     id,
@@ -10,6 +11,22 @@ const button = (id: string, title = id) => ({
 }) as IBreadcrumbButtonOptions;
 
 describe("BreadcrumbButtonRegistry", () => {
+    it("encodes dotted plugin names and IDs as distinct stable configuration keys", () => {
+        assert.equal(getPluginBreadcrumbEntryKey("plugin.a", "button:b"), "plugin:plugin%2Ea:button%3Ab");
+        assert.notEqual(getPluginBreadcrumbEntryKey("a:b", "c"), getPluginBreadcrumbEntryKey("a", "b:c"));
+        assert.notEqual(getPluginBreadcrumbEntryKey("a.b", "c"), getPluginBreadcrumbEntryKey("a", "b.c"));
+    });
+
+    it("exposes current button labels to settings without serializing callbacks", () => {
+        breadcrumbButtonRegistry.set("snapshot-plugin", button("a", "Original"));
+        breadcrumbButtonRegistry.set("snapshot-plugin", button("a", "Updated"));
+        assert.deepEqual(getBreadcrumbButtonCatalogSnapshot(), [{
+            key: "plugin:snapshot-plugin:a", label: "snapshot-plugin - Updated",
+        }]);
+        breadcrumbButtonRegistry.removePlugin("snapshot-plugin");
+        assert.deepEqual(getBreadcrumbButtonCatalogSnapshot(), []);
+    });
+
     it("replaces a button without changing its position", () => {
         const registry = new BreadcrumbButtonRegistry();
         registry.set("plugin-a", button("first"));

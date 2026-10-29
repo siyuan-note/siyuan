@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261025133233"
 	},
 	"Children": [
 		{
@@ -3298,7 +3298,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ub34qwj",
-				"updated": "20261024164212"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
@@ -3347,6 +3347,108 @@
 			]
 		},
 		{
+			"ID": "20261025133233-dxjkfxm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-dxjkfxm",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文檔標題支援全部原生行內元素，包括組合文字樣式、圖片、超連結、標籤、區塊引用、行內公式、備註及檔案註解引用。可在文檔上方編輯完整標題；行動端點選精簡標題即可開啟標題編輯器。文檔樹、頁籤及麵包屑顯示純文字摘要。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-dfv76nl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-dfv76nl",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標題中的引用歸屬於文檔區塊，會出現在目標的反向連結中；開啟標題反鏈可定位到標題編輯器。動態錨文字隨目標更新，循環引用使用穩定的局部文字，避免標題反覆膨脹。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-xvxpsht",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-xvxpsht",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標題區塊轉換為文檔時，行內內容完整進入文檔標題；反向轉換時還原為標題區塊中的內容。既有正文段落即使文字與標題相同，也會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-x7u32te",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-x7u32te",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筆記本名稱也可保留半形 /，仍使用純文字。名稱中的斜線不產生層級，匯出時會產生適合檔案系統的名稱，不修改已儲存的名稱。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-e083exh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-e083exh",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其他編輯器修改標題時，目前輸入會保留。可先檢視最新標題，再選擇儲存自己的標題；支援富文字剪貼簿時，也可複製目前輸入並載入最新標題。"
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-wuaruwh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-wuaruwh",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標題編輯器中，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 進入正文，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 插入標題內換行。原有行內格式快捷鍵同樣可用，區塊轉換快捷鍵不適用於標題。"
+				}
+			]
+		},
+		{
 			"ID": "20261023112115-2wpc8r5",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -3379,12 +3481,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-ddvm3sb",
-				"updated": "20261024164212"
+				"updated": "20261025133233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "移轉自動完成，中斷後會繼續復原。升級後，請勿再用舊版本開啟、編輯、還原或同步同一資料。舊版本可能拒絕開啟採用新版標題格式（Spec 6）的文檔，但仍可能讀寫保留舊格式的文檔，也可能將已開啟頁面中的舊編輯快取寫回，覆蓋新標題或內容，並透過同步傳播到其他裝置。不能因為部分文檔無法開啟，就認為資料已受到保護。"
+					"Data": "移轉自動完成，中斷後會繼續復原。升級後，請勿再用舊版本開啟、編輯、還原或同步同一資料。舊版本可能拒絕開啟採用新版標題格式（Spec 6 / Spec 7）的文檔，但仍可能讀寫保留舊格式的文檔，也可能將已開啟頁面中的舊編輯快取寫回，覆蓋新標題或內容，並透過同步傳播到其他裝置。不能因為部分文檔無法開啟，就認為資料已受到保護。"
 				}
 			]
 		},

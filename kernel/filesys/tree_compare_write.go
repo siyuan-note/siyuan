@@ -18,8 +18,18 @@ import (
 // WriteTreeIfUnchanged 仅在文档仍与扫描源的原始文件字节一致时原子替换，防止覆盖并发修改。
 // 加密源必须先通过认证，落盘沿用现有密文格式，缓存仅在条件写成功后更新。
 func WriteTreeIfUnchanged(tree *parse.Tree, original []byte) (size uint64, err error) {
+	return WriteTreeIfUnchangedWithPreflight(tree, original, nil)
+}
+
+// WriteTreeIfUnchangedWithPreflight 在同一源写入锁内同时检查业务条件和认证源快照。
+func WriteTreeIfUnchangedWithPreflight(tree *parse.Tree, original []byte, preflight func() error) (size uint64, err error) {
 	unlock := lockDocumentSource()
 	defer unlock()
+	if preflight != nil {
+		if err = preflight(); err != nil {
+			return 0, err
+		}
+	}
 	if err = validateTreePath(tree.Box, tree.Path); err != nil {
 		return 0, err
 	}

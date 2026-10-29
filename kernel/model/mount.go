@@ -162,9 +162,9 @@ func RenameBox(boxID, name string) (err error) {
 }
 
 func normalizeBoxName(name string) string {
-	name = normalizeDocTitle(name)
+	name = normalizeTitleText(name)
 	if "" == name {
-		name = normalizeDocTitle(Conf.language(105))
+		name = normalizeTitleText(Conf.language(105))
 	}
 	return name
 }

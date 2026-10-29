@@ -230,6 +230,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Rename a notebook
 
+`name` is a plain display label. ASCII `/` remains distinct from `／` and does not create a directory. Notebook identity remains its ID.
+
 * `/api/notebook/renameNotebook`
 * Parameters
 
@@ -252,6 +254,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
   ```
 
 ### Create a notebook
+
+`name` accepts literal ASCII `/` as part of one plain display label; it is not Markdown, rich text, or a filesystem path.
 
 * `/api/notebook/createNotebook`
 * Parameters
@@ -412,6 +416,8 @@ Legacy string creation checks every parent prefix before writing. Slash or empty
     * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten
 
 ### Rename a document
+
+The two rename endpoints below accept plain titles. For a rich title, returning its current plain-text summary is a no-op; a different summary is rejected to preserve the full source. Use the source-aware title transaction declared in the generated API contracts when editing rich titles.
 
 * `/api/filetree/renameDoc`
 * Parameters
@@ -1995,6 +2001,7 @@ The field types (`keyType`) are:
     * `groupPaging`: Optional paging configuration for grouped (kanban) views
     * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata
     * `targetGroupID`: Optional group hint used with `targetItemID`
+    * `nested`: Optional tree-reading request for enabled sub-items in a nested table or list view. Omission preserves flat responses. `expandedIDs` controls expansion; `groupExpandedIDs` overrides it per group. `childPaging` maps `parentID` (or `groupID/parentID`) to `{page, pageSize}`; pages start at 1 and child page size is capped at 200. Root paging uses `page`/`pageSize`. The response's `view.nested` reports the actual page, root and matching-item counts; `rows[].hierarchy` identifies visible ancestry and context-only rows. Locating an item opens its ancestors and selects the necessary pages. Inaccessible ancestors are not exposed
     * `temporarySort`: Optional single-field sort, e.g. `{"column":"field-id","order":"DESC"}`. Omitted or `null` uses the saved rules. Overrides sorting before pagination for this request only; does not create or save the database or change the carrier view. `order` must be `ASC` or `DESC`; missing or unsupported fields fall back to saved rules. Existing `valueSource` and `dateEndpoint` options are supported
     * `createIfNotExist`: When `true` (default), create a database with a default view if the database does not exist
     * `persistView`: Deprecated compatibility parameter. It is accepted but ignored because the database definition no longer stores a top-level current view
@@ -2248,7 +2255,7 @@ The field types (`keyType`) are:
   }
   ```
 
-    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
+    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), and all views with their raw layout config (`table`/`list`/`gallery`/`kanban`) and item ordering (`itemIds`). Optional hierarchy configuration is stored in `subItems`, with each view's display mode in `subItemsDisplay`; groups may include `subItemsItemIds` for nested manual order, separate from flat `groupItemIds`. The compatibility `viewID` is computed as the first available view and is not persisted. Returns no rendered rows or pagination; therefore, use [Render](#Render) for computed rows
 
     * `data.av.automations` optionally contains database-wide rules (`spec: 1` through `8`). A `block` trigger uses `blockSource` to select notebooks/documents, block types, tags, and custom attributes; its `collect` action binds matching source blocks to this database. New scopes saved through `setAttrViewAutomations` allow at most 32 distinct notebooks/documents in total. Existing larger scopes remain readable and usable and may be retained or reduced; adding scopes while above the limit is rejected. Undo and redo preserve the original scope. Main types include every subtype; format 3 supports `h:h1` through `h:h6`, `l:u/o/t`, `i:u/o/t`, and `callout:TYPE` (case-sensitive, including custom types). Empty types impose no restriction, and multiple types use OR. Automatically created primary values may include `block.collectionRuleID`, which is maintained by the kernel. Automatic collection only adds entries. Source changes and changes to rule conditions, scope, target, or activation preserve existing rows and fields; matching again keeps the same row. Explicit cleanup checks all enabled collection rules for manual and automatic bound entries alike, preserves matches and indeterminate entries, and rechecks before removing unmatched entries; undo restores the original row and all fields. `blockSource.tagMatch` and `attributeMatch` default to `and`; format 3 also supports `or` independently within each group. Groups remain ANDed, and empty groups add no restriction. Each rule's optional `notifyOnSuccess` defaults to `true` (including `null`); successful changes are summarized once after the transaction commits. Disabled notifications do not suppress errors. No-op actions, explicit collection, undo, redo, and rolled-back transactions do not generate success messages. Format 4 adds optional `blockSource.tagTarget`: omitted/empty uses default selection, preferring an eligible list item over its first content block, `block` collects the tagged block itself, and `container` collects the nearest container meeting type and attribute conditions, deduplicated by block ID. Documents require an explicit `d` type. AND tags must occur in one source block; without tag conditions this option has no effect. Preview and actual collection share the same targets; changing this option preserves existing rows and fields. Format 5 adds optional `blockSource.documentDepth`: omitted or `null` means unlimited, `0` includes only each selected document itself, and `1` also includes its direct children. Other nonnegative integers set the maximum relative descendant depth. It applies uniformly to document scopes, not notebook scopes; scopes remain combined by union. Changing depth preserves existing rows and fields and does not backfill existing content. Format 6 adds each attribute condition's optional `nameOperator`: omitted/empty or `equals` retains exact full-name matching, `contains` matches a literal substring without requiring the `custom-` prefix, and `regex` uses Go regular expressions against the full name including that prefix. Only custom attributes are considered. Names and values are case-sensitive and must match on the same attribute; `exists` requires at least one name match and `notExists` requires none, ignoring the value. Name patterns are limited to 256 bytes; invalid expressions are rejected on save. Existing formats 1–5 retain their behavior; older readers reject format 6 without rewriting the database. Format 7 adds optional `blockSource.includeSelectedDocuments`: omitted, `null`, or `true` includes each selected document itself; `false` excludes it and all blocks inside it while descendants still follow `documentDepth`. This option is shared by document scopes and does not affect notebook scopes or other overlapping document scopes; scopes remain combined by union. With `false` and depth `0`, the corresponding document scope is empty. Changing it preserves existing rows and fields without automatic backfill or removal. Formats 1–6 remain readable; older readers reject format 7 without rewriting the database. Format 8 adds optional `blockSource.referenceID`: body block references must point to this block; a document target also includes its internal content blocks, excluding child documents. Embeds, ordinary links and references in database rich-text fields are excluded. Tags constrain the same reference source; sources are grouped using backlink parent rules before type and attribute filtering, and `tagTarget` is ignored. The target must be in the same encryption boundary. Existing rows and fields are preserved when references are removed or the target changes; older matches require explicit preview and collection. Formats 1–7 remain readable; older readers reject format 8 without rewriting the database.
 

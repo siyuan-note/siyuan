@@ -230,6 +230,8 @@ if (response.code === 0 && response.data) {
 
 ### 重命名笔记本
 
+`name` 是纯文本显示名称，保留半角 `/` 并与 `／` 区分，不会因此创建目录；笔记本身份仍由 ID 确定。
+
 * `/api/notebook/renameNotebook`
 * 参数
 
@@ -252,6 +254,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 创建笔记本
+
+`name` 中的半角 `/` 属于同一个纯文本显示名称，不作为 Markdown、富文本或文件系统路径解释。
 
 * `/api/notebook/createNotebook`
 * 参数
@@ -412,6 +416,8 @@ if (response.code === 0 && response.data) {
     * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档
 
 ### 重命名文档
+
+以下两个重命名接口接受普通标题。对于富文本标题，原样回传当前纯文本摘要不产生修改，传入不同摘要则拒绝写入以保护完整源内容。编辑富文本标题应使用生成的 API 契约中声明的标题源事务。
 
 * `/api/filetree/renameDoc`
 * 参数
@@ -1991,6 +1997,7 @@ if (response.code === 0 && response.data) {
     * `groupPaging`: 分组（看板）视图的可选分页配置
     * `targetItemID`: 可选的待定位数据库条目 ID。指定后，返回值中包含目标定位信息
     * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
+    * `nested`：启用父子条目且设置为树形显示的表格、列表视图的可选树形读取请求，省略时保持平铺返回。`expandedIDs` 控制展开项，`groupExpandedIDs` 可按分组覆盖；`childPaging` 使用 `parentID`（分组内使用 `groupID/parentID`）映射到 `{page, pageSize}`，页码从 1 开始，子项每页最多 200 条。根条目使用 `page`/`pageSize` 分页。响应的 `view.nested` 返回实际页码、根数量和匹配条目数，`rows[].hierarchy` 标识可见层级及仅用于上下文的祖先。定位会展开祖先并切换到对应页面，不返回不可访问的祖先身份
     * `temporarySort`: 可选的单字段排序，例如 `{"column":"field-id","order":"DESC"}`。省略或为 `null` 时使用已保存规则；指定时仅覆盖本次请求的排序，在分页前生效，不创建或保存数据库，也不改变载体默认视图。`order` 必须为 `ASC` 或 `DESC`；字段缺失或不支持排序时恢复已保存规则。支持现有的 `valueSource` 和 `dateEndpoint` 选项
     * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
     * `persistView`: 已废弃的兼容参数。接口仍接受该参数但会忽略，因为数据库定义不再存储顶层当前视图
@@ -2244,7 +2251,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
+    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。可选的层级配置位于 `subItems`，各视图的显示方式位于 `subItemsDisplay`；分组可包含独立的树形手动顺序 `subItemsItemIds`，不改变平铺成员顺序 `groupItemIds`。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
     * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `8`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。通过 `setAttrViewAutomations` 保存新增范围时，笔记本与文档分别去重后合计最多 32 项。既有超限范围仍可读取和使用，可保留或删减；超限时新增范围会被拒绝。撤销重做保留原范围。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。 格式 5 增加可选的 `blockSource.documentDepth`：缺省或 `null` 表示不限，`0` 仅包含每个选中文档本身，`1` 还包含一级子文档，其他非负整数指定最大相对后代深度。该设置统一限制文档范围，不影响笔记本范围，各范围仍取并集。修改深度保留已有条目和字段，不自动补收存量内容。 格式 6 为每条属性条件增加可选的 `nameOperator`：缺省、空字符串或 `equals` 保持完整名称精确匹配，`contains` 按字面子串匹配且无需输入 `custom-` 前缀，`regex` 使用 Go 正则语法匹配包含该前缀的完整名称。仅匹配自定义属性，名称和值区分大小写，且必须由同一条属性同时满足；`exists` 要求至少一个名称匹配，`notExists` 要求没有名称匹配，两者忽略属性值。名称模式最多 256 字节，非法正则拒绝保存。既有格式 1–5 的行为保持不变，旧读取器拒绝格式 6 且不改写数据库。 格式 7 增加可选的 `blockSource.includeSelectedDocuments`：缺省、`null` 或 `true` 包含每个所选文档自身；`false` 排除该文档及其内部所有块，子文档仍按 `documentDepth` 匹配。该设置由所有文档范围共用，不影响笔记本范围或其他重叠文档范围，各范围仍取并集。`false` 与深度 `0` 组合时，对应文档范围为空。修改后保留已有条目和字段，不自动补收或移出。格式 1–6 仍可读取，旧读取器拒绝格式 7 且不改写数据库。 格式 8 增加可选的 `blockSource.referenceID`：匹配正文中指向该块的块引用，文档目标还包含内部内容块，不含子文档；不包含嵌入块、普通链接和数据库富文本字段中的引用。标签约束同一引用来源块，来源按反链父块规则归并后再匹配类型和属性，`tagTarget` 不参与选择。目标必须位于同一加密边界。移除引用或更改目标会保留已有条目和字段，历史内容需预览后显式补收。既有格式 1–7 仍可读取，旧客户端会拒绝格式 8 且不改写数据库。
 

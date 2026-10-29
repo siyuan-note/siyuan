@@ -1,7 +1,18 @@
-import {BreadcrumbButtonRegistry, type IBreadcrumbButtonOptions} from "./breadcrumbButtonRegistry";
+import {
+    breadcrumbButtonRegistry as registry,
+    getBreadcrumbButtonCatalogSnapshot,
+    getPluginBreadcrumbEntryKey,
+    type IBreadcrumbButtonOptions,
+} from "./breadcrumbButtonRegistry";
+import {refreshBreadcrumbCatalog} from "../config/entryVisibility/catalog";
+import {applyBreadcrumbEntryVisibility} from "../config/entryVisibility/runtime";
 
-const registry = new BreadcrumbButtonRegistry();
 const breadcrumbElements = new Map<IProtyle, HTMLElement>();
+
+const refreshButtons = () => {
+    refreshBreadcrumbCatalog(getBreadcrumbButtonCatalogSnapshot());
+    breadcrumbElements.forEach(applyBreadcrumbEntryVisibility);
+};
 
 const getDataID = (pluginName: string, id: string) => {
     return `${encodeURIComponent(pluginName)}:${encodeURIComponent(id)}`;
@@ -17,6 +28,7 @@ const updateButton = (button: HTMLButtonElement, pluginName: string, options: IB
     button.className = "block__icon fn__flex-center ariaLabel";
     button.setAttribute("aria-label", options.title);
     button.setAttribute("data-id", getDataID(pluginName, options.id));
+    button.setAttribute("data-breadcrumb-entry", getPluginBreadcrumbEntryKey(pluginName, options.id));
     button.setAttribute("data-plugin-name", pluginName);
     button.type = "button";
     button.innerHTML = options.icon.startsWith("icon") ?
@@ -33,7 +45,7 @@ const insertButton = (element: HTMLElement, pluginName: string, options: IBreadc
     const nextPluginName = registry.getNextPluginName(pluginName);
     const nextPluginButton = nextPluginName ? Array.from(element.children).find(item =>
         item.getAttribute("data-plugin-name") === nextPluginName) : undefined;
-    element.insertBefore(button, nextPluginButton || null);
+    element.insertBefore(button, nextPluginButton || element.querySelector('[data-type="exit-focus"]'));
 };
 
 export const mountBreadcrumbButtons = (protyle: IProtyle, element: HTMLElement) => {
@@ -41,6 +53,8 @@ export const mountBreadcrumbButtons = (protyle: IProtyle, element: HTMLElement) 
     registry.getAll().forEach(item => {
         insertButton(element, item.pluginName, item.options, protyle);
     });
+    refreshBreadcrumbCatalog(getBreadcrumbButtonCatalogSnapshot());
+    applyBreadcrumbEntryVisibility(element);
 };
 
 export const unmountBreadcrumbButtons = (protyle: IProtyle) => {
@@ -57,6 +71,7 @@ export const addBreadcrumbButton = (pluginName: string, options: IBreadcrumbButt
             insertButton(element, pluginName, options, protyle);
         }
     });
+    refreshButtons();
 };
 
 export const removeBreadcrumbButton = (pluginName: string, id: string) => {
@@ -66,6 +81,7 @@ export const removeBreadcrumbButton = (pluginName: string, id: string) => {
     breadcrumbElements.forEach(element => {
         findButton(element, pluginName, id)?.remove();
     });
+    refreshButtons();
 };
 
 export const removeBreadcrumbButtons = (pluginName: string) => {
@@ -77,4 +93,5 @@ export const removeBreadcrumbButtons = (pluginName: string) => {
             }
         });
     });
+    refreshButtons();
 };

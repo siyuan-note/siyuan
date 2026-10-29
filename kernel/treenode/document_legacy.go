@@ -33,6 +33,16 @@ const legacyAncestorMetadataQuery = `WITH RECURSIVE ancestors(id) AS (
 // ClassifyLegacyDocumentPaths reads readiness, candidates and all ancestors in one
 // database snapshot. It never reads document sources or falls back to another box.
 func ClassifyLegacyDocumentPaths(boxID string, hpaths []string) (map[string]*LegacyDocumentCandidates, error) {
+	return classifyLegacyDocumentPaths(boxID, hpaths, nil)
+}
+
+// ClassifyLegacyDocumentPathsForCreate 仅排除本次新建文档尚未提交的块树行。
+// 调用方必须持有源写入锁且已确认源不存在；已提交的摘要和恢复标记仍须完整校验。
+func ClassifyLegacyDocumentPathsForCreate(boxID string, hpaths []string, pending *BlockTree) (map[string]*LegacyDocumentCandidates, error) {
+	return classifyLegacyDocumentPaths(boxID, hpaths, pending)
+}
+
+func classifyLegacyDocumentPaths(boxID string, hpaths []string, pendingRoot *BlockTree) (map[string]*LegacyDocumentCandidates, error) {
 	tx, err := beginTxForBox(boxID)
 	if err != nil {
 		return nil, err
@@ -45,6 +55,14 @@ func ClassifyLegacyDocumentPaths(boxID string, hpaths []string) (map[string]*Leg
 	}
 	if err = tx.QueryRow("SELECT EXISTS(SELECT 1 FROM document_metadata_pending WHERE box_id=?)", boxID).Scan(&pending); err != nil || pending {
 		return nil, ErrDocumentMetadataUnavailable
+	}
+	excludePending := false
+	if pendingRoot != nil && pendingRoot.BoxID == boxID {
+		var committed bool
+		if err = tx.QueryRow("SELECT EXISTS(SELECT 1 FROM document_metadata WHERE box_id=? AND id=?)", boxID, pendingRoot.ID).Scan(&committed); err != nil {
+			return nil, err
+		}
+		excludePending = !committed
 	}
 	ret := map[string]*LegacyDocumentCandidates{}
 	var candidates []*BlockTree
@@ -63,6 +81,10 @@ func ClassifyLegacyDocumentPaths(boxID string, hpaths []string) (map[string]*Leg
 			if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); err != nil {
 				rows.Close()
 				return nil, err
+			}
+			if excludePending && block.ID == pendingRoot.ID && block.RootID == pendingRoot.ID &&
+				block.BoxID == pendingRoot.BoxID && block.Path == pendingRoot.Path && block.HPath == pendingRoot.HPath {
+				continue
 			}
 			// Keep the requested lookup key separate from the stored display path.
 			if !seenCandidates[block.ID] {

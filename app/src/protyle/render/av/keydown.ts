@@ -27,6 +27,14 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     if (event.isComposing) {
         return true;
     }
+    const treeControl = (event.target as Element)?.closest<HTMLElement>('[data-type="av-sub-items-toggle"], [data-type="av-sub-items-more"], [data-type="av-sub-items-root-page"]');
+    if (treeControl) {
+        if (event.key === "Enter" || event.key === " ") {
+            treeControl.click();
+            event.preventDefault();
+        }
+        return true;
+    }
     // 避免浏览器默认快捷键
     if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
         event.preventDefault();

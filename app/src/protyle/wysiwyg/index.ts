@@ -3783,6 +3783,10 @@ export class WYSIWYG {
             }
             event.stopPropagation();
             const target = event.detail.target || event.target as HTMLElement;
+            if (target.closest('[data-document-title="true"]')) {
+                event.preventDefault();
+                return;
+            }
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             /// #if MOBILE
             if (isIOSDevice() && selectElements.length === 0 && !isInEmbedBlock(target) &&
@@ -4798,6 +4802,10 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("dblclick", (event: MouseEvent) => {
+            if ((event.target as HTMLElement).closest('[data-document-title="true"]')) {
+                event.stopPropagation();
+                return;
+            }
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();

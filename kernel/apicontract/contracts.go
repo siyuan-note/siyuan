@@ -428,6 +428,10 @@ var (
 
 var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/getDocInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// GetDocTitle 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
+// 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
+var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle", "/api/block/getDocTitle", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
 var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/block/getTreeStat", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1179,7 +1183,11 @@ var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/fi
 var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDocByID = define[FileTreeTrimIDRequest, Null]("removeDocByID", "/api/filetree/removeDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveDocs = define[FileTreePathsRequest, Null]("removeDocs", "/api/filetree/removeDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RenameDoc 仅修改普通标题；富文本标题原样回传摘要为无操作，其他摘要写入拒绝以保护完整源。
 var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/renameDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RenameDocByID 与 RenameDoc 使用相同的富文本保护；修改富文本必须使用带源版本的 setDocTitle 事务。
 var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // DuplicateDoc evaluates block collection rules for the new document and its blocks, initializing only new rows.
@@ -1223,6 +1231,16 @@ var SetDocSortMode = define[FileTreeSortModeRequest, *FileTreeSortModeData]("set
 // SearchDocs 保留兼容展示 hPath，并单独返回文档或笔记本的纯文本 title；客户端不能从 hPath 拆出标题或层级。
 var SearchDocs = define[FileTreeSearchRequest, []*FileTreeSearchDoc]("searchDocs", "/api/filetree/searchDocs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var ListDocsByPath = define[FileTreeListRequest, FileTreeListData]("listDocsByPath", "/api/filetree/listDocsByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按可见直接子文档的当前排序读取范围；parentID 为空表示笔记本根级，其他值必须属于指定笔记本。
+// offset 为非负整数，limit 为 1..10240 的整数，省略时采用 docTreeBatchSize。返回 offset 不超过 total。
+// revision 是不透明的目录顺序版本。传入旧版本时返回 stale=true 和空 files，客户端须替换该目录状态后重试。
+// 隐藏、发布不可见及笔记本文档不计入 total；响应保留加密笔记本租约。旧 listDocsByPath 的上限语义不变。
+var ListDocTreeRange = define[FileTreeRangeRequest, FileTreeRangeData]("listDocTreeRange", "/api/filetree/listDocTreeRange", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
+// 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
+var LocateDocTreeItem = define[FileTreeLocateRequest, FileTreeLocateData]("locateDocTreeItem", "/api/filetree/locateDocTreeItem", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
 var SetPublishAccess = define[FileTreeSetPublishRequest, Null]("setPublishAccess", "/api/filetree/setPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPublishAccess = define[FileTreePublishIDsRequest, FileTreePublishData]("getPublishAccess", "/api/filetree/getPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1409,7 +1427,8 @@ var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet
 var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
-// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用密钥的 DeepSeek。
+// web 初始搜索为 Exa、抓取为直接请求，可独立切换到共用 apiKey 的 DeepSeek。
+// exaApiKey 是独立的 Exa 凭据，空值使用匿名模式；非空通过请求头认证，可能产生费用，失败不切换模式或服务。
 // 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
 // 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
 // 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
@@ -1856,7 +1875,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
 // 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
 // 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
-var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-409}}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformRedo = define[TransactionHistoryRequest, TransactionHistoryResult]("performRedo", "/api/transactions/redo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1864,3 +1883,16 @@ var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", 
 
 var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast", AuthenticatedAccess|AdminAccess, NoBody, RawWebSocketOptions(), "GET")
 var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", AuthenticatedAccess|AdminAccess, NoBody, RawSSEOptions(), "GET")
+
+// 记忆接口仅面向工作空间管理员；写入需要可写空间，读取不依赖模型配置。
+var AIMemoryList = define[AIMemoryListRequest, AIMemoryListData]("listAIMemory", "/api/ai/memory/list", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryGet = define[AIMemoryGetRequest, AIMemoryGetData]("getAIMemory", "/api/ai/memory/get", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemorySave = define[AIMemorySaveRequest, AIMemorySaveData]("saveAIMemory", "/api/ai/memory/save", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。
+var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAIMemory", "/api/ai/memory/forget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryTask = define[AIMemoryTaskRequest, AIMemoryTaskData]("taskAIMemory", "/api/ai/memory/task", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryCancel = define[AIMemoryTaskRequest, EmptyRequest]("cancelAIMemory", "/api/ai/memory/cancel", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryCapabilities = define[EmptyRequest, AIMemoryCapabilitiesData]("capabilitiesAIMemory", "/api/ai/memory/capabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

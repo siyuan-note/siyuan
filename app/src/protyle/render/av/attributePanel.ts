@@ -36,6 +36,10 @@ export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => 
 };
 
 const refreshActions = new Set<TOperation>([
+    "setAttrViewSubItems",
+    "reparentAttrViewItems",
+    "promoteAttrViewItems",
+    "duplicateAttrViewSubtree",
     "addAttrViewCol",
     "removeAttrViewCol",
     "updateAttrViewCol",

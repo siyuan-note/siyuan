@@ -454,15 +454,27 @@ const initEditorName = () => {
     let titleSavePromise: Promise<unknown> = Promise.resolve();
     let titleSavedOnEnter: {rootID: string, value: string} | undefined;
     let enteringDocument = false;
+    const richTitle = () => {
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        return protyle?.block.rootID !== protyle?.notebookId;
+    };
+    const openTitle = () => {
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        if (richTitle() && protyle && !protyle.disabled) {
+            inputElement.blur();
+            void protyle.title?.openEditor();
+        }
+    };
+    inputElement.addEventListener("click", openTitle);
     const saveTitle = () => {
-        if (inputElement.getAttribute("readonly") === "readonly") {
+        if (richTitle() || inputElement.getAttribute("readonly") === "readonly") {
             return titleSavePromise;
         }
-        if (!validateName(inputElement.value, undefined, true)) {
+        if (!validateName(inputElement.value)) {
             const original = inputElement.value;
             inputElement.value = truncateDocumentTitle(inputElement.value);
             if (inputElement.value === original ||
-                !validateName(inputElement.value, undefined, true)) {
+                !validateName(inputElement.value)) {
                 return titleSavePromise;
             }
         }
@@ -487,6 +499,12 @@ const initEditorName = () => {
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing || event.key !== "Enter") {
+            return;
+        }
+        if (richTitle()) {
+            event.preventDefault();
+            event.stopPropagation();
+            openTitle();
             return;
         }
         const protyle = window.siyuan.mobile.editor?.protyle;

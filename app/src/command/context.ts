@@ -1,4 +1,5 @@
 import type {App} from "../index";
+import {getActiveDocTreeController, getDocTreeController} from "../layout/dock/docTree/DocTreeController";
 import {getFrontend} from "../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
 import {
@@ -145,6 +146,13 @@ const getFileTree = (elements?: Element[]) => {
     const model = dockFile?.data.file;
     if (!(model instanceof Files)) {
         return undefined;
+    }
+    const controller = (elements?.length ? getDocTreeController(elements[0]) : undefined) ||
+        getActiveDocTreeController(model.element.parentElement) || model.docTree;
+    if (controller) {
+        const items = controller.getSelectedItems().map(item => ({...item}));
+        return {model, controller, items, selectionVersion: controller.selectionVersion, elements: [],
+            ids: items.map(item => item.id), paths: items.map(item => item.path)} as ICommandFileTreeContext;
     }
     const selectedElements = elements ? [...elements] :
         Array.from(model.element.querySelectorAll(".b3-list-item--focus"));

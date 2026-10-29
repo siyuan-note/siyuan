@@ -24,7 +24,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -328,7 +327,7 @@ func scanEncryptedBoxUnusedAssets(ctx context.Context, boxID string, dek []byte)
 		if specErr := treenode.CheckSpecJSON(plain); specErr != nil {
 			return specErr
 		}
-		tree, _, parseErr := dataparser.ParseJSON(plain, luteEngine.ParseOptions)
+		tree, _, parseErr := treenode.ParseJSON(plain, luteEngine.ParseOptions)
 		if parseErr != nil {
 			return parseErr
 		}

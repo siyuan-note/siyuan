@@ -273,7 +273,7 @@ export const mountDesktopDatabaseRowNavigation = (model: Editor | Custom, data: 
         if (!tab.panelElement.isConnected || tab.model !== model) {
             return false;
         }
-        if (model instanceof Editor && model.editor.protyle.upload.isUploading) {
+        if (model instanceof Editor && model.editor.isUploading()) {
             showMessage(window.siyuan.languages.uploading);
             return false;
         }
@@ -322,7 +322,7 @@ export const mountDesktopDatabaseRowNavigation = (model: Editor | Custom, data: 
                 });
             })()]);
             ready = ready && tab.panelElement.isConnected && tab.model === model && tab.parent === wnd;
-            if (model instanceof Editor && model.editor.protyle.upload.isUploading) {
+            if (model instanceof Editor && model.editor.isUploading()) {
                 ready = false;
                 showMessage(window.siyuan.languages.uploading);
             }

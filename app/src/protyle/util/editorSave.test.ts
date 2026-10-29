@@ -41,7 +41,7 @@ const response = (data: unknown) => new Response(JSON.stringify(data), {headers:
 
 const loadSyncSaves = () => loadModule<Pick<typeof import("./editorSave"),
     "trackEditorSaveRequest" | "flushPendingEditorSaves" | "getEditorSaveFailureVersion" |
-    "registerSyncEditorSave" | "disposeSyncEditorSave">>("src/protyle/util/editorSave.ts", {
+    "registerSyncEditorSave" | "disposeSyncEditorSave" | "acknowledgeDocumentTitleReload" | "registerEditorSave">>("src/protyle/util/editorSave.ts", {
         window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}},
     }, ScriptTarget.ES2020);
 
@@ -75,6 +75,36 @@ test("sync save confirmation preserves structural failures and ignores supersede
     await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "move"), Promise.resolve({code: -1}));
     await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
     await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+});
+
+test("rich title source retries clear their own failed save without clearing body failures", async () => {
+    const saves = loadSyncSaves();
+    const titleRequest = {session: "rich-title", transactions: [{doOperations: [{action: "setDocTitle", id: "root",
+        data: {blockDOM: "<div>source</div>", expectedRevision: "revision"}}]}]};
+    await saves.trackEditorSaveRequest("/api/transactions", titleRequest, Promise.resolve({code: -1}));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("rich-title", "update", "root"), Promise.resolve({code: -1}));
+    await saves.trackEditorSaveRequest("/api/transactions", titleRequest, Promise.resolve(success));
+    await assert.rejects(saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion()), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request("rich-title", "update", "root"), Promise.resolve(success));
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+});
+
+test("explicit title conflict reload clears title protection while retaining unrelated body failures", async () => {
+    const saves = loadSyncSaves();
+    const owner = {id: "conflict", block: {rootID: "root"}} as IProtyle;
+    const guard = saves.registerEditorSave(owner);
+    const titleRequest = {session: owner.id, transactions: [{doOperations: [{action: "setDocTitle", id: "root",
+        data: {blockDOM: "<div>draft</div>", expectedRevision: "old"}}]}]};
+    await saves.trackEditorSaveRequest("/api/transactions", titleRequest, Promise.resolve({code: -409}));
+    await assert.rejects(guard.flush(), /Save failed/);
+    saves.acknowledgeDocumentTitleReload(owner);
+    await guard.flush();
+    await saves.flushPendingEditorSaves(saves.getEditorSaveFailureVersion());
+    await saves.trackEditorSaveRequest("/api/transactions", request(owner.id), Promise.resolve({code: -1}));
+    saves.acknowledgeDocumentTitleReload(owner);
+    await assert.rejects(guard.flush(), /Save failed/);
+    guard.dispose();
 });
 
 test("closing an editor clears only its failed text and structural saves, including late responses", async () => {
@@ -284,7 +314,7 @@ test("disposal drops failure state and ignores late requests after lock or destr
     await guard.flush();
 });
 
-test("Title flushes debounce once, captures composition, and can cancel pending saves", () => {
+test("plain notebook Title flushes debounce once, captures composition, and can cancel pending saves", () => {
     let nextTimer = 0;
     const timers = new Map<number, () => void>();
     const requests: unknown[] = [];
@@ -296,11 +326,13 @@ test("Title flushes debounce once, captures composition, and can cancel pending 
             if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 400}};
             return {};
         },
-        window: {setTimeout: (callback: () => void) => {timers.set(++nextTimer, callback); return nextTimer;}},
+        window: {siyuan: {},
+            setTimeout: (callback: () => void) => {timers.set(++nextTimer, callback); return nextTimer;}},
         clearTimeout: (timer: number) => timers.delete(timer),
     }, ScriptTarget.ES2020);
     const title = Object.create(exports.Title.prototype);
     const protyle = editor();
+    protyle.block = {rootID: protyle.notebookId};
     title.protyle = protyle;
     title.editElement = {textContent: "new title"};
     title.rename(protyle);

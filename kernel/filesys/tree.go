@@ -26,7 +26,6 @@ import (
 	"github.com/88250/lute/render"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -560,6 +559,12 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint64, err error) {
 	unlock := lockDocumentSource()
 	defer unlock()
+	var finishDocTreeChange func()
+	defer func() {
+		if finishDocTreeChange != nil {
+			finishDocTreeChange()
+		}
+	}()
 	if preflight != nil {
 		if err = preflight(); err != nil {
 			return
@@ -624,6 +629,7 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 			return fmt.Errorf("%w: %s", util.ErrFileChanged, filePath)
 		}
 		if current == nil {
+			finishDocTreeChange = cache.BeginDocTreeMutation(tree.Box)
 			return nil
 		}
 		plain, readErr := decryptDataWithDEK(tree.Box, tree.Path, current, dek)
@@ -631,10 +637,13 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 			return readErr
 		}
 		// 缓存只在成功读取或写入后发布；磁盘认证结果完全一致时复用已验证的源。
-		if validatedSource != nil && bytes.Equal(plain, validatedSource) {
-			return nil
+		if validatedSource == nil || !bytes.Equal(plain, validatedSource) {
+			if err := CheckDocumentSpecJSON(tree.Box, plain); err != nil {
+				return err
+			}
 		}
-		return CheckDocumentSpecJSON(tree.Box, plain)
+		finishDocTreeChange = beginDocumentTreeWrite(tree.Box, tree.Path, plain, data, len(current) != len(encData))
+		return nil
 	})
 	if err != nil {
 		return
@@ -659,6 +668,9 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		return
 	}
 	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
+		return
+	}
+	if err = treenode.RefreshDocumentTitle(tree.Root); err != nil {
 		return
 	}
 	if err = treenode.CheckSpec(tree); nil != err {
@@ -773,7 +785,7 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 	}
 	jsonData, removedNull := removeUnescapedUnicodeNull(jsonData)
 	needFix = needFix || removedNull
-	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, parseNeedFix, err := treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if parseNeedFix {
 		needFix = true
 	}
@@ -883,7 +895,7 @@ func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lut
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
-	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, _, err = treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)

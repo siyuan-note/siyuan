@@ -47,6 +47,7 @@ import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
 import {getInsertedRenderRoots, renderContent} from "./renderContent";
 import {beginPerformance} from "./performance";
+import {deferDocumentTitleNavigation} from "../header/documentTitleNavigation";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 import {pauseMobileBarsScroll} from "../../mobile/util/mobileBars";
@@ -68,9 +69,15 @@ export const onGet = (options: {
     isValid?: () => boolean,
     focusAfterZoom?: boolean,
     suppressFocus?: boolean,
-}) => {
+}, sourceTitleFlushed?: IProtyle["title"]) => {
     if (options.isValid && !options.isValid()) {
         options.onAVRenderError?.();
+        return;
+    }
+    if (options.data.code === 0 && options.protyle.title?.prepareForDocumentSwitch &&
+        !options.action?.includes(Constants.CB_GET_APPEND) && !options.action?.includes(Constants.CB_GET_BEFORE) &&
+        sourceTitleFlushed !== options.protyle.title && deferDocumentTitleNavigation(options.protyle,
+            options.data.data.rootID, title => onGet(options, title), options.onAVRenderError)) {
         return;
     }
     if (!options.action) {
@@ -574,10 +581,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
-    if (protyle.title && protyle.title.editElement) {
-        protyle.title.editElement.setAttribute("contenteditable", "false");
-        protyle.title.editElement.style.userSelect = "text";
-    }
+    protyle.title?.setReadonly?.(true);
     /// #if MOBILE
     updateMobileTitleReadonly(protyle);
     /// #endif
@@ -622,6 +626,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
+    protyle.title?.setReadonly?.(false);
     if (isMobile()) {
         /// #if MOBILE
         updateMobileTitleReadonly(protyle);
@@ -632,10 +637,6 @@ export const enableProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.style.userSelect = "";
     // 用于区分移动端样式
     protyle.wysiwyg.element.setAttribute("data-readonly", "false");
-    if (protyle.title && protyle.title.editElement) {
-        protyle.title.editElement.setAttribute("contenteditable", "true");
-        protyle.title.editElement.style.userSelect = "";
-    }
     if (protyle.background) {
         protyle.background.element.classList.add("protyle-background--enable");
     }
@@ -647,7 +648,9 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
-        item.setAttribute("contenteditable", "true");
+        if (!item.closest('[data-document-title="true"]')) {
+            item.setAttribute("contenteditable", "true");
+        }
     });
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
         item.setAttribute("draggable", "true");

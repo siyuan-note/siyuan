@@ -1420,7 +1420,11 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	if id == "" {
 		id = ast.NewNodeID()
 	}
-	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, map[string]string{"tags": tags})
+	var attributes map[string]string
+	if tags != "" {
+		attributes = map[string]string{"tags": tags}
+	}
+	retID, err = createLegacyDocuments(box.ID, hPath, dom, parentID, id, titleEmpty, attributes)
 	if err != nil {
 		return
 	}
@@ -2147,6 +2151,7 @@ func RemoveDoc(boxID, p string) error {
 
 	refreshParentDocInfo(tree)
 	refreshBoxDocInfo(tree)
+	memoryCommittedSourcesChanged([]string{tree.ID})
 	return nil
 }
 
@@ -2204,6 +2209,11 @@ func refreshRemovedDocInfo(trees []*parse.Tree) {
 	for boxID := range boxDocBoxes {
 		refreshBoxDocInfoByBoxID(boxID)
 	}
+	ids := make([]string, 0, len(trees))
+	for _, tree := range trees {
+		ids = append(ids, tree.ID)
+	}
+	memoryCommittedSourcesChanged(ids)
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
@@ -2416,6 +2426,12 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 // 规范化标题及空标题标记，由调用方选择普通写入或基于扫描源的条件写入。
 func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUpdated bool, err error) {
+	if tree.Root.DocumentTitle != nil {
+		if title != treenode.ReadDocumentTitle(tree.Root).Text {
+			err = &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(446), cause: treenode.ErrRichDocumentTitleWrite}
+		}
+		return
+	}
 	title = normalizeDocumentTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -2462,6 +2478,7 @@ func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUp
 // 在标题持久化成功后广播变更并刷新引用，避免失败的条件写入发布过期标题。
 func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	if titleChanged || emptyAttrUpdated {
+		cache.InvalidateDocTree(tree.Box)
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
@@ -2479,6 +2496,7 @@ func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
 	}
 	if titleChanged || emptyAttrUpdated {
 		IncSync()
+		memoryCommittedSourcesChanged([]string{tree.ID})
 	}
 }
 
@@ -2734,6 +2752,8 @@ func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	if err := recoverSortConfAppend(confPath); err != nil {
 		return err
 	}
@@ -2812,6 +2832,7 @@ func pushDocSortModeChanged(oldAttrs map[string]string, node *ast.Node, tree *pa
 
 // PushDocSortModeChanged 广播会改变子文档有效排序方式的配置变更。
 func PushDocSortModeChanged(scope, boxID, id, p string, sortMode *int) {
+	cache.InvalidateDocTree(boxID)
 	util.BroadcastByType("main", "docSortModeChanged", 0, "", map[string]any{
 		"scope":    scope,
 		"box":      boxID,

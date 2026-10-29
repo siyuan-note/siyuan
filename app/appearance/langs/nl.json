@@ -1,4 +1,5 @@
 {
+	"aiSelectModel": "Selecteer een model",
 	"aiMemoryEnabledTip": "Als dit is ingeschakeld, haalt de ingestelde modeldienst automatisch herinneringen uit alle niet-versleutelde notitieboeken en toekomstige gebruikersberichten die met succes zijn verzonden, en onderhoudt deze; AI-antwoorden en eerdere gesprekken zijn uitgesloten; kosten volgen de tarieven van die dienst",
 	"aiMemoryKind": "Type herinnering",
 	"aiMemoryState": "Status van herinnering",

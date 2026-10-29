@@ -1,4 +1,5 @@
 {
+	"aiSelectModel": "Please select a model",
 	"aiMemoryEnabledTip": "When enabled, the configured model service automatically extracts and maintains memories from all non-encrypted notebooks and future successfully submitted user messages; excludes AI replies and past conversations; charges follow that service’s pricing",
 	"aiMemoryKind": "Memory type",
 	"aiMemoryState": "Memory status",

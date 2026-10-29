@@ -3430,6 +3430,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回所选记忆模型的标准推理选项，与智能体共用策略，不按模型名称推断供应商能力。
+     * 可用模型使用受支持协议时，efforts 为 none、low、medium、high、xhigh、max；默认空字符串不列入其中。
+     * 未选择模型、模型不可用或协议不支持时返回空数组；这些选项不保证供应商接受每个值，实际请求由协议适配器处理。
+     */
     "/api/ai/memory/capabilities": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIMemoryCapabilitiesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -1,4 +1,5 @@
 {
+	"aiSelectModel": "Veuillez sélectionner un modèle",
 	"aiMemoryEnabledTip": "Une fois activée, le service de modèles configuré extrait et maintient automatiquement les souvenirs de tous les carnets non chiffrés et des futurs messages utilisateur envoyés avec succès ; exclut les réponses de l’IA et les conversations passées ; les frais dépendent des tarifs du service",
 	"aiMemoryKind": "Type de souvenir",
 	"aiMemoryState": "État du souvenir",

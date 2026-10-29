@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -81,5 +82,44 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	json.Unmarshal(call("forget", apicontract.AIMemoryForgetRequest{ID: saved.ID, Revision: saved.Revision, OperationID: "forget-1"}, 0), &forgotten)
 	if !forgotten.Saved || !forgotten.CleanupPending {
 		t.Fatalf("partial cleanup response lost durable withdrawal: %+v", forgotten)
+	}
+}
+
+func TestAPIContractAIMemoryReasoningOptions(t *testing.T) {
+	aiContractConfiguration(t)
+	engine := gin.New()
+	engine.POST("/api/ai/memory/capabilities", capabilitiesAIMemory)
+	cfg := conf.NewAI()
+	cfg.Providers = []*conf.Provider{{Enabled: true, Models: []*conf.Model{{ID: "chosen", Name: "deepseek-flash", Enabled: true}}}}
+	cfg.Memory.ModelID = "chosen"
+	for _, tc := range []struct {
+		name    string
+		modelID string
+		enabled bool
+		want    []string
+	}{
+		{"deepseek", "chosen", true, []string{"none", "low", "medium", "high", "xhigh", "max"}},
+		{"unconfigured", "", true, []string{}},
+		{"missing", "removed", true, []string{}},
+		{"disabled", "chosen", false, []string{}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg.Memory.ModelID = tc.modelID
+			cfg.Providers[0].Models[0].Enabled = tc.enabled
+			model.Conf.AI.Store(cfg)
+			w := httptest.NewRecorder()
+			engine.ServeHTTP(w, httptest.NewRequest("POST", "/api/ai/memory/capabilities", strings.NewReader("{}")))
+			requireAPIContract(t, "POST", "/api/ai/memory/capabilities", w)
+			var result struct {
+				Code int
+				Data apicontract.AIMemoryCapabilitiesData
+			}
+			if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil || result.Code != 0 {
+				t.Fatalf("capabilities: %s (%v)", w.Body.String(), err)
+			}
+			if !reflect.DeepEqual(result.Data.Efforts, tc.want) {
+				t.Fatalf("options = %v, want %v", result.Data.Efforts, tc.want)
+			}
+		})
 	}
 }

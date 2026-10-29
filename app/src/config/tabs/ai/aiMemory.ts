@@ -38,7 +38,7 @@ const mountMemorySelection = (root: HTMLElement) => {
     };
     const renderModels = () => {
         const current = window.siyuan.config.ai.memory?.modelId || "";
-        model.innerHTML = `<option value="">${escapeHtml(lang.select)}</option>` +
+        model.innerHTML = `<option value="">${escapeHtml(lang.aiSelectModel)}</option>` +
             memoryModelOptions(window.siyuan.config.ai.providers || [], current).map(option =>
                 `<option value="${escapeHtml(option.id)}" ${option.unavailable ? "disabled" : ""}>${escapeHtml(option.label)}</option>`).join("");
         model.value = current;

@@ -1,4 +1,5 @@
 {
+	"aiSelectModel": "Silakan pilih model",
 	"aiMemoryEnabledTip": "Saat diaktifkan, layanan model yang dikonfigurasi secara otomatis mengekstrak dan memelihara ingatan dari semua buku catatan yang tidak terenkripsi dan pesan pengguna yang berhasil dikirim setelah ini; tidak termasuk balasan AI dan percakapan sebelumnya; biaya mengikuti tarif layanan tersebut",
 	"aiMemoryKind": "Jenis ingatan",
 	"aiMemoryState": "Status ingatan",

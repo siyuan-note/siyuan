@@ -1,4 +1,5 @@
 {
+	"aiSelectModel": "请选择模型",
 	"aiMemoryEnabledTip": "启用后自动维护当前工作空间的长期记忆，模型会从所有非加密笔记本和此后成功提交的用户消息中提取并整理记忆；不收集 AI 回复、不回扫历史对话；费用按配置的模型服务规则计算",
 	"aiMemoryKind": "记忆类型",
 	"aiMemoryState": "记忆状态",

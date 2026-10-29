@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261029051700"
+		"updated": "20261029134000"
 	},
 	"Children": [
 		{
@@ -455,7 +455,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261029051700-k3s9gxa",
-				"updated": "20261029051700"
+				"updated": "20261029134000"
 			},
 			"Children": [
 				{
@@ -469,7 +469,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-5k5bwhb",
-				"updated": "20261029051700"
+				"updated": "20261029134000"
 			},
 			"Children": [
 				{
@@ -501,7 +501,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to configure shared workspace memory. Choose a separate processing model and supported reasoning effort; changing the conversation model does not change this selection. Model processing sends permitted content to the selected provider and may incur costs."
+					"Data": " to configure shared workspace memory. Choose a separate processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
 				}
 			]
 		},
@@ -510,16 +510,16 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-o1lc8ft",
-				"updated": "20261029051700"
+				"updated": "20261029134000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Memory use and automatic maintenance are separate switches. Automatic maintenance starts off. Select allowed notebooks before enabling it; enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
+					"Data": "One switch controls memory use, automatic maintenance, and future user-message capture, and starts off. Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
 				},
 				{
 					"Type": "NodeText",
-					"Data": " With automatic maintenance enabled, separately allow user messages to collect only future successfully committed user messages; AI replies and past conversation history are excluded."
+					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
 				}
 			]
 		},

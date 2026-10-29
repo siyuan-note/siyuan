@@ -45,58 +45,18 @@ func (ai *AI) GetMemoryModel() (*Provider, *Model, error) {
 	return nil, nil, errors.New("memory model unavailable")
 }
 
-// MemoryReasoningEfforts 仅返回已知模型族与已实现协议共同支持的保守交集，不包含默认空值。
-// 未识别的自定义名称不推断能力，调用方仍可使用其默认推理配置。
+// MemoryReasoningEfforts 返回与智能体一致的标准推理档位，不包含默认空值。
+// 具体模型的支持情况由供应商决定，协议适配器负责透传或转换，不根据模型名称推断能力。
 func MemoryReasoningEfforts(provider *Provider, model *Model) []string {
 	if provider == nil || model == nil {
 		return []string{}
 	}
-	name := strings.ToLower(model.Name)
-	if util.IsAnthropicMessagesProtocol(provider.Protocol) {
-		for _, prefix := range []string{"claude-3-7-sonnet", "claude-sonnet-4", "claude-opus-4", "claude-sonnet-4-5", "claude-opus-4-5", "claude-haiku-4-5", "claude-opus-4-1", "claude-opus-4-6", "claude-sonnet-4-6"} {
-			if memoryModelNameMatches(name, prefix) {
-				return []string{"low", "medium", "high"}
-			}
-		}
-		return []string{}
-	}
-	if util.IsGeminiInteractionsProtocol(provider.Protocol) {
-		if slices.Contains([]string{"gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3.1-pro-preview"}, name) {
-			return []string{"low", "high"}
-		}
-		return []string{}
-	}
-	if provider.Protocol == "" || provider.Protocol == util.OpenAIProtocolChatCompletions || provider.Protocol == util.OpenAIProtocolResponses {
-		if strings.Contains(name, "-pro") || strings.Contains(name, "-chat") {
-			return []string{}
-		}
-		for _, prefix := range []string{"o1", "o3", "o3-mini", "o4-mini", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5.1", "gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-6", "gpt-6.1"} {
-			if memoryModelNameMatches(name, prefix) {
-				return []string{"low", "medium", "high"}
-			}
-		}
+	if provider.Protocol == "" || provider.Protocol == util.OpenAIProtocolChatCompletions ||
+		util.IsOpenAIResponsesProtocol(provider.Protocol) || util.IsAnthropicMessagesProtocol(provider.Protocol) ||
+		util.IsGeminiInteractionsProtocol(provider.Protocol) {
+		return []string{"none", "low", "medium", "high", "xhigh", "max"}
 	}
 	return []string{}
-}
-
-// memoryModelNameMatches 仅接受明确名称或其纯数字日期快照，避免把自定义后缀当作已知能力。
-func memoryModelNameMatches(name, base string) bool {
-	if name == base {
-		return true
-	}
-	if !strings.HasPrefix(name, base+"-") {
-		return false
-	}
-	suffix := strings.ReplaceAll(strings.TrimPrefix(name, base+"-"), "-", "")
-	if len(suffix) != 8 {
-		return false
-	}
-	for _, char := range suffix {
-		if char < '0' || char > '9' {
-			return false
-		}
-	}
-	return true
 }
 
 // ValidateMemoryModel 在维护任务开始和提交前调用，不阻止无模型的读取、停用或撤回。

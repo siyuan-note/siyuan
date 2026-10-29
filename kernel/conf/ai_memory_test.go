@@ -73,11 +73,12 @@ func TestAIMemoryReasoningCapabilities(t *testing.T) {
 		valid                  bool
 	}{
 		{util.OpenAIProtocolResponses, "gpt-5", "high", true},
-		{util.OpenAIProtocolResponses, "custom", "high", false},
-		{util.OpenAIProtocolResponses, "gpt-5-custom", "high", false},
+		{util.OpenAIProtocolResponses, "custom", "high", true},
+		{util.OpenAIProtocolResponses, "gpt-5-custom", "high", true},
 		{util.OpenAIProtocolResponses, "custom", "", true},
 		{util.OpenAIProtocolResponses, "gpt-5", "invented", false},
 		{"unknown", "gpt-5", "low", false},
+		{"unknown", "gpt-5", "", true},
 		{util.AnthropicProtocolMessages, "claude-sonnet-4-5", "medium", true},
 	} {
 		ai := NewAI()
@@ -86,6 +87,33 @@ func TestAIMemoryReasoningCapabilities(t *testing.T) {
 		if (ai.ValidateMemoryModel() == nil) != tc.valid {
 			t.Errorf("unexpected support: %#v", tc)
 		}
+	}
+}
+
+func TestAIMemoryReasoningMatchesAgentOptions(t *testing.T) {
+	want := []string{"none", "low", "medium", "high", "xhigh", "max"}
+	for _, protocol := range []string{"", util.OpenAIProtocolChatCompletions, util.OpenAIProtocolResponses,
+		util.AnthropicProtocolMessages, util.GeminiProtocolInteractions} {
+		for _, name := range []string{"deepseek-flash", "gpt-5.4", "claude-opus-4-6", "gemini-3-flash-preview", "custom-model"} {
+			t.Run(protocol+"/"+name, func(t *testing.T) {
+				provider := &Provider{Enabled: true, Protocol: protocol, Models: []*Model{{ID: "chosen", Name: name, Enabled: true}}}
+				if got := MemoryReasoningEfforts(provider, provider.Models[0]); !reflect.DeepEqual(got, want) {
+					t.Fatalf("standard options = %v, want %v", got, want)
+				}
+				ai := NewAI()
+				ai.Providers = []*Provider{provider}
+				ai.Memory.ModelID = "chosen"
+				for _, effort := range append([]string{""}, want...) {
+					ai.Memory.ReasoningEffort = effort
+					if err := ai.ValidateMemoryModel(); err != nil {
+						t.Fatalf("effort %q: %v", effort, err)
+					}
+				}
+			})
+		}
+	}
+	if len(MemoryReasoningEfforts(nil, nil)) != 0 {
+		t.Fatal("missing model exposed reasoning options")
 	}
 }
 

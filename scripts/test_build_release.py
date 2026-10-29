@@ -509,6 +509,95 @@ class BuildTests(unittest.TestCase):
                 self.builder.linux()
             self.assertEqual("--with-harmony-kernel" in wsl.call_args.args[0], selected)
 
+    def test_mobile_packaging_overlaps_linux_and_harmony_waits_for_ready(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android", "harmony"]
+        android_started, harmony_started = threading.Event(), threading.Event()
+        def linux():
+            self.assertTrue(android_started.wait(3))
+            self.assertFalse(harmony_started.is_set())
+            Path(str(self.builder.parallel_marker) + ".ready").touch()
+            self.assertTrue(harmony_started.wait(3))
+        def android(assets):
+            android_started.set()
+            self.assertTrue(harmony_started.wait(3))
+        with patch.object(self.builder, "linux", side_effect=linux), \
+                patch.object(self.builder, "android", side_effect=android), \
+                patch.object(self.builder, "harmony", side_effect=lambda assets: harmony_started.set()):
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        self.assertIsNone(build.BUILD_CANCEL)
+        self.assertFalse(Path(str(self.builder.parallel_marker) + ".ready").exists())
+
+    def test_parallel_failure_cancels_running_process_and_waiting_harmony(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android", "harmony"]
+        started = threading.Event()
+        def linux():
+            started.set()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+        def android(assets):
+            self.assertTrue(started.wait(3))
+            raise build.BuildError("android failed")
+        process = unittest.mock.Mock()
+        with patch.object(self.builder, "linux", side_effect=linux), \
+                patch.object(self.builder, "android", side_effect=android), \
+                patch.object(self.builder, "harmony") as harmony, \
+                patch.object(build, "stop_build_process") as stop:
+            build.BUILD_PROCESSES.add(process)
+            try:
+                with self.assertRaisesRegex(build.BuildError, "android failed"):
+                    self.builder.parallel_platforms(self.root / "assets.zip")
+            finally:
+                build.BUILD_PROCESSES.discard(process)
+        stop.assert_called_once_with(process)
+        harmony.assert_not_called()
+        self.assertIsNone(build.BUILD_CANCEL)
+
+    def test_parallel_harmony_rejects_missing_readiness_marker(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "harmony"]
+        with patch.object(self.builder, "linux"), patch.object(self.builder, "harmony") as harmony:
+            with self.assertRaisesRegex(build.BuildError, "就绪标记"):
+                self.builder.parallel_platforms(self.root / "assets.zip")
+        harmony.assert_not_called()
+
+    def test_parallel_harmony_reports_kernel_failure_before_linux_finishes(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "harmony"]
+        def linux():
+            Path(str(self.builder.parallel_marker) + ".ready.failed").touch()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+        with patch.object(self.builder, "linux", side_effect=linux), patch.object(self.builder, "harmony") as harmony:
+            with self.assertRaisesRegex(build.BuildError, "内核编译失败"):
+                self.builder.parallel_platforms(self.root / "assets.zip")
+        harmony.assert_not_called()
+
+    def test_parallel_progress_keeps_artifacts_in_their_own_stages(self):
+        import threading
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["linux", "android"]
+        directory = self.root / "records"
+        directory.mkdir()
+        record = build.BuildRecord(directory, self.args, "3.8.4")
+        self.builder.record = record
+        barrier = threading.Barrier(2)
+        def package(name):
+            barrier.wait(timeout=3)
+            path = self.write(self.builder.work / (name + ".pkg"))
+            self.builder.collect([path], name, time.time())
+        with patch.object(self.builder, "linux", side_effect=lambda: package("linux")), \
+                patch.object(self.builder, "android", side_effect=lambda assets: package("android")), \
+                contextlib.redirect_stdout(io.StringIO()), record.session():
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        progress = json.loads((directory / "progress.json").read_text())
+        for name in self.args.platforms:
+            stage = next(s for s in progress["stages"] if s["id"] == name)
+            self.assertEqual(stage["status"], "succeeded")
+            self.assertEqual(stage["artifacts"], [str(self.args.output / (name + ".pkg"))])
+        self.assertEqual(progress["current_stages"], [])
+
     def test_harmony_rejects_unsigned_only_output(self):
         self.builder.wsl_root = self.root / "wsl"
         assets = self.write(self.root / "app.zip")

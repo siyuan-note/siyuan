@@ -15,6 +15,8 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET='all'
 HARMONY_KERNEL=false
+HARMONY_READY_FILE=''
+PROCESS_ID_FILE=''
 validate_target() {
     if [[ -z "$1" ]]; then
         echo 'Error: --target option requires a value'
@@ -30,6 +32,14 @@ validate_target() {
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --harmony-ready-file=*)
+            HARMONY_READY_FILE="${1#*=}"
+            shift
+            ;;
+        --process-id-file=*)
+            PROCESS_ID_FILE="${1#*=}"
+            shift
+            ;;
         --with-harmony-kernel)
             HARMONY_KERNEL=true
             shift
@@ -51,6 +61,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [[ -n "$PROCESS_ID_FILE" ]]; then
+    printf '%s\n' "$$" > "$PROCESS_ID_FILE"
+fi
+
 export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct
 # Toolchain selection can download and authenticate a toolchain even for
@@ -67,6 +81,7 @@ cleanup_kernels() {
     local pid
     for pid in "${KERNEL_PIDS[@]}"; do
         kill -TERM -- "-$pid" 2>/dev/null || true
+        kill -TERM "$pid" 2>/dev/null || true
     done
     for pid in "${KERNEL_PIDS[@]}"; do
         wait "$pid" 2>/dev/null || true
@@ -169,7 +184,20 @@ if $HARMONY_KERNEL; then
     trap 'cleanup_kernels' EXIT
     trap 'exit 130' INT
     trap 'exit 143' TERM
-    (cd "$PROJECT_ROOT/kernel/harmony"; exec setsid bash -e "$PROJECT_ROOT/scripts/harmony-kernel-build.sh") &
+    (cd "$PROJECT_ROOT/kernel/harmony"
+     setsid bash -e "$PROJECT_ROOT/scripts/harmony-kernel-build.sh" &
+     child=$!
+     trap 'kill -TERM -- "-$child" 2>/dev/null || true; wait "$child" 2>/dev/null || true' EXIT
+     if ! wait "$child"; then
+         if [[ -n "$HARMONY_READY_FILE" ]]; then
+             touch "${HARMONY_READY_FILE}.failed"
+         fi
+         exit 1
+     fi
+     trap - EXIT
+     if [[ -n "$HARMONY_READY_FILE" ]]; then
+         touch "$HARMONY_READY_FILE"
+     fi) &
     KERNEL_PIDS=("$!")
 fi
 
@@ -179,12 +207,14 @@ cd "$PROJECT_ROOT/app"
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Electron App amd64'
-    pnpm run dist-linux
+    # Electron Builder otherwise defaults gzip archives to level 9 even when
+    # compression is "normal". Keep this override local to Linux packaging.
+    ELECTRON_BUILDER_COMPRESSION_LEVEL=5 pnpm run dist-linux
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Electron App arm64'
-    pnpm run dist-linux-arm64
+    ELECTRON_BUILDER_COMPRESSION_LEVEL=5 pnpm run dist-linux-arm64
 fi
 
 if $HARMONY_KERNEL; then

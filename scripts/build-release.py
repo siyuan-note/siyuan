@@ -19,6 +19,8 @@ import tempfile
 import time
 import warnings
 import zipfile
+import threading
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +31,19 @@ PLATFORMS = ("windows", "linux", "android", "harmony")
 GOVERSIONINFO_MODULE = "github.com/josephspurrier/goversioninfo"
 GOVERSIONINFO_VERSION = "v1.7.0"
 ACTIVE_RECORD = None
+BUILD_CANCEL = None
+BUILD_PROCESSES = set()
+BUILD_PROCESS_LOCK = threading.Lock()
+
+
+def stop_build_process(process):
+    if process.poll() is None:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        else:
+            process.terminate()
+
 
 
 def compile_kernels(commands, directory, jobs=2, on_complete=None):
@@ -111,6 +126,8 @@ class LoggedStream:
 class BuildRecord:
     def __init__(self, directory, args, version):
         self.directory = Path(directory)
+        self.lock = threading.RLock()
+        self.local = threading.local()
         self.log = None
         self.line_start = True
         self.active_stage = None
@@ -129,7 +146,21 @@ class BuildRecord:
                      "current_stage": None, "stages": [dict(id=key, name=name, status="pending", artifacts=[])
                                                        for key, name in stages]}
 
+    @property
+    def active_stage(self):
+        return getattr(self.local, "stage", None)
+
+    @active_stage.setter
+    def active_stage(self, value):
+        self.local.stage = value
+
     def save(self):
+        with self.lock:
+            self._save()
+
+    def _save(self):
+        self.data["current_stages"] = [s["id"] for s in self.data["stages"] if s["status"] == "running"]
+        self.data["current_stage"] = ",".join(self.data["current_stages"]) or None
         self.data["updated_at"] = timestamp()
         # 同目录原子替换，查看进度时不会读到写入一半的 JSON。
         path = self.directory / "progress.json.tmp"
@@ -144,6 +175,10 @@ class BuildRecord:
             path.unlink(missing_ok=True)
 
     def write(self, text):
+        with self.lock:
+            self._write(text)
+
+    def _write(self, text):
         for part in text.splitlines(keepends=True):
             if self.line_start:
                 self.log.write(f"[{timestamp()}] ")
@@ -226,6 +261,8 @@ def create_record(args, version):
 
 
 def run(command, cwd, env=None, capture=False, interactive=False):
+    if BUILD_CANCEL is not None and BUILD_CANCEL.is_set():
+        raise BuildError("并行构建已取消")
     command = [str(value) for value in command]
     executable = shutil.which(command[0]) or command[0]
     command[0] = executable
@@ -243,8 +280,9 @@ def run(command, cwd, env=None, capture=False, interactive=False):
     if not capture:
         print(f"[{cwd}] {subprocess.list2cmdline(command)}", flush=True)
     if ACTIVE_RECORD is not None:
-        ACTIVE_RECORD.data["last_command"] = {"arguments": command, "directory": str(cwd),
+        command_record = {"arguments": command, "directory": str(cwd),
                                                "started_at": timestamp(), "interactive": interactive}
+        ACTIVE_RECORD.data["last_command"] = command_record
         ACTIVE_RECORD.save()
         if capture:
             ACTIVE_RECORD.write(f"[{cwd}] {subprocess.list2cmdline(command)}\n")
@@ -252,6 +290,10 @@ def run(command, cwd, env=None, capture=False, interactive=False):
         # 只采集输出，标准输入仍连接终端；SSH 认证单独保留完整终端交互。
         with subprocess.Popen(invocation, cwd=cwd, env=env, shell=shell,
                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
+            with BUILD_PROCESS_LOCK:
+                BUILD_PROCESSES.add(process)
+                if BUILD_CANCEL is not None and BUILD_CANCEL.is_set():
+                    stop_build_process(process)
             decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
             try:
                 while chunk := process.stdout.read1(65536):
@@ -261,10 +303,12 @@ def run(command, cwd, env=None, capture=False, interactive=False):
                 sys.stdout.flush()
                 returncode = process.wait()
             except BaseException:
-                if process.poll() is None:
-                    process.terminate()
+                stop_build_process(process)
                 process.wait()
                 raise
+            finally:
+                with BUILD_PROCESS_LOCK:
+                    BUILD_PROCESSES.discard(process)
         output, detail = "", "请查看上方输出或 build.log"
     else:
         result = subprocess.run(invocation, cwd=cwd, env=env, shell=shell, check=False,
@@ -275,7 +319,7 @@ def run(command, cwd, env=None, capture=False, interactive=False):
         output = (result.stdout or "").strip() if capture else ""
         detail = (result.stderr or "").strip() if capture else "请查看上方终端输出"
     if ACTIVE_RECORD is not None:
-        ACTIVE_RECORD.data["last_command"].update(returncode=returncode, finished_at=timestamp())
+        command_record.update(returncode=returncode, finished_at=timestamp())
         ACTIVE_RECORD.save()
     if returncode:
         raise BuildError(f"命令失败（{returncode}）：{command[0]}；{detail}")
@@ -653,6 +697,10 @@ class Builder:
     def linux(self):
         started = time.time()
         command = ["bash", "scripts/linux-build.sh", "--target=all"]
+        if hasattr(self, "parallel_marker"):
+            command = ["setsid"] + command
+            command.extend(("--process-id-file=" + self.parallel_remote + ".pid",
+                            "--harmony-ready-file=" + self.parallel_remote + ".ready"))
         if "harmony" in self.args.platforms:
             command.append("--with-harmony-kernel")
         self.wsl(command)
@@ -662,6 +710,67 @@ class Builder:
         expected = [folder / f"siyuan-{self.version}-linux{arch}.{extension}"
                     for arch in ("", "-arm64") for extension in ("tar.gz", "AppImage", "deb", "rpm")]
         self.collect(expected, "Linux", started)
+
+    def parallel_platforms(self, assets):
+        """Linux owns its kernel workers; mobile packaging waits only for its own inputs."""
+        global BUILD_CANCEL
+        BUILD_CANCEL = threading.Event()
+        marker = self.wsl_root / ".cache" / self.work.name
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        self.parallel_marker = marker
+        self.parallel_remote = self.args.wsl_repo.rstrip("/") + "/.cache/" + marker.name
+        self.harmony_prebuilt_started = time.time()
+        linux_done = threading.Event()
+        def task(platform):
+            if platform == "harmony":
+                while not Path(str(marker) + ".ready").exists():
+                    if Path(str(marker) + ".ready.failed").exists():
+                        raise BuildError("鸿蒙内核编译失败")
+                    if BUILD_CANCEL.wait(0.2):
+                        raise BuildError("鸿蒙打包已取消")
+                    if linux_done.is_set() and not Path(str(marker) + ".ready").exists():
+                        raise BuildError("Linux 未提供本次鸿蒙内核就绪标记")
+            try:
+                with self.stage(platform):
+                    method = getattr(self, platform)
+                    method() if platform == "linux" else method(assets)
+            finally:
+                if platform == "linux":
+                    linux_done.set()
+        def cancel():
+            BUILD_CANCEL.set()
+            # Kill the WSL session as well as Windows child trees. Killing wsl.exe alone
+            # does not reliably terminate its Linux descendants.
+            pid_file = Path(str(marker) + ".pid")
+            deadline = time.monotonic() + 2
+            while not pid_file.exists() and not linux_done.is_set() and time.monotonic() < deadline:
+                time.sleep(0.05)
+            if pid_file.exists():
+                pid = pid_file.read_text().strip()
+                if pid.isdigit():
+                    prefix = ["wsl.exe"]
+                    if self.args.wsl_distro:
+                        prefix += ["--distribution", self.args.wsl_distro]
+                    subprocess.run(prefix + ["--user", self.args.wsl_user, "--exec", "kill", "-TERM", "--", "-" + pid],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+            with BUILD_PROCESS_LOCK:
+                for process in list(BUILD_PROCESSES):
+                    stop_build_process(process)
+        try:
+            with ThreadPoolExecutor(max_workers=3) as pool:
+                futures = [pool.submit(task, platform) for platform in PLATFORMS[1:] if platform in self.args.platforms]
+                try:
+                    done, _ = wait(futures, return_when=FIRST_EXCEPTION)
+                    error = next((future.exception() for future in done if future.exception() is not None), None)
+                    if error is not None:
+                        raise error
+                except BaseException:
+                    cancel()
+                    raise
+        finally:
+            BUILD_CANCEL = None
+            for suffix in (".pid", ".ready", ".ready.failed"):
+                Path(str(marker) + suffix).unlink(missing_ok=True)
 
     def check_kernel(self, path, architecture):
         info = VERIFY.kernel_info(path)
@@ -863,6 +972,9 @@ def execute_build(args, version, record, signing_pin=None):
             create_mobile_assets(assets, version)
     for platform in PLATFORMS:
         if platform in args.platforms:
+            if platform == "linux" and set(args.platforms) & {"android", "harmony"}:
+                builder.parallel_platforms(assets)
+                break
             method = getattr(builder, platform)
             with record.stage(platform) if platform != "windows" else nullcontext():
                 method(assets) if platform in {"android", "harmony"} else method()

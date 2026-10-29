@@ -130,9 +130,13 @@ python -X utf8 scripts/build-release.py --appx
 python -X utf8 scripts/build-release.py --appx --execute
 ```
 
-各平台安装包按 Windows、Linux、Android、鸿蒙的顺序构建。选择 Windows 时，先准备 Windows 资源，再同时编译 AMD64、ARM64 和同时选中的 Android 内核，默认最多三个任务并行。AMD64 内核完成并验证后立即开始打包，无需等待 Android；ARM64 内核就绪且 AMD64 打包完成后，再打包 ARM64。Windows 安装包及签名始终串行，Android 编译可在其间继续运行，Android 阶段复用本次已编译的 AAR。可传入 `--kernel-jobs 2` 限制为两个任务，或用 `--kernel-jobs 1` 恢复这部分串行编译。
+首先构建 Windows 安装包；Windows 完成后，同时选择的 Linux 与 Android 应用打包并行执行。选择 Windows 时，先准备 Windows 资源，再同时编译 AMD64、ARM64 和同时选中的 Android 内核，默认最多三个任务并行。AMD64 内核完成并验证后立即开始打包，无需等待 Android；ARM64 内核就绪且 AMD64 打包完成后，再打包 ARM64。Windows 安装包及签名始终串行，Android 编译可在其间继续运行，Android 阶段复用本次已编译的 AAR。可传入 `--kernel-jobs 2` 限制为两个任务，或用 `--kernel-jobs 1` 恢复这部分内核串行编译。
 
-Linux 在首次调用 Go 前配置下载镜像，并在前端构建前检查所需工具链；工具链下载仍保留校验，网络或校验失败时提前退出。Linux 前端仅构建一次，AMD64、ARM64 内核并行编译，各自使用独立输出目录；Electron 安装包仍串行生成。同时选择 Linux 和鸿蒙时，Linux 安装包生成期间并行编译鸿蒙 ARM64 内核，Linux 阶段等待该编译完成，鸿蒙阶段验证并复用本次内核和头文件后打包。仅选择鸿蒙时仍在鸿蒙阶段编译内核。编译失败会阻止后续阶段；中断时回收后台编译进程。
+Linux 在首次调用 Go 前配置下载镜像，并在前端构建前检查所需工具链；工具链下载仍保留校验，网络或校验失败时提前退出。Linux 前端仅构建一次，AMD64、ARM64 内核并行编译，各自使用独立输出目录；Electron 安装包仍串行生成。同时选择 Linux 和鸿蒙时，Linux 安装包生成期间并行编译鸿蒙 ARM64 内核；内核成功后发送本次构建的就绪标记，鸿蒙阶段立即验证版本、架构和头文件并开始应用打包，无需等待 Linux 安装包或 Android 完成。仅选择鸿蒙时仍在鸿蒙阶段编译内核。任一并行任务失败时取消其余任务，中断时回收 Windows 子进程树及 WSL 构建进程组。
+
+并行阶段分别记录状态和产物，`progress.json` 的 `current_stages` 列出所有运行阶段，`current_stage` 为逗号分隔的兼容摘要。记录写入加锁并原子更新；各平台产物仍须通过原有的新鲜度、版本和复制摘要检查。
+
+Linux 双架构打包命令固定设置 `ELECTRON_BUILDER_COMPRESSION_LEVEL=5`，降低 `tar.gz` 的压缩耗时；该变量仅作用于 Linux Electron Builder 子进程。归档仍使用原有格式，产物仍须完成最终安装包校验。
 
 并行编译日志分别保存在本次临时构建目录的 `kernel-logs/` 中，主日志记录任务启动、结束和失败。编译、打包失败或按 Ctrl+C 时，停止队列并回收仍在运行的编译进程；未开始的任务不再执行。Windows 资源准备阶段仅记录资源生成，各架构安装包阶段可与剩余内核编译重叠。
 

@@ -29,7 +29,7 @@ PLATFORMS = ("windows", "linux", "android", "harmony")
 ACTIVE_RECORD = None
 
 
-def compile_kernels(commands, directory, jobs=2):
+def compile_kernels(commands, directory, jobs=2, on_complete=None):
     """Run isolated compiler processes; keep all record updates on the calling thread."""
     processes = []
     directory.mkdir(parents=True, exist_ok=True)
@@ -65,6 +65,8 @@ def compile_kernels(commands, directory, jobs=2):
                 if code:
                     raise BuildError(f"内核编译失败：{name}（{code}）；日志：{path}")
                 print(f"内核编译完成：{name}", flush=True)
+                if on_complete is not None:
+                    on_complete(name)
             if pending:
                 time.sleep(0.1)
     finally:
@@ -328,14 +330,14 @@ def read_signing_pin(value=None):
     return value
 
 
-def check_signing_pin(pin, thumbprint):
+def check_signing_pin(pin, thumbprint, files=()):
     # 认证请求仅通过标准输入传递，不经命令行、配置文件或发布日志。
     env = dict(os.environ)
     for key in ("SIYUAN_SIGNING_PIN", "SIYUAN_RELEASE_SIGN_PIN", "PSModulePath"):
         env.pop(key, None)
     command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
                str(ROOT / "scripts/release-sign-windows.ps1")]
-    request = json.dumps({"pin": pin, "thumbprint": thumbprint, "files": []}) + "\n"
+    request = json.dumps({"pin": pin, "thumbprint": thumbprint, "files": [str(path) for path in files]}) + "\n"
     for attempt in range(2):
         try:
             result = subprocess.run(command, cwd=ROOT, env=env, input=request, encoding="utf-8", errors="replace",
@@ -346,9 +348,9 @@ def check_signing_pin(pin, thumbprint):
         if result.returncode == 0:
             return
         if result.returncode != 20 or attempt:
-            diagnostic = re.search(r'SIGNING_DIAGNOSTIC:(request|certificate|authentication):((?:0x[0-9a-fA-F]{8},?)+)', result.stderr or '')
-            if diagnostic:
-                print(diagnostic.group(0), flush=True)
+            diagnostics = re.findall(r'SIGNING_DIAGNOSTIC:(?:request|certificate|authentication|signing|verification):(?:0x[0-9a-fA-F]{8},?)+|SIGNING_STATUS:\d+:\d+', result.stderr or '')
+            for diagnostic in diagnostics:
+                print(diagnostic, flush=True)
             raise BuildError("Windows 签名认证失败，请检查 PIN、设备和证书；PIN 错误不会自动重试")
         # 仅重试已识别的设备通信中断，不重试 PIN 错误。
         time.sleep(1)
@@ -494,8 +496,12 @@ class Builder:
         if "windows" in self.args.platforms:
             self.thumbprint = certificate_thumbprint(self.args.certificate_subject, self.args.certificate_sha1)
             if self.signing_pin is not None:
-                check_signing_pin(self.signing_pin, self.thumbprint)
-                print(f"Windows 签名证书：{self.thumbprint}；PIN 已验证，后续自动签名", flush=True)
+                with tempfile.TemporaryDirectory(prefix="siyuan-signing-probe-") as temporary:
+                    probe = Path(temporary) / "signing-probe.exe"
+                    shutil.copy2(ROOT / "app/elevator/elevator-amd64.exe", probe)
+                    check_signing_pin(self.signing_pin, self.thumbprint, [probe])
+                    verify_signature(probe, self.thumbprint)
+                print(f"Windows 签名证书：{self.thumbprint}；临时 EXE 签名、时间戳和验签已通过，后续自动签名", flush=True)
             else:
                 print(f"Windows 签名证书：{self.thumbprint}；签名时请按系统提示输入 YubiKey PIN", flush=True)
         if {"linux", "harmony"} & set(self.args.platforms):
@@ -540,23 +546,36 @@ class Builder:
     def windows(self):
         with self.stage("windows_tools"):
             self.windows_tools()
-            if self.args.kernel_jobs > 1:
-                commands = []
-                for arch in ("amd64", "arm64"):
-                    kernel, env = self.windows_kernel(arch)
-                    # Each Go invocation also limits its package parallelism.
-                    command = ["go", "build", "-p", str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs)),
-                               "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."]
-                    commands.append((arch, command, ROOT / "kernel", env))
-                if "android" in self.args.platforms:
-                    aar, env, command = self.android_kernel()
-                    env["GOMAXPROCS"] = str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs))
-                    commands.insert(1, ("android", command, ROOT / "kernel", env))
-                compile_kernels(commands, self.work / "kernel-logs", jobs=self.args.kernel_jobs)
-                for arch in ("amd64", "arm64"):
-                    self.check_kernel(self.work / "kernels" / arch / "SiYuan-Kernel.exe", arch)
-                self.kernels_prebuilt = True
-                self.android_prebuilt = "android" in self.args.platforms
+        if self.args.kernel_jobs > 1:
+            commands = []
+            for arch in ("amd64", "arm64"):
+                kernel, env = self.windows_kernel(arch)
+                command = ["go", "build", "-p", str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs)),
+                           "-tags", "fts5 sqlcipher", "-ldflags=-s -w", "-o", kernel, "."]
+                commands.append((arch, command, ROOT / "kernel", env))
+            if "android" in self.args.platforms:
+                aar, env, command = self.android_kernel()
+                env["GOMAXPROCS"] = str(max(1, (os.cpu_count() or 2) // self.args.kernel_jobs))
+                commands.insert(1, ("android", command, ROOT / "kernel", env))
+            ready = set()
+            packaged = set()
+            def completed(name):
+                if name == "android":
+                    self.android_prebuilt = True
+                    return
+                self.check_kernel(self.work / "kernels" / name / "SiYuan-Kernel.exe", name)
+                ready.add(name)
+                for arch, config in (("amd64", "electron-builder.yml"), ("arm64", "electron-builder-arm64.yml")):
+                    if arch in packaged:
+                        continue
+                    if arch not in ready:
+                        break
+                    self.kernels_prebuilt = True
+                    with self.stage("windows_" + arch):
+                        self.windows_arch(arch, config)
+                    packaged.add(arch)
+            compile_kernels(commands, self.work / "kernel-logs", jobs=self.args.kernel_jobs, on_complete=completed)
+            return
         for arch, config in (("amd64", "electron-builder.yml"), ("arm64", "electron-builder-arm64.yml")):
             with self.stage("windows_" + arch):
                 self.windows_arch(arch, config)

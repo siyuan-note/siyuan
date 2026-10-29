@@ -130,11 +130,11 @@ python -X utf8 scripts/build-release.py --appx
 python -X utf8 scripts/build-release.py --appx --execute
 ```
 
-各平台安装包按 Windows、Linux、Android、鸿蒙的顺序构建。选择 Windows 时，先准备 Windows 资源，再同时编译 AMD64、ARM64 和同时选中的 Android 内核，默认最多三个任务并行；随后串行打包和签名，Android 阶段复用本次已编译的 AAR。可传入 `--kernel-jobs 2` 限制为两个任务，或用 `--kernel-jobs 1` 恢复这部分串行编译。
+各平台安装包按 Windows、Linux、Android、鸿蒙的顺序构建。选择 Windows 时，先准备 Windows 资源，再同时编译 AMD64、ARM64 和同时选中的 Android 内核，默认最多三个任务并行。AMD64 内核完成并验证后立即开始打包，无需等待 Android；ARM64 内核就绪且 AMD64 打包完成后，再打包 ARM64。Windows 安装包及签名始终串行，Android 编译可在其间继续运行，Android 阶段复用本次已编译的 AAR。可传入 `--kernel-jobs 2` 限制为两个任务，或用 `--kernel-jobs 1` 恢复这部分串行编译。
 
 Linux 前端仅构建一次，AMD64、ARM64 内核并行编译，各自使用独立输出目录；Electron 安装包仍串行生成。同时选择 Linux 和鸿蒙时，Linux 安装包生成期间并行编译鸿蒙 ARM64 内核，Linux 阶段等待该编译完成，鸿蒙阶段验证并复用本次内核和头文件后打包。仅选择鸿蒙时仍在鸿蒙阶段编译内核。编译失败会阻止后续阶段；中断时回收后台编译进程。
 
-并行编译日志分别保存在本次临时构建目录的 `kernel-logs/` 中，主日志记录任务启动、结束和失败。编译失败或按 Ctrl+C 时，停止队列并回收仍在运行的编译进程；未开始的任务不再执行。Windows 资源准备阶段包含并行内核编译，完成后才进入各架构安装包阶段。
+并行编译日志分别保存在本次临时构建目录的 `kernel-logs/` 中，主日志记录任务启动、结束和失败。编译、打包失败或按 Ctrl+C 时，停止队列并回收仍在运行的编译进程；未开始的任务不再执行。Windows 资源准备阶段仅记录资源生成，各架构安装包阶段可与剩余内核编译重叠。
 
 包含 Windows 时，先隐藏输入一次签名 PIN；预检验证通过后自动完成后续签名。仅查看计划或构建其他平台时不询问 PIN。WSL 的 SSH 认证仍在预检阶段完成，预检通过后再离开电脑。
 
@@ -361,7 +361,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 ### YubiKey PIN
 
-默认通过 Windows 智能卡驱动和 Authenticode 接口自动签名，支持 CNG 的 RSA、ECDSA 签名密钥。启动时隐藏输入一次 PIN，预检先验证密钥可用，再进行耗时构建；PIN 仅在进程内存中暂存，经签名子进程的标准输入传递，不写入文件或日志。每个文件使用 SHA256 签名，并检查证书、签名和时间戳；仅设备通信中断自动重试一次，PIN 错误立即停止。
+默认通过 Windows 智能卡驱动和 Authenticode 接口自动签名，支持 CNG 的 RSA、ECDSA 签名密钥。启动时隐藏输入一次 PIN，预检将已有的 AMD64 elevator EXE 复制到临时目录，验证 PIN 后对副本执行 SHA256 签名、时间戳请求和验签，通过后才开始耗时构建；原文件保持不变，临时副本在成功或失败后均删除。PIN 仅在进程内存中暂存，经签名子进程的标准输入传递，不写入文件或日志。每个发布文件仍单独签名并检查证书和时间戳；预检通过不保证后续网络或设备状态不变。失败时仅输出阶段、错误码和签名状态，不输出凭据或异常原文；仅设备通信中断自动重试一次，PIN 错误立即停止。
 
 自动执行时可由启动程序通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供 PIN，无需把密码写进命令或脚本。仍需保持签名设备连接；脚本不改变 PIN 或触摸策略，需要触摸的密钥不能完全无人值守。若驱动不支持自动认证，可添加 `--signing-ui` 沿用系统弹窗。
 

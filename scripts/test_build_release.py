@@ -76,10 +76,16 @@ class BuildTests(unittest.TestCase):
     def test_windows_queue_includes_android_and_serializes_packaging(self):
         self.args.kernel_jobs = 3
         packed = []
-        def compile(commands, directory, jobs):
+        def compile(commands, directory, jobs, on_complete):
             self.assertEqual(jobs, 3)
             self.assertEqual([item[0] for item in commands], ["amd64", "android", "arm64"])
             self.assertEqual(len({str(item[1][item[1].index("-o") + 1]) for item in commands}), 3)
+            on_complete("amd64")
+            self.assertEqual(packed, ["amd64"])
+            self.assertFalse(getattr(self.builder, "android_prebuilt", False))
+            on_complete("arm64")
+            self.assertEqual(packed, ["amd64", "arm64"])
+            on_complete("android")
         with patch.object(self.builder, "windows_tools"), patch.object(self.builder, "check_kernel"), \
                 patch.object(self.builder, "android_kernel", return_value=(self.root / "kernel.aar", {},
                              ["gomobile", "bind", "-o", self.root / "kernel.aar"])), \
@@ -116,6 +122,45 @@ class BuildTests(unittest.TestCase):
                          {"pin": "secret", "thumbprint": "A" * 40, "files": []})
         self.assertNotIn("SIYUAN_SIGNING_PIN", run.call_args.kwargs["env"])
         self.assertNotIn("PSModulePath", run.call_args.kwargs["env"])
+
+    def test_preflight_signs_and_verifies_temporary_copy(self):
+        self.args.platforms = ["windows"]
+        self.builder.signing_pin = "private-pin"
+        original = self.write(self.root / "app/elevator/elevator-amd64.exe", b"original executable")
+        probes = []
+        def sign(pin, thumbprint, files):
+            self.assertEqual(pin, "private-pin")
+            probe = files[0]
+            probes.append(probe)
+            self.assertNotEqual(probe, original)
+            self.assertEqual(probe.read_bytes(), original.read_bytes())
+            probe.write_bytes(b"signed executable")
+        def verify(path, thumbprint):
+            self.assertEqual(path.read_bytes(), b"signed executable")
+        with patch.object(build, "ROOT", self.root), patch.object(build, "source_preflight"), \
+                patch.object(build, "certificate_thumbprint", return_value="A" * 40), \
+                patch.object(build, "check_signing_pin", side_effect=sign), \
+                patch.object(build, "verify_signature", side_effect=verify):
+            self.builder.preflight()
+        self.assertEqual(original.read_bytes(), b"original executable")
+        self.assertFalse(probes[0].exists())
+
+    def test_preflight_signing_failure_is_propagated_and_copy_removed(self):
+        self.args.platforms = ["windows"]
+        self.builder.signing_pin = "private-pin"
+        self.write(self.root / "app/elevator/elevator-amd64.exe")
+        probes = []
+        def fail(pin, thumbprint, files):
+            probes.extend(files)
+            raise build.BuildError("signing probe failed")
+        with patch.object(build, "ROOT", self.root), patch.object(build, "source_preflight"), \
+                patch.object(build, "certificate_thumbprint", return_value="A" * 40), \
+                patch.object(build, "check_signing_pin", side_effect=fail), \
+                patch.object(build, "verify_signature") as verify:
+            with self.assertRaisesRegex(build.BuildError, "signing probe failed"):
+                self.builder.preflight()
+        verify.assert_not_called()
+        self.assertFalse(probes[0].exists())
 
     def test_signing_preflight_retries_only_device_communication(self):
         for codes in ((20, 0), (20, 20), (1,)):

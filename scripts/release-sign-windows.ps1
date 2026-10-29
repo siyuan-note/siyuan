@@ -85,7 +85,10 @@ try {
     [SiYuanReleaseKey]::Authenticate($certificate.Handle, $payload.pin, $oid -eq '1.2.840.113549.1.1.1')
     $payload.pin = $null
     foreach ($file in $payload.files) {
+        $stage = "signing"
         $signature = Set-AuthenticodeSignature -LiteralPath $file -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com"
+        $stage = 'verification'
+        [Console]::Error.WriteLine('SIGNING_STATUS:' + [int]$signature.Status + ':' + [int]($null -ne $signature.TimeStamperCertificate))
         if ($signature.Status -ne "Valid" -or $signature.SignerCertificate.Thumbprint -ne $certificate.Thumbprint -or
             $null -eq $signature.TimeStamperCertificate) {
             throw "Signature or timestamp verification failed"

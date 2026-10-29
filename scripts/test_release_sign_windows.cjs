@@ -31,7 +31,7 @@ function load(codes = [0, 0]) {
                     maximum = Math.max(maximum, active);
                     setImmediate(() => {
                         active -= 1;
-                        child.stderr.emit("data", Buffer.from("test-secret"));
+                        child.stderr.emit("data", Buffer.from("test-secret SIGNING_DIAGNOSTIC:signing:0x8010006e SIGNING_STATUS:3:0"));
                         child.emit("close", codes.shift());
                     });
                 };
@@ -56,6 +56,7 @@ async function main() {
     const errors = await Promise.allSettled([failed.sign(options("first.exe")), failed.sign(options("second.exe"))]);
     assert.equal(failed.calls.length, 1);
     assert.ok(errors.every(result => result.status === "rejected" && !result.reason.message.includes("test-secret")));
+    assert.ok(errors.every(result => result.reason.message.includes("SIGNING_DIAGNOSTIC:signing:0x8010006e")));
     const retry = load([20, 0]);
     await retry.sign(options("retry.exe"));
     assert.equal(retry.calls.length, 2);

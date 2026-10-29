@@ -41,6 +41,16 @@ After an ordinary conversation or task reaches a suitable stopping point, candid
 
 **Open decisions:** The default consolidation switch, source selection, task-completion event, initial processing of existing notes, and scan budget are not yet determined. The proposed starting point is user-selected source scope rather than sending the entire notebook collection to a model by default. Whatever defaults are chosen, disabling consolidation must prevent new jobs from being queued and require running jobs to recheck permission before committing results.
 
+### Model and reasoning-effort configuration
+
+Users must be able to select the model and its supported reasoning effort for long-term memory processing. The provider, model, and effort must not be hard-coded or required to match the current conversation. Reuse the existing AI provider and model configuration while exposing an independent choice for memory processing; changing the current conversation model must not implicitly change the choice for background memory work.
+
+This configuration applies to model calls for candidate extraction, search-term generation, duplicate or change judgment, and overview generation. File traversal, text matching, metadata validation, and persistence remain program operations and do not thereby require model requests. The UI must explain the scope and cost of model calls and offer reasoning options according to the target model and protocol capabilities. When unsupported, disable the corresponding selection or clearly explain the limitation; do not send known unsupported parameters or assume that all models accept the same effort values.
+
+If the selected model is removed, disabled, inaccessible, or incompatible with the configuration, preserve existing memory and report the affected tasks rather than silently switching providers or clearing records. Reading existing memory and suspending or withdrawing an unambiguous target without model involvement must not depend on the generation service recovering.
+
+**Open decisions:** The configuration entry point and fields, initial model and reasoning effort, explicit inheritance or fallback options, and the treatment of queued and running tasks after configuration changes remain to be determined. Configuration choices must be traceable rather than chosen ad hoc by the model. Until fallback rules are defined, do not promise automatic completion with another model.
+
 ### Visible limitations and failures
 
 No matching memory, incomplete search, inaccessible sources, malformed records, write conflicts, and model service failures must be distinguishable. A failed file search does not mean there is no relevant memory, and failed model generation must not clear existing records. When appropriate, continue the current task and disclose the lack of reliable memory rather than repeatedly interrupting the user to confirm low-value details.
@@ -68,6 +78,8 @@ data/storage/ai/
 `USER.md` provides a concise overview of relatively stable user background and preferences. `MEMORY.md` provides a small selection of frequently useful background, conventions, and pointers to detailed records. Both are derived from canonical records and bounded by relevance and context budgets, rather than concatenating all memory or serving as a complete catalog. Both persist under `memos/`, participate in normal data synchronization, and can be rebuilt when needed.
 
 Canonical records and overviews reuse existing snapshots and data synchronization, subject to the user's sync settings and ignore rules. The first version has no separate database or persistent retrieval index and does not create `temp/ai/memos/` in advance. If a cache becomes necessary later, that path may contain only rebuildable data; clearing it must not lose memory, corrections, or withdrawal decisions.
+
+Model and reasoning-effort choices belong to AI configuration, not `records/` or either overview. Follow existing configuration persistence and export rules and reuse model references rather than copying provider credentials into memory files. Synchronizing memory files does not mean the receiving device automatically has the same model configuration or service access.
 
 ### Canonical records
 
@@ -169,6 +181,7 @@ The specified behavior requires tests after implementation. Neither file format 
 | Source changes | Edits, deletion, access changes, and support from multiple sources trigger appropriate review |
 | Concurrency and recovery | Multiple AI requests, offline devices, interrupted generation, and malformed files do not silently overwrite or lose information |
 | User control and privacy | Disabling consolidation prevents later commits; read-only, encrypted, and restricted sources do not leak |
+| Model configuration | Use the user's selected model and supported reasoning effort; changing the conversation model does not implicitly alter memory configuration; unsupported parameters and invalid configuration produce clear feedback while preserving existing memory |
 | Cross-platform search | Desktop, browser, and mobile use the same kernel semantics without external search-command dependencies |
 | Cost and performance | Measure search latency, reads, misses, model calls, and cancellation/recovery across dataset sizes |
 

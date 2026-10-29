@@ -319,7 +319,7 @@ const browserCases = async (source: string, css: string) => {
     let selected = a.id;
     Object.assign(controller, {
         list, host: document.createElement("div"), model, owner: {lute, block: {rootID: "document"}, disabled: false},
-        view: {getSelectedId: () => selected, getSelectedIds: () => [selected], focusNode: (id: string) => selected = id,
+        view: {captureHistoryViewport: () => "{}", getSelectedId: () => selected, getSelectedIds: () => [selected], focusNode: (id: string) => selected = id,
             getContentHost: () => controller.host},
         change: async (action: () => boolean | void) => {
             const before = list.outerHTML;

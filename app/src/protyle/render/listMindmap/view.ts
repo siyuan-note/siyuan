@@ -123,6 +123,7 @@ const createElement = <T extends keyof HTMLElementTagNameMap>(tag: T, className:
 
 export class ListMindmapView {
     private themeColors = new Map<string, ListMindmapNodeStyle>();
+    private historyViewport?: {scale: number, x: number, y: number};
     private suppressPanContextMenu = false;
     private readonly options: ListMindmapViewOptions;
     private model: ListMindmapModel;
@@ -1138,6 +1139,27 @@ export class ListMindmapView {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
     }
 
+    public captureHistoryViewport() {
+        return JSON.stringify({scale: this.scale, x: this.offsetX, y: this.offsetY});
+    }
+
+    public restoreHistoryViewport(value: unknown) {
+        if (typeof value !== "string") {
+            return;
+        }
+        try {
+            const state = JSON.parse(value);
+            if (!state || !Number.isFinite(state.scale) || state.scale < .15 || state.scale > 2.5 ||
+                ![state.x, state.y].every(value => Number.isFinite(value) && Math.abs(value) <= 1000000)) {
+                return;
+            }
+            this.historyViewport = state;
+            this.refreshLayout();
+        } catch (_error) {
+            // 无效的取景上下文不影响节点和正文回放。
+        }
+    }
+
     private destroyContentViews(id: string) {
         this.nestedViews.get(id)?.forEach(view => view.destroy());
         this.nestedViews.delete(id);
@@ -1469,7 +1491,15 @@ export class ListMindmapView {
                 this.offsetX = this.viewport.clientWidth / 2 - center.x * this.scale;
                 this.offsetY = this.getViewportAnchorY(this.viewport.clientHeight) - center.y * this.scale;
             }
-            if (this.printTransform || this.options.printLayout) {
+            if (this.historyViewport && !this.printTransform && !this.options.printLayout) {
+                const state = this.historyViewport;
+                this.historyViewport = undefined;
+                this.initialFit = false;
+                this.scale = state.scale;
+                this.offsetX = state.x;
+                this.offsetY = state.y;
+                this.draw();
+            } else if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;

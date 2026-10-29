@@ -735,6 +735,7 @@ class ListMindmapController {
                     ...(query?.dataset.nodeId ? {undoFocusEmbedId: query.dataset.nodeId} : {})};
             };
             const undoFocus = focusContext(selectedID, model);
+            const undoViewport = this.view.captureHistoryViewport();
             if (change() === false) {
                 return false;
             }
@@ -750,6 +751,7 @@ class ListMindmapController {
                 updateTransaction(this.owner, this.list, before, {
                     undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    undoFocusMindmapViewport: undoViewport,
                     ...undoFocus,
                     ...(selection?.undo ? {undoFocusMindmapSelection: JSON.stringify(selection.undo)} : {}),
                 }, {doOperations: [], undoOperations: [], context: {
@@ -1104,6 +1106,7 @@ class ListMindmapController {
             return;
         }
         const id = candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id;
+        this.view.restoreHistoryViewport(selection?.undoFocusMindmapViewport);
         this.view.focusNode(id, false);
         const node = this.model.nodes.get(id);
         const content = selection && node && !node.virtual && this.view.getContentHost(id);

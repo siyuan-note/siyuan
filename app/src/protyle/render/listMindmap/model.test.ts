@@ -5264,6 +5264,41 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskStyle.remove();
     hostParent.remove();
 
+    // 结构撤销在布局完成后恢复操作前取景，保留小数偏移和缩放。
+    const historyList = reset("- Root\n  - First\n  - Second\n");
+    const historyHost = document.createElement("div");
+    historyHost.style.width = "700px";
+    document.body.append(historyHost);
+    const historyView = new api.ListMindmapView({host: historyHost, model: api.readListMindmap(historyList)});
+    await settle();
+    Object.assign(historyView, {scale: 1.25, offsetX: -80.5, offsetY: 45.25});
+    historyView.draw();
+    const historyViewport = historyView.captureHistoryViewport();
+    const historySource = historyList.outerHTML;
+    const historyModel = api.readListMindmap(historyList);
+    const insertedHistoryItem = (() => {
+        const holder = document.createElement("div");
+        holder.innerHTML = lute.Md2BlockDOM("- Inserted\n");
+        return holder.firstElementChild.firstElementChild as HTMLElement;
+    })();
+    check.ok(api.addListMindmapNode(historyList, historyModel.root.children[0].id, "before", insertedHistoryItem));
+    historyView.update(api.readListMindmap(historyList));
+    historyView.focusNode(insertedHistoryItem.dataset.nodeId);
+    await settle();
+    const restoredHistory = document.createElement("div");
+    restoredHistory.innerHTML = historySource;
+    historyView.update(api.readListMindmap(restoredHistory.firstElementChild));
+    historyView.restoreHistoryViewport(historyViewport);
+    await settle();
+    check.equal(historyView.captureHistoryViewport(), historyViewport, "undo restores exact pan and zoom after reflow");
+    for (const invalid of ["{", "null", JSON.stringify({scale: 0, x: 1, y: 2}), JSON.stringify({scale: 1, x: "1", y: 2})]) {
+        historyView.restoreHistoryViewport(invalid);
+        await settle();
+        check.equal(historyView.captureHistoryViewport(), historyViewport, "invalid context preserves the current viewport");
+    }
+    historyView.destroy();
+    historyHost.remove();
+
     // 概要的触屏点选、编辑、复制及列表往返使用真实 DOM 和 Lute。
     const summaryList = reset("- Root\n  - First\n    - Descendant\n  - Second\n  - Third\n");
     const summaryModel = api.readListMindmap(summaryList);

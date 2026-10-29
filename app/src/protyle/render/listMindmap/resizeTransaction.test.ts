@@ -48,7 +48,7 @@ test("resizing uses one source update with both dimensions and retains the exact
     };
     runInNewContext(compiled, context);
     const target = Object.assign(new context.Controller(list), {owner: {},
-        view: {getSelectedId: () => "root"}, refresh() {}, activeEditor: {finish: async () => {
+        view: {captureHistoryViewport: () => "{}", getSelectedId: () => "root"}, refresh() {}, activeEditor: {finish: async () => {
             title = "Saved node content";
             return true;
         }}});

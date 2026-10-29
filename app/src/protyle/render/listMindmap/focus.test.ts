@@ -206,7 +206,7 @@ test("undo from a node editor restores that node or its previous sibling", async
     const target = new context.Controller();
     Object.assign(target, {
         owner, list: {dataset: {nodeId: "map"}, isConnected: true, outerHTML: "map", closest: (): null => null}, model: {nodes, root},
-        view: {getSelectedId: () => "root", focusNode: (id: string, reveal: boolean) => {
+        view: {restoreHistoryViewport: () => {}, getSelectedId: () => "root", focusNode: (id: string, reveal: boolean) => {
             assert.equal(reveal, false, "history selection must not reveal or pan to the node");
             selected.push(id);
         }},
@@ -218,6 +218,21 @@ test("undo from a node editor restores that node or its previous sibling", async
     removeNew = true;
     await onEditorUndo(false);
     assert.equal(selected.pop(), "existing", "undoing node insertion focuses the previous sibling");
+});
+
+test("history focus restores its saved viewport only while the focus guard remains valid", () => {
+    const context: any = {};
+    runInNewContext(compiled, context);
+    const restored: unknown[] = [];
+    const node = {id: "node", contentBlocks: [] as HTMLElement[]};
+    const target = Object.assign(new context.Controller(), {model: {nodes: new Map([[node.id, node]]), root: node},
+        view: {restoreHistoryViewport: (value: unknown) => restored.push(value), focusNode: () => {},
+            getContentHost: (): undefined => undefined}});
+    const viewport = JSON.stringify({scale: 1.25, x: -80.5, y: 45.25});
+    target.focusNode([node.id], {undoFocusMindmapViewport: viewport}, () => true);
+    assert.deepEqual(restored, [viewport]);
+    target.focusNode([node.id], {undoFocusMindmapViewport: viewport}, () => false);
+    assert.deepEqual(restored, [viewport]);
 });
 
 test("text history records the edited node even when selection changes before its save", async () => {
@@ -236,7 +251,7 @@ test("text history records the edited node even when selection changes before it
     };
     runInNewContext(compiled, context);
     const target = Object.assign(new context.Controller(), {owner: {}, list, refresh() {},
-        view: {getSelectedId: () => "root"}});
+        view: {captureHistoryViewport: () => "{}", getSelectedId: () => "root"}});
     const undo = {undoFocusId: "paragraph", undoFocusStart: "2", undoFocusEnd: "2"};
     const redo = {...undo, undoFocusStart: "5", undoFocusEnd: "5"};
     assert.equal(await target.change(() => { list.outerHTML = "after"; }, true, "child", {undo, redo}), true);
@@ -313,7 +328,8 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     runInNewContext(compiled, context);
     const createController = () => Object.assign(new context.Controller(), {
         owner, list, model: getModel(), refresh() { this.model = getModel(); },
-        view: {getSelectedId: () => selectedID, focusNode: (id: string) => { selectedID = id; }},
+        view: {captureHistoryViewport: () => "{}", restoreHistoryViewport: () => {},
+            getSelectedId: () => selectedID, focusNode: (id: string) => { selectedID = id; }},
     });
     target = createController();
     await target.change(() => {
@@ -358,7 +374,7 @@ test("empty or canceled history restores the current text selection unless a new
     runInNewContext(compiled, context);
     const target = Object.assign(new context.Controller(), {
         owner, list: {dataset: {nodeId: "map"}, outerHTML: "same", isConnected: true, closest: (): null => null}, model: {root: node, nodes},
-        view: {getSelectedId: () => "item", focusNode: () => {}, getContentHost: () => ({isConnected: true})},
+        view: {restoreHistoryViewport: () => {}, getSelectedId: () => "item", focusNode: () => {}, getContentHost: () => ({isConnected: true})},
         edit: async (...args: unknown[]) => opened.push(args[4]),
     });
     const state = {focusRevision: 0, interactionRevision: 0,

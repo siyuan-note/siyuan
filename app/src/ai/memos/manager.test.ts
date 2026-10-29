@@ -4,11 +4,14 @@ import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {MemoryEditorState} from "./state";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 
 class ElementStub {
     value = "";
     textContent = "";
     disabled = false;
+    hidden = false;
+    open = false;
     dataset: Record<string, string> = {};
     children: ElementStub[] = [];
     listeners = new Map<string, (event: unknown) => void>();
@@ -42,7 +45,7 @@ const harness = (fetch: (url: string, data: Record<string, unknown>) => Promise<
             if (name.endsWith("/confirmDialog")) { return {confirmDialog: (_title: string, _text: string, callback: () => void) => { if (confirm) { callback(); } }}; }
             if (name.endsWith("/message")) { return {showMessage: (text: string) => notices.push(text)}; }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: fetch}; }
-            if (name.endsWith("/escape")) { return {escapeHtml: (text: string) => text}; }
+            if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr}; }
             if (name.endsWith("/genID")) { return {genUUID: () => String(++serial)}; }
             if (name.endsWith("/functions")) { return {isMobile: () => false}; }
             if (name === "./state") { return {MemoryEditorState}; }
@@ -122,7 +125,9 @@ test("recent automatic failure is visible without knowing task identity or start
     assert.equal(root.querySelector("[data-memory-task-choice]").value, "automatic-1");
     assert.match(root.querySelector("[data-memory-task-status]").textContent, /configuration changed/);
     assert.deepEqual(calls, ["/api/ai/memory/list"]);
+    root.querySelector("[data-memory-model]").open = false;
     await click("task");
+    assert.equal(root.querySelector("[data-memory-model]").open, false, "refresh must preserve a deliberately collapsed model panel");
     assert.equal(calls.filter(url => url.endsWith("/list")).length, 2, "terminal task refresh must not create a list/poll loop");
     assert.equal(calls.filter(url => url.endsWith("/task")).length, 1);
 });
@@ -187,4 +192,53 @@ test("forget distinguishes logical withdrawal from pending physical cleanup", as
     await click("forget");
     assert.deepEqual(notices, ["aiMemoryCleanupPending"]);
     assert.equal(root.querySelector('[data-memory-field="content"]').value, "");
+    assert.equal(root.querySelector("[data-memory-editor]").hidden, true, "forget returns to the list rather than an unsolicited new draft");
+});
+
+test("empty manager guides creation without an empty editor or meaningless pagination", async () => {
+    const {root, click, flush} = harness(async () => ({code: 0, data: {records: [], tasks: []}}));
+    await flush();
+    assert.equal(root.querySelector("[data-memory-editor]").hidden, true);
+    assert.equal(root.querySelector("[data-memory-empty]").hidden, false);
+    assert.equal(root.querySelector("[data-memory-empty-title]").textContent, "aiMemoryEmpty");
+    assert.equal(root.querySelector("[data-memory-pagination]").hidden, true);
+    assert.equal(root.querySelector("[data-memory-status]").textContent, "");
+    assert.equal(root.querySelector("[data-memory-task-history]").hidden, true);
+    await click("new");
+    assert.equal(root.querySelector("[data-memory-editor]").hidden, false);
+    assert.equal(root.querySelector("[data-memory-editor-title]").textContent, "new");
+    root.querySelector("[data-memory-query]").value = "missing";
+    await click("search");
+    assert.equal(root.querySelector("[data-memory-empty-title]").textContent, "aiMemoryNoResults");
+    assert.equal(root.querySelector("[data-memory-empty-tip]").textContent, "");
+});
+
+test("blank model input explains the required source instead of starting a failing paid task", async () => {
+    const calls: string[] = [];
+    const {root, click} = harness(async url => {
+        calls.push(url);
+        return {code: 0, data: {records: [], tasks: []}};
+    });
+    await click("maintain");
+    assert.deepEqual(calls, ["/api/ai/memory/list"]);
+    assert.equal(root.querySelector("[data-memory-task-status]").textContent, "aiMemoryTaskInputTip");
+});
+
+test("model organization submits the entered text and exposes the completed task", async () => {
+    const calls: Array<{url: string; data: Record<string, unknown>}> = [];
+    const {root, click} = harness(async (url, data) => {
+        calls.push({url, data});
+        if (url.endsWith("/list")) { return {code: 0, data: {records: [], tasks: []}}; }
+        if (url.endsWith("/maintain")) { return {code: 0, data: {taskId: "manual-1"}}; }
+        if (url.endsWith("/task")) { return {code: 0, data: {taskId: "manual-1", state: "completed", results: []}}; }
+        throw new Error(url);
+    });
+    root.querySelector("[data-memory-task-input]").value = "I prefer short answers";
+    await click("maintain");
+    assert.equal(calls.find(call => call.url.endsWith("/maintain")).data.text, "I prefer short answers");
+    assert.equal(root.querySelector("[data-memory-model]").open, true);
+    assert.equal(root.querySelector("[data-memory-task-history]").hidden, false);
+    assert.equal(root.querySelector("[data-memory-task-status]").textContent, "taskStatusDone");
+    assert.equal(root.querySelector('[data-memory-action="maintain"]').disabled, false);
+    assert.equal(root.querySelector('[data-memory-action="cancel"]').disabled, true);
 });

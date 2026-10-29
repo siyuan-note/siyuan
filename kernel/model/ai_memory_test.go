@@ -100,12 +100,12 @@ func TestAIMemoryRepeatedConfirmationDoesNotDuplicateEvidence(t *testing.T) {
 
 func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	oldReader := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = oldReader })
 	content := "User prefers concise answers"
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return content, nil }
-	source, err := memorySource(context.Background(), "conversation:session:entry", nil)
+	source, err := memorySource(context.Background(), "conversation:session:entry")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 		t.Fatal(err)
 	}
 	content = "User prefers detailed answers"
-	source, err = memorySource(context.Background(), source.ID, nil)
+	source, err = memorySource(context.Background(), source.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,12 +144,12 @@ func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 
 func TestAIMemoryCandidateSourceChangesDuringModelCall(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	oldReader := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = oldReader })
 	content := "User prefers concise answers"
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return content, nil }
-	source, err := memorySource(context.Background(), "conversation:session:entry", nil)
+	source, err := memorySource(context.Background(), "conversation:session:entry")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,12 +178,12 @@ func TestAIMemoryCandidateSourceChangesDuringModelCall(t *testing.T) {
 
 func TestAIMemoryOverviewRejectsSourceChangedDuringGeneration(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	oldReader := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = oldReader })
 	content := "Original source"
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return content, nil }
-	source, err := memorySource(context.Background(), "conversation:session:entry", nil)
+	source, err := memorySource(context.Background(), "conversation:session:entry")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +262,7 @@ func TestAIMemoryActivationDoesNotHideRevokedSources(t *testing.T) {
 
 func TestAIMemoryCommitGuardRechecksCandidateSource(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	oldReader := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = oldReader })
 	const original = "User prefers concise answers"
@@ -274,7 +274,7 @@ func TestAIMemoryCommitGuardRechecksCandidateSource(t *testing.T) {
 		}
 		return original, nil
 	}
-	source, err := memorySource(context.Background(), "conversation:session:entry", nil)
+	source, err := memorySource(context.Background(), "conversation:session:entry")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -361,6 +361,26 @@ func TestAIMemoryReadOnlyWrites(t *testing.T) {
 	}
 }
 
+func TestAIMemoryDisabledStopsAutomaticWork(t *testing.T) {
+	cfg := setupAIMemoryTest(t)
+	cfg.Memory.Enabled = false
+	Conf.AI.Store(cfg)
+	called := false
+	memoryComplete = func(context.Context, *conf.AI, string) (string, error) {
+		called = true
+		return "", errors.New("unexpected model call")
+	}
+	if _, err := StartAIMemory(context.Background(), apicontract.AIMemoryMaintainRequest{OperationID: "disabled-auto"}, true); err == nil {
+		t.Fatal("disabled memory accepted automatic work")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	task := &memoryTask{cancel: cancel}
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{OperationID: "disabled-queued"}, nil, true, task)
+	if called || task.status.State == "completed" {
+		t.Fatalf("disabled queued task invoked model or completed: %+v", task.status)
+	}
+}
+
 func TestAIMemoryConfigChangeDuringModelCall(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	memoryComplete = func(ctx context.Context, selected *conf.AI, prompt string) (string, error) {
@@ -441,38 +461,40 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 func TestAIMemoryMixedSourceCannotBypassAccess(t *testing.T) {
 	setupAIMemoryTest(t)
 	r := memo.Record{Sources: []memo.Source{{Kind: "user", ID: "one", Revision: "one"}, {Kind: "unknown", ID: "two", Revision: "two"}}}
-	if validateMemorySources(context.Background(), r, nil) {
+	if validateMemorySources(context.Background(), r) {
 		t.Fatal("user evidence bypassed restricted source")
 	}
 }
 
 func TestAIMemoryConversationPermissionAndRevision(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
+	cfg.Memory.Enabled = false
+	Conf.AI.Store(cfg)
 	old := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = old })
 	content := "User prefers concise replies"
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return content, nil }
 	id := "conversation:session:entry"
-	if _, err := memorySource(context.Background(), id, nil); err == nil {
-		t.Fatal("conversation capture was opt-out")
+	if _, err := memorySource(context.Background(), id); err == nil {
+		t.Fatal("disabled memory captured conversation")
 	}
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	Conf.AI.Store(cfg)
-	source, err := memorySource(context.Background(), id, nil)
+	source, err := memorySource(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
 	r := memo.Record{Sources: []memo.Source{source}}
-	if !validateMemorySources(context.Background(), r, nil) {
+	if !validateMemorySources(context.Background(), r) {
 		t.Fatal("allowed conversation invalid")
 	}
 	content = "Changed user preference"
-	if validateMemorySources(context.Background(), r, nil) {
+	if validateMemorySources(context.Background(), r) {
 		t.Fatal("edited utterance revision was ignored")
 	}
-	cfg.Memory.Conversations = false
+	cfg.Memory.Enabled = false
 	Conf.AI.Store(cfg)
-	if validateMemorySources(context.Background(), r, nil) {
+	if validateMemorySources(context.Background(), r) {
 		t.Fatal("revoked conversation remained accessible")
 	}
 }
@@ -482,9 +504,9 @@ func TestAIMemoryModelReadRevocation(t *testing.T) {
 	old := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = old })
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return "PRIVATE_SOURCE", nil }
-	cfg.Memory.Conversations = true
+	cfg.Memory.Enabled = true
 	Conf.AI.Store(cfg)
-	source, err := memorySource(context.Background(), "conversation:session:entry", nil)
+	source, err := memorySource(context.Background(), "conversation:session:entry")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -495,7 +517,7 @@ func TestAIMemoryModelReadRevocation(t *testing.T) {
 	if _, err = GetAIMemoryForModel(context.Background(), entry.Record.ID); err != nil {
 		t.Fatal(err)
 	}
-	cfg.Memory.Conversations = false
+	cfg.Memory.Enabled = false
 	Conf.AI.Store(cfg)
 	if _, err = GetAIMemoryForModel(context.Background(), entry.Record.ID); err == nil {
 		t.Fatal("model read bypassed revoked source")

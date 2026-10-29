@@ -27,8 +27,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 	setupFoldTransactionDatabase(t, fixture)
 	oldComplete := memoryComplete
 	cfg := conf.NewAI()
-	cfg.Memory.Enabled = true
-	cfg.Memory.Sources = []string{fixture.box.ID}
+	cfg.Memory.Enabled = false
 	cfg.Memory.ModelID = "memory-model"
 	cfg.Providers = []*conf.Provider{{Enabled: true, Models: []*conf.Model{{ID: "memory-model", Name: "test", Enabled: true}}}}
 	Conf.AI.Store(cfg)
@@ -42,7 +41,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 		memorySourceQueue.Unlock()
 	})
 	ctx := context.Background()
-	source, err := memorySource(ctx, fixture.childID, cfg.Memory.Sources)
+	source, err := memorySource(ctx, fixture.childID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,12 +64,12 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 			break
 		}
 		if time.Now().After(deadline) {
-			now, sourceErr := memorySource(ctx, fixture.childID, cfg.Memory.Sources)
+			now, sourceErr := memorySource(ctx, fixture.childID)
 			t.Fatalf("committed transaction did not invalidate memory: roots=%v state=%s sameRevision=%v sourceErr=%v revalidateErr=%v", tx.GetMutatedRootIDs(), current.Record.State, now.Revision == source.Revision, sourceErr, RevalidateAIMemorySources(ctx, []string{fixture.sourceID}))
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	rootSource, err := memorySource(ctx, fixture.sourceID, cfg.Memory.Sources)
+	rootSource, err := memorySource(ctx, fixture.sourceID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +92,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 		t.Fatalf("transaction reconciliation failed: %+v", task.status)
 	}
 	updated, err := aiMemoryStore().Get(ctx, entry.Record.ID)
-	if err != nil || updated.Record.State != "candidate" || updated.Record.Content != "Project status: completed" || !validateMemorySources(ctx, updated.Record, cfg.Memory.Sources) {
+	if err != nil || updated.Record.State != "candidate" || updated.Record.Content != "Project status: completed" || !validateMemorySources(ctx, updated.Record) {
 		t.Fatalf("invalid updated record: %+v %v", updated, err)
 	}
 }
@@ -105,8 +104,7 @@ func TestAIMemoryLongDocumentTransactionRefreshesExistingChild(t *testing.T) {
 	oldComplete := memoryComplete
 	t.Cleanup(func() { memoryComplete = oldComplete })
 	cfg := conf.NewAI()
-	cfg.Memory.Enabled, cfg.Memory.AutoMaintain = true, true
-	cfg.Memory.Sources = []string{fixture.box.ID}
+	cfg.Memory.Enabled = true
 	cfg.Memory.ModelID = "memory-model"
 	cfg.Providers = []*conf.Provider{{Enabled: true, Models: []*conf.Model{{ID: "memory-model", Name: "test", Enabled: true}}}}
 	Conf.AI.Store(cfg)
@@ -122,10 +120,10 @@ func TestAIMemoryLongDocumentTransactionRefreshesExistingChild(t *testing.T) {
 	}
 	treenode.UpsertBlockTree(tree)
 	ctx := context.Background()
-	if _, err = memorySource(ctx, fixture.sourceID, cfg.Memory.Sources); err == nil {
+	if _, err = memorySource(ctx, fixture.sourceID); err == nil {
 		t.Fatal("test requires oversized document source")
 	}
-	source, err := memorySource(ctx, fixture.childID, cfg.Memory.Sources)
+	source, err := memorySource(ctx, fixture.childID)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,34 +9,22 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// Memory 将使用、自动维护和模型选择分开；来源仅表示用户授权，不替代运行时权限检查。
+// Memory 总开关控制使用和自动维护；笔记默认覆盖非加密笔记本，仍检查运行时访问权限。
 type Memory struct {
-	Enabled         bool     `json:"enabled"`
-	AutoMaintain    bool     `json:"autoMaintain"`
-	Conversations   bool     `json:"conversations"`
-	ModelID         string   `json:"modelId"`
-	ReasoningEffort string   `json:"reasoningEffort"`
-	Sources         []string `json:"sources"`
+	Enabled         bool   `json:"enabled"`
+	ModelID         string `json:"modelId"`
+	ReasoningEffort string `json:"reasoningEffort"`
 }
 
-func defaultMemory() *Memory { return &Memory{Sources: []string{}} }
+func defaultMemory() *Memory { return &Memory{} }
 
 // Normalize 不清除失效的模型引用或推理选项，以便界面展示并要求用户修正。
 func (memory *Memory) Normalize() {
 	memory.ModelID = strings.TrimSpace(memory.ModelID)
 	memory.ReasoningEffort = strings.ToLower(strings.TrimSpace(memory.ReasoningEffort))
-	sources := []string{}
-	for _, source := range memory.Sources {
-		source = strings.TrimSpace(source)
-		if source != "" && !slices.Contains(sources, source) {
-			sources = append(sources, source)
-		}
-	}
-	memory.Sources = sources
 }
 
 // GetMemoryModel 只接受用户选择的稳定模型 ID，不接受旧名称或首个可用模型回退。
@@ -119,11 +107,6 @@ func (ai *AI) ValidateMemoryModel() error {
 	}
 	if ai.Memory.ReasoningEffort != "" && !slices.Contains(MemoryReasoningEfforts(provider, model), ai.Memory.ReasoningEffort) {
 		return errors.New("unsupported memory reasoning effort")
-	}
-	for _, source := range ai.Memory.Sources {
-		if !ast.IsNodeIDPattern(source) {
-			return errors.New("invalid memory source notebook ID")
-		}
 	}
 	return nil
 }

@@ -139,16 +139,12 @@ declare namespace Config {
         decision: IDecision;
     }
 
-    /** 工作空间长期记忆；模型选择独立且不自动回退，配置不随记忆 Markdown 同步。 */
+    /** 工作空间长期记忆；笔记来源覆盖全部非加密笔记本，模型选择独立且不自动回退，配置不随记忆 Markdown 同步。 */
     export interface IMemory {
-        /** 允许整理成功会话的用户原话，默认关闭；不采集助手输出。 */
-        conversations: boolean;
+        /** 默认关闭；统一控制记忆使用、自动整理和后续已提交用户消息采集，不扫描历史或采集助手输出。 */
         enabled: boolean;
-        autoMaintain: boolean;
         modelId: string;
         reasoningEffort: string;
-        /** 用户明确允许自动整理的普通笔记本 ID；默认空，不自动扫描全库。 */
-        sources: string[];
     }
 
     /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */

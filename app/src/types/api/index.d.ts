@@ -2276,9 +2276,9 @@ export type SettingMarkdown = { "blockFullWidthTaskList": boolean | null; "codeB
 
 export type SettingMarkdownInput = { "blockFullWidthTaskList"?: boolean | null; "codeBlockMiddleDot"?: boolean | null; "inlineAsterisk"?: boolean | null; "inlineFullWidthStrikethrough"?: boolean | null; "inlineMark"?: boolean | null; "inlineMath"?: boolean | null; "inlineStrikethrough"?: boolean | null; "inlineSub"?: boolean | null; "inlineSup"?: boolean | null; "inlineTag"?: boolean | null; "inlineUnderscore"?: boolean | null; };
 
-export type SettingMemory = { "autoMaintain": boolean; "conversations": boolean; "enabled": boolean; "modelId": string; "reasoningEffort": string; "sources": Array<string> | null; };
+export type SettingMemory = { "enabled": boolean; "modelId": string; "reasoningEffort": string; };
 
-export type SettingMemoryInput = { "autoMaintain"?: boolean | null; "conversations"?: boolean | null; "enabled"?: boolean | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "sources"?: Array<string> | null; };
+export type SettingMemoryInput = { "enabled"?: boolean | null; "modelId"?: string | null; "reasoningEffort"?: string | null; };
 
 export type SettingMobileBars = { "autoHide": boolean | null; "sidebarButtons": boolean | null; "sidebarSwipe": boolean | null; };
 

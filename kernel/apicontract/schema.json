@@ -51159,12 +51159,6 @@
     "SettingMemory": {
       "type": "object",
       "properties": {
-        "autoMaintain": {
-          "type": "boolean"
-        },
-        "conversations": {
-          "type": "boolean"
-        },
         "enabled": {
           "type": "boolean"
         },
@@ -51173,54 +51167,18 @@
         },
         "reasoningEffort": {
           "type": "string"
-        },
-        "sources": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
-        "autoMaintain",
-        "conversations",
         "enabled",
         "modelId",
-        "reasoningEffort",
-        "sources"
+        "reasoningEffort"
       ],
       "additionalProperties": false
     },
     "SettingMemoryInput": {
       "type": "object",
       "properties": {
-        "autoMaintain": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "conversations": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "enabled": {
           "anyOf": [
             {
@@ -51245,19 +51203,6 @@
           "anyOf": [
             {
               "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "sources": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             },
             {
               "type": "null"

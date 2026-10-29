@@ -7,54 +7,53 @@ import {ModuleKind, transpileModule} from "typescript";
 class ControlStub {
     value = "";
     disabled = false;
-    checked = false;
     innerHTML = "";
     textContent = "";
-    children: ControlStub[] = [];
     listeners = new Map<string, () => void>();
     addEventListener(name: string, callback: () => void) { this.listeners.set(name, callback); }
-    append(...children: ControlStub[]) { this.children.push(...children); }
-    replaceChildren() { this.children = []; }
 }
 
-test("memory settings expose independent use, maintenance and conversation permission without changing defaults", () => {
+test("memory settings expose one enable switch without changing defaults", () => {
     const switches: string[] = [];
-    const memory = {enabled: false, autoMaintain: false, conversations: false, modelId: "", reasoningEffort: "", sources: new Array<string>()};
+    const memory = {enabled: false, modelId: "", reasoningEffort: ""};
     const code = transpileModule(readFileSync("src/config/tabs/ai/aiMemory.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
     const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
     let writes = 0;
+    let html = "";
     runInNewContext(code, {
         exports: exported,
         window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {ai: {memory}}}},
         require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} : {},
     });
     exported.registerAiMemoryGroup({group: () => ({
-        switch: (id: string) => switches.push(id), slot: () => {}, button: () => {},
+        switch: (id: string) => switches.push(id),
+        slot: (spec: {html: () => string}) => { html = spec.html(); }, button: () => {},
     })});
-    assert.deepEqual(switches, ["ai.memory.enabled", "ai.memory.autoMaintain", "ai.memory.conversations"]);
+    assert.deepEqual(switches, ["ai.memory.enabled"]);
     assert.equal(writes, 0);
+    assert.ok(!html.includes("data-memory-sources"));
+    assert.ok(html.includes("data-memory-model"));
+    assert.ok(html.includes("data-memory-effort"));
     assert.equal(memory.modelId, "");
-    assert.equal(memory.autoMaintain, false);
-    assert.equal(memory.conversations, false);
+    assert.equal(memory.enabled, false);
 });
 
-test("model selection cannot restore queued opt-outs and source selection serializes acknowledged state", async () => {
-    const memory = {enabled: true, autoMaintain: true, conversations: true, modelId: "old", reasoningEffort: "", sources: new Array<string>()};
+test("model selection preserves queued opt-outs without fetching or selecting notebooks", async () => {
+    const memory = {enabled: true, modelId: "old", reasoningEffort: ""};
     const model = new ControlStub();
     const effort = new ControlStub();
-    const sources = new ControlStub();
-    const root = {isConnected: true, querySelector: (selector: string) => selector.includes("model") ? model : selector.includes("effort") ? effort : sources};
+    const requests: string[] = [];
+    const root = {isConnected: true, querySelector: (selector: string) => selector.includes("model") ? model : selector.includes("effort") ? effort : null};
     let mount: (root: unknown) => void;
-    const patches: Array<{path: string; value: Record<string, unknown> | string[]; finish: () => void}> = [];
-    const patch = (path: string, value: Record<string, unknown> | string[], applied?: () => void) => {
+    const patches: Array<{path: string; value: Record<string, unknown>; finish: () => void}> = [];
+    const patch = (path: string, value: Record<string, unknown>, applied?: () => void) => {
         let resolve: () => void;
         const pending = new Promise<void>(done => { resolve = done; });
         patches.push({path, value, finish: resolve});
         return pending.then(() => {
             if (path === "memory") { Object.assign(memory, value); }
-            if (path === "memory.sources") { memory.sources = value as string[]; }
             applied?.();
         });
     };
@@ -71,10 +70,11 @@ test("model selection cannot restore queued opt-outs and source selection serial
             if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr: String}; }
             if (name.endsWith("/state")) { return {memoryModelOptions: () => new Array<{id: string; label: string}>()}; }
             if (name.endsWith("/reasoningEffort")) { return {getReasoningEffortOptions: () => [{value: "", label: "default"}]}; }
-            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string) => url.endsWith("capabilities") ?
-                {code: 0, data: {efforts: new Array<string>()}} : {code: 0, data: {notebooks: [
-                    {id: "A", name: "A", encrypted: false, closed: false}, {id: "B", name: "B", encrypted: false, closed: false},
-                ]}}}; }
+            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string) => {
+                requests.push(url);
+                assert.equal(url, "/api/ai/memory/capabilities");
+                return {code: 0, data: {efforts: new Array<string>()}};
+            }}; }
             if (name.endsWith("/message")) { return {showMessage: (error: string) => { throw new Error(error); }}; }
             return {};
         },
@@ -90,27 +90,11 @@ test("model selection cannot restore queued opt-outs and source selection serial
     effort.listeners.get("change")();
     assert.equal(patches.length, 1, "old model effort cannot be queued during model change");
     assert.deepEqual(Object.keys(patches[0].value).sort(), ["modelId", "reasoningEffort"]);
-    memory.autoMaintain = false;
-    memory.conversations = false;
+    memory.enabled = false;
     patches[0].finish();
     await flush();
-    assert.equal(memory.autoMaintain, false);
-    assert.equal(memory.conversations, false);
-    const a = sources.children[0].children[1];
-    const b = sources.children[1].children[1];
-    a.checked = true;
-    a.listeners.get("change")();
-    assert.equal(b.disabled, true);
-    b.checked = true;
-    b.listeners.get("change")();
-    assert.equal(patches.length, 2);
-    patches[1].finish();
-    await flush();
-    assert.equal(b.checked, false);
-    assert.equal(b.disabled, false);
-    b.checked = true;
-    b.listeners.get("change")();
-    assert.equal(JSON.stringify(patches[2].value), JSON.stringify(["A", "B"]));
-    patches[2].finish();
-    await flush();
+    assert.equal(memory.enabled, false);
+    assert.ok(requests.length > 0);
+    assert.ok(requests.every(url => url === "/api/ai/memory/capabilities"));
+    assert.equal(patches.length, 1);
 });

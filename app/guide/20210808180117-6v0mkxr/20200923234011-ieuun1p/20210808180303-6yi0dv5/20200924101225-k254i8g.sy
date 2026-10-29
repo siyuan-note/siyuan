@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261025133233"
+		"updated": "20261030070610"
 	},
 	"Children": [
 		{
@@ -1474,7 +1474,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261024164212"
+				"updated": "20261030070610"
 			},
 			"Children": [
 				{
@@ -3312,7 +3312,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-clx67q4",
-				"updated": "20261025133233"
+				"updated": "20261030070610"
 			},
 			"Children": [
 				{
@@ -3472,48 +3472,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "A displayed path is for reading. Use document links or block references to navigate to the intended document. Plugins that locate documents by splitting title paths need to support structured addressing."
-				}
-			]
-		},
-		{
-			"ID": "20261023112115-9dsprn2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261023112115-9dsprn2",
-				"updated": "20261024161816"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Before opening the workspace with the new version, quit older SiYuan versions on every device, upgrade every device that accesses this workspace or syncs its data to a version that supports the new title format, and check plugin compatibility. Do not open the workspace or resume syncing until all devices have been upgraded."
-				}
-			]
-		},
-		{
-			"ID": "20261024161816-y5ag66f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261024161816-y5ag66f",
-				"updated": "20261025133233"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Devices that are temporarily offline must also be upgraded before accessing or syncing this data. Migration runs automatically and resumes after interruption. After upgrading, do not use older versions to open, edit, restore, or sync the same data. An older version may reject documents using the new title format (Spec 6 / Spec 7) but still read and write documents that retain an earlier format."
-				}
-			]
-		},
-		{
-			"ID": "20261024161816-s0b7spt",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261024161816-s0b7spt",
-				"updated": "20261024161816"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "It may also write back a stale editor copy from an open page, overwriting newer titles or content and syncing the overwritten data to other devices. Some documents being blocked does not mean the data is protected."
 				}
 			]
 		},

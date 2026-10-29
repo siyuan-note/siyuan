@@ -51,6 +51,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+export GO111MODULE=on
+export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct
+# Toolchain selection can download and authenticate a toolchain even for
+# `go version`. Configure its proxy before the first Go invocation, and fail
+# before spending time building frontend resources. Keep checksum validation.
+echo 'Checking Go toolchain'
+(cd "$PROJECT_ROOT/kernel"; go version)
+
 echo 'Checking OCR worker toolchains (glibc)'
 # Each compiler runs in its own process group so failures and interrupts also
 # stop its compiler/linker children before packaging can start.
@@ -118,9 +126,6 @@ pnpm run build
 echo
 echo 'Building Kernel'
 cd "$PROJECT_ROOT/kernel"
-go version
-export GO111MODULE=on
-export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct
 export CGO_ENABLED=1
 export GOOS=linux
 

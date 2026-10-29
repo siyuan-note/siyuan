@@ -24,7 +24,12 @@ class LinuxReleaseTests(unittest.TestCase):
             path.write_text('#!/bin/bash\nset -e\n' + text)
             path.chmod(0o755)
         executable(root / 'bin/go', '''
-[[ "$1" == version ]] && exit 0
+if [[ "$1" == version ]]; then
+ [[ "$GOPROXY" == https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct ]] || exit 7
+ [[ "$GOSUMDB" != off ]] || exit 8
+ echo toolchain-ready >> "$EVENTS"
+ exit 0
+fi
 echo "$GOARCH-start" >> "$EVENTS"
 sleep 0.3
 if [[ "$FAIL_ARCH" == "$GOARCH" ]]; then exit 9; fi
@@ -53,6 +58,7 @@ echo harmony-end >> "$EVENTS"
     def test_kernels_overlap_and_harmony_overlaps_packaging(self):
         result, events = self.run_build()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(events[0], 'toolchain-ready')
         self.assertLess(max(events.index('amd64-start'), events.index('arm64-start')),
                         min(events.index('amd64-end'), events.index('arm64-end')))
         self.assertLess(events.index('harmony-start'), events.index('package-end'))

@@ -48,8 +48,9 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
         documentSelf.ondragstart = () => false;
 
         let hasMove = false;
+        const resizeEvents = new AbortController();
         const topBarHeight = getTopBarHeight();
-        documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+        const move = (moveEvent: MouseEvent) => {
             hasMove = true;
             if (!element) {
                 return;
@@ -120,7 +121,20 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             }
         };
 
-        documentSelf.onmouseup = () => {
+        // 捕获阶段接收底层编辑器隔离的事件，触摸桥接仍可直接调用文档入口。
+        documentSelf.addEventListener("mousemove", move, {capture: true, signal: resizeEvents.signal});
+        documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            if (moveEvent.eventPhase === Event.NONE) {
+                move(moveEvent);
+            }
+        };
+        let finished = false;
+        const finish = () => {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            resizeEvents.abort();
             if (!element) {
                 return;
             }
@@ -153,5 +167,8 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                 afterCB(type);
             }
         };
+        documentSelf.onmouseup = finish;
+        documentSelf.addEventListener("mouseup", finish, {capture: true, signal: resizeEvents.signal});
+        window.addEventListener("blur", finish, {signal: resizeEvents.signal});
     });
 };

@@ -3,6 +3,7 @@ import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../testSupport/loadModule";
 import {isUndoViewportPreserved} from "../undo/viewport";
+import {shouldReloadForEmbedConversion} from "./transactionUpdate";
 
 type ElementSpec = {attrs?: Record<string, string>; children?: ElementSpec[]; tag?: string};
 type InsertAnchor = "previousID" | "nextID" | "parentID";
@@ -174,6 +175,7 @@ const fixture = (containerType: ContainerType = "editor") => {
         invalidateTrackedRangesByOperations: noop, invalidateViewFoldRequests: noop,
         handleViewFoldSourceOperation: () => false, syncTrackedRanges: noop, applyViewFoldStates: noop,
         queueHeadingNumberRefresh: noop, refreshHeadingFoldIndicators: noop, shouldReloadForHeadingBatch: () => false,
+        shouldReloadForEmbedConversion,
         isInEmbedBlock: () => false, refreshSbResize: noop,
         processRender: (element: TestElement) => record("process", element),
         highlightRender: (element: TestElement) => record("highlight", element),

@@ -59,6 +59,7 @@ import {
     getPartialUpdateCleanupElements,
     shouldDeferCodeBlockCaretRestore,
     shouldReloadForHeadingBatch,
+    shouldReloadForEmbedConversion,
 } from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {getVisibleMoveElements} from "./transactionMove";
@@ -892,6 +893,11 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
 export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUndo: boolean,
                               preserveTrackedRanges = isUndo) => {
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
+        return;
+    }
+    if (shouldReloadForEmbedConversion(protyle.block.rootID, operations)) {
+        // 隐藏子块可能已在内核删除，直接重载可避免回放时定位失效 ID，并恢复折叠边界外的内容。
+        reloadProtyle(protyle, false);
         return;
     }
     if (!preserveTrackedRanges) {

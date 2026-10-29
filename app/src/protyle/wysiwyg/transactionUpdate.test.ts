@@ -4,7 +4,20 @@ import {
     getPartialUpdateCleanupElements,
     shouldDeferCodeBlockCaretRestore,
     shouldReloadForHeadingBatch,
+    shouldReloadForEmbedConversion,
 } from "./transactionUpdate";
+
+describe("shouldReloadForEmbedConversion", () => {
+    it("reloads folded conversion snapshots for their document in both replay directions", () => {
+        assert.equal(shouldReloadForEmbedConversion("root", [{}, {context: {headingBatchRootID: "root", ignoreProcess: "true"}}]), true);
+    });
+    it("preserves ordinary replay and other documents", () => {
+        assert.equal(shouldReloadForEmbedConversion("root", [{}]), false);
+        assert.equal(shouldReloadForEmbedConversion("root", [{context: {headingBatchRootID: "root"}}]), false);
+        assert.equal(shouldReloadForEmbedConversion("other", [{context: {headingBatchRootID: "root"}}]), false);
+        assert.equal(shouldReloadForEmbedConversion(undefined, [{context: {}}]), false);
+    });
+});
 
 describe("getPartialUpdateCleanupElements", () => {
     const breadcrumb = {id: "breadcrumb"};

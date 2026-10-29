@@ -87,6 +87,22 @@ const browserCases = (sources: string[], lutePath: string) => {
     check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 2);
     check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "**literal** [link](url) $x$");
     check.equal(template.content.querySelector('[data-type~="strong"]').getAttribute("style"), "color: red");
+    const liveTitle = document.createElement("div");
+    liveTitle.innerHTML = paragraph('<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'data-render="true" class="render-node"><span class="katex">Rendered equation</span></span>');
+    const stableLute = wrap(lute, () => liveTitle);
+    const formula = '<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'contenteditable="false" class="render-node"></span>';
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula + "123"));
+    check.equal(template.content.querySelector(".katex").textContent, "Rendered equation");
+    check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-render"), "true");
+    check.equal(template.content.querySelector("[contenteditable]").classList.contains("protyle-title__input"), true);
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("x^2", "x^3")));
+    check.equal(template.content.querySelector(".katex"), null, "changed formula must render its new source");
+    liveTitle.replaceChildren();
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("</span>",
+        '<span class="katex">Untrusted cache</span></span>')));
+    check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
     return "Document title DOM cases passed";
 };
 

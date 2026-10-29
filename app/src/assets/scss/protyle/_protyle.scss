@@ -982,6 +982,9 @@
 }
 
 .protyle-title__rich {
+  // 标题按内容撑高，不继承完整编辑器为滚动条预留的最小高度。
+  min-height: 0;
+
   .protyle-content {
     overflow: visible;
 

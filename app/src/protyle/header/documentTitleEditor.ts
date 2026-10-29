@@ -77,7 +77,7 @@ export class DocumentTitleEditor {
         const lute = getDocumentTitleLute(getAgentLute({
             emojiSite: "/emojis", emojis: {}, headingAnchor: false, listStyle: false,
             paragraphBeginningSpace: true, sanitize: true,
-        }));
+        }), () => this.fragment?.wysiwyg);
         this.fragment = mountProtyleLiteFragment(host, {
             app: owner.app,
             initialBlockHTML: prepareDocumentTitleInitialDOM(initial.blockDOM, this.blockID),

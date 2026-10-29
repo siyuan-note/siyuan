@@ -86,11 +86,31 @@ export const getDocumentTitleDOMFingerprint = (blockDOM: string) => {
 };
 
 // 原生行级解析器固定保留唯一的段落载体，块级 Markdown 和软换行不会改变标题结构。
-export const getDocumentTitleLute = (lute: Lute): Lute => new Proxy(lute, {
+export const getDocumentTitleLute = (lute: Lute, getRenderedTitle?: () => HTMLElement): Lute => new Proxy(lute, {
     get(target, property) {
         if (property !== "SpinBlockDOM") {
             return Reflect.get(target, property);
         }
-        return (blockDOM: string) => target.SpinInlineBlockDOM(blockDOM);
+        return (blockDOM: string) => {
+            const template = document.createElement("template");
+            template.innerHTML = target.SpinInlineBlockDOM(blockDOM);
+            template.content.querySelector(`${paragraphSelector} > [contenteditable]`)
+                ?.classList.add("protyle-title__input");
+            // 只复用当前编辑器中已渲染且公式源未变的缓存，不信任粘贴内容中的渲染标记。
+            const rendered = new Map<string, HTMLElement>();
+            getRenderedTitle?.()?.querySelectorAll<HTMLElement>(
+                '[data-type="inline-math"][data-subtype="math"][data-render="true"]',
+            ).forEach(element => rendered.set(element.dataset.content, element));
+            template.content.querySelectorAll<HTMLElement>('[data-type="inline-math"][data-subtype="math"]')
+                .forEach(element => {
+                    const previous = rendered.get(element.dataset.content);
+                    if (previous) {
+                        element.replaceChildren(...Array.from(previous.childNodes, node => node.cloneNode(true)));
+                        element.dataset.render = "true";
+                        element.classList.toggle("ft__error", previous.classList.contains("ft__error"));
+                    }
+                });
+            return template.innerHTML;
+        };
     },
 });

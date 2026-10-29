@@ -45,9 +45,15 @@ const createExitDialog = (sources, languages, mobile) => {
         "../util/fetchTimeout": {withFetchTimeout: request => request()},
         "../util/escape": {escapeHtml},
     });
+    const schedule = window.setTimeout;
+    window.setTimeout = (callback, delay, ...args) => {
+        if (delay === 12000) window.offerExitSync = callback;
+        return schedule(callback, delay, ...args);
+    };
     window.exitResult = requestSystemExit({force: false, setCurrentWorkspace: true}, response => {
         window.exitResponse = response;
     });
+    window.setTimeout = schedule;
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -171,6 +177,8 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(merged.duplicates, 0);
                 assert.ok(merged.error.includes("Unrelated warning"));
                 await capture("exit");
+                await win.webContents.executeJavaScript("window.offerExitSync();");
+                await capture("exit-action");
                 await win.webContents.executeJavaScript("window.failExit(new Error('offline')); window.exitResult;");
                 const failed = await win.webContents.executeJavaScript(`(() => {
                     const buttons = [...document.querySelectorAll("button")];

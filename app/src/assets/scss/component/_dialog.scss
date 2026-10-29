@@ -199,6 +199,16 @@
     font-variant-numeric: tabular-nums;
   }
 
+  &__loading-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+
+    .b3-button {
+      max-width: 100%;
+    }
+  }
+
   &__progress {
     margin: 12px 0;
     height: 4px;

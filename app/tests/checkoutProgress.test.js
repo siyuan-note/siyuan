@@ -69,6 +69,14 @@ const run = async () => {
                 assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
                 assert.equal(document.querySelector("#other-progress button"),skipButton,"progress update replaced the exit action");
                 const skipBounds = skipButton.getBoundingClientRect();
+                const footer = skipButton.parentElement;
+                const statusBounds = document.querySelector('#other-progress [role="status"]').getBoundingClientRect();
+                const progressPanel = document.querySelector('#other-progress .b3-dialog__loading');
+                const panelBounds = progressPanel.getBoundingClientRect();
+                assert.equal(getComputedStyle(footer).borderTopWidth,"0px","progress actions have no dialog divider");
+                assert.ok(skipBounds.top - statusBounds.bottom >= 16,"exit action crowds the status message");
+                assert.ok(Math.abs(skipBounds.right - (panelBounds.right - parseFloat(getComputedStyle(progressPanel).paddingRight) -
+                    parseFloat(getComputedStyle(progressPanel).borderRightWidth))) <= 1,"exit action has an extra right inset");
                 assert.ok(skipBounds.left >= 0 && skipBounds.right <= innerWidth && skipBounds.bottom <= innerHeight,
                     "exit action overflowed the progress panel");
                 assert.equal(document.querySelector("#other-progress img"),null);

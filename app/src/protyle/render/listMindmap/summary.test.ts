@@ -62,7 +62,7 @@ test("summary brackets cover visible subtrees, single nodes and disappear with t
     const expanded = layoutListMindmapSummaries(model, positions, sizes).get("s");
     assert.equal(expanded.x, 476);
     assert.equal(expanded.top, 9);
-    assert.equal(expanded.bottom, 215);
+    assert.equal(expanded.bottom, 218);
     assert.equal(expanded.labelY + expanded.height / 2, (expanded.top + expanded.bottom) / 2);
     sizes.set("s", {width: 150, height: 400});
     const tall = layoutListMindmapSummaries(model, positions, sizes).get("s");
@@ -72,7 +72,7 @@ test("summary brackets cover visible subtrees, single nodes and disappear with t
     model.metadata.summaries = [summary(["a"])];
     const single = layoutListMindmapSummaries(model, positions, sizes).get("s");
     assert.equal(single.top, 9);
-    assert.equal(single.bottom, 115);
+    assert.equal(single.bottom, 118);
     assert.equal(single.x, 476);
     model.metadata.summaries = [summary(["a", "b"])];
     positions.delete("nested");

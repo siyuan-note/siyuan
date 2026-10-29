@@ -5267,6 +5267,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     // 概要的触屏点选、编辑、复制及列表往返使用真实 DOM 和 Lute。
     const summaryList = reset("- Root\n  - First\n    - Descendant\n  - Second\n  - Third\n");
     const summaryModel = api.readListMindmap(summaryList);
+    summaryModel.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b"};
+    api.writeListMindmapMetadata(summaryList, summaryModel.metadata);
     const summaryIds = summaryModel.root.children.map((node: ListMindmapNode) => node.id);
     const summaryHost = document.createElement("div");
     summaryHost.style.width = "700px";
@@ -5315,10 +5317,19 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const editor = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
         check.ok(editor, "single-node creation opens summary text editing");
         check.equal(document.activeElement, editor);
+        check.ok(editor.offsetWidth >= 80 && editor.offsetWidth < 240, "short summaries use a compact input");
+        editor.value = "Long summary text ".repeat(10);
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        await settle();
+        check.ok(editor.offsetWidth <= 240, "long summaries keep the maximum input width");
         editor.value = "Single node summary";
         editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
         await settle();
         check.equal(api.readListMindmap(summaryList).metadata.summaries[0].label, "Single node summary");
+        if (id === summaryModel.root.id) {
+            check.equal(summaryHost.querySelector<HTMLElement>(".mindmap-view__summary").style.backgroundColor,
+                summaryView.nodeElements.get(id).style.backgroundColor, "root summaries inherit the root background");
+        }
         summaryView.focusNode(id);
         check.equal(summaryButton.disabled, true, "an identical single-node summary cannot be created twice");
         summaryButton.click();
@@ -5328,6 +5339,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         api.writeListMindmapMetadata(summaryList, resetSingleSummary.metadata);
         summaryView.update(api.readListMindmap(summaryList));
     }
+    const unthemedSummary = api.readListMindmap(summaryList);
+    delete unthemedSummary.metadata.appearance;
+    api.writeListMindmapMetadata(summaryList, unthemedSummary.metadata);
+    summaryView.update(api.readListMindmap(summaryList));
     const virtualSummaryList = reset("- First\n- Second\n");
     const virtualSummaryModel = api.readListMindmap(virtualSummaryList);
     const virtualSummaryHost = document.createElement("div");

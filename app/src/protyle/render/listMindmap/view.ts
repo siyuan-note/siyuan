@@ -19,7 +19,7 @@ import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold"
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset, clampMindmapPanPosition, MindmapPanRect} from "./pan";
 import {getListMindmapSummarySelection, getListMindmapSummarySnapshot,
-    layoutListMindmapSummaries} from "./summary";
+    layoutListMindmapSummaries, resolveListMindmapSummaryStyle} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
@@ -1745,6 +1745,7 @@ export class ListMindmapView {
             }
         });
         this.world.append(input);
+        input.style.top = `${position.labelY + (position.height - input.offsetHeight) / 2}px`;
         this.draw();
         input.focus();
         input.select();
@@ -1770,7 +1771,10 @@ export class ListMindmapView {
                 this.model.metadata.connectorStyle || "bezier", () => new Path2D());
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
             const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
-            const style = resolveStyle(summary.color, selected, hovered);
+            const inherited = resolveListMindmapSummaryStyle(this.model, summary, this.themeColors);
+            element.style.color = inherited.textColor || "";
+            element.style.backgroundColor = inherited.backgroundColor || "";
+            const style = resolveStyle(inherited.lineColor, selected, hovered);
             context.strokeStyle = style.color;
             context.lineWidth = style.width;
             context.globalAlpha = opacity;

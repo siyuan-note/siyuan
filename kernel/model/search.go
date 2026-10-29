@@ -2425,7 +2425,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 		return
 	}
 
-	quotedKeyword := stringQuery(keyword)
+	quotedKeyword := strings.ReplaceAll(stringQuery(keyword), "'", "''")
 	table := "blocks_fts"
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
@@ -3480,7 +3480,6 @@ func stringQuery(query string) string {
 	}
 
 	query = strings.ReplaceAll(query, "\"", "\"\"")
-	query = strings.ReplaceAll(query, "'", "''")
 
 	if strings.Contains(trimmedQuery, " ") {
 		buf := bytes.Buffer{}

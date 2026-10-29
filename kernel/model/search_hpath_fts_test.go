@@ -148,3 +148,31 @@ func TestSiYuanFTSMatchesWhitespace(t *testing.T) {
 	assertMatches(" ", []string{"你 好", "你  好"})
 	assertMatches("  ", []string{"你  好"})
 }
+
+func TestSiYuanFTSMatchesQuotedKeywords(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { testDB.Close() })
+	if _, err = testDB.Exec(`CREATE VIRTUAL TABLE quoted_fts USING fts5(content, tokenize="siyuan")`); err != nil {
+		t.Fatal(err)
+	}
+	for _, content := range []string{"it's none", "O'Reilly books", `a"b text`} {
+		if _, err = testDB.Exec("INSERT INTO quoted_fts(content) VALUES (?)", content); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, query := range []string{"it's", "it's none", "O'Reilly", `a"b`} {
+		t.Run(query, func(t *testing.T) {
+			ftsQuery, _ := buildKeywordSearchQueries(query)
+			var count int
+			if err = testDB.QueryRow("SELECT COUNT(*) FROM quoted_fts WHERE quoted_fts MATCH ?", ftsQuery).Scan(&count); err != nil {
+				t.Fatal(err)
+			}
+			if count != 1 {
+				t.Fatalf("关键词 %q 应命中一条记录，实际为 %d", query, count)
+			}
+		})
+	}
+}

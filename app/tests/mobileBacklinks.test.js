@@ -67,6 +67,10 @@ const runCases = async (sources) => {
                     wysiwyg: {element: element.firstElementChild, flushPendingInput: async () => {}}};
             }
             destroy() {load("mobile/util/secondaryEditors").unregisterMobileSecondaryEditor(this); this.destroyed = true;}
+            async flushPendingTransactions() {
+                await this.protyle.wysiwyg.flushPendingInput();
+                await load("protyle/util/transactionQueue").waitForPendingTransactions(this.protyle);
+            }
         }},
         "menus/Menu": {MenuItem: class {}},
         "protyle/render/searchMarkRender": {isSupportCSSHL: () => true, searchMarkRender: noop},
@@ -185,6 +189,8 @@ const runCases = async (sources) => {
     editor.protyle.wysiwyg.flushPendingInput = () => new Promise(resolve => {finishInput = resolve;});
     editor.protyle.wysiwyg.element.focus();
     toolbar.focus();
+    await tick();
+    assert.equal(typeof finishInput, "function", "focusout must start flushing the active editor");
     editor.protyle.wysiwyg.flushPendingInput = async () => {};
     let flushed = false;
     const flushing = registry.flushMobileSecondaryEditor(editor).then(() => {flushed = true;});

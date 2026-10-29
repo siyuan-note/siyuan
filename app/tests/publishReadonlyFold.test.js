@@ -147,6 +147,7 @@ const runElectron = async () => {
             const avDependencies = new Proxy({
                 ...window.publishAV,
                 ...window.readonlyAV,
+                locateRequests: new WeakMap(),
                 Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view", TIMEOUT_COUNT: 1},
                 hasClosestBlock: element => element.closest('[data-type="NodeAttributeView"]'),
                 hasClosestByClassName: (element, name) => element.closest("." + name),

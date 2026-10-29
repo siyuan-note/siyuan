@@ -12,7 +12,8 @@ import {initTabMenu} from "./tab";
 import {ipcRenderer} from "electron";
 /// #endif
 import {Menu} from "./Menu";
-import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {getDocTreeMenuItems} from "./navigationSelection";
 import type {App} from "../index";
 import {Constants} from "../constants";
 import {textMenu} from "./text";
@@ -154,10 +155,7 @@ export class Menus {
     }
 
     private getDir(target: HTMLElement) {
-        const rootElement = hasTopClosestByTag(target, "UL");
-        if (rootElement) {
-            return rootElement.getAttribute("data-url");
-        }
+        return getDocTreeMenuItems([target])[0]?.notebookId;
     }
 
     private unselect() {

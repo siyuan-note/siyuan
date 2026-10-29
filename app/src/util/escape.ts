@@ -1,6 +1,13 @@
+// 字符类扫描适合短文本，长文本使用 V8 更高效的字面量扫描路径。
+const SINGLE_PASS_ESCAPE_MAX_LENGTH = 512;
+
 // 转义 HTML 文本和双引号属性值，保持 Lute.EscapeHTMLStr 的字符替换规则。
 export const escapeHtmlTextAndAttr = (html: unknown) => {
-    return String(html).replace(/[&<>"]/g, (char) => {
+    const text = String(html);
+    if (text.length > SINGLE_PASS_ESCAPE_MAX_LENGTH) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    return text.replace(/[&<>"]/g, (char) => {
         switch (char) {
             case "&":
                 return "&amp;";
@@ -19,8 +26,7 @@ export const escapeHtmlTextAndAttr = (html: unknown) => {
 // setAttribute 接受的提示 HTML 不再转义属性层。
 export const escapeTooltipTextAttr = (text: string) => escapeHtmlTextAndAttr(escapeHtmlTextAndAttr(text));
 
-// 两个字符的转义保持逐字面量替换：V8 对单字面量正则有专用扫描路径，
-// 字符类的逐字符成本约为其四倍，长正文上单次字符类扫描反而更慢。
+// V8 的字面量正则扫描更适合长正文，两个字符的转义分别处理。
 export const escapeHtml = (html: string) => {
     if (!html) {
         return html;
@@ -30,6 +36,29 @@ export const escapeHtml = (html: string) => {
 
 // 将纯文本中的 Markdown 标记转义，保留编辑器重新解析时的字面内容。
 export const escapeMarkdownPlainText = (text: string) => {
+    if (text.length > SINGLE_PASS_ESCAPE_MAX_LENGTH) {
+        return text.replace(/\\/g, "\\\\")
+            .replace(/\*/g, "\\*")
+            .replace(/_/g, "\\_")
+            .replace(/\[/g, "\\[")
+            .replace(/]/g, "\\]")
+            .replace(/!/g, "\\!")
+            .replace(/`/g, "\\`")
+            .replace(/</g, "\\<")
+            .replace(/>/g, "\\>")
+            .replace(/&/g, "\\&")
+            .replace(/~/g, "\\~")
+            .replace(/\{/g, "\\{")
+            .replace(/}/g, "\\}")
+            .replace(/\(/g, "\\(")
+            .replace(/\)/g, "\\)")
+            .replace(/=/g, "\\=")
+            .replace(/#/g, "\\#")
+            .replace(/\$/g, "\\$")
+            .replace(/\^/g, "\\^")
+            .replace(/\|/g, "\\|")
+            .replace(/\./g, "\\.");
+    }
     return text.replace(/[\\*_[\]!`<>&~{}()=#$^|.]/g, "\\$&");
 };
 
@@ -57,6 +86,10 @@ export const escapeAttr = (html: string) => {
 export const escapeAriaLabel = (html: string) => {
     if (!html) {
         return html;
+    }
+    if (html.length > SINGLE_PASS_ESCAPE_MAX_LENGTH) {
+        return html.replace(/"/g, "&quot;").replace(/'/g, "&apos;")
+            .replace(/</g, "&amp;lt;").replace(/&lt;/g, "&amp;lt;");
     }
     return html.replace(/&lt;|["'<]/g, (match) => {
         switch (match) {

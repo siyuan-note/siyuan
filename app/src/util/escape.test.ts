@@ -28,6 +28,26 @@ describe("escape HTML strings", () => {
         assert.equal(escapeHtmlTextAndAttr("\ud800"), "\ud800");
         assert.equal(escapeHtmlTextAndAttr("\udc00"), "\udc00");
     });
+
+    it("escapes text around the single-pass length boundary and long text", () => {
+        const text = "&lt;<tag>\"'\\\ud800";
+        for (const length of [511, 512, 513, 8192]) {
+            const prefix = "x".repeat(length - text.length);
+            assert.equal(escapeHtmlTextAndAttr(prefix + text), prefix + "&amp;lt;&lt;tag&gt;&quot;'\\\ud800");
+        }
+    });
+
+    it("converts long non-string input only once", () => {
+        let conversions = 0;
+        const value = {
+            toString: () => {
+                conversions++;
+                return "x".repeat(1024) + "<&>\"";
+            },
+        };
+        assert.equal(escapeHtmlTextAndAttr(value), "x".repeat(1024) + "&lt;&amp;&gt;&quot;");
+        assert.equal(conversions, 1);
+    });
 });
 
 describe("escape HTML fragments and attributes", () => {
@@ -41,17 +61,33 @@ describe("escape HTML fragments and attributes", () => {
         assert.equal(escapeAttr("&<>\"'"), "&<>&quot;&apos;");
     });
 
-    it("escapes aria-label text with the inner attribute level", () => {
+    it("escapes short and long aria-label text with the inner attribute level", () => {
         assert.equal(escapeAriaLabel(""), "");
         assert.equal(escapeAriaLabel("&lt;a<b>'c\"d"), "&amp;lt;a&amp;lt;b>&apos;c&quot;d");
+        const text = "&lt;<tag>\"'\\\ud800";
+        for (const length of [511, 512, 513, 8192]) {
+            const prefix = "x".repeat(length - text.length);
+            assert.equal(escapeAriaLabel(prefix + text), prefix + "&amp;lt;&amp;lt;tag>&quot;&apos;\\\ud800");
+        }
     });
 });
 
 describe("escape Markdown plain text", () => {
     it("prefixes every escapable marker with a backslash", () => {
+        assert.equal(escapeMarkdownPlainText(""), "");
         assert.equal(escapeMarkdownPlainText("plain text"), "plain text");
         assert.equal(escapeMarkdownPlainText("\\*_[]!`<>&~{}()=#$^|."),
             "\\\\\\*\\_\\[\\]\\!\\`\\<\\>\\&\\~\\{\\}\\(\\)\\=\\#\\$\\^\\|\\.");
+    });
+
+    it("escapes text around the single-pass length boundary and dense long text", () => {
+        const text = "\\*_[]!`<>&~{}()=#$^|.";
+        const escaped = "\\\\\\*\\_\\[\\]\\!\\`\\<\\>\\&\\~\\{\\}\\(\\)\\=\\#\\$\\^\\|\\.";
+        for (const length of [511, 512, 513, 8192]) {
+            const prefix = "x".repeat(length - text.length);
+            assert.equal(escapeMarkdownPlainText(prefix + text), prefix + escaped);
+        }
+        assert.equal(escapeMarkdownPlainText(text.repeat(400)), escaped.repeat(400));
     });
 });
 

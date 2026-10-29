@@ -49,7 +49,7 @@ export interface IDocTreeLocateStep {
 
 export interface IDocTreeDataSource {
     range(request: {notebook: string, parentID: string, offset: number, limit: number, revision?: string}): Promise<IDocTreeRange>;
-    locate(request: {notebook: string, id: string}): Promise<{box: string, id: string, steps: IDocTreeLocateStep[]}>;
+    locate(request: {notebook: string, id: string}, options?: {ignoreUnavailable?: boolean}): Promise<{box: string, id: string, steps: IDocTreeLocateStep[]}>;
 }
 
 export interface IDocTreeExpansion {

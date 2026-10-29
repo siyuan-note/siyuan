@@ -7,7 +7,7 @@ const load = (fetch: (route: string, request: unknown) => Promise<unknown>, mess
     const source = ts.transpileModule(readFileSync(new URL("./dataSource.ts", import.meta.url), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
     }).outputText;
-    const exports: {docTreeDataSource?: {range: (request: unknown) => Promise<unknown>, locate: (request: unknown) => Promise<unknown>}} = {};
+    const exports: {docTreeDataSource?: {range: (request: unknown) => Promise<unknown>, locate: (request: unknown, options?: {ignoreUnavailable?: boolean}) => Promise<unknown>}} = {};
     new Function("require", "exports", source)((name: string) => {
         if (name === "../../../dialog/message") {
             return {showMessage: (message: string) => messages.push(message)};
@@ -65,3 +65,29 @@ for (const method of ["range", "locate"] as const) {
         }
     });
 }
+
+test("background location suppresses only unavailable targets while retaining the rejection", async () => {
+    for (const [code, msg, silent] of [
+        [-1, "document tree item is unavailable", true],
+        [-1, "notebook locked", false],
+        [-1, "corrupt source", false],
+        [-2, "document tree item is unavailable", false],
+    ] as const) {
+        const messages: string[] = [];
+        let calls = 0;
+        const source = load(async () => { calls++; return {code, msg}; }, messages);
+        await assert.rejects(source.locate({}, {ignoreUnavailable: true}), {message: msg});
+        assert.equal(calls, 1);
+        assert.deepEqual(messages, silent ? [] : [msg]);
+    }
+});
+
+test("explicit location and range reads report unavailable targets", async () => {
+    const messages: string[] = [];
+    const msg = "document tree item is unavailable";
+    const source = load(async () => ({code: -1, msg}), messages);
+    await assert.rejects(source.locate({}), {message: msg});
+    await assert.rejects(source.locate({}, {ignoreUnavailable: false}), {message: msg});
+    await assert.rejects(source.range({}), {message: msg});
+    assert.deepEqual(messages, [msg, msg, msg]);
+});

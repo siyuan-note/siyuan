@@ -456,7 +456,9 @@ export class DocTreeController {
         if (parent.id !== id) {
             let located: Awaited<ReturnType<IDocTreeDataSource["locate"]>>;
             try {
-                located = await this.source.locate({notebook, id});
+                located = await this.source.locate({notebook, id}, {
+                    ignoreUnavailable: options.select === false && options.scroll === false,
+                });
             } catch {
                 return;
             }
@@ -615,6 +617,19 @@ export class DocTreeController {
             element.scrollTop = Math.max(0, top + this.rowHeight - element.clientHeight);
         }
         this.render();
+        const row = this.getMountedElement(key);
+        if (row && element.clientHeight > 0) {
+            // 实际行边界包含主题间距和像素取整，校正估算行距留下的裁切。
+            const bounds = row.getBoundingClientRect();
+            const viewportTop = element.getBoundingClientRect().top + element.clientTop;
+            const viewportBottom = viewportTop + element.clientHeight;
+            const adjustment = bounds.top < viewportTop ? -Math.ceil(viewportTop - bounds.top) :
+                bounds.bottom > viewportBottom ? Math.ceil(bounds.bottom - viewportBottom) : 0;
+            if (adjustment) {
+                element.scrollTop += adjustment;
+                this.render();
+            }
+        }
         return this.getMountedElement(key);
     }
 

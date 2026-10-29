@@ -615,5 +615,37 @@ exports.cases = async sources => {
         check.equal(directory.files.get(0).id, "d69", "offscreen metadata changes invalidate dependent sorting");
         fixture.destroy();
     }
+    {
+        const fixture = make(50000);
+        const {controller, element} = fixture;
+        element.style.height = "280.4px";
+        element.style.border = "1px solid transparent";
+        controller.list.style.paddingTop = "2px";
+        for (const height of [28, 40]) {
+            element.style.setProperty("--b3-ui-list-height", height + "px");
+            const last = await controller.locate("box", "d49999");
+            fullyVisible(last, element);
+            const viewport = element.getBoundingClientRect();
+            check.ok(last.getBoundingClientRect().bottom <= viewport.top + element.clientTop + element.clientHeight,
+                "far location uses the actual inner viewport after row-height changes");
+            await controller.focusBoundary("first");
+            fullyVisible(controller.getMountedElement("notebook:box"), element);
+        }
+        fixture.destroy();
+    }
+    {
+        const fixture = make(10);
+        const {controller, source} = fixture;
+        const locate = source.locate;
+        const options = [];
+        source.locate = (request, flags) => { options.push(flags); return locate(request); };
+        await controller.restoreExpanded([{notebookId: "box", id: "missing", kind: "document"}]);
+        check.deepEqual(options.at(-1), {ignoreUnavailable: true}, "saved stale targets are probed quietly");
+        await controller.locate("box", "missing");
+        check.deepEqual(options.at(-1), {ignoreUnavailable: false}, "explicit targets keep error feedback");
+        await controller.locate("box", "d0", {select: false});
+        check.deepEqual(options.at(-1), {ignoreUnavailable: false}, "a scrolling locate retains user feedback");
+        fixture.destroy();
+    }
     return "File tree selection cases passed";
 };

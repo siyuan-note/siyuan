@@ -437,6 +437,52 @@ exports.cases = async sources => {
         fixture.destroy();
     }
     {
+        const fixture = make(6);
+        const {controller, source, element, directories, locates} = fixture;
+        directories.get("")[1].subFileCount = 1;
+        directories.set("d1", [file("child", "d1")]);
+        await controller.toggle("notebook:box", true);
+        await controller.toggle("notebook:box/d1", true);
+        controller.setRoots([...controller.model.roots, {id: "d1", notebookId: "box", kind: "document",
+            occurrenceKey: "pin:d1", name: "Pinned", path: "/d1.sy", subFileCount: 1}]);
+        await controller.toggle("pin:d1", true);
+        await controller.select("notebook:box/d1", {scroll: false});
+        await controller.select("notebook:box/d1/child", {toggle: true, scroll: false});
+        await controller.select("pin:d1", {toggle: true, scroll: false});
+        await controller.select("notebook:box/d3", {toggle: true, scroll: false});
+        controller.render();
+        locates.length = 0;
+        const original = source.range;
+        let release;
+        source.range = async request => {
+            const response = await original(request);
+            return new Promise(resolve => { release = () => resolve(response); });
+        };
+        directories.set("", directories.get("").filter(item => item.id !== "d1"));
+        directories.delete("d1");
+        fixture.revise("two");
+        const reload = controller.reload.bind(controller);
+        let refreshed;
+        controller.reload = filter => { refreshed = reload(filter); return refreshed; };
+        controller.handleMessage({cmd: "removeDoc", data: {ids: ["d1", "child"]}});
+        check.equal(element.querySelector('[data-node-id="d1"]'), null, "confirmed deletion removes all visible occurrences before refreshing");
+        check.equal(element.querySelector('[data-node-id="child"]'), null, "confirmed deletion removes expanded descendants immediately");
+        check.ok(controller.getMountedElement("notebook:box/d0"), "deletion keeps unaffected rows visible");
+        check.ok(controller.getSelectedItems().every(item => !["d1", "child"].includes(item.id)),
+            "deleted entries cannot remain selected while the remaining selection is revalidated");
+        check.ok(!controller.isExpanded("notebook:box/d1"));
+        check.ok(!controller.isExpanded("pin:d1"));
+        check.equal(controller.model.roots.some(item => item.id === "d1"), false);
+        while (!release) { await Promise.resolve(); }
+        source.range = original;
+        release();
+        await refreshed;
+        check.ok(!locates.includes("d1") && !locates.includes("child"), "refresh never tries to restore deleted identities");
+        check.equal(element.querySelector('[data-node-id="d1"]'), null);
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d3"]);
+        fixture.destroy();
+    }
+    {
         const fixture = make(0);
         const {controller, directories} = fixture;
         await controller.toggle("notebook:box", true);

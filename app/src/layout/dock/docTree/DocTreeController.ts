@@ -798,9 +798,47 @@ export class DocTreeController {
                 const parentID = path.split("/").filter(Boolean).slice(-2, -1)[0] || "";
                 void this.reload({notebook, parentID});
             }
-        } else if (["reloadFiletree", "removeDoc", "moveDocs", "mount"].includes(data.cmd)) {
+        } else if (data.cmd === "removeDoc") {
+            if (Array.isArray(data.data?.ids)) {
+                this.removeDocuments(new Set(data.data.ids.filter((id: unknown) => typeof id === "string")));
+            }
+            void this.reload();
+        } else if (["reloadFiletree", "moveDocs", "mount"].includes(data.cmd)) {
             void this.reload();
         }
+    }
+
+    private removeDocuments(ids: ReadonlySet<string>) {
+        if (!ids.size) { return; }
+        const removedRoots = new Set(this.model.roots.filter(item => item.kind === "document" && ids.has(item.id))
+            .map(item => item.occurrenceKey));
+        const removed = (key?: string) => key && (removedRoots.has(key.split("/")[0]) ||
+            key.split("/").slice(1).some(id => ids.has(id)));
+        // 删除通知代表源已成功移除，立即清理可见行和恢复目标，不等待目录请求。
+        for (const [key, mounted] of this.mounted) {
+            if (!removed(key)) { continue; }
+            this.observer.unobserve(mounted.element);
+            mounted.element.remove();
+            this.mounted.delete(key);
+        }
+        for (const key of this.selected.keys()) {
+            if (removed(key)) { this.selected.delete(key); }
+        }
+        for (const key of this.model.expanded.keys()) {
+            if (removed(key)) { this.model.expanded.delete(key); }
+        }
+        this.model.roots = this.model.roots.filter(item => !removedRoots.has(item.occurrenceKey));
+        if (removed(this.focused)) {
+            this.focused = undefined;
+            this.focusedItem = undefined;
+        }
+        if (removed(this.anchor)) {
+            this.anchor = undefined;
+            this.anchorItem = undefined;
+        }
+        if (removed(this.dragging)) { this.dragging = undefined; }
+        this.selectionChanged();
+        this.options.onExpansionChange?.();
     }
 
     private applyMetadata(id: string, metadata: Partial<IFile>, refreshSort: boolean) {

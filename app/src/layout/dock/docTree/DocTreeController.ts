@@ -57,6 +57,7 @@ export class DocTreeController {
     private operation = 0;
     private interaction = 0;
     private generation = 0;
+    private refresh: {interaction: number};
     private disposed = false;
     private frame = 0;
     private rowHeight = 28;
@@ -639,6 +640,21 @@ export class DocTreeController {
 
     public async reload(filter: {notebook?: string, parentID?: string} = {}) {
         if (this.disposed) { return; }
+        const refresh = {interaction: this.interaction};
+        this.refresh = refresh;
+        try {
+            await this.reloadContent(filter);
+        } finally {
+            // 只发布最新刷新结果；加载过程保留已有行，真实输入仍可立即更新视区。
+            if (this.refresh === refresh) {
+                this.refresh = undefined;
+                this.render();
+            }
+        }
+    }
+
+    private async reloadContent(filter: {notebook?: string, parentID?: string}) {
+        if (this.disposed) { return; }
         const interaction = this.interaction;
         const anchor = this.getScrollAnchor();
         const affected = (item: IDocTreeItem) => (!filter.notebook || item.notebookId === filter.notebook) &&
@@ -723,6 +739,21 @@ export class DocTreeController {
         this.anchorItem = this.getItem(this.anchor);
         if (interaction === this.interaction) {
             this.restoreScrollAnchor(anchor);
+        }
+        // 首批数据可能远离当前视区，恢复展开和选择后补齐可见范围再替换已有行。
+        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+            this.options.element.clientHeight, this.rowHeight);
+        const loaded = new Set<string>();
+        for (let position = viewport.start; position < viewport.end; position++) {
+            const row = this.model.rowAt(position);
+            if (row?.item || !row?.parent) { continue; }
+            const directory = this.model.directory(row.parent);
+            const key = `${directory.key}:${Math.floor(row.index / this.batchSize())}`;
+            if (!loaded.has(key) && !this.errors.has(directory.key)) {
+                loaded.add(key);
+                await this.load(row.parent, row.index);
+                if (this.disposed || generation !== this.generation || operation !== this.operation) { return; }
+            }
         }
         this.render();
         this.options.onSelectionChange?.();
@@ -896,10 +927,9 @@ export class DocTreeController {
             this.evictPages();
             this.scheduleRender();
         }).catch(error => {
-            if (!this.disposed && generation === this.generation) {
-                this.errors.add(directory.key);
-                this.scheduleRender();
-            }
+            if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation) { return; }
+            this.errors.add(directory.key);
+            this.scheduleRender();
             console.warn("Failed to load document tree range", error);
         }).then(async () => {
             if (stale && !this.disposed && generation === this.generation) {
@@ -991,7 +1021,7 @@ export class DocTreeController {
     }
 
     private render() {
-        if (this.disposed) {
+        if (this.disposed || (this.refresh && this.refresh.interaction === this.interaction)) {
             return;
         }
         const element = this.options.element;

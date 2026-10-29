@@ -378,6 +378,65 @@ exports.cases = async sources => {
         fixture.destroy();
     }
     {
+        const fixture = make(10000);
+        const {controller, source, element, directories} = fixture;
+        await controller.locate("box", "d9000");
+        const before = controller.getMountedElement("notebook:box/d9000");
+        const top = element.scrollTop;
+        const original = source.range;
+        const pending = new Map();
+        source.range = async request => {
+            const response = await original(request);
+            if ([0, 8992].includes(request.offset)) {
+                return new Promise(resolve => pending.set(request.offset, () => resolve(response)));
+            }
+            return response;
+        };
+        directories.get("")[9000] = {...directories.get("")[9000], name: "Renamed"};
+        fixture.revise("two");
+        const refreshing = controller.reload({notebook: "box", parentID: ""});
+        while (!pending.has(0)) { await Promise.resolve(); }
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box/d9000"), before, "refresh retains the visible row while the first range loads");
+        check.equal(element.querySelector("[data-tree-loading]"), null, "rename never replaces the panel with loading rows");
+        pending.get(0)();
+        while (!pending.has(8992)) { await Promise.resolve(); }
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box/d9000"), before, "refresh retains rows until the offscreen anchor range is ready");
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        pending.get(8992)();
+        await refreshing;
+        check.equal(controller.getMountedElement("notebook:box/d9000").textContent, "Renamed");
+        check.equal(element.scrollTop, top);
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d9000"]);
+        fullyVisible(controller.getMountedElement("notebook:box/d9000"), element);
+        fixture.destroy();
+    }
+    {
+        const fixture = make(10);
+        const {controller, source, element} = fixture;
+        await controller.toggle("notebook:box", true);
+        const original = source.range;
+        let reject;
+        source.range = request => reject ? original(request) : new Promise((_resolve, fail) => { reject = fail; });
+        const older = controller.reload();
+        while (!reject) { await Promise.resolve(); }
+        await controller.reload();
+        const warnings = [];
+        const warn = console.warn;
+        console.warn = (...args) => warnings.push(args);
+        try {
+            reject(new Error("document tree changed, please retry"));
+            await older;
+        } finally {
+            console.warn = warn;
+        }
+        check.equal(warnings.length, 0, "a superseded request cannot report a current load failure");
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        check.ok(controller.getMountedElement("notebook:box/d0"), "an older failure cannot replace the newer completed refresh");
+        fixture.destroy();
+    }
+    {
         const fixture = make(0);
         const {controller, directories} = fixture;
         await controller.toggle("notebook:box", true);

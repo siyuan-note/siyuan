@@ -144,6 +144,7 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
+        memory: IMemory;
         web: IAIWeb;
         providers: IProvider[];
         editing: IEditing;
@@ -153,6 +154,18 @@ declare namespace Config {
         embedding: IEmbedding;
         rerank: IRerank;
         decision: IDecision;
+    }
+
+    /** 工作空间长期记忆；模型选择独立且不自动回退，配置不随记忆 Markdown 同步。 */
+    export interface IMemory {
+        /** 允许整理成功会话的用户原话，默认关闭；不采集助手输出。 */
+        conversations: boolean;
+        enabled: boolean;
+        autoMaintain: boolean;
+        modelId: string;
+        reasoningEffort: string;
+        /** 用户明确允许自动整理的普通笔记本 ID；默认空，不自动扫描全库。 */
+        sources: string[];
     }
 
     /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */

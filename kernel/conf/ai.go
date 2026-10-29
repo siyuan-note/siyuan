@@ -32,6 +32,7 @@ import (
 )
 
 type AI struct {
+	Memory          *Memory          `json:"memory"`
 	Web             *AIWeb           `json:"web"`
 	MCP             *MCP             `json:"mcp"`
 	Embedding       *Embedding       `json:"embedding"`
@@ -430,6 +431,7 @@ func defaultImageGeneration() *ImageGeneration {
 
 func NewAI() *AI {
 	ai := &AI{
+		Memory:          defaultMemory(),
 		Providers:       []*Provider{},
 		MCP:             &MCP{Servers: []MCPServer{}, ExposurePolicy: defaultCapabilityPolicy()},
 		Embedding:       defaultEmbedding(),
@@ -663,6 +665,10 @@ func (ai *AI) ReconcileModelIDs() {
 }
 
 func (ai *AI) Normalize() {
+	if ai.Memory == nil {
+		ai.Memory = defaultMemory()
+	}
+	ai.Memory.Normalize()
 	if ai.Providers == nil {
 		ai.Providers = []*Provider{}
 	}

@@ -1531,6 +1531,7 @@ func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) err
 		return err
 	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
 	refreshAppearancePackages(themes, icons)
 	refresh(err)
@@ -2551,6 +2552,7 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
+	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
 	confSyncSnapshot := Conf.LoadSync()
 

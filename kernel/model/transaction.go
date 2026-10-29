@@ -3218,6 +3218,7 @@ func (tx *Transaction) commit() (err error) {
 	tx.finishAttributeViewMutation(false)
 	tx.releaseCommittedResources()
 	tx.m.Unlock()
+	memoryCommittedSourcesChanged(tx.mutatedRootIDs)
 	if 0 < len(crossTreeMoveRefRefreshes) {
 		task.AppendAsyncTaskWithDelay(task.RefreshCrossTreeMoveRefs, util.SQLFlushInterval,
 			refreshCrossTreeMoveRefs, crossTreeMoveRefRefreshes)

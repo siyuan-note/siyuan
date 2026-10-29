@@ -114,7 +114,7 @@ func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) e
 				}
 			}
 		}
-		return nil
+		return memoryCheckoutPreflight(repo.DataPath, plan)
 	}
 }
 

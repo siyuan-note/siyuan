@@ -68,6 +68,40 @@ export type AIMCPIDRequestInput = { "id"?: string | null; };
 
 export type AIMCPStatus = { "authorizationURL"?: string; "authorized": boolean; "error"?: string; "id": string; "name": string; "status": string; "tools": number; };
 
+export type AIMemoryCapabilitiesData = { "efforts": Array<string> | null; };
+
+export type AIMemoryForgetData = { "cleanupPending": boolean; "saved": boolean; };
+
+export type AIMemoryForgetRequestInput = { "id": string; "operationId": string; "revision": string; };
+
+export type AIMemoryGetData = { "record": AIMemoryRecord; "revision": string; };
+
+export type AIMemoryGetRequestInput = { "id": string; };
+
+export type AIMemoryListData = { "errors": Array<string> | null; "incomplete": boolean; "records": Array<AIMemoryRecord> | null; "tasks": Array<AIMemoryTaskData> | null; };
+
+export type AIMemoryListRequestInput = { "limit"?: number; "offset"?: number; "query"?: string; };
+
+export type AIMemoryMaintainRequestInput = { "operationId": string; "sourceIDs"?: Array<string>; "text": string; };
+
+export type AIMemoryOverviewData = { "memory": string; "stale": boolean; "user": string; };
+
+export type AIMemoryRecord = { "confirmed": string; "content": string; "created": string; "id": string; "kind": string; "reason": string; "revision": string; "scope": string; "sources": Array<AIMemorySource> | null; "state": string; "subject": string; "supersedes": string; "updated": string; "validFrom": string; "validUntil": string; };
+
+export type AIMemorySaveData = { "id": string; "overviewPending": boolean; "revision": string; "saved": boolean; };
+
+export type AIMemorySaveRequestInput = { "content": string; "id"?: string; "kind": string; "operationId": string; "revision": string; "scope": string; "state": string; "subject": string; };
+
+export type AIMemorySource = { "evidence": string; "id": string; "kind": string; "revision": string; };
+
+export type AIMemoryTaskData = { "error": string; "overviewPending": boolean; "results": Array<AIMemoryTaskResult> | null; "state": string; "taskId": string; };
+
+export type AIMemoryTaskRequestInput = { "taskId": string; };
+
+export type AIMemoryTaskResult = { "error": string; "id": string; "saved": boolean; };
+
+export type AIMemoryTaskStarted = { "taskId": string; };
+
 export type AIMessageRequestInput = { "msg": string; };
 
 export type AIModelRequestInput = { "model": string; "provider"?: string | null; "providerConfig"?: SettingProviderInput | null; };
@@ -1082,6 +1116,8 @@ export type EmbedBlocksData = { "blocks": Array<EmbedBlock | null> | null; };
 
 export type EmbedStat = { "complete": boolean; "cycleCount": number; "depthLimitCount": number; "failedQueryCount": number; "failedResultCount": number; "jsEmbedCount": number; "queryEmbedCount": number; "resultCount": number; "truncatedQueryCount": number; };
 
+export type EmptyRequest = Record<string, never>;
+
 export type EmptyRequestInput = Record<string, never>;
 
 export type EncryptedBoxAssetsRequestInput = { "notebook": string; };
@@ -2002,7 +2038,7 @@ export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResul
 
 export type SearchWidgetResult = { "content": string; "name": string; };
 
-export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
+export type SetAIRequestInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "memory"?: SettingMemoryInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
 
 export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "compactMode"?: boolean | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "lockScreenWallpaper"?: boolean | null; "menuMouseScroll"?: boolean | null; "mobileBars"?: SettingMobileBarsInput | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "outlineKeepCurrentExpand"?: boolean | null; "pdfTheme"?: SettingPDFThemeInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
@@ -2080,9 +2116,9 @@ export type SetSyncWebDAVRequestInput = { "webdav": SyncWebDAVInput; };
 
 export type SetVariablesRequestInput = { "items"?: Array<SettingVariableInput | null> | null; };
 
-export type SettingAI = { "agent": SettingAgent | null; "decision": SettingDecision | null; "editing": SettingEditing | null; "embedding": SettingEmbedding | null; "imageGeneration": SettingImageGeneration | null; "mcp": SettingMCP | null; "providers": Array<SettingProvider | null> | null; "rerank": SettingRerank | null; "web": SettingAIWeb | null; };
+export type SettingAI = { "agent": SettingAgent | null; "decision": SettingDecision | null; "editing": SettingEditing | null; "embedding": SettingEmbedding | null; "imageGeneration": SettingImageGeneration | null; "mcp": SettingMCP | null; "memory": SettingMemory | null; "providers": Array<SettingProvider | null> | null; "rerank": SettingRerank | null; "web": SettingAIWeb | null; };
 
-export type SettingAIInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
+export type SettingAIInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "memory"?: SettingMemoryInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; "web"?: SettingAIWebInput | null; };
 
 export type SettingAIWeb = { "apiKey": string; "exaApiKey": string; "fetchProvider": string; "searchProvider": string; "timeout": number; };
 
@@ -2231,6 +2267,10 @@ export type SettingMCPServerInput = { "args"?: Array<string> | null; "command"?:
 export type SettingMarkdown = { "blockFullWidthTaskList": boolean | null; "codeBlockMiddleDot": boolean | null; "inlineAsterisk": boolean; "inlineFullWidthStrikethrough": boolean; "inlineMark": boolean; "inlineMath": boolean; "inlineStrikethrough": boolean; "inlineSub": boolean; "inlineSup": boolean; "inlineTag": boolean; "inlineUnderscore": boolean; };
 
 export type SettingMarkdownInput = { "blockFullWidthTaskList"?: boolean | null; "codeBlockMiddleDot"?: boolean | null; "inlineAsterisk"?: boolean | null; "inlineFullWidthStrikethrough"?: boolean | null; "inlineMark"?: boolean | null; "inlineMath"?: boolean | null; "inlineStrikethrough"?: boolean | null; "inlineSub"?: boolean | null; "inlineSup"?: boolean | null; "inlineTag"?: boolean | null; "inlineUnderscore"?: boolean | null; };
+
+export type SettingMemory = { "autoMaintain": boolean; "conversations": boolean; "enabled": boolean; "modelId": string; "reasoningEffort": string; "sources": Array<string> | null; };
+
+export type SettingMemoryInput = { "autoMaintain"?: boolean | null; "conversations"?: boolean | null; "enabled"?: boolean | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "sources"?: Array<string> | null; };
 
 export type SettingMobileBars = { "autoHide": boolean | null; "sidebarButtons": boolean | null; "sidebarSwipe": boolean | null; };
 
@@ -3360,6 +3400,72 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIMCPStatus> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/memory/cancel": {
+        request: AIMemoryTaskRequestInput;
+        response: { "code": 0; "data": EmptyRequest; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/memory/capabilities": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIMemoryCapabilitiesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/memory/forget": {
+        request: AIMemoryForgetRequestInput;
+        response: { "code": 0; "data": AIMemoryForgetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/memory/get": {
+        request: AIMemoryGetRequestInput;
+        response: { "code": 0; "data": AIMemoryGetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 记忆接口仅面向工作空间管理员；写入需要可写空间，读取不依赖模型配置。
+     */
+    "/api/ai/memory/list": {
+        request: AIMemoryListRequestInput;
+        response: { "code": 0; "data": AIMemoryListData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/memory/maintain": {
+        request: AIMemoryMaintainRequestInput;
+        response: { "code": 0; "data": AIMemoryTaskStarted; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/memory/overview": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIMemoryOverviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/memory/save": {
+        request: AIMemorySaveRequestInput;
+        response: { "code": 0; "data": AIMemorySaveData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/memory/task": {
+        request: AIMemoryTaskRequestInput;
+        response: { "code": 0; "data": AIMemoryTaskData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };

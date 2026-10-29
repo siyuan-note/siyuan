@@ -4,7 +4,7 @@
 
 ## Feature scope
 
-This document defines the design goals, storage, and maintenance rules for workspace-level long-term memory in SiYuan. The capability is not implemented yet. The following sections describe target behavior and identify open decisions separately; they do not describe released APIs or configuration defaults.
+This document defines the design goals, storage, and maintenance rules for workspace-level long-term memory in SiYuan. The following sections define implementation behavior and identify open decisions separately; they do not imply that every currently released version provides these APIs or configuration defaults.
 
 Long-term memory retains sourced user background, preferences, project facts, conventions, and reasons for decisions. It serves current and future AI features that need contextual understanding, reducing repeated explanations across tasks and sessions. Features share the same memory rather than maintaining separate user profiles. Memory does not replace source notes, document search, conversation history, or manually maintained instructions.
 
@@ -41,6 +41,8 @@ After an ordinary conversation or task reaches a suitable stopping point, candid
 
 Automatic consolidation is off initially. Users select allowed sources before enabling it; enabling it does not queue a full scan of existing notes. Explicit remember, correct, and forget requests remain available independently. Queue consolidation only after a successfully committed ordinary task or a committed source change, coalescing affected sources rather than processing every edit. Disabling consolidation stops new jobs and makes running jobs recheck permission before committing. Source-selection presentation and numerical scan/call budgets may be tuned without changing these boundaries.
 
+Conversation sources have a separate permission, disabled by default. Once enabled, only user messages in subsequently committed turns are processed; AI replies and historical conversations are not collected. Sources retain session and message identities and the original revision. Messages involving encrypted or inaccessible references are excluded from global memory. Edits, deletion, or permission revocation require source revalidation before use. Deleting a session does not erase historical snapshots; explicit forgetting still uses withdrawal markers.
+
 ### Model and reasoning-effort configuration
 
 Users must be able to select the model and its supported reasoning effort for long-term memory processing. The provider, model, and effort must not be hard-coded or required to match the current conversation. Reuse the existing AI provider and model configuration while exposing an independent choice for memory processing; changing the current conversation model must not implicitly change the choice for background memory work.
@@ -71,8 +73,13 @@ data/storage/ai/
     ├── MEMORY.md
     ├── records/
     │   └── <SiYuanID>.md
-    └── withdrawals/
-        └── <SiYuanID>.md
+    ├── withdrawals/
+    │   └── <SiYuanID>.md
+    ├── operations/
+    │   └── <operationSHA>.md
+    └── conflicts/
+        └── <recordID>/
+            └── <sha256>.md
 ```
 
 `AGENTS.md` is the existing manually maintained instruction file. Memory consolidation must not rewrite it without the user's direction. `memos/` and its memory files are proposed additions. `records/` is the sole canonical source; file names use program-generated SiYuan IDs, which remain stable when titles or content change.
@@ -179,6 +186,8 @@ Ordinary global Markdown records must not contain plaintext extracted from encry
 Canonical records must carry a format version. Unknown formats, malformed metadata, and incomplete writes must not trigger clearing, silent reconstruction, or full-corpus extraction. Preserve the original file, exclude the affected record from use, and report the error while other valid records remain usable. Rebuilding applies only to derived overviews and optional caches; an overview must not replace canonical records in reverse.
 
 Memory Markdown needs explicit conflict handling; existing `.sy` conflict-document behavior does not prove it handles these files. Preserve both recoverable versions of a conflicting record before replacement and exclude the unresolved record from retrieval and projections. Reconcile withdrawal markers before activating received records. Do not select truth by device timestamp or last writer. Synced overviews are disposable projections: compare fingerprints, skip an already applicable generation, and regenerate locally only when needed. Verify this integration before enabling automatic maintenance across devices.
+
+`conflicts/<recordID>/<sha256>.md` durably preserves complete unresolved versions and is not disposable cache. A record with a conflict directory is excluded from memory context. `operations/<operationSHA>.md` contains only the source-set fingerprint and item-identity hashes to keep a retried operation's proposal set stable; it stores no source text and adds no database. In the first version, restoration or synchronization that would remove or overwrite unresolved evidence or an existing operation manifest explicitly fails before applying the batch; removal is not treated as resolution. Before withdrawal markers are replaced or removed, equivalent markers with fresh file identities preserve the currently known withdrawal intent across restoration of older snapshots.
 
 Forgetting must consistently invalidate records, overviews, and retrieval results, accounting for old devices, retries, extraction, and historical restoration. Historical snapshots may still contain previous content: ordinary forgetting is not erasure of all backups. During an in-app snapshot restore, preserve currently known withdrawal markers and reconcile them before exposing restored memory; do not automatically reactivate matching records. Restoring a complete older workspace outside this flow may also remove the newer markers and is outside this guarantee; explain the limitation rather than promising unconditional resurrection prevention.
 

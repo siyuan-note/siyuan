@@ -1403,6 +1403,450 @@
       ],
       "additionalProperties": false
     },
+    "AIMemoryCapabilitiesData": {
+      "type": "object",
+      "properties": {
+        "efforts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "efforts"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryForgetData": {
+      "type": "object",
+      "properties": {
+        "cleanupPending": {
+          "type": "boolean"
+        },
+        "saved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cleanupPending",
+        "saved"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryForgetRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "operationId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "operationId",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryGetData": {
+      "type": "object",
+      "properties": {
+        "record": {
+          "$ref": "#/$defs/AIMemoryRecord"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "record",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryGetRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryListData": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "incomplete": {
+          "type": "boolean"
+        },
+        "records": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AIMemoryRecord"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tasks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AIMemoryTaskData"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "errors",
+        "incomplete",
+        "records",
+        "tasks"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryListRequestInput": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "query": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AIMemoryMaintainRequestInput": {
+      "type": "object",
+      "properties": {
+        "operationId": {
+          "type": "string"
+        },
+        "sourceIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "operationId",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryOverviewData": {
+      "type": "object",
+      "properties": {
+        "memory": {
+          "type": "string"
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "user": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "memory",
+        "stale",
+        "user"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryRecord": {
+      "type": "object",
+      "properties": {
+        "confirmed": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AIMemorySource"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "supersedes": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "string"
+        },
+        "validFrom": {
+          "type": "string"
+        },
+        "validUntil": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "confirmed",
+        "content",
+        "created",
+        "id",
+        "kind",
+        "reason",
+        "revision",
+        "scope",
+        "sources",
+        "state",
+        "subject",
+        "supersedes",
+        "updated",
+        "validFrom",
+        "validUntil"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemorySaveData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "overviewPending": {
+          "type": "boolean"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "saved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "overviewPending",
+        "revision",
+        "saved"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemorySaveRequestInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "operationId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "kind",
+        "operationId",
+        "revision",
+        "scope",
+        "state",
+        "subject"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemorySource": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence",
+        "id",
+        "kind",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTaskData": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "overviewPending": {
+          "type": "boolean"
+        },
+        "results": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AIMemoryTaskResult"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string"
+        },
+        "taskId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "error",
+        "overviewPending",
+        "results",
+        "state",
+        "taskId"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTaskRequestInput": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskId"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTaskResult": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "saved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "error",
+        "id",
+        "saved"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTaskStarted": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskId"
+      ],
+      "additionalProperties": false
+    },
     "AIMessageRequestInput": {
       "type": "object",
       "properties": {
@@ -25045,6 +25489,10 @@
       ],
       "additionalProperties": false
     },
+    "EmptyRequest": {
+      "type": "object",
+      "additionalProperties": false
+    },
     "EmptyRequestInput": {
       "type": "object",
       "additionalProperties": false
@@ -42108,6 +42556,16 @@
             }
           ]
         },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMemoryInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "providers": {
           "anyOf": [
             {
@@ -45106,6 +45564,16 @@
             }
           ]
         },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMemory"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "providers": {
           "anyOf": [
             {
@@ -45154,6 +45622,7 @@
         "embedding",
         "imageGeneration",
         "mcp",
+        "memory",
         "providers",
         "rerank",
         "web"
@@ -45217,6 +45686,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingMCPInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMemoryInput"
             },
             {
               "type": "null"
@@ -50472,6 +50951,117 @@
           "anyOf": [
             {
               "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingMemory": {
+      "type": "object",
+      "properties": {
+        "autoMaintain": {
+          "type": "boolean"
+        },
+        "conversations": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "reasoningEffort": {
+          "type": "string"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoMaintain",
+        "conversations",
+        "enabled",
+        "modelId",
+        "reasoningEffort",
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMemoryInput": {
+      "type": "object",
+      "properties": {
+        "autoMaintain": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conversations": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             {
               "type": "null"
@@ -130975,6 +131565,721 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/cancel",
+      "handler": "cancelAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryTaskRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/EmptyRequest"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/capabilities",
+      "handler": "capabilitiesAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryCapabilitiesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/forget",
+      "handler": "forgetAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryForgetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryForgetData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/get",
+      "handler": "getAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryGetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryGetData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/list",
+      "handler": "listAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryListRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryListData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/maintain",
+      "handler": "maintainAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryMaintainRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryTaskStarted"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/overview",
+      "handler": "overviewAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryOverviewData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/save",
+      "handler": "saveAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemorySaveRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemorySaveData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/task",
+      "handler": "taskAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryTaskRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryTaskData"
               },
               "msg": {
                 "type": "string"

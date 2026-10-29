@@ -1828,3 +1828,14 @@ var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", 
 
 var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast", AuthenticatedAccess|AdminAccess, NoBody, RawWebSocketOptions(), "GET")
 var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", AuthenticatedAccess|AdminAccess, NoBody, RawSSEOptions(), "GET")
+
+// 记忆接口仅面向工作空间管理员；写入需要可写空间，读取不依赖模型配置。
+var AIMemoryList = define[AIMemoryListRequest, AIMemoryListData]("listAIMemory", "/api/ai/memory/list", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryGet = define[AIMemoryGetRequest, AIMemoryGetData]("getAIMemory", "/api/ai/memory/get", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemorySave = define[AIMemorySaveRequest, AIMemorySaveData]("saveAIMemory", "/api/ai/memory/save", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAIMemory", "/api/ai/memory/forget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryTask = define[AIMemoryTaskRequest, AIMemoryTaskData]("taskAIMemory", "/api/ai/memory/task", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryCancel = define[AIMemoryTaskRequest, EmptyRequest]("cancelAIMemory", "/api/ai/memory/cancel", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var AIMemoryCapabilities = define[EmptyRequest, AIMemoryCapabilitiesData]("capabilitiesAIMemory", "/api/ai/memory/capabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

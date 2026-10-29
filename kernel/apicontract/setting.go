@@ -11,6 +11,7 @@ type SettingBazaar struct {
 }
 
 type SettingAI struct {
+	Memory          *SettingMemory          `json:"memory" api:"optional,nullable"`
 	Web             *SettingAIWeb           `json:"web" api:"optional,nullable"`
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
@@ -20,6 +21,20 @@ type SettingAI struct {
 	Editing         *SettingEditing         `json:"editing" api:"optional,nullable"`
 	ImageGeneration *SettingImageGeneration `json:"imageGeneration" api:"optional,nullable"`
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
+}
+
+// SettingMemory 独立选择长期记忆模型，不跟随对话模型，不为失效引用选择替代模型。
+// enabled 与 autoMaintain 初始均关闭；sources 是允许自动整理的普通笔记本 ID，初始为空。
+// modelId 与 reasoningEffort 初始为空，未知模型仅支持默认推理设置；具体能力由内核返回。
+// 省略字段保留当前值，null 恢复该字段默认值；配置变化使旧维护任务在提交前失效。
+// conversations 初始关闭，仅授权采集成功提交会话中的用户原话，不采集助手输出。
+type SettingMemory struct {
+	Enabled         bool     `json:"enabled" api:"optional,nullable"`
+	AutoMaintain    bool     `json:"autoMaintain" api:"optional,nullable"`
+	Conversations   bool     `json:"conversations" api:"optional,nullable"`
+	ModelID         string   `json:"modelId" api:"optional,nullable"`
+	ReasoningEffort string   `json:"reasoningEffort" api:"optional,nullable"`
+	Sources         []string `json:"sources" api:"optional,nullable"`
 }
 
 // SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。

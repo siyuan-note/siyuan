@@ -32,6 +32,11 @@ func settingAIPayload(value *conf.AI) *apicontract.SettingAI {
 		return nil
 	}
 	result := &apicontract.SettingAI{}
+	if value.Memory != nil {
+		result.Memory = &apicontract.SettingMemory{Enabled: value.Memory.Enabled, AutoMaintain: value.Memory.AutoMaintain,
+			Conversations: value.Memory.Conversations, ModelID: value.Memory.ModelID, ReasoningEffort: value.Memory.ReasoningEffort,
+			Sources: append([]string{}, value.Memory.Sources...)}
+	}
 	if value.Web != nil {
 		result.Web = &apicontract.SettingAIWeb{SearchProvider: value.Web.SearchProvider,
 			FetchProvider: value.Web.FetchProvider, APIKey: value.Web.APIKey, ExaAPIKey: value.Web.ExaAPIKey, Timeout: value.Web.Timeout}

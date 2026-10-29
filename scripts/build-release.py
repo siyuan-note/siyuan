@@ -709,7 +709,7 @@ class Builder:
             started = getattr(self, "harmony_prebuilt_started", None)
             if started is None:
                 started = time.time()
-                self.wsl(["bash", "-e", script], directory)
+                self.wsl(["bash", "-e", "../../scripts/harmony-kernel-build.sh"], directory)
             source = self.wsl_root / "kernel/harmony/libkernel.so"
             if source.stat().st_mtime < started - 2:
                 raise BuildError(f"鸿蒙内核未更新：{source}")

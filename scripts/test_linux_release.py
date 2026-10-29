@@ -44,7 +44,7 @@ fi
 ''')
         for arch in ('x86_64', 'aarch64'):
             executable(root / ('bin/' + arch + '-linux-musl-gcc'), 'exit 0\n')
-        executable(root / 'kernel/harmony/build.sh', '''
+        executable(root / 'scripts/harmony-kernel-build.sh', '''
 echo harmony-start >> "$EVENTS"
 sleep 0.3
 echo harmony-end >> "$EVENTS"

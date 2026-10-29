@@ -169,7 +169,7 @@ if $HARMONY_KERNEL; then
     trap 'cleanup_kernels' EXIT
     trap 'exit 130' INT
     trap 'exit 143' TERM
-    (cd "$PROJECT_ROOT/kernel/harmony"; exec setsid bash -e build.sh) &
+    (cd "$PROJECT_ROOT/kernel/harmony"; exec setsid bash -e "$PROJECT_ROOT/scripts/harmony-kernel-build.sh") &
     KERNEL_PIDS=("$!")
 fi
 

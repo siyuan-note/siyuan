@@ -428,8 +428,8 @@ class BuildTests(unittest.TestCase):
                                   b"stale kernel")
 
         def fake_wsl(command, directory=None, capture=False):
-            self.assertEqual(command[-1], "build.sh")
-            architecture = "arm64" if command[-1] == "build.sh" else "amd64"
+            self.assertEqual(command[-1], "../../scripts/harmony-kernel-build.sh")
+            architecture = "arm64"
             self.write(remote / "kernel/harmony/libkernel.so", kernel(architecture=architecture))
             self.write(remote / "kernel/harmony/libkernel.h", architecture.encode())
             self.write(remote / "kernel/harmony/lan_sync_bridge.h", b"bridge")

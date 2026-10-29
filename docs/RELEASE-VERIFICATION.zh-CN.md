@@ -354,6 +354,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
 - Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.9.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙仅构建并复制 ARM64 真机内核，不构建 x86_64 模拟器内核；release 工程须保持 ARM64 ABI 筛选及排除 x86_64 库的配置。使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 `build/outputs/default/siyuan-harmony-default-signed.app`，缺少签名产物时失败，不收集 `unsigned.app` 或单独的 HAP
+- 鸿蒙内核通过 `scripts/harmony-kernel-build.sh` 构建，复用开发部署流程的独立 Go 工具链适配；Linux 打包期间的后台编译和单独鸿蒙构建均使用该入口。工具链副本及三处源码适配见[贡献指南](../.github/CONTRIBUTING.zh-CN.md#harmony)，不修改系统 Go 或共享模块缓存
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
 - 鸿蒙的 `entry/libs/arm64-v8a/` 只接收 `libkernel.so`，头文件从 ARM64 构建目录同步到 `entry/src/main/cpp/include/`；`libkernel.h` 必须为本次生成，`lan_sync_bridge.h` 若由构建目录提供则同步，否则保留工程中维护的版本，缺少必需头文件时停止构建
 - 各平台产物生成后立即复制到桌面 `siyuan`，不覆盖同名包；构建完成后单独运行 `verify-release.py check` 检查收集目录，构建失败时保留已复制的包。需要重新构建同名包时，先人工移走旧包；校验失败修复后可直接对桌面目录重跑 `verify-release.py check`。保留已有的 `SHA256SUMS.txt`，校验和清单由发布者最终手动生成

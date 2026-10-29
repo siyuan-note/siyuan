@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -21,7 +22,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
 
@@ -691,7 +691,7 @@ func downloadSkillSource(src normalizedSkillSource) (data []byte, contentType st
 
 // fetchBytes 执行带大小限制的 GET
 func fetchBytes(rawURL string) (data []byte, contentType string, err error) {
-	resp, err := httpclient.NewBrowserRequest().Get(rawURL)
+	resp, err := skillDownloadHTTPClient().Get(rawURL)
 	if err != nil {
 		return nil, "", errors.New("download failed: " + err.Error())
 	}
@@ -710,6 +710,27 @@ func fetchBytes(rawURL string) (data []byte, contentType string, err error) {
 		return nil, "", errors.New("skill source too large (limit 10MB)")
 	}
 	return body, contentType, nil
+}
+
+// skillDownloadHTTPClient 返回 skill 下载专用客户端：沿用 ssrfSafeClient 在拨号期固定已校验公网 IP 的行为，
+// 并对每一跳重定向复查目标，避免安装来源把请求引向内网。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-6pg3-pqxw-jm82
+func skillDownloadHTTPClient() *http.Client {
+	client := *ssrfSafeClient
+	client.CheckRedirect = checkSkillDownloadRedirect
+	return &client
+}
+
+// checkSkillDownloadRedirect 复查每一跳重定向：限制跳数与协议，并在发起请求前拦下内网目标。
+// 连接层的拨号校验仍是最终防线，此处用于提前失败。
+func checkSkillDownloadRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 5 {
+		return errors.New("too many redirects")
+	}
+	if scheme := req.URL.Scheme; scheme != "http" && scheme != "https" {
+		return errors.New("redirect scheme is not allowed")
+	}
+	return CheckHostSSRF(req.URL.Hostname())
 }
 
 // installFromZip 解压 zip 并安装其中的 skill

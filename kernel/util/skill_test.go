@@ -7,6 +7,9 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -574,5 +577,77 @@ func TestFirstLineTruncation(t *testing.T) {
 	got := firstLine(string(long))
 	if len([]rune(got)) != 203 { // 200 + "..."
 		t.Errorf("firstLine(long) len = %d, want 203", len([]rune(got)))
+	}
+}
+
+// TestCheckSkillDownloadRedirect 验证重定向复查拦截内网目标、非 HTTP(S) 协议与超长跳转链。
+func TestCheckSkillDownloadRedirect(t *testing.T) {
+	tooMany := make([]*http.Request, 5)
+	cases := []struct {
+		name   string
+		rawURL string
+		via    []*http.Request
+		want   string
+	}{
+		{"loopback", "http://127.0.0.1:6806/api/system/version", nil, "prohibited"},
+		{"ipv6 loopback", "http://[::1]:6806/", nil, "prohibited"},
+		{"private", "http://10.0.0.5:8080/", nil, "prohibited"},
+		{"scheme", "file:///etc/passwd", nil, "scheme"},
+		{"too many redirects", "https://example.com/", tooMany, "too many redirects"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, c.rawURL, nil)
+			if err != nil {
+				t.Fatalf("build request: %v", err)
+			}
+			err = checkSkillDownloadRedirect(req, c.via)
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("checkSkillDownloadRedirect(%s) error = %v, want containing %q", c.rawURL, err, c.want)
+			}
+		})
+	}
+}
+
+// TestFetchBytesRejectsRedirectToPrivateAddress 验证下载被 302 指向内网时不会跟随。
+func TestFetchBytesRejectsRedirectToPrivateAddress(t *testing.T) {
+	previousClient := ssrfSafeClient
+	t.Cleanup(func() { ssrfSafeClient = previousClient })
+	ssrfSafeClient = &http.Client{Transport: webFetchRoundTripper(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "127.0.0.1" {
+			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"text/plain"}},
+				Body: io.NopCloser(strings.NewReader("INTERNAL-SERVICE")), Request: req}, nil
+		}
+		return &http.Response{StatusCode: http.StatusFound,
+			Header: http.Header{"Location": {"http://127.0.0.1:6806/latest/meta-data/"}},
+			Body:   io.NopCloser(strings.NewReader("")), Request: req}, nil
+	})}
+
+	data, _, err := fetchBytes("https://example.com/skill.zip")
+	if err == nil {
+		t.Fatalf("redirect to private address followed, got %q", string(data))
+	}
+}
+
+// TestFetchBytesBlocksPrivateAddress 验证直连内网地址在拨号阶段被拒绝。
+func TestFetchBytesBlocksPrivateAddress(t *testing.T) {
+	t.Setenv("HTTP_PROXY", "")
+	t.Setenv("HTTPS_PROXY", "")
+	t.Setenv("NO_PROXY", "")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("INTERNAL-SERVICE"))
+	}))
+	defer srv.Close()
+
+	if _, _, err := fetchBytes(srv.URL + "/skill.md"); err == nil || !strings.Contains(err.Error(), "prohibited") {
+		t.Fatalf("private address download error = %v, want prohibited", err)
+	}
+}
+
+// TestDownloadSkillSourceRejectsPrivateHost 验证解析期的内网主机预检保持生效。
+func TestDownloadSkillSourceRejectsPrivateHost(t *testing.T) {
+	src := normalizedSkillSource{downloadURL: "http://127.0.0.1:6806/skill.md"}
+	if _, _, err := downloadSkillSource(src); err == nil || !strings.Contains(err.Error(), "prohibited") {
+		t.Fatalf("downloadSkillSource(private) error = %v, want prohibited", err)
 	}
 }

@@ -295,13 +295,11 @@ func indexBox(boxID string) {
 	}
 	flushBatch()
 	if !sourceFailed {
-		if recoveringSources {
-			paths := make([]string, 0, len(files))
-			for _, file := range files {
-				paths = append(paths, file.path)
-			}
-			treenode.ClearRedundantBlockTrees(boxID, paths)
+		paths := make([]string, 0, len(files))
+		for _, file := range files {
+			paths = append(paths, file.path)
 		}
+		treenode.ClearRedundantBlockTrees(boxID, paths)
 		pending, pendingErr := treenode.PendingDocumentMetadata(boxID)
 		for _, doc := range pending {
 			if pendingErr = filesys.RecoverDocumentMetadataWrite(doc); pendingErr != nil {

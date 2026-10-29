@@ -3706,6 +3706,8 @@ export class ListMindmapView {
             const node = this.model.nodes.get(id);
             const kind = siblingShortcut ? "sibling" : "child";
             if (!node || (kind === "sibling" && node.virtual)) {
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
             this.finishThen(() => {

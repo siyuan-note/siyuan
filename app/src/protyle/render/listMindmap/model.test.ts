@@ -388,7 +388,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
-            matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
+            matchHotKey: (binding: {custom: string} | undefined, event: KeyboardEvent) => !!binding?.custom &&
+                (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
+                binding.custom === "⌘" + event.key.toUpperCase(),
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
             preserveUndoViewport: () => () => {},
             isEncryptedBox: () => false,
@@ -498,6 +500,60 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await new Promise(resolve => setTimeout(resolve, 0));
         check.equal(target.view.getSelectedId(), followingID, "after entering editing, deletion keeps the normal next-sibling policy");
         check.equal(operations.at(-1).doOperations[0].context.undoFocusId, followingID);
+        // 创建副本快捷键在节点选择态新增同级节点，空白画布仍交给外层块快捷键处理。
+        let outerDuplicates = 0;
+        const duplicate = (key: string, init: KeyboardEventInit = {}) => {
+            const event = new KeyboardEvent("keydown", {key, ctrlKey: true, bubbles: true, cancelable: true, ...init});
+            target.host.dispatchEvent(event);
+            return event;
+        };
+        const receiveDuplicate = () => outerDuplicates++;
+        root.addEventListener("keydown", receiveDuplicate);
+        for (const key of ["d", "p"]) {
+            window.siyuan.config.keymap.editor.general.duplicate = {default: "⌘D", custom: "⌘" + key.toUpperCase()};
+            for (const modifier of [{ctrlKey: true}, {ctrlKey: false, metaKey: true}]) {
+                target.view.focusNode(itemID);
+                const count = operations.length;
+                const beforeChildren = target.model.nodes.get(itemID).children.length;
+                check.equal(duplicate(key, modifier).defaultPrevented, true);
+                await new Promise(resolve => setTimeout(resolve, 0));
+                const created = target.model.nodes.get(target.view.getSelectedId());
+                check.notEqual(created.id, itemID);
+                check.equal(created.parentId, target.model.nodes.get(itemID).parentId);
+                check.equal(created.element.previousElementSibling.dataset.nodeId, itemID);
+                check.equal(created.children.length, 0, "node insertion does not duplicate the source branch");
+                check.equal(target.model.nodes.get(itemID).children.length, beforeChildren);
+                check.equal(operations.length, count + 1, "insertion uses one undoable transaction");
+                check.equal(outerDuplicates, 0, "selected-node shortcuts never reach whole-map duplication");
+                check.equal(operations.at(-1).undoOperations[0].context.undoFocusId, itemID);
+                check.equal(operations.at(-1).doOperations[0].context.undoFocusId, created.id);
+                await target.undo(false);
+                check.equal(target.model.nodes.has(created.id), false);
+                await target.undo(true);
+                check.equal(target.model.nodes.has(created.id), true);
+            }
+        }
+        target.view.focusNode(itemID);
+        const count = operations.length;
+        check.equal(duplicate("p", {repeat: true}).defaultPrevented, true);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(operations.length, count, "holding the shortcut does not insert repeatedly");
+        target.view.clearSelection();
+        check.equal(duplicate("p").defaultPrevented, false);
+        check.equal(outerDuplicates, 1, "a canvas with no selected node keeps whole-map duplication");
+        target.view.focusNode(target.model.root.id);
+        check.equal(duplicate("p").defaultPrevented, true);
+        check.equal(outerDuplicates, 1, "the virtual root cannot fall back to whole-map duplication");
+        target.view.focusNode(itemID);
+        target.view.setEditing(itemID);
+        check.equal(duplicate("p").defaultPrevented, false, "text editing keeps its own shortcut routing");
+        target.view.setEditing();
+        target.view.setReadOnly(true);
+        duplicate("p");
+        check.equal(operations.length, count, "read-only maps cannot insert nodes");
+        target.view.setReadOnly(false);
+        root.removeEventListener("keydown", receiveDuplicate);
+        delete window.siyuan.config.keymap.editor.general.duplicate;
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }

@@ -458,7 +458,8 @@ class ListMindmapController {
             },
             isAddSiblingShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddSibling;
-                return !!key && matchHotKey(key, event);
+                return !!key && matchHotKey(key, event) ||
+                    matchHotKey(window.siyuan.config.keymap.editor.general.duplicate, event);
             },
             isAddChildShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddChild;

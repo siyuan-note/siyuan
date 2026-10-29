@@ -270,18 +270,28 @@
     left: 0;
     pointer-events: none;
     color: var(--b3-theme-primary);
-    border: 1px solid currentColor;
+    border-radius: var(--b3-border-radius);
+    z-index: 4;
+  }
+
+  &__document-viewport-surface {
+    position: absolute;
+    pointer-events: none;
+    color: var(--b3-theme-primary);
+    z-index: 4;
+    // 阴影与背景宽度支持小数 CSS 像素，避免 border 将设备像素宽度再次取整。
+    box-shadow: inset 0 0 0 var(--mindmap-grid-stroke) currentColor;
     border-radius: var(--b3-border-radius);
     overflow: hidden;
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px),
-    radial-gradient(circle, currentColor 1px, transparent 1px);
-    background-image: radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px),
-    radial-gradient(circle, color-mix(in srgb, currentColor 35%, transparent) 1px, transparent 1px);
+    background-image: conic-gradient(at var(--mindmap-grid-dot) var(--mindmap-grid-dot), transparent 75%, currentColor 0),
+    conic-gradient(at var(--mindmap-grid-dot) var(--mindmap-grid-dot), transparent 75%, currentColor 0);
+    background-image: conic-gradient(at var(--mindmap-grid-dot) var(--mindmap-grid-dot), transparent 75%, color-mix(in srgb, currentColor 40%, transparent) 0),
+    conic-gradient(at var(--mindmap-grid-dot) var(--mindmap-grid-dot), transparent 75%, color-mix(in srgb, currentColor 40%, transparent) 0);
     // 横纵点线组成 96px 大格，每 12px 一点；网格固定于取景框，不随导图缩放。
     background-size: 12px 96px, 96px 12px;
-    background-position: center;
+    background-position: calc(var(--mindmap-grid-x) - var(--mindmap-grid-dot) / 2)
+    calc(var(--mindmap-grid-y) - var(--mindmap-grid-dot) / 2);
     box-sizing: border-box;
-    z-index: 4;
 
     &::before,
     &::after {
@@ -293,18 +303,27 @@
     &::before {
       top: 0;
       bottom: 0;
-      left: 50%;
-      border-left: 1px dashed currentColor;
-      transform: translateX(-50%);
+      left: calc(var(--mindmap-grid-x) - var(--mindmap-grid-dot) / 2);
+      width: var(--mindmap-grid-dot);
+      // 中心轴只在相邻网格点之间补同宽方点，原点和已有刻度不重复叠加。
+      background-image: linear-gradient(to bottom, currentColor var(--mindmap-grid-dot), transparent 0);
+      background-size: 100% 12px;
+      background-position: 0 calc(var(--mindmap-grid-y) + var(--mindmap-grid-half-step) - var(--mindmap-grid-dot) / 2);
     }
 
     &::after {
       left: 0;
       right: 0;
-      top: 50%;
-      border-top: 1px dashed currentColor;
-      transform: translateY(-50%);
+      top: calc(var(--mindmap-grid-y) - var(--mindmap-grid-dot) / 2);
+      height: var(--mindmap-grid-dot);
+      background-image: linear-gradient(to right, currentColor var(--mindmap-grid-dot), transparent 0);
+      background-size: 12px 100%;
+      background-position: calc(var(--mindmap-grid-x) + var(--mindmap-grid-half-step) - var(--mindmap-grid-dot) / 2) 0;
     }
+  }
+
+  &__document-viewport[hidden] + &__document-viewport-surface {
+    display: none;
   }
 
   &__selection-box {
@@ -1139,6 +1158,7 @@
     &__selection-box,
     &__selection-input,
     &__document-viewport,
+    &__document-viewport-surface,
     &__inspector-popover,
     &__add-bridge,
     &__fold,

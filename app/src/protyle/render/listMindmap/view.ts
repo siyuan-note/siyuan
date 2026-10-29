@@ -151,6 +151,7 @@ export class ListMindmapView {
     private summaryPending = false;
     private readonly selectionBox = createElement("div", "mindmap-view__selection-box");
     private readonly documentViewport = createElement("div", "mindmap-view__document-viewport");
+    private readonly documentViewportSurface = createElement("div", "mindmap-view__document-viewport-surface");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -247,7 +248,7 @@ export class ListMindmapView {
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.documentViewport.hidden = true;
         this.documentViewport.setAttribute("aria-hidden", "true");
-        this.viewport.append(this.canvas, this.world, this.documentViewport);
+        this.viewport.append(this.canvas, this.world, this.documentViewport, this.documentViewportSurface);
         this.selectionInput.contentEditable = "plaintext-only";
         this.selectionInput.tabIndex = -1;
         this.selectionInput.hidden = true;
@@ -4486,6 +4487,27 @@ export class ListMindmapView {
         this.documentViewport.style.width = `${width}px`;
         this.documentViewport.style.height = `${height}px`;
         this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;
+        // 装饰层独立于逻辑框的半像素变换，避免合成时重新采样；视角仍按精确取景范围应用。
+        const ratio = window.devicePixelRatio || 1;
+        const rect = this.documentViewport.getBoundingClientRect();
+        const left = Math.round(rect.left * ratio) / ratio;
+        const top = Math.round(rect.top * ratio) / ratio;
+        const right = Math.round(rect.right * ratio) / ratio;
+        const bottom = Math.round(rect.bottom * ratio) / ratio;
+        const strokePixels = Math.max(1, Math.round(ratio));
+        const stroke = strokePixels / ratio;
+        const dotPixels = Math.max(1, Math.round(2 * ratio));
+        const center = (value: number) => (Math.round(value * ratio - dotPixels / 2) + dotPixels / 2) / ratio;
+        const surface = this.documentViewportSurface.style;
+        surface.left = `${left - rect.left + x}px`;
+        surface.top = `${top - rect.top + y}px`;
+        surface.width = `${right - left}px`;
+        surface.height = `${bottom - top}px`;
+        surface.setProperty("--mindmap-grid-stroke", `${stroke}px`);
+        surface.setProperty("--mindmap-grid-dot", `${dotPixels / ratio}px`);
+        surface.setProperty("--mindmap-grid-half-step", `${Math.round(6 * ratio) / ratio}px`);
+        surface.setProperty("--mindmap-grid-x", `${center(rect.left + rect.width / 2) - left}px`);
+        surface.setProperty("--mindmap-grid-y", `${center(rect.top + rect.height / 2) - top}px`);
     }
 
     private restoreViewport() {

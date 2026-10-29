@@ -60,6 +60,8 @@ const bootChild = async (sources) => {
         const token = new URLSearchParams(location.search).get("settingsWindowToken");
         window.opener.dispatchEvent(new CustomEvent("siyuan-settings-host-" + token, {detail: resolve}));
     });
+    require("node:assert/strict").equal(JSON.stringify(host.getBreadcrumbButtonCatalogSnapshot()),
+        JSON.stringify([{key: "plugin:owner:button", label: "owner - Owner button"}]));
     class Plugin {openSetting() {}}
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
@@ -200,6 +202,10 @@ const runCases = async (sources) => {
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
     const settingInterface = loadRendererModule(sources.settingInterface, {electron: {ipcRenderer}});
+    const breadcrumbRegistry = loadRendererModule(sources.breadcrumbRegistry, {});
+    breadcrumbRegistry.breadcrumbButtonRegistry.set("owner", {
+        id: "button", title: "Owner button", icon: "iconFile", callback() {},
+    });
     const native = loadRendererModule(sources.native, {
         electron: {ipcRenderer}, "../../util/genID": {genUUID}, "../../protyle/util/compatibility": {setStorageVal() {}},
         "../../layout/util": {exportLayout: async options => options.cb()}, "../../dialog/processSystem": {exitSiYuan: async () => {}},
@@ -211,6 +217,7 @@ const runCases = async (sources) => {
         "../../util/processTitle": titles,
         "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({})},
         "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
+        "../../plugin/breadcrumbButtonRegistry": breadcrumbRegistry,
         "./taskBlocker": {hasNativeSettingTasks: () => false},
         "../bazaar/openPath": bazaarPath,
         "../tabs/compactMode": {isCompactModeEnabled: () => false},
@@ -478,6 +485,7 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
+            breadcrumbRegistry: "plugin/breadcrumbButtonRegistry.ts",
             overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",
             settingInterface: "config/setting/interface.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",

@@ -31,6 +31,15 @@ const applyMenuConfig = (menuElement: HTMLElement) => {
     /// #endif
 };
 
+// 标记「搜索框固定、内容由内层列表滚动」的菜单。标记写在内容容器上，样式见 component/_menu.scss
+// 的 .b3-menu__items--inner-scroll：容器不再自行滚动，保留 popup() 按锚点位置写入的可用高度，
+// 放不下时由内层列表滚动。返回内容容器，供调用方继续调整内层结构。
+export const markMenuInnerScroll = (menuElement: HTMLElement): HTMLElement => {
+    const itemsElement = menuElement.lastElementChild as HTMLElement;
+    itemsElement.classList.add("b3-menu__items--inner-scroll");
+    return itemsElement;
+};
+
 export class Menu {
     public element: HTMLElement;
     public data: any;   // 用于记录当前菜单的数据
@@ -618,7 +627,7 @@ export class Menu {
         (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
             window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
-        this.element.lastElementChild.classList.remove("b3-menu__items--menu");
+        this.element.lastElementChild.classList.remove("b3-menu__items--menu", "b3-menu__items--inner-scroll");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
         setPopoverMenuOpen(this.element, false);

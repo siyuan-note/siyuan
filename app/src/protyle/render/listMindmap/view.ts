@@ -151,6 +151,7 @@ export class ListMindmapView {
     private summaryPending = false;
     private readonly selectionBox = createElement("div", "mindmap-view__selection-box");
     private readonly documentViewport = createElement("div", "mindmap-view__document-viewport");
+    private readonly documentViewportSurface = createElement("div", "mindmap-view__document-viewport-surface");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -182,6 +183,13 @@ export class ListMindmapView {
     private relationFrom?: string;
     private relationPreview?: {x: number, y: number, targetId?: string};
     private editingId?: string;
+    private readonly selectionInput = createElement("div", "b3-text-field mindmap-view__selection-input");
+    private selectionInputId?: string;
+    private selectionInputRevision = 0;
+    private selectionCompositionRevision = 0;
+    private selectionComposing = false;
+    private selectionCompositionEnding = false;
+    private touchInput = false;
     private pointer?: PointerState;
     private pointerCapture?: HTMLElement;
     private pinching = false;
@@ -240,7 +248,13 @@ export class ListMindmapView {
         this.zoomLabel = createElement("span", "mindmap-view__zoom");
         this.documentViewport.hidden = true;
         this.documentViewport.setAttribute("aria-hidden", "true");
-        this.viewport.append(this.canvas, this.world, this.documentViewport);
+        this.viewport.append(this.canvas, this.world, this.documentViewport, this.documentViewportSurface);
+        this.selectionInput.contentEditable = "plaintext-only";
+        this.selectionInput.tabIndex = -1;
+        this.selectionInput.hidden = true;
+        this.selectionInput.setAttribute("role", "textbox");
+        this.selectionInput.setAttribute("aria-label", this.label("text"));
+        this.world.append(this.selectionInput);
         this.tooltip.hidden = true;
         this.tooltip.setAttribute("role", "tooltip");
         this.colorProbe.setAttribute("aria-hidden", "true");
@@ -268,6 +282,38 @@ export class ListMindmapView {
         this.viewport.append(this.selectionBox);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
+        this.listen(options.host, "pointerdown", (event: PointerEvent) => {
+            this.touchInput = event.pointerType === "touch";
+        }, {capture: true});
+        this.listen(options.host, "focus", () => queueMicrotask(() => {
+            // 等待调用方交接选区，避免嵌套 focus 被浏览器恢复到不可编辑的画布。
+            if (!this.destroyed && document.activeElement === options.host) {
+                this.focusSelectionInput();
+            }
+        }));
+        this.listen(this.selectionInput, "compositionstart", () => {
+            this.selectionComposing = true;
+            this.selectionCompositionRevision = this.selectionInputRevision;
+        });
+        this.listen(this.selectionInput, "compositionend", () => {
+            this.selectionComposing = false;
+            this.selectionCompositionEnding = true;
+            const revision = this.selectionCompositionRevision;
+            // 等待浏览器写入最后一次 input，整个组词过程保持同一输入目标。
+            queueMicrotask(() => {
+                this.selectionCompositionEnding = false;
+                if (revision === this.selectionInputRevision) {
+                    this.commitSelectionInput();
+                } else if (!this.selectionComposing) {
+                    this.selectionInput.textContent = "";
+                }
+            });
+        });
+        this.listen(this.selectionInput, "input", (event: InputEvent) => {
+            if (!event.isComposing && !this.selectionComposing && !this.selectionCompositionEnding) {
+                this.commitSelectionInput();
+            }
+        });
         this.listen(options.host, "pointerdown", this.activatePointer, {capture: true});
         this.listen(options.host, "click", this.activatePointer, {capture: true});
         this.listen(options.host, "click", (event: MouseEvent) => {
@@ -1193,6 +1239,7 @@ export class ListMindmapView {
         this.setInteractionActive(true);
         this.selectNode(id);
         this.options.host.focus({preventScroll: true});
+        this.focusSelectionInput();
         this.queueInspectorLayout(reveal);
         if (reveal) {
             this.revealNode(id);
@@ -1204,6 +1251,7 @@ export class ListMindmapView {
             this.nodeElements.get(this.editingId)?.classList.remove("mindmap-view__node--editing");
         }
         this.editingId = id;
+        this.syncSelectionInput();
         if (id) {
             this.setInteractionActive(true);
             this.destroyContentViews(id);
@@ -1211,6 +1259,62 @@ export class ListMindmapView {
             this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
         }
         this.refreshLayout();
+    }
+
+    private syncSelectionInput() {
+        const focused = document.activeElement === this.selectionInput;
+        const id = !this.destroyed && !this.readOnly && !this.editingId && !this.relationFrom &&
+            !this.selectedRelation && !this.selectedSummary && !this.selectedEdge &&
+            this.getSelectedIds().length === 1 && this.model.nodes.has(this.selectedId) ? this.selectedId : undefined;
+        if (id !== this.selectionInputId) {
+            this.selectionInputId = id;
+            this.selectionInputRevision++;
+            this.selectionInput.textContent = "";
+            this.selectionComposing = false;
+            this.selectionCompositionEnding = false;
+        }
+        this.selectionInput.hidden = !id;
+        const position = this.positions.get(id);
+        if (position) {
+            this.selectionInput.style.left = `${position.x}px`;
+            this.selectionInput.style.top = `${position.y}px`;
+            this.selectionInput.style.width = `${position.width}px`;
+        }
+        if (!id && focused) {
+            this.options.host.focus({preventScroll: true});
+        }
+    }
+
+    private focusSelectionInput() {
+        this.syncSelectionInput();
+        // 触屏点选仍保持画布焦点，避免仅选择节点就弹出软键盘。
+        if (this.selectionInputId && !this.touchInput &&
+            !document.body.matches(".body--ios, .body--android, .body--harmony")) {
+            this.selectionInput.focus({preventScroll: true});
+        }
+    }
+
+    private commitSelectionInput() {
+        const id = this.selectionInputId;
+        const revision = this.selectionInputRevision;
+        if (!id || this.selectionComposing || this.selectionCompositionEnding || !this.selectionInput.textContent) {
+            return;
+        }
+        this.finishThen(() => {
+            if (revision !== this.selectionInputRevision || this.readOnly || this.editingId || this.selectionComposing) {
+                return;
+            }
+            const text = this.selectionInput.textContent;
+            if (!text) {
+                return;
+            }
+            if (this.model.nodes.get(id)?.virtual) {
+                this.editRootTitle(id, false, text);
+            } else {
+                this.setEditing(id);
+                this.options.onEdit?.(id, this.getContentHost(id), text);
+            }
+        });
     }
 
     public refreshLayout() {
@@ -2052,6 +2156,7 @@ export class ListMindmapView {
         const height = this.viewport.clientHeight;
         this.resizeViewport(width, height);
         this.world.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
+        this.syncSelectionInput();
         this.rememberViewport();
         this.updateDocumentViewport();
         this.zoomLabel.textContent = `${Math.round(this.scale * 100)}%`;
@@ -2640,12 +2745,14 @@ export class ListMindmapView {
             if (event.ctrlKey || event.metaKey || this.multiSelect) {
                 this.suppressLinkClick = true;
                 this.options.host.focus({preventScroll: true});
+                this.focusSelectionInput();
                 this.cancelPointer();
                 return;
             }
         }
         if ((!this.editingId || id) && !this.isTemporaryPan(event)) {
             this.options.host.focus({preventScroll: true});
+            this.focusSelectionInput();
         }
         // 在捕获指针改变悬停状态前记录控件所属节点，避免拖动时重算整张脑图。
         const hiddenControls = Array.from(this.world.querySelectorAll<HTMLElement>(
@@ -3391,9 +3498,9 @@ export class ListMindmapView {
 
     private copySelection = (event: ClipboardEvent) => {
         const cut = event.type === "cut";
-        if (event.defaultPrevented || this.editingId || this.relationFrom ||
+        if (event.defaultPrevented || this.editingId || this.relationFrom || this.selectionComposing ||
             cut && this.readOnly || !this.options.onCopy || !this.getSelectedIds().length ||
-            (event.target as HTMLElement).isContentEditable ||
+            (event.target !== this.selectionInput && (event.target as HTMLElement).isContentEditable) ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
             return;
         }
@@ -3402,9 +3509,9 @@ export class ListMindmapView {
     };
 
     private pasteSelection = (event: ClipboardEvent) => {
-        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom ||
+        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.selectionComposing ||
             !this.options.onPaste || this.getSelectedIds().length !== 1 ||
-            (event.target as HTMLElement).isContentEditable ||
+            (event.target !== this.selectionInput && (event.target as HTMLElement).isContentEditable) ||
             (event.target as HTMLElement).closest("input, textarea, select")) {
             return;
         }
@@ -3446,7 +3553,15 @@ export class ListMindmapView {
             }
             return;
         }
-        const target = event.target as HTMLElement;
+        const selectionInput = event.target === this.selectionInput;
+        if (selectionInput && (this.selectionComposing || this.selectionCompositionEnding || event.isComposing ||
+            event.key === "Process" || event.key === "Dead" || event.keyCode === 229 ||
+            !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== " " && Array.from(event.key).length === 1)) {
+            // 原生输入事件提供实际文本，keydown 的字母不能代替输入法结果。
+            event.stopPropagation();
+            return;
+        }
+        const target = selectionInput ? this.options.host : event.target as HTMLElement;
         const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
             event.keyCode === 229;
         if (target.closest("input, textarea, select, audio, video, iframe") ||
@@ -3592,6 +3707,8 @@ export class ListMindmapView {
             const node = this.model.nodes.get(id);
             const kind = siblingShortcut ? "sibling" : "child";
             if (!node || (kind === "sibling" && node.virtual)) {
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
             this.finishThen(() => {
@@ -3807,16 +3924,77 @@ export class ListMindmapView {
             control.insertAdjacentHTML("beforeend",
                 '<svg class="color__square-mark" aria-hidden="true"><use xlink:href="#iconSelect"></use></svg>');
         });
-        // 触屏沿用原生横向滚动，鼠标支持拖动和滚轮浏览；拖动完成后不触发色卡点击。
+        // 滚轮手势期间暂停吸附，横向位移由浏览器处理，纵向位移累计后写入；触屏沿用原生滚动。
         let drag: {id: number, x: number, scroll: number, scale: number};
         let moved = false;
+        let wheel: {position: number, direction: number, target?: number};
+        let wheelFrame = 0;
         let wheelTimer: number;
-        const snap = () => {
-            if (!drag) {
+        let settleTimer: number;
+        let nativeScrolling = false;
+        let nativeDirection = 0;
+        const stopWheel = (restore = true) => {
+            window.clearTimeout(wheelTimer);
+            window.clearTimeout(settleTimer);
+            cancelAnimationFrame(wheelFrame);
+            wheelFrame = 0;
+            if (wheel?.target !== undefined) {
+                palette.scrollTo({left: palette.scrollLeft, behavior: "instant"});
+            }
+            wheel = undefined;
+            nativeScrolling = false;
+            if (restore && !drag) {
                 palette.removeAttribute("data-scrolling");
             }
         };
+        const snap = (direction = 0, position = palette.scrollLeft) => {
+            if (drag || !palette.isConnected) {
+                stopWheel();
+                return;
+            }
+            cancelAnimationFrame(wheelFrame);
+            wheelFrame = 0;
+            const step = parseFloat(getComputedStyle(palette).gridTemplateColumns);
+            if (!(step > 0)) {
+                stopWheel();
+                return;
+            }
+            // 纵向滚轮沿输入方向停靠，避免小于半列的滚动反复回到原列。
+            const column = direction > 0 ? Math.ceil((position - .001) / step) :
+                direction < 0 ? Math.floor((position + .001) / step) : Math.round(position / step);
+            const target = Math.max(0, Math.min(palette.scrollWidth - palette.clientWidth, column * step));
+            wheel = {position, direction, target};
+            palette.setAttribute("data-scrolling", "");
+            palette.scrollTo({left: target, behavior:
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+            // 部分 WebView 没有 scrollend；超时后完成对齐并恢复原生吸附。
+            settleTimer = window.setTimeout(() => {
+                if (palette.isConnected) {
+                    palette.scrollLeft = target;
+                }
+                stopWheel();
+            }, 500);
+        };
+        const waitForNativeScroll = () => {
+            window.clearTimeout(wheelTimer);
+            wheelTimer = window.setTimeout(() => {
+                nativeScrolling = false;
+                snap(nativeDirection);
+            }, 240);
+        };
+        palette.addEventListener("scroll", () => {
+            if (nativeScrolling) {
+                waitForNativeScroll();
+            }
+        }, {passive: true});
+        palette.addEventListener("scrollend", () => {
+            if (wheel?.target !== undefined && Math.abs(palette.scrollLeft - wheel.target) < 1) {
+                stopWheel();
+            }
+        });
+        palette.addEventListener("keydown", () => stopWheel());
         palette.addEventListener("pointerdown", (event: PointerEvent) => {
+            stopWheel();
             moved = false;
             if (event.pointerType !== "mouse" || event.button !== 0 ||
                 palette.scrollWidth <= palette.clientWidth) {
@@ -3824,6 +4002,22 @@ export class ListMindmapView {
             }
             drag = {id: event.pointerId, x: event.clientX, scroll: palette.scrollLeft,
                 scale: palette.getBoundingClientRect().width / palette.offsetWidth || 1};
+        });
+        const finishDrag = (event: PointerEvent) => {
+            if (drag?.id === event.pointerId) {
+                drag = undefined;
+                if (moved) {
+                    snap();
+                }
+            }
+        };
+        palette.addEventListener("pointerup", finishDrag);
+        palette.addEventListener("pointercancel", finishDrag);
+        palette.addEventListener("lostpointercapture", finishDrag);
+        palette.addEventListener("pointerleave", () => {
+            if (drag && !moved) {
+                drag = undefined;
+            }
         });
         palette.addEventListener("pointermove", (event: PointerEvent) => {
             if (!drag || event.pointerId !== drag.id) {
@@ -3842,21 +4036,6 @@ export class ListMindmapView {
             palette.scrollLeft = drag.scroll - delta;
             event.preventDefault();
         });
-        const end = (event: PointerEvent) => {
-            if (drag?.id === event.pointerId) {
-                drag = undefined;
-                snap();
-            }
-        };
-        palette.addEventListener("pointerup", end);
-        palette.addEventListener("pointercancel", end);
-        palette.addEventListener("lostpointercapture", end);
-        palette.addEventListener("pointerleave", () => {
-            if (!moved) {
-                drag = undefined;
-                snap();
-            }
-        });
         palette.addEventListener("click", event => {
             if (moved && event.detail !== 0) {
                 event.preventDefault();
@@ -3866,18 +4045,55 @@ export class ListMindmapView {
         }, {capture: true});
         palette.addEventListener("wheel", (event: WheelEvent) => {
             if (event.ctrlKey || event.metaKey || palette.scrollWidth <= palette.clientWidth) {
+                stopWheel();
                 return;
             }
-            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-            if (delta) {
-                palette.setAttribute("data-scrolling", "");
-                window.clearTimeout(wheelTimer);
-                const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
-                    event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
-                palette.scrollLeft += delta * unit;
-                wheelTimer = window.setTimeout(snap, 160);
+            if (drag) {
                 event.preventDefault();
+                return;
             }
+            // 同一横向手势即使末尾只剩纵向抖动，也由浏览器处理，避免轴向切换。
+            if (event.deltaX || event.shiftKey || nativeScrolling) {
+                if (!nativeScrolling) {
+                    stopWheel(false);
+                    nativeScrolling = true;
+                    nativeDirection = 0;
+                    palette.setAttribute("data-scrolling", "");
+                }
+                if (event.deltaX) {
+                    nativeDirection = Math.sign(event.deltaX);
+                } else if (event.shiftKey && event.deltaY) {
+                    nativeDirection = Math.sign(event.deltaY);
+                }
+                waitForNativeScroll();
+                return;
+            }
+            if (!event.deltaY) {
+                return;
+            }
+            if (!wheel || wheel.target !== undefined) {
+                stopWheel(false);
+                wheel = {position: palette.scrollLeft, direction: 0};
+                palette.setAttribute("data-scrolling", "");
+            }
+            const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+                event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? palette.clientWidth : 1;
+            wheel.position = Math.max(0, Math.min(palette.scrollWidth - palette.clientWidth,
+                wheel.position + event.deltaY * unit));
+            wheel.direction = Math.sign(event.deltaY);
+            if (!wheelFrame) {
+                wheelFrame = requestAnimationFrame(() => {
+                    wheelFrame = 0;
+                    if (!palette.isConnected) {
+                        stopWheel();
+                    } else if (wheel) {
+                        palette.scrollLeft = wheel.position;
+                    }
+                });
+            }
+            window.clearTimeout(wheelTimer);
+            wheelTimer = window.setTimeout(() => snap(wheel?.direction, wheel?.position), 160);
+            event.preventDefault();
         }, {passive: false});
         const row = createElement("div", "mindmap-view__palette-row");
         row.style.setProperty("--mindmap-palette-columns", String(columns - controls.length));
@@ -4271,6 +4487,27 @@ export class ListMindmapView {
         this.documentViewport.style.width = `${width}px`;
         this.documentViewport.style.height = `${height}px`;
         this.documentViewport.style.transform = `translate(${x}px, ${y}px)`;
+        // 装饰层独立于逻辑框的半像素变换，避免合成时重新采样；视角仍按精确取景范围应用。
+        const ratio = window.devicePixelRatio || 1;
+        const rect = this.documentViewport.getBoundingClientRect();
+        const left = Math.round(rect.left * ratio) / ratio;
+        const top = Math.round(rect.top * ratio) / ratio;
+        const right = Math.round(rect.right * ratio) / ratio;
+        const bottom = Math.round(rect.bottom * ratio) / ratio;
+        const strokePixels = Math.max(1, Math.round(ratio));
+        const stroke = strokePixels / ratio;
+        const dotPixels = Math.max(1, Math.round(2 * ratio));
+        const center = (value: number) => (Math.round(value * ratio - dotPixels / 2) + dotPixels / 2) / ratio;
+        const surface = this.documentViewportSurface.style;
+        surface.left = `${left - rect.left + x}px`;
+        surface.top = `${top - rect.top + y}px`;
+        surface.width = `${right - left}px`;
+        surface.height = `${bottom - top}px`;
+        surface.setProperty("--mindmap-grid-stroke", `${stroke}px`);
+        surface.setProperty("--mindmap-grid-dot", `${dotPixels / ratio}px`);
+        surface.setProperty("--mindmap-grid-half-step", `${Math.round(6 * ratio) / ratio}px`);
+        surface.setProperty("--mindmap-grid-x", `${center(rect.left + rect.width / 2) - left}px`);
+        surface.setProperty("--mindmap-grid-y", `${center(rect.top + rect.height / 2) - top}px`);
     }
 
     private restoreViewport() {

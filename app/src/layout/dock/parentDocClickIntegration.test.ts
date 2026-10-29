@@ -38,9 +38,10 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     const attributes: Record<string, string> = {
         "data-type": "navigation-file", "data-path": "/doc.sy", "data-node-id": "doc", "data-count": "4",
     };
+    const expansion = {value: expanded};
     const row = {isConnected: true, getAttribute: (key: string) => attributes[key],
-        querySelector: () => expanded ? {} : null};
-    const text = {tagName: "SPAN", parentElement: row, closest: () => text,
+        dataset: {notebookId: "box"}};
+    const text = {tagName: "SPAN", parentElement: row, closest: (selector: string) => selector.startsWith("li[") ? row : text,
         classList: {contains: (name: string) => name === "b3-list-item__text"}, isEqualNode: () => false};
     const event = {target: text, button: 0, preventDefault() {}, stopPropagation() {}};
     const response = {code: 0, data: {box: "box", path: "/doc.sy", files: [] as {id: string}[]}};
@@ -51,24 +52,26 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     const panel = {
         element: {}, app: {}, parentDocClick,
         setCurrent() {}, toggleLeaf: toggle, toggleTreeItem: toggle,
-        onLsHTML: () => calls.push("render"), getOpenPaths() {},
+        docTree: {
+            getItemFromElement: () => ({id: "doc", occurrenceKey: "box/doc", path: attributes["data-path"]}),
+            getItem: () => ({path: attributes["data-path"]}),
+            isExpanded: () => expansion.value,
+            itemAtDirectoryIndex: (key: string, index: number) => {
+                assert.equal(key, "box/doc");
+                assert.equal(index, 0);
+                calls.push("request");
+                return pending.then(result => result.code === 0 ? {id: "child"} : undefined);
+            },
+            toggle: () => calls.push("toggle"),
+        },
     };
     const click = loadClick(mobile, {
         window: {siyuan: {config: {fileTree: config}, menus: {menu: {remove() {}}}}},
         options: {app: {}}, Constants: {SIYUAN_APPID: "app"},
         isNotCtrl: () => true, isPhablet: () => false, setPanelFocus() {},
-        hasTopClosestByTag: () => ({getAttribute: () => "box"}),
-        fetchSyncPost: (path: string, request: {notebook: string, path: string}) => {
-            assert.equal(path, "/api/filetree/listDocsByPath");
-            assert.equal(request.notebook, "box");
-            assert.equal(request.path, "/doc.sy");
-            calls.push("request");
-            return pending;
-        },
-        toggleFileTree: (_row: unknown, _collapse: unknown, expand: () => void) => expand(),
         openFileById: () => calls.push("open"), openMobileFileById: () => calls.push("open"),
     });
-    return {calls, config, attributes, row,
+    return {calls, config, attributes, row, expansion,
         click: () => click.call(panel, ...(mobile ? [row, "box"] : [event])),
         resolve: (code = 0) => resolveRequest({...response, code})};
 };
@@ -99,7 +102,7 @@ test("double-click mode prefetches immediately and double clicks discard child r
     }
 });
 
-test("desktop and mobile single clicks wait for data without requesting children twice", async () => {
+test("desktop and mobile single clicks wait for the first range before expanding", async () => {
     const contexts = [false, true].map(mobile => harness(mobile, 2));
     contexts.forEach(h => h.click());
     await delay(330);
@@ -108,7 +111,7 @@ test("desktop and mobile single clicks wait for data without requesting children
         h.resolve();
     });
     await delay(0);
-    contexts.forEach(h => assert.deepEqual(h.calls, ["request", "render"]));
+    contexts.forEach(h => assert.deepEqual(h.calls, ["request", "toggle"]));
 });
 
 test("prefetch results cannot apply after settings, paths, attachment or expansion state change", async () => {
@@ -118,7 +121,7 @@ test("prefetch results cannot apply after settings, paths, attachment or expansi
         if (change === 0) { h.config.parentDocTitleClickMode = 1; }
         if (change === 1) { h.attributes["data-path"] = "/moved.sy"; }
         if (change === 2) { h.row.isConnected = false; }
-        if (change === 3) { h.row.querySelector = () => ({}); }
+        if (change === 3) { h.expansion.value = true; }
         h.resolve();
         return h;
     }));
@@ -126,7 +129,7 @@ test("prefetch results cannot apply after settings, paths, attachment or expansi
     contexts.forEach(h => assert.deepEqual(h.calls, ["request"]));
 });
 
-test("failed child requests never render prefetched lists", async () => {
+test("failed range requests never expand a prefetched branch", async () => {
     const contexts = [false, true].map(mobile => harness(mobile, 2));
     contexts.forEach(h => { h.click(); h.resolve(-1); });
     await delay(330);

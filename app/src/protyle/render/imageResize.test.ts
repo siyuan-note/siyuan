@@ -36,6 +36,36 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     context.fillRect(0, 0, 200, 100);
     const url = canvas.toDataURL();
     const settle = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    {
+        const batch = document.createElement("div");
+        batch.className = "protyle-wysiwyg";
+        batch.innerHTML = lute.Md2BlockDOM(Array.from({length: 24}, () => "![batch](assets/sample.png)").join("\n\n"));
+        document.body.append(batch);
+        let measuring = true;
+        let reads = 0;
+        batch.querySelectorAll("img").forEach(image => {
+            for (const property of ["clientWidth", "clientHeight", "offsetLeft", "offsetTop"]) {
+                const getter = Object.getOwnPropertyDescriptor(
+                    property.startsWith("client") ? Element.prototype : HTMLElement.prototype, property).get;
+                Object.defineProperty(image, property, {get() {
+                    if (measuring) {
+                        reads++;
+                        check.equal(batch.querySelector(".protyle-image-resize[style]"), null,
+                            "all image geometry is read before any frame receives positioning styles");
+                    }
+                    return getter.call(this);
+                }});
+            }
+        });
+        const stop = api.bindImageResize(batch);
+        check.equal(reads, 0, "initializing image controls defers layout reads");
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        measuring = false;
+        check.equal(reads, 24 * 4, "each image is measured once in the batch");
+        check.equal(batch.querySelectorAll(".protyle-image-resize[style]").length, 24);
+        stop();
+        batch.remove();
+    }
     const create = async (legacy = false) => {
         root.style.zoom = "";
         root.innerHTML = lute.Md2BlockDOM('![description](assets/sample.png "caption")');

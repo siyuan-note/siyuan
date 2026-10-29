@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -18,6 +19,68 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
+	oldConf, oldReadonly, oldContainer, oldDir := model.Conf, util.ReadOnly, util.Container, util.WorkspaceDir
+	t.Cleanup(func() {
+		// 等待设置接口发出的延迟界面刷新，避免其读取后续测试的全局配置。
+		time.Sleep(250 * time.Millisecond)
+		model.Conf, util.ReadOnly, util.Container, util.WorkspaceDir = oldConf, oldReadonly, oldContainer, oldDir
+	})
+	util.ReadOnly, util.Container, util.WorkspaceDir = true, util.ContainerStd, "desktop-session-setting"
+	for _, mode := range []string{"new", "bound", "remembered", "expired"} {
+		t.Run(mode, func(t *testing.T) {
+			model.Conf = model.NewAppConf()
+			model.Conf.AccessAuthCode = "old-password"
+			engine := gin.New()
+			engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("desktop-setting-test-key"))))
+			engine.GET("/seed", func(c *gin.Context) {
+				session := util.GetSession(c)
+				ws := util.GetWorkspaceSession(session)
+				if mode != "new" {
+					ws.AccessAuthCode = model.Conf.AccessAuthCode
+					model.BindDesktopSession(c, ws, mode == "remembered")
+					if mode == "expired" {
+						ws.DesktopSessionID = "previous-boot"
+					}
+				}
+				if err := session.Save(c); err != nil {
+					t.Fatal(err)
+				}
+			})
+			engine.POST("/api/system/setAccessAuthCode", setAccessAuthCode)
+			engine.GET("/session", func(c *gin.Context) { c.JSON(200, util.GetWorkspaceSession(util.GetSession(c))) })
+			call := func(method, path, body string, cookies []*http.Cookie) *httptest.ResponseRecorder {
+				r := httptest.NewRequest(method, "http://127.0.0.1:6806"+path, strings.NewReader(body))
+				r.RemoteAddr = "127.0.0.1:1234"
+				r.Header.Set("User-Agent", "SiYuan/3.8.9 https://b3log.org/siyuan Electron Chrome/140")
+				r.Header.Set("Content-Type", "application/json")
+				for _, value := range cookies {
+					r.AddCookie(value)
+				}
+				w := httptest.NewRecorder()
+				engine.ServeHTTP(w, r)
+				return w
+			}
+			seed := call("GET", "/seed", "", nil).Result().Cookies()
+			if mode == "new" {
+				model.Conf.AccessAuthCode = ""
+			}
+			result := call("POST", "/api/system/setAccessAuthCode", `{"accessAuthCode":"new-password"}`, seed)
+			var response struct{ Code int }
+			if err := json.Unmarshal(result.Body.Bytes(), &response); err != nil || response.Code != 0 {
+				t.Fatalf("setting password failed: %s, %v", result.Body.String(), err)
+			}
+			var ws util.WorkspaceSession
+			if err := json.Unmarshal(call("GET", "/session", "", result.Result().Cookies()).Body.Bytes(), &ws); err != nil {
+				t.Fatal(err)
+			}
+			if (ws.DesktopSessionID != "") != (mode != "remembered") || !model.IsAccessCodeSessionAuthenticated(&ws) {
+				t.Fatalf("password setting lost session policy: %+v", ws)
+			}
+		})
+	}
+}
 
 func TestSetOIDCRejectsUnverifiedEnabledConfiguration(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -278,7 +341,7 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 func TestPreserveImportedAISecrets(t *testing.T) {
 	currentMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "server", Headers: map[string]string{"Authorization": "secret"}}}}
 	current := &conf.AI{
-		Web: &conf.AIWeb{APIKey: "web-key"},
+		Web: &conf.AIWeb{APIKey: "web-key", ExaAPIKey: "exa-key"},
 		Providers: []*conf.Provider{
 			{ID: "matching", APIKey: "local-key", BaseURL: "https://example.com", Protocol: "openai"},
 			{ID: "changed-endpoint", APIKey: "endpoint-key", BaseURL: "https://local.example.com"},
@@ -301,12 +364,12 @@ func TestPreserveImportedAISecrets(t *testing.T) {
 	}
 
 	preserveImportedAISecrets(imported, current)
-	if imported.Web.APIKey != "web-key" || imported.Web.FetchProvider != "deepseek" || imported.Web.SearchProvider != "exa" {
+	if imported.Web.ExaAPIKey != "exa-key" || imported.Web.APIKey != "web-key" || imported.Web.FetchProvider != "deepseek" || imported.Web.SearchProvider != "exa" {
 		t.Fatal("web credential or independent provider selection lost on import")
 	}
-	providedWeb := &conf.AI{Web: &conf.AIWeb{APIKey: "provided-web-key"}}
+	providedWeb := &conf.AI{Web: &conf.AIWeb{APIKey: "provided-web-key", ExaAPIKey: "provided-exa-key"}}
 	preserveImportedAISecrets(providedWeb, current)
-	if providedWeb.Web.APIKey != "provided-web-key" {
+	if providedWeb.Web.ExaAPIKey != "provided-exa-key" || providedWeb.Web.APIKey != "provided-web-key" {
 		t.Fatal("provided web credential was overwritten")
 	}
 

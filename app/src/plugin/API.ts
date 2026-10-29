@@ -316,19 +316,17 @@ export const expandDocTree = async (options: {
         }
     });
     let liElement: HTMLElement;
-    let notebookId = options.id;
     const file = getModelByDockType("file") as MobileFiles | Files;
     if (typeof options.isSetCurrent === "undefined") {
         options.isSetCurrent = true;
     }
     if (isNotebook) {
-        liElement = file.element.querySelector(`.b3-list[data-url="${options.id}"]`)?.firstElementChild as HTMLElement;
+        liElement = await file.selectItem(options.id, "/", undefined, undefined, options.isSetCurrent);
     } else {
         const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
         if (response.code !== 0 || response.data.publishAccessRequired) {
             return;
         }
-        notebookId = response.data.box;
         liElement = await file.selectItem(response.data.box, response.data.path, undefined, undefined, options.isSetCurrent);
     }
     if (!liElement) {
@@ -337,11 +335,10 @@ export const expandDocTree = async (options: {
     if (options.isSetCurrent || typeof options.isSetCurrent === "undefined") {
         file.setCurrent(liElement);
     }
-    const toggleElement = liElement.querySelector(".b3-list-item__arrow");
-    if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
-        return;
+    const item = file.docTree.getItemFromElement(liElement);
+    if (item) {
+        await file.docTree.toggle(item.occurrenceKey, true);
     }
-    file.getLeaf(liElement, notebookId);
 };
 
 const openEmoji = (options: {

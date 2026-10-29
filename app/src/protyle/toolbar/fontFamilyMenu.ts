@@ -1,5 +1,6 @@
 import {toggleMenu} from "../../menus/menuToggle";
 import {Menu} from "../../plugin/Menu";
+import {markMenuInnerScroll} from "../../menus/Menu";
 import {observeFontPreview} from "../../util/fontPreview";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
@@ -322,8 +323,8 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
                     session.show(() => menu.fullscreen("bottom"));
                 } else {
                     const rect = target.getBoundingClientRect();
+                    markMenuInnerScroll(menu.element);
                     session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target}));
-                    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
                 }
             };
             target.setAttribute("aria-expanded", "true");

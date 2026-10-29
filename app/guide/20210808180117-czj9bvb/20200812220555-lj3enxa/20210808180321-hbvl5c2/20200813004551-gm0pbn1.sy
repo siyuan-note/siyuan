@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261026142807"
 	},
 	"Children": [
 		{
@@ -3603,12 +3603,76 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文档"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-hsk7yl5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-hsk7yl5",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档树按需加载，继续滚动可浏览全部可访问文档。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档树单次加载数量"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 调整每次加载量，它不限制可浏览的文档总数。最大列出数量继续限制标签列表和包含子文档的合并导出。"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-89jhslp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-89jhslp",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端文档树中，Home 和 End 分别选择已展开文档树的第一行和最后一行。按住 Shift 再按上、下方向键或 Home、End 可扩展选区，包括屏幕外的条目。定位文档时会自动加载目标所在位置。"
 				}
 			]
 		},

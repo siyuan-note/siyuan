@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
 // BuildCapabilityID 构造由来源、执行侧和提供方局部名称组成的稳定能力 ID。
@@ -156,14 +158,15 @@ type CallToolResult struct {
 // ModelAttachment 描述工具希望在下一轮模型请求中附加的多模态输入。
 // Data 只在当前运行期内存中传递，持久化时仅保存可重新解析资源的元数据。
 type ModelAttachment struct {
-	Type       string `json:"type"`
-	Data       []byte `json:"-"`
-	MIMEType   string `json:"mimeType,omitempty"`
-	Path       string `json:"path,omitempty"`
-	DocumentID string `json:"documentId,omitempty"`
-	Detail     string `json:"detail,omitempty"`
-	Width      int    `json:"width,omitempty"`
-	Height     int    `json:"height,omitempty"`
+	PDFImage   *model.PDFImageSelection `json:"pdfImage,omitempty"`
+	Type       string                   `json:"type"`
+	Data       []byte                   `json:"-"`
+	MIMEType   string                   `json:"mimeType,omitempty"`
+	Path       string                   `json:"path,omitempty"`
+	DocumentID string                   `json:"documentId,omitempty"`
+	Detail     string                   `json:"detail,omitempty"`
+	Width      int                      `json:"width,omitempty"`
+	Height     int                      `json:"height,omitempty"`
 }
 
 func (r CallToolResult) HasStructuredContent() bool {

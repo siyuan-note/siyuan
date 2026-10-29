@@ -60,14 +60,49 @@ public static class SiYuanReleaseKey {
 }
 '@
 
+function Set-VerifiedFileSignature($file, $certificate) {
+    Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1')
+    $file = [IO.Path]::GetFullPath($file)
+    $temporary = Join-Path ([IO.Path]::GetDirectoryName($file)) ('.siyuan-sign-' + [guid]::NewGuid().ToString('N') + [IO.Path]::GetExtension($file))
+    $inputFile = $null
+    try {
+        # Deny concurrent writes until the verified replacement is installed.
+        $inputFile = [IO.File]::Open($file, [IO.FileMode]::Open, [IO.FileAccess]::Read,
+                                   ([IO.FileShare]::Read -bor [IO.FileShare]::Delete))
+        $originalHash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+        $copy = [IO.File]::Create($temporary)
+        try { $inputFile.CopyTo($copy) } finally { $copy.Dispose() }
+        if ((Get-FileHash -LiteralPath $temporary -Algorithm SHA256).Hash -ne $originalHash) {
+            throw 'Signing input changed during copy'
+        }
+        $script:stage = 'signing'
+        $null = Set-AuthenticodeSignature -LiteralPath $temporary -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
+        $script:stage = 'verification'
+        $signature = Get-AuthenticodeSignature -LiteralPath $temporary
+        [Console]::Error.WriteLine('SIGNING_STATUS:' + [int]$signature.Status + ':' + [int]($null -ne $signature.TimeStamperCertificate))
+        if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $certificate.Thumbprint -or
+            $null -eq $signature.TimeStamperCertificate) { throw 'Signature or timestamp verification failed' }
+        if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $originalHash) {
+            throw 'Signing input changed before replacement'
+        }
+        [IO.File]::Replace($temporary, $file, [System.Management.Automation.Language.NullString]::Value)
+    } finally {
+        if ($null -ne $inputFile) { $inputFile.Dispose() }
+        if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) }
+    }
+}
+
 $payload = $null
 $certificate = $null
+$stage = "request"
 try {
     # PIN 仅通过标准输入传递，失败信息不包含请求内容。
     $payload = [Console]::ReadLine() | ConvertFrom-Json
     if ($payload.thumbprint -notmatch '^[0-9a-fA-F]{40}$' -or [string]::IsNullOrEmpty($payload.pin)) {
         throw "Invalid signing request"
     }
+    $stage = "certificate"
+    Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1')
     $certificate = Get-Item -LiteralPath ("Cert:\CurrentUser\My\" + $payload.thumbprint)
     if (!$certificate.HasPrivateKey -or $certificate.NotAfter -le (Get-Date) -or
         $certificate.NotBefore -ge (Get-Date) -or
@@ -78,17 +113,17 @@ try {
     if ($oid -notin @('1.2.840.113549.1.1.1', '1.2.840.10045.2.1')) {
         throw "The signing key must use RSA or ECDSA"
     }
+    $stage = "authentication"
     [SiYuanReleaseKey]::Authenticate($certificate.Handle, $payload.pin, $oid -eq '1.2.840.113549.1.1.1')
     $payload.pin = $null
     foreach ($file in $payload.files) {
-        $signature = Set-AuthenticodeSignature -LiteralPath $file -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com"
-        if ($signature.Status -ne "Valid" -or $signature.SignerCertificate.Thumbprint -ne $certificate.Thumbprint -or
-            $null -eq $signature.TimeStamperCertificate) {
-            throw "Signature or timestamp verification failed"
-        }
+        Set-VerifiedFileSignature $file $certificate
         Write-Output ("Signed and verified: " + $file)
     }
 } catch {
+    $codes = @([regex]::Matches($_.Exception.ToString(), '0x[0-9a-fA-F]{8}') | ForEach-Object { $_.Value })
+    $codes += '0x' + $_.Exception.HResult.ToString('x8')
+    [Console]::Error.WriteLine('SIGNING_DIAGNOSTIC:' + $stage + ':' + ($codes -join ','))
     [Console]::Error.WriteLine("Windows hardware signing failed; check the PIN, token, certificate and timestamp connection")
     # 仅标识设备通信中断，PIN 错误不重试，避免消耗智能卡重试次数。
     if ($_.Exception.ToString() -match '0x8010001f|0x80100068') { exit 20 }

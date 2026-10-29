@@ -355,7 +355,6 @@ const getArticle = (edit: Protyle, id: string) => {
         if (edit.protyle.element.dataset.loadingCardId !== id) {
             return;
         }
-        edit.protyle.wysiwyg.renderCustom(response.data.ial);
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
@@ -369,6 +368,8 @@ const getArticle = (edit: Protyle, id: string) => {
                 data: getResponse,
                 protyle: edit.protyle,
                 action: getResponse.code === 0 && getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
+                isValid: () => edit.protyle.element.dataset.loadingCardId === id,
+                beforeAVRender: () => edit.protyle.wysiwyg.renderCustom(response.data.ial),
             });
         });
     });

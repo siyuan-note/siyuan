@@ -19,19 +19,6 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
     lute.SetProtyleWYSIWYG(true);
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); await frame(); };
-    const resizeWindow = async (width: number, height: number) => {
-        await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
-        // 原生窗口调用返回时，渲染进程可能尚未收到新的视口尺寸。
-        // 窗口尺寸由操作系统取整，高 DPI 下可能与请求值相差 1px，因此按容差等待。
-        for (let count = 0; count < 120 &&
-            (Math.abs(innerWidth - width) > 1 || Math.abs(innerHeight - height) > 1); count++) {
-            await frame();
-        }
-        // 仍要求尺寸确实换了，只是允许 1px 的设备像素取整。
-        check.ok(Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1,
-            `viewport did not resize: ${innerWidth}x${innerHeight} vs ${width}x${height}`);
-        await settle();
-    };
     const originalWindow = {width: innerWidth, height: innerHeight};
     for (const mobile of [false, true]) {
         for (const dark of [false, true]) {
@@ -57,13 +44,32 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 onViewportChange: remember, onExit: () => {}});
             await settle();
             const viewport = host.querySelector<HTMLElement>(".mindmap-view__viewport");
+            const resizeWindow = async (width: number, height: number) => {
+                await require("electron").ipcRenderer.invoke("mindmap-fullscreen-size", width, height);
+                // 原生尺寸通知、ResizeObserver 和布局绘制分步完成；尺寸到达后还须等待导图同步。
+                // 操作系统在高 DPI 下可能产生 1px 取整，取景框的位置断言仍使用原有精度。
+                const ready = () => Math.abs(innerWidth - width) <= 1 && Math.abs(innerHeight - height) <= 1 &&
+                    view.viewportSize.width === viewport.clientWidth && view.viewportSize.height === viewport.clientHeight &&
+                    !view.frame && !view.drawFrame;
+                await settle();
+                for (let count = 0; count < 120 && !ready(); count++) {
+                    await frame();
+                }
+                check.ok(ready(), "mindmap did not finish resizing: " + JSON.stringify({
+                    requested: {width, height}, window: {width: innerWidth, height: innerHeight},
+                    viewport: {width: viewport.clientWidth, height: viewport.clientHeight},
+                    layout: view.viewportSize, frame: view.frame, drawFrame: view.drawFrame,
+                }));
+            };
             const center = () => [(viewport.clientWidth / 2 - view.offsetX) / view.scale,
                 (viewport.clientHeight / 2 - view.offsetY) / view.scale];
             const equalCenter = (expected: number[]) => center().forEach((value, index) =>
                 check.ok(Math.abs(value - expected[index]) < 1e-8, "mode changes preserve the logical center"));
             const button = (label: string) => host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
             const preview = host.querySelector<HTMLElement>(".mindmap-view__document-viewport");
+            const surface = host.querySelector<HTMLElement>(".mindmap-view__document-viewport-surface");
             check.ok(preview.hidden);
+            check.equal(getComputedStyle(surface).display, "none", "the decorative surface follows the hidden logical frame");
             check.ok(button("listMindmapDocumentLayout").hidden, "the layout control is fullscreen-only");
             const initialStyle = host.style.cssText;
             const documentRadius = getComputedStyle(host).borderTopLeftRadius;
@@ -138,30 +144,44 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             const layoutScale = view.scale;
             const root = host.querySelector<HTMLElement>(".mindmap-view__node");
             const checkGrid = () => {
-                const style = getComputedStyle(preview);
-                check.equal(style.backgroundImage.match(/radial-gradient/g)?.length, 2,
+                const style = getComputedStyle(surface);
+                check.equal(style.backgroundImage.match(/conic-gradient/g)?.length, 2,
                     "separate dot rows and columns form the grid lines");
-                check.match(style.backgroundImage, /1px/);
                 check.equal(style.backgroundSize, "12px 96px, 96px 12px");
-                check.ok(style.backgroundPosition.split(", ").every(position => position === "50% 50%"),
-                    "both dot layers share the center origin");
+                const dot = parseFloat(style.getPropertyValue("--mindmap-grid-dot"));
+                const gridX = parseFloat(style.getPropertyValue("--mindmap-grid-x"));
+                const gridY = parseFloat(style.getPropertyValue("--mindmap-grid-y"));
+                const positions = style.backgroundPosition.split(", ").map(position => position.split(" ").map(parseFloat));
+                check.ok(positions.every(position => Math.abs(position[0] + dot / 2 - gridX) < .02 &&
+                    Math.abs(position[1] + dot / 2 - gridY) < .02), "both dot layers share the guide origin");
                 check.ok(style.backgroundOrigin.split(", ").every(origin => origin === "padding-box"));
                 check.equal(style.overflow, "hidden", "dots and guides stay inside the rounded frame");
-                const vertical = getComputedStyle(preview, "::before");
-                const horizontal = getComputedStyle(preview, "::after");
-                check.equal(vertical.borderLeftStyle, "dashed");
-                check.equal(horizontal.borderTopStyle, "dashed");
-                check.equal(vertical.borderLeftColor, style.borderTopColor);
-                check.equal(horizontal.borderTopColor, style.borderTopColor);
-                const rect = preview.getBoundingClientRect();
-                const width = rect.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
-                const height = rect.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth);
+                const vertical = getComputedStyle(surface, "::before");
+                const horizontal = getComputedStyle(surface, "::after");
+                check.match(vertical.backgroundImage, /linear-gradient/);
+                check.match(horizontal.backgroundImage, /linear-gradient/);
+                check.equal(vertical.backgroundSize, "100% 12px");
+                check.equal(horizontal.backgroundSize, "12px 100%");
+                check.ok(Math.abs(parseFloat(vertical.width) - dot) < .02 &&
+                    Math.abs(parseFloat(horizontal.height) - dot) < .02, "guides and grid use equal square dots");
+                check.equal(vertical.color, style.color);
+                check.equal(horizontal.color, style.color);
+                const rect = surface.getBoundingClientRect();
+                const logical = preview.getBoundingClientRect();
                 const x = parseFloat(vertical.left) + new DOMMatrixReadOnly(vertical.transform).m41 +
-                    parseFloat(vertical.borderLeftWidth) / 2;
+                    parseFloat(vertical.width) / 2;
                 const y = parseFloat(horizontal.top) + new DOMMatrixReadOnly(horizontal.transform).m42 +
-                    parseFloat(horizontal.borderTopWidth) / 2;
-                check.ok(Math.abs(x - width / 2) < .02, "the vertical stroke center meets the center grid dot");
-                check.ok(Math.abs(y - height / 2) < .02, "the horizontal stroke center meets the center grid dot");
+                    parseFloat(horizontal.height) / 2;
+                check.ok(Math.abs(x - gridX) < .02, "the vertical stroke center meets the center grid dot");
+                check.ok(Math.abs(y - gridY) < .02, "the horizontal stroke center meets the center grid dot");
+                const deviceAligned = (value: number) => Math.abs(value * devicePixelRatio - Math.round(value * devicePixelRatio)) < .05;
+                check.ok([rect.left, rect.top, rect.right, rect.bottom,
+                    rect.left + x - dot / 2, rect.top + y - dot / 2].every(deviceAligned),
+                `frame edges and guide stroke edges align to device pixels: ${JSON.stringify({dpr: devicePixelRatio,
+                    rect: rect.toJSON(), dot, x, y, css: surface.style.cssText})}`);
+                check.ok(Math.abs(rect.left + x - logical.left - logical.width / 2) <= .53 / devicePixelRatio &&
+                    Math.abs(rect.top + y - logical.top - logical.height / 2) <= .53 / devicePixelRatio,
+                "decorative snapping stays within half a device pixel of the logical center");
                 for (const guide of [vertical, horizontal]) {
                     check.ok(Number(guide.opacity) > 0 && Number(guide.opacity) < 1);
                     check.equal(guide.pointerEvents, "none");
@@ -175,13 +195,15 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                 check.ok(Math.abs(rect.left - viewportRect.left -
                     (viewport.clientWidth - rect.width) / 2) < .1);
                 check.ok(Math.abs(rect.top - viewportRect.top -
-                    Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1);
-                const style = getComputedStyle(preview);
+                    Math.max(0, (viewport.clientHeight - rect.height) / 2)) < .1,
+                "document frame vertical position: " + JSON.stringify({mobile, dark, dpr: devicePixelRatio,
+                    top: rect.top, viewportTop: viewportRect.top, viewportHeight: viewport.clientHeight,
+                    frameHeight: rect.height, transform: preview.style.transform, size: view.viewportSize}));
+                const style = getComputedStyle(surface);
                 const canvasStyle = getComputedStyle(host);
                 check.equal(style.pointerEvents, "none", "the frame does not intercept gestures");
-                check.equal(style.borderTopStyle, "solid");
-                check.equal(style.borderTopColor, canvasStyle.outlineColor, "the frame follows the active canvas color");
-                check.equal(style.borderTopWidth, canvasStyle.outlineWidth);
+                check.match(style.boxShadow, /inset/);
+                check.equal(style.color, canvasStyle.outlineColor, "the frame follows the active canvas color");
                 check.equal(style.borderTopLeftRadius, documentRadius, "the frame keeps the document canvas radius");
                 checkGrid();
                 check.equal(button("listMindmapDocumentLayout").getAttribute("aria-pressed"), "true");
@@ -203,6 +225,7 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                     (viewport.clientHeight - expected.height) / 2) < .2,
                 "the document shows the vertical position framed in fullscreen");
                 check.ok(preview.hidden);
+                check.equal(getComputedStyle(surface).display, "none", "applied layout hides the decorative surface");
                 check.ok(button("listMindmapDocumentLayout").hidden);
             };
             button("fullscreen").click();
@@ -213,21 +236,41 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             check.equal(preview.hidden, false);
             checkFrame();
             // 奇数和小数尺寸下，验证笔画中心与网格原点，而非只验证线条边缘的百分比位置。
-            const frameStyle = preview.style.cssText;
+            const frameSize = {width: view.documentView.width, height: view.documentView.height};
             for (const [width, height] of [[320, 200], [321, 201], [320.5, 200.5], [321.25, 201.75]]) {
-                preview.style.width = `${width}px`;
-                preview.style.height = `${height}px`;
+                Object.assign(view.documentView, {width, height});
+                view.updateDocumentViewport();
                 checkGrid();
             }
-            preview.style.cssText = frameStyle;
+            Object.assign(view.documentView, frameSize);
+            view.updateDocumentViewport();
+            for (const dpr of [1, 1.25, 1.5, 2]) {
+                await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid", {
+                    width: innerWidth, height: innerHeight, dpr, background: {x: 0, y: 0}, points: [],
+                });
+                view.updateDocumentViewport();
+                checkFrame();
+            }
+            await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid-reset");
+            await settle();
+            view.updateDocumentViewport();
             checkFrame();
             // 栅格采样确认大格边上有中间刻度，格内留白，避免仅检查 CSS 字符串却绘成孤立交点。
             const gridSample = document.createElement("div");
             gridSample.style.cssText = "position:fixed;left:16px;top:16px;width:322px;height:202px;z-index:9999;" +
                 `background:${getComputedStyle(host).backgroundColor}`;
             const gridClone = preview.cloneNode(false) as HTMLElement;
-            gridClone.style.cssText = "left:0;top:0;width:321.25px;height:201.75px";
+            gridClone.style.cssText = "left:0;top:0;width:322px;height:202px";
+            const sampleSurface = surface.cloneNode(false) as HTMLElement;
+            gridClone.append(sampleSurface);
+            sampleSurface.style.cssText = "left:0;top:0;width:322px;height:202px;" +
+                "--mindmap-grid-stroke:1px;--mindmap-grid-dot:2px;--mindmap-grid-half-step:6px;" +
+                "--mindmap-grid-x:161px;--mindmap-grid-y:101px";
             gridSample.append(gridClone);
+            const hideGuides = document.createElement("style");
+            hideGuides.textContent = ".mindmap-view__document-viewport-surface[data-test-no-guides]::before," +
+                ".mindmap-view__document-viewport-surface[data-test-no-guides]::after{display:none}";
+            gridSample.append(hideGuides);
             document.body.append(gridSample);
             try {
                 for (const dpr of [1, 2]) {
@@ -245,6 +288,27 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
                         `every intermediate grid dot is visible, dpr=${dpr}, dark=${dark}: ${differences}`);
                     check.ok(differences.slice(dots.length).every(value => value < 2),
                         `dot gaps and grid interiors stay clear, dpr=${dpr}, dark=${dark}: ${differences}`);
+                    const corners = [-.75, .75].flatMap(dx => [-.75, .75].map(dy =>
+                        ({x: x + 12 + dx, y: y - 96 + dy})));
+                    const intermediate = [{x, y: y + 6}, {x: x + 6, y}, {x, y: y - 6}];
+                    const empty = [{x, y: y + 3}, {x: x + 3, y}];
+                    const existing = [{x, y}, {x: x + 12, y}, {x, y: y + 12}, {x: x + 96, y: y - 96}];
+                    const sample = (points: {x: number, y: number}[]) =>
+                        require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid", {
+                            width: innerWidth, height: innerHeight, dpr, background: {x: x + 6, y: y + 6},
+                            points, sampleRadius: 0,
+                        }) as Promise<number[]>;
+                    const pixels = await sample([...corners, ...intermediate, ...empty, ...existing]);
+                    check.ok(pixels.slice(0, corners.length + intermediate.length).every(value => value > 10),
+                        `square corners and intermediate guide dots are filled, dpr=${dpr}: ${pixels}`);
+                    check.ok(pixels.slice(corners.length + intermediate.length,
+                        corners.length + intermediate.length + empty.length).every(value => value < 2),
+                    "guide dots leave gaps between the original grid points and the inserted points");
+                    sampleSurface.setAttribute("data-test-no-guides", "true");
+                    const withoutGuides = await sample(existing);
+                    sampleSurface.removeAttribute("data-test-no-guides");
+                    check.deepEqual(pixels.slice(-existing.length), withoutGuides,
+                        "the center and existing grid dots are not painted again by either guide");
                 }
             } finally {
                 await require("electron").ipcRenderer.invoke("mindmap-fullscreen-grid-reset");
@@ -326,6 +390,15 @@ const browserCases = async (source: string, css: string, contentCSS: string, the
             window.dispatchEvent(new Event("beforeprint"));
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "print");
             check.equal(getComputedStyle(preview).display, "none", "layout guides are excluded from printing");
+            check.equal(getComputedStyle(surface).display, "none", "the decorative surface is excluded from printing");
+            const printBounds = viewport.getBoundingClientRect();
+            for (const node of host.querySelectorAll<HTMLElement>(".mindmap-view__node:not([hidden])")) {
+                const bounds = node.getBoundingClientRect();
+                check.ok(bounds.width > 0 && bounds.height > 0, "printed nodes retain their dimensions");
+                check.ok(bounds.left >= printBounds.left - 1 && bounds.right <= printBounds.right + 1 &&
+                    bounds.top >= printBounds.top - 1 && bounds.bottom <= printBounds.bottom + 1,
+                    "print fitting retains every node inside the printable viewport");
+            }
             check.equal(JSON.stringify(remembered), rememberedBeforePrint, "print fitting does not overwrite the saved view");
             await require("electron").ipcRenderer.invoke("mindmap-fullscreen-media", "");
             window.dispatchEvent(new Event("afterprint"));
@@ -696,7 +769,7 @@ app.whenReady().then(async () => {
             return [bitmap[offset], bitmap[offset + 1], bitmap[offset + 2]];
         };
         const background = pixel(Math.floor(options.background.x * options.dpr), Math.floor(options.background.y * options.dpr));
-        const radius = Math.ceil(1.5 * options.dpr);
+        const radius = options.sampleRadius ?? Math.ceil(1.5 * options.dpr);
         return options.points.map(point => {
             let difference = 0;
             const centerX = Math.floor(point.x * options.dpr);

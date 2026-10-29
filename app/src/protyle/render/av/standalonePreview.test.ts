@@ -6,12 +6,14 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 for (const layout of ["table", "gallery", "kanban"]) {
     test(`${layout} previews omit temporary carriers and never create missing databases`, async () => {
-        const requests: Array<{blockID: string, createIfNotExist: boolean}> = [];
+        const requests: Array<{blockID: string, createIfNotExist: boolean, nested: unknown, page: number}> = [];
+        const nested = {expandedIDs: ["parent"], childPaging: {parent: {page: 2, pageSize: 50}}};
         const methods: Record<string, (...args: unknown[]) => Promise<void>> = {};
         const imports: Record<string, unknown> = {
             Constants: {CB_GET_AV_NO_CREATE: "standalone"},
             getAVSelectedItemPoints: (): [] => [],
-            getPageSize: () => ({unGroupPageSize: 50, groupPageSize: {}}),
+            getPageSize: () => ({unGroupPage: 3, unGroupPageSize: 50, groupPageSize: {}}),
+            getSubItemsRequest: () => nested,
             isCurrentAVRender: () => false,
             fetchSyncPost: async (url: string, request: typeof requests[number]) => {
                 assert.equal(url, "/api/av/renderAttributeView");
@@ -54,5 +56,9 @@ for (const layout of ["table", "gallery", "kanban"]) {
         assert.equal(requests[0].createIfNotExist, false);
         assert.equal(requests[1].blockID, "carrier");
         assert.equal(requests[1].createIfNotExist, true);
+        for (const request of requests) {
+            assert.equal(request.nested, nested);
+            assert.equal(request.page, 3);
+        }
     });
 }

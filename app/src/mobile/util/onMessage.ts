@@ -1,6 +1,7 @@
 import {openMobileFileById} from "../editor";
 import {refreshSettingConfig} from "../../config/setting/sync";
 import {closeNotebookHistoryDialogs} from "../../history/notebookDialogs";
+import {closeDocumentTitleDialogs} from "../../protyle/header/documentTitleDialogs";
 import {clearDocumentCreationPlans} from "../../util/configuredDocument";
 import {closeNotebookLivePhotos} from "../../protyle/preview/livePhoto";
 import {
@@ -131,6 +132,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "closeBox":
             case "removeBox": {
+                closeDocumentTitleDialogs({notebookId: data.data.box});
                 closeNotebookHistoryDialogs(data.data.box);
                 clearDocumentCreationPlans(data.data.box);
                 closeNotebookLivePhotos(data.data.box);
@@ -143,6 +145,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 void activateOnboarding(app, data.data);
                 break;
             case "removeDoc":
+                closeDocumentTitleDialogs({rootIDs: data.data.ids});
                 removeMobileBacklinkContent({rootIDs: data.data.ids});
                 removeMobileReferenceSheet({rootIDs: data.data.ids});
                 window.siyuan.mobile.tabs?.removeRoots(data.data.ids);

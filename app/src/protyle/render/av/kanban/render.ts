@@ -2,6 +2,7 @@ import {afterRenderCards, captureAVCardRenderState, getAVCardHTML} from "../card
 import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
+import {getSubItemsRequest, reconcileSubItems} from "../subItemsState";
 import {getPublishAVView} from "../publishState";
 import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "../readonlyState";
 import {hasClosestByAttribute} from "../../../util/hasClosest";
@@ -78,12 +79,14 @@ export const renderKanban = async (options: {
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
         const common = {
+            nested: getSubItemsRequest(options.blockElement, options.protyle, locateParams?.viewID, resetData.query.trim()),
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: standalone ? "" : options.blockElement.getAttribute("data-node-id"),
             viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) :
                 options.protyle.disabled ? getReadonlyAVView(options.blockElement) : ""),
         };
         const paging = {
+            page: avPageSize.unGroupPage,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
             query: resetData.query.trim(),
@@ -92,7 +95,7 @@ export const renderKanban = async (options: {
         const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
             ...common, ...paging, created, carrierViewID,
         }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
-            ...common, snapshot, carrierViewID,
+            ...common, ...paging, snapshot, carrierViewID,
         }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
             ...common, ...paging,
             initialLayout: options.blockElement.getAttribute("data-av-type"),
@@ -120,6 +123,7 @@ export const renderKanban = async (options: {
     }
     reconcileReadonlyAVSort(options.blockElement, data);
     applyAVRenderContext(options.blockElement, data);
+    reconcileSubItems(options.blockElement, options.protyle, data, resetData.query.trim());
     prepareAVLocate(options.blockElement, data, resetData);
     if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);

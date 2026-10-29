@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261026142807"
 	},
 	"Children": [
 		{
@@ -3597,12 +3597,76 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文檔"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-0pp1wdu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-0pp1wdu",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件樹按需載入，繼續捲動可瀏覽全部可存取文件。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "檔案管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件樹單次載入數量"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 調整每次載入量，它不限制可瀏覽的文件總數。最大列出數量繼續限制標籤清單和包含子文件的合併匯出。"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-y0xzszs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-y0xzszs",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端文件樹中，Home 和 End 分別選取已展開文件樹的第一列和最後一列。按住 Shift 再按上、下方向鍵或 Home、End 可延伸選取範圍，包括畫面外的項目。定位文件時會自動載入目標所在位置。"
 				}
 			]
 		},

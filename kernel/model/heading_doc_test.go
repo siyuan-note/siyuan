@@ -5,84 +5,54 @@
 package model
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestHeadingDocParagraph(t *testing.T) {
+func TestHeadingDocTitle(t *testing.T) {
 	for _, tc := range []struct {
-		name     string
-		markdown string
-		title    string
-		preserve bool
+		name, markdown, text string
 	}{
-		{"plain", "Test", "Test", false},
-		{"escaped text", "A & B", "A &amp; B", false},
-		{"slash", "A/B", "A_B", true},
-		{"literal slash retained in title", "A/B", "A/B", false},
-		{"truncated", strings.Repeat("标题", 20), "标题...", true},
-		{"image", "Test ![image](assets/test.png)", "Test image", true},
-		{"image only", "![](assets/test.png)", "image", true},
-		{"link", "[Test](https://example.com)", "Test", true},
-		{"mixed", "Before ![image](assets/test.png) [link](https://example.com) after", "Before image link after", true},
-		{"strong", "**Test**", "Test", true},
-		{"code", "`Test`", "Test", true},
+		{"plain", "Test", "Test"},
+		{"escaped text", "A & B", "A & B"},
+		{"slash", "A/B", "A/B"},
+		{"literal slash retained in title", "A/B／C", "A/B／C"},
+		{"long title retained without display truncation", strings.Repeat("标题", 300), strings.Repeat("标题", 300)},
+		{"image", "Test ![image](assets/test.png)", "Test image"},
+		{"image only", "![](assets/test.png)", ""},
+		{"link", "[Test](https://example.com)", "Test"},
+		{"mixed", "Before ![image](assets/test.png) [link](https://example.com) after", "Before image link after"},
+		{"strong", "**Test**", "Test"},
+		{"code", "`Test`", "Test"},
+		{"formula", "$a^2+b^2$", "a^2+b^2"},
+		{"tag", "#Tag#", "Tag"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			engine := lute.New()
+			engine := util.NewLute()
 			tree := parse.Parse("", []byte("# "+tc.markdown+"\n\n123\n\n## Child\n\nBody\n\n# Next\n"), engine.ParseOptions)
 			heading := tree.Root.FirstChild
 			heading.ID = "20260909120000-heading"
 			heading.SetIALAttr("id", heading.ID)
-			var inlines []*ast.Node
-			var before [][]byte
-			for c := heading.FirstChild; c != nil; c = c.Next {
-				if c.Type == ast.NodeHeadingC8hMarker || c.Type == ast.NodeHeadingID {
-					continue
-				}
-				inlines = append(inlines, c)
-				data, err := json.Marshal(c)
-				if err != nil {
-					t.Fatal(err)
-				}
-				before = append(before, data)
-			}
+			originalDOM := engine.RenderNodeBlockDOM(heading)
 			children := treenode.HeadingChildren(heading)
-			paragraph := headingDocParagraph(heading, tc.title)
-			if (paragraph != nil) != tc.preserve {
-				t.Fatalf("preserve = %v, expected %v", paragraph != nil, tc.preserve)
+			paragraph, err := headingDocTitle(heading)
+			if err != nil {
+				t.Fatal(err)
 			}
-			if paragraph == nil {
-				if heading.ChildByType(ast.NodeText) != inlines[0] {
-					t.Fatal("plain heading content changed")
-				}
-				return
+			if paragraph.Type != ast.NodeParagraph || paragraph.ID != "" || paragraph.Parent != nil {
+				t.Fatal("title source must be an anonymous detached inline fragment")
 			}
-			if paragraph.Type != ast.NodeParagraph || paragraph.ID == "" || paragraph.ID == heading.ID || paragraph.IALAttr("id") != paragraph.ID {
-				t.Fatal("expected a paragraph with its own block ID")
+			if got := treenode.DocumentTitleText(paragraph); got != tc.text {
+				t.Fatalf("title text = %q, want %q", got, tc.text)
 			}
-			i := 0
-			for c := paragraph.FirstChild; c != nil; c = c.Next {
-				if i >= len(inlines) || c != inlines[i] || c.Parent != paragraph {
-					t.Fatal("inline order or parent changed")
-				}
-				data, err := json.Marshal(c)
-				if err != nil || string(data) != string(before[i]) {
-					t.Fatalf("inline content changed: %s, error: %v", data, err)
-				}
-				i++
-			}
-			if i != len(inlines) {
-				t.Fatal("inline content lost")
-			}
-			if heading.ID != "20260909120000-heading" || heading.IALAttr("id") != heading.ID {
-				t.Fatal("source heading ID changed")
+			if engine.RenderNodeBlockDOM(heading) != originalDOM || heading.ID != "20260909120000-heading" {
+				t.Fatal("copying title source changed the original heading")
 			}
 			after := treenode.HeadingChildren(heading)
 			if len(after) != len(children) || len(after) != 3 {
@@ -96,16 +66,54 @@ func TestHeadingDocParagraph(t *testing.T) {
 			if children[1].HeadingLevel != 2 {
 				t.Fatal("child heading level changed")
 			}
+			root := &ast.Node{Type: ast.NodeDocument, ID: heading.ID}
+			if err := treenode.SetDocumentTitleParagraph(root, paragraph); err != nil {
+				t.Fatal(err)
+			}
+			restored, err := treenode.DocumentTitleParagraph(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			source, err := render.NewDocumentTitle(restored)
+			if err != nil || source.Content != root.DocumentTitle.Content {
+				t.Fatalf("title source did not round-trip: %v", err)
+			}
+			if root.FirstChild != nil {
+				t.Fatal("title persistence created a duplicate body block")
+			}
 		})
 	}
 }
 
-func TestHeadingDocParagraphTextMark(t *testing.T) {
-	heading := &ast.Node{Type: ast.NodeHeading}
-	link := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: "Test", TextMarkAHref: "https://example.com"}
-	heading.AppendChild(link)
-	paragraph := headingDocParagraph(heading, "Test")
-	if paragraph == nil || paragraph.FirstChild != link || link.TextMarkAHref != "https://example.com" {
-		t.Fatal("text mark link lost")
+func TestHeadingDocTitleTextMarks(t *testing.T) {
+	nodes := []*ast.Node{
+		{Type: ast.NodeTextMark, TextMarkType: "a strong em", TextMarkTextContent: "Link", TextMarkAHref: "https://example.com/a/b", TextMarkATitle: "Link title"},
+		{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: "20260909120000-abcdefg", TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Dynamic"},
+		{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: "20260909120001-abcdefg", TextMarkBlockRefSubtype: "s", TextMarkTextContent: "Static"},
+		{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkTextContent: "Memo", TextMarkInlineMemoContent: "Private memo"},
+		{Type: ast.NodeTextMark, TextMarkType: "file-annotation-ref", TextMarkTextContent: "Annotation", TextMarkFileAnnotationRefID: "assets/test.pdf/20260909120002-abcdefg"},
+		{Type: ast.NodeTextMark, TextMarkType: "inline-math", TextMarkInlineMathContent: "a^2"},
+		{Type: ast.NodeTextMark, TextMarkType: "u s mark sup sub kbd code", TextMarkTextContent: "Style"},
+	}
+	for _, node := range nodes {
+		t.Run(node.TextMarkType+node.TextMarkBlockRefSubtype, func(t *testing.T) {
+			heading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 2}
+			heading.AppendChild(node)
+			paragraph, err := headingDocTitle(heading)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := paragraph.FirstChild
+			if got == nil || got == node || heading.FirstChild != node || node.Parent != heading {
+				t.Fatal("title conversion moved or omitted source nodes")
+			}
+			if got.TextMarkType != node.TextMarkType || got.TextMarkTextContent != node.TextMarkTextContent ||
+				got.TextMarkAHref != node.TextMarkAHref || got.TextMarkATitle != node.TextMarkATitle ||
+				got.TextMarkBlockRefID != node.TextMarkBlockRefID || got.TextMarkBlockRefSubtype != node.TextMarkBlockRefSubtype ||
+				got.TextMarkInlineMathContent != node.TextMarkInlineMathContent || got.TextMarkInlineMemoContent != node.TextMarkInlineMemoContent ||
+				got.TextMarkFileAnnotationRefID != node.TextMarkFileAnnotationRefID {
+				t.Fatalf("inline attributes changed: %#v, want %#v", got, node)
+			}
+		})
 	}
 }

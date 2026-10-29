@@ -71,8 +71,12 @@ func TestTreeWritesValidateCurrentSourceBehindCache(t *testing.T) {
 				if encrypted {
 					disk[len(disk)-1] ^= 1
 					writeStalePathFixture(t, box, p, disk)
+					version, _ := cache.DocTreeSourceVersion(box, false)
 					if _, err = WriteTree(tree); err == nil || errors.Is(err, source.err) {
 						t.Fatal("ordinary save bypassed source authentication", err)
+					}
+					if current, stable := cache.DocTreeSourceVersion(box, false); !stable || current != version {
+						t.Fatal("unauthenticated source advanced document ordering cache")
 					}
 					retained, _ = os.ReadFile(abs)
 					if !bytes.Equal(retained, disk) {

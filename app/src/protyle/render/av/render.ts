@@ -1,4 +1,7 @@
 import {isAVSelectType} from "./capabilities";
+import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems} from "./subItemsState";
+import {prepareSubItemsRefresh} from "./subItemsRefresh";
+import {locateRequests} from "./locateState";
 import {renderCalendar} from "./calendar/render";
 import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
@@ -57,6 +60,7 @@ import {
 import {removeAVPasteSkeleton} from "./paste";
 import {renderAVRichTextElements} from "./richText";
 import {
+    clampGroupTableVirtualData,
     getGroupTableRenderPlan,
     getUninitializedGroupRowCounts,
     GROUP_TABLE_ESTIMATED_ROW_HEIGHT,
@@ -206,6 +210,9 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
+    if (data.nested) {
+        virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
+    }
     const viewType = e.dataset.avType === "list" ? "list" : "table";
     let calcHTML = "";
     let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
@@ -274,7 +281,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             if (rowIndex < virtualData.renderedStart) {
                 return;
             }
-        } else if (data.pageSize > 100 && rowIndex > 99) {
+        } else if ((data.nested ? data.rows.length : data.pageSize) > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
@@ -285,18 +292,20 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
         const missingRowCount = data.rows.length - virtualData.renderedEnd - 1;
         bottomSpacerHTML = `<div class="av__spacer av__spacer--bottom" data-row-count="${missingRowCount}" style="height: ${missingRowCount * GROUP_TABLE_ESTIMATED_ROW_HEIGHT}px"></div>`;
     }
-    return `${contentHTML}${bottomSpacerHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
+    const hasMore = data.nested ? data.nested.page * data.nested.pageSize < data.nested.rootCount : data.rowCount > data.rows.length;
+    return `${contentHTML}${bottomSpacerHTML}<div class="av__row--util${hasMore || data.nested ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
         <button class="b3-button av__button" data-type="av-add-bottom">
             <svg><use xlink:href="#iconAdd"></use></svg>
             <span>${window.siyuan.languages.newRow}</span>
         </button>
         <span class="fn__space"></span>
-        <button class="b3-button av__button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
+        ${data.nested ? `${data.nested.page > 1 ? `<button class="b3-button av__button" data-type="av-sub-items-root-page" data-page="${data.nested.page - 1}"><svg><use xlink:href="#iconLeft"></use></svg><span>${window.siyuan.languages.previous}</span></button>` : ""}${hasMore ? `<button class="b3-button av__button" data-type="av-sub-items-root-page" data-page="${data.nested.page + 1}"><span>${window.siyuan.languages.next}</span><svg><use xlink:href="#iconRight"></use></svg></button>` : ""}` : `<button class="b3-button av__button${hasMore ? "" : " fn__none"}" data-type="av-load-more">
             <svg><use xlink:href="#iconArrowDown"></use></svg>
             <span>${window.siyuan.languages.loadMore}</span>
             <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
-        </button>
+        </button>`}
+        ${data.nested ? `<span class="ft__secondary av__sub-items-count">${escapeHtml(window.siyuan.languages.avSubItemsCounts.replace("${roots}", String(data.nested.rootCount)).replace("${matches}", String(data.nested.matchedCount)))}</span>` : ""}
     </div>
 </div>
 <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`;
@@ -345,7 +354,7 @@ const renderGroupTable = (options: ITableOptions) => {
             const virtualData = plan.virtualData[group.id];
             const renderBody = !group.groupFolded || virtualData?.locate;
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}"${group.nested ? ` data-root-page="${group.nested.page}"` : ""} data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
         }
     });
     if (options.renderAll) {
@@ -678,15 +687,17 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             });
             e.firstElementChild.innerHTML = html;
         }
-        const avPageSize = getPageSize(e);
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const locateParams = getAVLocateParams(e, !created && !snapshot);
+        const nested = getSubItemsRequest(e, protyle, locateParams?.viewID, resetData.query.trim());
+        const avPageSize = getPageSize(e);
         let data: IAV;
         if (!avData) {
             // 未引用数据库预览没有实际载体，不向内核传递临时块 ID。
             const standalone = protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE);
             const common = {
+                nested,
                 calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
                 blockID: standalone ? "" : e.getAttribute("data-node-id"),
@@ -694,6 +705,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                     protyle.disabled ? getReadonlyAVView(e) : ""),
             };
             const paging = {
+                page: avPageSize.unGroupPage,
                 pageSize: avPageSize.unGroupPageSize,
                 groupPaging: avPageSize.groupPageSize,
                 query: resetData.query.trim(),
@@ -702,7 +714,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
                 ...common, ...paging, created, carrierViewID,
             }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
-                ...common, snapshot, carrierViewID,
+                ...common, ...paging, snapshot, carrierViewID,
             }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
                 ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
@@ -732,10 +744,14 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         }
         reconcileReadonlyAVSort(e, data);
         applyAVRenderContext(e, data);
+        reconcileSubItems(e, protyle, data, resetData.query.trim());
         if (e.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
         }
         prepareAVLocate(e, data, resetData);
+        if (data.view.nested) {
+            prepareSubItemsViewport(e, data, resetData.virtualData);
+        }
         if (data.viewType === "calendar") {
             await renderCalendar(e, protyle, data, cb);
             continue;
@@ -753,7 +769,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             renderGroupTable({blockElement: e, protyle, cb, renderAll, data, resetData});
             continue;
         }
-        const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}"${resetData.virtualData.all?.locate ? ' data-av-locate-window="true"' : ""} style="float: left">
+        const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}"${view.nested ? ` data-root-page="${view.nested.page}"` : ""}${resetData.virtualData.all?.locate ? ' data-av-locate-window="true"' : ""} style="float: left">
     ${getTableHTMLs(view, e, resetData.virtualData.all)}
 </div>`;
         if (renderAll) {
@@ -895,15 +911,24 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 item.querySelector(".av__header")?.getAttribute("data-view-pages"), operation.id
             );
             item.querySelectorAll<HTMLElement>(".av__body").forEach(body => {
+                delete body.dataset.rootPage;
+                delete body.dataset.avLocateWindow;
                 if (pageSize) body.dataset.pageSize = pageSize;
                 else body.removeAttribute("data-page-size");
             });
+            item.setAttribute(Constants.CUSTOM_SY_AV_VIEW, operation.id);
+            clearSubItemsViewportAnchor(item);
+            item.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);
+            const pendingLocate = locateRequests.get(item);
+            if (!pendingLocate || pendingLocate.located || pendingLocate.viewID !== operation.id) {
+                locateRequests.delete(item);
+            }
             item.removeAttribute("data-render");
             void avRender(item, protyle);
         });
         return;
     }
-    if (operation.action === "insertAttrViewBlock") {
+    if (["insertAttrViewBlock", "duplicateAttrViewSubtree", "reparentAttrViewItems", "promoteAttrViewItems"].includes(operation.action)) {
         inspectAVInsertedItem(protyle, operation);
     }
     if (operation.action === "addAttrViewView" || operation.action === "duplicateAttrViewView") {
@@ -1122,6 +1147,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         }
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
+            const subItemsRefresh = prepareSubItemsRefresh(item, protyle, operation);
             if (["setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
                 "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow",
                 "setAttrViewDisplayFieldName"].includes(operation.action) &&
@@ -1176,6 +1202,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
             const hasGhost = item.querySelector('[data-type="ghost"]');
             avRender(item, protyle, () => {
+                subItemsRefresh?.restoreViewport?.();
                 if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
                     if (operation.context?.message) {
                         showMessage(operation.context.message);
@@ -1191,16 +1218,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         }
                         let isAddingFocusPending = false;
                         if (operation.srcs.length === 1) {
-                            let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+                            const focusItemID = subItemsRefresh?.insertedItemID || operation.srcs[0].itemID;
+                            let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${focusItemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
                             if (!popCellElement) {
-                                const popCellElements = item.querySelectorAll(`.av__body [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`);
+                                const popCellElements = item.querySelectorAll(`.av__body [data-id="${focusItemID}"] .av__cell[data-dtype="block"]`);
                                 if (popCellElements.length === 1) {
                                     popCellElement = popCellElements[0] as HTMLElement;
                                 }
                             }
                             if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
                                 !genCellValueByElement("block", popCellElement).block?.content &&
-                                popCellElement.getBoundingClientRect().height !== 0 && hasGhost) {
+                                popCellElement.getBoundingClientRect().height !== 0 && (hasGhost || subItemsRefresh?.insertedItemID)) {
                                 if (!isTableLikeView(item.getAttribute("data-av-type"))) {
                                     if (addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
                                         addingFocusTokens.delete(addingFocusKey);
@@ -1212,8 +1240,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                         protyle,
                                         avID,
                                         blockID: item.dataset.nodeId,
-                                        itemID: operation.srcs[0].itemID,
-                                        groupID: operation.groupID,
+                                        itemID: focusItemID,
+                                        groupID: popCellElement.closest<HTMLElement>(".av__body")?.dataset.groupId || operation.groupID,
                                     };
                                     scrollAddingCellIntoView(protyle, item, popCellElement);
                                     waitForAddingCellPosition(addingCellOptions).then((result) => {

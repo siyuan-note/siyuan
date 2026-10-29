@@ -813,6 +813,37 @@ const browserCases = async (sources: Record<string, string>) => {
     mobile = false;
     {
         const f = fixture();
+        await frames(2);
+        const query = f.editor.querySelectorAll.bind(f.editor);
+        f.editor.querySelectorAll = ((selector: string) => {
+            check.notEqual(selector, '[data-type="NodeTable"] table', "hover never scans the whole editor for tables");
+            return query(selector);
+        }) as typeof f.editor.querySelectorAll;
+        const rect = f.table.getBoundingClientRect();
+        const wrapper = f.table.parentElement.getBoundingClientRect();
+        for (const [x, y, type] of [
+            [rect.right + 5, rect.top + 20, "add-column"],
+            [rect.left + 20, wrapper.bottom + 5, "add-row"],
+            [rect.right + 5, wrapper.bottom + 5, "add-both"],
+        ] as const) {
+            Reflect.set(f.core, "hoverCell", undefined);
+            check.equal(f.invoke("getEdgeHover", x, y)?.type, type,
+                "edge controls can be approached directly from outside the table");
+        }
+        const paragraph = document.createElement("div");
+        paragraph.textContent = "Ordinary document text";
+        paragraph.style.height = "100px";
+        f.editor.append(paragraph);
+        Reflect.set(f.core, "hoverCell", undefined);
+        const originalRect = f.table.getBoundingClientRect.bind(f.table);
+        f.table.getBoundingClientRect = () => check.fail("ordinary text hover must not measure unrelated tables");
+        const p = paragraph.getBoundingClientRect();
+        check.equal(f.invoke("getEdgeHover", p.left + 100, p.top + 70), undefined);
+        f.table.getBoundingClientRect = originalRect;
+        f.dispose();
+    }
+    {
+        const f = fixture();
         const rightClick = (target: Element, shiftKey = false) => {
             const event = new MouseEvent("contextmenu", {bubbles: true, cancelable: true, shiftKey});
             target.dispatchEvent(event);

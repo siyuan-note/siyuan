@@ -545,7 +545,7 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 	setupCompactionAgentTest(t)
 	entries := []SessionEntry{
 		{ID: "user-1", Type: "user", Content: "first completed task"},
-		{ID: "assistant-1", Type: "assistant", Content: strings.Repeat("first result ", 6000)},
+		{ID: "assistant-1", Type: "assistant", Content: strings.Repeat("first result ", 12000)},
 		{ID: "user-2", Type: "user", Content: "second completed task"},
 		{ID: "assistant-2", Type: "assistant", Content: strings.Repeat("second result ", 6000)},
 		{ID: "user-3", Type: "user", Content: "current task"},
@@ -561,12 +561,18 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	requestTools := currentCapabilitiesForTest(t).definitions
+	capabilities := currentCapabilitiesForTest(t)
+	requestTools := capabilities.definitions
 	fullTokens := estimateChatRequestTokens(
-		"test-model", checkpointMessagesToOpenAIWithSummary(entriesToAgentMessages(entries), "English", nil, nil), requestTools)
+		"test-model", checkpointMessagesToOpenAIWithSummary(entriesToAgentMessages(entries), "English", capabilities, nil), requestTools)
 	afterFirstTokens := estimateChatRequestTokens(
-		"test-model", checkpointMessagesToOpenAIWithSummary(entriesToAgentMessages(entries[2:]), "English", nil, nil), requestTools)
+		"test-model", checkpointMessagesToOpenAIWithSummary(entriesToAgentMessages(entries[2:]), "English", capabilities, nil), requestTools)
 	contextLimit := compactionTestContextLimit(t, fullTokens, afterFirstTokens)
+	// 首次压缩须在目标预算内保留第二轮历史，供服务端报溢出后继续压缩。
+	targetBudget := contextInputBudget(contextLimit, 512) * 3 / 4
+	if afterFirstTokens+compactionSummaryOverhead+compactionSummaryMinTokens > targetBudget {
+		t.Fatalf("test context cannot retain the second turn after proactive compaction: base=%d, target=%d", afterFirstTokens, targetBudget)
+	}
 
 	var requestCount atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -579,6 +585,10 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 		case 1:
 			writeCompactionSummaryStream(t, w, "The first task is complete", 90, 8)
 		case 2:
+			runtime, err := loadRuntimeState(testSessionID)
+			if err != nil || runtime == nil || runtime.Compaction == nil || runtime.Compaction.CoveredMessageCount != 2 {
+				t.Errorf("proactive compaction must cover only the first completed turn: runtime=%+v, err=%v", runtime, err)
+			}
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = fmt.Fprint(w,

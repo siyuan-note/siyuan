@@ -1,7 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getCommandBlocks, getCommandDocument, hasCommandEditorTarget} from "./contextTargets";
+import {getCommandBlocks, getCommandDocument, hasCommandEditorTarget, hasCommandFileTreeTarget} from "./contextTargets";
 import type {ICommandContextSnapshot} from "./types";
+import type {DocTreeController} from "../layout/dock/docTree/DocTreeController";
+import type {IDocTreeItem} from "../layout/dock/docTree/types";
 
 const createEditorContext = () => {
     const block = (id: string) => ({isConnected: true, nodeType: 1, tagName: "DIV",
@@ -28,6 +30,25 @@ const createEditorContext = () => {
 };
 
 describe("context command targets", () => {
+    it("keeps virtual file tree command targets across DOM recycling and rejects changed selections", () => {
+        const {context} = createEditorContext();
+        const item = {id: "far", notebookId: "box", path: "/far.sy", occurrenceKey: "box/far",
+            kind: "document"} as IDocTreeItem;
+        let version = 4;
+        let currentPath = item.path;
+        const controller = {validateSelection: (captured: number, items: IDocTreeItem[]) =>
+            captured === version && items.length === 1 && items[0].path === currentPath} as DocTreeController;
+        context.focus = "fileTree";
+        context.fileTree = {controller, selectionVersion: version, items: [{...item}],
+            elements: [{isConnected: false} as HTMLElement], ids: [item.id], paths: [item.path]};
+        assert.equal(hasCommandFileTreeTarget(context), true);
+        assert.deepEqual(getCommandDocument(context), {id: "far", notebookId: "box", path: "/far.sy"});
+        version++;
+        assert.equal(getCommandDocument(context), undefined);
+        version--;
+        currentPath = "/moved/far.sy";
+        assert.equal(getCommandDocument(context), undefined);
+    });
     it("prioritizes selected blocks over the current block", () => {
         const {context, state, second} = createEditorContext();
         context.selectedBlocks = [{id: "second", element: second}];

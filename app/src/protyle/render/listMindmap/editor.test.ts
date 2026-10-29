@@ -41,7 +41,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         return block.outerHTML;
     };
     const create = (initialBlockHTML = textHTML("Initial"), replaceFirstParagraph?: string,
-                    branchType = "NodeList", embedded = false) => {
+                    branchType = "NodeList", embedded = false, canvas = false) => {
         let transactionOwner: (operations: Array<{action: string; id: string; parentID?: string;
             previousID?: string; nextID?: string}>) => unknown;
         const container = document.createElement("section");
@@ -65,6 +65,18 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         const subElement = document.createElement("div");
         [hintElement, toolbarElement, subElement].forEach(item => item.classList.add("fn__none"));
         container.append(element, host, hintElement, toolbarElement, subElement);
+        if (canvas) {
+            const map = document.createElement("div");
+            map.className = "mindmap-view";
+            map.innerHTML = '<div class="mindmap-view__viewport"><div class="mindmap-view__world">' +
+                '<div class="mindmap-view__node mindmap-view__node--editing"></div></div></div>';
+            map.querySelector(".mindmap-view__node").append(host);
+            host.classList.add("mindmap-view__content");
+            hintElement.classList.add("protyle-hint", "protyle-hint--lite-overlay");
+            toolbarElement.classList.add("protyle-toolbar");
+            subElement.classList.add("protyle-util");
+            container.append(map);
+        }
         document.body.append(container);
         const state = {
             focusedText: "",
@@ -877,6 +889,36 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     const style = document.createElement("style");
     style.textContent = css;
     document.head.append(style);
+    // 编辑浮层挂载在未缩放的脑图根元素，跨过画布边界时仍可点击。
+    for (const fullscreen of [false, true]) {
+        for (const scale of [1, .75]) {
+            const current = create(textHTML("Paint isolation"), undefined, "NodeMindmap", false, true);
+            current.container.style.cssText = "position:fixed;top:40px;left:40px;width:500px";
+            const map = current.host.closest<HTMLElement>(".mindmap-view");
+            map.classList.toggle("fullscreen", fullscreen);
+            const viewport = map.querySelector<HTMLElement>(".mindmap-view__viewport");
+            map.querySelector<HTMLElement>(".mindmap-view__world").style.transform = `translate(30px, 30px) scale(${scale})`;
+            const overlays = [current.hintElement, current.protyle.toolbar.element, current.protyle.toolbar.subElement];
+            for (const overlay of overlays) {
+                check.equal(overlay.parentElement, map, "editor overlays stay outside the isolated viewport");
+                const bounds = viewport.getBoundingClientRect();
+                const top = fullscreen ? bounds.bottom - 48 : bounds.bottom - 8;
+                overlay.style.cssText = `position:fixed;left:${bounds.left + 20}px;top:${top}px;` +
+                    "width:140px;height:36px;min-height:0;max-height:none;display:block;z-index:10";
+                overlay.classList.remove("fn__none");
+                const rect = overlay.getBoundingClientRect();
+                check.ok(Math.abs(rect.left - bounds.left - 20) < 1 && Math.abs(rect.top - top) < 1,
+                    "world zoom does not change editor overlay coordinates");
+                check.ok(overlay.contains(document.elementFromPoint(rect.left + 10, rect.bottom - 5)),
+                    "editor controls remain clickable outside the canvas and in fullscreen");
+                overlay.classList.add("fn__none");
+            }
+            await current.type("Edited with paint isolation");
+            check.equal(await current.editor.finish(), true);
+            check.ok(current.element.textContent.includes("Edited with paint isolation"), "editing still saves source content");
+            await current.remove();
+        }
+    }
     const fixture = document.createElement("div");
     fixture.className = "protyle-wysiwyg";
     document.body.append(fixture);

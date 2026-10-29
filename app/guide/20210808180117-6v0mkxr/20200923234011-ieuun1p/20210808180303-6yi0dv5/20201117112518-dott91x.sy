@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed content blocks",
 		"type": "doc",
-		"updated": "20261024163828"
+		"updated": "20261028115947"
 	},
 	"Children": [
 		{
@@ -671,6 +671,85 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-9l6y432",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028115947-9l6y432",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Convert embedded results"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028115947-x0bgqn9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-x0bgqn9",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the embed block menu and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Convert to regular blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to replace the embed with independent copies of its current results, in display order. Formatting and child blocks, including folded content, are retained. Heading content follows the embed display mode and keeps the source heading levels. Nested references, embeds, and databases retain their own behavior; this operation does not freeze all linked data."
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-71843i7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-71843i7",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embed block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Convert to block references"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create one dynamic block reference for each current result, in display order. These references still depend on the source blocks. Both conversions can be undone. Empty results and custom JavaScript output without block results cannot be converted."
 				}
 			]
 		},

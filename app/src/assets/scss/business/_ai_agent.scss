@@ -1153,11 +1153,11 @@
   height: 2px;
   flex-shrink: 0;
   padding: 3px 5px;
+  // Rounded corners can make content-box backgrounds paint the padding at fractional zoom.
   background-clip: content-box;
   background-color: var(--b3-theme-on-surface);
   opacity: 0.3;
   cursor: pointer;
-  border-radius: var(--b3-border-radius-b);
   transition: opacity 150ms ease-out;
 
   &:hover {

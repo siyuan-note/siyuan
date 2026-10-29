@@ -6,7 +6,7 @@ const {test} = require("node:test");
 const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
 const sass = require("sass");
 
-const browserCases = async (sources, css, template) => {
+const browserCases = async (sources, css, template, animationOnly = false) => {
     const check = require("node:assert/strict");
     const load = (name, dependencies = {}) => {
         const exports = {};
@@ -100,9 +100,112 @@ const browserCases = async (sources, css, template) => {
     const rightDockSpace = () => document.documentElement.style.getPropertyValue("--b3-dock-right-width");
     const checkRightDockSpace = (message) => {
         const reserved = !hidden(rightBar) && !rightBar.classList.contains("dock--float");
-        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "0px", message);
+        check.equal(rightDockSpace(), reserved ? "var(--b3-ui-dock-width, 42px)" : "var(--b3-layout-space)",
+            message);
     };
     checkRightDockSpace("a hidden right bar reserves no space for fixed overlays");
+    if (animationOnly) {
+        const nextFrames = async () => {
+            for (let index = 0; index < 3; index++) {
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            }
+        };
+        for (const position of ["Left", "Right"]) {
+            const dock = docks[position];
+            const panel = dock.layout.element;
+            const element = position === "Left" ? leftBar : rightBar;
+            open(position);
+            await settle();
+            dock.hideDock();
+            await settle();
+            const checkAttached = (message, checkOpacity = true) => {
+                const panelRect = panel.getBoundingClientRect();
+                const barRect = element.getBoundingClientRect();
+                const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
+                check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
+                if (checkOpacity) {
+                    check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
+                        `${position} ${message}: opacity follows the panel`);
+                }
+                check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
+            };
+            const finish = async () => {
+                await Promise.all([...panel.getAnimations(), ...element.getAnimations()].map(animation => animation.finished));
+                await nextFrames();
+            };
+            // 动画结束后必须回到停靠栏原始位置，否则边缘会留出缝隙并在动画释放时跳动。
+            const checkResting = (message) => {
+                const barRect = element.getBoundingClientRect();
+                const edge = position === "Left" ? barRect.left : window.innerWidth - barRect.right;
+                check.ok(Math.abs(edge) < 1, `${position} ${message}: resting edge=${edge}`);
+                check.equal(getComputedStyle(element).transform, "none",
+                    `${position} ${message}: no residual translation`);
+            };
+            for (const transition of ["none", "transform 600ms linear, opacity 50ms linear",
+                "transform 600ms linear", "opacity 300ms linear", "transform 350ms linear 120ms, opacity 50ms linear 120ms"]) {
+                panel.style.transition = transition;
+                dock.showDock();
+                await nextFrames();
+                checkAttached(`entry with ${transition}`);
+                if (transition === "none") {
+                    check.equal(element.getAnimations().length, 0, "disabled panel transitions create no standalone bar animation");
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 180));
+                    checkAttached(`entry after opacity completes with ${transition}`);
+                }
+                await finish();
+                checkResting(`entry with ${transition}`);
+                dock.hideDock();
+                await nextFrames();
+                if (transition === "none") {
+                    check.ok(hidden(element), "disabled transitions hide the bar without a trailing animation");
+                } else {
+                    checkAttached(`exit with ${transition}`);
+                    await new Promise(resolve => setTimeout(resolve, 180));
+                    if (transition.startsWith("transform")) {
+                        check.ok(!hidden(element), "short opacity transitions do not end the longer transform");
+                        checkAttached(`exit after opacity completes with ${transition}`);
+                    }
+                }
+                await finish();
+                check.ok(hidden(element), "all animations complete before the temporary bar is removed");
+            }
+            panel.style.transition = "transform 600ms linear, opacity 50ms linear";
+            dock.showDock();
+            await nextFrames();
+            await new Promise(resolve => setTimeout(resolve, 160));
+            dock.hideDock();
+            await nextFrames();
+            dock.showDock();
+            await nextFrames();
+            checkAttached("reversing custom transitions");
+            await finish();
+            check.ok(!hidden(element) && !element.inert, "canceled animations cannot clean up the reopened bar");
+            dock.hideDock();
+            await nextFrames();
+            await finish();
+            check.ok(hidden(element));
+            // 面板在停靠栏已经浮出时展开，停靠栏仍需贴着面板外沿一起移动。
+            bar.setDockBarHover(element, true);
+            await nextFrames();
+            check.ok(!hidden(element) && element.classList.contains("dock--float"),
+                "the edge reveals the bar before the panel opens");
+            await finish();
+            dock.showDock();
+            await nextFrames();
+            // 停靠栏已在位时面板只淡入，停靠栏不参与透明度过渡。
+            checkAttached("panel opens while the bar is already floating", false);
+            await finish();
+            checkResting("panel opens while the bar is already floating");
+            bar.setDockBarHover(element, false);
+            dock.hideDock();
+            await nextFrames();
+            await finish();
+            check.ok(hidden(element));
+            panel.style.transition = "";
+        }
+        return "Floating dock bar cases passed";
+    }
     const {windowMouseMove} = load("mousemove", dependencies);
     const move = event => windowMouseMove(event);
     document.addEventListener("mousemove", move);
@@ -140,11 +243,15 @@ const browserCases = async (sources, css, template) => {
         check.equal(dock.layout.element.style.opacity, "1", "clicking a revealed entry opens its panel");
         check.ok(!hidden(element) && hidden(otherBar), "only the expanded side reveals its bar");
         check.equal(getComputedStyle(element).position, "fixed");
+        check.equal(getComputedStyle(element).transform, "none",
+            "clicking a revealed entry does not restart the bar from the window edge");
         check.deepEqual(rect(center.element), initialEditor, "revealing a bar and panel does not resize the editor");
         const panelRect = dock.layout.element.getBoundingClientRect();
         const barRect = element.getBoundingClientRect();
         check.equal(position === "Left" ? panelRect.left : panelRect.right,
             position === "Left" ? barRect.right : barRect.left, "panel stays beside the bar");
+        check.equal(getComputedStyle(element).transform, "none",
+            "the settled bar keeps no residual translation, so no gap opens at the window edge");
         const temporary = {bar: rect(element), panel: rect(dock.layout.element),
             barStyle: appearance(element), panelStyle: appearance(dock.layout.element)};
         const backdrop = element.previousElementSibling;
@@ -220,8 +327,12 @@ const browserCases = async (sources, css, template) => {
         check.ok(hidden(entries[0]) && !hidden(element), "profile-hidden entries stay hidden during refresh");
         entries[0].classList.remove("fn__none");
 
-        dock.hideDockByHover();
+        // 指针离开图标栏后，位置刷新不应取消待执行的收起。
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: window.innerWidth / 2, clientY: 200}));
         dock.showDock(true);
+        // 悬停收起要等延迟计时和面板过渡都结束，位置刷新不得打断它们。
+        await settle();
         await settle();
         check.ok(hidden(element), "position refreshes do not cancel a pending hover close");
         dock.showDock();
@@ -271,6 +382,10 @@ const browserCases = async (sources, css, template) => {
         check.deepEqual(rect(center.element), initialEditor, "closing a temporary bar restores the editor space");
         dock.showDock();
         dock.togglePanel(false);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        check.ok(!hidden(element) && element.getAnimations().length > 0,
+            "explicitly collapsing a panel slides its temporary bar out instead of removing it at once");
+        await settle();
         check.ok(hidden(element), "explicitly collapsing a panel clears its temporary bar");
         center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
             clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
@@ -287,13 +402,25 @@ const browserCases = async (sources, css, template) => {
         dock.showDock();
         await settle();
         check.ok(!hidden(element));
+        // 指针停在图标栏上时点击已打开的图标收起面板，停靠栏保持可见以便继续切换工具。
+        element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
+        await settle();
         dock.toggleModel(position + "two", false, true, false, false);
         await settle();
-        check.ok(hidden(element), "closing the final active item hides the temporary bar");
+        check.ok(!hidden(element), "the pointer over the bar keeps the temporary bar visible after the panel closes");
+        center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+            clientX: window.innerWidth / 2, clientY: 200}));
+        await new Promise(resolve => setTimeout(resolve, 60));
+        check.ok(!hidden(element) && element.getAnimations().length > 0,
+            "leaving the bar slides it out instead of removing it at once");
+        await settle();
+        check.ok(hidden(element), "leaving the bar hides the temporary bar after the panel closes");
         center.element.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
             clientX: position === "Left" ? 1 : window.innerWidth - 1, clientY: 200}));
         await settle();
         check.ok(!hidden(element), "the edge remains usable after closing the last panel");
+        bar.setDockBarHover(element, false);
         dock.hideDock();
     }
     document.removeEventListener("mousemove", move);
@@ -364,7 +491,8 @@ const browserCases = async (sources, css, template) => {
     window.siyuan.config.uiLayout.hideDock = true;
     bar.syncDockBarVisibility();
     check.ok(hidden(leftBar) && hidden(rightBar));
-    check.equal(rightDockSpace(), "0px", "hiding the right bar restores the window edge offset");
+    check.equal(rightDockSpace(), "var(--b3-layout-space)",
+        "hiding the right bar keeps only the editor outer margin for fixed overlays");
     check.equal(window.siyuan.config.uiLayout.hideDock, true);
     return "Floating dock bar cases passed";
 };
@@ -406,15 +534,16 @@ if (process.versions.electron && process.type === "browser") {
                 .split('<div class="fn__flex-1 fn__flex">')[1].split('<div id="status"')[0];
             const html = '<div class="fn__flex-1 fn__flex">' + template;
             const styles = sass.compile(path.join(__dirname, "../src/assets/scss/base.scss"), {logger: sass.Logger.silent}).css;
+            const animationOnly = process.env.SIYUAN_DOCK_ANIMATION_CASES === "1";
             for (const theme of ["daylight", "midnight"]) {
                 const css = readFileSync(path.join(__dirname, `../appearance/themes/${theme}/theme.css`), "utf8") + styles;
-                for (const width of [1200, 700]) {
-                    for (const hideToolbar of [false, true]) {
+                for (const width of animationOnly ? [1200] : [1200, 700]) {
+                    for (const hideToolbar of animationOnly ? [false] : [false, true]) {
                         captureName = `${theme}-${width}-${hideToolbar ? "hidden-toolbar" : "toolbar"}`;
                         win.setContentSize(width, 800);
                         await win.loadURL(`data:text/html,<html><body class='fn__flex-column${hideToolbar ? " body--toolbar-hide" : ""}'></body></html>`);
                         const result = await win.webContents.executeJavaScript(`(${browserCases.toString()})(${[
-                            sources, css, html,
+                            sources, css, html, animationOnly,
                         ].map(value => JSON.stringify(value)).join(",")})`);
                         assert.equal(result, "Floating dock bar cases passed", captureName);
                     }
@@ -430,11 +559,8 @@ if (process.versions.electron && process.type === "browser") {
         }
     });
 } else {
-    test("floating dock bars preserve editor width and remain accessible when every panel is closed", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 180000,
-    }, async () => {
-        const env = {...process.env};
+    const runCases = async (animationOnly) => {
+        const env = {...process.env, SIYUAN_DOCK_ANIMATION_CASES: animationOnly ? "1" : "0"};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-dock-bar-"));
         try {
@@ -446,5 +572,11 @@ if (process.versions.electron && process.type === "browser") {
             assert.ok(path.basename(profile).startsWith("siyuan-dock-bar-"));
             rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }
-    });
+    };
+    const options = {
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        timeout: 180000,
+    };
+    test("floating dock bars follow disabled, partial, delayed and interrupted panel transitions", options, () => runCases(true));
+    test("floating dock bars preserve editor width and remain accessible when every panel is closed", options, () => runCases(false));
 }

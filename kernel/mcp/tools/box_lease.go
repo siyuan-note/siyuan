@@ -27,6 +27,7 @@ var encryptedBoxScopedToolNames = map[string]struct{}{
 	"image":     {},
 	"import":    {},
 	"outline":   {},
+	"pdf":       {},
 	"ref":       {},
 	"repo":      {},
 	"search":    {},

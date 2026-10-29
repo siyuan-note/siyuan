@@ -54,6 +54,7 @@ func mergeAgentAttachments(current []AgentAttachment, attachments []mcptools.Mod
 			)
 		}
 		added = append(added, AgentAttachment{
+			PDFImage:   attachment.PDFImage,
 			Type:       attachment.Type,
 			Data:       attachment.Data,
 			MIMEType:   attachment.MIMEType,
@@ -115,6 +116,10 @@ func buildAttachmentMessage(attachments []AgentAttachment) (openai.ChatCompletio
 		})
 	}
 	if imageCount == 0 {
+		if omitted {
+			return openai.ChatCompletionMessage{Role: openai.ChatMessageRoleUser, Content: "The requested image attachments are unavailable. Do not claim to have inspected them. " +
+				"For PDF previews, list the source PDF again before requesting a new preview; the source may have changed or become inaccessible."}, true
+		}
 		return openai.ChatCompletionMessage{}, false
 	}
 	if omitted {
@@ -143,7 +148,17 @@ func resolveAgentAttachment(attachment AgentAttachment) (data []byte, mimeType s
 	}
 	var prepared kernelModel.PreparedDocumentImage
 	var prepareErr error
-	if attachment.DocumentID == "" {
+	if attachment.PDFImage != nil {
+		var image util.PreparedImage
+		image, prepareErr = kernelModel.PreparePDFImage(context.Background(), kernelModel.PDFImageSource{
+			DocumentID: attachment.DocumentID, Path: attachment.Path,
+		}, *attachment.PDFImage)
+		if prepareErr != nil {
+			err = prepareErr
+			return
+		}
+		return image.Data, image.MIMEType, image.Width, image.Height, nil
+	} else if attachment.DocumentID == "" {
 		prepared, prepareErr = kernelModel.PrepareAgentMessageImage(attachment.Path)
 	} else {
 		prepared, prepareErr = kernelModel.PrepareDocumentImage(attachment.DocumentID, attachment.Path)

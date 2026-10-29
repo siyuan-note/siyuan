@@ -5,7 +5,7 @@ body {
   --b3-snackbar-top-bar-height: var(--b3-ui-toolbar-height, 32px);
   // 原生窗口控件可能高于顶栏，通知从其下方开始
   --b3-snackbar-top: calc(max(var(--b3-snackbar-top-bar-height), var(--b3-window-controls-height, 0px)) + var(--b3-snackbar-gap));
-  // 右侧停靠栏占用布局空间时避让它的宽度，隐藏或浮动时只保留窗口边缘间距
+  // 避让右侧内容左边界：停靠栏占用布局时是栏宽，隐藏或浮动时是编辑区外边距
   --b3-snackbar-right: calc(var(--b3-dock-right-width, 0px) + var(--b3-snackbar-gap));
 }
 

@@ -74,6 +74,7 @@ test("the shared block menu exposes popovers in editable and read-only embeds", 
     const dependencies = {window,
         MenuItem: class {public element: IMenu; constructor(item: IMenu) { this.element = item; }},
         embedOpenMenu: () => ({id: "refPopover"}), embedBreadcrumbMenu: (): IMenu[] => [],
+        embedConversionMenu: (): IMenu[] => [{id: "convertToBlocks"}, {id: "convertToReferences"}],
         isHeadingEmbed: () => false, getEmbedHeadingLevel: () => 0,
     };
     const render = new Function("protyle", "nodeElement", ...Object.keys(dependencies),
@@ -85,6 +86,8 @@ test("the shared block menu exposes popovers in editable and read-only embeds", 
         const children = items.find(item => item.id === "blockEmbed").submenu;
         assert.ok(children.some(item => item.id === "refPopover"));
         assert.equal(children.some(item => item.id === "update"), !readonly);
+        assert.equal(children.some(item => item.id === "convertToBlocks"), !readonly);
+        assert.equal(children.some(item => item.id === "convertToReferences"), !readonly);
         assert.deepEqual(children.slice(0, readonly ? 1 : 3).map(item => item.id),
             readonly ? ["refPopover"] : ["refresh", "update", "refPopover"]);
     }

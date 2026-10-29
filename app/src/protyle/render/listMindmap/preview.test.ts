@@ -333,6 +333,7 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../chartRender.ts", ["refreshChartTheme"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
+        extract("../../util/tableResize.ts", ["TABLE_ADD_CONTROL_GAP", "TABLE_ADD_CONTROL_THICKNESS"]) +
         extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
         compile(readFileSync(path.join(__dirname, "appearance.ts"), "utf8")

@@ -295,6 +295,7 @@ declare class Lute {
     public PutEmojis(emojis: IObject): void;
 
     public SpinBlockDOM(html: string): string;
+    public SpinInlineBlockDOM(html: string): string;
 
     public Md2BlockDOM(html: string): string;
 

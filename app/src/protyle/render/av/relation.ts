@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {reparentSubItems} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint} from "../../../util/upDownHint";
@@ -769,6 +770,8 @@ ${genRelationLoaderHTML(false)}`;
             page,
             pageSize: RELATION_PAGE_SIZE,
             selectedBlockIDs: selectedItems.map((item) => item.id),
+            excludeItemIDs: relationElement.dataset.subItemsParent === "true" ? options.cellElements.map(cell =>
+                getFieldIdByCellElement(cell, options.blockElement.getAttribute("data-av-type") as TAVView)) : undefined,
             sort: state.sort,
         }, response => {
             if (controller.signal.aborted || keyword !== state.keyword) {
@@ -991,7 +994,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         }
     });
     if (colRelationData && colRelationData.avID) {
-        return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
+        return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}"${data.subItems?.enabled && colId === data.subItems.parentKeyID ? ' data-sub-items-parent="true"' : ""} class="fn__flex-column av__relation">
 <div>
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
@@ -1071,6 +1074,14 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
 
     if (target.classList.contains("b3-menu__item")) {
         const rowId = target.getAttribute("data-row-id");
+        if (rowId && relationElement.dataset.subItemsParent === "true") {
+            reparentSubItems(protyle, nodeElement, cellElements.map(cell =>
+                getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView)),
+            target.dataset.relationType === "selected" ? "" : rowId, undefined, undefined,
+            cellElements[0].closest<HTMLElement>(".av__body")?.dataset.groupId);
+            menuElement.closest(".av__panel")?.remove();
+            return;
+        }
         if (target.dataset.relationType === "selected") {
             target.dataset.relationType = "candidate";
             target.removeAttribute("draggable");
@@ -1102,6 +1113,10 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 // 用临时 ID 计算批量关系合并结果，仅成功创建后更新面板。
                 const pendingID = Lute.NewNodeID();
                 const value = getRelationValue(menuElement);
+                if (relationElement.dataset.subItemsParent === "true") {
+                    value.blockIDs = [];
+                    value.contents = [];
+                }
                 value.blockIDs.push(pendingID);
                 value.contents.push({type: "block", block: {content: useInputName ?
                     (entry.preview.inputPrimaryKey ?? entry.keyword.trim()) : entry.preview.primaryKey}, isDetached: true});
@@ -1114,6 +1129,12 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                             relatedItemIDs: operation.data.relation.blockIDs.filter(id => id !== pendingID)});
                     }
                 });
+                if (relationElement.dataset.subItemsParent === "true") {
+                    cells.splice(0, cells.length, ...cellElements.map((cell): AVRelationItemCellInput => ({
+                        itemID: getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView),
+                        relatedItemIDs: [],
+                    })));
+                }
                 if (!cells.length) {
                     return;
                 }
@@ -1138,6 +1159,9 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                     showMessage(response.data.warnings.map(item => escapeHtml(item)).join("<br>"));
                 }
                 if (menuElement.isConnected && !menuElement.querySelector(`[data-relation-type="selected"][data-row-id="${response.data.itemID}"]`)) {
+                    if (relationElement.dataset.subItemsParent === "true") {
+                        menuElement.querySelector('[data-relation-type="selectedRows"]').innerHTML = "";
+                    }
                     menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML("beforeend",
                         genCreatedRelationRowHTML(menuElement, response.data.itemID, response.data.content,
                             response.data.blockID, response.data.isDetached));

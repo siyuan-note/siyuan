@@ -127,7 +127,10 @@ export const getDocByScroll = (options: {
                 isValid: options.isValid,
                 beforeAVRender: options.beforeAVRender,
                 afterAVRender: options.afterAVRender,
-                onAVRenderError: options.onRenderError,
+                onAVRenderError: () => {
+                    options.onRenderError?.();
+                    options.fail?.();
+                },
             });
         } catch (error) {
             console.error(error);

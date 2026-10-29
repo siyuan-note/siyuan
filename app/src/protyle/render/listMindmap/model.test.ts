@@ -388,7 +388,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
-            matchHotKey: (binding: unknown) => { check.equal(binding, undefined); return false; },
+            matchHotKey: (binding: {custom: string} | undefined, event: KeyboardEvent) => !!binding?.custom &&
+                (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
+                binding.custom === "⌘" + event.key.toUpperCase(),
             isMobile: () => mobile, waitForPendingTransactions: async () => {},
             preserveUndoViewport: () => () => {},
             isEncryptedBox: () => false,
@@ -448,7 +450,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.notEqual(addedID, itemID);
         check.equal(target.activeEditor, undefined, "new nodes remain selected without mounting an editor");
         check.equal(editorOptions, undefined);
-        check.equal(document.activeElement, target.host, "new nodes retain the canvas keyboard focus");
+        check.equal(document.activeElement, target.host.querySelector(".mindmap-view__selection-input"),
+            "new nodes prepare an editable target for the first IME keystroke");
         check.match(copies[1].textContent, /Added/);
         // Direct typing opens the new node's editor and preserves the embedded source identity.
         target.host.dispatchEvent(new KeyboardEvent("keydown", {key: "x", bubbles: true, cancelable: true}));
@@ -497,6 +500,60 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await new Promise(resolve => setTimeout(resolve, 0));
         check.equal(target.view.getSelectedId(), followingID, "after entering editing, deletion keeps the normal next-sibling policy");
         check.equal(operations.at(-1).doOperations[0].context.undoFocusId, followingID);
+        // 创建副本快捷键在节点选择态新增同级节点，空白画布仍交给外层块快捷键处理。
+        let outerDuplicates = 0;
+        const duplicate = (key: string, init: KeyboardEventInit = {}) => {
+            const event = new KeyboardEvent("keydown", {key, ctrlKey: true, bubbles: true, cancelable: true, ...init});
+            target.host.dispatchEvent(event);
+            return event;
+        };
+        const receiveDuplicate = () => outerDuplicates++;
+        root.addEventListener("keydown", receiveDuplicate);
+        for (const key of ["d", "p"]) {
+            window.siyuan.config.keymap.editor.general.duplicate = {default: "⌘D", custom: "⌘" + key.toUpperCase()};
+            for (const modifier of [{ctrlKey: true}, {ctrlKey: false, metaKey: true}]) {
+                target.view.focusNode(itemID);
+                const count = operations.length;
+                const beforeChildren = target.model.nodes.get(itemID).children.length;
+                check.equal(duplicate(key, modifier).defaultPrevented, true);
+                await new Promise(resolve => setTimeout(resolve, 0));
+                const created = target.model.nodes.get(target.view.getSelectedId());
+                check.notEqual(created.id, itemID);
+                check.equal(created.parentId, target.model.nodes.get(itemID).parentId);
+                check.equal(created.element.previousElementSibling.dataset.nodeId, itemID);
+                check.equal(created.children.length, 0, "node insertion does not duplicate the source branch");
+                check.equal(target.model.nodes.get(itemID).children.length, beforeChildren);
+                check.equal(operations.length, count + 1, "insertion uses one undoable transaction");
+                check.equal(outerDuplicates, 0, "selected-node shortcuts never reach whole-map duplication");
+                check.equal(operations.at(-1).undoOperations[0].context.undoFocusId, itemID);
+                check.equal(operations.at(-1).doOperations[0].context.undoFocusId, created.id);
+                await target.undo(false);
+                check.equal(target.model.nodes.has(created.id), false);
+                await target.undo(true);
+                check.equal(target.model.nodes.has(created.id), true);
+            }
+        }
+        target.view.focusNode(itemID);
+        const count = operations.length;
+        check.equal(duplicate("p", {repeat: true}).defaultPrevented, true);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(operations.length, count, "holding the shortcut does not insert repeatedly");
+        target.view.clearSelection();
+        check.equal(duplicate("p").defaultPrevented, false);
+        check.equal(outerDuplicates, 1, "a canvas with no selected node keeps whole-map duplication");
+        target.view.focusNode(target.model.root.id);
+        check.equal(duplicate("p").defaultPrevented, true);
+        check.equal(outerDuplicates, 1, "the virtual root cannot fall back to whole-map duplication");
+        target.view.focusNode(itemID);
+        target.view.setEditing(itemID);
+        check.equal(duplicate("p").defaultPrevented, false, "text editing keeps its own shortcut routing");
+        target.view.setEditing();
+        target.view.setReadOnly(true);
+        duplicate("p");
+        check.equal(operations.length, count, "read-only maps cannot insert nodes");
+        target.view.setReadOnly(false);
+        root.removeEventListener("keydown", receiveDuplicate);
+        delete window.siyuan.config.keymap.editor.general.duplicate;
         controllers.forEach(controller => controller.destroy());
         root.remove();
     }
@@ -815,7 +872,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(sourceRange);
     check.ok(api.focusListMindmap(focusList, focusHost));
-    check.equal(document.activeElement, focusHost);
+    // 隐藏窗口在尚未接收原生指针事件时只更新 activeElement，补发焦点事件验证选区交接。
+    focusHost.dispatchEvent(new FocusEvent("focus"));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    check.equal(document.activeElement, focusHost.querySelector(".mindmap-view__selection-input"),
+        "creating a mindmap retains the editable input focus while moving the source selection");
     check.ok(focusHost.contains(window.getSelection().anchorNode));
     focusHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
     check.equal(mindmapKeys, 1);
@@ -1382,7 +1443,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             check.ok(after.left >= viewportRect.left && after.right <= viewportRect.right &&
                 after.top >= viewportRect.top && after.bottom <= viewportRect.bottom,
                 `${item.key} reveals the target after layout, readOnly=${readOnly}`);
-            check.equal(document.activeElement, navigationHost, "navigation keeps keyboard focus on the canvas");
+            check.equal(document.activeElement, readOnly ? navigationHost : navigationHost.querySelector(".mindmap-view__selection-input"),
+                "navigation prepares the selected node for native text input");
         }
         navigationView.fit();
         navigationView.selectNode(model.root.id);
@@ -2064,6 +2126,90 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     navigate(" ");
     check.equal(edits.length, beforeSpaceEdit);
     view.setReadOnly(false);
+    // 浏览器原生组合输入必须从选中态的可编辑目标开始，不能用合成 keydown 代替输入法。
+    const selectionInput = host.querySelector<HTMLElement>(".mindmap-view__selection-input");
+    const ime = (text: string) => require("electron").ipcRenderer.invoke("mindmap-view-ime", text);
+    const insertText = (text: string) => require("electron").ipcRenderer.invoke("mindmap-view-insert-text", text);
+    view.focusNode(beta);
+    check.equal(document.activeElement, selectionInput);
+    check.equal(selectionInput.isContentEditable, true);
+    const beforeIME = edits.length;
+    await ime("n");
+    await ime("ni");
+    check.equal(document.activeElement, selectionInput, "composition retains its original input target");
+    check.equal(edits.length, beforeIME, "uncommitted phonetic text does not replace node content");
+    check.equal(selectionInput.textContent, "ni");
+    check.equal(getComputedStyle(selectionInput).opacity, "0", "composition does not expose an extra input box over the node");
+    const confirmation = new KeyboardEvent("keydown", {key: "Enter", keyCode: 229, bubbles: true, cancelable: true});
+    selectionInput.dispatchEvent(confirmation);
+    check.equal(confirmation.defaultPrevented, false, "IME confirmation is not a node shortcut");
+    await insertText("你好");
+    await settle();
+    check.equal(edits.length, beforeIME + 1);
+    check.equal(editTexts[editTexts.length - 1], "你好", "the entire first composition reaches the node editor");
+    check.equal(selectionInput.textContent, "");
+    view.setEditing();
+    view.focusNode(beta);
+    await ime("n");
+    await ime("");
+    await settle();
+    check.equal(edits.length, beforeIME + 1, "canceling composition preserves the original node");
+    check.equal(getComputedStyle(selectionInput).opacity, "0");
+    await nativeInput([{type: "keyDown", keyCode: "X"}, {type: "char", keyCode: "X"}, {type: "keyUp", keyCode: "X"}]);
+    check.equal(editTexts[editTexts.length - 1], "X", "ordinary typing uses native input without duplicating the first key");
+    view.setEditing();
+    view.focusNode(beta);
+    const beforeSpace = edits.length;
+    await nativeInput([{type: "keyDown", keyCode: "Space"}, {type: "keyUp", keyCode: "Space"}]);
+    check.equal(edits.length, beforeSpace + 1);
+    check.equal(editTexts[editTexts.length - 1], undefined, "space retains its open-editor shortcut");
+    view.setEditing();
+    view.focusNode(beta);
+    await nativeInput([{type: "keyDown", keyCode: "Up"}, {type: "keyUp", keyCode: "Up"}]);
+    check.equal(view.selectedId, alpha, "the editable input target preserves node navigation");
+    check.equal(document.activeElement, selectionInput);
+    view.focusNode(beta);
+    const beforeStaleIME = edits.length;
+    await ime("n");
+    view.focusNode(alpha);
+    selectionInput.dispatchEvent(new CompositionEvent("compositionend", {data: "你", bubbles: true}));
+    selectionInput.textContent = "你";
+    selectionInput.dispatchEvent(new InputEvent("input", {data: "你", inputType: "insertText", bubbles: true}));
+    await settle();
+    check.equal(edits.length, beforeStaleIME, "changing selection does not insert stale composition text");
+    check.equal(selectionInput.textContent, "", "late composition input cannot carry over to the new selection");
+    view.focusNode(beta);
+    let finishInput: (value: boolean) => void;
+    finishAllowed = new Promise<boolean>(resolve => finishInput = resolve);
+    await insertText("Pending");
+    view.focusNode(alpha);
+    view.focusNode(beta);
+    finishInput(true);
+    await settle();
+    check.equal(edits.length, beforeStaleIME, "delayed editor activation cannot follow a newer selection, even of the same node");
+    finishAllowed = true;
+    let inputCopiedNodes: string[];
+    view.options.onCopy = (ids: string[]) => inputCopiedNodes = ids;
+    selectionInput.dispatchEvent(new ClipboardEvent("copy", {bubbles: true, cancelable: true}));
+    check.deepEqual(inputCopiedNodes, [beta], "copy from the idle input still copies the selected node");
+    view.options.onCopy = undefined;
+    view.setReadOnly(true);
+    check.equal(selectionInput.hidden, true);
+    check.equal(document.activeElement, host, "read-only selection returns focus to the canvas");
+    view.setReadOnly(false);
+    document.body.classList.add("body--android");
+    view.focusNode(beta);
+    check.equal(document.activeElement, host, "mobile selection does not open the software keyboard");
+    document.body.classList.remove("body--android");
+    view.focusNode(model.root.id);
+    await ime("zhong");
+    await insertText("中文根节点");
+    await settle();
+    const composedTitle = host.querySelector<HTMLTextAreaElement>(".mindmap-view__root-title");
+    check.equal(composedTitle.value, "中文根节点", "virtual roots receive the committed composition too");
+    composedTitle.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    view.focusNode(beta);
+    edits.length = beforeIME;
     navigate(" ");
     check.equal(edits[edits.length - 1], beta, "space opens the selected node editor");
     check.equal(editTexts[editTexts.length - 1], undefined, "space keeps the node content");
@@ -2100,7 +2246,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(titleInput.selectionStart, titleInput.value.length);
     check.equal(titleInput.selectionEnd, titleInput.value.length);
     titleInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
-    check.equal(document.activeElement, host);
+    await settle();
+    check.equal(document.activeElement, selectionInput);
     select(model.root.id);
     navigate("R");
     const typedTitleInput = host.querySelector<HTMLTextAreaElement>(".mindmap-view__root-title");
@@ -2455,6 +2602,17 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const start = {x: Math.round(bounds.right - 12), y: Math.round(bounds.top + bounds.height / 2)};
         const canvasPosition = {x: view.offsetX, y: view.offsetY, scale: view.scale};
         const settingsPosition = touchManager.getBoundingClientRect().left;
+        await nativeInput([
+            {type: "mouseMove", ...start},
+            ...Array.from({length: 20}, () => ({type: "mouseWheel", ...start, deltaX: -2, deltaY: 0})),
+        ]);
+        check.ok(touchPalette.scrollLeft > 30, "a continuous trackpad gesture scrolls the actual node palette");
+        check.equal(touchPalette.hasAttribute("data-scrolling"), true,
+            "the actual node palette keeps snapping disabled during a horizontal gesture");
+        await settlePalette();
+        check.deepEqual({x: view.offsetX, y: view.offsetY, scale: view.scale}, canvasPosition);
+        check.equal(touchManager.getBoundingClientRect().left, settingsPosition);
+        touchPalette.scrollLeft = 0;
         await nativeInput([
             {type: "mouseMove", ...start},
             {type: "mouseWheel", ...start, deltaX: 0, deltaY: -60},
@@ -3323,6 +3481,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     window.dispatchEvent(new Event("beforeprint"));
     await settle();
     check.ok(host.offsetHeight < screenHeight, "PDF does not retain the fixed editor canvas height");
+    check.equal(getComputedStyle(selectionInput).display, "none", "printing excludes the IME input target");
     const printBounds = viewport.getBoundingClientRect();
     for (const node of view.positions.values()) {
         check.ok(node.x * view.scale + view.offsetX >= 0);
@@ -4328,13 +4487,13 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     };
     await settle();
     await clickMouse(nodeElement(deleteFirst));
-    check.equal(document.activeElement, host);
+    check.equal(document.activeElement, host.querySelector(".mindmap-view__selection-input"));
     await nativeKey("Backspace");
     check.equal(deleteList.querySelector(`[data-node-id="${deleteFirst}"]`), null);
     check.equal(nodeElement(deleteFirst), null);
     check.ok(deleteList.querySelector(`[data-node-id="${deleteSecond}"]`));
     check.equal(nodeElement(deleteSecond).getAttribute("aria-selected"), "true");
-    check.equal(document.activeElement, host);
+    check.equal(document.activeElement, host.querySelector(".mindmap-view__selection-input"));
     await clickMouse(nodeElement(deleteSecond));
     const beforeProtectedDelete = deleteList.outerHTML;
     deleting.setEditing(deleteSecond);
@@ -4353,7 +4512,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(nodeElement(deleteSecond), null);
     check.ok(nodeElement(deleteModel.root.id));
     check.equal(nodeElement(deleteModel.root.id).getAttribute("aria-selected"), "true");
-    check.equal(document.activeElement, host);
+    check.equal(document.activeElement, host.querySelector(".mindmap-view__selection-input"));
     await clickMouse(nodeElement(deleteModel.root.id));
     await nativeKey("Backspace");
     check.ok(nodeElement(deleteModel.root.id), "the last root is preserved for the macOS Delete key");
@@ -4376,7 +4535,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(api.resolveVisibleListMindmapBlock(locateList).carrier, locateHost);
     located.reveal();
     located.focus();
-    check.equal(document.activeElement, locateHost);
+    check.equal(document.activeElement, locateHost.querySelector(".mindmap-view__selection-input"),
+        "locating a node prepares its keyboard input target");
     check.equal(locateHost.querySelector(`[data-mindmap-id="${locateChild.id}"]`).getAttribute("aria-selected"), "true");
     const missingBlock = document.createElement("div");
     missingBlock.dataset.nodeId = "missing-block";
@@ -5810,6 +5970,14 @@ app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     win.webContents.debugger.attach("1.3");
+    ipcMain.handle("mindmap-view-ime", async (_event, text) => {
+        await win.webContents.debugger.sendCommand("Input.imeSetComposition", {
+            text, selectionStart: text.length, selectionEnd: text.length,
+        });
+    });
+    ipcMain.handle("mindmap-view-insert-text", async (_event, text) => {
+        await win.webContents.debugger.sendCommand("Input.insertText", {text});
+    });
     ipcMain.handle("mindmap-view-print-media", async (_event, media) => {
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});
     });

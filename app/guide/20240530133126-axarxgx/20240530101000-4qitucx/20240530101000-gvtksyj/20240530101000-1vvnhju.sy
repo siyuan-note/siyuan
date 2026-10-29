@@ -7,7 +7,7 @@
 		"id": "20240530101000-1vvnhju",
 		"title": "埋め込みコンテンツブロック",
 		"type": "doc",
-		"updated": "20261024163828"
+		"updated": "20261028115947"
 	},
 	"Children": [
 		{
@@ -651,6 +651,81 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-h3xetry",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028115947-h3xetry",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込み結果の変換"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028115947-axdlvdv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-axdlvdv",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みブロックのブロックメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通常のブロックに変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、現在の結果を表示順に独立したコピーへ変換します。書式と子ブロックは、折りたたまれた内容も含めて保持されます。見出しの内容は埋め込みの表示モードに従い、元の見出しレベルを保持します。内容内の参照、入れ子の埋め込み、データベースはそれぞれの動作を保ち、関連データ全体が固定されるわけではありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261028115947-6a8z303",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028115947-6a8z303",
+				"updated": "20261028115947"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロック参照に変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、現在の結果ごとに表示順で動的なブロック参照を作成します。これらの参照は引き続き元のブロックに依存します。どちらの変換も元に戻せます。結果がない場合や、JavaScript がブロック結果を返さず独自の内容だけを表示している場合は変換できません。"
 				}
 			]
 		},

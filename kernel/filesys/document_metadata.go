@@ -78,6 +78,8 @@ func MutateDocumentSources(documents []*treenode.BlockTree, mutate func() error)
 func MutateDocumentSourceSet(collect func() ([]*treenode.BlockTree, error), mutate func() error) error {
 	unlock := lockDocumentSource()
 	defer unlock()
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	documents, err := collect()
 	if err != nil {
 		return err

@@ -20,6 +20,7 @@ import {
     isPluginTopBarEntryKey,
 } from "../../plugin/topBarKey";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
+import type {IBreadcrumbButtonCatalogEntry} from "../../plugin/breadcrumbButtonRegistry";
 
 export {getPluginDockEntryKey} from "../../plugin/dockKey";
 export {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "../../plugin/topBarKey";
@@ -467,6 +468,9 @@ const gutterSingle = () => [
             node("auto", lang("embedHeadingLevelPreserve")),
             ...[1, 2, 3, 4, 5, 6].map(level => node(`heading${level}`, lang(`heading${level}`))),
         ]),
+        separator("separator_conversion"),
+        node("convertToBlocks", lang("embedToBlocks")),
+        node("convertToReferences", lang("embedToReferences")),
     ]),
     separator("separator_1"),
     gutterHeadingTransform(),
@@ -635,6 +639,24 @@ const toolbarCatalogSection: IEntryCatalogSection = {
 export const TOP_BAR_ROOT_PATH = "topBar";
 export const STATUS_BAR_ROOT_PATH = "statusBar";
 export const WINDOW_TOP_BAR_ROOT_PATH = "windowTopBar";
+export const BREADCRUMB_ROOT_PATH = "editor.breadcrumb";
+
+const breadcrumbBuiltinChildren = [
+    node("undo", lang("undo")),
+    node("redo", lang("redo")),
+    node("outdent", lang("outdent")),
+    node("indent", lang("indent")),
+    node("command-panel", lang("commandPanel")),
+    node("readonly", lang("lockEdit")),
+    node("doc", lang("entryDocumentMenu")),
+    node("more", lang("more")),
+];
+
+const breadcrumbCatalogSection: IEntryCatalogSection = {
+    key: BREADCRUMB_ROOT_PATH,
+    label: location(lang("editor"), lang("breadcrumb")),
+    children: breadcrumbBuiltinChildren,
+};
 
 const statusBarCatalogSection: IEntryCatalogSection = {
     key: STATUS_BAR_ROOT_PATH,
@@ -903,6 +925,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         ],
     },
     toolbarCatalogSection,
+    breadcrumbCatalogSection,
     {
         key: "editor.blockEmbed",
         label: location(lang("editor"), lang("blockEmbed")),
@@ -1162,6 +1185,24 @@ export const getEntryPaths = () => Array.from(entryMap.entries())
     .map(([path]) => path);
 export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
 export const getEntryCatalogChildren = (path: string) => childrenMap.get(path);
+
+let breadcrumbCatalogSignature = "[]";
+
+export const refreshBreadcrumbCatalog = (entries: IBreadcrumbButtonCatalogEntry[]) => {
+    const signature = JSON.stringify(entries);
+    if (signature === breadcrumbCatalogSignature) return;
+    const seen = new Set<string>();
+    breadcrumbCatalogSection.children = [
+        ...entries.filter(entry => {
+            if (!entry.key.startsWith("plugin:") || seen.has(entry.key)) return false;
+            seen.add(entry.key);
+            return true;
+        }).map(entry => node(entry.key, literal(entry.label))),
+        ...breadcrumbBuiltinChildren,
+    ];
+    breadcrumbCatalogSignature = signature;
+    rebuildCatalogIndexes();
+};
 export const isEntryOrderSortable = (parentPath: string) => {
     const section = getEntryCatalogSection(parentPath);
     if (section) {

@@ -36,9 +36,14 @@ func settingAIPayload(value *conf.AI) *apicontract.SettingAI {
 		return nil
 	}
 	result := &apicontract.SettingAI{}
+	if value.Memory != nil {
+		result.Memory = &apicontract.SettingMemory{Enabled: value.Memory.Enabled, AutoMaintain: value.Memory.AutoMaintain,
+			Conversations: value.Memory.Conversations, ModelID: value.Memory.ModelID, ReasoningEffort: value.Memory.ReasoningEffort,
+			Sources: append([]string{}, value.Memory.Sources...)}
+	}
 	if value.Web != nil {
 		result.Web = &apicontract.SettingAIWeb{SearchProvider: value.Web.SearchProvider,
-			FetchProvider: value.Web.FetchProvider, APIKey: value.Web.APIKey, Timeout: value.Web.Timeout}
+			FetchProvider: value.Web.FetchProvider, APIKey: value.Web.APIKey, ExaAPIKey: value.Web.ExaAPIKey, Timeout: value.Web.Timeout}
 	}
 	result.MCP = settingMCPPayload(value.MCP)
 	result.Embedding = settingEmbeddingPayload(value.Embedding)
@@ -533,6 +538,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 	result.ShorthandSaveBox = value.ShorthandSaveBox
 	result.ShorthandSavePath = value.ShorthandSavePath
 	result.MaxListCount = value.MaxListCount
+	result.DocTreeBatchSize = value.DocTreeBatchSize
 	result.MaxOpenTabCount = value.MaxOpenTabCount
 	result.AllowCreateDeeper = value.AllowCreateDeeper
 	result.RemoveDocWithoutConfirm = value.RemoveDocWithoutConfirm

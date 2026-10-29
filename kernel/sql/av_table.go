@@ -78,7 +78,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	}
 
 	rowsValues := generateAttrViewItems(attrView, view) // 生成行
-	filterNotFoundAttrViewItems(rowsValues)             // 过滤掉不存在的行
+	historical := renderContext.HistoricalAttributeViewID != "" && renderContext.HistoricalAttributeViewID == attrView.ID
+	if !historical {
+		filterNotFoundAttrViewItems(rowsValues) // 实时视图过滤不存在的绑定块，历史源保留当时的条目身份。
+	}
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {
@@ -130,7 +133,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	var ialIDs []string
 	for _, row := range ret.Rows {
 		blockVal := row.GetBlockValue()
-		if nil != blockVal && !blockVal.IsDetached {
+		if !historical && nil != blockVal && !blockVal.IsDetached {
 			ialIDs = append(ialIDs, blockVal.Block.ID)
 		}
 	}

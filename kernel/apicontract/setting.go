@@ -15,6 +15,7 @@ type SettingBazaar struct {
 }
 
 type SettingAI struct {
+	Memory          *SettingMemory          `json:"memory" api:"optional,nullable"`
 	Web             *SettingAIWeb           `json:"web" api:"optional,nullable"`
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
@@ -26,7 +27,23 @@ type SettingAI struct {
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
 }
 
+// SettingMemory 独立选择长期记忆模型，不跟随对话模型，不为失效引用选择替代模型。
+// enabled 与 autoMaintain 初始均关闭；sources 是允许自动整理的普通笔记本 ID，初始为空。
+// modelId 与 reasoningEffort 初始为空，未知模型仅支持默认推理设置；具体能力由内核返回。
+// 省略字段保留当前值，null 恢复该字段默认值；配置变化使旧维护任务在提交前失效。
+// conversations 初始关闭，仅授权采集成功提交会话中的用户原话，不采集助手输出。
+type SettingMemory struct {
+	Enabled         bool     `json:"enabled" api:"optional,nullable"`
+	AutoMaintain    bool     `json:"autoMaintain" api:"optional,nullable"`
+	Conversations   bool     `json:"conversations" api:"optional,nullable"`
+	ModelID         string   `json:"modelId" api:"optional,nullable"`
+	ReasoningEffort string   `json:"reasoningEffort" api:"optional,nullable"`
+	Sources         []string `json:"sources" api:"optional,nullable"`
+}
+
 // SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// exaApiKey 独立于 DeepSeek 的 apiKey；留空使用匿名 Exa，非空通过 x-api-key 认证并可能产生费用。
+// 省略密钥保留当前值，null 或空字符串清除；认证或限流失败不会回退到匿名模式或其他服务。
 // 超时默认 30 秒，上限 600 秒。
 // DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
 // Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
@@ -34,6 +51,7 @@ type SettingAIWeb struct {
 	SearchProvider string `json:"searchProvider" api:"optional,nullable"`
 	FetchProvider  string `json:"fetchProvider" api:"optional,nullable"`
 	APIKey         string `json:"apiKey" api:"optional,nullable"`
+	ExaAPIKey      string `json:"exaApiKey" api:"optional,nullable"`
 	Timeout        int    `json:"timeout" api:"optional,nullable"`
 }
 
@@ -368,28 +386,30 @@ type SettingFileTree struct {
 	// 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档。
 	// 没有子文档时各取值均直接打开文档；取 2 时单击需等待约 300 毫秒以判断是否双击。超出取值范围的输入按 0 处理。
 	// 已废弃的 parentDocClickExpand 与 parentDocDoubleClickOpen 不再读取，旧配置升级后回到 0。
-	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
-	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
-	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
-	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`
-	RefCreateSavePath        string `json:"refCreateSavePath" api:"optional,nullable"`
-	DocCreateSaveBox         string `json:"docCreateSaveBox" api:"optional,nullable"`
-	DocCreateSavePath        string `json:"docCreateSavePath" api:"optional,nullable"`
-	DocCreateTemplatePath    string `json:"docCreateTemplatePath" api:"optional,nullable"`
-	ShorthandSaveBox         string `json:"shorthandSaveBox" api:"optional,nullable"`
-	ShorthandSavePath        string `json:"shorthandSavePath" api:"optional,nullable"`
-	MaxListCount             int    `json:"maxListCount" api:"optional,nullable"`
-	MaxOpenTabCount          int    `json:"maxOpenTabCount" api:"optional,nullable"`
-	AllowCreateDeeper        bool   `json:"allowCreateDeeper" api:"optional,nullable"`
-	RemoveDocWithoutConfirm  bool   `json:"removeDocWithoutConfirm" api:"optional,nullable"`
-	CloseTabsOnStart         bool   `json:"closeTabsOnStart" api:"optional,nullable"`
-	TabStartupMode           *int   `json:"tabStartupMode" api:"optional,nullable"`
-	UseSingleLineSave        bool   `json:"useSingleLineSave" api:"optional,nullable"`
-	LargeFileWarningSize     int    `json:"largeFileWarningSize" api:"optional,nullable"`
-	CreateDocAtTop           *bool  `json:"createDocAtTop" api:"optional,nullable"`
-	Sort                     int    `json:"sort" api:"optional,nullable"`
-	RecentDocsMaxListCount   int    `json:"recentDocsMaxListCount" api:"optional,nullable"`
-	NoSplitScreenWhenOpenTab bool   `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
+	ParentDocTitleClickMode int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
+	BoxDocEnabled           *bool  `json:"boxDocEnabled" api:"optional,nullable"`
+	UseSVGDefaultIcon       *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
+	RefCreateSaveBox        string `json:"refCreateSaveBox" api:"optional,nullable"`
+	RefCreateSavePath       string `json:"refCreateSavePath" api:"optional,nullable"`
+	DocCreateSaveBox        string `json:"docCreateSaveBox" api:"optional,nullable"`
+	DocCreateSavePath       string `json:"docCreateSavePath" api:"optional,nullable"`
+	DocCreateTemplatePath   string `json:"docCreateTemplatePath" api:"optional,nullable"`
+	ShorthandSaveBox        string `json:"shorthandSaveBox" api:"optional,nullable"`
+	ShorthandSavePath       string `json:"shorthandSavePath" api:"optional,nullable"`
+	MaxListCount            int    `json:"maxListCount" api:"optional,nullable"`
+	// 文档树单次加载数量，默认 512，范围 1..10240；省略保留现值，null 恢复默认。
+	DocTreeBatchSize         *int  `json:"docTreeBatchSize" api:"optional,nullable"`
+	MaxOpenTabCount          int   `json:"maxOpenTabCount" api:"optional,nullable"`
+	AllowCreateDeeper        bool  `json:"allowCreateDeeper" api:"optional,nullable"`
+	RemoveDocWithoutConfirm  bool  `json:"removeDocWithoutConfirm" api:"optional,nullable"`
+	CloseTabsOnStart         bool  `json:"closeTabsOnStart" api:"optional,nullable"`
+	TabStartupMode           *int  `json:"tabStartupMode" api:"optional,nullable"`
+	UseSingleLineSave        bool  `json:"useSingleLineSave" api:"optional,nullable"`
+	LargeFileWarningSize     int   `json:"largeFileWarningSize" api:"optional,nullable"`
+	CreateDocAtTop           *bool `json:"createDocAtTop" api:"optional,nullable"`
+	Sort                     int   `json:"sort" api:"optional,nullable"`
+	RecentDocsMaxListCount   int   `json:"recentDocsMaxListCount" api:"optional,nullable"`
+	NoSplitScreenWhenOpenTab bool  `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
 }
 
 type SettingSearch struct {

@@ -10,6 +10,8 @@ import {ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, css: string) => {
     const check: typeof assert = require("node:assert/strict");
+    check.ok(Math.abs(window.innerWidth - 1500) <= 2 && Math.abs(window.innerHeight - 1200) <= 2,
+        `unexpected drag test viewport: ${window.innerWidth}x${window.innerHeight}`);
     Object.assign(window, {siyuan: {config: {editor: {}}, languages: {database: "Database"}, dialogs: []}});
     document.head.innerHTML = `<style>${css}
         :root {--b3-theme-primary:#1565c0}
@@ -282,7 +284,10 @@ test("database attribute panels render responsive columns with stable drag previ
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, width: 1500, height: 1200, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    const win = new BrowserWindow({show: false, width: 1500, height: 1200, useContentSize: true,
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    // 显式设置内容尺寸，避免初始窗口受屏幕工作区限制而裁掉拖放命中目标。
+    win.setContentSize(1500, 1200);
     win.webContents.on("console-message", event => console.error(event.message));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");

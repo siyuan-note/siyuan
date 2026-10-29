@@ -8,6 +8,7 @@ import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
 import {createAVLocationFromText, createAVLocationReplacement} from "../render/av/locationValue";
 import {
     compactAVCellOperations,
+    getAVNestedPasteItemIDs,
     getAVPasteMatrixWidth,
     getAVPasteValueForType,
     inferAVPasteColumnType,
@@ -21,7 +22,7 @@ const compiled = transpileModule(source.slice(start, end) + "\nexports.pasteAVMa
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
 }).outputText;
 
-const createHarness = (inferable = false) => {
+const createHarness = (inferable = false, nested = false) => {
     const oldValue: IAVCellValue = {id: "value", type: "location", location: {
         name: "Old", latitude: 20, longitude: 30, originalInput: "old input",
     }};
@@ -30,6 +31,7 @@ const createHarness = (inferable = false) => {
     const warnings: string[] = [];
     const pasted: Array<string | IAVCellValue> = [];
     const transactions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
+    const requests: Array<{itemIDs?: string[]}> = [];
     const cellElement = {dataset: {id: "value"}};
     const rowElement = {querySelector: () => cellElement};
     const body = {dataset: {groupId: ""}, querySelector: () => rowElement};
@@ -37,6 +39,7 @@ const createHarness = (inferable = false) => {
         dataset: {avId: "av", nodeId: "block"},
         querySelectorAll: () => [body], querySelector: (): null => null,
         getAttribute: () => "view",
+        hasAttribute: () => nested,
     };
     let measured = 0;
     let restored = 0;
@@ -45,9 +48,13 @@ const createHarness = (inferable = false) => {
         exports: methods,
         Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"},
         getAVPasteMatrixWidth, getAVPasteValueForType, inferAVPasteColumnType,
+        getAVNestedPasteItemIDs, getAvBodyData: () => view,
         compactAVCellOperations, cloneAVCellValueSnapshot,
         createAVLocationFromText, createAVLocationReplacement, isAVReadonlyType,
-        fetchSyncPost: async () => ({code: 0, data: {view, inferableKeyIDs: inferable ? [column.id] : []}}),
+        fetchSyncPost: async (_url: string, request: {itemIDs?: string[]}) => {
+            requests.push(request);
+            return {code: 0, data: {view, inferableKeyIDs: inferable ? [column.id] : []}};
+        },
         showMessage: (message: string) => warnings.push(message),
         window: {siyuan: {languages: {locationPasteInEditor: "Invalid WGS84 coordinates"}}},
         getAVColumnTextMeasurer: () => measured++,
@@ -72,7 +79,7 @@ const createHarness = (inferable = false) => {
             transactions.push({doOperations, undoOperations}),
     });
     return {
-        oldValue, column, warnings, pasted, transactions,
+        oldValue, column, warnings, pasted, transactions, requests,
         getMeasured: () => measured, getRestored: () => restored,
         paste: (values: Array<Array<string | IAVCellValue>>, header?: string[]) => methods.pasteAVMatrix({
             values, header, columns: [column], protyle: {}, blockElement, html: "",
@@ -98,6 +105,18 @@ test("matrix paste accepts decimal and canonical location text and restores the 
         assert.deepEqual(update.data.location, createAVLocationFromText(text));
         assert.deepEqual(undo.data.location, createAVLocationReplacement(harness.oldValue.location));
         assert.equal(harness.getRestored(), 1);
+    }
+});
+
+test("tree matrix paste requests explicit visible item IDs while flat paste keeps its existing API behavior", async () => {
+    for (const nested of [false, true]) {
+        const harness = createHarness(false, nested);
+        assert.equal(await harness.paste([["31.20, 121.40"]]), true);
+        if (nested) {
+            assert.deepEqual([...harness.requests[0].itemIDs], ["row"]);
+        } else {
+            assert.equal(harness.requests[0].itemIDs, undefined);
+        }
     }
 });
 

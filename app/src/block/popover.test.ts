@@ -5,13 +5,15 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
 import test from "node:test";
-import {ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isCallExpression, isClassDeclaration, isConstructorDeclaration,
+    isExpressionStatement, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string) => {
+const browserCases = async (source: string, keyboardSource: string) => {
     const check = require("node:assert/strict");
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
+    const notebookRequests: {id: string, receive: (response: unknown) => void}[] = [];
     const ocrRequests: ((text: string | undefined | {text: string, failed: boolean}) => void)[] = [];
     class Panel {
         element = document.createElement("div");
@@ -42,8 +44,12 @@ const browserCases = async (source: string) => {
             resolve(typeof result === "string" ? {text: result, failed: false} : result))),
         hideTooltip: () => { tooltip = ""; },
         showTooltip: (text: string) => { tooltip = text; },
-        fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
+        fetchPost: (url: string, body: {path: string, notebook?: string}, receive: (response: unknown) => void,
                     _before: unknown, _after: unknown, signal: AbortSignal) => {
+            if (url === "/api/notebook/getNotebookInfo") {
+                notebookRequests.push({id: body.notebook, receive});
+                return;
+            }
             assetRequests.push({path: body.path, receive, signal});
         },
         isLocalPath: (value: string) => value.startsWith("assets/"),
@@ -294,6 +300,23 @@ const browserCases = async (source: string) => {
     url.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tooltip, '<span style="word-break: break-all">https://example.com/</span><br><span>Column title</span>');
 
+    const notebookRow = document.createElement("li");
+    notebookRow.dataset.type = "navigation-root";
+    notebookRow.dataset.url = "notebook-id";
+    notebookRow.innerHTML = '<span class="b3-list-item__text ariaLabel">Notebook</span>';
+    document.body.append(notebookRow);
+    notebookRow.firstElementChild.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(notebookRequests.at(-1).id, "notebook-id", "flat virtual rows supply notebook identity");
+    notebookRequests.at(-1).receive({code: 0, data: {boxInfo: {
+        name: "Notebook", hSize: "1 KiB", docCount: 0, hMtime: "Now", hCtime: "Before",
+    }}});
+    check.match(tooltip, /^Notebook /);
+    notebookRow.firstElementChild.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    notebookRow.remove();
+    tooltip = "";
+    notebookRequests.at(-1).receive({code: 0, data: {boxInfo: {name: "Detached notebook"}}});
+    check.equal(tooltip, "", "late responses cannot reopen tooltips for unmounted rows");
+
     const editor = document.createElement("div");
     editor.className = "protyle";
     editor.innerHTML = '<div data-type="NodeListItem"><div class="protyle-action"><span>1.</span></div></div>';
@@ -316,10 +339,121 @@ const browserCases = async (source: string) => {
     check.equal(tooltip, "", "fragment editors continue to hide the list action tooltip");
     editor.remove();
     fragment.remove();
+
+    window.siyuan.blockPanels.slice().forEach(panel => panel.destroy());
+    window.siyuan.dialogs = [];
+    let mac = true;
+    const keyboard = new Function("isMac", "showPopover", "Constants", keyboardSource +
+        "; return {filterHotkey, windowKeyUp, bindMindmapKeyboard};")(
+        () => mac, api.showPopover, {KEYCODELIST: {}});
+    keyboard.bindMindmapKeyboard(root);
+    const outer = document.createElement("div");
+    outer.className = "protyle-wysiwyg";
+    document.body.append(outer);
+    outer.append(root);
+    let outerReleases = 0;
+    outer.addEventListener("keyup", () => outerReleases++);
+    const nodeEditor = document.createElement("div");
+    nodeEditor.className = "mindmap-view__editor";
+    nodeEditor.contentEditable = "true";
+    // 节点编辑器在冒泡阶段隔离按键释放，容器仍需同步修饰键状态。
+    nodeEditor.addEventListener("keyup", event => event.stopPropagation());
+    root.append(nodeEditor);
+    const keydown = (event: KeyboardEvent) => keyboard.filterHotkey(event, {});
+    const keyup = (event: KeyboardEvent) => keyboard.windowKeyUp({}, event);
+    window.addEventListener("keydown", keydown);
+    window.addEventListener("keyup", keyup);
+    for (const platform of ["mac", "windows"]) {
+        mac = platform === "mac";
+        const key = mac ? "Meta" : "Control";
+        const modifier = mac ? {metaKey: true} : {ctrlKey: true};
+        for (const target of [root, nodeEditor]) {
+            window.siyuan.config.editor.floatWindowMode = 1;
+            hover();
+            check.equal(window.siyuan.blockPanels.length, 0, `${platform}: hover alone does not open a panel`);
+            target.dispatchEvent(new KeyboardEvent("keydown", {key, ...modifier, bubbles: true}));
+            check.equal(window.siyuan.ctrlIsPressed, true);
+            check.equal(window.siyuan.blockPanels.length, 1, `${platform}: pressing the modifier over a reference opens it`);
+            target.dispatchEvent(new KeyboardEvent("keyup", {key, bubbles: true}));
+            check.equal(window.siyuan.ctrlIsPressed, false, `${platform}: releasing inside a mindmap clears the modifier`);
+            document.body.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            await settle();
+            hover();
+            await settle();
+            check.equal(window.siyuan.blockPanels.length, 0, `${platform}: released modifiers cannot trigger another panel`);
+            hover();
+            target.dispatchEvent(new KeyboardEvent("keydown", {key, ...modifier, bubbles: true}));
+            check.equal(window.siyuan.blockPanels.length, 1, `${platform}: the next modifier press still works`);
+            target.dispatchEvent(new KeyboardEvent("keyup", {key, bubbles: true}));
+            document.body.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+            await settle();
+            check.equal(window.siyuan.blockPanels.length, 0);
+        }
+    }
+    for (const key of ["Shift", "Alt"]) {
+        const field = key === "Shift" ? "shiftIsPressed" : "altIsPressed";
+        nodeEditor.dispatchEvent(new KeyboardEvent("keydown", {
+            key, shiftKey: key === "Shift", altKey: key === "Alt", bubbles: true,
+        }));
+        check.equal(window.siyuan[field], true);
+        nodeEditor.dispatchEvent(new KeyboardEvent("keyup", {key, bubbles: true}));
+        check.equal(window.siyuan[field], false, `${key} cannot remain pressed after node editing`);
+        check.equal(document.body.classList.contains("body--shift-pressed"), false);
+    }
+    window.siyuan.config.editor.floatWindowMode = 0;
+    hover();
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 1, "ordinary hover mode still opens a panel");
+    window.siyuan.blockPanels[0].destroy();
+    window.siyuan.config.editor.floatWindowMode = 2;
+    hover();
+    await settle();
+    check.equal(window.siyuan.blockPanels.length, 0, "disabled mode never opens a panel");
+    check.equal(outerReleases, 0, "mindmap key releases do not reach the source editor");
+    window.removeEventListener("keydown", keydown);
+    window.removeEventListener("keyup", keyup);
+    outer.remove();
     return "Popover interaction cases passed";
 };
 
-test("mindmap interaction cancels pending popovers and preserves hover preferences and pinned panels", {
+const getKeyboardSource = () => {
+    const read = (file: string) => createSourceFile(file, readFileSync(path.join(__dirname, file), "utf8"),
+        ScriptTarget.Latest, true);
+    const variables = (file: string, names: string[]) => {
+        const source = read(file);
+        const statements = source.statements.filter(statement => isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration => names.includes(declaration.name.getText(source))));
+        assert.equal(statements.length, names.length);
+        return statements.map(statement => statement.getText(source).replace(/^export /, "")).join("\n");
+    };
+    const controllerSource = read("../protyle/render/listMindmap/index.ts");
+    const controller = controllerSource.statements.find(isClassDeclaration);
+    const controllerConstructor = controller.members.find(isConstructorDeclaration);
+    const releases = controllerConstructor.body.statements.filter(statement => isExpressionStatement(statement) &&
+        isCallExpression(statement.expression) &&
+        statement.expression.expression.getText(controllerSource) === "this.host.addEventListener" &&
+        statement.expression.arguments[0]?.getText(controllerSource) === '"keyup"');
+    const viewSource = read("../protyle/render/listMindmap/view.ts");
+    const view = viewSource.statements.find(isClassDeclaration);
+    const viewConstructor = view.members.find(isConstructorDeclaration);
+    const isolation = viewConstructor.body.statements.find(statement =>
+        statement.getText(viewSource).includes('"compositionend"') && statement.getText(viewSource).includes(".forEach"));
+    assert.ok(isolation);
+    return transpileModule([
+        variables("../protyle/util/compatibility.ts", ["isOnlyMeta", "isNotCtrl"]),
+        variables("../boot/globalEvent/commonHotkey.ts", ["filterHotkey"]),
+        variables("../boot/globalEvent/keyup.ts", ["windowKeyUp"]),
+        `const bindMindmapKeyboard = host => {
+            const options = {host};
+            (function () {
+                ${releases.map(statement => statement.getText(controllerSource)).join("\n")}
+                ${isolation.getText(viewSource)}
+            }).call({host, options: {}, listen: (target, type, handler, options) => target.addEventListener(type, handler, options)});
+        };`,
+    ].join("\n"), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+};
+
+test("mindmap interactions release modifiers and preserve hover preferences and pinned panels", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
@@ -337,7 +471,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)})`)}));
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(getKeyboardSource())})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

@@ -18,7 +18,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -367,7 +366,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 		if specErr := treenode.CheckSpecJSON(data); nil != specErr {
 			return specErr
 		}
-		tree, _, parseErr := dataparser.ParseJSON(data, luteEngine.ParseOptions)
+		tree, _, parseErr := treenode.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			return parseErr
 		}

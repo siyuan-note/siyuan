@@ -49,6 +49,7 @@ import {getDocByScroll} from "./scroll/saveScroll";
 import type {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
+import {clearSubItemsState} from "./render/av/subItemsState";
 import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
 import {setStorageVal} from "./util/compatibility";
@@ -403,6 +404,7 @@ export class Protyle {
                         case "closeBox":
                         case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
+                                clearSubItemsState(this.protyle.element);
                                 /// #if MOBILE
                                 // 主编辑器由页签管理切换文档，避免切换前显示空白主页
                                 if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {
@@ -410,7 +412,7 @@ export class Protyle {
                                 }
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false, true, true);
                                 }
                                 /// #endif
                             }
@@ -424,7 +426,7 @@ export class Protyle {
                                 }
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false, true, true);
                                 }
                                 /// #endif
                                 delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][this.protyle.block.rootID];
@@ -667,7 +669,7 @@ export class Protyle {
 
     /** 上传是否还在进行中 */
     public isUploading() {
-        return this.protyle.upload?.isUploading || false;
+        return this.protyle.upload?.isUploading || this.protyle.title?.isUploading() || false;
     }
 
     /** 清空 undo & redo 栈 */
@@ -708,8 +710,15 @@ export class Protyle {
     }
 
     public async flushPendingTransactions() {
+        if (this.destroyed) return;
+        await this.protyle.title?.flushPendingInput();
+        if (this.destroyed) return;
         await this.protyle.wysiwyg.flushPendingInput();
+        if (this.destroyed) return;
         await waitForPendingTransactions(this.protyle);
+        if (this.destroyed) return;
+        // 正文保存期间标题仍可输入，销毁或交接前确认最后一份标题源。
+        await this.protyle.title?.flushPendingInput();
     }
 
     public transaction(doOperations: IOperation[], undoOperations?: IOperation[]) {

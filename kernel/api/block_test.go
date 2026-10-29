@@ -477,6 +477,15 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 		}
 	})
 
+	t.Run("document title publish access", func(t *testing.T) {
+		for _, id := range []string{disabledID, protectedID} {
+			response := blockGuardRequest(model.RoleReader, `{"id":"`+id+`"}`, getDocTitle)
+			if response["code"] != float64(-1) || response["data"] != nil || response["msg"] == "" {
+				t.Fatalf("unavailable document title must return a typed failure without title data: %v", response)
+			}
+		}
+	})
+
 	t.Run("administrator", func(t *testing.T) {
 		if response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+disabledID+`"}`, checkBlockExist); !response["data"].(bool) {
 			t.Fatalf("disabled block should be visible to the administrator, got %v", response["data"])

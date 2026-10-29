@@ -129,7 +129,11 @@ func allocateExportDocumentPaths(locations []exportDocumentLocation, boxPaths ma
 	for _, box := range ids {
 		directory := "/"
 		if prefix := boxPaths[box]; prefix != "" {
-			directory += exportDocumentFileName(prefix, box)
+			if prefix == "." || prefix == ".." || strings.ContainsAny(prefix, `/\`) {
+				return nil, errors.New("invalid export notebook directory")
+			}
+			// 已分配的目录包含去重后缀，不能再次截断而丢失身份。
+			directory += prefix
 		}
 		if err := allocate(exportDocumentIdentity{box: box}, directory); err != nil {
 			return nil, err

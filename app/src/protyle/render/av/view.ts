@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {locateRequests} from "./locateState";
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
@@ -297,6 +298,11 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${fields.filter((item: IAVColumn) => !item.hidden).length}/${fields.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
+<button class="b3-menu__item" data-type="go-sub-items">
+    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.avSubItems}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
 <button class="b3-menu__item" data-type="goFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
@@ -354,6 +360,7 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
+                locateRequests.delete(options.blockElement as HTMLElement);
                 const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
                     options.blockElement.querySelector(".av__views .item--focus")?.getAttribute("data-id");
                 if (currentElement.dataset.id !== currentViewID) {

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -24,7 +25,7 @@ const (
 	maxWebSearchChars = 50000
 )
 
-var webSearchHTTPClient = httpclient.NewBrowserRequest().GetClient().Clone().SetTimeout(0)
+var webSearchHTTPClient = httpclient.NewBrowserRequest().GetClient().Clone().SetTimeout(0).SetRedirectPolicy(req.NoRedirectPolicy())
 
 type mcpRequest struct {
 	JSONRPC string    `json:"jsonrpc"`
@@ -61,10 +62,7 @@ type mcpContent struct {
 func WebSearchContext(ctx context.Context, query, exaApiKey string, timeout int) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(NormalizeWebTimeout(timeout))*time.Second)
 	defer cancel()
-	exaURL := defaultExaURL
-	if exaApiKey != "" {
-		exaURL += "?exaApiKey=" + url.QueryEscape(exaApiKey)
-	}
+	exaApiKey = strings.TrimSpace(exaApiKey)
 
 	reqBody := mcpRequest{
 		JSONRPC: "2.0",
@@ -81,18 +79,49 @@ func WebSearchContext(ctx context.Context, query, exaApiKey string, timeout int)
 		},
 	}
 
-	resp, err := webSearchHTTPClient.R().SetRetryCount(1).SetRetryFixedInterval(3*time.Second).
-		SetContext(ctx).SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
-	if err != nil {
-		return "", errors.New("web search failed: " + err.Error())
+	request := webSearchHTTPClient.R().SetRetryCount(0).
+		SetContext(ctx).SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody)
+	if exaApiKey != "" {
+		request.SetHeader("x-api-key", exaApiKey)
+	} else {
+		request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
 	}
-	return parseWebSearchResponse(resp.Response)
+	resp, err := request.Post(defaultExaURL)
+	if err != nil {
+		// 网络错误可能包含请求信息，返回前移除凭据；取消与超时保留可判断的错误类型。
+		if ctx.Err() != nil {
+			return "", fmt.Errorf("web search failed: %w", ctx.Err())
+		}
+		return "", errors.New("web search failed: " + redactExaKey(err.Error(), exaApiKey))
+	}
+	text, err := parseWebSearchResponse(resp.Response)
+	if err != nil {
+		return "", errors.New(redactExaKey(err.Error(), exaApiKey))
+	}
+	return text, nil
+}
+
+// redactExaKey 避免上游回显的凭据进入工具错误。
+func redactExaKey(message, key string) string {
+	if key == "" {
+		return message
+	}
+	return strings.NewReplacer(key, "[redacted]", url.QueryEscape(key), "[redacted]").Replace(message)
 }
 
 func parseWebSearchResponse(resp *http.Response) (string, error) {
 	defer resp.Body.Close()
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return "", fmt.Errorf("web search failed: HTTP %d", resp.StatusCode)
+		switch resp.StatusCode {
+		case http.StatusUnauthorized:
+			return "", errors.New("Exa authentication failed: check the API key (HTTP 401)")
+		case http.StatusForbidden:
+			return "", errors.New("Exa access denied: check account permissions (HTTP 403)")
+		case http.StatusTooManyRequests:
+			return "", errors.New("Exa rate limit exceeded: check account limits or try again later (HTTP 429)")
+		default:
+			return "", fmt.Errorf("web search failed: HTTP %d", resp.StatusCode)
+		}
 	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
@@ -101,11 +130,8 @@ func parseWebSearchResponse(resp *http.Response) (string, error) {
 	}
 	body := string(bodyBytes)
 
-	preview := body
-	if len(preview) > 500 {
-		preview = body[:500]
-	}
-	logging.LogInfof("websearch response: status=%d, len=%d, preview=%s", resp.StatusCode, len(body), preview)
+	// 只记录响应元数据，避免上游错误回显密钥或查询内容。
+	logging.LogInfof("websearch response: status=%d, len=%d", resp.StatusCode, len(body))
 
 	text, err := parseMcpResponse(body)
 	if err != nil {

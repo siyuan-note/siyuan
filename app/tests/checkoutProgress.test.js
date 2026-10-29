@@ -48,7 +48,7 @@ const run = async () => {
                 assert.equal(standard.querySelector("img"),null);
                 const sharedBarHeight = getComputedStyle(standard.querySelector(".b3-dialog__progress")).height;
                 const sharedColor = getComputedStyle(standard.querySelector(".b3-dialog__loading")).color;
-                assert.equal(sharedBarHeight,"8px");
+                assert.equal(sharedBarHeight,"4px");
                 progressExports.progressLoading({code:0,msg:"overrun",data:{current:999,total:10}},"standard-progress");
                 assert.equal(standard.querySelector(".b3-dialog__progressbar").style.width,"100%");
                 progressExports.progressLoading({code:0,msg:"unknown",data:{current:NaN,total:0}},"standard-progress");

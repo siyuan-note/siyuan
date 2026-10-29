@@ -16,16 +16,14 @@ interface IPanelHarness {
     sourceTree: unknown;
     clearSelection(): void;
     updateDocActions(): void;
-    refresh(dirtyChildren?: Set<string>): Promise<void>;
+    refresh(): Promise<void>;
     onFileTreeMessage(data: {cmd: string, data?: {id?: string, rootID?: string} & Partial<IFile>}): void;
     collapse(): void;
-    expanded: Set<string>;
+    docTree: unknown;
+    restored: boolean;
     list: unknown;
     generation: number;
-    rootSnapshot: string;
-    names: Map<string, string>;
-    appendDoc(...args: unknown[]): Promise<void>;
-    loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
+    renderRow(item: unknown): {tagName: string, draggable: boolean, dataset: Record<string, string>};
     drop(ids: string[], x: number, y: number, allowSource?: boolean): Promise<void>;
     click(event: unknown): void;
     menu(row: unknown, position: {x: number, y: number, h: number}): void;
@@ -47,7 +45,6 @@ const loadPanel = (fetchCode = 0) => {
     const hitTest = {target: null as unknown};
     const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
-    const childData = {effectiveSortMode: 6, files: [] as ({id: string, name: string} & Partial<IFile>)[]};
     const config = {readonly: false, fileTree: {docIconClickMode: 0, parentDocTitleClickMode: 0}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const timers: (() => void)[] = [];
@@ -59,11 +56,11 @@ const loadPanel = (fetchCode = 0) => {
     };
     const runtime = {config, notebooks: [] as unknown[], languages: {pinDoc: "Pin", dragTipMoveChild: "Into ${x}",
         dragTipMoveBefore: "Before ${x}", dragTipMoveAfter: "After ${x}"}, dragElement: undefined as {innerText: string},
-        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown, menus: {menu}};
+        storage: {} as Record<string, unknown>, dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown, menus: {menu}};
     const tips: unknown[][] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
-        return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
+        return {code: kind === "http" ? fetchCode : 0, data: docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
     const tooltip = {};
@@ -94,7 +91,7 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
-            if (name.endsWith("/constants")) { return {Constants: {TIMEOUT_LONGPRESS: 500}}; }
+            if (name.endsWith("/constants")) { return {Constants: {TIMEOUT_LONGPRESS: 500, LOCAL_PINNED_DOC_TREE_STATE: "local-pinned-doc-tree-state"}}; }
             if (name.endsWith("/menuToggle")) { return menuToggle; }
             if (name.endsWith("/menuClick")) { return {globalClickHideMenu: () => {}}; }
             if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
@@ -102,7 +99,7 @@ const loadPanel = (fetchCode = 0) => {
             if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
             if (name.endsWith("/pinnedDocsDrop")) { return {getPinnedDropPosition}; }
             if (name.endsWith("/dragover")) { return {dragOverScroll: () => {}}; }
-            if (name.endsWith("/compatibility")) { return {isOnlyMeta: (event: MouseEvent) => Boolean(event.ctrlKey)}; }
+            if (name.endsWith("/compatibility")) { return {isOnlyMeta: (event: MouseEvent) => Boolean(event.ctrlKey), setStorageVal: () => {}}; }
             if (name.endsWith("/fileTreeIcon")) { return {getFileTreeIconHTML: () => ""}; }
             if (name.endsWith("/escape")) { return escape; }
             if (name.endsWith("/fileTreeTooltip")) { return tooltip; }
@@ -129,7 +126,29 @@ const loadPanel = (fetchCode = 0) => {
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
-    return {panel, calls, config, docs, storage, childData, hitTest, runtime, timers, tips};
+    const selected = new Set<string>();
+    const expansions = new Set<string>();
+    const messages: {cmd: string, data?: unknown}[] = [];
+    panel.restored = true;
+    panel.docTree = {
+        retain() {}, release() {},
+        getItemFromElement: (row: {dataset: Record<string, string>}) => row && ({
+            id: row.dataset.nodeId, notebookId: row.dataset.notebook,
+            occurrenceKey: row.dataset.treeKey || row.dataset.pinRow || row.dataset.nodeId}),
+        select: (key: string, options: {toggle?: boolean} = {}) => {
+            if (!options.toggle) { selected.clear(); }
+            if (options.toggle && selected.has(key)) { selected.delete(key); } else { selected.add(key); }
+        },
+        clearSelection: () => selected.clear(),
+        getSelectedItems: () => [...selected].map(occurrenceKey => ({occurrenceKey})),
+        toggle: (key: string, expand = !expansions.has(key)) => { if (expand) { expansions.add(key); } else { expansions.delete(key); } },
+        isExpanded: (key: string) => expansions.has(key),
+        itemAtDirectoryIndex: async (key: string, index: number) => { calls.push({kind: "range", args: [key, index]}); },
+        collapseAll: () => expansions.clear(),
+        getExpandedItems: () => [...expansions].map(occurrenceKey => ({occurrenceKey, notebookId: "box"})),
+        setRoots() {}, handleMessage: (message: {cmd: string, data?: unknown}) => messages.push(message),
+    };
+    return {panel, calls, config, docs, storage, selected, expansions, messages, hitTest, runtime, timers, tips};
 };
 
 const loadTouchPanel = () => {
@@ -245,32 +264,20 @@ test("mobile source tree skips bubbled pinned touches and still starts ordinary 
     }
 });
 
-test("collapse clears descendant expansion and persists the closed section", async () => {
-    const {panel, storage, calls} = loadPanel();
-    panel.generation = 3;
-    panel.expanded = new Set(["root", "root/child"]);
+test("collapse clears controller expansion and persists the closed section", () => {
+    const {panel, runtime, expansions} = loadPanel();
+    expansions.add("pin:root");
+    expansions.add("pin:root/child");
     const states: unknown[] = [];
-    const row = {
-        nextElementSibling: {replaceChildren: () => states.push("clear"), removeAttribute: () => {}, classList: {add: (name: string) => states.push(name)}},
-        querySelector: () => ({classList: {remove: (name: string) => states.push(name)}}),
-        hasAttribute: () => true,
-        setAttribute: (name: string, value: string) => states.push([name, value]),
-    };
-    panel.list = {querySelectorAll: () => [row], classList: {toggle: (name: string, value: boolean) => states.push([name, value])}};
-    panel.heading = {
-        setAttribute: (name: string, value: string) => states.push([name, value]),
-        querySelector: () => ({classList: {toggle: () => {}}}),
-    };
+    panel.list = {classList: {toggle: (name: string, value: boolean) => states.push([name, value])}};
+    let expanded = "true";
+    panel.heading = {getAttribute: () => expanded,
+        setAttribute: (_name: string, value: string) => { expanded = value; },
+        querySelector: () => ({classList: {toggle() {}}})};
     panel.collapse();
-    assert.equal(panel.generation, 4);
-    assert.equal(panel.expanded.size, 0);
-    assert.equal(storage.get("siyuan-pinned-docs-expanded"), "[]");
-    assert.equal(storage.get("siyuan-pinned-docs-collapsed"), "true");
-    assert.deepEqual(states, [["fn__none", true], ["aria-expanded", "false"], "clear", "fn__none",
-        "b3-list-item__arrow--open", ["aria-expanded", "false"]]);
-    await panel.loadChildren({dataset: {notebook: "notebook", path: "/root.sy", pinRow: "root"}}, {}, 3);
-    assert.equal(calls.length, 1);
-    assert.equal(calls[0].args[0], "/api/filetree/listDocsByPath");
+    assert.equal(expansions.size, 0);
+    assert.equal(JSON.stringify(runtime.storage["local-pinned-doc-tree-state"]), JSON.stringify({version: 2, collapsed: true, expanded: []}));
+    assert.deepEqual(states, [["fn__none", true]]);
 });
 
 test("pinned document more actions open the source document menu and toggle on repeated clicks", () => {
@@ -298,19 +305,15 @@ test("pinned document more actions open the source document menu and toggle on r
     assert.equal(calls.length, 8);
 });
 
-test("pinned roots share one list and retain each document notebook without wrapper lists", async () => {
+test("pinned rows retain notebook and occurrence metadata without creating descendant wrappers", () => {
     const {panel} = loadPanel();
-    panel.expanded = new Set();
-    const children: {tagName: string, dataset: Record<string, string>}[] = [];
-    const parent = {append: (child: typeof children[number]) => children.push(child)};
-    for (const notebook of ["first", "second"]) {
-        await panel.appendDoc(parent, {id: notebook + "-doc", notebook, name: "Document", path: "/doc.sy", subFileCount: 0}, notebook, 0, 0);
-    }
-    assert.deepEqual(children.map(child => child.tagName), ["li", "ul", "li", "ul"]);
-    assert.equal(children[0].dataset.notebook, "first");
-    assert.equal(children[2].dataset.notebook, "second");
-    assert.equal(children[1].dataset.url, "first");
-    assert.equal(children[3].dataset.url, "second");
+    const rows = ["first", "second"].map(notebookId => panel.renderRow({id: "doc", notebookId,
+        occurrenceKey: "pin:" + notebookId, depth: 0, unavailable: false,
+        file: {id: "doc", name: "Document", path: "/doc.sy", subFileCount: 0}}));
+    assert.deepEqual(rows.map(row => row.tagName), ["li", "li"]);
+    assert.equal(rows[0].dataset.notebook, "first");
+    assert.equal(rows[1].dataset.notebook, "second");
+    assert.equal(rows[0].dataset.pinRow, "pin:first");
 });
 
 test("touch long press suppresses the context menu before and during dragging", () => {
@@ -337,15 +340,13 @@ test("touch long press suppresses the context menu before and during dragging", 
     assert.deepEqual({...calls[3].args[0] as object}, {x: 200, y: 120, h: 28});
 });
 
-test("mobile pinned rows use touch dragging without native HTML dragging", async () => {
+test("mobile pinned rows use touch dragging without native HTML dragging", () => {
     const {panel} = loadPanel();
-    panel.expanded = new Set();
     for (const mobile of [false, true]) {
         panel.mobile = mobile;
-        const children: {draggable?: boolean}[] = [];
-        const parent = {append: (child: typeof children[number]) => children.push(child)};
-        await panel.appendDoc(parent, {id: "doc", notebook: "box", name: "Document", path: "/doc.sy", subFileCount: 0}, "doc", 0, 0);
-        assert.equal(children[0].draggable, !mobile);
+        const row = panel.renderRow({id: "doc", notebookId: "box", occurrenceKey: "pin:doc", depth: 0,
+            file: {id: "doc", name: "Document", path: "/doc.sy", subFileCount: 0}});
+        assert.equal(row.draggable, !mobile);
     }
 });
 
@@ -372,7 +373,7 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
 });
 
 test("document action updates refresh existing pinned icons without reloading their documents", () => {
-    const {panel, config, runtime, calls} = loadPanel();
+    const {panel, config, runtime, calls, expansions} = loadPanel();
     Object.assign(runtime.languages, {changeIcon: "Change icon", docIconClickExpand: "Expand children", openDocument: "Open"});
     const makeRow = (count: number) => {
         const attributes = new Map<string, string>();
@@ -388,7 +389,7 @@ test("document action updates refresh existing pinned icons without reloading th
     };
     const rows = [makeRow(2), makeRow(0)];
     panel.list = {querySelectorAll: () => rows};
-    panel.expanded = new Set(["parent"]);
+    expansions.add("parent");
     const file = "Files.ts";
     const source = ts.createSourceFile(file, readFileSync(join(__dirname, file), "utf8"), ts.ScriptTarget.Latest, true);
     let method: ts.MethodDeclaration;
@@ -416,7 +417,7 @@ test("document action updates refresh existing pinned icons without reloading th
     }
     assert.equal(regularUpdates.length, 3);
     assert.equal(regularUpdates[0], regularRow);
-    assert.deepEqual([...panel.expanded], ["parent"]);
+    assert.deepEqual([...expansions], ["parent"]);
     assert.equal(calls.length, 0);
     panel.mobile = true;
     for (const mode of [0, 1]) {
@@ -448,12 +449,12 @@ test("child ordering uses the existing conflict confirmation and inside drops mo
     assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({fromIDs: ["child"], toID: "parent"}));
 });
 
-test("dropping on a notebook resolves its outer list ID with or without root documents", async () => {
+test("dropping on a notebook resolves row metadata with or without root documents", async () => {
     const {panel, calls, hitTest} = loadPanel();
     const highlights: string[] = [];
-    const row = {dataset: {type: "navigation-root", nodeId: ""},
+    const row = {dataset: {type: "navigation-root", nodeId: "", notebookId: "notebook"},
         querySelector: () => ({textContent: "Notebook"}),
-        closest: (selector: string) => selector === "ul[data-url]" ? {dataset: {url: "notebook"}} : null,
+        closest: (): null => null,
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
     panel.sourceTree = {contains: () => true, getBoundingClientRect: () => ({})};
@@ -571,75 +572,69 @@ test("panel clicks never bubble into the mobile source tree handler", () => {
     assert.equal(prevented, 1);
 });
 
-test("modifier clicks toggle pins without opening and ordinary clicks clear source selection", () => {
-    const {panel} = loadPanel();
-    let focused = true;
+test("modifier clicks change logical selection without opening and ordinary clicks select the target", () => {
+    const {panel, selected} = loadPanel();
     let opened = 0;
-    let sourceCleared = 0;
-    const row = {dataset: {nodeId: "doc", notebook: "box"}, classList: {
-        toggle: () => { focused = !focused; }, add: () => { focused = true; }, remove: () => { focused = false; },
-    }, removeAttribute: () => {}};
-    panel.list = {querySelectorAll: () => [row]};
-    panel.sourceTree = {querySelectorAll: () => [{classList: {remove: () => sourceCleared++}, removeAttribute: () => {}}]};
+    const row = {dataset: {nodeId: "doc", notebook: "box", pinRow: "pin:doc"}};
     panel.open = () => opened++;
-    const event = {ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {},
+    selected.add("pin:doc");
+    const event = {ctrlKey: true, stopPropagation() {}, preventDefault() {},
         target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : null}};
     panel.click(event);
-    assert.equal(focused, false);
+    assert.equal(selected.size, 0);
     panel.click(event);
-    assert.equal(focused, true);
+    assert.equal(selected.has("pin:doc"), true);
     assert.equal(opened, 0);
     event.ctrlKey = false;
     panel.click(event);
     assert.equal(opened, 1);
-    assert.equal(sourceCleared, 1);
+    assert.deepEqual([...selected], ["pin:doc"]);
     panel.clearSelection();
-    assert.equal(focused, false);
+    assert.equal(selected.size, 0);
 });
 
-test("notebook root expansion requests physical root while documents keep their own paths", async () => {
-    const {panel, calls} = loadPanel(-1);
+test("notebook root expansion delegates to the controller using occurrence identity", async () => {
+    const {panel, expansions} = loadPanel();
     for (const id of ["notebook", "document"]) {
-        await panel.loadChildren({dataset: {notebook: "notebook", nodeId: id, path: `/${id}.sy`}}, {}, 0);
+        await panel.toggle({dataset: {notebook: "notebook", nodeId: id, pinRow: "pin:" + id, count: "2"}}, true);
     }
-    assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({notebook: "notebook", path: "/", maxListCount: 0}));
-    assert.equal(JSON.stringify(calls[1].args[1]), JSON.stringify({notebook: "notebook", path: "/document.sy", maxListCount: 0}));
+    assert.deepEqual([...expansions], ["pin:notebook", "pin:document"]);
 });
 
-test("parent titles prefetch once and double clicks preserve expanded and collapsed pinned rows", async () => {
+test("double clicks open without expanding pinned rows while the first child range is prefetched", async () => {
     for (const {expanded, mobile} of [
         {expanded: false, mobile: false}, {expanded: true, mobile: false},
         {expanded: false, mobile: true}, {expanded: true, mobile: true},
     ]) {
-        const {panel, config, calls} = loadPanel();
+        const {panel, config, calls, expansions} = loadPanel();
         config.fileTree.parentDocTitleClickMode = 2;
         panel.mobile = mobile;
         panel.generation = 0;
-        panel.expanded = new Set(expanded ? ["doc"] : []);
-        const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
+        if (expanded) { expansions.add("doc"); }
+        const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", treeKey: "doc", pinRow: "doc", path: "/doc.sy", count: "1"},
             classList: {add: () => {}}};
         const event = {stopPropagation: () => {}, target: {closest: (selector: string) =>
             selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
         panel.open = () => calls.push({kind: "open", args: []});
         panel.toggle = (...args) => { calls.push({kind: "toggle", args}); };
         panel.click(event);
-        assert.equal(calls.filter(call => call.kind === "http").length, expanded ? 0 : 1);
+        assert.equal(calls.filter(call => call.kind === "http").length, 0);
+        assert.equal(calls.filter(call => call.kind === "range").length, expanded ? 0 : 1);
         await delay(0);
         assert.equal(calls.filter(call => call.kind === "toggle").length, 0);
         panel.click(event);
         await delay(330);
         assert.equal(calls.filter(call => call.kind === "open").length, 1);
         assert.equal(calls.filter(call => call.kind === "toggle").length, 0);
-        assert.equal(panel.expanded.has("doc"), expanded);
+        assert.equal(expansions.has("doc"), expanded);
     }
 });
 
-test("single parent click reuses prefetched children after the click window", async () => {
-    const {panel, config, calls, childData} = loadPanel();
+test("single parent click uses the prefetched child range after the double click window", async () => {
+    const {panel, config, calls} = loadPanel();
     config.fileTree.parentDocTitleClickMode = 2;
     panel.generation = 0;
-    panel.expanded = new Set();
-    const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
+    const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", treeKey: "doc", pinRow: "doc", path: "/doc.sy", count: "1"},
         classList: {add: () => {}}};
     const event = {stopPropagation: () => {}, target: {closest: (selector: string) =>
         selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
@@ -647,8 +642,9 @@ test("single parent click reuses prefetched children after the click window", as
     panel.toggle = (...args) => { calls.push({kind: "toggle", args}); };
     panel.click(event);
     await delay(330);
-    assert.equal(calls.filter(call => call.kind === "http").length, 1);
-    assert.deepEqual(calls.find(call => call.kind === "toggle").args, [row, true, childData]);
+    assert.equal(calls.filter(call => call.kind === "http").length, 0);
+    assert.equal(calls.filter(call => call.kind === "range").length, 1);
+    assert.deepEqual(calls.find(call => call.kind === "toggle").args, [row, true]);
 });
 
 test("expand-only mode toggles pinned parent titles immediately on desktop and mobile", () => {
@@ -672,8 +668,6 @@ test("pinned area follows list contents on initial load, pin, unpin and sync", a
     const {panel, calls, docs} = loadPanel();
     const states: boolean[] = [];
     panel.generation = 0;
-    panel.names = new Map();
-    panel.appendDoc = async () => {};
     panel.list = {scrollTop: 0, contains: () => false,
         querySelectorAll: (): unknown[] => [], replaceChildren: () => {}};
     panel.element = {classList: {toggle: (name: string, hidden: boolean) => {
@@ -681,98 +675,34 @@ test("pinned area follows list contents on initial load, pin, unpin and sync", a
         states.push(hidden);
     }}};
     await panel.refresh();
-    await panel.refresh(new Set());
+    await panel.refresh();
     docs.push({id: "document", notebook: "notebook", name: "Document"});
     await panel.refresh();
     docs.length = 0;
     await panel.refresh();
     docs.push({id: "synced", notebook: "notebook", name: "Synced"});
     await panel.refresh();
-    assert.deepEqual(states, [true, false, true, false]);
+    assert.deepEqual(states, [true, true, false, true, false]);
     assert.ok(calls.every(call => call.kind === "http" && call.args[0] === "/api/filetree/getPinnedDocs"));
 });
 
-test("document info updates every available pinned copy without scheduling another tree refresh", () => {
-    const {panel, calls, runtime} = loadPanel();
-    Object.assign(runtime.languages, {bookmark: "Bookmark", name: "Name", alias: "Alias", memo: "Memo",
-        includeSubFile: " (x children)", modifiedAt: "Modified", createdAt: "Created"});
-    const rows = ["document", "document", "other", "document"].map((nodeId, index) => ({
-        dataset: {nodeId, unavailable: String(index === 3)},
-        label: "unchanged",
-        querySelector() { return {setAttribute: (_name: string, value: string) => { this.label = value; }}; },
-    }));
-    panel.list = {querySelectorAll: () => rows};
-    const info = {rootID: "document", name: 'A "title" <tag> &copy;', hSize: "2 KB", hMtime: "updated", hCtime: "created",
-        bookmark: "bookmark <text>", name1: "named", alias: "alias", memo: "memo", subFileCount: 2};
+test("document info delegates metadata updates to the shared controller without reloading roots", () => {
+    const {panel, messages} = loadPanel();
+    const scheduled: unknown[] = [];
+    panel.scheduleRefresh = id => scheduled.push(id);
+    const info = {rootID: "document", name: 'A "title" <tag>', hSize: "2 KB", subFileCount: 2};
     panel.onFileTreeMessage({cmd: "reloadDocInfo", data: info});
-    const expected = "A &quot;title&quot; &lt;tag&gt; &amp;copy; <small class='ft__on-surface'>2 KB</small><br>Bookmark bookmark &lt;text&gt;" +
-        "<br>Name named<br>Alias alias<br>Memo memo (2 children)<br>Modified updated<br>Created created";
-    assert.equal(rows[0].label, expected);
-    assert.equal(rows[1].label, expected);
-    assert.equal(rows[2].label, "unchanged");
-    assert.equal(rows[3].label, "unchanged");
-    assert.equal(calls.length, 0);
+    assert.equal(messages[0].data, info);
+    assert.equal(scheduled.length, 0);
 });
 
-test("rename refresh is not repeated by delayed document info or notebook info pushes", () => {
-    const {panel} = loadPanel();
-    const updates: (string | undefined)[] = [];
+test("root changes schedule refresh while metadata updates stay within the shared controller", () => {
+    const {panel, messages} = loadPanel();
+    const updates: unknown[] = [];
     panel.scheduleRefresh = id => updates.push(id);
-    panel.onFileTreeMessage({cmd: "rename", data: {id: "document"}});
-    panel.onFileTreeMessage({cmd: "reloadDocInfo", data: {rootID: "document"}});
-    panel.onFileTreeMessage({cmd: "reloadNotebookInfo"});
-    panel.onFileTreeMessage({cmd: "reloadFiletree"});
-    assert.deepEqual(updates, ["document"]);
-    panel.onFileTreeMessage({cmd: "pinnedDocsChanged"});
-    panel.onFileTreeMessage({cmd: "moveDocs"});
-    assert.deepEqual(updates, ["document", "", undefined]);
-});
-
-test("unchanged child lists preserve DOM while title, icon and order changes rebuild", async () => {
-    const {panel, childData} = loadPanel();
-    panel.generation = 1;
-    panel.expanded = new Set(["root"]);
-    panel.appendDoc = async () => {};
-    let rebuilds = 0;
-    const children = {dataset: {} as Record<string, string>, replaceChildren: () => rebuilds++,
-        setAttribute: () => {}, querySelectorAll: (): unknown[] => [], classList: {remove: () => {}}};
-    const row = {dataset: {notebook: "box", nodeId: "root", path: "/root.sy", pinRow: "root"},
-        querySelector: () => ({classList: {add: () => {}}}), setAttribute: () => {}};
-    childData.files.push({id: "one", name: "One"}, {id: "two", name: "Two"});
-    await panel.loadChildren(row, children, 1);
-    await panel.loadChildren(row, children, 1);
-    assert.equal(rebuilds, 1);
-    childData.files[0].name = "Renamed";
-    await panel.loadChildren(row, children, 1);
-    childData.files[0].icon = "1f600";
-    await panel.loadChildren(row, children, 1);
-    childData.files.reverse();
-    await panel.loadChildren(row, children, 1);
-    assert.equal(rebuilds, 4);
-    for (const field of ["hSize", "hMtime", "hCtime", "name1", "alias", "memo", "bookmark"] as const) {
-        childData.files[0][field] = "updated " + field;
-        await panel.loadChildren(row, children, 1);
+    for (const cmd of ["rename", "reloadDocInfo", "reloadNotebookInfo", "reloadFiletree", "pinnedDocsChanged", "moveDocs"]) {
+        panel.onFileTreeMessage({cmd, data: {id: "document", rootID: "document"}});
     }
-    assert.equal(rebuilds, 11);
-});
-
-test("unchanged roots still refresh the affected expanded child list without replacing root rows", async () => {
-    const {panel, docs} = loadPanel();
-    docs.push({id: "root", notebook: "box", name: "Root"});
-    panel.rootSnapshot = JSON.stringify(docs);
-    panel.generation = 0;
-    panel.expanded = new Set(["root", "root/parent", "other"]);
-    const keys = ["root", "root/parent", "other"];
-    const rows = keys.map(key => ({dataset: {pinRow: key, pinRoot: String(!key.includes("/"))}}));
-    panel.list = {scrollTop: 0, contains: () => false, querySelectorAll: (selector: string) =>
-        selector === "[data-pin-row]" ? rows : [], replaceChildren: () => assert.fail("root DOM was rebuilt")};
-    const refreshed: string[] = [];
-    panel.loadChildren = async (row: typeof rows[number]) => { refreshed.push(row.dataset.pinRow); };
-    await panel.refresh(new Set(["root/parent"]));
-    assert.deepEqual(refreshed, ["root/parent"]);
-    refreshed.length = 0;
-    await panel.refresh(new Set());
-    assert.deepEqual(refreshed, []);
-    await panel.refresh();
-    assert.deepEqual(refreshed, ["root", "other"]);
+    assert.equal(updates.length, 4);
+    assert.equal(messages.length, 6);
 });

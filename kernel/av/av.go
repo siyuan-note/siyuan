@@ -39,6 +39,7 @@ type AttributeView struct {
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
 	Automations       *AutomationConfig  `json:"automations,omitempty"`
+	SubItems          *SubItemsConfig    `json:"subItems,omitempty"`
 	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
 	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
@@ -308,6 +309,7 @@ var widthValuePattern = regexp.MustCompile(`^\d+(\.\d+)?(px|em|rem|%)$`)
 
 // View 描述了视图的结构。
 type View struct {
+	SubItemsDisplay   string                  `json:"subItemsDisplay,omitempty"`
 	ConditionalColors []*ConditionalColorRule `json:"conditionalColors"` // nil 兼容旧日历，空数组禁用颜色
 	ID                string                  `json:"id"`                // 视图 ID
 	Icon              string                  `json:"icon"`              // 视图图标
@@ -326,16 +328,17 @@ type View struct {
 	Kanban            *LayoutKanban           `json:"kanban,omitempty"`  // 看板布局
 	ItemIDs           []string                `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
-	GroupCreated int64      `json:"groupCreated"`        // 分组生成时间戳
-	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
-	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
-	GroupKey     *Key       `json:"groupKey,omitempty"`  // 分组字段
-	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
-	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
-	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
-	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
+	Group           *ViewGroup `json:"group,omitempty"`           // 分组规则
+	GroupCreated    int64      `json:"groupCreated"`              // 分组生成时间戳
+	Groups          []*View    `json:"groups,omitempty"`          // 分组视图列表
+	GroupItemIDs    []string   `json:"groupItemIds"`              // 分组项目 ID 列表，用于维护分组中的所有项目
+	SubItemsItemIDs []string   `json:"subItemsItemIds,omitempty"` // 树形分组的独立手工顺序，不决定平铺分组成员
+	GroupCalc       *GroupCalc `json:"groupCalc,omitempty"`       // 分组计算规则
+	GroupKey        *Key       `json:"groupKey,omitempty"`        // 分组字段
+	GroupVal        *Value     `json:"groupVal,omitempty"`        // 分组值
+	GroupFolded     bool       `json:"groupFolded"`               // 分组是否折叠
+	GroupHidden     int        `json:"groupHidden"`               // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupSort       int        `json:"groupSort"`                 // 分组排序值，用于手动排序
 
 	legacyMapFallback bool
 }
@@ -619,6 +622,7 @@ func cacheAttributeViewData(attrView *AttributeView, boxID string, data []byte) 
 }
 
 func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, err error) {
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeViewSearchInfo{}
 	if err = json.Unmarshal(data, ret); err != nil {
 		return
@@ -687,7 +691,7 @@ func loadAttributeViewSearchInfoInBox(avID, avJSONPath, avBoxID string) (ret *At
 
 		if ret, err = parseAttributeViewSearchInfo(data); err != nil {
 			logging.LogErrorf("unmarshal attribute view search info [%s] failed: %s", avID, err)
-			return nil, err
+			return nil, fmt.Errorf("parse attribute view search info [%s] failed: %w", avJSONPath, err)
 		}
 		if cache.SetAVSearchDataInBox(avID, avBoxID, dataVersion, ret) {
 			return ret, nil
@@ -836,6 +840,11 @@ func ReadAttributeViewCustomColorUsageByPath(avJSONPath string) (avID string, in
 }
 
 func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveColors bool) (ret *AttributeView, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("load attribute view [%s] failed: %w", avJSONPath, err)
+		}
+	}()
 	generation := cache.GetAVCacheGeneration()
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
@@ -905,6 +914,8 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 }
 
 func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
+	// 仅处理已认证明文的开头 BOM；缓存和条件写入保留原始字节以检测外部修改。
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -977,6 +988,9 @@ func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (r
 	if nil == err {
 		err = ret.NormalizeLocations()
 	}
+	if nil == err {
+		err = ret.ValidateSubItems()
+	}
 	return
 }
 
@@ -1019,6 +1033,9 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	// 做一些数据兼容和订正处理
+	if err = av.ValidateSubItems(); err != nil {
+		return
+	}
 	UpgradeSpec(av)
 
 	// 值去重
@@ -1413,6 +1430,16 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	}
 
 	ret.remapAutomationKeys(av.ID, keyIDMap)
+	if ret.SubItems != nil {
+		ret.SubItems.ParentKeyID = keyIDMap[ret.SubItems.ParentKeyID]
+		ret.SubItems.ChildrenKeyID = keyIDMap[ret.SubItems.ChildrenKeyID]
+		if parent, e := ret.GetKey(ret.SubItems.ParentKeyID); e == nil {
+			parent.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ChildrenKeyID}
+		}
+		if children, e := ret.GetKey(ret.SubItems.ChildrenKeyID); e == nil {
+			children.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ParentKeyID}
+		}
+	}
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
 	sorts := map[string]int{}
 	for i, k := range ret.KeyIDs {
@@ -1470,6 +1497,13 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			}
 		}
 		view.ItemIDs = []string{}
+		pending := []*View{view}
+		for len(pending) > 0 {
+			current := pending[len(pending)-1]
+			pending = pending[:len(pending)-1]
+			current.SubItemsItemIDs = nil
+			pending = append(pending, current.Groups...)
+		}
 	}
 	ret.CardCoverPositions = nil
 

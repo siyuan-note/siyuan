@@ -1,5 +1,6 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
+import {closeDocumentTitleDialogs} from "../protyle/header/documentTitleDialogs";
 import {clearDocumentCreationPlans} from "../util/configuredDocument";
 import {closeNotebookLivePhotos} from "../protyle/preview/livePhoto";
 import {Constants} from "../constants";
@@ -172,6 +173,7 @@ class App {
                                 break;
                             case "closeBox":
                             case "removeBox":
+                                closeDocumentTitleDialogs({notebookId: data.data.box});
                                 closeNotebookHistoryDialogs(data.data.box);
                                 clearDocumentCreationPlans(data.data.box);
                                 closeNotebookLivePhotos(data.data.box);
@@ -182,13 +184,14 @@ class App {
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
                                             if (initTabData.instance === "Editor" && data.data.box === initTabData.notebookId) {
-                                                tab.parent.removeTab(tab.id);
+                                                tab.parent.removeTab(tab.id, false, false, true, true);
                                             }
                                         }
                                     }
                                 });
                                 break;
                             case "removeDoc":
+                                closeDocumentTitleDialogs({rootIDs: data.data.ids});
                                 removeBlockPanelEditors({rootIDs: data.data.ids});
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
@@ -196,7 +199,7 @@ class App {
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
                                             if (initTabData.instance === "Editor" && data.data.ids.includes(initTabData.rootId)) {
-                                                tab.parent.removeTab(tab.id);
+                                                tab.parent.removeTab(tab.id, false, false, true, true);
                                             }
                                         }
                                     }

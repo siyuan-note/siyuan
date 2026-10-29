@@ -196,6 +196,13 @@ class ListMindmapController {
         this.host.className = "mindmap-view";
         syncListMindmapHeight(list, this.host);
         this.host.contentEditable = "false";
+        // 节点编辑器和画布隔离 keyup，捕获阶段同步全局修饰键释放状态。
+        this.host.addEventListener("keyup", () => {
+            window.siyuan.ctrlIsPressed = false;
+            window.siyuan.shiftIsPressed = false;
+            window.siyuan.altIsPressed = false;
+            document.body.classList.remove("body--shift-pressed");
+        }, {capture: true});
         const renderGutter = (event: PointerEvent) => {
             if (!owner.options.render.gutter ||
                 !owner.gutter || this.host.classList.contains("fullscreen") ||
@@ -451,7 +458,8 @@ class ListMindmapController {
             },
             isAddSiblingShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddSibling;
-                return !!key && matchHotKey(key, event);
+                return !!key && matchHotKey(key, event) ||
+                    matchHotKey(window.siyuan.config.keymap.editor.general.duplicate, event);
             },
             isAddChildShortcut: event => {
                 const key = window.siyuan.config.keymap.editor.list?.mindmapAddChild;

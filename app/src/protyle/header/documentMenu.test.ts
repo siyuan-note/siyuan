@@ -190,7 +190,7 @@ for (const mobile of [false, true]) {
         const protyle = {app: menu.options.app, notebookId: "notebook", path: menu.options.path, disabled: false,
             block: {rootID: menu.options.id, id: "heading", showAll: true},
             element: menu.options.target, options: {history: {}, render: {title: true}},
-            title: {editElement: {textContent: "Editor title"}}, lute: menu.lute,
+            title: {getText: () => "Editor title"}, lute: menu.lute,
         } as unknown as IProtyle;
         menu.titleModule.openTitleMenu(protyle, menu.options.position, "editor");
         assert.equal(menu.events[0].detail.protyle, protyle);

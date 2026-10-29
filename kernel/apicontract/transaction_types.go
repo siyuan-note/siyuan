@@ -177,6 +177,16 @@ type TransactionNewItemTemplates struct {
 	Templates         []*AVNewItemTemplate `json:"templates" api:"optional,nullable"`
 	DefaultTemplateID string               `json:"defaultTemplateID,omitempty" api:"optional,nullable"`
 }
+
+// TransactionSubItems 启用双向自身关联字段，省略字段 ID 时创建新字段。
+// 停用保留关联值；结构变更保证原子性并支持撤销，parentID 为空表示顶层条目。
+type TransactionSubItems struct {
+	Enabled       bool   `json:"enabled"`
+	ParentKeyID   string `json:"parentKeyID" api:"optional"`
+	ChildrenKeyID string `json:"childrenKeyID" api:"optional"`
+	ParentName    string `json:"parentName" api:"optional"`
+	ChildrenName  string `json:"childrenName" api:"optional"`
+}
 type TransactionRollup struct {
 	Calc *AVRollupCalc `json:"calc" api:"optional"`
 }

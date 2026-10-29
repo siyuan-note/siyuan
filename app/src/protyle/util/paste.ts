@@ -83,6 +83,7 @@ import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
     getProtyleUnsupportedPasteBlocks,
+    getProtyleUnsupportedPasteMessage,
     getProtyleRestrictedPlainTextHTML,
     isProtyleRichHTMLPasteEnabled,
     isProtyleUploadDisabled,
@@ -305,7 +306,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element, prep
         // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符
         clipText = escapeMarkdownPlainText(clipText);
         // 转义文本不能使用 DOM 结构 https://github.com/siyuan-note/siyuan/issues/11778
-        paste(protyle, {textPlain: clipText, textHTML: "", target: nodeElement as HTMLElement});
+        paste(protyle, {textPlain: clipText, textHTML: "", target: nodeElement as HTMLElement, escapedText: true});
     } catch (e) {
         console.log(e);
     }
@@ -707,10 +708,12 @@ export const shouldPasteClipboardImage = (textHTML: string, isAVTarget: boolean)
 };
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
-    target: HTMLElement
+    target: HTMLElement;
+    escapedText?: boolean;
 }, uploadOptions?: IUploadInsertOptions) => {
     const blockDOMSanitizer = getProtyleBlockDOMSanitizer(protyle);
-    const mathCompatible = window.siyuan.config.editor.mathDelimiterCompatibility !== false;
+    // 原义粘贴中的反斜杠用于 Markdown 转义，不能作为外部公式分隔符。
+    const mathCompatible = !event.escapedText && window.siyuan.config.editor.mathDelimiterCompatibility !== false;
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -873,7 +876,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const unsupported = getUnsupportedBlocks(source);
             if (unsupported.length > 0) {
-                showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
+                showMessage(getProtyleUnsupportedPasteMessage(protyle)?.(unsupported) ||
+                    window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
                 return;
             }
             if (initialBlockElement) {

@@ -1,6 +1,7 @@
 import type {Transaction, TransactionOperation, UnknownTransactionAction} from "../../types/api";
 
 const transactionActions: Record<IOperation["action"], true> = {
+    "setDocTitle": true,
     "setAttrViewAutomations": true,
     "collectAttrViewBlocks": true,
     "cleanupAttrViewBlocks": true,
@@ -28,6 +29,11 @@ const transactionActions: Record<IOperation["action"], true> = {
     "removeFlashcards": true,
     "setAttrViewName": true,
     "setAttrViewNewItemTemplates": true,
+    "setAttrViewSubItems": true,
+    "setAttrViewSubItemsDisplay": true,
+    "reparentAttrViewItems": true,
+    "promoteAttrViewItems": true,
+    "duplicateAttrViewSubtree": true,
     "setAttrViewFilters": true,
     "setAttrViewContextFilter": true,
     "setAttrViewColRelationFilters": true,

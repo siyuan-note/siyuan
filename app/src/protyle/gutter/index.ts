@@ -48,6 +48,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {embedBreadcrumbMenu} from "./embedBreadcrumbMenu";
 import {embedOpenMenu} from "./embedOpenMenu";
+import {embedConversionMenu} from "./embedConversion";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
@@ -2613,7 +2614,7 @@ export class Gutter {
                             });
                         }
                     }))
-                }]
+                }, ...embedConversionMenu(protyle, nodeElement)]
             }).element);
         } else if (type === "NodeHeading" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);

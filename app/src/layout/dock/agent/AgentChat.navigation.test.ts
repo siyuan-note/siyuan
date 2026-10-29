@@ -130,7 +130,28 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     return "Navigation cases passed";
 };
 
-test("agent navigation keeps previews outside its click targets on desktop and stays hidden on mobile", {
+const markerPaintFixture = async (css: string) => {
+    document.head.innerHTML = `<style>${css}</style>`;
+    document.body.style.cssText = "margin:0;background:#fff";
+    document.documentElement.style.setProperty("--b3-theme-on-surface", "#202020");
+    document.documentElement.style.setProperty("--b3-theme-primary", "#0044cc");
+    document.body.innerHTML = ["", " agent-chat__nav-rail-marker--active"].map((active, index) =>
+        `<div class="agent-chat__nav-rail-marker${active}" style="position:absolute;left:40px;top:${40 + index * 40}px"></div>`).join("");
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return {
+        width: innerWidth,
+        height: innerHeight,
+        markers: Array.from(document.body.children).map(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+                left: parseFloat(style.paddingLeft), top: parseFloat(style.paddingTop),
+                contentWidth: parseFloat(style.width), contentHeight: parseFloat(style.height)};
+        }),
+    };
+};
+
+test("agent navigation keeps previews outside its click targets, paints short lines at every zoom and stays hidden on mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {
@@ -172,6 +193,43 @@ app.whenReady().then(async () => {
                 console.log(await win.webContents.executeJavaScript("const __name = value => value; (" +
                     ${JSON.stringify(browserCases.toString())} + ")(" + JSON.stringify(${JSON.stringify(sources)}) + "," +
                     JSON.stringify(css) + "," + (sheet.name === "mobile") + ")"));
+                if (sheet.name === "base") {
+                    for (const zoom of [0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3]) {
+                        win.webContents.setZoomFactor(zoom);
+                        const fixture = await win.webContents.executeJavaScript("(" +
+                            ${JSON.stringify(markerPaintFixture.toString())} + ")(" + JSON.stringify(css) + ")");
+                        const image = await win.webContents.capturePage();
+                        const size = image.getSize();
+                        const bitmap = image.toBitmap();
+                        const scaleX = size.width / fixture.width;
+                        const scaleY = size.height / fixture.height;
+                        const check = require("node:assert/strict");
+                        for (const [index, marker] of fixture.markers.entries()) {
+                            const context = theme + " zoom=" + zoom + " active=" + Boolean(index);
+                            check.ok(Math.abs(marker.width - 20) < 0.1, context + ": click width is preserved");
+                            check.ok(Math.abs(marker.height - 8) < 0.1, context + ": click height is preserved");
+                            check.ok(Math.abs(marker.contentWidth - 10) < 0.1, context + ": line width is preserved");
+                            check.ok(Math.abs(marker.contentHeight - 2) < 0.1, context + ": line height is preserved");
+                            let painted = 0;
+                            for (let y = Math.floor(marker.y * scaleY); y < Math.ceil((marker.y + marker.height) * scaleY); y++) {
+                                for (let x = Math.floor(marker.x * scaleX); x < Math.ceil((marker.x + marker.width) * scaleX); x++) {
+                                    const offset = (y * size.width + x) * 4;
+                                    if (Math.min(bitmap[offset], bitmap[offset + 1], bitmap[offset + 2]) >= 235) continue;
+                                    painted++;
+                                    // Allow one raster pixel for fractional positioning and antialiasing.
+                                    check.ok(x >= Math.floor((marker.x + marker.left) * scaleX) - 1 &&
+                                        x < Math.ceil((marker.x + marker.left + marker.contentWidth) * scaleX) + 1 &&
+                                        y >= Math.floor((marker.y + marker.top) * scaleY) - 1 &&
+                                        y < Math.ceil((marker.y + marker.top + marker.contentHeight) * scaleY) + 1,
+                                        context + ": marker paint must stay inside the short line, outside the click padding");
+                                }
+                            }
+                            check.ok(painted > 0, context + ": marker remains visible");
+                        }
+                    }
+                    win.webContents.setZoomFactor(1);
+                    console.log("Marker paint cases passed");
+                }
             }
         }
         win.destroy();app.exit(0);
@@ -182,6 +240,7 @@ app.whenReady().then(async () => {
     try {
         const result = await promisify(execFile)(require("electron"), [script], {env, windowsHide: true, timeout: 50000});
         assert.equal(result.stdout.match(/Navigation cases passed/g)?.length, 4);
+        assert.equal(result.stdout.match(/Marker paint cases passed/g)?.length, 2);
     } finally {
         assert.equal(path.dirname(path.resolve(temporary)), path.resolve(tmpdir()));
         assert.ok(path.basename(temporary).startsWith("siyuan-agent-navigation-"));

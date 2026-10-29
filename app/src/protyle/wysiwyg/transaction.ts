@@ -902,6 +902,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "setDocTitle") {
+            if (operation.id === protyle.block.rootID) {
+                void protyle.title?.refresh().catch(error => console.error(error));
+            }
+            return;
+        }
         if (operation.action === "convertList") {
             refreshListConversion(protyle, operation.retData, isUndo);
             return;
@@ -1531,7 +1537,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             protyle.databaseAttributePanel?.refreshForOperation(operation);
             return;
         }
-        if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
+        if (["setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree",
+            "addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
             "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewAutomations", "collectAttrViewBlocks", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",

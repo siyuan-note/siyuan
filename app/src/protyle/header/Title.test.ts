@@ -38,6 +38,7 @@ const setup = () => {
             if (name === "../util/selection") return {focusByOffset: () => {}};
             if (name === "../../dialog/tooltip") return {hideTooltip: () => {}};
             if (name === "../../util/fetch") return {fetchPost: (url: string, data: any) => requests.push({url, data})};
+            if (name === "../util/transactionQueue") return {waitForPendingTransactions: () => Promise.resolve()};
             return {};
         },
     });
@@ -94,4 +95,111 @@ test("invalid structured titles cancel saving when truncation cannot make them v
         assert.equal(timers.size, 0);
         assert.equal(requests.length, 0);
     }
+});
+
+test("rich title labels use the source summary instead of rendered formula and image text", () => {
+    const {title} = setup();
+    title.richEditor = {};
+    title.summary = "Canonical title summary";
+    title.editElement.textContent = "Rendered math duplicated with image captions";
+    assert.equal(title.getText(), "Canonical title summary");
+    title.richEditor = undefined;
+    title.editElement.textContent = "Plain notebook title";
+    assert.equal(title.getText(), "Plain notebook title");
+});
+
+test("document reuse awaits the title source and body queue and catches edits during the wait", async () => {
+    const {title} = setup();
+    const order: string[] = [];
+    let accept: () => void;
+    const pending = new Promise<void>(resolve => { accept = resolve; });
+    title.element = {dataset: {nodeId: "old-root"}};
+    title.richEditor = {flush: () => { order.push("title"); return pending; }};
+    title.protyle.wysiwyg = {flushPendingInput: () => { order.push("body"); }};
+    assert.equal(title.prepareForDocumentSwitch("old-root"), undefined);
+    const switching = title.prepareForDocumentSwitch("new-root");
+    assert.deepEqual(order, ["title"]);
+    accept();
+    await switching;
+    assert.deepEqual(order, ["title", "body", "title"]);
+});
+
+test("failed or replaced title source prevents document reuse", async () => {
+    const {title} = setup();
+    title.element = {dataset: {nodeId: "old-root"}};
+    let bodyFlushes = 0;
+    title.protyle.wysiwyg = {flushPendingInput: () => { bodyFlushes++; }};
+    title.richEditor = {flush: async () => { throw new Error("Conflict"); }};
+    await assert.rejects(title.prepareForDocumentSwitch("new-root"), /Conflict/);
+    assert.equal(bodyFlushes, 0);
+    title.richEditor = {flush: async () => { title.richEditor = undefined; }};
+    await assert.rejects(title.prepareForDocumentSwitch("new-root"));
+});
+
+test("normal editor enabling cannot unlock the plain title while its full source is still loading", async () => {
+    const timers = new Map<number, () => void>();
+    const requests: Array<{url: string, resolve: (response: unknown) => void}> = [];
+    let timerID = 0;
+    const noop = () => {};
+    const window = {siyuan: {mobile: {}, languages: {}, config: {editor: {autoDirection: false}}},
+        setTimeout: (callback: () => void) => { timers.set(++timerID, callback); return timerID; }};
+    const plain = {contentEditable: "true", textContent: "Original", style: {userSelect: ""}, contains: () => false,
+        replaceWith: noop, setAttribute(name: string, value: string) {
+            if (name === "contenteditable") this.contentEditable = value;
+        }};
+    const moduleExports: {Title?: {prototype: any}} = {};
+    runInNewContext(compile("Title.ts"), {exports: moduleExports, window,
+        clearTimeout: (id: number) => timers.delete(id), getSelection: () => ({rangeCount: 0}),
+        document: {createElement: () => ({})}, require: (name: string) => {
+            if (name === "../../util/fetch") return {fetchSyncPost: (url: string) =>
+                new Promise(resolve => requests.push({url, resolve}))};
+            if (name === "../../editor/rename") return {validateName: () => true};
+            if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 256}};
+            if (name === "../../dialog/tooltip") return {hideTooltip: noop};
+            if (name === "../render/autoDirection") return {setTitleAutoDirection: noop};
+            if (name === "./documentTitleEditor") return {DocumentTitleEditor: class {
+                constructor(_owner: unknown, _host: unknown, initial: {text: string}, onEditable: (element: unknown) => void) {
+                    onEditable({...plain, textContent: initial.text, contentEditable: "true"});
+                }
+            }};
+            return {};
+        }});
+    const title = Object.assign(Object.create(moduleExports.Title.prototype), {
+        editElement: plain, element: {dataset: {nodeId: "document"}}, sourceRequest: 0,
+    });
+    const protyle = {block: {rootID: "document"}, notebookId: "notebook", path: "/document.sy", title, disabled: false,
+        element: {getAttribute: (): null => null}, wysiwyg: {element: {setAttribute: noop, style: {}, querySelectorAll: (): never[] => []}}};
+    title.protyle = protyle;
+    const source = readFileSync(resolve(__dirname, "../util/onGet.ts"), "utf8");
+    const enableExports: {enableProtyle?: (owner: unknown) => void} = {};
+    runInNewContext(transpileModule(source.slice(source.indexOf("export const enableProtyle ="),
+        source.indexOf("const focusElementById =")), {compilerOptions: {module: ModuleKind.CommonJS}}).outputText,
+    {exports: enableExports, window, hideElements: noop, hideTooltip: noop,
+        isMobile: () => false, isIPhone: () => false, isAndroid: () => false});
+
+    const loading = title.loadSource();
+    assert.equal(plain.contentEditable, "false");
+    enableExports.enableProtyle(protyle);
+    assert.equal(plain.contentEditable, "false", "setHTML enables the body while the title source remains pending");
+    assert.equal(title.rename(protyle), false, "stale plain listeners cannot schedule a legacy title write");
+    assert.equal(timers.size, 0);
+    assert.equal(requests.length, 1);
+    requests[0].resolve({code: 0, data: {text: "Original", blockDOM: "Original", revision: "r0"}});
+    await loading;
+    assert.equal(title.editElement.contentEditable, "true");
+    assert.equal(title.editElement.textContent, "Original");
+});
+
+test("a title without its loaded source stays readonly while notebook roots retain plain editing", () => {
+    const {title} = setup();
+    title.protyle.block = {rootID: "document"};
+    const attributes: Record<string, string> = {};
+    title.editElement = {style: {}, setAttribute: (name: string, value: string) => { attributes[name] = value; }};
+    title.setReadonly(false);
+    assert.equal(attributes.contenteditable, "false");
+    title.protyle.block.rootID = title.protyle.notebookId;
+    title.setReadonly(false);
+    assert.equal(attributes.contenteditable, "true", "notebook roots retain their plain title editor");
+    title.setReadonly(true);
+    assert.equal(attributes.contenteditable, "false");
 });

@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261027140312"
+		"updated": "20261028114540"
 	},
 	"Children": [
 		{
@@ -1074,7 +1074,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261018102417-ch6z3dh",
-				"updated": "20261018104335"
+				"updated": "20261028114540"
 			},
 			"Children": [
 				{
@@ -1136,6 +1136,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可以分别选择搜索和抓取服务，默认使用 Exa 搜索和直接抓取。使用 DeepSeek 时，填写 Search 和 Fetch 共用的 DeepSeek API 密钥，此设置与对话模型无关。DeepSeek Search 请求 5 条结果且不包含网页正文，单条摘要最多 800 个字符，总输出最多 8,000 个字符。需要正文时再抓取具体网页。"
+				}
+			]
+		},
+		{
+			"ID": "20261028114540-78xw9yq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028114540-78xw9yq",
+				"updated": "20261028114540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Exa API 密钥留空时使用有限流的匿名服务，填写自己的密钥后使用相应账户额度。搜索词会发送给 Exa，请求可能产生费用。Exa 与 DeepSeek 的密钥分别保存，切换服务时保留；清空 Exa 密钥即可恢复匿名模式。带密钥的请求失败时会返回错误，不会自动退回匿名模式或切换其他服务。密钥在本地配置中加密保存，导出配置时不会包含密钥。"
 				}
 			]
 		},

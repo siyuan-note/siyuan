@@ -16,7 +16,7 @@ const createReview = async () => {
     const requests: Array<{url: string, payload: Record<string, unknown>, callback: (response: unknown) => void, resolve: () => void}> = [];
     const menuItems = new Map<string, IMenu>();
     let confirmDue: (value: string, dialog: unknown) => void;
-    const renders: Array<() => void> = [];
+    const renders: Array<{afterCB: () => void, beforeAVRender: () => void, isValid: () => boolean}> = [];
     let click: (event: unknown) => void;
     const button = {setAttribute: () => {}, removeAttribute: () => {}, previousElementSibling: {textContent: ""}};
     const actions = [0, 1].map(() => ({classList: classList(), firstElementChild: button,
@@ -33,7 +33,7 @@ const createReview = async () => {
         Menu: class {addItem(item: IMenu) {menuItems.set(item.id, item);} addSeparator() {} fullscreen() {} open() {}},
         hasClosestByAttribute: (target: {type: string}, _name: string, value: string) => target.type === value ? target : null,
         openInputDialog: (options: {onConfirm: typeof confirmDue}) => { confirmDue = options.onConfirm; },
-        onGet: (options: {afterCB: () => void}) => renders.push(options.afterCB), hasFlashcardAnswer: () => true,
+        onGet: (options: typeof renders[number]) => renders.push(options), hasFlashcardAnswer: () => true,
         forEachPluginSubscriber: () => {},
     }, {get: (target, key) => key in target ? Reflect.get(target, key) : () => {}});
     const exports: Record<string, unknown> = {};
@@ -57,7 +57,9 @@ const createReview = async () => {
         complete: () => {
         requests[0].callback({data: {ial: {}}});
         requests[1].callback({code: 0, data: {id: "block", rootID: "block"}});
-        renders[0]();
+        assert.equal(renders[0].isValid(), true);
+        renders[0].beforeAVRender();
+        renders[0].afterCB();
     }};
 };
 

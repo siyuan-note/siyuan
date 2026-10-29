@@ -44,6 +44,7 @@ const browserCases = async (source: string, pasteSource: string) => {
         "../../constants": {Constants: dependencies.Constants},
         "../../util/pathName": {isEncryptedBox: () => false},
         "./tableCellRichContext": api, "./hasClosest": api, "./tableVirtualizationDOM": api,
+        "./mathPaste": api,
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: (protyle: IProtyle) => protyle === cellEditor ? (html: string) => html : undefined,
             getProtyleUnsupportedPasteBlocks: () => (html: string) => {
@@ -52,6 +53,7 @@ const browserCases = async (source: string, pasteSource: string) => {
                 }
                 return api.getAVRichTextUnsupportedPasteBlocks(html, true);
             },
+            getProtyleUnsupportedPasteMessage: (): undefined => undefined,
             isProtyleRichHTMLPasteEnabled: () => true, isProtyleUploadDisabled: () => true,
             areProtylePluginExtensionsEnabled: () => false,
         },
@@ -87,7 +89,6 @@ const browserCases = async (source: string, pasteSource: string) => {
             const block = api.hasClosestBlock(range.startContainer) as HTMLElement;
             check.equal(api.processTable(range, html, owner, block, api.getTablePasteTarget(range)), true);
         }},
-        "./mathPaste": {markdownMathPaste: api.markdownMathPaste, htmlMathPaste: api.htmlMathPaste},
     };
     const exports = {};
     new Function("exports", "require", pasteSource)(exports, (id: string) => mocks[id] || {});

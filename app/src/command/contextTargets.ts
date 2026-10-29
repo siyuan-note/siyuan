@@ -1,8 +1,22 @@
 import type {ICommandContextSnapshot} from "./types";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {getDocTreeActionItems} from "../menus/navigationSelection";
 
 export const getCommandBlocks = (context: ICommandContextSnapshot) =>
     context.selectedBlocks.length ? context.selectedBlocks : context.block ? [context.block] : [];
+
+export const hasCommandFileTreeTarget = (context: ICommandContextSnapshot) => {
+    const tree = context.fileTree;
+    if (context.focus !== "fileTree" || !tree) {
+        return false;
+    }
+    if (tree.controller) {
+        return Boolean(tree.items && tree.controller.validateSelection(tree.selectionVersion, tree.items));
+    }
+    return tree.elements.every((element, index) => element.isConnected &&
+        element.getAttribute("data-node-id") === tree.ids[index] &&
+        element.getAttribute("data-path") === tree.paths[index]);
+};
 
 export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
     const editor = context.protyle?.wysiwyg?.element;
@@ -29,6 +43,18 @@ export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
 
 export const getCommandDocument = (context: ICommandContextSnapshot) => {
     if (context.focus === "fileTree") {
+        const tree = context.fileTree;
+        if (tree?.controller) {
+            if (!hasCommandFileTreeTarget(context)) {
+                return undefined;
+            }
+            const items = getDocTreeActionItems(tree.items);
+            if (items.length !== 1 || items[0].kind !== "document") {
+                return undefined;
+            }
+            const {id, path, notebookId} = items[0];
+            return {id, path, notebookId};
+        }
         const elements = context.fileTree?.elements;
         if (elements?.length !== 1) {
             return undefined;

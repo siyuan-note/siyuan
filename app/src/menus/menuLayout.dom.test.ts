@@ -122,7 +122,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
     document.head.append(style);
     Object.assign(window, {siyuan: {languages: {back: "Back"}, zIndex: 0, storage: {}, config: {appearance: {}},
         mobile: {size: {portrait: {height1: innerHeight}}}, menus: {}}});
-    const {Menu, MenuItem}: typeof import("./Menu") = load("menus/Menu");
+    const {Menu, MenuItem, markMenuInnerScroll}: typeof import("./Menu") = load("menus/Menu");
     const {Menu: PluginMenu}: typeof import("../plugin/Menu") = load("plugin/Menu");
     const settle = async () => {
         for (let i = 0; i < 3; i++) {
@@ -636,6 +636,31 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.equal(hiddenItems.scrollTop, 0);
     dispose(multiple);
 
+    const innerScroll = createMenu();
+    const openModelPicker = new Function("toggleMenu", "Menu", "markMenuInnerScroll", "escapeHTML", "upDownHint",
+        sources.modelPicker + "\nreturn openAvailableModelMenu;")(
+        ({build}: {build: (menu: unknown, session: {show: (show: () => void) => void}) => void}) =>
+            build(undefined, {show: show => show()}), PluginMenu, markMenuInnerScroll, (value: string) => value, () => {});
+    const modelInput = document.createElement("input");
+    modelInput.style.cssText = "position:fixed;left:40px;top:40px;height:28px";
+    document.body.append(modelInput);
+    openModelPicker(modelInput, Array.from({length: 60}, (_, index) => `Model ${index}`));
+    check.ok(innerScroll.element.querySelector(".b3-menu__filter").getBoundingClientRect().height > innerHeight * .5 + 20,
+        "the model picker must enable inner scrolling before popup measures its height");
+    fitsViewport(innerScroll.element);
+    const innerScrollItems = markMenuInnerScroll(innerScroll.element);
+    innerScroll.popup({x: 40, y: 40});
+    await settle();
+    check.ok(innerScrollItems === innerScroll.element.lastElementChild,
+        "markMenuInnerScroll returns the content container");
+    check.ok(innerScrollItems.classList.contains("b3-menu__items--inner-scroll"), "the container is marked for inner scrolling");
+    check.equal(getComputedStyle(innerScrollItems).overflow, "visible", "the container does not scroll by itself");
+    innerScroll.remove();
+    check.equal(innerScrollItems.classList.contains("b3-menu__items--inner-scroll"), false,
+        "closing the menu clears the inner scroll marker");
+    dispose(innerScroll);
+    modelInput.remove();
+
     const {getPdfViewerHTML} = load("asset/pdf/viewerTemplate");
     const {SecondaryToolbar} = load("asset/pdf/secondary_toolbar.js");
     const createPDFMenu = () => {
@@ -854,6 +879,11 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
         }).outputText]));
+    const providerSource = readFileSync(path.join(__dirname, "../config/tabs/ai/aiProviderUi.ts"), "utf8");
+    sources.modelPicker = transpileModule(providerSource.slice(providerSource.indexOf("const openAvailableModelMenu ="),
+        providerSource.indexOf("const showTestResult =")), {
+        compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+    }).outputText;
     const css = ["component/_menu.scss", "component/_list.scss", "component/_text-field.scss", "util/_function.scss",
         "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss",
         "protyle/_mindmap-view.scss"].map(name =>

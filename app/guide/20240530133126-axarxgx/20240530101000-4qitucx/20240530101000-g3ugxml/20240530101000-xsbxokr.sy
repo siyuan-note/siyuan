@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261026142807"
 	},
 	"Children": [
 		{
@@ -3589,7 +3589,7 @@
 			"Properties": {
 				"ID": "20240530101000-jqxdws2",
 				"id": "20240530101000-fibh6bk",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
@@ -3605,6 +3605,70 @@
 					"Properties": {
 						"id": ""
 					}
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-v29wp07",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-v29wp07",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントツリーは必要に応じて読み込まれます。スクロールを続けると、アクセス可能なすべてのドキュメントを参照できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ファイル管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメントツリーの読み込み件数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で一度に読み込む件数を変更できますが、参照できるドキュメントの総数は制限されません。最大表示件数は、引き続きタグ一覧と結合エクスポートに含めるサブドキュメントの件数を制限します。"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-77jzcr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-77jzcr0",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版のドキュメントツリーでは、Home と End で展開中のツリーの先頭行と末尾行を選択できます。Shift を押しながら上下の矢印キー、Home、End を押すと、画面外の項目を含めて選択範囲を広げられます。ドキュメントの位置を表示するときは、その位置が自動的に読み込まれます。"
 				}
 			]
 		},

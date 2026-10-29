@@ -28,6 +28,7 @@ func TestAPIContractSystemExportSecrets(t *testing.T) {
 		if populated {
 			model.Conf.AI.Store(conf.NewAI())
 			model.Conf.AI.Load().Web.APIKey = "export-test-web-secret"
+			model.Conf.AI.Load().Web.ExaAPIKey = "export-test-exa-secret"
 			model.Conf.AI.Load().Web.FetchProvider = "deepseek"
 			model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey = "export-test-decision-secret"
 			model.Conf.AI.Load().Decision.Profiles["openai"].APIKey = "export-test-openai-secret"
@@ -72,7 +73,7 @@ func TestAPIContractSystemExportSecrets(t *testing.T) {
 			t.Fatal(err)
 		}
 		if populated {
-			if exported.AI.Load().Web.APIKey != "" || exported.AI.Load().Decision.APIKey != "" || exported.AI.Load().Decision.Profiles["typesafe"].APIKey != "" || exported.AI.Load().Decision.Profiles["openai"].APIKey != "" || exported.OIDC.ClientSecret != "" ||
+			if exported.AI.Load().Web.ExaAPIKey != "" || exported.AI.Load().Web.APIKey != "" || exported.AI.Load().Decision.APIKey != "" || exported.AI.Load().Decision.Profiles["typesafe"].APIKey != "" || exported.AI.Load().Decision.Profiles["openai"].APIKey != "" || exported.OIDC.ClientSecret != "" ||
 				bytes.Contains(data, []byte("export-test-")) {
 				t.Fatal("export retained secrets")
 			}

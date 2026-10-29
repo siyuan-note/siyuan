@@ -5,19 +5,23 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getEntryCatalogChildren} from "../config/entryVisibility/catalog";
+import * as navigationSelection from "./navigationSelection";
+import type {DocTreeController} from "../layout/dock/docTree/DocTreeController";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const setup = (mobile = false, readonly = false) => {
+const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeController>, subscribed = true) => {
     const exports = {} as typeof import("./navigation");
     const items: IMenu[] = [];
     const requests: {url: string, data: unknown}[] = [];
     const histories: Parameters<typeof import("../history/doc").openDocHistory>[0][] = [];
     const databases: unknown[][] = [];
     const deletions: string[][] = [];
+    const treeDeletions: unknown[][] = [];
     const moves: unknown[] = [];
     const events: {detail: {elements: NodeListOf<HTMLElement>, items: {id: string}[]}}[] = [];
     const created: unknown[][] = [];
+    const flashcards: unknown[][] = [];
     const menuAttributes = new Map<string, string>();
     const menu = {element: {setAttribute: (name: string, value: string) => menuAttributes.set(name, value)},
         remove: () => { items.length = 0; }, append: (item: IMenu) => { if (!item.ignore) { items.push(item); } }};
@@ -36,6 +40,7 @@ const setup = (mobile = false, readonly = false) => {
                         moves.push({paths, notebooks}); return {id: "move"};
                     }, renameMenu: () => ({id: "rename"})},
                 "../util/pathName": {pathPosix: () => posix, isEncryptedBox: () => false,
+                    getNotebookName: (id: string) => id,
                     getDisplayName: (name: string) => name.replace(/\.sy$/, "")},
                 "../util/pinnedDocs": {pinnedDocIDs: new Set()},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, callback?: (response: unknown) => void) => {
@@ -45,12 +50,20 @@ const setup = (mobile = false, readonly = false) => {
                 "../constants": {Constants: {MENU_DOC_TREE_MORE: "doctree", MENU_FROM_DOC_TREE_MORE_DOC: "doc"}},
                 "../util/newFile": {newFileInTree: (...args: unknown[]) => created.push(args)},
                 "../protyle/util/hasClosest": {hasClosestByTag: (row: {tree: unknown}) => row.tree},
-                "../editor/deleteFile": {deleteFile: (...args: string[]) => deletions.push(args)},
+                "../editor/deleteFile": {deleteFile: (...args: string[]) => deletions.push(args),
+                    deleteDocTreeItems: (items: unknown[]) => treeDeletions.push(items)},
                 "../layout/tabUtil": {getDockByType: (): undefined => undefined},
+                "../layout/dock/docTree/DocTreeController": {getDocTreeController: () => controller},
+                "../card/openCard": {openCardByScope: (_app: object, ...scope: unknown[]) => flashcards.push(["study", ...scope])},
+                "../card/flashcardV2": {openFlashcardV2ManagementByRoots: (...scope: unknown[]) => flashcards.push(["manage", ...scope])},
+                "../mobile/util/closePanel": {closePanel() {}},
+                "./navigationSelection": navigationSelection,
                 "../history/doc": {openDocHistory: (options: typeof histories[number]) => histories.push(options)},
                 "./util": {openEditorTab: () => menu.append({id: "openBy"})},
-                "../plugin/EventBus": {emitOpenMenu: (event: typeof events[number]) => {
-                    events.push(event); menu.append({id: "separator_pluginTop", type: "separator"}); menu.append({id: "plugin"});
+                "../plugin/EventBus": {emitOpenMenu: (event: {detail: typeof events[number]["detail"] | (() => typeof events[number]["detail"])}) => {
+                    if (!subscribed) return;
+                    events.push({detail: typeof event.detail === "function" ? event.detail() : event.detail});
+                    menu.append({id: "separator_pluginTop", type: "separator"}); menu.append({id: "plugin"});
                 }},
                 "../protyle/render/av/addToDatabase": {addBlocksToDatabase: (...args: unknown[]) => databases.push(args)},
                 "../util/fileTreeSort": {getConfiguredChildrenSortMode: () => 0, isCustomFileTreeList: () => false},
@@ -75,10 +88,21 @@ const setup = (mobile = false, readonly = false) => {
         assert.ok(item, id);
         return item.click(null, null);
     };
-    return {exports, open, click, options, items, requests, histories, databases, deletions, moves, events, created, menuAttributes};
+    return {exports, open, click, options, items, requests, histories, databases, deletions, treeDeletions, moves, events, created, menuAttributes, flashcards};
 };
 
 for (const mobile of [false, true]) {
+    test(`document menu keeps flashcard v2 study and management scopes without a mounted tree row (${mobile ? "mobile" : "desktop"})`, () => {
+        const {open, items, flashcards} = setup(mobile);
+        open();
+        const cardItems = items.find(item => item.id === "riffCard").submenu as IMenu[];
+        cardItems.find(item => item.id === "spaceRepetition").click(null, null);
+        cardItems.find(item => item.id === "manage").click(null, null);
+        assert.equal(JSON.stringify(flashcards), JSON.stringify([
+            ["study", "doc", "doc", "Document"], ["manage", ["doc"], "Document"],
+        ]));
+    });
+
     test(`complete document menu uses explicit document targets without a tree row (${mobile ? "mobile" : "desktop"})`, () => {
         const {open, click, items, moves, deletions, databases, histories, events, options} = setup(mobile);
         open();
@@ -144,12 +168,50 @@ test("notebook documents do not expose regular document deletion, moving, renami
 
 test("document tree adapter preserves its real selection in plugin events", () => {
     const {exports, options, events} = setup();
-    const rows = [options.target] as unknown as NodeListOf<HTMLElement>;
     const row = {tree: {querySelectorAll: () => rows}, classList: {contains: () => true},
-        getAttribute: (name: string) => ({"data-node-id": "doc", "data-name": "Document.sy", "data-count": "2"})[name],
-        parentElement: {}};
+        getAttribute: (name: string) => ({"data-node-id": "doc", "data-name": "Document.sy", "data-count": "2",
+            "data-type": "navigation-file", "data-notebook-id": "notebook", "data-path": "/doc.sy"})[name],
+        querySelector: (): null => null, parentElement: {getAttribute: (): null => null}};
+    const rows = [row] as unknown as NodeListOf<HTMLElement>;
     exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/doc.sy", row as unknown as Element);
     assert.equal(events[0].detail.elements, rows);
+    assert.equal(events[0].detail.items[0].id, options.id);
+});
+
+test("large virtual selections build native menus from complete metadata without DOM snapshots", () => {
+    const selected = Array.from({length: 10000}, (_, index) => ({id: String(index), notebookId: "notebook",
+        path: `/${index}.sy`, kind: "document" as const, name: String(index), occurrenceKey: `root/${index}`}));
+    selected.push({...selected[0], occurrenceKey: "pinned/0"});
+    const controller = {
+        getSelectedItems: () => selected,
+        getItemFromElement: () => selected[0],
+        getSelectionElements: () => { throw new Error("unsubscribed menus must not build selection DOM"); },
+    } as unknown as Partial<DocTreeController>;
+    const {exports, click, treeDeletions, events, moves} = setup(false, false, controller, false);
+    exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/0.sy", {} as Element);
+    assert.equal(events.length, 0);
+    click("delete");
+    assert.equal(treeDeletions[0].length, 10000);
+    assert.equal((moves[0] as {paths: string[]}).paths.length, 10000);
+});
+
+test("subscribed virtual menu events preserve all occurrence snapshots while actions deduplicate documents", () => {
+    const selected = ["root", "pinned"].map(root => ({id: "doc", notebookId: "notebook", path: "/doc.sy",
+        kind: "document" as const, name: "Document", occurrenceKey: `${root}/doc`}));
+    const rows = [{}, {}] as unknown as NodeListOf<HTMLElement>;
+    let snapshots = 0;
+    const controller = {
+        getSelectedItems: () => selected,
+        getItemFromElement: () => selected[0],
+        getSelectionElements: () => { snapshots++; return rows; },
+    } as unknown as Partial<DocTreeController>;
+    const {exports, click, treeDeletions, events} = setup(false, false, controller);
+    exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/doc.sy", {} as Element);
+    assert.equal(snapshots, 1);
+    assert.equal(events[0].detail.elements, rows);
+    assert.equal(events[0].detail.items.length, 2);
+    click("delete");
+    assert.equal(treeDeletions[0].length, 1);
 });
 
 test("import reload tolerates a document absent from the file tree", () => {

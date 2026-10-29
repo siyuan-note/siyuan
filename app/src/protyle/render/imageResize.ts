@@ -13,15 +13,31 @@ export const getImageResizeWidth = (width: number, height: number, deltaX: numbe
 
 export const bindImageResize = (root: HTMLElement) => {
     const images = new Map<HTMLImageElement, {frame: HTMLElement, container: HTMLElement}>();
-    const position = (image: HTMLImageElement, frame: HTMLElement) => {
-        image.parentElement.classList.toggle("protyle-image-container--compact", image.clientWidth < 96 || image.clientHeight < 48);
-        // 说明文字按图片显示宽度缩放，派生样式只写入说明节点，避免影响图片容器的宽度规则。
-        image.parentElement.querySelectorAll<HTMLElement>(":scope > .img__name, :scope > .protyle-action__title, :scope > .img__alt")
-            .forEach(caption => caption.style.setProperty("--protyle-image-font-size", Math.max(8, image.clientWidth / 10) + "px"));
-        frame.style.left = image.offsetLeft + "px";
-        frame.style.top = image.offsetTop + "px";
-        frame.style.width = image.clientWidth + "px";
-        frame.style.height = image.clientHeight + "px";
+    const pending = new Set<HTMLImageElement>();
+    let positionFrame = 0;
+    const schedulePosition = (image: HTMLImageElement) => {
+        pending.add(image);
+        if (positionFrame) {
+            return;
+        }
+        positionFrame = requestAnimationFrame(() => {
+            positionFrame = 0;
+            // 全部图片先读取布局，再统一写入控件，避免逐张图片触发同步重排。
+            const positions = Array.from(pending).filter(image => images.has(image) && root.contains(image))
+                .map(image => ({image, frame: images.get(image).frame, width: image.clientWidth,
+                    height: image.clientHeight, left: image.offsetLeft, top: image.offsetTop}));
+            pending.clear();
+            positions.forEach(({image, frame, width, height, left, top}) => {
+                image.parentElement.classList.toggle("protyle-image-container--compact", width < 96 || height < 48);
+                // 说明文字按图片显示宽度缩放，派生样式只写入说明节点，避免影响图片容器的宽度规则。
+                image.parentElement.querySelectorAll<HTMLElement>(":scope > .img__name, :scope > .protyle-action__title, :scope > .img__alt")
+                    .forEach(caption => caption.style.setProperty("--protyle-image-font-size", Math.max(8, width / 10) + "px"));
+                frame.style.left = left + "px";
+                frame.style.top = top + "px";
+                frame.style.width = width + "px";
+                frame.style.height = height + "px";
+            });
+        });
     };
     const resizeObserver = new ResizeObserver(entries => {
         entries.forEach(entry => {
@@ -29,7 +45,7 @@ export const bindImageResize = (root: HTMLElement) => {
                 entry.target.querySelector<HTMLImageElement>(":scope > img");
             const state = images.get(image);
             if (state) {
-                position(image, state.frame);
+                schedulePosition(image);
             }
         });
     });
@@ -79,7 +95,7 @@ export const bindImageResize = (root: HTMLElement) => {
             resizeObserver.observe(container);
         }
         images.set(image, {frame, container});
-        position(image, frame);
+        schedulePosition(image);
     };
     const renderAdded = (element: Element) => {
         if (element.matches(".img img")) {
@@ -97,6 +113,12 @@ export const bindImageResize = (root: HTMLElement) => {
             }
         };
         records.forEach(record => {
+            // 控件自身追加的节点只参与派生 UI，不触发图片重新初始化。
+            if (record.target instanceof Element && record.target.closest(".protyle-image-resize") ||
+                record.removedNodes.length === 0 && record.addedNodes.length > 0 &&
+                Array.from(record.addedNodes).every(node => node instanceof Element && node.matches(".protyle-image-resize"))) {
+                return;
+            }
             const parent = record.target instanceof Element ? record.target.closest(".img") : null;
             parent?.querySelectorAll<HTMLImageElement>("img").forEach(render);
             record.addedNodes.forEach(node => {
@@ -119,6 +141,8 @@ export const bindImageResize = (root: HTMLElement) => {
     return () => {
         observer.disconnect();
         resizeObserver.disconnect();
+        cancelAnimationFrame(positionFrame);
+        pending.clear();
         images.clear();
     };
 };

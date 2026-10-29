@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261027140312"
+		"updated": "20261028114540"
 	},
 	"Children": [
 		{
@@ -1130,7 +1130,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261018102417-6nqgr74",
-				"updated": "20261024164212"
+				"updated": "20261028114540"
 			},
 			"Children": [
 				{
@@ -1192,6 +1192,20 @@
 				{
 					"Type": "NodeText",
 					"Data": ", choose the search and fetch providers separately. The defaults are Exa search and direct fetching. To use DeepSeek, enter a DeepSeek API Key shared by Search and Fetch; this setting is independent of your chat model."
+				}
+			]
+		},
+		{
+			"ID": "20261028114540-vrw37hz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028114540-vrw37hz",
+				"updated": "20261028114540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Exa uses rate-limited anonymous access when its API Key is empty. Enter your own Exa API Key to use your account quota; queries are sent to Exa and charges may apply. Exa and DeepSeek keys are stored separately and retained when switching providers. Clear the Exa key to return to anonymous access. If an authenticated request fails, SiYuan reports the error without falling back to anonymous access or another provider. API keys are encrypted in local configuration and excluded from configuration exports."
 				}
 			]
 		},

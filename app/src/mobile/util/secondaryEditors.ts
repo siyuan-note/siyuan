@@ -1,5 +1,4 @@
 import type {Protyle} from "../../protyle";
-import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
 
 const editors = new Map<Protyle, {dispose: () => void, remove: () => void, flushing?: Promise<void>}>();
 let activeEditor: Protyle;
@@ -22,8 +21,7 @@ export const clearActiveMobileSecondaryEditor = () => {
 
 export const flushMobileSecondaryEditor = (editor: Protyle) => {
     const record = editors.get(editor);
-    const flushing = Promise.all([record?.flushing, editor.protyle.wysiwyg.flushPendingInput()])
-        .then(() => waitForPendingTransactions(editor.protyle));
+    const flushing = Promise.resolve(record?.flushing).then(() => editor.flushPendingTransactions());
     if (record) {
         record.flushing = flushing;
         void flushing.then(() => {

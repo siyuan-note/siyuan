@@ -55,6 +55,8 @@ const browserCases = async (source: string, css: string) => {
                 check.ok(rect.top >= clip.top - 1 && rect.bottom <= clip.bottom + 1,
                     `vertical bounds ${rect.top}..${rect.bottom} within ${clip.top}..${clip.bottom}`);
                 check.ok(rect.left >= clip.left - 1 && rect.right <= clip.right + 1);
+                check.ok(element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)),
+                    `${stage}: ${element.className} remains above the canvas and receives pointer input`);
             };
             const checkPalette = async (columns: number) => {
                 const palette = inspector.querySelector<HTMLElement>(".mindmap-view__palette");

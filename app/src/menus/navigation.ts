@@ -6,7 +6,7 @@ import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
 import {pinnedDocIDs, updatePinnedDocs} from "../util/pinnedDocs";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -23,7 +23,7 @@ import {popSearch} from "../mobile/menu/search";
 import {Constants} from "../constants";
 import {newFileInTree} from "../util/newFile";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
-import {deleteFile, deleteFiles, deleteNotebooks} from "../editor/deleteFile";
+import {deleteFile, deleteDocTreeItems, deleteNotebooks} from "../editor/deleteFile";
 /// #if !MOBILE
 import {openFileById} from "../editor/util";
 /// #endif
@@ -31,6 +31,8 @@ import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {openCardByScope} from "../card/openCard";
 import {openFlashcardV2ManagementByNotebook, openFlashcardV2ManagementByRoots} from "../card/flashcardV2";
+import {getDocTreeController} from "../layout/dock/docTree/DocTreeController";
+import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import type {App} from "../index";
 import {openDocHistory} from "../history/doc";
 import {openEditorTab} from "./util";
@@ -38,14 +40,13 @@ import {createQuickSources, makeCard} from "../card/makeCard";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
-import {addBlocksToDatabase, addFilesToDatabase} from "../protyle/render/av/addToDatabase";
-import {getDocTreeMenuItems, getDocTreeMenuType} from "./navigationSelection";
+import {addBlocksToDatabase} from "../protyle/render/av/addToDatabase";
+import {getDocTreeActionItems, getDocTreeMenuItems, getDocTreeTopPaths} from "./navigationSelection";
 import {
     FILE_TREE_CHILDREN_SORT_MODE,
     getConfiguredChildrenSortMode,
     isCustomFileTreeList
 } from "../util/fileTreeSort";
-import {syncFileTreeItemDefaultIcon} from "../emoji/fileTreeIcon";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
@@ -86,17 +87,57 @@ const openFileTreeSearch = async (app: App, notebookId: string, pathString: stri
     /// #endif
 };
 
-const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) => {
-    const selectedItems = Array.from(selectItemElements);
-    const fileItemElements = selectedItems.filter((item) => item.getAttribute("data-type") === "navigation-file");
-    const type = getDocTreeMenuType(selectedItems);
-    const items = getDocTreeMenuItems(selectedItems);
+type IDocTreeMenuItem = Pick<IDocTreeItem, "id" | "notebookId" | "path" | "kind" | "name" | "occurrenceKey"> & {sortMode?: number};
+
+const getMenuSelection = (liElement: Element) => {
+    const controller = getDocTreeController(liElement);
+    const fileElement = hasClosestByTag(liElement, "DIV") || undefined;
+    if (!fileElement && !controller) {
+        return;
+    }
+    let selected: IDocTreeItem[];
+    let items: IDocTreeMenuItem[];
+    let elements: () => NodeListOf<HTMLElement>;
+    if (controller) {
+        const item = controller.getItemFromElement(liElement);
+        if (item && !controller.getSelectedItems().some(value => value.occurrenceKey === item.occurrenceKey)) {
+            void controller.select(item.occurrenceKey);
+        }
+        selected = controller.getSelectedItems();
+        items = selected.map(item => ({...item, sortMode: item.notebook?.sortMode}));
+        elements = () => controller.getSelectionElements();
+    } else {
+        if (!liElement.classList.contains("b3-list-item--focus")) {
+            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                item.classList.remove("b3-list-item--focus");
+                item.removeAttribute("select-end");
+                item.removeAttribute("select-start");
+            });
+            liElement.classList.add("b3-list-item--focus");
+        }
+        const rows = fileElement.querySelectorAll<HTMLElement>(".b3-list-item--focus");
+        items = Array.from(rows).flatMap(row => getDocTreeMenuItems([row]).map(item => ({...item,
+            kind: row.getAttribute("data-type") === "navigation-root" ? "notebook" as const : "document" as const,
+            name: row.querySelector(".b3-list-item__text")?.textContent || "",
+            occurrenceKey: "",
+            sortMode: parseInt(row.getAttribute("data-sortmode") || row.parentElement?.getAttribute("data-sortmode")),
+        })));
+        elements = () => rows;
+    }
+    return {controller, selected, items, elements, version: controller?.selectionVersion, target: liElement as HTMLElement};
+};
+
+const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App) => {
+    const selectedItems = getDocTreeActionItems(selection.items);
+    const docCount = selection.items.filter(item => item.kind === "document").length;
+    const type = docCount === selection.items.length ? "docs" : docCount === 0 ? "notebooks" : "items";
+    const items = selection.items.map(({id, path, notebookId}) => ({id, path, notebookId}));
     if (type === "notebooks") {
         window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOKS);
-        const notebookIds = items.map((item) => item.id);
+        const notebookIds = selectedItems.map((item) => item.id);
         const notebookNames = notebookIds.map((notebookId) => getNotebookName(notebookId)).join(" ");
         if (!window.siyuan.config.readonly) {
-            const sortModes = selectedItems.map((item) => parseInt(item.parentElement?.getAttribute("data-sortmode")));
+            const sortModes = selectedItems.map((item) => item.sortMode);
             const sortMode = sortModes.every((item) => item === sortModes[0]) ? sortModes[0] : -1;
             const subMenu = sortMenu("notebook", sortMode, async (sort) => {
                 if (sort === null) {
@@ -109,7 +150,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
                 for (const item of selectedItems) {
-                    const notebookId = item.parentElement?.getAttribute("data-url");
+                    const notebookId = item.notebookId;
                     if (!notebookId) {
                         continue;
                     }
@@ -117,7 +158,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                     if (response.code !== 0) {
                         continue;
                     }
-                    item.parentElement.setAttribute("data-sortmode", sort.toString());
                     const notebook = window.siyuan.notebooks.find((notebookItem) => notebookItem.id === notebookId);
                     if (notebook) {
                         notebook.sortMode = sort;
@@ -240,7 +280,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         }
         emitOpenMenu({
             type: "open-menu-doctree",
-            detail: {elements: selectItemElements, type: "notebooks", items},
+            detail: () => ({elements: selection.elements(), type: "notebooks", items}),
             separatorPosition: "top",
         });
         return window.siyuan.menus.menu;
@@ -253,26 +293,19 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                deleteFiles(selectedItems);
+                deleteDocTreeItems(selectedItems);
             }
         }).element);
         emitOpenMenu({
             type: "open-menu-doctree",
-            detail: {elements: selectItemElements, type: "items", items},
+            detail: () => ({elements: selection.elements(), type: "items", items}),
             separatorPosition: "top",
         });
         return window.siyuan.menus.menu;
     }
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOCS);
-    const fileItemElement = fileItemElements[0];
-    const blockIDs: string[] = [];
-    const notebookId = fileItemElement.getAttribute("data-notebook") || fileItemElement.closest("ul[data-url]")?.getAttribute("data-url") || "";
-    selectItemElements.forEach(item => {
-        const id = item.getAttribute("data-node-id");
-        if (id) {
-            blockIDs.push(id);
-        }
-    });
+    const notebookId = selectedItems[0].notebookId;
+    const blockIDs = Array.from(new Set(selectedItems.map(item => item.id)));
 
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -296,8 +329,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         }).element);
     }
 
-    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(selectedItems), selectedItems.map((item) =>
-        item.getAttribute("data-notebook") || item.closest("ul[data-url]")?.getAttribute("data-url") || "")));
+    window.siyuan.menus.menu.append(movePathToMenu(getDocTreeTopPaths(selectedItems), selectedItems.map(item => item.notebookId)));
 
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -305,8 +337,16 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
-            click: () => {
-                addFilesToDatabase(Array.from(selectItemElements));
+            click: async () => {
+                const controller = selection.controller;
+                if (controller) {
+                    const target = await controller.ensureRendered(selection.selected[0].occurrenceKey);
+                    if (target && controller.validateSelection(selection.version, selection.selected)) {
+                        addBlocksToDatabase(blockIDs, target);
+                    }
+                } else {
+                    addBlocksToDatabase(blockIDs, selection.target);
+                }
             }
         }).element);
     }
@@ -316,7 +356,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
         click: () => {
-            deleteFiles(Array.from(selectItemElements));
+            deleteDocTreeItems(selectedItems);
         }
     }).element);
 
@@ -324,10 +364,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         return window.siyuan.menus.menu;
     }
     if (!window.siyuan.config.readonly) {
-        const canPin = selectedItems.every(item => {
-            const notebook = item.getAttribute("data-notebook") || item.closest("ul[data-url]")?.getAttribute("data-url");
-            return notebook && !isEncryptedBox(notebook);
-        });
+        const canPin = selectedItems.every(item => item.notebookId && !isEncryptedBox(item.notebookId));
         if (canPin) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "pinDoc",
@@ -414,11 +451,11 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
     }
     emitOpenMenu({
         type: "open-menu-doctree",
-        detail: {
-            elements: selectItemElements,
+        detail: () => ({
+            elements: selection.elements(),
             type,
             items,
-        },
+        }),
         separatorPosition: "top",
     });
     return window.siyuan.menus.menu;
@@ -427,24 +464,15 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
 export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
-    const fileElement = hasClosestByTag(liElement, "DIV");
-    if (!fileElement) {
+    const selection = getMenuSelection(liElement);
+    if (!selection) {
         return window.siyuan.menus.menu;
     }
-    if (!liElement.classList.contains("b3-list-item--focus")) {
-        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-            item.classList.remove("b3-list-item--focus");
-            item.removeAttribute("select-end");
-            item.removeAttribute("select-start");
-        });
-        liElement.classList.add("b3-list-item--focus");
-    }
-    const selectItemElements = fileElement.querySelectorAll<HTMLElement>(".b3-list-item--focus");
-    if (selectItemElements.length > 1) {
-        return initMultiMenu(selectItemElements, app);
+    if (selection.items.length > 1) {
+        return initMultiMenu(selection, app);
     }
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
-    const notebookId = liElement.parentElement.getAttribute("data-url");
+    const notebookId = liElement.getAttribute("data-notebook-id") || liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     const boxDocID = liElement.getAttribute("data-node-id");
     if (boxDocID && window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
@@ -515,7 +543,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 click: () => { updatePinnedDocs([notebookId], pinned ? "unpin" : "pin"); },
             }).element);
         }
-        const subMenu = sortMenu("notebook", parseInt(liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
+        const subMenu = sortMenu("notebook", parseInt(liElement.getAttribute("data-sortmode") ||
+            liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
             if (sort === null) {
                 return;
             }
@@ -525,7 +554,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 if (response.code !== 0) {
                     return;
                 }
-                liElement.parentElement.setAttribute("data-sortmode", sort.toString());
+                liElement.setAttribute("data-sortmode", sort.toString());
                 let files;
                 /// #if MOBILE
                 files = window.siyuan.mobile.docks.file;
@@ -663,7 +692,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")));
+                deleteDocTreeItems(selection.items);
             }
         }).element);
     }
@@ -716,11 +745,11 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     emitOpenMenu({
         type: "open-menu-doctree",
-        detail: {
-            elements: selectItemElements,
+        detail: () => ({
+            elements: selection.elements(),
             type: "notebook",
             items: [{id: notebookId, path: "/", notebookId}],
-        },
+        }),
         separatorPosition: "top",
     });
     return window.siyuan.menus.menu;
@@ -729,21 +758,12 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
 export const initFileMenu = (app: App, notebookId: string, pathString: string, liElement: Element) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
-    const fileElement = hasClosestByTag(liElement, "DIV");
-    if (!fileElement) {
+    const selection = getMenuSelection(liElement);
+    if (!selection) {
         return window.siyuan.menus.menu;
     }
-    if (!liElement.classList.contains("b3-list-item--focus")) {
-        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-            item.classList.remove("b3-list-item--focus");
-            item.removeAttribute("select-end");
-            item.removeAttribute("select-start");
-        });
-        liElement.classList.add("b3-list-item--focus");
-    }
-    const selectItemElements = fileElement.querySelectorAll<HTMLElement>(".b3-list-item--focus");
-    if (selectItemElements.length > 1) {
-        return initMultiMenu(selectItemElements, app);
+    if (selection.items.length > 1) {
+        return initMultiMenu(selection, app);
     }
     return initDocumentMenu(app, {
         id: liElement.getAttribute("data-node-id"),
@@ -752,9 +772,10 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         name: getDisplayName(liElement.getAttribute("data-name"), false, true),
         subFileCount: Number(liElement.getAttribute("data-count")),
         childrenSortMode: getConfiguredChildrenSortMode(liElement),
-        customSort: isCustomFileTreeList(liElement.getAttribute("data-pin-root") === "true" ? liElement : liElement.parentElement),
+        customSort: selection.controller ? selection.controller.getItemFromElement(liElement)?.effectiveSortMode === 6 :
+            isCustomFileTreeList(liElement.getAttribute("data-pin-root") === "true" ? liElement : liElement.parentElement),
         target: liElement as HTMLElement,
-        elements: selectItemElements,
+        elements: selection.elements,
         treeElement: liElement,
     });
 };
@@ -768,7 +789,7 @@ export const initDocumentMenu = (app: App, options: {
     childrenSortMode: number | null,
     customSort: boolean,
     target: HTMLElement,
-    elements: NodeListOf<HTMLElement>,
+    elements: NodeListOf<HTMLElement> | (() => NodeListOf<HTMLElement>),
     treeElement?: Element,
     position?: IPosition,
     readonlyHistory?: boolean,
@@ -1042,11 +1063,11 @@ export const initDocumentMenu = (app: App, options: {
     window.siyuan.menus.menu.append(exportMd(id));
     emitOpenMenu({
         type: "open-menu-doctree",
-        detail: {
-            elements: options.elements,
+        detail: () => ({
+            elements: typeof options.elements === "function" ? options.elements() : options.elements,
             type: "doc",
             items: [{id, path: pathString, notebookId}],
-        },
+        }),
         separatorPosition: "top",
     });
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
@@ -1064,14 +1085,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
         /// #else
         files = (getDockByType("file")?.data["file"] as Files);
         /// #endif
-        const liElement = files?.element.querySelector(`[data-url="${notebookId}"] [data-path="${pathString}"]`);
-        if (!liElement) {
-            window.siyuan.menus.menu.remove();
-            return;
-        }
-        liElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
-        syncFileTreeItemDefaultIcon(liElement as HTMLElement);
-        files.getLeaf(liElement, notebookId, true);
+        files?.onDocsImported({notebook: notebookId, parentPath: pathString, rootIDs: []});
         window.siyuan.menus.menu.remove();
     };
     /// #if !BROWSER

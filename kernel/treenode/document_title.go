@@ -120,7 +120,10 @@ func DocumentTitleText(paragraph *ast.Node) string {
 		}
 		return ast.WalkContinue
 	})
-	return strings.ReplaceAll(strings.ReplaceAll(text.String(), "\r", " "), "\n", " ")
+	// BlockDOM 在代码、标签和键盘样式旁使用零宽空格放置光标；摘要不显示它们。
+	// 只处理派生文字，完整源及其中的资源地址、用户单词连接符保持不变。
+	visible := strings.ReplaceAll(text.String(), "\u200b", "")
+	return strings.ReplaceAll(strings.ReplaceAll(visible, "\r", " "), "\n", " ")
 }
 
 // DocumentTitleRevision 排除动态锚文本缓存，样式和引用身份变化仍会影响并发写入版本。

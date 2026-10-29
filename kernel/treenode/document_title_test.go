@@ -160,3 +160,27 @@ func TestDocumentTitleMetadataTracksStyleOnlyChanges(t *testing.T) {
 		})
 	}
 }
+
+func TestDocumentTitleSummaryIgnoresCaretPlaceholdersWithoutChangingSource(t *testing.T) {
+	paragraph := &ast.Node{Type: ast.NodeParagraph}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Start \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "kbd", TextMarkTextContent: "Ctrl"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b / \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "code", TextMarkTextContent: "Code"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b / \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: "Tag"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b word\u2060joiner")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: "Link",
+		TextMarkAHref: "assets/file\u200bname.txt"})
+	before, err := render.NewDocumentTitle(paragraph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := DocumentTitleText(paragraph); got != "Start Ctrl / Code / Tag word\u2060joinerLink" {
+		t.Fatalf("caret placeholders entered the visible summary: %q", got)
+	}
+	after, err := render.NewDocumentTitle(paragraph)
+	if err != nil || before.Content != after.Content || !strings.Contains(after.Content, "file\u200bname.txt") {
+		t.Fatalf("summary extraction changed the source or resource address: %v", err)
+	}
+}

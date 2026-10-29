@@ -69,7 +69,7 @@ export class Tab {
     constructor(options: ITab) {
         this.id = genUUID();
         this.callback = options.callback;
-        if (options.title || options.icon) {
+        if (typeof options.title === "string" || options.icon) {
             this.title = options.title;
             this.icon = options.icon;
             this.docIcon = options.docIcon;

@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Selecciona el campo de relación que guarda el elemento padre de cada elemento",
+	"avSubItemsParentFieldTip": "Selecciona un par de relaciones, revisa la vista previa de la jerarquía y actívalo",
+	"avSubItemsPreview": "Vista previa de la jerarquía",
+	"avSubItemsReverse": "Invertir dirección",
+	"avSubItemsPreviewEmpty": "No hay elementos relacionados disponibles para esta vista previa",
+	"avSubItemsRelationDirection": "${parent} guarda los padres; ${children} guarda los hijos",
+	"avSubItemsPreviewInvalid": "Algunos elementos tienen varios padres en esta dirección; inviértela o revisa las relaciones",
 	"aiMemoryRememberedCount": "${count} recuerdos utilizables",
 	"aiMemoryCountUnavailable": "El número total de recuerdos no está disponible temporalmente",
 	"aiMemoryTaskNoNewUsable": "No se añadieron nuevos recuerdos utilizables",

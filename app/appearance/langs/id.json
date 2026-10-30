@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Pilih kolom relasi yang menyimpan induk setiap entri",
+	"avSubItemsParentFieldTip": "Pilih pasangan relasi, periksa pratinjau hierarki, lalu aktifkan",
+	"avSubItemsPreview": "Pratinjau hierarki",
+	"avSubItemsReverse": "Balik arah",
+	"avSubItemsPreviewEmpty": "Tidak ada entri terkait yang tersedia untuk pratinjau ini",
+	"avSubItemsRelationDirection": "${parent} menyimpan induk; ${children} menyimpan anak",
+	"avSubItemsPreviewInvalid": "Beberapa entri memiliki lebih dari satu induk dalam arah ini; balik arahnya atau periksa relasinya",
 	"aiMemoryRememberedCount": "${count} ingatan yang dapat digunakan",
 	"aiMemoryCountUnavailable": "Jumlah keseluruhan ingatan untuk sementara tidak tersedia",
 	"aiMemoryTaskNoNewUsable": "Tidak ada ingatan baru yang dapat digunakan yang ditambahkan",

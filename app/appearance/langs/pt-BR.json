@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Selecione o campo de relação que armazena o item pai de cada item",
+	"avSubItemsParentFieldTip": "Selecione um par de relações, confira a prévia da hierarquia e ative",
+	"avSubItemsPreview": "Prévia da hierarquia",
+	"avSubItemsReverse": "Inverter direção",
+	"avSubItemsPreviewEmpty": "Não há itens relacionados disponíveis para esta prévia",
+	"avSubItemsRelationDirection": "${parent} armazena os pais; ${children} armazena os filhos",
+	"avSubItemsPreviewInvalid": "Alguns itens têm vários pais nesta direção; inverta-a ou verifique as relações",
 	"aiMemoryRememberedCount": "${count} memórias utilizáveis",
 	"aiMemoryCountUnavailable": "O número total de memórias está temporariamente indisponível",
 	"aiMemoryTaskNoNewUsable": "Nenhuma nova memória utilizável foi adicionada",

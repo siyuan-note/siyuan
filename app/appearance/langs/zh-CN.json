@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "选择用于记录每个条目父项的关联字段",
+	"avSubItemsParentFieldTip": "选择一组关系，查看层级预览后启用",
+	"avSubItemsPreview": "层级预览",
+	"avSubItemsReverse": "反转方向",
+	"avSubItemsPreviewEmpty": "暂无可预览的关联条目",
+	"avSubItemsRelationDirection": "${parent} 记录上级，${children} 记录下级",
+	"avSubItemsPreviewInvalid": "此方向中有条目对应多个上级，请反转方向或检查关联数据",
 	"aiMemoryRememberedCount": "已记住 ${count} 条记忆",
 	"aiMemoryCountUnavailable": "暂时无法获取完整记忆数量",
 	"aiMemoryTaskNoNewUsable": "未新增可用记忆",

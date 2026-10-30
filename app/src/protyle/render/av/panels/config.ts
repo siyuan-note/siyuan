@@ -15,7 +15,9 @@ import {bindSubItemsSettings, getSubItemsSettingsHTML} from "../subItems";
 const openSubItemsSettings = (context: IAVPanelContext, existing = false) => {
     context.menuElement.innerHTML = getSubItemsSettingsHTML(context.data, existing);
     setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
-    bindSubItemsSettings(context.menuElement, context.options.protyle, context.options.blockElement as HTMLElement, context.data, existing);
+    bindSubItemsSettings(context.menuElement, context.options.protyle, context.options.blockElement as HTMLElement, context.data, existing, () => {
+        if (!isMobile()) setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+    });
     window.siyuan.menus.menu.remove();
 };
 export const configPanel: IAVPanelDescriptor = {

@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Виберіть поле зв’язку, яке зберігає батьківський елемент кожного елемента",
+	"avSubItemsParentFieldTip": "Виберіть пару зв’язків, перевірте попередній перегляд ієрархії та ввімкніть функцію",
+	"avSubItemsPreview": "Попередній перегляд ієрархії",
+	"avSubItemsReverse": "Змінити напрямок",
+	"avSubItemsPreviewEmpty": "Немає пов’язаних елементів для попереднього перегляду",
+	"avSubItemsRelationDirection": "${parent} зберігає батьківські елементи; ${children} — дочірні",
+	"avSubItemsPreviewInvalid": "У цьому напрямку деякі елементи мають кількох батьків; змініть напрямок або перевірте зв’язки",
 	"aiMemoryRememberedCount": "Доступних спогадів: ${count}",
 	"aiMemoryCountUnavailable": "Загальна кількість спогадів тимчасово недоступна",
 	"aiMemoryTaskNoNewUsable": "Нові доступні спогади не додано",

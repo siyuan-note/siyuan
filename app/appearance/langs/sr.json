@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Изаберите поље везе које чува надређену ставку сваке ставке",
+	"avSubItemsParentFieldTip": "Изаберите пар веза, проверите преглед хијерархије, па омогућите функцију",
+	"avSubItemsPreview": "Преглед хијерархије",
+	"avSubItemsReverse": "Обрни смер",
+	"avSubItemsPreviewEmpty": "Нема повезаних ставки за овај преглед",
+	"avSubItemsRelationDirection": "${parent} чува надређене ставке; ${children} чува подређене",
+	"avSubItemsPreviewInvalid": "У овом смеру неке ставке имају више надређених ставки; обрните смер или проверите везе",
 	"aiMemoryRememberedCount": "Број употребљивих сећања: ${count}",
 	"aiMemoryCountUnavailable": "Укупан број сећања тренутно није доступан",
 	"aiMemoryTaskNoNewUsable": "Нису додата нова употребљива сећања",

@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Seleziona il campo relazione che contiene l'elemento padre di ogni elemento",
+	"avSubItemsParentFieldTip": "Seleziona una coppia di relazioni, controlla l’anteprima della gerarchia e attivala",
+	"avSubItemsPreview": "Anteprima della gerarchia",
+	"avSubItemsReverse": "Inverti direzione",
+	"avSubItemsPreviewEmpty": "Nessun elemento collegato disponibile per questa anteprima",
+	"avSubItemsRelationDirection": "${parent} contiene gli elementi padre; ${children} contiene i figli",
+	"avSubItemsPreviewInvalid": "Alcuni elementi hanno più padri in questa direzione; invertila o controlla le relazioni",
 	"aiMemoryRememberedCount": "${count} memorie utilizzabili",
 	"aiMemoryCountUnavailable": "Il numero totale di memorie non è temporaneamente disponibile",
 	"aiMemoryTaskNoNewUsable": "Non sono state aggiunte nuove memorie utilizzabili",

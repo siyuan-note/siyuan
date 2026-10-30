@@ -5613,7 +5613,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", select the field that stores each item's parent, and confirm enabling. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
+					"Data": ", select a reciprocal relation pair and review the hierarchy using real items. If needed, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reverse the hierarchy direction, then confirm enabling. The preview covers only some loaded items; enabling validates all relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
 				}
 			]
 		},

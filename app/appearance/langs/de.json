@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Wähle das Verknüpfungsfeld, das den übergeordneten Eintrag jedes Eintrags speichert",
+	"avSubItemsParentFieldTip": "Wähle ein Beziehungspaar, prüfe die Hierarchievorschau und aktiviere es",
+	"avSubItemsPreview": "Hierarchievorschau",
+	"avSubItemsReverse": "Richtung umkehren",
+	"avSubItemsPreviewEmpty": "Keine verknüpften Einträge für diese Vorschau verfügbar",
+	"avSubItemsRelationDirection": "${parent} speichert übergeordnete, ${children} untergeordnete Einträge",
+	"avSubItemsPreviewInvalid": "Einige Einträge haben in dieser Richtung mehrere Eltern; kehre die Richtung um oder prüfe die Beziehungen",
 	"aiMemoryRememberedCount": "${count} nutzbare Erinnerungen",
 	"aiMemoryCountUnavailable": "Die vollständige Anzahl der Erinnerungen ist vorübergehend nicht verfügbar",
 	"aiMemoryTaskNoNewUsable": "Es wurden keine neuen nutzbaren Erinnerungen hinzugefügt",

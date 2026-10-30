@@ -13,6 +13,8 @@ import {isMobile} from "../../../util/functions";
 import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
 import {beginAVEditorSession} from "./editorSession";
 import {getAVFilteredTipContext} from "./filteredTip";
+import {getSubItemsInitialParentKey, getSubItemsRelationPairs, getSubItemsRelationPreview} from "./subItemsRelationPreview";
+import type {ISubItemsRelationPair} from "./subItemsRelationPreview";
 
 const operationContext = (blockElement: HTMLElement) => ({
     avID: blockElement.dataset.avId,
@@ -140,55 +142,80 @@ export const addSubItemsMenu = (menu: Menu, protyle: IProtyle, blockElement: HTM
         click: () => reparentSubItems(protyle, blockElement, itemIDs, "", undefined, undefined, groupID)});
 };
 
-const getSubItemsParentFields = (data: IAV) => (getFieldsByData(data) || []).filter(field =>
-    field.type === "relation" && field.relation?.avID === data.id && field.relation.isTwoWay &&
-    field.relation.backKeyID && field.relation.backKeyID !== field.id);
-
 export const getSubItemsSettingsHTML = (data: IAV, existing = false) => {
     const enabled = Boolean(data.subItems?.enabled);
-    const fields = getSubItemsParentFields(data);
-    const selected = existing && fields.some(field => field.id === data.subItems?.parentKeyID) ? data.subItems.parentKeyID : "";
+    const pairs = getSubItemsRelationPairs(getFieldsByData(data) || [], data.id);
     const currentDisplay = data.views?.find(view => view.id === data.viewID)?.subItemsDisplay || "flat";
-    const enableHTML = `<button class="b3-menu__item" data-sub-items-enabled="${!enabled}"${existing && !selected ? " disabled" : ""}><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>`;
-    const choicesHTML = fields.map(field => `<button class="b3-menu__item" data-sub-items-parent-key="${escapeAttr(field.id)}" aria-pressed="${field.id === selected}"><span class="b3-menu__label">${escapeHtml(field.name)}</span><svg class="b3-menu__checked${field.id === selected ? "" : " fn__none"}"><use xlink:href="#iconSelect"></use></svg></button>`).join("");
+    const enableHTML = `<button class="b3-menu__item" data-sub-items-enabled="${!enabled}"${existing ? " disabled" : ""}><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>`;
+    const choicesHTML = pairs.map(pair => `<button class="b3-menu__item" data-sub-items-pair="${escapeAttr(pair.id)}" aria-pressed="false"><span class="b3-menu__label">${escapeHtml(pair.first.name)} / ${escapeHtml(pair.second.name)}</span><svg class="b3-menu__checked fn__none"><use xlink:href="#iconSelect"></use></svg></button>`).join("");
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
     <span class="block__icon block__icon--menu-back" data-type="${existing ? "go-sub-items" : "go-config"}"><svg><use xlink:href="#iconLeft"></use></svg></span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages[existing ? "avSubItemsExistingFields" : "avSubItems"]}</span>
 </button>
 <button class="b3-menu__separator"></button>
-${existing ? `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface">${window.siyuan.languages.avSubItemsParentFieldTip}</span></div>
-${choicesHTML}<button class="b3-menu__separator"></button>${enableHTML}` : `${enableHTML}
-${!enabled && fields.length ? `<button class="b3-menu__item" data-type="go-sub-items-existing"><span class="b3-menu__label">${window.siyuan.languages.avSubItemsExistingFields}</span><svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg></button>` : ""}
+${existing ? `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface fn__flex"><span class="fn__flex-center">${window.siyuan.languages.avSubItemsParentFieldTip}</span></span></div>
+${choicesHTML}<div data-sub-items-preview class="fn__none"></div><button class="b3-menu__separator"></button>${enableHTML}` : `${enableHTML}
+${!enabled && pairs.length ? `<button class="b3-menu__item" data-type="go-sub-items-existing"><span class="b3-menu__label">${window.siyuan.languages.avSubItemsExistingFields}</span><svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg></button>` : ""}
 ${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}`}
 </div>`;
 };
 
-export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle, blockElement: HTMLElement, data: IAV, existing = false) => {
+export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle, blockElement: HTMLElement, data: IAV, existing = false, onResize?: () => void) => {
     if (protyle.disabled || window.siyuan.isPublish || protyle.options.history) {
         menuElement.querySelectorAll<HTMLButtonElement>("button:not([data-type=nobg])").forEach(button => { button.disabled = true; });
         return;
     }
-    const fields = getSubItemsParentFields(data);
-    let parentKeyID = existing && fields.some(field => field.id === data.subItems?.parentKeyID) ? data.subItems.parentKeyID : undefined;
+    const fields = getFieldsByData(data) || [];
+    const pairs = getSubItemsRelationPairs(fields, data.id);
+    let selectedPair: ISubItemsRelationPair;
+    let parentKeyID: string;
     const enableButton = menuElement.querySelector<HTMLButtonElement>("[data-sub-items-enabled]");
-    const choices = menuElement.querySelectorAll<HTMLButtonElement>("[data-sub-items-parent-key]");
+    const choices = menuElement.querySelectorAll<HTMLButtonElement>("[data-sub-items-pair]");
+    const canEdit = () => editable(protyle, blockElement) && blockElement.dataset.avId === data.id;
+    const previewData = () => {
+        const cached = getAVData(blockElement);
+        return cached?.id === data.id && cached.viewID === data.viewID ? cached : data;
+    };
+    const updatePreview = () => {
+        const preview = getSubItemsRelationPreview(previewData(), selectedPair, parentKeyID);
+        const element = menuElement.querySelector<HTMLElement>("[data-sub-items-preview]");
+        const direction = window.siyuan.languages.avSubItemsRelationDirection
+            .replace(/\$\{(?:parent|children)\}/g, (token: string) => token === "${parent}" ? preview.parentField.name : preview.childrenField.name);
+        element.innerHTML = `<button class="b3-menu__separator"></button>
+<div class="b3-menu__item" data-type="nobg"><span class="b3-menu__label">${window.siyuan.languages.avSubItemsPreview}</span><button class="block__icon" data-sub-items-reverse>${window.siyuan.languages.avSubItemsReverse}</button></div>
+<div class="b3-menu__item b3-menu__item--readonly"><div class="b3-menu__label av__sub-items-preview">${preview.examples.length ? preview.examples.map(example => `<div><div class="fn__ellipsis" title="${escapeAttr(example.title)}">${escapeHtml(example.title)}</div><div class="av__sub-items-preview-children">${example.children.map(child => `<div class="fn__ellipsis" title="${escapeAttr(child)}">${escapeHtml(child)}</div>`).join("")}</div></div>`).join("") : window.siyuan.languages.avSubItemsPreviewEmpty}</div></div>
+<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface fn__flex"><span class="fn__flex-center">${escapeHtml(direction)}</span></span></div>
+${preview.multipleParents ? `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__error">${window.siyuan.languages.avSubItemsPreviewInvalid}</span></div>` : ""}`;
+        element.classList.remove("fn__none");
+        enableButton.disabled = preview.multipleParents;
+        element.querySelector<HTMLButtonElement>("[data-sub-items-reverse]").onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!canEdit()) return;
+            parentKeyID = parentKeyID === selectedPair.first.id ? selectedPair.second.id : selectedPair.first.id;
+            updatePreview();
+        };
+        onResize?.();
+    };
     choices.forEach(button => {
         button.onclick = event => {
             event.preventDefault();
             event.stopPropagation();
-            if (!editable(protyle, blockElement)) return;
-            parentKeyID = button.dataset.subItemsParentKey;
+            if (!canEdit()) return;
+            selectedPair = pairs.find(pair => pair.id === button.dataset.subItemsPair);
+            if (!selectedPair) return;
+            parentKeyID = getSubItemsInitialParentKey(previewData(), selectedPair, data.subItems?.parentKeyID);
             choices.forEach(choice => {
-                const selected = choice.dataset.subItemsParentKey === parentKeyID;
+                const selected = choice.dataset.subItemsPair === selectedPair.id;
                 choice.setAttribute("aria-pressed", String(selected));
                 choice.querySelector(".b3-menu__checked").classList.toggle("fn__none", !selected);
             });
-            enableButton.disabled = false;
+            updatePreview();
         };
     });
     enableButton.onclick = () => {
-        if (!editable(protyle, blockElement) || existing && !parentKeyID) return;
+        if (!canEdit() || enableButton.disabled || existing && !parentKeyID) return;
         const parent = fields.find(field => field.id === parentKeyID);
         const operation: IOperation = {action: "setAttrViewSubItems", ...operationContext(blockElement), data: {
             enabled: !data.subItems?.enabled, parentKeyID, childrenKeyID: parent?.relation?.backKeyID,

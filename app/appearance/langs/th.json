@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "เลือกฟิลด์ความสัมพันธ์ที่จัดเก็บรายการแม่ของแต่ละรายการ",
+	"avSubItemsParentFieldTip": "เลือกคู่ความสัมพันธ์ ตรวจสอบตัวอย่างลำดับชั้น แล้วเปิดใช้งาน",
+	"avSubItemsPreview": "ตัวอย่างลำดับชั้น",
+	"avSubItemsReverse": "กลับทิศทาง",
+	"avSubItemsPreviewEmpty": "ไม่มีรายการที่เกี่ยวข้องสำหรับตัวอย่างนี้",
+	"avSubItemsRelationDirection": "${parent} จัดเก็บรายการแม่ และ ${children} จัดเก็บรายการลูก",
+	"avSubItemsPreviewInvalid": "ในทิศทางนี้บางรายการมีรายการแม่หลายรายการ ให้กลับทิศทางหรือตรวจสอบความสัมพันธ์",
 	"aiMemoryRememberedCount": "ความทรงจำที่ใช้ได้ ${count} รายการ",
 	"aiMemoryCountUnavailable": "ยังไม่สามารถเรียกดูจำนวนความทรงจำทั้งหมดได้ในขณะนี้",
 	"aiMemoryTaskNoNewUsable": "ไม่มีการเพิ่มความทรงจำใหม่ที่ใช้ได้",

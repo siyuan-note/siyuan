@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Sélectionnez le champ de relation qui contient le parent de chaque élément",
+	"avSubItemsParentFieldTip": "Sélectionnez une paire de relations, vérifiez l’aperçu de la hiérarchie, puis activez",
+	"avSubItemsPreview": "Aperçu de la hiérarchie",
+	"avSubItemsReverse": "Inverser le sens",
+	"avSubItemsPreviewEmpty": "Aucun élément lié disponible pour cet aperçu",
+	"avSubItemsRelationDirection": "${parent} contient les parents ; ${children} contient les enfants",
+	"avSubItemsPreviewInvalid": "Certains éléments ont plusieurs parents dans ce sens ; inversez-le ou vérifiez les relations",
 	"aiMemoryRememberedCount": "${count} souvenirs utilisables",
 	"aiMemoryCountUnavailable": "Le nombre total de souvenirs est temporairement indisponible",
 	"aiMemoryTaskNoNewUsable": "Aucun nouveau souvenir utilisable n’a été ajouté",

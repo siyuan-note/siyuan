@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "각 항목의 부모 항목을 저장하는 관계 필드를 선택하세요",
+	"avSubItemsParentFieldTip": "관계 쌍을 선택하고 계층 미리보기를 확인한 다음 활성화하세요",
+	"avSubItemsPreview": "계층 미리보기",
+	"avSubItemsReverse": "방향 반전",
+	"avSubItemsPreviewEmpty": "미리 볼 수 있는 연결된 항목이 없습니다",
+	"avSubItemsRelationDirection": "${parent}에는 부모 항목을, ${children}에는 자식 항목을 저장합니다",
+	"avSubItemsPreviewInvalid": "이 방향에서 일부 항목에 부모가 여러 개 있습니다. 방향을 반전하거나 관계를 확인하세요",
 	"aiMemoryRememberedCount": "사용 가능한 기억 ${count}개",
 	"aiMemoryCountUnavailable": "현재 전체 기억 수를 가져올 수 없습니다",
 	"aiMemoryTaskNoNewUsable": "사용 가능한 새 기억이 추가되지 않았습니다",

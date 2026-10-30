@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Vyberte pole vzťahu, ktoré uchováva nadradenú položku každej položky",
+	"avSubItemsParentFieldTip": "Vyberte pár vzťahov, skontrolujte náhľad hierarchie a zapnite funkciu",
+	"avSubItemsPreview": "Náhľad hierarchie",
+	"avSubItemsReverse": "Obrátiť smer",
+	"avSubItemsPreviewEmpty": "Pre tento náhľad nie sú dostupné súvisiace položky",
+	"avSubItemsRelationDirection": "${parent} uchováva nadradené položky; ${children} podradené položky",
+	"avSubItemsPreviewInvalid": "V tomto smere majú niektoré položky viac rodičov; obráťte smer alebo skontrolujte vzťahy",
 	"aiMemoryRememberedCount": "Počet použiteľných spomienok: ${count}",
 	"aiMemoryCountUnavailable": "Celkový počet spomienok je dočasne nedostupný",
 	"aiMemoryTaskNoNewUsable": "Neboli pridané žiadne nové použiteľné spomienky",

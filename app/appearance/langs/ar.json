@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "اختر حقل العلاقة الذي يخزن العنصر الأب لكل عنصر",
+	"avSubItemsParentFieldTip": "اختر زوجًا من العلاقات وراجع معاينة التسلسل الهرمي ثم فعّل الميزة",
+	"avSubItemsPreview": "معاينة التسلسل الهرمي",
+	"avSubItemsReverse": "عكس الاتجاه",
+	"avSubItemsPreviewEmpty": "لا توجد عناصر مرتبطة متاحة لهذه المعاينة",
+	"avSubItemsRelationDirection": "${parent} يخزن العناصر الأب؛ ${children} يخزن العناصر الفرعية",
+	"avSubItemsPreviewInvalid": "لبعض العناصر أكثر من عنصر أب في هذا الاتجاه؛ اعكسه أو تحقق من العلاقات",
 	"aiMemoryRememberedCount": "${count} من الذكريات القابلة للاستخدام",
 	"aiMemoryCountUnavailable": "العدد الكامل للذكريات غير متاح مؤقتًا",
 	"aiMemoryTaskNoNewUsable": "لم تتم إضافة ذكريات جديدة قابلة للاستخدام",

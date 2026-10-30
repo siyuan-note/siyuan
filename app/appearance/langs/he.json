@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "בחרו את שדה הקשר ששומר את פריט האב של כל פריט",
+	"avSubItemsParentFieldTip": "בחרו זוג קשרים, בדקו את תצוגת ההיררכיה ואז הפעילו",
+	"avSubItemsPreview": "תצוגה מקדימה של ההיררכיה",
+	"avSubItemsReverse": "היפוך כיוון",
+	"avSubItemsPreviewEmpty": "אין פריטים מקושרים זמינים לתצוגה מקדימה זו",
+	"avSubItemsRelationDirection": "${parent} שומר פריטי אב; ${children} שומר פריטים צאצאים",
+	"avSubItemsPreviewInvalid": "לחלק מהפריטים יש כמה פריטי אב בכיוון זה; הפכו את הכיוון או בדקו את הקשרים",
 	"aiMemoryRememberedCount": "${count} זיכרונות זמינים לשימוש",
 	"aiMemoryCountUnavailable": "המספר הכולל של הזיכרונות אינו זמין כרגע",
 	"aiMemoryTaskNoNewUsable": "לא נוספו זיכרונות חדשים זמינים לשימוש",

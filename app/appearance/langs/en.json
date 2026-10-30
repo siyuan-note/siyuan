@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Select the relation field that stores each item's parent",
+	"avSubItemsParentFieldTip": "Select a relation pair, review the hierarchy preview, then enable",
+	"avSubItemsPreview": "Hierarchy preview",
+	"avSubItemsReverse": "Reverse direction",
+	"avSubItemsPreviewEmpty": "No related items are available for this preview",
+	"avSubItemsRelationDirection": "${parent} stores parents; ${children} stores children",
+	"avSubItemsPreviewInvalid": "Some items have multiple parents in this direction; reverse it or check the relations",
 	"aiMemoryRememberedCount": "${count} usable memories",
 	"aiMemoryCountUnavailable": "The complete memory count is temporarily unavailable",
 	"aiMemoryTaskNoNewUsable": "No new usable memories were added",

@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "選擇用於記錄每個項目父項的關聯欄位",
+	"avSubItemsParentFieldTip": "選擇一組關聯，查看階層預覽後啟用",
+	"avSubItemsPreview": "階層預覽",
+	"avSubItemsReverse": "反轉方向",
+	"avSubItemsPreviewEmpty": "暫無可預覽的關聯項目",
+	"avSubItemsRelationDirection": "${parent} 記錄上層項目，${children} 記錄下層項目",
+	"avSubItemsPreviewInvalid": "此方向中有項目對應多個上層項目，請反轉方向或檢查關聯資料",
 	"aiMemoryRememberedCount": "已記住 ${count} 則記憶",
 	"aiMemoryCountUnavailable": "暫時無法取得完整記憶數量",
 	"aiMemoryTaskNoNewUsable": "未新增可用記憶",

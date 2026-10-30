@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Выберите поле связи, в котором хранится родитель каждого элемента",
+	"avSubItemsParentFieldTip": "Выберите пару связей, проверьте предпросмотр иерархии и включите функцию",
+	"avSubItemsPreview": "Предпросмотр иерархии",
+	"avSubItemsReverse": "Обратить направление",
+	"avSubItemsPreviewEmpty": "Нет связанных элементов для предпросмотра",
+	"avSubItemsRelationDirection": "${parent} хранит родителей; ${children} хранит дочерние элементы",
+	"avSubItemsPreviewInvalid": "В этом направлении у некоторых элементов несколько родителей; обратите направление или проверьте связи",
 	"aiMemoryRememberedCount": "Доступных воспоминаний: ${count}",
 	"aiMemoryCountUnavailable": "Общее количество воспоминаний временно недоступно",
 	"aiMemoryTaskNoNewUsable": "Новые доступные воспоминания не добавлены",

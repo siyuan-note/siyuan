@@ -3448,3 +3448,16 @@ img.av__cellassetimg {
   padding: 4px 8px;
   white-space: nowrap;
 }
+
+.av__sub-items-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.5;
+
+  &-children {
+    margin-left: 4px;
+    padding-left: 16px;
+    border-left: 1px solid var(--b3-border-color);
+  }
+}

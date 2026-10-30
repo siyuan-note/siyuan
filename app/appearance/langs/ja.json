@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "各項目の親項目を保存するリレーションフィールドを選択してください",
+	"avSubItemsParentFieldTip": "関連フィールドの組を選び、階層のプレビューを確認してから有効にしてください",
+	"avSubItemsPreview": "階層のプレビュー",
+	"avSubItemsReverse": "方向を反転",
+	"avSubItemsPreviewEmpty": "プレビューできる関連項目がありません",
+	"avSubItemsRelationDirection": "${parent} は親項目、${children} は子項目を記録します",
+	"avSubItemsPreviewInvalid": "この方向では複数の親を持つ項目があります。方向を反転するか関連データを確認してください",
 	"aiMemoryRememberedCount": "利用可能な記憶は ${count} 件",
 	"aiMemoryCountUnavailable": "現在、記憶の総数を取得できません",
 	"aiMemoryTaskNoNewUsable": "利用可能な記憶は追加されませんでした",

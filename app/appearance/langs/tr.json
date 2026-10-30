@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Her öğenin üst öğesini saklayan ilişki alanını seçin",
+	"avSubItemsParentFieldTip": "Bir ilişki çifti seçin, hiyerarşi önizlemesini kontrol edin ve etkinleştirin",
+	"avSubItemsPreview": "Hiyerarşi önizlemesi",
+	"avSubItemsReverse": "Yönü tersine çevir",
+	"avSubItemsPreviewEmpty": "Bu önizleme için ilişkili öğe bulunmuyor",
+	"avSubItemsRelationDirection": "${parent} üst öğeleri, ${children} alt öğeleri saklar",
+	"avSubItemsPreviewInvalid": "Bu yönde bazı öğelerin birden fazla üst öğesi var; yönü tersine çevirin veya ilişkileri kontrol edin",
 	"aiMemoryRememberedCount": "${count} kullanılabilir anı",
 	"aiMemoryCountUnavailable": "Toplam anı sayısı geçici olarak kullanılamıyor",
 	"aiMemoryTaskNoNewUsable": "Yeni kullanılabilir anı eklenmedi",

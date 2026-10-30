@@ -1,5 +1,10 @@
 {
-	"avSubItemsParentFieldTip": "Selecteer het relatieveld dat het bovenliggende item van elk item opslaat",
+	"avSubItemsParentFieldTip": "Selecteer een relatiepaar, controleer de hiërarchievoorvertoning en schakel het in",
+	"avSubItemsPreview": "Hiërarchievoorvertoning",
+	"avSubItemsReverse": "Richting omkeren",
+	"avSubItemsPreviewEmpty": "Geen gerelateerde items beschikbaar voor deze voorvertoning",
+	"avSubItemsRelationDirection": "${parent} bevat bovenliggende items; ${children} bevat onderliggende items",
+	"avSubItemsPreviewInvalid": "Sommige items hebben in deze richting meerdere bovenliggende items; keer de richting om of controleer de relaties",
 	"aiMemoryRememberedCount": "${count} bruikbare herinneringen",
 	"aiMemoryCountUnavailable": "Het totale aantal herinneringen is tijdelijk niet beschikbaar",
 	"aiMemoryTaskNoNewUsable": "Er zijn geen nieuwe bruikbare herinneringen toegevoegd",

@@ -719,8 +719,20 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
     const interactionGeneration = popoverGeneration;
     let refDefs: IRefDefs[] = [];
     let originalRefBlockIDs: Record<string, string>;
+    let backlink: {blockId: string, rootId: string, notebookId: string};
     const notebookId = getPopoverNotebookId();
     const dataId = popoverTargetElement.getAttribute("data-id");
+    /// #if !MOBILE
+    if (popoverTargetElement.classList.contains("protyle-attr--refcount")) {
+        const blockId = popoverTargetElement.parentElement.parentElement.getAttribute("data-node-id");
+        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: blockId, notebook: notebookId});
+        if (response.code !== 0) {
+            return;
+        }
+        backlink = {blockId, rootId: response.data.rootID, notebookId: response.data.box};
+        refDefs = [{refID: blockId}];
+    } else
+    /// #endif
     if (dataId) {
         // backlink/util/hint 上的弹层
         if (showRef) {
@@ -816,6 +828,7 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
     let hasPin = false;
     window.siyuan.blockPanels.find((item) => {
         if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true"
+            && Boolean(backlink) === Boolean(item.backlink)
             && JSON.stringify(refDefs) === JSON.stringify(item.refDefs)) {
             hasPin = true;
             return true;
@@ -829,6 +842,7 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
             targetElement: popoverTargetElement,
             isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
             refDefs,
+            backlink,
             originalRefBlockIDs,
             canShow: automatic ? () => generation === getPopoverGeneration() && isBlockPanelTargetAvailable(targetElement) &&
                 !isPopoverSuspended() && !isPopoverMenuBlocked(targetElement) : undefined,

@@ -46,6 +46,10 @@ export const processBacklinkIndexCommit = (data: {
         item.markIndexDirty(data);
         item.refreshAfterIndex();
     });
+    window.siyuan.blockPanels.forEach(item => {
+        item.backlink?.markIndexDirty(data);
+        item.backlink?.refreshAfterIndex();
+    });
     /// #endif
 };
 

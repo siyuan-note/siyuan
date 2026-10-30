@@ -75,7 +75,8 @@ const createHarness = (android = false) => {
     };
     const clearTimer = (id: number) => timers.delete(id);
     const panels: {element: TestElement, targetElement: TestElement, canShow?: () => boolean,
-        refDefs: IRefDefs[], editors: unknown[], destroy: () => void}[] = [];
+        refDefs: IRefDefs[], editors: unknown[], destroy: () => void,
+        backlink?: {blockId: string, rootId: string, notebookId: string}}[] = [];
     const requests: {url: string, resolve: (data: unknown) => void}[] = [];
     const siyuan = {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
@@ -304,6 +305,38 @@ test("closing dialog anchors reject late explicit backlink queries without chang
     assert.equal(h.requests.length, 1);
     dialog.dataset.dialogClosing = "true";
     h.requests[0].resolve({code: 0, data: {refDefs: [{refID: "backlink"}]}});
+    await h.advance();
+    assert.equal(h.panels.length, 0);
+});
+
+test("document and ordinary block reference counts open backlinks for their own target", async () => {
+    for (const blockId of ["document", "heading", "list"]) {
+        const h = createHarness();
+        const block = h.element({"data-node-id": blockId});
+        const attrs = h.element({}, [], block);
+        const count = h.element({}, ["popover__block", "protyle-attr--refcount"], attrs);
+        h.fire("mouseover", count);
+        await h.advance();
+        assert.equal(h.requests[0].url, "/api/block/getBlockInfo");
+        h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
+        await h.advance();
+        assert.equal(h.panels.length, 1);
+        assert.equal(h.panels[0].backlink.blockId, blockId);
+        assert.equal(h.panels[0].backlink.rootId, "document");
+        assert.equal(h.panels[0].backlink.notebookId, "notebook");
+        assert.equal(h.requests.length, 1, "counts use the shared backlink query instead of fetching preview IDs");
+    }
+});
+
+test("late reference count metadata cannot open a popover after its anchor closes", async () => {
+    const h = createHarness();
+    const block = h.element({"data-node-id": "heading"});
+    const attrs = h.element({}, [], block);
+    const count = h.element({}, ["popover__block", "protyle-attr--refcount"], attrs);
+    h.fire("mouseover", count);
+    await h.advance();
+    block.dataset.dialogClosing = "true";
+    h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
     await h.advance();
     assert.equal(h.panels.length, 0);
 });
@@ -568,8 +601,9 @@ test("destroying a canceled loading panel preserves a menu owned by another pane
     for (const removeMenu of [false, true]) {
         const element = new TestElement();
         element.dataset.level = "1";
-        const panel = {element, editors: [] as unknown[], refDefElements: new Map(),
-            refDefEditors: new Map(), refDefInfos: new Map()};
+        const panel = Object.assign(Object.create(module.BlockPanel.prototype), {
+            element, previewEditors: [], refDefElements: new Map(), refDefEditors: new Map(), refDefInfos: new Map(),
+        });
         module.BlockPanel.prototype.destroy.call(panel, removeMenu);
         assert.equal(closed, removeMenu ? 1 : 0);
         assert.equal(element.isConnected, false);

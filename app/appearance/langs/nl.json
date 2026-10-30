@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Deze keer toestaan",
+	"templateHTTPAllowAlways": "Deze sjabloon altijd netwerktoegang toestaan",
+	"templateHTTPTemplateWarning": "Eenmalig of altijd toestaan geeft deze sjabloon toegang tot meerdere openbare doelen en laat de sjabloon inhoud van notities die hij mag lezen naar externe diensten sturen. Blijvende toestemming kan worden ingetrokken in sjabloonbeheer of de instellingen van databasevelden",
+	"templateHTTPAllowed": "Netwerktoegang voor sjabloon toegestaan",
+	"templateHTTPNotAllowed": "Geen blijvende netwerktoestemming",
+	"templateHTTPRevoke": "Netwerktoestemming intrekken",
+	"templateHTTPRevokeAll": "Alle netwerktoestemmingen voor sjablonen intrekken",
+	"templateHTTPRevokeAllConfirm": "Netwerktoestemmingen voor alle bestandssjablonen en databaseveldsjablonen intrekken?",
+	"templateHTTPPermissionUnknown": "Status van netwerktoestemming onbekend",
 	"aiMemoryServiceTip": "AI-antwoorden en eerdere gesprekken zijn uitgesloten, en de kosten volgen de tarieven van die dienst",
 	"templateHTTPDenied": "HTTP-verzoek van sjabloon geweigerd",
 	"templateHTTPTimeout": "Time-out bij HTTP-verzoek of bevestiging van sjabloon",

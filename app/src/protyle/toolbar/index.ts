@@ -50,6 +50,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isEndOfBl
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
+import {takeTemplateHTTPConfirmation} from "../../template/httpConfirmHandoff";
 import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
 /// #endif
@@ -2212,7 +2213,9 @@ export class Toolbar {
             }
             if (event.key === "Enter") {
                 if (!isEmpty) {
-                    hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    const path = decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"));
+                    hintRenderTemplate(path, protyle, nodeElement,
+                        takeTemplateHTTPConfirmation(previewElement, path, protyle.block.parentID));
                 } else {
                     focusByRange(this.range);
                 }
@@ -2294,7 +2297,9 @@ export class Toolbar {
             }
             const listElement = hasClosestByClassName(target, "b3-list-item");
             if (listElement) {
-                hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                const path = decodeURIComponent(listElement.getAttribute("data-value"));
+                hintRenderTemplate(path, protyle, nodeElement,
+                    takeTemplateHTTPConfirmation(previewElement, path, protyle.block.parentID));
                 event.stopPropagation();
             }
         });

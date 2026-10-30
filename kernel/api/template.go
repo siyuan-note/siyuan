@@ -68,6 +68,7 @@ var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Con
 	mode := model.TemplateRenderMode(modeValue)
 
 	var content string
+	var httpConfirmToken string
 	var docTreePlan *model.TemplateDocTreePlanSummary
 	var err error
 	source, sourceErr := request.PreviewSource(modeValue)
@@ -83,7 +84,7 @@ var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Con
 	}
 	defer execution.Close()
 	if execution != nil {
-		_, content, docTreePlan, err = model.RenderTemplateWithHTTP(p, id, mode, source, execution.Runtime)
+		_, content, docTreePlan, httpConfirmToken, err = model.RenderTemplateWithHTTPHandoff(p, id, mode, source, execution, request.HTTPConfirmToken)
 	} else if source != nil {
 		_, content, docTreePlan, err = model.PreviewTemplateSource(p, id, *source)
 	} else {
@@ -93,7 +94,7 @@ var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Con
 		return apicontract.Failure[apicontract.RenderTemplateData](-1, util.EscapeHTML(err.Error()))
 	}
 
-	data := apicontract.RenderTemplateData{Path: p, Content: content}
+	data := apicontract.RenderTemplateData{Path: p, Content: content, HTTPConfirmToken: httpConfirmToken}
 	if docTreePlan != nil {
 		plan := &apicontract.TemplatePlan{ID: docTreePlan.ID, Count: docTreePlan.Count}
 		if docTreePlan.Nodes != nil {

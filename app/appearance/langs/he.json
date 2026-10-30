@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "לאפשר הפעם",
+	"templateHTTPAllowAlways": "לאפשר תמיד לתבנית זו גישה לרשת",
+	"templateHTTPTemplateWarning": "אישור חד־פעמי או קבוע מאפשר לתבנית זו לגשת למספר יעדים ציבוריים ולשלוח לשירותים חיצוניים תוכן הערות שהיא מורשית לקרוא. ניתן לבטל הרשאה קבועה בניהול התבניות או בהגדרות שדות מסד הנתונים",
+	"templateHTTPAllowed": "גישת התבנית לרשת מותרת",
+	"templateHTTPNotAllowed": "אין הרשאת רשת קבועה",
+	"templateHTTPRevoke": "ביטול הרשאת רשת",
+	"templateHTTPRevokeAll": "ביטול כל הרשאות הרשת לתבניות",
+	"templateHTTPRevokeAllConfirm": "לבטל הרשאות רשת לכל תבניות הקבצים ותבניות שדות מסד הנתונים?",
+	"templateHTTPPermissionUnknown": "מצב הרשאת הרשת אינו ידוע",
 	"aiMemoryServiceTip": "תשובות של הבינה המלאכותית ושיחות קודמות אינן נכללות, והחיובים נקבעים לפי תעריפי השירות",
 	"templateHTTPDenied": "בקשת HTTP של התבנית נדחתה",
 	"templateHTTPTimeout": "תם הזמן לבקשת HTTP של התבנית או לאישורה",

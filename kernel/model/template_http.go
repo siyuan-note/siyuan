@@ -17,7 +17,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// TemplateHTTPExecution 将联网权限限定于本次请求及发起窗口。
+// TemplateHTTPExecution 将联网执行绑定到发起窗口，并校验实际模板来源的许可。
 type TemplateHTTPExecution struct {
 	boxes              []string
 	Runtime            *templatehttp.Execution
@@ -28,7 +28,9 @@ type TemplateHTTPExecution struct {
 	once               sync.Once
 	mu                 sync.Mutex
 	confirmation       string
-	answer             chan bool
+	answer             chan templateHTTPAnswer
+	sources            map[string]*TemplateHTTPSource
+	allowedSources     map[string]bool
 }
 
 var templateHTTPExecutions = struct {
@@ -59,6 +61,8 @@ func StartTemplateHTTPExecution(ctx context.Context, id, app, sessionID, scope s
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	execution := &TemplateHTTPExecution{boxes: append([]string(nil), boxIDs...), id: id, app: app, sessionID: sessionID, session: session, ctx: ctx, cancel: cancel}
 	execution.Runtime = templatehttp.New(ctx, scope, execution.confirm)
+	execution.Runtime.SetRequestGuard(execution.sourceGuard)
+	execution.Runtime.SetRequestStarted(func() { execution.status("requesting") })
 	execution.Runtime.SetErrorHandler(func(code string) {
 		if execution.ctx.Err() == nil {
 			execution.push("templateHTTPStatus", map[string]string{"executionID": execution.id, "state": "error", "errorCode": code})
@@ -104,8 +108,19 @@ func (execution *TemplateHTTPExecution) confirm(ctx context.Context, request tem
 		execution.cancel()
 		return false
 	}
+	source := execution.sourceForScope(request.Scope)
+	if source != nil {
+		allowed, sourceErr := execution.sourceAllowed(request.Scope, source)
+		if sourceErr != nil {
+			execution.cancel()
+			return false
+		}
+		if allowed {
+			return true
+		}
+	}
 	confirmation := rand.Text()
-	answer := make(chan bool, 1)
+	answer := make(chan templateHTTPAnswer, 1)
 	execution.mu.Lock()
 	execution.confirmation, execution.answer = confirmation, answer
 	execution.mu.Unlock()
@@ -115,9 +130,14 @@ func (execution *TemplateHTTPExecution) confirm(ctx context.Context, request tem
 		execution.mu.Unlock()
 	}()
 	execution.status("waiting")
+	label, kind, canPersist := "", "", false
+	if source != nil {
+		label, kind, canPersist = source.Label, source.Kind, source.Persistable
+	}
 	if !execution.push("templateHTTPConfirm", map[string]any{
 		"executionID": execution.id, "confirmID": confirmation, "method": request.Method,
 		"url": request.URL, "headerNames": request.HeaderNames,
+		"sourceLabel": label, "sourceKind": kind, "canPersist": canPersist,
 	}) {
 		execution.cancel()
 		return false
@@ -125,8 +145,12 @@ func (execution *TemplateHTTPExecution) confirm(ctx context.Context, request tem
 	timer := time.NewTimer(time.Minute)
 	defer timer.Stop()
 	select {
-	case approved := <-answer:
-		if approved && ctx.Err() == nil && execution.ctx.Err() == nil && execution.accessValid(request.Scope) {
+	case reply := <-answer:
+		if reply.approved && ctx.Err() == nil && execution.ctx.Err() == nil && execution.accessValid(request.Scope) {
+			if !execution.allowSource(request.Scope, source, reply.scope) {
+				execution.cancel()
+				return false
+			}
 			execution.status("requesting")
 			return true
 		}
@@ -144,7 +168,14 @@ func (execution *TemplateHTTPExecution) confirm(ctx context.Context, request tem
 }
 
 // RespondTemplateHTTP 只消费当前等待的一次回答；旧确认及重复回答无副作用。
-func RespondTemplateHTTP(id, confirmation, app, sessionID string, approved bool) bool {
+func RespondTemplateHTTP(id, confirmation, app, sessionID string, approved bool, permissionScope ...string) bool {
+	scope := "once"
+	if len(permissionScope) > 0 && permissionScope[0] != "" {
+		scope = permissionScope[0]
+	}
+	if scope != "once" && scope != "template" {
+		return false
+	}
 	templateHTTPExecutions.Lock()
 	execution := templateHTTPExecutions.values[id]
 	templateHTTPExecutions.Unlock()
@@ -161,7 +192,7 @@ func RespondTemplateHTTP(id, confirmation, app, sessionID string, approved bool)
 		return false
 	}
 	select {
-	case execution.answer <- approved:
+	case execution.answer <- templateHTTPAnswer{approved: approved, scope: scope}:
 		execution.confirmation = ""
 		return true
 	default:
@@ -176,6 +207,7 @@ func CancelTemplateHTTP(id, app, sessionID string) {
 	if execution != nil && execution.app == app && execution.sessionID == sessionID {
 		execution.Close()
 	}
+	revokeTemplateHTTPExecutionHandoff(id, app, sessionID)
 }
 
 func (execution *TemplateHTTPExecution) Close() {
@@ -203,6 +235,7 @@ func cancelTemplateHTTPExecutions() {
 	for _, execution := range executions {
 		execution.Close()
 	}
+	clearTemplateHTTPHandoffs()
 }
 
 func templateHTTPAccessValid(ctx context.Context) bool {

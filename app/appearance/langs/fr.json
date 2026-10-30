@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Autoriser cette fois",
+	"templateHTTPAllowAlways": "Toujours autoriser ce modèle à accéder au réseau",
+	"templateHTTPTemplateWarning": "Autoriser cette fois ou toujours permet à ce modèle d’accéder à plusieurs destinations publiques et d’envoyer à des services externes le contenu des notes qu’il est autorisé à lire. L’autorisation persistante peut être révoquée dans la gestion des modèles ou les paramètres des champs de base de données",
+	"templateHTTPAllowed": "Accès réseau autorisé pour le modèle",
+	"templateHTTPNotAllowed": "Aucune autorisation réseau persistante",
+	"templateHTTPRevoke": "Révoquer l’autorisation réseau",
+	"templateHTTPRevokeAll": "Révoquer toutes les autorisations réseau des modèles",
+	"templateHTTPRevokeAllConfirm": "Révoquer les autorisations réseau de tous les modèles de fichiers et de champs de base de données ?",
+	"templateHTTPPermissionUnknown": "État de l’autorisation réseau à confirmer",
 	"aiMemoryServiceTip": "Les réponses de l’IA et les conversations passées sont exclues, et les frais dépendent des tarifs du service",
 	"templateHTTPDenied": "Requête HTTP du modèle refusée",
 	"templateHTTPTimeout": "Délai de la requête HTTP du modèle ou de la confirmation dépassé",

@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Povoliť tentoraz",
+	"templateHTTPAllowAlways": "Vždy povoliť tejto šablóne prístup k sieti",
+	"templateHTTPTemplateWarning": "Jednorazové alebo trvalé povolenie umožní tejto šablóne prístup k viacerým verejným cieľom a odosielanie obsahu poznámok, ktoré smie čítať, externým službám. Trvalé povolenie možno odvolať v správe šablón alebo nastaveniach polí databázy",
+	"templateHTTPAllowed": "Prístup šablóny k sieti povolený",
+	"templateHTTPNotAllowed": "Bez trvalého povolenia prístupu k sieti",
+	"templateHTTPRevoke": "Odvolať povolenie prístupu k sieti",
+	"templateHTTPRevokeAll": "Odvolať všetky sieťové povolenia šablón",
+	"templateHTTPRevokeAllConfirm": "Odvolať prístup k sieti všetkým súborovým šablónam a šablónam polí databázy?",
+	"templateHTTPPermissionUnknown": "Stav sieťového povolenia nie je potvrdený",
 	"aiMemoryServiceTip": "Odpovede AI ani minulé rozhovory nie sú zahrnuté a poplatky sa riadia cenníkom služby",
 	"templateHTTPDenied": "HTTP požiadavka šablóny bola zamietnutá",
 	"templateHTTPTimeout": "Vypršal čas HTTP požiadavky šablóny alebo potvrdenia",

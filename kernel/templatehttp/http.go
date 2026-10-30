@@ -35,9 +35,29 @@ const (
 	maxNetworkDuration   = 30 * time.Second
 	maxRequestDuration   = 10 * time.Second
 	confirmationDuration = time.Minute
+	approvalLifetime     = 30 * time.Second
 )
 
 var networkSlots = make(chan struct{}, 4)
+
+// Approvals 是短期、一次性、仅内存保存的精确请求确认交接，不包含响应数据。
+type Approvals struct {
+	mu           sync.Mutex
+	fingerprints map[[32]byte]struct{}
+	expires      time.Time
+	consumed     bool
+}
+
+// Close 在交接失效或被丢弃时清理指纹。
+func (a *Approvals) Close() {
+	if a == nil {
+		return
+	}
+	a.mu.Lock()
+	clear(a.fingerprints)
+	a.consumed = true
+	a.mu.Unlock()
+}
 
 // Request 只包含可以展示的目标信息，查询参数值及请求头值不会发送给界面。
 type Request struct {
@@ -67,9 +87,17 @@ type Execution struct {
 	mu                     sync.Mutex
 	cache                  map[[32]byte]result
 	onError                func(string)
+	onRequestStarted       func()
+	requestGuard           func(context.Context, string) bool
 	preflightErrors        map[string]struct{}
 	outputBytes            int
 	outputExceeded         bool
+	confirmedRequests      map[[32]byte]struct{}
+	inheritedRequests      map[[32]byte]struct{}
+	inheritedExpires       time.Time
+	approvalsFailed        bool
+	approvalsExported      bool
+	approvalsImported      bool
 	requests, bytes, calls int
 	networkTime            time.Duration
 	transport              http.RoundTripper
@@ -94,6 +122,111 @@ func (e *Execution) FuncsForScope(scope string) template.FuncMap {
 	}}
 }
 func (e *Execution) Err() error { return e.ctx.Err() }
+
+// SetRequestStarted 在真正发送请求时通知执行界面；缓存和等待确认不触发。
+func (e *Execution) SetRequestStarted(handler func()) {
+	e.mu.Lock()
+	e.onRequestStarted = handler
+	e.mu.Unlock()
+}
+func (e *Execution) requestStarted() {
+	e.mu.Lock()
+	handler := e.onRequestStarted
+	e.mu.Unlock()
+	if handler != nil {
+		handler()
+	}
+}
+
+// SetRequestGuard 在缓存读取及各跳出网前复核内核构建的数据范围，拒绝会终止整个执行。
+// guard 不显示确认框，且必须响应 ctx 取消；调用时不持有状态互斥锁。
+func (e *Execution) SetRequestGuard(guard func(context.Context, string) bool) {
+	e.mu.Lock()
+	e.requestGuard = guard
+	e.mu.Unlock()
+}
+
+func (e *Execution) checkRequestGuard(scope string) bool {
+	if e.Err() != nil {
+		return false
+	}
+	e.mu.Lock()
+	guard := e.requestGuard
+	e.mu.Unlock()
+	if guard != nil && !guard(e.ctx, scope) {
+		e.Close()
+		return false
+	}
+	return e.Err() == nil
+}
+
+// ExportApprovals 只交接本次执行中亲自确认且请求成功的目标，失败执行及导入的确认不能再次交接。
+// 调用者必须在模板整体成功且输出仍有效时调用，并负责模板、文档和发起窗口的绑定。
+func (e *Execution) ExportApprovals() *Approvals {
+	select {
+	case e.serial <- struct{}{}:
+		defer func() { <-e.serial }()
+	default:
+		return nil
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.Err() != nil || e.approvalsFailed || e.approvalsExported || e.approvalsImported || len(e.confirmedRequests) == 0 {
+		return nil
+	}
+	e.approvalsExported = true
+	ret := &Approvals{fingerprints: e.confirmedRequests, expires: time.Now().Add(approvalLifetime)}
+	e.confirmedRequests = nil
+	return ret
+}
+
+// ImportApprovals 必须在执行任何 HTTP 函数前调用；交接对象只能被一个可交互执行消费一次。
+func (e *Execution) ImportApprovals(approvals *Approvals) bool {
+	if approvals == nil || e.confirm == nil {
+		return false
+	}
+	select {
+	case e.serial <- struct{}{}:
+		defer func() { <-e.serial }()
+	default:
+		return false
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.Err() != nil || e.calls != 0 || e.approvalsImported {
+		return false
+	}
+	approvals.mu.Lock()
+	defer approvals.mu.Unlock()
+	if approvals.consumed || !time.Now().Before(approvals.expires) {
+		clear(approvals.fingerprints)
+		approvals.consumed = true
+		return false
+	}
+	e.inheritedRequests = approvals.fingerprints
+	e.inheritedExpires = approvals.expires
+	e.approvalsImported = true
+	approvals.fingerprints = nil
+	approvals.consumed = true
+	return true
+}
+
+func (e *Execution) requestFingerprint(scope string, target *url.URL, headers http.Header, previous [32]byte) [32]byte {
+	// 前序指纹绑定完整跳转链，已确认的独立目标不能授权另一条链的新跳转。
+	data, _ := json.Marshal([]any{http.MethodGet, e.scope, scope, target.String(), headers, previous})
+	return sha256.Sum256(data)
+}
+
+func (e *Execution) inheritedApproval(fingerprint [32]byte) bool {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.Err() != nil || !time.Now().Before(e.inheritedExpires) {
+		clear(e.inheritedRequests)
+		return false
+	}
+	_, ok := e.inheritedRequests[fingerprint]
+	return ok
+}
 
 // Writer 在每次输出前检查取消和共享输出预算，不能抢占没有函数调用或输出的纯计算。
 func (e *Execution) Writer(destination io.Writer) io.Writer {
@@ -141,6 +274,7 @@ func (e *Execution) SetErrorHandler(handler func(code string)) {
 
 func (e *Execution) notifyError(code string) {
 	e.mu.Lock()
+	e.approvalsFailed = true
 	handler := e.onError
 	e.mu.Unlock()
 	if handler != nil {
@@ -170,6 +304,8 @@ func (e *Execution) Close() {
 	e.cancel()
 	e.mu.Lock()
 	clear(e.cache)
+	clear(e.confirmedRequests)
+	clear(e.inheritedRequests)
 	e.mu.Unlock()
 	if transport, ok := e.transport.(*http.Transport); ok {
 		transport.CloseIdleConnections()
@@ -188,7 +324,7 @@ func (e *Execution) getScoped(scope, rawURL string, options ...map[string]any) m
 	case <-e.ctx.Done():
 		return result{Error: "execution_ended"}.value()
 	}
-	if e.ctx.Err() != nil {
+	if !e.checkRequestGuard(scope) {
 		return result{Error: "execution_ended"}.value()
 	}
 	e.calls++
@@ -211,7 +347,7 @@ func (e *Execution) getScoped(scope, rawURL string, options ...map[string]any) m
 	cached, exists := e.cache[key]
 	e.mu.Unlock()
 	if exists {
-		if e.ctx.Err() != nil {
+		if !e.checkRequestGuard(scope) {
 			return result{Error: "execution_ended"}.value()
 		}
 		return cached.value()
@@ -236,14 +372,19 @@ func (e *Execution) getScoped(scope, rawURL string, options ...map[string]any) m
 	if !r.OK {
 		e.notifyError(r.Error)
 	}
-	if e.ctx.Err() != nil {
+	if !e.checkRequestGuard(scope) {
 		return result{Error: "execution_ended"}.value()
 	}
 	return r.value()
 }
 
 func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout time.Duration) result {
+	var confirmed [][32]byte
+	var previous [32]byte
 	for redirect := 0; ; redirect++ {
+		if !e.checkRequestGuard(scope) {
+			return result{Error: "execution_ended"}
+		}
 		if e.requests >= maxRequests || e.bytes >= maxTotalBody || e.networkTime >= maxNetworkDuration {
 			return result{Error: "budget_exceeded"}
 		}
@@ -253,18 +394,26 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 			names = append(names, name)
 		}
 		sort.Strings(names)
-		confirmCtx, cancelConfirm := context.WithTimeout(e.ctx, confirmationDuration)
-		approved := e.confirm(confirmCtx, Request{Method: http.MethodGet, URL: displayURL(u), HeaderNames: names, Scope: scope})
-		confirmErr := confirmCtx.Err()
-		cancelConfirm()
-		if e.ctx.Err() != nil {
+		fingerprint := e.requestFingerprint(scope, u, headers, previous)
+		previous = fingerprint
+		if !e.inheritedApproval(fingerprint) {
+			confirmCtx, cancelConfirm := context.WithTimeout(e.ctx, confirmationDuration)
+			approved := e.confirm(confirmCtx, Request{Method: http.MethodGet, URL: displayURL(u), HeaderNames: names, Scope: scope})
+			confirmErr := confirmCtx.Err()
+			cancelConfirm()
+			if e.ctx.Err() != nil {
+				return result{Error: "execution_ended"}
+			}
+			if confirmErr != nil {
+				return result{Error: "confirmation_timeout"}
+			}
+			if !approved {
+				return result{Error: "denied"}
+			}
+			confirmed = append(confirmed, fingerprint)
+		}
+		if !e.checkRequestGuard(scope) {
 			return result{Error: "execution_ended"}
-		}
-		if confirmErr != nil {
-			return result{Error: "confirmation_timeout"}
-		}
-		if !approved {
-			return result{Error: "denied"}
 		}
 		remaining := maxNetworkDuration - e.networkTime
 		if timeout > remaining {
@@ -277,9 +426,15 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 			cancelNetwork()
 			return result{Error: "timeout"}
 		}
+		if !e.checkRequestGuard(scope) {
+			cancelNetwork()
+			<-networkSlots
+			return result{Error: "execution_ended"}
+		}
 		started := time.Now()
 		req, _ := http.NewRequestWithContext(networkCtx, http.MethodGet, u.String(), nil)
 		req.Header = headers.Clone()
+		e.requestStarted()
 		resp, requestErr := e.transport.RoundTrip(req)
 		var body []byte
 		if requestErr == nil {
@@ -295,7 +450,7 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		networkErr := networkCtx.Err()
 		cancelNetwork()
 		<-networkSlots
-		if e.ctx.Err() != nil {
+		if !e.checkRequestGuard(scope) {
 			return result{Error: "execution_ended"}
 		}
 		if requestErr != nil {
@@ -337,6 +492,17 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		r := result{OK: resp.StatusCode >= 200 && resp.StatusCode < 300, Status: resp.StatusCode, Body: string(body)}
 		if !r.OK {
 			r.Error = "http_status"
+		} else {
+			e.mu.Lock()
+			if e.Err() == nil {
+				if e.confirmedRequests == nil {
+					e.confirmedRequests = make(map[[32]byte]struct{})
+				}
+				for _, fingerprint := range confirmed {
+					e.confirmedRequests[fingerprint] = struct{}{}
+				}
+			}
+			e.mu.Unlock()
 		}
 		return r
 	}

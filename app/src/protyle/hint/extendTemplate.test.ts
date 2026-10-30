@@ -9,11 +9,11 @@ const loadInsertion = () => {
     const start = source.indexOf("const templateInsertRequests");
     const end = source.indexOf("export const hintRenderWidget", start);
     assert.ok(start >= 0 && end > start);
-    const pending: Array<{callback: (response: object) => void; signal: AbortSignal}> = [];
+    const pending: Array<{callback: (response: object) => void; signal: AbortSignal; data: {httpConfirmToken?: string}}> = [];
     const inserted: string[] = [];
     const focused: object[] = [];
     const confirms: Array<() => void> = [];
-    const exports: {hintRenderTemplate?: (path: string, protyle: object, node: object) => void} = {};
+    const exports: {hintRenderTemplate?: (path: string, protyle: object, node: object, token?: string) => void} = {};
     const range = {startContainer: {isConnected: true}};
     const protyle = {block: {rootID: "original", parentID: "parent"}, toolbar: {range: {cloneRange: () => range}},
         wysiwyg: {element: {isConnected: true, closest: (): Element => null, querySelectorAll: (): Element[] => []}}};
@@ -27,9 +27,9 @@ const loadInsertion = () => {
             const controller = new AbortController();
             return {signal: controller.signal, cancel: () => controller.abort(), dispose: () => {}};
         },
-        fetchPost: (_url: string, _data: object, callback: (response: object) => void, _headers: object,
+        fetchPost: (_url: string, data: {httpConfirmToken?: string}, callback: (response: object) => void, _headers: object,
                     _failure: unknown, signal: AbortSignal) => {
-            pending.push({callback, signal});
+            pending.push({callback, signal, data});
             return Promise.resolve();
         },
         getContenteditableElement: (): Element => null,
@@ -40,7 +40,7 @@ const loadInsertion = () => {
         confirmDialog: (_title: string, _text: string, confirm: () => void) => confirms.push(confirm),
     });
     return {pending, inserted, focused, confirms, range, protyle, node,
-        start: () => exports.hintRenderTemplate("template", protyle, node),
+        start: (token?: string) => exports.hintRenderTemplate("template", protyle, node, token),
         respond: (index: number, plan = false) => pending[index].callback({data: {content: "rendered",
             ...(plan ? {docTreePlan: {id: "plan"}} : {})}})};
 };
@@ -55,6 +55,17 @@ test("repeated template insertion cancels the obsolete transport and ignores its
     state.respond(1);
     assert.deepEqual(state.inserted, ["rendered"]);
     assert.equal(state.focused[0], state.range);
+});
+
+test("an explicit preview token accompanies a new insertion request, not cached content", () => {
+    const state = loadInsertion();
+    state.start("preview-token");
+    assert.equal(state.pending[0].data.httpConfirmToken, "preview-token");
+    assert.equal(state.inserted.length, 0);
+    state.respond(0);
+    assert.deepEqual(state.inserted, ["rendered"]);
+    state.start();
+    assert.equal(state.pending[1].data.httpConfirmToken, undefined);
 });
 
 test("navigation and detached source ranges cannot receive delayed template content", () => {

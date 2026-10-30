@@ -18,11 +18,13 @@ import {
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {destroyTabsRender, tabsRender} from "../render/tabsRender";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
-import {guardTemplateHTTPRequest} from "../../template/http";
+import {getTemplateHTTPWindow, guardTemplateHTTPRequest, revokeTemplateHTTPConfirmation} from "../../template/http";
+import {clearTemplateHTTPConfirmation, clearTemplateHTTPConfirmations, retainTemplateHTTPConfirmation, templateHTTPConfirmEpoch} from "../../template/httpConfirmHandoff";
 
 const templatePreviewRequests = new WeakMap<Element, ReturnType<typeof guardTemplateHTTPRequest>>();
 
 export const clearTemplatePreview = (element: Element) => {
+    clearTemplateHTTPConfirmation(element);
     templatePreviewRequests.get(element)?.cancel();
     templatePreviewRequests.get(element)?.dispose();
     templatePreviewRequests.delete(element);
@@ -39,9 +41,12 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
     }
     templatePreviewRequests.get(element)?.cancel();
     templatePreviewRequests.get(element)?.dispose();
+    clearTemplateHTTPConfirmations();
+    const confirmationEpoch = templateHTTPConfirmEpoch();
+    const confirmationOwner = getTemplateHTTPWindow();
     const request = guardTemplateHTTPRequest(() => element.isConnected && !element.closest(".fn__none"));
     templatePreviewRequests.set(element, request);
-    fetchSyncPost("/api/template/render", {
+    return fetchSyncPost("/api/template/render", {
         id: parentId,
         path: pathString,
         mode: "preview",
@@ -50,6 +55,9 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
     }, undefined, true, request.signal).then((response) => {
         // 切换模板或关闭预览后，忽略先前请求的返回结果。
         if (templatePreviewRequests.get(element) !== request || !element.isConnected) {
+            if (response.code === 0) {
+                revokeTemplateHTTPConfirmation(response.data?.httpConfirmToken, confirmationOwner);
+            }
             return;
         }
         clearTemplatePreview(element);
@@ -63,6 +71,10 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
                 window.siyuan.languages.newSubDoc));
         }
         tabsRender(element.firstElementChild, {label: window.siyuan.languages.tabItem});
+        if (confirmationOwner) {
+            retainTemplateHTTPConfirmation(element, pathString, parentId, response.data.httpConfirmToken,
+                confirmationEpoch, () => revokeTemplateHTTPConfirmation(response.data.httpConfirmToken, confirmationOwner));
+        }
     }).catch(() => {
         if (templatePreviewRequests.get(element) === request) {
             clearTemplatePreview(element);

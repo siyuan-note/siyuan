@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -543,4 +544,482 @@ func TestPreflightFailuresNotifyOncePerCodeWithoutNetwork(t *testing.T) {
 	if e.Err() != nil {
 		t.Fatal(e.Err())
 	}
+}
+
+func previewApprovals(t *testing.T, scope, target string, options ...map[string]any) *Approvals {
+	t.Helper()
+	e := New(context.Background(), scope, func(context.Context, Request) bool { return true })
+	defer e.Close()
+	e.transport = transportFunc(func(*http.Request) (*http.Response, error) { return response(200, "preview"), nil })
+	if e.Get(target, options...)["ok"] != true {
+		t.Fatal("preview failed")
+	}
+	a := e.ExportApprovals()
+	if a == nil {
+		t.Fatal("missing approvals")
+	}
+	if e.ExportApprovals() != nil {
+		t.Fatal("approvals exported twice")
+	}
+	return a
+}
+
+func TestApprovalHandoffFetchesFreshResponseWithoutReconfirmation(t *testing.T) {
+	options := map[string]any{"headers": map[string]any{"Authorization": "secret"}, "timeout": 1}
+	a := previewApprovals(t, "box", "https://example.com?key=secret", options)
+	defer a.Close()
+	confirmations, requests := 0, 0
+	e := New(context.Background(), "box", func(context.Context, Request) bool { confirmations++; return true })
+	defer e.Close()
+	e.transport = transportFunc(func(*http.Request) (*http.Response, error) { requests++; return response(200, "fresh insertion"), nil })
+	if !e.ImportApprovals(a) {
+		t.Fatal("handoff rejected")
+	}
+	options["timeout"] = 2
+	r := e.Get("https://example.com?key=secret", options)
+	if r["body"] != "fresh insertion" || confirmations != 0 || requests != 1 {
+		t.Fatal(r, confirmations, requests)
+	}
+	if e.ExportApprovals() != nil {
+		t.Fatal("inherited authorization exported again")
+	}
+	other := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	defer other.Close()
+	if other.ImportApprovals(a) {
+		t.Fatal("handoff consumed twice")
+	}
+}
+
+func TestApprovalHandoffRequiresExactURLHeadersAndScopes(t *testing.T) {
+	for _, change := range []string{"query", "headers", "root-scope", "actual-scope"} {
+		t.Run(change, func(t *testing.T) {
+			options := map[string]any{"headers": map[string]any{"Authorization": "secret"}}
+			a := previewApprovals(t, "box", "https://example.com?key=secret", options)
+			defer a.Close()
+			scope, actualScope, target := "box", "box", "https://example.com?key=secret"
+			switch change {
+			case "query":
+				target = "https://example.com?key=different"
+			case "headers":
+				options["headers"] = map[string]any{"Authorization": "changed"}
+			case "root-scope":
+				scope = "other-box"
+			case "actual-scope":
+				actualScope = "related-box"
+			}
+			confirmations := 0
+			e := New(context.Background(), scope, func(context.Context, Request) bool { confirmations++; return false })
+			defer e.Close()
+			if !e.ImportApprovals(a) {
+				t.Fatal("handoff rejected before matching")
+			}
+			r := e.getScoped(actualScope, target, options)
+			if r["error"] != "denied" || confirmations != 1 {
+				t.Fatal(r, confirmations)
+			}
+		})
+	}
+}
+
+func TestApprovalHandoffChecksEveryRedirect(t *testing.T) {
+	preview := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	preview.transport = transportFunc(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Path == "/start" {
+			r := response(302, "")
+			r.Header.Set("Location", "/approved")
+			return r, nil
+		}
+		return response(200, "preview"), nil
+	})
+	if preview.Get("https://example.com/start")["ok"] != true {
+		t.Fatal("preview failed")
+	}
+	a := preview.ExportApprovals()
+	preview.Close()
+	defer a.Close()
+	confirmations, requests := 0, 0
+	insertion := New(context.Background(), "box", func(_ context.Context, request Request) bool {
+		confirmations++
+		if request.URL != "https://example.com/new-target" {
+			t.Error(request.URL)
+		}
+		return false
+	})
+	defer insertion.Close()
+	if !insertion.ImportApprovals(a) {
+		t.Fatal("handoff rejected")
+	}
+	insertion.transport = transportFunc(func(*http.Request) (*http.Response, error) {
+		requests++
+		r := response(302, "")
+		r.Header.Set("Location", "/new-target")
+		return r, nil
+	})
+	if insertion.Get("https://example.com/start")["error"] != "denied" || confirmations != 1 || requests != 1 {
+		t.Fatal(confirmations, requests)
+	}
+}
+
+func TestFailedOrCanceledPreviewCannotExportApprovals(t *testing.T) {
+	for _, failure := range []string{"network", "http-status", "denied", "invalid-target", "canceled"} {
+		t.Run(failure, func(t *testing.T) {
+			allow := true
+			e := New(context.Background(), "box", func(context.Context, Request) bool { return allow })
+			defer e.Close()
+			e.transport = transportFunc(func(*http.Request) (*http.Response, error) { return response(200, "ok"), nil })
+			e.Get("https://example.com/success")
+			switch failure {
+			case "network":
+				e.transport = transportFunc(func(*http.Request) (*http.Response, error) { return nil, errors.New("offline") })
+			case "http-status":
+				e.transport = transportFunc(func(*http.Request) (*http.Response, error) { return response(500, "failed"), nil })
+			case "denied":
+				allow = false
+			case "invalid-target":
+				e.Get("http://127.0.0.1")
+			case "canceled":
+				e.Close()
+			}
+			e.Get("https://example.com/failure")
+			if e.ExportApprovals() != nil {
+				t.Fatal("failed preview exported approvals")
+			}
+		})
+	}
+}
+
+func TestApprovalHandoffExpiryAndCancellation(t *testing.T) {
+	for _, state := range []string{"expired-before-import", "expired-after-import", "closed", "canceled-execution"} {
+		t.Run(state, func(t *testing.T) {
+			a := previewApprovals(t, "box", "https://example.com")
+			defer a.Close()
+			confirmations := 0
+			e := New(context.Background(), "box", func(context.Context, Request) bool { confirmations++; return false })
+			defer e.Close()
+			switch state {
+			case "expired-before-import":
+				a.expires = time.Now().Add(-time.Second)
+			case "closed":
+				a.Close()
+			case "canceled-execution":
+				e.Close()
+			}
+			imported := e.ImportApprovals(a)
+			if state == "expired-after-import" {
+				if !imported {
+					t.Fatal("fresh handoff rejected")
+				}
+				e.inheritedExpires = time.Now().Add(-time.Second)
+			} else if imported {
+				t.Fatal("invalid handoff accepted")
+			}
+			r := e.Get("https://example.com")
+			if state == "canceled-execution" {
+				if r["error"] != "execution_ended" || confirmations != 0 {
+					t.Fatal(r, confirmations)
+				}
+			} else if r["error"] != "denied" || confirmations != 1 {
+				t.Fatal(r, confirmations)
+			}
+		})
+	}
+}
+
+func TestOrdinaryExecutionStillConfirmsWithoutHandoff(t *testing.T) {
+	a := previewApprovals(t, "box", "https://example.com")
+	defer a.Close()
+	confirmations := 0
+	e := New(context.Background(), "box", func(context.Context, Request) bool { confirmations++; return false })
+	defer e.Close()
+	if e.Get("https://example.com")["error"] != "denied" || confirmations != 1 {
+		t.Fatal("ordinary execution inherited approval")
+	}
+	if e.ImportApprovals(a) {
+		t.Fatal("approval imported after execution started")
+	}
+	background := New(context.Background(), "box", nil)
+	defer background.Close()
+	if background.ImportApprovals(a) {
+		t.Fatal("noninteractive execution inherited approval")
+	}
+}
+
+func TestApprovalHandoffConcurrentConsumptionIsSingleUse(t *testing.T) {
+	a := previewApprovals(t, "box", "https://example.com")
+	defer a.Close()
+	var accepted atomic.Int32
+	var wg sync.WaitGroup
+	for i := 0; i < 12; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			e := New(context.Background(), "box", func(context.Context, Request) bool { return false })
+			defer e.Close()
+			if e.ImportApprovals(a) {
+				accepted.Add(1)
+			}
+		}()
+	}
+	wg.Wait()
+	if accepted.Load() != 1 {
+		t.Fatal(accepted.Load())
+	}
+}
+
+func TestFailedRedirectChainDoesNotExportApproval(t *testing.T) {
+	e := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	defer e.Close()
+	e.transport = transportFunc(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Path == "/start" {
+			r := response(302, "")
+			r.Header.Set("Location", "/failed")
+			return r, nil
+		}
+		return response(500, "failed"), nil
+	})
+	e.Get("https://example.com/start")
+	if e.ExportApprovals() != nil {
+		t.Fatal("failed redirect chain granted approval")
+	}
+}
+
+func TestApprovalHandoffReusesExactRedirectChainButNotBudgets(t *testing.T) {
+	chain := transportFunc(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Path == "/start" {
+			r := response(302, "")
+			r.Header.Set("Location", "https://other.example.com/end")
+			return r, nil
+		}
+		if req.Header.Get("Authorization") != "" {
+			t.Error("cross-origin credential leaked")
+		}
+		return response(200, "fresh"), nil
+	})
+	options := map[string]any{"headers": map[string]any{"Authorization": "secret"}}
+	preview := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	preview.transport = chain
+	preview.Get("https://example.com/start", options)
+	a := preview.ExportApprovals()
+	preview.Close()
+	defer a.Close()
+	confirmations := 0
+	insertion := New(context.Background(), "box", func(context.Context, Request) bool { confirmations++; return false })
+	defer insertion.Close()
+	insertion.transport = chain
+	if !insertion.ImportApprovals(a) {
+		t.Fatal("handoff rejected")
+	}
+	if insertion.Get("https://example.com/start", options)["body"] != "fresh" || confirmations != 0 || insertion.requests != 2 {
+		t.Fatal(confirmations, insertion.requests)
+	}
+	insertion.requests = maxRequests
+	options["timeout"] = 1
+	if insertion.Get("https://example.com/start", options)["error"] != "budget_exceeded" || insertion.Err() == nil {
+		t.Fatal("inherited approval bypassed request budget")
+	}
+}
+
+func TestApprovalHandoffCannotMixPreviouslyApprovedRedirectChains(t *testing.T) {
+	for _, sharedMiddle := range []bool{false, true} {
+		t.Run(strconv.FormatBool(sharedMiddle), func(t *testing.T) {
+			preview := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+			root := ""
+			preview.transport = transportFunc(func(req *http.Request) (*http.Response, error) {
+				path := req.URL.Path
+				if path == "/a" || path == "/c" {
+					root = path
+				}
+				location := ""
+				switch {
+				case sharedMiddle && (path == "/a" || path == "/c"):
+					location = "/middle"
+				case path == "/a" || path == "/middle" && root == "/a":
+					location = "/b"
+				case path == "/c" || path == "/middle" && root == "/c":
+					location = "/d"
+				}
+				if location != "" {
+					r := response(302, "")
+					r.Header.Set("Location", location)
+					return r, nil
+				}
+				return response(200, "preview"), nil
+			})
+			for _, path := range []string{"/a", "/c", "/d"} {
+				if preview.Get("https://example.com" + path)["ok"] != true {
+					t.Fatal("preview failed", path)
+				}
+			}
+			a := preview.ExportApprovals()
+			preview.Close()
+			defer a.Close()
+			confirmations, requests := 0, 0
+			insertion := New(context.Background(), "box", func(_ context.Context, request Request) bool {
+				confirmations++
+				if request.URL != "https://example.com/d" {
+					t.Error("unexpected confirmation", request.URL)
+				}
+				return false
+			})
+			defer insertion.Close()
+			if !insertion.ImportApprovals(a) {
+				t.Fatal("handoff rejected")
+			}
+			insertion.transport = transportFunc(func(req *http.Request) (*http.Response, error) {
+				requests++
+				location := "/d"
+				if sharedMiddle && req.URL.Path == "/a" {
+					location = "/middle"
+				}
+				r := response(302, "")
+				r.Header.Set("Location", location)
+				return r, nil
+			})
+			r := insertion.Get("https://example.com/a")
+			wantRequests := 1
+			if sharedMiddle {
+				wantRequests = 2
+			}
+			if r["error"] != "denied" || confirmations != 1 || requests != wantRequests {
+				t.Fatal(r, confirmations, requests)
+			}
+		})
+	}
+}
+
+func TestRequestGuardRejectsCachedResultsAfterRevocation(t *testing.T) {
+	e := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	defer e.Close()
+	allowed := true
+	requests, checks := 0, 0
+	e.SetRequestGuard(func(ctx context.Context, scope string) bool {
+		checks++
+		if ctx != e.ctx || scope != "box" {
+			t.Fatal("wrong source guard context", scope)
+		}
+		return allowed
+	})
+	e.transport = transportFunc(func(*http.Request) (*http.Response, error) { requests++; return response(200, "private"), nil })
+	if e.Get("https://example.com")["body"] != "private" {
+		t.Fatal("first request failed")
+	}
+	previousChecks := checks
+	if e.Get("https://example.com")["body"] != "private" || checks <= previousChecks {
+		t.Fatal("cache bypassed guard")
+	}
+	allowed = false
+	r := e.Get("https://example.com")
+	if r["error"] != "execution_ended" || r["body"] != "" || e.Err() == nil || requests != 1 || len(e.cache) != 0 {
+		t.Fatal(r, requests)
+	}
+}
+
+func TestRequestGuardChecksInheritedApprovalAfterImport(t *testing.T) {
+	a := previewApprovals(t, "box", "https://example.com")
+	defer a.Close()
+	confirmations := 0
+	e := New(context.Background(), "box", func(context.Context, Request) bool { confirmations++; return true })
+	defer e.Close()
+	if !e.ImportApprovals(a) {
+		t.Fatal("handoff rejected")
+	}
+	e.SetRequestGuard(func(context.Context, string) bool { return false })
+	e.transport = transportFunc(func(*http.Request) (*http.Response, error) {
+		t.Fatal("revoked inherited request sent")
+		return nil, nil
+	})
+	if e.Get("https://example.com")["error"] != "execution_ended" || confirmations != 0 || e.Err() == nil {
+		t.Fatal("handoff bypassed guard")
+	}
+}
+
+func TestRequestGuardRechecksAfterConfirmationAndOnRedirect(t *testing.T) {
+	for _, stage := range []string{"confirmation", "redirect-confirmation"} {
+		t.Run(stage, func(t *testing.T) {
+			allowed := true
+			confirmations, requests := 0, 0
+			e := New(context.Background(), "box", func(context.Context, Request) bool {
+				confirmations++
+				if stage == "confirmation" || confirmations == 2 {
+					allowed = false
+				}
+				return true
+			})
+			defer e.Close()
+			e.SetRequestGuard(func(context.Context, string) bool { return allowed })
+			e.transport = transportFunc(func(*http.Request) (*http.Response, error) {
+				requests++
+				r := response(302, "")
+				r.Header.Set("Location", "/next")
+				return r, nil
+			})
+			r := e.Get("https://example.com")
+			wantRequests := 0
+			if stage == "redirect-confirmation" {
+				wantRequests = 1
+			}
+			if r["error"] != "execution_ended" || requests != wantRequests || e.Err() == nil {
+				t.Fatal(r, requests)
+			}
+		})
+	}
+}
+
+func TestRequestGuardDiscardsResponseAndUsesActualScope(t *testing.T) {
+	allowed := true
+	e := New(context.Background(), "root-box", func(context.Context, Request) bool { return true })
+	defer e.Close()
+	e.SetRequestGuard(func(_ context.Context, scope string) bool {
+		if scope != "related-box\x00database" {
+			t.Fatal("guard received root instead of actual scope", scope)
+		}
+		return allowed
+	})
+	e.transport = transportFunc(func(*http.Request) (*http.Response, error) {
+		allowed = false
+		return response(200, "stale private data"), nil
+	})
+	get := e.FuncsForScope("related-box\x00database")["httpGet"].(func(string, ...map[string]any) (map[string]any, error))
+	r, err := get("https://example.com")
+	if err == nil || r != nil || e.ExportApprovals() != nil {
+		t.Fatal("revocation allowed fallback or old data", r, err)
+	}
+}
+
+func TestRequestGuardMayCloseExecutionWithoutDeadlock(t *testing.T) {
+	e := New(context.Background(), "box", func(context.Context, Request) bool { return true })
+	defer e.Close()
+	e.SetRequestGuard(func(context.Context, string) bool { e.Close(); return true })
+	if e.Get("https://example.com")["error"] != "execution_ended" {
+		t.Fatal("guard cancellation ignored")
+	}
+}
+
+func TestRequestStartedOnlyForActualNetworkIncludingInheritedApproval(t *testing.T) {
+	preview := New(context.Background(), "scope", func(context.Context, Request) bool { return true })
+	defer preview.Close()
+	preview.transport = transportFunc(func(*http.Request) (*http.Response, error) { return response(200, "preview"), nil })
+	started := 0
+	preview.SetRequestStarted(func() { started++ })
+	preview.Get("https://example.com/data")
+	preview.Get("https://example.com/data")
+	if started != 1 {
+		t.Fatalf("cached request notified start: %d", started)
+	}
+	approvals := preview.ExportApprovals()
+	insert := New(context.Background(), "scope", func(context.Context, Request) bool { t.Fatal("inherited request prompted"); return false })
+	defer insert.Close()
+	insert.transport = transportFunc(func(*http.Request) (*http.Response, error) { return response(200, "fresh"), nil })
+	insert.SetRequestStarted(func() { started++ })
+	if !insert.ImportApprovals(approvals) {
+		t.Fatal("could not import approval")
+	}
+	insert.Get("https://example.com/data")
+	if started != 2 {
+		t.Fatalf("inherited actual request did not notify start: %d", started)
+	}
+	denied := New(context.Background(), "scope", func(context.Context, Request) bool { return false })
+	defer denied.Close()
+	denied.SetRequestStarted(func() { t.Fatal("denial notified request start") })
+	denied.Get("https://example.com/data")
 }

@@ -8,14 +8,15 @@ const loadHTTP = () => {
     const requests: Array<{url: string; data: Record<string, unknown>}> = [];
     const messages: unknown[][] = [];
     const hidden: string[] = [];
-    const dialogs: Array<{text: string; approve: () => void; reject: () => void; destroyed: boolean}> = [];
+    const dialogs: Array<{text: string; approve: () => void; reject: () => void; always?: () => void; destroyed: boolean}> = [];
     const timers = new Set<() => void>();
     const listeners = new Map<string, () => void>();
     const owner = {isConnected: true, closest: (): Element => null};
     const siyuan = {isPublish: false, ws: {ws: {url: "ws://localhost/ws?app=app&id=main-session&type=main", readyState: 1}},
-        languages: {templateHTTPConfirm: "HTTP?", templateHTTPWarning: "Warning", templateHTTPWaiting: "Waiting",
+        languages: {templateHTTPConfirm: "HTTP?", templateHTTPWarning: "Warning", templateHTTPTemplateWarning: "Multiple targets", templateHTTPWaiting: "Waiting",
             templateHTTPRequesting: "Requesting", templateHTTPTimeout: "Timed out", templateHTTPFailed: "Failed"}};
     let id = 0;
+    let invalidations = 0;
     const exports: Record<string, (...args: any[]) => any> = {};
     runInNewContext(transpileModule(readFileSync("src/template/http.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
@@ -28,6 +29,7 @@ const loadHTTP = () => {
         require: (name: string) => {
             switch (name) {
                 case "../constants": return {Constants: {SIYUAN_APPID: "app"}};
+                case "./httpConfirmHandoff": return {clearTemplateHTTPConfirmations: () => {invalidations++;}};
                 case "../util/genID": return {genUUID: () => `execution-${++id}`};
                 case "../util/fetchWithAppId": return {fetchWithAppId: async (url: string, init: RequestInit) => {
                     requests.push({url, data: JSON.parse(init.body as string)});
@@ -37,10 +39,11 @@ const loadHTTP = () => {
                     hideMessage: (value: string) => hidden.push(value),
                 };
                 case "../dialog/confirmDialog": return {confirmDialog: (_title: string, text: string,
-                                                                          approve: () => void, reject: () => void) => {
-                    const dialog = {text, approve, reject, destroyed: false};
+                                                                          approve: () => void, reject: () => void, _delete: boolean,
+                                                                          extra?: {callback: () => void}) => {
+                    const dialog = {text, approve, reject, always: extra?.callback, destroyed: false};
                     dialogs.push(dialog);
-                    return {destroy: () => {dialog.destroyed = true; reject();}};
+                    return {element: {querySelector: (): Element => null}, destroy: () => {dialog.destroyed = true; reject();}};
                 }};
                 default: throw new Error(name);
             }
@@ -50,7 +53,8 @@ const loadHTTP = () => {
         exports.beginTemplateHTTPRequest(url, {id: "doc", blockID: "block"}, {custom: "header"}, signal);
     const event = (cmd: string, fields: Record<string, unknown> = {}) =>
         exports.processTemplateHTTPEvent(cmd, {executionID: "execution-1", ...fields});
-    return {exports, begin, event, requests, messages, hidden, dialogs, timers, owner, siyuan, listeners};
+    return {exports, begin, event, requests, messages, hidden, dialogs, timers, owner, siyuan, listeners,
+        invalidations: () => invalidations};
 };
 
 test("template requests bind one execution to the exact main socket", () => {
@@ -89,7 +93,7 @@ test("confirmation is escaped, scoped, and each confirmation can be answered onl
     assert.equal(state.dialogs.length, 1);
     assert.equal(state.requests.length, 1);
     assert.deepEqual(state.requests[0], {url: "/api/template/respondHTTP", data: {
-        executionID: "execution-1", confirmID: "first", approved: true, app: "app", session: "main-session",
+        executionID: "execution-1", confirmID: "first", approved: true, scope: "once", app: "app", session: "main-session",
     }});
     state.event("templateHTTPConfirm", {confirmID: "redirect", url: "https://other.example/"});
     assert.equal(state.dialogs.length, 2);
@@ -193,6 +197,19 @@ test("a completed fetch releases abort listeners and daily notes opt into the sa
     assert.equal(state.requests.length, 0);
 });
 
+test("unused preview grants are revoked with their captured window identity, without replaying rendering", () => {
+    const state = loadHTTP();
+    const owner = state.exports.getTemplateHTTPWindow();
+    assert.equal(owner.app, "app");
+    assert.equal(owner.session, "main-session");
+    state.exports.revokeTemplateHTTPConfirmation("preview-token", owner);
+    assert.deepEqual(state.requests, [{url: "/api/template/cancelHTTP", data: {
+        executionID: "", httpConfirmToken: "preview-token", app: "app", session: "main-session",
+    }}]);
+    state.exports.cancelTemplateHTTPExecutions();
+    assert.equal(state.invalidations(), 1);
+});
+
 test("preview signal abort terminates transport, closes confirmation, and ignores late replies", () => {
     const state = loadHTTP();
     const controller = new AbortController();
@@ -225,3 +242,19 @@ for (const kind of ["disconnect", "pagehide", "owner-removed", "superseded"]) {
         assert.equal(state.requests[0].url, "/api/template/cancelHTTP");
     });
 }
+
+
+test("persistent approval is explicit and only offered for kernel-verified sources", () => {
+    const state = loadHTTP();
+    const request = state.begin();
+    state.event("templateHTTPConfirm", {confirmID: "unknown"});
+    assert.equal(state.dialogs[0].always, undefined);
+    state.event("templateHTTPConfirm", {confirmID: "saved", canPersist: true, sourceLabel: "<saved>"});
+    assert.match(state.dialogs[1].text, /&lt;saved&gt;/);
+    assert.match(state.dialogs[1].text, /Multiple targets/);
+    state.dialogs[1].always();
+    state.dialogs[1].approve();
+    assert.equal(state.requests.filter(item => item.data.confirmID === "saved").length, 1);
+    assert.equal(state.requests.at(-1).data.scope, "template");
+    request.finish();
+});

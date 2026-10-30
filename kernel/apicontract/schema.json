@@ -39641,6 +39641,9 @@
         "docTreePlan": {
           "$ref": "#/$defs/TemplatePlan"
         },
+        "httpConfirmToken": {
+          "type": "string"
+        },
         "path": {
           "type": "string"
         }
@@ -39655,6 +39658,9 @@
       "type": "object",
       "properties": {
         "content": {
+          "type": "string"
+        },
+        "httpConfirmToken": {
           "type": "string"
         },
         "id": {
@@ -57091,6 +57097,9 @@
     "TemplateFileEntry": {
       "type": "object",
       "properties": {
+        "httpPermission": {
+          "type": "boolean"
+        },
         "isDir": {
           "type": "boolean"
         },
@@ -57102,6 +57111,7 @@
         }
       },
       "required": [
+        "httpPermission",
         "isDir",
         "path"
       ],
@@ -57171,6 +57181,9 @@
         "executionID": {
           "type": "string"
         },
+        "httpConfirmToken": {
+          "type": "string"
+        },
         "session": {
           "type": "string"
         }
@@ -57179,6 +57192,45 @@
         "app",
         "executionID",
         "session"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPPermissionData": {
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowed"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPPermissionRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "avID": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "slot": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
       ],
       "additionalProperties": false
     },
@@ -57195,6 +57247,9 @@
           "type": "string"
         },
         "executionID": {
+          "type": "string"
+        },
+        "scope": {
           "type": "string"
         },
         "session": {
@@ -184463,6 +184518,86 @@
               },
               "data": {
                 "$ref": "#/$defs/TemplateDocumentInfo"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/template/httpPermission",
+      "handler": "templateHTTPPermission",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TemplateHTTPPermissionRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TemplateHTTPPermissionData"
               },
               "msg": {
                 "type": "string"

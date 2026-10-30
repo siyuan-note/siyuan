@@ -75,6 +75,7 @@ type templateDocTreePlan struct {
 }
 
 type templateDocTreeCollector struct {
+	httpSources   *templateHTTPSourceSnapshot
 	rootID        string
 	boxID         string
 	rootPath      string

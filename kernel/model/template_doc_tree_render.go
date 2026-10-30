@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
+	"maps"
 	"strings"
 	"text/template"
 	templateparse "text/template/parse"
@@ -50,6 +50,9 @@ func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootT
 		execution = executions[0]
 	}
 	if execution != nil {
+		if collector.httpSources == nil {
+			collector.httpSources = &templateHTTPSourceSnapshot{execution: managedTemplateHTTPExecution(execution), files: map[string][]byte{}}
+		}
 		if execution.Err() != nil {
 			return nil, execution.Err()
 		}
@@ -95,9 +98,21 @@ func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootT
 	if nil != err {
 		return nil, err
 	}
-	content, err := os.ReadFile(childPath)
+	content, err := collector.httpSources.read(childPath)
 	if nil != err {
 		return nil, err
+	}
+	if execution != nil {
+		scope := templateHTTPSourceScope(collector.boxID, childPath, content)
+		if managedTemplateHTTPExecution(execution) != nil {
+			source, sourceErr := collector.httpSources.source(childPath, content)
+			if sourceErr != nil {
+				return nil, sourceErr
+			}
+			scope = registerTemplateHTTPSource(execution, collector.boxID, source)
+		}
+		funcs = maps.Clone(funcs)
+		maps.Copy(funcs, execution.FuncsForScope(scope))
 	}
 	childTemplate := template.New("").Delims(".action{", "}").Funcs(funcs)
 	childTemplate, err = childTemplate.Parse(string(content))

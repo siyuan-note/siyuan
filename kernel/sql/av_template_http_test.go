@@ -134,3 +134,28 @@ func TestAttributeViewHTTPTemplateNilContextKeepsOfflineBehavior(t *testing.T) {
 		}
 	}
 }
+
+func TestAttributeViewHTTPTemplateIdenticalFieldsKeepSeparateSources(t *testing.T) {
+	scopes := []string{}
+	execution := templatehttp.New(context.Background(), "render", func(_ context.Context, request templatehttp.Request) bool {
+		scopes = append(scopes, request.Scope)
+		return false
+	})
+	defer execution.Close()
+	blockKey := av.NewKey("block", "Primary", "", av.KeyTypeBlock)
+	first := av.NewKey("first", "First", "", av.KeyTypeTemplate)
+	second := av.NewKey("second", "Second", "", av.KeyTypeTemplate)
+	first.Template = `.action{(httpGet "https://example.com/data").error}`
+	second.Template = first.Template
+	database := &av.AttributeView{ID: "database", KeyValues: []*av.KeyValues{{Key: blockKey}, {Key: first}, {Key: second}}}
+	table := newTemplateErrorTestTable(blockKey, []*av.Key{first, second})
+	renderContext := NewAttributeViewRenderContext()
+	renderContext.TemplateHTTP = execution
+	renderContext.TemplateHTTPSourceScope = func(owner, avID, keyID, slot, content string) string {
+		return owner + "\x00" + avID + "\x00" + keyID + "\x00" + slot
+	}
+	fillAttributeViewTemplateValues(database, &av.View{ID: "view"}, table, nil, renderContext)
+	if len(scopes) != 2 || scopes[0] == scopes[1] {
+		t.Fatalf("identical source text reused another field closure: %v", scopes)
+	}
+}

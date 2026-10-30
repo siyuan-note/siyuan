@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Permitir esta vez",
+	"templateHTTPAllowAlways": "Permitir siempre que esta plantilla acceda a la red",
+	"templateHTTPTemplateWarning": "Permitir esta vez o siempre autoriza a esta plantilla a acceder a varios destinos públicos y enviar a servicios externos el contenido de notas que tiene permiso para leer. El permiso permanente se puede revocar en la gestión de plantillas o en la configuración de campos de la base de datos",
+	"templateHTTPAllowed": "Acceso a la red permitido para la plantilla",
+	"templateHTTPNotAllowed": "Sin permiso permanente de acceso a la red",
+	"templateHTTPRevoke": "Revocar permiso de acceso a la red",
+	"templateHTTPRevokeAll": "Revocar todos los permisos de red de las plantillas",
+	"templateHTTPRevokeAllConfirm": "¿Revocar los permisos de red de todas las plantillas de archivo y de campos de bases de datos?",
+	"templateHTTPPermissionUnknown": "Estado del permiso de red sin confirmar",
 	"aiMemoryServiceTip": "Se excluyen las respuestas de la IA y las conversaciones anteriores, y los cargos dependen de las tarifas del servicio",
 	"templateHTTPDenied": "Solicitud HTTP de la plantilla denegada",
 	"templateHTTPTimeout": "Se agotó el tiempo de la solicitud HTTP o de su confirmación",

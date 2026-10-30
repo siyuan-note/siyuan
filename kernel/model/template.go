@@ -963,6 +963,19 @@ func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string
 
 func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *string, now *time.Time, httpExecution ...*templatehttp.Execution) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
+	var execution *templatehttp.Execution
+	if len(httpExecution) > 0 {
+		execution = httpExecution[0]
+	}
+	return renderTemplateSourceWithHTTPSource(p, id, mode, content, now, execution, nil)
+}
+
+func renderTemplateSourceWithHTTPSource(p, id string, mode TemplateRenderMode, content *string, now *time.Time,
+	httpRuntime *templatehttp.Execution, sources *templateHTTPSourceSnapshot) (tree *parse.Tree, dom string,
+	summary *TemplateDocTreePlanSummary, err error) {
+	if httpRuntime != nil && sources == nil {
+		sources = &templateHTTPSourceSnapshot{execution: managedTemplateHTTPExecution(httpRuntime), mode: mode, files: map[string][]byte{}}
+	}
 	if TemplateRenderModeContent != mode && TemplateRenderModePreview != mode && TemplateRenderModeEditorInsert != mode {
 		err = fmt.Errorf("unsupported template render mode [%s]", mode)
 		return
@@ -982,12 +995,15 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 	block := sql.BuildBlockFromNode(node, tree)
 	var md []byte
 	if content == nil {
-		md, err = os.ReadFile(p)
+		md, err = sources.read(p)
 		if err != nil {
 			return
 		}
 	} else {
 		md = []byte(*content)
+	}
+	if sources != nil {
+		sources.prepare(p, id, sourceTree.Box, sourceTree.ID, md)
 	}
 
 	dataModel := map[string]string{}
@@ -1010,6 +1026,7 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 		}
 	}
 	collector := &templateDocTreeCollector{
+		httpSources:   sources,
 		rootID:        sourceTree.Root.ID,
 		boxID:         sourceTree.Box,
 		rootPath:      sourceTree.Path,
@@ -1021,17 +1038,22 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
-	var httpRuntime *templatehttp.Execution
-	if len(httpExecution) > 0 {
-		httpRuntime = httpExecution[0]
-	}
 	if httpRuntime != nil {
 		defer func() {
 			if executionErr := httpRuntime.Err(); executionErr != nil {
 				tree, dom, summary, err = nil, "", nil, executionErr
 			}
 		}()
-		for name, function := range httpRuntime.FuncsForScope(sourceTree.Box) {
+		scope := templateHTTPSourceScope(sourceTree.Box, p, md)
+		if managedTemplateHTTPExecution(httpRuntime) != nil {
+			var source *TemplateHTTPSource
+			source, err = sources.source(p, md)
+			if err != nil {
+				return
+			}
+			scope = registerTemplateHTTPSource(httpRuntime, sourceTree.Box, source)
+		}
+		for name, function := range httpRuntime.FuncsForScope(scope) {
 			tplFuncMap[name] = function
 		}
 	}

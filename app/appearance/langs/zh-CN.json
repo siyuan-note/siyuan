@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "本次允许",
+	"templateHTTPAllowAlways": "始终允许此模板联网",
+	"templateHTTPTemplateWarning": "本次允许或始终允许将授权此模板访问多个公网目标，并可将其有权读取的笔记内容发送到外部服务。持久许可可在模板管理或数据库字段配置中撤销",
+	"templateHTTPAllowed": "已允许模板联网",
+	"templateHTTPNotAllowed": "未持久允许联网",
+	"templateHTTPRevoke": "撤销联网许可",
+	"templateHTTPRevokeAll": "撤销全部模板联网许可",
+	"templateHTTPRevokeAllConfirm": "撤销所有文件模板和数据库字段模板的联网许可？",
+	"templateHTTPPermissionUnknown": "联网许可状态待确认",
 	"aiMemoryServiceTip": "不收集 AI 回复、不回扫历史对话，费用按配置的模型服务规则计算",
 	"templateHTTPDenied": "模板 HTTP 请求已被拒绝",
 	"templateHTTPTimeout": "模板 HTTP 请求或确认已超时",

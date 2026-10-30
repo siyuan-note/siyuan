@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "本次允許",
+	"templateHTTPAllowAlways": "一律允許此範本聯網",
+	"templateHTTPTemplateWarning": "本次允許或一律允許將授權此範本存取多個公網目標，並可將其有權讀取的筆記內容傳送到外部服務。持續性許可可在範本管理或資料庫欄位設定中撤銷",
+	"templateHTTPAllowed": "已允許範本聯網",
+	"templateHTTPNotAllowed": "尚未持續允許聯網",
+	"templateHTTPRevoke": "撤銷聯網許可",
+	"templateHTTPRevokeAll": "撤銷所有範本聯網許可",
+	"templateHTTPRevokeAllConfirm": "撤銷所有檔案範本和資料庫欄位範本的聯網許可？",
+	"templateHTTPPermissionUnknown": "聯網許可狀態待確認",
 	"aiMemoryServiceTip": "不收集 AI 回覆、不回溯歷史對話，費用依設定的模型服務規則計算",
 	"templateHTTPDenied": "範本 HTTP 請求已被拒絕",
 	"templateHTTPTimeout": "範本 HTTP 請求或確認已逾時",

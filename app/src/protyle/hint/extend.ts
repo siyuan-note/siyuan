@@ -873,7 +873,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
 
 const templateInsertRequests = new WeakMap<IProtyle, ReturnType<typeof guardTemplateHTTPRequest>>();
 
-export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement: Element) => {
+export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement: Element, httpConfirmToken?: string) => {
     templateInsertRequests.get(protyle)?.cancel();
     templateInsertRequests.get(protyle)?.dispose();
     const rootID = protyle.block.rootID;
@@ -887,7 +887,8 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
     fetchPost("/api/template/render", {
         id: protyle.block.parentID,
         path: value,
-        mode: "editorInsert"
+        mode: "editorInsert",
+        ...(httpConfirmToken ? {httpConfirmToken} : {})
     }, (response) => {
         if (!isCurrent()) {
             return;

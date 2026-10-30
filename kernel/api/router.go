@@ -697,6 +697,7 @@ func registerConvertRoutes(ginServer *gin.Engine) {
 // registerTemplateRoutes 注册本域的契约路由。
 func registerTemplateRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/template/respondHTTP", contractRouteHandlers(apicontract.RespondTemplateHTTP, respondTemplateHTTP)...)
+	ginServer.Handle("POST", "/api/template/httpPermission", contractRouteHandlers(apicontract.TemplateHTTPPermission, templateHTTPPermission)...)
 	ginServer.Handle("POST", "/api/template/cancelHTTP", contractRouteHandlers(apicontract.CancelTemplateHTTP, cancelTemplateHTTP)...)
 	ginServer.Handle("POST", "/api/template/render", contractRouteHandlers(apicontract.RenderTemplate, renderTemplate)...)
 	ginServer.Handle("POST", "/api/template/manage", contractRouteHandlers(apicontract.ManageTemplateFiles, manageTemplateFiles)...)

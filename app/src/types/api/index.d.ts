@@ -1876,9 +1876,9 @@ export type RenderSnapshotAttributeViewRequestInput = { "blockID"?: string | nul
 
 export type RenderSprigRequestInput = { "template": string; };
 
-export type RenderTemplateData = { "content": string; "docTreePlan"?: TemplatePlan; "path": string; };
+export type RenderTemplateData = { "content": string; "docTreePlan"?: TemplatePlan; "httpConfirmToken"?: string; "path": string; };
 
-export type RenderTemplateRequestInput = { "content"?: string; "id": string; "mode"?: string | null; "path": string; "preview"?: boolean | null; };
+export type RenderTemplateRequestInput = { "content"?: string; "httpConfirmToken"?: string; "id": string; "mode"?: string | null; "path": string; "preview"?: boolean | null; };
 
 export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
 
@@ -2608,7 +2608,7 @@ export type TemplateDocumentInfo = { "directory": string; "hasDatabase": boolean
 
 export type TemplateDocumentRequestInput = { "id": string; };
 
-export type TemplateFileEntry = { "isDir": boolean; "isPackage"?: boolean; "path": string; };
+export type TemplateFileEntry = { "httpPermission": boolean; "isDir": boolean; "isPackage"?: boolean; "path": string; };
 
 export type TemplateFileRequestInput = { "action"?: string; "content"?: string; "path"?: string; "revision"?: string; "target"?: string; };
 
@@ -2616,9 +2616,13 @@ export type TemplateFileRevision = { "revision": string; };
 
 export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; "sourceDocID"?: string; };
 
-export type TemplateHTTPCancelRequestInput = { "app": string; "executionID": string; "session": string; };
+export type TemplateHTTPCancelRequestInput = { "app": string; "executionID": string; "httpConfirmToken"?: string; "session": string; };
 
-export type TemplateHTTPReplyRequestInput = { "app": string; "approved": boolean; "confirmID": string; "executionID": string; "session": string; };
+export type TemplateHTTPPermissionData = { "allowed": boolean; };
+
+export type TemplateHTTPPermissionRequestInput = { "action": string; "avID"?: string; "keyID"?: string; "kind"?: string; "path"?: string; "slot"?: string; };
+
+export type TemplateHTTPReplyRequestInput = { "app": string; "approved": boolean; "confirmID": string; "executionID": string; "scope"?: string; "session": string; };
 
 export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
 
@@ -8863,6 +8867,13 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    "/api/template/httpPermission": {
+        request: TemplateHTTPPermissionRequestInput;
+        response: { "code": 0; "data": TemplateHTTPPermissionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     /**
      * 读取模板源码时，可选的 sourceDocID 表示导出模板末尾文档属性中的静态来源 ID。
      * 普通 Markdown、目录或未声明有效 ID 的模板不返回该字段；读取不会执行模板或检查源文档是否仍可访问。
@@ -8876,7 +8887,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 可通过上述执行请求头启用 httpGet 的交互确认；预览与插入各有独立授权。
+     * 可通过上述执行请求头启用 httpGet 的交互确认；短期交接或同来源当前版本的许可可复用确认。
      * HTTP 正文只作为模板数据，后台无窗口调用返回 interaction_required；断开或锁定后丢弃失效结果。
      */
     "/api/template/render": {
@@ -8896,7 +8907,8 @@ export interface APIPOSTRoutes {
     /**
      * HTTP 模板执行由 X-Siyuan-Template-Execution、X-Siyuan-Template-App、X-Siyuan-Template-Session 绑定。
      * 执行 ID 为 16～128 字符的本次唯一标识，窗口必须为在线、已就绪的非发布主连接。
-     * 缺少可交互窗口时 httpGet 返回 interaction_required；授权只作用于本次精确请求。
+     * 缺少可交互窗口时 httpGet 返回 interaction_required；本次许可只作用于当前执行的同来源版本。
+     * 持久许可仅通过有效确认签发，绑定内核识别的模板版本，保存在本地且不随模板同步或内置导出。
      */
     "/api/template/respondHTTP": {
         request: TemplateHTTPReplyRequestInput;

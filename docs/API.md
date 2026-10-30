@@ -1359,7 +1359,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 
 * `/api/template/render`
 
-Without a live interactive window, `httpGet` returns `interaction_required` and performs no network request. Interactive template requests use execution-scoped confirmation; preview approval does not authorize later insertion. Background `renderSprig` calls remain noninteractive.
+Without a live interactive window, `httpGet` returns `interaction_required` and performs no network request. “Allow this time” authorizes the current execution's template version to access multiple public targets, including subsequent requests and redirects, and to send note content it is permitted to read to external services without gaining additional read access. Persistent permission is available only for kernel-identified file or database field template sources and content versions; it applies locally within the current workspace, not just the current target document or unlocked notebook, is not included in built-in export or sync, and can be revoked in template management or database field settings. Referenced child template files do not inherit their parent's permission. Editing, copying, or importing requires confirmation again. Background execution, published pages, and locked notebooks cannot use these permissions to bypass interaction or access checks.
 * Parameters
 
   ```json
@@ -1373,6 +1373,7 @@ Without a live interactive window, `httpGet` returns `interaction_required` and 
     * `id`: The ID of the document where the rendering is called
     * `path`: Template file absolute path
     * `mode`: Optional rendering mode. Currently supports `"preview"` and `"editorInsert"` only. Preview mode produces a document tree plan without writing files; editor-insert mode produces a plan that can be confirmed and applied with the corresponding editor transaction
+    * `httpConfirmToken`: Optional approval token returned by a successful preview; always-allow permission is not required. Pass it with `mode: "editorInsert"` within 30 seconds for one insertion in the same window, with unchanged template source and dependencies, target document/notebook, and actual requests. Only approvals are reused; insertion fetches fresh data. Changed or revoked context, expiry, or an already-used token returns to normal template permission checks. Closing or switching the preview, locking the notebook, or disconnecting invalidates the handoff; `/api/template/cancelHTTP` also accepts the optional `httpConfirmToken` to revoke it. This handoff does not apply to database or daily-note executions
     * When `mode` is omitted, the legacy `preview` Boolean parameter remains supported: `preview: true` is equivalent to `mode: "preview"`; otherwise the template is rendered as ordinary content and `createDocTree` is disabled
 * Return value
 
@@ -1407,6 +1408,7 @@ Without a live interactive window, `httpGet` returns `interaction_required` and 
   }
   ```
 
+    * `httpConfirmToken`: Optional one-time approval token issued after a successful interactive preview; see the request field for its scope and 30-second validity
     * `docTreePlan`: Present when the template declares a child document tree with `createDocTree`
         * `id`: Empty in preview mode, which never writes files. In editor-insert mode, this is a short-lived, one-time plan token; after confirmation, submit it as the top-level `templateDocTreePlanID` field of the corresponding transaction object
         * `count`: Total number of child documents in the plan

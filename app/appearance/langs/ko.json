@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "이번에만 허용",
+	"templateHTTPAllowAlways": "이 템플릿의 네트워크 접근 항상 허용",
+	"templateHTTPTemplateWarning": "이번에만 허용하거나 항상 허용하면 이 템플릿이 여러 공개 대상에 접근하고 읽기 권한이 있는 노트 내용을 외부 서비스에 전송할 수 있습니다. 지속적인 권한은 템플릿 관리 또는 데이터베이스 필드 설정에서 취소할 수 있습니다",
+	"templateHTTPAllowed": "템플릿 네트워크 접근 허용됨",
+	"templateHTTPNotAllowed": "지속적인 네트워크 권한 없음",
+	"templateHTTPRevoke": "네트워크 권한 취소",
+	"templateHTTPRevokeAll": "모든 템플릿의 네트워크 권한 취소",
+	"templateHTTPRevokeAllConfirm": "모든 파일 템플릿과 데이터베이스 필드 템플릿의 네트워크 권한을 취소할까요?",
+	"templateHTTPPermissionUnknown": "네트워크 권한 상태 확인 필요",
 	"aiMemoryServiceTip": "AI 응답과 과거 대화는 제외하며, 비용은 해당 서비스의 요금 체계에 따라 계산됩니다",
 	"templateHTTPDenied": "템플릿 HTTP 요청이 거부되었습니다",
 	"templateHTTPTimeout": "템플릿 HTTP 요청 또는 확인 시간이 초과되었습니다",

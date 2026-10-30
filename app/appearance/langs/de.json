@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Dieses Mal erlauben",
+	"templateHTTPAllowAlways": "Diesem Template den Netzwerkzugriff immer erlauben",
+	"templateHTTPTemplateWarning": "Die einmalige oder dauerhafte Erlaubnis gestattet diesem Template den Zugriff auf mehrere öffentliche Ziele und das Senden von Notizinhalten, die es lesen darf, an externe Dienste. Die dauerhafte Erlaubnis kann in der Template-Verwaltung oder den Datenbankfeldeinstellungen widerrufen werden",
+	"templateHTTPAllowed": "Netzwerkzugriff für Template erlaubt",
+	"templateHTTPNotAllowed": "Keine dauerhafte Netzwerkerlaubnis",
+	"templateHTTPRevoke": "Netzwerkerlaubnis widerrufen",
+	"templateHTTPRevokeAll": "Alle Netzwerkerlaubnisse für Templates widerrufen",
+	"templateHTTPRevokeAllConfirm": "Netzwerkerlaubnisse für alle Datei-Templates und Datenbankfeld-Templates widerrufen?",
+	"templateHTTPPermissionUnknown": "Status der Netzwerkerlaubnis unbekannt",
 	"aiMemoryServiceTip": "KI-Antworten und frühere Gespräche sind ausgeschlossen, die Kosten richten sich nach den Preisen des Dienstes",
 	"templateHTTPDenied": "HTTP-Anfrage der Vorlage wurde abgelehnt",
 	"templateHTTPTimeout": "Zeitüberschreitung bei HTTP-Anfrage oder Bestätigung der Vorlage",

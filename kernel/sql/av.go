@@ -39,6 +39,7 @@ type GroupViewRenderSource struct {
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
 type AttributeViewRenderContext struct {
 	TemplateHTTP               *templatehttp.Execution
+	TemplateHTTPSourceScope    func(owner, avID, keyID, slot, content string) string
 	templateErrors             map[string]*attributeViewTemplateRenderError
 	renderingRelationTemplates bool
 	renderingRollupTargets     map[rollupTargetID]bool
@@ -1116,11 +1117,6 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		}
 	}
 	timing.Stage("evaluate")
-	var httpFuncs template.FuncMap
-	if renderContext != nil && renderContext.TemplateHTTP != nil {
-		// 关联数据库共享执行预算，但响应缓存按数据库及所属笔记本隔离。
-		httpFuncs = renderContext.TemplateHTTP.FuncsForScope(av.GetAVBoxID(attrView.ID) + "\x00" + attrView.ID)
-	}
 	for _, templateKey := range templateKeys {
 		if keys != nil && !keys[templateKey.ID] {
 			continue
@@ -1129,6 +1125,22 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		isRenderTemplate := av.KeyTypeTemplate != templateKey.Type
 		if isRenderTemplate {
 			templateContent = templateKey.RenderTemplate
+		}
+		slot := "template"
+		if isRenderTemplate {
+			slot = "renderTemplate"
+		}
+		cacheKey := templateContent
+		var httpFuncs template.FuncMap
+		if renderContext != nil && renderContext.TemplateHTTP != nil {
+			// 字段及模板槽位各自绑定来源，避免相同源码复用其他字段的许可闭包。
+			owner := av.GetAVBoxID(attrView.ID)
+			scope := owner + "\x00" + attrView.ID + "\x00" + templateKey.ID + "\x00" + slot
+			if renderContext.TemplateHTTPSourceScope != nil && strings.Contains(templateContent, "httpGet") {
+				scope = renderContext.TemplateHTTPSourceScope(owner, attrView.ID, templateKey.ID, slot, templateContent)
+			}
+			httpFuncs = renderContext.TemplateHTTP.FuncsForScope(scope)
+			cacheKey = templateKey.ID + "\x00" + slot + "\x00" + templateContent
 		}
 		for _, item := range collection.GetItems() {
 			if renderContext != nil && renderContext.TemplateHTTP != nil && renderContext.TemplateHTTP.Err() != nil {
@@ -1152,18 +1164,18 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 
 			var content string
 			var renderErr error
-			tpl, tried := tplCache[templateContent]
+			tpl, tried := tplCache[cacheKey]
 			if !tried {
 				compiled, compileErr := compileTemplateField(templateContent, httpFuncs)
-				tplCache[templateContent] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
+				tplCache[cacheKey] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
 				if nil != compileErr {
-					compileErrCache[templateContent] = compileErr
+					compileErrCache[cacheKey] = compileErr
 					renderErr = compileErr
 				} else {
 					tpl = compiled
 				}
 			} else if nil == tpl {
-				renderErr = compileErrCache[templateContent] // 复用首次解析的错误
+				renderErr = compileErrCache[cacheKey] // 复用首次解析的错误
 			}
 			if nil == renderErr {
 				var execution *templatehttp.Execution

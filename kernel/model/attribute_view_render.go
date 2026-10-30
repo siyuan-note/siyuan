@@ -665,6 +665,7 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
 	renderContext.TemplateHTTP = options.TemplateHTTP
+	renderContext.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(options.TemplateHTTP)
 	defer func() {
 		if templateErr := renderContext.HTTPTemplateError(); templateErr != nil {
 			viewable, err = nil, templateErr

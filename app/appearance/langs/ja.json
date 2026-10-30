@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "今回のみ許可",
+	"templateHTTPAllowAlways": "このテンプレートの通信を常に許可",
+	"templateHTTPTemplateWarning": "今回のみ許可または常に許可すると、このテンプレートは複数の公開アクセス先に接続し、読み取り権限のあるノートの内容を外部サービスに送信できます。継続的な許可はテンプレート管理またはデータベース属性の設定で取り消せます",
+	"templateHTTPAllowed": "テンプレートの通信を許可済み",
+	"templateHTTPNotAllowed": "継続的な通信許可なし",
+	"templateHTTPRevoke": "通信許可を取り消す",
+	"templateHTTPRevokeAll": "すべてのテンプレートの通信許可を取り消す",
+	"templateHTTPRevokeAllConfirm": "すべてのファイルテンプレートとデータベース属性テンプレートの通信許可を取り消しますか？",
+	"templateHTTPPermissionUnknown": "通信許可の状態を確認できません",
 	"aiMemoryServiceTip": "AI の返信や過去の会話は対象外で、料金はそのサービスの料金体系に従って計算されます",
 	"templateHTTPDenied": "テンプレートの HTTP リクエストは拒否されました",
 	"templateHTTPTimeout": "テンプレートの HTTP リクエストまたは確認がタイムアウトしました",

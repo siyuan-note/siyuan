@@ -1,3 +1,4 @@
+import {templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -58,11 +59,11 @@ export const openTemplateManager = (contextID = "", onClose?: () => void, initia
     let layoutObserver: ResizeObserver;
     const canOpenFolder = !isBrowser() && !mobile && getHostCapabilities().localFileSystem;
     const expandedPaths = new Set<string>();
-    const button = (action: string, label: string) => `<button type="button" class="b3-button b3-button--outline" data-action="${action}">${label}</button>`;
+    const button = (action: string, label: string) => `<button type="button" class="b3-button b3-button--outline${action === "revokeAllHTTP" ? " b3-button--wrap" : ""}" data-action="${action}">${label}</button>`;
     const content = `<div class="template-manager${mobile ? " template-manager--mobile" : ""}">
 <div class="template-manager__actions template-manager__global-actions">
 ${button("new", lang.newTemplate)}${button("mkdir", lang.templateNewFolder)}
-${button("refresh", lang.refresh)}
+${button("refresh", lang.refresh)}${button("revokeAllHTTP", lang.templateHTTPRevokeAll)}
 ${canOpenFolder ? button("open", lang.showInFolder) : ""}
 </div>
 <div class="template-manager__panels">
@@ -194,7 +195,8 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
         dialog.destroy = back;
     }
     const update = () => {
-        pathLabel.textContent = (editing?.path || "") + (dirty() ? " *" : "");
+        pathLabel.textContent = (editing?.path || "") + (dirty() ? " *" : "") +
+            (editing ? " — " + templateHTTPPermissionLabel(dirty() ? undefined : editing.httpPermission) : "");
         pathLabel.classList.toggle("fn__none", !editing);
         source.disabled = !editing;
         source.readOnly = busy;
@@ -285,6 +287,12 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             name.textContent = entry.name;
             element.append(name);
             element.title = entry.path;
+            if (!entry.isDir) {
+                const permission = document.createElement("span");
+                permission.className = "ft__on-surface";
+                permission.textContent = templateHTTPPermissionLabel(entry.httpPermission);
+                element.append(permission);
+            }
             element.addEventListener("click", () => {
                 if (busy || closed) {
                     return;
@@ -522,6 +530,17 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             }
         });
     };
+    const refreshPermissions = async () => {
+        const response = await api({action: "list"});
+        if (!response || !Array.isArray(response.data) || closed) {
+            return;
+        }
+        const permissions = new Map(response.data.map(entry => [entry.path, entry.httpPermission]));
+        entries.forEach(entry => {entry.httpPermission = permissions.get(entry.path);});
+        if (editing) editing.httpPermission = permissions.get(editing.path);
+        renderList();
+        update();
+    };
     const openEntryMenu = (entry: TemplateEntry, anchor: HTMLElement, event?: MouseEvent) => {
         toggleMenu({
             target: anchor,
@@ -565,6 +584,15 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                     };
                     if (target.sourceDocID && !entry.isDir) {
                         add("source", lang.templateOpenSourceDoc, "iconFile");
+                    }
+                    if (!entry.isDir) {
+                        menu.append(new MenuItem({
+                            id: "revokeHTTP", label: lang.templateHTTPRevoke, icon: "iconClose",
+                            click: () => {void run(async () => {
+                                await templateHTTPPermission("revoke", {kind: "file", path: entry.path});
+                                await refreshPermissions();
+                            });},
+                        }).element);
                     }
                     add("rename", lang.rename, "iconEdit");
                     add("move", lang.move, "iconMove");
@@ -641,7 +669,14 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
         if (!action || busy || closed || (target as HTMLButtonElement).disabled) {
             return;
         }
-        if (action === "save") {
+        if (action === "revokeAllHTTP") {
+            confirmDialog(lang.templateHTTPRevokeAll, lang.templateHTTPRevokeAllConfirm, () => {
+                void run(async () => {
+                    await templateHTTPPermission("revokeAll");
+                    await refreshPermissions();
+                });
+            });
+        } else if (action === "save") {
             void run(async () => {
                 const content = useCRLF ? source.value.replace(/\n/g, "\r\n") : source.value;
                 const response = await api({action: "write", path: editing.path, content, revision: editingRevision});
@@ -660,6 +695,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                         }
                     }
                 }
+                await refreshPermissions();
             });
         } else if (action === "open") {
             /// #if !MOBILE
@@ -667,7 +703,8 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             openBy(root, "app");
             /// #endif
         } else if (action === "preview") {
-            previewTemplate(previewPath, preview, context.value, source.value);
+            void previewTemplate(previewPath, preview, context.value, dirty() ? source.value : undefined)
+                ?.then(() => {if (!closed) void run(refreshPermissions);});
         } else if (action === "source") {
             openSourceDocument(sourceDocID);
         } else {

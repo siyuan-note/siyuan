@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Izinkan kali ini",
+	"templateHTTPAllowAlways": "Selalu izinkan templat ini mengakses jaringan",
+	"templateHTTPTemplateWarning": "Mengizinkan kali ini atau selalu memberi templat ini akses ke beberapa tujuan publik dan izin mengirim isi catatan yang boleh dibacanya ke layanan eksternal. Izin persisten dapat dicabut di pengelolaan templat atau pengaturan kolom basis data",
+	"templateHTTPAllowed": "Akses jaringan templat diizinkan",
+	"templateHTTPNotAllowed": "Tidak ada izin jaringan persisten",
+	"templateHTTPRevoke": "Cabut izin jaringan",
+	"templateHTTPRevokeAll": "Cabut semua izin jaringan templat",
+	"templateHTTPRevokeAllConfirm": "Cabut izin jaringan untuk semua templat berkas dan templat kolom basis data?",
+	"templateHTTPPermissionUnknown": "Status izin jaringan belum dikonfirmasi",
 	"aiMemoryServiceTip": "Balasan AI dan percakapan sebelumnya tidak disertakan, dan biaya mengikuti tarif layanan tersebut",
 	"templateHTTPDenied": "Permintaan HTTP templat ditolak",
 	"templateHTTPTimeout": "Permintaan HTTP templat atau konfirmasi kehabisan waktu",

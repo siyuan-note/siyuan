@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Zezwól tym razem",
+	"templateHTTPAllowAlways": "Zawsze zezwalaj temu szablonowi na dostęp do sieci",
+	"templateHTTPTemplateWarning": "Zezwolenie jednorazowe lub stałe umożliwia temu szablonowi dostęp do wielu publicznych adresów i wysyłanie do usług zewnętrznych treści notatek, które ma prawo odczytać. Stałe uprawnienie można cofnąć w zarządzaniu szablonami lub ustawieniach pól bazy danych",
+	"templateHTTPAllowed": "Dostęp szablonu do sieci dozwolony",
+	"templateHTTPNotAllowed": "Brak stałego uprawnienia do sieci",
+	"templateHTTPRevoke": "Cofnij uprawnienie do sieci",
+	"templateHTTPRevokeAll": "Cofnij wszystkie uprawnienia szablonów do sieci",
+	"templateHTTPRevokeAllConfirm": "Cofnąć uprawnienia do sieci wszystkim szablonom plików i pól bazy danych?",
+	"templateHTTPPermissionUnknown": "Stan uprawnienia do sieci niepotwierdzony",
 	"aiMemoryServiceTip": "Odpowiedzi AI i wcześniejsze rozmowy są pomijane, a opłaty są naliczane według cennika usługi",
 	"templateHTTPDenied": "Żądanie HTTP szablonu zostało odrzucone",
 	"templateHTTPTimeout": "Upłynął czas żądania HTTP szablonu lub potwierdzenia",

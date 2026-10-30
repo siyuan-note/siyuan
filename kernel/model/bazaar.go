@@ -539,6 +539,11 @@ func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
+	if pkgType == "templates" {
+		if err = InvalidateTemplateHTTPFilePath(installPath); err != nil {
+			return
+		}
+	}
 	options := bazaar.PackageInstallOptions{Context: ctx}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
@@ -725,6 +730,11 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 	if result.Updated && !overwrite {
 		return result, ErrLocalBazaarPackageExists
 	}
+	if pkgType == "templates" {
+		if err = InvalidateTemplateHTTPFilePath(installPath); err != nil {
+			return result, err
+		}
+	}
 	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision, Context: ctx, Recheck: check}
 	installed, err := bazaar.InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, pkg.Name, result.Updated, installOptions)
 	if installed != nil {
@@ -801,6 +811,11 @@ func UninstallPackage(pkgType, packageName string) error {
 			IncSync()
 		}
 	}()
+	if pkgType == "templates" {
+		if err = InvalidateTemplateHTTPFilePath(installPath); err != nil {
+			return err
+		}
+	}
 	err = bazaar.UninstallPackage(installPath)
 	if err != nil {
 		return fmt.Errorf(Conf.Language(47), err.Error())

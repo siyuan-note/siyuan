@@ -11,6 +11,10 @@ import {applySettingTask} from "../config/setting/taskBlocker";
 import {notifyOCRChanged} from "../config/ocrRuntime";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "closeBox" || response.cmd === "removeBox") {
+        const {clearTemplateHTTPConfirmations}: typeof import("../template/httpConfirmHandoff") = require("../template/httpConfirmHandoff");
+        clearTemplateHTTPConfirmations();
+    }
     if (response.cmd === "templateHTTPConfirm" || response.cmd === "templateHTTPStatus") {
         const {processTemplateHTTPEvent}: typeof import("../template/http") = require("../template/http");
         processTemplateHTTPEvent(response.cmd, response.data);

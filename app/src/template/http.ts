@@ -3,6 +3,7 @@ import {genUUID} from "../util/genID";
 import {fetchWithAppId} from "../util/fetchWithAppId";
 import type {Dialog} from "../dialog";
 import type {TemplateHTTPCancelRequestInput, TemplateHTTPReplyRequestInput} from "../types/api";
+import {clearTemplateHTTPConfirmations} from "./httpConfirmHandoff";
 
 interface HTTPExecution {
     id: string;
@@ -43,7 +44,23 @@ const cleanExecutionUI = (execution: HTTPExecution) => {
 };
 
 export const cancelTemplateHTTPExecutions = () => {
+    clearTemplateHTTPConfirmations();
     executions.forEach(execution => execution.controller.abort());
+};
+
+export const getTemplateHTTPWindow = () => {
+    const socket = window.siyuan.ws?.ws;
+    if (!socket || socket.readyState !== WebSocket.OPEN || window.siyuan.isPublish) return undefined;
+    const socketURL = new URL(socket.url);
+    const session = socketURL.searchParams.get("id");
+    if (!session || socketURL.searchParams.get("type") !== "main") return undefined;
+    return {app: Constants.SIYUAN_APPID, session};
+};
+
+export const revokeTemplateHTTPConfirmation = (token: string, owner: {app: string; session: string}) => {
+    if (token && owner) {
+        sendControl("/api/template/cancelHTTP", {executionID: "", httpConfirmToken: token, ...owner});
+    }
 };
 
 export const cancelTemplateHTTPForElement = (element: Element) => {
@@ -157,6 +174,9 @@ interface HTTPEvent {
     headerNames?: string[];
     state?: "waiting" | "requesting" | "done" | "error";
     errorCode?: string;
+    sourceLabel?: string;
+    sourceKind?: string;
+    canPersist?: boolean;
 }
 
 export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
@@ -196,7 +216,7 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
     execution.confirmations.add(data.confirmID);
     closeConfirmation(execution);
     execution.confirmation = data.confirmID;
-    const respond = (approved: boolean) => {
+    const respond = (approved: boolean, scope: "once" | "template" = "once") => {
         if (!execution.isCurrent()) {
             execution.controller.abort();
             return;
@@ -208,13 +228,16 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
         execution.confirmation = undefined;
         execution.dialog = undefined;
         sendControl("/api/template/respondHTTP", {executionID: execution.id, confirmID: data.confirmID,
-            approved, app: execution.app, session: execution.session});
+            approved, scope, app: execution.app, session: execution.session});
     };
     const escape = (value: string) => value.replace(/[&<>"']/g, character =>
         ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"})[character]);
     const {confirmDialog}: typeof import("../dialog/confirmDialog") = require("../dialog/confirmDialog");
     execution.dialog = confirmDialog(lang.templateHTTPConfirm,
-        `${escape(lang.templateHTTPWarning)}<br><br><code>${escape(data.method || "GET")} ${escape(data.url || "")}</code>` +
+        `${escape(lang.templateHTTPTemplateWarning)}<br>${escape(data.sourceLabel || "")}<br><br><code>${escape(data.method || "GET")} ${escape(data.url || "")}</code>` +
         (data.headerNames?.length ? `<br><code>${escape(data.headerNames.join(", "))}</code>` : ""),
-        () => respond(true), () => respond(false));
+        () => respond(true), () => respond(false), false, data.canPersist ? {
+            label: lang.templateHTTPAllowAlways, callback: () => respond(true, "template"),
+        } : undefined, lang.templateHTTPAllowOnce);
+    execution.dialog.element.querySelector("#extraDialogConfirmBtn")?.classList.add("b3-button--wrap");
 };

@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261030031540"
+		"updated": "20261030043635"
 	},
 	"Children": [
 		{
@@ -235,7 +235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20261030031540"
+				"updated": "20261030043635"
 			},
 			"Children": [
 				{
@@ -1888,7 +1888,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261030003500-nv4y9r3",
-				"updated": "20261030031540"
+				"updated": "20261030043635"
 			},
 			"Children": [
 				{
@@ -1962,12 +1962,40 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261030003500-0tzs2wh",
-				"updated": "20261030031540"
+				"updated": "20261030043635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The actual target is shown when the function is called. Confirm to continue without rerunning the template; query parameter and header values are hidden. New targets, different credentials, and redirects require confirmation again, as do preview and insertion separately. Execution status appears at the top right. Closing the window, switching previews, or locking the notebook ends the wait and discards the result. If interactive confirmation is unavailable, the function returns interaction_required without automatically accessing the network."
+					"Data": "When confirmation is needed, the template source and actual target are shown; query parameter and header values are hidden. Choosing “Allow this time” permits the same template version to access multiple public targets during the current execution, including subsequent requests and redirects. The template may send note content it is permitted to read to external services, without gaining additional read access; check the template first. Denial sends no request. Execution status appears at the top right. Closing the window, switching previews, or locking the notebook ends the wait and discards the result. No interactive window, background execution, published pages, and locked notebooks never receive automatic access."
+				}
+			]
+		},
+		{
+			"ID": "20261030042412-2hzxja9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030042412-2hzxja9",
+				"updated": "20261030043305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Saved file templates whose source the kernel can verify, and database field templates, can offer “Always allow this template to access the network”. Permission is stored locally for the template source and content version in the current workspace, not limited to the current target document or unlocked notebook. It is not included in built-in export or sync. Editing, copying, or importing requires confirmation again. Referenced child template files require their own permission and do not inherit the parent's. Template management shows permission status. Use a template's more menu to revoke its permission, or the “Revoke all template network permissions” button at the top to revoke all permissions, including database permissions. Database field template settings also show the status and allow revocation."
+				}
+			]
+		},
+		{
+			"ID": "20261030042412-oloeawr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030042412-oloeawr",
+				"updated": "20261030042412"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Without choosing always allow, one insertion in the same window within 30 seconds of a successful preview can still reuse approvals if the template and its referenced content, target document and notebook, and actual requests are unchanged. Insertion fetches fresh data rather than reusing preview results. Editing, closing or switching the preview, locking the notebook, disconnecting, or expiry invalidates this handoff. This convenience applies only to insertion after a preview, not databases, daily notes, or other executions."
 				}
 			]
 		},

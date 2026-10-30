@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Allow this time",
+	"templateHTTPAllowAlways": "Always allow this template to access the network",
+	"templateHTTPTemplateWarning": "Allowing this time or always lets this template access multiple public targets and send note content it is permitted to read to external services. Persistent permission can be revoked in template management or database field settings",
+	"templateHTTPAllowed": "Template network access allowed",
+	"templateHTTPNotAllowed": "No persistent network permission",
+	"templateHTTPRevoke": "Revoke network permission",
+	"templateHTTPRevokeAll": "Revoke all template network permissions",
+	"templateHTTPRevokeAllConfirm": "Revoke network permissions for all file templates and database field templates?",
+	"templateHTTPPermissionUnknown": "Network permission status unknown",
 	"aiMemoryServiceTip": "AI replies and past conversations are excluded, and charges follow the configured model service’s pricing",
 	"templateHTTPDenied": "Template HTTP request was denied",
 	"templateHTTPTimeout": "Template HTTP request or confirmation timed out",

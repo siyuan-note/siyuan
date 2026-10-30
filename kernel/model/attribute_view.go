@@ -7764,6 +7764,9 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 		if keyValues.Key.ID != operation.ID || keyValues.Key.Type != colType {
 			continue
 		}
+		if err = InvalidateTemplateHTTPDatabase(av.GetAVBoxID(operation.AvID), operation.AvID, operation.ID); err != nil {
+			return
+		}
 		if av.KeyTypeTemplate == colType {
 			keyValues.Key.Template = templateContent
 		} else {

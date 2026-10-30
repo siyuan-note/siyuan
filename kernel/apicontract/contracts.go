@@ -701,8 +701,10 @@ var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", Authent
 
 // HTTP 模板执行由 X-Siyuan-Template-Execution、X-Siyuan-Template-App、X-Siyuan-Template-Session 绑定。
 // 执行 ID 为 16～128 字符的本次唯一标识，窗口必须为在线、已就绪的非发布主连接。
-// 缺少可交互窗口时 httpGet 返回 interaction_required；授权只作用于本次精确请求。
+// 缺少可交互窗口时 httpGet 返回 interaction_required；本次许可只作用于当前执行的同来源版本。
+// 持久许可仅通过有效确认签发，绑定内核识别的模板版本，保存在本地且不随模板同步或内置导出。
 var RespondTemplateHTTP = define[TemplateHTTPReplyRequest, Null]("respondTemplateHTTP", "/api/template/respondHTTP", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var TemplateHTTPPermission = define[TemplateHTTPPermissionRequest, TemplateHTTPPermissionData]("templateHTTPPermission", "/api/template/httpPermission", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var CancelTemplateHTTP = define[TemplateHTTPCancelRequest, Null]("cancelTemplateHTTP", "/api/template/cancelHTTP", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -711,7 +713,7 @@ var GetDocSaveAsTemplateInfo = define[TemplateDocumentRequest, TemplateDocumentI
 
 var DocSaveAsTemplate = define[SaveTemplateRequest, Null]("docSaveAsTemplate", "/api/template/docSaveAsTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
-// RenderTemplate 可通过上述执行请求头启用 httpGet 的交互确认；预览与插入各有独立授权。
+// RenderTemplate 可通过上述执行请求头启用 httpGet 的交互确认；短期交接或同来源当前版本的许可可复用确认。
 // HTTP 正文只作为模板数据，后台无窗口调用返回 interaction_required；断开或锁定后丢弃失效结果。
 var RenderTemplate = define[RenderTemplateRequest, RenderTemplateData]("renderTemplate", "/api/template/render", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 

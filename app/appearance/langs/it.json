@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Consenti questa volta",
+	"templateHTTPAllowAlways": "Consenti sempre a questo modello di accedere alla rete",
+	"templateHTTPTemplateWarning": "Consentire questa volta o sempre autorizza questo modello ad accedere a più destinazioni pubbliche e a inviare a servizi esterni il contenuto delle note che ha il permesso di leggere. L’autorizzazione persistente può essere revocata nella gestione dei modelli o nelle impostazioni dei campi del database",
+	"templateHTTPAllowed": "Accesso alla rete consentito per il modello",
+	"templateHTTPNotAllowed": "Nessuna autorizzazione di rete persistente",
+	"templateHTTPRevoke": "Revoca autorizzazione di rete",
+	"templateHTTPRevokeAll": "Revoca tutte le autorizzazioni di rete dei modelli",
+	"templateHTTPRevokeAllConfirm": "Revocare le autorizzazioni di rete per tutti i modelli di file e di campi del database?",
+	"templateHTTPPermissionUnknown": "Stato dell’autorizzazione di rete da confermare",
 	"aiMemoryServiceTip": "Le risposte dell’IA e le conversazioni passate sono escluse, e i costi seguono le tariffe del servizio",
 	"templateHTTPDenied": "Richiesta HTTP del modello rifiutata",
 	"templateHTTPTimeout": "Tempo scaduto per la richiesta HTTP del modello o la conferma",

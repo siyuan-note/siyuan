@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Permitir desta vez",
+	"templateHTTPAllowAlways": "Sempre permitir que este modelo acesse a rede",
+	"templateHTTPTemplateWarning": "Permitir desta vez ou sempre autoriza este modelo a acessar vários destinos públicos e enviar a serviços externos o conteúdo das notas que ele tem permissão para ler. A permissão persistente pode ser revogada no gerenciamento de modelos ou nas configurações dos campos do banco de dados",
+	"templateHTTPAllowed": "Acesso à rede permitido para o modelo",
+	"templateHTTPNotAllowed": "Sem permissão persistente de rede",
+	"templateHTTPRevoke": "Revogar permissão de rede",
+	"templateHTTPRevokeAll": "Revogar todas as permissões de rede dos modelos",
+	"templateHTTPRevokeAllConfirm": "Revogar as permissões de rede de todos os modelos de arquivo e de campos de banco de dados?",
+	"templateHTTPPermissionUnknown": "Estado da permissão de rede não confirmado",
 	"aiMemoryServiceTip": "As respostas da IA e as conversas anteriores são excluídas, e as cobranças seguem os preços desse serviço",
 	"templateHTTPDenied": "Solicitação HTTP do modelo negada",
 	"templateHTTPTimeout": "A solicitação HTTP do modelo ou a confirmação expirou",

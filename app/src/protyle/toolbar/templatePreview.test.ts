@@ -7,10 +7,12 @@ import * as ts from "typescript";
 import {withFetchTimeout} from "../../util/fetchTimeout";
 import {trackSettingRequest} from "../../config/setting/pending";
 import {trackEditorSaveRequest} from "../util/editorSave";
+import * as handoff from "../../template/httpConfirmHandoff";
 
 const loadPreview = () => {
     const requests: Array<{resolve: (response: Response) => void, reject: (error: Error) => void, signal?: AbortSignal}> = [];
     const messages: string[] = [];
+    const revoked: string[] = [];
     let destroyed = 0;
     const loadModule = (path: string, dependencies: Record<string, unknown>) => {
         const exports: Record<string, any> = {};
@@ -40,7 +42,11 @@ const loadPreview = () => {
     });
     const previewModule = loadModule("util.ts", {
         "../../util/fetch": fetchModule,
-        "../../template/http": {guardTemplateHTTPRequest: () => {
+        "../../template/httpConfirmHandoff": handoff,
+        "../../template/http": {
+            getTemplateHTTPWindow: () => ({app: "app", session: "session"}),
+            revokeTemplateHTTPConfirmation: (token: string) => {if (token) revoked.push(token);},
+            guardTemplateHTTPRequest: () => {
             const controller = new AbortController();
             return {signal: controller.signal, cancel: () => controller.abort(), dispose: () => {}};
         }},
@@ -55,14 +61,15 @@ const loadPreview = () => {
             return this.innerHTML ? {} : null;
         },
     };
-    const respond = async (index: number, code = 0, content = "current template") => {
+    const respond = async (index: number, code = 0, content = "current template", httpConfirmToken?: string) => {
         requests[index].resolve(new Response(JSON.stringify({
-            code, msg: code ? "template parse failed" : "", data: code ? null : {content},
+            code, msg: code ? "template parse failed" : "", data: code ? null : {content, httpConfirmToken},
         }), {headers: {"Content-Type": "application/json"}}));
         await new Promise(resolve => setImmediate(resolve));
     };
     return {
-        element, requests, messages, respond,
+        element, requests, messages, respond, revoked,
+        take: () => handoff.takeTemplateHTTPConfirmation(element as unknown as Element, "template", "parent"),
         preview: () => previewModule.previewTemplate("template", element, "parent"),
         clear: () => previewModule.clearTemplatePreview(element),
         destroyed: () => destroyed,
@@ -111,4 +118,28 @@ it("does not restore a preview after it has been closed", async () => {
     assert.equal(fixture.requests[0].signal.aborted, true);
     await fixture.respond(0);
     assert.equal(fixture.element.innerHTML, "");
+});
+
+it("successful previews hand off confirmation once while ordinary close revokes it", async () => {
+    const fixture = loadPreview();
+    fixture.preview();
+    await fixture.respond(0, 0, "snapshot", "approved-token");
+    assert.equal(fixture.take(), "approved-token");
+    assert.equal(fixture.take(), undefined);
+    fixture.clear();
+    assert.deepEqual(fixture.revoked, []);
+    fixture.preview();
+    await fixture.respond(1, 0, "new snapshot", "unused-token");
+    fixture.clear();
+    assert.deepEqual(fixture.revoked, ["unused-token"]);
+});
+
+it("starting another preview invalidates the completed preview's confirmation", async () => {
+    const fixture = loadPreview();
+    fixture.preview();
+    await fixture.respond(0, 0, "snapshot", "old-token");
+    fixture.preview();
+    assert.equal(fixture.take(), undefined);
+    assert.deepEqual(fixture.revoked, ["old-token"]);
+    await fixture.respond(1);
 });

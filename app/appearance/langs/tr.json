@@ -1,4 +1,13 @@
 {
+	"templateHTTPAllowOnce": "Bu sefer izin ver",
+	"templateHTTPAllowAlways": "Bu şablonun ağ erişimine her zaman izin ver",
+	"templateHTTPTemplateWarning": "Bu sefer veya her zaman izin vermek, bu şablonun birden fazla genel hedefe erişmesine ve okuma yetkisi olan notların içeriğini harici hizmetlere göndermesine izin verir. Kalıcı izin, şablon yönetiminden veya veritabanı alanı ayarlarından iptal edilebilir",
+	"templateHTTPAllowed": "Şablonun ağ erişimine izin verildi",
+	"templateHTTPNotAllowed": "Kalıcı ağ izni yok",
+	"templateHTTPRevoke": "Ağ iznini iptal et",
+	"templateHTTPRevokeAll": "Tüm şablonların ağ izinlerini iptal et",
+	"templateHTTPRevokeAllConfirm": "Tüm dosya şablonlarının ve veritabanı alanı şablonlarının ağ izinleri iptal edilsin mi?",
+	"templateHTTPPermissionUnknown": "Ağ izni durumu doğrulanmadı",
 	"aiMemoryServiceTip": "Yapay zekâ yanıtları ve geçmiş konuşmalar kapsam dışıdır, ücretler hizmetin fiyatlandırmasına göre hesaplanır",
 	"templateHTTPDenied": "Şablonun HTTP isteği reddedildi",
 	"templateHTTPTimeout": "Şablonun HTTP isteği veya onayı zaman aşımına uğradı",

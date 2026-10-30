@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "利用可能な記憶は ${count} 件",
+	"aiMemoryCountUnavailable": "現在、記憶の総数を取得できません",
+	"aiMemoryTaskNoNewUsable": "利用可能な記憶は追加されませんでした",
 	"aiMemoryTaskSavedCount": "保存済みレコード：${count}",
 	"aiMemoryTaskSaved": "保存済みレコード",
 	"aiMemoryTaskNotSaved": "レコードは保存されませんでした",

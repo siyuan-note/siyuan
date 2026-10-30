@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "Liczba dostępnych wspomnień: ${count}",
+	"aiMemoryCountUnavailable": "Łączna liczba wspomnień jest tymczasowo niedostępna",
+	"aiMemoryTaskNoNewUsable": "Nie dodano nowych dostępnych wspomnień",
 	"aiMemoryTaskSavedCount": "Zapisane rekordy: ${count}",
 	"aiMemoryTaskSaved": "Zapisane rekordy",
 	"aiMemoryTaskNotSaved": "Nie zapisano żadnych rekordów",

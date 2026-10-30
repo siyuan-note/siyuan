@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} kullanılabilir anı",
+	"aiMemoryCountUnavailable": "Toplam anı sayısı geçici olarak kullanılamıyor",
+	"aiMemoryTaskNoNewUsable": "Yeni kullanılabilir anı eklenmedi",
 	"aiMemoryTaskSavedCount": "Kaydedilen kayıtlar: ${count}",
 	"aiMemoryTaskSaved": "Kaydedilen kayıtlar",
 	"aiMemoryTaskNotSaved": "Hiçbir kayıt kaydedilmedi",

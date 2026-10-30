@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "已记住 ${count} 条记忆",
+	"aiMemoryCountUnavailable": "暂时无法获取完整记忆数量",
+	"aiMemoryTaskNoNewUsable": "未新增可用记忆",
 	"aiMemoryTaskSavedCount": "已保存的记录：${count}",
 	"aiMemoryTaskSaved": "已保存的记录",
 	"aiMemoryTaskNotSaved": "未保存任何记录",

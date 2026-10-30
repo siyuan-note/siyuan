@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "ความทรงจำที่ใช้ได้ ${count} รายการ",
+	"aiMemoryCountUnavailable": "ยังไม่สามารถเรียกดูจำนวนความทรงจำทั้งหมดได้ในขณะนี้",
+	"aiMemoryTaskNoNewUsable": "ไม่มีการเพิ่มความทรงจำใหม่ที่ใช้ได้",
 	"aiMemoryTaskSavedCount": "ระเบียนที่บันทึกแล้ว: ${count}",
 	"aiMemoryTaskSaved": "ระเบียนที่บันทึกแล้ว",
 	"aiMemoryTaskNotSaved": "ไม่มีระเบียนที่บันทึก",

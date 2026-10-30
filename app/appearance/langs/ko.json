@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "사용 가능한 기억 ${count}개",
+	"aiMemoryCountUnavailable": "현재 전체 기억 수를 가져올 수 없습니다",
+	"aiMemoryTaskNoNewUsable": "사용 가능한 새 기억이 추가되지 않았습니다",
 	"aiMemoryTaskSavedCount": "저장된 기록: ${count}",
 	"aiMemoryTaskSaved": "저장된 기록",
 	"aiMemoryTaskNotSaved": "저장된 기록이 없습니다",

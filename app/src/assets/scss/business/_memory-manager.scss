@@ -24,80 +24,23 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    input { min-width: 100px; }
     .b3-button { min-height: 32px; }
   }
 
-  &__empty {
-    text-align: center;
-    padding: 28px 16px;
-    border: 1px dashed var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
-    p { margin-top: 8px; }
-  }
+  textarea { resize: vertical; min-height: 96px; box-sizing: border-box; max-width: 100%; }
 
-  &__list {
-    max-height: 240px;
-    overflow: auto;
-    &:empty { display: none; }
-  }
-
-  &__record.b3-list-item {
-    display: block;
-    width: 100%;
-    height: auto;
-    min-height: 40px;
-    padding: 8px 12px;
-    border: 0;
-    color: inherit;
-    background: transparent;
-    font: inherit;
-    text-align: start;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    cursor: pointer;
-    &:hover, &:focus-visible { background-color: var(--b3-theme-primary-lightest); }
-  }
-
-  &__detail {
-    border-top: 1px solid var(--b3-border-color);
-    padding-top: 16px;
-  }
-
-  &__detail,
-  &__model {
-    > * + * { margin-top: 12px; }
-  }
-
-  &__field {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 6px;
-  }
-
-  textarea { resize: vertical; min-height: 96px; }
-  input, select, textarea { box-sizing: border-box; max-width: 100%; }
-  summary {
-    list-style: none;
-    &::-webkit-details-marker { display: none; }
-  }
-  details[open] > summary .b3-list-item__arrow { transform: rotate(90deg); }
-
-  &__content {
+  &__content,
+  &__status {
     margin: 0;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     font: inherit;
+    &:empty { display: none; }
   }
 
-  &__evidence {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+  &__status {
     max-height: 160px;
     overflow: auto;
-    font: inherit;
-    &:empty { display: none; }
   }
 }
 

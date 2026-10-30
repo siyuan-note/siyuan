@@ -1,16 +1,7 @@
-// 只接受最新读取结果；失败重试保留同一操作身份，内容改变后才创建新操作。
-export class MemoryEditorState {
-    private generation = 0;
+// 失败重试保留同一操作身份，内容改变后才创建新操作。
+export class MemoryOperationState {
     private operation = "";
     private draft = "";
-
-    nextRead() {
-        return ++this.generation;
-    }
-
-    accepts(generation: number) {
-        return generation === this.generation;
-    }
 
     operationFor(draft: string, create: () => string) {
         if (!this.operation || this.draft !== draft) {

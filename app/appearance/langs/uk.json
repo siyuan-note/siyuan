@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "Доступних спогадів: ${count}",
+	"aiMemoryCountUnavailable": "Загальна кількість спогадів тимчасово недоступна",
+	"aiMemoryTaskNoNewUsable": "Нові доступні спогади не додано",
 	"aiMemoryTaskSavedCount": "Збережені записи: ${count}",
 	"aiMemoryTaskSaved": "Збережені записи",
 	"aiMemoryTaskNotSaved": "Жодного запису не збережено",

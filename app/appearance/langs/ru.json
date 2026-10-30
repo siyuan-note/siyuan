@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "Доступных воспоминаний: ${count}",
+	"aiMemoryCountUnavailable": "Общее количество воспоминаний временно недоступно",
+	"aiMemoryTaskNoNewUsable": "Новые доступные воспоминания не добавлены",
 	"aiMemoryTaskSavedCount": "Сохранённые записи: ${count}",
 	"aiMemoryTaskSaved": "Сохранённые записи",
 	"aiMemoryTaskNotSaved": "Ни одна запись не сохранена",

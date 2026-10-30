@@ -33,6 +33,34 @@ func TestAIMemorySyncCausalHistory(t *testing.T) {
 		}
 	}
 }
+
+func TestAIMemorySyncPreservesProjectionBeforeRemoval(t *testing.T) {
+	dir := t.TempDir()
+	base := filepath.Join(dir, "storage/ai/memos")
+	if err := os.MkdirAll(base, 0700); err != nil {
+		t.Fatal(err)
+	}
+	original := []byte("legacy overview with unique content")
+	if err := os.WriteFile(filepath.Join(base, "USER.md"), original, 0600); err != nil {
+		t.Fatal(err)
+	}
+	plan := &dejavu.CheckoutPlan{Removes: []*entity.File{{Path: memorySyncPrefix + "USER.md"}}}
+	if err := memoryCheckoutPreflight(dir, plan); err != nil {
+		t.Fatal(err)
+	}
+	files, err := os.ReadDir(filepath.Join(base, "legacy-projections"))
+	if err != nil || len(files) != 1 {
+		t.Fatalf("backup: %v %v", files, err)
+	}
+	data, err := os.ReadFile(filepath.Join(base, "legacy-projections", files[0].Name()))
+	if err != nil || string(data) != string(original) {
+		t.Fatalf("original not preserved: %q %v", data, err)
+	}
+	plan.Removes = []*entity.File{{Path: memorySyncPrefix + "legacy-projections/" + files[0].Name()}}
+	if err = memoryCheckoutPreflight(dir, plan); err == nil {
+		t.Fatal("migration backup can be silently deleted by sync")
+	}
+}
 func memorySyncTestRecord() memo.Record {
 	return memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "concise answers", Sources: []memo.Source{{Kind: "manual", ID: "test", Revision: "v1"}}}
 }

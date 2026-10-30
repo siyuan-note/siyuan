@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} bruikbare herinneringen",
+	"aiMemoryCountUnavailable": "Het totale aantal herinneringen is tijdelijk niet beschikbaar",
+	"aiMemoryTaskNoNewUsable": "Er zijn geen nieuwe bruikbare herinneringen toegevoegd",
 	"aiMemoryTaskSavedCount": "Opgeslagen records: ${count}",
 	"aiMemoryTaskSaved": "Opgeslagen records",
 	"aiMemoryTaskNotSaved": "Er zijn geen records opgeslagen",

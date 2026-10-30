@@ -84,7 +84,7 @@ export type AIMemoryListRequestInput = { "limit"?: number; "offset"?: number; "q
 
 export type AIMemoryMaintainRequestInput = { "operationId": string; "sourceIDs"?: Array<string>; "text": string; };
 
-export type AIMemoryOverviewData = { "memory": string; "stale": boolean; "user": string; };
+export type AIMemoryOverviewData = { "count": number; "countComplete": boolean; "memory": string; "stale": boolean; "user": string; };
 
 export type AIMemoryRecord = { "confirmed": string; "content": string; "created": string; "id": string; "kind": string; "reason": string; "revision": string; "scope": string; "sources": Array<AIMemorySource> | null; "state": string; "subject": string; "supersedes": string; "updated": string; "validFrom": string; "validUntil": string; };
 
@@ -3484,6 +3484,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * memory 返回统一 MEMORY.md 只读概览；user 保留为空字符串供旧调用方兼容，stale 表示概览不可用或过期。
+     * count 只统计来源有效且当前可用的正式记忆；仅 countComplete=true 时可作为完整总数展示。
+     */
     "/api/ai/memory/overview": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIMemoryOverviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

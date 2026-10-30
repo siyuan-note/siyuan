@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} من الذكريات القابلة للاستخدام",
+	"aiMemoryCountUnavailable": "العدد الكامل للذكريات غير متاح مؤقتًا",
+	"aiMemoryTaskNoNewUsable": "لم تتم إضافة ذكريات جديدة قابلة للاستخدام",
 	"aiMemoryTaskSavedCount": "السجلات المحفوظة: ${count}",
 	"aiMemoryTaskSaved": "السجلات المحفوظة",
 	"aiMemoryTaskNotSaved": "لم يتم حفظ أي سجلات",

@@ -90,7 +90,12 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 		}
 		relative := strings.TrimPrefix(file.Path, memorySyncPrefix)
 		parts := strings.Split(relative, "/")
-		if (strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/")) && readErr == nil && !bytes.Equal(current, incoming) {
+		if (relative == "USER.md" || relative == "MEMORY.md") && readErr == nil && !bytes.Equal(current, incoming) {
+			if err = store.PreserveProjection(ctx, relative, current); err != nil {
+				return err
+			}
+		}
+		if (strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/") || strings.HasPrefix(relative, "legacy-projections/")) && readErr == nil && !bytes.Equal(current, incoming) {
 			return errors.New("memory safety metadata would be replaced by checkout")
 		}
 		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
@@ -139,6 +144,17 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 			continue
 		}
 		parts := strings.Split(relative, "/")
+		if relative == "USER.md" || relative == "MEMORY.md" {
+			current, readErr := memorySyncRead(dataDir, file.Path)
+			if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
+				return readErr
+			}
+			if readErr == nil {
+				if err := store.PreserveProjection(ctx, relative, current); err != nil {
+					return err
+				}
+			}
+		}
 		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
 			current, err := memorySyncRead(dataDir, file.Path)
 			if errors.Is(err, os.ErrNotExist) {
@@ -152,7 +168,7 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 			}
 		}
 		// 未解决冲突不能通过删除证据自动恢复为事实，保留证据并报告恢复被阻止。
-		if strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/") {
+		if strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/") || strings.HasPrefix(relative, "legacy-projections/") {
 			if _, err := memorySyncRead(dataDir, file.Path); errors.Is(err, os.ErrNotExist) {
 				continue
 			} else if err != nil {

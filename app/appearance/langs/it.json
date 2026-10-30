@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} memorie utilizzabili",
+	"aiMemoryCountUnavailable": "Il numero totale di memorie non è temporaneamente disponibile",
+	"aiMemoryTaskNoNewUsable": "Non sono state aggiunte nuove memorie utilizzabili",
 	"aiMemoryTaskSavedCount": "Record salvati: ${count}",
 	"aiMemoryTaskSaved": "Record salvati",
 	"aiMemoryTaskNotSaved": "Nessun record salvato",

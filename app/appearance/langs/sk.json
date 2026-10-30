@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "Počet použiteľných spomienok: ${count}",
+	"aiMemoryCountUnavailable": "Celkový počet spomienok je dočasne nedostupný",
+	"aiMemoryTaskNoNewUsable": "Neboli pridané žiadne nové použiteľné spomienky",
 	"aiMemoryTaskSavedCount": "Uložené záznamy: ${count}",
 	"aiMemoryTaskSaved": "Uložené záznamy",
 	"aiMemoryTaskNotSaved": "Neboli uložené žiadne záznamy",

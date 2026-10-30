@@ -29,7 +29,7 @@ Users can explicitly ask to remember, correct, or forget information. The system
 | Suspend use | Retain the record but exclude it from subsequent retrieval results and overview injection |
 | Forget | Stop using the content and persist the minimum withdrawal information needed to prevent older versions from becoming active again |
 
-Users should be able to inspect memory content, provenance, scope, validity, and the reason for the latest change, and to correct, disable, or forget records through one management entry point. `USER.md` and `MEMORY.md` are displayed as system-generated, read-only overviews. Corrections must update canonical records rather than create a second source of facts by editing an overview independently.
+The management interface shows an input, the Organize with model action, an overall usable-memory count and processing status, and one read-only `MEMORY.md` overview. It does not expose a record list, individual metadata, search, pagination, refresh or cancel controls. The overview combines user background and preferences with common context; it is not an editable source of facts. The typed record APIs retain inspection, explicit correction, activation, disabling and withdrawal capabilities, including their source, revision and authorization checks.
 
 An explicit current instruction takes precedence over an older preference. For example, a tutorial that requires detailed steps follows that task-specific instruction even if the global preference is concise answers; the task does not thereby rewrite the global preference. A temporary request must not automatically become a global long-term rule.
 
@@ -69,7 +69,7 @@ Cancellation, configuration/workspace changes, revoked source access and source-
 
 No matching memory, incomplete search, inaccessible sources, malformed records, write conflicts, and model service failures must be distinguishable. A failed file search does not mean there is no relevant memory, and failed model generation must not clear existing records. When appropriate, continue the current task and disclose the lack of reliable memory rather than repeatedly interrupting the user to confirm low-value details.
 
-The shared AI settings provide the initial management entry for desktop, browser, and mobile viewing, correction, suspension, and forgetting. Bulk-operation UX and supported external-editor workflows can be refined separately; external file changes must still be validated and must not bypass revision or withdrawal checks.
+The shared AI settings provide this same concise management entry on desktop, browser and mobile. A complete count includes only currently usable active records, not candidates, review items, disabled records or an overview’s bounded selection. An incomplete count is reported as unavailable rather than as zero. Task completion does not by itself mean new usable memory was added. When a task has completed and the complete usable-memory count is zero, report that no new usable memories were added; otherwise, show completion and the overall count without inferring how many memories the task added. The existing acceptance rule remains unchanged: a new model-proposed active record must be supported verbatim by its cited evidence; uncertain or revised proposals are not automatically promoted to active.
 
 ## Data and storage
 
@@ -81,8 +81,10 @@ All paths below are relative to the user's SiYuan workspace, not the source repo
 data/storage/ai/
 ├── AGENTS.md
 └── memos/
-    ├── USER.md
     ├── MEMORY.md
+    ├── legacy-projections/
+    │   ├── USER-<sha256>.md
+    │   └── MEMORY-<sha256>.md
     ├── records/
     │   └── <SiYuanID>.md
     ├── withdrawals/
@@ -96,11 +98,11 @@ data/storage/ai/
 
 `AGENTS.md` is the existing manually maintained instruction file. Memory consolidation must not rewrite it without the user's direction. `memos/` and its memory files are proposed additions. `records/` is the sole canonical source; file names use program-generated SiYuan IDs, which remain stable when titles or content change.
 
-`USER.md` provides a concise overview of relatively stable user background and preferences. `MEMORY.md` provides a small selection of frequently useful background, conventions, and pointers to detailed records. Both are derived from canonical records and bounded by relevance and context budgets, rather than concatenating all memory or serving as a complete catalog. Both persist under `memos/`, participate in normal data synchronization, and can be rebuilt when needed.
+`MEMORY.md` is the single active, system-generated overview of stable user background and preferences, common context, conventions and record references. It is derived from canonical records and bounded by relevance and context budgets, not a concatenation of all memory or a complete inventory. It persists under `memos/`, participates in normal data synchronization, and can be rebuilt when needed. The usable-memory count is computed from eligible records independently of this bounded overview.
 
 Canonical records and overviews reuse existing snapshots and data synchronization, subject to the user's sync settings and ignore rules. The first version has no separate database or persistent retrieval index and does not create `temp/ai/memos/` in advance. If a cache becomes necessary later, that path may contain only rebuildable data; clearing it must not lose memory, corrections, or withdrawal decisions.
 
-Model and reasoning-effort choices belong to AI configuration, not `records/` or either overview. Follow existing configuration persistence and export rules and reuse model references rather than copying provider credentials into memory files. Synchronizing memory files does not mean the receiving device automatically has the same model configuration or service access.
+Model and reasoning-effort choices belong to AI configuration, not `records/` or the overview. Follow existing configuration persistence and export rules and reuse model references rather than copying provider credentials into memory files. Synchronizing memory files does not mean the receiving device automatically has the same model configuration or service access.
 
 ### Canonical records
 
@@ -128,7 +130,7 @@ New withdrawal markers also retain SHA-256 hashes of the forgotten record's oper
 
 Each overview carries the schema and a fingerprint of the complete eligible source set relevant to that overview, including record IDs, semantic content, scope, state, validity, and withdrawal/conflict eligibility. Additions as well as changes and removals invalidate the fingerprint. Provenance-only confirmation may avoid regeneration only if it changes neither meaning nor eligibility. Validate the fingerprint and current access scope before use; a globally generated overview must not leak content outside the caller’s allowed scope. An older overview received through sync must not overwrite canonical records or be accepted solely because its timestamp is newer.
 
-Overview generation uses a verified record snapshot. If relevant records change before the result is saved, discard that stale result and reschedule it. The two overviews may refresh independently; every update need not rewrite both. If an overview is temporarily unavailable, eligible canonical records can be read on demand. Waiting for an overview must not reactivate invalidated content.
+Overview generation uses a verified record snapshot. If relevant records change before the result is saved, discard that stale result and reschedule it. Generate and atomically replace only the unified `MEMORY.md`; a failed generation leaves canonical records intact. If the overview is temporarily unavailable, eligible canonical records can be read on demand. Waiting for an overview must not reactivate invalidated content.
 
 ## Implementation and interfaces
 
@@ -191,13 +193,15 @@ Search can stream through files without keeping them all resident, but still inc
 
 ### Concurrency and security
 
-Updates require the revision read by the caller and an atomic save under a lock or equivalent protection. Stale writes return a conflict while preserving current content and the pending proposal, without forced overwrite. Single-file atomic writes do not guarantee cross-file overview consistency or offline-device consistency; overview version validation and sync conflict handling require separate verification.
+Updates require the revision read by the caller and an atomic save under a lock or equivalent protection. Stale writes return a conflict while preserving current content and the pending proposal, without forced overwrite. Single-file atomic writes do not guarantee offline-device consistency; overview version validation and sync conflict handling require separate verification.
 
 Model output, note quotations, and memory content are data. Current requests and manual instructions retain their existing priority rules. Memory retrieval must not bypass permissions, expand tool access, or accept operational instructions from collected material. Logs and diagnostics should record states, identifiers, and timing rather than complete memory or sensitive source content by default.
 
 Ordinary global Markdown records must not contain plaintext extracted from encrypted notebooks. If the first version lacks memory storage and lifecycle rules that preserve the original encryption boundary, it must exclude those sources and explain the limitation. A notebook being unlocked is not sufficient permission to write its contents into global files. See [Encrypted notebooks](ENCRYPTED-NOTEBOOK.md) for authenticated reads, lock-time cleanup, and recovery requirements.
 
 ## Compatibility and recovery
+
+The unified overview uses projection schema 2. Legacy schema-1 `USER.md` and `MEMORY.md` are migrated without treating their text as canonical records: preserve original bytes in content-addressed `legacy-projections/` backups first, include only content whose fingerprint matches the current eligible records, atomically write the unified `MEMORY.md`, then retire `USER.md`. Stale, malformed or unsupported content is preserved for recovery but is not injected or used to reconstruct facts. A failed or interrupted migration is retriable; old files reintroduced by another device must be revalidated and must not make stale summaries usable again or revive withdrawn memory. Read-only access does not migrate files and reports legacy projections as stale until migration is possible. Migration backups are not an additional active overview and must not be silently removed or overwritten during sync or snapshot recovery.
 
 `data/storage/ai/AGENTS.md` already has independent read, revision, and compatibility migration rules. This feature does not migrate or overwrite it. Compatibility handling for the old `data/ai/AGENTS.md` path follows the existing implementation. Session compaction and conversation history retain their separate lifecycles; deleting a session must not be described as having deleted all memory derived from it.
 
@@ -209,7 +213,7 @@ Memory Markdown needs explicit conflict handling; existing `.sy` conflict-docume
 
 Forgetting must consistently invalidate records, overviews, and retrieval results, accounting for old devices, retries, extraction, and historical restoration. Historical snapshots may still contain previous content: ordinary forgetting is not erasure of all backups. During an in-app snapshot restore, preserve currently known withdrawal markers and reconcile them before exposing restored memory; do not automatically reactivate matching records. Restoring a complete older workspace outside this flow may also remove the newer markers and is outside this guarantee; explain the limitation rather than promising unconditional resurrection prevention.
 
-The first version does not automatically resume model jobs after process restart. For requests identifiable from existing persisted task state, report interruption and offer an explicit retry that revalidates configuration, sources, and operation identity; do not claim to reconstruct unpersisted queued jobs or their status; do not add a persistent job database merely to imply recovery. Cancellation acknowledged before commit prevents that commit; cancellation arriving after a successful write cannot undo it and must report what was saved. Projection refresh failure leaves canonical records intact.
+The manager polls the current task automatically and reloads the overall result when it finishes. Temporary query failures retry the same task with backoff; they never automatically resubmit a paid model request. Closing the manager releases its polling resources without cancelling the background job, which retains the existing three-minute timeout. The first version does not automatically resume model jobs after process restart: an unavailable task permits an explicit retry with configuration, source and operation-identity checks, not a fabricated reconstruction of unpersisted jobs. Cancellation remains a backend lifecycle capability; cancellation acknowledged before commit prevents that commit, while cancellation after a successful write cannot undo it. Projection refresh failure leaves canonical records intact.
 
 Adjustable product choices are bulk operations, external-editor support, and measured scan/context/call budgets. Safe defaults, record semantics, withdrawal retention, and failure behavior above are implementation requirements rather than decisions delegated to the model.
 

@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030025512"
+		"updated": "20261030063122"
 	},
 	"Children": [
 		{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-7kelad9",
-				"updated": "20261029155830"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
@@ -140,12 +140,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-w46deg2",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage and correct records"
+					"Data": "Manage and organize memory"
 				}
 			],
 			"HeadingLevel": 2
@@ -155,12 +155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-mlne86v",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open Manage and enter the facts or preferences to organize or correct, including their applicable conditions, then use Organize with model. Model suggestions may remain Candidate (candidate). Check their subject, scope, conditions and evidence before clicking Enable and confirming. Submit corrections through model organization rather than editing a derived overview."
+					"Data": "Open Manage, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model. The manager shows processing status, the overall usable-memory count and a unified overview. Successfully submitting a task does not mean its content has been remembered."
 				}
 			]
 		},
@@ -169,12 +169,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-4mkva7o",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Search and Refresh in the manager to find records, then click a record to read it in full. Expand Details and sources to inspect the subject, scope, times, sources and evidence. The subject user and scope workspace describe workspace-level user information; do not mistake someone else’s information or a project-specific rule for a global user preference. Record content is read-only, with actions to enable, disable or forget records as needed."
+					"Data": "The count includes only active memories that are currently usable, excluding unconfirmed, disabled, expired or source-invalid records. An incomplete count is shown as unavailable, not as zero. The manager does not display individual records or their internal categories."
 				}
 			]
 		},
@@ -183,12 +183,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-agntqax",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Check the resulting record’s scope and conditions; if it is a candidate, click Enable and confirm. Preserve project restrictions on agreements that apply to only one project; do not rewrite them as preferences for every task."
+					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Read the overall result after processing; “No new usable memories were added” does not mean existing memories were deleted."
 				}
 			]
 		},
@@ -197,12 +197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-2hw0xe9",
-				"updated": "20261029051700"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Disable preserves a record but stops using it. Forget creates a withdrawal marker before removing its content. Old backups may retain the original text; withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
+					"Data": "The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
 				}
 			]
 		},
@@ -211,12 +211,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-eyepamf",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Review candidates and changed sources"
+					"Data": "Sources and reliability"
 				}
 			],
 			"HeadingLevel": 2
@@ -226,12 +226,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-vpy6gbc",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or submit currently verified facts for model organization rather than forcing the old record to become active."
+					"Data": "Only active memories that pass source, scope and validity checks are used. Uncertain proposals are not automatically activated. When a source changes, is deleted or becomes inaccessible, old evidence must not be treated as a current fact. Restore source access or submit currently verified facts for organization; an old overview must not restore invalid content."
 				}
 			]
 		},
@@ -240,7 +240,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-oj02bkz",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
@@ -255,12 +255,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-jksxqku",
-				"updated": "20261030025512"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The manager shows the model organization input by default, processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model shows a configuration prompt and prevents model organization, but you can still inspect existing records and enable them after validation, disable them or forget them."
+					"Data": "Task status updates automatically without a manual refresh. Temporary query failures retry the same task without automatically resubmitting a paid organization request; an unavailable task permits an explicit retry. Closing the manager does not cancel the background job, which remains subject to its timeout. A missing or unavailable model prompts you to configure one first. Existing overviews remain readable, and model failure must not be reported as a successful save."
 				}
 			]
 		},
@@ -330,7 +330,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-nyu2063",
-				"updated": "20261029135500"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
@@ -345,12 +345,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-lmw7mfc",
-				"updated": "20261029135500"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Authoritative records live in data/storage/ai/memos/ within the current workspace, not in ordinary notebook documents. Records sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories. Check the reported issue and review the records."
+					"Data": "Canonical records live in data/storage/ai/memos/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories."
 				}
 			]
 		},
@@ -359,12 +359,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-qf51204",
-				"updated": "20261029051700"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "USER.md and MEMORY.md are read-only derived overviews, not a second editable source of truth. Saved records remain valid when overview generation fails. Conflicts and incomplete searches are reported rather than treated as successful saves or proof that no memory exists."
+					"Data": "MEMORY.md is the single active, read-only derived overview combining user background, preferences and common context, not a separate editable record source. Migration preserves the original legacy USER.md and MEMORY.md text before combining only content that still matches current eligible records. Invalid legacy text is retained only as a recovery backup and is not reused in conversations. Overview generation failure does not roll back saved canonical records."
 				}
 			]
 		},
@@ -373,12 +373,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-n44lj73",
-				"updated": "20261029135500"
+				"updated": "20261030063122"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click Read-only overviews in the manager to read USER.md and MEMORY.md. The former summarizes stable user background and preferences; the latter summarizes common context and record references. Overviews use a selection of verified records, not a complete inventory, and their generation does not resend full source evidence. Return to the authoritative records to find or correct a specific fact."
+					"Data": "The manager displays the unified overview directly. It contains a bounded selection of verified records rather than a complete memory inventory, so its number of text items does not define the overall count. Generating it does not resend full source evidence. To organize or correct content, use the input above rather than editing the overview file directly."
 				}
 			]
 		},

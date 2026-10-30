@@ -1901,6 +1901,9 @@ var AIMemorySave = define[AIMemorySaveRequest, AIMemorySaveData]("saveAIMemory",
 
 // 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。
 var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAIMemory", "/api/ai/memory/forget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// memory 返回统一 MEMORY.md 只读概览；user 保留为空字符串供旧调用方兼容，stale 表示概览不可用或过期。
+// count 只统计来源有效且当前可用的正式记忆；仅 countComplete=true 时可作为完整总数展示。
 var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 

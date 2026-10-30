@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} souvenirs utilisables",
+	"aiMemoryCountUnavailable": "Le nombre total de souvenirs est temporairement indisponible",
+	"aiMemoryTaskNoNewUsable": "Aucun nouveau souvenir utilisable n’a été ajouté",
 	"aiMemoryTaskSavedCount": "Enregistrements sauvegardés : ${count}",
 	"aiMemoryTaskSaved": "Enregistrements sauvegardés",
 	"aiMemoryTaskNotSaved": "Aucun enregistrement sauvegardé",

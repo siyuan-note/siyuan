@@ -1596,6 +1596,12 @@
     "AIMemoryOverviewData": {
       "type": "object",
       "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "countComplete": {
+          "type": "boolean"
+        },
         "memory": {
           "type": "string"
         },
@@ -1607,6 +1613,8 @@
         }
       },
       "required": [
+        "count",
+        "countComplete",
         "memory",
         "stale",
         "user"

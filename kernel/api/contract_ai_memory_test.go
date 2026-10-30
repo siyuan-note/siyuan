@@ -28,6 +28,7 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	engine.POST("/api/ai/memory/get", getAIMemory)
 	engine.POST("/api/ai/memory/list", listAIMemory)
 	engine.POST("/api/ai/memory/forget", forgetAIMemory)
+	engine.POST("/api/ai/memory/overview", overviewAIMemory)
 	call := func(route string, body any, code int) json.RawMessage {
 		t.Helper()
 		data, _ := json.Marshal(body)
@@ -55,6 +56,13 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	if read.Record.Content != q.Content || read.Revision != saved.Revision {
 		t.Fatal("memory roundtrip mismatch")
 	}
+	var overview apicontract.AIMemoryOverviewData
+	if err := json.Unmarshal(call("overview", apicontract.EmptyRequest{}, 0), &overview); err != nil {
+		t.Fatal(err)
+	}
+	if overview.Count != 1 || !overview.CountComplete || overview.User != "" {
+		t.Fatalf("overview lost the usable count or compatibility field: %+v", overview)
+	}
 	q.ID = saved.ID
 	q.Revision = saved.Revision
 	q.OperationID = "manual-2"
@@ -68,6 +76,12 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	json.Unmarshal(call("list", apicontract.AIMemoryListRequest{}, 0), &listed)
 	if len(listed.Records) != 0 {
 		t.Fatal("withdrawn record still listed")
+	}
+	if err := json.Unmarshal(call("overview", apicontract.EmptyRequest{}, 0), &overview); err != nil {
+		t.Fatal(err)
+	}
+	if overview.Count != 0 || !overview.CountComplete || overview.User != "" {
+		t.Fatalf("overview counted withdrawn memory: %+v", overview)
 	}
 	call("save", original, -1)
 	// 撤回标记已生效，但同步残留的目标暂时不能物理删除，响应仍保留成功状态。

@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} ingatan yang dapat digunakan",
+	"aiMemoryCountUnavailable": "Jumlah keseluruhan ingatan untuk sementara tidak tersedia",
+	"aiMemoryTaskNoNewUsable": "Tidak ada ingatan baru yang dapat digunakan yang ditambahkan",
 	"aiMemoryTaskSavedCount": "Catatan tersimpan: ${count}",
 	"aiMemoryTaskSaved": "Catatan tersimpan",
 	"aiMemoryTaskNotSaved": "Tidak ada catatan yang disimpan",

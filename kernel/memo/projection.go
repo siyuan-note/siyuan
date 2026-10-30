@@ -5,9 +5,11 @@
 package memo
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,12 +19,124 @@ type projectionHeader struct {
 }
 
 func projectionName(name string) bool { return name == "USER.md" || name == "MEMORY.md" }
+
+// 迁移备份按原始内容寻址，只用于恢复，不参与概览读取或模型上下文。
+func preserveProjection(root *os.Root, name string, data []byte) error {
+	if !projectionName(name) || len(data) > MaxFileSize {
+		return ErrInvalid
+	}
+	backup, err := subroot(root, "legacy-projections", true)
+	if err != nil {
+		return err
+	}
+	defer backup.Close()
+	file := strings.TrimSuffix(name, ".md") + "-" + revision(data) + ".md"
+	previous, err := readFile(backup, file)
+	if err == nil {
+		if !bytes.Equal(previous, data) {
+			return ErrConflict
+		}
+		return nil
+	}
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return writeFile(backup, file, data)
+}
+
+func (s *Store) PreserveProjection(ctx context.Context, name string, data []byte) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := checkContext(ctx); err != nil {
+		return err
+	}
+	root, err := s.root(true)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	return preserveProjection(root, name, data)
+}
+
+// MigrateProjection 先保存旧文件原文，再原子写入统一概览，最后移除旧入口。
+// 指纹不匹配的原文只保存在备份中，绝不能据此恢复已撤回或失效的记忆。
+func (s *Store) MigrateProjection(ctx context.Context, scopes []string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := checkContext(ctx); err != nil {
+		return err
+	}
+	root, err := s.root(false)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	snapshot, err := s.snapshot(ctx, root, scopes)
+	if err != nil {
+		return err
+	}
+	var parts []string
+	var unified bool
+	var userExists bool
+	for _, name := range []string{"USER.md", "MEMORY.md"} {
+		data, readErr := readFile(root, name)
+		if errors.Is(readErr, os.ErrNotExist) {
+			continue
+		}
+		if readErr != nil {
+			return readErr
+		}
+		if name == "USER.md" {
+			userExists = true
+		}
+		var header projectionHeader
+		body, decodeErr := decode(data, &header)
+		if name == "MEMORY.md" && decodeErr == nil && header.Schema == 2 {
+			unified = true
+			continue
+		}
+		if err = preserveProjection(root, name, data); err != nil {
+			return err
+		}
+		if decodeErr != nil || header.Schema != 1 {
+			return ErrInvalid
+		}
+		if header.Fingerprint == snapshot.Fingerprint {
+			parts = append(parts, body)
+		}
+	}
+	if err = checkContext(ctx); err != nil {
+		return err
+	}
+	if !unified {
+		if len(parts) == 0 {
+			return ErrConflict
+		}
+		data, encodeErr := encode(projectionHeader{2, snapshot.Fingerprint}, strings.Join(parts, "\n\n"))
+		if encodeErr != nil {
+			return encodeErr
+		}
+		if len(data) > MaxFileSize {
+			return ErrInvalid
+		}
+		if err = writeFile(root, "MEMORY.md", data); err != nil {
+			return err
+		}
+	}
+	if userExists {
+		return root.Remove("USER.md")
+	}
+	return nil
+}
 func (s *Store) SaveProjection(ctx context.Context, name, content, fingerprint string, scopes []string) error {
-	if !projectionName(name) {
+	if name != "MEMORY.md" {
 		return ErrInvalid
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if err := checkContext(ctx); err != nil {
+		return err
+	}
 	root, e := s.root(true)
 	if e != nil {
 		return e
@@ -35,17 +149,46 @@ func (s *Store) SaveProjection(ctx context.Context, name, content, fingerprint s
 	if snapshot.Fingerprint != fingerprint {
 		return ErrConflict
 	}
-	data, e := encode(projectionHeader{1, fingerprint}, content)
+	// 写入失败或不支持的旧格式不能被静默覆盖。
+	for _, oldName := range []string{"USER.md", "MEMORY.md"} {
+		previous, readErr := readFile(root, oldName)
+		if errors.Is(readErr, os.ErrNotExist) {
+			continue
+		}
+		if readErr != nil {
+			return readErr
+		}
+		var header projectionHeader
+		_, decodeErr := decode(previous, &header)
+		if decodeErr != nil || (header.Schema != 1 && !(oldName == "MEMORY.md" && header.Schema == 2)) {
+			return ErrInvalid
+		}
+		if header.Schema == 1 {
+			if e = preserveProjection(root, oldName, previous); e != nil {
+				return e
+			}
+		}
+	}
+	data, e := encode(projectionHeader{2, fingerprint}, content)
 	if e != nil {
 		return e
 	}
 	if e = checkContext(ctx); e != nil {
 		return e
 	}
-	return writeFile(root, name, data)
+	if len(data) > MaxFileSize {
+		return ErrInvalid
+	}
+	if e = writeFile(root, name, data); e != nil {
+		return e
+	}
+	if e = root.Remove("USER.md"); e != nil && !errors.Is(e, os.ErrNotExist) {
+		return e
+	}
+	return nil
 }
 func (s *Store) ReadProjection(ctx context.Context, name string, scopes []string) (Projection, error) {
-	if !projectionName(name) {
+	if name != "MEMORY.md" {
 		return Projection{}, ErrInvalid
 	}
 	s.mu.Lock()
@@ -61,7 +204,7 @@ func (s *Store) ReadProjection(ctx context.Context, name string, scopes []string
 	}
 	var header projectionHeader
 	body, e := decode(data, &header)
-	if e != nil || header.Schema != 1 {
+	if e != nil || header.Schema != 2 {
 		return Projection{}, ErrInvalid
 	}
 	snapshot, e := s.snapshot(ctx, root, scopes)

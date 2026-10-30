@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} recuerdos utilizables",
+	"aiMemoryCountUnavailable": "El número total de recuerdos no está disponible temporalmente",
+	"aiMemoryTaskNoNewUsable": "No se añadieron nuevos recuerdos utilizables",
 	"aiMemoryTaskSavedCount": "Registros guardados: ${count}",
 	"aiMemoryTaskSaved": "Registros guardados",
 	"aiMemoryTaskNotSaved": "No se guardó ningún registro",

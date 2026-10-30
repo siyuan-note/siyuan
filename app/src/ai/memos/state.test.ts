@@ -1,14 +1,9 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {MemoryEditorState, memoryModelOptions} from "./state";
+import {MemoryOperationState, memoryModelOptions} from "./state";
 
-test("memory editor ignores stale reads and reuses operation identity after failed save", () => {
-    const state = new MemoryEditorState();
-    const old = state.nextRead();
-    assert.equal(state.accepts(old), true);
-    const current = state.nextRead();
-    assert.equal(state.accepts(old), false);
-    assert.equal(state.accepts(current), true);
+test("memory organization reuses operation identity after failure and renews it after completion", () => {
+    const state = new MemoryOperationState();
     let count = 0;
     const id = () => String(++count);
     assert.equal(state.operationFor("draft", id), "1");

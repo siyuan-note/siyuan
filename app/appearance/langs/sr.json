@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "Број употребљивих сећања: ${count}",
+	"aiMemoryCountUnavailable": "Укупан број сећања тренутно није доступан",
+	"aiMemoryTaskNoNewUsable": "Нису додата нова употребљива сећања",
 	"aiMemoryTaskSavedCount": "Сачувани записи: ${count}",
 	"aiMemoryTaskSaved": "Сачувани записи",
 	"aiMemoryTaskNotSaved": "Ниједан запис није сачуван",

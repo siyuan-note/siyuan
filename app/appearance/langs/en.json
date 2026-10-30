@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} usable memories",
+	"aiMemoryCountUnavailable": "The complete memory count is temporarily unavailable",
+	"aiMemoryTaskNoNewUsable": "No new usable memories were added",
 	"aiMemoryTaskSavedCount": "Saved records: ${count}",
 	"aiMemoryTaskSaved": "Saved records",
 	"aiMemoryTaskNotSaved": "No records were saved",

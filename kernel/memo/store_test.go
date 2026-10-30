@@ -218,13 +218,13 @@ func TestMemoryProjectionInvalidationAndScope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = s.SaveProjection(ctx, "USER.md", "Concise replies", snapshot.Fingerprint, nil); err != nil {
+	if err = s.SaveProjection(ctx, "MEMORY.md", "Concise replies", snapshot.Fingerprint, nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.ReadProjection(ctx, "USER.md", nil); err != nil {
+	if _, err = s.ReadProjection(ctx, "MEMORY.md", nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.ReadProjection(ctx, "USER.md", []string{"other-project"}); !errors.Is(err, ErrConflict) {
+	if _, err = s.ReadProjection(ctx, "MEMORY.md", []string{"other-project"}); !errors.Is(err, ErrConflict) {
 		t.Fatalf("scope leak %v", err)
 	}
 	r := sample()
@@ -233,10 +233,10 @@ func TestMemoryProjectionInvalidationAndScope(t *testing.T) {
 	if _, err = s.Save(ctx, r, "missing", "op2"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.ReadProjection(ctx, "USER.md", nil); !errors.Is(err, ErrConflict) {
+	if _, err = s.ReadProjection(ctx, "MEMORY.md", nil); !errors.Is(err, ErrConflict) {
 		t.Fatalf("new record must invalidate %v", err)
 	}
-	if err = s.SaveProjection(ctx, "USER.md", "stale", snapshot.Fingerprint, nil); !errors.Is(err, ErrConflict) {
+	if err = s.SaveProjection(ctx, "MEMORY.md", "stale", snapshot.Fingerprint, nil); !errors.Is(err, ErrConflict) {
 		t.Fatalf("stale generation committed %v", err)
 	}
 }

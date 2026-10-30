@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} उपयोग योग्य स्मृतियाँ",
+	"aiMemoryCountUnavailable": "स्मृतियों की कुल संख्या अभी उपलब्ध नहीं है",
+	"aiMemoryTaskNoNewUsable": "कोई नई उपयोग योग्य स्मृति नहीं जोड़ी गई",
 	"aiMemoryTaskSavedCount": "सहेजे गए रिकॉर्ड: ${count}",
 	"aiMemoryTaskSaved": "सहेजे गए रिकॉर्ड",
 	"aiMemoryTaskNotSaved": "कोई रिकॉर्ड नहीं सहेजा गया",

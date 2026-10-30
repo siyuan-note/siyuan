@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} זיכרונות זמינים לשימוש",
+	"aiMemoryCountUnavailable": "המספר הכולל של הזיכרונות אינו זמין כרגע",
+	"aiMemoryTaskNoNewUsable": "לא נוספו זיכרונות חדשים זמינים לשימוש",
 	"aiMemoryTaskSavedCount": "רשומות שנשמרו: ${count}",
 	"aiMemoryTaskSaved": "רשומות שנשמרו",
 	"aiMemoryTaskNotSaved": "לא נשמרו רשומות",

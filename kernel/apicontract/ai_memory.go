@@ -76,9 +76,13 @@ type AIMemoryForgetData struct {
 	CleanupPending bool `json:"cleanupPending"`
 }
 type AIMemoryOverviewData struct {
+	// User 保留兼容字段；统一概览通过 Memory 返回。
 	User   string `json:"user"`
 	Memory string `json:"memory"`
 	Stale  bool   `json:"stale"`
+	// Count 仅包含来源有效且当前可用的正式记忆；不完整时不能作为精确总数展示。
+	Count         int  `json:"count"`
+	CountComplete bool `json:"countComplete"`
 }
 type AIMemoryMaintainRequest struct {
 	Text        string   `json:"text"`

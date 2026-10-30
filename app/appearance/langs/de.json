@@ -1,4 +1,7 @@
 {
+	"aiMemoryRememberedCount": "${count} nutzbare Erinnerungen",
+	"aiMemoryCountUnavailable": "Die vollständige Anzahl der Erinnerungen ist vorübergehend nicht verfügbar",
+	"aiMemoryTaskNoNewUsable": "Es wurden keine neuen nutzbaren Erinnerungen hinzugefügt",
 	"aiMemoryTaskSavedCount": "Gespeicherte Einträge: ${count}",
 	"aiMemoryTaskSaved": "Gespeicherte Einträge",
 	"aiMemoryTaskNotSaved": "Keine Einträge gespeichert",

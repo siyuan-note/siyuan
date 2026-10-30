@@ -199,7 +199,7 @@ func TestAIMemoryOverviewRejectsSourceChangedDuringGeneration(t *testing.T) {
 	if err == nil {
 		t.Fatal("obsolete overview committed")
 	}
-	if _, err = aiMemoryStore().ReadProjection(context.Background(), "USER.md", []string{"workspace"}); err == nil {
+	if _, err = aiMemoryStore().ReadProjection(context.Background(), "MEMORY.md", []string{"workspace"}); err == nil {
 		t.Fatal("obsolete overview was persisted")
 	}
 }

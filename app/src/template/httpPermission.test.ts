@@ -10,7 +10,12 @@ const fixture = () => {
     let cleared = 0;
     runInNewContext(transpileModule(readFileSync("src/template/httpPermission.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports, window: {siyuan: {languages: {templateHTTPAllowed: "allowed",
+    }).outputText, {exports, document: {createElement: (tag: string) => {
+        assert.equal(tag, "span");
+        const attributes: Record<string, string> = {};
+        return {className: "", innerHTML: "", attributes,
+            setAttribute: (name: string, value: string) => {attributes[name] = value;}};
+    }}, window: {siyuan: {languages: {templateHTTPAllowed: "allowed",
         templateHTTPNotAllowed: "not allowed", templateHTTPPermissionUnknown: "unknown"}}},
     require: (path: string) => path === "../util/fetch" ? {
         fetchSyncPost: (url: string, data: Record<string, unknown>) => new Promise(resolve => requests.push({url, data, resolve})),
@@ -35,6 +40,23 @@ test("only successful revocation clears preview handoffs, and revokeAll has no f
     state.requests[2].resolve({code: 0, data: {allowed: false}});
     assert.equal(await response, false);
     assert.equal(state.cleared(), 1);
+});
+
+test("file permission indicators use the shared globe and primary color only for allowed templates", () => {
+    const state = fixture();
+    for (const [allowed, label] of [[true, "allowed"], [false, "not allowed"], [undefined, "unknown"]] as const) {
+        const indicator = state.exports.createTemplateHTTPPermissionIndicator(allowed);
+        assert.match(indicator.innerHTML, /xlink:href="#iconGlobe"/);
+        assert.match(indicator.innerHTML, /aria-hidden="true"/);
+        assert.equal(indicator.className.includes("ft__primary"), allowed === true);
+        assert.match(indicator.className, /b3-tooltips b3-tooltips__w/);
+        assert.equal(indicator.attributes["aria-label"], label);
+        assert.equal(indicator.attributes.role, "img");
+        assert.doesNotMatch(indicator.innerHTML, /style=|#[\da-f]{6}\b/i);
+    }
+    assert.equal(state.requests.length, 0);
+    assert.match(readFileSync("src/template/manager.ts", "utf8"),
+        /if \(!entry.isDir\) \{\s*element.append\(createTemplateHTTPPermissionIndicator\(entry.httpPermission\)\);/);
 });
 
 test("AV permission controls reject stale results after editing or menu destruction", async () => {

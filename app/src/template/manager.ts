@@ -1,4 +1,4 @@
-import {templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
+import {createTemplateHTTPPermissionIndicator, templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -288,10 +288,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             element.append(name);
             element.title = entry.path;
             if (!entry.isDir) {
-                const permission = document.createElement("span");
-                permission.className = "ft__on-surface";
-                permission.textContent = templateHTTPPermissionLabel(entry.httpPermission);
-                element.append(permission);
+                element.append(createTemplateHTTPPermissionIndicator(entry.httpPermission));
             }
             element.addEventListener("click", () => {
                 if (busy || closed) {

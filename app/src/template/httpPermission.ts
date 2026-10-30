@@ -21,6 +21,15 @@ export const templateHTTPPermissionLabel = (allowed?: boolean) => allowed === un
     window.siyuan.languages.templateHTTPPermissionUnknown : window.siyuan.languages[
         allowed ? "templateHTTPAllowed" : "templateHTTPNotAllowed"];
 
+export const createTemplateHTTPPermissionIndicator = (allowed?: boolean) => {
+    const indicator = document.createElement("span");
+    indicator.className = `b3-tooltips b3-tooltips__w fn__flex-center${allowed === true ? " ft__primary" : ""}`;
+    indicator.setAttribute("role", "img");
+    indicator.setAttribute("aria-label", templateHTTPPermissionLabel(allowed));
+    indicator.innerHTML = '<svg class="svg" aria-hidden="true"><use xlink:href="#iconGlobe"></use></svg>';
+    return indicator;
+};
+
 export const templateHTTPPermissionHTML = (slot: "template" | "renderTemplate") =>
     `<button class="b3-menu__item" data-http-permission="${slot}">
 <span class="b3-menu__label">${window.siyuan.languages.templateHTTPRevoke}</span>

@@ -6,10 +6,12 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
+import {compile} from "sass";
 
-const browserCases = (sources: string[], lutePath: string) => {
+const browserCases = (sources: string[], lutePath: string, styles: string[]) => {
     const check: typeof assert = require("node:assert/strict");
-    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only"}}});
+    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only",
+        _kernel: {16: "Untitled document"}}}});
     const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
     const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
     const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
@@ -103,21 +105,63 @@ const browserCases = (sources: string[], lutePath: string) => {
     template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("</span>",
         '<span class="katex">Untrusted cache</span></span>')));
     check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
+
+    const Editor = new Function(sources[3] + "\nreturn DocumentTitleEditor;")();
+    const container = document.createElement("div");
+    container.className = "protyle-title";
+    container.innerHTML = '<div class="protyle-title__rich"><div class="protyle-wysiwyg"></div></div>';
+    document.body.appendChild(container);
+    const wysiwyg = container.querySelector<HTMLElement>(".protyle-wysiwyg");
+    const editor = Object.assign(Object.create(Editor.prototype), {fragment: {wysiwyg}, onEditable: () => {}});
+    const style = document.createElement("style");
+    document.head.appendChild(style);
+    for (const css of styles) {
+        style.textContent = css;
+        // Loading, clearing and restoring a title all replace its temporary paragraph.
+        for (const content of ["", "Named title", "", "image", ""]) {
+            wysiwyg.innerHTML = lute.SpinBlockDOM(content === "image" ? lute.Md2BlockDOM("![](assets/p.png)") : paragraph(content));
+            if (content === "image") check.ok(wysiwyg.querySelector("img"), "the native empty-alt image remains in the title");
+            const savedFingerprint = fingerprint(wysiwyg.innerHTML);
+            editor.updateEditable();
+            const editable = editor.editable as HTMLElement;
+            check.equal(editable.dataset.tip, "Untitled document");
+            const placeholder = getComputedStyle(editable, "::after").content;
+            if (content === "") {
+                check.equal(placeholder, '"Untitled document"', "empty titles retain the localized placeholder");
+                editable.contentEditable = "false";
+                check.equal(getComputedStyle(editable, "::after").content, placeholder, "readonly titles retain the placeholder");
+            } else {
+                check.ok(placeholder === "none" || placeholder === "normal",
+                    `text and empty-alt images are not empty titles: ${JSON.stringify({content, placeholder, html: editable.innerHTML})}`);
+            }
+            check.equal(fingerprint(wysiwyg.innerHTML), savedFingerprint, "placeholder decoration cannot dirty the title source");
+            check.ok(!prepare(wysiwyg.innerHTML).includes("data-tip"), "placeholder text is not serialized into title content");
+            const observer = new MutationObserver(() => {});
+            observer.observe(editable, {attributes: true});
+            editor.updateEditable();
+            check.equal(observer.takeRecords().length, 0, "repeated decoration cannot create an observer feedback loop");
+            observer.disconnect();
+        }
+    }
+    container.remove();
+    style.remove();
     return "Document title DOM cases passed";
 };
 
-test("native document title DOM preserves every inline family, format edits and paragraph-only parsing", {
+test("native document title DOM preserves inline content, format edits, paragraph-only parsing and empty placeholders", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts"].map(file =>
+    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
     const script = path.join(temporary, "run.cjs");
+    const styles = ["base", "mobile"].map(entry => compile(path.resolve(__dirname,
+        "../../assets/scss", `${entry}.scss`), {logger: {warn() {}, debug() {}}}).css);
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," +
-        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + ")";
+        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + "," + JSON.stringify(styles) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

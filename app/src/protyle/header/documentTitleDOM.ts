@@ -31,6 +31,7 @@ export const prepareDocumentTitleBlockDOM = (blockDOM: string, id?: string) => {
     paragraph.querySelectorAll("wbr").forEach(element => element.remove());
     paragraph.querySelectorAll(".protyle-attr").forEach(element => element.remove());
     paragraph.removeAttribute("data-document-title");
+    paragraph.querySelector(":scope > [contenteditable]")?.removeAttribute("data-tip");
     return template.innerHTML;
 };
 

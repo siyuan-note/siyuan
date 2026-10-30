@@ -159,6 +159,9 @@ export class DocumentTitleEditor {
             if (!editable.classList.contains("protyle-title__input")) {
                 editable.classList.add("protyle-title__input");
             }
+            if (editable.dataset.tip !== window.siyuan.languages._kernel[16]) {
+                editable.dataset.tip = window.siyuan.languages._kernel[16];
+            }
             this.onEditable(editable);
         }
     }

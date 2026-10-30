@@ -2790,7 +2790,7 @@ func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
-	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	finishDocTreeChange := cache.BeginDocTreeSortMutation()
 	defer finishDocTreeChange()
 	if err := recoverSortConfAppend(confPath); err != nil {
 		return err

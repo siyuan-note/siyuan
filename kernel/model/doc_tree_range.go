@@ -174,7 +174,15 @@ func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQ
 }
 
 func (query *docTreeQuery) childCount(ctx context.Context, p string) (int, error) {
-	entries, err := os.ReadDir(filepath.Join(util.DataDir, query.box.ID, strings.TrimSuffix(p, ".sy")))
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	directory := strings.TrimSuffix(p, ".sy")
+	version, stable := cache.DocTreeSourceVersion(query.box.ID, true)
+	if count, ok := cache.GetDocTreeChildCount(query.key, query.box.ID, directory); stable && ok {
+		return count, nil
+	}
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, query.box.ID, directory))
 	if os.IsNotExist(err) {
 		return 0, nil
 	}
@@ -200,6 +208,9 @@ func (query *docTreeQuery) childCount(ctx context.Context, p string) (int, error
 		if ial[DocHiddenAttr] != "true" {
 			count++
 		}
+	}
+	if stable {
+		cache.PutDocTreeChildCount(query.key, query.box.ID, directory, version, count)
 	}
 	return count, nil
 }

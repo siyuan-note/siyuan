@@ -1071,5 +1071,30 @@ exports.cases = async sources => {
         check.equal(element.querySelector("[data-tree-loading]"), null);
         fixture.destroy();
     }
+    {
+        const fixture = make(3);
+        const {controller, source} = fixture;
+        await controller.toggle("notebook:box", true);
+        await controller.select("notebook:box/d0");
+        const locate = source.locate;
+        let release;
+        let pending = true;
+        source.locate = async request => {
+            if (request.id === "d1" && pending) {
+                pending = false;
+                await new Promise(resolve => { release = resolve; });
+            }
+            return locate(request);
+        };
+        const locating = controller.locate("box", "d1");
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        await controller.reload({notebook: "box"});
+        release();
+        await locating;
+        check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d1"],
+            "background restoration of an older selection cannot cancel active document navigation");
+        check.ok(controller.getMountedElement("notebook:box/d1"));
+        fixture.destroy();
+    }
     return "File tree selection cases passed";
 };

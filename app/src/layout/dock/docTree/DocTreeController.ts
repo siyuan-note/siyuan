@@ -68,7 +68,7 @@ export class DocTreeController {
     private expanding = new Map<string, {item: IDocTreeItem}>();
     private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
         indicatorTimer: number, showIndicator: boolean}>();
-    private navigation: {interaction: number, generation: number, publishing: boolean};
+    private navigation: {interaction: number, generation: number, publishing: boolean, select: boolean};
     private navigationID = 0;
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
     private errors = new Set<string>();
@@ -481,6 +481,8 @@ export class DocTreeController {
 
     public async locate(notebook: string, id: string, options: {select?: boolean, scroll?: boolean, rootKey?: string} = {}, attempt = 0): Promise<HTMLElement> {
         if (this.disposed) { return; }
+        // 后台恢复不能替换主动定位；刷新改变源版本时，主动定位会重试整个路径。
+        if (options.select === false && this.navigation?.select) { return; }
         if (!attempt && options.select !== false) {
             this.interaction++;
             this.operation++;
@@ -495,7 +497,7 @@ export class DocTreeController {
             return;
         }
         const root = parent;
-        const navigation = {interaction, generation, publishing: false};
+        const navigation = {interaction, generation, publishing: false, select: options.select !== false};
         const expansion = {item: root};
         this.navigation = navigation;
         this.expanding.set(root.occurrenceKey, expansion);

@@ -629,7 +629,7 @@ func WriteTreeWithPreflight(tree *parse.Tree, preflight func() error) (size uint
 			return fmt.Errorf("%w: %s", util.ErrFileChanged, filePath)
 		}
 		if current == nil {
-			finishDocTreeChange = cache.BeginDocTreeMutation(tree.Box)
+			finishDocTreeChange = cache.BeginDocTreeCreation(tree.Box, tree.Path)
 			return nil
 		}
 		plain, readErr := decryptDataWithDEK(tree.Box, tree.Path, current, dek)

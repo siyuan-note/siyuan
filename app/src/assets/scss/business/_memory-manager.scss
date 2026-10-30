@@ -41,18 +41,6 @@
 
   .b3-loading { margin-right: 8px; }
 
-  &__status {
-    margin: 0;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font: inherit;
-    &:empty { display: none; }
-  }
-
-  &__status {
-    max-height: 160px;
-    overflow: auto;
-  }
 }
 
 @media (max-width: 600px) {

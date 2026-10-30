@@ -6,7 +6,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {escapeHtmlTextAndAttr as escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
 import {isMobile} from "../../util/functions";
-import type {AIMemoryTaskData} from "../../types/api";
+import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {MemoryOperationState, memoryModelOptions} from "./state";
 
 // 当前页面重新打开管理器时继续查询后台任务，关闭窗口不取消模型处理。
@@ -23,9 +23,6 @@ export const openMemoryManager = () => {
     let discovering = true;
     let taskId = activeMemoryTask;
     let submittedInput: {id: string; text: string};
-    let lastTask: AIMemoryTaskData;
-    let taskSummaryReady = false;
-    let count: number;
     let taskGeneration = 0;
     let overviewGeneration = 0;
     let taskFailures = 0;
@@ -48,12 +45,9 @@ export const openMemoryManager = () => {
         title: lang.aiMemorySummary,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
-<p class="memory-manager__hint" data-memory-overview-status role="status"></p>
 <div class="memory-manager__hint" data-memory-translation-status role="status" aria-live="polite" aria-label="${escapeHtml(lang.loading)}" hidden><span class="b3-loading b3-loading--small" aria-hidden="true"></span></div>
 <div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
 <textarea class="b3-text-field fn__block" data-memory-task-input rows="1" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
-<p class="memory-manager__hint" data-memory-model-hint role="status" hidden></p>
-<pre class="memory-manager__status" data-memory-task-status role="status" aria-live="polite"></pre>
 <div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 </div>`,
         beforeClose: () => {
@@ -75,11 +69,8 @@ export const openMemoryManager = () => {
     const root = dialog.element;
     const input = root.querySelector<HTMLTextAreaElement>("[data-memory-task-input]");
     const maintain = root.querySelector<HTMLButtonElement>('[data-memory-action="maintain"]');
-    const taskStatus = root.querySelector<HTMLElement>("[data-memory-task-status]");
-    const overviewStatus = root.querySelector<HTMLElement>("[data-memory-overview-status]");
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
-    const taskLabels: Record<string, string> = {completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
     const reportedErrors = new Set<string>();
     const reportError = (error: unknown, channel = "task") => {
         const message = String(error);
@@ -93,22 +84,13 @@ export const openMemoryManager = () => {
         const ai = window.siyuan.config.ai;
         const id = ai?.memory?.modelId || "";
         const ready = !!id && memoryModelOptions(ai?.providers || [], id).some(model => model.id === id && !model.unavailable);
-        const hint = root.querySelector<HTMLElement>("[data-memory-model-hint]");
-        hint.hidden = ready;
-        hint.textContent = ready ? "" : `${lang.aiSelectModel} (${lang.config} - ${lang.ai} - ${lang.aiMemory})`;
+        maintain.title = ready ? "" : `${lang.aiSelectModel} (${lang.config} - ${lang.ai} - ${lang.aiMemory})`;
+        if (!ready) { reportError(maintain.title, "model"); }
         maintain.disabled = isReadOnly() || !ready || submitting || running || discovering;
+        maintain.setAttribute("aria-busy", String(submitting || running));
         root.querySelector<HTMLElement>("[data-memory-loading]").hidden = !submitting && !running;
         input.disabled = isReadOnly() || submitting;
         return ready;
-    };
-    const renderTask = () => {
-        if (!lastTask) { return; }
-        if (["queued", "running"].includes(lastTask.state)) {
-            taskStatus.textContent = "";
-            return;
-        }
-        taskStatus.textContent = [taskLabels[lastTask.state] || lastTask.state, lastTask.error,
-            lastTask.state === "completed" && taskSummaryReady && count === 0 ? lang.aiMemoryTaskNoNewUsable : ""].filter(Boolean).join("\n");
     };
     const translateOverview = async (memory: string, generation: number) => {
         const config = window.siyuan.config;
@@ -184,8 +166,6 @@ export const openMemoryManager = () => {
             if (closed || generation !== overviewGeneration) { return; }
             if (response.code !== 0) { throw new Error(response.msg); }
             overviewFailures = 0;
-            count = response.data.countComplete ? response.data.count : undefined;
-            overviewStatus.textContent = response.data.stale ? lang.aiMemoryOverviewPending : "";
             // 过期概览不能继续显示为当前事实，等待后台重新生成后再展示。
             overviewSource = response.data.stale ? "" : response.data.memory;
             if (response.data.stale) {
@@ -196,21 +176,16 @@ export const openMemoryManager = () => {
             else {
                 void translateOverview(overviewSource, generation);
             }
-            taskSummaryReady = true;
-            if (lastTask?.state === "completed") { renderTask(); }
-            if (!response.data.countComplete || response.data.stale) {
+            if (response.data.stale) {
                 overviewTimer = window.setTimeout(() => { void refreshOverview(); }, 30000);
             }
         } catch (error) {
             if (closed || generation !== overviewGeneration) { return; }
-            count = undefined;
-            overviewStatus.textContent = lang.embeddingFailed;
             reportError(error, "overview");
             overview.textContent = "";
             translationStatus.hidden = true;
             overviewSource = "";
             abortTranslations();
-            if (lastTask?.state === "completed") { renderTask(); }
             overviewTimer = window.setTimeout(() => { void refreshOverview(); }, retryDelay(++overviewFailures));
         }
     };
@@ -228,9 +203,7 @@ export const openMemoryManager = () => {
             if (closed || generation !== taskGeneration) { return; }
             if (response.code !== 0) {
                 if (response.msg === "memory task unavailable; retry explicitly") {
-                    taskStatus.textContent = response.msg;
-                    reportError(response.msg);
-                    lastTask = undefined;
+                    reportError(response.msg, "result");
                     clearTask();
                     void refreshOverview();
                     return;
@@ -238,16 +211,16 @@ export const openMemoryManager = () => {
                 throw new Error(response.msg);
             }
             taskFailures = 0;
-            lastTask = response.data;
-            running = ["queued", "running"].includes(lastTask.state);
-            if (!running) { taskSummaryReady = false; }
+            const task = response.data;
+            running = ["queued", "running"].includes(task.state);
             updateModel();
-            renderTask();
-            if (lastTask.state === "failed") { reportError(lastTask.error || lang.embeddingFailed, "result"); }
+            if (task.state === "failed" || (task.state === "cancelled" && task.error)) {
+                reportError(task.error || lang.embeddingFailed, "result");
+            }
             if (running) {
                 taskTimer = window.setTimeout(() => { void poll(); }, 1000);
             } else {
-                if (lastTask.state === "completed") {
+                if (task.state === "completed") {
                     operation.committed();
                     if (submittedInput?.id === taskId && submittedInput.text === input.value) { taskDirty = false; }
                 }
@@ -256,7 +229,6 @@ export const openMemoryManager = () => {
             }
         } catch (error) {
             if (closed || generation !== taskGeneration) { return; }
-            taskStatus.textContent = String(error);
             reportError(error);
             // 查询故障只重查同一任务，不能自动重新发起可能计费的整理请求。
             taskTimer = window.setTimeout(() => { void poll(); }, retryDelay(++taskFailures));
@@ -277,31 +249,32 @@ export const openMemoryManager = () => {
                 activeMemoryTask = taskId;
                 running = true;
                 void poll();
-            } else {
-                taskStatus.textContent = "";
             }
             updateModel();
         } catch (error) {
             if (closed || generation !== taskGeneration) { return; }
-            taskStatus.textContent = String(error);
             reportError(error);
             taskTimer = window.setTimeout(() => { void discoverTask(); }, retryDelay(++taskFailures));
         }
     };
     input.addEventListener("input", () => { taskDirty = !!input.value.trim(); updateModel(); });
     input.addEventListener("focus", updateModel);
+    input.addEventListener("keydown", event => {
+        if (event.key !== "Enter" || event.isComposing || event.keyCode === 229 || event.repeat ||
+            event.altKey || event.shiftKey || !isOnlyMeta(event) || closed || input.disabled || maintain.disabled) { return; }
+        event.preventDefault();
+        event.stopPropagation();
+        maintain.click();
+    });
     maintain.addEventListener("click", () => {
         if (closed || isReadOnly() || submitting || running || discovering || !updateModel()) { return; }
         const text = input.value;
-        if (!text.trim()) { taskStatus.textContent = lang.aiMemoryTaskInputTip; return; }
+        if (!text.trim()) { return; }
         const operationId = operation.operationFor(text, genUUID);
         reportedErrors.clear();
         submitting = true;
         taskGeneration++;
         window.clearTimeout(taskTimer);
-        lastTask = undefined;
-        taskSummaryReady = false;
-        taskStatus.textContent = "";
         updateModel();
         void (async () => {
             try {
@@ -310,7 +283,6 @@ export const openMemoryManager = () => {
                 if (response.code !== 0) {
                     // A rejected changed request has not started; the next explicit click needs a new identity.
                     if (response.msg === "memory task input changed; start a new task") { operation.committed(); }
-                    taskStatus.textContent = response.msg;
                     reportError(response.msg);
                     return;
                 }
@@ -322,7 +294,6 @@ export const openMemoryManager = () => {
                 void poll();
             } catch (error) {
                 if (closed) { return; }
-                taskStatus.textContent = String(error);
                 reportError(error);
                 // 提交回包丢失时按提交身份查询，避免用户重复付费处理。
                 taskId = operationId;

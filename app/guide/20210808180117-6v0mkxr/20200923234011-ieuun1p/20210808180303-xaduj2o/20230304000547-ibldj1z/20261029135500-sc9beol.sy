@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030112353"
+		"updated": "20261030113607"
 	},
 	"Children": [
 		{
@@ -140,7 +140,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-w46deg2",
-				"updated": "20261030112353"
+				"updated": "20261030113607"
 			},
 			"Children": [
 				{
@@ -155,12 +155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-mlne86v",
-				"updated": "20261030101644"
+				"updated": "20261030113607"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open Manage to view Memory summary, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model. The manager shows processing status and a unified overview. Successfully submitting a task does not mean its content has been remembered."
+					"Data": "Open Manage to view Memory summary, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model, or press Ctrl+Enter (Cmd+Enter on macOS) in the input. The manager shows the unified overview and a loading spinner while processing; errors appear in the upper-right message area. Successfully submitting a task does not mean its content has been remembered."
 				}
 			]
 		},
@@ -183,12 +183,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-agntqax",
-				"updated": "20261030111945"
+				"updated": "20261030113607"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Read the overall result after processing; “No usable memories are currently available” describes the current usable state, not whether the task failed."
+					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Review the updated overview after processing."
 				}
 			]
 		},
@@ -240,7 +240,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-oj02bkz",
-				"updated": "20261030063122"
+				"updated": "20261030113607"
 			},
 			"Children": [
 				{
@@ -255,12 +255,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-jksxqku",
-				"updated": "20261030063122"
+				"updated": "20261030113607"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Task status updates automatically without a manual refresh. Temporary query failures retry the same task without automatically resubmitting a paid organization request; an unavailable task permits an explicit retry. Closing the manager does not cancel the background job, which remains subject to its timeout. A missing or unavailable model prompts you to configure one first. Existing overviews remain readable, and model failure must not be reported as a successful save."
+					"Data": "The manager checks tasks automatically without a manual refresh; task status and completion text are not displayed inline. Temporary query failures retry the same task without automatically resubmitting a paid organization request; an unavailable task permits an explicit retry. Closing the manager does not cancel the background job, which remains subject to its timeout. A missing or unavailable model prompts you to configure one first. Existing overviews remain readable, and model failure must not be reported as a successful save."
 				}
 			]
 		},

@@ -6,10 +6,14 @@ package util
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/olahol/melody"
 )
 
@@ -116,5 +120,93 @@ func TestWaitInteractiveSessionRejectsInvalidExpectedConnection(t *testing.T) {
 	}
 	if !WaitInteractiveSession(context.Background(), hub.first, "main", hub.clients[0].session) {
 		t.Fatal("did not accept already ready connection")
+	}
+}
+
+func TestWaitBindableInteractiveSessionCoversUpgradeBeforeRegistration(t *testing.T) {
+	for _, cancelBeforeRegistration := range []bool{false, true} {
+		t.Run(map[bool]string{false: "register", true: "cancel"}[cancelBeforeRegistration], func(t *testing.T) {
+			app := strings.ReplaceAll(t.Name(), "/", "-")
+			hub := melody.New()
+			release := make(chan struct{})
+			entered := make(chan struct{})
+			registered := make(chan *melody.Session, 1)
+			var releaseOnce sync.Once
+			releaseConnect := func() { releaseOnce.Do(func() { close(release) }) }
+			hub.HandleConnect(func(session *melody.Session) {
+				close(entered)
+				<-release
+				AddPushChan(session)
+				registered <- session
+			})
+			hub.HandleDisconnect(RemovePushChan)
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _ = hub.HandleRequest(w, r) }))
+			t.Cleanup(func() { releaseConnect(); hub.Close(); server.Close() })
+			connection, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http")+"/ws?app="+app+"&id=main&type=main&ready=false", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer connection.Close()
+			<-entered
+			if session, _ := BindableInteractiveSession(app, "main"); session != nil {
+				t.Fatal("fixture registered before connect handler was released")
+			}
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			results := make(chan *melody.Session, 1)
+			go func() { session, _ := WaitBindableInteractiveSession(ctx, app, "main"); results <- session }()
+			select {
+			case <-results:
+				t.Fatal("upgraded socket was rejected before registration")
+			case <-time.After(30 * time.Millisecond):
+			}
+			if cancelBeforeRegistration {
+				cancel()
+				select {
+				case session := <-results:
+					if session != nil {
+						t.Fatal("canceled request acquired a session")
+					}
+				case <-time.After(time.Second):
+					t.Fatal("canceled registration wait blocked")
+				}
+				releaseConnect()
+				<-registered
+				if session, _ := WaitBindableInteractiveSession(ctx, app, "main"); session != nil {
+					t.Fatal("later registration revived canceled request")
+				}
+			} else {
+				releaseConnect()
+				expected := <-registered
+				select {
+				case session := <-results:
+					if session != expected {
+						t.Fatal("did not bind the authenticated registered socket")
+					}
+				case <-time.After(time.Second):
+					t.Fatal("registration did not resume binding")
+				}
+				if session, _ := InteractiveSession(app, "main"); session != nil {
+					t.Fatal("registration bypassed UI readiness")
+				}
+			}
+		})
+	}
+}
+
+func TestWaitBindableInteractiveSessionRejectsRegisteredInvalidWindows(t *testing.T) {
+	hub := newNotificationTestHub(t)
+	for _, id := range []string{"publish", "auth", "tree"} {
+		if session, done := WaitBindableInteractiveSession(context.Background(), hub.first, id); session != nil || done != nil {
+			t.Fatalf("accepted invalid session %q", id)
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	if session, _ := WaitBindableInteractiveSession(ctx, hub.first, "missing"); session != nil {
+		t.Fatal("accepted missing session")
+	}
+	if ctx.Err() == nil {
+		t.Fatal("missing session was not bounded by request deadline")
 	}
 }

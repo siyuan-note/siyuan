@@ -43,7 +43,7 @@ func StartTemplateHTTPExecution(ctx context.Context, id, app, sessionID, scope s
 	if len(id) < 16 || len(id) > 128 {
 		return nil, errors.New("invalid template execution")
 	}
-	session, done := util.BindableInteractiveSession(app, sessionID)
+	session, done := util.WaitBindableInteractiveSession(ctx, app, sessionID)
 	if session == nil {
 		return nil, errors.New("template interaction requires an active window")
 	}

@@ -799,26 +799,65 @@ func WaitInteractiveSession(ctx context.Context, app, id string, expected *melod
 	}
 }
 
-// BindableInteractiveSession 只绑定当前有效的非发布主窗口，界面就绪检查由联网确认阶段执行。
-func BindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+// WaitBindableInteractiveSession 处理升级握手已完成但认证连接尚未登记的短暂窗口。
+// 已登记的无效连接立即拒绝；请求取消后不得等待后续同名连接。
+func WaitBindableInteractiveSession(ctx context.Context, app, id string) (*melody.Session, <-chan struct{}) {
 	if app == "" || id == "" {
 		return nil, nil
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		if ctx.Err() != nil {
+			return nil, nil
+		}
+		if session, done, registered := bindableInteractiveSession(app, id); registered {
+			if ctx.Err() != nil {
+				return nil, nil
+			}
+			return session, done
+		}
+		// 授权页使用独立注册表，不能被当成尚未完成登记的交互窗口。
+		if value, ok := authSessions.Load(app); ok {
+			if _, exists := value.(*sync.Map).Load(id); exists {
+				return nil, nil
+			}
+		}
+		select {
+		case <-ctx.Done():
+			return nil, nil
+		case <-ticker.C:
+		}
+	}
+}
+
+// BindableInteractiveSession 只绑定当前有效的非发布主窗口，界面就绪检查由联网确认阶段执行。
+func BindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+	session, done, _ := bindableInteractiveSession(app, id)
+	return session, done
+}
+
+func bindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}, bool) {
+	if app == "" || id == "" {
+		return nil, nil, false
+	}
 	value, ok := sessions.Load(app)
 	if !ok {
-		return nil, nil
+		return nil, nil, false
 	}
 	value, ok = value.(*sync.Map).Load(id)
 	if !ok {
-		return nil, nil
+		return nil, nil, false
 	}
 	session := value.(*melody.Session)
 	typ, _ := session.Get("type")
 	state, exists := session.Get("interactiveDone")
 	if typ != "main" || !exists || isPublishSession(session) || session.IsClosed() {
-		return nil, nil
+		return nil, nil, true
 	}
-	return session, state.(*interactiveSessionDone).done
+	return session, state.(*interactiveSessionDone).done, true
 }
 
 type interactiveSessionDone struct {

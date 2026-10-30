@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030101644"
+		"updated": "20261030112353"
 	},
 	"Children": [
 		{
@@ -140,7 +140,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-w46deg2",
-				"updated": "20261030101644"
+				"updated": "20261030112353"
 			},
 			"Children": [
 				{
@@ -183,12 +183,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-agntqax",
-				"updated": "20261030063122"
+				"updated": "20261030111945"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Read the overall result after processing; “No new usable memories were added” does not mean existing memories were deleted."
+					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Read the overall result after processing; “No usable memories are currently available” describes the current usable state, not whether the task failed."
 				}
 			]
 		},
@@ -197,12 +197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-2hw0xe9",
-				"updated": "20261030063122"
+				"updated": "20261030112353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
+					"Data": "To forget a specific memory, submit a separate direct request in Memory summary, for example “Forget my preference for starting project reports with conclusions.” Do not combine forgetting with additions. Quoted, ambiguous or clear-all requests do not authorize deletion. The selected model checks the target again, which may incur additional charges; review the result rather than assuming every request succeeds. The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup."
 				}
 			]
 		},

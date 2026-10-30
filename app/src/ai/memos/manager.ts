@@ -79,8 +79,7 @@ export const openMemoryManager = () => {
     const overviewStatus = root.querySelector<HTMLElement>("[data-memory-overview-status]");
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
-    const taskLabels: Record<string, string> = {queued: lang.agentConfirmPending, running: lang.loading,
-        completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
+    const taskLabels: Record<string, string> = {completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
     const reportedErrors = new Set<string>();
     const reportError = (error: unknown, channel = "task") => {
         const message = String(error);
@@ -104,6 +103,10 @@ export const openMemoryManager = () => {
     };
     const renderTask = () => {
         if (!lastTask) { return; }
+        if (["queued", "running"].includes(lastTask.state)) {
+            taskStatus.textContent = "";
+            return;
+        }
         taskStatus.textContent = [taskLabels[lastTask.state] || lastTask.state, lastTask.error,
             lastTask.state === "completed" && taskSummaryReady && count === 0 ? lang.aiMemoryTaskNoNewUsable : ""].filter(Boolean).join("\n");
     };
@@ -298,7 +301,7 @@ export const openMemoryManager = () => {
         window.clearTimeout(taskTimer);
         lastTask = undefined;
         taskSummaryReady = false;
-        taskStatus.textContent = lang.loading;
+        taskStatus.textContent = "";
         updateModel();
         void (async () => {
             try {

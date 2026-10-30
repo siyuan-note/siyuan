@@ -498,12 +498,25 @@ func (s *Store) save(ctx context.Context, r Record, expected, op string, explici
 	return Entry{r, revision(data)}, nil
 }
 func (s *Store) Forget(ctx context.Context, id, expected, op string) (ForgetResult, error) {
+	return s.GuardedForget(ctx, id, expected, op, nil)
+}
+
+// GuardedForget 在撤回写入锁内复核调用方权限与来源，复用持久撤回和 CAS 保护。
+func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guard func() error) (ForgetResult, error) {
 	ret := ForgetResult{ID: id}
 	if !idPattern.MatchString(id) || op == "" || len(op) > 256 {
 		return ret, ErrInvalid
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if e := checkContext(ctx); e != nil {
+		return ret, e
+	}
+	if guard != nil {
+		if e := guard(); e != nil {
+			return ret, e
+		}
+	}
 	root, e := s.root(true)
 	if e != nil {
 		return ret, e
@@ -522,6 +535,15 @@ func (s *Store) Forget(ctx context.Context, id, expected, op string) (ForgetResu
 	entry, e := s.get(root, id)
 	if e != nil {
 		return ret, e
+	}
+	if guard != nil {
+		conflicted, conflictErr := hasConflict(root, id)
+		if conflictErr != nil {
+			return ret, conflictErr
+		}
+		if conflicted {
+			return ret, ErrConflict
+		}
 	}
 	if entry.Revision != expected {
 		return ret, ErrConflict
@@ -549,6 +571,28 @@ func (s *Store) Forget(ctx context.Context, id, expected, op string) (ForgetResu
 		return ret, e
 	}
 	defer wr.Close()
+	if e = checkContext(ctx); e != nil {
+		return ret, e
+	}
+	if guard != nil {
+		if e = guard(); e != nil {
+			return ret, e
+		}
+		current, readErr := s.get(root, id)
+		if readErr != nil || current.Revision != expected {
+			return ret, ErrConflict
+		}
+		conflicted, conflictErr := hasConflict(root, id)
+		if conflictErr != nil {
+			return ret, conflictErr
+		}
+		if conflicted {
+			return ret, ErrConflict
+		}
+	}
+	if e = checkContext(ctx); e != nil {
+		return ret, e
+	}
 	if e = writeFile(wr, w.ID+".md", data); e != nil {
 		return ret, e
 	}

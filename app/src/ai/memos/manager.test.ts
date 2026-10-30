@@ -93,6 +93,36 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
 
 const completed = (id = "task", results: unknown[] = []) => ({code: 0, data: {taskId: id, state: "completed", results}});
 
+test("submission, queued and running phases use only the button spinner while terminal status remains visible", async () => {
+    for (const terminal of ["completed", "failed"]) {
+        let accept: (value: unknown) => void;
+        let reads = 0;
+        const state = harness(url => {
+            if (url.endsWith("/maintain")) { return new Promise(resolve => { accept = resolve; }); }
+            if (url.endsWith("/task")) {
+                const phase = ["queued", "running", terminal][reads++];
+                return {code: 0, data: {taskId: "task", state: phase, error: phase === "failed" ? "Model failed" : ""}};
+            }
+        });
+        await state.flush();
+        state.enter("Remember this");
+        await state.click();
+        assert.equal(state.field("[data-memory-task-status]").textContent, "");
+        assert.equal(state.field("[data-memory-loading]").hidden, false);
+        accept({code: 0, data: {taskId: "task"}});
+        await state.flush();
+        assert.equal(state.field("[data-memory-task-status]").textContent, "");
+        assert.equal(state.field("[data-memory-loading]").hidden, false);
+        await state.tick(1000);
+        assert.equal(state.field("[data-memory-task-status]").textContent, "");
+        assert.equal(state.field("[data-memory-loading]").hidden, false);
+        await state.tick(1000);
+        assert.equal(state.field("[data-memory-loading]").hidden, true);
+        assert.match(state.field("[data-memory-task-status]").textContent,
+            terminal === "completed" ? /taskStatusDone/ : /embeddingFailed\nModel failed/);
+    }
+});
+
 test("pending display processing shows only its spinner without rendering the original, then reuses the result", async () => {
     let resolveTranslation: (value: unknown) => void;
     const state = harness(url => {

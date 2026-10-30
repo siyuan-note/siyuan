@@ -97,6 +97,12 @@ const browserCases = async (source: string) => {
         selectedMap.classList.add("protyle-wysiwyg--select");
         protyle.toolbar.range = getEditorRange(selectedMap);
         restoreGutterRange(protyle);
+        check.equal(document.activeElement, root, "whole-block shortcuts retain editor focus");
+        check.equal(getSelection().rangeCount, 0, "whole-block menus must not place a native caret in the canvas");
+        check.equal(protyle.toolbar.range.startContainer, selectedMap);
+        check.equal(protyle.toolbar.range.collapsed, true);
+        check.equal(getEditorRange(root).startContainer, selectedMap, "range reads resolve the selected block");
+        check.equal(getSelection().rangeCount, 0, "range reads keep the native caret empty");
         calls.length = 0;
         const clickEvent = await press(conversion === "UL2TL" ? "l" : "j", conversion === "UL2TL" ? 76 : 74,
             true, conversion === "UL2OL");
@@ -105,6 +111,23 @@ const browserCases = async (source: string) => {
         check.equal(calls[0].nodeElement, selectedMap);
         check.equal(calls[0].type, conversion);
     }
+    root.innerHTML = '<div data-type="NodeMindmap" data-node-id="map" class="mindmap protyle-wysiwyg--select">' +
+        '<div class="mindmap-view" contenteditable="false">Map</div></div>' +
+        '<div data-type="NodeParagraph" data-node-id="text"><div contenteditable="true">Text</div></div>';
+    const text = root.lastElementChild.firstChild.firstChild;
+    getSelection().setBaseAndExtent(text, 1, text, 1);
+    const textRange = getEditorRange(root);
+    check.equal(textRange.startContainer, text, "an existing text selection takes priority over block state");
+    check.equal(textRange.startOffset, 1);
+    const other = document.createElement("div");
+    other.className = "protyle-wysiwyg";
+    other.contentEditable = "true";
+    other.innerHTML = '<div data-type="NodeParagraph" data-node-id="other"><div contenteditable="true">Other</div></div>';
+    document.body.append(other);
+    getSelection().removeAllRanges();
+    const otherRange = getEditorRange(other);
+    check.ok(other.contains(otherRange.startContainer), "range fallback stays within its editor");
+    other.remove();
     return "Keyboard block selection cases passed";
 };
 

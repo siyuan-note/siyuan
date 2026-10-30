@@ -166,7 +166,8 @@ const restoreGutterRange = (protyle: IProtyle) => {
         range.setStart(mindmap, 0);
         range.collapse(true);
         protyle.toolbar.range = range;
-        focusByRange(range);
+        // 脑图容器内的原生光标会使 Chromium 在菜单悬停时反复进行昂贵的布局和绘制。
+        window.getSelection()?.removeAllRanges();
         return;
     }
     const range = protyle.toolbar.range;

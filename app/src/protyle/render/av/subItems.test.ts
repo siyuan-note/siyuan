@@ -81,10 +81,14 @@ it("keeps nesting choices limited to table/list while exposing database configur
         assert.match(disabled, /avEnableSubItems/);
         assert.match(disabled, /data-sub-items-field/);
         assert.doesNotMatch(disabled, /b3-menu__item--readonly/);
+        assert.match(disabled, /^<div class="b3-menu__items">/);
+        assert.match(disabled, /block__icon--menu-back" data-type="go-config"/);
+        assert.match(disabled, /b3-menu__label ft__center/);
         const html = h.api.getSubItemsSettingsHTML({viewType, view: {subItemsDisplay: "nested"},
             subItems: {enabled: true, parentKeyID: "parent", childrenKeyID: "children"}} as IAV);
         assert.match(html, /avDisableSubItems/);
         assert.equal(html.includes('data-sub-items-display="nested"'), viewType === "table" || viewType === "list");
+        assert.equal(html.includes('class="b3-menu__checked"'), viewType === "table" || viewType === "list");
     }
 });
 

@@ -23,7 +23,9 @@ export const configPanel: IAVPanelDescriptor = {
     actions: {
         "go-sub-items": (context, action) => {
             context.menuElement.innerHTML = getSubItemsSettingsHTML(context.data);
+            setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
             bindSubItemsSettings(context.menuElement, context.options.protyle, context.options.blockElement as HTMLElement, context.data);
+            window.siyuan.menus.menu.remove();
             action.event.preventDefault();
             action.event.stopPropagation();
             return "handled";

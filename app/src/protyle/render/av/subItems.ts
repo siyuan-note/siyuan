@@ -144,16 +144,21 @@ export const addSubItemsMenu = (menu: Menu, protyle: IProtyle, blockElement: HTM
 export const getSubItemsSettingsHTML = (data: IAV) => {
     const enabled = Boolean(data.subItems?.enabled);
     const currentDisplay = data.views?.find(view => view.id === data.viewID)?.subItemsDisplay || "flat";
-    return `<button class="b3-menu__item" data-type="go-config"><svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg><span class="b3-menu__label">${window.siyuan.languages.avSubItems}</span></button>
+    return `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="nobg">
+    <span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.avSubItems}</span>
+</button>
 <button class="b3-menu__separator"></button>
 ${!enabled ? `<button class="b3-menu__item" data-sub-items-field=""><span class="b3-menu__label">${window.siyuan.languages.avParentItem}</span><span class="b3-menu__accelerator">${window.siyuan.languages.avSubItemsNewFields}</span><svg class="b3-menu__icon"><use xlink:href="#iconRight"></use></svg></button>` : ""}
 <button class="b3-menu__item" data-sub-items-enabled="${!enabled}"><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>
-${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__icon"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}`;
+${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}
+</div>`;
 };
 
 export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle, blockElement: HTMLElement, data: IAV) => {
     if (protyle.disabled || window.siyuan.isPublish || protyle.options.history) {
-        menuElement.querySelectorAll<HTMLButtonElement>("button:not([data-type=go-config])").forEach(button => { button.disabled = true; });
+        menuElement.querySelectorAll<HTMLButtonElement>("button:not([data-type=nobg])").forEach(button => { button.disabled = true; });
         return;
     }
     const fieldButton = menuElement.querySelector<HTMLButtonElement>("[data-sub-items-field]");

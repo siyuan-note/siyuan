@@ -6,6 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {openMemoryManager} from "../../../ai/memos/manager";
 import {memoryModelOptions} from "../../../ai/memos/state";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
+import {genButtonHtml} from "../../render/render";
 
 const mountMemorySelection = (root: HTMLElement) => {
     const model = root.querySelector<HTMLSelectElement>("[data-memory-model]");
@@ -66,7 +67,16 @@ const mountMemorySelection = (root: HTMLElement) => {
 export const registerAiMemoryGroup = (tab: SettingTabBuilder) => {
     const lang = window.siyuan.languages;
     const group = tab.group("memory", lang.aiMemory);
-    group.switch("ai.memory.enabled", {title: lang.aiMemory, desc: lang.aiMemoryEnabledTip});
+    group.switch("ai.memory.enabled", {
+        title: lang.aiMemory,
+        desc: lang.aiMemoryEnabledTip,
+        keywords: [lang.manage],
+        afterMount: root => {
+            const toggle = root.querySelector<HTMLInputElement>('[id="ai.memory.enabled"]');
+            toggle.insertAdjacentHTML("afterend", `<span class="fn__space"></span>${genButtonHtml("manageMemory", lang.manage, "iconSettings")}`);
+            root.querySelector("#manageMemory").addEventListener("click", openMemoryManager);
+        },
+    });
     group.slot({
         key: "memorySelection",
         keywords: [lang.aiMemory, lang.apiModel, lang.reasoningEffortTooltip],
@@ -74,6 +84,4 @@ export const registerAiMemoryGroup = (tab: SettingTabBuilder) => {
 <div class="fn__hr"></div><label class="fn__flex">${lang.reasoningEffortTooltip}<span class="fn__flex-1"></span><select class="b3-select" data-memory-effort disabled></select></label></div>`,
         afterMount: mountMemorySelection,
     });
-    group.button({id: "manageMemory", title: lang.aiMemory, label: lang.manage, icon: "iconSettings",
-        afterMount: root => root.querySelector("#manageMemory")?.addEventListener("click", openMemoryManager)});
 };

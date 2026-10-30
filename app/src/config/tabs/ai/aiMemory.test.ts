@@ -41,6 +41,60 @@ test("memory settings expose one enable switch without changing defaults", () =>
     assert.equal(memory.enabled, false);
 });
 
+test("memory management shares the enable row and remains available with memory on or off", () => {
+    for (const enabled of [false, true]) {
+        const memory = {enabled};
+        let mount: (root: unknown) => void;
+        let opened = 0;
+        let writes = 0;
+        let separateButtons = 0;
+        let inserted = "";
+        const manage = new ControlStub();
+        const toggle = {
+            insertAdjacentHTML: (position: string, html: string) => {
+                assert.equal(position, "afterend", "management follows the switch in the same row");
+                inserted = html;
+            },
+        };
+        const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
+        runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiMemory.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS},
+        }).outputText, {
+            exports: exported,
+            window: {siyuan: {languages: {aiMemory: "memory", manage: "manage"}, config: {ai: {memory}}}},
+            require: (name: string) => {
+                if (name.endsWith("/aiRuntime")) { return {aiConfigApi: {patch: () => { writes++; }}}; }
+                if (name.endsWith("/manager")) { return {openMemoryManager: () => { opened++; }}; }
+                if (name.endsWith("/render")) { return {genButtonHtml: (id: string, label: string, icon: string) => {
+                    assert.equal(id, "manageMemory");
+                    assert.equal(label, "manage");
+                    assert.equal(icon, "iconSettings");
+                    return '<button id="manageMemory">manage</button>';
+                }}; }
+                return {};
+            },
+        });
+        exported.registerAiMemoryGroup({group: () => ({
+            switch: (id: string, spec: {afterMount: (root: unknown) => void; keywords: string[]}) => {
+                assert.equal(id, "ai.memory.enabled");
+                assert.ok(spec.keywords.includes("manage"));
+                mount = spec.afterMount;
+            },
+            slot: () => {},
+            button: () => { separateButtons++; },
+        })});
+        mount({querySelector: (selector: string) => selector === '[id="ai.memory.enabled"]' ? toggle : manage});
+        assert.match(inserted, /fn__space/);
+        assert.match(inserted, /id="manageMemory"/);
+        assert.equal(separateButtons, 0);
+        assert.equal(manage.disabled, false);
+        manage.listeners.get("click")();
+        assert.equal(opened, 1);
+        assert.equal(writes, 0);
+        assert.equal(memory.enabled, enabled);
+    }
+});
+
 test("memory model placeholder preserves empty selection and model changes preserve queued opt-outs", async () => {
     const memory = {enabled: true, modelId: "old", reasoningEffort: ""};
     const languages = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));

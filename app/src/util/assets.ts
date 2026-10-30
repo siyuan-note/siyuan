@@ -135,6 +135,10 @@ export const refreshThemeStyle = (themeAddress: string) => {
 };
 
 export const loadAssets = async (appearance: Config.IAppearance) => {
+    // 跟随当前前端的系统模式，仅更新运行时状态，避免共用内核的不同设备反复写回配置。
+    if (appearance.modeOS) {
+        appearance.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? 1 : 0;
+    }
     initSelectionStyle();
     const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
@@ -159,13 +163,6 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     htmlElement.setAttribute("data-light-theme", data.themeLight);
     htmlElement.setAttribute("data-dark-theme", data.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    if (window.siyuan.config.appearance.modeOS && (
-        (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
-        (window.siyuan.config.appearance.mode === 0 && OSTheme === "dark")
-    )) {
-        configApi.set("appearance.mode", OSTheme === "light" ? 0 : 1);
-        window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
-    }
     if (previousThemeMode && previousThemeMode !== themeMode) {
         refreshChartTheme(document.body);
         refreshMermaidTheme(document.body);

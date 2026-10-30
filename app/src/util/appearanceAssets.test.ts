@@ -14,6 +14,8 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
     navigator?: TBrowserNavigator;
     backend?: string;
     mobile?: boolean;
+    dark?: boolean;
+    customAppearance?: boolean;
 } = {}) => {
     const source = readFileSync(resolve(process.cwd(), "src/util/assets.ts"), "utf8");
     const processed = parse(source, {MOBILE: client.mobile || false, BROWSER: true}, false, true);
@@ -34,12 +36,12 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
         remove: () => removedElements.push(attributes.href || attributes.src),
     });
     const elements = {
-        themeDefaultStyle: element({href: "/appearance/themes/daylight/theme.css?v=3.8.5"}),
+        themeDefaultStyle: element({href: `/appearance/themes/${client.dark ? "midnight" : "daylight"}/theme.css?v=3.8.5`}),
         themeStyle: element({href: "/appearance/themes/custom/theme.css?v=1.0.0"}),
         iconDefaultScript: element({src: "/appearance/icons/litheness/icon.js?v=3.8.5"}),
         iconScript: element({src: "/appearance/icons/custom/icon.js?v=1.0.0"}),
     };
-    const html = element({"data-theme-mode": "light"});
+    const html = element({"data-theme-mode": client.dark ? "dark" : "light"});
     const appearance = {
         pdfTheme: {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"},
         lang: "en", mode: 0, modeOS: false, themeLight: "custom", themeDark: "midnight", themeVer: "1.0.0",
@@ -55,6 +57,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
     } = {};
     const errors: string[] = [];
     const scriptURLs: string[] = [];
+    const writes: {path: string; value: unknown}[] = [];
     runInNewContext(code, {
         exports: moduleExports,
         URL,
@@ -63,7 +66,7 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
             siyuan: {config: {appearance}, storage: {pdf: {light: "light", dark: "dark"}}},
             location: {href: "http://localhost/stage/build/desktop/"},
             navigator: client.navigator || {userAgent: "", platform: "", maxTouchPoints: 0},
-            matchMedia: () => ({matches: false}),
+            matchMedia: () => ({matches: client.dark || false}),
             setTimeout: () => 0,
             clearTimeout: () => {},
         },
@@ -79,7 +82,10 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
                 return {Constants: {SIYUAN_VERSION: "3.8.5", LOCAL_PDFTHEME: "pdf"}};
             }
             if (name === "./hostCapabilities") {
-                return {getHostCapabilities: () => ({customAppearance: true})};
+                return {getHostCapabilities: () => ({customAppearance: client.customAppearance !== false})};
+            }
+            if (name === "../config/util/configApi") {
+                return {config: {set: (path: string, value: unknown) => writes.push({path, value})}};
             }
             if (name === "./themeCompatibility") {
                 return themeCompatibility;
@@ -108,8 +114,41 @@ const createAssets = (ensureLute: () => Promise<void> = async () => {}, client: 
             return new Proxy({}, {get: () => (): undefined => undefined});
         },
     });
-    return {assets: moduleExports, appearance, elements, html, errors, scriptURLs, removedElements};
+    return {assets: moduleExports, appearance, elements, html, errors, scriptURLs, removedElements, writes};
 };
+
+for (const mobile of [false, true]) {
+    for (const dark of [false, true]) {
+        for (const customAppearance of [false, true]) {
+            test(`system theme rendering does not write shared settings (mobile=${mobile}, dark=${dark}, custom=${customAppearance})`, async () => {
+                const {assets, appearance, elements, html, writes} = createAssets(undefined,
+                    {mobile, dark, customAppearance, backend: "android"});
+                appearance.modeOS = true;
+                appearance.themeLight = "daylight";
+                for (let notification = 0; notification < 3; notification++) {
+                    // 手机与浏览器共用内核，收到的模式可能与当前前端的系统模式相反。
+                    appearance.mode = dark ? 0 : 1;
+                    await assets.loadAssets(appearance);
+                    assert.equal(appearance.mode, dark ? 1 : 0);
+                    assert.equal(html.getAttribute("data-theme-mode"), dark ? "dark" : "light");
+                    assert.equal(elements.themeDefaultStyle.getAttribute("href"),
+                        `/appearance/themes/${dark ? "midnight" : "daylight"}/theme.css?v=3.8.5`);
+                    assert.deepEqual(writes, []);
+                }
+            });
+        }
+    }
+    test(`manual theme mode takes precedence over the system (mobile=${mobile})`, async () => {
+        const {assets, appearance, elements, html, writes} = createAssets(undefined, {mobile, dark: true});
+        elements.themeDefaultStyle.setAttribute("href", "/appearance/themes/daylight/theme.css?v=3.8.5");
+        html.setAttribute("data-theme-mode", "light");
+        await assets.loadAssets(appearance);
+        assert.equal(appearance.mode, 0);
+        assert.equal(html.getAttribute("data-theme-mode"), "light");
+        assert.equal(elements.themeDefaultStyle.getAttribute("href"), "/appearance/themes/daylight/theme.css?v=3.8.5");
+        assert.deepEqual(writes, []);
+    });
+}
 
 test("appearance exposes the kernel backend and the browser frontend independently", async () => {
     const cases = [

@@ -1146,13 +1146,18 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         setNoteBook(() => this.init(false));
     }
 
-    private toggleLeaf(liElement: Element, notebookId: string) {
+    private async toggleLeaf(liElement: Element, notebookId: string) {
         this.parentDocClick.cancel();
         const item = this.docTree.getItemFromElement(liElement);
-        if (item?.kind === "notebook" && !item.subFileCount && !window.siyuan.config.readonly) {
-            newFileInTree(this.app, notebookId, "/");
-        } else if (item) {
-            void this.docTree.toggle(item.occurrenceKey);
+        if (!item) { return; }
+        const pending = this.docTree.toggle(item.occurrenceKey);
+        const interaction = this.docTree.interactionVersion;
+        await pending;
+        // 笔记本摘要中的计数可能尚未加载，只有目录范围确认为空后才自动新建。
+        if (item.kind === "notebook" && !window.siyuan.config.readonly &&
+            interaction === this.docTree.interactionVersion && this.docTree.isExpanded(item.occurrenceKey)) {
+            const directory = this.docTree.model.directory(item);
+            if (directory.revision && directory.total === 0) { newFileInTree(this.app, notebookId, "/"); }
         }
     }
 

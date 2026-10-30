@@ -71,6 +71,7 @@ export class DocTreeController {
     private navigation: {interaction: number, generation: number, publishing: boolean, select: boolean};
     private navigationID = 0;
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
+    private refreshingDirectories = new Map<IDocTreeDirectory, {generation: number, offsets: Set<number>, request?: Promise<void>}>();
     private errors = new Set<string>();
     private observer: ResizeObserver;
     private events = new AbortController();
@@ -118,15 +119,17 @@ export class DocTreeController {
         }, {signal});
         options.element.addEventListener("click", event => {
             const placeholder = (event.target as Element).closest<HTMLElement>("[data-tree-loading]");
-            if (!placeholder) {
-                return;
-            }
+            const row = (event.target as Element).closest<HTMLElement>("[data-tree-key]");
+            const item = row && this.getItem(row.dataset.treeKey);
+            const retry = item && (event.target as Element).closest(".b3-list-item__arrow") &&
+                this.errors.has(this.model.directory(item).key);
+            if (!placeholder && !retry) { return; }
             event.preventDefault();
             event.stopImmediatePropagation();
-            const parent = this.getItem(placeholder.dataset.parentKey);
+            const parent = retry ? item : this.getItem(placeholder.dataset.parentKey);
             if (parent) {
                 this.errors.delete(this.model.directory(parent).key);
-                void this.load(parent, Number(placeholder.dataset.index)).catch((): void => undefined);
+                void this.load(parent, placeholder ? Number(placeholder.dataset.index) : 0).catch((): void => undefined);
             }
         }, {capture: true, signal});
         this.observer = new ResizeObserver(() => this.scheduleRender());
@@ -790,11 +793,30 @@ export class DocTreeController {
         const generation = ++this.generation;
         const operation = ++this.operation;
         this.finishSelection(this.selectionPending);
-        this.model.invalidate(filter.notebook, filter.parentID);
-        for (const [key, page] of this.pages) {
-            if ((!filter.notebook || page.directory.notebookId === filter.notebook) &&
-                (filter.parentID === undefined || page.directory.parentID === filter.parentID)) {
-                this.pages.delete(key);
+        // 保留已挂载目录的完整旧批次，新视区及展开路径的批次就绪后再替换。
+        const required = new Map<IDocTreeDirectory, Set<number>>();
+        const retain = (parent: IDocTreeItem, index: number) => {
+            const directory = this.model.directory(parent);
+            const offsets = required.get(directory) || new Set<number>([0]);
+            offsets.add(Math.floor(index / this.batchSize()) * this.batchSize());
+            required.set(directory, offsets);
+        };
+        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+            this.options.element.clientHeight, this.rowHeight);
+        for (let position = viewport.start; position < viewport.end; position++) {
+            const row = this.model.rowAt(position);
+            if (row?.parent) { retain(row.parent, row.index); }
+        }
+        this.model.expanded.forEach(item => {
+            const parent = this.model.getItem(item.parentKey);
+            if (parent) { retain(parent, item.index); }
+        });
+        this.model.invalidate(filter.notebook, filter.parentID, true);
+        for (const directory of this.model.directories.values()) {
+            if ((!filter.notebook || directory.notebookId === filter.notebook) &&
+                (filter.parentID === undefined || directory.parentID === filter.parentID)) {
+                this.refreshingDirectories.set(directory, {generation: directory.generation,
+                    offsets: required.get(directory) || new Set([0])});
             }
         }
         this.errors.clear();
@@ -852,10 +874,10 @@ export class DocTreeController {
             this.restoreScrollAnchor(anchor);
         }
         // 首批数据可能远离当前视区，恢复展开和选择后补齐可见范围再替换已有行。
-        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+        const nextViewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
             this.options.element.clientHeight, this.rowHeight);
         const loaded = new Set<string>();
-        for (let position = viewport.start; position < viewport.end; position++) {
+        for (let position = nextViewport.start; position < nextViewport.end; position++) {
             const row = this.model.rowAt(position);
             if (row?.item || !row?.parent) { continue; }
             const directory = this.model.directory(row.parent);
@@ -942,6 +964,15 @@ export class DocTreeController {
             if (removed(key)) { this.model.expanded.delete(key); }
         }
         this.model.roots = this.model.roots.filter(item => !removedRoots.has(item.occurrenceKey));
+        for (const directory of this.model.removeDocuments(ids)) {
+            for (const [key, page] of this.pages) {
+                if (page.directory === directory) { this.pages.delete(key); }
+            }
+            const limit = this.batchSize();
+            const offsets = new Set([...directory.files.keys()].map(index => Math.floor(index / limit) * limit));
+            offsets.forEach(start => this.pages.set(`retained:${directory.key}:${directory.generation}:${start}`,
+                {directory, start, count: Math.min(limit, directory.total - start)}));
+        }
         if (removed(this.focused)) {
             this.focused = undefined;
             this.focusedItem = undefined;
@@ -952,6 +983,7 @@ export class DocTreeController {
         }
         if (removed(this.dragging)) { this.dragging = undefined; }
         this.selectionChanged();
+        this.render();
         this.options.onExpansionChange?.();
     }
 
@@ -1011,6 +1043,9 @@ export class DocTreeController {
                 this.pages.delete(key);
             }
         }
+        for (const directory of this.refreshingDirectories.keys()) {
+            if (directory.notebookId === notebook) { this.refreshingDirectories.delete(directory); }
+        }
         this.selectionChanged();
         this.render();
     }
@@ -1054,6 +1089,57 @@ export class DocTreeController {
 
     private async load(parent: IDocTreeItem, index: number) {
         const directory = this.model.directory(parent);
+        const refresh = this.refreshingDirectories.get(directory);
+        if (refresh && refresh.generation === directory.generation) {
+            refresh.offsets.add(Math.floor(index / this.batchSize()) * this.batchSize());
+            if (!refresh.request) {
+                const generation = this.generation;
+                const current = () => !this.disposed && generation === this.generation && refresh.generation === directory.generation;
+                const key = `refresh:${directory.key}:${directory.generation}:${generation}`;
+                let applied = false;
+                const request = (async () => {
+                    for (let attempt = 0; attempt < 3 && current(); attempt++) {
+                        const ranges: IDocTreeRange[] = [];
+                        for (const offset of refresh.offsets) {
+                            const range = await this.limited(() => this.source.range({notebook: directory.notebookId,
+                                parentID: directory.parentID, offset, limit: this.batchSize(), revision: ranges[0]?.revision}));
+                            if (!current()) { return; }
+                            if (range.stale) { break; }
+                            ranges.push(range);
+                        }
+                        if (ranges.length !== refresh.offsets.size) { continue; }
+                        for (const [pageKey, page] of this.pages) {
+                            if (page.directory === directory) { this.pages.delete(pageKey); }
+                        }
+                        directory.files.clear();
+                        directory.indices.clear();
+                        directory.revision = undefined;
+                        for (const range of ranges) {
+                            this.model.applyRange(directory, range);
+                            this.pages.set(`${key}:${range.offset}`, {directory, start: range.offset, count: range.files.length});
+                        }
+                        this.errors.delete(directory.key);
+                        applied = true;
+                        this.evictPages();
+                        return;
+                    }
+                    if (current()) { throw Error("Document tree refresh did not reach a stable revision"); }
+                })().catch(error => {
+                    if (current()) {
+                        this.errors.add(directory.key);
+                        console.warn("Failed to load document tree range", error);
+                    }
+                }).finally(() => {
+                    if (this.refreshingDirectories.get(directory) === refresh) {
+                        if (applied || !current()) { this.refreshingDirectories.delete(directory); }
+                        else { refresh.request = undefined; }
+                    }
+                });
+                refresh.request = this.trackRequest(key, directory, request, current);
+            }
+            await refresh.request;
+            if (directory.files.has(index) || this.errors.has(directory.key)) { return; }
+        }
         if (directory.files.has(index) || (directory.revision && directory.total !== undefined && index >= directory.total)) {
             return;
         }
@@ -1201,7 +1287,7 @@ export class DocTreeController {
         const pending = expanded || this.expanding.has(item.occurrenceKey) ? Array.from(this.inFlight.values()).filter(request =>
             request.directory === directory && request.isCurrent()) : [];
         const showIndicator = pending.some(request => request.showIndicator);
-        const retry = !expanded && !this.expanding.has(item.occurrenceKey) &&
+        const retry = !this.expanding.has(item.occurrenceKey) &&
             Boolean(directory && this.errors.has(directory.key));
         row.setAttribute("aria-busy", String(pending.length > 0));
         const arrow = row.querySelector(".b3-list-item__arrow");
@@ -1371,6 +1457,7 @@ export class DocTreeController {
         this.mounted.clear();
         this.refreshItems.clear();
         this.pages.clear();
+        this.refreshingDirectories.clear();
         this.errors.clear();
         this.inFlight.forEach(pending => window.clearTimeout(pending.indicatorTimer));
         this.inFlight.clear();

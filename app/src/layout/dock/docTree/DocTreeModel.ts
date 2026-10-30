@@ -219,11 +219,12 @@ export class DocTreeModel {
         return -1;
     }
 
-    public invalidate(notebookId?: string, parentID?: string) {
+    public invalidate(notebookId?: string, parentID?: string, retainFiles = false) {
         for (const directory of this.directories.values()) {
             if ((!notebookId || directory.notebookId === notebookId) &&
                 (parentID === undefined || directory.parentID === parentID)) {
                 directory.generation++;
+                if (retainFiles) { continue; }
                 directory.files.clear();
                 directory.indices.clear();
                 // 保留旧长度作为加载占位，避免刷新等待期间滚动条被浏览器夹回顶部。
@@ -231,6 +232,35 @@ export class DocTreeModel {
             }
         }
         this.project();
+    }
+
+    public removeDocuments(ids: ReadonlySet<string>) {
+        const changed = new Set<IDocTreeDirectory>();
+        for (const directory of this.directories.values()) {
+            const removed = [...directory.files].filter(([, file]) => ids.has(file.id)).map(([index]) => index).sort((a, b) => a - b);
+            if (!removed.length) { continue; }
+            const files = new Map<number, IFile>();
+            directory.indices.clear();
+            let shift = 0;
+            for (const [index, file] of [...directory.files].sort(([left], [right]) => left - right)) {
+                while (shift < removed.length && removed[shift] < index) { shift++; }
+                if (ids.has(file.id)) { continue; }
+                const position = index - shift;
+                files.set(position, file);
+                directory.indices.set(file.id, position);
+            }
+            directory.files = files;
+            directory.total = Math.max(0, (directory.total ?? 0) - removed.length);
+            directory.revision = undefined;
+            directory.generation++;
+            changed.add(directory);
+        }
+        this.expanded.forEach((item, key) => {
+            const current = this.getItem(key);
+            if (current) { this.expanded.set(key, current); }
+        });
+        this.setRoots(this.roots);
+        return changed;
     }
 
     public removeNotebook(notebookId: string) {

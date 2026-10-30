@@ -100,3 +100,23 @@ test("navigation projects a staged child without publishing its directory snapsh
     assert.equal(model.getItem(child.occurrenceKey), undefined);
     assert.equal(model.rowCount, 1);
 });
+
+test("refresh retains a complete old directory until replacement and deletion compacts cached ranges", () => {
+    const model = new DocTreeModel();
+    model.setRoots([{id: "box", notebookId: "box", path: "/", name: "Box", kind: "notebook", subFileCount: 6}]);
+    const root = model.roots[0];
+    model.expanded.set(root.occurrenceKey, root);
+    model.applyRange(model.directory(root), range([file("a"), file("b"), file("c", 1)], 6));
+    model.applyRange(model.directory(root), range([file("f")], 6, 5));
+    const c = model.child(root, 2);
+    model.expanded.set(c.occurrenceKey, c);
+    model.applyRange(model.directory(c), range([file("child")], 1));
+    model.invalidate("box", undefined, true);
+    assert.equal(model.rowAt(2).item.id, "b", "waiting for refresh retains visible source metadata");
+    model.removeDocuments(new Set(["a", "b"]));
+    assert.equal(model.rowCount, 6);
+    assert.equal(model.rowAt(1).item.id, "c");
+    assert.equal(model.rowAt(2).item.id, "child", "remaining expanded branches follow their compacted parent index");
+    assert.equal(model.directory(root).indices.get("f"), 3, "sparse cached pages shift without allocating their holes");
+    assert.equal(model.getItem("notebook:box/a"), undefined);
+});

@@ -474,6 +474,7 @@ exports.cases = async sources => {
         check.ok(!controller.isExpanded("notebook:box/d1"));
         check.ok(!controller.isExpanded("pin:d1"));
         check.equal(controller.model.roots.some(item => item.id === "d1"), false);
+        check.equal(controller.model.directory(controller.model.roots[0]).total, 5, "confirmed deletion removes its source row from the projection");
         while (!release) { await Promise.resolve(); }
         source.range = original;
         release();
@@ -539,7 +540,7 @@ exports.cases = async sources => {
         source.range = async () => { throw new Error("offline"); };
         await controller.reload();
         await frame();
-        check.equal(element.querySelector("[data-tree-loading]").textContent, "Retry");
+        check.equal(element.querySelector("[data-tree-loading]"), null, "failed refresh retains the previous directory instead of empty retry rows");
         const root = controller.getMountedElement("notebook:box");
         check.equal(root.getAttribute("aria-busy"), "false", "a failed range stops the loading arrow");
         check.equal(root.querySelector("[data-tree-indicator]"), null);
@@ -548,7 +549,8 @@ exports.cases = async sources => {
             await new Promise(resolve => { retry = resolve; });
             return original(request);
         };
-        element.querySelector("[data-tree-loading]").click();
+        check.equal(root.querySelector("use").getAttribute("xlink:href"), "#iconRefresh", "a failed refresh offers retry on its existing arrow");
+        root.querySelector(".b3-list-item__arrow").dispatchEvent(new MouseEvent("click", {bubbles: true}));
         controller.render();
         check.equal(root.querySelector("[data-tree-indicator]"), null, "retrying keeps the arrow during the initial wait");
         await new Promise(resolve => setTimeout(resolve, 220));
@@ -556,7 +558,7 @@ exports.cases = async sources => {
         check.equal(root.getAttribute("aria-busy"), "true", "retrying animates the parent arrow");
         check.ok(root.querySelector(".b3-loading.b3-loading--small[data-tree-indicator]"));
         check.ok(root.querySelector(".b3-list-item__arrow").classList.contains("fn__none"));
-        check.equal(element.querySelector("[data-tree-loading]").textContent, "");
+        check.equal(element.querySelector("[data-tree-loading]"), null, "retrying preserves existing rows");
         retry();
         await frame();
         check.equal(root.getAttribute("aria-busy"), "false");
@@ -1094,6 +1096,30 @@ exports.cases = async sources => {
         check.deepEqual(controller.getSelectedItems().map(item => item.id), ["d1"],
             "background restoration of an older selection cannot cancel active document navigation");
         check.ok(controller.getMountedElement("notebook:box/d1"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(6);
+        const {controller, source, element} = fixture;
+        controller.setRoots([...controller.model.roots, {id: "other", notebookId: "other", kind: "notebook", name: "Other", path: "/", subFileCount: 6}]);
+        await controller.toggle("notebook:box", true);
+        await controller.toggle("notebook:other", true);
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            if (request.notebook === "other") { await new Promise(resolve => { release = resolve; }); }
+            return range(request);
+        };
+        const refreshing = controller.reload();
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        await controller.locate("box", "d1");
+        await frame();
+        check.equal(element.querySelector("[data-tree-loading]"), null,
+            "navigation during a multi-notebook refresh cannot expose empty rows from another notebook");
+        check.ok(controller.getMountedElement("notebook:other/d0"), "waiting directories retain their previous complete rows");
+        source.range = range;
+        release();
+        await refreshing;
         fixture.destroy();
     }
     return "File tree selection cases passed";

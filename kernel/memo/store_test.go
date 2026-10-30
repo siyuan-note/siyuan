@@ -439,28 +439,6 @@ func TestMemoryFinalGuardRejectsWrite(t *testing.T) {
 	}
 }
 
-func TestMemoryOperationManifestStableKeys(t *testing.T) {
-	ctx := context.Background()
-	s := newTestStore(t)
-	source := revision([]byte("source"))
-	a, b := revision([]byte("action A")), revision([]byte("action B"))
-	if err := s.PrepareOperation(ctx, "batch", source, []string{a, b}); err != nil {
-		t.Fatal(err)
-	}
-	if err := s.PrepareOperation(ctx, "batch", source, []string{b, a}); err != nil {
-		t.Fatalf("reorder should be stable: %v", err)
-	}
-	if err := s.PrepareOperation(ctx, "batch", source, []string{a}); !errors.Is(err, ErrConflict) {
-		t.Fatal("changed batch accepted")
-	}
-	if err := s.PrepareOperation(ctx, "batch", revision([]byte("changed source")), []string{a, b}); !errors.Is(err, ErrConflict) {
-		t.Fatal("changed source accepted")
-	}
-	if err := s.PrepareOperation(ctx, "batch2", source, []string{"private plaintext"}); !errors.Is(err, ErrInvalid) {
-		t.Fatal("plaintext action key accepted")
-	}
-}
-
 func TestMemoryActiveStateStillChecksValidity(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)

@@ -219,6 +219,8 @@ export const openMemoryManager = () => {
                 const response = await fetchSyncPost("/api/ai/memory/maintain", {text, operationId}, undefined, false);
                 if (closed) { return; }
                 if (response.code !== 0) {
+                    // A rejected changed request has not started; the next explicit click needs a new identity.
+                    if (response.msg === "memory task input changed; start a new task") { operation.committed(); }
                     taskStatus.textContent = response.msg;
                     reportError(response.msg);
                     return;

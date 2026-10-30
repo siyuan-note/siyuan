@@ -422,6 +422,7 @@ func TestAIMemoryModelFailurePreservesRecords(t *testing.T) {
 func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	content := "Prefer concise replies"
+	proposalCalls := 0
 	memoryComplete = func(ctx context.Context, selected *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, "\"terms\"") {
 			return `{"terms":["concise"]}`, nil
@@ -429,11 +430,14 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 		if strings.HasPrefix(prompt, "Generate a concise") {
 			return content, nil
 		}
+		proposalCalls++
 		return `{"actions":[{"id":"","kind":"preference","subject":"user","scope":"workspace","content":"Prefer concise replies","state":"active","sourceIndexes":[0]}]}`, nil
 	}
+	task := &memoryTask{}
 	run := func() *memoryTask {
 		ctx, cancel := context.WithCancel(context.Background())
-		task := &memoryTask{cancel: cancel}
+		task.cancel = cancel
+		task.status = apicontract.AIMemoryTaskData{}
 		runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: content, OperationID: "grounded"}, []memo.Source{{Kind: "user", ID: "grounded", Revision: "source", Evidence: content}}, false, task)
 		return task
 	}
@@ -441,20 +445,30 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 	if first.status.State != "completed" || len(first.status.Results) != 1 || !first.status.Results[0].Saved {
 		t.Fatalf("first: %+v", first.status)
 	}
+	firstID := first.status.Results[0].ID
 	second := run()
-	if second.status.State != "completed" || second.status.Results[0].ID != first.status.Results[0].ID {
+	if second.status.State != "completed" || second.status.Results[0].ID != firstID {
 		t.Fatalf("retry: %+v", second.status)
 	}
 	text, err := BuildAIMemoryContext(context.Background(), "write a response", nil, 6000)
 	if err != nil || !strings.Contains(text, content) {
 		t.Fatalf("later use failed: %q %v", text, err)
 	}
-	memoryComplete = func(context.Context, *conf.AI, string) (string, error) {
+	// A prepared task must not ask the model for a replacement proposal on retry.
+	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
+		if strings.HasPrefix(prompt, "Generate a concise") {
+			return content, nil
+		}
+		proposalCalls++
 		return `{"actions":[{"id":"","kind":"preference","subject":"user","scope":"workspace","content":"A changed proposal","state":"active","sourceIndexes":[0]}]}`, nil
 	}
-	changed := run()
-	if changed.status.State != "failed" {
-		t.Fatal("changed retry proposal was accepted")
+	retried := run()
+	if retried.status.State != "completed" || len(retried.status.Results) != 1 || retried.status.Results[0].ID != firstID || proposalCalls != 1 {
+		t.Fatalf("prepared retry replaced its proposal: %+v calls=%d", retried.status, proposalCalls)
+	}
+	entry, err := aiMemoryStore().Get(context.Background(), firstID)
+	if err != nil || entry.Record.Content != content {
+		t.Fatalf("prepared retry changed persisted content: %+v %v", entry, err)
 	}
 }
 

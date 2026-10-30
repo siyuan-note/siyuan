@@ -393,3 +393,17 @@ test("editing input while a task runs preserves the new draft and requires disca
     state.confirmations[0]();
     assert.equal(state.timers.size, 0);
 });
+
+
+test("a rejected changed configuration starts a fresh identity only on the next explicit click", async () => {
+    const state = harness(url => url.endsWith("/maintain") ?
+        {code: -1, msg: "memory task input changed; start a new task"} : undefined);
+    await state.flush();
+    state.enter("Remember this");
+    await state.click();
+    assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+    await state.click();
+    const submits = state.requests.filter(request => request.url.endsWith("/maintain"));
+    assert.equal(submits.length, 2);
+    assert.notEqual(submits[0].data.operationId, submits[1].data.operationId);
+});

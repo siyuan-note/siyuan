@@ -187,7 +187,7 @@ func TestAIMemorySyncCheckoutDivergenceQuarantines(t *testing.T) {
 }
 
 func TestAIMemorySyncProtectsSafetyMetadata(t *testing.T) {
-	for _, relative := range []string{"operations/operation-hash.md", "conflicts/20261029000000-abcdefg/version.md"} {
+	for _, relative := range []string{"conflicts/20261029000000-abcdefg/version.md"} {
 		t.Run(relative, func(t *testing.T) {
 			dir := t.TempDir()
 			name := memorySyncPrefix + relative
@@ -207,5 +207,30 @@ func TestAIMemorySyncProtectsSafetyMetadata(t *testing.T) {
 				t.Fatalf("metadata changed: %s %v", data, err)
 			}
 		})
+	}
+}
+
+func TestAIMemorySyncIgnoresObsoleteOperations(t *testing.T) {
+	dir := t.TempDir()
+	name := memorySyncPrefix + "operations/legacy.md"
+	target := filepath.Join(dir, filepath.FromSlash(name))
+	if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(target, []byte("legacy opaque ledger"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	// No plan reader is supplied: obsolete operation contents must not be inspected.
+	for _, plan := range []*dejavu.CheckoutPlan{
+		{Upserts: []*entity.File{{Path: name, Size: memo.MaxFileSize + 1}}},
+		{Removes: []*entity.File{{Path: name}}},
+	} {
+		if err := memoryCheckoutPreflight(dir, plan); err != nil {
+			t.Fatalf("ordinary operation sync blocked: %v", err)
+		}
+	}
+	data, err := os.ReadFile(target)
+	if err != nil || string(data) != "legacy opaque ledger" {
+		t.Fatal("preflight deleted legacy files", err)
 	}
 }

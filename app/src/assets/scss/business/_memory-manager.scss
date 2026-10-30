@@ -23,11 +23,12 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
     .b3-button { min-height: 32px; }
   }
 
-  textarea { resize: vertical; min-height: 96px; box-sizing: border-box; max-width: 100%; flex-shrink: 0; }
+  textarea { resize: vertical; box-sizing: border-box; max-width: 100%; flex-shrink: 0; }
 
   &__content {
     max-height: min(360px, 40vh);

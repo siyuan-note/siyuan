@@ -45,18 +45,16 @@ export const openMemoryManager = () => {
         });
     };
     const dialog = new Dialog({
-        title: lang.aiMemory,
+        title: lang.aiMemorySummary,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
-<p class="memory-manager__hint" data-memory-count role="status" aria-live="polite"></p>
 <p class="memory-manager__hint" data-memory-overview-status role="status"></p>
 <div class="memory-manager__hint" data-memory-translation-status role="status" aria-live="polite" aria-label="${escapeHtml(lang.loading)}" hidden><span class="b3-loading b3-loading--small" aria-hidden="true"></span></div>
 <div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
-<p class="memory-manager__hint">${escapeHtml(lang.aiMemoryTip)}</p>
-<textarea class="b3-text-field fn__block" data-memory-task-input rows="4" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
+<textarea class="b3-text-field fn__block" data-memory-task-input rows="1" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
 <p class="memory-manager__hint" data-memory-model-hint role="status" hidden></p>
-<div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 <pre class="memory-manager__status" data-memory-task-status role="status" aria-live="polite"></pre>
+<div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 </div>`,
         beforeClose: () => {
             if (submitting) { return false; }
@@ -78,7 +76,6 @@ export const openMemoryManager = () => {
     const input = root.querySelector<HTMLTextAreaElement>("[data-memory-task-input]");
     const maintain = root.querySelector<HTMLButtonElement>('[data-memory-action="maintain"]');
     const taskStatus = root.querySelector<HTMLElement>("[data-memory-task-status]");
-    const countStatus = root.querySelector<HTMLElement>("[data-memory-count]");
     const overviewStatus = root.querySelector<HTMLElement>("[data-memory-overview-status]");
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
@@ -173,8 +170,6 @@ export const openMemoryManager = () => {
             if (response.code !== 0) { throw new Error(response.msg); }
             overviewFailures = 0;
             count = response.data.countComplete ? response.data.count : undefined;
-            countStatus.textContent = count === undefined ? lang.aiMemoryCountUnavailable :
-                lang.aiMemoryRememberedCount.replace("${count}", String(count));
             overviewStatus.textContent = response.data.stale ? lang.aiMemoryOverviewPending : "";
             // 过期概览不能继续显示为当前事实，等待后台重新生成后再展示。
             overviewSource = response.data.stale ? "" : response.data.memory;
@@ -194,7 +189,6 @@ export const openMemoryManager = () => {
         } catch (error) {
             if (closed || generation !== overviewGeneration) { return; }
             count = undefined;
-            countStatus.textContent = lang.aiMemoryCountUnavailable;
             overviewStatus.textContent = lang.embeddingFailed;
             reportError(error, "overview");
             overview.textContent = "";
@@ -326,7 +320,6 @@ export const openMemoryManager = () => {
             }
         })();
     });
-    countStatus.textContent = lang.loading;
     updateModel();
     void refreshOverview();
     if (taskId) {

@@ -32,6 +32,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     let serial = 0;
     let timerID = 0;
     let content = "";
+    let title = "";
     let beforeClose: () => boolean;
     let destroy: () => void;
     const exported = {} as {openMemoryManager: () => void};
@@ -45,8 +46,8 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
             if (name === "../../dialog") { return {Dialog: class {
                 element = root;
-                constructor(spec: {content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
-                    content = spec.content; beforeClose = spec.beforeClose; destroy = spec.destroyCallback;
+                constructor(spec: {title: string; content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
+                    title = spec.title; content = spec.content; beforeClose = spec.beforeClose; destroy = spec.destroyCallback;
                 }
                 destroy() { destroy(); }
             }}; }
@@ -65,7 +66,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "./state") { return {MemoryOperationState, memoryModelOptions}; }
             throw new Error(name);
         },
-        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => key === "aiMemoryRememberedCount" ? "remembered ${count}" : String(key)})},
+        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => String(key)})},
             setTimeout: (callback: () => void, delay: number) => { const id = ++timerID; timers.set(id, {callback, delay}); return id; },
             clearTimeout: (id: number) => timers.delete(id)},
     });
@@ -83,6 +84,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     };
     return {field, input, button, requests, messages, timers, confirmations, config, flush, tick,
         get content() { return content; },
+        get title() { return title; },
         enter: (text: string) => {input.value = text; input.listeners.get("input")();},
         click: async () => {button.listeners.get("click")(); await flush();},
         close: () => beforeClose(), destroy: () => destroy(), reopen: () => exported.openMemoryManager()};
@@ -218,16 +220,19 @@ test("changing provider configuration or reasoning effort invalidates the displa
     assert.equal(state.field("[data-memory-overview]").textContent, "Processed 3");
 });
 
-test("memory management presents one action and one overview without record-management controls", async () => {
+test("memory management presents one action and one overview without count or record-management controls", async () => {
     const state = harness(url => url.endsWith("/overview") ?
         {code: 0, data: {count: 251, countComplete: true, memory: "A unified overview", user: "legacy content", stale: false}} : undefined);
     await state.flush();
     assert.deepEqual([...state.content.matchAll(/data-memory-action="([^"]+)"/g)].map(match => match[1]), ["maintain"]);
-    assert.doesNotMatch(state.content, /data-memory-(?:query|list|detail|pagination|task-choice)|<details|<select/);
-    assert.equal(state.field("[data-memory-count]").textContent, "remembered 251");
+    assert.equal(state.title, "aiMemorySummary");
+    assert.doesNotMatch(state.content, /aiMemoryTip/);
+    assert.doesNotMatch(state.content, /data-memory-(?:count|query|list|detail|pagination|task-choice)|<details|<select/);
     assert.equal(state.field("[data-memory-overview]").textContent, "A unified overview");
     assert.ok(state.content.indexOf("data-memory-overview aria-label") < state.content.indexOf("data-memory-task-input"));
     assert.ok(state.content.indexOf("data-memory-task-input") < state.content.indexOf('data-memory-action="maintain"'));
+    assert.ok(state.content.indexOf("data-memory-task-status") < state.content.indexOf('data-memory-action="maintain"'));
+    assert.match(state.content, /data-memory-task-input rows="1"/);
     assert.equal(state.requests.filter(request => request.url.endsWith("/list")).length, 1);
     assert.equal(state.requests.find(request => request.url.endsWith("/list")).data.limit, 1);
     assert.equal(state.timers.size, 0);
@@ -240,6 +245,10 @@ test("summary text inherits dialog typography and retains multiline wrapping wit
     assert.match(styles, /&__status\s*\{[^}]*white-space:\s*pre-wrap;[^}]*overflow-wrap:\s*anywhere;[^}]*font:\s*inherit;/);
     assert.match(styles, /&__content\s*\{\s*max-height:\s*min\(360px, 40vh\);\s*overflow:\s*auto;/);
     assert.match(source, /<div class="memory-manager__content b3-typography"/);
+    assert.doesNotMatch(source, /countStatus|aiMemoryRememberedCount|aiMemoryCountUnavailable/);
+    assert.match(styles, /&__actions\s*\{[^}]*justify-content:\s*flex-end;/);
+    assert.match(styles, /textarea\s*\{[^}]*resize:\s*vertical;/);
+    assert.doesNotMatch(styles, /min-height:\s*96px/);
     assert.match(styles, /&__status\s*\{\s*max-height:\s*160px;\s*overflow:\s*auto;/);
     assert.doesNotMatch(styles, /&__(?:record|list|detail|field|empty)\b/);
 });
@@ -248,7 +257,6 @@ test("incomplete counts and stale overviews never display a precise zero or obso
     const state = harness(url => url.endsWith("/overview") ?
         {code: 0, data: {count: 0, countComplete: false, memory: "withdrawn fact", stale: true}} : undefined);
     await state.flush();
-    assert.equal(state.field("[data-memory-count]").textContent, "aiMemoryCountUnavailable");
     assert.equal(state.field("[data-memory-overview]").textContent, "");
     assert.equal(state.field("[data-memory-overview-status]").textContent, "aiMemoryOverviewPending");
     assert.deepEqual([...state.timers.values()].map(timer => timer.delay), [30000]);
@@ -297,7 +305,6 @@ test("completed candidate-only work reports no new usable memory and hides inter
     const message = state.field("[data-memory-task-status]").textContent;
     assert.match(message, /aiMemoryTaskNoNewUsable/);
     assert.doesNotMatch(message, /candidate-internal|aiMemoryTaskSaved/);
-    assert.equal(state.field("[data-memory-count]").textContent, "remembered 0");
     assert.equal(state.requests.filter(request => request.url.endsWith("/overview")).length, 2);
 });
 
@@ -311,7 +318,6 @@ test("unknown final count and concurrent total changes do not invent per-task sa
     await state.flush();
     state.enter("A correction");
     await state.click();
-    assert.equal(state.field("[data-memory-count]").textContent, "aiMemoryCountUnavailable");
     assert.equal(state.field("[data-memory-task-status]").textContent, "taskStatusDone");
 });
 
@@ -394,7 +400,6 @@ test("completion waits for its fresh overview before reporting that no usable me
     finishOverview({code: 0, data: {count: 1, countComplete: true, memory: "New memory", stale: false}});
     await state.flush();
     assert.equal(state.field("[data-memory-task-status]").textContent, "taskStatusDone");
-    assert.equal(state.field("[data-memory-count]").textContent, "remembered 1");
 });
 
 test("an unavailable task unlocks explicit retry with the same operation identity", async () => {
@@ -427,7 +432,7 @@ test("lost submit acknowledgments recover by operation ID without automatically 
     assert.equal(state.close(), true);
 });
 
-test("overview read failures recover automatically and do not claim a zero count", async () => {
+test("overview read failures recover automatically without a count placeholder", async () => {
     let attempts = 0;
     const state = harness(url => {
         if (url.endsWith("/overview")) {
@@ -436,9 +441,9 @@ test("overview read failures recover automatically and do not claim a zero count
         }
     });
     await state.flush();
-    assert.equal(state.field("[data-memory-count]").textContent, "aiMemoryCountUnavailable");
+    assert.equal(state.field("[data-memory-overview-status]").textContent, "embeddingFailed");
     await state.tick(2000);
-    assert.equal(state.field("[data-memory-count]").textContent, "remembered 3");
+    assert.equal(state.field("[data-memory-overview-status]").textContent, "");
     assert.equal(state.field("[data-memory-overview]").textContent, "Valid summary");
     assert.equal(state.timers.size, 0);
 });
@@ -501,7 +506,6 @@ test("closed dialogs ignore delayed task and overview responses", async () => {
     finishOverview({code: 0, data: {count: 10, countComplete: true, memory: "late", stale: false}});
     finishTask(completed("running"));
     await state.flush();
-    assert.equal(state.field("[data-memory-count]").textContent, "loading");
     assert.equal(state.field("[data-memory-overview]").textContent, "");
     assert.equal(state.timers.size, 0);
 });

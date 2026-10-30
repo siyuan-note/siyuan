@@ -121,6 +121,8 @@ export const openMemoryManager = () => {
         if (!memory.trim() || !language || isReadOnly() || !config.ai?.memory?.enabled ||
             !memoryModelOptions(config.ai?.providers || [], modelId || "").some(model => model.id === modelId && !model.unavailable)) {
             abortTranslations();
+            translationStatus.hidden = true;
+            renderMemoryOverview(overview, memory);
             return;
         }
         const key = JSON.stringify([memory, language, modelId, reasoningEffort]);
@@ -150,20 +152,30 @@ export const openMemoryManager = () => {
         if (closed || generation !== overviewGeneration || overviewSource !== memory) { return; }
         translationStatus.hidden = true;
         if (window.siyuan.config.lang !== language || window.siyuan.config.ai?.providers !== providers ||
-            window.siyuan.config.ai?.memory?.reasoningEffort !== reasoningEffort) { return; }
+            window.siyuan.config.ai?.memory?.reasoningEffort !== reasoningEffort ||
+            window.siyuan.config.ai?.memory?.modelId !== modelId) {
+            renderMemoryOverview(overview, memory);
+            return;
+        }
         if (result.error) {
-            if (!entry.controller.signal.aborted) { reportError(result.error, "translation"); }
+            if (!entry.controller.signal.aborted) {
+                renderMemoryOverview(overview, memory);
+                reportError(result.error, "translation");
+            }
             return;
         }
         if (!isReadOnly() && window.siyuan.config.ai?.memory?.enabled && window.siyuan.config.ai.memory.modelId === modelId &&
             memoryModelOptions(window.siyuan.config.ai.providers || [], modelId).some(model => model.id === modelId && !model.unavailable)) {
             renderMemoryOverview(overview, result.memory);
+        } else {
+            renderMemoryOverview(overview, memory);
         }
     };
     const refreshOverview = async () => {
         window.clearTimeout(overviewTimer);
         const generation = ++overviewGeneration;
-        translationStatus.hidden = true;
+        overview.textContent = "";
+        translationStatus.hidden = false;
         try {
             const response = await fetchSyncPost("/api/ai/memory/overview", {}, undefined, false);
             if (closed || generation !== overviewGeneration) { return; }
@@ -175,10 +187,10 @@ export const openMemoryManager = () => {
             overviewSource = response.data.stale ? "" : response.data.memory;
             if (response.data.stale) {
                 overview.textContent = "";
+                translationStatus.hidden = true;
                 abortTranslations();
             }
             else {
-                renderMemoryOverview(overview, overviewSource);
                 void translateOverview(overviewSource, generation);
             }
             taskSummaryReady = true;
@@ -192,6 +204,7 @@ export const openMemoryManager = () => {
             overviewStatus.textContent = lang.embeddingFailed;
             reportError(error, "overview");
             overview.textContent = "";
+            translationStatus.hidden = true;
             overviewSource = "";
             abortTranslations();
             if (lastTask?.state === "completed") { renderTask(); }

@@ -647,5 +647,32 @@ exports.cases = async sources => {
         check.deepEqual(options.at(-1), {ignoreUnavailable: false}, "a scrolling locate retains user feedback");
         fixture.destroy();
     }
+    {
+        const fixture = make(200);
+        const {controller, element} = fixture;
+        await controller.toggle("notebook:box", true);
+        element.scrollTop = 600;
+        element.dispatchEvent(new Event("scroll"));
+        await frame();
+        const row = controller.getMountedElement("notebook:box/d25");
+        const top = row.getBoundingClientRect().top;
+        const scrollTop = element.scrollTop;
+        // 焦点行和逐步布局使浏览器在占位区间替换期间执行滚动锚定。
+        row.focus({preventScroll: true});
+        const insertBefore = controller.list.insertBefore.bind(controller.list);
+        controller.list.insertBefore = (...args) => {
+            const inserted = insertBefore(...args);
+            controller.list.getBoundingClientRect();
+            return inserted;
+        };
+        await controller.select(row.dataset.treeKey, {scroll: false});
+        await frame();
+        check.equal(element.scrollTop, scrollTop, "selecting a visible row keeps its viewport during layout");
+        check.equal(row.getBoundingClientRect().top, top, "spacer replacement keeps the clicked row in place");
+        fullyVisible(await controller.locate("box", "d180"), element);
+        await controller.focusRelative(1);
+        fullyVisible(controller.getMountedElement("notebook:box/d181"), element);
+        fixture.destroy();
+    }
     return "File tree selection cases passed";
 };

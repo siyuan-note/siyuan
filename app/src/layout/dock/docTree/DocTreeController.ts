@@ -87,6 +87,8 @@ export class DocTreeController {
         this.list.style.minHeight = "0";
         this.list.style.display = "flex";
         this.list.style.flexDirection = "column";
+        // 滚动位置由控制器维护，浏览器锚定会在占位区间替换时额外补偿。
+        this.list.style.overflowAnchor = "none";
         options.element.replaceChildren(this.list);
         controllers.set(options.element, this);
         const signal = this.events.signal;

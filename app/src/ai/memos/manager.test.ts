@@ -19,6 +19,7 @@ type Request = {url: string; data: Record<string, unknown>};
 const harness = (respond?: (url: string, data: Record<string, unknown>) => unknown | Promise<unknown>,
                  options: {readonly?: boolean; configured?: boolean} = {}) => {
     const requests: Request[] = [];
+    const messages: string[] = [];
     const nodes = new Map<string, ElementStub>();
     const root = {querySelector: (selector: string) => {
         if (!nodes.has(selector)) { nodes.set(selector, new ElementStub()); }
@@ -39,6 +40,8 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     }).outputText, {
         exports: exported,
         require: (name: string) => {
+            if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { element.textContent = markdown; }}; }
+            if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
             if (name === "../../dialog") { return {Dialog: class {
                 element = root;
                 constructor(spec: {content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
@@ -77,7 +80,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         next[1].callback();
         await flush();
     };
-    return {field, input, button, requests, timers, confirmations, config, flush, tick,
+    return {field, input, button, requests, messages, timers, confirmations, config, flush, tick,
         get content() { return content; },
         enter: (text: string) => {input.value = text; input.listeners.get("input")();},
         click: async () => {button.listeners.get("click")(); await flush();},
@@ -103,7 +106,9 @@ test("summary text inherits dialog typography and retains multiline wrapping wit
     const source = readFileSync("src/ai/memos/manager.ts", "utf8");
     const styles = readFileSync("src/assets/scss/business/_memory-manager.scss", "utf8");
     assert.match(source, /<pre class="memory-manager__status" data-memory-task-status role="status" aria-live="polite">/);
-    assert.match(styles, /&__content,\s*&__status\s*\{[^}]*white-space:\s*pre-wrap;[^}]*overflow-wrap:\s*anywhere;[^}]*font:\s*inherit;/);
+    assert.match(styles, /&__status\s*\{[^}]*white-space:\s*pre-wrap;[^}]*overflow-wrap:\s*anywhere;[^}]*font:\s*inherit;/);
+    assert.match(styles, /&__content\s*\{\s*max-height:\s*min\(360px, 40vh\);\s*overflow:\s*auto;/);
+    assert.match(source, /<div class="memory-manager__content b3-typography"/);
     assert.match(styles, /&__status\s*\{\s*max-height:\s*160px;\s*overflow:\s*auto;/);
     assert.doesNotMatch(styles, /&__(?:record|list|detail|field|empty)\b/);
 });
@@ -216,6 +221,29 @@ test("running-task polling does not repeatedly scan the full overview", async ()
     assert.equal(state.requests.filter(request => request.url.endsWith("/overview")).length, 1);
     await state.tick(1000);
     assert.equal(state.requests.filter(request => request.url.endsWith("/overview")).length, 2);
+});
+
+test("the shared spinner follows submission and running state; repeated errors show one escaped notification", async () => {
+    let reads = 0;
+    const state = harness(url => {
+        if (url.endsWith("/maintain")) { return {code: 0, data: {taskId: "task"}}; }
+        if (url.endsWith("/task")) {
+            if (++reads < 3) { throw new Error("<img src=x onerror=bad>"); }
+            return completed();
+        }
+    });
+    await state.flush();
+    assert.match(state.content, /class="b3-loading b3-loading--small" data-memory-loading/);
+    assert.equal(state.field("[data-memory-loading]").hidden, true);
+    state.enter("Remember this");
+    await state.click();
+    assert.equal(state.field("[data-memory-loading]").hidden, false);
+    await state.tick(2000);
+    assert.equal(state.messages.length, 1);
+    assert.match(state.messages[0], /&lt;img/);
+    assert.doesNotMatch(state.messages[0], /<img/);
+    await state.tick(4000);
+    assert.equal(state.field("[data-memory-loading]").hidden, true);
 });
 
 test("completion waits for its fresh overview before reporting that no usable memories were added", async () => {

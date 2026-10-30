@@ -29,7 +29,16 @@
 
   textarea { resize: vertical; min-height: 96px; box-sizing: border-box; max-width: 100%; }
 
-  &__content,
+  &__content {
+    max-height: min(360px, 40vh);
+    overflow: auto;
+    overflow-wrap: anywhere;
+    flex-shrink: 0;
+    &:empty { display: none; }
+  }
+
+  .b3-loading { margin-right: 8px; }
+
   &__status {
     margin: 0;
     white-space: pre-wrap;

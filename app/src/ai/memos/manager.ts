@@ -1,3 +1,5 @@
+import {renderMemoryOverview} from "./overview";
+import {showMessage} from "../../dialog/message";
 import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchSyncPost} from "../../util/fetch";
@@ -37,11 +39,11 @@ export const openMemoryManager = () => {
 <p class="memory-manager__hint">${escapeHtml(lang.aiMemoryTip)}</p>
 <textarea class="b3-text-field fn__block" data-memory-task-input rows="4" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
 <p class="memory-manager__hint" data-memory-model-hint role="status" hidden></p>
-<div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain">${escapeHtml(lang.aiMemoryOrganize)}</button></div>
+<div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 <pre class="memory-manager__status" data-memory-task-status role="status" aria-live="polite"></pre>
 <p class="memory-manager__hint" data-memory-count role="status" aria-live="polite"></p>
 <p class="memory-manager__hint" data-memory-overview-status role="status"></p>
-<pre class="memory-manager__content" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></pre>
+<div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
 </div>`,
         beforeClose: () => {
             if (submitting) { return false; }
@@ -66,6 +68,14 @@ export const openMemoryManager = () => {
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const taskLabels: Record<string, string> = {queued: lang.agentConfirmPending, running: lang.loading,
         completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
+    const reportedErrors = new Set<string>();
+    const reportError = (error: unknown, channel = "task") => {
+        const message = String(error);
+        if (!closed && message && !reportedErrors.has(channel)) {
+            reportedErrors.add(channel);
+            showMessage(escapeHtml(message), 5000, "error");
+        }
+    };
     const retryDelay = (attempt: number) => Math.min(30000, 1000 * 2 ** Math.min(attempt, 5));
     const updateModel = () => {
         const ai = window.siyuan.config.ai;
@@ -75,6 +85,7 @@ export const openMemoryManager = () => {
         hint.hidden = ready;
         hint.textContent = ready ? "" : `${lang.aiSelectModel} (${lang.config} - ${lang.ai} - ${lang.aiMemory})`;
         maintain.disabled = isReadOnly() || !ready || submitting || running || discovering;
+        root.querySelector<HTMLElement>("[data-memory-loading]").hidden = !submitting && !running;
         input.disabled = isReadOnly() || submitting;
         return ready;
     };
@@ -87,7 +98,7 @@ export const openMemoryManager = () => {
         window.clearTimeout(overviewTimer);
         const generation = ++overviewGeneration;
         try {
-            const response = await fetchSyncPost("/api/ai/memory/overview", {});
+            const response = await fetchSyncPost("/api/ai/memory/overview", {}, undefined, false);
             if (closed || generation !== overviewGeneration) { return; }
             if (response.code !== 0) { throw new Error(response.msg); }
             overviewFailures = 0;
@@ -96,7 +107,8 @@ export const openMemoryManager = () => {
                 lang.aiMemoryRememberedCount.replace("${count}", String(count));
             overviewStatus.textContent = response.data.stale ? lang.aiMemoryOverviewPending : "";
             // 过期概览不能继续显示为当前事实，等待后台重新生成后再展示。
-            overview.textContent = response.data.stale ? "" : response.data.memory;
+            if (response.data.stale) { overview.textContent = ""; }
+            else { renderMemoryOverview(overview, response.data.memory); }
             taskSummaryReady = true;
             if (lastTask?.state === "completed") { renderTask(); }
             if (!response.data.countComplete || response.data.stale) {
@@ -106,7 +118,8 @@ export const openMemoryManager = () => {
             if (closed || generation !== overviewGeneration) { return; }
             count = undefined;
             countStatus.textContent = lang.aiMemoryCountUnavailable;
-            overviewStatus.textContent = String(error);
+            overviewStatus.textContent = lang.embeddingFailed;
+            reportError(error, "overview");
             overview.textContent = "";
             if (lastTask?.state === "completed") { renderTask(); }
             overviewTimer = window.setTimeout(() => { void refreshOverview(); }, retryDelay(++overviewFailures));
@@ -122,11 +135,12 @@ export const openMemoryManager = () => {
         if (closed || !taskId) { return; }
         const generation = ++taskGeneration;
         try {
-            const response = await fetchSyncPost("/api/ai/memory/task", {taskId});
+            const response = await fetchSyncPost("/api/ai/memory/task", {taskId}, undefined, false);
             if (closed || generation !== taskGeneration) { return; }
             if (response.code !== 0) {
                 if (response.msg === "memory task unavailable; retry explicitly") {
                     taskStatus.textContent = response.msg;
+                    reportError(response.msg);
                     lastTask = undefined;
                     clearTask();
                     void refreshOverview();
@@ -140,6 +154,7 @@ export const openMemoryManager = () => {
             if (!running) { taskSummaryReady = false; }
             updateModel();
             renderTask();
+            if (lastTask.state === "failed") { reportError(lastTask.error || lang.embeddingFailed, "result"); }
             if (running) {
                 taskTimer = window.setTimeout(() => { void poll(); }, 1000);
             } else {
@@ -153,6 +168,7 @@ export const openMemoryManager = () => {
         } catch (error) {
             if (closed || generation !== taskGeneration) { return; }
             taskStatus.textContent = String(error);
+            reportError(error);
             // 查询故障只重查同一任务，不能自动重新发起可能计费的整理请求。
             taskTimer = window.setTimeout(() => { void poll(); }, retryDelay(++taskFailures));
         }
@@ -160,7 +176,7 @@ export const openMemoryManager = () => {
     const discoverTask = async () => {
         const generation = ++taskGeneration;
         try {
-            const response = await fetchSyncPost("/api/ai/memory/list", {limit: 1});
+            const response = await fetchSyncPost("/api/ai/memory/list", {limit: 1}, undefined, false);
             if (closed || generation !== taskGeneration) { return; }
             if (response.code !== 0) { throw new Error(response.msg); }
             taskFailures = 0;
@@ -179,6 +195,7 @@ export const openMemoryManager = () => {
         } catch (error) {
             if (closed || generation !== taskGeneration) { return; }
             taskStatus.textContent = String(error);
+            reportError(error);
             taskTimer = window.setTimeout(() => { void discoverTask(); }, retryDelay(++taskFailures));
         }
     };
@@ -189,6 +206,7 @@ export const openMemoryManager = () => {
         const text = input.value;
         if (!text.trim()) { taskStatus.textContent = lang.aiMemoryTaskInputTip; return; }
         const operationId = operation.operationFor(text, genUUID);
+        reportedErrors.clear();
         submitting = true;
         taskGeneration++;
         window.clearTimeout(taskTimer);
@@ -198,9 +216,13 @@ export const openMemoryManager = () => {
         updateModel();
         void (async () => {
             try {
-                const response = await fetchSyncPost("/api/ai/memory/maintain", {text, operationId});
+                const response = await fetchSyncPost("/api/ai/memory/maintain", {text, operationId}, undefined, false);
                 if (closed) { return; }
-                if (response.code !== 0) { taskStatus.textContent = response.msg; return; }
+                if (response.code !== 0) {
+                    taskStatus.textContent = response.msg;
+                    reportError(response.msg);
+                    return;
+                }
                 taskId = response.data.taskId;
                 submittedInput = {id: taskId, text};
                 activeMemoryTask = taskId;
@@ -210,6 +232,7 @@ export const openMemoryManager = () => {
             } catch (error) {
                 if (closed) { return; }
                 taskStatus.textContent = String(error);
+                reportError(error);
                 // 提交回包丢失时按提交身份查询，避免用户重复付费处理。
                 taskId = operationId;
                 submittedInput = {id: taskId, text};

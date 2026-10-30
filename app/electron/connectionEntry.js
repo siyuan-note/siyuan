@@ -9,6 +9,9 @@
     button.type = "button";
     button.className = "b3-button";
     const langSelect = document.querySelector(".lang");
+    // 安装包的页面位于资源目录的 app/electron 下，语言文件位于资源目录的 appearance 下；源码运行时两者都位于 app 下。
+    const languageDir = [path.join(__dirname, "..", "..", "appearance", "langs"),
+        path.join(__dirname, "..", "appearance", "langs")].find(dir => fs.existsSync(dir));
     const language = () => langSelect?.value || new URLSearchParams(location.search).get("lang") || "en";
     const update = () => {
         let lang = language();
@@ -16,10 +19,10 @@
             lang = "en";
         }
         try {
-            button.textContent = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "appearance", "langs", lang + ".json"),
+            button.textContent = JSON.parse(fs.readFileSync(path.join(languageDir, lang + ".json"),
                 "utf8")).connectRemoteKernel;
         } catch (error) {
-            button.textContent = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "appearance", "langs", "en.json"),
+            button.textContent = JSON.parse(fs.readFileSync(path.join(languageDir, "en.json"),
                 "utf8")).connectRemoteKernel;
         }
     };

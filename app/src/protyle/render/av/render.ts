@@ -310,7 +310,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             <span>${window.siyuan.languages.loadMore}</span>
             <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
         </button>`}
-        ${data.nested ? `<span class="ft__secondary av__sub-items-count">${escapeHtml(window.siyuan.languages.avSubItemsCounts.replace("${roots}", String(data.nested.rootCount)).replace("${matches}", String(data.nested.matchedCount)))}</span>` : ""}
+        ${data.nested ? `<span class="ft__on-surface av__sub-items-count">${escapeHtml(window.siyuan.languages.avSubItemsCounts.replace("${roots}", String(data.nested.rootCount)).replace("${matches}", String(data.nested.matchedCount)))}</span>` : ""}
     </div>
 </div>
 <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`;

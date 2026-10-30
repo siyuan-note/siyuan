@@ -415,45 +415,45 @@ if (response.code === 0 && response.data) {
 
 ### 親ドキュメントIDでドキュメントを作成
 
-* `POST /api/filetree/createDocByParent`
-* 認証、管理者権限、書き込み可能なワークスペース、および文書メタデータの準備が完了した開いているノートブックが必要です。暗号化ノートブックはロック解除済みである必要があります
-* 既存の親の下に1つのドキュメントを作成します。親の自動作成やタイトルによる既存ドキュメントの再利用は行いません
-* パラメータ：次の例ではノートブックのルートに `C/C++` というタイトルのドキュメントを作成します
+既存の親の下に1つのドキュメントを作成します。管理者権限、書き込み可能なワークスペース、および文書メタデータの準備が完了した開いているノートブックが必要です。暗号化ノートブックはロック解除済みである必要があります。
+
+* `/api/filetree/createDocByParent`
+* パラメータ
 
   ```json
   {
     "notebook": "20210817205410-2kvfpfn",
     "parentID": null,
     "id": "20261030150000-abc1234",
-    "title": {"format": "plain", "text": "C/C++"},
+    "title": {
+      "format": "plain",
+      "text": "C/C++"
+    },
     "markdown": "Hello"
   }
   ```
 
-| 必須フィールド | 説明 |
-| --- | --- |
-| `notebook` | 作成先ノートブックのID |
-| `parentID` | 同じノートブック内の既存の親ドキュメントID。ルートには明示的な `null` を指定し、省略や `""` は使用できません |
-| `id` | 呼び出し側が送信前に生成して保存する新しいドキュメントID。思源のフロントエンドでは `Lute.NewNodeID()` を使用できます。新しい文書ごとに例のIDを置き換えてください |
-| `title` | `{ "format": "plain", "text": "..." }`。両フィールドが必須です。Markdown記号は文字として扱われ、`/` は1つのタイトル内に保持されます |
-| `markdown` | GFM形式の本文。`""` も指定できます |
-
-`null` を指定できるのは `parentID` のみです。`path` や `hPath` を含む未知のフィールドは拒否されます。タイトルは最大512 Unicodeコードポイントです。前後の空白、無効な文字、`.`、`..` は自動的に除去・置換されず、拒否されます。空の `title.text` は明示的な空タイトルとして保存され、表示用の仮タイトルが生成されます。親が存在しない場合、本文ブロックIDや別ノートブックの親IDを指定した場合も、ルートには切り替わりません。既存の文書IDは `documentIDConflict` となり、上書きやIDの自動変更は行われません。名前条件を指定しなければ、異なるIDで同名の兄弟文書を作成できます。
-
-| 任意フィールド | 説明 |
-| --- | --- |
-| `expectedParentRevision` | パス照会で得た親の不透明なリビジョン。ルートでは `resolveDocPath` の `data.start.revision` を使用します。不一致は `planChanged` になります |
-| `nameConditions` | 最大128個の `{parentID, title, expectedID}` オブジェクト。各オブジェクトの3フィールドはすべて必須です。`parentID: null` はルートを表し、`expectedID: null` は同名の子が存在しないことを要求します。それ以外は、同名の子が1つだけ存在しIDが一致することを要求します。条件の対象は作成先の親とその祖先のみです |
-| `expectedTarget` | 設定から作成した計画の `{notebook, purpose, revision}`。`purpose` は `document`、`reference`、`dailyNote` のいずれかです。直接作成では省略できます。対象設定の変更は `planChanged` になります |
-| `tags` | カンマ区切りの文書タグ。既定値は `""`。ノートブックの機能制限が適用されます |
-| `withMath` | インライン数式の解析を有効にします。既定値は `false` |
-| `clippingHref` | クリッピング元URL。既定値は `""`。認識されたコミュニティ記事URLでは対応するMarkdown構文オプションを有効にします |
-| `sorts` | カスタム順序を指定する兄弟文書の保存パス配列。既定値は `[]`。`sortTargetID` とは併用できません |
-| `sortTargetID`、`sortPosition` | 既存の兄弟文書IDの `before` または `after` に配置します。両方を指定するか、両方を省略してください。並べ替えオプションを指定しない場合はノートブックの新規文書の順序設定を使用します |
-| `docCreateTemplatePath` | 本文テンプレートのパス。`markdown` が空の場合のみ適用します。既定値は `""` |
-| `listDocTree` | 作成通知に含めるドキュメントツリーの更新フラグ。既定値は `false` |
-
-* 成功時の戻り値
+    * `notebook`：作成先ノートブックID
+    * `parentID`：同じノートブック内の既存の親文書ID。ルートは `null`。必須で、空文字列は指定できません
+    * `id`：送信前に生成して保存する新しい文書ID。思源のフロントエンドでは `Lute.NewNodeID()` を使用できます。文書ごとに例のIDを置き換えます
+    * `title`：タイトルオブジェクト。`format` は `plain` のみで、`text` は必須です。Markdown記号は文字として扱い、`/` はタイトル内に保持します
+    * `title.text`：最大512 Unicodeコードポイント。空の場合は空タイトルの印と表示用の仮タイトルを生成します。前後の空白、無効な文字、`.`、`..` は拒否します
+    * `markdown`：GFM形式の本文。空文字列も指定できます
+    * `expectedParentRevision`：パス照会で得た親のバージョン、省略可能。ルートは `resolveDocPath` の `data.start.revision` を使用します。不一致は `planChanged` になります
+    * `nameConditions`：最大128個の `{parentID, title, expectedID}` の配列、省略可能。各オブジェクトの3フィールドはすべて必須です。`parentID: null` はルート、`expectedID: null` は同名の子が存在しないことを要求します。それ以外は同名の子が1つだけ存在しIDが一致することを要求します。対象は作成先の親とその祖先です
+    * `expectedTarget`：設定に基づく作成計画の `{notebook, purpose, revision}`、省略可能。`purpose` は `document`、`reference`、`dailyNote` のいずれかです。設定変更は `planChanged` になります
+    * `tags`：カンマ区切りの文書タグ、省略可能。既定値は空文字列。ノートブックの機能制限が適用されます
+    * `withMath`：インライン数式の解析を有効にするか、省略可能。既定値は `false`
+    * `clippingHref`：クリッピング元URL、省略可能。既定値は空文字列。認識されたコミュニティ記事URLでは対応するMarkdown構文オプションを有効にします
+    * `sorts`：カスタム順序を指定する兄弟文書の保存パス配列、省略可能。既定値は `[]`。`sortTargetID` とは併用できません
+    * `sortTargetID`：相対順序の基準となる兄弟文書ID、省略可能。`sortPosition` と一緒に指定します
+    * `sortPosition`：`before` または `after`、省略可能。`sortTargetID` と一緒に指定します。並べ替え指定がなければノートブックの新規文書の順序設定を使用します
+    * `docCreateTemplatePath`：本文テンプレートのパス、省略可能。既定値は空文字列。`markdown` が空の場合のみ適用します
+    * `listDocTree`：作成通知に含めるドキュメントツリー更新フラグ、省略可能。既定値は `false`
+    * `null` を指定できるのは `parentID` のみです。`path` や `hPath` などの未知のフィールドは拒否します
+    * 不足する親は自動作成しません。親IDが無効、本文ブロック、別ノートブックの文書の場合はエラーになります
+    * 既存IDは `documentIDConflict` になります。名前条件で制限しなければ、異なるIDで同名文書を作成できます
+* 戻り値
 
   ```json
   {
@@ -466,8 +466,18 @@ if (response.code === 0 && response.data) {
         "id": "20261030150000-abc1234",
         "parentID": null,
         "path": "/20261030150000-abc1234.sy",
-        "title": {"format": "plain", "text": "C/C++", "empty": false},
-        "segments": [{"id": "20261030150000-abc1234", "text": "C/C++", "empty": false}],
+        "title": {
+          "format": "plain",
+          "text": "C/C++",
+          "empty": false
+        },
+        "segments": [
+          {
+            "id": "20261030150000-abc1234",
+            "text": "C/C++",
+            "empty": false
+          }
+        ],
         "depth": 1,
         "displayPath": "/C/C++",
         "revision": "opaque-revision"
@@ -476,65 +486,99 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-`data.id` は作成された文書IDです。`document` は文書の識別情報とパスを表します。ルートの `parentID` は `null`、`path` はIDに基づく `.sy` 保存パス、`segments` は現在の文書を含む祖先列、`depth` はその要素数です。`title.empty` と各要素の `empty` は明示的な空タイトルを示します。既存文書の読み取りでは `title.format` は `plain` または `inline-ast` になります。`displayPath` は表示専用であり、分割して識別情報を復元してはいけません。`revision` は不透明な値です。上の例の文字列ではなく、実際の戻り値を使用してください。
+    * `data.id`：作成された文書ID
+    * `data.document`：文書メタデータ。後述のパス照会も同じ構造を使用します
+    * `data.document.parentID`：親文書ID。ルートは `null`
+    * `data.document.path`：IDに基づく `.sy` 保存パス
+    * `data.document.title`：タイトル要約。`format` は `plain` または `inline-ast`、`text` は表示文字列、`empty` は明示的な空タイトルを示します
+    * `data.document.segments`：現在の文書を含む祖先列。各要素は `id`、`text`、`empty` を含みます
+    * `data.document.depth`：パス要素数
+    * `data.document.displayPath`：表示用パス。タイトルに `/` を含められるため、分割して文書IDを復元できません
+    * `data.document.revision`：後続の確認に使うバージョン文字列。例の `opaque-revision` ではなく実際の戻り値を使用します
 
-上の文書の下に子文書を作成するには、同じエンドポイントへ別のリクエストを送信します。
+上の文書の下に子文書を作成するパラメータの例：
 
 ```json
 {
   "notebook": "20210817205410-2kvfpfn",
   "parentID": "20261030150000-abc1234",
   "id": "20261030150001-def5678",
-  "title": {"format": "plain", "text": "Child"},
+  "title": {
+    "format": "plain",
+    "text": "Child"
+  },
   "markdown": "Child content",
   "expectedParentRevision": "opaque-revision",
-  "nameConditions": [{"parentID": "20261030150000-abc1234", "title": "Child", "expectedID": null}]
+  "nameConditions": [
+    {
+      "parentID": "20261030150000-abc1234",
+      "title": "Child",
+      "expectedID": null
+    }
+  ]
 }
 ```
 
-親の実際のリビジョンに置き換えてください。任意の名前条件により、照会後に別の呼び出し側が `Child` を作成した場合の重複を防げます。既存の名前付き祖先を再利用する場合や、複数階層の親を作成する場合は、[パス解決の手順](#タイトル配列でドキュメントパスを解決)を使用してください。
+`expectedParentRevision` には返された親のバージョンを使用します。名前条件は `Child` が存在しないことを要求します。複数階層の親の作成は[パス解決](#タイトル配列でドキュメントパスを解決)を参照してください。
 
-* 作成失敗時は `code: -1` を返し、利用可能な場合は `data` に作成結果の状態を含みます
+* 作成失敗時は `code: -1` を返します。失敗段階の情報がある場合は次の `data` を含みます
 
   ```json
   {
     "code": -1,
     "msg": "parent document changed after planning",
-    "data": {"reason": "planChanged", "commitState": "none", "stage": "source", "completed": []}
+    "data": {
+      "reason": "planChanged",
+      "commitState": "none",
+      "stage": "source",
+      "completed": []
+    }
   }
   ```
 
-| `data.reason` | 意味 |
-| --- | --- |
-| `invalidTitle` | タイトルまたは名前条件内のタイトルが無効 |
-| `unsupportedTitleFormat` | 作成時のタイトル形式が `plain` 以外 |
-| `parentUnavailable` | 親が無効、存在しない、アクセス不能、または作成先ノートブック内の文書ではない |
-| `planChanged` | 親のリビジョン、名前条件、設定由来の対象、並べ替え先が変更されたため、対象を再解決して確認する必要がある |
-| `documentIDConflict` | 指定IDが使用済み。存在するだけでは同一リクエストの成功を確認できない |
-| `indexUnavailable` | 文書メタデータが未準備または不整合。準備完了後に再解決する |
-| `writeFailed` | その他の作成、並べ替え、テンプレートの失敗。`msg` とコミット状態を確認する |
+    * `data.reason`：エラーの原因
+        * `invalidTitle`：無効なタイトル
+        * `unsupportedTitleFormat`：作成形式が `plain` 以外
+        * `parentUnavailable`：親を利用できない
+        * `planChanged`：親のバージョン、名前条件、設定由来の対象、並べ替え先の変更
+        * `documentIDConflict`：使用済みID
+        * `indexUnavailable`：メタデータの未準備や不整合
+        * `writeFailed`：その他の作成・並べ替え・テンプレートのエラー
+    * `data.commitState`：`none` は今回の呼び出しでは未保存、`committed` は保存済みだが後続処理が失敗した可能性がある状態、`unknown` は保存されたか確認できない状態です
+    * `data.id`：保存を確認できた文書ID、省略される場合があります
+    * `data.stage`：`validate`、`source`、`sort`、`template` などの失敗段階
+    * `data.completed`：`source`、`sort` などの完了済み段階
+    * リクエスト解析、認証、ノートブックアクセスのエラーでは通常のエラー形式のみを返す場合があります
 
-`commitState` は `none`（この呼び出しではソース文書をコミットしていない）、`committed`（ソースは保存済みだが後続処理が失敗した可能性がある）、`unknown`（保存されたか確認できない）のいずれかです。`stage` は `validate`、`source`、`sort`、`template` などの失敗段階、`completed` は `source`、`sort` などの完了済み段階を示します。任意の `id` は保存を確認できた文書を示します。並べ替えやテンプレートの失敗でも文書は保持されます。再作成したり、処理全体の成功と判断したりしないでください。リクエスト解析、認証、ノートブックへのアクセスの失敗では、これらのフィールドを含まない通常のエラー形式が返る場合があります。
-
-送信前に各IDとリクエストを保存してください。タイムアウト、応答喪失、`unknown` の場合は自動作成を停止し、メタデータの準備完了後に[元のIDを照会](#idでドキュメントパスを取得)して親、タイトル、内容、未完了処理を確認してください。別のIDを生成したり、テンプレートを無確認で再実行したりしてはいけません。ID競合やメタデータの取得成功だけでは、すべての後続処理の完了は確認できません。構造化リクエストの失敗を理由に、旧パスAPIへの書き込みに自動で切り替えないでください。
+並べ替えやテンプレートの失敗でも保存済みの文書は保持します。タイムアウト、応答喪失、`unknown` の場合は、メタデータの準備完了後に[元のIDを照会](#idでドキュメントパスを取得)し、親、タイトル、本文、未完了段階を確認して再試行を判断します。IDの一致だけでは全段階の成功を確認できません。元のIDを保持し、テンプレートの重複実行や旧パスAPIへの自動切り替えを避けてください。
 
 ### タイトル配列でドキュメントパスを解決
 
-* `POST /api/filetree/resolveDocPath`
-* 認証、管理者権限、および開いていてロック解除済みで文書メタデータの準備が完了したノートブックが必要です。このエンドポイントは読み取り専用で、文書を作成しません
+指定位置からタイトルを順に解決します。文書は作成しません。管理者権限、および開いていてロック解除済みで文書メタデータの準備が完了したノートブックが必要です。
+
+* `/api/filetree/resolveDocPath`
 * パラメータ
 
   ```json
   {
     "notebook": "20210817205410-2kvfpfn",
-    "start": {"kind": "root"},
-    "segments": ["Notes", "C/C++"]
+    "start": {
+      "kind": "root"
+    },
+    "segments": [
+      "Notes",
+      "C/C++"
+    ]
   }
   ```
 
-`start` は `id` を含まない `{ "kind": "root" }`、または `{ "kind": "document", "id": "existing-document-id" }` です。`segments` は0〜128個の空でないタイトルの配列で、各親の下で順に完全一致を確認します。要素内の `/` は文字のまま扱い、Unicode正規化、全角半角変換、パーセントデコードは行いません。明示的な空タイトルは文書IDを起点にしてください。ノートブックのルート文書IDは論理ルートに正規化されます。
+    * `notebook`：ノートブックID
+    * `start`：ルートは `id` なしの `{kind: "root"}`、既存文書は `{kind: "document", id: "existing-document-id"}`。ノートブックのルート文書IDは論理ルートとして扱います
+    * `segments`：0〜128個の空でないタイトルの配列。順に完全一致で検索します。タイトル内の `/` は文字のまま扱い、Unicode正規化、全角半角変換、パーセントデコードは行いません
+    * 空タイトルの文書は文書IDを起点にします。空の配列は起点文書またはルートを返します
+* 戻り値
 
-* `Notes` が存在しない場合の戻り値の例
+  次の戻り値の例では `Notes` が存在しないものとします。
 
   ```json
   {
@@ -542,45 +586,71 @@ if (response.code === 0 && response.data) {
     "msg": "",
     "data": {
       "status": "missing",
-      "start": {"notebook": "20210817205410-2kvfpfn", "id": null, "revision": "opaque-root-revision"},
+      "start": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": null,
+        "revision": "opaque-root-revision"
+      },
       "resolved": null,
       "nextIndex": 0,
       "candidates": [],
       "candidatesTruncated": false,
-      "nameConditions": [{"parentID": null, "title": "Notes", "expectedID": null}]
+      "nameConditions": [
+        {
+          "parentID": null,
+          "title": "Notes",
+          "expectedID": null
+        }
+      ]
     }
   }
   ```
 
-`status` は `resolved`、`missing`、`ambiguous` のいずれかで、すべて `code: 0` の正常な照会結果です。次の操作前に必ず状態を確認してください。`resolved` は最後に一意に解決された文書で、構造は上記と同じです。ルートでは `null` です。`nextIndex` は不足または曖昧な要素の0始まりの位置で、すべて解決できた場合は `segments.length` です。`start` は起点の識別情報とリビジョンです。空の配列では起点文書または論理ルートを返します。
+    * `data.status`：`resolved`（解決済み）、`missing`（不足）、`ambiguous`（曖昧）。いずれも `code: 0` を返します
+    * `data.start`：起点のノートブック、文書ID（ルートは `null`）、バージョン
+    * `data.resolved`：最後に一意に解決された文書。上記の文書メタデータと同じ構造で、ルートは `null`
+    * `data.nextIndex`：不足または曖昧な要素の0始まりの位置。すべて解決できた場合は `segments.length`
+    * `data.candidates`：曖昧な要素の同名候補。ID順で最大128件。文書IDを明示的に選択します
+    * `data.candidatesTruncated`：追加候補が存在するか
+    * `data.nameConditions`：一意の一致と最初の不足名。作成時に渡すと照会後の変更を確認できます
+    * エラーは `code: -1` となり、`data.reason` を含む場合があります。エラーは文書の不足を意味しません
 
-`ambiguous` の場合、`candidates` はID順で最大128件の同名文書を返し、`candidatesTruncated` は追加候補の存在を示します。先頭候補を自動選択してはいけません。`nameConditions` は一意に一致した名前と最初の不足名を記録し、作成時に送り返すことで照会後の変更を検出できます。メタデータの利用不能などのエラーは `code: -1` となり、`data.reason` を含む場合があります。エラーを文書の不足として扱わないでください。
+`/Notes/2026-10-30/Article` を取り込む場合は、親のタイトル配列を `["Notes", "2026-10-30"]`、最終タイトルを `"Article"` とします。
 
-たとえば `/Notes/2026-10-30/Article` を取り込む場合は、親のタイトル配列 `["Notes", "2026-10-30"]` と最終タイトル `"Article"` を分けて保持します。
+1. ルートから親のタイトル配列を解決します。`ambiguous` の場合はIDで親を選択します
+2. `missing` の場合は `markdown: ""` で `segments[nextIndex]` を作成します。`parentID` は `resolved.id`、`resolved` が `null` なら `start.id` を使用します。対応するバージョンを `expectedParentRevision` に設定し、返された `nameConditions` も渡して、生成した文書IDを保存します
+3. 成功後に親のタイトル配列を再解決し、すべて解決できるまで繰り返します。作成ごとに名前条件を更新します
+4. 解決した親の下に `Article` を作成し、親のバージョンと最終的なMarkdown本文を渡します。最終タイトルの一意性が必要なら `{parentID, title: "Article", expectedID: null}` を加え、条件数を128以内に保ちます
 
-1. ルートから親のタイトル配列を解決します。`ambiguous` の場合は、続行前に親文書IDを明示的に選択します
-2. `missing` の場合は `createDocByParent` で `segments[nextIndex]` を作成します。`parentID` は `resolved.id`、`resolved` が `null` なら `start.id` を使用します。`expectedParentRevision` は対応する `resolved.revision` または `start.revision` を使用し、返された `nameConditions` も渡します。新しいIDを保存し、祖先の本文は `markdown: ""` とします
-3. 成功後に親のタイトル配列全体を再解決し、すべて解決できるまで繰り返します。その名前を作成した後に、古い「名前が存在しない」という条件を再使用してはいけません
-4. 解決された親文書IDの下に `Article` を作成し、親のリビジョンと最終的なMarkdown本文を渡します。最終タイトルの一意性が必要なら、条件に `{parentID, title: "Article", expectedID: null}` を追加し、条件数を128以内に保ちます
-
-各作成は別々にコミットされます。後続処理が失敗しても作成済みの祖先とIDを保持し、失敗した段階の結果を確認してから再開してください。複数文書全体の原子性や、パス全体の自動ロールバックは保証されません。
+文書はそれぞれ保存されます。後続処理が失敗しても既存の親は保持し、失敗段階の結果を確認して続行します。パス全体を1つの操作としてコミットまたはロールバックするものではありません。
 
 ### IDでドキュメントパスを取得
 
-* `POST /api/filetree/getDocPaths`
-* 認証、管理者権限、および開いていてロック解除済みで文書メタデータの準備が完了したノートブックが必要です
+IDで文書メタデータを読み取ります。管理者権限、および開いていてロック解除済みで文書メタデータの準備が完了したノートブックが必要です。
+
+* `/api/filetree/getDocPaths`
 * パラメータ
 
   ```json
   {
     "notebook": "20210817205410-2kvfpfn",
-    "ids": ["20261030150000-abc1234", "20261030150001-def5678"]
+    "ids": [
+      "20261030150000-abc1234",
+      "20261030150001-def5678"
+    ]
   }
   ```
 
-`ids` は1〜128個の有効な文書IDです。重複は最初の出現順を保って除去されます。`code: 0` の場合、`data.documents` は[作成結果](#親ドキュメントidでドキュメントを作成)で説明した `document` オブジェクトの配列です。`data.missingIDs` は存在しないID、別ノートブックのID、本文ブロックIDを列挙します。両配列は空になる場合があります。インデックスが未準備または不整合の場合はエラーであり、正常な不足結果として扱ってはいけません。各文書のメタデータは一貫して読み取られますが、バッチ全体の単一スナップショットは保証されません。
+    * `notebook`：ノートブックID
+    * `ids`：1〜128個の有効な文書ID。重複は最初の出現順で除去します
+* 戻り値
 
-このエンドポイントはメタデータのみを読み取り、本文は返しません。作成結果が不明な場合は、保存した元のIDで文書を特定し、本文を別途読み取って確認してから、残りの並べ替え、テンプレート、インポーターの処理を行ってください。
+    * `data.documents`：リクエスト順の文書メタデータ配列。構造は[作成結果](#親ドキュメントidでドキュメントを作成)を参照してください
+    * `data.missingIDs`：存在しないID、別ノートブックのID、本文ブロックID
+    * 各配列は空になる場合があります。メタデータが未準備または不整合の場合は、不足結果ではなくエラーになります
+    * 各文書は一貫して読み取られますが、バッチ全体の単一スナップショットは保証されません
+
+このエンドポイントは本文を返しません。作成結果が不明な場合は元のIDで文書を特定し、本文を別途読み取り、残りの並べ替え、テンプレート、インポート段階を確認してください。
 
 ### ドキュメントの名前を変更
 

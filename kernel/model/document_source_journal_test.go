@@ -6,7 +6,6 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,6 +32,10 @@ func TestDocumentSourceRecoveryPreservesConflictsAndCorruptRecords(t *testing.T)
 			if err = j.save(); err != nil {
 				t.Fatal(err)
 			}
+			originalJournal, err := os.ReadFile(j.filename())
+			if err != nil {
+				t.Fatal(err)
+			}
 			newer := append(append([]byte{}, original...), '\n')
 			if err = os.WriteFile(filename, newer, 0600); err != nil {
 				t.Fatal(err)
@@ -43,8 +46,8 @@ func TestDocumentSourceRecoveryPreservesConflictsAndCorruptRecords(t *testing.T)
 				}
 			}
 			err = recoverDocumentSources()
-			if err == nil || (!corrupt && !errors.Is(err, util.ErrFileChanged)) {
-				t.Fatalf("unsafe recovery was not rejected: %v", err)
+			if corrupt && err == nil || !corrupt && err != nil {
+				t.Fatalf("unexpected recovery result: %v", err)
 			}
 			current, readErr := os.ReadFile(filename)
 			if readErr != nil || !bytes.Equal(current, newer) {
@@ -52,6 +55,12 @@ func TestDocumentSourceRecoveryPreservesConflictsAndCorruptRecords(t *testing.T)
 			}
 			if _, statErr := os.Stat(j.filename()); statErr != nil {
 				t.Fatal("unsafe recovery discarded recovery evidence", statErr)
+			}
+			if !corrupt {
+				archived, err := os.ReadFile(documentSourceArchivePath(j.ID))
+				if err != nil || !bytes.Equal(archived, originalJournal) {
+					t.Fatal("archive did not preserve exact recovery bytes", err)
+				}
 			}
 		})
 	}

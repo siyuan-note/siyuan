@@ -167,6 +167,14 @@ func SyncDataJob() {
 
 func BootSyncData() {
 	defer logging.Recover()
+	if err := prepareDocumentSourceBootSync(); err != nil {
+		if util.IsBooted() {
+			logging.LogErrorf("prepare recovered document sources before sync failed: %s", err)
+		} else {
+			logging.LogFatalf(logging.ExitCodeFileSysErr, "prepare recovered document sources before sync failed: %s", err)
+		}
+		return
+	}
 	if scheduleBootSync() {
 		return
 	}

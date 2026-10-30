@@ -7,9 +7,11 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"testing"
 
@@ -18,8 +20,148 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestTransactionSourceEncryptedMirrorRollback(t *testing.T) {
+	if !prepareStructuredTitlesCryptoTest(t) {
+		return
+	}
+	oldQueue := util.QueueDir
+	util.QueueDir = t.TempDir()
+	t.Cleanup(func() { util.QueueDir = oldQueue })
+	util.Lang = "en"
+	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "table": "Table", "select": "Select"}}
+	box := newStructuredTitlesEncryptedBox(t)
+	source := createStructuredTitlesEncryptedDoc(t, box, nil, "Private database")
+	target := createStructuredTitlesEncryptedDoc(t, box, nil, "Private bound source")
+	view := av.NewAttributeView(ast.NewNodeID())
+	av.SetAVBoxID(view.ID, box)
+	primary := view.GetBlockKeyValues()
+	primary.Values = append(primary.Values, &av.Value{ID: ast.NewNodeID(), KeyID: primary.Key.ID, BlockID: ast.NewNodeID(), Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: target.ID}})
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	bound, _, err := filesys.ReadTreeSnapshot(box, target.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bound.Root.SetIALAttr(av.NodeAttrNameAvs, view.ID)
+	if err = indexWriteTreeUpsertQueue(bound); err != nil {
+		t.Fatal(err)
+	}
+	carrierTree, _, err := filesys.ReadTreeSnapshot(box, source.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	carrier := &ast.Node{Type: ast.NodeAttributeView, ID: ast.NewNodeID(), AttributeViewID: view.ID, AttributeViewType: "table"}
+	carrier.SetIALAttr("id", carrier.ID)
+	carrierTree.Root.AppendChild(carrier)
+	if err = indexWriteTreeUpsertQueue(carrierTree); err != nil {
+		t.Fatal(err)
+	}
+	av.UpsertBlockRel(view.ID, carrier.ID)
+	sourceBefore, targetBefore := structuredTitlesCiphertext(t, source), structuredTitlesCiphertext(t, target)
+	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "delete", ID: carrier.ID}}}
+	tx.writeTransactionTree = func(*parse.Tree) error { return errors.New("injected encrypted mirror save failure") }
+	if err = PerformTxSync(tx); err == nil || tx.sourceRollbackErr != nil {
+		t.Fatal("encrypted mirror rollback failed", err, tx.sourceRollbackErr)
+	}
+	assertEncryptedFileBytes(t, filepath.Join(util.DataDir, box, source.Path), sourceBefore)
+	assertEncryptedFileBytes(t, filepath.Join(util.DataDir, box, target.Path), targetBefore)
+	rels, err := av.GetBlockRelsByAVIDs([]string{view.ID})
+	if err != nil || !slices.Contains(rels[view.ID], carrier.ID) {
+		t.Fatal("private mirror was not restored", err)
+	}
+	if treenode.GetBlockTreeInExactBox(carrier.ID, box) == nil || sql.GetBlock(carrier.ID) != nil {
+		t.Fatal("private mirror recovery lost scope")
+	}
+	if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "delete", ID: carrier.ID}}}); err != nil {
+		t.Fatal(err)
+	}
+	bound, _, err = filesys.ReadTreeSnapshot(box, target.Path)
+	if err != nil || bound.Root.IALAttr(av.NodeAttrNameAvs) != "" {
+		t.Fatal("private binding was not removed", err)
+	}
+}
+
+func TestTransactionSourceEncryptedConflictArchive(t *testing.T) {
+	if !prepareStructuredTitlesCryptoTest(t) {
+		return
+	}
+	oldQueue := util.QueueDir
+	util.QueueDir = t.TempDir()
+	t.Cleanup(func() { util.QueueDir = oldQueue })
+	box := newStructuredTitlesEncryptedBox(t)
+	source := createStructuredTitlesEncryptedDoc(t, box, nil, "Archived private source")
+	before := structuredTitlesCiphertext(t, source)
+	tree, _, err := filesys.ReadTreeSnapshot(box, source.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Root.SetIALAttr("title", "Pending private source")
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
+		t.Fatal(err)
+	}
+	after := structuredTitlesCiphertext(t, source)
+	tree.Root.SetIALAttr("title", "Current private source")
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
+		t.Fatal(err)
+	}
+	current := structuredTitlesCiphertext(t, source)
+	j := &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending", Files: []*documentSourceFile{{Box: box, Path: source.Path, Before: before, After: after}}}
+	if err = j.save(); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(j.filename())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = recoverDocumentSources(); err != nil {
+		t.Fatal(err)
+	}
+	archived, err := os.ReadFile(documentSourceArchivePath(j.ID))
+	if err != nil || !bytes.Equal(archived, raw) || bytes.Contains(archived, []byte("private source")) {
+		t.Fatal("archive lost ciphertext or leaked plaintext", err)
+	}
+	keyBackup, err := os.ReadFile(filepath.Join(filepath.Dir(documentSourceArchivePath(j.ID)), "keys", "backup.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	originalKeys, err := os.ReadFile(dataCryptoBackupPath())
+	if err != nil || !bytes.Equal(originalKeys, keyBackup) {
+		t.Fatal("archive lost matching recovery keys", err)
+	}
+	indexBox(box)
+	assertEncryptedFileBytes(t, filepath.Join(util.DataDir, box, source.Path), current)
+	if hasDocumentSourceRecovery(box) {
+		t.Fatal("authenticated encrypted index did not complete recovery")
+	}
+	if _, err = os.Stat(documentSourceArchivePath(j.ID)); err != nil {
+		t.Fatal("index removed ciphertext archive", err)
+	}
+
+	// 认证失败保留当前密文和待索引记录，不以日志快照替换损坏源。
+	j.ID, j.State = ast.NewNodeID(), "pending"
+	j.Recovered = nil
+	if err = j.save(); err != nil {
+		t.Fatal(err)
+	}
+	corrupt := append([]byte{}, current...)
+	corrupt[len(corrupt)-1] ^= 1
+	if err = os.WriteFile(filepath.Join(util.DataDir, box, source.Path), corrupt, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = recoverDocumentSources(); err != nil {
+		t.Fatal(err)
+	}
+	indexBox(box)
+	if !hasDocumentSourceRecovery(box) {
+		t.Fatal("authentication failure completed index recovery")
+	}
+	assertEncryptedFileBytes(t, filepath.Join(util.DataDir, box, source.Path), corrupt)
+}
 
 func TestTransactionSourceEncryptedPartialFailure(t *testing.T) {
 	if !prepareStructuredTitlesCryptoTest(t) {

@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -203,26 +204,37 @@ func readDocumentSourceJournals() ([]*documentSourceJournal, error) {
 		if err != nil {
 			return nil, err
 		}
-		var envelope struct {
-			Data   json.RawMessage `json:"data"`
-			Digest string          `json:"sha256"`
-		}
-		if json.Unmarshal(data, &envelope) != nil {
-			return nil, errors.New("corrupt document source recovery record")
-		}
-		digest := sha256.Sum256(envelope.Data)
-		j := &documentSourceJournal{}
-		if envelope.Digest != hex.EncodeToString(digest[:]) || json.Unmarshal(envelope.Data, j) != nil || !j.valid() || entry.Name() != j.ID+".json" {
-			return nil, errors.New("unsupported or corrupt document source recovery record")
+		j, err := parseDocumentSourceJournal(data, entry.Name())
+		if err != nil {
+			return nil, err
 		}
 		result = append(result, j)
 	}
 	return result, nil
 }
 
-// rollback checks the entire batch before changing anything and conditionally restores
-// each source. Unexpected edits and conflicting directories preserve the record and data.
-func (j *documentSourceJournal) rollback() error {
+func parseDocumentSourceJournal(data []byte, name string) (*documentSourceJournal, error) {
+	var envelope struct {
+		Data   json.RawMessage `json:"data"`
+		Digest string          `json:"sha256"`
+	}
+	if json.Unmarshal(data, &envelope) != nil {
+		return nil, errors.New("corrupt document source recovery record")
+	}
+	digest := sha256.Sum256(envelope.Data)
+	j := &documentSourceJournal{}
+	if envelope.Digest != hex.EncodeToString(digest[:]) || json.Unmarshal(envelope.Data, j) != nil || !j.valid() || name != j.ID+".json" {
+		return nil, errors.New("unsupported or corrupt document source recovery record")
+	}
+	return j, nil
+}
+
+func equalDocumentSource(a, b []byte) bool {
+	return (a == nil) == (b == nil) && bytes.Equal(a, b)
+}
+
+func (j *documentSourceJournal) checkSources() error {
+	var conflict error
 	for _, file := range j.Files {
 		name, _ := file.filename()
 		current, err := os.ReadFile(name)
@@ -232,40 +244,60 @@ func (j *documentSourceJournal) rollback() error {
 		if err != nil {
 			return err
 		}
-		if !bytes.Equal(current, file.Before) && !bytes.Equal(current, file.After) {
-			return fmt.Errorf("%w: %s", util.ErrFileChanged, name)
+		if !equalDocumentSource(current, file.Before) && !equalDocumentSource(current, file.After) {
+			conflict = fmt.Errorf("%w: %s", util.ErrFileChanged, name)
 		}
 	}
+	_, err := j.checkMove()
+	if err != nil {
+		return err
+	}
+	return conflict
+}
+
+func (j *documentSourceJournal) checkMove() (bool, error) {
+	if j.Move == nil {
+		return false, nil
+	}
+	from, _ := documentSourcePath(j.Move.Box, j.Move.From, true)
+	to, _ := documentSourcePath(j.Move.Box, j.Move.To, true)
+	fromInfo, fromErr := os.Lstat(from)
+	toInfo, toErr := os.Lstat(to)
+	if fromErr != nil && !os.IsNotExist(fromErr) {
+		return false, fromErr
+	}
+	if toErr != nil && !os.IsNotExist(toErr) {
+		return false, toErr
+	}
+	if os.IsNotExist(fromErr) && toErr == nil && toInfo.IsDir() {
+		return true, nil
+	}
+	if fromErr == nil && fromInfo.IsDir() && os.IsNotExist(toErr) {
+		return false, nil
+	}
+	return false, fmt.Errorf("%w: conflicting document recovery directories", util.ErrFileChanged)
+}
+
+// rollback 在修改前预检整笔事务，每次实际替换仍只接受事务已记录的写入结果。
+func (j *documentSourceJournal) rollback() error {
+	if err := j.checkSources(); err != nil {
+		return err
+	}
 	if j.Move != nil {
+		move, err := j.checkMove()
+		if err != nil {
+			return err
+		}
 		from, _ := documentSourcePath(j.Move.Box, j.Move.From, true)
 		to, _ := documentSourcePath(j.Move.Box, j.Move.To, true)
-		fromInfo, fromErr := os.Lstat(from)
-		toInfo, toErr := os.Lstat(to)
-		if os.IsNotExist(fromErr) && toErr == nil && toInfo.IsDir() {
+		if move {
 			if err := os.Rename(to, from); err != nil {
 				return err
 			}
-		} else if fromErr != nil || !fromInfo.IsDir() || !os.IsNotExist(toErr) {
-			return errors.New("conflicting document recovery directories")
 		}
 	}
 	for _, file := range j.Files {
-		name, _ := file.filename()
-		current, err := os.ReadFile(name)
-		if os.IsNotExist(err) {
-			current, err = nil, nil
-		}
-		if err != nil {
-			return err
-		}
-		if bytes.Equal(current, file.Before) {
-			continue
-		}
-		if file.Before == nil {
-			if err = removeIndexRepairSourceIfUnchanged(name, file.After); err != nil {
-				return err
-			}
-		} else if err = util.WriteFileIfUnchanged(name, current, file.Before); err != nil {
+		if err := restoreDocumentSource(file); err != nil {
 			return err
 		}
 		if file.Kind == "database" {
@@ -281,21 +313,72 @@ func (j *documentSourceJournal) rollback() error {
 	return j.save()
 }
 
+func restoreDocumentSource(file *documentSourceFile) error {
+	name, err := file.filename()
+	if err != nil {
+		return err
+	}
+	current, err := os.ReadFile(name)
+	if os.IsNotExist(err) {
+		current, err = nil, nil
+	}
+	if err != nil {
+		return err
+	}
+	if equalDocumentSource(current, file.Before) {
+		return nil
+	}
+	if !equalDocumentSource(current, file.After) {
+		return fmt.Errorf("%w: %s", util.ErrFileChanged, name)
+	}
+	if file.Before == nil {
+		return removeIndexRepairSourceIfUnchanged(name, file.After)
+	}
+	if err = util.WriteFileIfUnchanged(name, file.After, file.Before); os.IsNotExist(err) {
+		return fmt.Errorf("%w: %s", util.ErrFileChanged, name)
+	}
+	return err
+}
+
 func recoverDocumentSources() error {
 	entries, err := readDocumentSourceJournals()
 	if err != nil {
 		return err
 	}
+	preserve, err := documentSourceConflicts(entries)
+	if err != nil {
+		return err
+	}
+	// 所有相连记录先归档再恢复，避免旧事务覆盖已选择保留的当前源。
 	for _, entry := range entries {
-		if entry.State == "pending" && !entry.Forward {
+		if preserve[entry.ID] {
+			if err = archiveDocumentSource(entry); err != nil {
+				return err
+			}
+		}
+	}
+	for _, entry := range entries {
+		if entry.State == "pending" && !entry.Forward && !preserve[entry.ID] {
 			if err = entry.rollback(); err != nil {
+				// 预检后的外部变更同样保留当前源，原记录先持久化归档。
+				if errors.Is(err, util.ErrFileChanged) {
+					if err = archiveDocumentSource(entry); err == nil {
+						return recoverDocumentSources()
+					}
+				}
 				return err
 			}
 		} else {
+			if entry.State != "recovered" {
+				entry.Recovered = nil
+			}
 			entry.State = "recovered"
 			if err = entry.save(); err != nil {
 				return err
 			}
+		}
+		if preserve[entry.ID] {
+			logging.LogWarnf("preserved current transaction sources [%s]; recovery archived", entry.ID)
 		}
 		if !slices.ContainsFunc(entry.Files, func(file *documentSourceFile) bool { return file.Kind == "" }) {
 			if err = os.Remove(entry.filename()); err != nil {

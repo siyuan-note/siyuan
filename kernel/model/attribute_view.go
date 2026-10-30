@@ -5484,7 +5484,12 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 			if nil == tx {
 				tree, _ = LoadTreeByBlockID(blockID)
 			} else {
-				tree, _ = tx.loadTree(blockID)
+				var err error
+				tree, err = tx.loadTree(blockID)
+				if err != nil && !errors.Is(err, ErrBlockNotFound) && !os.IsNotExist(err) {
+					tx.sourceErr = err
+					return
+				}
 			}
 		}
 		if nil == tree {

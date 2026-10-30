@@ -2314,7 +2314,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	var nonEditorTx *Transaction
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
-		for _, id := range nonEditorTx.syncDelete2Block(removeTree.Root, removeTree) {
+		var avIDs []string
+		avIDs, err = nonEditorTx.syncDelete2Block(removeTree.Root, removeTree)
+		if err != nil {
+			return
+		}
+		for _, id := range avIDs {
 			ReloadAttrView(id)
 		}
 	}

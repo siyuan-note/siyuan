@@ -9,6 +9,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -261,6 +262,34 @@ func (tx *Transaction) commitDocumentSources() error {
 	return nil
 }
 
+func (tx *Transaction) stageSourceBlockAttrs(before map[string]string, node *ast.Node) {
+	if tx.sourceBlockAttrs == nil {
+		tx.sourceBlockAttrs = map[string]*Operation{}
+	}
+	if previous := tx.sourceBlockAttrs[node.ID]; previous != nil {
+		before = previous.Data.(map[string]any)["old"].(map[string]string)
+	}
+	tx.sourceBlockAttrs[node.ID] = blockAttrsOperation(before, node)
+}
+
+func (tx *Transaction) publishSourceBlockAttrs() {
+	ids := make([]string, 0, len(tx.sourceBlockAttrs))
+	for id := range tx.sourceBlockAttrs {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	var operations []*Operation
+	for _, id := range ids {
+		operations = append(operations, tx.sourceBlockAttrs[id])
+	}
+	if len(operations) > 0 {
+		tx.DoOperations = append(tx.DoOperations, operations...)
+		event := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		event.Data = []*Transaction{{DoOperations: operations, UndoOperations: []*Operation{}}}
+		util.PushEvent(event)
+	}
+}
+
 func (tx *Transaction) rollbackDocumentSources() {
 	if tx.sourceJournal == nil {
 		return
@@ -284,6 +313,8 @@ func (tx *Transaction) rollbackDocumentSources() {
 	}
 	// Rebuild from actual authenticated sources, including failure before the first save.
 	// Queue replacement after any already-enqueued partial saves so SQL converges to the rollback.
+	presentMirrors := map[string]string{}
+	mirrorSourcesValid := true
 	for _, file := range j.Files {
 		if file.Kind == "relations" || file.Kind == "flashcard" {
 			continue
@@ -302,11 +333,20 @@ func (tx *Transaction) rollbackDocumentSources() {
 			continue
 		}
 		if err == nil {
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				presentMirrors[node.ID] = node.AttributeViewID
+			}
 			clearAttrs(tree)
 			sql.UpsertTreeQueue(tree)
 			err = treenode.ReplaceBlockTree(tree)
 		}
 		if err != nil {
+			mirrorSourcesValid = false
+			tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, err)
+		}
+	}
+	if mirrorSourcesValid {
+		if err := av.ReconcileBlockRels(tx.sourceMirrors, presentMirrors); err != nil {
 			tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, err)
 		}
 	}
@@ -324,6 +364,7 @@ func (tx *Transaction) releaseDocumentSources(committed bool) {
 	tx.sourceWatchers = nil
 	tx.sourceDatabaseBefore = nil
 	tx.sourceRelationBoundaries = nil
+	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	if committed && tx.sourceJournal != nil {
 		if err := os.Remove(tx.sourceJournal.filename()); err != nil {
 			logging.LogWarnf("retain committed transaction recovery [%s]: %s", tx.sourceJournal.ID, err)

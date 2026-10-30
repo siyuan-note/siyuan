@@ -6,7 +6,7 @@
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
 		"type": "doc",
-		"updated": "20261021005205"
+		"updated": "20261030093418"
 	},
 	"Children": [
 		{
@@ -829,6 +829,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "第三方主题保存在 data/themes/，图标包保存在 data/icons/，参与数据同步和快照。各设备的外观选择仍保存在本机 conf/conf.json 中；内置外观资源不参与同步。升级迁移将原目录移入数据目录，迁移后移除源副本。"
+				}
+			]
+		},
+		{
+			"ID": "20261030093418-iki0mer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030093418-iki0mer",
+				"updated": "20261030093418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未完成事务的恢复记录与后来修改、移动或删除的文件冲突时，启动会自动保留当前文件并重建相关索引，不会重新创建已删除的文档。原始恢复记录保留在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/document-source-recovery/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中供排查，无需手动清理或确认。文件访问错误、不支持的格式和认证失败仍会报错并保留原始数据。"
 				}
 			]
 		}

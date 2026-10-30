@@ -17,7 +17,7 @@ const runElectron = async () => {
             assert.ok(offset >= 0 && limit > offset);
             return source.slice(offset, limit);
         };
-        const prepare = section("    const fixBlockWidth =", "    const setPadding =") +
+        const prepare = section("    const getPageSizeDimensions =", "    const setPadding =") +
             section("        const buildExportConfig =", "        const reserveEmbeddedAssetSpace =")
                 .replaceAll("${currentWindowId}", "0") +
             section("            const isPaged =", "            exportConfig.filePaths =");

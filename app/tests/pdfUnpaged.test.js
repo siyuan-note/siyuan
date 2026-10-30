@@ -18,22 +18,29 @@ const runElectron = async () => {
             assert.ok(limit > offset);
             return source.slice(offset, limit);
         };
-        const prepare = section("    const fixBlockWidth =", "    const setPadding =") +
+        const prepare = section("    const getPageSizeDimensions =", "    const setPadding =") +
             section("        const buildExportConfig =", "        const reserveEmbeddedAssetSpace =")
                 .replaceAll("${currentWindowId}", "0") +
             section("            const isPaged =", "            exportConfig.filePaths =");
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/export.scss")).css;
         for (const landscape of [false, true]) {
             for (const scale of [0.5, 1, 1.5]) {
-                for (const {margin, paged} of [{margin: 0, paged: false}, {margin: 1, paged: false},
-                    {margin: 1, paged: true}]) {
+                for (const {margin, paged, size} of [
+                    {margin: 0, paged: false}, {margin: 1, paged: false}, {margin: 1, paged: true},
+                    {margin: 0.2, paged: false, size: {width: 5, height: 7}},
+                    {margin: 0.2, paged: true, size: {width: 5, height: 7}},
+                    {margin: 0.2, paged: false, size: {width: 9, height: 6}},
+                    {margin: 0.2, paged: true, size: {width: 9, height: 6}},
+                ]) {
                     await win.loadURL("data:text/html,<html><body></body></html>");
                     await win.webContents.insertCSS(css);
                     const options = await win.webContents.executeJavaScript(`(async () => {
                         document.body.innerHTML = '<div id="action"></div><div id="preview"></div>';
                         document.body.style.margin = "0";
                         const actionElement = document.getElementById("action");
-                        const values = {pageSize: "A4", scale: ${scale}, marginsTop: ${margin},
+                        const values = {pageSize: ${JSON.stringify(size ? "custom" : "A4")},
+                            pageWidth: ${size?.width || 8.27}, pageHeight: ${size?.height || 11.7},
+                            scale: ${scale}, marginsTop: ${margin},
                             marginsBottom: ${margin}, marginsLeft: 0.54, marginsRight: 0.54,
                             marginsType: "custom"};
                         for (const [id, value] of Object.entries(values)) {
@@ -59,6 +66,9 @@ const runElectron = async () => {
                         const updateHeadingPageBreaks = () => {};
                         ${prepare}
                         if (exportConfig.titleImage !== false) throw new Error("PDF export must retain the title image choice");
+                        if (JSON.stringify(exportConfig.pageSize) !== ${JSON.stringify(JSON.stringify(size || "A4"))}) {
+                            throw new Error("The export record must retain the selected paper size");
+                        }
                         actionElement.remove();
                         return exportConfig.pdfOptions;
                     })()`);
@@ -66,6 +76,15 @@ const runElectron = async () => {
                         headerTemplate: "<span></span>",
                         footerTemplate: '<div style="font-size:10px"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'});
                     const pages = pdf.toString("latin1").match(/\/Type\s*\/Page\b/g) || [];
+                    const box = pdf.toString("latin1").match(/\/MediaBox\s*\[0 0 ([\d.]+) ([\d.]+)\]/);
+                    assert.ok(box);
+                    const dimensions = size || {width: 8.27, height: 11.7};
+                    assert.ok(Math.abs(Number(box[1]) / 72 - (landscape ? dimensions.height : dimensions.width)) < 0.02);
+                    if (paged) {
+                        assert.ok(Math.abs(Number(box[2]) / 72 - (landscape ? dimensions.width : dimensions.height)) < 0.02);
+                    } else {
+                        assert.ok(Number(box[2]) / 72 >= (landscape ? dimensions.width : dimensions.height) - 0.02);
+                    }
                     if (paged) {
                         assert.ok(pages.length > 1, JSON.stringify({landscape, scale, margin, paged}));
                     } else {

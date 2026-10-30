@@ -12,8 +12,6 @@ github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7 h1:MafIFwSS0x6A4
 github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7/go.mod h1:HrKCCTin3YNDSLBD02K0AOljjV6eNwc3/zyEI+xyV1I=
 github.com/88250/go-sqlite3 v1.14.13-0.20261023044249-ae36e402e11a h1:iLZDK9lOrGhTFlgV7QePn8TSEL8gv7FkWqznvn8XPSU=
 github.com/88250/go-sqlite3 v1.14.13-0.20261023044249-ae36e402e11a/go.mod h1:6JTjA44L93a0QCyJef5YvlPoKXntQPjzWv5gtm9sB6w=
-github.com/88250/gulu v1.2.3-0.20261021101108-2de4ad3e7cc0 h1:GMQKi2cPgLee73WVy18FwGh9W2gYcNhdjVwNlCjTZ/Y=
-github.com/88250/gulu v1.2.3-0.20261021101108-2de4ad3e7cc0/go.mod h1:+ynqZu9Ep0aCc/wxiKIN2q0EXthGVNN94HlUNIZEVTY=
 github.com/88250/gulu v1.2.3-0.20261027015724-890e40ac7f1c h1:e3b1FDTF3QSXYL4Ts7SNHM0k6pF1oheUltSIfAZI/5I=
 github.com/88250/gulu v1.2.3-0.20261027015724-890e40ac7f1c/go.mod h1:+ynqZu9Ep0aCc/wxiKIN2q0EXthGVNN94HlUNIZEVTY=
 github.com/88250/lute v1.7.9-0.20261024142257-43235da776fd h1:Pfl2fy+flOE1G//ZPthXGq53nnleKonV/1D8MZGHNRw=
@@ -200,8 +198,8 @@ github.com/gin-contrib/sse v1.1.1 h1:uGYpNwTacv5R68bSGMapo62iLTRa9l5zxGCps4hK6ko
 github.com/gin-contrib/sse v1.1.1/go.mod h1:QXzuVkA0YO7o/gun03UI1Q+FTI8ZV/n5t03kIQAI89s=
 github.com/gin-gonic/gin v1.12.0 h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=
 github.com/gin-gonic/gin v1.12.0/go.mod h1:VxccKfsSllpKshkBWgVgRniFFAzFb9csfngsqANjnLc=
-github.com/go-jose/go-jose/v4 v4.1.4 h1:moDMcTHmvE6Groj34emNPLs/qtYXRVcd6S7NHbHz3kA=
-github.com/go-jose/go-jose/v4 v4.1.4/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
+github.com/go-jose/go-jose/v4 v4.1.6 h1:sNRkftxFJxwsILiQukqp5z83QBSmntVwmgRY7AqBDO4=
+github.com/go-jose/go-jose/v4 v4.1.6/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-ole/go-ole v1.2.6/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
@@ -438,16 +436,6 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17 h1:cZbH1QcW/LWYtaKBv2i0O96qVm6HXKeEE3Z74VYdUHM=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17/go.mod h1:zE2SJ4t+2lFAeLgmhi27YtfzdyOWh3l9DXXUr9m/xU0=
-github.com/siyuan-note/dejavu v0.0.0-20261025033245-e954d7ce4e03 h1:XvvGKxivRyedb6ovOamQGXCHLADehvScBvysvagQpN8=
-github.com/siyuan-note/dejavu v0.0.0-20261025033245-e954d7ce4e03/go.mod h1:pvd1gT7Wm8o/Nb45rrl2zNfz50UPokiAD0en6mCMfBo=
-github.com/siyuan-note/dejavu v0.0.0-20261027015243-9282567dcee4 h1:Uw6SV8QBtTbM35zfW0+49vZJi/plubELUgWjJ4TkqAY=
-github.com/siyuan-note/dejavu v0.0.0-20261027015243-9282567dcee4/go.mod h1:pvd1gT7Wm8o/Nb45rrl2zNfz50UPokiAD0en6mCMfBo=
-github.com/siyuan-note/dejavu v0.0.0-20261027015601-40089082f212 h1:n+jOxJ0vlXbqsKmQj/VyBwNm/neMhggGuAE2xagQ78I=
-github.com/siyuan-note/dejavu v0.0.0-20261027015601-40089082f212/go.mod h1:pvd1gT7Wm8o/Nb45rrl2zNfz50UPokiAD0en6mCMfBo=
-github.com/siyuan-note/dejavu v0.0.0-20261027015800-accc7a2ce58f h1:DbfhPZ+hg1vcM9lN+X51FIHBTWWYY9dUSI2HvVO7g/U=
-github.com/siyuan-note/dejavu v0.0.0-20261027015800-accc7a2ce58f/go.mod h1:pvd1gT7Wm8o/Nb45rrl2zNfz50UPokiAD0en6mCMfBo=
-github.com/siyuan-note/dejavu v0.0.0-20261027030106-3da487a26d5e h1:H+kyYQzCCDm77kQknJFlqB+2+MFQsxiq/VJQq84Nifs=
-github.com/siyuan-note/dejavu v0.0.0-20261027030106-3da487a26d5e/go.mod h1:ZQgKK2+Fnqe3JOwTAyetTGHK4EwqgBBt2qPbDXwJZlo=
 github.com/siyuan-note/dejavu v0.0.0-20261027083850-4ce2f57c199f h1:V3NBR64fiemDUDyNieynSrY8ufZ9OBTcSo71EjgbhJk=
 github.com/siyuan-note/dejavu v0.0.0-20261027083850-4ce2f57c199f/go.mod h1:ZQgKK2+Fnqe3JOwTAyetTGHK4EwqgBBt2qPbDXwJZlo=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044 h1:b1/Q4DSREDvGh1/NbzR9873EKrjakdoUtsNlghWxUOI=
@@ -460,8 +448,6 @@ github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de h1:2liBebKn
 github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de/go.mod h1:khLwgEGUZiW+haLJsLamZxQAJy54PgIut1rQzf2RRAg=
 github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490 h1:z8m0SaVN/9rQqQE+EHbqBoqEz7gSk8qtrNFhKyXHz9I=
 github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490/go.mod h1:t3Tmt3DgQx0zqJmrckszJ+JBZ7iJrD1Ktp8FDBQ249E=
-github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754 h1:6QYpy7s5HlRSge09TyM/mT0vz1RDcWYZdkxEh7hmbH4=
-github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754/go.mod h1:/N7+N2CsZ0nleNPpP3b+06Bzqvuhy6GUmLY7Kug/zT0=
 github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f h1:XR9uI0hsYkunhrT9OxRB7X88iiWFUQlMzlxzGDQ08pU=
 github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f/go.mod h1:/N7+N2CsZ0nleNPpP3b+06Bzqvuhy6GUmLY7Kug/zT0=
 github.com/smallnest/chanx v1.2.0 h1:RLyldZBbQZ4O0dSvdkTMHo4+mDw20Bc1jXXTHf+ymZo=

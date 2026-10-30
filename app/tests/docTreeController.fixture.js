@@ -549,6 +549,9 @@ exports.cases = async sources => {
             return original(request);
         };
         element.querySelector("[data-tree-loading]").click();
+        controller.render();
+        check.equal(root.querySelector(".fn__rotate"), null, "retrying keeps the arrow during the initial wait");
+        await new Promise(resolve => setTimeout(resolve, 220));
         await frame();
         check.equal(root.getAttribute("aria-busy"), "true", "retrying animates the parent arrow");
         check.equal(root.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh");
@@ -712,6 +715,10 @@ exports.cases = async sources => {
         const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true};
         const first = controller.toggle("notebook:box/d0", true);
         const second = controller.toggle("notebook:box/d1", true);
+        controller.render();
+        check.deepEqual(arrowState("notebook:box/d0"), {...idle, busy: "true"}, "new requests keep the ordinary arrow");
+        check.deepEqual(arrowState("notebook:box/d1"), {...idle, busy: "true"});
+        await new Promise(resolve => setTimeout(resolve, 220));
         await frame();
         check.deepEqual(arrowState("notebook:box/d0"), busy, "expanding a slow directory animates its arrow");
         check.deepEqual(arrowState("notebook:box/d1"), busy);
@@ -751,6 +758,8 @@ exports.cases = async sources => {
             return range(request);
         };
         const opening = controller.toggle("notebook:box", true);
+        controller.render();
+        check.equal(element.querySelector(".fn__rotate"), null, "fast notebook loads do not flash an indicator");
         await frame();
         check.equal(element.querySelector("[data-tree-key]").getAttribute("aria-busy"), "true",
             "notebook expansion displays loading on its own arrow");
@@ -795,6 +804,34 @@ exports.cases = async sources => {
             "obsolete pages cannot keep a revised directory's loading arrow spinning");
         release();
         await oldPage;
+        fixture.destroy();
+    }
+    {
+        const fixture = make(3);
+        const {controller, element, source} = fixture;
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        const flashed = [];
+        const observer = new MutationObserver(records => {
+            records.forEach(record => {
+                if (record.target.classList?.contains("fn__rotate")) { flashed.push(record.target); }
+            });
+        });
+        observer.observe(element, {subtree: true, attributes: true, attributeFilter: ["class"]});
+        const opening = controller.toggle("notebook:box", true);
+        controller.render();
+        release();
+        await opening;
+        await new Promise(resolve => setTimeout(resolve, 250));
+        await frame();
+        check.equal(element.querySelector(".fn__rotate"), null, "a completed fast request never starts a delayed animation");
+        check.equal(flashed.length, 0);
+        check.ok(controller.getMountedElement("notebook:box/d0"));
+        observer.disconnect();
         fixture.destroy();
     }
     return "File tree selection cases passed";

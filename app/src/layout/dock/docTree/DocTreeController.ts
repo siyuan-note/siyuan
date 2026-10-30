@@ -65,7 +65,8 @@ export class DocTreeController {
     private rowHeight = 28;
     private rowSpacing = 0;
     private mounted = new Map<string, {element: HTMLElement, signature: string}>();
-    private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean}>();
+    private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
+        indicatorTimer: number, showIndicator: boolean}>();
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
     private errors = new Set<string>();
     private observer: ResizeObserver;
@@ -1006,11 +1007,21 @@ export class DocTreeController {
                 if (!refreshing) { await reload; }
             }
         }).finally(() => {
+            window.clearTimeout(this.inFlight.get(key)?.indicatorTimer);
             this.inFlight.delete(key);
             this.scheduleRender();
         });
+        // 快请求直接显示结果，持续等待时才在箭头位置显示动画。
+        const indicatorTimer = window.setTimeout(() => {
+            const pending = this.inFlight.get(key);
+            if (pending?.isCurrent()) {
+                pending.showIndicator = true;
+                this.scheduleRender();
+            }
+        }, 200);
         this.inFlight.set(key, {request, directory, isCurrent: () =>
-            generation === this.generation && directoryGeneration === directory.generation});
+            generation === this.generation && directoryGeneration === directory.generation,
+        indicatorTimer, showIndicator: false});
         this.scheduleRender();
         return request;
     }
@@ -1093,13 +1104,14 @@ export class DocTreeController {
             row.removeAttribute("aria-expanded");
         }
         const expanded = this.isExpanded(item.occurrenceKey);
-        const loading = expanded && Array.from(this.inFlight.values()).some(pending =>
-            pending.directory === this.model.directory(item) && pending.isCurrent());
-        row.setAttribute("aria-busy", String(loading));
+        const pending = expanded ? Array.from(this.inFlight.values()).filter(request =>
+            request.directory === this.model.directory(item) && request.isCurrent()) : [];
+        const showIndicator = pending.some(request => request.showIndicator);
+        row.setAttribute("aria-busy", String(pending.length > 0));
         const arrow = row.querySelector(".b3-list-item__arrow");
         arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
-        arrow?.classList.toggle("fn__rotate", loading);
-        arrow?.querySelector("use")?.setAttribute("xlink:href", loading ? "#iconRefresh" : "#iconRight");
+        arrow?.classList.toggle("fn__rotate", showIndicator);
+        arrow?.querySelector("use")?.setAttribute("xlink:href", showIndicator ? "#iconRefresh" : "#iconRight");
     }
 
     private render() {
@@ -1230,6 +1242,7 @@ export class DocTreeController {
         this.refreshItems.clear();
         this.pages.clear();
         this.errors.clear();
+        this.inFlight.forEach(pending => window.clearTimeout(pending.indicatorTimer));
         this.inFlight.clear();
         this.options.onSelectionProgress?.(0, 0, () => { this.operation++; });
         controllers.delete(this.options.element);

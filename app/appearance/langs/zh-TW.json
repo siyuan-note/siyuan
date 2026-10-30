@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "選擇用於記錄每個項目父項的關聯欄位",
 	"aiMemoryRememberedCount": "已記住 ${count} 則記憶",
 	"aiMemoryCountUnavailable": "暫時無法取得完整記憶數量",
 	"aiMemoryTaskNoNewUsable": "未新增可用記憶",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "篩選上下文",
 	"avSubItemsCounts": "${roots} 個頂層條目，${matches} 個符合條件的條目",
 	"avSubItemsExistingFields": "使用現有關聯欄位",
-	"avSubItemsNewFields": "建立關聯欄位",
 	"avSubItemsSortLocked": "同級順序由排序規則決定",
 	"embedToBlocks": "轉為一般內容",
 	"embedToReferences": "轉為區塊引用",

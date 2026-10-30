@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "اختر حقل العلاقة الذي يخزن العنصر الأب لكل عنصر",
 	"aiMemoryRememberedCount": "${count} من الذكريات القابلة للاستخدام",
 	"aiMemoryCountUnavailable": "العدد الكامل للذكريات غير متاح مؤقتًا",
 	"aiMemoryTaskNoNewUsable": "لم تتم إضافة ذكريات جديدة قابلة للاستخدام",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "سياق التصفية",
 	"avSubItemsCounts": "${roots} عنصرًا في المستوى الأعلى، ${matches} عنصرًا مطابقًا",
 	"avSubItemsExistingFields": "استخدام حقول العلاقات الموجودة",
-	"avSubItemsNewFields": "إنشاء حقول العلاقات",
 	"avSubItemsSortLocked": "تحدد قواعد الفرز ترتيب العناصر في المستوى نفسه",
 	"embedToBlocks": "تحويل إلى كتل عادية",
 	"embedToReferences": "تحويل إلى مراجع كتل",

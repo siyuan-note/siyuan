@@ -5595,7 +5595,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the database settings to create parent and child relation fields or select existing self-relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
+					"Data": " in the database settings, then choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enable sub-items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create parent and child relation fields automatically on first activation. To reuse existing relations, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use existing relation fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", select the field that stores each item's parent, and confirm enabling. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
 				}
 			]
 		},

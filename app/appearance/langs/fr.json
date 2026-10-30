@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Sélectionnez le champ de relation qui contient le parent de chaque élément",
 	"aiMemoryRememberedCount": "${count} souvenirs utilisables",
 	"aiMemoryCountUnavailable": "Le nombre total de souvenirs est temporairement indisponible",
 	"aiMemoryTaskNoNewUsable": "Aucun nouveau souvenir utilisable n’a été ajouté",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Contexte du filtre",
 	"avSubItemsCounts": "${roots} éléments de premier niveau, ${matches} correspondances",
 	"avSubItemsExistingFields": "Utiliser les champs de relation existants",
-	"avSubItemsNewFields": "Créer des champs de relation",
 	"avSubItemsSortLocked": "L’ordre des éléments de même niveau dépend des règles de tri",
 	"embedToBlocks": "Convertir en blocs ordinaires",
 	"embedToReferences": "Convertir en références de blocs",

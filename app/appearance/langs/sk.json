@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Vyberte pole vzťahu, ktoré uchováva nadradenú položku každej položky",
 	"aiMemoryRememberedCount": "Počet použiteľných spomienok: ${count}",
 	"aiMemoryCountUnavailable": "Celkový počet spomienok je dočasne nedostupný",
 	"aiMemoryTaskNoNewUsable": "Neboli pridané žiadne nové použiteľné spomienky",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Kontext filtra",
 	"avSubItemsCounts": "Položky najvyššej úrovne: ${roots}, zodpovedajúce položky: ${matches}",
 	"avSubItemsExistingFields": "Použiť existujúce polia vzťahov",
-	"avSubItemsNewFields": "Vytvoriť polia vzťahov",
 	"avSubItemsSortLocked": "Poradie položiek na rovnakej úrovni určujú pravidlá zoradenia",
 	"embedToBlocks": "Previesť na bežné bloky",
 	"embedToReferences": "Previesť na odkazy na bloky",

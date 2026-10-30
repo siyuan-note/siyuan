@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Выберите поле связи, в котором хранится родитель каждого элемента",
 	"aiMemoryRememberedCount": "Доступных воспоминаний: ${count}",
 	"aiMemoryCountUnavailable": "Общее количество воспоминаний временно недоступно",
 	"aiMemoryTaskNoNewUsable": "Новые доступные воспоминания не добавлены",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Контекст фильтра",
 	"avSubItemsCounts": "Элементов верхнего уровня: ${roots}, совпадений: ${matches}",
 	"avSubItemsExistingFields": "Использовать существующие поля связей",
-	"avSubItemsNewFields": "Создать поля связей",
 	"avSubItemsSortLocked": "Порядок элементов одного уровня определяется правилами сортировки",
 	"embedToBlocks": "Преобразовать в обычные блоки",
 	"embedToReferences": "Преобразовать в ссылки на блоки",

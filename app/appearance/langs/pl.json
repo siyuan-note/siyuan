@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Wybierz pole relacji przechowujące element nadrzędny każdego elementu",
 	"aiMemoryRememberedCount": "Liczba dostępnych wspomnień: ${count}",
 	"aiMemoryCountUnavailable": "Łączna liczba wspomnień jest tymczasowo niedostępna",
 	"aiMemoryTaskNoNewUsable": "Nie dodano nowych dostępnych wspomnień",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Kontekst filtra",
 	"avSubItemsCounts": "Elementy najwyższego poziomu: ${roots}, pasujące elementy: ${matches}",
 	"avSubItemsExistingFields": "Użyj istniejących pól relacji",
-	"avSubItemsNewFields": "Utwórz pola relacji",
 	"avSubItemsSortLocked": "Kolejność elementów na tym samym poziomie określają reguły sortowania",
 	"embedToBlocks": "Konwertuj na zwykłe bloki",
 	"embedToReferences": "Konwertuj na odwołania do bloków",

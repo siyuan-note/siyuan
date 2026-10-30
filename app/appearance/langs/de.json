@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Wähle das Verknüpfungsfeld, das den übergeordneten Eintrag jedes Eintrags speichert",
 	"aiMemoryRememberedCount": "${count} nutzbare Erinnerungen",
 	"aiMemoryCountUnavailable": "Die vollständige Anzahl der Erinnerungen ist vorübergehend nicht verfügbar",
 	"aiMemoryTaskNoNewUsable": "Es wurden keine neuen nutzbaren Erinnerungen hinzugefügt",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Filterkontext",
 	"avSubItemsCounts": "${roots} Einträge auf oberster Ebene, ${matches} passende Einträge",
 	"avSubItemsExistingFields": "Vorhandene Relationsfelder verwenden",
-	"avSubItemsNewFields": "Relationsfelder erstellen",
 	"avSubItemsSortLocked": "Die Reihenfolge gleichrangiger Einträge wird durch Sortierregeln bestimmt",
 	"embedToBlocks": "In normale Blöcke umwandeln",
 	"embedToReferences": "In Blockreferenzen umwandeln",

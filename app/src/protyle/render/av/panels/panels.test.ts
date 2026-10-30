@@ -138,6 +138,10 @@ test("navigation dispatches the destination action while retaining the initial p
     assert.ok(h.calls.some(([name]) => name === "setPosition"));
     assert.ok(h.calls.some(([name]) => name === "bindSubItemsSettings"));
     assert.ok(h.calls.some(([name]) => name === "menu.remove"));
+    h.calls.length = 0;
+    assert.equal(h.registry.dispatchAVPanelAction(context, {type: "go-sub-items-existing", target: {} as HTMLElement, event}), "handled");
+    assert.ok(h.calls.some(([name, args]) => name === "getSubItemsSettingsHTML" && args[1] === true));
+    assert.ok(h.calls.some(([name, args]) => name === "bindSubItemsSettings" && args[4] === true));
 });
 
 test("asynchronous group navigation consumes the current close callback and uses current field state", async () => {

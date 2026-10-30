@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "选择用于记录每个条目父项的关联字段",
 	"aiMemoryRememberedCount": "已记住 ${count} 条记忆",
 	"aiMemoryCountUnavailable": "暂时无法获取完整记忆数量",
 	"aiMemoryTaskNoNewUsable": "未新增可用记忆",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "筛选上下文",
 	"avSubItemsCounts": "${roots} 个顶层条目，${matches} 个匹配条目",
 	"avSubItemsExistingFields": "使用已有关系字段",
-	"avSubItemsNewFields": "创建关系字段",
 	"avSubItemsSortLocked": "同级顺序由排序规则决定",
 	"embedToBlocks": "转为普通内容",
 	"embedToReferences": "转为块引用",

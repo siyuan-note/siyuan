@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "בחרו את שדה הקשר ששומר את פריט האב של כל פריט",
 	"aiMemoryRememberedCount": "${count} זיכרונות זמינים לשימוש",
 	"aiMemoryCountUnavailable": "המספר הכולל של הזיכרונות אינו זמין כרגע",
 	"aiMemoryTaskNoNewUsable": "לא נוספו זיכרונות חדשים זמינים לשימוש",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "הקשר הסינון",
 	"avSubItemsCounts": "${roots} פריטים ברמה העליונה, ${matches} פריטים תואמים",
 	"avSubItemsExistingFields": "שימוש בשדות קשר קיימים",
-	"avSubItemsNewFields": "יצירת שדות קשר",
 	"avSubItemsSortLocked": "סדר הפריטים באותה רמה נקבע לפי כללי המיון",
 	"embedToBlocks": "המרה לבלוקים רגילים",
 	"embedToReferences": "המרה להפניות לבלוקים",

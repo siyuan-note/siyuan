@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Виберіть поле зв’язку, яке зберігає батьківський елемент кожного елемента",
 	"aiMemoryRememberedCount": "Доступних спогадів: ${count}",
 	"aiMemoryCountUnavailable": "Загальна кількість спогадів тимчасово недоступна",
 	"aiMemoryTaskNoNewUsable": "Нові доступні спогади не додано",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Контекст фільтра",
 	"avSubItemsCounts": "Елементів верхнього рівня: ${roots}, збігів: ${matches}",
 	"avSubItemsExistingFields": "Використати наявні поля зв’язків",
-	"avSubItemsNewFields": "Створити поля зв’язків",
 	"avSubItemsSortLocked": "Порядок елементів одного рівня визначається правилами сортування",
 	"embedToBlocks": "Перетворити на звичайні блоки",
 	"embedToReferences": "Перетворити на посилання на блоки",

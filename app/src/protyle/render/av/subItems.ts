@@ -7,8 +7,7 @@ import {getAVData} from "./virtualScroll";
 import {getFieldsByData} from "./view";
 import {insertRows} from "./row";
 import {registerSubItemsCleanup, toggleSubItems} from "./subItemsState";
-import {Menu} from "../../../plugin/Menu";
-import {toggleMenu} from "../../../menus/menuToggle";
+import type {Menu} from "../../../plugin/Menu";
 import {showMessage} from "../../../dialog/message";
 import {isMobile} from "../../../util/functions";
 import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
@@ -141,75 +140,56 @@ export const addSubItemsMenu = (menu: Menu, protyle: IProtyle, blockElement: HTM
         click: () => reparentSubItems(protyle, blockElement, itemIDs, "", undefined, undefined, groupID)});
 };
 
-export const getSubItemsSettingsHTML = (data: IAV) => {
+const getSubItemsParentFields = (data: IAV) => (getFieldsByData(data) || []).filter(field =>
+    field.type === "relation" && field.relation?.avID === data.id && field.relation.isTwoWay &&
+    field.relation.backKeyID && field.relation.backKeyID !== field.id);
+
+export const getSubItemsSettingsHTML = (data: IAV, existing = false) => {
     const enabled = Boolean(data.subItems?.enabled);
+    const fields = getSubItemsParentFields(data);
+    const selected = existing && fields.some(field => field.id === data.subItems?.parentKeyID) ? data.subItems.parentKeyID : "";
     const currentDisplay = data.views?.find(view => view.id === data.viewID)?.subItemsDisplay || "flat";
+    const enableHTML = `<button class="b3-menu__item" data-sub-items-enabled="${!enabled}"${existing && !selected ? " disabled" : ""}><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>`;
+    const choicesHTML = fields.map(field => `<button class="b3-menu__item" data-sub-items-parent-key="${escapeAttr(field.id)}" aria-pressed="${field.id === selected}"><span class="b3-menu__label">${escapeHtml(field.name)}</span><svg class="b3-menu__checked${field.id === selected ? "" : " fn__none"}"><use xlink:href="#iconSelect"></use></svg></button>`).join("");
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>
-    <span class="b3-menu__label ft__center">${window.siyuan.languages.avSubItems}</span>
+    <span class="block__icon block__icon--menu-back" data-type="${existing ? "go-sub-items" : "go-config"}"><svg><use xlink:href="#iconLeft"></use></svg></span>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages[existing ? "avSubItemsExistingFields" : "avSubItems"]}</span>
 </button>
 <button class="b3-menu__separator"></button>
-${!enabled ? `<button class="b3-menu__item" data-sub-items-field=""><span class="b3-menu__label">${window.siyuan.languages.avParentItem}</span><span class="b3-menu__accelerator">${window.siyuan.languages.avSubItemsNewFields}</span><svg class="b3-menu__icon"><use xlink:href="#iconRight"></use></svg></button>` : ""}
-<button class="b3-menu__item" data-sub-items-enabled="${!enabled}"><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>
-${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}
+${existing ? `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface">${window.siyuan.languages.avSubItemsParentFieldTip}</span></div>
+${choicesHTML}<button class="b3-menu__separator"></button>${enableHTML}` : `${enableHTML}
+${!enabled && fields.length ? `<button class="b3-menu__item" data-type="go-sub-items-existing"><span class="b3-menu__label">${window.siyuan.languages.avSubItemsExistingFields}</span><svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg></button>` : ""}
+${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}`}
 </div>`;
 };
 
-export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle, blockElement: HTMLElement, data: IAV) => {
+export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle, blockElement: HTMLElement, data: IAV, existing = false) => {
     if (protyle.disabled || window.siyuan.isPublish || protyle.options.history) {
         menuElement.querySelectorAll<HTMLButtonElement>("button:not([data-type=nobg])").forEach(button => { button.disabled = true; });
         return;
     }
-    const fieldButton = menuElement.querySelector<HTMLButtonElement>("[data-sub-items-field]");
-    if (fieldButton) {
-        const show = (toggle: boolean) => {
-            let menu: Menu;
-            toggleMenu({
-                target: fieldButton,
-                toggle,
-                build: () => {
-                    menu = new Menu("av-sub-items-field");
-                    const fields = getFieldsByData(data).filter(field => field.type === "relation" && field.relation?.avID === data.id &&
-                        field.relation.isTwoWay && field.relation.backKeyID && field.relation.backKeyID !== field.id);
-                    [{id: "", name: window.siyuan.languages.avSubItemsNewFields}, ...fields].forEach(field => {
-                        menu.addItem({id: field.id || "create", label: field.name,
-                            checked: fieldButton.dataset.subItemsField === field.id,
-                            click: () => {
-                                fieldButton.dataset.subItemsField = field.id;
-                                fieldButton.querySelector(".b3-menu__accelerator").textContent = field.name;
-                            }});
-                    });
-                },
-                show: () => {
-                    const rect = fieldButton.getBoundingClientRect();
-                    menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                },
+    const fields = getSubItemsParentFields(data);
+    let parentKeyID = existing && fields.some(field => field.id === data.subItems?.parentKeyID) ? data.subItems.parentKeyID : undefined;
+    const enableButton = menuElement.querySelector<HTMLButtonElement>("[data-sub-items-enabled]");
+    const choices = menuElement.querySelectorAll<HTMLButtonElement>("[data-sub-items-parent-key]");
+    choices.forEach(button => {
+        button.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!editable(protyle, blockElement)) return;
+            parentKeyID = button.dataset.subItemsParentKey;
+            choices.forEach(choice => {
+                const selected = choice.dataset.subItemsParentKey === parentKeyID;
+                choice.setAttribute("aria-pressed", String(selected));
+                choice.querySelector(".b3-menu__checked").classList.toggle("fn__none", !selected);
             });
+            enableButton.disabled = false;
         };
-        fieldButton.onclick = () => show(isMobile());
-        if (!isMobile()) {
-            fieldButton.addEventListener("mouseenter", () => show(false));
-            fieldButton.addEventListener("keydown", event => {
-                if (event.key === "ArrowRight") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    show(false);
-                    window.siyuan.menus.menu.element.querySelector<HTMLButtonElement>(".b3-menu__item")?.focus();
-                }
-            });
-            menuElement.addEventListener("mouseover", event => {
-                const hovered = (event.target as Element).closest(".b3-menu__item");
-                if (hovered && hovered !== fieldButton && window.siyuan.menus.menu.data === fieldButton) {
-                    window.siyuan.menus.menu.remove();
-                }
-            });
-        }
-    }
-    menuElement.querySelector<HTMLButtonElement>("[data-sub-items-enabled]").onclick = () => {
-        if (!editable(protyle, blockElement)) return;
-        const parentKeyID = fieldButton?.dataset.subItemsField;
-        const parent = getFieldsByData(data).find(field => field.id === parentKeyID);
+    });
+    enableButton.onclick = () => {
+        if (!editable(protyle, blockElement) || existing && !parentKeyID) return;
+        const parent = fields.find(field => field.id === parentKeyID);
         const operation: IOperation = {action: "setAttrViewSubItems", ...operationContext(blockElement), data: {
             enabled: !data.subItems?.enabled, parentKeyID, childrenKeyID: parent?.relation?.backKeyID,
             parentName: window.siyuan.languages.avParentItem, childrenName: window.siyuan.languages.avChildItems,

@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Pilih kolom relasi yang menyimpan induk setiap entri",
 	"aiMemoryRememberedCount": "${count} ingatan yang dapat digunakan",
 	"aiMemoryCountUnavailable": "Jumlah keseluruhan ingatan untuk sementara tidak tersedia",
 	"aiMemoryTaskNoNewUsable": "Tidak ada ingatan baru yang dapat digunakan yang ditambahkan",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Konteks filter",
 	"avSubItemsCounts": "${roots} item tingkat teratas, ${matches} item cocok",
 	"avSubItemsExistingFields": "Gunakan bidang relasi yang ada",
-	"avSubItemsNewFields": "Buat bidang relasi",
 	"avSubItemsSortLocked": "Urutan item setingkat ditentukan oleh aturan pengurutan",
 	"embedToBlocks": "Ubah menjadi blok biasa",
 	"embedToReferences": "Ubah menjadi referensi blok",

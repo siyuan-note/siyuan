@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Seleziona il campo relazione che contiene l'elemento padre di ogni elemento",
 	"aiMemoryRememberedCount": "${count} memorie utilizzabili",
 	"aiMemoryCountUnavailable": "Il numero totale di memorie non è temporaneamente disponibile",
 	"aiMemoryTaskNoNewUsable": "Non sono state aggiunte nuove memorie utilizzabili",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Contesto del filtro",
 	"avSubItemsCounts": "${roots} elementi principali, ${matches} elementi corrispondenti",
 	"avSubItemsExistingFields": "Usa i campi relazione esistenti",
-	"avSubItemsNewFields": "Crea campi relazione",
 	"avSubItemsSortLocked": "L’ordine degli elementi dello stesso livello dipende dalle regole di ordinamento",
 	"embedToBlocks": "Converti in blocchi normali",
 	"embedToReferences": "Converti in riferimenti a blocchi",

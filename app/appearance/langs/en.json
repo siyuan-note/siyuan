@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Select the relation field that stores each item's parent",
 	"aiMemoryRememberedCount": "${count} usable memories",
 	"aiMemoryCountUnavailable": "The complete memory count is temporarily unavailable",
 	"aiMemoryTaskNoNewUsable": "No new usable memories were added",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Filter context",
 	"avSubItemsCounts": "${roots} root items, ${matches} matching items",
 	"avSubItemsExistingFields": "Use existing relation fields",
-	"avSubItemsNewFields": "Create relation fields",
 	"avSubItemsSortLocked": "Sibling order is determined by sorting rules",
 	"embedToBlocks": "Convert to regular blocks",
 	"embedToReferences": "Convert to block references",

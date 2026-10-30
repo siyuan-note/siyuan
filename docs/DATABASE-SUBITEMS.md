@@ -28,7 +28,7 @@ Task dependencies express ordering or blocking between tasks and are outside thi
 
 ### Enabling and displaying sub-items
 
-Enable the feature under `Database settings - Sub-items` to create the `Parent` and `Sub-items` self-relation fields, or select existing self-relation fields. Existing fields must pass checks for a single parent, valid targets, cycles, and reverse-relation consistency. A failed check identifies the affected items and preserves the original data; it must not automatically choose a parent or remove relations.
+Select `Enable sub-items` under `Database settings - Sub-items` to create the `Parent` and `Sub-items` self-relation fields automatically on first activation. To reuse existing relations, open `Use existing relation fields`, select the field that stores each item's parent, and confirm enabling; this entry is hidden when no eligible fields exist. Existing fields must pass checks for a single parent, valid targets, cycles, and reverse-relation consistency. A failed check identifies the affected items and preserves the original data; it must not automatically choose a parent or remove relations.
 
 Automatically created fields are hidden from table columns by default. They can be shown through property settings and viewed or edited in the item property panel. Fields are identified by ID, so renaming does not change their role. While the feature is enabled, the designated fields cannot be deleted, converted to another type, or retargeted to another database. Replacing the designated fields requires validation of the complete replacement before committing.
 

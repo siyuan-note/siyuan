@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "वह संबंध फ़ील्ड चुनें जिसमें प्रत्येक आइटम का मूल आइटम संग्रहीत है",
 	"aiMemoryRememberedCount": "${count} उपयोग योग्य स्मृतियाँ",
 	"aiMemoryCountUnavailable": "स्मृतियों की कुल संख्या अभी उपलब्ध नहीं है",
 	"aiMemoryTaskNoNewUsable": "कोई नई उपयोग योग्य स्मृति नहीं जोड़ी गई",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "फ़िल्टर संदर्भ",
 	"avSubItemsCounts": "${roots} शीर्ष-स्तरीय आइटम, ${matches} मेल खाते आइटम",
 	"avSubItemsExistingFields": "मौजूदा संबंध फ़ील्ड का उपयोग करें",
-	"avSubItemsNewFields": "संबंध फ़ील्ड बनाएँ",
 	"avSubItemsSortLocked": "समान स्तर के आइटम का क्रम सॉर्टिंग नियमों से तय होता है",
 	"embedToBlocks": "सामान्य ब्लॉक में बदलें",
 	"embedToReferences": "ब्लॉक संदर्भों में बदलें",

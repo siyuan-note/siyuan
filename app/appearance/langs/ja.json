@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "各項目の親項目を保存するリレーションフィールドを選択してください",
 	"aiMemoryRememberedCount": "利用可能な記憶は ${count} 件",
 	"aiMemoryCountUnavailable": "現在、記憶の総数を取得できません",
 	"aiMemoryTaskNoNewUsable": "利用可能な記憶は追加されませんでした",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "フィルターのコンテキスト",
 	"avSubItemsCounts": "最上位 ${roots} 件、一致 ${matches} 件",
 	"avSubItemsExistingFields": "既存の関連フィールドを使用",
-	"avSubItemsNewFields": "関連フィールドを作成",
 	"avSubItemsSortLocked": "同じ階層の順序は並べ替えルールで決まります",
 	"embedToBlocks": "通常のブロックに変換",
 	"embedToReferences": "ブロック参照に変換",

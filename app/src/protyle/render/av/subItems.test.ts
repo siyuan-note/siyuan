@@ -8,7 +8,6 @@ import * as ts from "typescript";
 const setup = () => {
     const operations: IOperation[] = [];
     const inserted: unknown[] = [];
-    const menus: IMenu[][] = [];
     const module = {exports: {}};
     const languages = new Proxy({}, {get: (_value, key) => String(key)});
     const siyuan = {languages, isPublish: false};
@@ -24,23 +23,12 @@ const setup = () => {
             "./filteredTip": {getAVFilteredTipContext: () => ({filteredTipScope: "target"})},
             "../../../util/functions": {isMobile: () => false},
             "../../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
-            "../../../menus/menuToggle": {toggleMenu: (options: {target: Element; build: () => void; show: () => void}) => {
-                assert.ok(options.target);
-                options.build();
-                options.show();
-            }},
-            "../../../plugin/Menu": {Menu: class {
-                items: IMenu[] = [];
-                constructor() { menus.push(this.items); }
-                addItem(item: IMenu) { this.items.push(item); }
-                open() {}
-            }},
         }[id] || {}),
     });
     const block = {isConnected: true, dataset: {avId: "db", nodeId: "carrier"},
         hasAttribute: () => true, getAttribute: () => "view"} as unknown as HTMLElement;
     const protyle = {options: {}} as IProtyle;
-    return {api: module.exports as typeof import("./subItems"), operations, inserted, menus, block, protyle, siyuan};
+    return {api: module.exports as typeof import("./subItems"), operations, inserted, block, protyle, siyuan};
 };
 
 it("reparents a deduplicated selection with a complete-sibling anchor and refuses stale readonly actions", () => {
@@ -79,7 +67,7 @@ it("keeps nesting choices limited to table/list while exposing database configur
     for (const viewType of ["table", "list", "gallery", "kanban", "calendar"] as TAVView[]) {
         const disabled = h.api.getSubItemsSettingsHTML({viewType, view: {}} as IAV);
         assert.match(disabled, /avEnableSubItems/);
-        assert.match(disabled, /data-sub-items-field/);
+        assert.doesNotMatch(disabled, /data-sub-items-field|data-sub-items-parent-key|go-sub-items-existing/);
         assert.doesNotMatch(disabled, /b3-menu__item--readonly/);
         assert.match(disabled, /^<div class="b3-menu__items">/);
         assert.match(disabled, /block__icon--menu-back" data-type="go-config"/);
@@ -94,25 +82,63 @@ it("keeps nesting choices limited to table/list while exposing database configur
 
 it("configures an existing self-relation pair through checked choices without changing field identity", () => {
     const h = setup();
-    const label = {textContent: ""};
-    const listeners: Record<string, () => void> = {};
-    const field = {dataset: {subItemsField: ""}, querySelector: () => label,
-        addEventListener: (name: string, listener: () => void) => { listeners[name] = listener; },
-        getBoundingClientRect: () => ({right: 10, bottom: 20, height: 10}), onclick: () => {}};
-    const enabled = {onclick: () => {}};
-    const menu = {querySelector: (selector: string) => selector === "[data-sub-items-field]" ? field : enabled,
-        querySelectorAll: (): HTMLElement[] => [], closest: () => ({remove() {}}), addEventListener() {}} as unknown as HTMLElement;
+    const field = {dataset: {subItemsParentKey: "parent"}, setAttribute() {},
+        querySelector: () => ({classList: {toggle() {}}}), onclick: (event: MouseEvent) => { assert.ok(event); }};
+    const enabled = {disabled: true, onclick: () => {}};
+    const menu = {querySelector: () => enabled,
+        querySelectorAll: (selector: string) => selector === "[data-sub-items-parent-key]" ? [field] : [],
+        closest: () => ({remove() {}})} as unknown as HTMLElement;
     const data = {id: "db", view: {columns: [{id: "parent", name: "Parent", type: "relation",
         relation: {avID: "db", isTwoWay: true, backKeyID: "children"}}]}} as IAV;
-    h.api.bindSubItemsSettings(menu, h.protyle, h.block, data);
-    listeners.mouseenter();
-    assert.equal(h.menus[0][0].checked, true);
-    h.menus[0][1].click(undefined, undefined);
+    const root = h.api.getSubItemsSettingsHTML(data);
+    assert.match(root, /go-sub-items-existing/);
+    assert.doesNotMatch(root, /data-sub-items-parent-key|avSubItemsNewFields/);
+    const advanced = h.api.getSubItemsSettingsHTML(data, true);
+    assert.match(advanced, /avSubItemsParentFieldTip/);
+    assert.match(advanced, /data-type="go-sub-items"/);
+    h.api.bindSubItemsSettings(menu, h.protyle, h.block, data, true);
+    enabled.onclick();
+    assert.equal(h.operations.length, 0);
+    field.onclick({preventDefault() {}, stopPropagation() {}} as MouseEvent);
+    assert.equal(enabled.disabled, false);
     enabled.onclick();
     const operation = h.operations[0];
     assert.equal(operation.action, "setAttrViewSubItems");
     if (operation.action === "setAttrViewSubItems") {
         assert.equal(operation.data.parentKeyID, "parent");
         assert.equal(operation.data.childrenKeyID, "children");
+    }
+});
+
+it("one-click enabling delegates field setup without requiring a relation selection", () => {
+    const h = setup();
+    const enabled = {onclick: () => {}};
+    const menu = {querySelector: () => enabled, querySelectorAll: (): HTMLElement[] => [], closest: () => ({remove() {}})} as unknown as HTMLElement;
+    const data = {id: "db", subItems: {enabled: false, parentKeyID: "old-parent"}, view: {columns: []}} as IAV;
+    h.api.bindSubItemsSettings(menu, h.protyle, h.block, data);
+    enabled.onclick();
+    const operation = h.operations[0];
+    assert.equal(operation.action, "setAttrViewSubItems");
+    if (operation.action === "setAttrViewSubItems") {
+        assert.equal(operation.data.enabled, true);
+        assert.equal(operation.data.parentKeyID, undefined);
+        assert.equal(operation.data.childrenKeyID, undefined);
+    }
+});
+
+it("readonly settings keep their back header while disabling activation and relation choices", () => {
+    for (const reason of ["disabled", "publish", "history"]) {
+        const h = setup();
+        h.protyle.disabled = reason === "disabled";
+        h.siyuan.isPublish = reason === "publish";
+        if (reason === "history") h.protyle.options.history = {created: "past"};
+        const action = {disabled: false};
+        const menu = {querySelectorAll: (selector: string) => {
+            assert.equal(selector, "button:not([data-type=nobg])");
+            return [action];
+        }} as unknown as HTMLElement;
+        h.api.bindSubItemsSettings(menu, h.protyle, h.block, {view: {columns: []}} as IAV, true);
+        assert.equal(action.disabled, true);
+        assert.equal(h.operations.length, 0);
     }
 });

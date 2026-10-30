@@ -5343,7 +5343,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，建立父項與子項關聯欄位，或選擇現有的自關聯欄位。啟用後，存取此資料庫的各端需要支援新格式。未啟用的資料庫不受影響。"
+					"Data": "，點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "啟用父子條目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可在首次啟用時自動建立父項與子項關聯欄位。需要重用現有關聯時，進入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用現有關聯欄位"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，選擇記錄每個項目父項的關聯欄位，再確認啟用。啟用後，存取此資料庫的各端需要支援新格式。未啟用的資料庫不受影響。"
 				}
 			]
 		},

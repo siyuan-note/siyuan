@@ -1,4 +1,5 @@
 {
+	"avSubItemsParentFieldTip": "Her öğenin üst öğesini saklayan ilişki alanını seçin",
 	"aiMemoryRememberedCount": "${count} kullanılabilir anı",
 	"aiMemoryCountUnavailable": "Toplam anı sayısı geçici olarak kullanılamıyor",
 	"aiMemoryTaskNoNewUsable": "Yeni kullanılabilir anı eklenmedi",
@@ -76,7 +77,6 @@
 	"avSubItemsContext": "Filtre bağlamı",
 	"avSubItemsCounts": "${roots} üst düzey öğe, ${matches} eşleşen öğe",
 	"avSubItemsExistingFields": "Mevcut ilişki alanlarını kullan",
-	"avSubItemsNewFields": "İlişki alanları oluştur",
 	"avSubItemsSortLocked": "Aynı düzeydeki öğelerin sırası sıralama kurallarına göre belirlenir",
 	"embedToBlocks": "Normal bloklara dönüştür",
 	"embedToReferences": "Blok referanslarına dönüştür",

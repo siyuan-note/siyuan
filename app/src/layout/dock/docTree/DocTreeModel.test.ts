@@ -81,3 +81,22 @@ test("viewport size remains bounded at the beginning, middle, and end of a large
         }
     }
 });
+
+test("navigation projects a staged child without publishing its directory snapshot", () => {
+    const model = new DocTreeModel();
+    model.setRoots([{id: "box", notebookId: "box", path: "/", name: "Box", kind: "notebook", subFileCount: 1}]);
+    const root = model.roots[0];
+    const directory = model.directory(root);
+    model.applyRange(directory, range([file("old")], 1));
+    const snapshot = {...directory, total: 100, effectiveSortMode: 3,
+        files: new Map([[90, file("target")]]), indices: new Map([["target", 90]])};
+    const child = model.child(root, 90, snapshot);
+    assert.equal(child.id, "target");
+    assert.equal(child.setSize, 100);
+    assert.equal(child.effectiveSortMode, 3);
+    assert.equal(child.occurrenceKey, "notebook:box/target");
+    assert.equal(directory.total, 1);
+    assert.equal(directory.files.get(0).id, "old");
+    assert.equal(model.getItem(child.occurrenceKey), undefined);
+    assert.equal(model.rowCount, 1);
+});

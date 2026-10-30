@@ -2,7 +2,7 @@ import {DocTreeModel, getDocTreeWindow, type IDocTreeDirectory} from "./DocTreeM
 import {docTreeDataSource} from "./dataSource";
 import {getTransactionOperations} from "../../../util/transactionOperations";
 import {docTreeDirectoryKey, docTreeParentID, type IDocTreeDataSource, type IDocTreeExpansion, type IDocTreeItem, type IDocTreeRoot,
-    type IDocTreeSelectOptions} from "./types";
+    type IDocTreeSelectOptions, type IDocTreeRange} from "./types";
 
 interface IDocTreeControllerOptions {
     element: HTMLElement;
@@ -68,6 +68,8 @@ export class DocTreeController {
     private expanding = new Map<string, {item: IDocTreeItem}>();
     private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
         indicatorTimer: number, showIndicator: boolean}>();
+    private navigation: {interaction: number, generation: number, publishing: boolean};
+    private navigationID = 0;
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
     private errors = new Set<string>();
     private observer: ResizeObserver;
@@ -492,69 +494,110 @@ export class DocTreeController {
         if (!parent || parent.unavailable) {
             return;
         }
-        if (parent.id !== id) {
-            let located: Awaited<ReturnType<IDocTreeDataSource["locate"]>>;
-            try {
-                located = await this.source.locate({notebook, id}, {
-                    ignoreUnavailable: options.select === false && options.scroll === false,
-                });
-            } catch {
-                return;
-            }
-            if (this.disposed || generation !== this.generation || interaction !== this.interaction) {
-                return;
-            }
-            let started = parent.kind === "notebook";
-            for (const step of located.steps) {
-                if (!started) {
-                    if (step.id === parent.id) {
-                        started = true;
-                    }
-                    continue;
-                }
-                if (docTreeParentID(parent) !== step.parentID) {
-                    return;
-                }
-                this.model.expanded.set(parent.occurrenceKey, parent);
-                const directory = this.model.directory(parent);
-                if (directory.revision && directory.revision !== step.revision) {
-                    directory.files.clear();
-                    directory.indices.clear();
-                    directory.generation++;
-                }
-                directory.total = step.total;
-                directory.revision = step.revision;
-                directory.effectiveSortMode = step.effectiveSortMode;
-                await this.load(parent, step.index);
-                if (this.disposed || interaction !== this.interaction) { return; }
-                if (this.disposed || generation !== this.generation) {
-                    if (!this.disposed && attempt < 2) {
-                        return this.locate(notebook, id, options, attempt + 1);
-                    }
-                    return;
-                }
-                parent = this.model.child(parent, step.index);
-                if (!parent || parent.id !== step.id) {
-                    if (attempt < 2) {
-                        return this.locate(notebook, id, options, attempt + 1);
-                    }
-                    return;
-                }
-            }
+        const root = parent;
+        const navigation = {interaction, generation, publishing: false};
+        const expansion = {item: root};
+        this.navigation = navigation;
+        this.expanding.set(root.occurrenceKey, expansion);
+        const rootDirectory = this.model.directory(root);
+        const interrupted = () => this.disposed || this.navigation !== navigation || interaction !== this.interaction;
+        const isCurrent = () => !interrupted() && generation === this.generation;
+        const retry = () => !interrupted() && attempt < 2 ? this.locate(notebook, id, options, attempt + 1) : undefined;
+        const requestKey = `locate:${++this.navigationID}`;
+        let finish: () => void;
+        const tracked = this.trackRequest(requestKey, rootDirectory,
+            new Promise<void>(resolve => { finish = resolve; }), isCurrent);
+        const stages: {directory: IDocTreeDirectory, generation: number, revision: string,
+            index: number, id: string, range?: IDocTreeRange}[] = [];
+        const ancestors: IDocTreeItem[] = [];
+        try {
             if (parent.id !== id) {
-                return;
+                let located: Awaited<ReturnType<IDocTreeDataSource["locate"]>>;
+                try {
+                    located = await this.source.locate({notebook, id}, {
+                        ignoreUnavailable: options.select === false && options.scroll === false,
+                    });
+                } catch {
+                    return;
+                }
+                if (!isCurrent()) { return retry(); }
+                let started = parent.kind === "notebook";
+                for (const step of located.steps) {
+                    if (!started) {
+                        if (step.id === parent.id) { started = true; }
+                        continue;
+                    }
+                    if (docTreeParentID(parent) !== step.parentID) { return; }
+                    const directory = this.model.directory(parent);
+                    const directoryGeneration = directory.generation;
+                    let range: IDocTreeRange;
+                    let snapshot = directory;
+                    if (directory.revision !== step.revision || directory.files.get(step.index)?.id !== step.id) {
+                        const limit = this.batchSize();
+                        range = await this.limited(() => this.source.range({notebook, parentID: step.parentID,
+                            offset: Math.floor(step.index / limit) * limit, limit, revision: step.revision}));
+                        if (!isCurrent()) { return retry(); }
+                        if (range.stale || range.revision !== step.revision) { return retry(); }
+                        snapshot = {...directory, total: range.total, revision: range.revision,
+                            effectiveSortMode: range.effectiveSortMode,
+                            files: new Map(range.files.map((file, index) => [range.offset + index, file])),
+                            indices: new Map(range.files.map((file, index) => [file.id, range.offset + index]))};
+                    }
+                    const child = this.model.child(parent, step.index, snapshot);
+                    if (!child || child.id !== step.id) { return retry(); }
+                    stages.push({directory, generation: directoryGeneration, revision: step.revision,
+                        index: step.index, id: step.id, range});
+                    ancestors.push(parent);
+                    parent = child;
+                }
+                if (parent.id !== id) { return; }
+            }
+            if (!isCurrent()) { return retry(); }
+            if (!this.model.roots.some(item => item.occurrenceKey === root.occurrenceKey && !item.unavailable)) { return; }
+            if (stages.some(stage => stage.directory.generation !== stage.generation ||
+                (!stage.range && (stage.directory.revision !== stage.revision ||
+                    stage.directory.files.get(stage.index)?.id !== stage.id)))) { return retry(); }
+            // 路径和目录批次一次提交，等待期间不清空已有缓存或展开祖先。
+            navigation.publishing = true;
+            for (const {directory, range} of stages) {
+                if (!range) { continue; }
+                if (directory.revision !== range.revision) {
+                    for (const [key, page] of this.pages) {
+                        if (page.directory === directory) { this.pages.delete(key); }
+                    }
+                }
+                this.model.applyRange(directory, range);
+                this.pages.set(`${requestKey}:${directory.key}:${range.offset}`,
+                    {directory, start: range.offset, count: range.files.length});
+                this.errors.delete(directory.key);
+            }
+            ancestors.forEach(item => this.model.expanded.set(item.occurrenceKey, item));
+            this.model.project();
+            this.evictPages();
+            if (options.select !== false) {
+                await this.select(parent.occurrenceKey, {scroll: options.scroll}, false);
+            }
+            this.options.onExpansionChange?.();
+            if (options.scroll === false) {
+                this.render();
+                return this.getMountedElement(parent.occurrenceKey);
+            }
+            return await this.ensureRendered(parent.occurrenceKey);
+        } catch (error) {
+            if (isCurrent()) {
+                this.errors.add(rootDirectory.key);
+                console.warn("Failed to load document tree range", error);
+            }
+        } finally {
+            finish();
+            await tracked;
+            if (this.expanding.get(root.occurrenceKey) === expansion) { this.expanding.delete(root.occurrenceKey); }
+            if (this.navigation === navigation) {
+                if (navigation.publishing) { this.render(); }
+                this.navigation = undefined;
+                this.scheduleRender();
             }
         }
-        this.model.project();
-        if (options.select !== false) {
-            await this.select(parent.occurrenceKey, {scroll: options.scroll}, false);
-        }
-        this.options.onExpansionChange?.();
-        if (options.scroll === false) {
-            this.render();
-            return this.getMountedElement(parent.occurrenceKey);
-        }
-        return this.ensureRendered(parent.occurrenceKey);
     }
 
     public async itemAtDirectoryIndex(parentKey: string, index: number) {
@@ -988,6 +1031,25 @@ export class DocTreeController {
             window.siyuan?.config?.fileTree?.docTreeBatchSize ?? 512)));
     }
 
+    private trackRequest(key: string, directory: IDocTreeDirectory, request: Promise<void>, isCurrent: () => boolean) {
+        const tracked = request.finally(() => {
+            window.clearTimeout(this.inFlight.get(key)?.indicatorTimer);
+            this.inFlight.delete(key);
+            this.scheduleRender();
+        });
+        // 快请求直接显示结果，持续等待时才在箭头位置显示动画。
+        const indicatorTimer = window.setTimeout(() => {
+            const pending = this.inFlight.get(key);
+            if (pending?.isCurrent()) {
+                pending.showIndicator = true;
+                this.scheduleRender();
+            }
+        }, 200);
+        this.inFlight.set(key, {request: tracked, directory, isCurrent, indicatorTimer, showIndicator: false});
+        this.scheduleRender();
+        return tracked;
+    }
+
     private async load(parent: IDocTreeItem, index: number) {
         const directory = this.model.directory(parent);
         if (directory.files.has(index) || (directory.revision && directory.total !== undefined && index >= directory.total)) {
@@ -1048,24 +1110,9 @@ export class DocTreeController {
                 // 当前刷新可能正等待本次 load，不能反过来等待队列中的刷新。
                 if (!refreshing) { await reload; }
             }
-        }).finally(() => {
-            window.clearTimeout(this.inFlight.get(key)?.indicatorTimer);
-            this.inFlight.delete(key);
-            this.scheduleRender();
         });
-        // 快请求直接显示结果，持续等待时才在箭头位置显示动画。
-        const indicatorTimer = window.setTimeout(() => {
-            const pending = this.inFlight.get(key);
-            if (pending?.isCurrent()) {
-                pending.showIndicator = true;
-                this.scheduleRender();
-            }
-        }, 200);
-        this.inFlight.set(key, {request, directory, isCurrent: () =>
-            generation === this.generation && directoryGeneration === directory.generation,
-        indicatorTimer, showIndicator: false});
-        this.scheduleRender();
-        return request;
+        return this.trackRequest(key, directory, request, () =>
+            generation === this.generation && directoryGeneration === directory.generation);
     }
 
     private evictPages() {
@@ -1177,9 +1224,18 @@ export class DocTreeController {
     }
 
     private render() {
-        if (this.disposed || (this.refresh && this.refresh.interaction === this.interaction)) {
+        if (this.disposed) { return; }
+        const navigation = this.navigation?.generation === this.generation &&
+            this.navigation.interaction === this.interaction ? this.navigation : undefined;
+        if (navigation && !navigation.publishing) {
+            // 定位只更新加载提示；整条路径就绪后再发布投影，保持已有行可见。
+            this.mounted.forEach((mounted, key) => {
+                const item = this.getItem(key);
+                if (item) { this.decorate(mounted.element, item); }
+            });
             return;
         }
+        if (this.refresh && this.refresh.interaction === this.interaction && !navigation?.publishing) { return; }
         const element = this.options.element;
         const sample = this.mounted.values().next().value?.element as HTMLElement | undefined;
         const measured = sample?.getBoundingClientRect().height;
@@ -1303,6 +1359,7 @@ export class DocTreeController {
         this.model.directories.clear();
         this.model.expanded.clear();
         this.expanding.clear();
+        this.navigation = undefined;
         this.model.setRoots([]);
         this.selected.clear();
         this.focused = undefined;

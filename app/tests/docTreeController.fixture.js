@@ -979,5 +979,97 @@ exports.cases = async sources => {
         observer.disconnect();
         fixture.destroy();
     }
+    {
+        const fixture = make(8);
+        const {controller, element, source, directories} = fixture;
+        await controller.toggle("notebook:box", true);
+        await controller.toggle("notebook:box", false);
+        directories.get("").unshift(file("new"));
+        fixture.revise("two");
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        controller.handleMessage({cmd: "create", data: {box: "box", path: "/new.sy"}});
+        const locating = controller.locate("box", "new");
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        controller.setRoots(controller.model.roots);
+        controller.render();
+        check.equal(controller.model.rowCount, 1, "locating a new document never publishes empty ancestor rows");
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        await new Promise(resolve => setTimeout(resolve, 220));
+        await frame();
+        check.ok(element.querySelector("[data-tree-indicator]"));
+        release();
+        await locating;
+        await frame();
+        check.equal(controller.getSelectedItems()[0]?.id, "new");
+        check.ok(controller.getMountedElement("notebook:box/new"));
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        const previous = controller.getMountedElement("notebook:box/d0");
+        directories.get("").unshift(file("latest"));
+        fixture.revise("three");
+        release = undefined;
+        const canceled = controller.locate("box", "latest");
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        controller.setRoots(controller.model.roots);
+        controller.render();
+        check.equal(controller.getMountedElement("notebook:box/d0"), previous,
+            "an expanded directory keeps its visible data during navigation");
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        controller.collapseAll();
+        release();
+        await canceled;
+        check.equal(controller.model.rowCount, 1);
+        const directory = controller.model.directory(controller.model.roots[0]);
+        check.equal(directory.revision, "two", "canceled navigation does not overwrite live directory caches");
+        check.equal(controller.getSelectedItems().length, 0);
+        source.range = range;
+        await controller.locate("box", "latest");
+        check.equal(controller.getSelectedItems()[0]?.id, "latest");
+        directories.get("").unshift(file("failed"));
+        fixture.revise("four");
+        source.range = async () => { throw new Error("offline"); };
+        await controller.locate("box", "failed");
+        await frame();
+        check.equal(directory.revision, "three", "failed navigation preserves the last complete directory view");
+        check.ok(controller.getMountedElement("notebook:box/latest"));
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        check.equal(element.querySelector("[data-tree-indicator]"), null);
+        fixture.destroy();
+    }
+    {
+        const fixture = make(3);
+        const {controller, element, source} = fixture;
+        const range = source.range;
+        let reads = 0;
+        source.range = async request => {
+            check.equal(controller.isExpanded("notebook:box"), false, "navigation retries keep ancestors folded");
+            const result = await range(request);
+            return ++reads === 1 ? {...result, stale: true, files: []} : result;
+        };
+        await controller.locate("box", "d0");
+        check.equal(reads, 2);
+        check.ok(controller.getMountedElement("notebook:box/d0"));
+        await controller.toggle("notebook:box", false);
+        controller.model.invalidate("box");
+        let release;
+        reads = 0;
+        source.range = async request => {
+            if (++reads === 1) { await new Promise(resolve => { release = resolve; }); }
+            return range(request);
+        };
+        const locating = controller.locate("box", "d1");
+        while (!release) { await new Promise(resolve => setTimeout(resolve, 1)); }
+        await controller.reload({notebook: "box"});
+        release();
+        await locating;
+        check.equal(reads, 2, "a source refresh restarts the entire navigation snapshot");
+        check.equal(controller.getSelectedItems()[0]?.id, "d1");
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        fixture.destroy();
+    }
     return "File tree selection cases passed";
 };

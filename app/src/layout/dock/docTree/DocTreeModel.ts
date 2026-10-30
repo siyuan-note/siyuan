@@ -97,8 +97,7 @@ export class DocTreeModel {
         this.project();
     }
 
-    public child(parent: IDocTreeItem, index: number): IDocTreeItem | undefined {
-        const directory = this.directory(parent);
+    public child(parent: IDocTreeItem, index: number, directory = this.directory(parent)): IDocTreeItem | undefined {
         const file = directory.files.get(index);
         if (!file) {
             return;

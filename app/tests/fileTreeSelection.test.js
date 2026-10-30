@@ -6,11 +6,17 @@ const os = require("node:os");
 const {sources, cases} = require("./docTreeController.fixture");
 
 const runElectron = async () => {
-    const {app, BrowserWindow} = require("electron");
+    const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    const win = new BrowserWindow({show: false,
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
+    ipcMain.handle("file-tree-click", (event, point) => {
+        for (const type of ["mouseMove", "mouseDown", "mouseUp"]) {
+            event.sender.sendInputEvent({type, ...point, button: "left", clickCount: 1});
+        }
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`));

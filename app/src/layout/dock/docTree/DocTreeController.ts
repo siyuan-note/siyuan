@@ -1,7 +1,7 @@
 import {DocTreeModel, getDocTreeWindow, type IDocTreeDirectory} from "./DocTreeModel";
 import {docTreeDataSource} from "./dataSource";
 import {getTransactionOperations} from "../../../util/transactionOperations";
-import {docTreeParentID, type IDocTreeDataSource, type IDocTreeExpansion, type IDocTreeItem, type IDocTreeRoot,
+import {docTreeDirectoryKey, docTreeParentID, type IDocTreeDataSource, type IDocTreeExpansion, type IDocTreeItem, type IDocTreeRoot,
     type IDocTreeSelectOptions} from "./types";
 
 interface IDocTreeControllerOptions {
@@ -65,6 +65,7 @@ export class DocTreeController {
     private rowHeight = 28;
     private rowSpacing = 0;
     private mounted = new Map<string, {element: HTMLElement, signature: string}>();
+    private expanding = new Map<string, {item: IDocTreeItem}>();
     private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
         indicatorTimer: number, showIndicator: boolean}>();
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
@@ -147,6 +148,9 @@ export class DocTreeController {
         const rootKeys = new Set(this.model.roots.filter(root => !root.unavailable).map(root => root.occurrenceKey));
         const available = (item?: IDocTreeItem) => item && notebooks.has(item.notebookId) &&
             rootKeys.has(item.occurrenceKey.split("/")[0]);
+        this.expanding.forEach((expansion, key) => {
+            if (!available(expansion.item)) { this.expanding.delete(key); }
+        });
         let changed = false;
         for (const [key, item] of this.selected) {
             if (!available(item)) {
@@ -351,7 +355,7 @@ export class DocTreeController {
         }
     }
 
-    public async toggle(key: string, expanded = !this.isExpanded(key), userAction = true) {
+    public async toggle(key: string, expanded = !(this.isExpanded(key) || this.expanding.has(key)), userAction = true) {
         const item = this.getItem(key);
         if (!item || item.unavailable) {
             return;
@@ -362,14 +366,45 @@ export class DocTreeController {
             this.finishSelection(this.selectionPending);
         }
         const interaction = this.interaction;
-        const generation = this.generation;
-        const anchor = this.getScrollAnchor();
+        let generation = this.generation;
+        let anchor = this.getScrollAnchor();
         if (expanded) {
-            this.model.expanded.set(key, item);
-            this.model.project();
-            this.render();
-            await this.load(item, 0);
+            const expansion = {item};
+            this.expanding.set(key, expansion);
+            this.scheduleRender();
+            this.errors.delete(this.model.directory(item).key);
+            try {
+                let ready = false;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    generation = this.generation;
+                    await this.load(expansion.item, 0);
+                    if (this.disposed || this.expanding.get(key) !== expansion ||
+                        (!userAction && interaction !== this.interaction)) { return; }
+                    if (generation !== this.generation) {
+                        const current = this.getItem(key);
+                        if (!current || current.unavailable) { return; }
+                        expansion.item = current;
+                        continue;
+                    }
+                    const directory = this.model.directory(expansion.item);
+                    ready = Boolean(directory.revision && (directory.total === 0 || directory.files.has(0)));
+                    break;
+                }
+                if (!ready) { return; }
+                // 首批数据就绪后发布子树，等待期间保持折叠布局。
+                if (interaction !== this.interaction) { anchor = this.getScrollAnchor(); }
+                this.model.expanded.set(key, this.getItem(key) || expansion.item);
+                this.model.project();
+            } finally {
+                if (this.expanding.get(key) === expansion) {
+                    this.expanding.delete(key);
+                    this.scheduleRender();
+                }
+            }
         } else {
+            for (const expandingKey of this.expanding.keys()) {
+                if (expandingKey === key || expandingKey.startsWith(key + "/")) { this.expanding.delete(expandingKey); }
+            }
             for (const expandedKey of this.model.expanded.keys()) {
                 if (expandedKey === key || expandedKey.startsWith(key + "/")) {
                     this.model.expanded.delete(expandedKey);
@@ -395,7 +430,7 @@ export class DocTreeController {
             if (changed) { this.selectionChanged(); }
             this.model.project();
         }
-        if (this.disposed || interaction !== this.interaction || generation !== this.generation) { return; }
+        if (this.disposed || generation !== this.generation) { return; }
         this.restoreScrollAnchor(anchor);
         this.render();
         this.options.onExpansionChange?.();
@@ -403,6 +438,7 @@ export class DocTreeController {
 
     public collapseAll() {
         this.operation++;
+        this.expanding.clear();
         this.model.expanded.clear();
         this.model.project();
         this.clearSelection();
@@ -589,7 +625,7 @@ export class DocTreeController {
 
     public async collapseFocused() {
         if (this.focused) {
-            if (this.isExpanded(this.focused)) {
+            if (this.isExpanded(this.focused) || this.expanding.has(this.focused)) {
                 await this.toggle(this.focused, false);
             } else {
                 await this.focusParent();
@@ -844,6 +880,9 @@ export class DocTreeController {
             .map(item => item.occurrenceKey));
         const removed = (key?: string) => key && (removedRoots.has(key.split("/")[0]) ||
             key.split("/").slice(1).some(id => ids.has(id)));
+        for (const key of this.expanding.keys()) {
+            if (removed(key)) { this.expanding.delete(key); }
+        }
         // 删除通知代表源已成功移除，立即清理可见行和恢复目标，不等待目录请求。
         for (const [key, mounted] of this.mounted) {
             if (!removed(key)) { continue; }
@@ -904,6 +943,9 @@ export class DocTreeController {
         this.interaction++;
         this.operation++;
         this.finishSelection(this.selectionPending);
+        this.expanding.forEach((expansion, key) => {
+            if (expansion.item.notebookId === notebook) { this.expanding.delete(key); }
+        });
         if (this.getItem(this.focused)?.notebookId === notebook) {
             this.focused = undefined;
             this.focusedItem = undefined;
@@ -1050,9 +1092,11 @@ export class DocTreeController {
             count -= page.count;
             for (let index = page.start; index < page.start + page.count; index++) {
                 const file = page.directory.files.get(index);
-                const expanded = file && Array.from(this.model.expanded.values()).some(item =>
-                    item.notebookId === page.directory.notebookId && item.id === file.id);
-                if (!expanded) {
+                const retained = file && (Array.from(this.model.expanded.values()).some(item =>
+                    item.notebookId === page.directory.notebookId && item.id === file.id) ||
+                    Array.from(this.expanding.values()).some(expansion =>
+                        expansion.item.notebookId === page.directory.notebookId && expansion.item.id === file.id));
+                if (!retained) {
                     page.directory.files.delete(index);
                     if (file) {
                         page.directory.indices.delete(file.id);
@@ -1104,14 +1148,21 @@ export class DocTreeController {
             row.removeAttribute("aria-expanded");
         }
         const expanded = this.isExpanded(item.occurrenceKey);
-        const pending = expanded ? Array.from(this.inFlight.values()).filter(request =>
-            request.directory === this.model.directory(item) && request.isCurrent()) : [];
+        const directory = this.model.directories.get(docTreeDirectoryKey(item.notebookId, docTreeParentID(item)));
+        const pending = expanded || this.expanding.has(item.occurrenceKey) ? Array.from(this.inFlight.values()).filter(request =>
+            request.directory === directory && request.isCurrent()) : [];
         const showIndicator = pending.some(request => request.showIndicator);
+        const retry = !expanded && !this.expanding.has(item.occurrenceKey) &&
+            Boolean(directory && this.errors.has(directory.key));
         row.setAttribute("aria-busy", String(pending.length > 0));
         const arrow = row.querySelector(".b3-list-item__arrow");
         arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
         arrow?.classList.toggle("fn__rotate", showIndicator);
-        arrow?.querySelector("use")?.setAttribute("xlink:href", showIndicator ? "#iconRefresh" : "#iconRight");
+        if (retry) { arrow?.setAttribute("aria-label", window.siyuan?.languages?.retry || ""); }
+        else { arrow?.removeAttribute("aria-label"); }
+        const use = arrow?.querySelector("use");
+        const icon = showIndicator || retry ? "#iconRefresh" : "#iconRight";
+        if (use && use.getAttribute("xlink:href") !== icon) { use.setAttribute("xlink:href", icon); }
     }
 
     private render() {
@@ -1201,9 +1252,17 @@ export class DocTreeController {
                 this.mounted.delete(key);
             }
         }
-        // 按位置移动既有行，避免滚动时替换整个列表或重建活动行。
+        // 新节点先补入，再跳过过期占位，保持顺序未变的行及其焦点、悬停状态。
+        const nextChildren = new Set(children);
         let current = this.list.firstElementChild;
         children.forEach(child => {
+            if (child.parentElement === this.list) {
+                while (current && !nextChildren.has(current as HTMLElement)) {
+                    const next = current.nextElementSibling;
+                    current.remove();
+                    current = next;
+                }
+            }
             if (current === child) {
                 current = current.nextElementSibling;
             } else {
@@ -1232,6 +1291,7 @@ export class DocTreeController {
         this.observer.disconnect();
         this.model.directories.clear();
         this.model.expanded.clear();
+        this.expanding.clear();
         this.model.setRoots([]);
         this.selected.clear();
         this.focused = undefined;

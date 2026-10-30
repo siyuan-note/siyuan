@@ -711,21 +711,23 @@ exports.cases = async sources => {
                 icon: arrow.querySelector("use").getAttribute("xlink:href"),
                 expanded: arrow.classList.contains("b3-list-item__arrow--open")};
         };
-        const busy = {busy: "true", spinning: true, icon: "#iconRefresh", expanded: true};
+        const busy = {busy: "true", spinning: true, icon: "#iconRefresh", expanded: false};
         const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true};
+        const rowCount = controller.model.rowCount;
+        const siblingTop = controller.getMountedElement("notebook:box/d2").getBoundingClientRect().top;
         const first = controller.toggle("notebook:box/d0", true);
         const second = controller.toggle("notebook:box/d1", true);
         controller.render();
-        check.deepEqual(arrowState("notebook:box/d0"), {...idle, busy: "true"}, "new requests keep the ordinary arrow");
-        check.deepEqual(arrowState("notebook:box/d1"), {...idle, busy: "true"});
+        check.deepEqual(arrowState("notebook:box/d0"), {...idle, expanded: false, busy: "true"}, "new requests keep the closed arrow");
+        check.deepEqual(arrowState("notebook:box/d1"), {...idle, expanded: false, busy: "true"});
         await new Promise(resolve => setTimeout(resolve, 220));
         await frame();
         check.deepEqual(arrowState("notebook:box/d0"), busy, "expanding a slow directory animates its arrow");
         check.deepEqual(arrowState("notebook:box/d1"), busy);
-        element.querySelectorAll("[data-tree-loading]").forEach(row => {
-            check.equal(row.textContent, "", "unloaded ranges do not show a loading message");
-            check.equal(row.getAttribute("aria-hidden"), "true");
-        });
+        check.equal(controller.model.rowCount, rowCount, "pending expansions do not project blank children");
+        check.equal(controller.getMountedElement("notebook:box/d2").getBoundingClientRect().top, siblingTop);
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        check.equal(controller.isExpanded("notebook:box/d0"), false);
         releases.get("d0")();
         await first;
         await frame();
@@ -744,6 +746,21 @@ exports.cases = async sources => {
         await controller.toggle("notebook:box/d1", false);
         await controller.toggle("notebook:box/d1", true);
         check.deepEqual(arrowState("notebook:box/d1"), idle, "cached expansions keep the ordinary arrow");
+        const iconUpdates = [];
+        element.querySelectorAll("use").forEach(use => {
+            const setAttribute = use.setAttribute.bind(use);
+            use.setAttribute = (name, value) => {
+                if (name === "xlink:href") { iconUpdates.push(value); }
+                setAttribute(name, value);
+            };
+        });
+        const sibling = controller.getMountedElement("notebook:box/d2");
+        await controller.select("notebook:box/d2", {scroll: false});
+        controller.render();
+        controller.render();
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box/d2"), sibling);
+        check.equal(iconUpdates.length, 0, "ordinary clicks and redraws do not invalidate unchanged SVG references");
         fixture.destroy();
     }
     {
@@ -831,6 +848,131 @@ exports.cases = async sources => {
         check.equal(element.querySelector(".fn__rotate"), null, "a completed fast request never starts a delayed animation");
         check.equal(flashed.length, 0);
         check.ok(controller.getMountedElement("notebook:box/d0"));
+        observer.disconnect();
+        fixture.destroy();
+    }
+    {
+        const fixture = make(2);
+        const {controller, element, source} = fixture;
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        const opening = controller.toggle("notebook:box");
+        await controller.toggle("notebook:box");
+        release();
+        await opening;
+        await frame();
+        check.equal(controller.isExpanded("notebook:box"), false, "clicking a pending arrow again cancels its expansion");
+        check.equal(controller.model.rowCount, 1);
+        check.equal(element.querySelector("[data-tree-loading]"), null);
+        controller.model.invalidate("box");
+        const restoring = controller.restoreExpanded([{notebookId: "box", id: "box", kind: "notebook"}]);
+        element.dispatchEvent(new WheelEvent("wheel", {bubbles: true}));
+        release();
+        await restoring;
+        check.equal(controller.isExpanded("notebook:box"), false, "new input cancels an unfinished saved expansion");
+        // 清空缓存后验证首次请求失败仍保持折叠，并能从原箭头重试。
+        const directory = controller.model.directory(controller.model.roots[0]);
+        controller.model.invalidate("box");
+        source.range = async () => { throw new Error("offline"); };
+        await controller.toggle("notebook:box", true);
+        await frame();
+        const root = controller.getMountedElement("notebook:box");
+        check.equal(root.getAttribute("aria-expanded"), "false");
+        check.equal(root.querySelector(".fn__rotate"), null);
+        check.equal(root.querySelector("use").getAttribute("xlink:href"), "#iconRefresh");
+        check.equal(root.querySelector(".b3-list-item__arrow").getAttribute("aria-label"), "Retry");
+        check.equal(directory.files.size, 0);
+        source.range = range;
+        await controller.toggle("notebook:box");
+        check.equal(root.getAttribute("aria-expanded"), "true");
+        check.ok(controller.getMountedElement("notebook:box/d0"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(2);
+        const {controller, source} = fixture;
+        const range = source.range;
+        let release;
+        let requests = 0;
+        source.range = async request => {
+            if (++requests === 1) { await new Promise(resolve => { release = resolve; }); }
+            return range(request);
+        };
+        const opening = controller.toggle("notebook:box", true);
+        await controller.reload({notebook: "box"});
+        release();
+        await opening;
+        check.equal(requests, 2, "a pending expansion reloads its first page after a concurrent refresh");
+        check.equal(controller.isExpanded("notebook:box"), true);
+        check.ok(controller.getMountedElement("notebook:box/d0"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(3000);
+        const {controller, source, directories} = fixture;
+        directories.get("")[0] = file("d0", "", 1);
+        directories.set("d0", [file("child", "d0")]);
+        await controller.toggle("notebook:box", true);
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            if (request.parentID === "d0") { await new Promise(resolve => { release = resolve; }); }
+            return range(request);
+        };
+        const opening = controller.toggle("notebook:box/d0", true);
+        for (let page = 1; page <= 70; page++) {
+            await controller.itemAtDirectoryIndex("notebook:box", page * 32);
+        }
+        check.ok(controller.model.getItem("notebook:box/d0"), "page eviction retains pending parent metadata");
+        release();
+        await opening;
+        check.equal(controller.isExpanded("notebook:box/d0"), true);
+        check.ok(controller.getMountedElement("notebook:box/d0/child"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(200);
+        const {controller, element, directories} = fixture;
+        directories.get("")[25] = file("d25", "", 2);
+        directories.set("d25", [file("a", "d25"), file("b", "d25")]);
+        await controller.toggle("notebook:box", true);
+        element.scrollTop = 600;
+        element.dispatchEvent(new Event("scroll"));
+        await frame();
+        check.ok(controller.list.firstElementChild.dataset.treeSpacer, "the scrolled viewport has a leading spacer");
+        const row = controller.getMountedElement("notebook:box/d25");
+        const rows = new Set(element.querySelectorAll("[data-tree-key]"));
+        const removed = [];
+        const observer = new MutationObserver(records => records.forEach(record => {
+            record.removedNodes.forEach(node => { if (rows.has(node)) { removed.push(node); } });
+        }));
+        observer.observe(controller.list, {childList: true});
+        element.addEventListener("click", event => {
+            const target = event.target.closest("[data-tree-key]");
+            if (target) { void controller.select(target.dataset.treeKey, {scroll: false}); }
+        });
+        const rect = row.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("file-tree-click", {
+            x: Math.ceil(rect.left + 50), y: Math.ceil(rect.top + rect.height / 2),
+        });
+        await frame();
+        check.equal(controller.getSelectedItems()[0]?.id, "d25", "native input reaches the visible row");
+        check.equal(removed.length, 0, "clicking a scrolled tree never detaches unchanged visible rows");
+        check.equal(document.activeElement, row, "the clicked row keeps native focus during redraw");
+        const top = row.getBoundingClientRect().top;
+        await controller.toggle(row.dataset.treeKey, true);
+        await frame();
+        check.ok(!removed.includes(row), "expansion inserts children without detaching the clicked parent");
+        check.equal(document.activeElement, row);
+        check.equal(row.getBoundingClientRect().top, top);
+        await controller.toggle(row.dataset.treeKey, false);
+        await frame();
+        check.ok(!removed.includes(row), "collapse preserves the parent row too");
+        check.equal(document.activeElement, row);
         observer.disconnect();
         fixture.destroy();
     }

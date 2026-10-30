@@ -6,7 +6,6 @@ import {aiConfigApi} from "./aiRuntime";
 import {openMemoryManager} from "../../../ai/memos/manager";
 import {memoryModelOptions} from "../../../ai/memos/state";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
-import {genButtonHtml} from "../../render/render";
 
 const mountMemorySelection = (root: HTMLElement) => {
     const model = root.querySelector<HTMLSelectElement>("[data-memory-model]");
@@ -67,15 +66,13 @@ const mountMemorySelection = (root: HTMLElement) => {
 export const registerAiMemoryGroup = (tab: SettingTabBuilder) => {
     const lang = window.siyuan.languages;
     const group = tab.group("memory", lang.aiMemory);
-    group.switch("ai.memory.enabled", {
-        title: lang.aiMemory,
-        desc: lang.aiMemoryEnabledTip,
-        keywords: [lang.manage],
-        afterMount: root => {
-            const toggle = root.querySelector<HTMLInputElement>('[id="ai.memory.enabled"]');
-            toggle.insertAdjacentHTML("afterend", `<span class="fn__space"></span>${genButtonHtml("manageMemory", lang.manage, "iconSettings")}`);
-            root.querySelector("#manageMemory").addEventListener("click", openMemoryManager);
-        },
+    group.stack({
+        key: "memoryControls",
+        keywords: [lang.aiMemory, lang.aiMemoryEnabledTip, lang.aiMemoryServiceTip, lang.manage],
+        afterMount: root => root.querySelector("#manageMemory").addEventListener("click", openMemoryManager),
+    }, stack => {
+        stack.switch("ai.memory.enabled", {desc: lang.aiMemoryEnabledTip});
+        stack.desc(lang.aiMemoryServiceTip).button({id: "manageMemory", label: lang.manage, icon: "iconSettings"});
     });
     group.slot({
         key: "memorySelection",

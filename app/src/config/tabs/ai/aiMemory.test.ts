@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readFileSync, readdirSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
@@ -13,6 +13,17 @@ class ControlStub {
     listeners = new Map<string, () => void>();
     addEventListener(name: string, callback: () => void) { this.listeners.set(name, callback); }
 }
+
+test("memory descriptions are independently localized without semicolons or trailing sentence punctuation", () => {
+    for (const file of readdirSync("appearance/langs").filter(name => name.endsWith(".json"))) {
+        const languages = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
+        for (const key of ["aiMemoryEnabledTip", "aiMemoryServiceTip"]) {
+            assert.equal(typeof languages[key], "string", `${file}: ${key}`);
+            assert.ok(languages[key].trim(), `${file}: ${key}`);
+            assert.doesNotMatch(languages[key], /[;；؛]|[.。।]$/, `${file}: ${key}`);
+        }
+    }
+});
 
 test("memory settings expose one enable switch without changing defaults", () => {
     const switches: string[] = [];
@@ -29,7 +40,10 @@ test("memory settings expose one enable switch without changing defaults", () =>
         require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} : {},
     });
     exported.registerAiMemoryGroup({group: () => ({
-        switch: (id: string) => switches.push(id),
+        stack: (_spec: unknown, configure: (stack: unknown) => void) => {
+            const stack = {switch: (id: string) => switches.push(id), desc: () => stack, button: () => {}};
+            configure(stack);
+        },
         slot: (spec: {html: () => string}) => { html = spec.html(); }, button: () => {},
     })});
     assert.deepEqual(switches, ["ai.memory.enabled"]);
@@ -41,19 +55,22 @@ test("memory settings expose one enable switch without changing defaults", () =>
     assert.equal(memory.enabled, false);
 });
 
-test("memory management shares the enable row and remains available with memory on or off", () => {
+test("memory settings pair each description with its own control and allow management while disabled", () => {
     for (const enabled of [false, true]) {
         const memory = {enabled};
+        const languages = {aiMemory: "memory", manage: "manage", aiMemoryEnabledTip: "enabled description", aiMemoryServiceTip: "service description"};
         let mount: (root: unknown) => void;
         let opened = 0;
         let writes = 0;
-        let separateButtons = 0;
-        let inserted = "";
+        const lines: Array<{desc: string; id?: string}> = [];
         const manage = new ControlStub();
-        const toggle = {
-            insertAdjacentHTML: (position: string, html: string) => {
-                assert.equal(position, "afterend", "management follows the switch in the same row");
-                inserted = html;
+        const stack = {
+            switch: (id: string, spec: {desc: string}) => { lines.push({desc: spec.desc, id}); },
+            desc: (desc: string) => { lines.push({desc}); return stack; },
+            button: (spec: {id: string; label: string; icon: string}) => {
+                assert.equal(spec.label, languages.manage);
+                assert.equal(spec.icon, "iconSettings");
+                lines.at(-1).id = spec.id;
             },
         };
         const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
@@ -61,32 +78,31 @@ test("memory management shares the enable row and remains available with memory 
             compilerOptions: {module: ModuleKind.CommonJS},
         }).outputText, {
             exports: exported,
-            window: {siyuan: {languages: {aiMemory: "memory", manage: "manage"}, config: {ai: {memory}}}},
+            window: {siyuan: {languages, config: {ai: {memory}}}},
             require: (name: string) => {
                 if (name.endsWith("/aiRuntime")) { return {aiConfigApi: {patch: () => { writes++; }}}; }
                 if (name.endsWith("/manager")) { return {openMemoryManager: () => { opened++; }}; }
-                if (name.endsWith("/render")) { return {genButtonHtml: (id: string, label: string, icon: string) => {
-                    assert.equal(id, "manageMemory");
-                    assert.equal(label, "manage");
-                    assert.equal(icon, "iconSettings");
-                    return '<button id="manageMemory">manage</button>';
-                }}; }
                 return {};
             },
         });
         exported.registerAiMemoryGroup({group: () => ({
-            switch: (id: string, spec: {afterMount: (root: unknown) => void; keywords: string[]}) => {
-                assert.equal(id, "ai.memory.enabled");
-                assert.ok(spec.keywords.includes("manage"));
+            stack: (spec: {afterMount: (root: unknown) => void; keywords: string[]}, configure: (stack: unknown) => void) => {
+                assert.ok(spec.keywords.includes(languages.manage));
+                assert.ok(spec.keywords.includes(languages.aiMemoryEnabledTip));
+                assert.ok(spec.keywords.includes(languages.aiMemoryServiceTip));
                 mount = spec.afterMount;
+                configure(stack);
             },
             slot: () => {},
-            button: () => { separateButtons++; },
         })});
-        mount({querySelector: (selector: string) => selector === '[id="ai.memory.enabled"]' ? toggle : manage});
-        assert.match(inserted, /fn__space/);
-        assert.match(inserted, /id="manageMemory"/);
-        assert.equal(separateButtons, 0);
+        assert.deepEqual(lines, [
+            {desc: languages.aiMemoryEnabledTip, id: "ai.memory.enabled"},
+            {desc: languages.aiMemoryServiceTip, id: "manageMemory"},
+        ]);
+        mount({querySelector: (selector: string) => {
+            assert.equal(selector, "#manageMemory");
+            return manage;
+        }});
         assert.equal(manage.disabled, false);
         manage.listeners.get("click")();
         assert.equal(opened, 1);
@@ -135,7 +151,7 @@ test("memory model placeholder preserves empty selection and model changes prese
             return {};
         },
     });
-    exported.registerAiMemoryGroup({group: () => ({switch: () => {}, button: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
+    exported.registerAiMemoryGroup({group: () => ({stack: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
     mount(root);
     const flush = async () => { for (let i = 0; i < 12; i++) { await Promise.resolve(); } };
     await flush();
@@ -199,7 +215,7 @@ test("memory reasoning uses Agent options and saves, resets, and reloads model s
             return {};
         },
     });
-    exported.registerAiMemoryGroup({group: () => ({switch: () => {}, button: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
+    exported.registerAiMemoryGroup({group: () => ({stack: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
     const flush = async () => { for (let i = 0; i < 12; i++) { await Promise.resolve(); } };
     const complete = async () => {
         responses.shift()({code: 0, data: {efforts: options.filter(option => option.value).map(option => option.value)}});

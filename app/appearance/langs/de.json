@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "KI-Antworten und frühere Gespräche sind ausgeschlossen, die Kosten richten sich nach den Preisen des Dienstes",
 	"templateHTTPDenied": "HTTP-Anfrage der Vorlage wurde abgelehnt",
 	"templateHTTPTimeout": "Zeitüberschreitung bei HTTP-Anfrage oder Bestätigung der Vorlage",
 	"templateHTTPLimit": "HTTP-Anfrage der Vorlage hat ein Ressourcenlimit überschritten",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Master-Passwort der verschlüsselten Notizbücher",
 	"dataImportPasswordTip": "Gib das Master-Passwort der verschlüsselten Notizbücher ein, die aus der Sicherung importiert werden; übersprungene Notizbücher müssen nicht überprüft werden",
 	"aiSelectModel": "Bitte ein Modell auswählen",
-	"aiMemoryEnabledTip": "Wenn aktiviert, extrahiert und pflegt der konfigurierte Modelldienst automatisch Erinnerungen aus allen unverschlüsselten Notizbüchern und künftig erfolgreich übermittelten Benutzernachrichten; KI-Antworten und frühere Gespräche sind ausgeschlossen; Kosten richten sich nach den Preisen des Dienstes",
+	"aiMemoryEnabledTip": "Wenn aktiviert, extrahiert und pflegt der konfigurierte Modelldienst automatisch Erinnerungen aus allen unverschlüsselten Notizbüchern und künftig erfolgreich übermittelten Benutzernachrichten",
 	"aiMemoryKind": "Erinnerungstyp",
 	"aiMemoryState": "Erinnerungsstatus",
 	"aiMemoryEmpty": "Noch keine Erinnerungen",

@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "Balasan AI dan percakapan sebelumnya tidak disertakan, dan biaya mengikuti tarif layanan tersebut",
 	"templateHTTPDenied": "Permintaan HTTP templat ditolak",
 	"templateHTTPTimeout": "Permintaan HTTP templat atau konfirmasi kehabisan waktu",
 	"templateHTTPLimit": "Permintaan HTTP templat melampaui batas sumber daya",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Kata sandi utama buku catatan terenkripsi",
 	"dataImportPasswordTip": "Masukkan kata sandi utama buku catatan terenkripsi yang akan diimpor dari cadangan; buku catatan yang dilewati tidak perlu diverifikasi",
 	"aiSelectModel": "Silakan pilih model",
-	"aiMemoryEnabledTip": "Saat diaktifkan, layanan model yang dikonfigurasi secara otomatis mengekstrak dan memelihara ingatan dari semua buku catatan yang tidak terenkripsi dan pesan pengguna yang berhasil dikirim setelah ini; tidak termasuk balasan AI dan percakapan sebelumnya; biaya mengikuti tarif layanan tersebut",
+	"aiMemoryEnabledTip": "Saat diaktifkan, layanan model yang dikonfigurasi secara otomatis mengekstrak dan memelihara ingatan dari semua buku catatan yang tidak terenkripsi dan pesan pengguna yang berhasil dikirim setelah ini",
 	"aiMemoryKind": "Jenis ingatan",
 	"aiMemoryState": "Status ingatan",
 	"aiMemoryEmpty": "Belum ada ingatan",

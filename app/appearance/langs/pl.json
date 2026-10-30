@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "Odpowiedzi AI i wcześniejsze rozmowy są pomijane, a opłaty są naliczane według cennika usługi",
 	"templateHTTPDenied": "Żądanie HTTP szablonu zostało odrzucone",
 	"templateHTTPTimeout": "Upłynął czas żądania HTTP szablonu lub potwierdzenia",
 	"templateHTTPLimit": "Żądanie HTTP szablonu przekroczyło limit zasobów",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Hasło główne zaszyfrowanych notatników",
 	"dataImportPasswordTip": "Wprowadź hasło główne zaszyfrowanych notatników importowanych z kopii zapasowej; pominięte notatniki nie wymagają weryfikacji",
 	"aiSelectModel": "Wybierz model",
-	"aiMemoryEnabledTip": "Po włączeniu skonfigurowana usługa modelu automatycznie wyodrębnia i utrzymuje wspomnienia ze wszystkich niezaszyfrowanych notesów oraz przyszłych pomyślnie wysłanych wiadomości użytkownika; pomija odpowiedzi AI i wcześniejsze rozmowy; opłaty są naliczane według cennika usługi",
+	"aiMemoryEnabledTip": "Po włączeniu skonfigurowana usługa modelu automatycznie wyodrębnia i utrzymuje wspomnienia ze wszystkich niezaszyfrowanych notesów oraz przyszłych pomyślnie wysłanych wiadomości użytkownika",
 	"aiMemoryKind": "Typ wspomnienia",
 	"aiMemoryState": "Stan wspomnienia",
 	"aiMemoryEmpty": "Brak wspomnień",

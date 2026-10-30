@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "Odpovede AI ani minulé rozhovory nie sú zahrnuté a poplatky sa riadia cenníkom služby",
 	"templateHTTPDenied": "HTTP požiadavka šablóny bola zamietnutá",
 	"templateHTTPTimeout": "Vypršal čas HTTP požiadavky šablóny alebo potvrdenia",
 	"templateHTTPLimit": "HTTP požiadavka šablóny prekročila limit zdrojov",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Hlavné heslo šifrovaných zápisníkov",
 	"dataImportPasswordTip": "Zadajte hlavné heslo šifrovaných zápisníkov importovaných zo zálohy; preskočené zápisníky nevyžadujú overenie",
 	"aiSelectModel": "Vyberte model",
-	"aiMemoryEnabledTip": "Po zapnutí nastavená služba modelu automaticky získava a udržiava spomienky zo všetkých nešifrovaných zápisníkov a budúcich úspešne odoslaných správ používateľa; nezahŕňa odpovede AI ani minulé rozhovory; poplatky sa riadia cenníkom služby",
+	"aiMemoryEnabledTip": "Po zapnutí nastavená služba modelu automaticky získava a udržiava spomienky zo všetkých nešifrovaných zápisníkov a budúcich úspešne odoslaných správ používateľa",
 	"aiMemoryKind": "Typ spomienky",
 	"aiMemoryState": "Stav spomienky",
 	"aiMemoryEmpty": "Zatiaľ žiadne spomienky",

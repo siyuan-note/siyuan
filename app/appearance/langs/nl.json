@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "AI-antwoorden en eerdere gesprekken zijn uitgesloten, en de kosten volgen de tarieven van die dienst",
 	"templateHTTPDenied": "HTTP-verzoek van sjabloon geweigerd",
 	"templateHTTPTimeout": "Time-out bij HTTP-verzoek of bevestiging van sjabloon",
 	"templateHTTPLimit": "HTTP-verzoek van sjabloon heeft een resourcelimiet overschreden",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Hoofdwachtwoord voor versleutelde notitieboeken",
 	"dataImportPasswordTip": "Voer het hoofdwachtwoord in voor de versleutelde notitieboeken die uit de back-up worden geïmporteerd; overgeslagen notitieboeken hoeven niet te worden geverifieerd",
 	"aiSelectModel": "Selecteer een model",
-	"aiMemoryEnabledTip": "Als dit is ingeschakeld, haalt de ingestelde modeldienst automatisch herinneringen uit alle niet-versleutelde notitieboeken en toekomstige gebruikersberichten die met succes zijn verzonden, en onderhoudt deze; AI-antwoorden en eerdere gesprekken zijn uitgesloten; kosten volgen de tarieven van die dienst",
+	"aiMemoryEnabledTip": "Als dit is ingeschakeld, haalt de ingestelde modeldienst automatisch herinneringen uit alle niet-versleutelde notitieboeken en toekomstige gebruikersberichten die met succes zijn verzonden, en onderhoudt deze",
 	"aiMemoryKind": "Type herinnering",
 	"aiMemoryState": "Status van herinnering",
 	"aiMemoryEmpty": "Nog geen herinneringen",

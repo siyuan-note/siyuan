@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "Se excluyen las respuestas de la IA y las conversaciones anteriores, y los cargos dependen de las tarifas del servicio",
 	"templateHTTPDenied": "Solicitud HTTP de la plantilla denegada",
 	"templateHTTPTimeout": "Se agotó el tiempo de la solicitud HTTP o de su confirmación",
 	"templateHTTPLimit": "La solicitud HTTP de la plantilla superó un límite de recursos",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Contraseña maestra de los cuadernos cifrados",
 	"dataImportPasswordTip": "Introduce la contraseña maestra de los cuadernos cifrados que se importarán de la copia de seguridad; no es necesario verificar los cuadernos omitidos",
 	"aiSelectModel": "Seleccione un modelo",
-	"aiMemoryEnabledTip": "Al activarla, el servicio de modelos configurado extrae y mantiene automáticamente recuerdos de todos los cuadernos no cifrados y de los mensajes del usuario enviados correctamente a partir de ahora; excluye las respuestas de la IA y las conversaciones anteriores; los cargos dependen de las tarifas del servicio",
+	"aiMemoryEnabledTip": "Al activarla, el servicio de modelos configurado extrae y mantiene automáticamente recuerdos de todos los cuadernos no cifrados y de los mensajes del usuario enviados correctamente a partir de ahora",
 	"aiMemoryKind": "Tipo de recuerdo",
 	"aiMemoryState": "Estado del recuerdo",
 	"aiMemoryEmpty": "Aún no hay recuerdos",

@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "不收集 AI 回覆、不回溯歷史對話，費用依設定的模型服務規則計算",
 	"templateHTTPDenied": "範本 HTTP 請求已被拒絕",
 	"templateHTTPTimeout": "範本 HTTP 請求或確認已逾時",
 	"templateHTTPLimit": "範本 HTTP 請求超出資源限制",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "加密筆記本主密碼",
 	"dataImportPasswordTip": "請輸入備份中待匯入的加密筆記本所用的主密碼；略過的筆記本無需驗證",
 	"aiSelectModel": "請選擇模型",
-	"aiMemoryEnabledTip": "啟用後自動維護目前工作空間的長期記憶，模型會從所有非加密筆記本和此後成功提交的使用者訊息中擷取並整理記憶；不收集 AI 回覆、不回溯歷史對話；費用依設定的模型服務規則計算",
+	"aiMemoryEnabledTip": "啟用後自動維護目前工作空間的長期記憶，模型會從所有非加密筆記本和此後成功提交的使用者訊息中擷取並整理記憶",
 	"aiMemoryKind": "記憶類型",
 	"aiMemoryState": "記憶狀態",
 	"aiMemoryEmpty": "尚無記憶",

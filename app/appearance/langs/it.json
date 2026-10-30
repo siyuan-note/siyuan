@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "Le risposte dell’IA e le conversazioni passate sono escluse, e i costi seguono le tariffe del servizio",
 	"templateHTTPDenied": "Richiesta HTTP del modello rifiutata",
 	"templateHTTPTimeout": "Tempo scaduto per la richiesta HTTP del modello o la conferma",
 	"templateHTTPLimit": "La richiesta HTTP del modello ha superato un limite di risorse",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Password principale dei taccuini crittografati",
 	"dataImportPasswordTip": "Inserisci la password principale dei taccuini crittografati da importare dal backup; non è necessario verificare i taccuini ignorati",
 	"aiSelectModel": "Seleziona un modello",
-	"aiMemoryEnabledTip": "Quando è attiva, il servizio di modelli configurato estrae e mantiene automaticamente i ricordi di tutti i taccuini non crittografati e dei futuri messaggi dell’utente inviati correttamente; esclude le risposte dell’IA e le conversazioni passate; i costi seguono le tariffe del servizio",
+	"aiMemoryEnabledTip": "Quando è attiva, il servizio di modelli configurato estrae e mantiene automaticamente i ricordi di tutti i taccuini non crittografati e dei futuri messaggi dell’utente inviati correttamente",
 	"aiMemoryKind": "Tipo di ricordo",
 	"aiMemoryState": "Stato del ricordo",
 	"aiMemoryEmpty": "Nessun ricordo ancora",

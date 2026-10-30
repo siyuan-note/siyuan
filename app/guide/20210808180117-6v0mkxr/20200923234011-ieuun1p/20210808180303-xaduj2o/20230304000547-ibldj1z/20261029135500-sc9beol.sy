@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261029155830"
+		"updated": "20261030025512"
 	},
 	"Children": [
 		{
@@ -140,7 +140,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-w46deg2",
-				"updated": "20261029155830"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
@@ -155,12 +155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-mlne86v",
-				"updated": "20261029155830"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open Manage to search and inspect records, evidence and scope. New explicitly confirmed records use Active (active). Model suggestions may remain Candidate (candidate); check their subject, scope, conditions and evidence before selecting Active (active) and saving. Correct a record through this manager rather than editing a derived overview."
+					"Data": "Open Manage and enter the facts or preferences to organize or correct, including their applicable conditions, then use Organize with model. Model suggestions may remain Candidate (candidate). Check their subject, scope, conditions and evidence before clicking Enable and confirming. Submit corrections through model organization rather than editing a derived overview."
 				}
 			]
 		},
@@ -169,12 +169,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-4mkva7o",
-				"updated": "20261029135500"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use Search and Refresh in the manager to find records, then click a record to read it in full. Click New, enter its content, and select Fact, Preference, Background or Decision and the appropriate state. Expand Details and sources to inspect the subject, scope, times, sources and evidence. The defaults user and workspace describe workspace-level user information; do not mistake someone else’s information or a project-specific rule for a global user preference. Click Save after editing."
+					"Data": "Use Search and Refresh in the manager to find records, then click a record to read it in full. Expand Details and sources to inspect the subject, scope, times, sources and evidence. The subject user and scope workspace describe workspace-level user information; do not mistake someone else’s information or a project-specific rule for a global user preference. Record content is read-only, with actions to enable, disable or forget records as needed."
 				}
 			]
 		},
@@ -183,12 +183,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-agntqax",
-				"updated": "20261029135500"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For example, create “When writing project status reports, start with conclusions, then risks and next steps,” check its scope and conditions, and save it as Active (active). Preserve project restrictions on agreements that apply to only one project; do not rewrite them as preferences for every task."
+					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Check the resulting record’s scope and conditions; if it is a candidate, click Enable and confirm. Preserve project restrictions on agreements that apply to only one project; do not rewrite them as preferences for every task."
 				}
 			]
 		},
@@ -211,7 +211,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-eyepamf",
-				"updated": "20261029155830"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
@@ -226,12 +226,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-vpy6gbc",
-				"updated": "20261029135500"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or create a new explicitly confirmed record rather than forcing the old record to become active."
+					"Data": "Candidate (candidate) and Needs review (review) records are not confirmed usable memories. When a source changes, is deleted or becomes inaccessible, related records require review instead of treating old evidence as a current fact. Check who the subject is, the scope, time and conditions before confirming. If the original source remains inaccessible, restore access or submit currently verified facts for model organization rather than forcing the old record to become active."
 				}
 			]
 		},
@@ -240,7 +240,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-oj02bkz",
-				"updated": "20261029155830"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
@@ -255,12 +255,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-jksxqku",
-				"updated": "20261029051700"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Organize with model processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model does not prevent manual viewing, correction, disabling or forgetting."
+					"Data": "The manager shows the model organization input by default, processes the text you submit and reports each result. The task status supports refresh and cancellation. Already saved changes are not undone by later cancellation. A missing or unavailable model shows a configuration prompt and prevents model organization, but you can still inspect existing records and enable them after validation, disable them or forget them."
 				}
 			]
 		},
@@ -269,7 +269,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-iknqk8t",
-				"updated": "20261029155830"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
@@ -302,12 +302,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-7s47asc",
-				"updated": "20261029135500"
+				"updated": "20261030025512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To record an explicit fact immediately, create and confirm it in the manager."
+					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To submit an explicit fact immediately, use Organize with model in the manager and review the result."
 				}
 			]
 		},

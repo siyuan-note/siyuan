@@ -1,4 +1,5 @@
 {
+	"aiMemoryServiceTip": "As respostas da IA e as conversas anteriores são excluídas, e as cobranças seguem os preços desse serviço",
 	"templateHTTPDenied": "Solicitação HTTP do modelo negada",
 	"templateHTTPTimeout": "A solicitação HTTP do modelo ou a confirmação expirou",
 	"templateHTTPLimit": "A solicitação HTTP do modelo excedeu um limite de recursos",
@@ -12,7 +13,7 @@
 	"dataImportMasterPassword": "Senha mestra dos cadernos criptografados",
 	"dataImportPasswordTip": "Digite a senha mestra dos cadernos criptografados que serão importados do backup; os cadernos ignorados não precisam de verificação",
 	"aiSelectModel": "Selecione um modelo",
-	"aiMemoryEnabledTip": "Quando ativada, o serviço de modelos configurado extrai e mantém automaticamente memórias de todos os cadernos não criptografados e de futuras mensagens do usuário enviadas com sucesso; exclui respostas da IA e conversas anteriores; as cobranças seguem os preços desse serviço",
+	"aiMemoryEnabledTip": "Quando ativada, o serviço de modelos configurado extrai e mantém automaticamente memórias de todos os cadernos não criptografados e de futuras mensagens do usuário enviadas com sucesso",
 	"aiMemoryKind": "Tipo de memória",
 	"aiMemoryState": "Estado da memória",
 	"aiMemoryEmpty": "Ainda não há memórias",

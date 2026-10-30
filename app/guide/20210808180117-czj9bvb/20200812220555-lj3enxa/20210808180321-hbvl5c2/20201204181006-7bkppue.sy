@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20261030030559"
+		"updated": "20261030031540"
 	},
 	"Children": [
 		{
@@ -235,7 +235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20261030030559"
+				"updated": "20261030031540"
 			},
 			"Children": [
 				{
@@ -393,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20261030030559"
+				"updated": "20261030031540"
 			},
 			"Children": [
 				{
@@ -1850,7 +1850,7 @@
 					"Type": "NodeListItem",
 					"Properties": {
 						"id": "20261030030559-1q82taw",
-						"updated": "20261030030559"
+						"updated": "20261030031540"
 					},
 					"Children": [
 						{
@@ -1858,7 +1858,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261030030559-33mmh6o",
-								"updated": "20261030030559"
+								"updated": "20261030031540"
 							},
 							"Children": [
 								{
@@ -1876,10 +1876,6 @@
 									"TextMarkBlockRefID": "20261030003500-xwa7tv2",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "从外部接口读取数据"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "。"
 								}
 							]
 						}
@@ -1896,7 +1892,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261030003500-xwa7tv2",
-				"updated": "20261030030559"
+				"updated": "20261030031540"
 			},
 			"Children": [
 				{
@@ -1915,68 +1911,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261030003500-cgwlge5",
-				"updated": "20261030003500"
+				"updated": "20261030031540"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文档插入、预览、日记正文模板和数据库模板字段可以使用 httpGet 读取公网 HTTP/HTTPS 接口。首版仅支持 GET，不支持内网、代理或后台自动授权。返回值包含 ok、status、body、error；正文可交给已有 fromJson 等函数解析，不会作为模板再次执行。"
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-z65wnaq",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-z65wnaq",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "每次执行到联网函数时才显示实际目标并征求同意，查询参数值与请求头值隐藏。新目标、不同凭据或重定向需要新的确认；确认后从当前调用继续，不重跑模板。右上角显示执行状态。关闭窗口、切换预览或锁定笔记本会终止等待并丢弃失效结果；没有可交互窗口时返回 interaction_required。"
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-jr22yvj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-jr22yvj",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可选参数为 dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5，timeout 单位为秒，上限 10 秒。请勿在可分享的模板中写入真实密钥；模板及其密钥可能随同步、分享传播。跨来源重定向会清空自定义请求头，且不自动携带思源登录凭据。"
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-q47v9tf",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-q47v9tf",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "相同请求只在本次执行、相同数据范围及凭据内复用；数据库各行共享预算，不做跨执行缓存或定时刷新。重新渲染、预览与正式插入分别授权。单次执行最多 32 个目标请求、1024 次函数调用，单响应 1 MiB、总正文 8 MiB、总网络时间 30 秒、总执行时间 2 分钟；确认最多等待 1 分钟。 联网执行的模板输出合计上限为 8 MiB。总耗时、取消和预算会在 HTTP 调用或输出时检查；不含调用或输出的纯计算无法被抢占中止。"
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-wz9dj8e",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-wz9dj8e",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "普通网络失败、拒绝和 HTTP 非成功状态通过 error 返回，可用 ok 分支生成备用内容；超出总预算或执行失效会终止结果。新建日记先保存文档身份，再等待正文模板，终止后已创建的文档仍保留，不自动重跑。下面的示例地址需要替换成自己的公网接口："
+					"Data": "在文档插入、预览、日记正文模板或数据库模板字段中，使用 httpGet 读取公网 HTTP/HTTPS 接口，再用 fromJson 解析 JSON 正文。返回值包含 ok、status、body、error；返回的正文不会作为模板执行。请将示例地址替换为自己的接口："
 				}
 			]
 		},
@@ -2006,6 +1946,62 @@
 				}
 			],
 			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20261030003500-jr22yvj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-jr22yvj",
+				"updated": "20261030031540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可选参数为 dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5，timeout 单位为秒，上限 10 秒。仅支持 GET，不支持内网或代理。请勿在可分享的模板中写入真实密钥；密钥可能随模板同步、分享。跨来源重定向会清空自定义请求头，不会自动携带思源登录凭据。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-z65wnaq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-z65wnaq",
+				"updated": "20261030031540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "调用时会显示实际访问目标，确认后继续执行，不会重新运行模板；查询参数值和请求头值会隐藏。新目标、不同凭据或重定向需要重新确认，预览与正式插入也需分别确认。右上角显示执行状态。关闭窗口、切换预览或锁定笔记本会终止等待并丢弃结果；无法交互确认时返回 interaction_required，不会自动联网。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-q47v9tf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-q47v9tf",
+				"updated": "20261030031540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相同请求仅在本次执行、相同数据范围及凭据内复用，数据库各行共享额度；不跨次缓存或定时刷新。每次执行最多 32 个目标请求、1024 次函数调用，单响应最多 1 MiB，响应正文合计最多 8 MiB，模板输出合计最多 8 MiB。网络耗时合计最多 30 秒，总执行时限 2 分钟，确认最多等待 1 分钟。时限会在联网或输出时检查，请避免长时间不联网也不输出内容的循环。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-wz9dj8e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-wz9dj8e",
+				"updated": "20261030031540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "网络失败、拒绝访问和 HTTP 非成功状态通过 error 返回，可用 ok 分支显示备用内容。超过总额度或执行中断时，不会插入结果。新建日记中断后，已创建的文档仍保留，不会自动重试正文模板。"
+				}
+			]
 		},
 		{
 			"ID": "20260904022100-7ay9g5b",

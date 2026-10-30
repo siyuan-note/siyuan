@@ -17,6 +17,11 @@ import (
 	jose "github.com/go-jose/go-jose/v4"
 )
 
+func init() {
+	// 在任何 JWK 解析前设置共享上限，与插件支持的 RSA 密钥位长一致。
+	jose.MaxRSAModulusBits = rsaMaxModulusLength
+}
+
 // JWK 的 kty 取值。
 const (
 	jwkKeyTypeOct = "oct"

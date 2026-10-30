@@ -41,13 +41,30 @@ const getRowsHTML = () => {
             id: `${type}-${depth}`, hierarchy: {depth, expanded: false, childCount: 2, context: false},
             cells: [{id: "value", valueType: "block", value: {type: "block", isDetached: true, block: {content: "Title"}}}],
         } as IAVRow})).join("");
-        return `<div class="av" data-av-type="${type}" data-sub-items-nested><div class="av__container"><div class="av__scroll"><div class="av__body" data-group-id="">${rows}</div></div></div></div>`;
+        const footer = "<div class=\"av__row--util\"><div class=\"av__colsticky\"><button class=\"b3-button av__button\" data-type=\"av-add-bottom\"><span>Add entry</span></button><span class=\"fn__space\"></span><span class=\"ft__on-surface av__sub-items-count\">2 roots, 5 matches</span></div></div>";
+        return `<div class="av" data-av-type="${type}" data-sub-items-nested><div class="av__container"><div class="av__scroll"><div class="av__body" data-group-id="">${rows}${footer}</div></div></div></div>`;
     }).join("");
 };
 
-const checkLayout = () => {
+const checkLayout = (mobile: boolean) => {
     const check = require("node:assert/strict");
     for (const type of ["table", "list"]) {
+        for (const fontSize of [16, 24]) {
+            document.body.style.fontSize = fontSize + "px";
+            const block = document.querySelector<HTMLElement>(`.av[data-av-type="${type}"]`);
+            const button = block.querySelector<HTMLElement>('[data-type="av-add-bottom"]');
+            const count = block.querySelector<HTMLElement>(".av__sub-items-count");
+            check.equal(getComputedStyle(count).fontSize, getComputedStyle(button).fontSize);
+            if (type === "table") {
+                const label = button.querySelector("span").getBoundingClientRect();
+                const range = document.createRange();
+                range.selectNodeContents(count);
+                const text = range.getBoundingClientRect();
+                check.ok(Math.abs((text.top + text.bottom - label.top - label.bottom) / 2) <= 1,
+                    `count and add-entry text must be vertically centered at ${fontSize}px`);
+            }
+        }
+        document.body.style.fontSize = "16px";
         const row = document.querySelector<HTMLElement>(`[data-id="${type}-2"]`);
         const root = document.querySelector<HTMLElement>(`[data-id="${type}-0"]`);
         const cell = row.querySelector<HTMLElement>('.av__cell[data-dtype="block"]');
@@ -63,7 +80,7 @@ const checkLayout = () => {
         check.equal(Math.round(title.getBoundingClientRect().left - root.querySelector(".av__celltext").getBoundingClientRect().left), 40);
         check.ok(title.getBoundingClientRect().right <= actions.getBoundingClientRect().left);
         check.ok(actions.getBoundingClientRect().right <= cell.getBoundingClientRect().right);
-        check.equal(getComputedStyle(actions).pointerEvents, "auto");
+        check.equal(getComputedStyle(actions).pointerEvents, mobile ? "auto" : "none");
         row.classList.add("dragover__bottom--child");
         const indicator = getComputedStyle(row, "::after");
         check.equal(indicator.borderTopWidth, "2px");
@@ -73,11 +90,11 @@ const checkLayout = () => {
     return "sub-items-layout-ok";
 };
 
-test("mobile table/list tree titles stay beside controls, retain indentation and action space, and show child drop feedback", {timeout: 30000}, async () => {
+const testLayout = (stylesheet: string) => test(`${stylesheet} table/list tree titles retain controls, indentation and drop feedback while counts match footer buttons`, {timeout: 30000}, async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-sub-items-layout-"));
-    const css = sass.compile("src/assets/scss/mobile.scss", {style: "compressed", silenceDeprecations: ["legacy-js-api"]}).css;
+    const css = sass.compile(`src/assets/scss/${stylesheet}.scss`, {style: "compressed", silenceDeprecations: ["legacy-js-api"]}).css;
     const html = `<style>:root{--b3-theme-primary:blue;--b3-theme-primary-lightest:#eef;--b3-border-color:#ccc}body{width:390px}.av{width:390px}</style><style>${css}</style><div class="protyle-wysiwyg">${getRowsHTML()}</div>`;
-    const execute = ts.transpileModule(`const __name = (value) => value; document.write(${JSON.stringify(html)}); try { (${checkLayout.toString()})() } catch (error) { String(error.stack) }`, {
+    const execute = ts.transpileModule(`const __name = (value) => value; document.write(${JSON.stringify(html)}); try { (${checkLayout.toString()})(${stylesheet === "mobile"}) } catch (error) { String(error.stack) }`, {
         compilerOptions: {target: ts.ScriptTarget.ES2022},
     }).outputText;
     const script = path.join(directory, "main.cjs");
@@ -93,3 +110,5 @@ try{await win.loadURL("about:blank");console.log(await win.webContents.executeJa
         rmSync(directory, {recursive: true, force: true});
     }
 });
+
+["base", "mobile"].forEach(testLayout);

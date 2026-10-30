@@ -3442,6 +3442,9 @@ img.av__cellassetimg {
 }
 
 .av__sub-items-count {
+  display: flex;
+  align-items: center;
+  font-size: 75%;
   padding: 4px 8px;
   white-space: nowrap;
 }

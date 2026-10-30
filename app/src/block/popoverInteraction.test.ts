@@ -34,6 +34,9 @@ class TestElement {
         if (selector === '[data-dialog-closing="true"]' && this.dataset.dialogClosing === "true") {
             return this;
         }
+        if (selector === "[data-notebook-id]" && this.getAttribute("data-notebook-id")) {
+            return this;
+        }
         return this.parentElement?.closest(selector) || null;
     }
     querySelector(selector: string): TestElement {
@@ -77,7 +80,7 @@ const createHarness = (android = false) => {
     const panels: {element: TestElement, targetElement: TestElement, canShow?: () => boolean,
         refDefs: IRefDefs[], editors: unknown[], destroy: () => void,
         backlink?: {blockId: string, rootId: string, notebookId: string}}[] = [];
-    const requests: {url: string, resolve: (data: unknown) => void}[] = [];
+    const requests: {url: string, data: {id?: string, notebook?: string}, resolve: (data: unknown) => void}[] = [];
     const siyuan = {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: element({}, ["fn__none"]), data: undefined as unknown}},
@@ -126,8 +129,9 @@ const createHarness = (android = false) => {
                 closest(target, item => value === null ? Boolean(item.getAttribute(name)) :
                     Boolean(item.getAttribute(name)?.split(" ").includes(value))),
         },
-        "../util/fetch": {fetchSyncPost: (url: string) => new Promise(resolve => requests.push({url, resolve}))},
-        "../util/pathName": {isEncryptedBox: () => false, isLocalPath: () => false,
+        "../util/fetch": {fetchSyncPost: (url: string, data: {id?: string, notebook?: string}) =>
+            new Promise(resolve => requests.push({url, data, resolve}))},
+        "../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted", isLocalPath: () => false,
             parseSiYuanUriInfo: (href: string) => ({id: href.split("/").pop()})},
         "../protyle/render/av/cellOverflow": {shouldMeasureAVCellContentOverflow: () => false},
         "../dialog/tooltip": {
@@ -337,6 +341,46 @@ test("late reference count metadata cannot open a popover after its anchor close
     await h.advance();
     block.dataset.dialogClosing = "true";
     h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
+    await h.advance();
+    assert.equal(h.panels.length, 0);
+});
+
+test("document panel reference counts open the shared backlink popover with the row notebook identity", async () => {
+    for (const notebook of ["plain", "encrypted"]) {
+        const h = createHarness();
+        const row = h.element({"data-node-id": "tree-document", "data-type": "navigation-file",
+            "data-notebook-id": notebook});
+        const count = h.element({}, ["popover__block", "counter"], row);
+        h.fire("mouseover", count);
+        await h.advance();
+        assert.equal(h.requests.length, 1);
+        assert.equal(h.requests[0].url, "/api/block/getBlockInfo");
+        assert.equal(h.requests[0].data.id, "tree-document");
+        assert.equal(h.requests[0].data.notebook, notebook === "encrypted" ? notebook : "");
+        h.requests[0].resolve({code: 0, data: {rootID: "tree-document", box: notebook}});
+        await h.advance();
+        assert.equal(h.panels.length, 1);
+        assert.equal(h.panels[0].backlink.blockId, "tree-document");
+        assert.equal(h.panels[0].backlink.rootId, "tree-document");
+        assert.equal(h.panels[0].backlink.notebookId, notebook);
+    }
+});
+
+test("document panel icons retain document previews and late count responses cannot reopen removed rows", async () => {
+    const h = createHarness();
+    const row = h.element({"data-node-id": "tree-document", "data-type": "navigation-file"});
+    const icon = h.element({"data-id": "tree-document"}, ["popover__block"], row);
+    h.fire("mouseover", icon);
+    await h.advance();
+    assert.equal(h.panels.length, 1);
+    assert.equal(h.panels[0].backlink, undefined);
+    assert.equal(h.panels[0].refDefs[0].refID, "tree-document");
+    h.panels[0].destroy();
+    const count = h.element({}, ["popover__block", "counter"], row);
+    h.fire("mouseover", count);
+    await h.advance();
+    count.isConnected = false;
+    h.requests[0].resolve({code: 0, data: {rootID: "tree-document", box: "plain"}});
     await h.advance();
     assert.equal(h.panels.length, 0);
 });

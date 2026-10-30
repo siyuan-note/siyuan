@@ -723,8 +723,12 @@ export const showPopover = async (app: App, showRef = false, automatic = false) 
     const notebookId = getPopoverNotebookId();
     const dataId = popoverTargetElement.getAttribute("data-id");
     /// #if !MOBILE
-    if (popoverTargetElement.classList.contains("protyle-attr--refcount")) {
-        const blockId = popoverTargetElement.parentElement.parentElement.getAttribute("data-node-id");
+    if (popoverTargetElement.classList.contains("protyle-attr--refcount") ||
+        (popoverTargetElement.classList.contains("counter") &&
+            popoverTargetElement.parentElement.getAttribute("data-type") === "navigation-file")) {
+        const blockId = popoverTargetElement.classList.contains("protyle-attr--refcount") ?
+            popoverTargetElement.parentElement.parentElement.getAttribute("data-node-id") :
+            popoverTargetElement.parentElement.getAttribute("data-node-id");
         const response = await fetchSyncPost("/api/block/getBlockInfo", {id: blockId, notebook: notebookId});
         if (response.code !== 0) {
             return;

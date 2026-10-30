@@ -469,21 +469,18 @@ const pushRootID = (rootIDs: string[], item: Tab) => {
 export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
     const rootIDs: string[] = [];
     if (type === "closeOthers") {
-        for (let index = 0; index < tab.parent.children.length; index++) {
-            const item = tab.parent.children[index];
+        // Closing may wait for title persistence or be blocked by an upload.
+        for (const item of [...tab.parent.children]) {
             if (item.id !== tab.id && item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true, false);
-                index--;
             }
         }
     } else if (type === "closeAll") {
-        for (let index = 0; index < tab.parent.children.length; index++) {
-            const item = tab.parent.children[index];
+        for (const item of [...tab.parent.children]) {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true);
-                index--;
             }
         }
     } else if (tabs.length > 0) {

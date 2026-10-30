@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Disattivata",
 	"aiMemoryStateSuperseded": "Sostituita",
 	"aiMemory": "Memoria a lungo termine",
-	"aiMemoryTip": "I ricordi sono disponibili per le funzioni di IA di questo spazio di lavoro; l’organizzazione con un modello invia il contenuto necessario per questa attività al servizio di modelli configurato; i costi seguono le tariffe del servizio",
+	"aiMemoryTip": "I ricordi sono disponibili per le funzioni di IA di questo spazio di lavoro; l’elaborazione con un modello invia il contenuto necessario per questa attività al servizio di modelli configurato; i costi seguono le tariffe del servizio",
 	"aiMemoryScope": "Ambito",
 	"aiMemoryForget": "Dimentica",
 	"aiMemoryOverview": "Riepiloghi in sola lettura",
@@ -3588,6 +3588,7 @@
 		"455": "Servizio del modello di memoria non disponibile; riprova più tardi",
 		"456": "Il modello di memoria ha restituito una risposta non valida o incompleta; riprova o seleziona un altro modello",
 		"457": "Richiesta al modello di memoria non riuscita; controlla il fornitore e il modello selezionati",
-		"458": "Richiesta al modello di memoria annullata"
+		"458": "Richiesta al modello di memoria annullata",
+		"459": "Il riepilogo attuale dei ricordi non può essere elaborato al momento. Riprova più tardi"
 	}
 }

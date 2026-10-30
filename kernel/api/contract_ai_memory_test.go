@@ -137,3 +137,22 @@ func TestAPIContractAIMemoryReasoningOptions(t *testing.T) {
 		})
 	}
 }
+
+func TestAPIContractAIMemoryTranslationRequiresConfiguredEnabledMemory(t *testing.T) {
+	aiContractConfiguration(t)
+	model.Conf.Lang = "zh-CN"
+	engine := gin.New()
+	engine.POST("/api/ai/memory/translate", translateAIMemory)
+	for _, body := range []string{`{}`, `{"memory":"private overview","language":"zh-CN"}`, `{"memory":"private overview","language":"en"}`} {
+		w := httptest.NewRecorder()
+		engine.ServeHTTP(w, httptest.NewRequest("POST", "/api/ai/memory/translate", strings.NewReader(body)))
+		requireAPIContract(t, "POST", "/api/ai/memory/translate", w)
+		var result struct {
+			Code int
+			Data json.RawMessage
+		}
+		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil || result.Code == 0 {
+			t.Fatalf("translation must not implicitly enable or choose a model: %s %v", w.Body.String(), err)
+		}
+	}
+}

@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Vypnutá",
 	"aiMemoryStateSuperseded": "Nahradená",
 	"aiMemory": "Dlhodobá pamäť",
-	"aiMemoryTip": "Spomienky sú dostupné funkciám AI v tomto pracovnom priestore; pri usporiadaní pomocou modelu sa obsah potrebný pre túto úlohu odošle nastavenej službe modelu; poplatky sa riadia jej cenníkom",
+	"aiMemoryTip": "Spomienky sú dostupné funkciám AI v tomto pracovnom priestore; pri spracovaní pomocou modelu sa obsah potrebný pre túto úlohu odošle nastavenej službe modelu; poplatky sa riadia jej cenníkom",
 	"aiMemoryScope": "Rozsah",
 	"aiMemoryForget": "Zabudnúť",
 	"aiMemoryOverview": "Prehľady iba na čítanie",
@@ -3588,6 +3588,7 @@
 		"455": "Služba modelu pamäte nie je dostupná; skúste to neskôr",
 		"456": "Model pamäte vrátil neplatnú alebo neúplnú odpoveď; skúste to znova alebo vyberte iný model",
 		"457": "Požiadavka na model pamäte zlyhala; skontrolujte vybraného poskytovateľa a model",
-		"458": "Požiadavka na model pamäte bola zrušená"
+		"458": "Požiadavka na model pamäte bola zrušená",
+		"459": "Aktuálny prehľad spomienok teraz nemožno spracovať. Skúste to znova neskôr"
 	}
 }

@@ -1868,6 +1868,38 @@
       ],
       "additionalProperties": false
     },
+    "AIMemoryTranslateData": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "language",
+        "memory"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTranslateRequestInput": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "language",
+        "memory"
+      ],
+      "additionalProperties": false
+    },
     "AIMessageRequestInput": {
       "type": "object",
       "properties": {
@@ -132532,6 +132564,86 @@
               },
               "data": {
                 "$ref": "#/$defs/AIMemoryTaskData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/translate",
+      "handler": "translateAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryTranslateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryTranslateData"
               },
               "msg": {
                 "type": "string"

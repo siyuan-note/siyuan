@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Uitgeschakeld",
 	"aiMemoryStateSuperseded": "Vervangen",
 	"aiMemory": "Langetermijngeheugen",
-	"aiMemoryTip": "Herinneringen zijn beschikbaar voor AI-functies in deze werkruimte; bij het organiseren met een model wordt de benodigde inhoud voor deze taak naar de ingestelde modeldienst gestuurd; kosten volgen de tarieven van die dienst",
+	"aiMemoryTip": "Herinneringen zijn beschikbaar voor AI-functies in deze werkruimte; bij het verwerken met een model wordt de benodigde inhoud voor deze taak naar de ingestelde modeldienst gestuurd; kosten volgen de tarieven van die dienst",
 	"aiMemoryScope": "Bereik",
 	"aiMemoryForget": "Vergeten",
 	"aiMemoryOverview": "Alleen-lezenoverzichten",
@@ -3588,6 +3588,7 @@
 		"455": "Dienst van het geheugenmodel niet beschikbaar; probeer het later opnieuw",
 		"456": "Het geheugenmodel gaf een ongeldig of onvolledig antwoord; probeer het opnieuw of kies een ander model",
 		"457": "Verzoek aan het geheugenmodel mislukt; controleer de geselecteerde aanbieder en het model",
-		"458": "Verzoek aan het geheugenmodel geannuleerd"
+		"458": "Verzoek aan het geheugenmodel geannuleerd",
+		"459": "Het huidige geheugenoverzicht kan nu niet worden verwerkt. Probeer het later opnieuw"
 	}
 }

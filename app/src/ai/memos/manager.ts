@@ -32,18 +32,31 @@ export const openMemoryManager = () => {
     let overviewFailures = 0;
     let taskTimer: number;
     let overviewTimer: number;
+    let overviewSource = "";
+    type Translation = {promise: Promise<{memory?: string; error?: unknown}>; controller: AbortController; settled: boolean};
+    const translations = new Map<string, Translation>();
+    let translationProviders = window.siyuan.config.ai?.providers;
+    const abortTranslations = (keepKey?: string) => {
+        translations.forEach((entry, key) => {
+            if (key !== keepKey && !entry.settled) {
+                entry.controller.abort();
+                translations.delete(key);
+            }
+        });
+    };
     const dialog = new Dialog({
         title: lang.aiMemory,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
+<p class="memory-manager__hint" data-memory-count role="status" aria-live="polite"></p>
+<p class="memory-manager__hint" data-memory-overview-status role="status"></p>
+<div class="memory-manager__hint" data-memory-translation-status role="status" aria-live="polite" aria-label="${escapeHtml(lang.loading)}" hidden><span class="b3-loading b3-loading--small" aria-hidden="true"></span></div>
+<div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
 <p class="memory-manager__hint">${escapeHtml(lang.aiMemoryTip)}</p>
 <textarea class="b3-text-field fn__block" data-memory-task-input rows="4" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
 <p class="memory-manager__hint" data-memory-model-hint role="status" hidden></p>
 <div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 <pre class="memory-manager__status" data-memory-task-status role="status" aria-live="polite"></pre>
-<p class="memory-manager__hint" data-memory-count role="status" aria-live="polite"></p>
-<p class="memory-manager__hint" data-memory-overview-status role="status"></p>
-<div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
 </div>`,
         beforeClose: () => {
             if (submitting) { return false; }
@@ -57,6 +70,8 @@ export const openMemoryManager = () => {
             overviewGeneration++;
             window.clearTimeout(taskTimer);
             window.clearTimeout(overviewTimer);
+            abortTranslations();
+            translations.clear();
         },
     });
     const root = dialog.element;
@@ -66,6 +81,7 @@ export const openMemoryManager = () => {
     const countStatus = root.querySelector<HTMLElement>("[data-memory-count]");
     const overviewStatus = root.querySelector<HTMLElement>("[data-memory-overview-status]");
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
+    const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
     const taskLabels: Record<string, string> = {queued: lang.agentConfirmPending, running: lang.loading,
         completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
     const reportedErrors = new Set<string>();
@@ -94,9 +110,63 @@ export const openMemoryManager = () => {
         taskStatus.textContent = [taskLabels[lastTask.state] || lastTask.state, lastTask.error,
             lastTask.state === "completed" && taskSummaryReady && count === 0 ? lang.aiMemoryTaskNoNewUsable : ""].filter(Boolean).join("\n");
     };
+    const translateOverview = async (memory: string, generation: number) => {
+        const config = window.siyuan.config;
+        const language = config.lang;
+        const modelId = config.ai?.memory?.modelId;
+        const reasoningEffort = config.ai?.memory?.reasoningEffort;
+        const providers = config.ai?.providers;
+        if (translationProviders !== providers) {
+            abortTranslations();
+            translations.clear();
+            translationProviders = providers;
+        }
+        if (!memory.trim() || !language || isReadOnly() || !config.ai?.memory?.enabled ||
+            !memoryModelOptions(config.ai?.providers || [], modelId || "").some(model => model.id === modelId && !model.unavailable)) {
+            abortTranslations();
+            return;
+        }
+        const key = JSON.stringify([memory, language, modelId, reasoningEffort]);
+        abortTranslations(key);
+        translationStatus.hidden = false;
+        // 同一次打开期间保留成功和失败结果，概览重查不重复发起付费翻译。
+        if (!translations.has(key)) {
+            if (translations.size >= 32) {
+                const oldest = translations.keys().next().value;
+                translations.get(oldest).controller.abort();
+                translations.delete(oldest);
+            }
+            const controller = new AbortController();
+            const entry: Translation = {controller, settled: false, promise: undefined};
+            entry.promise = (async () => {
+                try {
+                    const response = await fetchSyncPost("/api/ai/memory/translate", {memory, language}, undefined, false, controller.signal);
+                    if (response.code !== 0) { throw new Error(response.msg); }
+                    if (response.data.language !== language || typeof response.data.memory !== "string") { throw new Error(lang.embeddingFailed); }
+                    return {memory: response.data.memory};
+                } catch (error) { return {error}; }
+            })().finally(() => { entry.settled = true; });
+            translations.set(key, entry);
+        }
+        const entry = translations.get(key);
+        const result = await entry.promise;
+        if (closed || generation !== overviewGeneration || overviewSource !== memory) { return; }
+        translationStatus.hidden = true;
+        if (window.siyuan.config.lang !== language || window.siyuan.config.ai?.providers !== providers ||
+            window.siyuan.config.ai?.memory?.reasoningEffort !== reasoningEffort) { return; }
+        if (result.error) {
+            if (!entry.controller.signal.aborted) { reportError(result.error, "translation"); }
+            return;
+        }
+        if (!isReadOnly() && window.siyuan.config.ai?.memory?.enabled && window.siyuan.config.ai.memory.modelId === modelId &&
+            memoryModelOptions(window.siyuan.config.ai.providers || [], modelId).some(model => model.id === modelId && !model.unavailable)) {
+            renderMemoryOverview(overview, result.memory);
+        }
+    };
     const refreshOverview = async () => {
         window.clearTimeout(overviewTimer);
         const generation = ++overviewGeneration;
+        translationStatus.hidden = true;
         try {
             const response = await fetchSyncPost("/api/ai/memory/overview", {}, undefined, false);
             if (closed || generation !== overviewGeneration) { return; }
@@ -107,8 +177,15 @@ export const openMemoryManager = () => {
                 lang.aiMemoryRememberedCount.replace("${count}", String(count));
             overviewStatus.textContent = response.data.stale ? lang.aiMemoryOverviewPending : "";
             // 过期概览不能继续显示为当前事实，等待后台重新生成后再展示。
-            if (response.data.stale) { overview.textContent = ""; }
-            else { renderMemoryOverview(overview, response.data.memory); }
+            overviewSource = response.data.stale ? "" : response.data.memory;
+            if (response.data.stale) {
+                overview.textContent = "";
+                abortTranslations();
+            }
+            else {
+                renderMemoryOverview(overview, overviewSource);
+                void translateOverview(overviewSource, generation);
+            }
             taskSummaryReady = true;
             if (lastTask?.state === "completed") { renderTask(); }
             if (!response.data.countComplete || response.data.stale) {
@@ -121,6 +198,8 @@ export const openMemoryManager = () => {
             overviewStatus.textContent = lang.embeddingFailed;
             reportError(error, "overview");
             overview.textContent = "";
+            overviewSource = "";
+            abortTranslations();
             if (lastTask?.state === "completed") { renderTask(); }
             overviewTimer = window.setTimeout(() => { void refreshOverview(); }, retryDelay(++overviewFailures));
         }

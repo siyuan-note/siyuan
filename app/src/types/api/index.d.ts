@@ -102,6 +102,10 @@ export type AIMemoryTaskResult = { "error": string; "id": string; "saved": boole
 
 export type AIMemoryTaskStarted = { "taskId": string; };
 
+export type AIMemoryTranslateData = { "language": string; "memory": string; };
+
+export type AIMemoryTranslateRequestInput = { "language": string; "memory": string; };
+
 export type AIMessageRequestInput = { "msg": string; };
 
 export type AIModelRequestInput = { "model": string; "provider"?: string | null; "providerConfig"?: SettingProviderInput | null; };
@@ -3513,6 +3517,17 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 仅翻译当前有效概览用于显示；需要启用记忆并配置记忆模型，可能产生模型费用。
+     * 缓存仅在当前进程内按内容、目标语言及配置复用；不会修改正式记录或 MEMORY.md。
+     */
+    "/api/ai/memory/translate": {
+        request: AIMemoryTranslateRequestInput;
+        response: { "code": 0; "data": AIMemoryTranslateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
      * 手动调用设备选择的 OCR AI 模型识别本地 assets/ 图片，不使用会话、工具。

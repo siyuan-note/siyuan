@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Disabled",
 	"aiMemoryStateSuperseded": "Superseded",
 	"aiMemory": "Long-term memory",
-	"aiMemoryTip": "Memory is available to AI features in this workspace; organizing with a model sends the content needed for this task to the configured model service; charges follow that service’s pricing",
+	"aiMemoryTip": "Memory is available to AI features in this workspace; model processing sends the content needed for this task to the configured model service; charges follow that service’s pricing",
 	"aiMemoryScope": "Scope",
 	"aiMemoryForget": "Forget",
 	"aiMemoryOverview": "Read-only overviews",
@@ -3588,6 +3588,7 @@
 		"455": "Memory model service is unavailable; try again later",
 		"456": "Memory model returned an invalid or incomplete response; try again or select another model",
 		"457": "Memory model request failed; check the selected provider and model",
-		"458": "Memory model request was cancelled"
+		"458": "Memory model request was cancelled",
+		"459": "The current memory overview cannot be processed right now. Please try again later"
 	}
 }

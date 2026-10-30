@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Devre dışı",
 	"aiMemoryStateSuperseded": "Yerine yenisi kondu",
 	"aiMemory": "Uzun süreli bellek",
-	"aiMemoryTip": "Anılar bu çalışma alanındaki yapay zekâ özellikleri tarafından kullanılabilir; modelle düzenleme, bu görev için gereken içeriği yapılandırılmış model hizmetine gönderir; ücretler o hizmetin fiyatlandırmasına göre hesaplanır",
+	"aiMemoryTip": "Anılar bu çalışma alanındaki yapay zekâ özellikleri tarafından kullanılabilir; modelle işleme, bu görev için gereken içeriği yapılandırılmış model hizmetine gönderir; ücretler o hizmetin fiyatlandırmasına göre hesaplanır",
 	"aiMemoryScope": "Kapsam",
 	"aiMemoryForget": "Unut",
 	"aiMemoryOverview": "Salt okunur özetler",
@@ -3588,6 +3588,7 @@
 		"455": "Bellek modeli hizmeti kullanılamıyor; daha sonra yeniden deneyin",
 		"456": "Bellek modeli geçersiz veya eksik yanıt döndürdü; yeniden deneyin veya başka bir model seçin",
 		"457": "Bellek modeli isteği başarısız; seçili sağlayıcıyı ve modeli kontrol edin",
-		"458": "Bellek modeli isteği iptal edildi"
+		"458": "Bellek modeli isteği iptal edildi",
+		"459": "Geçerli anı özeti şu anda işlenemiyor. Lütfen daha sonra tekrar deneyin"
 	}
 }

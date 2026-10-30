@@ -37,7 +37,7 @@ var memoryLogModelFailure = func(diagnostic string) {
 // 诊断只允许固定枚举和 HTTP 状态；未知字段省略，不能把提供方自由文本或请求内容写入日志。
 func memoryModelDiagnostic(ctx context.Context, protocol string, err error) string {
 	stage, _ := ctx.Value(memoryModelStageKey{}).(string)
-	if !slices.Contains([]string{"keywords", "proposal", "overview", "proposal_decode"}, stage) {
+	if !slices.Contains([]string{"keywords", "proposal", "overview", "translation", "proposal_decode"}, stage) {
 		stage = "unknown"
 	}
 	protocol = strings.ToLower(strings.TrimSpace(protocol))

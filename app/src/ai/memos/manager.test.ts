@@ -15,9 +15,9 @@ class ElementStub {
     addEventListener(name: string, callback: () => void) { this.listeners.set(name, callback); }
 }
 
-type Request = {url: string; data: Record<string, unknown>};
+type Request = {url: string; data: Record<string, unknown>; signal?: AbortSignal};
 const harness = (respond?: (url: string, data: Record<string, unknown>) => unknown | Promise<unknown>,
-                 options: {readonly?: boolean; configured?: boolean} = {}) => {
+                 options: {readonly?: boolean; configured?: boolean; translate?: boolean} = {}) => {
     const requests: Request[] = [];
     const messages: string[] = [];
     const nodes = new Map<string, ElementStub>();
@@ -27,7 +27,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     }};
     const timers = new Map<number, {callback: () => void; delay: number}>();
     const confirmations: Array<() => void> = [];
-    const config = {readonly: options.readonly === true, ai: {memory: {modelId: options.configured === false ? "" : "memory-model"},
+    const config = {lang: "zh-CN", readonly: options.readonly === true, ai: {memory: {enabled: options.translate === true, modelId: options.configured === false ? "" : "memory-model", reasoningEffort: ""},
         providers: [{enabled: true, models: [{enabled: true, id: "memory-model", name: "memory-model"}]}]}};
     let serial = 0;
     let timerID = 0;
@@ -39,6 +39,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText, {
         exports: exported,
+        AbortController,
         require: (name: string) => {
             if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { element.textContent = markdown; }}; }
             if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
@@ -50,8 +51,8 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
                 destroy() { destroy(); }
             }}; }
             if (name.endsWith("/confirmDialog")) { return {confirmDialog: (_title: string, _message: string, callback: () => void) => { confirmations.push(callback); }}; }
-            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>) => {
-                requests.push({url, data});
+            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
+                requests.push({url, data, signal});
                 const response = await respond?.(url, data);
                 if (response !== undefined) { return response; }
                 if (url.endsWith("/overview")) { return {code: 0, data: {count: 0, countComplete: true, memory: "", stale: false}}; }
@@ -89,6 +90,134 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
 
 const completed = (id = "task", results: unknown[] = []) => ({code: 0, data: {taskId: id, state: "completed", results}});
 
+test("display translation shows original content and an independent spinner, then reuses the result", async () => {
+    let resolveTranslation: (value: unknown) => void;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: "Original [20261030081347-eyy3fb5]", stale: false, countComplete: false}}; }
+        if (url.endsWith("/translate")) { return new Promise(resolve => { resolveTranslation = resolve; }); }
+    }, {translate: true});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "Original [20261030081347-eyy3fb5]");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, false);
+    assert.equal(state.field("[data-memory-loading]").hidden, true);
+    assert.deepEqual({...state.requests.find(request => request.url.endsWith("/translate")).data},
+        {memory: "Original [20261030081347-eyy3fb5]", language: "zh-CN"});
+    resolveTranslation({code: 0, data: {memory: "Translated", language: "zh-CN"}});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "Translated");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, true);
+    await state.tick(30000);
+    assert.equal(state.requests.filter(request => request.url.endsWith("/translate")).length, 1);
+    assert.equal(state.field("[data-memory-overview]").textContent, "Translated");
+});
+
+test("translation is skipped for readonly, disabled or unconfigured memory", async () => {
+    for (const options of [{translate: false}, {translate: true, readonly: true}, {translate: true, configured: false}]) {
+        const state = harness(url => url.endsWith("/overview") ?
+            {code: 0, data: {memory: "Original", stale: false, countComplete: true, count: 1}} : undefined, options);
+        await state.flush();
+        assert.equal(state.requests.some(request => request.url.endsWith("/translate")), false);
+        assert.equal(state.field("[data-memory-overview]").textContent, "Original");
+    }
+});
+
+test("failed translation retains the original and overview polling never retries the paid request", async () => {
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: "Original", stale: false, countComplete: false}}; }
+        if (url.endsWith("/translate")) { throw new Error("Translation unavailable"); }
+    }, {translate: true});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "Original");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, true);
+    assert.equal(state.messages.length, 1);
+    await state.tick(30000);
+    assert.equal(state.requests.filter(request => request.url.endsWith("/translate")).length, 1);
+    assert.equal(state.messages.length, 1);
+});
+
+test("old translation responses cannot overwrite a newer overview or a changed UI language", async () => {
+    const resolveTranslations: Array<(value: unknown) => void> = [];
+    let reads = 0;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: ++reads === 1 ? "Old" : "New", stale: false, countComplete: false}}; }
+        if (url.endsWith("/translate")) { return new Promise(resolve => { resolveTranslations.push(resolve); }); }
+    }, {translate: true});
+    await state.flush();
+    await state.tick(30000);
+    assert.equal(state.requests.find(request => request.url.endsWith("/translate")).signal.aborted, true);
+    resolveTranslations[0]({code: 0, data: {memory: "Old translated", language: "zh-CN"}});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "New");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, false);
+    state.config.lang = "en_US";
+    resolveTranslations[1]({code: 0, data: {memory: "Wrong language", language: "zh-CN"}});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "New");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, true);
+});
+
+test("translation completion after closing neither changes the old view nor posts an error", async () => {
+    let finish: (value: unknown) => void;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: "Original", stale: false, countComplete: true, count: 1}}; }
+        if (url.endsWith("/translate")) { return new Promise(resolve => { finish = resolve; }); }
+    }, {translate: true});
+    await state.flush();
+    state.destroy();
+    assert.equal(state.requests.find(request => request.url.endsWith("/translate")).signal.aborted, true);
+    finish({code: -1, msg: "Translation failed"});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "Original");
+    assert.equal(state.messages.length, 0);
+});
+
+test("a provider disabled while display processing is pending cannot replace the original content", async () => {
+    let finish: (value: unknown) => void;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: "Original", stale: false, countComplete: true, count: 1}}; }
+        if (url.endsWith("/translate")) { return new Promise(resolve => { finish = resolve; }); }
+    }, {translate: true});
+    await state.flush();
+    state.config.ai.providers[0].enabled = false;
+    finish({code: 0, data: {memory: "Translated", language: "zh-CN"}});
+    await state.flush();
+    assert.equal(state.field("[data-memory-overview]").textContent, "Original");
+    assert.equal(state.field("[data-memory-translation-status]").hidden, true);
+});
+
+test("returning to an overview whose pending request was abandoned starts a fresh wait", async () => {
+    let reads = 0;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: ++reads === 2 ? "Other" : "Original", stale: false, countComplete: false}}; }
+        if (url.endsWith("/translate")) { return new Promise(() => {}); }
+    }, {translate: true});
+    await state.flush();
+    await state.tick(30000);
+    await state.tick(30000);
+    const requests = state.requests.filter(request => request.url.endsWith("/translate"));
+    assert.equal(requests.length, 3);
+    assert.equal(requests[0].signal.aborted, true);
+    assert.equal(requests[1].signal.aborted, true);
+    assert.equal(requests[2].signal.aborted, false);
+});
+
+test("changing provider configuration or reasoning effort invalidates the display cache even with the same selected ID", async () => {
+    let calls = 0;
+    const state = harness(url => {
+        if (url.endsWith("/overview")) { return {code: 0, data: {memory: "Original", stale: false, countComplete: false}}; }
+        if (url.endsWith("/translate")) { return {code: 0, data: {memory: `Processed ${++calls}`, language: "zh-CN"}}; }
+    }, {translate: true});
+    await state.flush();
+    state.config.ai.providers = state.config.ai.providers.map(provider => ({...provider}));
+    await state.tick(30000);
+    assert.equal(calls, 2);
+    assert.equal(state.field("[data-memory-overview]").textContent, "Processed 2");
+    state.config.ai.memory.reasoningEffort = "high";
+    await state.tick(30000);
+    assert.equal(calls, 3);
+    assert.equal(state.field("[data-memory-overview]").textContent, "Processed 3");
+});
+
 test("memory management presents one action and one overview without record-management controls", async () => {
     const state = harness(url => url.endsWith("/overview") ?
         {code: 0, data: {count: 251, countComplete: true, memory: "A unified overview", user: "legacy content", stale: false}} : undefined);
@@ -97,6 +226,8 @@ test("memory management presents one action and one overview without record-mana
     assert.doesNotMatch(state.content, /data-memory-(?:query|list|detail|pagination|task-choice)|<details|<select/);
     assert.equal(state.field("[data-memory-count]").textContent, "remembered 251");
     assert.equal(state.field("[data-memory-overview]").textContent, "A unified overview");
+    assert.ok(state.content.indexOf("data-memory-overview aria-label") < state.content.indexOf("data-memory-task-input"));
+    assert.ok(state.content.indexOf("data-memory-task-input") < state.content.indexOf('data-memory-action="maintain"'));
     assert.equal(state.requests.filter(request => request.url.endsWith("/list")).length, 1);
     assert.equal(state.requests.find(request => request.url.endsWith("/list")).data.limit, 1);
     assert.equal(state.timers.size, 0);

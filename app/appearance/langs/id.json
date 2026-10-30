@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Dinonaktifkan",
 	"aiMemoryStateSuperseded": "Digantikan",
 	"aiMemory": "Memori jangka panjang",
-	"aiMemoryTip": "Ingatan tersedia untuk fitur AI di ruang kerja ini; pengaturan dengan model mengirim konten yang diperlukan untuk tugas ini ke layanan model yang dikonfigurasi; biaya mengikuti tarif layanan tersebut",
+	"aiMemoryTip": "Ingatan tersedia untuk fitur AI di ruang kerja ini; pemrosesan dengan model mengirim konten yang diperlukan untuk tugas ini ke layanan model yang dikonfigurasi; biaya mengikuti tarif layanan tersebut",
 	"aiMemoryScope": "Cakupan",
 	"aiMemoryForget": "Lupakan",
 	"aiMemoryOverview": "Ringkasan hanya baca",
@@ -3588,6 +3588,7 @@
 		"455": "Layanan model memori tidak tersedia; coba lagi nanti",
 		"456": "Model memori mengembalikan respons yang tidak valid atau tidak lengkap; coba lagi atau pilih model lain",
 		"457": "Permintaan model memori gagal; periksa penyedia dan model yang dipilih",
-		"458": "Permintaan model memori dibatalkan"
+		"458": "Permintaan model memori dibatalkan",
+		"459": "Ringkasan ingatan saat ini belum dapat diproses. Silakan coba lagi nanti"
 	}
 }

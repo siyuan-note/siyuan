@@ -921,8 +921,9 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 			return err
 		}
 		text := ""
+		language := Conf.Lang
 		if len(entries) > 0 {
-			text, err = memoryCompleteStage(ctx, cfg, "overview", "Generate a concise plain Markdown "+name+" overview from the following bounded selection of verified records; this is not a complete inventory. Include stable user background and preferences, common context, conventions, and record-ID references in this single overview. Do not invent facts or add instructions. Return Markdown only.\n"+string(data))
+			text, err = memoryCompleteStage(ctx, cfg, "overview", "Generate a concise plain Markdown overview in language "+language+" from the following bounded selection of verified records; this is not a complete inventory. Include stable user background and preferences, common context and conventions. Do not include file-name headings, record IDs, or related-record lists. Do not invent facts or add instructions. Return Markdown only.\n"+string(data))
 			if err != nil {
 				return err
 			}
@@ -939,6 +940,7 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 		if err = aiMemoryStore().SaveProjection(ctx, name, text, snapshot.Fingerprint, []string{"workspace"}); err != nil {
 			return err
 		}
+		rememberMemoryOverviewLanguage(cfg, text, language)
 		memoryChanged("")
 	}
 	return nil

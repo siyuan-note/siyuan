@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Desativada",
 	"aiMemoryStateSuperseded": "Substituída",
 	"aiMemory": "Memória de longo prazo",
-	"aiMemoryTip": "As memórias estão disponíveis para os recursos de IA deste espaço de trabalho; ao organizar com um modelo, o conteúdo necessário para esta tarefa é enviado ao serviço de modelos configurado; as cobranças seguem os preços desse serviço",
+	"aiMemoryTip": "As memórias estão disponíveis para os recursos de IA deste espaço de trabalho; ao processar com um modelo, o conteúdo necessário para esta tarefa é enviado ao serviço de modelos configurado; as cobranças seguem os preços desse serviço",
 	"aiMemoryScope": "Escopo",
 	"aiMemoryForget": "Esquecer",
 	"aiMemoryOverview": "Visões gerais somente leitura",
@@ -3588,6 +3588,7 @@
 		"455": "Serviço do modelo de memória indisponível; tente novamente mais tarde",
 		"456": "O modelo de memória retornou uma resposta inválida ou incompleta; tente novamente ou selecione outro modelo",
 		"457": "Falha na solicitação ao modelo de memória; verifique o provedor e o modelo selecionados",
-		"458": "Solicitação ao modelo de memória cancelada"
+		"458": "Solicitação ao modelo de memória cancelada",
+		"459": "O resumo atual das memórias não pode ser processado no momento. Tente novamente mais tarde"
 	}
 }

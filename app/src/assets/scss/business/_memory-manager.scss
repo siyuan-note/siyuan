@@ -27,13 +27,14 @@
     .b3-button { min-height: 32px; }
   }
 
-  textarea { resize: vertical; min-height: 96px; box-sizing: border-box; max-width: 100%; }
+  textarea { resize: vertical; min-height: 96px; box-sizing: border-box; max-width: 100%; flex-shrink: 0; }
 
   &__content {
     max-height: min(360px, 40vh);
     overflow: auto;
     overflow-wrap: anywhere;
-    flex-shrink: 0;
+    min-height: 0;
+    flex-shrink: 1;
     &:empty { display: none; }
   }
 

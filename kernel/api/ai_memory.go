@@ -57,6 +57,12 @@ func overviewAIMemoryContract(c *gin.Context, q apicontract.EmptyRequest) apicon
 	return memoryResponse(model.ReadAIMemoryOverview(c.Request.Context()))
 }
 
+var translateAIMemory = contractHandler(apicontract.AIMemoryTranslate, translateAIMemoryContract)
+
+func translateAIMemoryContract(c *gin.Context, q apicontract.AIMemoryTranslateRequest) apicontract.Response[apicontract.AIMemoryTranslateData] {
+	return memoryResponse(model.TranslateAIMemoryOverview(c.Request.Context(), q))
+}
+
 var maintainAIMemory = contractHandler(apicontract.AIMemoryMaintain, maintainAIMemoryContract)
 
 func maintainAIMemoryContract(c *gin.Context, q apicontract.AIMemoryMaintainRequest) apicontract.Response[apicontract.AIMemoryTaskStarted] {

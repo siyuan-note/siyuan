@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030063122"
+		"updated": "20261030094544"
 	},
 	"Children": [
 		{
@@ -330,7 +330,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-nyu2063",
-				"updated": "20261030063122"
+				"updated": "20261030094544"
 			},
 			"Children": [
 				{
@@ -373,12 +373,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-n44lj73",
-				"updated": "20261030063122"
+				"updated": "20261030094544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The manager displays the unified overview directly. It contains a bounded selection of verified records rather than a complete memory inventory, so its number of text items does not define the overall count. Generating it does not resend full source evidence. To organize or correct content, use the input above rather than editing the overview file directly."
+					"Data": "The manager displays the unified overview above the input, without its file name or technical record references. It contains a bounded selection of verified records rather than a complete inventory, so its text items do not define the overall count. When memory is enabled, the workspace is writable and a processing model is configured, the overview is displayed in the interface language; model processing shows a loading indicator and keeps the original text if it fails. Display processing sends only the overview to the configured memory model and does not change the stored original. Cached results reduce repeated calls, but an existing overview may need another model request after restart. To organize or correct content, use the input below rather than editing the overview file directly."
 				}
 			]
 		},
@@ -387,7 +387,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261029135500-pxo4q07",
-				"updated": "20261029135500"
+				"updated": "20261030094544"
 			},
 			"Children": [
 				{
@@ -402,12 +402,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-hqao4c5",
-				"updated": "20261029135500"
+				"updated": "20261030094544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Local storage does not mean offline processing. Automatic maintenance, manual model organization and overview generation may send relevant text, source evidence and existing memories to the selected model provider and incur API charges. Using memory in a conversation may also send relevant memories to the conversation model. Review the provider’s data policy before enabling this feature and avoid submitting sensitive content you do not want sent out. Encrypted notebooks are excluded from automatic collection, but text you paste manually is still processed as part of your model organization request."
+					"Data": "Local storage does not mean offline processing. Automatic maintenance, manual model organization, overview generation and display processing may send relevant text, source evidence and existing memories to the selected model provider and incur API charges. Using memory in a conversation may also send relevant memories to the conversation model. Review the provider’s data policy before enabling this feature and avoid submitting sensitive content you do not want sent out. Encrypted notebooks are excluded from automatic collection, but text you paste manually is still processed as part of your model organization request."
 				}
 			]
 		}

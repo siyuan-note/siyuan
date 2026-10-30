@@ -1905,6 +1905,10 @@ var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAI
 // memory 返回统一 MEMORY.md 只读概览；user 保留为空字符串供旧调用方兼容，stale 表示概览不可用或过期。
 // count 只统计来源有效且当前可用的正式记忆；仅 countComplete=true 时可作为完整总数展示。
 var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// 仅翻译当前有效概览用于显示；需要启用记忆并配置记忆模型，可能产生模型费用。
+// 缓存仅在当前进程内按内容、目标语言及配置复用；不会修改正式记录或 MEMORY.md。
+var AIMemoryTranslate = define[AIMemoryTranslateRequest, AIMemoryTranslateData]("translateAIMemory", "/api/ai/memory/translate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // results[].saved 表示该条新增或更新已持久化，候选记录仍需确认；失败或取消不回滚已保存结果。

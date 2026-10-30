@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Wyłączona",
 	"aiMemoryStateSuperseded": "Zastąpiona",
 	"aiMemory": "Pamięć długoterminowa",
-	"aiMemoryTip": "Wspomnienia są dostępne dla funkcji AI w tym obszarze roboczym; porządkowanie za pomocą modelu wysyła treść potrzebną do tego zadania do skonfigurowanej usługi modelu; opłaty są naliczane według jej cennika",
+	"aiMemoryTip": "Wspomnienia są dostępne dla funkcji AI w tym obszarze roboczym; przetwarzanie za pomocą modelu wysyła treść potrzebną do tego zadania do skonfigurowanej usługi modelu; opłaty są naliczane według jej cennika",
 	"aiMemoryScope": "Zakres",
 	"aiMemoryForget": "Zapomnij",
 	"aiMemoryOverview": "Przeglądy tylko do odczytu",
@@ -3588,6 +3588,7 @@
 		"455": "Usługa modelu pamięci jest niedostępna; spróbuj później",
 		"456": "Model pamięci zwrócił nieprawidłową lub niepełną odpowiedź; spróbuj ponownie lub wybierz inny model",
 		"457": "Żądanie do modelu pamięci nie powiodło się; sprawdź wybranego dostawcę i model",
-		"458": "Żądanie do modelu pamięci anulowano"
+		"458": "Żądanie do modelu pamięci anulowano",
+		"459": "Nie można teraz przetworzyć bieżącego podsumowania wspomnień. Spróbuj ponownie później"
 	}
 }

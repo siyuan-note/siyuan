@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Desactivada",
 	"aiMemoryStateSuperseded": "Sustituida",
 	"aiMemory": "Memoria a largo plazo",
-	"aiMemoryTip": "Los recuerdos están disponibles para las funciones de IA de este espacio de trabajo; al organizar con un modelo, el contenido necesario para esta tarea se envía al servicio de modelos configurado; los cargos dependen de sus tarifas",
+	"aiMemoryTip": "Los recuerdos están disponibles para las funciones de IA de este espacio de trabajo; al procesar con un modelo, el contenido necesario para esta tarea se envía al servicio de modelos configurado; los cargos dependen de sus tarifas",
 	"aiMemoryScope": "Ámbito",
 	"aiMemoryForget": "Olvidar",
 	"aiMemoryOverview": "Resúmenes de solo lectura",
@@ -3588,6 +3588,7 @@
 		"455": "El servicio del modelo de memoria no está disponible; inténtalo más tarde",
 		"456": "El modelo de memoria devolvió una respuesta no válida o incompleta; inténtalo de nuevo o selecciona otro modelo",
 		"457": "Error en la solicitud al modelo de memoria; comprueba el proveedor y el modelo seleccionados",
-		"458": "Se canceló la solicitud al modelo de memoria"
+		"458": "Se canceló la solicitud al modelo de memoria",
+		"459": "El resumen actual de recuerdos no se puede procesar en este momento. Inténtalo de nuevo más tarde"
 	}
 }

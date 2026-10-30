@@ -84,6 +84,16 @@ type AIMemoryOverviewData struct {
 	Count         int  `json:"count"`
 	CountComplete bool `json:"countComplete"`
 }
+type AIMemoryTranslateRequest struct {
+	// Memory 必须与当前有效概览逐字相同，不接受任意待翻译文本。
+	Memory string `json:"memory"`
+	// Language 必须是当前界面语言；仅为显示翻译，不回写记忆。
+	Language string `json:"language"`
+}
+type AIMemoryTranslateData struct {
+	Memory   string `json:"memory"`
+	Language string `json:"language"`
+}
 type AIMemoryMaintainRequest struct {
 	Text        string   `json:"text"`
 	SourceIDs   []string `json:"sourceIDs" api:"optional"`

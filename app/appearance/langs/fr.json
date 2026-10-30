@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Désactivée",
 	"aiMemoryStateSuperseded": "Remplacée",
 	"aiMemory": "Mémoire à long terme",
-	"aiMemoryTip": "Les souvenirs sont accessibles aux fonctions d’IA de cet espace de travail ; l’organisation avec un modèle envoie le contenu nécessaire à cette tâche au service de modèles configuré ; les frais dépendent de ses tarifs",
+	"aiMemoryTip": "Les souvenirs sont accessibles aux fonctions d’IA de cet espace de travail ; le traitement avec un modèle envoie le contenu nécessaire à cette tâche au service de modèles configuré ; les frais dépendent de ses tarifs",
 	"aiMemoryScope": "Portée",
 	"aiMemoryForget": "Oublier",
 	"aiMemoryOverview": "Aperçus en lecture seule",
@@ -3588,6 +3588,7 @@
 		"455": "Service du modèle de mémoire indisponible ; réessayez plus tard",
 		"456": "Le modèle de mémoire a renvoyé une réponse invalide ou incomplète ; réessayez ou choisissez un autre modèle",
 		"457": "Échec de la requête au modèle de mémoire ; vérifiez le fournisseur et le modèle sélectionnés",
-		"458": "Requête au modèle de mémoire annulée"
+		"458": "Requête au modèle de mémoire annulée",
+		"459": "Le résumé actuel des souvenirs ne peut pas être traité pour le moment. Veuillez réessayer plus tard"
 	}
 }

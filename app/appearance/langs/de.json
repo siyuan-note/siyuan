@@ -59,7 +59,7 @@
 	"aiMemoryStateDisabled": "Deaktiviert",
 	"aiMemoryStateSuperseded": "Ersetzt",
 	"aiMemory": "Langzeitgedächtnis",
-	"aiMemoryTip": "Erinnerungen stehen den KI-Funktionen in diesem Arbeitsbereich zur Verfügung; Beim Organisieren mit einem Modell werden die für diese Aufgabe benötigten Inhalte an den konfigurierten Modelldienst gesendet; Kosten richten sich nach dessen Preisen",
+	"aiMemoryTip": "Erinnerungen stehen den KI-Funktionen in diesem Arbeitsbereich zur Verfügung; bei der Verarbeitung mit einem Modell werden die für diese Aufgabe benötigten Inhalte an den konfigurierten Modelldienst gesendet; Kosten richten sich nach dessen Preisen",
 	"aiMemoryScope": "Geltungsbereich",
 	"aiMemoryForget": "Vergessen",
 	"aiMemoryOverview": "Schreibgeschützte Übersichten",
@@ -3588,6 +3588,7 @@
 		"455": "Dienst des Gedächtnismodells nicht verfügbar; später erneut versuchen",
 		"456": "Gedächtnismodell hat eine ungültige oder unvollständige Antwort geliefert; erneut versuchen oder ein anderes Modell wählen",
 		"457": "Anfrage an das Gedächtnismodell fehlgeschlagen; ausgewählten Anbieter und Modell prüfen",
-		"458": "Anfrage an das Gedächtnismodell abgebrochen"
+		"458": "Anfrage an das Gedächtnismodell abgebrochen",
+		"459": "Die aktuelle Erinnerungsübersicht kann derzeit nicht verarbeitet werden. Bitte versuchen Sie es später erneut"
 	}
 }

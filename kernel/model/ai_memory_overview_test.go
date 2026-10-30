@@ -20,6 +20,7 @@ import (
 
 func TestAIMemoryUnifiedOverviewGenerationAndInjection(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
+	Conf.Lang = "zh-CN"
 	ctx := context.Background()
 	r := memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memo.Source{{Kind: "user", ID: "user-request", Revision: "one"}}}
 	if _, err := aiMemoryStore().Save(ctx, r, "missing", "save"); err != nil {
@@ -28,7 +29,7 @@ func TestAIMemoryUnifiedOverviewGenerationAndInjection(t *testing.T) {
 	calls := 0
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		calls++
-		if !strings.Contains(prompt, "stable user background and preferences") || !strings.Contains(prompt, "common context") || strings.Contains(prompt, "USER.md") {
+		if !strings.Contains(prompt, "stable user background and preferences") || !strings.Contains(prompt, "common context") || strings.Contains(prompt, "USER.md") || !strings.Contains(prompt, "in language zh-CN") || !strings.Contains(prompt, "Do not include file-name headings, record IDs") {
 			t.Fatalf("wrong unified instructions: %s", prompt)
 		}
 		return "Unified overview", nil

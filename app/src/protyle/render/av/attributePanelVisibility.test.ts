@@ -150,11 +150,12 @@ const browserCases = async (source: string, css: string, columnSource: string, b
             transactions.push([[{action: "setAttrViewColDateFormat", avID, id, type, format}],
                 [{action: "setAttrViewColDateFormat", avID, id, type, format: oldFormat}]]);
         });
-    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat",
+    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat", "fetchSyncPost",
         columnSource + "\nreturn {getEditHTML, bindEditEvent};")(
         (data: IAV) => (data.view as IAVTable).columns, escape, escape, escape, () => {},
         (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]),
-        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format);
+        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format,
+        async () => ({code: 0, data: {allowed: false}}));
     for (const visibility of [undefined, "always", "hide-empty", "hide"]) {
         const field = {id: "key", name: "Notes", type: "text", attributePanelVisibility: visibility};
         const data = {id: "database", viewType: "table", view: {columns: [field]}};
@@ -403,7 +404,10 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
         readFileSync(path.resolve(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")).join("\n"),
     {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const columnSource = capabilitySource + transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
+    const permissionSource = transpileModule(readFileSync("src/template/httpPermission.ts", "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const columnSource = capabilitySource + permissionSource + transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const layoutSource = transpileModule(readFileSync(path.resolve(__dirname, "attributePanelLayout.ts"), "utf8")

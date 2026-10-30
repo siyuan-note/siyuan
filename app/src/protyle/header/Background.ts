@@ -1,7 +1,6 @@
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 import {hasClosestByClassName} from "../util/hasClosest";
-import {getRandom} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";
@@ -19,7 +18,6 @@ import {assetMenu} from "../../menus/protyle";
 import {previewImages} from "../preview/image";
 import {Menu} from "../../plugin/Menu";
 import {escapeHtml} from "../../util/escape";
-import {fetchCoverData} from "./coverData";
 import {openCoverPicker} from "./coverPicker";
 import {getAssetUploadSuccesses} from "../upload/uploadResult";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
@@ -298,75 +296,17 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "show-random" && !protyle.disabled) {
-                    window.siyuan.menus.menu.remove();
-                    const renderCSSPatterns = (d: Dialog) => {
-                        let html = "";
-                        bgs.forEach((item: string, index: number) => {
-                            html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card"></div>`;
-                        });
-                        const bodyEl = d.element.querySelector(".b3-dialog__body");
-                        if (bodyEl) {
-                            bodyEl.innerHTML = `<div class="b3-cards" style="padding: 16px">${html}</div>`;
-                        }
-                        d.element.addEventListener("click", (event) => {
-                            const target = event.target as HTMLElement;
-                            if (target.classList.contains("b3-card")) {
-                                this.ial["title-img"] = bgs[parseInt(target.getAttribute("data-index"))];
-                                this.render(this.ial, protyle.block.rootID);
-                                fetchPost("/api/attr/setBlockAttrs", {
-                                    id: protyle.block.rootID,
-                                    attrs: {"title-img": this.ial["title-img"]}
-                                });
-                                d.destroy();
-                            }
-                        });
-                    };
-
-                    const dialog = openCoverPicker({
-                        select: name => this.uploadBuiltInCover(protyle, name),
-                        fallback: renderCSSPatterns,
-                    });
-                    dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDRANDOM);
-                    bindPopoverDialog(dialog, protyle.element);
-
+                    this.openBuiltInPicker(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "random" && !protyle.disabled) {
-                    // 随机题头图：优先使用图片封面，加载失败时回退到 CSS 图案
-                    fetchCoverData().then((coverData) => {
-                        if (coverData && coverData.allCovers.length > 0) {
-                            const randomCover = coverData.allCovers[getRandom(0, coverData.allCovers.length - 1)];
-                            this.uploadBuiltInCover(protyle, randomCover.file);
-                        } else {
-                            this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
-                            this.render(this.ial, protyle.block.rootID);
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id: protyle.block.rootID,
-                                attrs: {"title-img": this.ial["title-img"]}
-                            });
-                        }
-                    });
+                    this.openBackgroundMenu(protyle, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "asset" && !protyle.disabled) {
-                    const rect = target.getBoundingClientRect();
-                    assetMenu(protyle, {target: target,
-                        x: target.parentElement.getBoundingClientRect().right,
-                        y: rect.bottom + 8,
-                        isLeft: true,
-                    }, (url) => {
-                        this.ial["title-img"] = `background-image:url("${url}")`;
-                        this.render(this.ial, protyle.block.rootID);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {"title-img": this.ial["title-img"]}
-                        });
-                        /// #if MOBILE
-                        window.siyuan.menus.menu.remove();
-                        /// #endif
-                    }, Constants.SIYUAN_ASSETS_IMAGE);
+                    this.openAssetMenu(protyle, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -397,22 +337,7 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "link" && !protyle.disabled) {
-                    const dialog = openInputDialog({
-                        title: window.siyuan.languages.link,
-                        value: this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src"),
-                        onConfirm: (value, dialog) => {
-                            const style = `background-image:url("${value}");`;
-                            this.ial["title-img"] = style;
-                            this.render(this.ial, protyle.block.rootID);
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id: protyle.block.rootID,
-                                attrs: {"title-img": this.ial["title-img"]}
-                            });
-                            dialog.destroy();
-                        },
-                    });
-                    dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
-                    bindPopoverDialog(dialog, protyle.element);
+                    this.openLinkDialog(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -595,6 +520,125 @@ export class Background {
             document.onmousemove = (e) => onMouseMove(e as MouseEvent);
             document.onmouseup = (e) => onMouseUp(e as MouseEvent);
         });
+    }
+
+    private openBackgroundMenu(protyle: IProtyle, target: HTMLElement) {
+        toggleMenu({
+            target,
+            build: menu => {
+                menu.addItem({
+                    icon: "iconUpload",
+                    label: window.siyuan.languages.upload,
+                    click: () => {
+                        menu.remove();
+                        this.element.querySelector<HTMLInputElement>("input").click();
+                    },
+                });
+                menu.addItem({
+                    icon: "iconLink",
+                    label: window.siyuan.languages.link,
+                    click: () => {
+                        menu.remove();
+                        this.openLinkDialog(protyle);
+                    },
+                });
+                menu.addItem({
+                    icon: "iconImage",
+                    label: window.siyuan.languages.assets,
+                    click: () => {
+                        menu.remove();
+                        this.openAssetMenu(protyle, target);
+                    },
+                });
+                menu.addItem({
+                    icon: "iconRefresh",
+                    label: window.siyuan.languages.builtIn,
+                    click: () => {
+                        menu.remove();
+                        this.openBuiltInPicker(protyle);
+                    },
+                });
+            },
+            show: menu => {
+                const rect = target.getBoundingClientRect();
+                /// #if MOBILE
+                menu.fullscreen("bottom");
+                /// #else
+                menu.popup({x: rect.left, y: rect.bottom});
+                /// #endif
+            },
+        });
+    }
+
+    private openBuiltInPicker(protyle: IProtyle) {
+        window.siyuan.menus.menu.remove();
+        const renderCSSPatterns = (d: Dialog) => {
+            let html = "";
+            bgs.forEach((item: string, index: number) => {
+                html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card"></div>`;
+            });
+            const bodyEl = d.element.querySelector(".b3-dialog__body");
+            if (bodyEl) {
+                bodyEl.innerHTML = `<div class="b3-cards" style="padding: 16px">${html}</div>`;
+            }
+            d.element.addEventListener("click", (event) => {
+                const target = event.target as HTMLElement;
+                if (target.classList.contains("b3-card")) {
+                    this.ial["title-img"] = bgs[parseInt(target.getAttribute("data-index"))];
+                    this.render(this.ial, protyle.block.rootID);
+                    fetchPost("/api/attr/setBlockAttrs", {
+                        id: protyle.block.rootID,
+                        attrs: {"title-img": this.ial["title-img"]}
+                    });
+                    d.destroy();
+                }
+            });
+        };
+
+        const dialog = openCoverPicker({
+            select: name => this.uploadBuiltInCover(protyle, name),
+            fallback: renderCSSPatterns,
+        });
+        dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDRANDOM);
+        bindPopoverDialog(dialog, protyle.element);
+    }
+
+    private openAssetMenu(protyle: IProtyle, target: HTMLElement) {
+        const rect = target.getBoundingClientRect();
+        assetMenu(protyle, {target: target,
+            x: target.parentElement.getBoundingClientRect().right,
+            y: rect.bottom + 8,
+            isLeft: true,
+        }, (url) => {
+            this.ial["title-img"] = `background-image:url("${url}")`;
+            this.render(this.ial, protyle.block.rootID);
+            fetchPost("/api/attr/setBlockAttrs", {
+                id: protyle.block.rootID,
+                attrs: {"title-img": this.ial["title-img"]}
+            });
+            /// #if MOBILE
+            window.siyuan.menus.menu.remove();
+            /// #endif
+        }, Constants.SIYUAN_ASSETS_IMAGE);
+    }
+
+    private openLinkDialog(protyle: IProtyle) {
+        const dialog = openInputDialog({
+            title: window.siyuan.languages.link,
+            value: this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src"),
+            onConfirm: (value, dialog) => {
+                const style = `background-image:url("${value}");`;
+                this.ial["title-img"] = style;
+                this.render(this.ial, protyle.block.rootID);
+                fetchPost("/api/attr/setBlockAttrs", {
+                    id: protyle.block.rootID,
+                    attrs: {"title-img": this.ial["title-img"]}
+                });
+                dialog.destroy();
+            },
+        });
+        dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
+        bindPopoverDialog(dialog, protyle.element);
     }
 
     private uploadBuiltInCover(protyle: IProtyle, name: string) {

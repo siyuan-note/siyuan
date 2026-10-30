@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261030095654"
 	},
 	"Children": [
 		{
@@ -2094,6 +2094,44 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
+				}
+			]
+		},
+		{
+			"ID": "20261030095654-cl5w6xj",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030095654-cl5w6xj",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document cover"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030095654-awrf6rs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030095654-awrf6rs",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Above the document title, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add cover"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose Upload, Link, Assets, or Built-in. The cover is saved only after you select an image or confirm a link. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets."
 				}
 			]
 		}

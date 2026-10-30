@@ -96,7 +96,7 @@
     overflow-wrap: anywhere;
     max-height: 160px;
     overflow: auto;
-    font-size: 12px;
+    font: inherit;
     &:empty { display: none; }
   }
 }

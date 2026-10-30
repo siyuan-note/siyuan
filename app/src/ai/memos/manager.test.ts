@@ -95,6 +95,21 @@ test("memory manager uses shared disclosure arrows while preserving native detai
     assert.match(styles, /details\[open\] > summary \.b3-list-item__arrow\s*\{\s*transform: rotate\(90deg\);/);
 });
 
+test("memory status and evidence inherit dialog typography while retaining wrapping and scrolling", () => {
+    const source = readFileSync("src/ai/memos/manager.ts", "utf8");
+    assert.match(source, /<pre class="memory-manager__evidence" data-memory-task-status role="status" aria-live="polite">/);
+    assert.match(source, /<pre class="memory-manager__evidence" data-memory-evidence>/);
+    const styles = readFileSync("src/assets/scss/business/_memory-manager.scss", "utf8");
+    const evidence = styles.match(/&__evidence\s*\{([^}]+)\}/)?.[1];
+    assert.ok(evidence);
+    assert.match(evidence, /font:\s*inherit;/);
+    assert.doesNotMatch(evidence, /font-(?:size|family):/);
+    assert.match(evidence, /white-space:\s*pre-wrap;/);
+    assert.match(evidence, /overflow-wrap:\s*anywhere;/);
+    assert.match(evidence, /max-height:\s*160px;/);
+    assert.match(evidence, /overflow:\s*auto;/);
+});
+
 test("record activation preserves failed operation identity and adopts the returned revision", async () => {
     const calls: Array<{url: string; data: Record<string, unknown>}> = [];
     let fail = true;

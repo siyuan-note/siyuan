@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Flat display",
 	"avEnableSubItems": "Enable sub-items",
 	"avDisableSubItems": "Disable sub-items",
-	"avSubItemsUpgradeTip": "Devices accessing this database must support the new format after enabling sub-items",
 	"avSubItemsContext": "Filter context",
 	"avSubItemsCounts": "${roots} root items, ${matches} matching items",
 	"avSubItemsExistingFields": "Use existing relation fields",

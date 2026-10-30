@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Tampilan datar",
 	"avEnableSubItems": "Aktifkan subitem",
 	"avDisableSubItems": "Nonaktifkan subitem",
-	"avSubItemsUpgradeTip": "Setelah diaktifkan, perangkat yang mengakses basis data ini harus mendukung format baru",
 	"avSubItemsContext": "Konteks filter",
 	"avSubItemsCounts": "${roots} item tingkat teratas, ${matches} item cocok",
 	"avSubItemsExistingFields": "Gunakan bidang relasi yang ada",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Vista plana",
 	"avEnableSubItems": "Activar subelementos",
 	"avDisableSubItems": "Desactivar subelementos",
-	"avSubItemsUpgradeTip": "Tras activar los subelementos, los dispositivos que accedan a esta base de datos deben admitir el nuevo formato",
 	"avSubItemsContext": "Contexto del filtro",
 	"avSubItemsCounts": "${roots} elementos de nivel superior, ${matches} coincidencias",
 	"avSubItemsExistingFields": "Usar campos de relación existentes",

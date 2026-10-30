@@ -73,7 +73,6 @@
 	"avFlatDisplay": "แสดงแบบแบน",
 	"avEnableSubItems": "เปิดใช้รายการย่อย",
 	"avDisableSubItems": "ปิดใช้รายการย่อย",
-	"avSubItemsUpgradeTip": "หลังเปิดใช้ อุปกรณ์ที่เข้าถึงฐานข้อมูลนี้ต้องรองรับรูปแบบใหม่",
 	"avSubItemsContext": "บริบทของตัวกรอง",
 	"avSubItemsCounts": "รายการระดับบนสุด ${roots} รายการ รายการที่ตรงกัน ${matches} รายการ",
 	"avSubItemsExistingFields": "ใช้ฟิลด์ความสัมพันธ์ที่มีอยู่",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Platte weergave",
 	"avEnableSubItems": "Subitems inschakelen",
 	"avDisableSubItems": "Subitems uitschakelen",
-	"avSubItemsUpgradeTip": "Na inschakeling moeten apparaten die deze database openen het nieuwe formaat ondersteunen",
 	"avSubItemsContext": "Filtercontext",
 	"avSubItemsCounts": "${roots} items op het hoogste niveau, ${matches} overeenkomende items",
 	"avSubItemsExistingFields": "Bestaande relatievelden gebruiken",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "समतल दृश्य",
 	"avEnableSubItems": "उप-आइटम सक्षम करें",
 	"avDisableSubItems": "उप-आइटम अक्षम करें",
-	"avSubItemsUpgradeTip": "सक्षम करने के बाद इस डेटाबेस तक पहुँचने वाले उपकरणों को नए प्रारूप का समर्थन करना होगा",
 	"avSubItemsContext": "फ़िल्टर संदर्भ",
 	"avSubItemsCounts": "${roots} शीर्ष-स्तरीय आइटम, ${matches} मेल खाते आइटम",
 	"avSubItemsExistingFields": "मौजूदा संबंध फ़ील्ड का उपयोग करें",

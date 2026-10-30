@@ -73,7 +73,6 @@
 	"avFlatDisplay": "平铺显示",
 	"avEnableSubItems": "启用父子条目",
 	"avDisableSubItems": "停用父子条目",
-	"avSubItemsUpgradeTip": "启用后，访问此数据库的设备需要支持新格式",
 	"avSubItemsContext": "筛选上下文",
 	"avSubItemsCounts": "${roots} 个顶层条目，${matches} 个匹配条目",
 	"avSubItemsExistingFields": "使用已有关系字段",

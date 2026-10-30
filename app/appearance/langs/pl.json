@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Widok płaski",
 	"avEnableSubItems": "Włącz podelementy",
 	"avDisableSubItems": "Wyłącz podelementy",
-	"avSubItemsUpgradeTip": "Po włączeniu urządzenia korzystające z tej bazy danych muszą obsługiwać nowy format",
 	"avSubItemsContext": "Kontekst filtra",
 	"avSubItemsCounts": "Elementy najwyższego poziomu: ${roots}, pasujące elementy: ${matches}",
 	"avSubItemsExistingFields": "Użyj istniejących pól relacji",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Плоский вид",
 	"avEnableSubItems": "Включить подэлементы",
 	"avDisableSubItems": "Отключить подэлементы",
-	"avSubItemsUpgradeTip": "После включения устройства, обращающиеся к этой базе данных, должны поддерживать новый формат",
 	"avSubItemsContext": "Контекст фильтра",
 	"avSubItemsCounts": "Элементов верхнего уровня: ${roots}, совпадений: ${matches}",
 	"avSubItemsExistingFields": "Использовать существующие поля связей",

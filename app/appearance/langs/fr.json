@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Affichage à plat",
 	"avEnableSubItems": "Activer les sous-éléments",
 	"avDisableSubItems": "Désactiver les sous-éléments",
-	"avSubItemsUpgradeTip": "Après activation, les appareils accédant à cette base de données doivent prendre en charge le nouveau format",
 	"avSubItemsContext": "Contexte du filtre",
 	"avSubItemsCounts": "${roots} éléments de premier niveau, ${matches} correspondances",
 	"avSubItemsExistingFields": "Utiliser les champs de relation existants",

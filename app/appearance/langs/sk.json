@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Ploché zobrazenie",
 	"avEnableSubItems": "Zapnúť podpoložky",
 	"avDisableSubItems": "Vypnúť podpoložky",
-	"avSubItemsUpgradeTip": "Po zapnutí musia zariadenia pristupujúce k tejto databáze podporovať nový formát",
 	"avSubItemsContext": "Kontext filtra",
 	"avSubItemsCounts": "Položky najvyššej úrovne: ${roots}, zodpovedajúce položky: ${matches}",
 	"avSubItemsExistingFields": "Použiť existujúce polia vzťahov",

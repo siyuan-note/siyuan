@@ -73,7 +73,6 @@
 	"avFlatDisplay": "フラット表示",
 	"avEnableSubItems": "親子項目を有効化",
 	"avDisableSubItems": "親子項目を無効化",
-	"avSubItemsUpgradeTip": "有効化後、このデータベースにアクセスする端末は新しい形式に対応している必要があります",
 	"avSubItemsContext": "フィルターのコンテキスト",
 	"avSubItemsCounts": "最上位 ${roots} 件、一致 ${matches} 件",
 	"avSubItemsExistingFields": "既存の関連フィールドを使用",

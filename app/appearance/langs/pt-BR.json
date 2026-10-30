@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Exibição plana",
 	"avEnableSubItems": "Ativar subitens",
 	"avDisableSubItems": "Desativar subitens",
-	"avSubItemsUpgradeTip": "Após a ativação, os dispositivos que acessam este banco de dados precisam oferecer suporte ao novo formato",
 	"avSubItemsContext": "Contexto do filtro",
 	"avSubItemsCounts": "${roots} itens de nível superior, ${matches} itens correspondentes",
 	"avSubItemsExistingFields": "Usar campos de relação existentes",

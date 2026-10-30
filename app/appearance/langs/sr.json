@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Раван приказ",
 	"avEnableSubItems": "Омогући подставке",
 	"avDisableSubItems": "Онемогући подставке",
-	"avSubItemsUpgradeTip": "Након омогућавања, уређаји који приступају овој бази података морају подржавати нови формат",
 	"avSubItemsContext": "Контекст филтера",
 	"avSubItemsCounts": "Ставке највишег нивоа: ${roots}, подударне ставке: ${matches}",
 	"avSubItemsExistingFields": "Користи постојећа поља веза",

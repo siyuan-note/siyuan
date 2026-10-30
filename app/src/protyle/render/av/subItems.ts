@@ -146,8 +146,7 @@ export const getSubItemsSettingsHTML = (data: IAV) => {
     const currentDisplay = data.views?.find(view => view.id === data.viewID)?.subItemsDisplay || "flat";
     return `<button class="b3-menu__item" data-type="go-config"><svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg><span class="b3-menu__label">${window.siyuan.languages.avSubItems}</span></button>
 <button class="b3-menu__separator"></button>
-${!enabled ? `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__secondary">${window.siyuan.languages.avSubItemsUpgradeTip}</span></div>
-<button class="b3-menu__item" data-sub-items-field=""><span class="b3-menu__label">${window.siyuan.languages.avParentItem}</span><span class="b3-menu__accelerator">${window.siyuan.languages.avSubItemsNewFields}</span><svg class="b3-menu__icon"><use xlink:href="#iconRight"></use></svg></button>` : ""}
+${!enabled ? `<button class="b3-menu__item" data-sub-items-field=""><span class="b3-menu__label">${window.siyuan.languages.avParentItem}</span><span class="b3-menu__accelerator">${window.siyuan.languages.avSubItemsNewFields}</span><svg class="b3-menu__icon"><use xlink:href="#iconRight"></use></svg></button>` : ""}
 <button class="b3-menu__item" data-sub-items-enabled="${!enabled}"><span class="b3-menu__label">${window.siyuan.languages[enabled ? "avDisableSubItems" : "avEnableSubItems"]}</span></button>
 ${enabled && (data.viewType === "table" || data.viewType === "list") ? ["flat", "nested"].map(display => `<button class="b3-menu__item" data-sub-items-display="${display}"><span class="b3-menu__label">${window.siyuan.languages[display === "nested" ? "avNestedDisplay" : "avFlatDisplay"]}</span>${currentDisplay === display ? '<svg class="b3-menu__icon"><use xlink:href="#iconSelect"></use></svg>' : ""}</button>`).join("") : ""}`;
 };

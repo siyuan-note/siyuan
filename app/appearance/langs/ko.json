@@ -73,7 +73,6 @@
 	"avFlatDisplay": "평면 표시",
 	"avEnableSubItems": "하위 항목 활성화",
 	"avDisableSubItems": "하위 항목 비활성화",
-	"avSubItemsUpgradeTip": "활성화 후 이 데이터베이스에 접근하는 기기는 새 형식을 지원해야 합니다",
 	"avSubItemsContext": "필터 문맥",
 	"avSubItemsCounts": "최상위 항목 ${roots}개, 일치하는 항목 ${matches}개",
 	"avSubItemsExistingFields": "기존 관계 필드 사용",

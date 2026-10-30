@@ -73,7 +73,6 @@
 	"avFlatDisplay": "عرض مسطح",
 	"avEnableSubItems": "تفعيل العناصر الفرعية",
 	"avDisableSubItems": "تعطيل العناصر الفرعية",
-	"avSubItemsUpgradeTip": "بعد التفعيل، يجب أن تدعم الأجهزة التي تصل إلى قاعدة البيانات هذه التنسيق الجديد",
 	"avSubItemsContext": "سياق التصفية",
 	"avSubItemsCounts": "${roots} عنصرًا في المستوى الأعلى، ${matches} عنصرًا مطابقًا",
 	"avSubItemsExistingFields": "استخدام حقول العلاقات الموجودة",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "תצוגה שטוחה",
 	"avEnableSubItems": "הפעלת פריטי משנה",
 	"avDisableSubItems": "השבתת פריטי משנה",
-	"avSubItemsUpgradeTip": "לאחר ההפעלה, מכשירים שניגשים למסד נתונים זה חייבים לתמוך בפורמט החדש",
 	"avSubItemsContext": "הקשר הסינון",
 	"avSubItemsCounts": "${roots} פריטים ברמה העליונה, ${matches} פריטים תואמים",
 	"avSubItemsExistingFields": "שימוש בשדות קשר קיימים",

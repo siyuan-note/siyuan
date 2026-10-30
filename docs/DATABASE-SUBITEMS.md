@@ -187,7 +187,7 @@ Maintain tests and fixtures alongside each implementation step. Data, interactio
 
 ### Format and disabling
 
-Sub-items use database format version `Spec 14`. Only databases that actually enable the feature upgrade their format; merely opening or reading an unaffected database must not upgrade it. Older kernels without format support must reject rewriting it, preventing configuration loss or bypassed constraints. The enable control should explain that devices accessing the database need support for the new format.
+Sub-items use database format version `Spec 14`. Only databases that actually enable the feature upgrade their format; merely opening or reading an unaffected database must not upgrade it. Older kernels without format support must reject rewriting it, preventing configuration loss or bypassed constraints.
 
 Save a recoverable original state before enabling, and commit configuration and format changes only after validation. Interruptions, write failures, and unsupported source formats must preserve original data rather than clearing relations to complete an upgrade. Hiding nested display or disabling the feature does not automatically downgrade the format. Reverting to an older version uses matching backups or history sources, not an older kernel ignoring added fields.
 

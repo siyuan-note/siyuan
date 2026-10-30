@@ -73,7 +73,6 @@
 	"avFlatDisplay": "平鋪顯示",
 	"avEnableSubItems": "啟用父子條目",
 	"avDisableSubItems": "停用父子條目",
-	"avSubItemsUpgradeTip": "啟用後，存取此資料庫的裝置需要支援新格式",
 	"avSubItemsContext": "篩選上下文",
 	"avSubItemsCounts": "${roots} 個頂層條目，${matches} 個符合條件的條目",
 	"avSubItemsExistingFields": "使用現有關聯欄位",

@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Düz görünüm",
 	"avEnableSubItems": "Alt öğeleri etkinleştir",
 	"avDisableSubItems": "Alt öğeleri devre dışı bırak",
-	"avSubItemsUpgradeTip": "Etkinleştirildikten sonra bu veritabanına erişen cihazların yeni biçimi desteklemesi gerekir",
 	"avSubItemsContext": "Filtre bağlamı",
 	"avSubItemsCounts": "${roots} üst düzey öğe, ${matches} eşleşen öğe",
 	"avSubItemsExistingFields": "Mevcut ilişki alanlarını kullan",

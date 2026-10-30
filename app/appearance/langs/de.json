@@ -73,7 +73,6 @@
 	"avFlatDisplay": "Flache Ansicht",
 	"avEnableSubItems": "Untereinträge aktivieren",
 	"avDisableSubItems": "Untereinträge deaktivieren",
-	"avSubItemsUpgradeTip": "Nach der Aktivierung müssen Geräte, die auf diese Datenbank zugreifen, das neue Format unterstützen",
 	"avSubItemsContext": "Filterkontext",
 	"avSubItemsCounts": "${roots} Einträge auf oberster Ebene, ${matches} passende Einträge",
 	"avSubItemsExistingFields": "Vorhandene Relationsfelder verwenden",

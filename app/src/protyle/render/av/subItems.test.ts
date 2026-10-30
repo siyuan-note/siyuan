@@ -77,6 +77,10 @@ it("offers shared row actions and creates a sub-item under its parent in one ins
 it("keeps nesting choices limited to table/list while exposing database configuration in every layout", () => {
     const h = setup();
     for (const viewType of ["table", "list", "gallery", "kanban", "calendar"] as TAVView[]) {
+        const disabled = h.api.getSubItemsSettingsHTML({viewType, view: {}} as IAV);
+        assert.match(disabled, /avEnableSubItems/);
+        assert.match(disabled, /data-sub-items-field/);
+        assert.doesNotMatch(disabled, /b3-menu__item--readonly/);
         const html = h.api.getSubItemsSettingsHTML({viewType, view: {subItemsDisplay: "nested"},
             subItems: {enabled: true, parentKeyID: "parent", childrenKeyID: "children"}} as IAV);
         assert.match(html, /avDisableSubItems/);

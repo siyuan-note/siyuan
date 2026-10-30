@@ -23,6 +23,13 @@ const (
 )
 
 type openAIResponsesContextKey struct{}
+type openAIResponsesDefaultSamplingKey struct{}
+
+// ContextWithOpenAIResponsesDefaultSampling 让未选择采样配置的调用方使用服务端默认值。
+// 仅影响 Responses；其他调用方显式设置的零温度仍按原值发送。
+func ContextWithOpenAIResponsesDefaultSampling(ctx context.Context) context.Context {
+	return context.WithValue(ctx, openAIResponsesDefaultSamplingKey{}, true)
+}
 
 type openAIResponsesRequestOptions struct {
 	storeFalse                bool
@@ -346,11 +353,14 @@ func responseRequestFromChat(ctx context.Context, request openai.ChatCompletionR
 	if options.includeEncryptedReasoning {
 		responseRequest.Include = []openai.ResponseInclude{openai.ResponseIncludeReasoningEncryptedContent}
 	}
-	temperature := request.Temperature
-	responseRequest.Temperature = &temperature
-	if request.TopP != 0 {
-		topP := request.TopP
-		responseRequest.TopP = &topP
+	defaultSampling, _ := ctx.Value(openAIResponsesDefaultSamplingKey{}).(bool)
+	if !defaultSampling {
+		temperature := request.Temperature
+		responseRequest.Temperature = &temperature
+		if request.TopP != 0 {
+			topP := request.TopP
+			responseRequest.TopP = &topP
+		}
 	}
 	if request.ReasoningEffort != "" {
 		responseRequest.Reasoning = &openai.ResponseReasoning{

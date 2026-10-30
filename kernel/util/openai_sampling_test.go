@@ -91,6 +91,37 @@ func TestOpenAIResponsesSamplingCompatibility(t *testing.T) {
 	}
 }
 
+func TestOpenAIResponsesDefaultSamplingOptIn(t *testing.T) {
+	ctx := ContextWithOpenAIResponsesDefaultSampling(context.Background())
+	ctx = ContextWithOpenAIResponsesBaseURL(ctx, "https://api.openai.com/v1")
+	request := openai.ChatCompletionRequest{Model: "test", Temperature: 0, TopP: 0.8, ReasoningEffort: "high", MaxCompletionTokens: 8192}
+	converted := responseRequestFromChat(ctx, request, nil)
+	if converted.Temperature != nil || converted.TopP != nil || converted.MaxOutputTokens != 8192 || converted.Reasoning.Effort != "high" || converted.Store == nil || *converted.Store {
+		t.Fatal("default sampling changed unrelated Responses options")
+	}
+	explicit := responseRequestFromChat(context.Background(), request, nil)
+	if explicit.Temperature == nil || *explicit.Temperature != 0 || explicit.TopP == nil || *explicit.TopP != 0.8 {
+		t.Fatal("non-opt-in sampling changed")
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Error(err)
+			return
+		}
+		if r.URL.Path != "/v1/chat/completions" || payload["temperature"] != float64(1) || payload["top_p"] != float64(0.8) {
+			t.Error("Responses opt-in changed Chat Completions sampling")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"ok"}}]}`)
+	}))
+	defer server.Close()
+	request.Temperature = 1
+	if _, err := CreateOpenAICompletion(ctx, NewAIClientWithModel("test", server.URL+"/v1", "test"), OpenAIProtocolChatCompletions, request, nil); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestOmitUnsupportedResponseSamplingParameterRejectsOtherErrors(t *testing.T) {
 	parameter := "temperature"
 	otherParameter := "reasoning.effort"

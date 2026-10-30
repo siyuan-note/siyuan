@@ -81,6 +81,10 @@ func TestAIMemoryModelHTTPErrorIsSanitized(t *testing.T) {
 	for _, protocol := range []string{util.OpenAIProtocolChatCompletions, util.OpenAIProtocolResponses, util.AnthropicProtocolMessages, util.GeminiProtocolInteractions} {
 		t.Run(protocol, func(t *testing.T) {
 			cfg := setupAIMemoryTest(t)
+			oldLog := memoryLogModelFailure
+			t.Cleanup(func() { memoryLogModelFailure = oldLog })
+			var diagnostics []string
+			memoryLogModelFailure = func(diagnostic string) { diagnostics = append(diagnostics, diagnostic) }
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
@@ -89,9 +93,12 @@ func TestAIMemoryModelHTTPErrorIsSanitized(t *testing.T) {
 			defer server.Close()
 			cfg.Providers[0].BaseURL = server.URL + "/v1"
 			cfg.Providers[0].Protocol = protocol
-			_, err := memoryComplete(context.Background(), cfg, "PRIVATE_INPUT")
+			_, err := memoryCompleteStage(context.Background(), cfg, "keywords", "PRIVATE_INPUT")
 			if err != memoryModelError(450) {
 				t.Fatalf("unexpected safe error: %v", err)
+			}
+			if len(diagnostics) != 1 || !strings.Contains(diagnostics[0], "stage=keywords") || !strings.Contains(diagnostics[0], "http_status=401") || strings.Contains(diagnostics[0], "PRIVATE") {
+				t.Fatalf("unsafe or missing production diagnostic: %v", diagnostics)
 			}
 		})
 	}

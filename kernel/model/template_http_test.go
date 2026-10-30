@@ -18,7 +18,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func templateHTTPTestWindow(t *testing.T) (*websocket.Conn, string) {
+func templateHTTPTestWindow(t *testing.T, unready ...bool) (*websocket.Conn, string) {
 	t.Helper()
 	app := strings.ReplaceAll(t.Name(), "/", "-")
 	hub := melody.New()
@@ -26,7 +26,11 @@ func templateHTTPTestWindow(t *testing.T) (*websocket.Conn, string) {
 	hub.HandleConnect(func(session *melody.Session) { util.AddPushChan(session); connected <- struct{}{} })
 	hub.HandleDisconnect(util.RemovePushChan)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _ = hub.HandleRequest(w, r) }))
-	connection, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http")+"/ws?app="+app+"&id=main&type=main", nil)
+	query := ""
+	if len(unready) > 0 && unready[0] {
+		query = "&ready=false"
+	}
+	connection, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http")+"/ws?app="+app+"&id=main&type=main"+query, nil)
 	if err != nil {
 		server.Close()
 		t.Fatal(err)
@@ -181,5 +185,84 @@ func TestTemplateHTTPNotebookLockCancelsBeforeWaitingForLease(t *testing.T) {
 	case <-locked:
 	case <-time.After(time.Second):
 		t.Fatal("lock did not finish after canceled request released its lease")
+	}
+}
+
+func TestTemplateHTTPRefreshWaitsOnlyForNetworkConfirmation(t *testing.T) {
+	connection, app := templateHTTPTestWindow(t, true)
+	execution, err := StartTemplateHTTPExecution(context.Background(), "template-refresh-not-ready", app, "main", "scope")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer execution.Close()
+	session, _ := util.BindableInteractiveSession(app, "main")
+	if session == nil || util.IsSessionReady(session) {
+		t.Fatal("fixture must be connected but not ready")
+	}
+	events := make(chan string, 4)
+	go func() {
+		for {
+			var event struct {
+				Cmd  string
+				Data struct{ ConfirmID string }
+			}
+			if err := connection.ReadJSON(&event); err != nil {
+				return
+			}
+			if event.Cmd == "templateHTTPConfirm" {
+				events <- event.Data.ConfirmID
+			}
+		}
+	}()
+	results := make(chan map[string]any, 1)
+	go func() { results <- execution.Runtime.Get("https://example.com/data") }()
+	select {
+	case <-events:
+		t.Fatal("confirmation sent before UI readiness")
+	case <-results:
+		t.Fatal("request failed instead of waiting for readiness")
+	case <-time.After(50 * time.Millisecond):
+	}
+	session.Set("uiReady", true)
+	select {
+	case id := <-events:
+		if !RespondTemplateHTTP(execution.id, id, app, "main", false) {
+			t.Fatal("ready window could not deny")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("readiness did not resume pending confirmation")
+	}
+	select {
+	case result := <-results:
+		if result["error"] != "denied" {
+			t.Fatalf("unexpected result: %v", result)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("denial did not resume the original request")
+	}
+}
+
+func TestTemplateHTTPRefreshReadinessWaitIsCanceledOnNotebookLock(t *testing.T) {
+	_, app := templateHTTPTestWindow(t, true)
+	execution, err := StartTemplateHTTPExecution(context.Background(), "template-refresh-lock", app, "main", "scope")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer execution.Close()
+	results := make(chan map[string]any, 1)
+	go func() { results <- execution.Runtime.Get("https://example.com/data") }()
+	select {
+	case <-results:
+		t.Fatal("request did not wait for readiness")
+	case <-time.After(50 * time.Millisecond):
+	}
+	cancelTemplateHTTPExecutions()
+	select {
+	case result := <-results:
+		if result["error"] != "execution_ended" {
+			t.Fatalf("canceled readiness escaped: %v", result)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("lock cancellation blocked on readiness")
 	}
 }

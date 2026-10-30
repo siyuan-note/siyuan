@@ -43,7 +43,7 @@ func StartTemplateHTTPExecution(ctx context.Context, id, app, sessionID, scope s
 	if len(id) < 16 || len(id) > 128 {
 		return nil, errors.New("invalid template execution")
 	}
-	session, done := util.InteractiveSession(app, sessionID)
+	session, done := util.BindableInteractiveSession(app, sessionID)
 	if session == nil {
 		return nil, errors.New("template interaction requires an active window")
 	}
@@ -95,6 +95,12 @@ func (execution *TemplateHTTPExecution) status(state string) {
 
 func (execution *TemplateHTTPExecution) confirm(ctx context.Context, request templatehttp.Request) bool {
 	if ctx.Err() != nil || execution.ctx.Err() != nil || !execution.accessValid(request.Scope) {
+		execution.cancel()
+		return false
+	}
+	// 界面恢复期间先完成普通渲染，仅联网调用等待当前窗口就绪。
+	if !util.WaitInteractiveSession(ctx, execution.app, execution.sessionID, execution.session) ||
+		execution.ctx.Err() != nil || !execution.accessValid(request.Scope) {
 		execution.cancel()
 		return false
 	}

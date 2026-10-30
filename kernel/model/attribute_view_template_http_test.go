@@ -69,3 +69,20 @@ func TestNestedAttributeViewHTTPTemplateUsesExecution(t *testing.T) {
 		t.Fatalf("restricted render prompted: %d", confirmations)
 	}
 }
+
+func TestAttributeViewRefreshRendersBeforeWindowReady(t *testing.T) {
+	_, app := templateHTTPTestWindow(t, true)
+	execution, err := StartTemplateHTTPExecution(context.Background(), "attribute-view-refresh-unready", app, "main", "scope")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer execution.Close()
+	database, _ := nestedFixture(t, 3)
+	table := nestedRender(t, database, "", 1, 10, nil, AttributeViewRenderOptions{TemplateHTTP: execution.Runtime})
+	if len(table.Rows) != 3 {
+		t.Fatalf("ordinary database failed during window restore: %d rows", len(table.Rows))
+	}
+	if execution.Runtime.Err() != nil {
+		t.Fatalf("ordinary rendering required UI readiness: %v", execution.Runtime.Err())
+	}
+}

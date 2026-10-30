@@ -5,6 +5,7 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -755,6 +756,51 @@ func IsIndexFixDirty() bool {
 
 // InteractiveSession 仅接受已就绪的非发布主窗口；空标识不能退化成广播。
 func InteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+	session, done := BindableInteractiveSession(app, id)
+	if session == nil || !IsSessionReady(session) {
+		return nil, nil
+	}
+	return session, done
+}
+
+// WaitInteractiveSession 最多等待 10 秒让原主窗口报告界面就绪，连接替换、断开或请求失效时终止等待。
+func WaitInteractiveSession(ctx context.Context, app, id string, expected *melody.Session) bool {
+	session, done := BindableInteractiveSession(app, id)
+	if session == nil || session != expected {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		if ctx.Err() != nil {
+			return false
+		}
+		select {
+		case <-done:
+			return false
+		default:
+		}
+		current, _ := BindableInteractiveSession(app, id)
+		if current != session {
+			return false
+		}
+		if IsSessionReady(session) {
+			return true
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-done:
+			return false
+		case <-ticker.C:
+		}
+	}
+}
+
+// BindableInteractiveSession 只绑定当前有效的非发布主窗口，界面就绪检查由联网确认阶段执行。
+func BindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
 	if app == "" || id == "" {
 		return nil, nil
 	}
@@ -769,7 +815,7 @@ func InteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
 	session := value.(*melody.Session)
 	typ, _ := session.Get("type")
 	state, exists := session.Get("interactiveDone")
-	if typ != "main" || !exists || isPublishSession(session) || !IsSessionReady(session) || session.IsClosed() {
+	if typ != "main" || !exists || isPublishSession(session) || session.IsClosed() {
 		return nil, nil
 	}
 	return session, state.(*interactiveSessionDone).done

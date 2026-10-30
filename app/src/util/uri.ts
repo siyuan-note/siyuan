@@ -17,6 +17,7 @@ import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {normalizeSiYuanUri, type ParsedSiYuanUri} from "./normalizeSiYuanUri";
+import {showMessage} from "../dialog/message";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
@@ -56,6 +57,8 @@ const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif
+            } else {
+                showMessage(window.siyuan.languages._kernel[15].replace("%s", id));
             }
             forEachPluginSubscriber("open-siyuan-url-block", eventBus => {
                 eventBus.emit("open-siyuan-url-block", {

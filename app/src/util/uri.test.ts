@@ -94,10 +94,12 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
     const opens: {id: string, action: string[]}[] = [];
     const events: {type: string, url: string}[] = [];
     const bazaar: {type: string, name: string, from: string}[] = [];
+    const messages: string[] = [];
     const exports = {} as typeof import("./uri");
     const dependencies = {
         ...parser,
         normalizeSiYuanUri,
+        showMessage: (message: string) => messages.push(message),
         Constants: constants,
         fetchPost: (url: string, data: {id: string}, callback: (response: {data: boolean}) => void) => {
             requests.push({url, id: data.id});
@@ -116,13 +118,13 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
     runInNewContext(compile("src/util/uri.ts", mobile), {
         exports,
         URL: URLClass,
-        window: {siyuan: {}},
+        window: {siyuan: {languages: {_kernel: {15: "Content block with id [%s] not found"}}}},
         require: () => dependencies,
     });
     const app = {plugins: [{name: "plugin-sample", eventBus: {
         emit: (type: string, detail: {url: string}) => events.push({type, url: detail.url}),
     }}]} as unknown as Parameters<typeof exports.processSiYuanUri>[0];
-    return {exports, app, requests, opens, events, bazaar};
+    return {exports, app, requests, opens, events, bazaar, messages};
 };
 
 test("reported agent block links reach document navigation in both desktop and mobile builds", () => {
@@ -136,21 +138,30 @@ test("reported agent block links reach document navigation in both desktop and m
                 assert.equal(context.opens[0].id, blockID);
                 assert.deepEqual(Array.from(context.opens[0].action), ["highlight", "context", "rootScroll"]);
                 assert.deepEqual(context.events, [{type: "open-siyuan-url-block", url: uri}]);
+                assert.deepEqual(context.messages, []);
             }
         }
     }
 });
 
-test("missing blocks retain the existence guard and invalid schemes make no requests", () => {
+test("missing blocks show feedback on desktop and mobile while preserving plugin events", () => {
     for (const URLClass of [URL, LegacyURL]) {
-        const context = createDispatcher(URLClass, true, false);
-        assert.equal(context.exports.processSiYuanUri(context.app, `siyuan://blocks/${blockID}`), true);
-        assert.equal(context.requests.length, 1);
-        assert.equal(context.opens.length, 0);
-        for (const uri of ["invalid", `https://blocks/${blockID}`, `siyuan://other/${blockID}`]) {
-            assert.equal(context.exports.processSiYuanUri(context.app, uri), false);
+        for (const mobile of [false, true]) {
+            for (const protocol of ["siyuan", "web+siyuan"]) {
+                const context = createDispatcher(URLClass, mobile, false);
+                const uri = `${protocol}://blocks/${blockID}`;
+                assert.equal(context.exports.processSiYuanUri(context.app, uri), true);
+                assert.equal(context.requests.length, 1);
+                assert.equal(context.opens.length, 0);
+                assert.deepEqual(context.messages, [`Content block with id [${blockID}] not found`]);
+                assert.deepEqual(context.events, [{type: "open-siyuan-url-block", url: uri}]);
+                for (const invalid of ["invalid", `https://blocks/${blockID}`, `siyuan://other/${blockID}`]) {
+                    assert.equal(context.exports.processSiYuanUri(context.app, invalid), false);
+                }
+                assert.equal(context.requests.length, 1);
+                assert.equal(context.messages.length, 1);
+            }
         }
-        assert.equal(context.requests.length, 1);
     }
 });
 

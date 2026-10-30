@@ -542,7 +542,7 @@ exports.cases = async sources => {
         check.equal(element.querySelector("[data-tree-loading]").textContent, "Retry");
         const root = controller.getMountedElement("notebook:box");
         check.equal(root.getAttribute("aria-busy"), "false", "a failed range stops the loading arrow");
-        check.equal(root.querySelector(".fn__rotate"), null);
+        check.equal(root.querySelector("[data-tree-indicator]"), null);
         let retry;
         source.range = async request => {
             await new Promise(resolve => { retry = resolve; });
@@ -550,11 +550,12 @@ exports.cases = async sources => {
         };
         element.querySelector("[data-tree-loading]").click();
         controller.render();
-        check.equal(root.querySelector(".fn__rotate"), null, "retrying keeps the arrow during the initial wait");
+        check.equal(root.querySelector("[data-tree-indicator]"), null, "retrying keeps the arrow during the initial wait");
         await new Promise(resolve => setTimeout(resolve, 220));
         await frame();
         check.equal(root.getAttribute("aria-busy"), "true", "retrying animates the parent arrow");
-        check.equal(root.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh");
+        check.ok(root.querySelector(".b3-loading.b3-loading--small[data-tree-indicator]"));
+        check.ok(root.querySelector(".b3-list-item__arrow").classList.contains("fn__none"));
         check.equal(element.querySelector("[data-tree-loading]").textContent, "");
         retry();
         await frame();
@@ -707,12 +708,12 @@ exports.cases = async sources => {
         const arrowState = key => {
             const row = controller.getMountedElement(key);
             const arrow = row.querySelector(".b3-list-item__arrow");
-            return {busy: row.getAttribute("aria-busy"), spinning: arrow.classList.contains("fn__rotate"),
+            return {busy: row.getAttribute("aria-busy"), spinning: Boolean(row.querySelector("[data-tree-indicator]")),
                 icon: arrow.querySelector("use").getAttribute("xlink:href"),
-                expanded: arrow.classList.contains("b3-list-item__arrow--open")};
+                expanded: arrow.classList.contains("b3-list-item__arrow--open"), hidden: arrow.classList.contains("fn__none")};
         };
-        const busy = {busy: "true", spinning: true, icon: "#iconRefresh", expanded: false};
-        const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true};
+        const busy = {busy: "true", spinning: true, icon: "#iconRight", expanded: false, hidden: true};
+        const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true, hidden: false};
         const rowCount = controller.model.rowCount;
         const siblingTop = controller.getMountedElement("notebook:box/d2").getBoundingClientRect().top;
         const first = controller.toggle("notebook:box/d0", true);
@@ -776,7 +777,7 @@ exports.cases = async sources => {
         };
         const opening = controller.toggle("notebook:box", true);
         controller.render();
-        check.equal(element.querySelector(".fn__rotate"), null, "fast notebook loads do not flash an indicator");
+        check.equal(element.querySelector("[data-tree-indicator]"), null, "fast notebook loads do not flash an indicator");
         await frame();
         check.equal(element.querySelector("[data-tree-key]").getAttribute("aria-busy"), "true",
             "notebook expansion displays loading on its own arrow");
@@ -835,17 +836,19 @@ exports.cases = async sources => {
         const flashed = [];
         const observer = new MutationObserver(records => {
             records.forEach(record => {
-                if (record.target.classList?.contains("fn__rotate")) { flashed.push(record.target); }
+                record.addedNodes.forEach(node => {
+                    if (node instanceof Element && node.matches("[data-tree-indicator]")) { flashed.push(node); }
+                });
             });
         });
-        observer.observe(element, {subtree: true, attributes: true, attributeFilter: ["class"]});
+        observer.observe(element, {subtree: true, childList: true});
         const opening = controller.toggle("notebook:box", true);
         controller.render();
         release();
         await opening;
         await new Promise(resolve => setTimeout(resolve, 250));
         await frame();
-        check.equal(element.querySelector(".fn__rotate"), null, "a completed fast request never starts a delayed animation");
+        check.equal(element.querySelector("[data-tree-indicator]"), null, "a completed fast request never starts a delayed animation");
         check.equal(flashed.length, 0);
         check.ok(controller.getMountedElement("notebook:box/d0"));
         observer.disconnect();
@@ -882,7 +885,7 @@ exports.cases = async sources => {
         await frame();
         const root = controller.getMountedElement("notebook:box");
         check.equal(root.getAttribute("aria-expanded"), "false");
-        check.equal(root.querySelector(".fn__rotate"), null);
+        check.equal(root.querySelector("[data-tree-indicator]"), null);
         check.equal(root.querySelector("use").getAttribute("xlink:href"), "#iconRefresh");
         check.equal(root.querySelector(".b3-list-item__arrow").getAttribute("aria-label"), "Retry");
         check.equal(directory.files.size, 0);

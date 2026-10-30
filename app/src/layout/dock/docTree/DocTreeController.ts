@@ -1157,11 +1157,22 @@ export class DocTreeController {
         row.setAttribute("aria-busy", String(pending.length > 0));
         const arrow = row.querySelector(".b3-list-item__arrow");
         arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
-        arrow?.classList.toggle("fn__rotate", showIndicator);
+        arrow?.classList.toggle("fn__none", showIndicator);
+        const indicator = arrow?.parentElement.querySelector("[data-tree-indicator]");
+        if (showIndicator && arrow && !indicator) {
+            const loading = document.createElement("span");
+            loading.className = "b3-loading b3-loading--small";
+            loading.dataset.treeIndicator = "true";
+            loading.setAttribute("aria-hidden", "true");
+            loading.style.setProperty("--b3-loading-size", "14px");
+            arrow.after(loading);
+        } else if (!showIndicator) {
+            indicator?.remove();
+        }
         if (retry) { arrow?.setAttribute("aria-label", window.siyuan?.languages?.retry || ""); }
         else { arrow?.removeAttribute("aria-label"); }
         const use = arrow?.querySelector("use");
-        const icon = showIndicator || retry ? "#iconRefresh" : "#iconRight";
+        const icon = retry ? "#iconRefresh" : "#iconRight";
         if (use && use.getAttribute("xlink:href") !== icon) { use.setAttribute("xlink:href", icon); }
     }
 

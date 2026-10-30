@@ -1,4 +1,6 @@
 {
+	"dataImportMasterPassword": "Kata sandi utama buku catatan terenkripsi",
+	"dataImportPasswordTip": "Masukkan kata sandi utama buku catatan terenkripsi yang akan diimpor dari cadangan; buku catatan yang dilewati tidak perlu diverifikasi",
 	"aiSelectModel": "Silakan pilih model",
 	"aiMemoryEnabledTip": "Saat diaktifkan, layanan model yang dikonfigurasi secara otomatis mengekstrak dan memelihara ingatan dari semua buku catatan yang tidak terenkripsi dan pesan pengguna yang berhasil dikirim setelah ini; tidak termasuk balasan AI dan percakapan sebelumnya; biaya mengikuti tarif layanan tersebut",
 	"aiMemoryKind": "Jenis ingatan",

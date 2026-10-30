@@ -28,9 +28,18 @@ func TestStagedImportRequestCompatibility(t *testing.T) {
 
 func TestDataImportContractRequiresExplicitConflictChoice(t *testing.T) {
 	for _, mode := range []string{"skip", "overwrite"} {
+		withoutPassword, err := CommitDataImport.Decode(strings.NewReader(`{"id":"plan","mode":"` + mode + `"}`))
+		if err != nil || withoutPassword.ID != "plan" || string(withoutPassword.Mode) != mode || withoutPassword.Password != "" {
+			t.Fatalf("omitted optional password rejected: %+v %v", withoutPassword, err)
+		}
 		request, err := CommitDataImport.Decode(strings.NewReader(`{"id":" plan ","mode":"` + mode + `","password":" secret "}`))
 		if err != nil || request.ID != "plan" || string(request.Mode) != mode || request.Password != "secret" {
 			t.Fatalf("invalid commit decoding: %+v %v", request, err)
+		}
+	}
+	for _, password := range []string{`""`, `"  "`, `null`} {
+		if _, err := CommitDataImport.Decode(strings.NewReader(`{"id":"plan","mode":"skip","password":` + password + `}`)); err == nil {
+			t.Fatalf("invalid present password accepted: %s", password)
 		}
 	}
 	for _, body := range []string{`{}`, `{"id":"plan"}`, `{"id":"plan","mode":"silent"}`, `{"id":"plan","mode":null}`, `{"id":"plan","mode":"skip","password":true}`} {

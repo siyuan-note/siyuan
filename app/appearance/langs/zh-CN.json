@@ -1,4 +1,6 @@
 {
+	"dataImportMasterPassword": "加密笔记本主密码",
+	"dataImportPasswordTip": "请输入备份中待导入的加密笔记本所用的主密码；跳过的笔记本无需验证",
 	"aiSelectModel": "请选择模型",
 	"aiMemoryEnabledTip": "启用后自动维护当前工作空间的长期记忆，模型会从所有非加密笔记本和此后成功提交的用户消息中提取并整理记忆；不收集 AI 回复、不回扫历史对话；费用按配置的模型服务规则计算",
 	"aiMemoryKind": "记忆类型",

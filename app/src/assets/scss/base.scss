@@ -2,6 +2,7 @@
 @use "util/density" as *;
 @use "util/function" as *;
 @use "business/history" as *;
+@use "business/data-import" as *;
 @use "business/template-manager" as *;
 @use "business/skill-manager" as *;
 @use "business/memory-manager" as *;

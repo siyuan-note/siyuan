@@ -1,4 +1,6 @@
 {
+	"dataImportMasterPassword": "Şifreli not defterlerinin ana parolası",
+	"dataImportPasswordTip": "Yedekten içe aktarılacak şifreli not defterlerinin ana parolasını girin; atlanan not defterlerinin doğrulanması gerekmez",
 	"aiSelectModel": "Lütfen bir model seçin",
 	"aiMemoryEnabledTip": "Etkinleştirildiğinde yapılandırılmış model hizmeti, şifrelenmemiş tüm not defterlerinden ve bundan sonra başarıyla gönderilen kullanıcı mesajlarından anıları otomatik olarak çıkarır ve güncel tutar; yapay zekâ yanıtlarını ve geçmiş konuşmaları dışarıda tutar; ücretler hizmetin fiyatlandırmasına göre hesaplanır",
 	"aiMemoryKind": "Anı türü",

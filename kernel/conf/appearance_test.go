@@ -50,6 +50,44 @@ func TestGlobalFontFamiliesPreservesPriority(t *testing.T) {
 	}
 }
 
+func TestAppearanceEntryVisibilityDefaults(t *testing.T) {
+	for _, mobile := range []bool{false, true} {
+		appearance := NormalizeAppearance(NewAppearanceForContainer(mobile), mobile)
+		if appearance.EntryVisibility.Active != EntryVisibilityProfileFull || len(appearance.EntryVisibility.Profiles) != 0 {
+			t.Fatalf("new workspace should use the full profile (mobile=%v): %+v", mobile, appearance.EntryVisibility)
+		}
+	}
+}
+
+func TestAppearanceEntryVisibilityPreservesSavedProfiles(t *testing.T) {
+	for _, active := range []string{EntryVisibilityProfileSimple, EntryVisibilityProfileFull, "custom"} {
+		for _, mobile := range []bool{false, true} {
+			saved := &EntryVisibility{Version: EntryVisibilityVersion, Active: active, Profiles: []*EntryVisibilityProfile{{
+				ID: "custom", Name: "Custom", Defaults: EntryVisibilityProfileSimple,
+				Entries: map[string]bool{"editor.toolbar.strong": false, "plugin:unavailable:item": true},
+				Orders:  map[string][]string{"dock.order.RightBottom": {"outline", "plugin:unavailable:dock", "file"}},
+			}}}
+			before, err := json.Marshal(saved)
+			if err != nil {
+				t.Fatal(err)
+			}
+			appearance := NewAppearanceForContainer(mobile)
+			data := append(append([]byte(`{"entryVisibility":`), before...), '}')
+			if err = json.Unmarshal(data, appearance); err != nil {
+				t.Fatal(err)
+			}
+			NormalizeAppearance(appearance, mobile)
+			after, err := json.Marshal(appearance.EntryVisibility)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(before, after) {
+				t.Fatalf("saved profile changed (active=%s, mobile=%v):\n%s\n%s", active, mobile, before, after)
+			}
+		}
+	}
+}
+
 func TestNormalizeEntryVisibilityDefaults(t *testing.T) {
 	entryVisibility := NormalizeEntryVisibility(nil, EntryVisibilityProfileSimple)
 	if entryVisibility.Version != EntryVisibilityVersion || entryVisibility.Active != EntryVisibilityProfileSimple {

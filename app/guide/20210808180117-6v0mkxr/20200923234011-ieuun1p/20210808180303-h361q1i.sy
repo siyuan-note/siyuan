@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261030103731"
 	},
 	"Children": [
 		{
@@ -468,12 +468,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-5rsqqov",
-				"updated": "20261024161816"
+				"updated": "20261030103731"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice."
+					"Data": "New workspaces use the Full profile by default. Full appears before Simple in the profile list. Existing workspaces keep their selected profile and saved visibility and order settings. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice."
 				}
 			]
 		},

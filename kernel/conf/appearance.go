@@ -93,7 +93,7 @@ func NewAppearanceForContainer(mobile bool) *Appearance {
 		HideStatusBar:       false,
 		StatusBar:           util.NewStatusBar(mobile),
 		Notifications:       util.NewNotifications(),
-		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileSimple),
+		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileFull),
 	}
 }
 

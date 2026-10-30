@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "اختر زوجًا من العلاقات وراجع معاينة التسلسل الهرمي ثم فعّل الميزة",
+	"avSubItemsParentFieldTip": "اختر زوجًا من حقول الربط وراجع معاينة التسلسل الهرمي ثم فعّل الميزة",
 	"avSubItemsPreview": "معاينة التسلسل الهرمي",
 	"avSubItemsReverse": "عكس الاتجاه",
 	"avSubItemsPreviewEmpty": "لا توجد عناصر مرتبطة متاحة لهذه المعاينة",
@@ -81,7 +81,7 @@
 	"avDisableSubItems": "تعطيل العناصر الفرعية",
 	"avSubItemsContext": "سياق التصفية",
 	"avSubItemsCounts": "${roots} عنصرًا في المستوى الأعلى، ${matches} عنصرًا مطابقًا",
-	"avSubItemsExistingFields": "استخدام حقول العلاقات الموجودة",
+	"avSubItemsExistingFields": "استخدام حقول الربط الموجودة",
 	"avSubItemsSortLocked": "تحدد قواعد الفرز ترتيب العناصر في المستوى نفسه",
 	"embedToBlocks": "تحويل إلى كتل عادية",
 	"embedToReferences": "تحويل إلى مراجع كتل",

@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "Select a relation pair, review the hierarchy preview, then enable",
+	"avSubItemsParentFieldTip": "Select a pair of relation fields, review the hierarchy preview, then enable",
 	"avSubItemsPreview": "Hierarchy preview",
 	"avSubItemsReverse": "Reverse direction",
 	"avSubItemsPreviewEmpty": "No related items are available for this preview",

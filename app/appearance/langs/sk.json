@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "Vyberte pár vzťahov, skontrolujte náhľad hierarchie a zapnite funkciu",
+	"avSubItemsParentFieldTip": "Vyberte pár relačných polí, skontrolujte náhľad hierarchie a zapnite funkciu",
 	"avSubItemsPreview": "Náhľad hierarchie",
 	"avSubItemsReverse": "Obrátiť smer",
 	"avSubItemsPreviewEmpty": "Pre tento náhľad nie sú dostupné súvisiace položky",
@@ -81,7 +81,7 @@
 	"avDisableSubItems": "Vypnúť podpoložky",
 	"avSubItemsContext": "Kontext filtra",
 	"avSubItemsCounts": "Položky najvyššej úrovne: ${roots}, zodpovedajúce položky: ${matches}",
-	"avSubItemsExistingFields": "Použiť existujúce polia vzťahov",
+	"avSubItemsExistingFields": "Použiť existujúce relačné polia",
 	"avSubItemsSortLocked": "Poradie položiek na rovnakej úrovni určujú pravidlá zoradenia",
 	"embedToBlocks": "Previesť na bežné bloky",
 	"embedToReferences": "Previesť na odkazy na bloky",

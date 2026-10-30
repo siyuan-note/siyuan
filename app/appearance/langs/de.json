@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "Wähle ein Beziehungspaar, prüfe die Hierarchievorschau und aktiviere es",
+	"avSubItemsParentFieldTip": "Wähle ein Paar Beziehungsfelder, prüfe die Hierarchievorschau und aktiviere es",
 	"avSubItemsPreview": "Hierarchievorschau",
 	"avSubItemsReverse": "Richtung umkehren",
 	"avSubItemsPreviewEmpty": "Keine verknüpften Einträge für diese Vorschau verfügbar",
@@ -81,7 +81,7 @@
 	"avDisableSubItems": "Untereinträge deaktivieren",
 	"avSubItemsContext": "Filterkontext",
 	"avSubItemsCounts": "${roots} Einträge auf oberster Ebene, ${matches} passende Einträge",
-	"avSubItemsExistingFields": "Vorhandene Relationsfelder verwenden",
+	"avSubItemsExistingFields": "Vorhandene Beziehungsfelder verwenden",
 	"avSubItemsSortLocked": "Die Reihenfolge gleichrangiger Einträge wird durch Sortierregeln bestimmt",
 	"embedToBlocks": "In normale Blöcke umwandeln",
 	"embedToReferences": "In Blockreferenzen umwandeln",

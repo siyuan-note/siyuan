@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "选择一组关系，查看层级预览后启用",
+	"avSubItemsParentFieldTip": "选择一组关联字段，查看层级预览后启用",
 	"avSubItemsPreview": "层级预览",
 	"avSubItemsReverse": "反转方向",
 	"avSubItemsPreviewEmpty": "暂无可预览的关联条目",
@@ -81,7 +81,7 @@
 	"avDisableSubItems": "停用父子条目",
 	"avSubItemsContext": "筛选上下文",
 	"avSubItemsCounts": "${roots} 个顶层条目，${matches} 个匹配条目",
-	"avSubItemsExistingFields": "使用已有关系字段",
+	"avSubItemsExistingFields": "使用已有关联字段",
 	"avSubItemsSortLocked": "同级顺序由排序规则决定",
 	"embedToBlocks": "转为普通内容",
 	"embedToReferences": "转为块引用",

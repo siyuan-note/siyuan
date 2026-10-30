@@ -1,5 +1,5 @@
 {
-	"avSubItemsParentFieldTip": "Изаберите пар веза, проверите преглед хијерархије, па омогућите функцију",
+	"avSubItemsParentFieldTip": "Изаберите пар поља релација, проверите преглед хијерархије, па омогућите функцију",
 	"avSubItemsPreview": "Преглед хијерархије",
 	"avSubItemsReverse": "Обрни смер",
 	"avSubItemsPreviewEmpty": "Нема повезаних ставки за овај преглед",
@@ -81,7 +81,7 @@
 	"avDisableSubItems": "Онемогући подставке",
 	"avSubItemsContext": "Контекст филтера",
 	"avSubItemsCounts": "Ставке највишег нивоа: ${roots}, подударне ставке: ${matches}",
-	"avSubItemsExistingFields": "Користи постојећа поља веза",
+	"avSubItemsExistingFields": "Користи постојећа поља релација",
 	"avSubItemsSortLocked": "Редослед ставки на истом нивоу одређују правила сортирања",
 	"embedToBlocks": "Претвори у обичне блокове",
 	"embedToReferences": "Претвори у референце на блокове",

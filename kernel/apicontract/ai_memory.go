@@ -92,16 +92,18 @@ type AIMemoryTaskStarted struct {
 	TaskID string `json:"taskId"`
 }
 type AIMemoryTaskResult struct {
-	ID    string `json:"id"`
+	ID string `json:"id"`
+	// Saved 表示该条新增或更新已持久化；候选记录仍需确认，不能据此推断已启用。
 	Saved bool   `json:"saved"`
 	Error string `json:"error"`
 }
 type AIMemoryTaskData struct {
-	TaskID          string               `json:"taskId"`
-	State           string               `json:"state"`
-	Results         []AIMemoryTaskResult `json:"results"`
-	Error           string               `json:"error"`
-	OverviewPending bool                 `json:"overviewPending"`
+	TaskID  string               `json:"taskId"`
+	State   string               `json:"state"`
+	Results []AIMemoryTaskResult `json:"results"`
+	Error   string               `json:"error"`
+	// OverviewPending 表示本任务已有已持久化结果且概览待刷新，不表示所有提案成功。
+	OverviewPending bool `json:"overviewPending"`
 }
 type AIMemoryCapabilitiesData struct {
 	Efforts []string `json:"efforts"`

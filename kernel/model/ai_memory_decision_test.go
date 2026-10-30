@@ -46,7 +46,7 @@ func TestAIMemoryDecisionPipeline(t *testing.T) {
 			cfg, fixture, sources := setupMemoryDecisionTest(t)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			task := &memoryTask{cancel: cancel, status: apicontract.AIMemoryTaskData{OverviewPending: true}}
+			task := &memoryTask{cancel: cancel}
 			q := apicontract.AIMemoryMaintainRequest{SourceIDs: []string{fixture.sourceID}, OperationID: "decision-test"}
 			automatic, decisionCalls, memoryCalls := true, 0, 0
 			bind := func(id string) {
@@ -137,7 +137,7 @@ func TestAIMemoryDecisionPipeline(t *testing.T) {
 			} else if memoryCalls != 1 {
 				t.Fatalf("fallback calls = %d", memoryCalls)
 			}
-			if scenario == "skip" && (task.status.State != "completed" || len(task.status.Results) != 0 || !task.status.OverviewPending) {
+			if scenario == "skip" && (task.status.State != "completed" || len(task.status.Results) != 0 || task.status.OverviewPending) {
 				t.Fatalf("skip claimed writes/refresh: %+v", task.status)
 			}
 			if abort && task.status.State != "failed" && task.status.State != "cancelled" {
@@ -236,7 +236,7 @@ func TestAIMemoryDecisionProcessCompletesOriginalPipeline(t *testing.T) {
 		return `{"actions":[]}`, nil
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	task := &memoryTask{cancel: cancel, status: apicontract.AIMemoryTaskData{OverviewPending: true}}
+	task := &memoryTask{cancel: cancel}
 	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{fixture.sourceID}, OperationID: "process"}, sources, true, task)
 	if task.status.State != "completed" || task.status.OverviewPending || keywords != 1 || proposals != 1 {
 		t.Fatalf("original pipeline did not complete: %+v keywords=%d proposals=%d overviews=%d", task.status, keywords, proposals, overviews)

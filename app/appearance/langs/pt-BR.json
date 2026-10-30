@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Registros salvos: ${count}",
+	"aiMemoryTaskSaved": "Registros salvos",
+	"aiMemoryTaskNotSaved": "Nenhum registro foi salvo",
+	"aiMemoryTaskNoChanges": "Nenhuma alteração de registro para salvar",
+	"aiMemoryOverviewPending": "Atualização da visão geral pendente",
 	"templateHTTPAllowOnce": "Permitir desta vez",
 	"templateHTTPAllowAlways": "Sempre permitir que este modelo acesse a rede",
 	"templateHTTPTemplateWarning": "Permitir desta vez ou sempre autoriza este modelo a acessar vários destinos públicos e enviar a serviços externos o conteúdo das notas que ele tem permissão para ler. A permissão persistente pode ser revogada no gerenciamento de modelos ou nas configurações dos campos do banco de dados",
@@ -3565,6 +3570,17 @@
 		"444": "Não foi possível salvar o registro de recuperação do índice; mantenha o SiYuan aberto e verifique o espaço em disco e as permissões do diretório",
 		"445": "Este título foi alterado em outro editor. Seu rascunho foi preservado",
 		"446": "Edite este título formatado no editor de títulos",
-		"447": "Não foi possível salvar o título; verifique o conteúdo em linha, o tamanho e o contexto de edição"
+		"447": "Não foi possível salvar o título; verifique o conteúdo em linha, o tamanho e o contexto de edição",
+		"448": "Falha na conexão com o modelo de memória; verifique a rede e o endereço do provedor",
+		"449": "A solicitação ao modelo de memória excedeu o tempo limite; tente novamente",
+		"450": "Falha na autenticação do modelo de memória; verifique as configurações de autenticação do provedor",
+		"451": "Acesso ao modelo de memória negado; verifique as permissões da conta e do modelo",
+		"452": "Limite de solicitações do modelo de memória atingido; tente novamente mais tarde",
+		"453": "Cota do modelo de memória esgotada; verifique o faturamento e a cota do provedor",
+		"454": "Modelo de memória ou parâmetros da solicitação inválidos; verifique o modelo selecionado e as configurações",
+		"455": "Serviço do modelo de memória indisponível; tente novamente mais tarde",
+		"456": "O modelo de memória retornou uma resposta inválida ou incompleta; tente novamente ou selecione outro modelo",
+		"457": "Falha na solicitação ao modelo de memória; verifique o provedor e o modelo selecionados",
+		"458": "Solicitação ao modelo de memória cancelada"
 	}
 }

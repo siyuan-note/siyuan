@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Catatan tersimpan: ${count}",
+	"aiMemoryTaskSaved": "Catatan tersimpan",
+	"aiMemoryTaskNotSaved": "Tidak ada catatan yang disimpan",
+	"aiMemoryTaskNoChanges": "Tidak ada perubahan catatan untuk disimpan",
+	"aiMemoryOverviewPending": "Pembaruan ringkasan tertunda",
 	"templateHTTPAllowOnce": "Izinkan kali ini",
 	"templateHTTPAllowAlways": "Selalu izinkan templat ini mengakses jaringan",
 	"templateHTTPTemplateWarning": "Mengizinkan kali ini atau selalu memberi templat ini akses ke beberapa tujuan publik dan izin mengirim isi catatan yang boleh dibacanya ke layanan eksternal. Izin persisten dapat dicabut di pengelolaan templat atau pengaturan kolom basis data",
@@ -3565,6 +3570,17 @@
 		"444": "Log pemulihan indeks tidak dapat disimpan; biarkan SiYuan tetap terbuka dan periksa ruang disk serta izin direktori",
 		"445": "Judul ini diubah di editor lain. Draf Anda tetap tersimpan",
 		"446": "Edit judul berformat ini melalui editor judul",
-		"447": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan"
+		"447": "Judul tidak dapat disimpan; periksa konten sebaris, ukuran, dan konteks pengeditan",
+		"448": "Koneksi ke model memori gagal; periksa jaringan dan alamat penyedia",
+		"449": "Permintaan model memori kehabisan waktu; coba lagi",
+		"450": "Autentikasi model memori gagal; periksa pengaturan autentikasi penyedia",
+		"451": "Akses ke model memori ditolak; periksa izin akun dan model",
+		"452": "Batas laju permintaan model memori tercapai; coba lagi nanti",
+		"453": "Kuota model memori habis; periksa tagihan dan kuota penyedia",
+		"454": "Model memori atau parameter permintaan tidak valid; periksa model yang dipilih dan pengaturan",
+		"455": "Layanan model memori tidak tersedia; coba lagi nanti",
+		"456": "Model memori mengembalikan respons yang tidak valid atau tidak lengkap; coba lagi atau pilih model lain",
+		"457": "Permintaan model memori gagal; periksa penyedia dan model yang dipilih",
+		"458": "Permintaan model memori dibatalkan"
 	}
 }

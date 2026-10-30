@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Uložené záznamy: ${count}",
+	"aiMemoryTaskSaved": "Uložené záznamy",
+	"aiMemoryTaskNotSaved": "Neboli uložené žiadne záznamy",
+	"aiMemoryTaskNoChanges": "Žiadne zmeny záznamov na uloženie",
+	"aiMemoryOverviewPending": "Aktualizácia prehľadu čaká na dokončenie",
 	"templateHTTPAllowOnce": "Povoliť tentoraz",
 	"templateHTTPAllowAlways": "Vždy povoliť tejto šablóne prístup k sieti",
 	"templateHTTPTemplateWarning": "Jednorazové alebo trvalé povolenie umožní tejto šablóne prístup k viacerým verejným cieľom a odosielanie obsahu poznámok, ktoré smie čítať, externým službám. Trvalé povolenie možno odvolať v správe šablón alebo nastaveniach polí databázy",
@@ -3565,6 +3570,17 @@
 		"444": "Nepodarilo sa uložiť denník obnovy indexu; nechajte SiYuan otvorený a skontrolujte miesto na disku a oprávnenia priečinka",
 		"445": "Tento názov bol zmenený v inom editore. Váš koncept zostal zachovaný",
 		"446": "Tento formátovaný názov upravte v editore názvov",
-		"447": "Názov sa nedá uložiť; skontrolujte riadkový obsah, veľkosť a kontext úprav"
+		"447": "Názov sa nedá uložiť; skontrolujte riadkový obsah, veľkosť a kontext úprav",
+		"448": "Pripojenie k modelu pamäte zlyhalo; skontrolujte sieť a adresu poskytovateľa",
+		"449": "Časový limit požiadavky na model pamäte vypršal; skúste to znova",
+		"450": "Overenie modelu pamäte zlyhalo; skontrolujte nastavenia overenia poskytovateľa",
+		"451": "Prístup k modelu pamäte bol zamietnutý; skontrolujte oprávnenia účtu a modelu",
+		"452": "Bol dosiahnutý limit frekvencie požiadaviek na model pamäte; skúste to neskôr",
+		"453": "Kvóta modelu pamäte je vyčerpaná; skontrolujte fakturáciu a kvótu poskytovateľa",
+		"454": "Model pamäte alebo parametre požiadavky sú neplatné; skontrolujte vybraný model a nastavenia",
+		"455": "Služba modelu pamäte nie je dostupná; skúste to neskôr",
+		"456": "Model pamäte vrátil neplatnú alebo neúplnú odpoveď; skúste to znova alebo vyberte iný model",
+		"457": "Požiadavka na model pamäte zlyhala; skontrolujte vybraného poskytovateľa a model",
+		"458": "Požiadavka na model pamäte bola zrušená"
 	}
 }

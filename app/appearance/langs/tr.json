@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Kaydedilen kayıtlar: ${count}",
+	"aiMemoryTaskSaved": "Kaydedilen kayıtlar",
+	"aiMemoryTaskNotSaved": "Hiçbir kayıt kaydedilmedi",
+	"aiMemoryTaskNoChanges": "Kaydedilecek kayıt değişikliği yok",
+	"aiMemoryOverviewPending": "Genel bakış güncellemesi bekliyor",
 	"templateHTTPAllowOnce": "Bu sefer izin ver",
 	"templateHTTPAllowAlways": "Bu şablonun ağ erişimine her zaman izin ver",
 	"templateHTTPTemplateWarning": "Bu sefer veya her zaman izin vermek, bu şablonun birden fazla genel hedefe erişmesine ve okuma yetkisi olan notların içeriğini harici hizmetlere göndermesine izin verir. Kalıcı izin, şablon yönetiminden veya veritabanı alanı ayarlarından iptal edilebilir",
@@ -3565,6 +3570,17 @@
 		"444": "Dizin kurtarma günlüğü kaydedilemedi; SiYuan'ı açık tutun ve disk alanını ve klasör izinlerini kontrol edin",
 		"445": "Bu başlık başka bir düzenleyicide değiştirildi. Taslağınız korundu",
 		"446": "Bu biçimlendirilmiş başlığı başlık düzenleyicisinde düzenleyin",
-		"447": "Başlık kaydedilemiyor; satır içi içeriği, boyutu ve düzenleme bağlamını kontrol edin"
+		"447": "Başlık kaydedilemiyor; satır içi içeriği, boyutu ve düzenleme bağlamını kontrol edin",
+		"448": "Bellek modeline bağlantı başarısız; ağı ve sağlayıcı adresini kontrol edin",
+		"449": "Bellek modeli isteği zaman aşımına uğradı; yeniden deneyin",
+		"450": "Bellek modeli kimlik doğrulaması başarısız; sağlayıcının kimlik doğrulama ayarlarını kontrol edin",
+		"451": "Bellek modeline erişim reddedildi; hesap ve model izinlerini kontrol edin",
+		"452": "Bellek modeli istek hızı sınırına ulaşıldı; daha sonra yeniden deneyin",
+		"453": "Bellek modeli kotası tükendi; sağlayıcının faturalandırmasını ve kotasını kontrol edin",
+		"454": "Bellek modeli veya istek parametreleri geçersiz; seçili modeli ve ayarları kontrol edin",
+		"455": "Bellek modeli hizmeti kullanılamıyor; daha sonra yeniden deneyin",
+		"456": "Bellek modeli geçersiz veya eksik yanıt döndürdü; yeniden deneyin veya başka bir model seçin",
+		"457": "Bellek modeli isteği başarısız; seçili sağlayıcıyı ve modeli kontrol edin",
+		"458": "Bellek modeli isteği iptal edildi"
 	}
 }

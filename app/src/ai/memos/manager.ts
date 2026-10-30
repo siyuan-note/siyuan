@@ -99,9 +99,14 @@ export const openMemoryManager = () => {
         if (task.state === "completed" && submittedInput?.id === task.taskId && submittedInput.text === taskInput.value) {
             taskDirty = false;
         }
-        taskStatus.textContent = [taskLabels[task.state] || task.state, task.error,
-            ...(task.results || []).map(result => `${result.id}: ${result.saved ? lang.save : result.error}`),
-            task.overviewPending ? lang.aiMemoryPending : ""].filter(Boolean).join("\n");
+        const results = task.results || [];
+        const saved = results.filter(result => result.saved).length;
+        const outcome = saved > 0 ? lang.aiMemoryTaskSavedCount.replace("${count}", String(saved)) :
+            task.state === "completed" && results.length === 0 ? lang.aiMemoryTaskNoChanges :
+                ["failed", "cancelled"].includes(task.state) ? lang.aiMemoryTaskNotSaved : "";
+        taskStatus.textContent = [taskLabels[task.state] || task.state, task.error, outcome,
+            ...results.map(result => `${result.id}: ${result.saved ? lang.aiMemoryTaskSaved : result.error}`),
+            saved > 0 && task.overviewPending ? lang.aiMemoryOverviewPending : ""].filter(Boolean).join("\n");
         taskRunning = ["queued", "running"].includes(task.state);
         action("cancel").disabled = isReadOnly() || !taskRunning;
         updateModel();
@@ -311,7 +316,7 @@ export const openMemoryManager = () => {
                     const response = await fetchSyncPost("/api/ai/memory/overview", {});
                     if (response.code !== 0) { showMessage(response.msg); break; }
                     new Dialog({title: lang.aiMemoryOverview, width: isMobile() ? "94vw" : "700px",
-                        content: `<div class="b3-dialog__content"><p>${response.data.stale ? lang.aiMemoryPending : ""}</p><pre class="ft__breakword">${escapeHtml("USER.md\n" + response.data.user + "\n\nMEMORY.md\n" + response.data.memory)}</pre></div>`});
+                        content: `<div class="b3-dialog__content"><p>${response.data.stale ? lang.aiMemoryOverviewPending : ""}</p><pre class="ft__breakword">${escapeHtml("USER.md\n" + response.data.user + "\n\nMEMORY.md\n" + response.data.memory)}</pre></div>`});
                     break;
                 }
                 case "forget": {

@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Record salvati: ${count}",
+	"aiMemoryTaskSaved": "Record salvati",
+	"aiMemoryTaskNotSaved": "Nessun record salvato",
+	"aiMemoryTaskNoChanges": "Nessuna modifica ai record da salvare",
+	"aiMemoryOverviewPending": "Aggiornamento della panoramica in attesa",
 	"templateHTTPAllowOnce": "Consenti questa volta",
 	"templateHTTPAllowAlways": "Consenti sempre a questo modello di accedere alla rete",
 	"templateHTTPTemplateWarning": "Consentire questa volta o sempre autorizza questo modello ad accedere a più destinazioni pubbliche e a inviare a servizi esterni il contenuto delle note che ha il permesso di leggere. L’autorizzazione persistente può essere revocata nella gestione dei modelli o nelle impostazioni dei campi del database",
@@ -3565,6 +3570,17 @@
 		"444": "Impossibile salvare il registro di ripristino dell’indice; lascia SiYuan aperto e controlla lo spazio su disco e i permessi della cartella",
 		"445": "Questo titolo è stato modificato in un altro editor. La bozza è conservata",
 		"446": "Modifica questo titolo formattato nell’editor dei titoli",
-		"447": "Impossibile salvare il titolo; verifica contenuto in linea, dimensioni e contesto di modifica"
+		"447": "Impossibile salvare il titolo; verifica contenuto in linea, dimensioni e contesto di modifica",
+		"448": "Connessione al modello di memoria non riuscita; controlla la rete e l’indirizzo del fornitore",
+		"449": "La richiesta al modello di memoria è scaduta; riprova",
+		"450": "Autenticazione del modello di memoria non riuscita; controlla le impostazioni di autenticazione del fornitore",
+		"451": "Accesso al modello di memoria negato; controlla le autorizzazioni dell’account e del modello",
+		"452": "Limite di richieste del modello di memoria raggiunto; riprova più tardi",
+		"453": "Quota del modello di memoria esaurita; controlla la fatturazione e la quota del fornitore",
+		"454": "Modello di memoria o parametri della richiesta non validi; controlla il modello selezionato e le impostazioni",
+		"455": "Servizio del modello di memoria non disponibile; riprova più tardi",
+		"456": "Il modello di memoria ha restituito una risposta non valida o incompleta; riprova o seleziona un altro modello",
+		"457": "Richiesta al modello di memoria non riuscita; controlla il fornitore e il modello selezionati",
+		"458": "Richiesta al modello di memoria annullata"
 	}
 }

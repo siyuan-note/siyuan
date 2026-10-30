@@ -63,7 +63,7 @@ const harness = (fetch: (url: string, data: Record<string, unknown>) => Promise<
             if (name === "./state") { return {MemoryEditorState, memoryModelOptions}; }
             throw new Error(name);
         },
-        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => String(key)})}, clearTimeout, setTimeout},
+        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => key === "aiMemoryTaskSavedCount" ? "aiMemoryTaskSavedCount ${count}" : String(key)})}, clearTimeout, setTimeout},
         document: {createElement: () => new ElementStub()},
     });
     exported.openMemoryManager();
@@ -74,7 +74,7 @@ const harness = (fetch: (url: string, data: Record<string, unknown>) => Promise<
         root.listeners.get("click")({target});
         await flush();
     };
-    return {root, flush, click, notices, content, config, confirmations, close: () => close(), destroy: () => destroy()};
+    return {root, flush, click, notices, get content() { return content; }, config, confirmations, close: () => close(), destroy: () => destroy()};
 };
 
 test("memory manager uses shared disclosure arrows while preserving native details semantics", () => {
@@ -178,6 +178,43 @@ test("recent automatic failure is visible without knowing task identity or start
     await click("task");
     assert.equal(calls.filter(url => url.endsWith("/list")).length, 2, "terminal task refresh must not create a list/poll loop");
     assert.equal(calls.filter(url => url.endsWith("/task")).length, 1);
+});
+
+test("task feedback separates persisted results from failures and pending overview", async () => {
+    for (const scenario of [
+        {state: "failed", results: [], pending: true, saved: 0, outcome: "aiMemoryTaskNotSaved"},
+        {state: "failed", results: [{id: "", saved: false, error: "invalid proposal"}], pending: false, saved: 0, outcome: "aiMemoryTaskNotSaved"},
+        {state: "failed", results: [{id: "updated-record", saved: true}, {id: "rejected", saved: false, error: "conflict"}], pending: true, saved: 1, outcome: "aiMemoryTaskSavedCount 1"},
+        {state: "failed", results: [{id: "candidate-record", saved: true}], pending: true, saved: 1, outcome: "aiMemoryTaskSavedCount 1"},
+        {state: "failed", results: [{id: "updated-record", saved: true}, {id: "rejected", saved: false, error: "conflict"}], pending: false, saved: 1, outcome: "aiMemoryTaskSavedCount 1"},
+        {state: "cancelled", results: [{id: "saved-before-cancel", saved: true}], pending: true, saved: 1, outcome: "aiMemoryTaskSavedCount 1"},
+        {state: "cancelled", results: [], pending: true, saved: 0, outcome: "aiMemoryTaskNotSaved"},
+        {state: "completed", results: [], pending: false, saved: 0, outcome: "aiMemoryTaskNoChanges"},
+        {state: "completed", results: [{id: "saved-record", saved: true}], pending: false, saved: 1, outcome: "aiMemoryTaskSavedCount 1"},
+    ]) {
+        const task = {taskId: "task", state: scenario.state, error: "", results: scenario.results, overviewPending: scenario.pending};
+        const {root, flush, destroy} = harness(async () => ({code: 0, data: {records: [], tasks: [task]}}));
+        await flush();
+        const text = root.querySelector("[data-memory-task-status]").textContent;
+        assert.ok(text.includes(scenario.outcome), JSON.stringify({scenario, text}));
+        assert.equal(text.includes("aiMemoryOverviewPending"), scenario.saved > 0 && scenario.pending);
+        assert.equal(text.includes("aiMemoryPending"), false);
+        assert.equal(text.includes("aiMemoryTaskNotSaved"), scenario.saved === 0 && scenario.state !== "completed");
+        if (scenario.results.some(result => result.error)) { assert.match(text, /invalid proposal|conflict/); }
+        destroy();
+    }
+});
+
+test("a stale overview does not claim that this operation saved records", async () => {
+    const manager = harness(async url => {
+        if (url.endsWith("/list")) { return {code: 0, data: {records: [], tasks: []}}; }
+        if (url.endsWith("/overview")) { return {code: 0, data: {user: "", memory: "", stale: true}}; }
+        throw new Error(url);
+    });
+    await manager.flush();
+    await manager.click("overview");
+    assert.match(manager.content, /aiMemoryOverviewPending/);
+    assert.doesNotMatch(manager.content, /aiMemoryPending/);
 });
 
 test("pending selection cannot replace or unlock a save, including its refresh", async () => {
@@ -286,7 +323,7 @@ test("model organization submits the entered text and exposes the completed task
     await click("maintain");
     assert.equal(calls.find(call => call.url.endsWith("/maintain")).data.text, "I prefer short answers");
     assert.equal(root.querySelector("[data-memory-task-history]").hidden, false);
-    assert.equal(root.querySelector("[data-memory-task-status]").textContent, "taskStatusDone");
+    assert.equal(root.querySelector("[data-memory-task-status]").textContent, "taskStatusDone\naiMemoryTaskNoChanges");
     assert.equal(root.querySelector('[data-memory-action="maintain"]').disabled, false);
     assert.equal(root.querySelector('[data-memory-action="cancel"]').disabled, true);
 });

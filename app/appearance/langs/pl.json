@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Zapisane rekordy: ${count}",
+	"aiMemoryTaskSaved": "Zapisane rekordy",
+	"aiMemoryTaskNotSaved": "Nie zapisano żadnych rekordów",
+	"aiMemoryTaskNoChanges": "Brak zmian rekordów do zapisania",
+	"aiMemoryOverviewPending": "Aktualizacja przeglądu oczekuje na zakończenie",
 	"templateHTTPAllowOnce": "Zezwól tym razem",
 	"templateHTTPAllowAlways": "Zawsze zezwalaj temu szablonowi na dostęp do sieci",
 	"templateHTTPTemplateWarning": "Zezwolenie jednorazowe lub stałe umożliwia temu szablonowi dostęp do wielu publicznych adresów i wysyłanie do usług zewnętrznych treści notatek, które ma prawo odczytać. Stałe uprawnienie można cofnąć w zarządzaniu szablonami lub ustawieniach pól bazy danych",
@@ -3565,6 +3570,17 @@
 		"444": "Nie udało się zapisać dziennika odzyskiwania indeksu; pozostaw SiYuan otwarty i sprawdź miejsce na dysku oraz uprawnienia do katalogu",
 		"445": "Tytuł zmieniono w innym edytorze. Twój szkic został zachowany",
 		"446": "Zmień ten sformatowany tytuł w edytorze tytułów",
-		"447": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji"
+		"447": "Nie można zapisać tytułu; sprawdź zawartość liniową, rozmiar i kontekst edycji",
+		"448": "Nie udało się połączyć z modelem pamięci; sprawdź sieć i adres dostawcy",
+		"449": "Upłynął limit czasu żądania do modelu pamięci; spróbuj ponownie",
+		"450": "Uwierzytelnianie modelu pamięci nie powiodło się; sprawdź ustawienia uwierzytelniania dostawcy",
+		"451": "Odmowa dostępu do modelu pamięci; sprawdź uprawnienia konta i modelu",
+		"452": "Osiągnięto limit częstotliwości żądań do modelu pamięci; spróbuj później",
+		"453": "Wyczerpano limit wykorzystania modelu pamięci; sprawdź rozliczenia i limit u dostawcy",
+		"454": "Nieprawidłowy model pamięci lub parametry żądania; sprawdź wybrany model i ustawienia",
+		"455": "Usługa modelu pamięci jest niedostępna; spróbuj później",
+		"456": "Model pamięci zwrócił nieprawidłową lub niepełną odpowiedź; spróbuj ponownie lub wybierz inny model",
+		"457": "Żądanie do modelu pamięci nie powiodło się; sprawdź wybranego dostawcę i model",
+		"458": "Żądanie do modelu pamięci anulowano"
 	}
 }

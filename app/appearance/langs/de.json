@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Gespeicherte Einträge: ${count}",
+	"aiMemoryTaskSaved": "Gespeicherte Einträge",
+	"aiMemoryTaskNotSaved": "Keine Einträge gespeichert",
+	"aiMemoryTaskNoChanges": "Keine Eintragsänderungen zu speichern",
+	"aiMemoryOverviewPending": "Aktualisierung der Übersicht ausstehend",
 	"templateHTTPAllowOnce": "Dieses Mal erlauben",
 	"templateHTTPAllowAlways": "Diesem Template den Netzwerkzugriff immer erlauben",
 	"templateHTTPTemplateWarning": "Die einmalige oder dauerhafte Erlaubnis gestattet diesem Template den Zugriff auf mehrere öffentliche Ziele und das Senden von Notizinhalten, die es lesen darf, an externe Dienste. Die dauerhafte Erlaubnis kann in der Template-Verwaltung oder den Datenbankfeldeinstellungen widerrufen werden",
@@ -3565,6 +3570,17 @@
 		"444": "Das Protokoll zur Indexwiederherstellung konnte nicht gespeichert werden; lassen Sie SiYuan geöffnet und prüfen Sie den Speicherplatz und die Verzeichnisberechtigungen",
 		"445": "Dieser Titel wurde in einem anderen Editor geändert. Ihr Entwurf bleibt erhalten",
 		"446": "Bearbeiten Sie diesen formatierten Titel im Titeleditor",
-		"447": "Der Titel kann nicht gespeichert werden; prüfen Sie Inline-Inhalt, Größe und Bearbeitungskontext"
+		"447": "Der Titel kann nicht gespeichert werden; prüfen Sie Inline-Inhalt, Größe und Bearbeitungskontext",
+		"448": "Verbindung zum Gedächtnismodell fehlgeschlagen; Netzwerk und Anbieteradresse prüfen",
+		"449": "Zeitüberschreitung bei der Anfrage an das Gedächtnismodell; erneut versuchen",
+		"450": "Authentifizierung beim Gedächtnismodell fehlgeschlagen; Authentifizierungseinstellungen des Anbieters prüfen",
+		"451": "Zugriff auf das Gedächtnismodell verweigert; Konto- und Modellberechtigungen prüfen",
+		"452": "Anfragelimit des Gedächtnismodells erreicht; später erneut versuchen",
+		"453": "Kontingent des Gedächtnismodells aufgebraucht; Abrechnung und Kontingent beim Anbieter prüfen",
+		"454": "Gedächtnismodell oder Anfrageparameter ungültig; ausgewähltes Modell und Einstellungen prüfen",
+		"455": "Dienst des Gedächtnismodells nicht verfügbar; später erneut versuchen",
+		"456": "Gedächtnismodell hat eine ungültige oder unvollständige Antwort geliefert; erneut versuchen oder ein anderes Modell wählen",
+		"457": "Anfrage an das Gedächtnismodell fehlgeschlagen; ausgewählten Anbieter und Modell prüfen",
+		"458": "Anfrage an das Gedächtnismodell abgebrochen"
 	}
 }

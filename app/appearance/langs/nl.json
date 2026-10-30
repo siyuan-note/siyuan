@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Opgeslagen records: ${count}",
+	"aiMemoryTaskSaved": "Opgeslagen records",
+	"aiMemoryTaskNotSaved": "Er zijn geen records opgeslagen",
+	"aiMemoryTaskNoChanges": "Geen recordwijzigingen om op te slaan",
+	"aiMemoryOverviewPending": "Overzichtsupdate in afwachting",
 	"templateHTTPAllowOnce": "Deze keer toestaan",
 	"templateHTTPAllowAlways": "Deze sjabloon altijd netwerktoegang toestaan",
 	"templateHTTPTemplateWarning": "Eenmalig of altijd toestaan geeft deze sjabloon toegang tot meerdere openbare doelen en laat de sjabloon inhoud van notities die hij mag lezen naar externe diensten sturen. Blijvende toestemming kan worden ingetrokken in sjabloonbeheer of de instellingen van databasevelden",
@@ -3565,6 +3570,17 @@
 		"444": "Het logboek voor indexherstel kon niet worden opgeslagen; houd SiYuan geopend en controleer de schijfruimte en mapmachtigingen",
 		"445": "Deze titel is in een andere editor gewijzigd. Je concept blijft behouden",
 		"446": "Bewerk deze opgemaakte titel in de titeleditor",
-		"447": "Deze titel kan niet worden opgeslagen; controleer de inline-inhoud, grootte en bewerkingscontext"
+		"447": "Deze titel kan niet worden opgeslagen; controleer de inline-inhoud, grootte en bewerkingscontext",
+		"448": "Verbinding met het geheugenmodel mislukt; controleer het netwerk en het adres van de aanbieder",
+		"449": "Time-out bij het verzoek aan het geheugenmodel; probeer het opnieuw",
+		"450": "Authenticatie bij het geheugenmodel mislukt; controleer de authenticatie-instellingen van de aanbieder",
+		"451": "Toegang tot het geheugenmodel geweigerd; controleer de account- en modelrechten",
+		"452": "Aanvraaglimiet van het geheugenmodel bereikt; probeer het later opnieuw",
+		"453": "Quotum van het geheugenmodel verbruikt; controleer facturering en quotum bij de aanbieder",
+		"454": "Geheugenmodel of verzoekparameters ongeldig; controleer het geselecteerde model en de instellingen",
+		"455": "Dienst van het geheugenmodel niet beschikbaar; probeer het later opnieuw",
+		"456": "Het geheugenmodel gaf een ongeldig of onvolledig antwoord; probeer het opnieuw of kies een ander model",
+		"457": "Verzoek aan het geheugenmodel mislukt; controleer de geselecteerde aanbieder en het model",
+		"458": "Verzoek aan het geheugenmodel geannuleerd"
 	}
 }

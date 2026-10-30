@@ -3498,6 +3498,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * results[].saved 表示该条新增或更新已持久化，候选记录仍需确认；失败或取消不回滚已保存结果。
+     * overviewPending 仅表示本任务已有已持久化结果且概览待刷新，不表示所有提案成功；无写入时为 false。
+     * 空 results 不代表保存成功；completed 且结果为空表示没有需要保存的记录变更。
+     */
     "/api/ai/memory/task": {
         request: AIMemoryTaskRequestInput;
         response: { "code": 0; "data": AIMemoryTaskData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Registros guardados: ${count}",
+	"aiMemoryTaskSaved": "Registros guardados",
+	"aiMemoryTaskNotSaved": "No se guardó ningún registro",
+	"aiMemoryTaskNoChanges": "No hay cambios de registros que guardar",
+	"aiMemoryOverviewPending": "Actualización del resumen pendiente",
 	"templateHTTPAllowOnce": "Permitir esta vez",
 	"templateHTTPAllowAlways": "Permitir siempre que esta plantilla acceda a la red",
 	"templateHTTPTemplateWarning": "Permitir esta vez o siempre autoriza a esta plantilla a acceder a varios destinos públicos y enviar a servicios externos el contenido de notas que tiene permiso para leer. El permiso permanente se puede revocar en la gestión de plantillas o en la configuración de campos de la base de datos",
@@ -3565,6 +3570,17 @@
 		"444": "No se pudo guardar el registro de recuperación del índice; mantén SiYuan abierto y comprueba el espacio en disco y los permisos del directorio",
 		"445": "Este título cambió en otro editor. Tu borrador se conserva",
 		"446": "Edita este título con formato en el editor de títulos",
-		"447": "No se puede guardar el título; revisa el contenido en línea, el tamaño y el contexto de edición"
+		"447": "No se puede guardar el título; revisa el contenido en línea, el tamaño y el contexto de edición",
+		"448": "Error de conexión con el modelo de memoria; comprueba la red y la dirección del proveedor",
+		"449": "La solicitud al modelo de memoria agotó el tiempo de espera; inténtalo de nuevo",
+		"450": "Error de autenticación del modelo de memoria; comprueba los ajustes de autenticación del proveedor",
+		"451": "Acceso al modelo de memoria denegado; comprueba los permisos de la cuenta y del modelo",
+		"452": "Se alcanzó el límite de solicitudes del modelo de memoria; inténtalo más tarde",
+		"453": "Se agotó la cuota del modelo de memoria; comprueba la facturación y la cuota del proveedor",
+		"454": "El modelo de memoria o los parámetros de la solicitud no son válidos; comprueba el modelo seleccionado y los ajustes",
+		"455": "El servicio del modelo de memoria no está disponible; inténtalo más tarde",
+		"456": "El modelo de memoria devolvió una respuesta no válida o incompleta; inténtalo de nuevo o selecciona otro modelo",
+		"457": "Error en la solicitud al modelo de memoria; comprueba el proveedor y el modelo seleccionados",
+		"458": "Se canceló la solicitud al modelo de memoria"
 	}
 }

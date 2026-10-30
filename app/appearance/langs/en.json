@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Saved records: ${count}",
+	"aiMemoryTaskSaved": "Saved records",
+	"aiMemoryTaskNotSaved": "No records were saved",
+	"aiMemoryTaskNoChanges": "No record changes to save",
+	"aiMemoryOverviewPending": "Overview update pending",
 	"templateHTTPAllowOnce": "Allow this time",
 	"templateHTTPAllowAlways": "Always allow this template to access the network",
 	"templateHTTPTemplateWarning": "Allowing this time or always lets this template access multiple public targets and send note content it is permitted to read to external services. Persistent permission can be revoked in template management or database field settings",
@@ -3565,6 +3570,17 @@
 		"444": "Index recovery log could not be saved; keep SiYuan open and check disk space and directory permissions",
 		"445": "This title changed in another editor. Your draft is preserved",
 		"446": "Edit this rich title with the title editor",
-		"447": "Unable to save this title; check its inline content, size and editing context"
+		"447": "Unable to save this title; check its inline content, size and editing context",
+		"448": "Memory model connection failed; check the network and provider address",
+		"449": "Memory model request timed out; try again",
+		"450": "Memory model authentication failed; check the provider authentication settings",
+		"451": "Memory model access denied; check account and model permissions",
+		"452": "Memory model rate limit reached; try again later",
+		"453": "Memory model quota exhausted; check provider billing and quota",
+		"454": "Memory model or request parameters are invalid; check the selected model and settings",
+		"455": "Memory model service is unavailable; try again later",
+		"456": "Memory model returned an invalid or incomplete response; try again or select another model",
+		"457": "Memory model request failed; check the selected provider and model",
+		"458": "Memory model request was cancelled"
 	}
 }

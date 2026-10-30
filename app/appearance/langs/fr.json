@@ -1,4 +1,9 @@
 {
+	"aiMemoryTaskSavedCount": "Enregistrements sauvegardés : ${count}",
+	"aiMemoryTaskSaved": "Enregistrements sauvegardés",
+	"aiMemoryTaskNotSaved": "Aucun enregistrement sauvegardé",
+	"aiMemoryTaskNoChanges": "Aucune modification d’enregistrement à sauvegarder",
+	"aiMemoryOverviewPending": "Mise à jour de l’aperçu en attente",
 	"templateHTTPAllowOnce": "Autoriser cette fois",
 	"templateHTTPAllowAlways": "Toujours autoriser ce modèle à accéder au réseau",
 	"templateHTTPTemplateWarning": "Autoriser cette fois ou toujours permet à ce modèle d’accéder à plusieurs destinations publiques et d’envoyer à des services externes le contenu des notes qu’il est autorisé à lire. L’autorisation persistante peut être révoquée dans la gestion des modèles ou les paramètres des champs de base de données",
@@ -3565,6 +3570,17 @@
 		"444": "Impossible d’enregistrer le journal de récupération de l’index ; gardez SiYuan ouvert et vérifiez l’espace disque et les autorisations du répertoire",
 		"445": "Ce titre a été modifié dans un autre éditeur. Votre brouillon est conservé",
 		"446": "Modifiez ce titre enrichi dans l’éditeur de titres",
-		"447": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification"
+		"447": "Impossible d’enregistrer ce titre ; vérifiez son contenu en ligne, sa taille et le contexte de modification",
+		"448": "Connexion au modèle de mémoire impossible ; vérifiez le réseau et l’adresse du fournisseur",
+		"449": "La requête au modèle de mémoire a expiré ; réessayez",
+		"450": "Échec de l’authentification du modèle de mémoire ; vérifiez les paramètres d’authentification du fournisseur",
+		"451": "Accès au modèle de mémoire refusé ; vérifiez les autorisations du compte et du modèle",
+		"452": "Limite de fréquence du modèle de mémoire atteinte ; réessayez plus tard",
+		"453": "Quota du modèle de mémoire épuisé ; vérifiez la facturation et le quota du fournisseur",
+		"454": "Modèle de mémoire ou paramètres de requête invalides ; vérifiez le modèle sélectionné et les réglages",
+		"455": "Service du modèle de mémoire indisponible ; réessayez plus tard",
+		"456": "Le modèle de mémoire a renvoyé une réponse invalide ou incomplète ; réessayez ou choisissez un autre modèle",
+		"457": "Échec de la requête au modèle de mémoire ; vérifiez le fournisseur et le modèle sélectionnés",
+		"458": "Requête au modèle de mémoire annulée"
 	}
 }

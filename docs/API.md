@@ -1358,6 +1358,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Render a template
 
 * `/api/template/render`
+
+Without a live interactive window, `httpGet` returns `interaction_required` and performs no network request. Interactive template requests use execution-scoped confirmation; preview approval does not authorize later insertion. Background `renderSprig` calls remain noninteractive.
 * Parameters
 
   ```json

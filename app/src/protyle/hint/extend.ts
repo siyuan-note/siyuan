@@ -58,6 +58,7 @@ import {
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
+import {guardTemplateHTTPRequest} from "../../template/http";
 import {getDailyNoteHints} from "./dailyNote";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
@@ -870,14 +871,32 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     return [];
 };
 
+const templateInsertRequests = new WeakMap<IProtyle, ReturnType<typeof guardTemplateHTTPRequest>>();
+
 export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement: Element) => {
+    templateInsertRequests.get(protyle)?.cancel();
+    templateInsertRequests.get(protyle)?.dispose();
+    const rootID = protyle.block.rootID;
+    const parentID = protyle.block.parentID;
+    const range = protyle.toolbar.range.cloneRange();
+    const isCurrent = () => !request.signal.aborted && nodeElement.isConnected && range.startContainer.isConnected &&
+        protyle.wysiwyg.element.isConnected && !protyle.wysiwyg.element.closest(".fn__none") && protyle.block.rootID === rootID &&
+        protyle.block.parentID === parentID && templateInsertRequests.get(protyle) === request;
+    const request = guardTemplateHTTPRequest(isCurrent);
+    templateInsertRequests.set(protyle, request);
     fetchPost("/api/template/render", {
         id: protyle.block.parentID,
         path: value,
         mode: "editorInsert"
     }, (response) => {
+        if (!isCurrent()) {
+            return;
+        }
         const insertTemplate = (templateDocTreePlanID?: string) => {
-            focusByRange(protyle.toolbar.range);
+            if (!isCurrent()) {
+                return;
+            }
+            focusByRange(range);
             const editElement = getContenteditableElement(nodeElement);
             if (templateDocTreePlanID || (editElement && editElement.textContent.trim() === "")) {
                 insertHTML(response.data.content, protyle, true, false, false, undefined, undefined,
@@ -900,12 +919,14 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             confirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc), () => {
                 insertTemplate(docTreePlan.id);
             }, () => {
-                focusByRange(protyle.toolbar.range);
+                if (isCurrent()) {
+                    focusByRange(range);
+                }
             });
         } else {
             insertTemplate();
         }
-    });
+    }, undefined, undefined, request.signal).finally(request.dispose);
 };
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {

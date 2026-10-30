@@ -28,6 +28,10 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	delete(ret, "expandenv")
 	delete(ret, "getHostByName")
 
+	// 无界面执行只能得到明确的拒绝结果，不能通过共享函数表隐式联网。
+	ret["httpGet"] = func(string, ...map[string]any) map[string]any {
+		return map[string]any{"ok": false, "status": 0, "body": "", "error": "interaction_required"}
+	}
 	ret["Weekday"] = util.Weekday
 	ret["WeekdayCN"] = util.WeekdayCN
 	ret["WeekdayCN2"] = util.WeekdayCN2

@@ -15,6 +15,7 @@ export class Model {
     public ws: WebSocket;
     public reqId: number;
     private socketDisposed = false;
+    private socketType: TWS;
     private reconnectTimer: ReturnType<typeof setTimeout>;
     private mainMessageQueue: {
         data: string,
@@ -70,6 +71,11 @@ export class Model {
 
     public connect(options: IConnectOptions) {
         if (this.socketDisposed) return;
+        if (this.ws && this.socketType === "main") {
+            const {cancelTemplateHTTPExecutions}: typeof import("../template/http") = require("../template/http");
+            cancelTemplateHTTPExecutions();
+        }
+        this.socketType = options.type;
         clearTimeout(this.reconnectTimer);
         const websocketURL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type === "main" ? "&ready=false" : ""}${options.type ? "&type=" + options.type : ""}`);
@@ -124,6 +130,10 @@ export class Model {
         };
         ws.onclose = (ev) => {
             if (this.socketDisposed || this.ws !== ws) return;
+            if (options.type === "main") {
+                const {cancelTemplateHTTPExecutions}: typeof import("../template/http") = require("../template/http");
+                cancelTemplateHTTPExecutions();
+            }
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
@@ -177,6 +187,10 @@ export class Model {
         clearTimeout(this.reconnectTimer);
         this.mainMessageQueue.length = 0;
         if (this.ws) {
+            if (this.socketType === "main") {
+                const {cancelTemplateHTTPExecutions}: typeof import("../template/http") = require("../template/http");
+                cancelTemplateHTTPExecutions();
+            }
             this.ws.onopen = null;
             this.ws.onmessage = null;
             this.ws.onclose = null;

@@ -1355,6 +1355,8 @@ if (response.code === 0 && response.data) {
 ### 渲染模板
 
 * `/api/template/render`
+
+没有可交互的在线窗口时，`httpGet` 返回 `interaction_required`，不会发送网络请求。交互式模板请求使用本次执行范围内的确认；预览授权不能授权后续插入。后台 `renderSprig` 调用仍为无交互执行。
 * 参数
 
   ```json

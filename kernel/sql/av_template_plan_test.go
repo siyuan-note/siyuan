@@ -70,6 +70,7 @@ func TestReusableTemplateKeyRequiresClosedPureExpressions(t *testing.T) {
 		{`.action{printf "%p" .Text}`, false}, {`.action{printf "%[1]p" .Text}`, false},
 		{`.action{printf .Text "value"}`, false}, {`.action{printf "%T" .Text}`, false},
 		{`.action{now}`, false}, {`.action{queryBlocks "SELECT * FROM blocks"}`, false},
+		{`.action{httpGet "https://example.com/data"}`, false},
 		{`.action{.Text_raw.Text.Content}`, false}, {`.action{.Text_created}`, false},
 		{`.action{index .id_mod_raw "text"}`, false}, {`.action{.Unknown}`, false},
 		{`.action{index . "Unknown"}`, false}, {`.action{.id_mod.text.Unknown}`, false},

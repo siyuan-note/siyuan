@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1498,9 +1499,27 @@ func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, er
 	return createDailyNoteAt(boxID, date, true)
 }
 
-func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, existed bool, err error) {
+// CreateDailyNoteWithHTTP 先提交日记身份，再在创建锁外执行需要确认的正文模板。
+func CreateDailyNoteWithHTTP(boxID string, date *time.Time, execution *templatehttp.Execution) (p string, existed bool, err error) {
+	now := time.Now()
+	if date != nil {
+		now = *date
+	}
+	return createDailyNoteAt(boxID, now, date != nil, execution)
+}
+
+func createDailyNoteAt(boxID string, now time.Time, findByDate bool, httpExecutions ...*templatehttp.Execution) (p string, existed bool, err error) {
 	createDocLock.Lock()
-	defer createDocLock.Unlock()
+	locked := true
+	defer func() {
+		if locked {
+			createDocLock.Unlock()
+		}
+	}()
+	var execution *templatehttp.Execution
+	if len(httpExecutions) > 0 {
+		execution = httpExecutions[0]
+	}
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -1533,6 +1552,10 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		}
 	}
 	last.Attributes, last.TemplateTime = map[string]string{DailyNoteAttrPrefix + date: date}, &now
+	templatePath := last.DocCreateTemplatePath
+	if execution != nil {
+		last.DocCreateTemplatePath = ""
+	}
 	document, err := executeDocumentCreationPlan(plan, true)
 	if err != nil {
 		return
@@ -1542,7 +1565,17 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		return
 	}
 	sql.FlushQueue()
-
+	if execution != nil && templatePath != "" {
+		createDocLock.Unlock()
+		locked = false
+		if execution.Err() != nil {
+			return p, false, execution.Err()
+		}
+		if err = applyDocContentTemplateAt(templatePath, document.ID, &now, execution); err != nil {
+			return p, false, documentCreateFailure(err, "committed", document.ID, "template", []string{"source", "sort"})
+		}
+		sql.FlushQueue()
+	}
 	return
 }
 

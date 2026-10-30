@@ -6,7 +6,9 @@ package sql
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"slices"
 	"sort"
@@ -20,6 +22,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -35,6 +38,7 @@ type GroupViewRenderSource struct {
 
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
 type AttributeViewRenderContext struct {
+	TemplateHTTP               *templatehttp.Execution
 	templateErrors             map[string]*attributeViewTemplateRenderError
 	renderingRelationTemplates bool
 	renderingRollupTargets     map[rollupTargetID]bool
@@ -44,6 +48,7 @@ type AttributeViewRenderContext struct {
 }
 
 type attributeViewTemplateRenderError struct {
+	httpTemplate      bool
 	attributeViewID   string
 	attributeViewName string
 	templateFieldID   string
@@ -62,6 +67,22 @@ func NewAttributeViewRenderContext() *AttributeViewRenderContext {
 // HasTemplateErrors 判断本次求值是否产生模板错误，错误结果不参与跨请求复用。
 func (context *AttributeViewRenderContext) HasTemplateErrors() bool {
 	return context != nil && len(context.templateErrors) != 0
+}
+
+// HTTPTemplateError 将交互执行中的模板语法错误交给发起请求，避免广播到其他窗口。
+func (context *AttributeViewRenderContext) HTTPTemplateError() error {
+	if context == nil || context.TemplateHTTP == nil {
+		return nil
+	}
+	if err := context.TemplateHTTP.Err(); err != nil {
+		return err
+	}
+	for _, templateErr := range context.sortedTemplateErrors() {
+		if templateErr.httpTemplate {
+			return errors.New(templateErr.renderErr)
+		}
+	}
+	return nil
 }
 
 func (context *AttributeViewRenderContext) addTemplateError(attrView *av.AttributeView, templateKey *av.Key,
@@ -83,6 +104,7 @@ func (context *AttributeViewRenderContext) addTemplateError(attrView *av.Attribu
 	templateErr := context.templateErrors[errorKey]
 	if nil == templateErr {
 		templateErr = &attributeViewTemplateRenderError{
+			httpTemplate:      strings.Contains(templateKey.Template, "httpGet") || strings.Contains(templateKey.RenderTemplate, "httpGet"),
 			attributeViewID:   attrView.ID,
 			attributeViewName: getAttrViewName(attrView),
 			templateFieldID:   templateKey.ID,
@@ -120,7 +142,14 @@ func (context *AttributeViewRenderContext) sortedTemplateErrors() (ret []*attrib
 }
 
 func (context *AttributeViewRenderContext) PushTemplateErrors() {
+	if context != nil && context.TemplateHTTP != nil && context.TemplateHTTP.Err() != nil {
+		return
+	}
 	for _, templateErr := range context.sortedTemplateErrors() {
+		// 联网模板的错误留在本次执行内，避免向其他窗口广播数据范围信息。
+		if context.TemplateHTTP != nil && templateErr.httpTemplate {
+			continue
+		}
 		detail := fmt.Sprintf(util.Langs[util.Lang][374], templateErr.attributeViewName, templateErr.templateFieldName,
 			templateErr.itemName, templateErr.itemID, len(templateErr.itemIDs), templateErr.renderErr)
 		util.PushErrMsg(fmt.Sprintf(util.Langs[util.Lang][44], util.EscapeHTML(detail)), 30000)
@@ -333,21 +362,27 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 }
 
 // compileTemplateField 解析模板内容并返回可复用的已编译模板，避免在逐行渲染时反复解析。
-func compileTemplateField(tplContent string) (tpl *template.Template, err error) {
+func compileTemplateField(tplContent string, functions ...template.FuncMap) (tpl *template.Template, err error) {
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
 	SQLTemplateFuncs(&tplFuncMap)
+	for _, funcs := range functions {
+		maps.Copy(tplFuncMap, funcs)
+	}
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err = goTpl.Parse(tplContent)
 	if err != nil {
-		logging.LogWarnf("parse template [%s] failed: %s", tplContent, err)
+		if strings.Contains(tplContent, "httpGet") {
+			err = errors.New("HTTP template parsing failed")
+		}
+		logging.LogWarnf("parse attribute view template failed")
 		return
 	}
 	return
 }
 
 func executeTemplateField(tpl *template.Template, ial map[string]string, keyValues []*av.KeyValues,
-	storedValueCache map[*av.Value]*av.Value) (ret string, err error) {
+	storedValueCache map[*av.Value]*av.Value, executions ...*templatehttp.Execution) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -491,7 +526,11 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 		dataModel["id_mod_raw"].(map[string]any)[keyValue.Key.ID] = rawValue
 	}
 
-	if err = tpl.Execute(buf, dataModel); err != nil {
+	var writer io.Writer = buf
+	if len(executions) > 0 && executions[0] != nil {
+		writer = executions[0].Writer(buf)
+	}
+	if err = tpl.Execute(writer, dataModel); err != nil {
 		return
 	}
 	ret = buf.String()
@@ -1077,6 +1116,11 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		}
 	}
 	timing.Stage("evaluate")
+	var httpFuncs template.FuncMap
+	if renderContext != nil && renderContext.TemplateHTTP != nil {
+		// 关联数据库共享执行预算，但响应缓存按数据库及所属笔记本隔离。
+		httpFuncs = renderContext.TemplateHTTP.FuncsForScope(av.GetAVBoxID(attrView.ID) + "\x00" + attrView.ID)
+	}
 	for _, templateKey := range templateKeys {
 		if keys != nil && !keys[templateKey.ID] {
 			continue
@@ -1087,6 +1131,9 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 			templateContent = templateKey.RenderTemplate
 		}
 		for _, item := range collection.GetItems() {
+			if renderContext != nil && renderContext.TemplateHTTP != nil && renderContext.TemplateHTTP.Err() != nil {
+				return
+			}
 			value := item.GetValue(templateKey.ID)
 			if nil == value || (!isRenderTemplate && nil == value.Template) {
 				continue
@@ -1107,7 +1154,7 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 			var renderErr error
 			tpl, tried := tplCache[templateContent]
 			if !tried {
-				compiled, compileErr := compileTemplateField(templateContent)
+				compiled, compileErr := compileTemplateField(templateContent, httpFuncs)
 				tplCache[templateContent] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
 				if nil != compileErr {
 					compileErrCache[templateContent] = compileErr
@@ -1119,7 +1166,14 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 				renderErr = compileErrCache[templateContent] // 复用首次解析的错误
 			}
 			if nil == renderErr {
-				content, renderErr = executeTemplateField(tpl, ial, keyValues, storedValueCache)
+				var execution *templatehttp.Execution
+				if renderContext != nil {
+					execution = renderContext.TemplateHTTP
+				}
+				content, renderErr = executeTemplateField(tpl, ial, keyValues, storedValueCache, execution)
+			}
+			if renderErr != nil && strings.Contains(templateContent, "httpGet") {
+				renderErr = errors.New("HTTP template evaluation failed")
 			}
 			if nil != renderErr {
 				renderContext.addTemplateError(attrView, templateKey, item, renderErr)

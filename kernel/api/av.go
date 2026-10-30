@@ -485,9 +485,18 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 	if request.CreateIfNotExist != nil {
 		create = *request.CreateIfNotExist
 	}
-	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, model.AttributeViewRenderOptions{
+	execution, executionErr := startTemplateHTTP(c, "attribute-view:"+request.ID+":"+request.BlockID)
+	if executionErr != nil {
+		return apicontract.Failure[apicontract.AVRenderResult](-1, executionErr.Error())
+	}
+	defer execution.Close()
+	options := model.AttributeViewRenderOptions{
 		CalendarRange: fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort), Nested: fromContractAVNestedRequest(request.Nested),
-	})
+	}
+	if execution != nil {
+		options.TemplateHTTP = execution.Runtime
+	}
+	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, options)
 })
 
 var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeViewCalendarUndated, func(c *gin.Context, request apicontract.AVCalendarUndatedRequest) apicontract.Response[apicontract.AVCalendarUndatedData] {

@@ -20,8 +20,14 @@ import {importObsidianVault} from "../menus/importObsidian";
 import * as path from "path";
 /// #endif
 
+const pendingDailyNotes = new Map<string, Promise<void>>();
+
 export const fetchNewDailyNote = (app: App, notebook: string) => {
-    fetchPost("/api/filetree/createDailyNote", {
+    const pending = pendingDailyNotes.get(notebook);
+    if (pending) {
+        return pending;
+    }
+    const request = fetchPost("/api/filetree/createDailyNote", {
         notebook,
         app: Constants.SIYUAN_APPID,
     }, (response) => {
@@ -33,7 +39,9 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
         /// #else
         openFileById({app, id: response.data.id, action: [Constants.CB_GET_SCROLL, Constants.CB_GET_FOCUS]});
         /// #endif
-    });
+    }).finally(() => pendingDailyNotes.delete(notebook));
+    pendingDailyNotes.set(notebook, request);
+    return request;
 };
 
 const openDailyNote = (app: App, useLastNotebook: boolean) => {

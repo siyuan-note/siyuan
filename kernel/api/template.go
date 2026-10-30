@@ -74,7 +74,17 @@ var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Con
 	if sourceErr != nil {
 		return apicontract.Failure[apicontract.RenderTemplateData](-1, sourceErr.Error())
 	}
-	if source != nil {
+	if leaseErr := holdEncryptedBlockRequests(c, "", []string{id}, false); leaseErr != nil {
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, model.Conf.Language(314))
+	}
+	execution, executionErr := startTemplateHTTP(c, "document:"+id)
+	if executionErr != nil {
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, executionErr.Error())
+	}
+	defer execution.Close()
+	if execution != nil {
+		_, content, docTreePlan, err = model.RenderTemplateWithHTTP(p, id, mode, source, execution.Runtime)
+	} else if source != nil {
 		_, content, docTreePlan, err = model.PreviewTemplateSource(p, id, *source)
 	} else {
 		_, content, docTreePlan, err = model.RenderTemplateWithMode(p, id, mode)

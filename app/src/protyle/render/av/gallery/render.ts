@@ -1,4 +1,5 @@
 import {afterRenderCards, captureAVCardRenderState, getAVCardHTML} from "../cardLayout";
+import {guardTemplateHTTPRequest} from "../../../../template/http";
 import type {IAVCardRenderOptions} from "../renderState";
 import {escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {isTableLikeView} from "../viewType";
@@ -88,6 +89,7 @@ export const renderGallery = async (options: {
             query: resetData.query.trim(),
         };
         const carrierViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+        const requestGuard = guardTemplateHTTPRequest(() => isCurrentAVRender(options.blockElement, renderToken), options.blockElement);
         const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
             ...common, ...paging, created, carrierViewID,
         }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
@@ -99,7 +101,7 @@ export const renderGallery = async (options: {
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
             temporarySort: getReadonlyAVSortRequest(options.blockElement, options.protyle, common.viewID),
-        }, undefined, false));
+        }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
         }

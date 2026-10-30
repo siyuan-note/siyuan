@@ -2616,6 +2616,10 @@ export type TemplateFileRevision = { "revision": string; };
 
 export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; "sourceDocID"?: string; };
 
+export type TemplateHTTPCancelRequestInput = { "app": string; "executionID": string; "session": string; };
+
+export type TemplateHTTPReplyRequestInput = { "app": string; "approved": boolean; "confirmID": string; "executionID": string; "session": string; };
+
 export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
 
 export type TemplatePlanNode = { "depth": number; "hPath": string; "id": string; "parentID": string; "title": string; };
@@ -8838,6 +8842,13 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    "/api/template/cancelHTTP": {
+        request: TemplateHTTPCancelRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/template/docSaveAsTemplate": {
         request: SaveTemplateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8864,6 +8875,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 可通过上述执行请求头启用 httpGet 的交互确认；预览与插入各有独立授权。
+     * HTTP 正文只作为模板数据，后台无窗口调用返回 interaction_required；断开或锁定后丢弃失效结果。
+     */
     "/api/template/render": {
         request: RenderTemplateRequestInput;
         response: { "code": 0; "data": RenderTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8874,6 +8889,18 @@ export interface APIPOSTRoutes {
     "/api/template/renderSprig": {
         request: RenderSprigRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * HTTP 模板执行由 X-Siyuan-Template-Execution、X-Siyuan-Template-App、X-Siyuan-Template-Session 绑定。
+     * 执行 ID 为 16～128 字符的本次唯一标识，窗口必须为在线、已就绪的非发布主连接。
+     * 缺少可交互窗口时 httpGet 返回 interaction_required；授权只作用于本次精确请求。
+     */
+    "/api/template/respondHTTP": {
+        request: TemplateHTTPReplyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

@@ -184,6 +184,7 @@ func beginEncryptedBoxLock(boxID string) {
 	lifecycle.lock.Lock()
 	lifecycle.state = EncryptedBoxStateLocking
 	lifecycle.acceptOperations = false
+	cancelTemplateHTTPExecutions()
 	LivePhotoPreviews.Clear(boxID)
 	for lifecycle.activeOperations > 0 {
 		lifecycle.condition.Wait()

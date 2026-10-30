@@ -673,16 +673,29 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		return apicontract.Failure[apicontract.FileTreeCreateData](-1, model.Conf.Language(314))
 	}
+	execution, executionErr := startTemplateHTTP(c, "daily-note:"+notebook)
+	if executionErr != nil {
+		return apicontract.Failure[apicontract.FileTreeCreateData](-1, executionErr.Error())
+	}
+	defer execution.Close()
 	var p string
 	var existed bool
 	var err error
 	if request.Date == "" {
-		p, existed, err = model.CreateDailyNote(notebook)
+		if execution != nil {
+			p, existed, err = model.CreateDailyNoteWithHTTP(notebook, nil, execution.Runtime)
+		} else {
+			p, existed, err = model.CreateDailyNote(notebook)
+		}
 	} else {
 		date, dateErr := parseDailyNoteDate(request.Date)
 		err = dateErr
 		if err == nil {
-			p, existed, err = model.CreateDailyNoteAt(notebook, date)
+			if execution != nil {
+				p, existed, err = model.CreateDailyNoteWithHTTP(notebook, &date, execution.Runtime)
+			} else {
+				p, existed, err = model.CreateDailyNoteAt(notebook, date)
+			}
 		}
 	}
 	if err != nil {

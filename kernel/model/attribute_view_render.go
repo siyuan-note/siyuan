@@ -23,6 +23,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -495,6 +496,7 @@ func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, 
 
 // AttributeViewRenderOptions 仅影响本次渲染，不参与数据库持久化。
 type AttributeViewRenderOptions struct {
+	TemplateHTTP     *templatehttp.Execution
 	historicalSource bool // 仅认证历史/快照入口设置，客户端不能覆盖实时块索引的校验。
 	ItemStatuses     map[string]string
 	Nested           *av.NestedRequest
@@ -506,6 +508,13 @@ type AttributeViewRenderOptions struct {
 
 // RenderAttributeViewWithTargetOptions 在分页前应用临时排序；临时排序和只读请求均不创建或保存数据库。
 func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	if options.TemplateHTTP != nil {
+		defer func() {
+			if executionErr := options.TemplateHTTP.Err(); executionErr != nil {
+				viewable, attrView, target, err = nil, nil, nil, executionErr
+			}
+		}()
+	}
 	timing := util.BeginPerformance("database.view")
 	defer timing.Finish()
 	writable := !options.ReadOnly && options.TemporarySort == nil
@@ -611,6 +620,16 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 }
 
 func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, err error) {
+	if options.ReadOnly || options.historicalSource || options.ScopeFilter != nil {
+		options.TemplateHTTP = nil
+	}
+	if options.TemplateHTTP != nil {
+		defer func() {
+			if executionErr := options.TemplateHTTP.Err(); executionErr != nil {
+				viewable, err = nil, executionErr
+			}
+		}()
+	}
 	timing := util.BeginPerformance("database.fields")
 	defer timing.Finish()
 	if err = attrView.ValidateLayouts(); nil != err {
@@ -645,6 +664,12 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext.TemplateHTTP = options.TemplateHTTP
+	defer func() {
+		if templateErr := renderContext.HTTPTemplateError(); templateErr != nil {
+			viewable, err = nil, templateErr
+		}
+	}()
 	renderContext.ReadOnly = !writable
 	if options.historicalSource {
 		renderContext.HistoricalAttributeViewID = attrView.ID
@@ -669,6 +694,11 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	} else {
 		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
 	}
+	if options.TemplateHTTP != nil {
+		if err = renderContext.HTTPTemplateError(); err != nil {
+			return nil, err
+		}
+	}
 	if calendar, ok := viewable.(*av.Calendar); ok {
 		calendar.CalendarRange = options.CalendarRange
 	}
@@ -691,6 +721,11 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	if deferTemplateValues {
 		sql.FillAttributeViewTemplateValuesForKeysWithContext(attrView, view, viewable.(av.Collection), templatePlan.deferred, renderContext)
 	}
+	if options.TemplateHTTP != nil {
+		if err = renderContext.HTTPTemplateError(); err != nil {
+			return nil, err
+		}
+	}
 	orderReuse.store(renderContext)
 	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
 		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
@@ -700,6 +735,11 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	if view.LayoutType != av.LayoutTypeCalendar && (!ignoreRows || len(view.Groups) > 0) {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
 			ignoreRows, writable, target, targetGroupID, renderContext, filterContext)
+	}
+	if options.TemplateHTTP != nil {
+		if err = renderContext.HTTPTemplateError(); err != nil {
+			return nil, err
+		}
 	}
 	if writable && nil == err && attrView.HasCardCoverPositionChanges() {
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -714,6 +754,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
 	target *AttributeViewRenderTarget, targetGroupID string, renderContext *sql.AttributeViewRenderContext,
 	filterContext *av.FilterContext) (err error) {
+	if renderContext != nil && renderContext.TemplateHTTP != nil {
+		if err = renderContext.HTTPTemplateError(); err != nil {
+			return
+		}
+	}
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {

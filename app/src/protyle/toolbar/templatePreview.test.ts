@@ -9,7 +9,7 @@ import {trackSettingRequest} from "../../config/setting/pending";
 import {trackEditorSaveRequest} from "../util/editorSave";
 
 const loadPreview = () => {
-    const requests: Array<{resolve: (response: Response) => void, reject: (error: Error) => void}> = [];
+    const requests: Array<{resolve: (response: Response) => void, reject: (error: Error) => void, signal?: AbortSignal}> = [];
     const messages: string[] = [];
     let destroyed = 0;
     const loadModule = (path: string, dependencies: Record<string, unknown>) => {
@@ -31,7 +31,8 @@ const loadPreview = () => {
         "../dialog/message": {showMessage: (message: string) => messages.push(message)},
     });
     const fetchModule = loadModule("../../util/fetch.ts", {
-        "./fetchWithAppId": {fetchWithAppId: () => new Promise<Response>((resolve, reject) => requests.push({resolve, reject}))},
+        "./fetchWithAppId": {fetchWithAppId: (_url: string, init: RequestInit) => new Promise<Response>((resolve, reject) => requests.push({resolve, reject, signal: init.signal}))},
+        "../template/http": {beginTemplateHTTPRequest: (): undefined => undefined},
         "./processMessage": messagesModule,
         "./fetchTimeout": {withFetchTimeout},
         "../config/setting/pending": {trackSettingRequest},
@@ -39,6 +40,10 @@ const loadPreview = () => {
     });
     const previewModule = loadModule("util.ts", {
         "../../util/fetch": fetchModule,
+        "../../template/http": {guardTemplateHTTPRequest: () => {
+            const controller = new AbortController();
+            return {signal: controller.signal, cancel: () => controller.abort(), dispose: () => {}};
+        }},
         "../../asset/html": {normalizeHTMLAssetIFrameBlockDOM: (html: string) => html},
         "../render/tabsRender": {tabsRender: () => {}, destroyTabsRender: () => destroyed++},
     });
@@ -103,6 +108,7 @@ it("does not restore a preview after it has been closed", async () => {
     const fixture = loadPreview();
     fixture.preview();
     fixture.clear();
+    assert.equal(fixture.requests[0].signal.aborted, true);
     await fixture.respond(0);
     assert.equal(fixture.element.innerHTML, "");
 });

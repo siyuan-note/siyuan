@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
@@ -17,14 +18,15 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func renderTemplateDocTreeNodes(collector *templateDocTreeCollector, rootTemplate *template.Template,
-	funcs template.FuncMap) error {
+	funcs template.FuncMap, executions ...*templatehttp.Execution) error {
 	for _, node := range flattenTemplateDocTreeNodes0(collector.nodes) {
-		content, err := renderTemplateDocTreeNodeContent(collector, rootTemplate, funcs, node)
+		content, err := renderTemplateDocTreeNodeContent(collector, rootTemplate, funcs, node, executions...)
 		if nil != err {
 			return err
 		}
@@ -42,7 +44,23 @@ func renderTemplateDocTreeNodes(collector *templateDocTreeCollector, rootTemplat
 }
 
 func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootTemplate *template.Template,
-	funcs template.FuncMap, node *TemplateDocTreeNode) ([]byte, error) {
+	funcs template.FuncMap, node *TemplateDocTreeNode, executions ...*templatehttp.Execution) (output []byte, retErr error) {
+	var execution *templatehttp.Execution
+	if len(executions) > 0 {
+		execution = executions[0]
+	}
+	if execution != nil {
+		if execution.Err() != nil {
+			return nil, execution.Err()
+		}
+		defer func() {
+			if execution.Err() != nil {
+				output, retErr = nil, execution.Err()
+			} else if retErr != nil {
+				retErr = errors.New("HTTP child template evaluation failed")
+			}
+		}()
+	}
 	if "" == node.Template && "" == node.Define {
 		return nil, nil
 	}
@@ -55,6 +73,10 @@ func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootT
 
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
+	var writer io.Writer = buf
+	if execution != nil {
+		writer = execution.Writer(buf)
+	}
 	dataModel := templateDocTreeDataModel(node)
 	if "" != node.Define {
 		if nil == rootTemplate.Lookup(node.Define) {
@@ -63,7 +85,7 @@ func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootT
 		if err := validateTemplateCallGraph(rootTemplate, node.Define); nil != err {
 			return nil, err
 		}
-		if err := rootTemplate.ExecuteTemplate(buf, node.Define, dataModel); nil != err {
+		if err := rootTemplate.ExecuteTemplate(writer, node.Define, dataModel); nil != err {
 			return nil, fmt.Errorf(Conf.Language(44), err.Error())
 		}
 		return buf.Bytes(), nil
@@ -80,12 +102,18 @@ func renderTemplateDocTreeNodeContent(collector *templateDocTreeCollector, rootT
 	childTemplate := template.New("").Delims(".action{", "}").Funcs(funcs)
 	childTemplate, err = childTemplate.Parse(string(content))
 	if nil != err {
+		if strings.Contains(string(content), "httpGet") {
+			return nil, errors.New("HTTP child template parsing failed")
+		}
 		return nil, fmt.Errorf(Conf.Language(44), err.Error())
 	}
 	if err = validateTemplateCallGraph(childTemplate, childTemplate.Name()); nil != err {
 		return nil, err
 	}
-	if err = childTemplate.Execute(buf, dataModel); nil != err {
+	if err = childTemplate.Execute(writer, dataModel); nil != err {
+		if strings.Contains(string(content), "httpGet") {
+			return nil, errors.New("HTTP child template execution failed")
+		}
 		return nil, fmt.Errorf(Conf.Language(44), err.Error())
 	}
 	return buf.Bytes(), nil

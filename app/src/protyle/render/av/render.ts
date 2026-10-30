@@ -1,4 +1,5 @@
 import {isAVSelectType} from "./capabilities";
+import {guardTemplateHTTPRequest} from "../../../template/http";
 import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems} from "./subItemsState";
 import {prepareSubItemsRefresh} from "./subItemsRefresh";
 import {locateRequests} from "./locateState";
@@ -711,6 +712,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 query: resetData.query.trim(),
             };
             const carrierViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+            const requestGuard = guardTemplateHTTPRequest(() => isCurrentAVRender(e, renderToken), e);
             const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
                 ...common, ...paging, created, carrierViewID,
             }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
@@ -722,7 +724,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
                 temporarySort: getReadonlyAVSortRequest(e, protyle, common.viewID),
-            }, undefined, false));
+            }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }

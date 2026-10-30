@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20261024161058"
+		"updated": "20261030003500"
 	},
 	"Children": [
 		{
@@ -2216,6 +2216,122 @@
 				"id": "20211226123024-c71b8tn",
 				"updated": "20211226123024"
 			}
+		},
+		{
+			"ID": "20261030003500-hjsgtsl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030003500-hjsgtsl",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "讀取外部介面資料"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030003500-yu8u5h7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-yu8u5h7",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件插入、預覽、日記內文範本及資料庫範本欄位可使用 httpGet 讀取公網 HTTP/HTTPS 介面。首版僅支援 GET，不支援內網、代理或背景自動授權。傳回值包含 ok、status、body、error；內文可由既有 fromJson 等函式解析，不會再當作範本執行。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-ev5og9n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-ev5og9n",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "執行到聯網函式時才顯示實際目標並徵求同意，查詢參數值及請求標頭值隱藏。新目標、不同憑證或重新導向需要新的確認；確認後從當前呼叫繼續，不重跑範本。右上角顯示執行狀態。關閉視窗、切換預覽或鎖定筆記本會終止等待並捨棄失效結果；沒有可互動視窗時傳回 interaction_required。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-tte3ct7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-tte3ct7",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選用參數為 dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5，timeout 單位為秒，上限 10 秒。請勿在可分享的範本中填寫真實金鑰；範本及金鑰可能隨同步、分享傳播。跨來源重新導向會清空自訂請求標頭，且不自動攜帶思源登入憑證。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-vl7i08h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-vl7i08h",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相同請求僅在本次執行、相同資料範圍及憑證內重用；資料庫各列共用預算，不做跨執行快取或定時重新整理。重新繪製、預覽與正式插入分別授權。每次執行最多 32 個目標請求、1024 次函式呼叫，單一回應 1 MiB、總內文 8 MiB、總網路時間 30 秒、總執行時間 2 分鐘；確認最多等待 1 分鐘。 聯網執行的範本輸出合計上限為 8 MiB。總耗時、取消與預算會在 HTTP 呼叫或輸出時檢查；不含呼叫或輸出的純計算無法被搶占中止。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-mrfx5z4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-mrfx5z4",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一般網路失敗、拒絕及 HTTP 非成功狀態透過 error 傳回，可用 ok 分支產生備用內容；超出總預算或執行失效會終止結果。新增日記先儲存文件身分，再等待內文範本，終止後已建立的文件仍保留，不自動重跑。以下範例網址需替換成自己的公網介面："
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-bo0yets",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261030003500-bo0yets",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$r := httpGet \"https://example.com/weather.json\" (dict \"timeout\" 5)}\n.action{if $r.ok}\n.action{$data := fromJson $r.body}\n.action{$data}\n.action{else}\n.action{$r.error}\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
 		}
 	]
 }

@@ -6,6 +6,7 @@ import {isEncryptedBox} from "../../util/pathName";
 import {selectDailyNoteNotebook} from "../../util/mount";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {setStorageVal} from "../util/compatibility";
+import {guardTemplateHTTPRequest} from "../../template/http";
 
 const getNotebooks = (sourceID: string) => window.siyuan.notebooks.filter(notebook => !notebook.closed &&
     canReferenceDailyNoteNotebook(sourceID, notebook.id, isEncryptedBox(sourceID), isEncryptedBox(notebook.id)));
@@ -45,22 +46,29 @@ export const getDailyNoteHints = async (key: string, protyle: IProtyle): Promise
 export const createDailyNoteReference = (protyle: IProtyle, date: string, notebookID: string,
                                         onCreated: (id: string, title: string) => void) => {
     const notebooks = getNotebooks(protyle.notebookId);
+    const rootID = protyle.block.rootID;
+    const sourceNotebook = protyle.notebookId;
+    const isCurrent = () => protyle.block.rootID === rootID && protyle.notebookId === sourceNotebook &&
+        protyle.wysiwyg.element.isConnected && !protyle.wysiwyg.element.closest(".fn__none") && !protyle.disabled;
+    let creating = false;
     const create = (notebook: string) => {
-        if (!getNotebooks(protyle.notebookId).some(item => item.id === notebook)) {
+        if (creating || !isCurrent() || !getNotebooks(protyle.notebookId).some(item => item.id === notebook)) {
             return;
         }
+        creating = true;
+        const request = guardTemplateHTTPRequest(isCurrent);
         window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
         setStorageVal(Constants.LOCAL_DAILYNOTEID, notebook);
         fetchPost("/api/filetree/createDailyNote", {notebook, date, app: Constants.SIYUAN_APPID}, response => {
-            if (response.code === 0 && response.data?.id) {
+            if (isCurrent() && response.code === 0 && response.data?.id) {
                 const id = response.data.id;
                 fetchPost("/api/block/getDocInfo", {id, notebook}, info => {
-                    if (info.code === 0 && info.data) {
+                    if (isCurrent() && info.code === 0 && info.data) {
                         onCreated(id, info.data.name || info.data.ial?.title || date);
                     }
                 });
             }
-        });
+        }, undefined, undefined, request.signal).finally(request.dispose);
     };
     if (notebookID && notebooks.some(item => item.id === notebookID)) {
         create(notebookID);

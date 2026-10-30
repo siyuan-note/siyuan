@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/url"
 	"os"
@@ -30,6 +31,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/xrash/smetrics"
@@ -946,12 +948,20 @@ func PreviewTemplateSource(p, id, content string) (tree *parse.Tree, dom string,
 	return renderTemplateSource(p, id, TemplateRenderModePreview, &content)
 }
 
+// RenderTemplateWithHTTP 在同一次函数调用中等待确认，关闭请求后丢弃渲染结果。
+func RenderTemplateWithHTTP(p, id string, mode TemplateRenderMode, content *string, execution *templatehttp.Execution) (tree *parse.Tree, dom string, summary *TemplateDocTreePlanSummary, err error) {
+	if content != nil && len(*content) > maxTemplateSourceSize {
+		return nil, "", nil, errors.New("template source is too large")
+	}
+	return renderTemplateSourceAt(p, id, mode, content, nil, execution)
+}
+
 func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
 	return renderTemplateSourceAt(p, id, mode, content, nil)
 }
 
-func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *string, now *time.Time) (tree *parse.Tree, dom string,
+func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *string, now *time.Time, httpExecution ...*templatehttp.Execution) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
 	if TemplateRenderModeContent != mode && TemplateRenderModePreview != mode && TemplateRenderModeEditorInsert != mode {
 		err = fmt.Errorf("unsupported template render mode [%s]", mode)
@@ -1011,6 +1021,21 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
+	var httpRuntime *templatehttp.Execution
+	if len(httpExecution) > 0 {
+		httpRuntime = httpExecution[0]
+	}
+	if httpRuntime != nil {
+		defer func() {
+			if executionErr := httpRuntime.Err(); executionErr != nil {
+				tree, dom, summary, err = nil, "", nil, executionErr
+			}
+		}()
+		for name, function := range httpRuntime.FuncsForScope(sourceTree.Box) {
+			tplFuncMap[name] = function
+		}
+	}
+	httpTemplate := strings.Contains(string(md), "httpGet")
 	if now != nil {
 		tplFuncMap["now"] = func() time.Time { return *now }
 	}
@@ -1020,7 +1045,11 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if err != nil {
-		err = fmt.Errorf(Conf.Language(44), err.Error())
+		if httpTemplate {
+			err = errors.New("HTTP template parsing failed")
+		} else {
+			err = fmt.Errorf(Conf.Language(44), err.Error())
+		}
 		return
 	}
 	if collector.enabled && templateUsesFunction(tpl, "createDocTree") {
@@ -1037,9 +1066,20 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
-	if err = tpl.Execute(buf, dataModel); err != nil {
-		err = fmt.Errorf(Conf.Language(44), err.Error())
+	var writer io.Writer = buf
+	if httpRuntime != nil {
+		writer = httpRuntime.Writer(buf)
+	}
+	if err = tpl.Execute(writer, dataModel); err != nil {
+		if httpTemplate {
+			err = errors.New("HTTP template execution failed")
+		} else {
+			err = fmt.Errorf(Conf.Language(44), err.Error())
+		}
 		return
+	}
+	if httpRuntime != nil && httpRuntime.Err() != nil {
+		return nil, "", nil, httpRuntime.Err()
 	}
 	if 0 < len(collector.nodes) && maxTemplateDocTreeOutputSize < buf.Len() {
 		err = fmt.Errorf("template output exceeds %d bytes", maxTemplateDocTreeOutputSize)
@@ -1061,7 +1101,7 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 			err = errors.New("database blocks are not supported by createDocTree templates")
 			return
 		}
-		if err = renderTemplateDocTreeNodes(collector, tpl, tplFuncMap); nil != err {
+		if err = renderTemplateDocTreeNodes(collector, tpl, tplFuncMap, httpRuntime); nil != err {
 			return
 		}
 	}
@@ -1131,6 +1171,9 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 	})
 	if nil != err {
 		return
+	}
+	if httpRuntime != nil && httpRuntime.Err() != nil {
+		return nil, "", nil, httpRuntime.Err()
 	}
 	if !preview {
 		if err = saveTemplateAttributeViewCopies(attributeViewCopies, templateAttributeViewBoxID(tree)); nil != err {
@@ -1311,12 +1354,12 @@ func applyDocContentTemplate(templatePath, docID string) error {
 	return applyDocContentTemplateAt(templatePath, docID, nil)
 }
 
-func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error {
+func applyDocContentTemplateAt(templatePath, docID string, now *time.Time, httpExecutions ...*templatehttp.Execution) error {
 	absPath, err := resolveDocContentTemplatePath(templatePath)
 	if nil != err {
 		return err
 	}
-	templateTree, templateDOM, _, err := renderTemplateSourceAt(absPath, docID, TemplateRenderModeContent, nil, now)
+	templateTree, templateDOM, _, err := renderTemplateSourceAt(absPath, docID, TemplateRenderModeContent, nil, now, httpExecutions...)
 	if nil != err {
 		return err
 	}
@@ -1336,6 +1379,9 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error
 	tree, original, err := filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
 	if nil != err {
 		return err
+	}
+	if len(httpExecutions) > 0 && httpExecutions[0] != nil && httpExecutions[0].Err() != nil {
+		return httpExecutions[0].Err()
 	}
 	// 只移除新建文档的空占位段落，保留模板渲染期间已经提交的首块编辑。
 	if first := tree.Root.FirstChild; isDocContentTemplatePlaceholder(first) {

@@ -1350,6 +1350,8 @@ if (response.code === 0 && response.data) {
 ### テンプレートをレンダリング
 
 * `/api/template/render`
+
+対話可能なオンラインウィンドウがない場合、`httpGet` は `interaction_required` を返し、通信しません。対話型テンプレートの承認はその実行だけに適用され、プレビューの承認は後の挿入に引き継がれません。バックグラウンドの `renderSprig` 呼び出しは対話を行いません。
 * パラメータ
 
   ```json

@@ -593,8 +593,8 @@ func ControlConcurrency(c *gin.Context) {
 
 	reqPath := c.Request.URL.Path
 
-	// 插件 RPC 独立处理各次调用，避免单个调用阻塞其他插件或信息查询。
-	if reqPath == "/api/plugin/rpc" {
+	// 插件 RPC 独立调用；日记创建使用内部身份锁，联网确认期间不能持有接口写入锁。
+	if reqPath == "/api/plugin/rpc" || reqPath == "/api/filetree/createDailyNote" {
 		c.Next()
 		return
 	}

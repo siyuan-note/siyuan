@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20261024161058"
+		"updated": "20261030003500"
 	},
 	"Children": [
 		{
@@ -2227,6 +2227,122 @@
 				"ID": "20240530101000-ysh7guz",
 				"id": "20240530101000-6htu6hr"
 			}
+		},
+		{
+			"ID": "20261030003500-hhftroa",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030003500-hhftroa",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "外部 API のデータを取得"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030003500-88ivehv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-88ivehv",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文書への挿入、プレビュー、日記本文テンプレート、データベースのテンプレート列で httpGet を使い、公開 HTTP/HTTPS API を読み取れます。初期実装は GET のみで、プライベートネットワーク、プロキシ、バックグラウンドでの自動承認には対応しません。戻り値は ok、status、body、error を含みます。body は既存の fromJson などで解析し、テンプレートとして再実行しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-c9q6gy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-c9q6gy3",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通信関数に到達して実際の宛先が確定した時点で承認を求めます。クエリ値とヘッダー値は非表示です。新しい宛先、異なる認証情報、リダイレクトには新たな確認が必要です。承認後は現在の呼び出しから再開し、テンプレート全体を再実行しません。実行状態は右上に表示されます。ウィンドウを閉じる、プレビューを切り替える、ノートブックをロックすると待機を終了し、無効な結果を破棄します。対話可能なウィンドウがない場合は interaction_required を返します。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-a2ba8oy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-a2ba8oy",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任意の引数は dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5 です。timeout は秒単位で最大 10 秒です。共有するテンプレートに実際の秘密鍵を書き込まないでください。テンプレートと鍵は共有や同期で広がる可能性があります。別オリジンへのリダイレクトではカスタムヘッダーを消去します。SiYuan のログイン認証情報は自動送信しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-rh9gh7b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-rh9gh7b",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同一リクエストの再利用は、同じ実行内でデータ範囲と認証情報が一致する場合に限られます。データベースの各行で予算を共有し、実行間のキャッシュや定期更新は行いません。再描画、プレビュー、挿入にはそれぞれ承認が必要です。1 回の実行は宛先リクエスト 32 回、関数呼び出し 1024 回、応答 1 MiB、本文合計 8 MiB、通信時間合計 30 秒、総経過時間 2 分までです。承認待機は最大 1 分です。 通信を有効にした実行のテンプレート出力は合計 8 MiB までです。経過時間、キャンセル、予算は HTTP 呼び出しまたは出力時に確認します。呼び出しも出力もない純粋な計算を強制中断することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-7e9lprc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-7e9lprc",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常の通信失敗、拒否、HTTP 非成功ステータスは error に返され、ok の分岐で代替内容を生成できます。予算超過や実行の無効化では結果を破棄します。日記作成は文書 ID を保存してから本文テンプレートを待機します。中断しても作成済み文書は残り、自動的に再実行しません。例の URL を自分の公開 API に置き換えてください："
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-idwv6a2",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261030003500-idwv6a2",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$r := httpGet \"https://example.com/weather.json\" (dict \"timeout\" 5)}\n.action{if $r.ok}\n.action{$data := fromJson $r.body}\n.action{$data}\n.action{else}\n.action{$r.error}\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
 		}
 	]
 }

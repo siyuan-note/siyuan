@@ -61,3 +61,19 @@ type TemplateDocumentInfo struct {
 	Directory   string `json:"directory"`
 	HasDatabase bool   `json:"hasDatabase"`
 }
+
+// TemplateHTTPReplyRequest 只响应指定窗口当前执行的确认，不建立持久授权。
+type TemplateHTTPReplyRequest struct {
+	ExecutionID string `json:"executionID"`
+	ConfirmID   string `json:"confirmID"`
+	Approved    bool   `json:"approved"`
+	App         string `json:"app"`
+	Session     string `json:"session"`
+}
+
+// TemplateHTTPCancelRequest 用于窗口、预览及导航生命周期清理，不提供取消按钮。
+type TemplateHTTPCancelRequest struct {
+	ExecutionID string `json:"executionID"`
+	App         string `json:"app"`
+	Session     string `json:"session"`
+}

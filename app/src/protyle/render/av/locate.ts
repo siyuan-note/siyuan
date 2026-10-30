@@ -14,6 +14,7 @@ import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {getBacklinkScrollElement, revealBacklinkReference, scrollBacklinkTarget} from "./backlinkScroll";
 
 import {IAVLocateRequest, locateRequests, retainAVLocate} from "./locateState";
+import {cancelTemplateHTTPForElement} from "../../../template/http";
 export type {IAVLocateRequest} from "./locateState";
 const locateQueueTimeout = 30000;
 const locateRenderSize = 200;
@@ -75,13 +76,14 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
 };
 
 export const beginAVRender = (blockElement: HTMLElement) => {
+    cancelTemplateHTTPForElement(blockElement);
     const token = Symbol();
     renderTokens.set(blockElement, token);
     return token;
 };
 
 export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
-    return renderTokens.get(blockElement) === token;
+    return blockElement.isConnected && renderTokens.get(blockElement) === token;
 };
 
 const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) => {

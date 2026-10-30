@@ -161,6 +161,7 @@ func AddPushChan(session *melody.Session) {
 		return
 	}
 	session.Set("id", id)
+	session.Set("interactiveDone", &interactiveSessionDone{done: make(chan struct{})})
 
 	typ := strings.TrimSpace(session.Request.URL.Query().Get("type"))
 	if "" == typ {
@@ -227,6 +228,10 @@ func IsAuthSession(session *melody.Session) bool {
 }
 
 func RemovePushChan(session *melody.Session) {
+	if value, ok := session.Get("interactiveDone"); ok {
+		state := value.(*interactiveSessionDone)
+		state.once.Do(func() { close(state.done) })
+	}
 	app, _ := session.Get("app")
 	id, _ := session.Get("id")
 
@@ -746,4 +751,31 @@ func IsIdle(idleThreshold time.Duration) bool {
 // IsIndexFixDirty 返回是否存在未订正的变更（上次订正后有新用户活动）。
 func IsIndexFixDirty() bool {
 	return indexFixVersion.Load() != indexFixCleanVersion.Load()
+}
+
+// InteractiveSession 仅接受已就绪的非发布主窗口；空标识不能退化成广播。
+func InteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+	if app == "" || id == "" {
+		return nil, nil
+	}
+	value, ok := sessions.Load(app)
+	if !ok {
+		return nil, nil
+	}
+	value, ok = value.(*sync.Map).Load(id)
+	if !ok {
+		return nil, nil
+	}
+	session := value.(*melody.Session)
+	typ, _ := session.Get("type")
+	state, exists := session.Get("interactiveDone")
+	if typ != "main" || !exists || isPublishSession(session) || !IsSessionReady(session) || session.IsClosed() {
+		return nil, nil
+	}
+	return session, state.(*interactiveSessionDone).done
+}
+
+type interactiveSessionDone struct {
+	once sync.Once
+	done chan struct{}
 }

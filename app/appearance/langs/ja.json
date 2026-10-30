@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "記憶の内容または処理範囲が上限を超えています。範囲を絞って再試行してください",
+	"aiMemoryReadFailed": "記憶データをすべて読み取れません。確認して再試行してください",
 	"aiMemoryTargetUnclear": "記憶の対象を特定できません。対象が変更された可能性があります。更新または忘れる内容を具体的に指定してください",
-	"aiMemoryContentChanged": "記憶の内容または情報源が変更されました。再試行してください",
+	"aiMemoryContentChanged": "記憶の内容、情報源または設定が変更されました。再試行してください",
 	"aiMemoryPartialFailure": "一部の記憶の更新は保存されませんでした。保存済みの記憶は引き続き利用できます",
 	"aiMemoryIntentUnclear": "要求が曖昧です。更新または忘れる内容を個別に指定してください",
 	"aiMemorySummary": "記憶の要約",

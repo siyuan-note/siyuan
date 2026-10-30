@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "Le contenu des souvenirs ou la portée du traitement dépasse la limite ; réduisez la portée de la demande et réessayez",
+	"aiMemoryReadFailed": "Impossible de lire toutes les données des souvenirs ; vérifiez-les et réessayez",
 	"aiMemoryTargetUnclear": "Aucun souvenir cible précis n’a été trouvé ; il a peut-être changé. Précisez ce qu’il faut mettre à jour ou oublier",
-	"aiMemoryContentChanged": "Le contenu du souvenir ou sa source a changé ; réessayez",
+	"aiMemoryContentChanged": "Le contenu du souvenir, sa source ou la configuration a changé ; réessayez",
 	"aiMemoryPartialFailure": "Certaines mises à jour des souvenirs n’ont pas été enregistrées ; les souvenirs enregistrés restent disponibles",
 	"aiMemoryIntentUnclear": "La demande est ambiguë ; précisez séparément ce qu’il faut mettre à jour ou oublier",
 	"aiMemorySummary": "Résumé des souvenirs",

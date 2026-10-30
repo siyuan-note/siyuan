@@ -220,6 +220,7 @@ export const openMemoryManager = () => {
                 reportError(memoryTaskErrorMessage(task, {
                     target: lang.aiMemoryTargetUnclear, changed: lang.aiMemoryContentChanged,
                     partial: lang.aiMemoryPartialFailure, intent: lang.aiMemoryIntentUnclear,
+                    limit: lang.aiMemoryProcessingLimit, read: lang.aiMemoryReadFailed,
                     generic: lang.embeddingFailed, model: lang._kernel,
                 }), "result");
             }

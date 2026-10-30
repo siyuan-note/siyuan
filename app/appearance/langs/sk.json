@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "Obsah spomienok alebo rozsah spracovania prekračuje limit; zúžte požiadavku a skúste to znova",
+	"aiMemoryReadFailed": "Nepodarilo sa prečítať všetky údaje spomienok; skontrolujte ich a skúste to znova",
 	"aiMemoryTargetUnclear": "Nenašla sa jednoznačná cieľová spomienka; možno sa zmenila. Presne uveďte, čo chcete aktualizovať alebo zabudnúť",
-	"aiMemoryContentChanged": "Obsah spomienky alebo jej zdroj sa zmenil; skúste to znova",
+	"aiMemoryContentChanged": "Obsah spomienky, jej zdroj alebo konfigurácia sa zmenili; skúste to znova",
 	"aiMemoryPartialFailure": "Niektoré aktualizácie spomienok sa neuložili; uložené spomienky zostávajú dostupné",
 	"aiMemoryIntentUnclear": "Požiadavka je nejednoznačná; samostatne uveďte, čo chcete aktualizovať alebo zabudnúť",
 	"aiMemorySummary": "Súhrn spomienok",

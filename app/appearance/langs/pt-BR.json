@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "O conteúdo das memórias ou o escopo do processamento excede o limite; reduza o escopo da solicitação e tente novamente",
+	"aiMemoryReadFailed": "Não foi possível ler todos os dados de memórias; verifique-os e tente novamente",
 	"aiMemoryTargetUnclear": "Nenhuma memória de destino clara foi encontrada; ela pode ter mudado. Especifique o que atualizar ou esquecer",
-	"aiMemoryContentChanged": "O conteúdo da memória ou sua fonte mudou; tente novamente",
+	"aiMemoryContentChanged": "O conteúdo da memória, sua fonte ou a configuração mudou; tente novamente",
 	"aiMemoryPartialFailure": "Algumas atualizações de memórias não foram salvas; as memórias salvas continuam disponíveis",
 	"aiMemoryIntentUnclear": "A solicitação é ambígua; especifique separadamente o que atualizar ou esquecer",
 	"aiMemorySummary": "Resumo das memórias",

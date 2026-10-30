@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "Treść wspomnień lub zakres przetwarzania przekracza limit; zawęź żądanie i spróbuj ponownie",
+	"aiMemoryReadFailed": "Nie można odczytać wszystkich danych wspomnień; sprawdź je i spróbuj ponownie",
 	"aiMemoryTargetUnclear": "Nie znaleziono jednoznacznego docelowego wspomnienia; mogło się zmienić. Określ dokładnie, co zaktualizować lub zapomnieć",
-	"aiMemoryContentChanged": "Treść wspomnienia lub jego źródło uległy zmianie; spróbuj ponownie",
+	"aiMemoryContentChanged": "Treść wspomnienia, jego źródło lub konfiguracja uległy zmianie; spróbuj ponownie",
 	"aiMemoryPartialFailure": "Niektóre aktualizacje wspomnień nie zostały zapisane; zapisane wspomnienia pozostają dostępne",
 	"aiMemoryIntentUnclear": "Żądanie jest niejednoznaczne; określ osobno, co zaktualizować lub zapomnieć",
 	"aiMemorySummary": "Podsumowanie wspomnień",

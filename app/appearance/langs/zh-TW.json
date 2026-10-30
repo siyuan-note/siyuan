@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "記憶內容或處理範圍超過限制，請縮小範圍後重試",
+	"aiMemoryReadFailed": "無法完整讀取記憶，請檢查後重試",
 	"aiMemoryTargetUnclear": "未找到明確的記憶目標，目標可能已變更，請具體說明要更新或忘記的內容",
-	"aiMemoryContentChanged": "記憶內容或來源已變更，請重試",
+	"aiMemoryContentChanged": "記憶內容、來源或設定已變更，請重試",
 	"aiMemoryPartialFailure": "部分記憶更新未儲存，已儲存的內容仍然可用",
 	"aiMemoryIntentUnclear": "請求含義不明確，請單獨說明要更新或忘記的內容",
 	"aiMemorySummary": "記憶摘要",

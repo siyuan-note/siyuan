@@ -71,3 +71,19 @@ func TestAIMemoryModelDiagnosticProtocol(t *testing.T) {
 		}
 	}
 }
+
+func TestAIMemoryParseDiagnosticStages(t *testing.T) {
+	cfg := setupAIMemoryTest(t)
+	cfg.Providers[0].APIKey = "PRIVATE_KEY"
+	cfg.Providers[0].BaseURL = "https://private.invalid/PRIVATE_PATH"
+	oldLog := memoryLogModelFailure
+	t.Cleanup(func() { memoryLogModelFailure = oldLog })
+	var got string
+	memoryLogModelFailure = func(value string) { got = value }
+	for _, stage := range []string{"keywords_decode", "forget-selection_decode", "forget-verification_decode"} {
+		memoryLogParseFailure(context.Background(), cfg, stage)
+		if !strings.HasPrefix(got, "stage="+stage+" ") || !strings.Contains(got, "category=456") || strings.Contains(got, "PRIVATE") || strings.Contains(got, "https:") {
+			t.Fatalf("unsafe or missing parse stage: %s", got)
+		}
+	}
+}

@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "The memory content or processing scope exceeds the limit; narrow the request and try again",
+	"aiMemoryReadFailed": "Unable to read all memory data; check it and try again",
 	"aiMemoryTargetUnclear": "No clear memory target was found; it may have changed. Specify what to update or forget",
-	"aiMemoryContentChanged": "The memory content or its source has changed; try again",
+	"aiMemoryContentChanged": "The memory content, source or configuration has changed; try again",
 	"aiMemoryPartialFailure": "Some memory updates were not saved; saved memories remain available",
 	"aiMemoryIntentUnclear": "The request is ambiguous; specify separately what to update or forget",
 	"aiMemorySummary": "Memory summary",

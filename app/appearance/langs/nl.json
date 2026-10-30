@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "De inhoud van het geheugen of de verwerkingsomvang overschrijdt de limiet; beperk het verzoek en probeer het opnieuw",
+	"aiMemoryReadFailed": "Niet alle geheugengegevens kunnen worden gelezen; controleer ze en probeer het opnieuw",
 	"aiMemoryTargetUnclear": "Er is geen duidelijk doelgeheugen gevonden; het is mogelijk gewijzigd. Geef aan wat je wilt bijwerken of vergeten",
-	"aiMemoryContentChanged": "De inhoud van de herinnering of de bron is gewijzigd; probeer het opnieuw",
+	"aiMemoryContentChanged": "De inhoud van de herinnering, de bron of de configuratie is gewijzigd; probeer het opnieuw",
 	"aiMemoryPartialFailure": "Sommige geheugenupdates zijn niet opgeslagen; opgeslagen herinneringen blijven beschikbaar",
 	"aiMemoryIntentUnclear": "Het verzoek is onduidelijk; geef afzonderlijk aan wat je wilt bijwerken of vergeten",
 	"aiMemorySummary": "Geheugensamenvatting",

@@ -37,7 +37,7 @@ var memoryLogModelFailure = func(diagnostic string) {
 // 诊断只允许固定枚举和 HTTP 状态；未知字段省略，不能把提供方自由文本或请求内容写入日志。
 func memoryModelDiagnostic(ctx context.Context, protocol string, err error) string {
 	stage, _ := ctx.Value(memoryModelStageKey{}).(string)
-	if !slices.Contains([]string{"keywords", "proposal", "overview", "translation", "proposal_decode", "forget-verification"}, stage) {
+	if !slices.Contains([]string{"keywords", "proposal", "overview", "translation", "proposal_decode", "forget-verification", "forget-selection", "keywords_decode", "forget-selection_decode", "forget-verification_decode"}, stage) {
 		stage = "unknown"
 	}
 	protocol = strings.ToLower(strings.TrimSpace(protocol))
@@ -71,4 +71,14 @@ func memoryModelDiagnostic(ctx context.Context, protocol string, err error) stri
 		status = 0
 	}
 	return fmt.Sprintf("stage=%s protocol=%s category=%d http_status=%d code=%s parameter=%s", stage, protocol, category, status, code, parameter)
+}
+
+// 解析诊断仅记录固定阶段和分类，不写入模型返回正文或请求内容。
+func memoryLogParseFailure(ctx context.Context, cfg *conf.AI, stage string) {
+	protocol := "unknown"
+	if p, _, err := cfg.GetMemoryModel(); err == nil {
+		protocol = memoryModelProtocol(p)
+	}
+	ctx = context.WithValue(ctx, memoryModelStageKey{}, stage)
+	memoryLogModelFailure(memoryModelDiagnostic(ctx, protocol, memoryModelError(456)))
 }

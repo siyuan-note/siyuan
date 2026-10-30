@@ -82,7 +82,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "./state") { return {MemoryOperationState, memoryModelOptions}; }
             throw new Error(name);
         },
-        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => key === "_kernel" ? {448: "Safe model connection error", 450: "Safe model authentication error"} : String(key)})},
+        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => key === "_kernel" ? {448: "Safe model connection error", 450: "Safe model authentication error", 456: "Safe model output format error"} : String(key)})},
             setTimeout: (callback: () => void, delay: number) => { const id = ++timerID; timers.set(id, {callback, delay}); return id; },
             clearTimeout: (id: number) => timers.delete(id)},
     });
@@ -171,6 +171,9 @@ test("task failure notifications include safe item classifications and never raw
 
 test("preflight intent failures and controlled model errors remain actionable without exposing provider text", async () => {
     for (const [error, message] of [["memory proposal does not match forget intent", "aiMemoryIntentUnclear"],
+        ["invalid memory forget selection", "Safe model output format error"],
+        ["forget verification exceeds budget", "aiMemoryProcessingLimit"],
+        ["memory scope scan incomplete", "aiMemoryReadFailed"],
         ["Safe model authentication error", "Safe model authentication error"],
         ["provider body contains private token", "embeddingFailed"]]) {
         const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :

@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "Anı içeriği veya işleme kapsamı sınırı aşıyor; isteği daraltıp tekrar deneyin",
+	"aiMemoryReadFailed": "Tüm anı verileri okunamıyor; kontrol edip tekrar deneyin",
 	"aiMemoryTargetUnclear": "Net bir hedef anı bulunamadı; değişmiş olabilir. Güncellemek veya unutmak istediğiniz içeriği belirtin",
-	"aiMemoryContentChanged": "Anının içeriği veya kaynağı değişti; tekrar deneyin",
+	"aiMemoryContentChanged": "Anının içeriği, kaynağı veya yapılandırması değişti; tekrar deneyin",
 	"aiMemoryPartialFailure": "Bazı anı güncellemeleri kaydedilmedi; kaydedilen anılar kullanılabilir durumda",
 	"aiMemoryIntentUnclear": "İstek belirsiz; güncellemek veya unutmak istediğiniz içeriği ayrı ayrı belirtin",
 	"aiMemorySummary": "Anı özeti",

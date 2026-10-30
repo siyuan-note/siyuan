@@ -1,6 +1,8 @@
 {
+	"aiMemoryProcessingLimit": "Der Erinnerungsinhalt oder Verarbeitungsumfang überschreitet das Limit; grenze die Anfrage ein und versuche es erneut",
+	"aiMemoryReadFailed": "Nicht alle Erinnerungsdaten konnten gelesen werden; prüfe sie und versuche es erneut",
 	"aiMemoryTargetUnclear": "Kein eindeutiges Erinnerungsziel gefunden; es wurde möglicherweise geändert. Gib konkret an, was aktualisiert oder vergessen werden soll",
-	"aiMemoryContentChanged": "Der Erinnerungsinhalt oder seine Quelle wurde geändert; versuche es erneut",
+	"aiMemoryContentChanged": "Der Erinnerungsinhalt, seine Quelle oder die Konfiguration wurde geändert; versuche es erneut",
 	"aiMemoryPartialFailure": "Einige Erinnerungsänderungen wurden nicht gespeichert; gespeicherte Erinnerungen bleiben verfügbar",
 	"aiMemoryIntentUnclear": "Die Anfrage ist mehrdeutig; gib getrennt an, was aktualisiert oder vergessen werden soll",
 	"aiMemorySummary": "Erinnerungszusammenfassung",

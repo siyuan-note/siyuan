@@ -75,14 +75,13 @@ func TestAIMemoryForgetIntentCannotBecomeOppositeFactOrEmptySuccess(t *testing.T
 }
 
 func TestAIMemoryForgetRecallRemovesOverviewRatherThanNegating(t *testing.T) {
-	cfg, entry, q, sources, a := memoryForgetFixture(t, "删除中西文空格规则", "workspace")
+	cfg, entry, q, sources, _ := memoryForgetFixture(t, "删除中西文空格规则", "workspace")
 	r := entry.Record
 	r.Content = "中西文之间加空格"
 	entry, err := aiMemoryStore().Save(context.Background(), r, entry.Revision, "spacing")
 	if err != nil {
 		t.Fatal(err)
 	}
-	a.Content = entry.Record.Content
 	snapshot, err := aiMemoryStore().Snapshot(context.Background(), []string{"workspace"})
 	if err != nil {
 		t.Fatal(err)
@@ -90,7 +89,7 @@ func TestAIMemoryForgetRecallRemovesOverviewRatherThanNegating(t *testing.T) {
 	if err = aiMemoryStore().SaveProjection(context.Background(), "MEMORY.md", r.Content, snapshot.Fingerprint, []string{"workspace"}); err != nil {
 		t.Fatal(err)
 	}
-	proposal, _ := json.Marshal(memoryProposal{Actions: []memoryAction{a}})
+	proposal := `{"targetIDs":["` + entry.Record.ID + `"]}`
 	calls := 0
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		calls++

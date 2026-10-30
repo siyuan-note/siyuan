@@ -6,7 +6,6 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -35,7 +34,7 @@ func memoryForgetFixture(t *testing.T, text, scope string) (*conf.AI, memo.Entry
 func TestAIMemoryForgetMultilingualAndRetry(t *testing.T) {
 	for _, text := range []string{"Forget my coffee preference", "忘记我喜欢咖啡这件事", "私のコーヒーの好みを忘れて", "Olvida mi preferencia por el café", "disabled", "superseded"} {
 		t.Run(text, func(t *testing.T) {
-			cfg, entry, q, sources, action := memoryForgetFixture(t, text, "other-scope")
+			cfg, entry, q, sources, _ := memoryForgetFixture(t, text, "other-scope")
 			if text == "disabled" || text == "superseded" {
 				r := entry.Record
 				r.State = text
@@ -47,9 +46,8 @@ func TestAIMemoryForgetMultilingualAndRetry(t *testing.T) {
 				q.Text = "Forget my coffee preference"
 				sources[0].Evidence = q.Text
 				sources[0].Revision = memoryHash([]byte(q.Text))
-				action.Instruction = q.Text
 			}
-			proposal, _ := json.Marshal(memoryProposal{Actions: []memoryAction{action}})
+			proposal := `{"targetIDs":["` + entry.Record.ID + `"]}`
 			calls := 0
 			memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 				calls++

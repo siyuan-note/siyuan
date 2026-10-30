@@ -1,9 +1,11 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
+import {readFileSync, readdirSync} from "node:fs";
 import {memoryTaskErrorMessage} from "./taskError";
 
 const messages = {target: "Specify the target", changed: "Content changed", partial: "Some updates were not saved",
-    intent: "Clarify update or forget", generic: "Processing failed", model: {448: "Safe connection error", 450: "Safe authentication error", 459: "Safe overview error"}};
+    intent: "Clarify update or forget", limit: "Processing limit exceeded", read: "Unable to read all memory data",
+    generic: "Processing failed", model: {448: "Safe connection error", 450: "Safe authentication error", 456: "Safe model output format error", 459: "Safe overview error"}};
 
 test("task and per-item failures map only exact known categories", () => {
     for (const [error, expected] of [
@@ -27,6 +29,43 @@ test("task and per-item failures map only exact known categories", () => {
     ]) {
         assert.equal(memoryTaskErrorMessage({error}, messages), expected);
         assert.equal(memoryTaskErrorMessage({results: [{error}]}, messages), expected);
+    }
+});
+
+test("production model-format failures, processing budgets and incomplete reads remain distinct", () => {
+    for (const error of ["unknown memory proposal operation", "multiple memory actions target the same record",
+        "duplicate memory proposal action", "unexpected trailing model output", "invalid forget verification",
+        "invalid forget verification targets", "invalid memory forget selection", "invalid memory keyword response",
+        "invalid memory validity timestamp", "memory validity timestamp is not explicit in evidence",
+        "memory validity interval is empty or reversed", "proposal has no grounded evidence", "proposal scope is not permitted", "proposal source is invalid"]) {
+        assert.equal(memoryTaskErrorMessage({error}, messages), messages.model[456]);
+        assert.equal(memoryTaskErrorMessage({results: [{error}]}, messages), messages.model[456]);
+    }
+    for (const error of ["memory input exceeds selected model context budget", "memory proposal too large",
+        "memory proposal exceeds batch budget", "memory candidate context exceeds budget; narrow the request",
+        "forget verification context exceeds budget", "forget verification exceeds budget", "memory source exceeds processing budget",
+        "memory sources exceed processing budget; select fewer blocks", "conversation source exceeds budget",
+        "memory native source exceeds processing budget", "memory database columns exceed processing budget",
+        "memory database rows exceed processing budget", "memory overview exceeds budget"]) {
+        assert.equal(memoryTaskErrorMessage({error}, messages), messages.limit);
+    }
+    for (const error of ["memory scan incomplete", "memory scope scan incomplete", "memory search incomplete; narrow the source before retrying",
+        "some memory records could not be validated", "memory overview scan incomplete", "memory overview sources require review",
+        "memory native source unavailable", "memory source is unavailable or encrypted", "invalid memory database value"]) {
+        assert.equal(memoryTaskErrorMessage({error}, messages), messages.read);
+    }
+    for (const error of ["memory candidate sources changed before model request", "memory saving cannot change an inactive forget target",
+        "memory configuration changed; retry explicitly", "memory configuration changed", "memory workspace changed"]) {
+        assert.equal(memoryTaskErrorMessage({error}, messages), messages.changed);
+    }
+});
+
+test("every exact classified constant exists in the production memory implementation", () => {
+    const source = readFileSync("src/ai/memos/taskError.ts", "utf8");
+    const production = readdirSync("../kernel/model").filter(file => /^ai_memory.*\.go$/.test(file) && !file.endsWith("_test.go"))
+        .map(file => readFileSync(`../kernel/model/${file}`, "utf8")).join("\n") + readFileSync("../kernel/memo/record.go", "utf8");
+    for (const match of source.matchAll(/\["([^"]+)", "(?:target|changed|partial|intent|format|limit|read)"\]/g)) {
+        assert.ok(production.includes(`"${match[1]}"`), `Missing production constant: ${match[1]}`);
     }
 });
 

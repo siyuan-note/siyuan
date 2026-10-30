@@ -19,7 +19,7 @@ type memoryKeywords struct {
 // 意图来自独立的检索阶段，仅约束提案方向，不能替代删除权限与目标核验。
 func decodeMemoryKeywords(raw string, manual bool) (memoryKeywords, error) {
 	var result memoryKeywords
-	invalid := errors.New("memory request intent is ambiguous; clarify the update")
+	invalid := errors.New("invalid memory keyword response")
 	if len(raw) > 8192 {
 		return result, invalid
 	}
@@ -36,6 +36,9 @@ func decodeMemoryKeywords(raw string, manual bool) (memoryKeywords, error) {
 		if len(term) > 100 || strings.TrimSpace(term) == "" {
 			return result, invalid
 		}
+	}
+	if manual && result.Intent == "ambiguous" {
+		return result, errors.New("memory request intent is ambiguous; clarify the update")
 	}
 	if manual && result.Intent != "remember" && result.Intent != "forget" {
 		return result, invalid

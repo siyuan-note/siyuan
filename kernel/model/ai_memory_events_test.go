@@ -133,3 +133,37 @@ func TestAIMemorySyncQueuesDatabaseOnlyChanges(t *testing.T) {
 		t.Fatalf("database sync notifications: %v", memoryDatabaseQueue.ids)
 	}
 }
+
+func TestAIMemoryDisabledConversationRevalidation(t *testing.T) {
+	cfg := setupAIMemoryTest(t)
+	previous := AIMemoryConversationReader
+	t.Cleanup(func() { AIMemoryConversationReader = previous })
+	evidence := "The user prefers coffee"
+	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return evidence, nil }
+	source := memo.Source{Kind: "conversation", ID: "conversation:session:entry", Revision: memoryHash([]byte(evidence)), Evidence: evidence}
+	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: evidence, Sources: []memo.Source{source}}, "missing", "conversation")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.Memory.Enabled = false
+	if _, err = memorySource(context.Background(), source.ID); err == nil {
+		t.Fatal("disabled automatic collection must remain unavailable")
+	}
+	if err = RevalidateAIMemorySources(context.Background(), []string{"20261030000000-abcdefg"}); err != nil {
+		t.Fatal(err)
+	}
+	cfg.Memory.Enabled = true
+	current, err := aiMemoryStore().Get(context.Background(), entry.Record.ID)
+	if err != nil || current.Record.State != "active" || current.Revision != entry.Revision {
+		t.Fatalf("disabled configuration invalidated unchanged conversation: %+v %v", current, err)
+	}
+	cfg.Memory.Enabled = false
+	evidence = "Changed conversation"
+	if err = RevalidateAIMemorySources(context.Background(), nil); err != nil {
+		t.Fatal(err)
+	}
+	current, err = aiMemoryStore().Get(context.Background(), entry.Record.ID)
+	if err != nil || current.Record.State != "review" {
+		t.Fatalf("disabled collection suppressed actual source invalidation: %+v %v", current, err)
+	}
+}

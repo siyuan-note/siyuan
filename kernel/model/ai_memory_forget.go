@@ -9,12 +9,32 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"slices"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/memo"
 )
+
+type memoryForgetCandidate struct {
+	ID      string `json:"id"`
+	Kind    string `json:"kind"`
+	Subject string `json:"subject"`
+	Scope   string `json:"scope"`
+	Content string `json:"content"`
+}
+
+// 忘记匹配保留完整事实和身份；来源证据、修订和操作记录仅在服务端校验。
+func memoryForgetCandidates(revisions map[string]memo.Entry) []memoryForgetCandidate {
+	candidates := make([]memoryForgetCandidate, 0, len(revisions))
+	for _, old := range revisions {
+		r := old.Record
+		candidates = append(candidates, memoryForgetCandidate{ID: r.ID, Kind: r.Kind, Subject: r.Subject, Scope: r.Scope, Content: r.Content})
+	}
+	slices.SortFunc(candidates, func(a, b memoryForgetCandidate) int { return strings.Compare(a.ID, b.ID) })
+	return candidates
+}
 
 // 引用、代码和多行材料不能作为删除权限；自然语言意图另由保守语义核验判断。
 func directMemoryInstruction(text string) bool {
@@ -69,15 +89,11 @@ func authorizeMemoryForgetting(ctx context.Context, cfg *conf.AI, q apicontract.
 	if err := validateCandidates(); err != nil {
 		return err
 	}
-	candidates := make([]memoryAction, 0, len(revisions))
-	for _, old := range revisions {
-		candidates = append(candidates, memoryAction{ID: old.Record.ID, Kind: old.Record.Kind, Subject: old.Record.Subject, Scope: old.Record.Scope, Content: old.Record.Content})
-	}
 	data, _ := json.Marshal(struct {
 		Text       string
 		Targets    []memoryAction
-		Candidates []memoryAction
-	}{q.Text, forget, candidates})
+		Candidates []memoryForgetCandidate
+	}{q.Text, forget, memoryForgetCandidates(revisions)})
 	if len(data) > 96000 {
 		return errors.New("forget verification context exceeds budget")
 	}

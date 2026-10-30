@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030115757"
+		"updated": "20261030213309"
 	},
 	"Children": [
 		{
@@ -197,12 +197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-2hw0xe9",
-				"updated": "20261030115757"
+				"updated": "20261030213309"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "To forget a specific memory, submit a separate direct request in Memory summary, for example “Forget my preference for starting project reports with conclusions.” Do not combine forgetting with additions. Quoted, ambiguous or clear-all requests do not authorize deletion. The selected model checks the target again, which may incur additional charges; review the result rather than assuming every request succeeds. The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup. If the intent or target cannot be established, no opposite fact is saved in place of forgetting; an error message appears in the upper-right area so you can clarify and retry."
+					"Data": "To forget a specific memory, submit a separate direct request in Memory summary, for example “Forget my preference for starting project reports with conclusions.” Do not combine forgetting with additions. Quoted, ambiguous or clear-all requests do not authorize deletion. The selected model checks the target again, which may incur additional charges; review the result rather than assuming every request succeeds. The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup. If the intent or target cannot be established, no opposite fact is saved in place of forgetting; an error message appears in the upper-right area so you can clarify and retry. Forgetting a fact preserves other existing, distinct records from the same source. Before syncing withdrawals, update all devices to a version supporting the current memory format. Older withdrawal markers retain their source restrictions; if they excluded an unrelated fact, explicitly submit that fact again instead of deleting the markers."
 				}
 			]
 		},

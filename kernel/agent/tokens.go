@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/pkoukk/tiktoken-go"
-	loader "github.com/pkoukk/tiktoken-go-loader"
 	"github.com/sashabaranov/go-openai"
 	tools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -21,10 +20,7 @@ type tokenCounter struct {
 	enc *tiktoken.Tiktoken
 }
 
-var (
-	tokenLoaderOnce sync.Once
-	tokenCounters   sync.Map
-)
+var tokenCounters sync.Map
 
 const (
 	estimatedLowDetailImageTokens  = 256
@@ -34,20 +30,13 @@ const (
 // getTokenCounter 按模型缓存 counter，避免切换模型后继续沿用上一个模型的编码器。
 // 未识别的模型回退到 cl100k_base。离线 BPE loader 只注册一次。
 func getTokenCounter(modelName string) (*tokenCounter, error) {
-	tokenLoaderOnce.Do(func() {
-		tiktoken.SetBpeLoader(loader.NewOfflineLoader())
-	})
 	key := strings.ToLower(strings.TrimSpace(modelName))
 	if cached, ok := tokenCounters.Load(key); ok {
 		return cached.(*tokenCounter), nil
 	}
-	enc, err := tiktoken.EncodingForModel(modelName)
+	enc, err := util.GetTokenEncoding(modelName)
 	if err != nil {
-		// 模型名未识别，回退到 cl100k_base（覆盖 GPT-3.5/4 系，最通用的编码）。
-		enc, err = tiktoken.GetEncoding("cl100k_base")
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	counter := &tokenCounter{enc: enc}
 	actual, _ := tokenCounters.LoadOrStore(key, counter)

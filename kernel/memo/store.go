@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -208,7 +209,7 @@ func (s *Store) withdrawals(ctx context.Context, root *os.Root) ([]withdrawal, e
 		if e != nil {
 			return e
 		}
-		if body != "" || w.Schema != 1 || !idPattern.MatchString(w.ID) || name != w.ID+".md" || !idPattern.MatchString(w.Target) || w.Operation == "" || w.Created == "" {
+		if body != "" || !idPattern.MatchString(w.ID) || name != w.ID+".md" || !idPattern.MatchString(w.Target) || w.Operation == "" || w.Created == "" {
 			return ErrInvalid
 		}
 		for _, source := range w.Sources {
@@ -227,6 +228,16 @@ func withdrawn(r Record, ws []withdrawal) bool {
 			return true
 		}
 		if contains(r.Authorizations, withdrawalAuthorization(w)) {
+			continue
+		}
+		preserved := false
+		for _, survivor := range w.Survivors {
+			if survivor.ID == r.ID && survivor.Fact == withdrawalFact(r) {
+				preserved = true
+				break
+			}
+		}
+		if preserved {
 			continue
 		}
 		for _, a := range w.Sources {
@@ -562,6 +573,38 @@ func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guar
 		source.Evidence = ""
 		w.Sources = append(w.Sources, source)
 	}
+	rr, e := subroot(root, "records", false)
+	if e != nil {
+		return ret, e
+	}
+	defer rr.Close()
+	targetFact := withdrawalFact(entry.Record)
+	e = eachFile(ctx, rr, func(name string, data []byte) error {
+		other, err := DecodeRecord(data, strings.TrimSuffix(name, ".md"))
+		if err != nil {
+			return err
+		}
+		r := other.Record
+		if r.ID == id || withdrawn(r, ws) || withdrawalFact(r) == targetFact {
+			return nil
+		}
+		for _, a := range w.Sources {
+			for _, b := range r.Sources {
+				if a.Kind == b.Kind && a.ID == b.ID {
+					w.Survivors = append(w.Survivors, withdrawalSurvivor{ID: r.ID, Fact: withdrawalFact(r)})
+					return nil
+				}
+			}
+		}
+		return nil
+	})
+	if e != nil {
+		return ret, e
+	}
+	if len(w.Survivors) > 0 {
+		w.Schema = 2
+	}
+	slices.SortFunc(w.Survivors, func(a, b withdrawalSurvivor) int { return strings.Compare(a.ID, b.ID) })
 	data, e := encode(w, "")
 	if e != nil {
 		return ret, e

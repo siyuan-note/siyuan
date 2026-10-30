@@ -10,6 +10,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -90,7 +91,19 @@ type withdrawal struct {
 	Created   string   `yaml:"created"`
 	// 仅保存旧写入身份的摘要，阻止延迟重试被误当成新的显式授权。
 	// JSON 省略空值，保持旧撤回文件已有授权摘要兼容。
-	OperationHashes []string `yaml:"operationHashes,omitempty" json:",omitempty"`
+	OperationHashes []string             `yaml:"operationHashes,omitempty" json:",omitempty"`
+	Survivors       []withdrawalSurvivor `yaml:"survivors,omitempty" json:",omitempty"`
+}
+
+// 第 2 版撤回只保留同来源下其他既有事实的身份和摘要，不保存其正文。
+type withdrawalSurvivor struct {
+	ID   string `yaml:"id"`
+	Fact string `yaml:"fact"`
+}
+
+func withdrawalFact(r Record) string {
+	data, _ := json.Marshal([]string{r.Kind, r.Subject, r.Scope, strings.TrimSpace(r.Content)})
+	return revision(data)
 }
 
 func NewID() string {

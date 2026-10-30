@@ -295,7 +295,7 @@ func ValidateWithdrawal(data []byte, id string) error {
 	if e != nil {
 		return e
 	}
-	if body != "" || w.Schema != 1 || w.ID != id || !idPattern.MatchString(w.ID) || !idPattern.MatchString(w.Target) || w.Operation == "" || w.Created == "" {
+	if body != "" || (w.Schema != 1 && w.Schema != 2) || w.ID != id || !idPattern.MatchString(w.ID) || !idPattern.MatchString(w.Target) || w.Operation == "" || w.Created == "" {
 		return ErrInvalid
 	}
 	if _, err := time.Parse(time.RFC3339Nano, w.Created); err != nil {
@@ -310,6 +310,16 @@ func ValidateWithdrawal(data []byte, id string) error {
 			return ErrInvalid
 		}
 		seen[hash] = true
+	}
+	if w.Schema == 1 && len(w.Survivors) > 0 {
+		return ErrInvalid
+	}
+	seen = map[string]bool{}
+	for _, survivor := range w.Survivors {
+		if !idPattern.MatchString(survivor.ID) || survivor.ID == w.Target || !validHash(survivor.Fact) || seen[survivor.ID] {
+			return ErrInvalid
+		}
+		seen[survivor.ID] = true
 	}
 	for _, source := range w.Sources {
 		if source.ID == "" || source.Kind == "" || source.Evidence != "" {

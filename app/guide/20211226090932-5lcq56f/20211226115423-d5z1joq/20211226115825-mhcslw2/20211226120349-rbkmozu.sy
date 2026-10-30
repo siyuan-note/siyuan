@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261030083650"
 	},
 	"Children": [
 		{
@@ -267,7 +267,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-p3ajlx2",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -476,7 +476,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120415-kqk522d",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -490,7 +490,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-k8yvb62",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -522,7 +522,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中設置搜索範圍），搜索結果為包含這些關鍵字的內容區塊。"
+					"Data": " 中選擇關鍵字來源），搜索結果為包含這些關鍵字的內容區塊。"
 				}
 			]
 		},
@@ -531,7 +531,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211228134547-inyam43",
-				"updated": "20260730184353"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -545,18 +545,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：提及搜索僅會在普通文字中搜索，不會在粗體、斜體等行級元素和代碼區塊、圖表等區塊級元素中搜索，這一點和"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226122825-w6wxq0c",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "虛擬引用探測規則"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "是相同的。"
+					"Data": "​：提及會比對正文，以及其他文檔的標題、文檔命名和別名；文檔命中以標題預覽顯示，目前文檔自身不參與。標題與正文的比對規則一致：粗體、斜體和超連結文字可參與，行內程式碼、公式、程式碼區塊、圖表和區塊引用錨文字不參與。命名、別名是否參與比對，遵循已啟用的區塊級屬性搜尋選項；反連提及選項用於選擇關鍵字來源。"
 				}
 			]
 		}

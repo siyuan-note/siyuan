@@ -1162,6 +1162,7 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 		terms = append(terms, keyword)
 	}
 	luteEngine := util.NewLute()
+	markStart, markEnd := search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd()
 	limit := confSearchSnapshot.Limit
 	beforeID := ""
 	// 按块 ID 分批补取候选，正文校验和反链排除后的有效提及才占用结果额度。
@@ -1177,13 +1178,36 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 			if excludeBacklinkIDs.Contains(b.ID) {
 				continue
 			}
-			tree := parse.Parse("", gulu.Str.ToBytes(b.Markdown), luteEngine.ParseOptions)
-			if nil == tree {
-				continue
+			markdown := b.Markdown
+			var textRoot, documentRoot *ast.Node
+			if b.IsDoc() {
+				// 文档索引没有正文 Markdown；读取原始标题片段，避免把摘要中的代码或引用当作普通文字。
+				tree, err := LoadTreeByBlockIDInExactBox(b.ID, b.Box)
+				if err != nil || tree.Root.ID != b.ID {
+					continue
+				}
+				documentRoot = tree.Root
+				paragraph, err := treenode.DocumentTitleParagraph(documentRoot)
+				if err != nil {
+					continue
+				}
+				if documentRoot.DocumentTitle == nil {
+					// 旧标题本来就是普通文字，不能重新解释其中的 Markdown 符号。
+					textRoot = paragraph
+				} else {
+					markdown = treenode.ExportNodeStdMd(paragraph, luteEngine)
+				}
+			}
+			if textRoot == nil {
+				tree := parse.Parse("", gulu.Str.ToBytes(markdown), luteEngine.ParseOptions)
+				if tree == nil {
+					continue
+				}
+				textRoot = tree.Root
 			}
 
 			textBuf := &bytes.Buffer{}
-			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			ast.Walk(textRoot, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || n.IsBlock() {
 					return ast.WalkContinue
 				}
@@ -1195,16 +1219,31 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 
 			text := textBuf.String()
 			text = strings.TrimSpace(text)
-			if "" == text {
+			if "" == text && documentRoot == nil {
 				continue
 			}
 
-			newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+			newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, markStart, markEnd)
 			if matched {
 				ret = append(ret, b)
 
-				k := getMarkedTextContents(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+				k := getMarkedTextContents(newText, markStart, markEnd)
 				retMentionKeywords = append(retMentionKeywords, k...)
+			} else if documentRoot != nil {
+				// 标题没有普通文字时仍可匹配文档命名、别名，并遵循搜索范围及大小写规则。
+				var fields []string
+				if confSearchSnapshot.Name {
+					fields = append(fields, documentRoot.IALAttr("name"))
+				}
+				if confSearchSnapshot.Alias {
+					fields = append(fields, documentRoot.IALAttr("alias"))
+				}
+				for _, field := range fields {
+					if _, matched = markReplaceSpanWithSplit(field, mentionKeywords, markStart, markEnd); matched {
+						ret = append(ret, b)
+						break
+					}
+				}
 			} else {
 				// columnFilter 中的命名、别名和备注命中的情况
 				// 反链提及搜索范围增加命名、别名和备注 https://github.com/siyuan-note/siyuan/issues/7639

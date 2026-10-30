@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261030083650"
 	},
 	"Children": [
 		{
@@ -294,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200920194146-psjundj",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -525,7 +525,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106201736-oyu11fw",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -543,7 +543,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106201743-z1iz0ce",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -575,7 +575,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
+					"Data": " 中选择关键词来源），搜索结果为包含这些关键字的内容块。"
 				}
 			]
 		},
@@ -584,7 +584,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221026221105-dyj8l8n",
-				"updated": "20221026222004"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -598,18 +598,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：提及搜索仅会在普通文本中搜索，不会在粗体、斜体等行级元素和代码块、图表等块级元素中搜索，这一点和"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211010211708-0qn8cpl",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "虚拟引用探测规则"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "是相同的。"
+					"Data": "​：提及会匹配正文，以及其他文档的标题、文档命名和别名；文档命中以标题预览展示，当前文档自身不参与。标题与正文的匹配规则一致：加粗、斜体和超链接文字可参与，行内代码、公式、代码块、图表和引用锚文本不参与。命名、别名是否参与匹配，遵循已启用的块级属性搜索选项；反链提及选项用于选择关键词来源。"
 				}
 			]
 		}

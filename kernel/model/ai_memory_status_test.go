@@ -53,7 +53,7 @@ func TestAIMemoryTaskSavedStatus(t *testing.T) {
 					if scenario.name == "keywords-fail" {
 						return "", errors.New("keyword failure")
 					}
-					return `{"terms":[]}`, nil
+					return `{"intent":"remember","terms":[]}`, nil
 				}
 				if strings.HasPrefix(prompt, "Generate a concise") {
 					if scenario.name == "cancel-after-save" {

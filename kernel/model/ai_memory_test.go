@@ -120,7 +120,7 @@ func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 	}
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, "\"terms\"") {
-			return `{"terms":["answers"]}`, nil
+			return `{"intent":"remember","terms":["answers"]}`, nil
 		}
 		if strings.HasPrefix(prompt, "Generate a concise") {
 			return "", nil
@@ -159,7 +159,7 @@ func TestAIMemoryCandidateSourceChangesDuringModelCall(t *testing.T) {
 	}
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, "\"terms\"") {
-			return `{"terms":["answers"]}`, nil
+			return `{"intent":"remember","terms":["answers"]}`, nil
 		}
 		content = "Changed source"
 		return fmt.Sprintf(`{"actions":[{"id":%q,"kind":"preference","subject":"user","scope":"workspace","content":"User prefers concise answers","state":"active","sourceIndexes":[0]}]}`, e.Record.ID), nil
@@ -285,7 +285,7 @@ func TestAIMemoryCommitGuardRechecksCandidateSource(t *testing.T) {
 	reads = 0
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, `"terms"`) {
-			return `{"terms":["answers"]}`, nil
+			return `{"intent":"remember","terms":["answers"]}`, nil
 		}
 		return fmt.Sprintf(`{"actions":[{"id":%q,"kind":"preference","subject":"user","scope":"workspace","content":%q,"state":"active","sourceIndexes":[0]}]}`, entry.Record.ID, original), nil
 	}
@@ -425,7 +425,7 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 	proposalCalls := 0
 	memoryComplete = func(ctx context.Context, selected *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, "\"terms\"") {
-			return `{"terms":["concise"]}`, nil
+			return `{"intent":"remember","terms":["concise"]}`, nil
 		}
 		if strings.HasPrefix(prompt, "Generate a concise") {
 			return content, nil

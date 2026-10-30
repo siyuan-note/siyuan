@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Nie znaleziono jednoznacznego docelowego wspomnienia; mogło się zmienić. Określ dokładnie, co zaktualizować lub zapomnieć",
+	"aiMemoryContentChanged": "Treść wspomnienia lub jego źródło uległy zmianie; spróbuj ponownie",
+	"aiMemoryPartialFailure": "Niektóre aktualizacje wspomnień nie zostały zapisane; zapisane wspomnienia pozostają dostępne",
+	"aiMemoryIntentUnclear": "Żądanie jest niejednoznaczne; określ osobno, co zaktualizować lub zapomnieć",
 	"aiMemorySummary": "Podsumowanie wspomnień",
 	"avSubItemsParentFieldTip": "Wybierz parę pól relacji, sprawdź podgląd hierarchii i włącz funkcję",
 	"avSubItemsPreview": "Podgląd hierarchii",

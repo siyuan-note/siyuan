@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "未找到明确的记忆目标，目标可能已变化，请具体说明要更新或忘记的内容",
+	"aiMemoryContentChanged": "记忆内容或来源已变化，请重试",
+	"aiMemoryPartialFailure": "部分记忆更新未保存，已保存的内容仍然可用",
+	"aiMemoryIntentUnclear": "请求含义不明确，请单独说明要更新或忘记的内容",
 	"aiMemorySummary": "记忆摘要",
 	"avSubItemsParentFieldTip": "选择一组关联字段，查看层级预览后启用",
 	"avSubItemsPreview": "层级预览",

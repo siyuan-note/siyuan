@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Aucun souvenir cible précis n’a été trouvé ; il a peut-être changé. Précisez ce qu’il faut mettre à jour ou oublier",
+	"aiMemoryContentChanged": "Le contenu du souvenir ou sa source a changé ; réessayez",
+	"aiMemoryPartialFailure": "Certaines mises à jour des souvenirs n’ont pas été enregistrées ; les souvenirs enregistrés restent disponibles",
+	"aiMemoryIntentUnclear": "La demande est ambiguë ; précisez séparément ce qu’il faut mettre à jour ou oublier",
 	"aiMemorySummary": "Résumé des souvenirs",
 	"avSubItemsParentFieldTip": "Sélectionnez une paire de champs de relation, vérifiez l’aperçu de la hiérarchie, puis activez",
 	"avSubItemsPreview": "Aperçu de la hiérarchie",

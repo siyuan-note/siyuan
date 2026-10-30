@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Nenhuma memória de destino clara foi encontrada; ela pode ter mudado. Especifique o que atualizar ou esquecer",
+	"aiMemoryContentChanged": "O conteúdo da memória ou sua fonte mudou; tente novamente",
+	"aiMemoryPartialFailure": "Algumas atualizações de memórias não foram salvas; as memórias salvas continuam disponíveis",
+	"aiMemoryIntentUnclear": "A solicitação é ambígua; especifique separadamente o que atualizar ou esquecer",
 	"aiMemorySummary": "Resumo das memórias",
 	"avSubItemsParentFieldTip": "Selecione um par de campos de relação, confira a prévia da hierarquia e ative",
 	"avSubItemsPreview": "Prévia da hierarquia",

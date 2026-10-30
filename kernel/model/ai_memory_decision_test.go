@@ -226,7 +226,7 @@ func TestAIMemoryDecisionProcessCompletesOriginalPipeline(t *testing.T) {
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, `"terms"`) {
 			keywords++
-			return `{"terms":[]}`, nil
+			return `{"intent":"remember","terms":[]}`, nil
 		}
 		if strings.HasPrefix(prompt, "Generate a concise") {
 			overviews++

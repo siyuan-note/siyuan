@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Target ingatan yang jelas tidak ditemukan; target mungkin telah berubah. Jelaskan secara spesifik apa yang ingin diperbarui atau dilupakan",
+	"aiMemoryContentChanged": "Isi ingatan atau sumbernya telah berubah; coba lagi",
+	"aiMemoryPartialFailure": "Sebagian pembaruan ingatan tidak disimpan; ingatan yang tersimpan tetap tersedia",
+	"aiMemoryIntentUnclear": "Permintaan tidak jelas; jelaskan secara terpisah apa yang ingin diperbarui atau dilupakan",
 	"aiMemorySummary": "Ringkasan ingatan",
 	"avSubItemsParentFieldTip": "Pilih pasangan bidang relasi, periksa pratinjau hierarki, lalu aktifkan",
 	"avSubItemsPreview": "Pratinjau hierarki",

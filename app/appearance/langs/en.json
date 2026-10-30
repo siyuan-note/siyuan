@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "No clear memory target was found; it may have changed. Specify what to update or forget",
+	"aiMemoryContentChanged": "The memory content or its source has changed; try again",
+	"aiMemoryPartialFailure": "Some memory updates were not saved; saved memories remain available",
+	"aiMemoryIntentUnclear": "The request is ambiguous; specify separately what to update or forget",
 	"aiMemorySummary": "Memory summary",
 	"avSubItemsParentFieldTip": "Select a pair of relation fields, review the hierarchy preview, then enable",
 	"avSubItemsPreview": "Hierarchy preview",

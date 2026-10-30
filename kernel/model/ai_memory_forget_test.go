@@ -54,7 +54,7 @@ func TestAIMemoryForgetMultilingualAndRetry(t *testing.T) {
 			memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 				calls++
 				if strings.Contains(prompt, `"terms"`) {
-					return `{"terms":["coffee"]}`, nil
+					return `{"intent":"forget","terms":["coffee"]}`, nil
 				}
 				if strings.HasPrefix(prompt, "Verify a memory forget request") {
 					if !strings.Contains(prompt, q.Text) || !strings.Contains(prompt, "Candidates") {

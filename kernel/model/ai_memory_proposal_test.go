@@ -42,7 +42,7 @@ func TestAIMemoryReplacementProposalChecksTarget(t *testing.T) {
 			}
 			memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 				if strings.Contains(prompt, `"terms"`) {
-					return `{"terms":["Project status"]}`, nil
+					return `{"intent":"remember","terms":["Project status"]}`, nil
 				}
 				if strings.HasPrefix(prompt, "Generate a concise") {
 					return "Project status pending", nil

@@ -8,6 +8,7 @@ import {genUUID} from "../../util/genID";
 import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {MemoryOperationState, memoryModelOptions} from "./state";
+import {memoryTaskErrorMessage} from "./taskError";
 
 // 当前页面重新打开管理器时继续查询后台任务，关闭窗口不取消模型处理。
 let activeMemoryTask = "";
@@ -22,7 +23,8 @@ export const openMemoryManager = () => {
     let running = false;
     let discovering = true;
     let taskId = activeMemoryTask;
-    let submittedInput: {id: string; text: string};
+    let inputRevision = 0;
+    let submittedInput: {id: string; text: string; revision: number};
     let taskGeneration = 0;
     let overviewGeneration = 0;
     let taskFailures = 0;
@@ -214,16 +216,25 @@ export const openMemoryManager = () => {
             const task = response.data;
             running = ["queued", "running"].includes(task.state);
             updateModel();
-            if (task.state === "failed" || (task.state === "cancelled" && task.error)) {
-                reportError(task.error || lang.embeddingFailed, "result");
+            if (task.state === "failed" || (!running && (task.error || task.results?.some(result => !!result.error)))) {
+                reportError(memoryTaskErrorMessage(task, {
+                    target: lang.aiMemoryTargetUnclear, changed: lang.aiMemoryContentChanged,
+                    partial: lang.aiMemoryPartialFailure, intent: lang.aiMemoryIntentUnclear,
+                    generic: lang.embeddingFailed, model: lang._kernel,
+                }), "result");
             }
             if (running) {
                 taskTimer = window.setTimeout(() => { void poll(); }, 1000);
             } else {
-                if (task.state === "completed") {
+                if (task.state === "completed" && !task.error && !task.results?.some(result => !!result.error)) {
                     operation.committed();
-                    if (submittedInput?.id === taskId && submittedInput.text === input.value) { taskDirty = false; }
+                    if (submittedInput?.id === taskId && submittedInput.revision === inputRevision && submittedInput.text === input.value) {
+                        input.value = "";
+                        inputRevision++;
+                        taskDirty = false;
+                    }
                 }
+                submittedInput = undefined;
                 clearTask();
                 void refreshOverview();
             }
@@ -257,7 +268,7 @@ export const openMemoryManager = () => {
             taskTimer = window.setTimeout(() => { void discoverTask(); }, retryDelay(++taskFailures));
         }
     };
-    input.addEventListener("input", () => { taskDirty = !!input.value.trim(); updateModel(); });
+    input.addEventListener("input", () => { inputRevision++; taskDirty = !!input.value.trim(); updateModel(); });
     input.addEventListener("focus", updateModel);
     input.addEventListener("keydown", event => {
         if (event.key !== "Enter" || event.isComposing || event.keyCode === 229 || event.repeat ||
@@ -271,6 +282,7 @@ export const openMemoryManager = () => {
         const text = input.value;
         if (!text.trim()) { return; }
         const operationId = operation.operationFor(text, genUUID);
+        submittedInput = {id: operationId, text, revision: inputRevision};
         reportedErrors.clear();
         submitting = true;
         taskGeneration++;
@@ -287,7 +299,7 @@ export const openMemoryManager = () => {
                     return;
                 }
                 taskId = response.data.taskId;
-                submittedInput = {id: taskId, text};
+                submittedInput.id = taskId;
                 activeMemoryTask = taskId;
                 running = true;
                 taskFailures = 0;
@@ -297,7 +309,6 @@ export const openMemoryManager = () => {
                 reportError(error);
                 // 提交回包丢失时按提交身份查询，避免用户重复付费处理。
                 taskId = operationId;
-                submittedInput = {id: taskId, text};
                 activeMemoryTask = taskId;
                 running = true;
                 taskTimer = window.setTimeout(() => { void poll(); }, retryDelay(1));

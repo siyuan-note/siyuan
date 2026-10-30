@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Nenašla sa jednoznačná cieľová spomienka; možno sa zmenila. Presne uveďte, čo chcete aktualizovať alebo zabudnúť",
+	"aiMemoryContentChanged": "Obsah spomienky alebo jej zdroj sa zmenil; skúste to znova",
+	"aiMemoryPartialFailure": "Niektoré aktualizácie spomienok sa neuložili; uložené spomienky zostávajú dostupné",
+	"aiMemoryIntentUnclear": "Požiadavka je nejednoznačná; samostatne uveďte, čo chcete aktualizovať alebo zabudnúť",
 	"aiMemorySummary": "Súhrn spomienok",
 	"avSubItemsParentFieldTip": "Vyberte pár relačných polí, skontrolujte náhľad hierarchie a zapnite funkciu",
 	"avSubItemsPreview": "Náhľad hierarchie",

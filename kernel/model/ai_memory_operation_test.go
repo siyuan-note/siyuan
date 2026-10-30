@@ -56,7 +56,7 @@ func TestAIMemoryOperationInMemoryReuse(t *testing.T) {
 			memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 				if strings.Contains(prompt, `"terms"`) {
 					keywords.Add(1)
-					return `{"terms":[]}`, nil
+					return `{"intent":"remember","terms":[]}`, nil
 				}
 				if strings.HasPrefix(prompt, "Generate a concise") {
 					if overviews.Add(1) == 1 && scenario == "overview-failure" {
@@ -136,7 +136,7 @@ func TestAIMemoryOperationExplicitRetryBeforeProposal(t *testing.T) {
 			if keywords.Add(1) == 1 {
 				return "", errors.New("temporary connection failure")
 			}
-			return `{"terms":[]}`, nil
+			return `{"intent":"remember","terms":[]}`, nil
 		}
 		return `{"actions":[]}`, nil
 	}
@@ -167,7 +167,7 @@ func TestAIMemoryOperationAutomaticSourceCoalescing(t *testing.T) {
 			case <-ctx.Done():
 				return "", ctx.Err()
 			}
-			return `{"terms":[]}`, nil
+			return `{"intent":"remember","terms":[]}`, nil
 		}
 		proposals.Add(1)
 		return `{"actions":[]}`, nil
@@ -211,7 +211,7 @@ func TestAIMemoryOperationCancelledExplicitRetry(t *testing.T) {
 				<-ctx.Done()
 				return "", ctx.Err()
 			}
-			return `{"terms":[]}`, nil
+			return `{"intent":"remember","terms":[]}`, nil
 		}
 		return `{"actions":[]}`, nil
 	}
@@ -292,7 +292,7 @@ func TestAIMemoryOperationRetryDoesNotResurrectForgottenSuccess(t *testing.T) {
 	var proposals atomic.Int32
 	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
 		if strings.Contains(prompt, `"terms"`) {
-			return `{"terms":[]}`, nil
+			return `{"intent":"remember","terms":[]}`, nil
 		}
 		if strings.HasPrefix(prompt, "Generate a concise") {
 			return "Concise answers", nil

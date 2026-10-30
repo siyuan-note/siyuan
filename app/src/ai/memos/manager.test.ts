@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {MemoryOperationState, memoryModelOptions} from "./state";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {memoryTaskErrorMessage} from "./taskError";
 
 class ElementStub {
     value = "";
@@ -53,6 +54,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         exports: exported,
         AbortController,
         require: (name: string) => {
+            if (name === "./taskError") { return {memoryTaskErrorMessage}; }
             if (name === "../../protyle/util/compatibility") { return compatibility; }
             if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { rendered.push(markdown); element.textContent = markdown; }}; }
             if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
@@ -80,7 +82,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "./state") { return {MemoryOperationState, memoryModelOptions}; }
             throw new Error(name);
         },
-        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => String(key)})},
+        window: {siyuan: {config, languages: new Proxy({}, {get: (_, key) => key === "_kernel" ? {448: "Safe model connection error", 450: "Safe model authentication error"} : String(key)})},
             setTimeout: (callback: () => void, delay: number) => { const id = ++timerID; timers.set(id, {callback, delay}); return id; },
             clearTimeout: (id: number) => timers.delete(id)},
     });
@@ -122,6 +124,112 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
 };
 
 const completed = (id = "task", results: unknown[] = []) => ({code: 0, data: {taskId: id, state: "completed", results}});
+
+test("successful and unchanged completed submissions clear their input through either submit path", async () => {
+    for (const keyboard of [false, true]) {
+        for (const results of [[], [{saved: false, error: ""}], [{saved: true, error: ""}]]) {
+            const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+                url.endsWith("/task") ? completed("task", results) : undefined);
+            await state.flush();
+            state.enter("Remember this");
+            if (keyboard) { await state.keydown({ctrlKey: true}); } else { await state.click(); }
+            assert.equal(state.input.value, "");
+            assert.equal(state.close(), true);
+            await state.click();
+            assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+        }
+    }
+});
+
+test("failed and partially failed tasks preserve their input for explicit retry", async () => {
+    for (const task of [
+        {state: "failed", error: "Model error", results: [] as unknown[]},
+        {state: "completed", error: "Partial failure", results: [] as unknown[]},
+        {state: "completed", error: "", results: [{saved: true, error: ""}, {saved: false, error: "Conflict"}]},
+    ]) {
+        const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+            url.endsWith("/task") ? {code: 0, data: {taskId: "task", ...task}} : undefined);
+        await state.flush();
+        state.enter("Retry this");
+        await state.click();
+        assert.equal(state.input.value, "Retry this");
+        assert.equal(state.close(), false);
+    }
+});
+
+test("task failure notifications include safe item classifications and never raw result text", async () => {
+    const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+        url.endsWith("/task") ? {code: 0, data: {taskId: "task", state: "failed",
+            error: "some memory proposals were not saved; saved memories remain available",
+            results: [{saved: true}, {error: "proposal target not in verified snapshot"}, {error: "private token /workspace/secret"}]}} : undefined);
+    await state.flush();
+    state.enter("Delete the spacing rule");
+    await state.click();
+    assert.deepEqual(state.messages, ["aiMemoryPartialFailure\naiMemoryTargetUnclear"]);
+    assert.equal(state.input.value, "Delete the spacing rule");
+});
+
+test("preflight intent failures and controlled model errors remain actionable without exposing provider text", async () => {
+    for (const [error, message] of [["memory proposal does not match forget intent", "aiMemoryIntentUnclear"],
+        ["Safe model authentication error", "Safe model authentication error"],
+        ["provider body contains private token", "embeddingFailed"]]) {
+        const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+            url.endsWith("/task") ? {code: 0, data: {taskId: "task", state: "failed", error}} : undefined);
+        await state.flush();
+        state.enter("Remember this");
+        await state.click();
+        assert.deepEqual(state.messages, [message]);
+    }
+});
+
+test("editing and restoring the same text while submission is pending cannot be cleared by its completion", async () => {
+    let accept: (response: unknown) => void;
+    const state = harness(url => url.endsWith("/maintain") ? new Promise(resolve => { accept = resolve; }) :
+        url.endsWith("/task") ? completed() : undefined);
+    await state.flush();
+    state.enter("Original");
+    await state.click();
+    state.enter("Edited");
+    state.enter("Original");
+    accept({code: 0, data: {taskId: "task"}});
+    await state.flush();
+    assert.equal(state.input.value, "Original");
+    assert.equal(state.close(), false);
+});
+
+test("editing back to identical text during a running task preserves the new draft revision", async () => {
+    let reads = 0;
+    const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+        url.endsWith("/task") ? (++reads === 1 ? {code: 0, data: {taskId: "task", state: "running"}} : completed()) : undefined);
+    await state.flush();
+    state.enter("Original");
+    await state.click();
+    state.enter("Edited");
+    state.enter("Original");
+    await state.tick(1000);
+    assert.equal(state.input.value, "Original");
+    assert.equal(state.close(), false);
+});
+
+test("restored tasks and old completion responses after reopening never clear a new window's draft", async () => {
+    const finish: Array<(response: unknown) => void> = [];
+    const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+        url.endsWith("/task") ? new Promise(resolve => { finish.push(resolve); }) : undefined);
+    await state.flush();
+    state.enter("Same text");
+    await state.click();
+    state.destroy();
+    state.reopen();
+    await state.flush();
+    state.enter("Same text");
+    finish[0](completed());
+    await state.flush();
+    assert.equal(state.input.value, "Same text");
+    finish[1](completed());
+    await state.flush();
+    assert.equal(state.input.value, "Same text");
+    assert.equal(state.close(), false);
+});
 
 test("the local platform modifier plus Enter clicks the existing organize button exactly once", async () => {
     for (const mac of [false, true]) {
@@ -206,7 +314,7 @@ test("submission and running phases use only the button spinner; only failures p
         await state.tick(1000);
         assert.equal(state.field("[data-memory-loading]").hidden, true);
         assert.equal(state.button.attributes.get("aria-busy"), "false");
-        assert.deepEqual(state.messages, terminal === "failed" ? ["Model failed"] : []);
+        assert.deepEqual(state.messages, terminal === "failed" ? ["embeddingFailed"] : []);
     }
 });
 
@@ -663,7 +771,7 @@ test("cancelled backend tasks notify their error but a cancellation without an e
         await state.flush();
         state.enter("Remember this");
         await state.click();
-        assert.deepEqual(state.messages, error ? [error] : []);
+        assert.deepEqual(state.messages, error ? ["embeddingFailed"] : []);
         assert.equal(state.button.disabled, false);
         assert.equal(state.field("[data-memory-loading]").hidden, true);
         assert.equal(state.requests.some(request => request.url.endsWith("/cancel")), false);
@@ -723,7 +831,7 @@ test("recent failure is notified without exposing record IDs or internal history
     const state = harness(url => url.endsWith("/list") ? {code: 0, data: {tasks: [{taskId: "failed", state: "failed"}]}} :
         url.endsWith("/task") ? {code: 0, data: {taskId: "failed", state: "failed", error: "Model request failed", results: [{id: "record-secret", saved: false, error: "record error"}]}} : undefined);
     await state.flush();
-    assert.match(state.messages[0], /Model request failed/);
+    assert.equal(state.messages[0], "embeddingFailed");
     assert.doesNotMatch(state.messages.join(""), /record-secret|record error/);
     assert.equal(state.button.disabled, false);
 });

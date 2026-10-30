@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "Er is geen duidelijk doelgeheugen gevonden; het is mogelijk gewijzigd. Geef aan wat je wilt bijwerken of vergeten",
+	"aiMemoryContentChanged": "De inhoud van de herinnering of de bron is gewijzigd; probeer het opnieuw",
+	"aiMemoryPartialFailure": "Sommige geheugenupdates zijn niet opgeslagen; opgeslagen herinneringen blijven beschikbaar",
+	"aiMemoryIntentUnclear": "Het verzoek is onduidelijk; geef afzonderlijk aan wat je wilt bijwerken of vergeten",
 	"aiMemorySummary": "Geheugensamenvatting",
 	"avSubItemsParentFieldTip": "Selecteer een paar relatievelden, controleer de hiërarchievoorvertoning en schakel het in",
 	"avSubItemsPreview": "Hiërarchievoorvertoning",

@@ -1,4 +1,8 @@
 {
+	"aiMemoryTargetUnclear": "No se encontró un recuerdo de destino claro; puede haber cambiado. Especifica qué actualizar u olvidar",
+	"aiMemoryContentChanged": "El contenido del recuerdo o su fuente ha cambiado; inténtalo de nuevo",
+	"aiMemoryPartialFailure": "Algunas actualizaciones de recuerdos no se guardaron; los recuerdos guardados siguen disponibles",
+	"aiMemoryIntentUnclear": "La solicitud es ambigua; especifica por separado qué actualizar u olvidar",
 	"aiMemorySummary": "Resumen de recuerdos",
 	"avSubItemsParentFieldTip": "Selecciona un par de campos de relación, revisa la vista previa de la jerarquía y actívalo",
 	"avSubItemsPreview": "Vista previa de la jerarquía",

@@ -18,7 +18,7 @@ interface IBodyState {
     // 缓存的行高，避免每帧读 currentRows[0].offsetHeight（强制重排来源）。
     // 表格行高在渲染后基本稳定，用缓存值做外推/分页计算即可，少量偏差不影响正确性。
     rowHeight?: number;
-    // 仅分组表格使用底部占位保持未渲染行的布局高度。
+    // 分组和树形表格使用底部占位保持未渲染行的布局高度。
     reserveBottomSpacer?: boolean;
     // 选中行 ID 快照。trim 会移除/回填行 DOM，而选中高亮（av__row--select）是纯运行时状态、
     // getRowHTML 不携带，故在每次 trim 处理前从现存 DOM 同步，回填后据此恢复。
@@ -201,8 +201,9 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         // 全部渲染即可，避免短列因 trim 导致 spacer 抖动或全部移除后无法回填
         const trimRange = viewportHeight + buffer * 2;
         const coversAllRows = state.renderedStart <= dataStart && state.renderedEnd >= dataEnd;
-        const groupedTable = isTableLikeView(type) && stored.data.view.groups?.length > 0;
-        if (!groupedTable && coversAllRows && bodyEl.dataset.avLocateWindow !== "true" &&
+        const windowedTable = isTableLikeView(type) &&
+            (stored.data.view.groups?.length > 0 || !!(state.view as IAVTable).nested);
+        if (!windowedTable && coversAllRows && bodyEl.dataset.avLocateWindow !== "true" &&
             dataRows.length <= Math.ceil(trimRange / Math.max(state.rowHeight || currentRows[0].offsetHeight, 1))) {
             // 数据已经完整渲染时无需 trim，清理可能残留的 spacer。
             const spacerEl = bodyEl.querySelector(".av__spacer:not(.av__spacer--bottom)") as HTMLElement;
@@ -249,7 +250,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         let lastVisibleIndex: number;
         const toRemoveAbove: HTMLElement[] = [];
         const toRemoveBelow: HTMLElement[] = [];
-        const minRetainedRows = groupedTable ? 1 : 10;
+        const minRetainedRows = windowedTable ? 1 : 10;
         let galleryColumn = isTableLikeView(type) ? 1 : 0;
         // 行高缓存，避免每帧读 offsetHeight 触发布局
         const rowHeight = state.rowHeight || currentRows[0].offsetHeight;
@@ -267,8 +268,8 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         const viewportBottom = Math.min(elementRect.bottom, blockRect.bottom);
         const windowOutsideBuffer = lastRowRect.bottom < topLimit || firstRowRect.top > bottomLimit;
         const bodyIntersectsViewport = bodyRect.bottom > viewportTop && bodyRect.top < viewportBottom;
-        if (groupedTable && (spacerElement || bottomSpacerElement) && windowOutsideBuffer && bodyIntersectsViewport) {
-            // 当前窗口完全离开缓冲区时，按视口在分组中的位置重建附近窗口。
+        if (windowedTable && (spacerElement || bottomSpacerElement) && windowOutsideBuffer && bodyIntersectsViewport) {
+            // 当前窗口完全离开缓冲区时，按视口在表格中的位置重建附近窗口。
             const headerHeight = type === "list" ? 0 :
                 (bodyEl.querySelector(".av__row--header") as HTMLElement)?.offsetHeight || rowHeight;
             rebuildTableWindow(bodyEl, state, getGroupTableViewportWindow({
@@ -286,7 +287,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         // 渐进式 trim 无法回填（firstVisibleIndex 取不到、回填分支依赖连续滚动方向）。
         // 此处用 spacer 下沿（即 renderedStart 行的实际位置）反推视口应显示的起始行，
         // 与 renderedStart 偏差超过一屏时整体重置渲染窗口，不依赖滚动方向与连续性。
-        if (!groupedTable && spacerElement && state.renderedStart > 0) {
+        if (!windowedTable && spacerElement && state.renderedStart > 0) {
             const viewportStartTop = Math.max(elementRect.top, blockRect.top);
             const renderedStartTop = spacerElement.getBoundingClientRect().bottom;
             const rowsPerViewport = Math.ceil(viewportHeight / Math.max(rowHeight, 1));
@@ -1000,7 +1001,7 @@ export const initVirtualScroll = (options: {
                 view,
                 topSpacerHeight: getTopSpacerHeight(item),
                 rowHeight: firstRow.offsetHeight || 36,
-                reserveBottomSpacer: options.data.view.groups?.length > 0,
+                reserveBottomSpacer: options.data.view.groups?.length > 0 || !!(view as IAVTable).nested,
                 selectedRowIds,
             };
             bodyStates.set(item, state);

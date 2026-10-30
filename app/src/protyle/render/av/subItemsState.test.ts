@@ -27,14 +27,50 @@ const block = () => {
     const attributes = new Map([["view", "v"], ["data-av-id", "db"]]);
     const element = {
         getAttribute: (name: string) => attributes.get(name),
+        setAttribute: (name: string, value: string) => attributes.set(name, value),
         toggleAttribute: (name: string, value: boolean) => value ? attributes.set(name, "") : attributes.delete(name),
         querySelector: () => ({textContent: search}),
         querySelectorAll: (): HTMLElement[] => [],
     } as unknown as HTMLElement;
-    return {element, search: (value: string) => { search = value; }};
+    return {element, search: (value: string) => { search = value; }, view: (value: string) => attributes.set("view", value)};
 };
 
 const protyle = (notebookId = "plain") => ({notebookId, options: {}} as IProtyle);
+
+it("restores the kernel-selected initial view without writing state or repeatedly rereading", () => {
+    const {api, storage, writes} = setup();
+    storage["local-av-sub-items"] = {"db/v": {"": ["parent"]}};
+    const a = block();
+    a.view("");
+    const requested = api.getSubItemsRequest(a.element, protyle());
+    const data = {viewID: "v", view: {nested: {}}} as IAV;
+    assert.equal(api.restoreSubItemsView(a.element, protyle(), data, requested, ""), true);
+    assert.equal(a.element.getAttribute("view"), "v");
+    const restored = api.getSubItemsRequest(a.element, protyle());
+    assert.deepEqual([...restored.groupExpandedIDs[""]], ["parent"]);
+    assert.equal(api.restoreSubItemsView(a.element, protyle(), data, restored, ""), false);
+    assert.equal(writes.length, 0);
+});
+
+it("clears another view's expansions and keeps encrypted and search reads out of saved ordinary state", () => {
+    const {api, storage} = setup();
+    storage["local-av-sub-items"] = {"db/v": {"": ["saved"]}};
+    const a = block().element;
+    const requested = api.getSubItemsRequest(a, protyle());
+    const other = {viewID: "other", view: {nested: {}}} as IAV;
+    assert.equal(api.restoreSubItemsView(a, protyle(), other, requested, ""), true);
+    assert.deepEqual(Object.keys(api.getSubItemsRequest(a, protyle()).groupExpandedIDs), []);
+    for (const editor of [protyle("encrypted"), {...protyle(), options: {history: {created: "past"}}} as IProtyle]) {
+        const b = block();
+        b.view("");
+        const initial = api.getSubItemsRequest(b.element, editor);
+        assert.equal(api.restoreSubItemsView(b.element, editor, {viewID: "v", view: {nested: {}}} as IAV, initial, ""), false);
+    }
+    const c = block();
+    c.view("");
+    assert.equal(api.restoreSubItemsView(c.element, protyle(), {viewID: "v", view: {nested: {}}} as IAV,
+        api.getSubItemsRequest(c.element, protyle(), "", "needle"), "needle"), false);
+});
 
 it("stores ordinary folds by database, view and group while keeping child pages local to each carrier", () => {
     const {api, writes} = setup();

@@ -116,6 +116,16 @@ export const getSubItemsRequest = (blockElement: Element, protyle: IProtyle, vie
     return getSubItemsState(blockElement, search ? searchKey : id, !search && canPersist(protyle));
 };
 
+export const restoreSubItemsView = (blockElement: Element, protyle: IProtyle, data: IAV,
+                                    requested: ISubItemsRequest, query: string) => {
+    if (!data.view.nested) return false;
+    const restored = getSubItemsRequest(blockElement, protyle, data.viewID, query);
+    if (restored === requested || JSON.stringify(restored) === JSON.stringify(requested)) return false;
+    // 首次读取由内核确定视图，按其身份重新读取已保存的展开状态。
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
+    return true;
+};
+
 export const toggleSubItems = (blockElement: Element, protyle: IProtyle, groupID: string, itemID: string, expanded: boolean) => {
     const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
     const state = getSubItemsRequest(blockElement, protyle, viewID);

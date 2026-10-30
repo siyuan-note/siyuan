@@ -27,6 +27,13 @@ func cloneNestedView(view *av.View) (*av.View, error) {
 	if err = json.Unmarshal(data, ret); err != nil {
 		return nil, err
 	}
+	// 视图持久化会省略空规则，渲染响应中的规则列表仍须保持数组形状。
+	if ret.Filters == nil {
+		ret.Filters = []*av.ViewFilter{}
+	}
+	if ret.Sorts == nil {
+		ret.Sorts = []*av.ViewSort{}
+	}
 	return ret, nil
 }
 

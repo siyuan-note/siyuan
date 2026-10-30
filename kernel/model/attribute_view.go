@@ -396,7 +396,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, blockID, viewID, groupID, previou
 	}
 
 	useGroupDefault := "" != groupID
-	if 1 > len(view.Filters) && !useGroupDefault && nil == filterContext {
+	if !hasAttrViewFilterConditions(view.Filters) && !useGroupDefault && nil == filterContext {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}
@@ -443,7 +443,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		}
 	}()
 
-	if 1 > len(view.Filters) && !useGroupDefault && nil == filterContext {
+	if !hasAttrViewFilterConditions(view.Filters) && !useGroupDefault && nil == filterContext {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}

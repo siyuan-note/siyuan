@@ -1,6 +1,6 @@
 import {isAVSelectType} from "./capabilities";
 import {guardTemplateHTTPRequest} from "../../../template/http";
-import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems} from "./subItemsState";
+import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems, restoreSubItemsView} from "./subItemsState";
 import {prepareSubItemsRefresh} from "./subItemsRefresh";
 import {locateRequests} from "./locateState";
 import {renderCalendar} from "./calendar/render";
@@ -213,6 +213,10 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
                        reserveVirtualHeight = false) => {
     if (data.nested) {
         virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
+        if (data.rows.length > 100) {
+            virtualData = virtualData || {renderedStart: 0, renderedEnd: 99, topSpacerHeight: 0};
+            reserveVirtualHeight = true;
+        }
     }
     const viewType = e.dataset.avType === "list" ? "list" : "table";
     let calcHTML = "";
@@ -735,6 +739,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 continue;
             }
             data = response.data;
+            if (restoreSubItemsView(e, protyle, data, nested, resetData.query.trim())) {
+                await avRender(e, protyle, cb, renderAll);
+                continue;
+            }
         } else {
             data = avData;
         }

@@ -66,6 +66,9 @@ func TestAVSubItemsRenderAndCandidateContract(t *testing.T) {
 		}
 	}
 	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code == 0 && (result.Data.View.Sorts == nil || result.Data.View.Filters == nil) {
+		t.Fatal("nested render returned null rules; desktop controls require arrays")
+	}
 	if result.Code != 0 || result.Data.SubItems == nil || len(result.Data.View.Rows) != 3 || result.Data.View.Rows[1].Hierarchy.ParentID != ids[0] {
 		t.Fatalf("nested response: %s", response.Body.String())
 	}

@@ -4,7 +4,7 @@ import type {IAVCardRenderOptions} from "../renderState";
 import {escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
-import {getSubItemsRequest, reconcileSubItems} from "../subItemsState";
+import {getSubItemsRequest, reconcileSubItems, restoreSubItemsView} from "../subItemsState";
 
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -112,6 +112,10 @@ export const renderGallery = async (options: {
             return;
         }
         data = response.data;
+        if (restoreSubItemsView(options.blockElement, options.protyle, data, common.nested, resetData.query.trim())) {
+            await renderGallery(options);
+            return;
+        }
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
         return;

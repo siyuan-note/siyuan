@@ -73,15 +73,17 @@ it("expanded table/list data uses the row window budget even when its root page 
         nested: {rootCount: 10000, rootLoaded: 50, matchedCount: 10001, page: 1, pageSize: 50}};
     for (const avType of ["table", "list"]) {
         mounted.length = 0;
-        render(data, {dataset: {avType}, setAttribute: (key: string) => attributes.push(key)});
+        const initialHTML = render(data, {dataset: {avType}, setAttribute: (key: string) => attributes.push(key)});
         assert.equal(mounted.length, 100);
         assert.equal(mounted[99], 99);
         assert.equal(attributes.at(-1), "v-scroll");
+        assert.match(initialHTML, /av__spacer--bottom.*data-row-count="401".*height: 14436px/);
         mounted.length = 0;
-        render(data, {dataset: {avType}, setAttribute: () => {}},
+        const restoredHTML = render(data, {dataset: {avType}, setAttribute: () => {}},
             {renderedStart: 150, renderedEnd: 249, topSpacerHeight: 5400});
         assert.equal(mounted.length, 100);
         assert.equal(mounted[0], 150);
         assert.equal(mounted[99], 249);
+        assert.match(restoredHTML, /av__spacer--bottom.*data-row-count="251".*height: 9036px/);
     }
 });

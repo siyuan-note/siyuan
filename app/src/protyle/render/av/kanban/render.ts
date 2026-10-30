@@ -3,7 +3,7 @@ import {guardTemplateHTTPRequest} from "../../../../template/http";
 import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
-import {getSubItemsRequest, reconcileSubItems} from "../subItemsState";
+import {getSubItemsRequest, reconcileSubItems, restoreSubItemsView} from "../subItemsState";
 import {getPublishAVView} from "../publishState";
 import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "../readonlyState";
 import {hasClosestByAttribute} from "../../../util/hasClosest";
@@ -116,6 +116,10 @@ export const renderKanban = async (options: {
             return;
         }
         data = response.data;
+        if (restoreSubItemsView(options.blockElement, options.protyle, data, common.nested, resetData.query.trim())) {
+            await renderKanban(options);
+            return;
+        }
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
         return;

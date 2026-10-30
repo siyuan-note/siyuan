@@ -2122,24 +2122,68 @@ body.mobile-topbar--merged {
 }
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
-  // 按钮留白放在内容内层，避免外层内边距撑大窄列，导致表头与正文错位。
-  & > .av__cellprimary {
-    display: block;
-    padding-right: 69px;
+  // 容器宽度扣除了子条目缩进，操作入口随实际剩余空间切换。
+  & > .av__primary-container {
+    container: av-primary / inline-size;
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
   }
 
-  & > .av__row-actions {
+  .av__cellprimary {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .av__row-actions {
+    align-self: center;
+    position: static;
+    transform: none;
+    padding: 0;
     opacity: 1;
     pointer-events: auto;
+    max-width: 100%;
+    overflow: hidden;
+
+    .av__row-action {
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .av__row-more {
+      display: inline-flex;
+    }
   }
 
-  &[data-align="center"] > .av__cellprimary {
-    padding-left: 69px;
+  &[data-align="right"] .av__row-actions {
+    order: -1;
   }
 
-  &[data-align="right"] > .av__cellprimary {
-    padding-left: 69px;
-    padding-right: 0;
+  &[data-wrap="true"] .av__cellprimary {
+    overflow-wrap: anywhere;
+  }
+}
+
+@container av-primary (min-width: calc(64px + 4em)) {
+  .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions {
+    .av__row-action {
+      display: inline-flex;
+    }
+
+    .av__row-more {
+      display: none;
+    }
+  }
+}
+
+@container av-primary (max-width: calc(32px + 1em)) {
+  .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions {
+    display: none;
   }
 }
 

@@ -1590,7 +1590,7 @@
         left: 5px;
       }
 
-      &[data-align="right"] > .av__row-actions {
+      &[data-align="right"] > .av__primary-container > .av__row-actions {
         right: auto;
         left: 4px;
       }
@@ -3415,7 +3415,7 @@ img.av__cellassetimg {
   display: flex;
   align-items: flex-start;
 
-  > .av__cellprimary {
+  > .av__primary-container > .av__cellprimary {
     min-width: 0;
     flex: 1;
   }

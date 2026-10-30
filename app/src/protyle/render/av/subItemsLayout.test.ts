@@ -86,6 +86,20 @@ const checkLayout = (mobile: boolean) => {
         check.equal(indicator.borderTopWidth, "2px");
         check.equal(indicator.pointerEvents, "none");
         check.notEqual(indicator.backgroundColor, "rgba(0, 0, 0, 0)");
+        if (mobile && type === "table") {
+            const rootCell = root.querySelector<HTMLElement>('.av__cell[data-dtype="block"]');
+            const visibleActions = (element: HTMLElement) => Array.from(element.querySelectorAll<HTMLElement>(".av__row-action"))
+                .filter(button => button.getClientRects().length > 0);
+            rootCell.style.width = "180px";
+            cell.style.width = "180px";
+            check.equal(visibleActions(rootCell).length, 2);
+            check.equal(visibleActions(cell).length, 1);
+            check.equal(visibleActions(cell)[0].dataset.type, "av-row-more");
+            cell.style.width = "25px";
+            check.equal(visibleActions(cell).length, 0);
+            cell.style.width = "340px";
+            check.equal(visibleActions(cell).length, 2);
+        }
     }
     return "sub-items-layout-ok";
 };

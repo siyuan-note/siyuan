@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261030003500"
+		"updated": "20261030030559"
 	},
 	"Children": [
 		{
@@ -235,7 +235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20261024161058"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -393,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20261024161058"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -1840,8 +1840,168 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20261030030559-j5tbfx6",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261030030559-j5tbfx6",
+						"updated": "20261030030559"
+					},
+					"Children": [
+						{
+							"ID": "20261030030559-pk7t44y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261030030559-pk7t44y",
+								"updated": "20261030030559"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "httpGet"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Read public API data. See "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261030003500-nv4y9r3",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Read external API data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "."
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
 				}
 			]
+		},
+		{
+			"ID": "20261030003500-nv4y9r3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030003500-nv4y9r3",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Read external API data"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261030003500-4px4amu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-4px4amu",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document insertion, previews, daily-note content templates, and database template fields can use httpGet to read public HTTP/HTTPS APIs. The initial implementation supports GET only, with no private-network access, proxies, or automatic background approval. The result contains ok, status, body, and error. Parse body with existing functions such as fromJson; responses are never executed as templates."
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-0tzs2wh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-0tzs2wh",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Approval is requested when execution reaches the network function and the actual target is known. Query values and header values are hidden. New targets, different credentials, and redirects require fresh confirmation. Approval resumes the current call without rerunning the template. Execution status appears in the upper-right message area. Closing the window, changing previews, or locking a notebook ends pending work and discards stale results. Calls without an interactive window return interaction_required."
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-sb4ox41",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-sb4ox41",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Optional arguments are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5, where timeout is in seconds and cannot exceed 10. Never place real secrets in templates intended for sharing: templates and their keys may spread through sharing and sync. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically."
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-w4kfdvd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-w4kfdvd",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Identical requests are reused only within one execution and the same data scope and credentials. Database rows share budgets; there is no cross-execution cache or scheduled refresh. Rendering, preview, and insertion require separate approval. Limits per execution: 32 target requests, 1024 function calls, 1 MiB per response, 8 MiB total body data, 30 seconds total network time, and 2 minutes total elapsed time. Confirmation waits at most 1 minute. Template output in a network-enabled execution is limited to 8 MiB in total. Elapsed-time, cancellation, and budget checks occur on HTTP calls or output writes; pure computation with neither calls nor output cannot be preempted."
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-xmtzn6v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030003500-xmtzn6v",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ordinary network failures, denial, and unsuccessful HTTP status codes return error, allowing an ok branch to provide fallback content. Exhausted budgets or an invalid execution discard the result. Daily-note creation saves the document identity before awaiting its content template; interruption retains the created document and does not rerun it. Replace the example URL with your own public API:"
+				}
+			]
+		},
+		{
+			"ID": "20261030003500-bxqawy4",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261030003500-bxqawy4",
+				"updated": "20261030003500"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$r := httpGet \"https://example.com/weather.json\" (dict \"timeout\" 5)}\n.action{if $r.ok}\n.action{$data := fromJson $r.body}\n.action{$data}\n.action{else}\n.action{$r.error}\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
 		},
 		{
 			"ID": "20260904022100-kqbyhrl",
@@ -2186,7 +2346,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210131162806-sk9tg4q",
-				"updated": "20260809232000"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -2225,122 +2385,6 @@
 			"Properties": {
 				"id": "20210131162142-6g1r08m"
 			}
-		},
-		{
-			"ID": "20261030003500-nv4y9r3",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20261030003500-nv4y9r3",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "Read external API data"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20261030003500-4px4amu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-4px4amu",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Document insertion, previews, daily-note content templates, and database template fields can use httpGet to read public HTTP/HTTPS APIs. The initial implementation supports GET only, with no private-network access, proxies, or automatic background approval. The result contains ok, status, body, and error. Parse body with existing functions such as fromJson; responses are never executed as templates."
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-0tzs2wh",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-0tzs2wh",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Approval is requested when execution reaches the network function and the actual target is known. Query values and header values are hidden. New targets, different credentials, and redirects require fresh confirmation. Approval resumes the current call without rerunning the template. Execution status appears in the upper-right message area. Closing the window, changing previews, or locking a notebook ends pending work and discards stale results. Calls without an interactive window return interaction_required."
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-sb4ox41",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-sb4ox41",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Optional arguments are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5, where timeout is in seconds and cannot exceed 10. Never place real secrets in templates intended for sharing: templates and their keys may spread through sharing and sync. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically."
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-w4kfdvd",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-w4kfdvd",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Identical requests are reused only within one execution and the same data scope and credentials. Database rows share budgets; there is no cross-execution cache or scheduled refresh. Rendering, preview, and insertion require separate approval. Limits per execution: 32 target requests, 1024 function calls, 1 MiB per response, 8 MiB total body data, 30 seconds total network time, and 2 minutes total elapsed time. Confirmation waits at most 1 minute. Template output in a network-enabled execution is limited to 8 MiB in total. Elapsed-time, cancellation, and budget checks occur on HTTP calls or output writes; pure computation with neither calls nor output cannot be preempted."
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-xmtzn6v",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261030003500-xmtzn6v",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Ordinary network failures, denial, and unsuccessful HTTP status codes return error, allowing an ok branch to provide fallback content. Exhausted budgets or an invalid execution discard the result. Daily-note creation saves the document identity before awaiting its content template; interruption retains the created document and does not rerun it. Replace the example URL with your own public API:"
-				}
-			]
-		},
-		{
-			"ID": "20261030003500-bxqawy4",
-			"Type": "NodeCodeBlock",
-			"Properties": {
-				"id": "20261030003500-bxqawy4",
-				"updated": "20261030003500"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "dGVtcGxhdGU="
-				},
-				{
-					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$r := httpGet \"https://example.com/weather.json\" (dict \"timeout\" 5)}\n.action{if $r.ok}\n.action{$data := fromJson $r.body}\n.action{$data}\n.action{else}\n.action{$r.error}\n.action{end}\n"
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			],
-			"IsFencedCodeBlock": true
 		}
 	]
 }

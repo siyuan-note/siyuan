@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261028142713"
+		"updated": "20261030030559"
 	},
 	"Children": [
 		{
@@ -3520,7 +3520,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120846-72y7j0d",
-				"updated": "20260902120000"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -3993,6 +3993,31 @@
 			},
 			"AttributeViewID": "20240208163918-rxu3llx",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261030030559-etrddmk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-etrddmk",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板字段可使用 httpGet 读取外部接口数据，执行时需要在当前窗口确认；各行共享请求预算。用法见"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-xwa7tv2",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "从外部接口读取数据"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
 		},
 		{
 			"ID": "20260830120100-a1dspcn",

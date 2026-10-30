@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261028142713"
+		"updated": "20261030030559"
 	},
 	"Children": [
 		{
@@ -3594,7 +3594,7 @@
 			"Properties": {
 				"ID": "20240530101000-gdiaw90",
 				"id": "20240530101000-yinvvxy",
-				"updated": "20261024164212"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -4069,6 +4069,31 @@
 			},
 			"AttributeViewID": "20240530133134-wlxgyny",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261030030559-v5eg83v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-v5eg83v",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート属性では httpGet で外部 API のデータを取得できます。実行時に現在のウィンドウで確認が必要です。リクエストの上限は行間で共有されます。使い方は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-hhftroa",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "外部 API のデータを取得"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をご覧ください。"
+				}
+			]
 		},
 		{
 			"ID": "20260830120300-a1dspja",

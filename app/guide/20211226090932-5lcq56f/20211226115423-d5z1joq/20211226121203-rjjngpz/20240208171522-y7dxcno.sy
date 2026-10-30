@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261028142713"
+		"updated": "20261030030559"
 	},
 	"Children": [
 		{
@@ -3520,7 +3520,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172038-fewwv8i",
-				"updated": "20260902120000"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -3993,6 +3993,31 @@
 			},
 			"AttributeViewID": "20240208172113-d44j7tk",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261030030559-99ma3mg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-99ma3mg",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本欄位可使用 httpGet 讀取外部介面資料，執行時需要在目前視窗確認；各列共用請求預算。用法見"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-hjsgtsl",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "讀取外部介面資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
 		},
 		{
 			"ID": "20260830120200-a1dsptw",

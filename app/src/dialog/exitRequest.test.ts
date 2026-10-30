@@ -54,6 +54,7 @@ const fixture = () => {
                 return {element: {contains: () => false}, destroy: confirmation.cancel};
             }};
             if (name === "../util/escape") return {escapeHtml: (value: string) => value};
+            if (name === "../util/hostCapabilities") return {sanitizeKernelHTML: (value: string) => value};
             if (name === "../util/fetch") return {fetchSyncPost: (...args: unknown[]) => {
                 requests.push(args);
                 return new Promise((done, fail) => {

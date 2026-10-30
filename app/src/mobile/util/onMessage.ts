@@ -14,6 +14,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
+import {updateExitProgressStatus} from "../../dialog/exitRequest";
 import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import type {App} from "../../index";
 import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
@@ -234,6 +235,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 transactionError(data.msg);
                 break;
             case"statusbar":
+                updateExitProgressStatus(data.msg);
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
                     window.siyuan.config.appearance.hideStatusBar) {
                     return;

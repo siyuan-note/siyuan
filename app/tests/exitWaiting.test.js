@@ -35,7 +35,7 @@ const createExitDialog = (sources, languages, mobile) => {
         "../block/panelOwnership": {destroyDialogBlockPanels() {}, getDialogBlockPanel() {}},
         "./anchoredInput": {getAnchoredInputMask() {}},
     });
-    const {requestSystemExit} = load(sources.exit, {
+    const {requestSystemExit, updateExitProgressStatus} = load(sources.exit, {
         "./index": {Dialog},
         "./progress": progress,
         "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
@@ -44,7 +44,9 @@ const createExitDialog = (sources, languages, mobile) => {
         })},
         "../util/fetchTimeout": {withFetchTimeout: request => request()},
         "../util/escape": {escapeHtml},
+        "../util/hostCapabilities": {sanitizeKernelHTML: escapeHtml},
     });
+    window.updateExitProgressStatus = updateExitProgressStatus;
     const schedule = window.setTimeout;
     window.setTimeout = (callback, delay, ...args) => {
         if (delay === 12000) window.offerExitSync = callback;
@@ -176,8 +178,36 @@ if (process.versions.electron && process.type === "browser") {
                 assert.ok(merged.status.includes(languages._kernel[81]));
                 assert.equal(merged.duplicates, 0);
                 assert.ok(merged.error.includes("Unrelated warning"));
+                const detail = "Uploading 2/10 <notes> " + "long-file-name-".repeat(30);
+                const statusUpdate = await win.webContents.executeJavaScript(`(() => {
+                    window.updateExitProgressStatus("Scanning files");
+                    window.updateExitProgressStatus(${JSON.stringify(detail)});
+                    const root = document.getElementById("exitProgress");
+                    const status = root.querySelector('[data-type="status-message"]');
+                    const bounds = root.querySelector(".b3-dialog__loading").getBoundingClientRect();
+                    return {text: status.textContent, count: root.querySelectorAll('[data-type="status-message"]').length,
+                        markup: status.querySelector("notes"), overflow: status.scrollWidth > status.clientWidth,
+                        waiting: root.querySelector('[data-type="message"]').textContent,
+                        visible: bounds.left >= 0 && bounds.right <= innerWidth && bounds.top >= 0 && bounds.bottom <= innerHeight};
+                })()`);
+                assert.equal(statusUpdate.text, detail);
+                assert.equal(statusUpdate.count, 1);
+                assert.equal(statusUpdate.markup, null);
+                assert.equal(statusUpdate.overflow, false);
+                assert.equal(statusUpdate.visible, true);
+                assert.ok(statusUpdate.waiting.includes(languages.exitWaiting));
                 await capture("exit");
                 await win.webContents.executeJavaScript("window.offerExitSync();");
+                const afterAction = await win.webContents.executeJavaScript(`(() => {
+                    const button = document.querySelector("#exitProgress button");
+                    window.updateExitProgressStatus("Uploading 3/10");
+                    return {text: document.querySelector('#exitProgress [data-type="status-message"]').textContent,
+                        sameButton: button === document.querySelector("#exitProgress button"),
+                        focused: document.activeElement === button};
+                })()`);
+                assert.equal(afterAction.text, "Uploading 3/10");
+                assert.equal(afterAction.sameButton, true);
+                assert.equal(afterAction.focused, true);
                 await capture("exit-action");
                 await win.webContents.executeJavaScript("window.failExit(new Error('offline')); window.exitResult;");
                 const failed = await win.webContents.executeJavaScript(`(() => {
@@ -194,6 +224,8 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(failed.focus, true);
                 assert.equal(failed.message, languages.exitWaitFailed);
                 assert.equal(failed.response, undefined);
+                await win.webContents.executeJavaScript('window.updateExitProgressStatus("Late status");');
+                assert.equal(await win.webContents.executeJavaScript('!!document.getElementById("exitProgress")'), false);
                 await capture("failure");
                 win.destroy();
             }

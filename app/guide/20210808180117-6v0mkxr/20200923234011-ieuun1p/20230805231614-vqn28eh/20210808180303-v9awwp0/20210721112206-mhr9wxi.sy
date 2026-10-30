@@ -964,7 +964,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
+					"Data": "While waiting to exit, the exit dialog displays incoming status bar messages so you can follow the current sync status. If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
 				}
 			]
 		},

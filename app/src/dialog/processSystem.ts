@@ -22,7 +22,7 @@ import {saveMobileLayout} from "../mobile/util/saveLayout";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
-import {requestSystemExit} from "./exitRequest";
+import {requestSystemExit, updateExitProgressStatus} from "./exitRequest";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 /// #if MOBILE
 import {getMobileBacklinkPanels} from "../mobile/util/backlinkPanels";
@@ -323,6 +323,7 @@ export const refreshFileTree = (cb?: () => void) => {
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
+    updateExitProgressStatus(data.msg);
     const msgElement = document.querySelector("#status .status__msg");
     if (msgElement) {
         clearTimeout(statusTimeout);

@@ -65,7 +65,7 @@ export class DocTreeController {
     private rowHeight = 28;
     private rowSpacing = 0;
     private mounted = new Map<string, {element: HTMLElement, signature: string}>();
-    private inFlight = new Map<string, Promise<void>>();
+    private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean}>();
     private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
     private errors = new Set<string>();
     private observer: ResizeObserver;
@@ -957,7 +957,7 @@ export class DocTreeController {
         let stale = false;
         const key = `${directory.key}:${offset}:${directoryGeneration}:${generation}`;
         if (this.inFlight.has(key)) {
-            return this.inFlight.get(key);
+            return this.inFlight.get(key).request;
         }
         const request = this.limited(async () => {
             if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation) {
@@ -1005,8 +1005,13 @@ export class DocTreeController {
                 // 当前刷新可能正等待本次 load，不能反过来等待队列中的刷新。
                 if (!refreshing) { await reload; }
             }
-        }).finally(() => this.inFlight.delete(key));
-        this.inFlight.set(key, request);
+        }).finally(() => {
+            this.inFlight.delete(key);
+            this.scheduleRender();
+        });
+        this.inFlight.set(key, {request, directory, isCurrent: () =>
+            generation === this.generation && directoryGeneration === directory.generation});
+        this.scheduleRender();
         return request;
     }
 
@@ -1087,7 +1092,14 @@ export class DocTreeController {
         } else {
             row.removeAttribute("aria-expanded");
         }
-        row.querySelector(".b3-list-item__arrow")?.classList.toggle("b3-list-item__arrow--open", this.isExpanded(item.occurrenceKey));
+        const expanded = this.isExpanded(item.occurrenceKey);
+        const loading = expanded && Array.from(this.inFlight.values()).some(pending =>
+            pending.directory === this.model.directory(item) && pending.isCurrent());
+        row.setAttribute("aria-busy", String(loading));
+        const arrow = row.querySelector(".b3-list-item__arrow");
+        arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
+        arrow?.classList.toggle("fn__rotate", loading);
+        arrow?.querySelector("use")?.setAttribute("xlink:href", loading ? "#iconRefresh" : "#iconRight");
     }
 
     private render() {
@@ -1161,8 +1173,9 @@ export class DocTreeController {
                 placeholder.className = "b3-list-item";
                 placeholder.style.opacity = "0.4";
                 const directory = this.model.directory(projected.parent);
-                placeholder.textContent = this.errors.has(directory.key) ? window.siyuan?.languages?.retry || "" :
-                    window.siyuan?.languages?.loading || "";
+                const failed = this.errors.has(directory.key);
+                placeholder.textContent = failed ? window.siyuan?.languages?.retry || "" : "";
+                if (!failed) { placeholder.setAttribute("aria-hidden", "true"); }
                 children.push(placeholder);
                 if (!this.errors.has(directory.key)) {
                     void this.load(projected.parent, projected.index).catch((): void => undefined);

@@ -31,14 +31,14 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").test("virtual document trees preserve bounded rendering, selection, expansion, and notebook isolation", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 45000,
+        timeout: 60000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-file-tree-selection-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
             assert.match(stdout, /File tree selection cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

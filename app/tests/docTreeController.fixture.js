@@ -77,7 +77,7 @@ exports.cases = async sources => {
                 const row = document.createElement("li");
                 row.className = "b3-list-item";
                 row.dataset.type = item.kind === "notebook" ? "navigation-root" : "navigation-file";
-                row.innerHTML = '<span class="b3-list-item__toggle"><span class="b3-list-item__arrow"></span></span><span class="b3-list-item__text"></span>';
+                row.innerHTML = '<span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__text"></span>';
                 row.querySelector(".b3-list-item__text").textContent = item.name;
                 return row;
             }, onSelectionProgress: (loaded, total, cancel) => progress.push({loaded, total, cancel}),
@@ -540,9 +540,22 @@ exports.cases = async sources => {
         await controller.reload();
         await frame();
         check.equal(element.querySelector("[data-tree-loading]").textContent, "Retry");
-        source.range = original;
+        const root = controller.getMountedElement("notebook:box");
+        check.equal(root.getAttribute("aria-busy"), "false", "a failed range stops the loading arrow");
+        check.equal(root.querySelector(".fn__rotate"), null);
+        let retry;
+        source.range = async request => {
+            await new Promise(resolve => { retry = resolve; });
+            return original(request);
+        };
         element.querySelector("[data-tree-loading]").click();
         await frame();
+        check.equal(root.getAttribute("aria-busy"), "true", "retrying animates the parent arrow");
+        check.equal(root.querySelector(".fn__rotate use").getAttribute("xlink:href"), "#iconRefresh");
+        check.equal(element.querySelector("[data-tree-loading]").textContent, "");
+        retry();
+        await frame();
+        check.equal(root.getAttribute("aria-busy"), "false");
         check.ok(controller.getMountedElement("notebook:box/d0"));
         fixture.destroy();
     }
@@ -672,6 +685,116 @@ exports.cases = async sources => {
         fullyVisible(await controller.locate("box", "d180"), element);
         await controller.focusRelative(1);
         fullyVisible(controller.getMountedElement("notebook:box/d181"), element);
+        fixture.destroy();
+    }
+    {
+        const fixture = make(12);
+        const {controller, element, source, directories} = fixture;
+        directories.get("")[0] = file("d0", "", 2);
+        directories.get("")[1] = file("d1", "", 2);
+        directories.set("d0", [file("a", "d0"), file("b", "d0")]);
+        directories.set("d1", [file("c", "d1"), file("d", "d1")]);
+        await controller.toggle("notebook:box", true);
+        const range = source.range;
+        const releases = new Map();
+        source.range = async request => {
+            await new Promise(resolve => releases.set(request.parentID, resolve));
+            return range(request);
+        };
+        const arrowState = key => {
+            const row = controller.getMountedElement(key);
+            const arrow = row.querySelector(".b3-list-item__arrow");
+            return {busy: row.getAttribute("aria-busy"), spinning: arrow.classList.contains("fn__rotate"),
+                icon: arrow.querySelector("use").getAttribute("xlink:href"),
+                expanded: arrow.classList.contains("b3-list-item__arrow--open")};
+        };
+        const busy = {busy: "true", spinning: true, icon: "#iconRefresh", expanded: true};
+        const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true};
+        const first = controller.toggle("notebook:box/d0", true);
+        const second = controller.toggle("notebook:box/d1", true);
+        await frame();
+        check.deepEqual(arrowState("notebook:box/d0"), busy, "expanding a slow directory animates its arrow");
+        check.deepEqual(arrowState("notebook:box/d1"), busy);
+        element.querySelectorAll("[data-tree-loading]").forEach(row => {
+            check.equal(row.textContent, "", "unloaded ranges do not show a loading message");
+            check.equal(row.getAttribute("aria-hidden"), "true");
+        });
+        releases.get("d0")();
+        await first;
+        await frame();
+        check.deepEqual(arrowState("notebook:box/d0"), idle, "completed siblings restore their expansion arrow");
+        check.deepEqual(arrowState("notebook:box/d1"), busy, "another pending directory keeps animating");
+        await controller.toggle("notebook:box/d1", false);
+        check.deepEqual(arrowState("notebook:box/d1"), {...idle, expanded: false}, "collapsing stops the visible animation");
+        const reopened = controller.toggle("notebook:box/d1", true);
+        await frame();
+        check.deepEqual(arrowState("notebook:box/d1"), busy, "reopening shares the pending request and restores animation");
+        releases.get("d1")();
+        await Promise.all([second, reopened]);
+        await frame();
+        check.deepEqual(arrowState("notebook:box/d1"), idle);
+        check.ok(controller.getMountedElement("notebook:box/d1/c"));
+        await controller.toggle("notebook:box/d1", false);
+        await controller.toggle("notebook:box/d1", true);
+        check.deepEqual(arrowState("notebook:box/d1"), idle, "cached expansions keep the ordinary arrow");
+        fixture.destroy();
+    }
+    {
+        const fixture = make(2);
+        const {controller, element, source, directories} = fixture;
+        const range = source.range;
+        let release;
+        let requests = 0;
+        source.range = async request => {
+            requests++;
+            await new Promise(resolve => { release = resolve; });
+            return range(request);
+        };
+        const opening = controller.toggle("notebook:box", true);
+        await frame();
+        check.equal(element.querySelector("[data-tree-key]").getAttribute("aria-busy"), "true",
+            "notebook expansion displays loading on its own arrow");
+        release();
+        await opening;
+        directories.set("parent", [file("child", "parent")]);
+        controller.setRoots(["first", "second"].map(occurrenceKey => ({id: "parent", notebookId: "box",
+            kind: "document", name: "Parent", path: "/parent.sy", subFileCount: 1, occurrenceKey})));
+        const first = controller.toggle("first", true);
+        const second = controller.toggle("second", true);
+        await frame();
+        check.equal(requests, 2, "duplicate pinned occurrences share one directory request");
+        for (const key of ["first", "second"]) {
+            check.equal(controller.getMountedElement(key).getAttribute("aria-busy"), "true");
+        }
+        release();
+        await Promise.all([first, second]);
+        await frame();
+        for (const key of ["first", "second"]) {
+            check.equal(controller.getMountedElement(key).getAttribute("aria-busy"), "false");
+            check.ok(controller.getMountedElement(key + "/child"));
+        }
+        fixture.destroy();
+    }
+    {
+        const fixture = make(64);
+        const {controller, source} = fixture;
+        await controller.toggle("notebook:box", true);
+        const range = source.range;
+        let release;
+        source.range = async request => {
+            if (request.offset === 32) { await new Promise(resolve => { release = resolve; }); }
+            return range(request);
+        };
+        const oldPage = controller.itemAtDirectoryIndex("notebook:box", 40);
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box").getAttribute("aria-busy"), "true");
+        fixture.revise("two");
+        await controller.locate("box", "d0");
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box").getAttribute("aria-busy"), "false",
+            "obsolete pages cannot keep a revised directory's loading arrow spinning");
+        release();
+        await oldPage;
         fixture.destroy();
     }
     return "File tree selection cases passed";

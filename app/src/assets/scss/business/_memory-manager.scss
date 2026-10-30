@@ -59,18 +59,14 @@
     &:hover, &:focus-visible { background-color: var(--b3-theme-primary-lightest); }
   }
 
-  &__editor,
-  &__model {
+  &__detail {
     border-top: 1px solid var(--b3-border-color);
     padding-top: 16px;
-    h3 { margin: 0; font-size: 16px; }
-    > * + * { margin-top: 12px; }
   }
 
-  &__fields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+  &__detail,
+  &__model {
+    > * + * { margin-top: 12px; }
   }
 
   &__field {
@@ -82,8 +78,18 @@
 
   textarea { resize: vertical; min-height: 96px; }
   input, select, textarea { box-sizing: border-box; max-width: 100%; }
-  summary { cursor: pointer; padding: 4px 0; }
-  details > .memory-manager__fields { margin-top: 12px; }
+  summary {
+    list-style: none;
+    &::-webkit-details-marker { display: none; }
+  }
+  details[open] > summary .b3-list-item__arrow { transform: rotate(90deg); }
+
+  &__content {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+  }
 
   &__evidence {
     white-space: pre-wrap;
@@ -98,7 +104,6 @@
 @media (max-width: 600px) {
   .memory-manager {
     padding: 16px;
-    &__fields { grid-template-columns: minmax(0, 1fr); }
     &__actions .b3-button { min-height: 36px; white-space: normal; }
   }
 }

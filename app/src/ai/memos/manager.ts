@@ -6,7 +6,7 @@ import {escapeHtmlTextAndAttr as escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
 import {isMobile} from "../../util/functions";
 import type {AIMemoryRecord, AIMemoryTaskData} from "../../types/api";
-import {MemoryEditorState} from "./state";
+import {MemoryEditorState, memoryModelOptions} from "./state";
 
 // 当前页面重新打开管理器时仍可查询或取消已启动任务，不承诺重启后恢复。
 let activeMemoryTask = "";
@@ -21,14 +21,17 @@ export const openMemoryManager = () => {
     let offset = 0;
     let closed = false;
     let busy = false;
-    let dirty = false;
+    let taskDirty = false;
+    let taskSubmitting = false;
+    let taskRunning = false;
+    let submittedInput: {id: string; text: string};
     let listGeneration = 0;
     let taskId = activeMemoryTask;
     let taskGeneration = 0;
-    let displayedTaskId = "";
     let pollTimer: number;
     const button = (action: string, title: string, primary = false) =>
         `<button type="button" class="b3-button ${primary ? "" : "b3-button--outline"}" data-memory-action="${action}">${escapeHtml(title)}</button>`;
+    const summary = (title: string) => `<summary class="b3-list-item"><svg class="b3-list-item__arrow" aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${escapeHtml(title)}</span></summary>`;
     const optionLabels: Record<string, string> = {
         fact: lang.aiMemoryKindFact, preference: lang.aiMemoryKindPreference,
         background: lang.aiMemoryKindBackground, decision: lang.aiMemoryKindDecision,
@@ -36,74 +39,81 @@ export const openMemoryManager = () => {
         review: lang.aiMemoryStateReview, disabled: lang.aiMemoryStateDisabled,
         superseded: lang.aiMemoryStateSuperseded,
     };
-    const select = (field: string, values: string[]) => `<select class="b3-select" aria-label="${escapeHtml(field === "kind" ? lang.aiMemoryKind : lang.aiMemoryState)}" data-memory-field="${field}">${values.map(value =>
-        `<option value="${value}">${escapeHtml(optionLabels[value])}</option>`).join("")}</select>`;
     const dialog = new Dialog({
         title: lang.aiMemory,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
 <p class="memory-manager__hint">${escapeHtml(lang.aiMemoryTip)}</p>
+<section class="memory-manager__model" data-memory-model>
+<textarea class="b3-text-field fn__block" data-memory-task-input rows="4" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
+<p class="memory-manager__hint" data-memory-model-hint role="status" hidden></p>
+<div class="memory-manager__actions">${button("maintain", lang.aiMemoryOrganize, true)}${button("cancel", lang.cancel)}${button("task", lang.refresh)}</div>
+<label class="memory-manager__field" data-memory-task-history hidden>${lang.aiMemoryTaskHistory}<select class="b3-select fn__block" data-memory-task-choice></select></label>
+<pre class="memory-manager__evidence" data-memory-task-status role="status" aria-live="polite"></pre></section>
 <div class="memory-manager__actions"><input class="b3-text-field fn__flex-1" data-memory-query aria-label="${escapeHtml(lang.search)}" placeholder="${escapeHtml(lang.search)}">${button("search", lang.search)}</div>
-<div class="memory-manager__actions">${button("new", lang.new, true)}${button("refresh", lang.refresh)}${button("overview", lang.aiMemoryOverview)}</div>
+<div class="memory-manager__actions">${button("refresh", lang.refresh)}${button("overview", lang.aiMemoryOverview)}</div>
 <p class="memory-manager__hint" data-memory-status role="status" aria-live="polite"></p>
 <div class="memory-manager__empty" data-memory-empty hidden><strong data-memory-empty-title></strong><p class="memory-manager__hint" data-memory-empty-tip></p></div>
 <div class="memory-manager__list" data-memory-list></div>
 <div class="memory-manager__actions" data-memory-pagination hidden>${button("previous", lang.previous)}${button("next", lang.next)}</div>
-<section class="memory-manager__editor" data-memory-editor hidden>
-<h3 data-memory-editor-title>${lang.new}</h3>
-<label class="memory-manager__field">${lang.text}<textarea class="b3-text-field fn__block" data-memory-field="content" rows="4" placeholder="${escapeHtml(lang.aiMemoryContentTip)}"></textarea></label>
-<div class="memory-manager__fields"><label class="memory-manager__field">${lang.aiMemoryKind}${select("kind", ["fact", "preference", "background", "decision"])}</label><label class="memory-manager__field">${lang.aiMemoryState}${select("state", ["active", "candidate", "review", "disabled", "superseded"])}</label></div>
-<details><summary>${lang.aiMemoryDetails}</summary>
-<div class="memory-manager__fields"><label class="memory-manager__field">${lang.subject}<input class="b3-text-field" data-memory-field="subject" value="user"><span class="memory-manager__hint">${escapeHtml(lang.aiMemorySubjectTip)}</span></label>
-<label class="memory-manager__field">${lang.aiMemoryScope}<input class="b3-text-field" data-memory-field="scope" value="workspace"><span class="memory-manager__hint">${escapeHtml(lang.aiMemoryScopeTip)}</span></label></div>
+<section class="memory-manager__detail" data-memory-detail hidden>
+<p class="memory-manager__hint" data-memory-record-status></p>
+<pre class="memory-manager__content" data-memory-content></pre>
+<details>${summary(lang.aiMemoryDetails)}
 <pre class="memory-manager__evidence" data-memory-evidence></pre></details>
-<div class="memory-manager__actions">${button("save", lang.save, true)}${button("disable", lang.disable)}${button("forget", lang.aiMemoryForget)}</div></section>
-<details class="memory-manager__model" data-memory-model><summary>${lang.aiMemoryOrganize}</summary>
-<label class="memory-manager__field">${lang.text}<span class="memory-manager__hint">${escapeHtml(lang.aiMemoryTaskInputTip)}</span><textarea class="b3-text-field fn__block" data-memory-task-input rows="4" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea></label>
-<div class="memory-manager__actions">${button("maintain", lang.aiMemoryOrganize, true)}${button("cancel", lang.cancel)}${button("task", lang.refresh)}</div>
-<label class="memory-manager__field" data-memory-task-history hidden>${lang.aiMemoryTaskHistory}<select class="b3-select fn__block" data-memory-task-choice></select></label>
-<pre class="memory-manager__evidence" data-memory-task-status role="status" aria-live="polite"></pre></details>
+<div class="memory-manager__actions">${button("enable", lang.enable)}${button("disable", lang.disable)}${button("forget", lang.aiMemoryForget)}</div></section>
 </div>`,
         beforeClose: () => {
-            if (busy) { return false; }
-            if (!dirty) { return true; }
-            confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { dirty = false; dialog.destroy(); });
+            if (busy || taskSubmitting) { return false; }
+            if (!taskDirty) { return true; }
+            confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
             return false;
         },
         destroyCallback: () => {
             closed = true;
             state.nextRead();
+            taskGeneration++;
             window.clearTimeout(pollTimer);
         },
     });
     const root = dialog.element;
-    const field = (name: string) => root.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[data-memory-field="${name}"]`);
+    const taskInput = root.querySelector<HTMLTextAreaElement>("[data-memory-task-input]");
     const status = root.querySelector<HTMLElement>("[data-memory-status]");
     const taskStatus = root.querySelector<HTMLElement>("[data-memory-task-status]");
     const taskChoice = root.querySelector<HTMLSelectElement>("[data-memory-task-choice]");
     const action = (name: string) => root.querySelector<HTMLButtonElement>(`[data-memory-action="${name}"]`);
     const taskLabels: Record<string, string> = {queued: lang.agentConfirmPending, running: lang.loading,
             completed: lang.taskStatusDone, failed: lang.embeddingFailed, cancelled: lang.cancel};
+    const updateModel = () => {
+        const ai = window.siyuan.config.ai;
+        const id = ai?.memory?.modelId || "";
+        const ready = !!id && memoryModelOptions(ai?.providers || [], id).some(option => option.id === id && !option.unavailable);
+        const hint = root.querySelector<HTMLElement>("[data-memory-model-hint]");
+        hint.hidden = ready;
+        hint.textContent = ready ? "" : `${lang.aiSelectModel} (${lang.config} - ${lang.ai} - ${lang.aiMemory})`;
+        action("maintain").disabled = isReadOnly() || !ready || taskSubmitting || taskRunning;
+        taskInput.disabled = isReadOnly() || taskSubmitting;
+        return ready;
+    };
     const renderTask = (task: AIMemoryTaskData) => {
-        if (displayedTaskId !== task.taskId) {
-            root.querySelector<HTMLDetailsElement>("[data-memory-model]").open = true;
-            displayedTaskId = task.taskId;
+        if (task.state === "completed" && submittedInput?.id === task.taskId && submittedInput.text === taskInput.value) {
+            taskDirty = false;
         }
         taskStatus.textContent = [taskLabels[task.state] || task.state, task.error,
             ...(task.results || []).map(result => `${result.id}: ${result.saved ? lang.save : result.error}`),
             task.overviewPending ? lang.aiMemoryPending : ""].filter(Boolean).join("\n");
-        const running = ["queued", "running"].includes(task.state);
-        action("cancel").disabled = isReadOnly() || !running;
-        action("maintain").disabled = isReadOnly() || running;
+        taskRunning = ["queued", "running"].includes(task.state);
+        action("cancel").disabled = isReadOnly() || !taskRunning;
+        updateModel();
         action("task").disabled = false;
-        return running;
+        return taskRunning;
     };
     const setBusy = (value: boolean) => {
         busy = value;
-        root.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
-            "[data-memory-editor] button, [data-memory-field], [data-memory-action=new]",
-        ).forEach(element => { element.disabled = value || isReadOnly(); });
+        action("enable").hidden = !selected || !["candidate", "review", "disabled"].includes(selected.state);
+        action("enable").disabled = value || isReadOnly() || !selected;
         action("disable").disabled = value || isReadOnly() || !selected;
+        action("disable").hidden = !selected || selected.state === "disabled" || selected.state === "superseded";
         action("forget").disabled = value || isReadOnly() || !selected;
     };
     const read = async (id: string, mutationRefresh = false) => {
@@ -122,19 +132,17 @@ export const openMemoryManager = () => {
             showMessage(response.msg);
             return;
         }
-        root.querySelector<HTMLElement>("[data-memory-editor]").hidden = false;
-        root.querySelector("[data-memory-editor-title]").textContent = lang.edit;
+        root.querySelector<HTMLElement>("[data-memory-detail]").hidden = false;
         selected = response.data.record;
         revision = response.data.revision;
-        for (const key of ["subject", "scope", "kind", "state", "content"] as const) {
-            field(key).value = selected[key];
-        }
+        root.querySelector("[data-memory-content]").textContent = selected.content;
+        root.querySelector("[data-memory-record-status]").textContent = `${optionLabels[selected.state] || selected.state} · ${optionLabels[selected.kind] || selected.kind}`;
         root.querySelector("[data-memory-evidence]").textContent = JSON.stringify({id: selected.id,
+            subject: selected.subject, scope: selected.scope,
             created: selected.created, updated: selected.updated, confirmed: selected.confirmed,
             validFrom: selected.validFrom, validUntil: selected.validUntil, reason: selected.reason,
             supersedes: selected.supersedes, sources: selected.sources}, null, 2);
         state.committed();
-        dirty = false;
         setBusy(busy);
     };
     const list = async () => {
@@ -157,19 +165,13 @@ export const openMemoryManager = () => {
             item.type = "button";
             item.className = "b3-list-item memory-manager__record";
             item.textContent = `[${optionLabels[record.state] || record.state}] ${record.content.slice(0, 160)}`;
-            item.addEventListener("click", () => {
-                if (dirty) {
-                    confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { void read(record.id); });
-                } else {
-                    void read(record.id);
-                }
-            });
+            item.addEventListener("click", () => { void read(record.id); });
             container.append(item);
         }
         root.querySelector<HTMLElement>("[data-memory-empty]").hidden = records.length > 0;
         const searching = root.querySelector<HTMLInputElement>("[data-memory-query]").value.trim() !== "";
         root.querySelector("[data-memory-empty-title]").textContent = searching || offset > 0 ? lang.aiMemoryNoResults : lang.aiMemoryEmpty;
-        root.querySelector("[data-memory-empty-tip]").textContent = searching || offset > 0 ? "" : lang.aiMemoryEmptyTip;
+        root.querySelector("[data-memory-empty-tip]").textContent = searching || offset > 0 ? "" : lang.aiMemoryTaskInputTip;
         root.querySelector<HTMLElement>("[data-memory-pagination]").hidden = offset === 0 && records.length < 50;
         status.textContent = [response.data.incomplete ? lang.aiMemoryIncomplete : (records.length ? `${offset + 1}–${offset + records.length}` : ""),
             ...(response.data.errors || [])].join("\n");
@@ -200,13 +202,12 @@ export const openMemoryManager = () => {
         taskChoice.disabled = !taskId;
         root.querySelector<HTMLElement>("[data-memory-task-history]").hidden = !taskId;
     };
-    const save = async (disable = false) => {
-        if (busy || isReadOnly()) {
+    const setRecordState = async (nextState: "active" | "disabled") => {
+        if (!selected || busy || isReadOnly() || closed) {
             return;
         }
-        const draft = {id: selected?.id, revision, content: field("content").value,
-            kind: field("kind").value, subject: field("subject").value, scope: field("scope").value,
-            state: disable ? "disabled" : field("state").value};
+        const draft = {id: selected.id, revision, content: selected.content,
+            kind: selected.kind, subject: selected.subject, scope: selected.scope, state: nextState};
         const operationId = state.operationFor(JSON.stringify(draft), genUUID);
         state.nextRead();
         setBusy(true);
@@ -218,13 +219,9 @@ export const openMemoryManager = () => {
             }
             if (response.data.saved) {
                 state.committed();
-                // 确认保存后立即采用新身份与修订，随后读取失败不能把重试变成重复新建。
                 revision = response.data.revision;
-                selected = {...draft, id: response.data.id, revision, sources: selected?.sources || [],
-                    created: selected?.created || "", updated: "", confirmed: selected?.confirmed || "",
-                    validFrom: selected?.validFrom || "", validUntil: selected?.validUntil || "",
-                    reason: selected?.reason || "", supersedes: selected?.supersedes || ""};
-                dirty = false;
+                selected = {...selected, state: nextState, revision};
+                root.querySelector("[data-memory-record-status]").textContent = `${optionLabels[selected.state]} · ${optionLabels[selected.kind] || selected.kind}`;
                 await read(response.data.id, true);
                 await list();
                 status.textContent = response.data.overviewPending ? lang.aiMemoryPending : lang.save;
@@ -233,25 +230,18 @@ export const openMemoryManager = () => {
             setBusy(false);
         }
     };
-    const reset = (keepBusy = false, showEditor = true) => {
-        root.querySelector<HTMLElement>("[data-memory-editor]").hidden = !showEditor;
-        root.querySelector("[data-memory-editor-title]").textContent = lang.new;
+    const reset = (keepBusy = false) => {
+        root.querySelector<HTMLElement>("[data-memory-detail]").hidden = true;
         state.nextRead();
         state.committed();
-        dirty = false;
         selected = undefined;
         revision = "missing";
-        field("subject").value = "user";
-        field("scope").value = "workspace";
-        field("kind").value = "fact";
-        field("state").value = "active";
-        field("content").value = "";
+        root.querySelector("[data-memory-content]").textContent = "";
         root.querySelector("[data-memory-evidence]").textContent = "";
         setBusy(keepBusy);
     };
-    const markDirty = () => { if (!busy) { dirty = true; state.nextRead(); } };
-    root.querySelector("[data-memory-editor]").addEventListener("input", markDirty);
-    root.querySelector("[data-memory-editor]").addEventListener("change", markDirty);
+    taskInput.addEventListener("input", () => { taskDirty = !!taskInput.value.trim(); updateModel(); });
+    taskInput.addEventListener("focus", updateModel);
     const poll = async () => {
         if (!taskId || closed) {
             return;
@@ -263,6 +253,17 @@ export const openMemoryManager = () => {
         }
         if (response.code !== 0) {
             taskStatus.textContent = response.msg;
+            if (response.msg === "memory task unavailable; retry explicitly") {
+                if (activeMemoryTask === taskId) { activeMemoryTask = ""; }
+                taskId = "";
+                taskRunning = false;
+                taskChoice.value = "";
+                taskChoice.disabled = true;
+                root.querySelector<HTMLElement>("[data-memory-task-history]").hidden = true;
+                action("cancel").disabled = true;
+                action("task").disabled = true;
+                updateModel();
+            }
             return;
         }
         const running = renderTask(response.data);
@@ -279,6 +280,7 @@ export const openMemoryManager = () => {
         if (event.key === "Enter") { offset = 0; void list().catch(error => { status.textContent = String(error); }); }
     });
     taskChoice.addEventListener("change", () => {
+        if (taskSubmitting) { return; }
         taskId = taskChoice.value;
         activeMemoryTask = taskId;
         window.clearTimeout(pollTimer);
@@ -291,13 +293,18 @@ export const openMemoryManager = () => {
         }
         const run = async () => {
             switch (target.dataset.memoryAction) {
-                case "new":
-                    if (dirty) { confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => reset()); } else { reset(); }
+                case "enable": {
+                    if (!selected || busy || isReadOnly() || !["candidate", "review", "disabled"].includes(selected.state)) { break; }
+                    const id = selected.id;
+                    const expected = revision;
+                    confirmDialog(lang.enable, escapeHtml(selected.content), () => {
+                        if (selected?.id === id && revision === expected) { void setRecordState("active").catch(error => showMessage(String(error))); }
+                    });
                     break;
-                case "save": await save(); break;
-                case "disable": await save(true); break;
+                }
+                case "disable": await setRecordState("disabled"); break;
                 case "search": offset = 0; await list(); break;
-                case "refresh": await list(); break;
+                case "refresh": updateModel(); await list(); break;
                 case "previous": offset = Math.max(0, offset - 50); await list(); break;
                 case "next": offset += 50; await list(); break;
                 case "overview": {
@@ -320,7 +327,7 @@ export const openMemoryManager = () => {
                             const response = await fetchSyncPost("/api/ai/memory/forget", {id, revision: expected, operationId});
                             if (response.code !== 0) { showMessage(response.msg); return; }
                             if (response.data.saved) {
-                                reset(true, false);
+                                reset(true);
                                 if (response.data.cleanupPending) { showMessage(lang.aiMemoryCleanupPending); }
                                 await list();
                             }
@@ -329,17 +336,30 @@ export const openMemoryManager = () => {
                     break;
                 }
                 case "maintain": {
-                    if (isReadOnly()) { break; }
-                    const text = root.querySelector<HTMLTextAreaElement>("[data-memory-task-input]").value;
+                    if (isReadOnly() || taskSubmitting || taskRunning || !updateModel()) { break; }
+                    const text = taskInput.value;
                     if (!text.trim()) { taskStatus.textContent = lang.aiMemoryTaskInputTip; return; }
                     const operationId = taskState.operationFor(`maintain:${text}`, genUUID);
-                    action("maintain").disabled = true;
-                    const response = await fetchSyncPost("/api/ai/memory/maintain", {text, operationId});
-                    if (response.code !== 0) { taskStatus.textContent = response.msg; action("maintain").disabled = false; break; }
-                    taskId = response.data.taskId;
-                    activeMemoryTask = taskId;
-                    action("task").disabled = false;
-                    await poll();
+                    taskSubmitting = true;
+                    taskGeneration++;
+                    window.clearTimeout(pollTimer);
+                    taskChoice.disabled = true;
+                    updateModel();
+                    try {
+                        const response = await fetchSyncPost("/api/ai/memory/maintain", {text, operationId});
+                        if (closed) { break; }
+                        if (response.code !== 0) { taskStatus.textContent = response.msg; break; }
+                        taskId = response.data.taskId;
+                        submittedInput = {id: taskId, text};
+                        activeMemoryTask = taskId;
+                        taskRunning = true;
+                        action("task").disabled = false;
+                        await poll();
+                    } finally {
+                        taskSubmitting = false;
+                        taskChoice.disabled = !taskId;
+                        updateModel();
+                    }
                     break;
                 }
                 case "task": window.clearTimeout(pollTimer); await poll(); break;
@@ -350,12 +370,12 @@ export const openMemoryManager = () => {
         };
         void run().catch(error => {
             showMessage(String(error));
-            if (target.dataset.memoryAction === "maintain") { action("maintain").disabled = isReadOnly(); }
+            if (target.dataset.memoryAction === "maintain") { updateModel(); }
         });
     });
-    reset(false, false);
+    reset();
     action("cancel").disabled = isReadOnly() || !taskId;
-    action("maintain").disabled = isReadOnly();
+    updateModel();
     action("task").disabled = !taskId;
     void list().catch(error => { status.textContent = String(error); });
     if (taskId) { void poll().catch(error => { taskStatus.textContent = String(error); }); }

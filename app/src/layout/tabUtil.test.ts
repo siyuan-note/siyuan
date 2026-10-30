@@ -95,8 +95,8 @@ test("padding-only updates leave the drag spacer untouched", () => {
 });
 
 for (const type of ["closeOthers", "closeAll"] as const) {
-    for (const outcome of ["immediate", "pending", "blocked"] as const) {
-        test(`${type} attempts each eligible tab once when closing is ${outcome}`, () => {
+    for (const outcome of ["immediate", "pending", "blocked", "failed", "mixed"] as const) {
+        test(`${type} records only successful closes when closing is ${outcome}`, async () => {
             const source = readFileSync(join(__dirname, "tabUtil.ts"), "utf8");
             const code = transpileModule(source, {
                 compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -113,30 +113,41 @@ for (const type of ["closeOthers", "closeAll"] as const) {
             new Function("exports", "require", code)(exports, (name: string) => modules[name] || {});
             const calls: {id: string, batch: boolean, animate: boolean}[] = [];
             const pending: (() => void)[] = [];
+            let focusedID = "current";
+            let switches = 0;
             const wnd = {
                 children: [] as Tab[],
-                removeTab(id: string, batch: boolean, animate = true) {
+                removeTab(id: string, batch: boolean, animate = true): boolean | Promise<boolean> {
                     calls.push({id, batch, animate});
                     // Bound the regression: the old loop retries forever without this guard.
                     assert.ok(calls.length <= 3, "a pending or blocked tab must not be retried in the same batch");
+                    if (outcome === "mixed" && id === "lazy") return Promise.resolve(false);
                     const remove = () => {
                         const index = this.children.findIndex((item: Tab) => item.id === id);
                         this.children.splice(index, 1);
+                        return true;
                     };
-                    if (outcome === "immediate") {
-                        remove();
+                    if (outcome === "immediate" || outcome === "mixed") {
+                        return remove();
                     } else if (outcome === "pending") {
-                        pending.push(remove);
+                        return new Promise(resolve => pending.push(() => resolve(remove())));
+                    } else if (outcome === "failed") {
+                        return Promise.resolve(false);
                     }
+                    return false;
                 },
-                switchTab() {},
+                switchTab(head: HTMLElement) {
+                    switches++;
+                    focusedID = this.children.find((item: Tab) => item.headElement === head)?.id;
+                },
             };
             const makeTab = (id: string, pinned = false, lazy = false) => ({
                 id,
                 parent: wnd,
                 model: lazy ? undefined : new Editor(),
                 headElement: {
-                    classList: {contains: (name: string) => name === "item--pin" && pinned},
+                    classList: {contains: (name: string) => (name === "item--pin" && pinned) ||
+                        (name === "item--focus" && id === focusedID)},
                     getAttribute: () => JSON.stringify({instance: "Editor", rootId: "lazy-document"}),
                     parentElement: {querySelector: () => ({})},
                 },
@@ -148,23 +159,31 @@ for (const type of ["closeOthers", "closeAll"] as const) {
             const hidden = {id: "without-header", parent: wnd} as unknown as Tab;
             wnd.children = [loaded, current, pinned, lazy, hidden];
 
-            exports.closeTabByType(current, type);
+            const closing = exports.closeTabByType(current, type);
 
             const expected = type === "closeOthers" ? ["loaded", "lazy"] : ["loaded", "current", "lazy"];
             assert.deepEqual(calls.map(call => call.id), expected);
             assert.ok(calls.every(call => call.batch && call.animate === (type === "closeAll")));
-            assert.deepEqual(requests, [{
-                url: "/api/storage/batchUpdateRecentDocCloseTime",
-                data: {rootIDs: type === "closeOthers" ?
-                    ["loaded-document", "lazy-document"] : ["loaded-document", "loaded-document", "lazy-document"]},
-            }]);
-            if (outcome !== "immediate") {
+            assert.deepEqual(requests, [], "no history update before close acknowledgement");
+            if (outcome !== "immediate" && outcome !== "mixed") {
                 assert.equal(wnd.children.length, 5, "pending and blocked tabs remain open");
             }
+            if (outcome === "pending") focusedID = "pinned";
             pending.forEach(remove => remove());
-            assert.deepEqual(wnd.children.map(item => item.id), outcome === "blocked" ?
+            await closing;
+            assert.deepEqual(requests, outcome === "blocked" || outcome === "failed" ? [] : [{
+                url: "/api/storage/batchUpdateRecentDocCloseTime",
+                data: {rootIDs: outcome === "mixed" ? (type === "closeOthers" ? ["loaded-document"] :
+                    ["loaded-document", "loaded-document"]) : type === "closeOthers" ?
+                    ["loaded-document", "lazy-document"] : ["loaded-document", "loaded-document", "lazy-document"]},
+            }]);
+            assert.deepEqual(wnd.children.map(item => item.id), outcome === "blocked" || outcome === "failed" ?
                 ["loaded", "current", "pinned", "lazy", "without-header"] :
+                outcome === "mixed" ? (type === "closeOthers" ? ["current", "pinned", "lazy", "without-header"] :
+                    ["pinned", "lazy", "without-header"]) :
                 type === "closeOthers" ? ["current", "pinned", "without-header"] : ["pinned", "without-header"]);
+            assert.equal(switches, type === "closeAll" && (outcome === "immediate" || outcome === "mixed") ? 1 : 0,
+                "late completion must preserve a newer focus");
         });
     }
 }

@@ -466,44 +466,48 @@ const pushRootID = (rootIDs: string[], item: Tab) => {
     }
 };
 
-export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
-    const rootIDs: string[] = [];
+export const closeTabByType = async (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
+    const wnd = tab.parent;
+    const closing: Promise<string[]>[] = [];
+    const focusRemainingTab = () => {
+        // A user may have switched tabs while title persistence was pending.
+        if (wnd.children.some(item => item.headElement?.classList.contains("item--focus"))) return;
+        const remaining = wnd.children.includes(tab) && tab.headElement ? tab :
+            [...wnd.children].reverse().find(item => item.headElement);
+        if (remaining) wnd.switchTab(remaining.headElement, true);
+    };
+    const close = async (item: Tab, animate: boolean) => {
+        const rootIDs: string[] = [];
+        pushRootID(rootIDs, item);
+        const closed = await item.parent.removeTab(item.id, true, animate);
+        if (closed) focusRemainingTab();
+        return closed ? rootIDs : [];
+    };
     if (type === "closeOthers") {
         // Closing may wait for title persistence or be blocked by an upload.
         for (const item of [...tab.parent.children]) {
             if (item.id !== tab.id && item.headElement && !item.headElement.classList.contains("item--pin")) {
-                pushRootID(rootIDs, item);
-                item.parent.removeTab(item.id, true, false);
+                closing.push(close(item, false));
             }
         }
     } else if (type === "closeAll") {
         for (const item of [...tab.parent.children]) {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                pushRootID(rootIDs, item);
-                item.parent.removeTab(item.id, true);
+                closing.push(close(item, true));
             }
         }
-    } else if (tabs.length > 0) {
-        for (let index = 0; index < tabs.length; index++) {
-            const item = tabs[index];
+    } else if (tabs?.length > 0) {
+        for (const item of [...tabs]) {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id);
+                closing.push(Promise.resolve(item.parent.removeTab(item.id)).then((): string[] => []));
             }
         }
     }
+    focusRemainingTab();
+    const rootIDs = (await Promise.all(closing)).flat();
     // 批量更新文档关闭时间
     if (rootIDs.length > 0) {
         fetchPost("/api/storage/batchUpdateRecentDocCloseTime", {rootIDs});
     }
-    if (tab.headElement?.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
-        tab.parent.switchTab(tab.headElement, true);
-    } else {
-        for (let index = tab.parent.children.length - 1; index >= 0; index--) {
-            const item = tab.parent.children[index];
-            if (item.headElement) {
-                tab.parent.switchTab(item.headElement, true);
-                break;
-            }
-        }
-    }
+    focusRemainingTab();
 };

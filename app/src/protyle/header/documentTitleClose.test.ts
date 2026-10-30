@@ -10,7 +10,7 @@ test("desktop tab close awaits title acknowledgement, preserves failures and ign
     const source = transpileModule(readFileSync(join(__dirname, "documentTitleClose.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const moduleExports: {flushDocumentTitleBeforeClose?: (editor: object, close: () => void, valid: () => boolean) => boolean} = {};
+    const moduleExports: {flushDocumentTitleBeforeClose?: (editor: object, close: () => void, valid: () => boolean) => false | Promise<boolean>} = {};
     let messages = 0;
     runInNewContext(source, {exports: moduleExports, console: {error: () => {}},
         window: {siyuan: {languages: {settingsPendingSaveError: "Save failed"}}},
@@ -24,21 +24,23 @@ test("desktop tab close awaits title acknowledgement, preserves failures and ign
     const editor = {protyle: {title: {flushPendingInput: () => { titleFlushes++; return pending; }}},
         flushPendingTransactions: async () => { bodyFlushes++; }};
     const close = () => { closed++; };
-    assert.equal(moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true), true);
-    moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true);
+    const failed = moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true);
+    assert.equal(moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true), failed);
     assert.equal(titleFlushes, 1, "repeated close does not duplicate in-flight saves");
     assert.equal(closed, 0);
     reject(new Error("Conflict"));
+    assert.equal(await failed, false);
     await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(closed, 0);
     assert.equal(messages, 1);
     pending = new Promise<void>(resolve => { accept = resolve; });
-    moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true);
+    const successful = moduleExports.flushDocumentTitleBeforeClose(editor, close, () => true);
     accept();
+    assert.equal(await successful, true);
     await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(closed, 1);
     assert.equal(bodyFlushes, 1);
-    moduleExports.flushDocumentTitleBeforeClose(editor, close, () => false);
+    assert.equal(await moduleExports.flushDocumentTitleBeforeClose(editor, close, () => false), false);
     await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(closed, 1, "a previously moved or replaced tab must remain open");
     assert.equal(bodyFlushes, 1, "invalidated editors cannot submit more body input");
@@ -100,7 +102,7 @@ test("closing through the actual Protyle flush saves title edits made while the 
         exports: flushExports, waitForPendingTransactions,
     });
     const editor = {protyle: owner, flushPendingTransactions: flushExports.flush};
-    const closeExports: {flushDocumentTitleBeforeClose?: (value: unknown, close: () => void, valid: () => boolean) => boolean} = {};
+    const closeExports: {flushDocumentTitleBeforeClose?: (value: unknown, close: () => void, valid: () => boolean) => false | Promise<boolean>} = {};
     runInNewContext(compile(readFileSync(join(__dirname, "documentTitleClose.ts"), "utf8")), {
         exports: closeExports, window, console, require: () => ({showMessage: () => {}}),
     });

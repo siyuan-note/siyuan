@@ -169,6 +169,7 @@ const insertTabHeaderElement = (tabBarElement: HTMLElement, tabHeaderElement: HT
 
 export class Wnd {
     private app: App;
+    private removingOverCounter = false;
     public id: string;
     public parent?: Layout;
     public element: HTMLElement;
@@ -846,15 +847,20 @@ export class Wnd {
         }
 
         // 预览切换先移除被替换的页签，再检查数量上限，避免关闭无关页签。
+        let replacement: boolean | Promise<boolean> = false;
         if (replaceTabID && replaceTabID !== tab.id) {
-            this.removeTab(replaceTabID, false, false, false);
+            replacement = this.removeTab(replaceTabID, false, false, false);
         }
 
         // 移除 centerLayout 中的 empty
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);
         } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
-            this.removeOverCounter(isSaveLayout);
+            if (typeof replacement === "boolean") {
+                void this.removeOverCounter(isSaveLayout);
+            } else {
+                void replacement.then(() => this.removeOverCounter(isSaveLayout));
+            }
         }
         /// #if !BROWSER
         setModelsHash();
@@ -907,12 +913,20 @@ export class Wnd {
                         bind: (element) => {
                             element.addEventListener("click", (itemEvent) => {
                                 if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                                    this.removeTab(item.getAttribute("data-id"));
-                                    if (element.previousElementSibling || element.nextElementSibling) {
-                                        element.remove();
-                                        setPosition(window.siyuan.menus.menu.element, rect.left + rect.width - window.siyuan.menus.menu.element.clientWidth, rect.top + rect.height);
+                                    const closed = (success: boolean) => {
+                                        if (!success || !session.isCurrent() || !element.isConnected) return;
+                                        if (element.previousElementSibling || element.nextElementSibling) {
+                                            element.remove();
+                                            setPosition(window.siyuan.menus.menu.element, rect.left + rect.width - window.siyuan.menus.menu.element.clientWidth, rect.top + rect.height);
+                                        } else {
+                                            window.siyuan.menus.menu.remove();
+                                        }
+                                    };
+                                    const result = this.removeTab(item.getAttribute("data-id"));
+                                    if (typeof result === "boolean") {
+                                        closed(result);
                                     } else {
-                                        window.siyuan.menus.menu.remove();
+                                        void result.then(closed);
                                     }
                                 } else {
                                     this.switchTab(item, true);
@@ -955,32 +969,23 @@ export class Wnd {
         });
     }
 
-    private removeOverCounter(isSaveLayout = false) {
-        let removeId: string;
-        let openTime: string;
-        let removeCount = 0;
-        this.children.forEach((item, index) => {
-            if (!item.headElement) {
-                return;
+    private async removeOverCounter(isSaveLayout = false) {
+        if (this.removingOverCounter) return;
+        this.removingOverCounter = true;
+        const attempted = new Set<Tab>();
+        try {
+            while (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
+                const candidates = this.children.filter(item => !attempted.has(item) && item.headElement &&
+                    !item.headElement.classList.contains("item--pin") && !item.headElement.classList.contains("item--focus"));
+                candidates.sort((a, b) => (a.headElement.getAttribute("data-activetime") || "").localeCompare(
+                    b.headElement.getAttribute("data-activetime") || ""));
+                const item = candidates[0];
+                if (!item) break;
+                attempted.add(item);
+                await this.removeTab(item.id, false, false, isSaveLayout);
             }
-            if (item.headElement.classList.contains("item--pin") || item.headElement.classList.contains("item--focus")) {
-                return;
-            }
-            removeCount++;
-            if (!openTime) {
-                openTime = item.headElement.getAttribute("data-activetime");
-                removeId = this.children[index].id;
-            } else if (item.headElement.getAttribute("data-activetime") < openTime) {
-                openTime = item.headElement.getAttribute("data-activetime");
-                removeId = this.children[index].id;
-            }
-        });
-        if (removeId) {
-            this.removeTab(removeId, false, false, isSaveLayout);
-            removeCount--;
-        }
-        if (removeCount > 0 && this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
-            this.removeOverCounter(isSaveLayout);
+        } finally {
+            this.removingOverCounter = false;
         }
     }
 
@@ -1123,32 +1128,35 @@ export class Wnd {
     };
 
     // 源已关闭或删除时立即清理明文，不能再等待该源上的保存和上传。
-    public removeTab(id: string, isBatchClose = false, animate = true, isSaveLayout = true, sourceRemoved = false) {
+    // Pending title saves resolve to the close result; other paths remain synchronous.
+    public removeTab(id: string, isBatchClose = false, animate = true, isSaveLayout = true, sourceRemoved = false): boolean | Promise<boolean> {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
                 if (sourceRemoved) {
                     this.removeTabAction(id, isBatchClose, false, isSaveLayout, true);
-                    return;
+                    return true;
                 }
                 if ((item.model instanceof Editor) && item.model.editor?.protyle) {
                     if (item.model.editor.isUploading()) {
                         showMessage(window.siyuan.languages.uploading);
-                        return;
+                        return false;
                     }
                     const model = item.model;
-                    if (flushDocumentTitleBeforeClose(model.editor,
+                    const pending = flushDocumentTitleBeforeClose(model.editor,
                         () => this.removeTabAction(id, isBatchClose, animate, isSaveLayout),
-                        () => this.children.includes(item) && item.model === model)) {
-                        return;
+                        () => this.children.includes(item) && item.model === model);
+                    if (pending) {
+                        return pending;
                     }
                     this.removeTabAction(id, isBatchClose, animate, isSaveLayout);
                 } else {
                     this.removeTabAction(id, isBatchClose, animate, isSaveLayout);
                 }
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public moveTab(tab: Tab, nextId?: string) {

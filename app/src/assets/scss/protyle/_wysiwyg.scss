@@ -1158,6 +1158,10 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
       display: none;
     }
 
+    .av__views:not(.av__views--mobile) > .av__readonly-sort + .fn__space {
+      display: inline-block;
+    }
+
     .av__row--util:not(.av__readonly--show) + .av__row--footer.av__readonly--show {
       border-top-color: transparent;
     }

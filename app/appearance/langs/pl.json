@@ -1,4 +1,7 @@
 {
+	"aiMemoryClearAndDisable": "Usuń wszystkie wspomnienia i wyłącz pamięć",
+	"aiMemoryClearAndDisableConfirm": "Usunąć wszystkie wpisy pamięci i podsumowanie w tym obszarze roboczym oraz wyłączyć pamięć długoterminową? Oryginalne notatki, rozmowy i wcześniejsze kopie zapasowe zostaną zachowane.",
+	"aiMemoryClearFailed": "Nie udało się usunąć części wspomnień; spróbuj ponownie",
 	"aiMemoryProcessingLimit": "Treść wspomnień lub zakres przetwarzania przekracza limit; zawęź żądanie i spróbuj ponownie",
 	"aiMemoryReadFailed": "Nie można odczytać wszystkich danych wspomnień; sprawdź je i spróbuj ponownie",
 	"aiMemoryTargetUnclear": "Nie znaleziono jednoznacznego docelowego wspomnienia; mogło się zmienić. Określ dokładnie, co zaktualizować lub zapomnieć",

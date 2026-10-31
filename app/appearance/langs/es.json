@@ -1,4 +1,7 @@
 {
+	"aiMemoryClearAndDisable": "Eliminar todos los recuerdos y desactivar la memoria",
+	"aiMemoryClearAndDisableConfirm": "¿Eliminar todos los recuerdos y el resumen de este espacio de trabajo y desactivar la memoria a largo plazo? Se conservarán las notas originales, las conversaciones y las copias de seguridad anteriores.",
+	"aiMemoryClearFailed": "No se pudieron eliminar algunos recuerdos; inténtalo de nuevo",
 	"aiMemoryProcessingLimit": "El contenido de los recuerdos o el alcance del procesamiento supera el límite; reduce el alcance de la solicitud e inténtalo de nuevo",
 	"aiMemoryReadFailed": "No se pueden leer todos los datos de recuerdos; revísalos e inténtalo de nuevo",
 	"aiMemoryTargetUnclear": "No se encontró un recuerdo de destino claro; puede haber cambiado. Especifica qué actualizar u olvidar",

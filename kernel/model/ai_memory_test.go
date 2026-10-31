@@ -22,6 +22,8 @@ import (
 
 func setupAIMemoryTest(t *testing.T) *conf.AI {
 	t.Helper()
+	previousEpoch := memoryWriteEpoch.Load()
+	memoryWriteEpoch.Store(0)
 	previousConf, previousDir, previousReadOnly, previousComplete := Conf, util.DataDir, util.ReadOnly, memoryComplete
 	util.DataDir, util.ReadOnly = t.TempDir(), false
 	Conf = NewAppConf()
@@ -32,6 +34,7 @@ func setupAIMemoryTest(t *testing.T) *conf.AI {
 	cfg.Providers = []*conf.Provider{{Enabled: true, Protocol: util.OpenAIProtocolResponses, Models: []*conf.Model{{ID: "memory-model", Name: "gpt-5", Enabled: true}}}}
 	Conf.AI.Store(cfg)
 	t.Cleanup(func() {
+		memoryWriteEpoch.Store(previousEpoch)
 		memoryStoreMu.Lock()
 		delete(memoryStores, util.DataDir)
 		memoryStoreMu.Unlock()

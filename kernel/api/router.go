@@ -202,6 +202,7 @@ func registerAiRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/memory/get", contractRouteHandlers(apicontract.AIMemoryGet, getAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/save", contractRouteHandlers(apicontract.AIMemorySave, saveAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/forget", contractRouteHandlers(apicontract.AIMemoryForget, forgetAIMemory)...)
+	ginServer.Handle("POST", "/api/ai/memory/clear", contractRouteHandlers(apicontract.AIMemoryClear, clearAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/overview", contractRouteHandlers(apicontract.AIMemoryOverview, overviewAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/translate", contractRouteHandlers(apicontract.AIMemoryTranslate, translateAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/maintain", contractRouteHandlers(apicontract.AIMemoryMaintain, maintainAIMemory)...)

@@ -1,4 +1,7 @@
 {
+	"aiMemoryClearAndDisable": "모든 기억을 삭제하고 기억 기능 끄기",
+	"aiMemoryClearAndDisableConfirm": "이 작업 공간의 모든 기억 기록과 요약을 삭제하고 장기 기억을 끄시겠습니까? 원본 노트, 대화 및 이전 백업은 유지됩니다.",
+	"aiMemoryClearFailed": "일부 기억을 삭제하지 못했습니다. 다시 시도하세요",
 	"aiMemoryProcessingLimit": "기억 내용이나 처리 범위가 제한을 초과했습니다. 범위를 줄인 후 다시 시도하세요",
 	"aiMemoryReadFailed": "모든 기억 데이터를 읽을 수 없습니다. 확인 후 다시 시도하세요",
 	"aiMemoryTargetUnclear": "기억 대상을 명확히 찾을 수 없습니다. 대상이 변경되었을 수 있으니 업데이트하거나 잊을 내용을 구체적으로 지정하세요",

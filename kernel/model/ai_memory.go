@@ -43,16 +43,18 @@ type memoryTask struct {
 	cancel    context.CancelFunc
 	request   string
 	automatic bool
+	epoch     uint64
 	batch     *memoryBatch
 }
 
 // Prepared suggestions and results live only as long as the bounded task cache.
 type memoryBatch struct {
-	proposal  memoryProposal
-	scopes    []string
-	revisions map[string]memo.Entry
-	keys      []string
-	saved     map[string]apicontract.AIMemoryTaskResult
+	proposal    memoryProposal
+	scopes      []string
+	revisions   map[string]memo.Entry
+	keys        []string
+	saved       map[string]apicontract.AIMemoryTaskResult
+	confirmable map[string]bool
 }
 
 var memoryStoreMu sync.Mutex
@@ -102,6 +104,10 @@ func GetAIMemory(ctx context.Context, id string) (apicontract.AIMemoryGetData, e
 	return apicontract.AIMemoryGetData{Record: memoryRecordDTO(e), Revision: e.Revision}, err
 }
 func SaveAIMemory(ctx context.Context, q apicontract.AIMemorySaveRequest) (ret apicontract.AIMemorySaveData, err error) {
+	epoch := memoryWriteEpoch.Load()
+	if memoryClearActive.Load() {
+		return ret, errors.New("memory writes are unavailable")
+	}
 	if err = memoryWriteAllowed(); err != nil {
 		return
 	}
@@ -145,6 +151,9 @@ func SaveAIMemory(ctx context.Context, q apicontract.AIMemorySaveRequest) (ret a
 		r.Confirmed = time.Now().UTC().Format(time.RFC3339Nano)
 	}
 	e, err := store.GuardedRemember(ctx, r, q.Revision, q.OperationID, func() error {
+		if memoryWriteEpoch.Load() != epoch {
+			return errors.New("memory configuration changed; retry explicitly")
+		}
 		if util.DataDir != workspace {
 			return errors.New("memory workspace changed")
 		}
@@ -439,6 +448,10 @@ func decodeMemoryProposal(raw string) (memoryProposal, error) {
 	return p, nil
 }
 func StartAIMemory(ctx context.Context, q apicontract.AIMemoryMaintainRequest, automatic bool) (apicontract.AIMemoryTaskStarted, error) {
+	epoch := memoryWriteEpoch.Load()
+	if memoryClearActive.Load() {
+		return apicontract.AIMemoryTaskStarted{}, errors.New("memory writes are unavailable")
+	}
 	if err := memoryWriteAllowed(); err != nil {
 		return apicontract.AIMemoryTaskStarted{}, err
 	}
@@ -500,6 +513,7 @@ func StartAIMemory(ctx context.Context, q apicontract.AIMemoryMaintainRequest, a
 		// An explicit retry resumes prepared suggestions; before preparation it may retry the model.
 		runCtx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 		prior.cancel = cancel
+		prior.epoch = epoch
 		prior.status.State, prior.status.Error = "queued", ""
 		prior.status.Results = []apicontract.AIMemoryTaskResult{}
 		memoryTasks.Unlock()
@@ -521,7 +535,7 @@ func StartAIMemory(ctx context.Context, q apicontract.AIMemoryMaintainRequest, a
 		return apicontract.AIMemoryTaskStarted{}, errors.New("memory task capacity reached")
 	}
 	runCtx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	t := &memoryTask{request: request, automatic: automatic, dataDir: util.DataDir, created: time.Now(), status: apicontract.AIMemoryTaskData{TaskID: q.OperationID, State: "queued", Results: []apicontract.AIMemoryTaskResult{}}, cancel: cancel}
+	t := &memoryTask{request: request, automatic: automatic, epoch: epoch, dataDir: util.DataDir, created: time.Now(), status: apicontract.AIMemoryTaskData{TaskID: q.OperationID, State: "queued", Results: []apicontract.AIMemoryTaskResult{}}, cancel: cancel}
 	memoryTasks.tasks[util.DataDir+"\x00"+q.OperationID] = t
 	memoryTasks.Unlock()
 	go runAIMemory(runCtx, cfg, q, sources, automatic, t)
@@ -582,6 +596,9 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		workspace = t.dataDir
 	}
 	check := func() error {
+		if t.epoch != memoryWriteEpoch.Load() {
+			return errors.New("memory configuration changed; retry explicitly")
+		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
@@ -713,7 +730,9 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		}
 		// 固定候选快照的修订只由程序保存，模型不能伪造 CAS。
 		verified := []memo.Entry{}
+		confirmable := map[string]bool{}
 		for _, e := range result.Entries {
+			confirmable[e.Record.ID] = e.Record.State == "candidate" && e.Record.Supersedes == "" && validateMemorySources(ctx, e.Record)
 			// 仅用本轮已核验的相同来源身份更新版本，保留记录 ID 供纠错匹配。
 			// 其他来源失效时仍排除，不把撤权或已删除来源的缓存外传。
 			e.Record.Sources = append([]memo.Source{}, e.Record.Sources...)
@@ -808,6 +827,21 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 				return
 			}
 		}
+		// 完全一致的候选复用原身份；语义相近或来源失效时仍由模型保守处理。
+		for i := range proposal.Actions {
+			a := &proposal.Actions[i]
+			if a.ID != "" || a.Operation == "forget" || a.Supersedes != "" {
+				continue
+			}
+			for id, entry := range revisions {
+				r := entry.Record
+				if r.State == "candidate" && r.Supersedes == "" && r.Kind == a.Kind && r.Subject == a.Subject && r.Scope == a.Scope &&
+					strings.TrimSpace(r.Content) == strings.TrimSpace(a.Content) && r.ValidFrom == a.ValidFrom && r.ValidUntil == a.ValidUntil &&
+					(a.ID == "" || id < a.ID) {
+					a.ID = id
+				}
+			}
+		}
 		if err = authorizeMemoryForgetting(ctx, cfg, q, sources, automatic, proposal, revisions, check); err != nil {
 			finish(err)
 			return
@@ -830,7 +864,7 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 			seenKeys[key] = true
 		}
 		memoryTasks.Lock()
-		t.batch = &memoryBatch{proposal: proposal, scopes: scopes, revisions: revisions, keys: actionKeys, saved: map[string]apicontract.AIMemoryTaskResult{}}
+		t.batch = &memoryBatch{proposal: proposal, scopes: scopes, revisions: revisions, keys: actionKeys, saved: map[string]apicontract.AIMemoryTaskResult{}, confirmable: confirmable}
 		memoryTasks.Unlock()
 	}
 	proposal, scopes, revisions, actionKeys := t.batch.proposal, t.batch.scopes, t.batch.revisions, t.batch.keys
@@ -912,7 +946,8 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 					groundedVerbatim = true
 				}
 			}
-			if a.ID == "" && a.State == "active" && groundedVerbatim {
+			if a.State == "active" && groundedVerbatim && (a.ID == "" ||
+				(t.batch.confirmable[a.ID] && strings.TrimSpace(revisions[a.ID].Record.Content) == strings.TrimSpace(a.Content))) {
 				r.State = "active"
 			}
 			if validityErr := memoryActionValidity(a, sources); validityErr != nil {
@@ -941,11 +976,8 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 			if item.Error == "" {
 				var e memo.Entry
 				e, err = store.GuardedProposal(ctx, r, revision, operationPrefix+":"+actionKeys[index], reference, func() error {
-					if err := memoryWriteAllowed(); err != nil {
+					if err := check(); err != nil {
 						return err
-					}
-					if Conf == nil || util.DataDir != workspace || memoryConfigHash(Conf.LoadAI()) != generation {
-						return errors.New("memory configuration changed; retry explicitly")
 					}
 					if !validateMemorySources(ctx, r) || (reference != nil && !validateMemorySources(ctx, reference.Record)) {
 						return errors.New("memory proposal sources changed before commit")
@@ -1271,7 +1303,8 @@ var memoryOverviewQueue struct {
 
 // ScheduleAIMemoryOverview 合并显式管理的概览刷新；无独立模型配置时保留待更新状态。
 func ScheduleAIMemoryOverview() {
-	if Conf == nil || memoryWriteAllowed() != nil {
+	epoch := memoryWriteEpoch.Load()
+	if memoryClearActive.Load() || Conf == nil || memoryWriteAllowed() != nil {
 		return
 	}
 	cfg := Conf.LoadAI()
@@ -1298,7 +1331,7 @@ func ScheduleAIMemoryOverview() {
 			if err := memoryWriteAllowed(); err != nil {
 				return err
 			}
-			if util.DataDir != workspace || Conf == nil || memoryConfigHash(Conf.LoadAI()) != generation {
+			if memoryWriteEpoch.Load() != epoch || util.DataDir != workspace || Conf == nil || memoryConfigHash(Conf.LoadAI()) != generation {
 				return errors.New("memory configuration changed")
 			}
 			return ctx.Err()
@@ -1316,6 +1349,7 @@ func ScheduleAIMemoryOverview() {
 var AIMemoryConversationReader func(context.Context, string, string) (string, error)
 
 func QueueAIMemoryConversation(sessionID, entryID string) {
+	epoch := memoryWriteEpoch.Load()
 	if Conf == nil || util.ReadOnly {
 		return
 	}
@@ -1327,7 +1361,7 @@ func QueueAIMemoryConversation(sessionID, entryID string) {
 	id := "conversation:" + sessionID + ":" + entryID
 	// 调用方的会话提交锁先释放，再读取持久来源；不回扫历史对话。
 	time.AfterFunc(time.Second, func() {
-		if Conf == nil || util.DataDir != workspace {
+		if Conf == nil || util.DataDir != workspace || memoryWriteEpoch.Load() != epoch {
 			return
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

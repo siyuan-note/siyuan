@@ -75,6 +75,11 @@ type AIMemoryForgetData struct {
 	// CleanupPending 表示原记录尚未物理删除，可用相同请求重试；不代表撤回失效。
 	CleanupPending bool `json:"cleanupPending"`
 }
+
+type AIMemoryClearData struct {
+	Disabled bool `json:"disabled"`
+	Cleared  bool `json:"cleared"`
+}
 type AIMemoryOverviewData struct {
 	// User 保留兼容字段；统一概览通过 Memory 返回。
 	User   string `json:"user"`

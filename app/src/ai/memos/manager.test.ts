@@ -15,14 +15,16 @@ class ElementStub {
     title = "";
     attributes = new Map<string, string>();
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
+    removeAttribute(name: string) { this.attributes.delete(name); }
     listeners = new Map<string, (event?: KeyboardEvent) => void>();
     addEventListener(name: string, callback: (event?: KeyboardEvent) => void) { this.listeners.set(name, callback); }
     click() { if (!this.disabled) { this.listeners.get("click")?.(); } }
+    getBoundingClientRect() { return {left: 20, right: 44, bottom: 40, height: 24}; }
 }
 
 type Request = {url: string; data: Record<string, unknown>; signal?: AbortSignal};
 const harness = (respond?: (url: string, data: Record<string, unknown>) => unknown | Promise<unknown>,
-                 options: {readonly?: boolean; configured?: boolean; translate?: boolean; mac?: boolean} = {}) => {
+                 options: {readonly?: boolean; configured?: boolean; translate?: boolean; mac?: boolean; mobile?: boolean} = {}) => {
     const requests: Request[] = [];
     const messages: string[] = [];
     const rendered: string[] = [];
@@ -33,6 +35,10 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     }};
     const timers = new Map<number, {callback: () => void; delay: number}>();
     const confirmations: Array<() => void> = [];
+    const menuItems: Array<{icon: string; warning: boolean; label: string; click: () => void}> = [];
+    const refreshed: string[] = [];
+    const remounted: string[] = [];
+    let destroyed = 0;
     const config = {lang: "zh-CN", readonly: options.readonly === true, ai: {memory: {enabled: options.translate === true, modelId: options.configured === false ? "" : "memory-model", reasoningEffort: ""},
         providers: [{enabled: true, models: [{enabled: true, id: "memory-model", name: "memory-model"}]}]}};
     let refreshing = false;
@@ -54,6 +60,18 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         exports: exported,
         AbortController,
         require: (name: string) => {
+            if (name === "../../menus/Menu") { return {MenuItem: class {
+                element: unknown;
+                constructor(spec: unknown) { this.element = spec; }
+            }}; }
+            if (name === "../../menus/menuToggle") { return {toggleMenu: (spec: {build: (menu: unknown, session: unknown) => void}) => {
+                spec.build({append: (item: typeof menuItems[number]) => { menuItems.push(item); }, popup: () => {}}, {show: (render: () => void) => render()});
+            }}; }
+            if (name === "../../config/setting/sync") { return {refreshSettingConfigAfter: async (namespace: string, save: () => Promise<boolean>) => {
+                refreshed.push(namespace); return save();
+            }}; }
+            if (name === "../../config/tabs/ai/aiRuntime") { return {aiConfigApi: {apply: (ai: typeof config.ai) => { config.ai = ai; }}}; }
+            if (name === "../../config/setting/mount") { return {remountOpenSettingTab: async (tab: string) => { remounted.push(tab); }}; }
             if (name === "./taskError") { return {memoryTaskErrorMessage}; }
             if (name === "../../protyle/util/compatibility") { return compatibility; }
             if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { rendered.push(markdown); element.textContent = markdown; }}; }
@@ -63,7 +81,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
                 constructor(spec: {title: string; content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
                     title = spec.title; content = spec.content; beforeClose = spec.beforeClose; destroy = spec.destroyCallback;
                 }
-                destroy() { destroy(); }
+                destroy() { if (beforeClose()) { destroyed++; destroy(); } }
             }}; }
             if (name.endsWith("/confirmDialog")) { return {confirmDialog: (_title: string, _message: string, callback: () => void) => { confirmations.push(callback); }}; }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
@@ -78,7 +96,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             }}; }
             if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr}; }
             if (name.endsWith("/genID")) { return {genUUID: () => `operation-${++serial}`}; }
-            if (name.endsWith("/functions")) { return {isMobile: () => false}; }
+            if (name.endsWith("/functions")) { return {isMobile: () => options.mobile === true}; }
             if (name === "./state") { return {MemoryOperationState, memoryModelOptions}; }
             throw new Error(name);
         },
@@ -98,7 +116,9 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         next[1].callback();
         await flush();
     };
-    return {field, input, button, requests, messages, rendered, timers, confirmations, config, flush, tick,
+    return {field, input, button, requests, messages, rendered, timers, confirmations, config, flush, tick, menuItems, refreshed, remounted,
+        get destroyed() { return destroyed; },
+        more: () => field("[data-memory-more]").listeners.get("click")({stopPropagation: () => {}} as KeyboardEvent),
         get content() { return content; },
         get title() { return title; },
         enter: (text: string) => {input.value = text; input.listeners.get("input")();},
@@ -138,6 +158,127 @@ test("successful and unchanged completed submissions clear their input through e
             await state.click();
             assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
         }
+    }
+});
+
+test("the shared header menu confirms a red trash action that clears and disables memory", async () => {
+    for (const mobile of [false, true]) {
+        for (const configured of [false, true]) {
+            const state = harness(url => url.endsWith("/clear") ? {code: 0, data: {disabled: true, cleared: true}} : undefined, {mobile, configured, translate: true});
+            await state.flush();
+            state.enter("Unsent draft");
+            state.more();
+            assert.equal(state.menuItems.length, 1);
+            const action = state.menuItems[0];
+            assert.equal(action.icon, "iconTrashcan");
+            assert.equal(action.warning, true);
+            assert.equal(action.label, "aiMemoryClearAndDisable");
+            action.click();
+            assert.equal(state.confirmations.length, 1);
+            assert.equal(state.requests.some(request => request.url.endsWith("/clear")), false);
+            state.confirmations[0]();
+            await state.flush();
+            assert.equal(state.requests.filter(request => request.url.endsWith("/clear")).length, 1);
+            assert.equal(state.config.ai.memory.enabled, false);
+            assert.deepEqual(state.refreshed, ["ai"]);
+            assert.deepEqual(state.remounted, mobile ? ["ai"] : []);
+            assert.equal(state.input.value, "");
+            assert.equal(state.destroyed, 1);
+            assert.equal(state.requests.some(request => request.url.endsWith("/maintain")), false);
+        }
+    }
+});
+
+test("cancelled confirmation and readonly transitions cannot clear memories", async () => {
+    const state = harness();
+    await state.flush();
+    state.more();
+    state.menuItems[0].click();
+    await state.flush();
+    assert.equal(state.requests.some(request => request.url.endsWith("/clear")), false);
+    state.config.readonly = true;
+    state.confirmations[0]();
+    await state.flush();
+    assert.equal(state.requests.some(request => request.url.endsWith("/clear")), false);
+    const readonly = harness(undefined, {readonly: true});
+    await readonly.flush();
+    readonly.more();
+    assert.equal(readonly.menuItems.length, 0);
+});
+
+test("clearing blocks duplicate requests and ignores late task responses", async () => {
+    let finishTask: (result: unknown) => void;
+    let finishClear: (result: unknown) => void;
+    const state = harness(url => {
+        if (url.endsWith("/maintain")) { return {code: 0, data: {taskId: "running"}}; }
+        if (url.endsWith("/task")) { return new Promise(resolve => { finishTask = resolve; }); }
+        if (url.endsWith("/clear")) { return new Promise(resolve => { finishClear = resolve; }); }
+    }, {translate: true});
+    await state.flush();
+    state.enter("Remember this");
+    await state.click();
+    state.more();
+    state.menuItems[0].click();
+    state.confirmations[0]();
+    await state.flush();
+    assert.equal(state.close(), false);
+    assert.equal(state.button.disabled, true);
+    assert.equal(state.input.disabled, true);
+    state.confirmations[0]();
+    await state.flush();
+    assert.equal(state.requests.filter(request => request.url.endsWith("/clear")).length, 1);
+    finishTask({code: 0, data: {taskId: "running", state: "failed", error: "memory configuration changed; retry explicitly"}});
+    await state.flush();
+    assert.deepEqual(state.messages, []);
+    finishClear({code: 0, data: {disabled: true, cleared: true}});
+    await state.flush();
+    assert.equal(state.destroyed, 1);
+    assert.equal(state.timers.size, 0);
+});
+
+test("partial cleanup preserves the draft and the disabled setting for an explicit retry", async () => {
+    const state = harness(url => url.endsWith("/clear") ? {code: 0, data: {disabled: true, cleared: false}} : undefined, {translate: true});
+    await state.flush();
+    state.enter("Keep this draft");
+    state.more();
+    state.menuItems[0].click();
+    state.confirmations[0]();
+    await state.flush();
+    assert.equal(state.config.ai.memory.enabled, false);
+    assert.equal(state.destroyed, 0);
+    assert.equal(state.input.value, "Keep this draft");
+    assert.equal(state.close(), false);
+    assert.deepEqual(state.messages, ["aiMemoryClearFailed"]);
+    assert.equal(state.requests.filter(request => request.url.endsWith("/clear")).length, 1);
+});
+
+test("a rejected clear resumes polling without resubmitting the running model task", async () => {
+    for (const disconnected of [false, true]) {
+        const state = harness(url => {
+            if (url.endsWith("/maintain")) { return {code: 0, data: {taskId: "running"}}; }
+            if (url.endsWith("/task")) { return {code: 0, data: {taskId: "running", state: "running"}}; }
+            if (url.endsWith("/clear")) {
+                if (disconnected) { throw new Error("Disconnected"); }
+                return {code: -1, msg: "Unable to save settings"};
+            }
+        }, {translate: true});
+        await state.flush();
+        state.enter("Keep this pending request");
+        await state.click();
+        state.more();
+        state.menuItems[0].click();
+        state.confirmations[0]();
+        await state.flush();
+        assert.equal(state.input.value, "Keep this pending request");
+        assert.equal(state.destroyed, 0);
+        assert.equal(state.button.disabled, true);
+        assert.equal(state.config.ai.memory.enabled, true);
+        assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+        assert.equal(state.requests.filter(request => request.url.endsWith("/task")).length, 2);
+        assert.equal(state.messages.length, 1);
+        assert.ok(state.messages[0].endsWith(disconnected ? "Disconnected" : "Unable to save settings"));
+        await state.tick(1000);
+        assert.equal(state.requests.filter(request => request.url.endsWith("/task")).length, 3);
     }
 });
 
@@ -551,7 +692,9 @@ test("memory management presents one action and one overview without count or re
         {code: 0, data: {count: 251, countComplete: true, memory: "A unified overview", user: "legacy content", stale: false}} : undefined);
     await state.flush();
     assert.deepEqual([...state.content.matchAll(/data-memory-action="([^"]+)"/g)].map(match => match[1]), ["maintain"]);
-    assert.equal(state.title, "aiMemorySummary");
+    assert.match(state.title, /aiMemorySummary/);
+    assert.match(state.title, /data-memory-more[^>]*aria-haspopup="menu"/);
+    assert.match(state.title, /#iconMore/);
     assert.doesNotMatch(state.content, /aiMemoryTip|data-memory-(?:task-status|overview-status|model-hint)/);
     assert.doesNotMatch(state.content, /data-memory-(?:count|query|list|detail|pagination|task-choice)|<details|<select/);
     assert.equal(state.field("[data-memory-overview]").textContent, "A unified overview");

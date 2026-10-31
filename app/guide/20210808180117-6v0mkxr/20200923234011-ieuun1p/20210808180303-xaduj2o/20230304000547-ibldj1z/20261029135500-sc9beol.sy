@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261031105717"
+		"updated": "20261031130026"
 	},
 	"Children": [
 		{
@@ -207,6 +207,20 @@
 			]
 		},
 		{
+			"ID": "20261031130026-rmaubcg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-rmaubcg",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open More in the upper-right corner of Memory summary and select Delete all memories and disable memory. After confirmation, long-term memory is disabled, running writes are stopped, and all current memory records and summaries are deleted. Original notes, conversations, historical backups and withdrawal markers are retained. This action does not call a model. If cleanup is incomplete, memory remains disabled and you can retry."
+				}
+			]
+		},
+		{
 			"ID": "20261029135500-eyepamf",
 			"Type": "NodeHeading",
 			"Properties": {
@@ -308,6 +322,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To submit an explicit fact immediately, use Organize with model in the manager and review the result."
+				}
+			]
+		},
+		{
+			"ID": "20261031130026-5dprj0g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-5dprj0g",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic candidates are managed in the background while memory is enabled in a writable workspace. Exact duplicates with identical evidence are merged. A later model review can activate an unchanged fact only when its current sources and verbatim evidence pass validation. Automatic candidates without a meaningful update for 30 days are cleaned up; repeating the same proposal does not restart that period. Manual submissions, confirmed records and usable memories are not removed by this cleanup. Cleanup itself does not call a model."
 				}
 			]
 		},

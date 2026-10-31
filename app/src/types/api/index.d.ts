@@ -70,6 +70,8 @@ export type AIMCPStatus = { "authorizationURL"?: string; "authorized": boolean; 
 
 export type AIMemoryCapabilitiesData = { "efforts": Array<string> | null; };
 
+export type AIMemoryClearData = { "cleared": boolean; "disabled": boolean; };
+
 export type AIMemoryForgetData = { "cleanupPending": boolean; "saved": boolean; };
 
 export type AIMemoryForgetRequestInput = { "id": string; "operationId": string; "revision": string; };
@@ -3453,6 +3455,18 @@ export interface APIPOSTRoutes {
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 先持久关闭长期记忆并取消旧任务，再撤回全部正式记录并删除当前概览，不调用模型。
+     * disabled 表示开关已保存为关闭；cleared=false 表示清理未全部完成，可由用户再次调用重试。
+     * 不删除原笔记、对话、数据历史或防恢复标记；不支持未知或损坏的记录格式时保留原文件。
+     */
+    "/api/ai/memory/clear": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIMemoryClearData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
      * 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。

@@ -1,4 +1,7 @@
 {
+	"aiMemoryClearAndDisable": "Odstrániť všetky spomienky a vypnúť pamäť",
+	"aiMemoryClearAndDisableConfirm": "Odstrániť všetky záznamy pamäte a súhrn v tomto pracovnom priestore a vypnúť dlhodobú pamäť? Pôvodné poznámky, konverzácie a predchádzajúce zálohy sa zachovajú.",
+	"aiMemoryClearFailed": "Niektoré spomienky sa nepodarilo odstrániť; skúste to znova",
 	"aiMemoryProcessingLimit": "Obsah spomienok alebo rozsah spracovania prekračuje limit; zúžte požiadavku a skúste to znova",
 	"aiMemoryReadFailed": "Nepodarilo sa prečítať všetky údaje spomienok; skontrolujte ich a skúste to znova",
 	"aiMemoryTargetUnclear": "Nenašla sa jednoznačná cieľová spomienka; možno sa zmenila. Presne uveďte, čo chcete aktualizovať alebo zabudnúť",

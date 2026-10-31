@@ -461,6 +461,10 @@ func (s *Store) save(ctx context.Context, r Record, expected, op string, explici
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	r.Schema = 1
 	r.Updated = now
+	if actual != "missing" && AutomaticCandidate(current.Record) && AutomaticCandidate(r) &&
+		candidateKey(current.Record) == candidateKey(r) && current.Record.Reason == r.Reason {
+		r.Updated = current.Record.Updated
+	}
 	if actual == "missing" {
 		r.Created = now
 	}
@@ -514,6 +518,15 @@ func (s *Store) Forget(ctx context.Context, id, expected, op string) (ForgetResu
 
 // GuardedForget 在撤回写入锁内复核调用方权限与来源，复用持久撤回和 CAS 保护。
 func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guard func() error) (ForgetResult, error) {
+	return s.forget(ctx, id, expected, op, guard, false)
+}
+
+// GuardedDiscardCandidate 只清理自动候选，按记录身份抑制恢复，不撤回其笔记或会话来源。
+func (s *Store) GuardedDiscardCandidate(ctx context.Context, id, expected, op string, guard func() error) (ForgetResult, error) {
+	return s.forget(ctx, id, expected, op, guard, true)
+}
+
+func (s *Store) forget(ctx context.Context, id, expected, op string, guard func() error, candidateOnly bool) (ForgetResult, error) {
 	ret := ForgetResult{ID: id}
 	if !idPattern.MatchString(id) || op == "" || len(op) > 256 {
 		return ret, ErrInvalid
@@ -547,7 +560,7 @@ func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guar
 	if e != nil {
 		return ret, e
 	}
-	if guard != nil {
+	if guard != nil || candidateOnly {
 		conflicted, conflictErr := hasConflict(root, id)
 		if conflictErr != nil {
 			return ret, conflictErr
@@ -557,6 +570,9 @@ func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guar
 		}
 	}
 	if entry.Revision != expected {
+		return ret, ErrConflict
+	}
+	if candidateOnly && !AutomaticCandidate(entry.Record) {
 		return ret, ErrConflict
 	}
 	if e = checkContext(ctx); e != nil {
@@ -572,6 +588,9 @@ func (s *Store) GuardedForget(ctx context.Context, id, expected, op string, guar
 	for _, source := range entry.Record.Sources {
 		source.Evidence = ""
 		w.Sources = append(w.Sources, source)
+	}
+	if candidateOnly {
+		w.Sources = []Source{{Kind: "record", ID: id, Revision: expected}}
 	}
 	rr, e := subroot(root, "records", false)
 	if e != nil {

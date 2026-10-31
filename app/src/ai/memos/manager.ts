@@ -9,6 +9,11 @@ import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {MemoryOperationState, memoryModelOptions} from "./state";
 import {memoryTaskErrorMessage} from "./taskError";
+import {MenuItem} from "../../menus/Menu";
+import {toggleMenu} from "../../menus/menuToggle";
+import {refreshSettingConfigAfter} from "../../config/setting/sync";
+import {aiConfigApi} from "../../config/tabs/ai/aiRuntime";
+import {remountOpenSettingTab} from "../../config/setting/mount";
 
 // 当前页面重新打开管理器时继续查询后台任务，关闭窗口不取消模型处理。
 let activeMemoryTask = "";
@@ -20,6 +25,7 @@ export const openMemoryManager = () => {
     let closed = false;
     let taskDirty = false;
     let submitting = false;
+    let clearing = false;
     let running = false;
     let discovering = true;
     let taskId = activeMemoryTask;
@@ -44,7 +50,7 @@ export const openMemoryManager = () => {
         });
     };
     const dialog = new Dialog({
-        title: lang.aiMemorySummary,
+        title: `<span class="fn__flex"><span class="fn__flex-1">${escapeHtml(lang.aiMemorySummary)}</span><button type="button" class="block__icon block__icon--show" data-memory-more aria-label="${escapeHtml(lang.more)}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></span>`,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
 <div class="memory-manager__hint" data-memory-translation-status role="status" aria-live="polite" aria-label="${escapeHtml(lang.loading)}" hidden><span class="b3-loading b3-loading--small" aria-hidden="true"></span></div>
@@ -53,7 +59,7 @@ export const openMemoryManager = () => {
 <div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 </div>`,
         beforeClose: () => {
-            if (submitting) { return false; }
+            if (submitting || clearing) { return false; }
             if (!taskDirty) { return true; }
             confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
             return false;
@@ -69,7 +75,11 @@ export const openMemoryManager = () => {
         },
     });
     const root = dialog.element;
+    const container = root.querySelector<HTMLElement>(".b3-dialog__container");
+    container.setAttribute("aria-label", lang.aiMemorySummary);
+    container.removeAttribute("aria-labelledby");
     const input = root.querySelector<HTMLInputElement>("[data-memory-task-input]");
+    const more = root.querySelector<HTMLButtonElement>("[data-memory-more]");
     const maintain = root.querySelector<HTMLButtonElement>('[data-memory-action="maintain"]');
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
@@ -88,10 +98,11 @@ export const openMemoryManager = () => {
         const ready = !!id && memoryModelOptions(ai?.providers || [], id).some(model => model.id === id && !model.unavailable);
         maintain.title = ready ? "" : `${lang.aiSelectModel} (${lang.config} - ${lang.ai} - ${lang.aiMemory})`;
         if (!ready) { reportError(maintain.title, "model"); }
-        maintain.disabled = isReadOnly() || !ready || submitting || running || discovering;
-        maintain.setAttribute("aria-busy", String(submitting || running));
-        root.querySelector<HTMLElement>("[data-memory-loading]").hidden = !submitting && !running;
-        input.disabled = isReadOnly() || submitting;
+        maintain.disabled = isReadOnly() || !ready || submitting || running || discovering || clearing;
+        more.disabled = isReadOnly() || submitting || clearing;
+        maintain.setAttribute("aria-busy", String(submitting || running || clearing));
+        root.querySelector<HTMLElement>("[data-memory-loading]").hidden = !submitting && !running && !clearing;
+        input.disabled = isReadOnly() || submitting || clearing;
         return ready;
     };
     const translateOverview = async (memory: string, generation: number) => {
@@ -202,7 +213,7 @@ export const openMemoryManager = () => {
         const generation = ++taskGeneration;
         try {
             const response = await fetchSyncPost("/api/ai/memory/task", {taskId}, undefined, false);
-            if (closed || generation !== taskGeneration) { return; }
+            if (closed || clearing || generation !== taskGeneration) { return; }
             if (response.code !== 0) {
                 if (response.msg === "memory task unavailable; retry explicitly") {
                     reportError(response.msg, "result");
@@ -240,7 +251,7 @@ export const openMemoryManager = () => {
                 void refreshOverview();
             }
         } catch (error) {
-            if (closed || generation !== taskGeneration) { return; }
+            if (closed || clearing || generation !== taskGeneration) { return; }
             reportError(error);
             // 查询故障只重查同一任务，不能自动重新发起可能计费的整理请求。
             taskTimer = window.setTimeout(() => { void poll(); }, retryDelay(++taskFailures));
@@ -250,7 +261,7 @@ export const openMemoryManager = () => {
         const generation = ++taskGeneration;
         try {
             const response = await fetchSyncPost("/api/ai/memory/list", {limit: 1}, undefined, false);
-            if (closed || generation !== taskGeneration) { return; }
+            if (closed || clearing || generation !== taskGeneration) { return; }
             if (response.code !== 0) { throw new Error(response.msg); }
             taskFailures = 0;
             discovering = false;
@@ -264,7 +275,7 @@ export const openMemoryManager = () => {
             }
             updateModel();
         } catch (error) {
-            if (closed || generation !== taskGeneration) { return; }
+            if (closed || clearing || generation !== taskGeneration) { return; }
             reportError(error);
             taskTimer = window.setTimeout(() => { void discoverTask(); }, retryDelay(++taskFailures));
         }
@@ -280,7 +291,7 @@ export const openMemoryManager = () => {
         maintain.click();
     });
     maintain.addEventListener("click", () => {
-        if (closed || isReadOnly() || submitting || running || discovering || !updateModel()) { return; }
+        if (closed || isReadOnly() || submitting || running || discovering || clearing || !updateModel()) { return; }
         const text = input.value;
         if (!text.trim()) { return; }
         const operationId = operation.operationFor(text, genUUID);
@@ -319,6 +330,80 @@ export const openMemoryManager = () => {
                 if (!closed) { updateModel(); }
             }
         })();
+    });
+    const clearMemory = async () => {
+        if (closed || isReadOnly() || submitting || clearing) { return; }
+        const resumeDiscovery = discovering;
+        clearing = true;
+        taskGeneration++;
+        overviewGeneration++;
+        window.clearTimeout(taskTimer);
+        window.clearTimeout(overviewTimer);
+        abortTranslations();
+        updateModel();
+        let cleared = false;
+        let disabled = false;
+        try {
+            await refreshSettingConfigAfter("ai", async () => {
+                const response = await fetchSyncPost("/api/ai/memory/clear", {}, undefined, false);
+                if (response.code !== 0) { throw new Error(response.msg); }
+                if (response.data.disabled) {
+                    disabled = true;
+                    const ai = window.siyuan.config.ai;
+                    aiConfigApi.apply({...ai, memory: {...ai.memory, enabled: false}});
+                    activeMemoryTask = "";
+                    taskId = "";
+                }
+                cleared = response.data.cleared && response.data.disabled;
+                return response.data.disabled;
+            });
+            if (isMobile()) { await remountOpenSettingTab("ai"); }
+            if (!cleared) { throw new Error(lang.aiMemoryClearFailed); }
+        } catch (error) {
+            reportedErrors.delete("clear");
+            reportError(error instanceof Error ? error.message : error, "clear");
+        } finally {
+            clearing = false;
+            running = false;
+            discovering = false;
+            if (cleared) {
+                activeMemoryTask = "";
+                taskId = "";
+                taskDirty = false;
+                submittedInput = undefined;
+                input.value = "";
+                operation.committed();
+                dialog.destroy();
+            }
+            else if (!closed) {
+                if (taskId) {
+                    running = true;
+                    void poll();
+                } else if (resumeDiscovery && !disabled) {
+                    discovering = true;
+                    void discoverTask();
+                }
+                updateModel();
+                void refreshOverview();
+            }
+        }
+    };
+    more.addEventListener("mousedown", event => event.stopPropagation());
+    more.addEventListener("touchstart", event => event.stopPropagation());
+    more.addEventListener("click", event => {
+        event.stopPropagation();
+        if (closed || more.disabled) { return; }
+        toggleMenu({target: more, build: (menu, session) => {
+            menu.append(new MenuItem({
+                icon: "iconTrashcan", warning: true, label: lang.aiMemoryClearAndDisable,
+                click: () => {
+                    if (closed || isReadOnly() || submitting || clearing) { return; }
+                    confirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm), () => { void clearMemory(); });
+                },
+            }).element);
+            const rect = more.getBoundingClientRect();
+            session.show(() => menu.popup({x: rect.right, y: rect.bottom, isLeft: true}));
+        }});
     });
     updateModel();
     void refreshOverview();

@@ -1,4 +1,7 @@
 {
+	"aiMemoryClearAndDisable": "Hapus semua ingatan dan nonaktifkan memori",
+	"aiMemoryClearAndDisableConfirm": "Hapus semua catatan memori dan ringkasan di ruang kerja ini, lalu nonaktifkan memori jangka panjang? Catatan asli, percakapan, dan cadangan sebelumnya akan tetap disimpan.",
+	"aiMemoryClearFailed": "Sebagian ingatan tidak dapat dihapus; coba lagi",
 	"aiMemoryProcessingLimit": "Isi ingatan atau cakupan pemrosesan melebihi batas; persempit permintaan dan coba lagi",
 	"aiMemoryReadFailed": "Tidak dapat membaca seluruh data ingatan; periksa dan coba lagi",
 	"aiMemoryTargetUnclear": "Target ingatan yang jelas tidak ditemukan; target mungkin telah berubah. Jelaskan secara spesifik apa yang ingin diperbarui atau dilupakan",

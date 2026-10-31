@@ -307,7 +307,11 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 	// 例外：dest 在工作区外且非加密 box 时允许解密复制（用户导出的场景）
 	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
 		if !rejectEncryptedBoxPath(dest) && !gulu.File.IsSubPath(util.WorkspaceDir, dest) {
-			// dest 在工作区外且非加密 box，允许解密后复制
+			// dest 在工作区外且非加密 box，允许解密后复制；解密出的明文与普通导出同样受写入目标限制
+			if util.IsSensitiveWritePath(dest) {
+				logging.LogErrorf("refuse to copy sensitive file [%s]", dest)
+				return apicontract.Failure[apicontract.Null](-2, fmt.Sprintf("refuse to copy sensitive file [%s]", dest))
+			}
 			boxID := util.BoxIDFromDataPath(src)
 			if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
@@ -333,7 +337,7 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 		return apicontract.FailureWithTimeout[apicontract.Null](-1, "Field [src]: path is a directory", 5000)
 	}
 
-	if util.IsSensitivePath(dest) {
+	if util.IsSensitiveWritePath(dest) {
 		logging.LogErrorf("refuse to copy sensitive file [%s]", dest)
 		return apicontract.Failure[apicontract.Null](-2, fmt.Sprintf("refuse to copy sensitive file [%s]", dest))
 	}

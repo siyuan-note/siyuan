@@ -132,7 +132,7 @@ test("successful and unchanged completed submissions clear their input through e
                 url.endsWith("/task") ? completed("task", results) : undefined);
             await state.flush();
             state.enter("Remember this");
-            if (keyboard) { await state.keydown({ctrlKey: true}); } else { await state.click(); }
+            if (keyboard) { await state.keydown({}); } else { await state.click(); }
             assert.equal(state.input.value, "");
             assert.equal(state.close(), true);
             await state.click();
@@ -234,37 +234,39 @@ test("restored tasks and old completion responses after reopening never clear a 
     assert.equal(state.close(), false);
 });
 
-test("the local platform modifier plus Enter clicks the existing organize button exactly once", async () => {
+test("Enter with or without the local platform modifier submits exactly once", async () => {
     for (const mac of [false, true]) {
-        let finish: (value: unknown) => void;
-        const state = harness(url => {
-            if (url.endsWith("/maintain")) { return new Promise(resolve => { finish = resolve; }); }
-            if (url.endsWith("/task")) { return {code: 0, data: {taskId: "task", state: "running"}}; }
-        }, {mac});
-        await state.flush();
-        state.enter("Remember this");
-        const modifier = mac ? {metaKey: true} : {ctrlKey: true};
-        assert.deepEqual(await state.keydown(modifier), {prevented: true, stopped: true});
-        assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
-        assert.equal(state.field("[data-memory-loading]").hidden, false);
-        assert.equal(state.button.attributes.get("aria-busy"), "true");
-        await state.keydown(modifier);
-        await state.keydown({...modifier, repeat: true});
-        assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
-        finish({code: 0, data: {taskId: "task"}});
-        await state.flush();
-        await state.keydown(modifier);
-        assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+        for (const modifier of [{}, mac ? {metaKey: true} : {ctrlKey: true}]) {
+            let finish: (value: unknown) => void;
+            const state = harness(url => {
+                if (url.endsWith("/maintain")) { return new Promise(resolve => { finish = resolve; }); }
+                if (url.endsWith("/task")) { return {code: 0, data: {taskId: "task", state: "running"}}; }
+            }, {mac});
+            await state.flush();
+            state.enter("Remember this");
+            assert.deepEqual(await state.keydown(modifier), {prevented: true, stopped: true});
+            assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+            assert.equal(state.field("[data-memory-loading]").hidden, false);
+            assert.equal(state.button.attributes.get("aria-busy"), "true");
+            await state.keydown(modifier);
+            await state.keydown({...modifier, repeat: true});
+            assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+            finish({code: 0, data: {taskId: "task"}});
+            await state.flush();
+            await state.keydown(modifier);
+            assert.equal(state.requests.filter(request => request.url.endsWith("/maintain")).length, 1);
+        }
     }
 });
 
-test("ordinary Enter, other modifiers, IME confirmation and repeated keydown retain their normal behavior", async () => {
+test("other modifiers, IME confirmation and repeated keydown retain their normal behavior", async () => {
     for (const mac of [false, true]) {
         const state = harness(undefined, {mac});
         await state.flush();
         state.enter("Remember this");
         const modifier = mac ? {metaKey: true} : {ctrlKey: true};
-        for (const properties of [{}, mac ? {ctrlKey: true} : {metaKey: true}, {ctrlKey: true, metaKey: true},
+        for (const properties of [mac ? {ctrlKey: true} : {metaKey: true}, {ctrlKey: true, metaKey: true},
+            {isComposing: true}, {keyCode: 229}, {repeat: true}, {shiftKey: true}, {altKey: true}, {key: "Escape"},
             {...modifier, altKey: true}, {...modifier, shiftKey: true}, {...modifier, isComposing: true},
             {...modifier, keyCode: 229}, {...modifier, repeat: true}, {...modifier, key: "Escape"}]) {
             assert.deepEqual(await state.keydown(properties), {prevented: false, stopped: false});
@@ -278,19 +280,19 @@ test("keyboard organization honors blank, readonly, missing model, discovering a
         const state = harness(undefined, options);
         await state.flush();
         state.enter(options.readonly || options.configured === false ? "Remember this" : "   ");
-        await state.keydown({ctrlKey: true});
+        await state.keydown({});
         assert.equal(state.requests.some(request => request.url.endsWith("/maintain")), false);
     }
     const discovering = harness(url => url.endsWith("/list") ? new Promise(() => {}) : undefined);
     await discovering.flush();
     discovering.enter("Remember this");
-    await discovering.keydown({ctrlKey: true});
+    await discovering.keydown({});
     assert.equal(discovering.requests.some(request => request.url.endsWith("/maintain")), false);
     const closed = harness();
     await closed.flush();
     closed.enter("Remember this");
     closed.destroy();
-    assert.deepEqual(await closed.keydown({ctrlKey: true}), {prevented: false, stopped: false});
+    assert.deepEqual(await closed.keydown({}), {prevented: false, stopped: false});
     assert.equal(closed.requests.some(request => request.url.endsWith("/maintain")), false);
 });
 
@@ -555,7 +557,8 @@ test("memory management presents one action and one overview without count or re
     assert.equal(state.field("[data-memory-overview]").textContent, "A unified overview");
     assert.ok(state.content.indexOf("data-memory-overview aria-label") < state.content.indexOf("data-memory-task-input"));
     assert.ok(state.content.indexOf("data-memory-task-input") < state.content.indexOf('data-memory-action="maintain"'));
-    assert.match(state.content, /data-memory-task-input rows="1"/);
+    assert.match(state.content, /<input type="text"[^>]*data-memory-task-input/);
+    assert.doesNotMatch(state.content, /<textarea/);
     assert.equal(state.requests.filter(request => request.url.endsWith("/list")).length, 1);
     assert.equal(state.requests.find(request => request.url.endsWith("/list")).data.limit, 1);
     assert.equal(state.timers.size, 0);
@@ -568,7 +571,7 @@ test("summary retains the shared typography, compact input and scrollable layout
     assert.match(source, /<div class="memory-manager__content b3-typography"/);
     assert.doesNotMatch(source, /countStatus|aiMemoryRememberedCount|aiMemoryCountUnavailable/);
     assert.match(styles, /&__actions\s*\{[^}]*justify-content:\s*flex-end;/);
-    assert.match(styles, /textarea\s*\{[^}]*resize:\s*vertical;/);
+    assert.doesNotMatch(styles, /\btextarea\b|\bresize\s*:/);
     assert.doesNotMatch(styles, /min-height:\s*96px/);
     assert.doesNotMatch(styles, /&__(?:record|list|detail|field|empty)\b/);
 });

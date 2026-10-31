@@ -49,7 +49,7 @@ export const openMemoryManager = () => {
         content: `<div class="b3-dialog__content memory-manager">
 <div class="memory-manager__hint" data-memory-translation-status role="status" aria-live="polite" aria-label="${escapeHtml(lang.loading)}" hidden><span class="b3-loading b3-loading--small" aria-hidden="true"></span></div>
 <div class="memory-manager__content b3-typography" data-memory-overview aria-label="${escapeHtml(lang.aiMemoryOverview)}"></div>
-<textarea class="b3-text-field fn__block" data-memory-task-input rows="1" aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}"></textarea>
+<input type="text" class="b3-text-field fn__block" data-memory-task-input aria-label="${escapeHtml(lang.aiMemoryOrganize)}" placeholder="${escapeHtml(lang.aiMemoryTaskInputTip)}">
 <div class="memory-manager__actions"><button type="button" class="b3-button" data-memory-action="maintain"><span class="b3-loading b3-loading--small" data-memory-loading aria-hidden="true" hidden></span>${escapeHtml(lang.aiMemoryOrganize)}</button></div>
 </div>`,
         beforeClose: () => {
@@ -69,7 +69,7 @@ export const openMemoryManager = () => {
         },
     });
     const root = dialog.element;
-    const input = root.querySelector<HTMLTextAreaElement>("[data-memory-task-input]");
+    const input = root.querySelector<HTMLInputElement>("[data-memory-task-input]");
     const maintain = root.querySelector<HTMLButtonElement>('[data-memory-action="maintain"]');
     const overview = root.querySelector<HTMLElement>("[data-memory-overview]");
     const translationStatus = root.querySelector<HTMLElement>("[data-memory-translation-status]");
@@ -273,7 +273,8 @@ export const openMemoryManager = () => {
     input.addEventListener("focus", updateModel);
     input.addEventListener("keydown", event => {
         if (event.key !== "Enter" || event.isComposing || event.keyCode === 229 || event.repeat ||
-            event.altKey || event.shiftKey || !isOnlyMeta(event) || closed || input.disabled || maintain.disabled) { return; }
+            event.altKey || event.shiftKey || ((event.ctrlKey || event.metaKey) && !isOnlyMeta(event)) ||
+            closed || input.disabled || maintain.disabled) { return; }
         event.preventDefault();
         event.stopPropagation();
         maintain.click();

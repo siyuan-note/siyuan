@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261030213309"
+		"updated": "20261031105717"
 	},
 	"Children": [
 		{
@@ -155,12 +155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-mlne86v",
-				"updated": "20261030115043"
+				"updated": "20261031105717"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open Manage to view Memory summary, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model, or press Ctrl+Enter (Cmd+Enter on macOS) in the input. The manager shows the unified overview and a loading spinner while processing; errors appear in the upper-right message area. Successfully submitting a task does not mean its content has been remembered. After the task completes successfully, including when no changes are needed, the submitted text is cleared only if you have not edited the input since submitting; failed or partially failed tasks and new edits leave it intact."
+					"Data": "Open Manage to view Memory summary, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model, or press Enter in the input. The manager shows the unified overview and a loading spinner while processing; errors appear in the upper-right message area. Successfully submitting a task does not mean its content has been remembered. After the task completes successfully, including when no changes are needed, the submitted text is cleared only if you have not edited the input since submitting; failed or partially failed tasks and new edits leave it intact."
 				}
 			]
 		},

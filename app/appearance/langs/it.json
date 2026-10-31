@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Riproduzione in ciclo",
 	"showDockBar": "Mostra le barre dock",
 	"hideDockBar": "Nascondi le barre dock",
 	"documentAncestorAmbiguous": "Più documenti hanno lo stesso titolo. Seleziona il documento per questa operazione",

@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Wiedergabe wiederholen",
 	"showDockBar": "Dockleisten anzeigen",
 	"hideDockBar": "Dockleisten ausblenden",
 	"documentAncestorAmbiguous": "Mehrere Dokumente haben denselben Titel. Wähle das Dokument für diesen Vorgang",

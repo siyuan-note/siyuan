@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Odtwarzanie w pętli",
 	"showDockBar": "Pokaż paski dokowania",
 	"hideDockBar": "Ukryj paski dokowania",
 	"documentAncestorAmbiguous": "Kilka dokumentów ma ten sam tytuł. Wybierz dokument dla tej operacji",

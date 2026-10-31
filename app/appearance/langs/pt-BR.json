@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Reprodução em loop",
 	"showDockBar": "Mostrar barras de encaixe",
 	"hideDockBar": "Ocultar barras de encaixe",
 	"documentAncestorAmbiguous": "Vários documentos têm o mesmo título. Selecione o documento para esta operação",

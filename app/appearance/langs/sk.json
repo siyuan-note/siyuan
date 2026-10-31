@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Opakované prehrávanie",
 	"showDockBar": "Zobraziť dokovacie lišty",
 	"hideDockBar": "Skryť dokovacie lišty",
 	"documentAncestorAmbiguous": "Viaceré dokumenty majú rovnaký názov. Vyberte dokument pre túto operáciu",

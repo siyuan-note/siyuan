@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Loop playback",
 	"showDockBar": "Show dock bars",
 	"hideDockBar": "Hide dock bars",
 	"documentAncestorAmbiguous": "Several documents have the same title. Select the document for this operation",

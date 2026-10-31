@@ -1,4 +1,5 @@
 {
+	"videoLoop": "ループ再生",
 	"showDockBar": "ドックバーを表示",
 	"hideDockBar": "ドックバーを非表示",
 	"documentAncestorAmbiguous": "同じタイトルのドキュメントが複数あります。この操作で使用するドキュメントを選択してください",

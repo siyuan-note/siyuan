@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Lecture en boucle",
 	"showDockBar": "Afficher les barres de dock",
 	"hideDockBar": "Masquer les barres de dock",
 	"documentAncestorAmbiguous": "Plusieurs documents portent le même titre. Sélectionnez le document pour cette opération",

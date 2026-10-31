@@ -1,4 +1,5 @@
 {
+	"videoLoop": "반복 재생",
 	"showDockBar": "도크 바 표시",
 	"hideDockBar": "도크 바 숨기기",
 	"documentAncestorAmbiguous": "제목이 같은 문서가 여러 개 있습니다. 이 작업에 사용할 문서를 선택하세요",

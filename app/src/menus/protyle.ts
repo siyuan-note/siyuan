@@ -2325,6 +2325,18 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             });
         }
     }];
+    if (type === "NodeVideo") {
+        subMenus.push({
+            id: "loop",
+            label: window.siyuan.languages.videoLoop,
+            checked: videoElement.hasAttribute("loop"),
+            click() {
+                videoElement.toggleAttribute("loop");
+                updateTransaction(protyle, nodeElement, html);
+                html = nodeElement.outerHTML;
+            }
+        });
+    }
     if (src && src.startsWith("assets/")) {
         subMenus.push({
             id: "separator_rename",

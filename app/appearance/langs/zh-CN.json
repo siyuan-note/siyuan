@@ -1,4 +1,5 @@
 {
+	"videoLoop": "循环播放",
 	"showDockBar": "显示停靠栏",
 	"hideDockBar": "隐藏停靠栏",
 	"documentAncestorAmbiguous": "多个文档标题相同，请选择本次操作使用的文档",

@@ -1,4 +1,5 @@
 {
+	"videoLoop": "Reproducción en bucle",
 	"showDockBar": "Mostrar barras de acoplamiento",
 	"hideDockBar": "Ocultar barras de acoplamiento",
 	"documentAncestorAmbiguous": "Varios documentos tienen el mismo título. Selecciona el documento para esta operación",

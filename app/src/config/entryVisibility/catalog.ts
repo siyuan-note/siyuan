@@ -425,6 +425,7 @@ const gutterSingle = () => [
     separator("separator_VideoOrAudio"),
     node("assetVideo", location(lang("video"), lang("assets")), true, [
         node("asset", lang("assets")),
+        node("loop", lang("videoLoop")),
         separator("separator_rename"),
         node("rename", lang("rename")),
         node("openBy", lang("openBy")),

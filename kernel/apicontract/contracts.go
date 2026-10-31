@@ -1756,6 +1756,9 @@ var PluginPrivateService = define[EmptyRequest, PluginServiceContent]("pluginPri
 // 日期类图标使用内置字体和常规字重；未配置全局字体时使用内置列表，缺失字体由客户端继续回退。
 var GetDynamicIcon = define[EmptyRequest, BinaryContent]("getDynamicIcon", "/api/icon/getDynamicIcon", AuthenticatedAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/svg+xml"}}, EmptyResponseStatuses: []int{500}}, "GET")
 
+// ExtensionCopy 转换浏览器提交的页面内容，保留动态资源字段和部分上传失败时的 Markdown。
+// 链滴、流云整页剪藏使用当前账号所属站点的登录 Cookie 获取原始 Markdown，不跟随重定向。
+// 未登录、站点与账号区域不匹配或获取原文失败时，使用提交的 DOM 和上传资源；局部剪藏直接使用 DOM。
 var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
 var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", PublicAccess, NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")

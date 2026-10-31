@@ -5525,6 +5525,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 转换浏览器提交的页面内容，保留动态资源字段和部分上传失败时的 Markdown。
+     * 链滴、流云整页剪藏使用当前账号所属站点的登录 Cookie 获取原始 Markdown，不跟随重定向。
+     * 未登录、站点与账号区域不匹配或获取原文失败时，使用提交的 DOM 和上传资源；局部剪藏直接使用 DOM。
+     */
     "/api/extension/copy": {
         request: ({ "assets"?: string; "clipType"?: string; "dom": string; "href"?: string; "notebook"?: string; } & Record<string, string | Blob | Array<string | Blob>>);
         response: { "code": 0; "data": ExtensionCopyData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ExtensionCopyData | null; "msg": string; };

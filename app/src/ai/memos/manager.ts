@@ -255,7 +255,7 @@ export const openMemoryManager = () => {
             taskFailures = 0;
             discovering = false;
             const tasks = response.data.tasks || [];
-            const task = tasks.find(item => ["queued", "running"].includes(item.state)) || tasks[0];
+            const task = tasks.find(item => ["queued", "running"].includes(item.state));
             if (task) {
                 taskId = task.taskId;
                 activeMemoryTask = taskId;

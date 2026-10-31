@@ -820,7 +820,7 @@ test("initial task discovery recovers before permitting another model request", 
     const state = harness(url => {
         if (url.endsWith("/list")) {
             if (++attempts === 1) { throw new Error("offline"); }
-            return {code: 0, data: {tasks: [{taskId: "already-running", state: "running"}]}};
+            return {code: 0, data: {tasks: [{taskId: "old-failure", state: "failed"}, {taskId: "already-running", state: "running"}]}};
         }
         if (url.endsWith("/task")) { return completed("already-running"); }
     });
@@ -833,13 +833,38 @@ test("initial task discovery recovers before permitting another model request", 
     assert.equal(state.requests.some(request => request.url.endsWith("/maintain")), false);
 });
 
-test("recent failure is notified without exposing record IDs or internal history controls", async () => {
-    const state = harness(url => url.endsWith("/list") ? {code: 0, data: {tasks: [{taskId: "failed", state: "failed"}]}} :
-        url.endsWith("/task") ? {code: 0, data: {taskId: "failed", state: "failed", error: "Model request failed", results: [{id: "record-secret", saved: false, error: "record error"}]}} : undefined);
+test("opening the summary ignores terminal history instead of replaying old task errors", async () => {
+    for (const phase of ["failed", "cancelled", "completed"]) {
+        const state = harness(url => url.endsWith("/list") ? {code: 0, data: {tasks: [{taskId: "old", state: phase}]}} :
+            url.endsWith("/task") ? {code: 0, data: {taskId: "old", state: phase, error: "memory configuration changed; retry explicitly", results: []}} : undefined);
+        await state.flush();
+        assert.deepEqual(state.messages, []);
+        assert.equal(state.requests.some(request => request.url.endsWith("/task")), false);
+        assert.equal(state.button.disabled, false);
+        assert.equal(state.timers.size, 0);
+    }
+});
+
+test("an owned task finishing while closed reports its failure once when reopened", async () => {
+    let phase = "running";
+    const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "owned"}} :
+        url.endsWith("/task") ? {code: 0, data: {taskId: "owned", state: phase, error: phase === "failed" ? "memory configuration changed; retry explicitly" : ""}} :
+            url.endsWith("/list") ? {code: 0, data: {tasks: [{taskId: "owned", state: phase}]}} : undefined);
     await state.flush();
-    assert.equal(state.messages[0], "embeddingFailed");
-    assert.doesNotMatch(state.messages.join(""), /record-secret|record error/);
+    state.enter("Remember this");
+    await state.click();
+    state.destroy();
+    phase = "failed";
+    state.reopen();
+    await state.flush();
+    assert.deepEqual(state.messages, ["aiMemoryContentChanged"]);
     assert.equal(state.button.disabled, false);
+    state.destroy();
+    const polls = state.requests.filter(request => request.url.endsWith("/task")).length;
+    state.reopen();
+    await state.flush();
+    assert.equal(state.requests.filter(request => request.url.endsWith("/task")).length, polls);
+    assert.deepEqual(state.messages, ["aiMemoryContentChanged"]);
 });
 
 test("closing clears recovery timers but never cancels a backend task, and reopening resumes it", async () => {

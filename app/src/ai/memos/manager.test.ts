@@ -310,6 +310,18 @@ test("task failure notifications include safe item classifications and never raw
     assert.equal(state.input.value, "Delete the spacing rule");
 });
 
+test("all-rejected scope proposals preserve the input without a partial-save notification", async () => {
+    const state = harness(url => url.endsWith("/maintain") ? {code: 0, data: {taskId: "task"}} :
+        url.endsWith("/task") ? {code: 0, data: {taskId: "task", state: "failed",
+            error: "some memory proposals were not saved; saved memories remain available",
+            results: [{saved: false, error: "proposal scope is not permitted"}]}} : undefined);
+    await state.flush();
+    state.enter("List items do not end with periods");
+    await state.click();
+    assert.deepEqual(state.messages, ["Safe model output format error"]);
+    assert.equal(state.input.value, "List items do not end with periods");
+});
+
 test("preflight intent failures and controlled model errors remain actionable without exposing provider text", async () => {
     for (const [error, message] of [["memory proposal does not match forget intent", "aiMemoryIntentUnclear"],
         ["invalid memory forget selection", "Safe model output format error"],

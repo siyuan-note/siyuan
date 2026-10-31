@@ -109,6 +109,9 @@ func TestAIMemoryTaskSavedStatus(t *testing.T) {
 			if task.status.State != scenario.state || saved != scenario.saved || task.status.OverviewPending != scenario.pending {
 				t.Fatalf("unexpected outcome: %+v", task.status)
 			}
+			if scenario.name == "all-rejected" && task.status.Error != "proposal has no grounded evidence" {
+				t.Fatalf("all-rejected task lost its failure reason: %+v", task.status)
+			}
 			data, err := json.Marshal(task.status)
 			if err != nil || strings.Contains(string(data), "PRIVATE_MODEL_OUTPUT") {
 				t.Fatal("unverified model output reached task metadata")

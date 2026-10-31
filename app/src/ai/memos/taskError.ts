@@ -77,12 +77,13 @@ export const memoryTaskErrorMessage = (task: TaskFailure, messages: ErrorMessage
     const result = new Set<string>();
     const errors = [task.error, ...(task.results || []).slice(0, 64).map(item => item.error)]
         .filter(error => typeof error === "string" && error.length > 0 && error.length <= 1024);
-    if (errors.some(error => categories.get(error) === "partial") ||
-        (task.results?.some(item => item.saved) && task.results.some(item => !!item.error))) {
+    if (task.results?.some(item => item.saved) &&
+        (errors.some(error => categories.get(error) === "partial") || task.results.some(item => !!item.error))) {
         result.add(messages.partial);
     }
     for (const error of errors) {
         const category = categories.get(error);
+        if (category === "partial") { continue; }
         if (category) {
             result.add(category === "format" ? (messages.model[456] || messages.generic) : messages[category]);
             continue;

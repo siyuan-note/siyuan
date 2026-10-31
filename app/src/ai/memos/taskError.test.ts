@@ -77,6 +77,13 @@ test("partial failures retain saved-result context and deduplicate safe explanat
     assert.equal(memoryTaskErrorMessage({results: [{saved: true}, {error: "private provider body /workspace/private"}]}, messages), messages.partial);
 });
 
+test("legacy all-rejected tasks never claim that some memories were saved", () => {
+    const error = "some memory proposals were not saved; saved memories remain available";
+    assert.equal(memoryTaskErrorMessage({error, results: [{saved: false, error: "proposal scope is not permitted"}]}, messages), messages.model[456]);
+    assert.equal(memoryTaskErrorMessage({error, results: [{saved: false, error: "unknown private failure"}]}, messages), messages.generic);
+    assert.equal(memoryTaskErrorMessage({error, results: []}, messages), messages.generic);
+});
+
 test("unknown errors and embedded known phrases never echo paths, input or provider response bodies", () => {
     for (const error of ["<img src=x onerror=bad>", "POST https://private.example/token?key=secret",
         "proposal target not in verified snapshot: private user input", "prefix memory revision conflict", "memory model error (999)"]) {

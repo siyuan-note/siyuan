@@ -186,6 +186,10 @@ The first version accepts optional `validFrom`, `validUntil`, and `supersedes` i
 
 ### Validated maintenance pipeline
 
+Save proposals receive an explicit `AllowedScopes` list and only candidates within those writable scopes. Examples use valid literal enum values; the model must choose an exact permitted scope rather than copy explanatory text or a subject name. Manual forgetting can still search verified targets across scopes. Scope, provenance and revision checks remain enforced at commit. If every proposed action is rejected, report the actual failure and skip the unnecessary overview request. A partial-save notification requires at least one saved result; older task responses with no saved results must not claim partial success.
+
+When every action is rejected solely by the scope check before any write, discard that prepared proposal so an explicit retry generates a fresh one. Do not retry automatically. Batches with saved results retain their prepared actions and operation identities to avoid repeating successful writes.
+
 1. Capture an operation ID, source identities/versions, allowed scope, and configuration generation; derive source authority in the kernel rather than trusting caller-provided IDs
 2. Retrieve related records using original text and optional model-proposed keyword groups; read candidate bodies on demand
 3. Ask the configured model for structured create, reinforce, revise, supersede, or no-op proposals with evidence; model proposals are not filesystem instructions

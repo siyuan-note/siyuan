@@ -29,6 +29,7 @@ func TestWebSocketDesktopSessionAuthentication(t *testing.T) {
 	sessionStore = cookie.NewStore([]byte("desktop-websocket-session-test-key"))
 	util.WorkspaceDir, util.Container = "Note1", util.ContainerStd
 	srv := newWebSocketTestServer(t)
+	model.Conf.CookieKey = "desktop-websocket-cookie-key"
 	model.Conf.AccessAuthCode = "desktop-password"
 	for _, state := range []string{"current", "remembered", "expired"} {
 		t.Run(state, func(t *testing.T) {
@@ -37,7 +38,7 @@ func TestWebSocketDesktopSessionAuthentication(t *testing.T) {
 			engine.GET("/login", func(c *gin.Context) {
 				session := util.GetSession(c)
 				ws := util.GetWorkspaceSession(session)
-				ws.AccessAuthCode = model.Conf.AccessAuthCode
+				model.SetAccessCodeSession(ws, model.Conf.AccessAuthCode)
 				model.BindDesktopSession(c, ws, state == "remembered")
 				if state == "expired" {
 					ws.DesktopSessionID = "previous-kernel-boot"

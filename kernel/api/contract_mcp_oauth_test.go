@@ -44,7 +44,7 @@ func oauthTestRouter(t *testing.T) *gin.Engine {
 	r.Use(ginSessions.Sessions("oauth-test-session", cookie.NewStore([]byte("oauth-test-session-key"))))
 	r.GET("/test-login", func(c *gin.Context) {
 		s := util.GetSession(c)
-		util.GetWorkspaceSession(s).AccessAuthCode = model.Conf.AccessAuthCode
+		model.SetAccessCodeSession(util.GetWorkspaceSession(s), model.Conf.AccessAuthCode)
 		if err := s.Save(c); err != nil {
 			t.Error(err)
 		}

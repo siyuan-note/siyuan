@@ -213,6 +213,7 @@ func newSessionCookieSecureTestEngine(t *testing.T) *gin.Engine {
 	previousWrongAuthCount := util.WrongAuthCount
 	util.WrongAuthCount = 0
 	t.Cleanup(func() { util.WrongAuthCount = previousWrongAuthCount })
+	model.Conf.CookieKey = "test-cookie-key"
 	model.Conf.AccessAuthCode = "test-access-code"
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()

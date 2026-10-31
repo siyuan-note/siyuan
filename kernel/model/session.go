@@ -110,7 +110,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		return apicontract.Failure[apicontract.Null](code, Conf.Language(83))
 	}
 
-	workspaceSession.AccessAuthCode = authCode
+	SetAccessCodeSession(workspaceSession, authCode)
 	workspaceSession.OIDCSessionVersion = ""
 	BindDesktopSession(c, workspaceSession, request.RememberMe)
 	util.WrongAuthCount = 0

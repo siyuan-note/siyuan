@@ -148,19 +148,16 @@ func Serve(fastMode bool, cookieKey string) {
 		gzipMiddleware(),
 	)
 
-	sessionStore = cookie.NewStore([]byte(cookieKey))
-	sessionStore.Options(sessions.Options{
-		Path: "/",
-		// Secure 属性逐请求按连接修正，见 tlsEnforceMiddleware
-		Secure:   util.SSL,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
-	})
+	store, err := newSessionStore(cookieKey)
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeSecurityRisk, "create session store failed: %s", err)
+	}
+	sessionStore = store
 	// TLS 强制中间件必须在会话中间件之前：跳转要发生在会话保存之前，
 	// 否则明文响应仍会携带未标记 Secure 的会话 Cookie
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
 	ginServer.Use(tlsEnforceMiddleware())
-	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
+	ginServer.Use(sessions.Sessions(util.SessionCookieName, sessionStore))
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)
@@ -319,6 +316,23 @@ func Serve(fastMode bool, cookieKey string) {
 			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
+}
+
+// newSessionStore 创建签名并加密的会话 Cookie 存储，载荷中的工作空间路径和认证状态不以明文留在客户端。
+func newSessionStore(cookieKey string) (cookie.Store, error) {
+	hashKey, blockKey, err := util.SessionCookieKeys(cookieKey)
+	if err != nil {
+		return nil, err
+	}
+	store := cookie.NewStore(hashKey, blockKey)
+	store.Options(sessions.Options{
+		Path: "/",
+		// Secure 属性逐请求按连接修正，见 tlsEnforceMiddleware
+		Secure:   util.SSL,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
+	})
+	return store, nil
 }
 
 func gzipMiddleware() gin.HandlerFunc {
@@ -1894,7 +1908,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 		authOk := !model.IsAccessAuthRequired() && (util.SiYuanAccessAuthCodeBypass || isLocalWebSocketRequest(s.Request))
 
 		if model.IsAccessAuthRequired() {
-			session, err := sessionStore.Get(s.Request, "siyuan")
+			session, err := sessionStore.Get(s.Request, util.SessionCookieName)
 			if err != nil {
 				authOk = false
 				logging.LogErrorf("get cookie failed: %s", err)

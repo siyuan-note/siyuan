@@ -634,7 +634,7 @@ func TestOIDCSessionVersionInvalidatesOnConfigurationChange(t *testing.T) {
 		t.Fatal("OIDC WebSocket session survived an authentication configuration change")
 	}
 	Conf.AccessAuthCode = "access-code"
-	workspaceSession.AccessAuthCode = "access-code"
+	SetAccessCodeSession(workspaceSession, "access-code")
 	if !IsWorkspaceSessionAuthenticated(workspaceSession) {
 		t.Fatal("valid access-code session should remain available as an independent login method")
 	}

@@ -45,13 +45,13 @@ function setup(lookup = async () => ({code: 0, data: {documents: [candidate("unl
         html: () => html, picker: () => picker, invalidate: () => { valid = false; }};
 }
 
-test("ancestor selector escapes titles, distinguishes IDs and allows changing the default candidate", async () => {
+test("ancestor selector shows titles only in candidate paths, distinguishes IDs and allows changing the default", async () => {
     const state = setup();
     const pending = state.choose();
     assert.equal(state.button.disabled, false);
     assert.equal(state.select.value, "0");
     assert.equal(state.select.focused, true);
-    assert.match(state.html(), /&lt;Same&gt;/);
+    assert.equal(state.html().match(/&lt;Same&gt;/g)?.length, 2);
     assert.doesNotMatch(state.html(), /<Same>/);
     assert.match(state.html(), /\[first\]/);
     assert.match(state.html(), /\[second\]/);

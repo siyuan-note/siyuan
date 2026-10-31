@@ -73,7 +73,6 @@ export const selectDocumentAncestor = (notebook: string, ambiguity: DocumentAnce
     };
     current = confirmDialog(window.siyuan.languages.newFile,
         `<label>${escapeHtml(window.siyuan.languages.documentAncestorAmbiguous)}
-<div class="fn__hr"></div><span class="ft__breakword">${escapeHtml(ambiguity.title)}</span>
 <div class="fn__hr"></div><select class="b3-select fn__block" data-ancestor-select>
 ${ambiguity.candidates.map((candidate, index) =>
             `<option value="${index}">${escapeHtml(candidate.displayPath)} [${escapeHtml(candidate.id)}]</option>`).join("")}

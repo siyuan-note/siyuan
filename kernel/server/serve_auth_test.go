@@ -7,10 +7,17 @@ package server
 import (
 	"bytes"
 	"html/template"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAuthPageActionLayout(t *testing.T) {
@@ -51,5 +58,35 @@ func TestAuthPageActionLayout(t *testing.T) {
 	if rememberMeIndex < strings.Index(lockScreenPage, `id="authSubmit"`) ||
 		rememberMeIndex < strings.Index(lockScreenPage, `id="oidcLogin"`) {
 		t.Fatal("combined authentication page renders remember me before a login action")
+	}
+}
+
+// 授权页在登录前可访问，不论客户端标识如何都不得返回工作空间路径。
+func TestAuthPageOmitsWorkspaceDir(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousConf, previousWorkingDir, previousDir := model.Conf, util.WorkingDir, util.WorkspaceDir
+	t.Cleanup(func() { model.Conf, util.WorkingDir, util.WorkspaceDir = previousConf, previousWorkingDir, previousDir })
+	model.Conf = model.NewAppConf()
+	model.Conf.Appearance.Store(conf.NewAppearance())
+	model.Conf.Keymap.Store(conf.NormalizeKeymap(nil))
+	model.Conf.AccessAuthCode = "lock-screen-password"
+	util.WorkingDir = filepath.Join("..", "..", "app")
+	util.WorkspaceDir = filepath.Join(t.TempDir(), "alice-private-workspace")
+
+	engine := gin.New()
+	serveCheckAuth(engine)
+	for _, userAgent := range []string{"SiYuan/3.8.10 https://b3log.org/siyuan Electron Chrome/140", "SiYuan/3.8.10 Android", "Mozilla/5.0"} {
+		r := httptest.NewRequest(http.MethodGet, "http://192.0.2.10:6806/check-auth", nil)
+		r.RemoteAddr = "192.0.2.20:1234"
+		r.Header.Set("User-Agent", userAgent)
+		w := httptest.NewRecorder()
+		engine.ServeHTTP(w, r)
+		body := w.Body.String()
+		if w.Code != http.StatusOK || !strings.Contains(body, `ipcRenderer.invoke("siyuan-init"`) {
+			t.Fatalf("auth page was not rendered for %q: %d", userAgent, w.Code)
+		}
+		if strings.Contains(body, "alice-private-workspace") {
+			t.Fatalf("auth page exposes the workspace path to %q", userAgent)
+		}
 	}
 }

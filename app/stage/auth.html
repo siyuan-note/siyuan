@@ -1037,7 +1037,6 @@
             })
             await ipcRenderer.invoke("siyuan-init", {
                 languages: {{.trayMenuLangs}},
-                workspaceDir: '{{.workspaceDir}}',
                 port: location.port
             });
             ipcRenderer.send("siyuan-hotkey", {

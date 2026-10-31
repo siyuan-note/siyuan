@@ -1716,6 +1716,21 @@ const installRemoteFrontendProtocol = (target) => {
     writeLog("installed local frontend handler for remote kernel [origin=" + target.origin + "]");
 };
 
+// 本机内核对环回地址的 getWorkspaceInfo 免认证放行；查询失败时沿用启动内核时的工作空间路径
+const getLocalKernelWorkspaceDir = async (workspaceItem) => {
+    try {
+        const response = await net.fetch(workspaceItem.kernelTarget.origin + "/api/system/getWorkspaceInfo", {method: "POST"});
+        const result = await response.json();
+        if (0 === result.code && "string" === typeof result.data?.workspaceDir && result.data.workspaceDir) {
+            return result.data.workspaceDir;
+        }
+        writeLog("get workspace info failed [code=" + result.code + "]");
+    } catch (e) {
+        writeLog("get workspace info failed: " + e);
+    }
+    return workspaceItem.workspaceDir || "";
+};
+
 const requestKernelExit = (port, options = {}, signal) => {
     if (!port) {
         return Promise.resolve();
@@ -4356,12 +4371,17 @@ app.whenReady().then(() => {
         const workspaceItem = workspaces.find((item) => event.sender.id === item.webContentsId);
         if (workspaceItem) {
             workspaceItem.initialized = true;
-            workspaceItem.workspaceDir = workspaceItem.ownsKernel ? data.workspaceDir : "";
+            let workspaceDir = "";
+            if (workspaceItem.ownsKernel) {
+                // 授权页在登录前加载，内核不向其下发工作空间路径，改由主进程向本机内核查询
+                workspaceDir = data.workspaceDir || await getLocalKernelWorkspaceDir(workspaceItem);
+            }
+            workspaceItem.workspaceDir = workspaceDir;
             let tray;
             if ("win32" === process.platform || "linux" === process.platform) {
                 // 系统托盘
                 tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
-                const trayName = workspaceItem.ownsKernel ? path.basename(data.workspaceDir) :
+                const trayName = workspaceItem.ownsKernel ? path.basename(workspaceDir) :
                     new URL(workspaceItem.kernelTarget.origin).host;
                 tray.setToolTip(`${trayName} - SiYuan v${appVer}`);
                 const mainWindow = getWindowByContentId(event.sender.id);

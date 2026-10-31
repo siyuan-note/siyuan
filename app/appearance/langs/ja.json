@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "すべての記憶を削除して記憶機能を無効にする",
-	"aiMemoryClearAndDisableConfirm": "このワークスペースのすべての記憶記録と要約を削除し、長期記憶を無効にしますか？元のノート、会話、過去のバックアップは保持されます。",
+	"aiMemoryClearAndDisableConfirm": "このワークスペースのすべての記憶記録と要約を削除し、長期記憶を無効にしますか？",
 	"aiMemoryClearFailed": "一部の記憶を削除できませんでした。再試行してください",
 	"aiMemoryProcessingLimit": "記憶の内容または処理範囲が上限を超えています。範囲を絞って再試行してください",
 	"aiMemoryReadFailed": "記憶データをすべて読み取れません。確認して再試行してください",

@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Tüm anıları sil ve belleği devre dışı bırak",
-	"aiMemoryClearAndDisableConfirm": "Bu çalışma alanındaki tüm bellek kayıtları ve özet silinip uzun süreli bellek devre dışı bırakılsın mı? Özgün notlar, konuşmalar ve önceki yedekler korunacaktır.",
+	"aiMemoryClearAndDisableConfirm": "Bu çalışma alanındaki tüm bellek kayıtları ve özet silinip uzun süreli bellek devre dışı bırakılsın mı?",
 	"aiMemoryClearFailed": "Bazı anılar silinemedi; yeniden deneyin",
 	"aiMemoryProcessingLimit": "Anı içeriği veya işleme kapsamı sınırı aşıyor; isteği daraltıp tekrar deneyin",
 	"aiMemoryReadFailed": "Tüm anı verileri okunamıyor; kontrol edip tekrar deneyin",

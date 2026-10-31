@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Alle Erinnerungen löschen und die Speicherfunktion deaktivieren",
-	"aiMemoryClearAndDisableConfirm": "Alle Erinnerungen und die Zusammenfassung dieses Arbeitsbereichs löschen und das Langzeitgedächtnis deaktivieren? Ursprüngliche Notizen, Gespräche und frühere Sicherungen bleiben erhalten.",
+	"aiMemoryClearAndDisableConfirm": "Alle Erinnerungen und die Zusammenfassung dieses Arbeitsbereichs löschen und das Langzeitgedächtnis deaktivieren?",
 	"aiMemoryClearFailed": "Einige Erinnerungen konnten nicht gelöscht werden; bitte erneut versuchen",
 	"aiMemoryProcessingLimit": "Der Erinnerungsinhalt oder Verarbeitungsumfang überschreitet das Limit; grenze die Anfrage ein und versuche es erneut",
 	"aiMemoryReadFailed": "Nicht alle Erinnerungsdaten konnten gelesen werden; prüfe sie und versuche es erneut",

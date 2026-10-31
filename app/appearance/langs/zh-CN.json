@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "删除所有记忆并关闭记忆功能",
-	"aiMemoryClearAndDisableConfirm": "删除当前工作空间的全部记忆记录和摘要，并关闭长期记忆？原笔记、对话和历史备份会保留。",
+	"aiMemoryClearAndDisableConfirm": "删除当前工作空间的全部记忆记录和摘要，并关闭长期记忆？",
 	"aiMemoryClearFailed": "部分记忆尚未删除，请重试",
 	"aiMemoryProcessingLimit": "记忆内容或处理范围超过限制，请缩小范围后重试",
 	"aiMemoryReadFailed": "无法完整读取记忆，请检查后重试",

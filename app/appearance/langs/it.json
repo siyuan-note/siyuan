@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Elimina tutti i ricordi e disattiva la memoria",
-	"aiMemoryClearAndDisableConfirm": "Eliminare tutti i ricordi e il riepilogo di questo spazio di lavoro e disattivare la memoria a lungo termine? Le note originali, le conversazioni e i backup precedenti saranno conservati.",
+	"aiMemoryClearAndDisableConfirm": "Eliminare tutti i ricordi e il riepilogo di questo spazio di lavoro e disattivare la memoria a lungo termine?",
 	"aiMemoryClearFailed": "Impossibile eliminare alcuni ricordi; riprova",
 	"aiMemoryProcessingLimit": "Il contenuto dei ricordi o l’ambito di elaborazione supera il limite; restringi la richiesta e riprova",
 	"aiMemoryReadFailed": "Impossibile leggere tutti i dati dei ricordi; controllali e riprova",

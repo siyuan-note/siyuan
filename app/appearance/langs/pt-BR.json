@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Excluir todas as memórias e desativar a memória",
-	"aiMemoryClearAndDisableConfirm": "Excluir todos os registros de memória e o resumo deste espaço de trabalho e desativar a memória de longo prazo? As notas originais, as conversas e os backups anteriores serão mantidos.",
+	"aiMemoryClearAndDisableConfirm": "Excluir todos os registros de memória e o resumo deste espaço de trabalho e desativar a memória de longo prazo?",
 	"aiMemoryClearFailed": "Não foi possível excluir algumas memórias; tente novamente",
 	"aiMemoryProcessingLimit": "O conteúdo das memórias ou o escopo do processamento excede o limite; reduza o escopo da solicitação e tente novamente",
 	"aiMemoryReadFailed": "Não foi possível ler todos os dados de memórias; verifique-os e tente novamente",

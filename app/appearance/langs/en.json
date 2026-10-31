@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Delete all memories and disable memory",
-	"aiMemoryClearAndDisableConfirm": "Delete all memory records and the summary in this workspace, and disable long-term memory? Original notes, conversations and historical backups will be kept.",
+	"aiMemoryClearAndDisableConfirm": "Delete all memory records and the summary in this workspace, and disable long-term memory?",
 	"aiMemoryClearFailed": "Some memories could not be deleted; try again",
 	"aiMemoryProcessingLimit": "The memory content or processing scope exceeds the limit; narrow the request and try again",
 	"aiMemoryReadFailed": "Unable to read all memory data; check it and try again",

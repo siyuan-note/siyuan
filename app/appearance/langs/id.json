@@ -1,6 +1,6 @@
 {
 	"aiMemoryClearAndDisable": "Hapus semua ingatan dan nonaktifkan memori",
-	"aiMemoryClearAndDisableConfirm": "Hapus semua catatan memori dan ringkasan di ruang kerja ini, lalu nonaktifkan memori jangka panjang? Catatan asli, percakapan, dan cadangan sebelumnya akan tetap disimpan.",
+	"aiMemoryClearAndDisableConfirm": "Hapus semua catatan memori dan ringkasan di ruang kerja ini, lalu nonaktifkan memori jangka panjang?",
 	"aiMemoryClearFailed": "Sebagian ingatan tidak dapat dihapus; coba lagi",
 	"aiMemoryProcessingLimit": "Isi ingatan atau cakupan pemrosesan melebihi batas; persempit permintaan dan coba lagi",
 	"aiMemoryReadFailed": "Tidak dapat membaca seluruh data ingatan; periksa dan coba lagi",

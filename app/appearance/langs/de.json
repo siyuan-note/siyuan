@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Dockleisten anzeigen",
+	"hideDockBar": "Dockleisten ausblenden",
+	"showFloatingDockBar": "Schwebende Dockleisten anzeigen",
+	"showFloatingDockBarTip": "Wenn aktiviert, werden ausgeblendete Dockleisten beim Öffnen einer schwebenden Seitenleiste oder beim Bewegen des Mauszeigers an den Fensterrand vorübergehend angezeigt",
 	"aiMemoryClearAndDisable": "Alle Erinnerungen löschen und die Speicherfunktion deaktivieren",
 	"aiMemoryClearAndDisableConfirm": "Alle Erinnerungen und die Zusammenfassung dieses Arbeitsbereichs löschen und das Langzeitgedächtnis deaktivieren?",
 	"aiMemoryClearFailed": "Einige Erinnerungen konnten nicht gelöscht werden; bitte erneut versuchen",

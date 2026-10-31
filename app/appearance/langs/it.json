@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Mostra le barre dock",
+	"hideDockBar": "Nascondi le barre dock",
+	"showFloatingDockBar": "Mostra le barre dock mobili",
+	"showFloatingDockBarTip": "Se attivato, le barre dock nascoste appaiono temporaneamente quando si apre un pannello laterale mobile o si sposta il puntatore sul bordo della finestra",
 	"aiMemoryClearAndDisable": "Elimina tutti i ricordi e disattiva la memoria",
 	"aiMemoryClearAndDisableConfirm": "Eliminare tutti i ricordi e il riepilogo di questo spazio di lavoro e disattivare la memoria a lungo termine?",
 	"aiMemoryClearFailed": "Impossibile eliminare alcuni ricordi; riprova",

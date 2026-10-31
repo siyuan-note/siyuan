@@ -98,6 +98,8 @@ func TestAPIContractSettingPreferencesCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetAppearance, conf.NewAppearance, []string{
 		`{}`, `{"compactMode":true,"menuMouseScroll":false,"outlineKeepCurrentExpand":true}`,
 		`{"pdfTheme":{"light":"dark","dark":"light","annoColor":"red"},"mobileBars":{"autoHide":false}}`,
+		`{"showFloatingDockBar":true}`, `{"showFloatingDockBar":false}`,
+		`{"showFloatingDockBar":null}`, `{"ShowFloatingDockBar":false}`, `{"showFloatingDockBar":"bad"}`,
 		`{"pdfTheme":null,"mobileBars":null}`, `{"mobileBars":{"sidebarSwipe":null,"sidebarButtons":false}}`,
 		`{"compactMode":"true"}`, `{"pdfTheme":{"light":false}}`, `{"mobileBars":{"autoHide":1}}`,
 	})

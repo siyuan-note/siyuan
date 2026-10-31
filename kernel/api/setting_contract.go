@@ -601,6 +601,7 @@ func settingAppearancePayload(value *conf.Appearance) *apicontract.SettingAppear
 		return nil
 	}
 	result := &apicontract.SettingAppearance{}
+	result.ShowFloatingDockBar = value.ShowFloatingDockBar
 	result.LockScreenWallpaper = value.LockScreenWallpaper
 	result.CompactMode = value.CompactMode
 	result.MenuMouseScroll = value.MenuMouseScroll

@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Show dock bars",
+	"hideDockBar": "Hide dock bars",
+	"showFloatingDockBar": "Show floating dock bars",
+	"showFloatingDockBarTip": "When enabled, hidden dock bars appear temporarily when a floating side panel opens or the pointer reaches the window edge",
 	"aiMemoryClearAndDisable": "Delete all memories and disable memory",
 	"aiMemoryClearAndDisableConfirm": "Delete all memory records and the summary in this workspace, and disable long-term memory?",
 	"aiMemoryClearFailed": "Some memories could not be deleted; try again",

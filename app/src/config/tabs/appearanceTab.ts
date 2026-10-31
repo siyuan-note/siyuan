@@ -937,6 +937,10 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.appearance19,
         desc: window.siyuan.languages.appearance20,
     });
+    group.switch("appearance.showFloatingDockBar", {
+        title: window.siyuan.languages.showFloatingDockBar,
+        desc: window.siyuan.languages.showFloatingDockBarTip,
+    });
     /// #endif
     group.stack({
         key: "statusBar",

@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Pokaż paski dokowania",
+	"hideDockBar": "Ukryj paski dokowania",
+	"showFloatingDockBar": "Pokaż pływające paski dokowania",
+	"showFloatingDockBarTip": "Po włączeniu ukryte paski dokowania pojawiają się tymczasowo po otwarciu pływającego panelu bocznego lub przesunięciu wskaźnika do krawędzi okna",
 	"aiMemoryClearAndDisable": "Usuń wszystkie wspomnienia i wyłącz pamięć",
 	"aiMemoryClearAndDisableConfirm": "Usunąć wszystkie wpisy pamięci i podsumowanie w tym obszarze roboczym oraz wyłączyć pamięć długoterminową?",
 	"aiMemoryClearFailed": "Nie udało się usunąć części wspomnień; spróbuj ponownie",

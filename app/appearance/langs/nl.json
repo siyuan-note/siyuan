@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Dockbalken tonen",
+	"hideDockBar": "Dockbalken verbergen",
+	"showFloatingDockBar": "Zwevende dockbalken tonen",
+	"showFloatingDockBarTip": "Wanneer ingeschakeld, verschijnen verborgen dockbalken tijdelijk bij het openen van een zwevend zijpaneel of wanneer de aanwijzer de vensterrand bereikt",
 	"aiMemoryClearAndDisable": "Alle herinneringen verwijderen en geheugen uitschakelen",
 	"aiMemoryClearAndDisableConfirm": "Alle geheugenrecords en de samenvatting in deze werkruimte verwijderen en het langetermijngeheugen uitschakelen?",
 	"aiMemoryClearFailed": "Sommige herinneringen konden niet worden verwijderd; probeer het opnieuw",

@@ -289,6 +289,9 @@ func NormalizeAppearance(appearance *Appearance, mobile bool) *Appearance {
 	if "" == appearance.CodeBlockThemeLight {
 		appearance.CodeBlockThemeLight = "github"
 	}
+	if appearance.ShowFloatingDockBar == nil {
+		appearance.ShowFloatingDockBar = new(true)
+	}
 	appearance.StatusBar = util.NormalizeStatusBar(appearance.StatusBar, mobile)
 	if appearance.PDFTheme == nil {
 		appearance.PDFTheme = NewPDFTheme()

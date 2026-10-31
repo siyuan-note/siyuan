@@ -143,6 +143,19 @@ export const adjustDockPadding = () => {
     }
 };
 
+// 配置确认后刷新停靠栏并重新定位展开的浮动面板，保持面板的开关与固定状态。
+export const syncFloatingDockBarPreference = () => {
+    const docks = [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock];
+    docks.forEach(dock => dock?.clearDockHoverTimeout());
+    syncDockBarVisibility();
+    docks.forEach(dock => {
+        if (dock?.isFloating() && dock.isPanelVisible() &&
+            !dock.layout.element.classList.contains("fn__none") && dock.layout.element.style.opacity === "1") {
+            dock.showDock(true);
+        }
+    });
+};
+
 export const syncDockBarVisibility = () => {
     let changed = false;
     let hasFloatingBar = false;
@@ -162,9 +175,11 @@ export const syncDockBarVisibility = () => {
             item.id === "dockRight" ? window.siyuan.layout?.rightDock : undefined;
         const floatingPanelOpen = Boolean(dock?.isFloating() && dock.isPanelVisible() &&
             !dock.layout.element.classList.contains("fn__none") && dock.layout.element.style.opacity === "1");
-        const canFloat = window.siyuan.config.uiLayout.hideDock && dock?.isFloating() && sectionVisibility.some(Boolean);
+        const canFloat = window.siyuan.config.appearance?.showFloatingDockBar !== false &&
+            window.siyuan.config.uiLayout.hideDock && dock?.isFloating() && sectionVisibility.some(Boolean);
         if (!canFloat) {
             hoveredDockBars.delete(item);
+            pointerOverDockBars.delete(item);
         }
         const floating = Boolean(canFloat && (floatingPanelOpen || hoveredDockBars.has(item)));
         const wasFloating = item.classList.contains("dock--float");

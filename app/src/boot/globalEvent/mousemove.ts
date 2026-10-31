@@ -114,7 +114,8 @@ export const windowMouseMove = (event: MouseEvent) => {
             const leftBar = document.getElementById("dockLeft");
             const leftBarWidth = leftBar.classList.contains("dock--float") ? 0 : leftBar.clientWidth;
             const leftTrigger = canTrigger && inYRange && leftDock.isFloating() &&
-                (leftDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock) &&
+                (leftDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock &&
+                    window.siyuan.config.appearance.showFloatingDockBar !== false) &&
                 event.clientX < Math.max(leftBarWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
                 (leftBarWidth > 0 || event.clientX < 8);
@@ -130,7 +131,8 @@ export const windowMouseMove = (event: MouseEvent) => {
             const rightBar = document.getElementById("dockRight");
             const rightBarWidth = rightBar.classList.contains("dock--float") ? 0 : rightBar.clientWidth;
             const rightTrigger = canTrigger && inYRange && rightDock.isFloating() &&
-                (rightDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock) &&
+                (rightDock.layout.element.clientWidth > 0 || window.siyuan.config.uiLayout.hideDock &&
+                    window.siyuan.config.appearance.showFloatingDockBar !== false) &&
                 event.clientX > window.innerWidth - Math.max(rightBarWidth - 2, 16) &&
                 (rightBarWidth > 0 || event.clientX > window.innerWidth - 8);
             if (rightTrigger || rightDock.layout.element.contains(target) || rightBar.contains(target)) {

@@ -1,4 +1,8 @@
 {
+	"showDockBar": "显示停靠栏",
+	"hideDockBar": "隐藏停靠栏",
+	"showFloatingDockBar": "显示浮动停靠栏",
+	"showFloatingDockBarTip": "启用后隐藏停靠栏时，展开浮动侧栏或将鼠标移至窗口边缘可临时显示停靠栏",
 	"aiMemoryClearAndDisable": "删除所有记忆并关闭记忆功能",
 	"aiMemoryClearAndDisableConfirm": "删除当前工作空间的全部记忆记录和摘要，并关闭长期记忆？",
 	"aiMemoryClearFailed": "部分记忆尚未删除，请重试",

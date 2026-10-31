@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Yuva çubuklarını göster",
+	"hideDockBar": "Yuva çubuklarını gizle",
+	"showFloatingDockBar": "Kayan yuva çubuklarını göster",
+	"showFloatingDockBarTip": "Etkinleştirildiğinde gizli yuva çubukları, kayan bir yan panel açıldığında veya işaretçi pencere kenarına taşındığında geçici olarak görünür",
 	"aiMemoryClearAndDisable": "Tüm anıları sil ve belleği devre dışı bırak",
 	"aiMemoryClearAndDisableConfirm": "Bu çalışma alanındaki tüm bellek kayıtları ve özet silinip uzun süreli bellek devre dışı bırakılsın mı?",
 	"aiMemoryClearFailed": "Bazı anılar silinemedi; yeniden deneyin",

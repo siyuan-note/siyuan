@@ -7,6 +7,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
+	ShowFloatingDockBar      *bool               `json:"showFloatingDockBar"`      // 隐藏停靠栏时允许临时显示浮动停靠栏，缺失时默认开启
 	LockScreenWallpaper      bool                `json:"lockScreenWallpaper"`      // 使用本工作空间的单张锁屏壁纸
 	CompactMode              bool                `json:"compactMode"`              // 桌面端紧凑模式
 	MenuMouseScroll          bool                `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
@@ -75,6 +76,7 @@ func NewAppearance() *Appearance {
 // NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
 func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
+		ShowFloatingDockBar: new(true),
 		LockScreenWallpaper: false,
 		MenuMouseScroll:     true,
 		PDFTheme:            NewPDFTheme(),

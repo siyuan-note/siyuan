@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Afficher les barres de dock",
+	"hideDockBar": "Masquer les barres de dock",
+	"showFloatingDockBar": "Afficher les barres de dock flottantes",
+	"showFloatingDockBarTip": "Lorsque cette option est activée, les barres de dock masquées apparaissent temporairement à l’ouverture d’un panneau latéral flottant ou lorsque le pointeur atteint le bord de la fenêtre",
 	"aiMemoryClearAndDisable": "Supprimer tous les souvenirs et désactiver la mémoire",
 	"aiMemoryClearAndDisableConfirm": "Supprimer tous les souvenirs et le résumé de cet espace de travail, puis désactiver la mémoire à long terme ?",
 	"aiMemoryClearFailed": "Certains souvenirs n’ont pas pu être supprimés ; réessayez",

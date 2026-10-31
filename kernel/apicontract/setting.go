@@ -451,6 +451,9 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
+	// ShowFloatingDockBar 控制隐藏停靠栏时是否临时显示左右浮动停靠栏，旧配置缺失时默认开启。
+	// 部分更新省略字段时保留当前值，null 恢复默认开启。
+	ShowFloatingDockBar *bool `json:"showFloatingDockBar" api:"optional,nullable"`
 	// LockScreenWallpaper 默认关闭；图片单独保存在 conf/lockscreen/wallpaper.jpg，不进入设置导出或笔记同步。
 	LockScreenWallpaper bool `json:"lockScreenWallpaper" api:"optional,nullable"`
 	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。

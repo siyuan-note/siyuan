@@ -222,6 +222,12 @@ export const updateDockHotkeys = () => {
     });
 };
 
+export const getDockBarToggleTip = () => {
+    const label = window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDockBar : window.siyuan.languages.hideDockBar;
+    const hotkey = updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom);
+    return hotkey ? `${label} ${hotkey}` : label;
+};
+
 export const toggleDockBar = (useElement: Element) => {
     const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
     if (dockIsShow) {
@@ -230,6 +236,7 @@ export const toggleDockBar = (useElement: Element) => {
         useElement.setAttribute("xlink:href", "#iconHideDock");
     }
     window.siyuan.config.uiLayout.hideDock = dockIsShow;
+    useElement.closest("#barDock")?.setAttribute("aria-label", getDockBarToggleTip());
     syncDockBarVisibility();
     resizeTabs();
     resetFloatDockSize();

@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Tampilkan bilah dok",
+	"hideDockBar": "Sembunyikan bilah dok",
+	"showFloatingDockBar": "Tampilkan bilah dok mengambang",
+	"showFloatingDockBarTip": "Jika diaktifkan, bilah dok yang disembunyikan muncul sementara saat panel samping mengambang dibuka atau penunjuk dipindahkan ke tepi jendela",
 	"aiMemoryClearAndDisable": "Hapus semua ingatan dan nonaktifkan memori",
 	"aiMemoryClearAndDisableConfirm": "Hapus semua catatan memori dan ringkasan di ruang kerja ini, lalu nonaktifkan memori jangka panjang?",
 	"aiMemoryClearFailed": "Sebagian ingatan tidak dapat dihapus; coba lagi",

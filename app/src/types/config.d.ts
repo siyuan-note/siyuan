@@ -370,6 +370,8 @@ declare namespace Config {
          * Whether to hide toolbar
          */
         hideToolbar: boolean;
+        /** Allow temporary left/right dock bars when hidden and floating. Defaults to true, including older configurations without this field. */
+        showFloatingDockBar?: boolean;
         /**
          * Whether to hide status bar
          */

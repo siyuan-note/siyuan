@@ -68,6 +68,11 @@ for (const mobile of [true, false]) {
         assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
         assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
+        assert.equal(switches.some(item => item.id === "appearance.showFloatingDockBar"), !mobile);
+        if (!mobile) {
+            const toolbarIndex = switches.findIndex(item => item.id === "appearance.hideToolbar");
+            assert.equal(switches[toolbarIndex + 1].id, "appearance.showFloatingDockBar");
+        }
         const colors = slots.find(item => item.key === "manageColors");
         assert.ok(colors);
         assert.equal(colors.keywords.join(","), "manageColors,color,colorFont,colorPrimary");

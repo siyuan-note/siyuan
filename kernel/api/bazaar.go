@@ -558,6 +558,7 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 		return nil
 	}
 	ret := &apicontract.BazaarAppearance{}
+	ret.ShowFloatingDockBar = value.ShowFloatingDockBar
 	ret.CompactMode = value.CompactMode
 	ret.MenuMouseScroll = value.MenuMouseScroll
 	ret.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand

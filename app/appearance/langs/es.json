@@ -1,4 +1,8 @@
 {
+	"showDockBar": "Mostrar barras de acoplamiento",
+	"hideDockBar": "Ocultar barras de acoplamiento",
+	"showFloatingDockBar": "Mostrar barras de acoplamiento flotantes",
+	"showFloatingDockBarTip": "Al activar esta opción, las barras de acoplamiento ocultas aparecen temporalmente al abrir un panel lateral flotante o mover el puntero al borde de la ventana",
 	"aiMemoryClearAndDisable": "Eliminar todos los recuerdos y desactivar la memoria",
 	"aiMemoryClearAndDisableConfirm": "¿Eliminar todos los recuerdos y el resumen de este espacio de trabajo y desactivar la memoria a largo plazo?",
 	"aiMemoryClearFailed": "No se pudieron eliminar algunos recuerdos; inténtalo de nuevo",

@@ -17749,6 +17749,16 @@
             }
           ]
         },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -17796,6 +17806,7 @@
         "notifications",
         "outlineKeepCurrentExpand",
         "pdfTheme",
+        "showFloatingDockBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -43109,6 +43120,16 @@
             }
           ]
         },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -46512,6 +46533,16 @@
             }
           ]
         },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -46559,6 +46590,7 @@
         "notifications",
         "outlineKeepCurrentExpand",
         "pdfTheme",
+        "showFloatingDockBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -46876,6 +46908,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingPDFThemeInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

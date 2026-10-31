@@ -1,4 +1,8 @@
 {
+	"showDockBar": "도크 바 표시",
+	"hideDockBar": "도크 바 숨기기",
+	"showFloatingDockBar": "플로팅 도크 바 표시",
+	"showFloatingDockBarTip": "활성화하면 숨겨진 도크 바가 플로팅 사이드 패널을 열거나 포인터를 창 가장자리로 이동할 때 일시적으로 표시됩니다",
 	"aiMemoryClearAndDisable": "모든 기억을 삭제하고 기억 기능 끄기",
 	"aiMemoryClearAndDisableConfirm": "이 작업 공간의 모든 기억 기록과 요약을 삭제하고 장기 기억을 끄시겠습니까?",
 	"aiMemoryClearFailed": "일부 기억을 삭제하지 못했습니다. 다시 시도하세요",

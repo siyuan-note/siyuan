@@ -546,6 +546,10 @@ export class Title {
     }
 
     public async openEditor(isValid?: () => boolean) {
+        return this.openEditorWithSelection(isValid);
+    }
+
+    private async openEditorWithSelection(isValid?: () => boolean, selectAll = false) {
         const id = this.protyle.block.rootID;
         const notebook = this.protyle.notebookId;
         let sourceRequest = this.sourceRequest;
@@ -569,6 +573,40 @@ export class Title {
         await loading;
         if (canOpen()) {
             this.richEditor?.focus();
+            if (selectAll && this.editElement) {
+                this.editElement.focus();
+                const range = this.editElement.ownerDocument.createRange();
+                range.selectNodeContents(this.editElement);
+                focusByRange(range);
+            }
+        }
+    }
+
+    private async selectNewTitle() {
+        const id = this.protyle.block.rootID;
+        const ownerDocument = this.editElement.ownerDocument;
+        const activeElement = ownerDocument.activeElement;
+        let cancelled = false;
+        const cancelOutside = (event: Event) => {
+            if (!this.element.contains(event.target as Node)) {
+                cancelled = true;
+            }
+        };
+        ownerDocument.addEventListener("pointerdown", cancelOutside, true);
+        ownerDocument.addEventListener("beforeinput", cancelOutside, true);
+        try {
+            // 新建文档的正文启用与标题源读取分别完成，不能在只读的旧标题节点上定位。
+            await this.loadSource();
+            if (id !== this.protyle.notebookId && !this.richEditor) {
+                return;
+            }
+            await this.openEditorWithSelection(() => !cancelled && this.protyle.block.rootID === id &&
+                this.element.getClientRects().length > 0 &&
+                (ownerDocument.activeElement === activeElement || this.element.contains(ownerDocument.activeElement) ||
+                    !activeElement?.isConnected && ownerDocument.activeElement === ownerDocument.body), true);
+        } finally {
+            ownerDocument.removeEventListener("pointerdown", cancelOutside, true);
+            ownerDocument.removeEventListener("beforeinput", cancelOutside, true);
         }
     }
 
@@ -642,10 +680,9 @@ export class Title {
             this.element.querySelector(":scope > .protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${response.data.refCount}</div>`);
         }
         // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
-        if (this.editElement && Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
-            const range = this.editElement.ownerDocument.createRange();
-            range.selectNodeContents(this.editElement);
-            focusByRange(range);
+        if (this.editElement && (protyle.block.action?.includes(Constants.CB_GET_OPENNEW) ||
+            Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000)) {
+            void this.selectNewTitle().catch(error => console.error(error));
         }
     }
 }

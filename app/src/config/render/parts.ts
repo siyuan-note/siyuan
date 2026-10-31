@@ -36,7 +36,7 @@ export type StackLeft =
 
 /** stack 右列控件 */
 export type StackRight =
-    | {kind: "button"; id: string; label: string; icon: string}
+    | {kind: "button"; id: string; label: string; icon: string; hidden?: boolean | (() => boolean)}
     | Extract<SettingControl, {kind: "switch" | "number" | "select"}>;
 
 export type StackLine = {

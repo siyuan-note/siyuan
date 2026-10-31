@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261031130026"
+		"updated": "20261031133741"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-1na7hjs",
-				"updated": "20261029155830"
+				"updated": "20261031133741"
 			},
 			"Children": [
 				{
@@ -117,7 +117,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " at the bottom of the AI settings, after the Rerank group. The master switch starts off; turn it on to use long-term memory. Click Manage to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
+					"Data": " at the bottom of the AI settings, after the Rerank group. The master switch starts off; turn it on to use long-term memory. The Manage button is shown only while long-term memory is enabled; click it to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
 				}
 			]
 		},

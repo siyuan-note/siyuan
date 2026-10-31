@@ -121,6 +121,7 @@ type StackButtonSpec = {
     id: string;
     label: string;
     icon: string;
+    hidden?: boolean | (() => boolean);
 };
 type StackSelectSpec = {
     desc: string;

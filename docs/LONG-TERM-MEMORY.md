@@ -18,6 +18,8 @@ Retention and use are separate. Preserve grounded information rather than discar
 
 ### Remembering, correcting, and forgetting
 
+The Manage button in AI settings is visible only while long-term memory is enabled. Its initial visibility and subsequent configuration changes use the current saved enable state on desktop, browser and mobile. Disabling memory hides this entry without deleting existing records; enabling it makes management available again. This UI rule does not change the typed record APIs.
+
 Users can explicitly ask to remember, correct, or forget information. The system retrieves related records, checks their subject, scope, and time, and performs the corresponding operation with an accurate result. It must not claim to have remembered information before the write is confirmed. When several targets are plausible, resolve the ambiguity instead of overwriting all similar records.
 
 | Operation | Target behavior |

@@ -6,6 +6,7 @@ import {ModuleKind, transpileModule} from "typescript";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
 
 class ControlStub {
+    isConnected = true;
     value = "";
     disabled = false;
     innerHTML = "";
@@ -55,21 +56,35 @@ test("memory settings expose one enable switch without changing defaults", () =>
     assert.equal(memory.enabled, false);
 });
 
-test("memory settings pair each description with its own control and allow management while disabled", () => {
+test("memory settings pair descriptions with controls and show management only while enabled", () => {
     for (const enabled of [false, true]) {
         const memory = {enabled};
         const languages = {aiMemory: "memory", manage: "manage", aiMemoryEnabledTip: "enabled description", aiMemoryServiceTip: "service description"};
         let mount: (root: unknown) => void;
         let opened = 0;
         let writes = 0;
+        let isHidden: () => boolean;
         const lines: Array<{desc: string; id?: string}> = [];
-        const manage = new ControlStub();
+        const classes = new Set<string>();
+        const manage = Object.assign(new ControlStub(), {classList: {toggle: (name: string, force: boolean) => {
+            if (force) { classes.add(name); } else { classes.delete(name); }
+        }}});
+        const events = new Map<string, () => void>();
+        const root = {
+            isConnected: true,
+            querySelector: (selector: string) => {
+                assert.equal(selector, "#manageMemory");
+                return manage;
+            },
+        };
         const stack = {
             switch: (id: string, spec: {desc: string}) => { lines.push({desc: spec.desc, id}); },
             desc: (desc: string) => { lines.push({desc}); return stack; },
-            button: (spec: {id: string; label: string; icon: string}) => {
+            button: (spec: {id: string; label: string; icon: string; hidden: () => boolean}) => {
                 assert.equal(spec.label, languages.manage);
                 assert.equal(spec.icon, "iconSettings");
+                isHidden = spec.hidden;
+                assert.equal(isHidden(), !enabled, "disabled memory is hidden before asynchronous mounting");
                 lines.at(-1).id = spec.id;
             },
         };
@@ -78,9 +93,13 @@ test("memory settings pair each description with its own control and allow manag
             compilerOptions: {module: ModuleKind.CommonJS},
         }).outputText, {
             exports: exported,
-            window: {siyuan: {languages, config: {ai: {memory}}}},
+            window: {siyuan: {languages, config: {ai: {memory}}},
+                addEventListener: (name: string, listener: () => void) => { events.set(name, listener); },
+                removeEventListener: (name: string, listener: () => void) => {
+                    assert.equal(events.get(name), listener); events.delete(name);
+                }},
             require: (name: string) => {
-                if (name.endsWith("/aiRuntime")) { return {aiConfigApi: {patch: () => { writes++; }}}; }
+                if (name.endsWith("/aiRuntime")) { return {AI_CONFIG_CHANGED_EVENT: "ai-config-changed", aiConfigApi: {patch: () => { writes++; }}}; }
                 if (name.endsWith("/manager")) { return {openMemoryManager: () => { opened++; }}; }
                 return {};
             },
@@ -99,15 +118,28 @@ test("memory settings pair each description with its own control and allow manag
             {desc: languages.aiMemoryEnabledTip, id: "ai.memory.enabled"},
             {desc: languages.aiMemoryServiceTip, id: "manageMemory"},
         ]);
-        mount({querySelector: (selector: string) => {
-            assert.equal(selector, "#manageMemory");
-            return manage;
-        }});
+        mount(root);
         assert.equal(manage.disabled, false);
+        assert.equal(classes.has("fn__none"), !enabled);
         manage.listeners.get("click")();
-        assert.equal(opened, 1);
+        assert.equal(opened, enabled ? 1 : 0);
+        for (const nextEnabled of [true, false, true]) {
+            memory.enabled = nextEnabled;
+            assert.equal(isHidden(), !nextEnabled, "a later render reads the current setting rather than its registration snapshot");
+            events.get("ai-config-changed")();
+            assert.equal(classes.has("fn__none"), !nextEnabled);
+            const previous: number = opened;
+            manage.listeners.get("click")();
+            assert.equal(opened, previous + (nextEnabled ? 1 : 0));
+        }
+        manage.isConnected = false;
+        events.get("ai-config-changed")();
+        assert.equal(events.size, 0, "replaced controls release listeners even while their settings root stays connected");
+        const previous: number = opened;
+        manage.listeners.get("click")();
+        assert.equal(opened, previous);
         assert.equal(writes, 0);
-        assert.equal(memory.enabled, enabled);
+        assert.equal(memory.enabled, true);
     }
 });
 

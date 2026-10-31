@@ -1920,6 +1920,26 @@ body.mobile-topbar--merged {
   }
 }
 
+.mobile-document-title-dialog {
+  .mobile-document-title-sheet {
+    max-height: 100%;
+  }
+
+  .document-title-dialog {
+    min-height: 0;
+    max-height: none;
+    flex: 0 1 auto;
+
+    > .protyle-content {
+      flex: 0 1 auto;
+
+      > .protyle-top > .protyle-title {
+        margin: 16px 24px;
+      }
+    }
+  }
+}
+
 .mobile-reference-dialog {
   .mobile-reference-sheet {
     // 按键盘上方的可见视口保留原文区域，不随键盘自动扩展到全屏。

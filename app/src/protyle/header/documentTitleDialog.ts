@@ -8,6 +8,8 @@ import {escapeHtml} from "../../util/escape";
 import {registerDocumentTitleDialog} from "./documentTitleDialogs";
 /// #if MOBILE
 import {registerMobileSecondaryEditor} from "../../mobile/util/secondaryEditors";
+import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
+import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 /// #endif
 
 // 重命名和移动端顶栏共用完整标题编辑器，保存失败时保留对话框中的输入。
@@ -15,9 +17,11 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     let closePending = false;
     let canClose = false;
     let disposed = false;
+    let disposeSheet = () => {};
     const dispose = () => {
         if (disposed) return;
         disposed = true;
+        disposeSheet?.();
         unregister?.();
         guard?.dispose();
         editor?.destroy();
@@ -51,9 +55,17 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             closePending = false;
         }
     };
+    let width = "560px";
+    /// #if MOBILE
+    width = "100vw";
+    /// #endif
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
-        width: "560px",
+        width,
+        /// #if MOBILE
+        height: "auto",
+        containerClassName: "mobile-document-title-sheet",
+        /// #endif
         content: `<div class="document-title-dialog"></div><div class="b3-dialog__action">
 <button class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div>`,
         beforeClose: () => {
@@ -66,6 +78,29 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         destroyCallback: dispose,
     });
     dialog.element.dataset.key = Constants.DIALOG_RENAME;
+    /// #if MOBILE
+    dialog.element.classList.add("mobile-document-title-dialog");
+    const keyboardToolbar = document.getElementById("keyboardToolbar");
+    const resize = () => {
+        const viewport = getVisibleViewportBounds();
+        const bottom = keyboardToolbar && !keyboardToolbar.classList.contains("fn__none") ?
+            Math.min(viewport.bottom, keyboardToolbar.getBoundingClientRect().top) : viewport.bottom;
+        const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
+        container.style.top = `${viewport.top}px`;
+        container.style.height = `${Math.max(0, bottom - viewport.top)}px`;
+    };
+    const unbindSheet = bindBottomSheetDialog(dialog, close, resize);
+    const toolbarObserver = new MutationObserver(resize);
+    if (keyboardToolbar) {
+        toolbarObserver.observe(keyboardToolbar, {attributes: true, attributeFilter: ["class", "style"]});
+    }
+    window.addEventListener("resize", resize);
+    disposeSheet = () => {
+        unbindSheet();
+        toolbarObserver.disconnect();
+        window.removeEventListener("resize", resize);
+    };
+    /// #endif
     const editor = new Protyle(options.app || window.siyuan.ws.app,
         dialog.element.querySelector<HTMLElement>(".document-title-dialog"), {
             blockId: options.id,

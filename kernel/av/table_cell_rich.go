@@ -36,9 +36,19 @@ func ParseTableCellRich(rich *ast.TableCellRich) (*parse.Tree, error) {
 	if err := rich.Validate(); nil != err {
 		return nil, err
 	}
-	_, tree, err := parseValueTextRichWithImages(&ValueTextRich{
+	luteEngine := newValueTextRichLute()
+	_, tree, err := parseValueTextRichWithLute(&ValueTextRich{
 		Spec: rich.Spec, Format: ValueTextRichFormat(rich.Format), Content: rich.Content,
-	}, true)
+	}, true, luteEngine)
+	if err == nil {
+		// 与 BlockDOM 解析使用相同的合并规则，保持转义字符附近的行内节点边界一致。
+		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && node.Type == ast.NodeTextMark {
+				luteEngine.MergeSameTextMark(node)
+			}
+			return ast.WalkContinue
+		})
+	}
 	return tree, err
 }
 

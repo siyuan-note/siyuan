@@ -112,11 +112,34 @@ func TestTableCellRichRejectsProjectionReplacement(t *testing.T) {
 	}
 }
 
+func TestTableCellRichSynchronizesEscapedFormattedText(t *testing.T) {
+	tree, cell := richTableTree(t, `- **1\&**`)
+	mark := cell.LastChild
+	if mark.Type != ast.NodeTextMark || mark.TextMarkType != "strong" || mark.TextMarkTextContent != "1&amp;" {
+		t.Fatalf("escaped text must share a single formatted node: %#v", mark)
+	}
+	mark.TextMarkTextContent = "2&amp;updated"
+	if err := SyncTableCellRichInlineChanges(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncTableCellRichInlineChanges(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	mark = cell.LastChild
+	if mark.Type != ast.NodeTextMark || mark.TextMarkType != "strong" ||
+		mark.TextMarkTextContent != "2&amp;updated" {
+		t.Fatalf("rewriting source must preserve literal text and formatting: %#v", mark)
+	}
+}
+
 func TestTableCellRichFrontendProjectionParity(t *testing.T) {
 	styled := `<span data-type="text">styled</span>{: style="font-family: ` +
 		`var(--b3-font-family-emoji-reset), 'A&#92;&#92;B &gt; C', ` +
 		`var(--b3-font-family-editor), var(--b3-font-family);"}`
-	for _, source := range []string{
+	sources := []string{
+		"- 1&",
+		"- **1&**",
+		"- 1&amp;",
 		"- **first**\n- second\n\n```go\na < b && c\nd\n```\n\n$$\nx < y\n$$",
 		"- list\n\n$$\n\n$$",
 		"```go\na < b && c\n```\n" + `{: id="20260921000000-code001" linewrap="false" linenumber="true" ligatures="false"}`,
@@ -127,7 +150,13 @@ func TestTableCellRichFrontendProjectionParity(t *testing.T) {
 			`var(--b3-font-family-editor), var(--b3-font-family);'}`,
 		"```text\n" + styled + "\n```\n\n" + styled,
 		"`" + styled + "`\n\n" + styled,
-	} {
+	}
+	for _, marker := range []string{"**", "*", "~~", "=="} {
+		for _, text := range []string{`1\&`, `a\<b\>`, `a\*b`, `a\_b`, `a\\b`, "a&amp;b", "a&lt;b&gt;"} {
+			sources = append(sources, "- "+marker+text+marker)
+		}
+	}
+	for _, source := range sources {
 		t.Run(source, func(t *testing.T) {
 			tree, _ := richTableTree(t, source)
 			luteEngine := util.NewLute()

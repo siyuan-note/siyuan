@@ -6,6 +6,7 @@ import {aiConfigApi, AI_CONFIG_CHANGED_EVENT} from "./aiRuntime";
 import {openMemoryManager} from "../../../ai/memos/manager";
 import {memoryModelOptions} from "../../../ai/memos/state";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
+import {genConfigItemMainHtml} from "../../render/fragments";
 
 const mountMemoryControls = (root: HTMLElement) => {
     const manage = root.querySelector<HTMLButtonElement>("#manageMemory");
@@ -96,9 +97,15 @@ export const registerAiMemoryGroup = (tab: SettingTabBuilder) => {
     });
     group.slot({
         key: "memorySelection",
-        keywords: [lang.aiMemory, lang.apiModel, lang.reasoningEffortTooltip],
-        html: () => `<div class="b3-label"><label class="fn__flex">${lang.apiModel}<span class="fn__flex-1"></span><select class="b3-select" data-memory-model></select></label>
-<div class="fn__hr"></div><label class="fn__flex">${lang.reasoningEffortTooltip}<span class="fn__flex-1"></span><select class="b3-select" data-memory-effort disabled></select></label></div>`,
+        keywords: [lang.aiMemory, lang.apiModel],
+        html: () => `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(lang.apiModel)}
+<span class="fn__space"></span><select class="b3-select fn__flex-center fn__size200" data-memory-model></select></label>`,
+    });
+    group.slot({
+        key: "memoryReasoningEffort",
+        keywords: [lang.aiMemory, lang.reasoningEffortTooltip],
+        html: () => `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(lang.reasoningEffortTooltip)}
+<span class="fn__space"></span><select class="b3-select fn__flex-center fn__size200" data-memory-effort disabled></select></label>`,
         afterMount: mountMemorySelection,
     });
 };

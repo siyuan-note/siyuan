@@ -4,6 +4,7 @@ import {readFileSync, readdirSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
+import {genConfigItemMainHtml} from "../../render/fragments";
 
 class ControlStub {
     isConnected = true;
@@ -38,20 +39,22 @@ test("memory settings expose one enable switch without changing defaults", () =>
     runInNewContext(code, {
         exports: exported,
         window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {ai: {memory}}}},
-        require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} : {},
+        require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} :
+            name.endsWith("/fragments") ? {genConfigItemMainHtml} : {},
     });
     exported.registerAiMemoryGroup({group: () => ({
         stack: (_spec: unknown, configure: (stack: unknown) => void) => {
             const stack = {switch: (id: string) => switches.push(id), desc: () => stack, button: () => {}};
             configure(stack);
         },
-        slot: (spec: {html: () => string}) => { html = spec.html(); }, button: () => {},
+        slot: (spec: {html: () => string}) => { html += spec.html(); }, button: () => {},
     })});
     assert.deepEqual(switches, ["ai.memory.enabled"]);
     assert.equal(writes, 0);
     assert.ok(!html.includes("data-memory-sources"));
     assert.ok(html.includes("data-memory-model"));
     assert.ok(html.includes("data-memory-effort"));
+    assert.equal((html.match(/class="fn__flex b3-label config-item"/g) || []).length, 2);
     assert.equal(memory.modelId, "");
     assert.equal(memory.enabled, false);
 });

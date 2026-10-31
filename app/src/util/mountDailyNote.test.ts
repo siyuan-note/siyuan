@@ -12,12 +12,11 @@ test("repeated daily-note clicks share the pending creation without replaying te
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports, require: (name: string) => {
         if (name === "../constants") return {Constants: {SIYUAN_APPID: "app"}};
-        if (name === "./fetch") return {fetchPost: (url: string, body: {notebook: string},
-                                                   callback: (response: object) => void) => {
+        if (name === "./documentSelectionRequest") return {fetchWithDocumentSelection: (submit: () => Promise<unknown>) => submit()};
+        if (name === "./fetch") return {fetchSyncPost: (url: string, body: {notebook: string}) => {
             assert.equal(url, "/api/filetree/createDailyNote");
-            return new Promise<void>(resolve => calls.push({body, complete: () => {
-                callback({code: 0, data: {id: "daily"}});
-                resolve();
+            return new Promise(resolve => calls.push({body, complete: () => {
+                resolve({code: 0, data: {id: "daily"}});
             }}));
         }};
         if (name === "../editor/util") return {openFileById: () => opened.push("desktop")};

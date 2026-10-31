@@ -5,13 +5,45 @@ import {showMessage} from "../dialog/message";
 import {escapeHtml} from "./escape";
 import {confirmDialog} from "../dialog/confirmDialog";
 import type {Dialog} from "../dialog";
-import type {DocumentCreatePlan, PlanDocCreateRequestInput} from "../types/api";
+import type {DocumentCreatePlan, PlanDocCreateRequestInput, DocumentSelectionInput, DocumentSelectionFailure} from "../types/api";
+import {selectDocumentAncestor} from "./documentAncestor";
 
 const attempts = new Map<string, {notebooks: string[]; attempt: DocumentCreationAttempt}>();
 const maximumAttempts = 32;
 const activeInputs = new Set<string>();
 let lifecycleRevision = 0;
 const recoveryDialogs = new Map<Dialog, string[]>();
+
+const hasDocumentSelection = (data: unknown): data is DocumentSelectionFailure => !!data && typeof data === "object" &&
+    "notebook" in data && typeof data.notebook === "string" && "ambiguity" in data &&
+    !!data.ambiguity && typeof data.ambiguity === "object";
+
+/** 只重试明确未写入的歧义响应，网络错误和已提交结果不重放。 */
+export const withDocumentSelection = async <T extends {code: number; data?: unknown}>(notebooks: string[],
+    submit: (selection?: DocumentSelectionInput) => Promise<T>, valid = () => true): Promise<T | undefined> => {
+    const revision = lifecycleRevision;
+    const isValid = () => lifecycleRevision === revision && valid();
+    let selection: DocumentSelectionInput;
+    while (isValid()) {
+        let response: T;
+        try {
+            response = await submit(selection);
+        } catch (error) {
+            if (!isValid()) return;
+            throw error;
+        }
+        if (!isValid()) return;
+        if (response.code === 0 || !hasDocumentSelection(response.data)) return response;
+        const {notebook, ambiguity} = response.data;
+        const chosen = await selectDocumentAncestor(notebook, ambiguity, {
+            open: dialog => recoveryDialogs.set(dialog, [...notebooks, notebook]),
+            close: dialog => recoveryDialogs.delete(dialog), valid: isValid,
+        });
+        if (!chosen || !isValid()) return;
+        selection = {time: ambiguity.time, targetRevision: ambiguity.targetRevision,
+            ancestorChoices: [...selection?.ancestorChoices || [], {index: ambiguity.index, id: chosen.id, revision: chosen.revision}]};
+    }
+};
 
 export const clearDocumentCreationPlans = (notebook: string) => {
     lifecycleRevision++;
@@ -66,11 +98,18 @@ export const createConfiguredDocument = async (input: Omit<PlanDocCreateRequestI
             }
             let plan = options.plan;
             if (!plan) {
-                const response = await fetchSyncPost("/api/filetree/planDocCreate", {...input, id: input.id || Lute.NewNodeID()});
-                if (response.code !== 0 || !response.data || !isValid()) {
+                const request = {...input, id: input.id || Lute.NewNodeID()};
+                const response = await withDocumentSelection([input.notebook], selection =>
+                    fetchSyncPost("/api/filetree/planDocCreate", {...request, ...selection}, undefined, false), isValid);
+                if (!response || !isValid()) return;
+                if (response.code !== 0 || !response.data) {
+                    showMessage(response.msg, 0, "error");
                     return;
                 }
                 plan = response.data;
+                if (!plan || !isValid()) {
+                    return;
+                }
             }
             const last = plan.steps[plan.steps.length - 1];
             if (last) {

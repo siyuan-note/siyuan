@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Dockbalken tonen",
 	"hideDockBar": "Dockbalken verbergen",
+	"documentAncestorAmbiguous": "Meerdere documenten hebben dezelfde titel. Selecteer het document voor deze bewerking",
+	"documentAncestorMore": "Een ander document met dezelfde titel kiezen...",
 	"showFloatingDockBar": "Zwevende dockbalken tonen",
 	"showFloatingDockBarTip": "Wanneer ingeschakeld, verschijnen verborgen dockbalken tijdelijk bij het openen van een zwevend zijpaneel of wanneer de aanwijzer de vensterrand bereikt",
 	"aiMemoryClearAndDisable": "Alle herinneringen verwijderen en geheugen uitschakelen",

@@ -289,7 +289,7 @@ func TestAttributeViewRelationItemPreservesExistingAndRollsBack(t *testing.T) {
 			}, nil
 		},
 	}
-	if _, err := createAttributeViewItem(fixture.target.ID, fixture.targetBlockID, "", "", "", "", nil, options); err == nil {
+	if _, err := createAttributeViewItem(fixture.target.ID, fixture.targetBlockID, "", "", "", "", nil, options, nil); err == nil {
 		t.Fatal("injected transaction failure was accepted")
 	}
 	sourceAfter, _ := json.Marshal(readAttributeViewItemsTest(t, fixture.source.ID))

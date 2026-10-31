@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Mostrar barras de acoplamiento",
 	"hideDockBar": "Ocultar barras de acoplamiento",
+	"documentAncestorAmbiguous": "Varios documentos tienen el mismo título. Selecciona el documento para esta operación",
+	"documentAncestorMore": "Elegir otro documento con el mismo título...",
 	"showFloatingDockBar": "Mostrar barras de acoplamiento flotantes",
 	"showFloatingDockBarTip": "Al activar esta opción, las barras de acoplamiento ocultas aparecen temporalmente al abrir un panel lateral flotante o mover el puntero al borde de la ventana",
 	"aiMemoryClearAndDisable": "Eliminar todos los recuerdos y desactivar la memoria",

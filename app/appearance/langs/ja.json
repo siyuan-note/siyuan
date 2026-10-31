@@ -1,6 +1,8 @@
 {
 	"showDockBar": "ドックバーを表示",
 	"hideDockBar": "ドックバーを非表示",
+	"documentAncestorAmbiguous": "同じタイトルのドキュメントが複数あります。この操作で使用するドキュメントを選択してください",
+	"documentAncestorMore": "同じタイトルの別のドキュメントを選択...",
 	"showFloatingDockBar": "フローティングドックバーを表示",
 	"showFloatingDockBarTip": "有効にするとドックバーが非表示のとき、フローティングサイドパネルを開くかウィンドウの端にマウスポインターを移動するとドックバーを一時的に表示します",
 	"aiMemoryClearAndDisable": "すべての記憶を削除して記憶機能を無効にする",

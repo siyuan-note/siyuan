@@ -1501,14 +1501,33 @@ func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, er
 
 // CreateDailyNoteWithHTTP 先提交日记身份，再在创建锁外执行需要确认的正文模板。
 func CreateDailyNoteWithHTTP(boxID string, date *time.Time, execution *templatehttp.Execution) (p string, existed bool, err error) {
+	return CreateDailyNoteWithSelection(boxID, date, execution, nil)
+}
+
+// CreateDailyNoteWithSelection 在原日记创建流程中验证选择，保留日期属性、复用与正文模板语义。
+func CreateDailyNoteWithSelection(boxID string, date *time.Time, execution *templatehttp.Execution, selection *DocumentSelection) (p string, existed bool, err error) {
 	now := time.Now()
 	if date != nil {
 		now = *date
 	}
-	return createDailyNoteAt(boxID, now, date != nil, execution)
+	if selection != nil {
+		if date != nil && selection.Time.In(time.Local).Format("2006-01-02") != date.Format("2006-01-02") {
+			return "", false, errors.New("daily note selection date changed")
+		}
+		now = selection.Time
+	}
+	return createDailyNoteSelected(boxID, now, date != nil, execution, selection)
 }
 
 func createDailyNoteAt(boxID string, now time.Time, findByDate bool, httpExecutions ...*templatehttp.Execution) (p string, existed bool, err error) {
+	var execution *templatehttp.Execution
+	if len(httpExecutions) > 0 {
+		execution = httpExecutions[0]
+	}
+	return createDailyNoteSelected(boxID, now, findByDate, execution, nil)
+}
+
+func createDailyNoteSelected(boxID string, now time.Time, findByDate bool, execution *templatehttp.Execution, selection *DocumentSelection) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	locked := true
 	defer func() {
@@ -1516,10 +1535,6 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool, httpExecuti
 			createDocLock.Unlock()
 		}
 	}()
-	var execution *templatehttp.Execution
-	if len(httpExecutions) > 0 {
-		execution = httpExecutions[0]
-	}
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -1527,7 +1542,7 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool, httpExecuti
 		return
 	}
 
-	plan, existTree, err := resolveDailyNotePlan(box, now, findByDate)
+	plan, existTree, err := resolveDailyNotePlan(box, now, findByDate, selection)
 	if err != nil {
 		return
 	}

@@ -28,8 +28,50 @@ type DocumentPlanRequest struct {
 	Reuse                    bool
 	Now                      time.Time
 	SkipContentTemplateCheck bool
+	TargetRevision           string
+	SelectionRevision        string
+	AncestorChoices          []DocumentAncestorChoice
 	// Target 供有独立保存配置的内核业务使用，不接受 HTTP 输入。
 	Target *EffectiveDocumentTarget
+}
+
+type DocumentAncestorChoice struct {
+	Index    int
+	ID       string
+	Revision string
+}
+
+type DocumentSelection struct {
+	Time            time.Time
+	TargetRevision  string
+	AncestorChoices []DocumentAncestorChoice
+}
+
+func (selection *DocumentSelection) apply(request *DocumentPlanRequest) {
+	if selection != nil {
+		request.Now, request.TargetRevision, request.AncestorChoices = selection.Time, selection.TargetRevision, selection.AncestorChoices
+	}
+}
+
+type DocumentAncestorAmbiguity struct {
+	DocumentTitle       string
+	DisplayPath         string
+	Notebook            string
+	Index               int
+	Title               string
+	ParentID            *string
+	Candidates          []*treenode.DocumentPath
+	CandidatesTruncated bool
+	Time                time.Time
+	TargetRevision      string
+}
+
+func (err *DocumentAncestorAmbiguity) Error() string {
+	return fmt.Sprintf("ambiguous document ancestor [%s]", err.Title)
+}
+
+func (err *DocumentAncestorAmbiguity) Unwrap() error {
+	return documentAddressingError("planChanged", errors.New(err.Error()))
 }
 
 type DocumentCreatePlan struct {
@@ -157,11 +199,27 @@ func renderDocumentTarget(target *EffectiveDocumentTarget, request DocumentPlanR
 }
 
 // PlanDocumentCreation 预先验证整组标题并分配全部 ID，不创建源文件或目录。
-// 各类模板均逐级拒绝歧义；执行仍按单篇提交并保留已完成结果。
+// 各类模板均逐级验证显式选择，未选择的歧义返回候选；执行仍按单篇提交并保留已完成结果。
 func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, error) {
 	if !ast.IsNodeIDPattern(request.ID) || request.ContextID != nil && !ast.IsNodeIDPattern(*request.ContextID) ||
 		request.Placement != "" && request.Placement != "configured" && request.Placement != "child" {
 		return nil, errors.New("invalid document creation context")
+	}
+	if len(request.AncestorChoices) > 128 || len(request.AncestorChoices) > 0 && (request.TargetRevision == "" || request.Now.IsZero()) {
+		return nil, errors.New("ancestor choices require a target revision and planning time")
+	}
+	choices := map[int]DocumentAncestorChoice{}
+	for _, choice := range request.AncestorChoices {
+		if choice.Index < 0 || !ast.IsNodeIDPattern(choice.ID) || choice.Revision == "" {
+			return nil, errors.New("invalid document ancestor choice")
+		}
+		if _, exists := choices[choice.Index]; exists {
+			return nil, errors.New("duplicate document ancestor choice")
+		}
+		choices[choice.Index] = choice
+	}
+	if request.Now.IsZero() {
+		request.Now = time.Now()
 	}
 	if err := AcquireEncryptedBoxOperation(request.Notebook); err != nil {
 		return nil, err
@@ -178,6 +236,16 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 			return nil, err
 		}
 	}
+	selectionRevision := target.Revision
+	if request.SelectionRevision != "" {
+		selectionRevision = request.SelectionRevision
+	}
+	if selectionRevision == "" {
+		selectionRevision = treenode.DocumentRevision([]interface{}{1, target.Notebook, target.Path, target.Structured, target.Rendered})
+	}
+	if request.TargetRevision != "" && request.TargetRevision != selectionRevision {
+		return nil, documentAddressingError("planChanged", errors.New("document creation target changed after selection"))
+	}
 	if request.Placement == "child" {
 		target.Notebook = request.Notebook
 	}
@@ -191,6 +259,11 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 	rendered, err := renderDocumentTarget(target, request)
 	if err != nil {
 		return nil, err
+	}
+	for index := range choices {
+		if index > len(rendered.parents) || index == len(rendered.parents) && !request.Reuse {
+			return nil, documentAddressingError("planChanged", errors.New("selected document ancestor is outside the target path"))
+		}
 	}
 	if err = ValidateDocumentTitle("plain", rendered.title); err != nil {
 		return nil, err
@@ -228,6 +301,23 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 		expected = nil
 	}
 	missing := false
+	ambiguous := func(index int, title string, resolved *treenode.ResolvedDocumentPath) error {
+		return &DocumentAncestorAmbiguity{Notebook: target.Notebook, Index: index, Title: title, ParentID: parentID,
+			Candidates: resolved.Candidates, CandidatesTruncated: resolved.CandidatesTruncated,
+			Time: request.Now, TargetRevision: selectionRevision, DocumentTitle: plan.Title, DisplayPath: plan.DisplayPath}
+	}
+	selectDocument := func(choice DocumentAncestorChoice, title string) (*treenode.DocumentPath, error) {
+		if missing || choice.ID == target.Notebook {
+			return nil, documentAddressingError("planChanged", errors.New("selected document ancestor is unavailable"))
+		}
+		chosen, readErr := getDocumentPath(target.Notebook, choice.ID)
+		sameParent := readErr == nil && (chosen.ParentID == nil && parentID == nil ||
+			chosen.ParentID != nil && parentID != nil && *chosen.ParentID == *parentID)
+		if !sameParent || chosen.Title.Empty || chosen.Title.Text != title || chosen.Revision != choice.Revision {
+			return nil, documentAddressingError("planChanged", errors.New("selected document ancestor changed after selection"))
+		}
+		return chosen, nil
+	}
 	appendStep := func(id, title string, ancestor bool) {
 		step := DocumentCreateRequest{Notebook: target.Notebook, ParentID: parentID, ID: id, TitleFormat: "plain", Title: title,
 			ExpectedTarget: expected, NameConditions: append([]treenode.DocumentNameCondition{}, conditions...)}
@@ -242,15 +332,24 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 		}
 		plan.Steps = append(plan.Steps, step)
 	}
-	for _, title := range rendered.parents {
+	for index, title := range rendered.parents {
 		depth++
+		if choice, selected := choices[index]; selected {
+			chosen, readErr := selectDocument(choice, title)
+			if readErr != nil {
+				return nil, readErr
+			}
+			id := chosen.ID
+			parentID, revision = &id, chosen.Revision
+			continue
+		}
 		if !missing {
 			resolved, resolveErr := resolveDocumentPath(target.Notebook, parentID, []string{title})
 			if resolveErr != nil {
 				return nil, resolveErr
 			}
 			if resolved.Status == "ambiguous" {
-				return nil, documentAddressingError("planChanged", fmt.Errorf("ambiguous document ancestor [%s]", title))
+				return nil, ambiguous(index, title, resolved)
 			}
 			if resolved.Status == "resolved" {
 				id := resolved.Resolved.ID
@@ -271,6 +370,14 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 		return nil, errors.New(Conf.Language(118))
 	}
 	if request.Reuse && !missing && rendered.title != "" {
+		if choice, selected := choices[len(rendered.parents)]; selected {
+			chosen, selectErr := selectDocument(choice, rendered.title)
+			if selectErr != nil {
+				return nil, selectErr
+			}
+			plan.ExistingID = chosen.ID
+			return plan, nil
+		}
 		resolved, resolveErr := resolveDocumentPath(target.Notebook, parentID, []string{rendered.title})
 		if resolveErr != nil {
 			return nil, resolveErr
@@ -280,8 +387,11 @@ func PlanDocumentCreation(request DocumentPlanRequest) (*DocumentCreatePlan, err
 			return plan, nil
 		}
 		if resolved.Status == "ambiguous" {
-			return nil, documentAddressingError("planChanged", errors.New("ambiguous document reuse target"))
+			return nil, ambiguous(len(rendered.parents), rendered.title, resolved)
 		}
+	}
+	if _, selected := choices[len(rendered.parents)]; selected {
+		return nil, documentAddressingError("planChanged", errors.New("selected reuse target is unavailable"))
 	}
 	if request.ID == target.Notebook || treenode.GetBlockTree(request.ID) != nil ||
 		treenode.GetBlockTreeInExactBox(request.ID, target.Notebook) != nil {

@@ -321,6 +321,46 @@ func TestAVResponseSchemas(t *testing.T) {
 	}
 }
 
+func TestDocumentSelectionResponseSchemas(t *testing.T) {
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	failure := DocumentSelectionFailure{Notebook: "notebook", Ambiguity: DocumentAncestorAmbiguity{
+		Index: 1, Title: "Repeated", Candidates: []DocumentPath{}, Time: "2026-10-31T00:00:00+08:00", TargetRevision: "revision",
+	}}
+	item, err := json.Marshal(CreateAttributeViewItem.FailureWithData(-1, "ambiguous", NewAVCreateItemSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	docs, err := json.Marshal(CreateAttributeViewItemDocs.FailureWithData(-1, "ambiguous", NewAVCreateItemDocsSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	daily, err := json.Marshal(CreateDailyNote.FailureWithData(-1, "ambiguous", NewDailyNoteSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		path string
+		body []byte
+	}{
+		{"/api/av/createAttributeViewItem", item},
+		{"/api/av/createAttributeViewItemWithMarkdown", item},
+		{"/api/av/createAttributeViewRelationItem", item},
+		{"/api/av/createAttributeViewItemDocs", docs},
+		{"/api/filetree/createDailyNote", daily},
+	} {
+		if err = bundle.ValidateResponse("POST", test.path, test.body); err != nil {
+			t.Fatalf("%s selection response: %s %v", test.path, test.body, err)
+		}
+		var decoded struct{ Data DocumentSelectionFailure }
+		if err = json.Unmarshal(test.body, &decoded); err != nil || !reflect.DeepEqual(decoded.Data, failure) {
+			t.Fatalf("%s selection lost: %s %v", test.path, test.body, err)
+		}
+	}
+}
+
 func TestAVRelationItemInputContract(t *testing.T) {
 	valid := `{"avID":" av ","blockID":"block","keyID":"key","cells":[{"itemID":"item","relatedItemIDs":[]}],"preview":{"templateID":"","primaryKey":"Task","createdAt":123}}`
 	request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(valid))

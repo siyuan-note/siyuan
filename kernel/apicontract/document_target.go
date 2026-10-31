@@ -93,14 +93,45 @@ type DocumentCreateTargetData struct {
 }
 
 type PlanDocCreateRequest struct {
-	Notebook  string  `json:"notebook"`
-	Purpose   string  `json:"purpose" api:"enum=document|reference|dailyNote"`
-	ContextID *string `json:"contextID,omitempty" api:"optional,nullable"`
-	Title     *string `json:"title,omitempty" api:"optional,nonnullable"`
-	ID        string  `json:"id"`
-	Placement string  `json:"placement,omitempty" api:"optional,enum=configured|child"`
-	Reuse     bool    `json:"reuse,omitempty" api:"optional"`
-	Date      *string `json:"date,omitempty" api:"optional,nonnullable"`
+	Notebook        string                   `json:"notebook"`
+	Purpose         string                   `json:"purpose" api:"enum=document|reference|dailyNote"`
+	ContextID       *string                  `json:"contextID,omitempty" api:"optional,nullable"`
+	Title           *string                  `json:"title,omitempty" api:"optional,nonnullable"`
+	ID              string                   `json:"id"`
+	Placement       string                   `json:"placement,omitempty" api:"optional,enum=configured|child"`
+	Reuse           bool                     `json:"reuse,omitempty" api:"optional"`
+	Date            *string                  `json:"date,omitempty" api:"optional,nonnullable"`
+	Time            string                   `json:"time,omitempty" api:"optional"`
+	TargetRevision  string                   `json:"targetRevision,omitempty" api:"optional"`
+	AncestorChoices []DocumentAncestorChoice `json:"ancestorChoices,omitempty" api:"optional,nonnullable"`
+}
+
+type DocumentAncestorChoice struct {
+	Index    int    `json:"index"`
+	ID       string `json:"id"`
+	Revision string `json:"revision"`
+}
+
+// DocumentSelection 只用于重试尚未写入的歧义请求，不保存为默认路径配置。
+type DocumentSelection struct {
+	Time            string                   `json:"time"`
+	TargetRevision  string                   `json:"targetRevision"`
+	AncestorChoices []DocumentAncestorChoice `json:"ancestorChoices" api:"nonnullable"`
+}
+
+type DocumentSelectionFailure struct {
+	Notebook  string                    `json:"notebook"`
+	Ambiguity DocumentAncestorAmbiguity `json:"ambiguity"`
+}
+
+type DocumentAncestorAmbiguity struct {
+	Index               int            `json:"index"`
+	Title               string         `json:"title"`
+	ParentID            *string        `json:"parentID"`
+	Candidates          []DocumentPath `json:"candidates" api:"nonnullable"`
+	CandidatesTruncated bool           `json:"candidatesTruncated"`
+	Time                string         `json:"time"`
+	TargetRevision      string         `json:"targetRevision"`
 }
 
 type DocumentCreatePlan struct {
@@ -108,4 +139,5 @@ type DocumentCreatePlan struct {
 	Title      string                     `json:"title"`
 	ExistingID string                     `json:"existingID,omitempty"`
 	Steps      []CreateDocByParentRequest `json:"steps" api:"nonnullable"`
+	Ambiguity  *DocumentAncestorAmbiguity `json:"ambiguity,omitempty" api:"optional"`
 }

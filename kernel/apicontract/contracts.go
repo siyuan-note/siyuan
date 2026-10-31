@@ -466,8 +466,10 @@ var BatchUpdateTaskListItemMarker = define[BatchTaskListMarkerRequest, []*BlockT
 
 var MoveOutlineHeading = define[MoveBlockRequest, []*BlockTransaction]("moveOutlineHeading", "/api/block/moveOutlineHeading", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 日记位置歧义时不插入内容；可传入 createDailyNote 返回的候选所形成的 selection，继续原追加流程。
 var AppendDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("appendDailyNoteBlock", "/api/block/appendDailyNoteBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 日记位置歧义时不插入内容；selection 语义与 appendDailyNoteBlock 相同。
 var PrependDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("prependDailyNoteBlock", "/api/block/prependDailyNoteBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 目标为原生页签或脑图容器时，只能插入各自的项目块。
@@ -1171,7 +1173,11 @@ var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetD
 // 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
 // reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
 // 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
-var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+// 路径祖先或待复用文档有多个匹配时 code=-1，data.ambiguity 返回至多 128 个候选及截断标记，steps 为空且未创建文档。
+// 选择后传回 ancestorChoices 的段索引、ID、revision，以及 ambiguity 的 time 和 targetRevision。
+// time 为 RFC3339Nano，优先于 date，固定本次模板求值时间；所选身份必须仍处于对应父级且标题、版本匹配。
+// 选择可包含未展示的候选 ID；多级歧义逐次选择，任何选择失效或配置变更均拒绝，不回退到其他同名文档。
+var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathByID", "/api/filetree/getFullHPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1215,10 +1221,14 @@ var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "
 // 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
 // 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
 // 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
-var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+// 路径祖先或复用目标重名时，未写入并返回 code=-1、data.notebook 和 data.ambiguity。
+// 用户选择后通过 selection 传回固定 time、targetRevision 及 ancestorChoices；不更改默认配置。
+// 选择后的重试仍执行原日记复用、日期属性和正文模板流程，指定 date 时 selection.time 必须属于同一本地日期。
+var CreateDailyNote = define[FileTreeDailyNoteRequest, DailyNoteCreateResult]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 
 // GetDailyNoteInfo 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
 // 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
+// 路径有歧义时仍返回可选择的创建标题和路径，不创建文档；已有日期文档仍按日期属性复用。
 var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
@@ -1600,9 +1610,16 @@ var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFie
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
 // true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+// 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// 关联新建遇到保存位置歧义时返回未写入的候选，selection 续接原预览时间，创建与关联共用一次撤销。
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// Markdown 新建沿用条目模板与正文规则；位置歧义在写入前返回候选，可用 selection 继续。
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// 批量绑定先解析所有目标；歧义时尚未创建文档或改动绑定，selection 对共享的保存路径生效。
 var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVCreateItemDocsResult]("createAttributeViewItemDocs", "/api/av/createAttributeViewItemDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")

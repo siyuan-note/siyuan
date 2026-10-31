@@ -14,6 +14,7 @@ import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {genNotebookOptionsHTML, getLastDailyNoteNotebookId} from "./dailyNote";
 import {getHostCapabilities} from "./hostCapabilities";
+import {fetchWithDocumentSelection} from "./documentSelectionRequest";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
@@ -27,11 +28,12 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
     if (pending) {
         return pending;
     }
-    const request = fetchPost("/api/filetree/createDailyNote", {
+    const request = fetchWithDocumentSelection(selection => fetchSyncPost("/api/filetree/createDailyNote", {
+        selection,
         notebook,
         app: Constants.SIYUAN_APPID,
-    }, (response) => {
-        if (response.code !== 0) {
+    }, undefined, false), {notebooks: [notebook]}).then(response => {
+        if (!response || response.code !== 0 || !("id" in response.data)) {
             return;
         }
         /// #if MOBILE

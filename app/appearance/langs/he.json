@@ -1,6 +1,8 @@
 {
 	"showDockBar": "הצגת סרגלי עגינה",
 	"hideDockBar": "הסתרת סרגלי עגינה",
+	"documentAncestorAmbiguous": "לכמה מסמכים יש אותה כותרת. יש לבחור את המסמך עבור פעולה זו",
+	"documentAncestorMore": "בחירת מסמך אחר עם אותה כותרת...",
 	"showFloatingDockBar": "הצגת סרגלי עגינה צפים",
 	"showFloatingDockBarTip": "כאשר האפשרות מופעלת סרגלי עגינה מוסתרים מוצגים זמנית בעת פתיחת חלונית צד צפה או הזזת המצביע לקצה החלון",
 	"aiMemoryClearAndDisable": "מחיקת כל הזיכרונות והשבתת הזיכרון",

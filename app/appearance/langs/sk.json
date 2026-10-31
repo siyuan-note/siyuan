@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Zobraziť dokovacie lišty",
 	"hideDockBar": "Skryť dokovacie lišty",
+	"documentAncestorAmbiguous": "Viaceré dokumenty majú rovnaký názov. Vyberte dokument pre túto operáciu",
+	"documentAncestorMore": "Vybrať iný dokument s rovnakým názvom...",
 	"showFloatingDockBar": "Zobraziť plávajúce dokovacie lišty",
 	"showFloatingDockBarTip": "Po zapnutí sa skryté dokovacie lišty dočasne zobrazia pri otvorení plávajúceho bočného panela alebo presunutí ukazovateľa na okraj okna",
 	"aiMemoryClearAndDisable": "Odstrániť všetky spomienky a vypnúť pamäť",

@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Afficher les barres de dock",
 	"hideDockBar": "Masquer les barres de dock",
+	"documentAncestorAmbiguous": "Plusieurs documents portent le même titre. Sélectionnez le document pour cette opération",
+	"documentAncestorMore": "Choisir un autre document portant le même titre...",
 	"showFloatingDockBar": "Afficher les barres de dock flottantes",
 	"showFloatingDockBarTip": "Lorsque cette option est activée, les barres de dock masquées apparaissent temporairement à l’ouverture d’un panneau latéral flottant ou lorsque le pointeur atteint le bord de la fenêtre",
 	"aiMemoryClearAndDisable": "Supprimer tous les souvenirs et désactiver la mémoire",

@@ -214,13 +214,97 @@ func TestDocumentCreationPlans(t *testing.T) {
 				plan, err := PlanDocumentCreation(DocumentPlanRequest{Notebook: box.ID, Purpose: "document", ID: id,
 					Reuse: reuse, Target: target})
 				var failure *DocumentAddressingError
-				if plan != nil || !errors.As(err, &failure) || failure.Reason != "planChanged" {
+				var ambiguity *DocumentAncestorAmbiguity
+				rejected := errors.As(err, &failure) && failure.Reason == "planChanged"
+				if !reuse {
+					rejected = rejected && errors.As(err, &ambiguity) && len(ambiguity.Candidates) == 2 && ambiguity.Title == "Ambiguous parent"
+				}
+				if plan != nil || !rejected {
 					t.Fatalf("structured=%t reuse=%t selected an ambiguous document: %+v, %v", structured, reuse, plan, err)
 				}
 				if treenode.GetBlockTree(id) != nil {
 					t.Fatal("rejected plan created a document")
 				}
 			}
+		}
+	})
+	t.Run("explicit ancestor choices preserve identity time and remaining path", func(t *testing.T) {
+		first := newHPathTestDoc(t, box.ID, "/", "Chosen", 1)
+		newHPathTestDoc(t, box.ID, "/", "Chosen", 1)
+		newHPathTestDoc(t, box.ID, "/"+first.ID, "Level", 1)
+		selected := newHPathTestDoc(t, box.ID, "/"+first.ID, "Level", 1)
+		boxConf.DocCreateSavePath = `/Chosen/Level/Missing/{{now | date "20060102150405"}}`
+		if err := box.SaveConf(boxConf); err != nil {
+			t.Fatal(err)
+		}
+		request := DocumentPlanRequest{Notebook: box.ID, Purpose: "document", ID: ast.NewNodeID(), Now: fixedNow}
+		_, err := PlanDocumentCreation(request)
+		var ambiguity *DocumentAncestorAmbiguity
+		if !errors.As(err, &ambiguity) || ambiguity.Index != 0 || len(ambiguity.Candidates) != 2 {
+			t.Fatalf("missing first ambiguity: %v", err)
+		}
+		request.TargetRevision = ambiguity.TargetRevision
+		chosen, err := getDocumentPath(box.ID, first.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.AncestorChoices = []DocumentAncestorChoice{{Index: 0, ID: first.ID, Revision: chosen.Revision}}
+		_, err = PlanDocumentCreation(request)
+		if !errors.As(err, &ambiguity) || ambiguity.Index != 1 || *ambiguity.ParentID != first.ID || !ambiguity.Time.Equal(fixedNow) {
+			t.Fatalf("missing nested ambiguity: %v", err)
+		}
+		chosen, err = getDocumentPath(box.ID, selected.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.AncestorChoices = append(request.AncestorChoices, DocumentAncestorChoice{Index: 1, ID: selected.ID, Revision: chosen.Revision})
+		plan, err := PlanDocumentCreation(request)
+		if err != nil || len(plan.Steps) != 2 || *plan.Steps[0].ParentID != selected.ID || plan.Title != "20261023235959" {
+			t.Fatalf("choice lost suffix, identity or time: %+v, %v", plan, err)
+		}
+		if len(plan.Steps[0].NameConditions) != 1 || plan.Steps[0].NameConditions[0].Title != "Missing" {
+			t.Fatal("explicit choices retained a uniqueness condition on a duplicate ancestor")
+		}
+		for _, mutate := range []func(*DocumentPlanRequest){
+			func(r *DocumentPlanRequest) { r.TargetRevision = "stale" },
+			func(r *DocumentPlanRequest) { r.AncestorChoices[1].Revision = "stale" },
+			func(r *DocumentPlanRequest) { r.AncestorChoices[1].ID = first.ID },
+			func(r *DocumentPlanRequest) { r.AncestorChoices[1].ID = ast.NewNodeID() },
+			func(r *DocumentPlanRequest) { r.AncestorChoices[1].Index = 10 },
+			func(r *DocumentPlanRequest) { r.AncestorChoices = append(r.AncestorChoices, r.AncestorChoices[0]) },
+			func(r *DocumentPlanRequest) { r.Now = time.Time{} },
+		} {
+			invalid := request
+			invalid.AncestorChoices = append([]DocumentAncestorChoice{}, request.AncestorChoices...)
+			mutate(&invalid)
+			if rejected, err := PlanDocumentCreation(invalid); err == nil || rejected != nil {
+				t.Fatal("invalid choice accepted", invalid)
+			}
+			if treenode.GetBlockTree(request.ID) != nil {
+				t.Fatal("invalid choice created a document")
+			}
+		}
+		created, err := executeDocumentCreationPlan(plan, false)
+		if err != nil || created.ID != request.ID || created.Depth != 4 || created.Segments[1].ID != selected.ID {
+			t.Fatalf("chosen creation failed: %+v, %v", created, err)
+		}
+		// 所选身份在计划后改名，即使仍存在同名候选，也必须拒绝原计划。
+		request.ID = ast.NewNodeID()
+		stalePlan, err := PlanDocumentCreation(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = RenameDoc(box.ID, selected.Path, "Renamed selection"); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = PlanDocumentCreation(request); err == nil {
+			t.Fatal("renamed choice accepted")
+		}
+		if _, err = CreateDocByParent(stalePlan.Steps[0]); err == nil {
+			t.Fatal("stale parent revision accepted")
+		}
+		if treenode.GetBlockTree(request.ID) != nil {
+			t.Fatal("stale choice created a document")
 		}
 	})
 }

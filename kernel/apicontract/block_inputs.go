@@ -14,9 +14,11 @@ type BatchTaskListMarkerRequest struct {
 }
 
 type DailyNoteBlockRequest struct {
-	Data     string `json:"data"`
-	DataType string `json:"dataType"`
-	Notebook string `json:"notebook"`
+	// selection 来自日记创建的歧义响应；继续前复核目标，失败不追加或前插内容。
+	Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
+	Data      string             `json:"data"`
+	DataType  string             `json:"dataType"`
+	Notebook  string             `json:"notebook"`
 }
 
 // AppendBlockRequest 在父块末尾追加内容，页签和脑图容器只能接收各自的项目块。

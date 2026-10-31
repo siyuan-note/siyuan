@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Pokaż paski dokowania",
 	"hideDockBar": "Ukryj paski dokowania",
+	"documentAncestorAmbiguous": "Kilka dokumentów ma ten sam tytuł. Wybierz dokument dla tej operacji",
+	"documentAncestorMore": "Wybierz inny dokument o tym samym tytule...",
 	"showFloatingDockBar": "Pokaż pływające paski dokowania",
 	"showFloatingDockBarTip": "Po włączeniu ukryte paski dokowania pojawiają się tymczasowo po otwarciu pływającego panelu bocznego lub przesunięciu wskaźnika do krawędzi okna",
 	"aiMemoryClearAndDisable": "Usuń wszystkie wspomnienia i wyłącz pamięć",

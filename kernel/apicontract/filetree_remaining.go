@@ -87,8 +87,9 @@ type FileTreeCreateRequest struct {
 	FileTreeCreateOptions
 }
 type FileTreeDailyNoteRequest struct {
-	Notebook string `json:"notebook"`
-	App      string `json:"app" api:"optional,nullable"`
+	Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
+	Notebook  string             `json:"notebook"`
+	App       string             `json:"app" api:"optional,nullable"`
 	// Date 为本地公历日期 YYYY-MM-DD；省略、空串或 null 时按当天的命名及路径模板复用或创建，不按日期属性查找。
 	// 指定日期时复用同笔记本的日记日期属性，路径和正文模板中的 now 使用目标日期。
 	// 日期无效返回 -1；多个匹配优先选择模板路径对应的文档，否则按文档 ID 升序选择。

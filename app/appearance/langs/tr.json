@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Yuva çubuklarını göster",
 	"hideDockBar": "Yuva çubuklarını gizle",
+	"documentAncestorAmbiguous": "Birden fazla belge aynı başlığa sahip. Bu işlem için belgeyi seçin",
+	"documentAncestorMore": "Aynı başlığa sahip başka bir belge seç...",
 	"showFloatingDockBar": "Kayan yuva çubuklarını göster",
 	"showFloatingDockBarTip": "Etkinleştirildiğinde gizli yuva çubukları, kayan bir yan panel açıldığında veya işaretçi pencere kenarına taşındığında geçici olarak görünür",
 	"aiMemoryClearAndDisable": "Tüm anıları sil ve belleği devre dışı bırak",

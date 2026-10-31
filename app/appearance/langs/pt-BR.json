@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Mostrar barras de encaixe",
 	"hideDockBar": "Ocultar barras de encaixe",
+	"documentAncestorAmbiguous": "Vários documentos têm o mesmo título. Selecione o documento para esta operação",
+	"documentAncestorMore": "Escolher outro documento com o mesmo título...",
 	"showFloatingDockBar": "Mostrar barras de encaixe flutuantes",
 	"showFloatingDockBarTip": "Quando ativado, as barras de encaixe ocultas aparecem temporariamente ao abrir um painel lateral flutuante ou mover o ponteiro até a borda da janela",
 	"aiMemoryClearAndDisable": "Excluir todas as memórias e desativar a memória",

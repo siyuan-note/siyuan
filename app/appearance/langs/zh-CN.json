@@ -1,6 +1,8 @@
 {
 	"showDockBar": "显示停靠栏",
 	"hideDockBar": "隐藏停靠栏",
+	"documentAncestorAmbiguous": "多个文档标题相同，请选择本次操作使用的文档",
+	"documentAncestorMore": "选择其他同名文档...",
 	"showFloatingDockBar": "显示浮动停靠栏",
 	"showFloatingDockBarTip": "启用后隐藏停靠栏时，展开浮动侧栏或将鼠标移至窗口边缘可临时显示停靠栏",
 	"aiMemoryClearAndDisable": "删除所有记忆并关闭记忆功能",

@@ -196,9 +196,10 @@ func init() {
 			return r, err
 		}
 		date, err := fileTreeBind[struct {
-			Date string `json:"date" api:"optional,nullable"`
+			Date      string             `json:"date" api:"optional,nullable"`
+			Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
 		}](r.fields)
-		r.Date = date.Date
+		r.Date, r.Selection = date.Date, date.Selection
 		return r, err
 	}
 	ListDocTree.decodeRequest = func(reader io.Reader) (r FileTreePathRequest, err error) {

@@ -8,7 +8,8 @@ import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
-import {fetchPost} from "../../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest";
 import {transaction} from "../../wysiwyg/transaction";
 import {avRender} from "./render";
 import {getFieldsByData} from "./view";
@@ -659,7 +660,12 @@ export const createAttributeViewItem = (options: {
     position?: ICreatePosition;
 }) => {
     const isCalendar = options.blockElement.dataset.avType === "calendar";
-    fetchPost("/api/av/createAttributeViewItem", {
+    if (options.blockElement.dataset.creatingItem === "true") return;
+    options.blockElement.dataset.creatingItem = "true";
+    const rootID = options.protyle.block.rootID;
+    const avID = options.blockElement.dataset.avId;
+    const blockID = options.blockElement.dataset.nodeId;
+    const request = {
         calendarDate: options.position?.calendarDate ?? getCalendarCreationDate(options.blockElement),
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         avID: options.blockElement.dataset.avId,
@@ -669,7 +675,11 @@ export const createAttributeViewItem = (options: {
         groupID: options.position?.groupID || "",
         app: options.protyle.app.appId,
         session: options.protyle.id,
-    }, response => {
+    };
+    fetchWithDocumentSelection(selection => fetchSyncPost("/api/av/createAttributeViewItem", {...request, selection}, undefined, false),
+        {notebooks: [options.protyle.notebookId], isValid: () => options.blockElement.isConnected &&
+        options.blockElement.dataset.avId === avID && options.blockElement.dataset.nodeId === blockID && options.protyle.block.rootID === rootID && !options.protyle.disabled}).then(response => {
+        if (!response) return;
         if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
             showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
             return;
@@ -691,7 +701,7 @@ export const createAttributeViewItem = (options: {
                 focusTitle: response.data.openAfterCreate === true && !response.data.isDetached,
             });
         }
-    });
+    }).finally(() => { delete options.blockElement.dataset.creatingItem; });
 };
 
 export const createAttributeViewItemDocs = (options: {
@@ -704,14 +714,21 @@ export const createAttributeViewItemDocs = (options: {
         return;
     }
     options.blockElement.dataset.createDocAndBind = "true";
-    fetchPost("/api/av/createAttributeViewItemDocs", {
+    const rootID = options.protyle.block.rootID;
+    const avID = options.blockElement.dataset.avId;
+    const blockID = options.blockElement.dataset.nodeId;
+    const request = {
         avID: options.blockElement.dataset.avId,
         blockID: options.blockElement.dataset.nodeId,
-        itemIDs: options.itemIDs,
+        itemIDs: [...options.itemIDs],
         saveMode: options.saveMode,
         app: options.protyle.app.appId,
         session: options.protyle.id,
-    }, response => {
+    };
+    fetchWithDocumentSelection(selection => fetchSyncPost("/api/av/createAttributeViewItemDocs", {...request, selection}, undefined, false),
+        {notebooks: [options.protyle.notebookId], isValid: () => options.blockElement.isConnected &&
+        options.blockElement.dataset.avId === avID && options.blockElement.dataset.nodeId === blockID && options.protyle.block.rootID === rootID && !options.protyle.disabled}).then(response => {
+        if (!response) return;
         if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
             showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
             return;

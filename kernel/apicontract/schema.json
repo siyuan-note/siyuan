@@ -8841,6 +8841,9 @@
         },
         {
           "$ref": "#/$defs/AVUnavailableNotebook"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
         }
       ]
     },
@@ -8851,6 +8854,9 @@
         },
         {
           "$ref": "#/$defs/AVUnavailableNotebook"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
         }
       ]
     },
@@ -22560,6 +22566,9 @@
         "saveMode": {
           "type": "string"
         },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
+        },
         "session": {
           "anyOf": [
             {
@@ -22627,6 +22636,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -22726,6 +22738,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -22837,6 +22852,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -24090,6 +24108,9 @@
         },
         "notebook": {
           "type": "string"
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         }
       },
       "required": [
@@ -24098,6 +24119,16 @@
         "notebook"
       ],
       "additionalProperties": false
+    },
+    "DailyNoteCreateResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FileTreeCreateData"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
+        }
+      ]
     },
     "DailyNoteInfo": {
       "type": "object",
@@ -24877,6 +24908,72 @@
       ],
       "additionalProperties": false
     },
+    "DocumentAncestorAmbiguity": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentPath"
+          }
+        },
+        "candidatesTruncated": {
+          "type": "boolean"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidates",
+        "candidatesTruncated",
+        "index",
+        "parentID",
+        "targetRevision",
+        "time",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentAncestorChoiceInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "index",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
     "DocumentCapabilities": {
       "type": "object",
       "properties": {
@@ -24975,6 +25072,9 @@
     "DocumentCreatePlan": {
       "type": "object",
       "properties": {
+        "ambiguity": {
+          "$ref": "#/$defs/DocumentAncestorAmbiguity"
+        },
         "existingID": {
           "type": "string"
         },
@@ -25317,6 +25417,45 @@
       "required": [
         "notebook",
         "src"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentSelectionFailure": {
+      "type": "object",
+      "properties": {
+        "ambiguity": {
+          "$ref": "#/$defs/DocumentAncestorAmbiguity"
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ambiguity",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentSelectionInput": {
+      "type": "object",
+      "properties": {
+        "ancestorChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentAncestorChoiceInput"
+          }
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ancestorChoices",
+        "targetRevision",
+        "time"
       ],
       "additionalProperties": false
     },
@@ -27475,6 +27614,9 @@
         },
         "notebook": {
           "type": "string"
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         }
       },
       "required": [
@@ -38273,6 +38415,12 @@
     "PlanDocCreateRequestInput": {
       "type": "object",
       "properties": {
+        "ancestorChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentAncestorChoiceInput"
+          }
+        },
         "contextID": {
           "anyOf": [
             {
@@ -38309,6 +38457,12 @@
         },
         "reuse": {
           "type": "boolean"
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
         },
         "title": {
           "type": "string"
@@ -153957,7 +154111,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/FileTreeCreateData"
+                "$ref": "#/$defs/DailyNoteCreateResult"
               },
               "msg": {
                 "type": "string"
@@ -153996,6 +154150,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/DailyNoteCreateResult"
                   }
                 ]
               },
@@ -156503,6 +156660,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/DocumentCreatePlan"
                   }
                 ]
               },

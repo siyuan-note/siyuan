@@ -7,6 +7,7 @@ import {selectDailyNoteNotebook} from "../../util/mount";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {setStorageVal} from "../util/compatibility";
 import {guardTemplateHTTPRequest} from "../../template/http";
+import {fetchWithDocumentSelection} from "../../util/documentSelectionRequest";
 
 const getNotebooks = (sourceID: string) => window.siyuan.notebooks.filter(notebook => !notebook.closed &&
     canReferenceDailyNoteNotebook(sourceID, notebook.id, isEncryptedBox(sourceID), isEncryptedBox(notebook.id)));
@@ -59,8 +60,9 @@ export const createDailyNoteReference = (protyle: IProtyle, date: string, notebo
         const request = guardTemplateHTTPRequest(isCurrent);
         window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
         setStorageVal(Constants.LOCAL_DAILYNOTEID, notebook);
-        fetchPost("/api/filetree/createDailyNote", {notebook, date, app: Constants.SIYUAN_APPID}, response => {
-            if (isCurrent() && response.code === 0 && response.data?.id) {
+        fetchWithDocumentSelection(selection => fetchSyncPost("/api/filetree/createDailyNote", {notebook, date, app: Constants.SIYUAN_APPID, selection}, undefined, false, request.signal),
+            {notebooks: [sourceNotebook, notebook], isValid: isCurrent, signal: request.signal}).then(response => {
+            if (isCurrent() && response?.code === 0 && response.data && "id" in response.data && response.data.id) {
                 const id = response.data.id;
                 fetchPost("/api/block/getDocInfo", {id, notebook}, info => {
                     if (isCurrent() && info.code === 0 && info.data) {
@@ -68,7 +70,7 @@ export const createDailyNoteReference = (protyle: IProtyle, date: string, notebo
                     }
                 });
             }
-        }, undefined, undefined, request.signal).finally(request.dispose);
+        }).finally(() => { creating = false; request.dispose(); });
     };
     if (notebookID && notebooks.some(item => item.id === notebookID)) {
         create(notebookID);

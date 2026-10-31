@@ -36,6 +36,41 @@ func documentPathContract(document *treenode.DocumentPath) apicontract.DocumentP
 	}
 }
 
+func documentSelectionModel(value *apicontract.DocumentSelection) (*model.DocumentSelection, error) {
+	if value == nil {
+		return nil, nil
+	}
+	now, err := time.Parse(time.RFC3339Nano, value.Time)
+	if err != nil {
+		return nil, err
+	}
+	if now.IsZero() || value.TargetRevision == "" || len(value.AncestorChoices) == 0 || len(value.AncestorChoices) > 128 {
+		return nil, errors.New("invalid document selection")
+	}
+	ret := &model.DocumentSelection{Time: now, TargetRevision: value.TargetRevision}
+	for _, choice := range value.AncestorChoices {
+		ret.AncestorChoices = append(ret.AncestorChoices, model.DocumentAncestorChoice{Index: choice.Index, ID: choice.ID, Revision: choice.Revision})
+	}
+	return ret, nil
+}
+
+func documentSelectionFailure(c *gin.Context, err error) (*apicontract.DocumentSelectionFailure, error) {
+	var ambiguity *model.DocumentAncestorAmbiguity
+	if !errors.As(err, &ambiguity) {
+		return nil, nil
+	}
+	if leaseErr := holdEncryptedBoxRequest(c, ambiguity.Notebook); leaseErr != nil {
+		return nil, leaseErr
+	}
+	data := apicontract.DocumentAncestorAmbiguity{Index: ambiguity.Index, Title: ambiguity.Title, ParentID: ambiguity.ParentID,
+		Candidates: []apicontract.DocumentPath{}, CandidatesTruncated: ambiguity.CandidatesTruncated,
+		Time: ambiguity.Time.Format(time.RFC3339Nano), TargetRevision: ambiguity.TargetRevision}
+	for _, candidate := range ambiguity.Candidates {
+		data.Candidates = append(data.Candidates, documentPathContract(candidate))
+	}
+	return &apicontract.DocumentSelectionFailure{Notebook: ambiguity.Notebook, Ambiguity: data}, nil
+}
+
 func documentTargetContract(target *conf.DocumentTarget) *apicontract.StructuredDocumentTarget {
 	if target == nil {
 		return nil
@@ -162,15 +197,38 @@ var planDocCreate = contractHandler(apicontract.PlanDocCreate, func(c *gin.Conte
 		return apicontract.Failure[apicontract.DocumentCreatePlan](-1, err.Error())
 	}
 	input := model.DocumentPlanRequest{Notebook: request.Notebook, Purpose: request.Purpose, ContextID: request.ContextID,
-		Title: request.Title, ID: request.ID, Placement: request.Placement, Reuse: request.Reuse}
+		Title: request.Title, ID: request.ID, Placement: request.Placement, Reuse: request.Reuse, TargetRevision: request.TargetRevision}
+	for _, choice := range request.AncestorChoices {
+		input.AncestorChoices = append(input.AncestorChoices, model.DocumentAncestorChoice{Index: choice.Index, ID: choice.ID, Revision: choice.Revision})
+	}
 	if request.Date != nil {
 		input.Now, err = time.ParseInLocation("2006-01-02", *request.Date, time.Local)
 		if err != nil {
 			return apicontract.Failure[apicontract.DocumentCreatePlan](-1, err.Error())
 		}
 	}
+	if request.Time != "" {
+		input.Now, err = time.Parse(time.RFC3339Nano, request.Time)
+		if err != nil {
+			return apicontract.Failure[apicontract.DocumentCreatePlan](-1, err.Error())
+		}
+	}
 	plan, err := model.PlanDocumentCreation(input)
 	if err != nil {
+		var ambiguity *model.DocumentAncestorAmbiguity
+		if errors.As(err, &ambiguity) {
+			if leaseErr := holdEncryptedBoxRequest(c, ambiguity.Notebook); leaseErr != nil {
+				return apicontract.Failure[apicontract.DocumentCreatePlan](-1, leaseErr.Error())
+			}
+			data := &apicontract.DocumentAncestorAmbiguity{Index: ambiguity.Index, Title: ambiguity.Title,
+				ParentID: ambiguity.ParentID, Candidates: []apicontract.DocumentPath{}, CandidatesTruncated: ambiguity.CandidatesTruncated,
+				Time: ambiguity.Time.Format(time.RFC3339Nano), TargetRevision: ambiguity.TargetRevision}
+			for _, candidate := range ambiguity.Candidates {
+				data.Candidates = append(data.Candidates, documentPathContract(candidate))
+			}
+			return apicontract.PlanDocCreate.FailureWithData(-1, err.Error(), apicontract.DocumentCreatePlan{
+				Notebook: ambiguity.Notebook, Steps: []apicontract.CreateDocByParentRequest{}, Ambiguity: data})
+		}
 		return apicontract.Failure[apicontract.DocumentCreatePlan](-1, err.Error())
 	}
 	// 配置可能在读取期间改变，响应实际目标仍须持有租约。

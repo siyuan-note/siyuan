@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Dockleisten anzeigen",
 	"hideDockBar": "Dockleisten ausblenden",
+	"documentAncestorAmbiguous": "Mehrere Dokumente haben denselben Titel. Wähle das Dokument für diesen Vorgang",
+	"documentAncestorMore": "Anderes Dokument mit demselben Titel wählen...",
 	"showFloatingDockBar": "Schwebende Dockleisten anzeigen",
 	"showFloatingDockBarTip": "Wenn aktiviert, werden ausgeblendete Dockleisten beim Öffnen einer schwebenden Seitenleiste oder beim Bewegen des Mauszeigers an den Fensterrand vorübergehend angezeigt",
 	"aiMemoryClearAndDisable": "Alle Erinnerungen löschen und die Speicherfunktion deaktivieren",

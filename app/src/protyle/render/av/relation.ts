@@ -4,6 +4,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint} from "../../../util/upDownHint";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest";
 import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
 import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
@@ -1138,7 +1139,8 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 if (!cells.length) {
                     return;
                 }
-                const response = await fetchSyncPost("/api/av/createAttributeViewRelationItem", {
+                const rootID = protyle.block.rootID;
+                const request = {
                     avID: nodeElement.dataset.avId,
                     blockID: nodeElement.dataset.nodeId,
                     keyID: relationElement.dataset.keyId,
@@ -1148,7 +1150,11 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                     preview: entry.preview,
                     app: protyle.app.appId,
                     session: protyle.id,
-                });
+                };
+                const response = await fetchWithDocumentSelection(selection => fetchSyncPost("/api/av/createAttributeViewRelationItem", {...request, selection}, undefined, false),
+                    {notebooks: [protyle.notebookId], isValid: () => nodeElement.isConnected && menuElement.isConnected &&
+                    protyle.block.rootID === rootID && !protyle.disabled});
+                if (!response) return;
                 if (response.code !== 0 || !response.data || !("itemID" in response.data)) {
                     if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
                         showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");

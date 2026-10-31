@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -667,43 +668,49 @@ func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest
 
 var createDailyNote = contractHandler(apicontract.CreateDailyNote, createDailyNoteContract)
 
-func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNoteRequest) apicontract.Response[apicontract.FileTreeCreateData] {
+func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNoteRequest) apicontract.Response[apicontract.DailyNoteCreateResult] {
 
 	notebook := request.Notebook
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-		return apicontract.Failure[apicontract.FileTreeCreateData](-1, model.Conf.Language(314))
+		return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, model.Conf.Language(314))
 	}
 	execution, executionErr := startTemplateHTTP(c, "daily-note:"+notebook)
 	if executionErr != nil {
-		return apicontract.Failure[apicontract.FileTreeCreateData](-1, executionErr.Error())
+		return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, executionErr.Error())
 	}
 	defer execution.Close()
 	var p string
 	var existed bool
-	var err error
-	if request.Date == "" {
+	selection, err := documentSelectionModel(request.Selection)
+	if err != nil {
+		return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, err.Error())
+	}
+	create := func(date *time.Time) (string, bool, error) {
 		if execution != nil {
-			p, existed, err = model.CreateDailyNoteWithHTTP(notebook, nil, execution.Runtime)
-		} else {
-			p, existed, err = model.CreateDailyNote(notebook)
+			return model.CreateDailyNoteWithSelection(notebook, date, execution.Runtime, selection)
 		}
+		return model.CreateDailyNoteWithSelection(notebook, date, nil, selection)
+	}
+	if request.Date == "" {
+		p, existed, err = create(nil)
 	} else {
 		date, dateErr := parseDailyNoteDate(request.Date)
 		err = dateErr
 		if err == nil {
-			if execution != nil {
-				p, existed, err = model.CreateDailyNoteWithHTTP(notebook, &date, execution.Runtime)
-			} else {
-				p, existed, err = model.CreateDailyNoteAt(notebook, date)
-			}
+			p, existed, err = create(&date)
 		}
 	}
 	if err != nil {
+		if failure, leaseErr := documentSelectionFailure(c, err); leaseErr != nil {
+			return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, leaseErr.Error())
+		} else if failure != nil {
+			return apicontract.CreateDailyNote.FailureWithData(-1, err.Error(), apicontract.NewDailyNoteSelectionFailure(*failure))
+		}
 		code := -1
 		if errors.Is(err, model.ErrBoxNotFound) {
 			code = 1
 		}
-		return apicontract.Failure[apicontract.FileTreeCreateData](code, err.Error())
+		return apicontract.Failure[apicontract.DailyNoteCreateResult](code, err.Error())
 	}
 
 	model.FlushTxQueue()
@@ -711,7 +718,7 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil {
-		return apicontract.Failure[apicontract.FileTreeCreateData](-1, err.Error())
+		return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, err.Error())
 	}
 
 	if !existed {
@@ -719,7 +726,7 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 		// Creating a dailynote existed no longer expands the doc tree https://github.com/siyuan-note/siyuan/issues/9959
 		app, decodeErr := request.AppID()
 		if decodeErr != nil {
-			return apicontract.Failure[apicontract.FileTreeCreateData](-1, decodeErr.Error())
+			return apicontract.Failure[apicontract.DailyNoteCreateResult](-1, decodeErr.Error())
 		}
 		evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast)
 		evt.AppId = app
@@ -730,7 +737,7 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 		util.PushEvent(evt)
 	}
 
-	return apicontract.Success(apicontract.FileTreeCreateData{ID: tree.Root.ID})
+	return apicontract.Success(apicontract.NewDailyNoteCreateResult(tree.Root.ID))
 }
 
 var createDocWithMd = contractHandler(apicontract.CreateDocWithMd, createDocWithMdContract)

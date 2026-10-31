@@ -1,6 +1,8 @@
 {
 	"showDockBar": "Show dock bars",
 	"hideDockBar": "Hide dock bars",
+	"documentAncestorAmbiguous": "Several documents have the same title. Select the document for this operation",
+	"documentAncestorMore": "Choose another document with the same title...",
 	"showFloatingDockBar": "Show floating dock bars",
 	"showFloatingDockBarTip": "When enabled, hidden dock bars appear temporarily when a floating side panel opens or the pointer reaches the window edge",
 	"aiMemoryClearAndDisable": "Delete all memories and disable memory",

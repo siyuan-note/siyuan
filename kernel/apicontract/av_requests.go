@@ -221,6 +221,7 @@ type GetAttributeViewFieldViewsRequest struct {
 }
 
 type CreateAttributeViewItemRequest struct {
+	Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
 	// 日历新条目的全天日期，单位为毫秒；仅支持绑定普通 date 字段的日历视图。
 	// 覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
 	// 绑定 created、updated 或带显示模板的 date 字段时拒绝指定日期；省略或传 null 时沿用常规创建流程。
@@ -240,6 +241,7 @@ type CreateAttributeViewItemRequest struct {
 // preview 来自 includeNewItemPreview 候选查询，解析时间最多保留五分钟；默认模板 ID 或名称变化时拒绝写入。
 // 不可用保存笔记本返回 code 1 和 unavailableNotebook；其他失败返回 code -1，保留原数据。
 type CreateAttributeViewRelationItemRequest struct {
+	Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
 	// useInputName 为 true 时只用非空 keyword 覆盖主键，其他默认模板配置仍然生效；省略时使用模板名称。
 	UseInputName bool                   `json:"useInputName" api:"optional,nullable"`
 	AvID         string                 `json:"avID" api:"trim"`
@@ -270,30 +272,32 @@ type AVRelationItemPreview struct {
 }
 
 type CreateAttributeViewItemWithMarkdownRequest struct {
-	AvID         string `json:"avID" api:"trim"`
-	BlockID      string `json:"blockID" api:"trim"`
-	ViewID       string `json:"viewID" api:"optional,nullable"`
-	TemplateID   string `json:"templateID" api:"trim"`
-	PreviousID   string `json:"previousID" api:"optional,nullable"`
-	GroupID      string `json:"groupID" api:"optional,nullable"`
-	Title        string `json:"title" api:"trim"`
-	Markdown     string `json:"markdown"`
-	Tags         string `json:"tags" api:"optional,nullable"`
-	WithMath     bool   `json:"withMath" api:"optional,nullable"`
-	ClippingHref string `json:"clippingHref" api:"optional,nullable"`
-	ListDocTree  bool   `json:"listDocTree" api:"optional,nullable"`
-	App          string `json:"app" api:"optional,nullable"`
-	Session      string `json:"session" api:"optional,nullable"`
+	Selection    *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
+	AvID         string             `json:"avID" api:"trim"`
+	BlockID      string             `json:"blockID" api:"trim"`
+	ViewID       string             `json:"viewID" api:"optional,nullable"`
+	TemplateID   string             `json:"templateID" api:"trim"`
+	PreviousID   string             `json:"previousID" api:"optional,nullable"`
+	GroupID      string             `json:"groupID" api:"optional,nullable"`
+	Title        string             `json:"title" api:"trim"`
+	Markdown     string             `json:"markdown"`
+	Tags         string             `json:"tags" api:"optional,nullable"`
+	WithMath     bool               `json:"withMath" api:"optional,nullable"`
+	ClippingHref string             `json:"clippingHref" api:"optional,nullable"`
+	ListDocTree  bool               `json:"listDocTree" api:"optional,nullable"`
+	App          string             `json:"app" api:"optional,nullable"`
+	Session      string             `json:"session" api:"optional,nullable"`
 }
 
 // 新建文档继承游离条目已设置的图标；条目未设置图标时沿用文档模板图标。
 type CreateAttributeViewItemDocsRequest struct {
-	AvID     string   `json:"avID"`
-	BlockID  string   `json:"blockID"`
-	SaveMode string   `json:"saveMode"`
-	ItemIDs  []string `json:"itemIDs" api:"filterstrings"`
-	App      string   `json:"app" api:"optional,nullable"`
-	Session  string   `json:"session" api:"optional,nullable"`
+	Selection *DocumentSelection `json:"selection,omitempty" api:"optional,nonnullable"`
+	AvID      string             `json:"avID"`
+	BlockID   string             `json:"blockID"`
+	SaveMode  string             `json:"saveMode"`
+	ItemIDs   []string           `json:"itemIDs" api:"filterstrings"`
+	App       string             `json:"app" api:"optional,nullable"`
+	Session   string             `json:"session" api:"optional,nullable"`
 }
 
 type SearchAttributeViewRequest struct {

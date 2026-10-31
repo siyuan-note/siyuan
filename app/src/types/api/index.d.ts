@@ -378,9 +378,9 @@ export type AVCreateAttributeViewItemDocsResult = { "blockIDs": Array<string> | 
 
 export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "openAfterCreate"?: boolean; "warnings"?: Array<string>; };
 
-export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "warnings"?: never; });
+export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "ambiguity"?: never; "notebook"?: never; "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "ambiguity"?: never; "blockIDs"?: never; "itemIDs"?: never; "notebook"?: never; "skippedItemIDs"?: never; "warnings"?: never; }) | (DocumentSelectionFailure & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "unavailableNotebook"?: never; "warnings"?: never; });
 
-export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "warnings"?: never; });
+export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "ambiguity"?: never; "notebook"?: never; "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "ambiguity"?: never; "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "notebook"?: never; "openAfterCreate"?: never; "warnings"?: never; }) | (DocumentSelectionFailure & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "unavailableNotebook"?: never; "warnings"?: never; });
 
 export type AVCreated = { "includeTime": boolean; };
 
@@ -966,13 +966,13 @@ export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | nul
 
 export type CreateAssetHistoryRequestInput = { "path": string; };
 
-export type CreateAttributeViewItemDocsRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "itemIDs": Array<string> | null; "saveMode": string; "session"?: string | null; };
+export type CreateAttributeViewItemDocsRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "itemIDs": Array<string> | null; "saveMode": string; "selection"?: DocumentSelectionInput; "session"?: string | null; };
 
-export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "calendarDate"?: number | null; "groupID"?: string | null; "previousID"?: string | null; "session"?: string | null; "templateID"?: string | null; "viewID"?: string | null; };
+export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "calendarDate"?: number | null; "groupID"?: string | null; "previousID"?: string | null; "selection"?: DocumentSelectionInput; "session"?: string | null; "templateID"?: string | null; "viewID"?: string | null; };
 
-export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
+export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "selection"?: DocumentSelectionInput; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
 
-export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; "useInputName"?: boolean | null; };
+export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "selection"?: DocumentSelectionInput; "session"?: string | null; "useInputName"?: boolean | null; };
 
 export type CreateDocByParentRequest = { "clippingHref"?: string; "docCreateTemplatePath"?: string; "expectedParentRevision"?: string; "expectedTarget"?: DocumentTargetRevision; "id": string; "listDocTree"?: boolean; "markdown": string; "nameConditions"?: Array<DocumentNameCondition>; "notebook": string; "parentID": string | null; "sortPosition"?: "before" | "after"; "sortTargetID"?: string; "sorts"?: Array<string>; "tags"?: string; "title": DocumentCreateTitle; "withMath"?: boolean; };
 
@@ -1012,7 +1012,9 @@ export type DOMData = { "dom": string; };
 
 export type DOMTextRequestInput = { "dom": string; };
 
-export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; };
+export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; "selection"?: DocumentSelectionInput; };
+
+export type DailyNoteCreateResult = (FileTreeCreateData & { "ambiguity"?: never; "notebook"?: never; }) | (DocumentSelectionFailure & { "id"?: never; });
 
 export type DailyNoteInfo = { "existed": boolean; "hPath": string; "id": string; "title": string; };
 
@@ -1066,11 +1068,15 @@ export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCo
 
 export type DocumentAddressingFailure = { "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "legacyPathUnsupported" | "pathAmbiguous" | "indexUnavailable" | "unsupportedTitleFormat" | "targetModeUnsupported" | "writeFailed"; };
 
+export type DocumentAncestorAmbiguity = { "candidates": Array<DocumentPath>; "candidatesTruncated": boolean; "index": number; "parentID": string | null; "targetRevision": string; "time": string; "title": string; };
+
+export type DocumentAncestorChoiceInput = { "id": string; "index": number; "revision": string; };
+
 export type DocumentCapabilities = { "indexState": "missing" | "building" | "ready" | "error"; "literalSlash": boolean; "revision": string; "structuredPaths": boolean; "titleFormats": Array<string> | null; };
 
 export type DocumentCreateFailure = { "commitState": "none" | "committed" | "unknown"; "completed": Array<string> | null; "id"?: string; "reason": "invalidTitle" | "parentUnavailable" | "planChanged" | "documentIDConflict" | "indexUnavailable" | "unsupportedTitleFormat" | "writeFailed"; "stage": string; };
 
-export type DocumentCreatePlan = { "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
+export type DocumentCreatePlan = { "ambiguity"?: DocumentAncestorAmbiguity; "existingID"?: string; "notebook": string; "steps": Array<CreateDocByParentRequest>; "title": string; };
 
 export type DocumentCreateTarget = (LegacyDocumentTarget & { "anchor"?: never; "onMissingParent"?: never; "parents"?: never; "title"?: never; "up"?: never; }) | (StructuredDocumentTarget & { "path"?: never; });
 
@@ -1097,6 +1103,10 @@ export type DocumentPathsData = { "documents": Array<DocumentPath> | null; "miss
 export type DocumentPathsResult = (DocumentPathsData & { "reason"?: never; }) | (DocumentAddressingFailure & { "documents"?: never; "missingIDs"?: never; });
 
 export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
+
+export type DocumentSelectionFailure = { "ambiguity": DocumentAncestorAmbiguity; "notebook": string; };
+
+export type DocumentSelectionInput = { "ancestorChoices": Array<DocumentAncestorChoiceInput>; "targetRevision": string; "time": string; };
 
 export type DocumentTargetAnchor = { "id"?: string; "kind": "notebookRoot" | "context" | "document"; };
 
@@ -1222,7 +1232,7 @@ export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath
 
 export type FileTreeCreateSavePathResult = (FileTreeCreateSavePathData & { "reason"?: never; }) | (StructuredTemplateRequired & { "box"?: never; "docCreateTemplatePath"?: never; "path"?: never; });
 
-export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; };
+export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; "selection"?: DocumentSelectionInput; };
 
 export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
 
@@ -1782,7 +1792,7 @@ export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInst
 
 export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
-export type PlanDocCreateRequestInput = { "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "title"?: string; };
+export type PlanDocCreateRequestInput = { "ancestorChoices"?: Array<DocumentAncestorChoiceInput>; "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "targetRevision"?: string; "time"?: string; "title"?: string; };
 
 export type PluginPublishInfo = { "fields": Array<string>; "granted": boolean; "resources": Array<string>; };
 
@@ -4044,6 +4054,7 @@ export interface APIPOSTRoutes {
     /**
      * 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
      * true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+     * 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
      */
     "/api/av/createAttributeViewItem": {
         request: CreateAttributeViewItemRequestInput;
@@ -4052,6 +4063,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 批量绑定先解析所有目标；歧义时尚未创建文档或改动绑定，selection 对共享的保存路径生效。
+     */
     "/api/av/createAttributeViewItemDocs": {
         request: CreateAttributeViewItemDocsRequestInput;
         response: { "code": 0; "data": AVCreateItemDocsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemDocsResult; "msg": string; };
@@ -4059,6 +4073,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * Markdown 新建沿用条目模板与正文规则；位置歧义在写入前返回候选，可用 selection 继续。
+     */
     "/api/av/createAttributeViewItemWithMarkdown": {
         request: CreateAttributeViewItemWithMarkdownRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
@@ -4066,6 +4083,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 关联新建遇到保存位置歧义时返回未写入的候选，selection 续接原预览时间，创建与关联共用一次撤销。
+     */
     "/api/av/createAttributeViewRelationItem": {
         request: CreateAttributeViewRelationItemRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
@@ -4674,6 +4694,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 日记位置歧义时不插入内容；可传入 createDailyNote 返回的候选所形成的 selection，继续原追加流程。
+     */
     "/api/block/appendDailyNoteBlock": {
         request: DailyNoteBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5108,6 +5131,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 日记位置歧义时不插入内容；selection 语义与 appendDailyNoteBlock 相同。
+     */
     "/api/block/prependDailyNoteBlock": {
         request: DailyNoteBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5667,10 +5693,13 @@ export interface APIPOSTRoutes {
      * 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
      * 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
      * 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
+     * 路径祖先或复用目标重名时，未写入并返回 code=-1、data.notebook 和 data.ambiguity。
+     * 用户选择后通过 selection 传回固定 time、targetRevision 及 ancestorChoices；不更改默认配置。
+     * 选择后的重试仍执行原日记复用、日期属性和正文模板流程，指定 date 时 selection.time 必须属于同一本地日期。
      */
     "/api/filetree/createDailyNote": {
         request: FileTreeDailyNoteRequestInput;
-        response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": DailyNoteCreateResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | DailyNoteCreateResult; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
@@ -5747,6 +5776,7 @@ export interface APIPOSTRoutes {
     /**
      * 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
      * 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
+     * 路径有歧义时仍返回可选择的创建标题和路径，不创建文档；已有日期文档仍按日期属性复用。
      */
     "/api/filetree/getDailyNoteInfo": {
         request: DailyNoteInfoRequestInput;
@@ -5966,10 +5996,14 @@ export interface APIPOSTRoutes {
      * 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
      * reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
      * 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
+     * 路径祖先或待复用文档有多个匹配时 code=-1，data.ambiguity 返回至多 128 个候选及截断标记，steps 为空且未创建文档。
+     * 选择后传回 ancestorChoices 的段索引、ID、revision，以及 ambiguity 的 time 和 targetRevision。
+     * time 为 RFC3339Nano，优先于 date，固定本次模板求值时间；所选身份必须仍处于对应父级且标题、版本匹配。
+     * 选择可包含未展示的候选 ID；多级歧义逐次选择，任何选择失效或配置变更均拒绝，不回退到其他同名文档。
      */
     "/api/filetree/planDocCreate": {
         request: PlanDocCreateRequestInput;
-        response: { "code": 0; "data": DocumentCreatePlan; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": DocumentCreatePlan; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "ambiguity"?: never; "existingID"?: never; "notebook"?: never; "steps"?: never; "title"?: never; }) | null | (DocumentCreatePlan & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];

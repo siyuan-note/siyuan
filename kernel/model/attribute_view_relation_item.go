@@ -80,12 +80,19 @@ func PreviewAttributeViewRelationItem(avID, blockID, keyID, keyword string) *Att
 			var preview *NewItemTemplatePreview
 			preview, err = resolveAttributeViewNewItemTemplateWithFallback(targetBlockID, itemTemplate,
 				time.UnixMilli(ret.CreatedAt), keyword)
+			var ambiguity *DocumentAncestorAmbiguity
+			if errors.As(err, &ambiguity) {
+				err = nil
+			}
 			if err == nil {
 				ret.PrimaryKey = preview.PrimaryKey
 				ret.InputPrimaryKey = strings.TrimSpace(keyword)
 				if av.NewItemTargetDocument == itemTemplate.TargetType && "" != ret.InputPrimaryKey {
 					preview, err = resolveAttributeViewItemDocument(targetBlockID, ret.InputPrimaryKey, itemTemplate,
 						time.UnixMilli(ret.CreatedAt))
+					if errors.As(err, &ambiguity) {
+						err = nil
+					}
 					if err == nil {
 						ret.InputPrimaryKey = preview.PrimaryKey
 					}
@@ -101,7 +108,7 @@ func PreviewAttributeViewRelationItem(avID, blockID, keyID, keyword string) *Att
 
 // CreateAttributeViewRelationItem 将模板创建、来源单元格更新和双向关联放入同一个可撤销事务。
 func CreateAttributeViewRelationItem(avID, blockID, keyID, keyword string, cells []*AttributeViewRelationItemCell,
-	preview *AttributeViewRelationItemPreview, useInputName bool) (*CreateAttributeViewItemResult, error) {
+	preview *AttributeViewRelationItemPreview, useInputName bool, selections ...*DocumentSelection) (*CreateAttributeViewItemResult, error) {
 	if preview == nil || preview.Error != "" || len(cells) == 0 {
 		return nil, errors.New("invalid relation item creation request")
 	}
@@ -169,5 +176,9 @@ func CreateAttributeViewRelationItem(avID, blockID, keyID, keyword string, cells
 		}
 		options.primaryOverride = &primary
 	}
-	return createAttributeViewItem(target.ID, targetBlockID, "", preview.TemplateID, "", "", nil, options)
+	var selection *DocumentSelection
+	if len(selections) > 0 {
+		selection = selections[0]
+	}
+	return createAttributeViewItem(target.ID, targetBlockID, "", preview.TemplateID, "", "", nil, options, selection)
 }

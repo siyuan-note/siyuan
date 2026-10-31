@@ -937,7 +937,7 @@
 
     &--mobile {
       position: fixed;
-      inset: env(safe-area-inset-top) 0 0;
+      inset: var(--mobile-top-safe-area, env(safe-area-inset-top)) 0 0;
       max-height: none;
       border: 0;
       border-radius: 0;

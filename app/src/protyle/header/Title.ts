@@ -531,7 +531,10 @@ export class Title {
     }
 
     public setReadonly(readonly: boolean) {
-        this.richEditor?.setReadonly(readonly);
+        if (this.richEditor) {
+            this.richEditor.setReadonly(readonly);
+            return;
+        }
         if (this.editElement) {
             this.editElement.setAttribute("contenteditable", String(!readonly && !this.needsSourceEditor()));
             this.editElement.style.userSelect = readonly ? "text" : "";

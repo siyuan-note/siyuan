@@ -8,9 +8,9 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compile} from "sass";
 
-const browserCases = (sources: string[], lutePath: string, styles: string[]) => {
+const browserCases = async (sources: string[], lutePath: string, styles: string[]) => {
     const check: typeof assert = require("node:assert/strict");
-    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only",
+    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only", settingsPendingSaveError: "Save failed",
         _kernel: {16: "Untitled document"}}}});
     const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
     const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
@@ -106,7 +106,9 @@ const browserCases = (sources: string[], lutePath: string, styles: string[]) => 
         '<span class="katex">Untrusted cache</span></span>')));
     check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
 
-    const Editor = new Function(sources[3] + "\nreturn DocumentTitleEditor;")();
+    const Editor = new Function("getDocumentTitleDOMFingerprint", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint);
+    const Title = new Function(sources[4] + "\nreturn Title;")();
+    const disable = new Function(sources[5] + "\nreturn disabledWYSIWYG;")();
     const container = document.createElement("div");
     container.className = "protyle-title";
     container.innerHTML = '<div class="protyle-title__rich"><div class="protyle-wysiwyg"></div></div>';
@@ -143,16 +145,59 @@ const browserCases = (sources: string[], lutePath: string, styles: string[]) => 
             observer.disconnect();
         }
     }
+    for (const initiallyReadonly of [false, true]) {
+        wysiwyg.innerHTML = paragraph('<span data-type="strong" style="color: red">Title</span>');
+        const owner = {disabled: initiallyReadonly};
+        const saved = fingerprint(wysiwyg.innerHTML);
+        const richEditor = Object.assign(Object.create(Editor.prototype), {
+            owner, saved, disposed: false, composing: false,
+            fragment: {
+                wysiwyg, getBlockHTML: () => wysiwyg.innerHTML, protyle: {},
+                instance: {
+                    disable: () => disable(wysiwyg),
+                    enable: () => {
+                        wysiwyg.style.userSelect = "";
+                        wysiwyg.querySelectorAll("[spellcheck]").forEach(element => element.setAttribute("contenteditable", "true"));
+                    },
+                },
+            },
+        });
+        const title = Object.assign(Object.create(Title.prototype), {
+            protyle: owner, richEditor, editElement: richEditor.editable,
+        });
+        title.setReadonly(initiallyReadonly);
+        check.equal(fingerprint(wysiwyg.innerHTML), saved, "initial readonly decoration preserves the saved title");
+        for (let cycle = 0; cycle < 2; cycle++) {
+            owner.disabled = true;
+            title.setReadonly(true);
+            check.equal(title.editElement.contentEditable, "false");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "locking an unchanged title cannot block sync preparation");
+            await richEditor.flush();
+            owner.disabled = false;
+            title.setReadonly(false);
+            check.equal(title.editElement.contentEditable, "true");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "unlocking cannot create a title save");
+        }
+        title.editElement.querySelector("span").style.color = "blue";
+        const draft = wysiwyg.innerHTML;
+        owner.disabled = true;
+        title.setReadonly(true);
+        await check.rejects(richEditor.flush(), /Save failed/, "a real formatting draft still blocks sync while readonly");
+        check.equal(title.editElement.querySelector("span").style.color, "blue", "readonly handoff retains the draft");
+        check.equal(richEditor.saved, saved);
+        check.notEqual(fingerprint(draft), saved);
+    }
     container.remove();
     style.remove();
     return "Document title DOM cases passed";
 };
 
-test("native document title DOM preserves inline content, format edits, paragraph-only parsing and empty placeholders", {
+test("native document title DOM preserves inline content, parsing, placeholders and readonly sync handoff", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts"].map(file =>
+    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
+        "Title.ts", "../util/disabledWYSIWYG.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);

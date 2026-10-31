@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261028111611"
+		"updated": "20261031115926"
 	},
 	"Children": [
 		{
@@ -2177,7 +2177,7 @@
 			"Properties": {
 				"ID": "20240530101000-ch5e4vh",
 				"id": "20240530101000-1ev7xub",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2216,7 +2216,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-8fr1gcz",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2245,12 +2245,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261028111611-70ba205",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "モバイル版では、文書のパンくずリストにある元に戻す・やり直しボタンを使えます。キーボードを閉じた状態やマインドマップの全画面表示中も操作できます。文書全体の履歴を共有するため、マインドマップ以外の変更も対象になります。元に戻す操作とやり直す操作がどちらもない場合や、文書が読み取り専用の場合はボタンが非表示になります。"
+					"Data": "モバイル版では、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "元に戻す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "やり直し"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " から文書の履歴を操作できます。キーボードを閉じた状態やマインドマップの全画面表示中も利用でき、編集ツールバーのボタンも使えます。文書全体の履歴を共有するため、マインドマップ以外の変更も対象になります。対応する履歴がないメニュー項目は無効になり、読み取り専用の文書では表示されません。"
 				}
 			]
 		},

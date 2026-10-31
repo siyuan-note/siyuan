@@ -604,7 +604,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')?.classList.add("fn__none");
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]')?.classList.add("fn__none");
         }
-        protyle.breadcrumb.refreshHistory?.(protyle.block.rootID);
+        protyle.breadcrumb.refreshHistory?.();
     }
     hideTooltip();
 };
@@ -678,7 +678,7 @@ export const enableProtyle = (protyle: IProtyle) => {
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')?.classList.remove("fn__none");
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]')?.classList.remove("fn__none");
         }
-        protyle.breadcrumb.refreshHistory?.(protyle.block.rootID);
+        protyle.breadcrumb.refreshHistory?.();
     }
     hideElements(["gutter"], protyle);
     hideTooltip();

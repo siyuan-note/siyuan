@@ -1960,7 +1960,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.setEditing();
     view.update(api.readListMindmap(list));
     check.equal(host.querySelector('[data-type="undo"], [data-type="redo"]'), null,
-        "history controls belong to the document action bar");
+        "history controls belong to the document menu and editing toolbar");
     finishAllowed = false;
     nodeElement(alpha).querySelector<HTMLButtonElement>(".mindmap-view__add-child").click();
     check.equal(additions.length, 0);

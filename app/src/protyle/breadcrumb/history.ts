@@ -1,35 +1,44 @@
 import {getUndoStateSnapshot, requestRedo, requestUndo, subscribeUndoState} from "../undo/globalUndo";
 import {finishListMindmaps} from "../render/listMindmap";
-import {escapeAttr} from "../../util/escape";
+import {MenuItem} from "../../menus/Menu";
 
 export class DocumentHistory {
-    public element = document.createElement("div");
+    private buttons: HTMLButtonElement[] = [];
     private rootID?: string;
     private unsubscribe?: () => void;
     private pending = false;
     private disposed = false;
 
     constructor(private protyle: IProtyle) {
-        this.element.className = "protyle-breadcrumb__history fn__flex";
-        this.element.innerHTML = (["undo", "redo"] as const).map(type =>
-            `<button class="block__icon fn__flex-center ariaLabel" disabled data-type="${type}" aria-label="${escapeAttr(window.siyuan.languages[type])}"><svg><use xlink:href="#icon${type === "undo" ? "Undo" : "Redo"}"></use></svg></button>`).join("");
-        this.element.classList.add("fn__none");
-        this.element.addEventListener("pointerdown", event => event.preventDefault());
-        this.element.addEventListener("click", event => {
-            const button = (event.target as Element).closest<HTMLButtonElement>("button");
-            if (!button) {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            void this.run(button.dataset.type === "redo").catch(error => console.error(error));
-        });
     }
 
-    public refresh(rootID: string) {
+    public createMenuItems() {
+        this.buttons = [];
+        if (this.disposed || this.protyle.disabled) {
+            return this.buttons;
+        }
+        const documentID = this.protyle.block.rootID;
+        const notebookID = this.protyle.notebookId;
+        this.buttons = (["undo", "redo"] as const).map(type => {
+            const button = new MenuItem({
+                id: type,
+                label: window.siyuan.languages[type],
+                icon: type === "undo" ? "iconUndo" : "iconRedo",
+                click: () => {
+                    void this.run(type === "redo", documentID, notebookID).catch(error => console.error(error));
+                },
+            }).element as HTMLButtonElement;
+            return button;
+        });
+        this.refresh();
+        return this.buttons;
+    }
+
+    public refresh() {
         if (this.disposed) {
             return;
         }
+        const rootID = this.protyle.block.rootID;
         if (this.rootID !== rootID) {
             this.unsubscribe?.();
             this.rootID = rootID;
@@ -40,20 +49,17 @@ export class DocumentHistory {
 
     private render() {
         const state = getUndoStateSnapshot(this.rootID);
-        this.element.classList.toggle("fn__none", this.protyle.disabled || !state.canUndo && !state.canRedo && !this.pending);
-        this.element.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
+        this.buttons.forEach(button => {
             button.disabled = this.protyle.disabled || this.pending || state.pending ||
-                !(button.dataset.type === "undo" ? state.canUndo : state.canRedo);
+                !(button.dataset.id === "undo" ? state.canUndo : state.canRedo);
         });
     }
 
-    private async run(redo: boolean) {
+    private async run(redo: boolean, documentID: string, notebookID: string) {
         const protyle = this.protyle;
-        const rootID = this.rootID;
-        const documentID = protyle.block.rootID;
-        const notebookID = protyle.notebookId;
-        const button = this.element.querySelector<HTMLButtonElement>(`[data-type="${redo ? "redo" : "undo"}"]`);
-        if (this.disposed || button.disabled || !rootID || this.pending) {
+        const button = this.buttons.find(item => item.dataset.id === (redo ? "redo" : "undo"));
+        if (this.disposed || !button || button.disabled || !documentID || this.pending || protyle.disabled ||
+            protyle.block.rootID !== documentID || protyle.notebookId !== notebookID) {
             return;
         }
         this.pending = true;
@@ -64,7 +70,7 @@ export class DocumentHistory {
                 return;
             }
             protyle.wysiwyg.flushPendingInput();
-            await (redo ? requestRedo(protyle, rootID) : requestUndo(protyle, rootID));
+            await (redo ? requestRedo(protyle, documentID) : requestUndo(protyle, documentID));
         } finally {
             this.pending = false;
             this.render();
@@ -75,5 +81,6 @@ export class DocumentHistory {
         this.disposed = true;
         this.unsubscribe?.();
         this.unsubscribe = undefined;
+        this.buttons = [];
     }
 }

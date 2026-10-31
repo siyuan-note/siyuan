@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261028111611"
+		"updated": "20261031115926"
 	},
 	"Children": [
 		{
@@ -2055,7 +2055,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2094,7 +2094,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-k1vwtue",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2123,12 +2123,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261028111611-9011ee1",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "移动端可使用文档面包屑栏中的撤销、重做按钮，收起键盘或将思维导图全屏后也能操作。它们共用文档的撤销历史，也可能撤销导图以外的修改。没有可撤销或重做的操作时，以及文档只读时，按钮隐藏。"
+					"Data": "移动端可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "撤销"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重做"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 操作文档历史，收起键盘或将思维导图全屏后也能使用。编辑工具栏中也保留这两个入口。它们共用文档的撤销历史，也可能撤销导图以外的修改。没有对应历史时，菜单项禁用；文档只读时不提供这两个菜单项。"
 				}
 			]
 		},

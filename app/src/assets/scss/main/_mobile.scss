@@ -43,10 +43,6 @@ body.mobile-keyboard--open {
   -webkit-user-select: none;
   user-select: none;
 
-  &__history {
-    flex-shrink: 0;
-  }
-
   > .protyle-breadcrumb__icon {
     min-width: 0;
     overflow: hidden;

@@ -48,7 +48,7 @@ const notifyUndoState = (rootID?: string) => {
     }
 };
 
-// 文档操作栏订阅共享历史状态，销毁编辑器时解除订阅。
+// 文档菜单订阅共享历史状态，销毁编辑器时解除订阅。
 export const subscribeUndoState = (rootID: string, listener: (state: ReturnType<typeof getUndoStateSnapshot>) => void) => {
     let listeners = undoStateListeners.get(rootID);
     if (!listeners) {
@@ -156,7 +156,7 @@ const applyUndoButtons = (protyle: IProtyle, rootID: string) => {
     };
     if (protyle.breadcrumb) {
         applyState(protyle.breadcrumb.element.parentElement);
-        protyle.breadcrumb.refreshHistory?.(rootID);
+        protyle.breadcrumb.refreshHistory?.();
     }
     /// #if MOBILE
     const toolbarEditor = getMobileToolbarProtyle();

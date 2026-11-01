@@ -211,8 +211,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
+    virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
     if (data.nested) {
-        virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
         if (data.rows.length > 100) {
             virtualData = virtualData || {renderedStart: 0, renderedEnd: 99, topSpacerHeight: 0};
             reserveVirtualHeight = true;
@@ -286,7 +286,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             if (rowIndex < virtualData.renderedStart) {
                 return;
             }
-        } else if ((data.nested ? data.rows.length : data.pageSize) > 100 && rowIndex > 99) {
+        } else if (data.rows.length > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }

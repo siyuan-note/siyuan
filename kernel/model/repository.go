@@ -325,7 +325,9 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 		tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		if needResetTree {
-			resetTree(tree, "", true)
+			if err = resetTree(tree, "", true); err != nil {
+				return
+			}
 		}
 
 		// Publish the restored source before removing the working document or
@@ -2600,7 +2602,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
 
 				previousPath := tree.Path
-				resetTree(tree, "Conflicted", true)
+				if resetErr := resetTree(tree, "Conflicted", true); resetErr != nil {
+					logging.LogErrorf("reset conflicted document [%s] failed: %s", absPath, resetErr)
+					continue
+				}
 				createTreeTx(tree)
 				box := Conf.Box(boxID)
 				if nil != box {

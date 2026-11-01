@@ -1287,7 +1287,9 @@ func DuplicateDoc(tree *parse.Tree) error {
 
 	isBoxDoc := IsBoxDoc(tree.Box, tree.ID)
 	previousPath := tree.Path
-	resetTree(tree, "Duplicated", false)
+	if err := resetTree(tree, "Duplicated", false); err != nil {
+		return err
+	}
 	if isBoxDoc {
 		removeBoxDocHiddenAttr(tree)
 	}

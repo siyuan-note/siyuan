@@ -418,7 +418,9 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 
 	if needResetTree {
-		resetTree(tree, "", true)
+		if err = resetTree(tree, "", true); err != nil {
+			return
+		}
 	}
 
 	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
@@ -515,7 +517,7 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 			"id":      tree.Root.ID,
 			"path":    tree.Path,
 			"title":   treenode.ReadDocumentTitle(tree.Root).Text,
-			"empty":   "" != tree.Root.IALAttr(NodeAttrTitleEmpty),
+			"empty":   "true" == tree.Root.IALAttr(NodeAttrTitleEmpty),
 			"refText": refText,
 		}
 		util.PushEvent(evt)

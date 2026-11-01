@@ -3355,7 +3355,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Document titles allow ASCII / by default, without a setting to enable it. For example, A/B can be one document title and is different from a document B inside A. Existing titles and document links stay unchanged; ／ and %2F remain literal text."
+					"Data": "Document titles allow ASCII / by default, without a setting to enable it. For example, A/B can be one document title and is different from a document B inside A. Existing titles and document links stay unchanged; ／ and %2F remain literal text. Duplicating a document preserves rich title formatting and adds the copy suffix to its title. Empty titles remain empty without a suffix, regardless of the interface language. When duplicating a document with its children, only the copied root receives the suffix."
 				}
 			]
 		},

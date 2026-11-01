@@ -115,12 +115,14 @@ const browserCases = async (sources, entries, themes) => {
 
     const progress = {};
     new Function("exports", sources.progress)(progress);
-    window.siyuan = {zIndex: 1};
+    window.siyuan = {zIndex: 1, languages: {_kernel: {35: "Rebuilding index, please wait..."}}};
     for (const entry of ["base", "mobile"]) {
         for (const theme of ["light", "dark"]) {
             styles.textContent = entries[entry] + themes[theme];
             host.replaceChildren();
             progress.progressLoading({code: 1, msg: "Rebuilding index, please wait..."});
+            progress.updateReindexProgressStatus("Indexed 64, remaining 128");
+            check.equal(document.querySelector('#progress [data-type="message"]').textContent, "Indexed 64, remaining 128");
             const panel = document.querySelector(".b3-dialog__loading");
             const track = panel.querySelector('[role="progressbar"]');
             const bar = track.firstElementChild;
@@ -147,6 +149,8 @@ const browserCases = async (sources, entries, themes) => {
             check.notEqual(getComputedStyle(bar, "::before").backgroundColor, "rgba(0, 0, 0, 0)");
             await ipcRenderer.invoke("loading-media", []);
             progress.progressLoading({code: 0, msg: "Rebuilding index", data: {current: 42, total: 100}});
+            progress.updateReindexProgressStatus("Unrelated status");
+            check.equal(document.querySelector('#progress [data-type="message"]').textContent, "Rebuilding index");
             check.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"), "42");
             check.equal(getComputedStyle(document.querySelector(".b3-dialog__progressbar"), "::before").content, "none");
             await ipcRenderer.invoke("capture-loading", `progress-determinate-${entry}-${theme}`);

@@ -13,7 +13,7 @@ import {
     setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
-import {progressLoading} from "../../dialog/progress";
+import {progressLoading, updateReindexProgressStatus} from "../../dialog/progress";
 import {updateExitProgressStatus} from "../../dialog/exitRequest";
 import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import type {App} from "../../index";
@@ -236,6 +236,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case"statusbar":
                 updateExitProgressStatus(data.msg);
+                updateReindexProgressStatus(sanitizeKernelHTML(data.msg));
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
                     window.siyuan.config.appearance.hideStatusBar) {
                     return;

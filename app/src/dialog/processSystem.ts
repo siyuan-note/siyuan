@@ -24,6 +24,7 @@ import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
 import {requestSystemExit, updateExitProgressStatus} from "./exitRequest";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
+import {updateReindexProgressStatus} from "./progress";
 /// #if MOBILE
 import {getMobileBacklinkPanels} from "../mobile/util/backlinkPanels";
 /// #endif
@@ -328,6 +329,7 @@ export const refreshFileTree = (cb?: () => void) => {
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
     updateExitProgressStatus(data.msg);
+    updateReindexProgressStatus(sanitizeKernelHTML(data.msg));
     const msgElement = document.querySelector("#status .status__msg");
     if (msgElement) {
         clearTimeout(statusTimeout);

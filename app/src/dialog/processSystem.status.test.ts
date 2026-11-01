@@ -17,9 +17,11 @@ test("desktop status messages reach the exit dialog even without a status bar", 
     for (const visible of [false, true]) {
         const status = {innerHTML: ""};
         const messages: string[] = [];
+        const progressMessages: string[] = [];
         let timeout: () => void;
         const progressStatus = runInNewContext(compiled, {
             updateExitProgressStatus: (message: string) => messages.push(message),
+            updateReindexProgressStatus: (message: string) => progressMessages.push(message),
             document: {querySelector: () => visible ? status : null},
             sanitizeKernelHTML: (message: string) => message,
             clearTimeout: () => {},
@@ -28,6 +30,7 @@ test("desktop status messages reach the exit dialog even without a status bar", 
         progressStatus({msg: "Uploading 1/10"});
         progressStatus({msg: "Uploading 2/10"});
         assert.deepEqual(messages, ["Uploading 1/10", "Uploading 2/10"]);
+        assert.deepEqual(progressMessages, messages);
         if (visible) {
             assert.equal(status.innerHTML, "Uploading 2/10");
             timeout();

@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {resolveAgentScrollState} from "./AgentScrollState";
+import {resolveAgentScrollState, resolveThinkingCardAnchor} from "./AgentScrollState";
 
 describe("AgentScrollState", () => {
     it("clears stale state when the content cannot scroll", () => {
@@ -74,5 +74,43 @@ describe("AgentScrollState", () => {
             userScrolledUp: false,
             buttonVisible: false,
         });
+    });
+});
+
+describe("resolveThinkingCardAnchor", () => {
+    it("puts a folded card back at the top of the scroll area", () => {
+        assert.equal(resolveThinkingCardAnchor({
+            cardTop: -576,
+            cardBottom: -546,
+            containerTop: 100,
+            scrollTop: 1500,
+        }), 824);
+    });
+
+    it("aligns a card that ends exactly at the scroll area top", () => {
+        assert.equal(resolveThinkingCardAnchor({
+            cardTop: -30,
+            cardBottom: 100,
+            containerTop: 100,
+            scrollTop: 500,
+        }), 370);
+    });
+
+    it("leaves the view alone while the card is still visible", () => {
+        assert.equal(resolveThinkingCardAnchor({
+            cardTop: 300,
+            cardBottom: 2330,
+            containerTop: 100,
+            scrollTop: 1500,
+        }), undefined);
+    });
+
+    it("does not scroll above the start of the scroll area", () => {
+        assert.equal(resolveThinkingCardAnchor({
+            cardTop: -300,
+            cardBottom: -270,
+            containerTop: 100,
+            scrollTop: 100,
+        }), 0);
     });
 });

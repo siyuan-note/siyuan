@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Hlavné heslo šifrovaných zápisníkov",
 	"dataImportPasswordTip": "Zadajte hlavné heslo šifrovaných zápisníkov importovaných zo zálohy; preskočené zápisníky nevyžadujú overenie",
 	"aiSelectModel": "Vyberte model",
-	"aiMemoryEnabledTip": "Po zapnutí nastavená služba modelu automaticky získava a udržiava spomienky zo všetkých nešifrovaných zápisníkov a budúcich úspešne odoslaných správ používateľa",
+	"aiMemoryEnabledTip": "Po zapnutí sa spomienky automaticky získavajú iba z budúcich správ používateľa",
 	"aiMemoryKind": "Typ spomienky",
 	"aiMemoryState": "Stav spomienky",
 	"aiMemoryEmpty": "Zatiaľ žiadne spomienky",

@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "암호화된 노트북의 마스터 비밀번호",
 	"dataImportPasswordTip": "백업에서 가져올 암호화된 노트북의 마스터 비밀번호를 입력하세요. 건너뛴 노트북은 인증할 필요가 없습니다",
 	"aiSelectModel": "모델을 선택하세요",
-	"aiMemoryEnabledTip": "활성화하면 설정된 모델 서비스가 암호화되지 않은 모든 노트북과 이후 성공적으로 전송된 사용자 메시지에서 기억을 자동으로 추출하고 유지 관리합니다",
+	"aiMemoryEnabledTip": "활성화하면 이후 사용자 메시지에서만 기억을 자동으로 추출합니다",
 	"aiMemoryKind": "기억 유형",
 	"aiMemoryState": "기억 상태",
 	"aiMemoryEmpty": "아직 기억이 없습니다",

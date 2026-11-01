@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -97,7 +98,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 	}
 }
 
-func TestAIMemoryLongDocumentTransactionRefreshesExistingChild(t *testing.T) {
+func TestAIMemoryLongDocumentTransactionOnlyInvalidatesExistingChild(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
 	resetMemoryEventQueues(t)
@@ -131,15 +132,12 @@ func TestAIMemoryLongDocumentTransactionRefreshesExistingChild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	memoryComplete = func(_ context.Context, _ *conf.AI, prompt string) (string, error) {
-		if strings.Contains(prompt, `"terms"`) {
-			return `{"intent":"remember","terms":["Project status"]}`, nil
-		}
-		if strings.HasPrefix(prompt, "Generate a concise") {
-			return "", nil
-		}
-		return fmt.Sprintf(`{"actions":[{"id":%q,"kind":"fact","subject":"project","scope":%q,"content":"Project status: completed","state":"active","sourceIndexes":[0]}]}`, entry.Record.ID, fixture.childID), nil
+	var modelCalls atomic.Int32
+	memoryComplete = func(context.Context, *conf.AI, string) (string, error) {
+		modelCalls.Add(1)
+		return "", nil
 	}
+
 	tx := &Transaction{DoOperations: []*Operation{{Action: "update", ID: fixture.childID, Data: fmt.Sprintf(`<div data-node-id="%s" data-type="NodeParagraph"><div contenteditable="true">Project status: completed</div></div>`, fixture.childID)}}}
 	if err = PerformTxSync(tx); err != nil {
 		t.Fatal(err)
@@ -147,17 +145,16 @@ func TestAIMemoryLongDocumentTransactionRefreshesExistingChild(t *testing.T) {
 	deadline := time.Now().Add(8 * time.Second)
 	for {
 		updated, readErr := aiMemoryStore().Get(ctx, entry.Record.ID)
-		completed := false
-		for _, task := range RecentAIMemoryTasks() {
-			if task.State == "completed" {
-				completed = true
+		if readErr == nil && updated.Record.State == "review" && updated.Record.Content == "Project status" {
+			time.Sleep(100 * time.Millisecond)
+			if modelCalls.Load() != 0 {
+				t.Fatal("note edits still invoked automatic extraction")
 			}
-		}
-		if readErr == nil && updated.Record.State == "candidate" && updated.Record.Content == "Project status: completed" && completed {
 			break
 		}
+
 		if time.Now().After(deadline) {
-			t.Fatalf("long document suppressed child maintenance: %+v %v tasks=%+v", updated, readErr, RecentAIMemoryTasks())
+			t.Fatalf("long document suppressed source invalidation: %+v %v tasks=%+v", updated, readErr, RecentAIMemoryTasks())
 		}
 		time.Sleep(10 * time.Millisecond)
 	}

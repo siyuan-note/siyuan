@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261031133741"
+		"updated": "20261101120000"
 	},
 	"Children": [
 		{
@@ -298,16 +298,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029051700-o1lc8ft",
-				"updated": "20261029155830"
+				"updated": "20261101120000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Notes from all non-encrypted notebooks are included subject to access checks; there is no separate notebook allowlist. Enabling does not scan all old notes, and encrypted notebooks are excluded even when unlocked."
-				},
-				{
-					"Type": "NodeText",
-					"Data": " While enabled, only future successfully committed user messages are collected; AI replies and past conversation history are excluded."
+					"Data": "Only future successfully committed user messages are collected automatically; AI replies, past conversations and notes are excluded. Note organization requires an explicit request and permitted non-encrypted sources. Existing memories remain available subject to source validation; note changes only invalidate affected records and do not extract new facts."
 				}
 			]
 		},
@@ -316,12 +312,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-7s47asc",
-				"updated": "20261030025512"
+				"updated": "20261101120000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic maintenance processes subsequent note changes and successfully committed user messages incrementally; not every passage will become a memory. Temporary questions, quotations of other people and conditional statements should not be treated as your lasting preferences. To submit an explicit fact immediately, use Organize with model in the manager and review the result."
+					"Data": "Automatic organization first checks whether the entire message clearly expresses your own lasting preference, background or agreement. External articles, third-party statements, mixed personal/external material and uncertain authorship are skipped. To submit an explicit fact immediately, use Organize with model in the manager and review the result."
 				}
 			]
 		},
@@ -344,12 +340,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135900-gllgfcf",
-				"updated": "20261029135900"
+				"updated": "20261101120000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When a decision model is enabled and configured, automatic maintenance of notes not already linked to memories can first screen for clearly empty or purely social content containing no facts, requests, directives or conditions. Only a high-confidence skip omits subsequent memory-model processing, without writing records or overviews. Uncertain or low-confidence results, timeouts, errors or missing configuration fall back to the selected memory model. User messages, manual organization and repairs to existing memory sources bypass this screening. Screening sends permitted source content to the configured decision service and may incur charges; it guarantees neither perfect decisions nor lower total costs."
+					"Data": "Attribution is checked in the existing keyword request, without an additional model call. Only a clear self-attribution proceeds; a missing or invalid verdict stops processing. Your own explicitly endorsed quoted words can qualify, so blockquote formatting alone does not determine authorship. Unlabelled pasted first-person text can still be misclassified; automatic judgment cannot guarantee authorship."
 				}
 			]
 		},

@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Password principale dei taccuini crittografati",
 	"dataImportPasswordTip": "Inserisci la password principale dei taccuini crittografati da importare dal backup; non è necessario verificare i taccuini ignorati",
 	"aiSelectModel": "Seleziona un modello",
-	"aiMemoryEnabledTip": "Quando è attiva, il servizio di modelli configurato estrae e mantiene automaticamente i ricordi di tutti i taccuini non crittografati e dei futuri messaggi dell’utente inviati correttamente",
+	"aiMemoryEnabledTip": "Quando è attiva, i ricordi vengono estratti automaticamente solo dai futuri messaggi dell’utente",
 	"aiMemoryKind": "Tipo di ricordo",
 	"aiMemoryState": "Stato del ricordo",
 	"aiMemoryEmpty": "Nessun ricordo ancora",

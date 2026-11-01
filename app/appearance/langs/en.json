@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Encrypted notebook master password",
 	"dataImportPasswordTip": "Enter the master password for the encrypted notebooks being imported from the backup; skipped notebooks do not require verification",
 	"aiSelectModel": "Please select a model",
-	"aiMemoryEnabledTip": "When enabled, the configured model service automatically extracts and maintains memories from all non-encrypted notebooks and future successfully submitted user messages",
+	"aiMemoryEnabledTip": "When enabled, automatically extract memories only from future user messages",
 	"aiMemoryKind": "Memory type",
 	"aiMemoryState": "Memory status",
 	"aiMemoryEmpty": "No memories yet",

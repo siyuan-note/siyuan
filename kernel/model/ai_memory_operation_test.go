@@ -152,9 +152,12 @@ func TestAIMemoryOperationExplicitRetryBeforeProposal(t *testing.T) {
 }
 
 func TestAIMemoryOperationAutomaticSourceCoalescing(t *testing.T) {
-	cfg, fixture, _ := setupMemoryDecisionTest(t)
-	cfg.Decision.Enabled = false
-	Conf.AI.Store(cfg)
+	setupAIMemoryTest(t)
+	previous := AIMemoryConversationReader
+	t.Cleanup(func() { AIMemoryConversationReader = previous })
+	AIMemoryConversationReader = func(context.Context, string, string) (string, error) {
+		return `{"role":"user","content":"Use concise answers"}`, nil
+	}
 	entered, release := make(chan struct{}), make(chan struct{})
 	var once sync.Once
 	var keywords, proposals atomic.Int32
@@ -167,12 +170,12 @@ func TestAIMemoryOperationAutomaticSourceCoalescing(t *testing.T) {
 			case <-ctx.Done():
 				return "", ctx.Err()
 			}
-			return `{"intent":"remember","terms":[]}`, nil
+			return `{"intent":"remember","terms":[],"attribution":"self"}`, nil
 		}
 		proposals.Add(1)
 		return `{"actions":[]}`, nil
 	}
-	q := apicontract.AIMemoryMaintainRequest{SourceIDs: []string{fixture.sourceID}, OperationID: "automatic-one"}
+	q := apicontract.AIMemoryMaintainRequest{SourceIDs: []string{"conversation:session:entry"}, OperationID: "automatic-one"}
 	id := startMemoryOperation(t, q, true)
 	defer func() {
 		select {

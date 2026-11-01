@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Mot de passe principal des carnets chiffrés",
 	"dataImportPasswordTip": "Saisissez le mot de passe principal des carnets chiffrés à importer depuis la sauvegarde ; les carnets ignorés ne nécessitent aucune vérification",
 	"aiSelectModel": "Veuillez sélectionner un modèle",
-	"aiMemoryEnabledTip": "Une fois activée, le service de modèles configuré extrait et maintient automatiquement les souvenirs de tous les carnets non chiffrés et des futurs messages utilisateur envoyés avec succès",
+	"aiMemoryEnabledTip": "Une fois activée, la mémoire est extraite automatiquement uniquement des futurs messages utilisateur",
 	"aiMemoryKind": "Type de souvenir",
 	"aiMemoryState": "État du souvenir",
 	"aiMemoryEmpty": "Aucun souvenir pour le moment",

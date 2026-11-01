@@ -12,7 +12,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// Memory 总开关控制使用和自动维护；笔记默认覆盖非加密笔记本，仍检查运行时访问权限。
+// Memory 总开关控制使用和自动对话采集；笔记仅供明确整理，并持续复核既有来源。
 type Memory struct {
 	Enabled         bool   `json:"enabled"`
 	ModelID         string `json:"modelId"`

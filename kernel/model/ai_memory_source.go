@@ -20,7 +20,6 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/memo"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -133,30 +132,6 @@ func memoryDatabaseSourceIDs(ctx context.Context, workspace string, databaseIDs 
 			if databaseIDs[database.ID] {
 				ids[source.ID] = true
 			}
-		}
-	})
-	if err != nil {
-		return nil, err
-	}
-	return memorySortedSourceIDs(ids), nil
-}
-
-// 文档变更保留原始事件，并补入该文档内已有记忆引用的小子树；不回扫笔记库。
-func memoryAffectedSourceIDs(ctx context.Context, workspace string, pending []string) ([]string, error) {
-	ids := map[string]bool{}
-	for _, id := range pending {
-		if ast.IsNodeIDPattern(id) {
-			ids[id] = true
-		}
-	}
-	roots := map[string]bool{}
-	for id := range ids {
-		roots[id] = true
-	}
-	err := memoryExistingSources(ctx, workspace, func(source memo.Source) {
-		bt := treenode.GetBlockTree(source.ID)
-		if bt != nil && roots[bt.RootID] && !IsEncryptedBox(bt.BoxID) {
-			ids[source.ID] = true
 		}
 	})
 	if err != nil {

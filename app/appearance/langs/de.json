@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Master-Passwort der verschlüsselten Notizbücher",
 	"dataImportPasswordTip": "Gib das Master-Passwort der verschlüsselten Notizbücher ein, die aus der Sicherung importiert werden; übersprungene Notizbücher müssen nicht überprüft werden",
 	"aiSelectModel": "Bitte ein Modell auswählen",
-	"aiMemoryEnabledTip": "Wenn aktiviert, extrahiert und pflegt der konfigurierte Modelldienst automatisch Erinnerungen aus allen unverschlüsselten Notizbüchern und künftig erfolgreich übermittelten Benutzernachrichten",
+	"aiMemoryEnabledTip": "Wenn aktiviert, werden Erinnerungen nur aus künftigen Benutzernachrichten automatisch extrahiert",
 	"aiMemoryKind": "Erinnerungstyp",
 	"aiMemoryState": "Erinnerungsstatus",
 	"aiMemoryEmpty": "Noch keine Erinnerungen",

@@ -8,15 +8,50 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"sort"
 	"testing"
 
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/memo"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAIMemoryNoteSourcesRetainValidityWithoutExtraction(t *testing.T) {
+	cfg := setupAIMemoryTest(t)
+	fixture := setupFileOperationTest(t)
+	Conf.AI.Store(cfg)
+	source, err := memorySource(context.Background(), fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	memoryComplete = func(context.Context, *conf.AI, string) (string, error) {
+		t.Fatal("note revalidation invoked a model")
+		return "", nil
+	}
+	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "existing note fact", Sources: []memo.Source{source}}, "missing", "unchanged")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = RevalidateAIMemorySources(context.Background(), nil); err != nil {
+		t.Fatal(err)
+	}
+	current, err := aiMemoryStore().Get(context.Background(), entry.Record.ID)
+	if err != nil || current.Revision != entry.Revision || current.Record.State != "active" {
+		t.Fatalf("unchanged legacy note memory modified: %+v %v", current, err)
+	}
+	source.Revision = "stale"
+	entry, err = aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "outdated note fact", Sources: []memo.Source{source}}, "missing", "stale")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = RevalidateAIMemorySources(context.Background(), nil); err != nil {
+		t.Fatal(err)
+	}
+	current, err = aiMemoryStore().Get(context.Background(), entry.Record.ID)
+	if err != nil || current.Record.State != "review" || current.Record.Content != "outdated note fact" {
+		t.Fatalf("legacy note invalidation lost: %+v %v", current, err)
+	}
+}
 
 func resetMemoryEventQueues(t *testing.T) {
 	t.Helper()
@@ -84,37 +119,6 @@ func TestAIMemoryDatabaseChangeTargetsExistingSources(t *testing.T) {
 	got, err := memoryDatabaseSourceIDs(ctx, dir, map[string]bool{databaseID: true})
 	if err != nil || !reflect.DeepEqual(got, []string{wantSource}) {
 		t.Fatalf("targeted paginated scan: %v %v", got, err)
-	}
-}
-
-func TestAIMemoryAffectedSourcesStayWithinChangedRoots(t *testing.T) {
-	fixture := setupFileOperationTest(t)
-	ctx := context.Background()
-	store := memo.NewStore(util.DataDir)
-	other := treenode.NewTree("20261029000009-abcdefg", "/20261029000008-abcdefg.sy", "/Other", "Other")
-	treenode.UpsertBlockTree(other)
-	for i := 0; i < 103; i++ {
-		sourceID := fixture.targetID
-		if i == 100 {
-			sourceID = fixture.childID
-		} else if i == 101 {
-			sourceID = other.Root.FirstChild.ID
-		}
-		r := memo.Record{ID: fmt.Sprintf("20261029000000-%07d", i), Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "fact",
-			Sources: []memo.Source{{Kind: "block", ID: sourceID, Revision: "previous"}}}
-		if _, err := store.Save(ctx, r, "missing", fmt.Sprint(i)); err != nil {
-			t.Fatal(err)
-		}
-	}
-	want := []string{fixture.sourceID, fixture.childID}
-	sort.Strings(want)
-	got, err := memoryAffectedSourceIDs(ctx, util.DataDir, []string{fixture.sourceID})
-	if err != nil || !reflect.DeepEqual(got, want) {
-		t.Fatalf("root expansion crossed source boundary or missed page: %v %v", got, err)
-	}
-	got, err = memoryAffectedSourceIDs(ctx, util.DataDir, []string{fixture.childID})
-	if err != nil || !reflect.DeepEqual(got, []string{fixture.childID}) {
-		t.Fatalf("subtree change unexpectedly expanded scope: %v %v", got, err)
 	}
 }
 

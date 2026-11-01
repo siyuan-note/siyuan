@@ -53,7 +53,7 @@
 	"dataImportMasterPassword": "Senha mestra dos cadernos criptografados",
 	"dataImportPasswordTip": "Digite a senha mestra dos cadernos criptografados que serão importados do backup; os cadernos ignorados não precisam de verificação",
 	"aiSelectModel": "Selecione um modelo",
-	"aiMemoryEnabledTip": "Quando ativada, o serviço de modelos configurado extrai e mantém automaticamente memórias de todos os cadernos não criptografados e de futuras mensagens do usuário enviadas com sucesso",
+	"aiMemoryEnabledTip": "Quando ativada, extrai memórias automaticamente apenas de futuras mensagens do usuário",
 	"aiMemoryKind": "Tipo de memória",
 	"aiMemoryState": "Estado da memória",
 	"aiMemoryEmpty": "Ainda não há memórias",

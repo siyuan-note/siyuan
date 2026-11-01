@@ -34,6 +34,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// publishSyncResult persists the completed outcome before publishing it to every frontend.
+func publishSyncResult(code int, syncErr error) {
+	UpdateSyncConf(func(s *conf.Sync) {
+		s.LastResult = code
+		if syncErr != nil {
+			s.Stat = formatSyncRepoErrorMsg(syncErr)
+		}
+	})
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+}
+
 func SyncDataDownload() (err error) {
 	err = errors.New("sync download did not complete")
 	defer logging.Recover()
@@ -62,7 +73,7 @@ func syncDataDownloadLocked() (err error) {
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	// Download-only completion does not publish local changes, including an empty remote.
 	// Keep the pending hint until an upload or full sync actually publishes them.
 	if 1 == code {
@@ -133,7 +144,7 @@ func SyncDataUpload() (err error) {
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	return
 }
@@ -247,7 +258,7 @@ func finishBootSync(revision uint64, cloudPublished bool, err error) {
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
@@ -385,7 +396,7 @@ func syncDataLockedContext(ctx context.Context, exit, byHand bool) (err error) {
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 
 	if !exit && 1 == code {

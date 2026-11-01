@@ -401,11 +401,20 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
+let lastSyncResult: number;
+
 export const processSync = (data?: IWebSocketData) => {
+    if (data?.code === 1 || data?.code === 2) {
+        lastSyncResult = data.code;
+    }
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
     const syncDisabled = !window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""));
+    // A configuration response started before the latest event must not overwrite its result.
+    const result = lastSyncResult ?? window.siyuan.config.sync.lastResult;
+    const syncIcon = syncDisabled ? "#iconCloudOff" : result === 2 ? "#iconCloudError" :
+        result === 1 ? "#iconCloudSucc" : "#iconCloud";
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
@@ -414,8 +423,8 @@ export const processSync = (data?: IWebSocketData) => {
             // 同步进行中时保持旋转状态，待同步完成后由同步结果消息更新图标 https://github.com/siyuan-note/siyuan/issues/18597
             return;
         }
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
         return;
     }
     menuSyncUseElement?.parentElement?.classList.remove("fn__rotate");
@@ -426,11 +435,11 @@ export const processSync = (data?: IWebSocketData) => {
         menuSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
         barSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
     } else if (data.code === 1) {   // success
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
     }
     /// #else
     const iconElement = document.querySelector("#barSync");
@@ -444,7 +453,7 @@ export const processSync = (data?: IWebSocketData) => {
             return;
         }
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        useElement.setAttribute("xlink:href", syncIcon);
         return;
     }
     iconElement.firstElementChild.classList.remove("fn__rotate");
@@ -454,10 +463,10 @@ export const processSync = (data?: IWebSocketData) => {
         useElement.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        useElement.setAttribute("xlink:href", syncIcon);
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        useElement.setAttribute("xlink:href", syncIcon);
     }
     /// #endif
     if (data.code === 0) {

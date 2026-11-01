@@ -2592,7 +2592,7 @@ export type SystemS3 = { "accessKey": string; "bucket": string; "concurrentReqs"
 
 export type SystemStat = { "assetsSize": number; "blockCount": number; "cAssetsSize": number; "cBlockCount": number; "cDataSize": number; "cTreeCount": number; "dataSize": number; "treeCount": number; };
 
-export type SystemSync = { "assetDownloadMode": number; "cloudName": string; "enabled": boolean; "generateConflictDoc": boolean; "interval": number; "lan": SystemLANSync | null; "local": SystemLocal | null; "mode": number; "perception": boolean; "provider": number; "s3": SystemS3 | null; "stat": string; "synced": number; "webdav": SystemWebDAV | null; };
+export type SystemSync = { "assetDownloadMode": number; "cloudName": string; "enabled": boolean; "generateConflictDoc": boolean; "interval": number; "lan": SystemLANSync | null; "lastResult": number; "local": SystemLocal | null; "mode": number; "perception": boolean; "provider": number; "s3": SystemS3 | null; "stat": string; "synced": number; "webdav": SystemWebDAV | null; };
 
 export type SystemSystem = { "appDir": string; "autoLaunch2": number; "confDir": string; "container": string; "dataDir": string; "disabledFeatures": Array<string> | null; "downloadInstallPkg": boolean; "encryptedNotebookFollowSystemLock": boolean; "homeDir": string; "id": string; "isMicrosoftStore": boolean; "kernelVersion": string; "lockScreenMode": number; "microsoftDefenderExcluded": boolean; "name": string; "networkProxy": SystemNetworkProxy | null; "networkServe": boolean; "networkServeTLS": boolean; "os": string; "osPlatform": string; "safeMode": boolean; "settingsWindow": boolean; "updateChannel"?: string; "workspaceDir": string; };
 

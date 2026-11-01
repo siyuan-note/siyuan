@@ -56846,6 +56846,9 @@
             }
           ]
         },
+        "lastResult": {
+          "type": "integer"
+        },
         "local": {
           "anyOf": [
             {
@@ -56899,6 +56902,7 @@
         "generateConflictDoc",
         "interval",
         "lan",
+        "lastResult",
         "local",
         "mode",
         "perception",

@@ -57,6 +57,7 @@ func notifyAutoSyncPaused() bool {
 	if Conf.Sync.Load().Stat != msg {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
+		publishSyncResult(2, nil)
 	}
 	if autoSyncPauseNotice.messageID == "" {
 		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")

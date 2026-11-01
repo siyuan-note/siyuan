@@ -5,7 +5,7 @@ const os = require("node:os");
 const {test} = require("node:test");
 const {execFile} = require("node:child_process");
 const {promisify} = require("node:util");
-const {replaceFile, preserveOwnership} = require("./replaceFile");
+const {replaceFile, preserveOwnership, syncDirectory} = require("./replaceFile");
 
 const execute = promisify(execFile);
 const powershell = path.join(process.env.SystemRoot || "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
@@ -70,4 +70,14 @@ test("POSIX replacement preserves ownership before mode and rejects an ownership
     assert.deepEqual(events, [["owner", 3, 4], ["mode", 0o640]]);
     await assert.rejects(preserveOwnership({...file, chown: async () => { throw new Error("denied"); },
         chmod: () => assert.fail("mode changed after ownership failure")}, original, {platform: "linux"}), /denied/);
+});
+
+test("POSIX directory sync propagates failures and always closes its descriptor", async () => {
+    const events = [];
+    const fileSystem = {open: async (directory, flags) => {
+        assert.equal(directory, "/selected"); assert.equal(flags, "r");
+        return {sync: async () => {events.push("sync"); throw new Error("EIO");}, close: async () => events.push("close")};
+    }};
+    await assert.rejects(syncDirectory("/selected", {fileSystem, platform: "linux"}), /EIO/);
+    assert.deepEqual(events, ["sync", "close"]);
 });

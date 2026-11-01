@@ -34,7 +34,7 @@ module.exports = (env, argv = {}) => {
             rules: [
                 {
                     test: /\.tsx?$/,
-                    include: path.resolve(__dirname, "src/markdown"),
+                    include: path.resolve(__dirname, "src"),
                     loader: "esbuild-loader",
                     options: {target: "es6", sourcemap: !production},
                 },

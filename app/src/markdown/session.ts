@@ -155,6 +155,9 @@ export class MarkdownSession {
 
     save(): Promise<void> {
         if (this.lifecycle === "closed") return Promise.resolve();
+        // 已确定失败的候选动作不阻断用户继续保存仍绑定的原文件。
+        if (!this.switching && !this.pending && this.problem?.kind !== "indeterminate" &&
+            this.problemTargetHandle !== this.target?.handle) this.setProblem();
         this.saveRequested = true;
         this.persistDraft();
         if (this.saveTask) return this.saveTask;
@@ -334,8 +337,9 @@ export class MarkdownSession {
                     this.emit();
                 }
             });
-        } else if (this.problem?.kind === "blocked" && this.problem.error.recoverable &&
-            this.problemTargetHandle === this.target?.handle) {
+        } else if (this.problem && this.problem.kind !== "indeterminate" &&
+            (this.problemTargetHandle !== this.target?.handle ||
+                this.problem.kind === "blocked" && this.problem.error.recoverable)) {
             this.setProblem();
         }
         if (!this.problem) await this.save();
@@ -350,6 +354,14 @@ export class MarkdownSession {
         this.setProblem();
         await this.save();
         return !this.problem;
+    }
+
+    async checkpoint(editor?: MarkdownEditorAdapter): Promise<boolean> {
+        if (this.lifecycle !== "open" || editor && !await this.captureEditor(editor) || this.composing) return false;
+        if (!this.isDirty() || this.draftRevision >= this.revision) return true;
+        if (!this.draftTask) this.persistDraft();
+        await this.draftQueue;
+        return this.draftRevision >= this.revision;
     }
 
     async flush(editor?: MarkdownEditorAdapter): Promise<boolean> {

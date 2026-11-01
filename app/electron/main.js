@@ -1447,7 +1447,7 @@ const exitWorkspace = (workspace, errorWindowId) => {
             });
         } else {
             markExpectedRendererExit(mainWindow);
-            if (keepAppOpenDuringSystemShutdown || keepAppOpenDuringUpdate || markdownLifecycle.hasWindows()) {
+            if (keepAppOpenDuringSystemShutdown || keepAppOpenDuringUpdate || markdownLifecycle.hasPendingWork()) {
                 mainWindow.destroy();
             } else {
                 relaunchConnection();

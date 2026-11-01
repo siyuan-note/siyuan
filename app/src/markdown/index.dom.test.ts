@@ -33,6 +33,7 @@ const browserCases = async (languages: Record<string, string>) => {
     const preferenceUpdates: Array<Partial<import("./bridge").MarkdownPreferences>> = [];
     let clears = 0;
     const releases: Array<{sessionId: string; targetGeneration: number}> = [];
+    const draftAcknowledgements: string[] = [];
     const bridge: import("./bridge").MarkdownBridge = {
         tree: {
             state: async () => ({kind: "ready", rootId: "root", generation: 1, rootName: "Notes", currentNodeId: "original", currentPath: ["root"], expanded: ["root"], width: 240, visible: true}),
@@ -51,7 +52,7 @@ const browserCases = async (languages: Record<string, string>) => {
             reserveSaveAs: async request => ({kind: "reserved", reservation: {id: "reservation", target: {...request.target, format: request.format}}}),
             prepareSaveAs: async () => {},
             commitSaveAs: async request => ({kind: "committed", target: {...request.operation.target, baseline: request.receipt.baseline}}),
-            releaseSaveAs: async () => {}, putDraft: async () => {}, clearDraft: async () => {clears++;},
+            releaseSaveAs: async () => {}, putDraft: async draft => {draftAcknowledgements.push(draft.content);}, clearDraft: async () => {clears++;},
             releaseSession: async request => {if (failRelease) throw new Error("Recovery store unavailable"); releases.push(request);},
         },
         bootstrap: async () => ({sessionId: "ui-session", content, target, preferences: {...storedPreferences},
@@ -139,6 +140,20 @@ const browserCases = async (languages: Record<string, string>) => {
     for (let attempt = 0; attempt < 5 && document.querySelector("#markdownStatus").textContent !== languages.markdownSaved; attempt++) await tick();
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownSaved,
         "a successful provider save uses the normal saved status without a cloud sync warning");
+    textarea.value += "\nAuto-save after toolbar\n";
+    textarea.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText"}));
+    await new Promise(resolve => setTimeout(resolve, 350));
+    document.querySelector(".vditor-toolbar button").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    await new Promise(resolve => setTimeout(resolve, 750));
+    check.ok(writes.at(-1).content.includes("Auto-save after toolbar"), "a menu-only toolbar action must resume dirty auto-save");
+    const originalSavePicker = bridge.chooseSaveAs;
+    bridge.chooseSaveAs = async () => ({kind: "cancelled"});
+    textarea.value += "\nAuto-save after cancelled Save As\n";
+    textarea.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText"}));
+    menuAction("markdownSaveAs");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    check.ok(writes.at(-1).content.includes("Auto-save after cancelled Save As"));
+    bridge.chooseSaveAs = originalSavePicker;
     document.dispatchEvent(new KeyboardEvent("keydown", {key: "n", ctrlKey: true, bubbles: true, cancelable: true}));
     await tick();
     check.equal(newDocuments, 1);
@@ -202,10 +217,12 @@ const browserCases = async (languages: Record<string, string>) => {
     await ipcRenderer.invoke("markdown-screenshot", "narrow");
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false);
+    check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "drawer mask also excludes the editor from keyboard focus");
     check.ok(document.querySelector("#markdownTree").getBoundingClientRect().width <= window.innerWidth - 48);
     await ipcRenderer.invoke("markdown-screenshot", "narrow-tree");
     (document.querySelector('[data-node-id="note2"]') as HTMLElement).click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "successful file selection closes the drawer");
+    check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, false);
     await ipcRenderer.invoke("markdown-resize", 390, 360);
     await tick();
     check.ok(document.documentElement.scrollWidth <= window.innerWidth + 1);
@@ -309,7 +326,10 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, false, "failed candidate read preserves the editable current document");
     const immediatePrepare = bridge.tree.prepareOpen;
     let finishPrepare: (value: import("./treeContracts").MarkdownTreeOpen) => void;
-    bridge.tree.prepareOpen = () => new Promise(resolve => {finishPrepare = resolve;});
+    bridge.tree.prepareOpen = () => {
+        check.equal(draftAcknowledgements.at(-1), "A pending cloud selection\n", "the current draft is acknowledged before a provider can block its queue");
+        return new Promise(resolve => {finishPrepare = resolve;});
+    };
     switchingApp.editor.setValue("A pending cloud selection\n");
     switchingApp.session.updateEditor({content: "A pending cloud selection\n", edited: true, composing: false});
     selectFile(); await tick();

@@ -41,7 +41,7 @@ test("closing the last workspace or showing its crash window preserves independe
         const workspace = {browserWindow: main, kernelTarget: {origin: "https://127.0.0.1:6806"}};
         const context = vm.createContext({workspace, workspaces: [workspace], URL, process: {platform: "win32"},
             BrowserWindow: {getAllWindows: () => [main, markdown, ...(crash ? [error] : [])]},
-            markdownWindows: {owns: contents => contents === markdown.webContents}, markdownLifecycle: {hasWindows: () => true},
+            markdownWindows: {owns: contents => contents === markdown.webContents}, markdownLifecycle: {hasPendingWork: () => true},
             resetWindowStateOnRestart: false, fs: {writeFileSync() {}}, windowStatePath: "unused", writeLog() {},
             keepAppOpenDuringSystemShutdown: false, keepAppOpenDuringUpdate: false, markExpectedRendererExit() {},
             globalShortcut: {unregisterAll() {}}, relaunchConnection: () => assert.fail("workspace exit relaunched app"),
@@ -54,6 +54,22 @@ test("closing the last workspace or showing its crash window preserves independe
         assert.equal(error.destroyed, undefined);
         assert.equal(context.workspaces.length, 0);
     }
+});
+
+test("closing the last workspace keeps a first Markdown request that has not created a window yet", () => {
+    const main = {webContents: {isDevToolsOpened: () => false}, getNormalBounds: () => ({}), isMaximized: () => false,
+        isFullScreen: () => false, isDestroyed: () => false, destroy() {this.destroyed = true;}};
+    const workspace = {browserWindow: main};
+    const context = vm.createContext({workspace, workspaces: [workspace], process: {platform: "win32"}, URL,
+        BrowserWindow: {getAllWindows: () => [main]}, markdownWindows: {owns: () => false},
+        markdownLifecycle: {hasPendingWork: () => true}, resetWindowStateOnRestart: false,
+        fs: {writeFileSync() {}}, windowStatePath: "unused", writeLog() {},
+        keepAppOpenDuringSystemShutdown: false, keepAppOpenDuringUpdate: false, markExpectedRendererExit() {},
+        globalShortcut: {unregisterAll() {}}, relaunchConnection: () => assert.fail("relaunch while file is loading"),
+        app: {exit: () => assert.fail("exit while file is loading")}});
+    vm.runInContext(section("const exitWorkspace =", "const exitApp ="), context);
+    vm.runInContext("exitWorkspace(workspace)", context);
+    assert.equal(main.destroyed, true);
 });
 
 test("second-instance routes Markdown with sender cwd before remote mode rejection", () => {

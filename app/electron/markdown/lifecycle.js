@@ -14,6 +14,7 @@ const createMarkdownLifecycle = ({getManager, quit, log = () => {}}) => {
     return {
         busy: () => !!quitting,
         hasWindows: () => !!getManager()?.hasWindows(),
+        hasPendingWork: () => hasPendingWork(getManager()),
         prepare: reason => call("prepareQuit", reason),
         finish: () => call("closeAll"),
         cancel: () => getManager()?.cancelQuit(),

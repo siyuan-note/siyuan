@@ -56,3 +56,33 @@ test("resource tokens expire on clear and never acquire new file identities", as
     assert.equal(await resources.read(token(url)), undefined);
     assert.notEqual(await resources.resolve("image.png", target), url);
 });
+
+test("replacing a granted directory revokes new resolutions and already issued tokens", async t => {
+    const {directory, resources, target} = await fixture(t);
+    const selected = path.join(directory, "images");
+    const moved = path.join(directory, "original-images");
+    await fs.mkdir(selected);
+    await fs.writeFile(path.join(selected, "old.png"), "old image");
+    await resources.authorizeDirectory(selected);
+    const url = await resources.resolve("images/old.png", target);
+    await fs.rename(selected, moved); await fs.mkdir(selected);
+    // 保持文件身份也不能把旧目录授权转移给替换目录。
+    await fs.link(path.join(moved, "old.png"), path.join(selected, "old.png"));
+    await fs.writeFile(path.join(selected, "private.png"), "replacement private image");
+    assert.equal(await resources.resolve("images/private.png", target), undefined);
+    assert.equal(await resources.read(token(url)), undefined);
+    await resources.authorizeDirectory(selected);
+    assert.ok(await resources.resolve("images/private.png", target));
+});
+
+test("changing the selected directory junction invalidates its unchanged canonical directory grant", async t => {
+    const {directory, resources, target} = await fixture(t);
+    const first = path.join(directory, "first"); const second = path.join(directory, "second"); const alias = path.join(directory, "alias");
+    await fs.mkdir(first); await fs.mkdir(second); await fs.writeFile(path.join(first, "image.png"), "image");
+    await fs.symlink(first, alias, process.platform === "win32" ? "junction" : "dir");
+    await resources.authorizeDirectory(alias);
+    const url = await resources.resolve("first/image.png", target);
+    await fs.unlink(alias); await fs.symlink(second, alias, process.platform === "win32" ? "junction" : "dir");
+    assert.equal(await resources.resolve("first/image.png", target), undefined);
+    assert.equal(await resources.read(token(url)), undefined);
+});

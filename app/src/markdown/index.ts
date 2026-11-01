@@ -218,6 +218,13 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         actionMessage = text("markdownError");
         if (session) render(session.getState());
     };
+    const scheduleAutoSave = () => {
+        clearTimeout(autoSave);
+        const state = session?.getState();
+        if (disposed || frozen || editPending || !state || state.lifecycle !== "open" ||
+            state.composing || state.problem || !state.target?.writable || !state.hasUnsavedChanges) return;
+        autoSave = setTimeout(() => {void session.save().catch(reportError);}, 250);
+    };
     const freeze = (value: boolean) => {
         if (disposed) return;
         frozen = value || switching || Boolean(pendingSwitch);
@@ -231,6 +238,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownProblemActions").inert = frozen && !pendingSwitch;
         tree?.freeze(frozen);
         render(session.getState());
+        if (!frozen) scheduleAutoSave();
     };
 
     try {
@@ -253,6 +261,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 if (disposed) return;
                 editPending = pending;
                 if (pending) {clearTimeout(autoSave); session.invalidateReload();}
+                else scheduleAutoSave();
                 render(session.getState());
             },
             onContentTooLarge() {
@@ -260,6 +269,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 clearTimeout(autoSave);
                 actionMessage = text("markdownTooLarge");
                 render(session.getState());
+                scheduleAutoSave();
             },
             onSourceOnlyChange(value) {
                 if (disposed) return;
@@ -278,10 +288,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 if (disposed) return;
                 if (actionMessage === text("markdownTooLarge")) actionMessage = "";
                 session.updateEditor(snapshot);
-                clearTimeout(autoSave);
-                if (!frozen && !snapshot.composing) autoSave = setTimeout(() => {
-                    void session.save().catch(reportError);
-                }, 250);
+                scheduleAutoSave();
             },
         });
         if (initializationClosing) {editor.destroy(); throw new Error("Markdown initialization was closed");}
@@ -503,6 +510,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         const task = (async () => {
             try {
                 await pendingFileAction;
+                if (!await session.checkpoint(editor)) return false;
                 const candidate = await bridge.tree.prepareOpen(location);
                 if (candidate.kind === "current") return true;
                 if (candidate.kind !== "ready") {
@@ -533,15 +541,19 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         onError() {actionMessage = text("markdownFolderError"); render(session.getState());},
     });
     tree.freeze(frozen);
-    const checkpointBackground = async (message: MarkdownCommand) => {
+    const checkpointBackground = async (message: MarkdownCommand, draftOnly = false) => {
         let accepted = false;
-        try {clearTimeout(autoSave); accepted = await session.flush(editor);}
+        try {
+            clearTimeout(autoSave);
+            accepted = draftOnly ? await session.checkpoint(editor) : await session.flush(editor);
+            if (draftOnly && accepted) void session.save().catch(reportError);
+        }
         finally {await bridge.respond(message.id, accepted);}
     };
     const command = async (message: MarkdownCommand) => {
         // 候选云文件读取可能很慢；进入后台仍先保护当前文档的已提交输入。
         if (message.type === "background" && switchTask && session.getState().lifecycle === "open") {
-            await checkpointBackground(message);
+            await checkpointBackground(message, true);
             return;
         }
         if (switchTask) {

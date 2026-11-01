@@ -67,6 +67,9 @@ export const createMarkdownTree = (options: {
         element.dataset.drawer = String(drawer());
         element.style.setProperty("--markdown-tree-width", `${width}px`);
         element.parentElement.classList.toggle("markdown-workspace--drawer", drawer() && visible);
+        for (const sibling of Array.from(element.parentElement.children)) {
+            if (sibling !== element) (sibling as HTMLElement).inert = frozen || drawer() && visible;
+        }
         toggle.setAttribute("aria-expanded", String(visible));
         resize.hidden = drawer();
         resize.setAttribute("aria-valuenow", String(width));
@@ -273,7 +276,10 @@ export const createMarkdownTree = (options: {
         else if ((position + 1) * height > viewport.scrollTop + viewport.clientHeight) viewport.scrollTop = (position + 1) * height - viewport.clientHeight;
         renderWindow();
     }, {signal});
-    const hideDrawer = () => {if (drawerOpen) {drawerOpen = false; updateVisibility(); toggle.focus();}};
+    const hideDrawer = (restoreFocus = true) => {if (drawerOpen) {drawerOpen = false; updateVisibility(); if (restoreFocus) toggle.focus();}};
+    document.addEventListener("focusin", event => {
+        if (drawer() && drawerOpen && !element.contains(event.target as Node) && !toggle.contains(event.target as Node)) hideDrawer(false);
+    }, {signal});
     document.addEventListener("pointerdown", event => {
         if (drawer() && drawerOpen && !element.contains(event.target as Node) && !toggle.contains(event.target as Node)) hideDrawer();
     }, {signal});
@@ -310,12 +316,15 @@ export const createMarkdownTree = (options: {
     return {
         refresh,
         chooseRoot,
-        freeze(value: boolean) {frozen = value; element.inert = value; toggle.disabled = value;},
+        freeze(value: boolean) {frozen = value; element.inert = value; toggle.disabled = value; updateVisibility();},
         destroy() {
             if (disposed) return;
             saveView(); disposed = true; version++; refreshSequence++;
             clearTimeout(saveTimer); cancelAnimationFrame(frame); events.abort(); resizeObserver.disconnect();
             element.parentElement?.classList.remove("markdown-workspace--drawer");
+            if (element.parentElement) for (const sibling of Array.from(element.parentElement.children)) {
+                if (sibling !== element) (sibling as HTMLElement).inert = frozen;
+            }
         },
     };
 };

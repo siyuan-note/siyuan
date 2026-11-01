@@ -4,7 +4,7 @@ const path = require("node:path");
 const {createHash, randomUUID} = require("node:crypto");
 const {MarkdownTargetRegistry} = require("./registry");
 const {decodeMarkdown, encodeMarkdown} = require("./codec");
-const {replaceFile, preserveOwnership} = require("./replaceFile");
+const {replaceFile, preserveOwnership, syncDirectory} = require("./replaceFile");
 
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const identity = stat => `${stat.dev}:${stat.ino}`;
@@ -35,10 +35,12 @@ const readBounded = async file => {
 };
 
 class MarkdownDiskService {
-    constructor({fileSystem = fs, registry = new MarkdownTargetRegistry(), replace = replaceFile} = {}) {
+    constructor({fileSystem = fs, registry = new MarkdownTargetRegistry(), replace = replaceFile,
+        synchronizeDirectory = directory => syncDirectory(directory, {fileSystem})} = {}) {
         this.fs = fileSystem;
         this.replace = replace;
         this.registry = registry;
+        this.synchronizeDirectory = synchronizeDirectory;
         this.queues = new Map();
     }
 
@@ -242,6 +244,7 @@ class MarkdownDiskService {
             }
             const saved = await this.snapshot(entry.descriptor);
             if (!saved.bytes || hash(saved.bytes) !== hash(bytes)) throw new Error("Markdown replacement could not be verified");
+            await this.synchronizeDirectory(path.dirname(entry.descriptor.path));
             this.registry.update(entry, saved);
             entry.format = {...request.target.format};
             entry.written = true;
@@ -288,6 +291,7 @@ class MarkdownDiskService {
             const current = await this.snapshot(entry.descriptor, true);
             let result;
             if (current.bytes && hash(current.bytes) === uncertain.hash) {
+                await this.synchronizeDirectory(path.dirname(entry.descriptor.path));
                 this.registry.update(entry, current);
                 entry.format = uncertain.format;
                 entry.written = true;

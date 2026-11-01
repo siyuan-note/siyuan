@@ -87,3 +87,19 @@ test("Markdown configuration is an independent web entry included by development
     assert.match(pkg.scripts["build:markdown"], /webpack\.markdown\.js/);
     assert.match(pkg.scripts.build, /\/build:\.\*\//);
 });
+
+test("the real standalone Webpack dependency graph compiles in an isolated output directory", {timeout: 90000}, async t => {
+    const config = require("../webpack.markdown")({}, {mode: "development"});
+    config.context = path.resolve(__dirname, "..");
+    config.watch = false;
+    config.devtool = false;
+    config.output = {...config.output, path: temporary(t)};
+    const compiler = require("webpack")(config);
+    try {
+        const stats = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
+        assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
+        assert.ok(fs.existsSync(path.join(config.output.path, "index.html")));
+        const modules = stats.toJson({all: false, modules: true}).modules;
+        for (const name of ["DocTreeModel.ts", "menuPosition.ts"]) assert.ok(modules.some(value => value.name?.includes(name)), name);
+    } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
+});

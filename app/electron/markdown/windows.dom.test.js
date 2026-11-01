@@ -5,7 +5,6 @@ const path = require("node:path");
 const os = require("node:os");
 const {execFile} = require("node:child_process");
 const {promisify} = require("node:util");
-const {prepareMarkdownAssets} = require("../../scripts/markdown-assets");
 
 const runElectron = async options => {
     const {app, BrowserWindow, ipcMain, protocol, nativeTheme} = require("electron");
@@ -133,24 +132,22 @@ const runElectron = async options => {
 
 test("the real sandboxed page saves and switches A to B to A through its restricted host and file tree", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    timeout: 90000,
 }, async () => {
     const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-markdown-sandbox-"));
     const root = path.join(temporary, "app");
     const output = path.join(root, "stage/build/markdown");
     try {
-        prepareMarkdownAssets(output);
         fs.mkdirSync(path.join(root, "appearance/langs"), {recursive: true});
         fs.copyFileSync(path.resolve(__dirname, "../../appearance/langs/en.json"), path.join(root, "appearance/langs/en.json"));
-        const esbuild = require(require.resolve("esbuild", {paths: [path.dirname(require.resolve("esbuild-loader"))]}));
-        await esbuild.build({entryPoints: [path.resolve(__dirname, "../../src/markdown/index.ts")], bundle: true,
-            outfile: path.join(output, "test.js"), platform: "browser", target: "es2022", define: {SIYUAN_VERSION: '"test"'},
-            plugins: [{name: "test-style", setup(build) { build.onLoad({filter: /\.scss$/}, () => ({contents: "", loader: "js"})); }}]});
-        const style = require("sass").compile(path.resolve(__dirname, "../../src/assets/scss/markdown.scss")).css;
-        fs.writeFileSync(path.join(output, "ui.css"), style);
-        const template = fs.readFileSync(path.resolve(__dirname, "../../src/assets/template/markdown/index.tpl"), "utf8")
-            .replace("</head>", '<link rel="stylesheet" href="./test.css"><link rel="stylesheet" href="./ui.css"><script defer src="./test.js"></script></head>');
-        fs.writeFileSync(path.join(output, "index.html"), template);
+        const config = require("../../webpack.markdown")({}, {mode: "development"});
+        config.context = path.resolve(__dirname, "../.."); config.watch = false; config.devtool = false;
+        config.output = {...config.output, path: output};
+        const compiler = require("webpack")(config);
+        try {
+            const stats = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
+            assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
+        } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
         const documents = path.join(temporary, "documents");
         fs.mkdirSync(documents);
         const document = path.join(documents, "A.md");

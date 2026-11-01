@@ -217,6 +217,22 @@ describe("MarkdownSession save transactions", () => {
 });
 
 describe("MarkdownSession Save As", () => {
+    for (const failure of ["reserve", "prepare", "write"] as const) for (const action of ["save", "retry"] as const) {
+        it(`can ${action} the original after a definite candidate ${failure} failure`, async () => {
+            const {host, session} = create();
+            edit(session, "keep editing the original");
+            if (failure === "reserve") host.reserveSaveAs = async () => ({kind: "blocked", error: {code: "permission", recoverable: true}});
+            if (failure === "prepare") host.prepareSaveAs = async () => {throw new Error("space");};
+            if (failure === "write") host.writeResult = async request => request.target.handle === "new" ?
+                {kind: "blocked", error: {code: "readonly", recoverable: false}} : committed();
+            assert.equal((await session.saveAs(target("new"))).kind, "blocked");
+            assert.equal(session.getState().target.handle, "original");
+            await session[action]();
+            assert.equal(host.writes.at(-1).target.handle, "original");
+            assert.equal(host.writes.at(-1).content, "keep editing the original");
+            assert.equal(session.getState().status, "saved");
+        });
+    }
     it("reserves a target before the first write and rejects another active owner", async () => {
         const {host, session} = create();
         host.owners.set("other", "b");
@@ -408,21 +424,27 @@ describe("MarkdownSession Save As", () => {
         assert.equal(session.getState().content, "local");
     });
 
-    it("never applies a candidate conflict version or retry to the original target", async () => {
+    it("retries the original using its own baseline after candidate failures", async () => {
         const {host, session} = create();
         host.writeResult = async () => ({kind: "conflict", baseline: "candidate external version"});
         edit(session, "local");
         await session.saveAs(target("candidate"));
         assert.equal(session.getState().problemTargetHandle, "candidate");
         assert.equal(await session.overwrite("candidate external version"), false);
-        await session.retry();
-        assert.equal(host.writes.length, 1);
-        assert.equal(session.getState().target.baseline, "baseline:original");
-        host.writeResult = async () => ({kind: "blocked", error: {code: "offline", recoverable: true}});
-        await session.saveAs(target("candidate"));
+        host.writeResult = async () => committed();
         await session.retry();
         assert.equal(host.writes.length, 2);
-        assert.equal(host.writes.every(request => request.target.handle === "candidate"), true);
+        assert.equal(host.writes[1].expectedBaseline, "baseline:original");
+        assert.equal(host.writes[1].target.handle, "original");
+        edit(session, "new local edit");
+        host.writeResult = async () => ({kind: "blocked", error: {code: "offline", recoverable: true}});
+        await session.saveAs(target("candidate"));
+        host.writeResult = async () => committed();
+        await session.retry();
+        assert.equal(host.writes.length, 4);
+        assert.equal(host.writes[2].target.handle, "candidate");
+        assert.equal(host.writes[3].target.handle, "original");
+        assert.equal(session.getState().status, "saved");
     });
 
     it("coalesces queued reconciliation attempts without creating a phantom uncertainty", async () => {
@@ -545,6 +567,20 @@ describe("MarkdownSession reload races", () => {
 });
 
 describe("MarkdownSession recovery", () => {
+    it("checkpoints committed input before a slow candidate without waiting for a file write", async () => {
+        const {host, session} = create();
+        const draft = deferred<void>(); let attempts = 0;
+        host.putResult = async () => {attempts++; await draft.promise;};
+        edit(session, "latest input before selecting cloud file");
+        let confirmed = false;
+        const checkpoint = session.checkpoint().then(value => {confirmed = value;});
+        await turn(); assert.equal(confirmed, false); assert.equal(host.writes.length, 0);
+        draft.resolve(); await checkpoint; assert.equal(confirmed, true);
+        assert.equal(session.getState().draftRevision, session.getState().revision);
+        await session.checkpoint(); assert.equal(attempts, 1);
+        session.updateEditor({content: "uncommitted composition", edited: true, composing: true});
+        assert.equal(await session.checkpoint(), false);
+    });
     it("closes an untouched blank document without creating a recovery record", async () => {
         const host = new MemoryHost();
         const session = new MarkdownSession({sessionId: "blank", host});

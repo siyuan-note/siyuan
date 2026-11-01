@@ -237,7 +237,8 @@ test("changes during staging are checked again before replacing the destination"
                 changed = true;
                 await fs.writeFile(selected, "external update during staging");
             }
-        }, chmod: mode => handle.chmod(mode), sync: () => handle.sync(), close: () => handle.close()};
+        }, stat: options => handle.stat(options), chown: (...args) => handle.chown(...args),
+        chmod: mode => handle.chmod(mode), sync: () => handle.sync(), close: () => handle.close()};
     }});
     selected = file("source.md");
     await fs.writeFile(selected, "original");
@@ -245,6 +246,25 @@ test("changes during staging are checked again before replacing the destination"
     assert.equal((await service.write(request(opened.target, "mine"))).kind, "conflict");
     assert.equal(await fs.readFile(selected, "utf8"), "external update during staging");
     assert.deepEqual(await fs.readdir(directory), ["source.md"]);
+});
+
+test("directory durability must be confirmed before commit and again when reconciling a failed sync", async t => {
+    const {service, directory, file} = await setup(t);
+    await fs.writeFile(file("sync.md"), "original");
+    const opened = await service.authorizeOpen("a", file("sync.md"));
+    let fail = true; const events = [];
+    service.replace = async (from, to) => {await fs.rename(from, to); events.push("replace");};
+    service.synchronizeDirectory = async parent => {
+        assert.equal(parent, directory); assert.equal(await fs.readFile(file("sync.md"), "utf8"), "saved");
+        events.push("directory-sync"); if (fail) throw Object.assign(new Error("sync failed"), {code: "EIO"});
+    };
+    const operation = request(opened.target, "saved");
+    assert.equal((await service.write(operation)).kind, "indeterminate");
+    assert.deepEqual(events, ["replace", "directory-sync"]);
+    assert.equal((await service.reconcileWrite(operation)).kind, "indeterminate");
+    fail = false;
+    assert.equal((await service.reconcileWrite(operation)).kind, "committed");
+    assert.equal(events.filter(value => value === "replace").length, 1);
 });
 
 test("directory junction aliases share ownership and changing the junction revokes file access", async t => {

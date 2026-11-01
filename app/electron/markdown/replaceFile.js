@@ -24,4 +24,10 @@ const preserveOwnership = async (file, original, {platform = process.platform} =
     await file.chmod(original.mode);
 };
 
-module.exports = {replaceFile, preserveOwnership};
+const syncDirectory = async (directory, {platform = process.platform, fileSystem = fs} = {}) => {
+    if (platform === "win32") return;
+    const handle = await fileSystem.open(directory, "r");
+    try {await handle.sync();} finally {await handle.close();}
+};
+
+module.exports = {replaceFile, preserveOwnership, syncDirectory};

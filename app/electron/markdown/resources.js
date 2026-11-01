@@ -14,15 +14,16 @@ const identity = stat => `${stat.dev}:${stat.ino}`;
 class MarkdownResources {
     constructor(sessionId) {
         this.sessionId = sessionId;
-        this.directories = new Set();
+        this.directories = new Map();
         this.files = new Map();
         this.entries = new Map();
     }
 
     async authorizeDirectory(directory) {
         const canonical = await fs.realpath(directory);
-        if (!(await fs.stat(canonical)).isDirectory()) throw new Error("Invalid Markdown resource directory");
-        this.directories.add(canonical);
+        const stat = await fs.stat(canonical, {bigint: true});
+        if (!stat.isDirectory()) throw new Error("Invalid Markdown resource directory");
+        this.directories.set(path.resolve(directory), {canonical, identity: identity(stat)});
     }
 
     async authorizeFile(file) {
@@ -32,8 +33,16 @@ class MarkdownResources {
         this.files.set(canonical, identity(stat));
     }
 
-    authorized(canonical, fileIdentity) {
-        return [...this.directories].some(directory => inside(directory, canonical)) || this.files.get(canonical) === fileIdentity;
+    async authorized(canonical, fileIdentity) {
+        if (this.files.get(canonical) === fileIdentity) return true;
+        for (const [selection, grant] of this.directories) {
+            if (!inside(grant.canonical, canonical)) continue;
+            try {
+                if (await fs.realpath(selection) === grant.canonical &&
+                    identity(await fs.stat(grant.canonical, {bigint: true})) === grant.identity) return true;
+            } catch { /* 失效目录需要用户重新授权。 */ }
+        }
+        return false;
     }
 
     async resolve(reference, targetPath) {
@@ -47,7 +56,7 @@ class MarkdownResources {
             const canonical = await fs.realpath(selection);
             const type = imageTypes[path.extname(canonical).toLowerCase()];
             const stat = await fs.stat(canonical, {bigint: true});
-            if (!type || !stat.isFile() || stat.size > 32n * 1024n * 1024n || !this.authorized(canonical, identity(stat))) return undefined;
+            if (!type || !stat.isFile() || stat.size > 32n * 1024n * 1024n || !await this.authorized(canonical, identity(stat))) return undefined;
             for (const [token, entry] of this.entries) {
                 if (entry.selection === selection && entry.canonical === canonical && entry.identity === identity(stat) && entry.modified === stat.mtimeNs) {
                     return `siyuan-markdown://${this.sessionId}/resource/${token}`;
@@ -64,7 +73,7 @@ class MarkdownResources {
 
     async read(token) {
         const entry = this.entries.get(token);
-        if (!entry || await fs.realpath(entry.selection) !== entry.canonical || !this.authorized(entry.canonical, entry.identity)) return undefined;
+        if (!entry || await fs.realpath(entry.selection) !== entry.canonical || !await this.authorized(entry.canonical, entry.identity)) return undefined;
         const file = await fs.open(entry.canonical, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
         try {
             const stat = await file.stat({bigint: true});
@@ -78,6 +87,7 @@ class MarkdownResources {
             }
             const after = await file.stat({bigint: true});
             if (offset !== bytes.length || after.size !== stat.size || after.mtimeNs !== stat.mtimeNs || after.ctimeNs !== stat.ctimeNs) return undefined;
+            if (!await this.authorized(entry.canonical, entry.identity)) return undefined;
             return {bytes, type: entry.type};
         } finally {
             await file.close();

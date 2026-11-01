@@ -55,6 +55,7 @@ const createEnvironment = ({browser = false, mobile = false, remote = true} = {}
         return exports;
     };
     dependencies["util/contractFormData"] = load("util/contractFormData");
+    dependencies["protyle/export/scriptLiteral"] = load("protyle/export/scriptLiteral");
     return {load, window, dependencies, capabilities, menus, requests, saved, messages, hidden};
 };
 

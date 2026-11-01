@@ -35,7 +35,7 @@ const run = async () => {
             const themeOverride = await win.webContents.insertCSS(".b3-button {background-color:rgb(90,100,110);}");
             const result = await win.webContents.executeJavaScript(`(async () => {
                 const assert = require("node:assert/strict");
-                window.siyuan = {zIndex:100,languages:{sync:"Sync",expand:"Expand",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{436:"Applying synchronized changes"}}};
+                window.siyuan = {zIndex:100,languages:{sync:"Sync",expand:"Expand",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{81:"Syncing...",436:"Applying synchronized changes"}}};
                 const escapeExports = {};
                 new Function("exports", ${JSON.stringify(escape)})(escapeExports);
                 const progressExports = {};
@@ -149,7 +149,10 @@ const run = async () => {
                 progress("first",0,2,"preparing",{token:"window-token"});
                 root = document.getElementById("sync-checkout-progress");
                 assert.ok(root && root.contains(document.activeElement));
-                assert.equal(root.classList.contains("sync-checkout--compact"),false,"local checkout should open the existing full progress view");
+                assert.equal(root.classList.contains("sync-checkout--compact"),true,"local checkout opens with concise sync progress");
+                assert.equal(root.querySelector('[data-type="message"]').textContent,window.siyuan.languages._kernel[81]);
+                assert.ok(root.querySelector(".sync-checkout__notice").classList.contains("fn__none"));
+                root.querySelector('[data-action="toggle"]').click();
                 assert.equal(root.querySelector(".sync-checkout__panel").hasAttribute("tabindex"),false,"the progress panel must not acquire a focus outline");
                 assert.equal(document.activeElement,root.querySelector('[data-action="toggle"]'));
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__panel")).color,sharedColor);
@@ -183,10 +186,11 @@ const run = async () => {
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
                 root.querySelector('[data-action="toggle"]').click();
                 assert.ok(root.classList.contains("sync-checkout--compact"));
-                assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
+                assert.ok(!root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
+                assert.equal(root.querySelector('[data-type="message"]').textContent,window.siyuan.languages._kernel[81]);
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
                 const compactPanel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
-                const noticeRect = root.querySelector(".sync-checkout__notice").getBoundingClientRect();
+                const noticeRect = root.querySelector(".sync-checkout__details").getBoundingClientRect();
                 const actionsRect = root.querySelector(".sync-checkout__actions").getBoundingClientRect();
                 assert.ok(actionsRect.top >= noticeRect.bottom,"compact actions must be below the notice");
                 assert.ok(Math.abs(actionsRect.width-noticeRect.width) <= 1,"compact rows must fill the same available width");

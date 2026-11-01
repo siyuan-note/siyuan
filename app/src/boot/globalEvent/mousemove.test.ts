@@ -143,7 +143,7 @@ test("editable embedded tables expose column resize handles while readonly and c
                     document: {body: {classList: {contains: () => false}}, getElementById: (): null => null},
                 });
                 for (const [clientX, index, left] of [[199, "1", 177], [101, "0", 77]] as const) {
-                    api.windowMouseMove({target, clientX, composedPath: () => [target]});
+                    api.windowMouseMove({target, clientX, buttons: 0, composedPath: () => [target]});
                     if (editable && !custom) {
                         assert.equal(attributes.get("data-col-index"), index);
                         assert.match(attributes.get("style"), new RegExp(`height:80px;left: ${left}px;display:block`));
@@ -151,8 +151,11 @@ test("editable embedded tables expose column resize handles while readonly and c
                         assert.equal(attributes.size, 0);
                     }
                 }
+                const beforeDrag = new Map(attributes);
+                api.windowMouseMove({target, clientX: 199, buttons: 1, composedPath: () => [target]});
+                assert.deepEqual(attributes, beforeDrag, "dragging preserves the current boundary instead of activating another hover");
                 if (editable && !custom) {
-                    api.windowMouseMove({target, clientX: 150, composedPath: () => [target]});
+                    api.windowMouseMove({target, clientX: 150, buttons: 0, composedPath: () => [target]});
                     assert.equal(attributes.get("style"), "display:none");
                 }
             }

@@ -1319,10 +1319,6 @@ table + .protyle-action__table {
     z-index: 2;
     touch-action: none;
 
-    &:hover::after {
-      background-color: var(--b3-theme-primary-light);
-    }
-
     &::after {
       top: 0;
       width: 2px;
@@ -1578,15 +1574,12 @@ table + .protyle-action__table {
   }
 
   &__height {
-    z-index: 0;
     height: 8px;
     cursor: row-resize;
     touch-action: none;
 
     &::before {
-      width: 100%;
-      height: 2px;
-      background-color: var(--b3-theme-primary);
+      display: none;
     }
   }
 

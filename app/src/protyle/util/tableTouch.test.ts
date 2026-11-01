@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>) => {
+const browserCases = async (sources: Record<string, string>, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     const nodePath: typeof path = require("node:path");
     const noop = () => {};
@@ -1020,13 +1020,139 @@ const browserCases = async (sources: Record<string, string>) => {
         check.match(copied.textSiyuan, /height: 100px/, "noncontiguous row clipboard retains each source height");
         f.dispose();
     }
+    // 用实际共享样式验证尺寸反馈，覆盖简化手势夹具未包含的层级、颜色和定位。
+    const realStyle = document.createElement("style");
+    realStyle.textContent = css;
+    document.head.append(realStyle);
+    document.documentElement.style.setProperty("--b3-theme-primary", "#5078ff");
+    document.documentElement.style.setProperty("--b3-tooltips-background", "#222");
+    document.documentElement.style.setProperty("--b3-tooltips-color", "#fff");
+    const delay = () => new Promise(resolve => setTimeout(resolve, 240));
+    mobile = false;
+    {
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        pointer(cell, "pointermove", x, rect.bottom);
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.ok(guide.classList.contains("fn__none"), "hover starts with an invisible guide");
+        await delay();
+        check.equal(guide.classList.contains("fn__none"), false, "hover reveals the guide after its delay");
+        check.equal(getComputedStyle(guide).backgroundColor, "rgb(80, 120, 255)");
+        pointer(f.cell(2, 1), "pointermove", x, f.cell(2, 1).getBoundingClientRect().bottom);
+        check.ok(guide.classList.contains("fn__none"), "crossing to a different boundary restarts the delay");
+        f.editor.dispatchEvent(new PointerEvent("pointerleave", {relatedTarget: document.body}));
+        await delay();
+        check.ok(guide.classList.contains("fn__none"), "leaving cancels a pending boundary reveal");
+        pointer(cell, "pointermove", rect.right, rect.top + rect.height / 2);
+        await delay();
+        check.equal(guide.className, "protyle-table-control__width-guide");
+        check.ok(Math.abs(guide.getBoundingClientRect().left + 1 - rect.right) <= 1,
+            "column hover identifies the actual column boundary");
+        f.dispose();
+    }
+    for (const touchMode of [false, true]) {
+        mobile = touchMode;
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const row = cell.parentElement as HTMLTableRowElement;
+        f.core.selectCellRange(cell, f.cell(2, 2));
+        f.render();
+        check.ok(f.core.getSelectedCells().length > 1);
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.bottom;
+        const saved = row.getAttribute("style");
+        const count = transactions.length;
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 99, clientX: x, clientY: y}), cell, row);
+        check.equal(f.core.getSelectedCells().length, 0, "starting a height drag clears cell selection");
+        const label = f.touch(".protyle-table-control__size");
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.ok(label.getBoundingClientRect().bottom <= y - (touchMode ? 47 : 11), "height values appear above the pointer");
+        pointer(document, "pointermove", x, y + 33, 99);
+        f.render();
+        check.equal(guide.classList.contains("fn__none"), false, "height feedback survives rendering during drag");
+        const guideRect = guide.getBoundingClientRect();
+        check.equal(guideRect.top + guideRect.height / 2, row.getBoundingClientRect().bottom,
+            "the guide is centered on the actual row boundary");
+        check.equal(label.textContent, `${Math.round(row.getBoundingClientRect().height)}px`);
+        document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        check.equal(row.getAttribute("style"), saved);
+        check.equal(transactions.length, count);
+        check.ok(guide.classList.contains("fn__none") && label.classList.contains("fn__none"));
+        f.dispose();
+    }
+    mobile = false;
+    for (const mode of ["left", "center", "center-scroll"]) {
+        const f = fixture();
+        const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+        node.style.textAlign = mode === "left" ? "left" : "center";
+        if (mode === "center-scroll") {
+            (f.table.parentElement as HTMLElement).style.width = "180px";
+            f.table.style.minWidth = "270px";
+            check.ok(f.table.parentElement.scrollWidth > f.table.parentElement.clientWidth,
+                "the centered scroll fixture must actually overflow");
+        }
+        const cell = f.cell(1, 0);
+        const column = f.table.querySelector("col");
+        const startWidth = column.getBoundingClientRect().width;
+        const rect = cell.getBoundingClientRect();
+        const handle = document.createElement("div");
+        handle.className = "table__resize";
+        handle.dataset.colIndex = "0";
+        node.querySelector(".protyle-action__table").append(handle);
+        f.core.selectCellRange(cell, f.cell(2, 1));
+        const start = () => {
+            const event = new MouseEvent("mousedown", {button: 0, clientX: rect.right, clientY: rect.top + 12, cancelable: true});
+            new Function("event", "customElement", "protyle", "target", "nodeElement", sources["desktop-column-resize"])
+                .call({tableControl: f.core}, event, false, f.owner, handle, node);
+        };
+        start();
+        check.equal(f.core.getSelectedCells().length, 0, "desktop column resizing clears cell selection");
+        const count = transactions.length;
+        document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 20, clientY: rect.top + 12}));
+        check.equal(parseFloat(column.style.width), Math.round(startWidth + (mode === "center" ? 40 : 20)),
+            `${mode}: centered tables retain double movement only without horizontal overflow`);
+        const label = f.touch(".protyle-table-control__size");
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.equal(label.textContent, `${Math.round(column.getBoundingClientRect().width)}px`);
+        check.ok(label.getBoundingClientRect().bottom < rect.top + 12);
+        check.equal(guide.classList.contains("fn__none"), false, "dragging keeps the column guide visible");
+        document.dispatchEvent(new MouseEvent("mouseup", {button: 0}));
+        check.equal(transactions.length, count + 1, "desktop drag commits exactly one undoable transaction");
+        const committed = node.outerHTML;
+        document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 80}));
+        check.equal(node.outerHTML, committed, "release removes drag listeners");
+        for (const cancel of ["Escape", "blur", "pointercancel", "hide"]) {
+            start();
+            document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 40, clientY: 1}));
+            check.ok(label.getBoundingClientRect().top >= 0 && label.getBoundingClientRect().right <= innerWidth,
+                "size labels remain visible at viewport edges");
+            if (cancel === "Escape") {
+                document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            } else if (cancel === "blur") {
+                window.dispatchEvent(new Event("blur"));
+            } else if (cancel === "hide") {
+                f.core.setHidden(true);
+                f.core.setHidden(false);
+            } else {
+                pointer(document, "pointercancel");
+            }
+            check.equal(node.outerHTML, committed, `${cancel} restores widths and cell styles`);
+            check.equal(transactions.length, count + 1);
+            check.ok(label.classList.contains("fn__none") && guide.classList.contains("fn__none"));
+        }
+        f.dispose();
+    }
+    realStyle.remove();
     menuElement.remove();
     menuScrim.remove();
     fixtureStyle.remove();
     return "Mobile table interaction cases passed";
 };
 
-test("mobile table selection, editing handoff, operations and gesture cancellation", {
+test("desktop and mobile table selection, resize feedback and gesture cancellation", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -1037,6 +1163,12 @@ test("mobile table selection, editing handoff, operations and gesture cancellati
     const sources = Object.fromEntries(files.map(file => [file, transpileModule(
         readFileSync(path.resolve(process.cwd(), file), "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022}}).outputText]));
+    const wysiwyg = readFileSync(path.resolve("src/protyle/wysiwyg/index.ts"), "utf8");
+    sources["desktop-column-resize"] = transpileModule(wysiwyg.slice(wysiwyg.indexOf("// table col resize"),
+        wysiwyg.indexOf("// 编辑器底部反链仅用于浏览和编辑，不参与块、数据库或表格框选")),
+        {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+    const css = require("sass").compile(path.resolve("src/assets/scss/protyle/_protyle.scss"),
+        {silenceDeprecations: ["legacy-js-api"]}).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-touch-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -1049,7 +1181,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-            browserCases.toString() + ")(" + JSON.stringify(sources) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
+            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
         win.destroy();
         app.exit(0);
     } catch (error) {

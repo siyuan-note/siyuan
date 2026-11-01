@@ -2177,54 +2177,11 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
-                const html = nodeElement.outerHTML;
-                // https://github.com/siyuan-note/siyuan/issues/4455
-                if (getSelection().rangeCount > 0) {
-                    getSelection().getRangeAt(0).collapse(false);
-                }
-                // @ts-ignore
-                nodeElement.firstElementChild.style.webkitUserModify = "read-only";
-                nodeElement.style.cursor = "col-resize";
-                protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
-                this.tableControl?.setHidden(true);
-                target.removeAttribute("style");
-                const x = event.clientX;
                 const colIndex = parseInt(target.getAttribute("data-col-index"));
-                const colElement = nodeElement.querySelectorAll("table col")[colIndex] as HTMLElement;
-                // 清空初始化 table 时的最小宽度
-                if (colElement.style.minWidth) {
-                    colElement.style.width = (nodeElement.querySelectorAll("table td, table th")[colIndex] as HTMLElement).offsetWidth + "px";
-                    colElement.style.minWidth = "";
-                }
-                // 移除 cell 上的宽度限制 https://github.com/siyuan-note/siyuan/issues/7795
-                nodeElement.querySelectorAll("tr").forEach((trItem: HTMLTableRowElement) => {
-                    trItem.cells[colIndex].style.width = "";
-                });
-                const oldWidth = colElement.clientWidth;
-                const hasScroll = nodeElement.firstElementChild.clientWidth < nodeElement.firstElementChild.scrollWidth;
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    if (nodeElement.style.textAlign === "center" && !hasScroll) {
-                        colElement.style.width = (oldWidth + (moveEvent.clientX - x) * 2) + "px";
-                    } else {
-                        colElement.style.width = (oldWidth + (moveEvent.clientX - x)) + "px";
-                    }
-                };
-
-                documentSelf.onmouseup = () => {
-                    // @ts-ignore
-                    nodeElement.firstElementChild.style.webkitUserModify = "";
-                    nodeElement.style.cursor = "";
-                    protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
-                    this.tableControl?.setHidden(false);
-                    documentSelf.onmousemove = null;
-                    documentSelf.onmouseup = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-                    if (nodeElement) {
-                        updateTransaction(protyle, nodeElement, html);
-                    }
-                };
+                const table = nodeElement.querySelector("table");
+                const cell = table.querySelector<HTMLElement>(".table__cell-editor")?.closest<HTMLTableCellElement>("td, th") ||
+                    table.querySelector<HTMLTableCellElement>("td, th");
+                this.tableControl?.startColumnResize(event, cell, colIndex);
                 return;
             }
 

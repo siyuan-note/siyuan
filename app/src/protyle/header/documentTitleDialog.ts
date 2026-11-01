@@ -11,6 +11,7 @@ import {confirmDocumentTitle} from "./documentTitleEditor";
 import {registerMobileSecondaryEditor} from "../../mobile/util/secondaryEditors";
 import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
+import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
 /// #endif
 
 // 重命名使用独立草稿，保存失败时保留输入。
@@ -83,6 +84,23 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     /// #if MOBILE
     dialog.element.classList.add("mobile-document-title-dialog");
     const keyboardToolbar = document.getElementById("keyboardToolbar");
+    let editorReady = false;
+    let sheetReady = false;
+    let focusPending = true;
+    const isCurrent = () => !disposed && dialog.element.isConnected &&
+        window.siyuan.dialogs[window.siyuan.dialogs.length - 1] === dialog;
+    const canFocus = () => !closePending && isCurrent() && !editor.protyle.disabled &&
+        !window.siyuan.config.readonly && !window.siyuan.isPublish;
+    const focusTitle = async () => {
+        if (!focusPending || !editorReady || !sheetReady || !canFocus()) return;
+        focusPending = false;
+        await editor.protyle.title?.openEditor(canFocus);
+        if (!canFocus()) return;
+        const input = editor.protyle.title?.editElement;
+        if (!input?.isConnected || input.getAttribute("contenteditable") !== "true") return;
+        input.focus({preventScroll: true});
+        if (input.ownerDocument.activeElement === input) callMobileAppShowKeyboard();
+    };
     const resize = () => {
         const viewport = getVisibleViewportBounds();
         const bottom = keyboardToolbar && !keyboardToolbar.classList.contains("fn__none") ?
@@ -91,7 +109,10 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         container.style.top = `${viewport.top}px`;
         container.style.height = `${Math.max(0, bottom - viewport.top)}px`;
     };
-    const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, resize);
+    const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, resize, () => {
+        sheetReady = true;
+        void focusTitle().catch(error => console.error(error));
+    });
     const toolbarObserver = new MutationObserver(resize);
     if (keyboardToolbar) {
         toolbarObserver.observe(keyboardToolbar, {attributes: true, attributeFilter: ["class", "style"]});
@@ -120,8 +141,11 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
                         owner.element.appendChild(field);
                     }
                     owner.title?.mountEditorOnly(field);
-                    /// #endif
+                    editorReady = true;
+                    void focusTitle().catch(error => console.error(error));
+                    /// #else
                     void protyle.protyle.title?.openEditor().catch(error => console.error(error));
+                    /// #endif
                 }
             },
         });

@@ -2,7 +2,8 @@ import type {Dialog} from "../../dialog";
 import {bindBottomSheetDrag} from "./bindBottomSheetDrag";
 import {waitForSheetViewport} from "../../menus/sheetOpen";
 
-export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>, afterResize?: () => void) => {
+export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>, afterResize?: () => void,
+                                     afterOpen?: () => void) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     // 初始定位不参与过渡，等待视口恢复后再从底部展开。
@@ -61,6 +62,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
                 sheet.style.transition = "";
                 void sheet.offsetHeight;
                 sheet.style.transform = "";
+                afterOpen?.();
             },
         });
     };

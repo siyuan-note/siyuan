@@ -34,6 +34,7 @@ class ElementMock {
 const setup = (mobile: boolean) => {
     const window = {siyuan: {
         dialogs: [] as any[], mobile: {}, layout: {}, blockPanels: [] as any[], ws: {app: {}},
+        config: {readonly: false}, isPublish: false,
         languages: {rename: "Rename", confirm: "Confirm", settingsPendingSaveError: "Save failed"},
     }};
     const messages: string[] = [];
@@ -45,9 +46,13 @@ const setup = (mobile: boolean) => {
     const resizeListeners = new Set<() => void>();
     let sheetClose: () => Promise<void>;
     let sheetResize: () => void;
+    let sheetOpen: () => void;
+    let keyboardShows = 0;
     let sheetDisposals = 0;
     const keyboardToolbar = {hidden: true, top: 752, classList: {contains: () => keyboardToolbar.hidden},
         getBoundingClientRect: () => ({top: keyboardToolbar.top})};
+    const document = {activeElement: undefined as unknown, addEventListener: () => {},
+        getElementById: () => keyboardToolbar, createElement: () => new ElementMock()};
     let toolbarObserver: () => void;
     let toolbarObserved = false;
     class MutationObserverMock {
@@ -62,13 +67,18 @@ const setup = (mobile: boolean) => {
     let flush: (editor: ProtyleMock) => Promise<void> = async () => {};
     let flushGuard: () => Promise<void> = async () => {};
     let flushTitle: (editor: ProtyleMock) => Promise<void> = async () => {};
+    let openTitle: (isValid?: () => boolean) => Promise<void> = async () => {};
     class ProtyleMock {
         destroyed = 0;
         titleFlushes = 0;
         protyle: any;
         constructor(_app: unknown, element: ElementMock, options: {blockId: string, notebookId?: string, after: (value: ProtyleMock) => void}) {
+            const input = {isConnected: true, editable: true, ownerDocument: document, focusCount: 0,
+                getAttribute: () => input.editable ? "true" : "false",
+                focus: () => { input.focusCount++; document.activeElement = input; }};
             this.protyle = {element, notebookId: options.notebookId, block: {rootID: options.blockId}, wysiwyg: {},
-                title: {flushPendingInput: () => { this.titleFlushes++; return flushTitle(this); }, openEditor: async () => {},
+                title: {editElement: input, flushPendingInput: () => { this.titleFlushes++; return flushTitle(this); },
+                    openEditor: (isValid?: () => boolean) => openTitle(isValid),
                     mountEditorOnly: (field: ElementMock) => { this.protyle.field = field; }}};
             instances.push(this);
             afters.push(() => options.after(this));
@@ -86,7 +96,7 @@ const setup = (mobile: boolean) => {
         destroyed = false;
         viewport = {style: {top: "", height: ""}};
         classes = new Set<string>();
-        element = {dataset: {}, classList: {add: (name: string) => this.classes.add(name)},
+        element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
                 selector === ".document-title-dialog" ? this.host : this.confirm};
         constructor(public options: {beforeClose: () => boolean, destroyCallback: () => void,
@@ -110,9 +120,11 @@ const setup = (mobile: boolean) => {
         },
         ipcRenderer: {send: (_channel: string, id: number) => ready.push(id)},
         getVisibleViewportBounds: () => viewport,
-        bindBottomSheetDialog: (_dialog: DialogMock, close: () => Promise<void>, resize: () => void) => {
+        callMobileAppShowKeyboard: () => { keyboardShows++; },
+        bindBottomSheetDialog: (_dialog: DialogMock, close: () => Promise<void>, resize: () => void, open: () => void) => {
             sheetClose = close;
             sheetResize = resize;
+            sheetOpen = open;
             resize();
             return () => { sheetDisposals++; };
         },
@@ -124,7 +136,7 @@ const setup = (mobile: boolean) => {
         runInNewContext(transpileModule(source, {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, window,
-            document: {addEventListener: () => {}, getElementById: () => keyboardToolbar, createElement: () => new ElementMock()},
+            document,
             MutationObserver: MutationObserverMock, console: {error: () => {}}});
         return exports;
     };
@@ -139,6 +151,8 @@ const setup = (mobile: boolean) => {
     const titleDialog = load("documentTitleDialog.ts");
     return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system,
         viewport, resizeListeners, closeSheet: () => sheetClose(), resizeSheet: () => sheetResize(),
+        openSheet: () => sheetOpen(), keyboardShows: () => keyboardShows,
+        setOpenTitle: (callback: typeof openTitle) => { openTitle = callback; },
         sheetDisposals: () => sheetDisposals,
         keyboardToolbar, resizeToolbar: () => toolbarObserver(), toolbarObserved: () => toolbarObserved,
         open: (id = "doc", notebook: string | undefined = "encrypted") =>
@@ -349,6 +363,85 @@ test("mobile rename readiness mounts one standalone field and rejects late readi
     const desktopDialog = desktop.open();
     desktop.afters[0]();
     assert.equal(desktopDialog.host.children.length, 0, "desktop keeps its existing title layout");
+});
+
+for (const sheetFirst of [true, false]) {
+    test(`mobile rename waits for the ${sheetFirst ? "editor" : "sheet"} before loading and focusing its title once`, async () => {
+        const state = setup(true);
+        const pending = deferred();
+        let loads = 0;
+        state.setOpenTitle(() => { loads++; return pending.promise; });
+        state.open();
+        const input = state.instances[0].protyle.title.editElement;
+        if (sheetFirst) state.openSheet();
+        else state.afters[0]();
+        assert.equal(loads, 0, "title focus must not run inside a hidden or uninitialized sheet");
+        assert.equal(input.focusCount, 0);
+        assert.equal(state.keyboardShows(), 0);
+        if (sheetFirst) state.afters[0]();
+        else state.openSheet();
+        assert.equal(loads, 1);
+        assert.equal(input.focusCount, 0, "source loading must finish before keyboard activation");
+        pending.resolve();
+        await settle();
+        assert.equal(input.focusCount, 1);
+        assert.equal(state.keyboardShows(), 1);
+        assert.equal(loads, 1);
+        state.openSheet();
+        state.resizeSheet();
+        state.resizeToolbar();
+        assert.equal(input.focusCount, 1);
+        assert.equal(state.keyboardShows(), 1);
+    });
+}
+
+for (const invalidate of ["dismiss", "lock", "another-dialog", "readonly", "workspace-readonly", "publish",
+    "not-editable", "detached", "save"] as const) {
+    test(`mobile rename does not steal focus after ${invalidate} during source loading`, async () => {
+        const state = setup(true);
+        const pending = deferred();
+        const saving = deferred();
+        let isValid: () => boolean;
+        state.setOpenTitle(valid => { isValid = valid; return pending.promise; });
+        const dialog = state.open();
+        state.afters[0]();
+        state.openSheet();
+        const editor = state.instances[0];
+        if (invalidate === "dismiss") dialog.destroy();
+        if (invalidate === "lock") state.registry.closeDocumentTitleDialogs({notebookId: "encrypted"});
+        if (invalidate === "another-dialog") state.window.siyuan.dialogs.push({});
+        if (invalidate === "readonly") editor.protyle.disabled = true;
+        if (invalidate === "workspace-readonly") state.window.siyuan.config.readonly = true;
+        if (invalidate === "publish") state.window.siyuan.isPublish = true;
+        if (invalidate === "not-editable") editor.protyle.title.editElement.editable = false;
+        if (invalidate === "detached") dialog.element.isConnected = false;
+        if (invalidate === "save") {
+            state.setFlush(() => saving.promise);
+            dialog.confirm.listeners.get("click")();
+        }
+        if (["dismiss", "lock", "another-dialog", "detached"].includes(invalidate)) assert.equal(isValid(), false);
+        pending.resolve();
+        await settle();
+        assert.equal(editor.protyle.title.editElement.focusCount, 0);
+        assert.equal(state.keyboardShows(), 0);
+        saving.resolve();
+        await settle();
+    });
+}
+
+test("failed mobile title loading and desktop readiness never request the mobile keyboard", async () => {
+    const mobile = setup(true);
+    mobile.setOpenTitle(async () => { throw new Error("Title unavailable"); });
+    mobile.open();
+    mobile.openSheet();
+    mobile.afters[0]();
+    const desktop = setup(false);
+    desktop.open();
+    desktop.afters[0]();
+    await settle();
+    assert.equal(mobile.keyboardShows(), 0);
+    assert.equal(mobile.instances[0].protyle.title.editElement.focusCount, 0);
+    assert.equal(desktop.keyboardShows(), 0);
 });
 
 const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: string, titleSource: string) => {

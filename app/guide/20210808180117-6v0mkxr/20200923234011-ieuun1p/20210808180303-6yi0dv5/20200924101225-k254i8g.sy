@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261101144749"
+		"updated": "20261101203156"
 	},
 	"Children": [
 		{
@@ -3364,12 +3364,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025133233-2qcn948",
-				"updated": "20261101144749"
+				"updated": "20261101203156"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the complete title directly above the document or in the mobile top bar; new mobile documents focus the top bar for immediate typing. The Rename action opens a bottom drawer on mobile with a standalone single-line rich-text field, without document block icons or corner badges. The field uses the interface font size and the editor's theme background; long titles scroll horizontally. The drawer follows the visible area above the keyboard. Changes in the rename dialog are saved only after confirmation; dismissing it cancels the draft. File trees, tabs, and the desktop tab dropdown render inline styles and images, while plain titles use ordinary text. Window titles and document breadcrumbs show a plain-text summary."
+					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the complete title directly above the document or in the mobile top bar; new mobile documents focus the top bar for immediate typing. The Rename action opens a bottom drawer on mobile with a standalone single-line rich-text field, without document block icons or corner badges. The field uses the interface font size and the editor's theme background; long titles scroll horizontally. Opening the drawer automatically focuses the title and opens the keyboard. The drawer follows the visible area above the keyboard. Changes in the rename dialog are saved only after confirmation; dismissing it cancels the draft. File trees, tabs, and the desktop tab dropdown render inline styles and images, while plain titles use ordinary text. Window titles and document breadcrumbs show a plain-text summary."
 				}
 			]
 		},

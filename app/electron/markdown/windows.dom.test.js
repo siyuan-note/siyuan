@@ -15,6 +15,7 @@ const runElectron = async options => {
     app.setPath("userData", options.profile);
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
+    nativeTheme.themeSource = "dark";
     const errors = [];
     let createdWindows = 0;
     class HiddenWindow extends BrowserWindow {
@@ -34,20 +35,26 @@ const runElectron = async options => {
         await window.webContents.executeJavaScript(`new Promise((resolve,reject) => {
             const deadline = Date.now() + 15000;
             const check = () => {
-                if (document.querySelector('#markdownEditor[aria-busy="false"] .vditor-ir')) return resolve();
+                if (document.querySelector('#markdownEditor[aria-busy="false"] .vditor-ir') &&
+                    document.getElementById('vditorContentTheme')?.sheet) return resolve();
                 if (Date.now() > deadline) return reject(new Error('Editor did not initialize: '+document.body.innerText));
                 setTimeout(check, 25);
             }; check();
         })`);
         const security = await window.webContents.executeJavaScript(`({node: typeof require, process: typeof process,
             host: typeof window.siyuanMarkdown.host.write, unsafe: typeof window.siyuanMarkdown.invoke,
-            origin: location.href, text: document.querySelector('#markdownEditor').innerText})`);
+            origin: location.href, text: document.querySelector('#markdownEditor').innerText,
+            contentTheme: document.getElementById('vditorContentTheme').href,
+            textColor: getComputedStyle(document.querySelector('#markdownEditor h1')).color})`);
         assert.equal(security.node, "undefined");
         assert.equal(security.process, "undefined");
         assert.equal(security.host, "function");
         assert.equal(security.unsafe, "undefined");
         assert.match(security.origin, /^siyuan-markdown:\/\/[a-f\d-]+\/index.html$/);
         assert.match(security.text, /Original document/);
+        assert.match(security.contentTheme, /\/dark\.css$/);
+        assert.ok(security.textColor.match(/\d+/g).slice(0, 3).every(value => Number(value) > 128),
+            `dark sandbox heading remains readable: ${security.textColor}`);
         assert.equal(await fs.readFile(options.document, "utf8"), "# Original document\n");
         const initialSession = await window.webContents.executeJavaScript("window.siyuanMarkdown.bootstrap().then(value => value.sessionId)");
         const containerId = window.id;

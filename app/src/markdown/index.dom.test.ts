@@ -67,6 +67,64 @@ const browserCases = async (languages: Record<string, string>) => {
         recover: async () => {}, discardRecovery: async () => {}, state: async () => {},
         onCommand: listener => {onCommand = listener; return () => {if (onCommand === listener) onCommand = undefined;};}, respond: async (_id, accepted) => {responses.push(accepted);},
     };
+    const luminance = (color: string) => {
+        const channels = color.match(/[\d.]+/g).slice(0, 3).map(value => {
+            const channel = Number(value) / 255;
+            return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+        });
+        return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+    };
+    const background = (element: Element): string => {
+        const color = getComputedStyle(element).backgroundColor;
+        return color === "rgba(0, 0, 0, 0)" && element.parentElement ? background(element.parentElement) : color;
+    };
+    const checkTheme = async (mode: import("./editor").MarkdownEditorMode, dark: boolean) => {
+        const selector = mode === "sv" ? ".vditor-preview .vditor-reset" : `.vditor-${mode} .vditor-reset`;
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline) {
+            const contentStyle = document.getElementById("vditorContentTheme") as HTMLLinkElement;
+            const codeStyle = document.getElementById("vditorHljsStyle") as HTMLLinkElement;
+            if (document.querySelector(`${selector} table td`) && document.querySelector(`${selector} code.hljs`) &&
+                contentStyle?.sheet && codeStyle?.sheet && contentStyle.href.endsWith(`/${dark ? "dark" : "light"}.css`) &&
+                codeStyle.href.endsWith(`/${dark ? "github-dark" : "github"}.min.css`)) break;
+            await tick();
+        }
+        const surface = document.querySelector(selector);
+        check.ok(surface?.querySelector("code.hljs"), `highlighted code rendered in ${mode}`);
+        for (const selector of ["h1", "p", "th", "td", "code.hljs"]) {
+            const element = surface.querySelector(selector);
+            check.ok(element, `${selector} rendered in ${mode}`);
+            const foreground = luminance(getComputedStyle(element).color);
+            const backdrop = luminance(background(element));
+            const contrast = (Math.max(foreground, backdrop) + 0.05) / (Math.min(foreground, backdrop) + 0.05);
+            check.ok(contrast >= 4.5, `${dark ? "dark" : "light"} ${mode} ${selector} contrast: ${contrast}`);
+        }
+        const tableBackground = luminance(background(surface.querySelector("td")));
+        check.ok(dark ? tableBackground < 0.1 : tableBackground > 0.7, `table follows ${dark ? "dark" : "light"} ${mode}`);
+        check.ok((document.getElementById("vditorContentTheme") as HTMLLinkElement).href.endsWith(`/${dark ? "dark" : "light"}.css`));
+        check.ok((document.getElementById("vditorHljsStyle") as HTMLLinkElement).href.endsWith(`/${dark ? "github-dark" : "github"}.min.css`));
+    };
+    const themeBootstrap = bridge.bootstrap;
+    for (const startup of [{theme: "dark", systemDark: false}, {theme: "system", systemDark: true}, {theme: "light", systemDark: true}] as const) {
+        const dark = startup.theme !== "light";
+        for (const mode of ["ir", "wysiwyg", "sv"] as const) {
+            bridge.bootstrap = async () => ({...await themeBootstrap(), content: original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n',
+                preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
+            const initial = await api.mountMarkdownApplication(bridge);
+            await checkTheme(mode, dark);
+            if (mode === "ir") await ipcRenderer.invoke("markdown-screenshot", `initial-${startup.theme}`);
+            if (startup.theme === "system") {
+                onCommand({id: `light-${mode}`, type: "theme", dark: false});
+                await checkTheme(mode, false);
+                onCommand({id: `dark-${mode}`, type: "theme", dark: true});
+                await checkTheme(mode, true);
+            }
+            check.equal(initial.session.getState().hasUnsavedChanges, false);
+            check.equal(writes.length, 0, "initial theme and mode changes never rewrite the file");
+            initial.destroy();
+        }
+    }
+    bridge.bootstrap = themeBootstrap;
     const mounting = api.mountMarkdownApplication(bridge);
     await new Promise(resolve => setTimeout(resolve, 0));
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "initial content cannot be edited before initialization finishes");

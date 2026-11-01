@@ -94,6 +94,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     let recoverySourceOnly = initialBytes > MARKDOWN_RENDER_BYTES;
     const {element} = options;
     const document = element.ownerDocument;
+    const dark = options.theme === "dark";
     if (factory === createVditor) {
         // Vditor 4.0.1 reads getItem before testing cache.enable and treats null
         // from storage-disabled native WebViews as an available Storage object.
@@ -426,10 +427,11 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         try {
             instance = factory(element, {
                 value: "", mode, cdn: options.cdn, _lutePath: options.lutePath,
-                lang: markdownEditorLanguage(options.lang), theme: options.theme === "dark" ? "dark" : "classic",
+                lang: markdownEditorLanguage(options.lang), theme: dark ? "dark" : "classic",
                 cache: {enable: false}, undoDelay: 250, height: "100%", minHeight: 0,
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
+                    theme: {current: dark ? "dark" : "light"}, hljs: {style: dark ? "github-dark" : "github"},
                     math: {engine: "KaTeX"}, render: {media: {enable: false}}, transform: policy.sanitize,
                     parse: () => policy.hydrate(element)},
                 link: {isOpen: false, click: followLink}, image: {isPreview: false},
@@ -496,7 +498,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             policy.hydrate(element);
         },
         setTheme(theme) {
-            if (!destroyed) instance.setTheme(theme === "dark" ? "dark" : "classic", theme === "dark" ? "dark" : "light");
+            if (!destroyed) instance.setTheme(theme === "dark" ? "dark" : "classic", theme, theme === "dark" ? "github-dark" : "github");
         },
         refreshResources() { if (!destroyed) policy.refresh(element); },
         insertImage(reference) {

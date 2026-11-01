@@ -172,8 +172,8 @@ const browserCases = async (sources: Record<string, string>, css: string,
                 instance.addItem(embedBreadcrumbMenu({} as IProtyle, embed)[index]);
                 instance.popup({x: 40, y: 40});
                 const parent = instance.element.querySelector<HTMLElement>(".b3-menu__item");
-                check.equal(parent.querySelector(":scope > svg:not(.b3-menu__icon--small)"), null,
-                    "breadcrumb menus have no empty leading icon");
+                check.ok(parent.querySelector(":scope > svg:not(.b3-menu__icon--small)"),
+                    "breadcrumb menus reserve the leading icon space to align with adjacent entries");
                 check.equal(parent.querySelector(":scope > .b3-menu__icon--small use")?.getAttribute("xlink:href"), "#iconRight",
                     "breadcrumb submenu retains the standard arrow");
                 parent.dispatchEvent(new MouseEvent(touch ? "click" : "mouseover", {bubbles: true}));

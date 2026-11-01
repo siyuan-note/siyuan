@@ -39,7 +39,7 @@ test("breadcrumb submenus persist overrides and delete attributes when returning
         for (const [id, value] of [["disable", "false"], ["enable", "true"], ["default", null]]) {
             const parent = open()[index];
             assert.equal(parent.type, "submenu");
-            assert.equal(parent.iconHTML, "", "no placeholder icon is rendered");
+            assert.equal(parent.iconHTML, undefined, "parent menus reserve the standard icon space");
             const option = parent.submenu.find(item => item.id === id);
             assert.equal(option.iconHTML, "");
             attributes.set("data-render", "true");

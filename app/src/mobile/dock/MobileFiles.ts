@@ -852,15 +852,21 @@ export class MobileFiles extends Model {
         this.setCurrent(target);
     }
 
-    public getLeaf(row: Element, notebookId: string, focusUpdate = false) {
+    public async getLeaf(row: Element, notebookId: string, focusUpdate = false) {
         const item = this.docTree.getItemFromElement(row);
         if (!item) { return; }
         if (focusUpdate) {
             void this.docTree.reload({notebook: notebookId, parentID: item.kind === "notebook" ? "" : item.id});
-        } else if (item.kind === "notebook" && !item.subFileCount && !window.siyuan.config.readonly) {
-            newFileInTree(this.app, notebookId, "/");
         } else {
-            void this.docTree.toggle(item.occurrenceKey);
+            const pending = this.docTree.toggle(item.occurrenceKey);
+            const interaction = this.docTree.interactionVersion;
+            await pending;
+            // 笔记本摘要计数可能未加载，只在目录范围确认为空且本次展开仍有效时新建。
+            if (item.kind === "notebook" && !window.siyuan.config.readonly &&
+                interaction === this.docTree.interactionVersion && this.docTree.isExpanded(item.occurrenceKey)) {
+                const directory = this.docTree.model.directory(item);
+                if (directory.revision && directory.total === 0) { newFileInTree(this.app, notebookId, "/"); }
+            }
         }
     }
 

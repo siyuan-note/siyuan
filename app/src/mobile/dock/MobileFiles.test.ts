@@ -6,6 +6,51 @@ import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} fro
 import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
 import type {DocTreeController} from "../../layout/dock/docTree/DocTreeController";
 import type {IMenuSession} from "../../menus/menuToggle";
+import {DocTreeModel} from "../../layout/dock/docTree/DocTreeModel";
+
+test("mobile notebook clicks load the directory before creating and can fold nonempty notebooks", async () => {
+    for (const scenario of [
+        {total: 2, revision: "one", readonly: false, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: false, canceled: false, expected: 1},
+        {total: 0, revision: undefined, readonly: false, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: true, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: false, canceled: true, expected: 0},
+    ]) {
+        let created = 0;
+        let expanded = false;
+        let interaction = 0;
+        let release: () => void;
+        const ready = new Promise<void>(resolve => { release = resolve; });
+        const adapter = loadMethods(["getLeaf"], {window: {siyuan: {config: {readonly: scenario.readonly}}},
+            newFileInTree: () => { created++; }}) as {
+            docTree: Partial<DocTreeController>;
+            getLeaf: (row: Element, notebook: string) => Promise<void>;
+        };
+        const model = new DocTreeModel();
+        model.setRoots([{id: "box", notebookId: "box", kind: "notebook", path: "/", name: "Box", subFileCount: 0}]);
+        const directory = model.directory(model.roots[0]);
+        directory.total = scenario.total;
+        directory.revision = scenario.revision;
+        adapter.docTree = {
+            get interactionVersion() { return interaction; },
+            getItemFromElement: () => model.roots[0],
+            toggle: async () => { interaction++; await ready; expanded = !expanded; },
+            isExpanded: () => expanded,
+            model,
+        };
+        const opening = adapter.getLeaf({} as Element, "box");
+        assert.equal(created, 0, "missing summary counts must not create documents before loading");
+        if (scenario.canceled) { interaction++; }
+        release();
+        await opening;
+        assert.equal(created, scenario.expected, JSON.stringify(scenario));
+        if (scenario.total > 0) {
+            await adapter.getLeaf({} as Element, "box");
+            assert.equal(expanded, false);
+            assert.equal(created, 0);
+        }
+    }
+});
 
 const loadMethods = (names: string[], globals: Record<string, unknown>) => {
     const source = createSourceFile("MobileFiles.ts", readFileSync("src/mobile/dock/MobileFiles.ts", "utf8"), ScriptTarget.Latest, true);

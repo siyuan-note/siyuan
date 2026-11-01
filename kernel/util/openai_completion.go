@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -109,6 +110,7 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 		return createAnthropicStream(ctx, client, request)
 	}
 	if !IsOpenAIResponsesProtocol(protocol) {
+		request.Tools = openAIChatTools(request.Tools)
 		stream, err := client.CreateChatCompletionStream(ctx, request)
 		if err != nil {
 			return nil, err
@@ -173,6 +175,7 @@ func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol stri
 		return createAnthropicCompletion(ctx, client, request)
 	}
 	if !IsOpenAIResponsesProtocol(protocol) {
+		request.Tools = openAIChatTools(request.Tools)
 		return client.CreateChatCompletion(ctx, request)
 	}
 	responseRequest := responseRequestFromChat(ctx, request, responseInput)
@@ -383,6 +386,30 @@ func firstSystemMessage(messages []openai.ChatCompletionMessage) string {
 	return ""
 }
 
+// openAIModelFunction 为模型提供参数提示；执行前的完整结构校验使用工具原始声明。
+// OpenAI 函数参数的根对象不接受组合约束，属性自身的类型和约束保持原样。
+func openAIModelFunction(function openai.FunctionDefinition) openai.FunctionDefinition {
+	if schema, ok := function.Parameters.(map[string]any); ok && schema["type"] == "object" {
+		projected := maps.Clone(schema)
+		for _, key := range []string{"oneOf", "anyOf", "allOf", "enum", "const", "not"} {
+			delete(projected, key)
+		}
+		function.Parameters = projected
+	}
+	return function
+}
+
+func openAIChatTools(tools []openai.Tool) []openai.Tool {
+	ret := append([]openai.Tool(nil), tools...)
+	for index, tool := range ret {
+		if tool.Type == openai.ToolTypeFunction && tool.Function != nil {
+			function := openAIModelFunction(*tool.Function)
+			ret[index].Function = &function
+		}
+	}
+	return ret
+}
+
 func responseTools(tools []openai.Tool) []openai.ResponseTool {
 	if len(tools) == 0 {
 		return nil
@@ -390,7 +417,11 @@ func responseTools(tools []openai.Tool) []openai.ResponseTool {
 	ret := make([]openai.ResponseTool, 0, len(tools))
 	for _, tool := range tools {
 		if tool.Type == openai.ToolTypeFunction && tool.Function != nil {
-			ret = append(ret, openai.NewResponseFunctionTool(*tool.Function))
+			function := openAIModelFunction(*tool.Function)
+			converted := openai.NewResponseFunctionTool(function)
+			// SDK 的 bool 字段会省略 false；显式传递可避免服务端把可选字段规范化为必填。
+			converted.Parameters["strict"] = function.Strict
+			ret = append(ret, converted)
 			continue
 		}
 		ret = append(ret, openai.ResponseTool{Type: tool.Type, Parameters: tool.Parameters})

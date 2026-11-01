@@ -223,7 +223,7 @@ func TestModelResponsesSamplingAndMinimumBudget(t *testing.T) {
 	}
 }
 
-func TestModelChatSamplingAndBudgetUnchanged(t *testing.T) {
+func TestModelChatSamplingAndReasoningBudget(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/v1/models" {
@@ -237,7 +237,7 @@ func TestModelChatSamplingAndBudgetUnchanged(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			t.Errorf("decode request: %s", err)
 		}
-		if payload["max_completion_tokens"] != float64(1) || payload["temperature"] != float64(1) {
+		if payload["max_completion_tokens"] != float64(1024) || payload["temperature"] != float64(1) {
 			t.Errorf("Chat probe parameters changed: %#v", payload)
 		}
 		_, _ = io.WriteString(w, `{"id":"chat_1","object":"chat.completion","model":"test-model","choices":[{"index":0,"message":{"role":"assistant","content":"1"},"finish_reason":"stop"}]}`)

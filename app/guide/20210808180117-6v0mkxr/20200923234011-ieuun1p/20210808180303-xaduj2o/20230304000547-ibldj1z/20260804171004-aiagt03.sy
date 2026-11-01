@@ -38,6 +38,7 @@
 				}
 			]
 		},
+		{"ID": "20261101224000-k531g73", "Type": "NodeParagraph", "Properties": {"id": "20261101224000-k531g73", "updated": "20261101224000"}, "Children": [{"Type": "NodeText", "Data": "You can ask the agent to reorder columns or card fields in a specific database view, for example, “Make the November table column order match October.” This changes display order while preserving field types and data. Mirrors of the same view display the updated order."}]},
 		{
 			"ID": "20260804170025-2kdbnc8",
 			"Type": "NodeHeading",

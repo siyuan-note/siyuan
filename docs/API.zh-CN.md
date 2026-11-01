@@ -3072,6 +3072,8 @@ if (response.code === 0 && response.data) {
 
 在单个视图的布局内重排列（例如表格的列顺序），不改变全局字段顺序。
 
+未知视图 ID 或字段 ID 返回错误。移动字段保留列宽、显隐设置、字段类型和已存储的数据。
+
 * `/api/av/sortAttributeViewViewKey`
 * 参数
 

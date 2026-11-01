@@ -4431,6 +4431,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按 viewID 精确定位视图；省略或为空时使用首个视图，未知视图返回错误。
+     * 将 keyID 移至 previousKeyID 之后，空前置 ID 表示首位；未知字段返回错误，列宽、显隐、字段类型和数据保持不变。
+     */
     "/api/av/sortAttributeViewViewKey": {
         request: SortAttributeViewViewKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

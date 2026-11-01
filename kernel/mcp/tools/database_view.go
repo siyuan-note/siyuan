@@ -57,6 +57,13 @@ func databaseViewAction(action string, args map[string]any) (CallToolResult, err
 			return blockToolError("previousID is required; use an empty string to move the view to the first position")
 		}
 		err = model.MoveAttributeViewView(id, blockID, viewID, previousID)
+	case "view_field_move":
+		keyID, _ := args["keyID"].(string)
+		previousID, ok := args["previousID"].(string)
+		if keyID == "" || !ok {
+			return blockToolError("keyID and previousID are required; use an empty previousID to move the field to the first position")
+		}
+		err = model.MoveAttributeViewViewField(id, blockID, viewID, keyID, previousID)
 	case "view_visibility_set":
 		return databaseViewVisibilitySet(args, id, blockID)
 	case "view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
@@ -99,6 +106,7 @@ func databaseViewResult(action, id, blockID, viewID string) (CallToolResult, err
 		"group":          view.Group,
 		"revision":       model.AttributeViewViewConfigRevision(view),
 		"keys":           metadata.Keys,
+		"fieldIDs":       model.AttributeViewViewFieldIDs(view),
 		"views":          metadata.Views,
 		"visibleViewIDs": visibleViewIDs,
 	})

@@ -7412,29 +7412,48 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := SortAttributeViewViewKey(operation.AvID, operation.BlockID, operation.ID, operation.PreviousID)
+	attrView, err := avParseView(operation.AvID, operation.BlockID)
+	if err == nil {
+		var view *av.View
+		view, err = resolveAttributeViewView(attrView, operation.ViewID, "", operation.BlockID)
+		if err == nil {
+			err = sortAttributeViewViewKey(view, operation.ID, operation.PreviousID)
+		}
+		if err == nil {
+			err = avSaveView(attrView, operation.BlockID)
+		}
+	}
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err error) {
-	if keyID == previousKeyID {
-		// 拖拽到自己的右侧，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
-		return
-	}
-
+// SortAttributeViewViewKey 调整指定视图的字段顺序，空视图 ID 使用首个视图。
+func SortAttributeViewViewKey(avID, viewID, keyID, previousKeyID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	view, err := resolveAttributeViewView(attrView, viewID, "", "")
 	if err != nil {
 		return
 	}
+	if err = sortAttributeViewViewKey(view, keyID, previousKeyID); nil != err {
+		return
+	}
+	return av.SaveAttributeView(attrView)
+}
 
+func sortAttributeViewViewKey(view *av.View, keyID, previousKeyID string) (err error) {
+	fieldIDs := AttributeViewViewFieldIDs(view)
+	if !slices.Contains(fieldIDs, keyID) || (previousKeyID != "" && !slices.Contains(fieldIDs, previousKeyID)) {
+		return errors.New("field not found in view")
+	}
+	if keyID == previousKeyID {
+		return nil
+	}
 	var curIndex, previousIndex int
 	switch view.LayoutType {
 	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
@@ -7502,7 +7521,6 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 		view.Kanban.Fields = slices.Insert(view.Kanban.Fields, previousIndex, field)
 	}
 
-	err = av.SaveAttributeView(attrView)
 	return
 }
 

@@ -3078,6 +3078,8 @@ Reorders a field (column) globally — moves `keyID` to the position after `prev
 
 Reorders a column within a single view's layout (e.g. a table's column order), without changing the global field ordering.
 
+Unknown view IDs or field IDs return an error. Moving a field preserves its width and visibility, field types and stored values.
+
 * `/api/av/sortAttributeViewViewKey`
 * Parameters
 

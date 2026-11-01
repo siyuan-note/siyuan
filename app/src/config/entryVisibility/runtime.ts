@@ -242,6 +242,8 @@ export const syncDockEntryOrders = () => {
 
 const entryScope = (menuElement: HTMLElement): string => {
     switch (menuElement.dataset.name) {
+        case Constants.MENU_BAR_WORKSPACE:
+            return "application";
         case Constants.MENU_DOC_TREE_PANEL_MORE:
             return "docTree.panel";
         case Constants.MENU_DOC_TREE_MORE:
@@ -361,6 +363,11 @@ export const applyMenuEntryVisibility = (menuElement: HTMLElement) => {
     }
     const itemsElement = menuElement.querySelector(":scope > .b3-menu__items") || menuElement.lastElementChild;
     if (!itemsElement) {
+        return;
+    }
+    if (scope === "application") {
+        // 只控制已登记的新入口，保持主菜单其余固定项目、子菜单和分隔符的原有行为。
+        filterMenuItems(itemsElement, scope);
         return;
     }
     sortMenuItems(itemsElement, scope);

@@ -400,12 +400,22 @@ def resolve_resource(source, url):
 
 
 def check_frontend_entries(paths, mobile):
-    entries = ["stage/build/mobile/index.html"]
+    entries = ["stage/build/mobile/index.html", "stage/build/markdown/index.html"]
     if not mobile:
         # 桌面安装包同时提供主窗口、独立窗口及桌面和移动浏览器入口。
         entries.extend(("stage/build/app/index.html", "stage/build/app/window.html",
                         "stage/build/desktop/index.html"))
     errors = [f"缺少前端入口：{entry}" for entry in entries if entry not in paths]
+    for asset in ("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+                  "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js",
+                  "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
+                  "vditor/dist/js/highlight.js/highlight.min.js", "appearance/themes/daylight/theme.css",
+                  "appearance/themes/midnight/theme.css", "appearance/icons/litheness/icon.js",
+                  "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE",
+                  "vditor/licenses/KaTeX-mhchem-NOTICE", "vditor/licenses/Apache-2.0-LICENSE"):
+        name = "stage/build/markdown/" + asset
+        if name not in paths:
+            errors.append(f"缺少 Markdown 离线资源：{name}")
     if "stage/build/export/protyle-method.js" not in paths:
         errors.append("缺少导出前端：stage/build/export/protyle-method.js")
     return errors

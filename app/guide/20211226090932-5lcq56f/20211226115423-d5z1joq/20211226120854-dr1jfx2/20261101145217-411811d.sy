@@ -1,0 +1,585 @@
+{
+	"ID": "20261101145217-411811d",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261101145217-411811d",
+		"title": "獨立 Markdown 編輯器",
+		"type": "doc",
+		"updated": "20261101175356"
+	},
+	"Children": [
+		{
+			"ID": "20261101145217-7be9a0a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-7be9a0a",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟與編輯"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-a964949",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-a964949",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Windows、macOS 和 Linux 桌面端，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主菜單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Markdown 編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟獨立視窗，無需開啟工作空間或啟動本機核心。"
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-da9759e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-da9759e",
+				"updated": "20261101153939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android、iOS 和 HarmonyOS 行動端，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主菜單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Markdown 編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟獨立編輯頁面。系統檔案管理員提供 Markdown 檔案的開啟方式時，也可以選擇思源。文件存取權限由系統選擇器授予，部分檔案提供者僅授予臨時權限，重新啟動後可能需要重新選擇檔案。"
+				}
+			]
+		},
+		{
+			"ID": "20261101154840-d20d136",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101154840-d20d136",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頂部僅保留檔名與 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選單。新建、開啟、儲存、另存為、編輯模式、插入圖片、授權資源目錄、復原草稿，以及佈景主題與字型大小設定均收在此處。狀態列僅在需要時顯示處理操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-659797b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-659797b",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "此編輯器直接編輯一般 UTF-8 編碼的 .md 和 .markdown 檔案，不會將檔案匯入筆記本、轉換為 .sy 文件，或加入工作空間的搜尋、區塊引用及同步。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-1ce9e3f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-1ce9e3f",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝支援檔案關聯的桌面安裝套件後，可在系統的開啟方式中選擇思源。安裝只新增候選應用程式，不接管既有的預設應用程式。也可以向思源桌面程式傳入 --markdown 建立空白文件，或傳入 --markdown=\"檔案路徑.md\" 開啟檔案。在編輯器中可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或拖入 Markdown 檔案。再次開啟其他編輯視窗正在使用的檔案時，會切換至既有視窗。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-9c38084",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-9c38084",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選擇即時渲染、所見即所得或分割預覽，目前模式以勾選標示。僅切換模式不會儲存檔案；實際編輯可能整理 Markdown 格式，但應保留內容。佈景主題與字型大小在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中使用相同的勾選子選單選擇，獨立於工作空間設定儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-62b5f30",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101171827-62b5f30",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "瀏覽 Markdown 檔案"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-e5be116",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-e5be116",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 A.md 時，預設以它所在的目錄作為檔案樹根目錄。檔案樹顯示實際資料夾以及 .md、.markdown 檔案，展開資料夾時才載入其內容。資料夾排在前面，名稱按自然順序排列，例如 file2.md 排在 file10.md 之前。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-1940643",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-1940643",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端點擊檔名可展開或收合側欄，拖曳分隔線可調整寬度；行動端點擊檔名開啟檔案抽屜。如果行動平台只授予單一檔案的權限，請依提示選擇檔案所在目錄以啟用檔案樹。取消目錄授權不會影響目前文件的編輯。檔案樹授權不會同時授權本機圖片。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-261349c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-261349c",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊檔案一次會在同一編輯容器中切換。編輯器先檢查目標檔案，再透過儲存或保留復原草稿保護目前文件；取消時仍停留在目前文件。根目錄內切換檔案會保留原根目錄，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "開啟資料夾"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可重新選擇導覽根目錄而不改變內文。即使目前文件不在所選根目錄內，也會保留你的選擇。另存為仍在根目錄內時維持原根目錄，儲存至根目錄外後會跟隨新檔案的父目錄。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-ff0bfd2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-ff0bfd2",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展開狀態與桌面面板寬度會被記住，目錄變更或重新聚焦編輯器時會重新整理檔案樹。目錄項目過多時，請選擇較小的目錄。此面板僅用於導覽，不提供重新命名、刪除或拖曳整理檔案的操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-6f04100",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-6f04100",
+				"updated": "20261101174206"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存與處理衝突"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-fee4d83",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-fee4d83",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可寫入的檔案在停止輸入後自動儲存。透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 立即要求儲存，新建文件須先選擇儲存位置。狀態列區分已儲存、未儲存、衝突與失敗，只有已儲存狀態表示目標檔案中的內容已獲確認。"
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-439a564",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-439a564",
+				"updated": "20261101174206"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android 的另存為透過系統檔案選擇器選擇儲存位置與檔名；iOS 和 HarmonyOS 先選擇目標目錄，再輸入檔名。儲存成功後統一顯示「已儲存至檔案」，雲端同步由對應的雲端硬碟管理。應用程式進入背景時，會嘗試持久儲存最新已提交的輸入並儲存待寫入修改；系統直接結束程序時，只能復原已寫入儲存空間的內容。iOS 的 Markdown 場景與工作空間共用應用程式程序，程序當機或終止會影響兩者。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-5e12273",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-5e12273",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其他應用程式修改檔案後，本機沒有編輯時可以重新載入。若已有編輯或儲存仍在進行，自動寫回會暫停。請核對內容，再選擇重新載入、明確確認覆寫或另存為。權限遺失、檔案刪除或寫入結果不確定也會暫停寫回，可在提供對應操作時重試或另存為。重新載入的結果不會取代讀取期間的新輸入。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-2f159fb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-2f159fb",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另存為在寫入前預留目標，確認儲存成功後才切換目前工作階段。其他編輯視窗已占用的目標不能直接覆寫。另存到其他目錄會保留原有相對資源連結，不會自動複製資源；請閱讀提示，並視需要移動資源或調整連結。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-a262f76",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-a262f76",
+				"updated": "20261101175356"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存時保留原有 UTF-8 BOM 與所選換行方式。含混合換行的檔案可能在首次實際編輯後統一換行。開啟、檢視及切換模式不會改寫原始檔案。不支援的編碼或大於 8 MiB 的檔案會被拒絕，原始檔案不變。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-4e9344c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-4e9344c",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "圖片與預覽"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-257c32d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-257c32d",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入圖片前請先儲存 Markdown 文件，再使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選擇來源圖片與新的資源儲存位置。編輯器確認複製成功後才插入相對引用，不會覆寫既有圖片，也不支援儲存到其他磁碟代號。此操作只授權所選圖片，不會擴大為整個目錄的存取權限。Android 會先選擇來源圖片，必要時授權 Markdown 文件所在目錄，再輸入該目錄內尚未使用的新檔名；插入的圖片單獨取得預覽授權。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-ae29f9b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-ae29f9b",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "授權資源目錄"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選擇相對路徑圖片所在的本機目錄，只顯示明確授權目錄內支援的圖片。圖片缺失或未獲授權時，保留原始 Markdown 引用並提示資源無法使用。臨時預覽位址不會寫入正文，目錄授權僅屬於目前編輯工作階段。Android 須選擇 Markdown 文件的直接父目錄，可顯示該目錄及其子目錄內支援的圖片；包含 .. 的父層目錄引用無法使用。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-1550bce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-1550bce",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "遠端圖片、音訊與視訊、嵌入頁面、指令碼及遠端圖表服務均被阻擋，沒有啟用網路媒體的開關。一般 HTTP、HTTPS 與郵件連結僅在點擊後交由系統開啟。數學公式使用本機資源，動態圖表原始碼以程式碼顯示。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-40822f6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-40822f6",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本機復原與隱私"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-59f49cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-59f49cb",
+				"updated": "20261101162448"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增且從未編輯的空白文件關閉時不顯示確認，也不產生復原草稿。實際編輯後尚未儲存的修改（包括編輯後清空內文）、非空白副本和復原草稿仍保留復原與關閉保護。關閉這些文件時若儲存失敗或文件尚未命名，可以保留可復原草稿、另存為或取消關閉。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "復原草稿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中檢視並復原記錄，復原不會直接覆寫原始檔案。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-98162d9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-98162d9",
+				"updated": "20261101153939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復原草稿以未加密形式儲存在本機 Markdown 編輯器的私人目錄中，位於工作空間之外，不受加密筆記本保護，也不參與思源同步。桌面端的作業系統備份或其他備份軟體可能包含此目錄。行動端會將 Markdown 私人目錄排除於系統備份之外；使用者選擇的原始檔案仍遵循其檔案提供者的備份與同步規則。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-27cf85a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-27cf85a",
+				"updated": "20261101175356"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支援開啟及儲存不超過 8 MiB 的 UTF-8 檔案。超過 64 KiB 時自動使用原始碼編輯並關閉預覽，刪減至閾值以內後可恢復豐富文字模式。檔案預算包含 BOM 與編碼後的換行。每篇復原草稿另設 16 MiB 正文預算，復原記錄總計 256 MiB、最多 1024 筆。超過檔案上限的復原草稿仍可複製或刪減，降至上限以內後才能寫回。達到預算會回報失敗，不刪除尚未復原的草稿，草稿不會自動到期。"
+				}
+			]
+		},
+		{
+			"ID": "20261101154840-d0580b4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101154840-d0580b4",
+				"updated": "20261101154840"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "含有密集表格或程式碼的複雜文件，在渲染、切換模式或儲存時仍可能停頓；大小限制不保證所有文件都能流暢操作。"
+				}
+			]
+		}
+	]
+}

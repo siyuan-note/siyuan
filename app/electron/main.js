@@ -28,6 +28,8 @@ const {
     globalShortcut,
     Tray,
     dialog,
+    protocol,
+    nativeTheme,
     systemPreferences,
     powerMonitor
 } = require("electron");
@@ -92,6 +94,10 @@ const {
     readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
     prepareLinuxInputMethodLaunch, linuxInputMethodRelaunchEnvironment,
 } = require("./linuxInputMethod");
+const {isMarkdownPath, parseMarkdownLaunch} = require("./markdown/launch");
+const {createMarkdownLifecycle} = require("./markdown/lifecycle");
+const {createMarkdownWindows, registerMarkdownSchemes} = require("./markdown/windows");
+registerMarkdownSchemes(protocol);
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -102,6 +108,41 @@ const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
 const linuxInputMethodSettingPath = path.join(confDir, "linux-input-method.json");
 const accessibilitySettingPath = path.join(confDir, "accessibility.json");
+const initialMarkdownArguments = process.argv.slice(app.isPackaged ? 1 : 2);
+let markdownStartup = parseMarkdownLaunch(initialMarkdownArguments, process.cwd()).requested;
+let markdownWindows;
+let markdownLaunchTask;
+const pendingMarkdownLaunches = markdownStartup ? [{argv: initialMarkdownArguments, cwd: process.cwd()}] : [];
+const markdownLifecycle = createMarkdownLifecycle({
+    getManager: () => markdownWindows,
+    quit: () => app.quit(),
+    log: message => writeLog(message),
+});
+const drainMarkdownLaunches = () => {
+    if (!markdownWindows || markdownLaunchTask) return;
+    markdownLaunchTask = (async () => {
+        while (pendingMarkdownLaunches.length) {
+            const {argv, cwd} = pendingMarkdownLaunches.shift();
+            try {
+                await markdownWindows.handleLaunch(argv, cwd);
+            } catch (error) {
+                writeLog("open Markdown file failed: " + error.message);
+            }
+        }
+    })().finally(() => {
+        markdownLaunchTask = undefined;
+        // 所有入口都失败或取消时，不留下没有窗口的独立进程。
+        if (markdownStartup && !pendingMarkdownLaunches.length && !BrowserWindow.getAllWindows().length &&
+            !workspaces.length && !localKernelStartups.size && !markdownLifecycle.busy() &&
+            !updateInstallPromise && systemShutdownState === systemShutdownNone) app.quit();
+    });
+};
+const routeMarkdownLaunch = (argv, cwd = process.cwd()) => {
+    if (!parseMarkdownLaunch(argv, cwd).requested) return false;
+    pendingMarkdownLaunches.push({argv: [...argv], cwd});
+    drainMarkdownLaunches();
+    return true;
+};
 
 // 在单实例锁、窗口和内核启动前完成兼容模式重启，不修改已经选定的原生后端。
 let linuxInputMethodOverride = null;
@@ -778,6 +819,15 @@ if (!app.requestSingleInstanceLock()) {
     return;
 }
 
+// macOS 文件打开事件可能早于 ready，先排队，不能触发工作空间初始化。
+app.on("open-file", (event, filePath) => {
+    if (!isMarkdownPath(filePath)) return;
+    event.preventDefault();
+    if (updateInstallPromise || systemShutdownState !== systemShutdownNone) return;
+    if (!app.isReady()) markdownStartup = true;
+    routeMarkdownLaunch(["--markdown=" + filePath]);
+});
+
 // 开发环境下 Windows 需显式传入 Electron 可执行文件路径和 main.js 路径，否则 siyuan:// 会被当作相对路径
 if (isDevEnv && process.defaultApp && process.argv.length >= 2) {
     const mainScript = path.resolve(process.argv[1]);
@@ -818,7 +868,7 @@ for (let i = argStart; i < linuxInputMethodLaunchArguments.length; i++) {
         arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("--connection-session=") || arg === "--remote" ||
         arg.startsWith("--remote=") || arg === "--trust-remote-extensions" ||
         arg.startsWith("--trust-remote-extensions=") ||
-        arg.startsWith("siyuan://")) {
+        arg.startsWith("siyuan://") || arg === "--markdown" || arg.startsWith("--markdown=")) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
             openAsHidden = true;
@@ -848,7 +898,6 @@ try {
 configureAccessibility(app.commandLine, accessibilityEnabled);
 
 try {
-    firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
     if (!fs.existsSync(confDir)) {
         fs.mkdirSync(confDir, {mode: 0o755, recursive: true});
     }
@@ -862,42 +911,45 @@ try {
 let lastWorkspaceMissing = false;
 let missingWorkspacePath = "";
 let availableWorkspaces = [];
-if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
-    // 显式通过命令行指定工作空间时尊重用户参数，跳过检测
-    try {
-        const wsFile = path.join(confDir, "workspace.json");
-        if (fs.existsSync(wsFile)) {
-            const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
-            if (Array.isArray(wsList) && 0 < wsList.length) {
-                const last = wsList[wsList.length - 1];
-                if (!fs.existsSync(last) || !fs.statSync(last).isDirectory()) {
-                    lastWorkspaceMissing = true;
-                    missingWorkspacePath = last;
-                    availableWorkspaces = wsList.slice(0, -1).filter(p =>
-                        fs.existsSync(p) && fs.statSync(p).isDirectory());
+let lastWorkspacePath = "";
+const initializeWorkspaceStartup = () => {
+    firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
+    if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
+        // 显式通过命令行指定工作空间时尊重用户参数，跳过检测
+        try {
+            const wsFile = path.join(confDir, "workspace.json");
+            if (fs.existsSync(wsFile)) {
+                const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
+                if (Array.isArray(wsList) && 0 < wsList.length) {
+                    const last = wsList[wsList.length - 1];
+                    if (!fs.existsSync(last) || !fs.statSync(last).isDirectory()) {
+                        lastWorkspaceMissing = true;
+                        missingWorkspacePath = last;
+                        availableWorkspaces = wsList.slice(0, -1).filter(p =>
+                            fs.existsSync(p) && fs.statSync(p).isDirectory());
+                    }
                 }
             }
+        } catch (e) {
+            writeLog("check missing workspace failed: " + e);
         }
-    } catch (e) {
-        writeLog("check missing workspace failed: " + e);
     }
-}
 
-// 读取上次打开的工作空间路径，用于崩溃恢复时默认选中该工作空间
-let lastWorkspacePath = "";
-if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
-    try {
-        const wsFile = path.join(confDir, "workspace.json");
-        if (fs.existsSync(wsFile)) {
-            const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
-            if (Array.isArray(wsList) && 0 < wsList.length) {
-                lastWorkspacePath = wsList[wsList.length - 1];
+    // 读取上次打开的工作空间路径，用于崩溃恢复时默认选中该工作空间
+    if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
+        try {
+            const wsFile = path.join(confDir, "workspace.json");
+            if (fs.existsSync(wsFile)) {
+                const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
+                if (Array.isArray(wsList) && 0 < wsList.length) {
+                    lastWorkspacePath = wsList[wsList.length - 1];
+                }
             }
+        } catch (e) {
+            writeLog("read last workspace path failed: " + e);
         }
-    } catch (e) {
-        writeLog("read last workspace path failed: " + e);
     }
-}
+};
 
 const openExternalURL = (url, remoteMode = false) => {
     if (remoteMode && !isAllowedRemoteExternalURL(url)) {
@@ -1168,7 +1220,7 @@ const setStartupApplicationMenu = () => {
     // 启动阶段使用现有语言资源，工作空间就绪后再同步用户配置的语言和快捷键。
     let requestedLanguage = getArg("--lang");
     const workspaceDir = getArg("--workspace") || lastWorkspacePath;
-    if (!requestedLanguage && !remoteKernelTarget && workspaceDir) {
+    if (!requestedLanguage && !markdownStartup && !remoteKernelTarget && workspaceDir) {
         try {
             const config = JSON.parse(fs.readFileSync(path.join(workspaceDir, "conf", "conf.json"), "utf8"));
             requestedLanguage = config.appearance?.lang || config.lang;
@@ -1389,13 +1441,13 @@ const exitWorkspace = (workspace, errorWindowId) => {
         if (errorWindowId) {
             markExpectedRendererExit(mainWindow);
             BrowserWindow.getAllWindows().forEach((item) => {
-                if (errorWindowId !== item.id) {
+                if (errorWindowId !== item.id && !markdownWindows?.owns(item.webContents)) {
                     item.destroy();
                 }
             });
         } else {
             markExpectedRendererExit(mainWindow);
-            if (keepAppOpenDuringSystemShutdown || keepAppOpenDuringUpdate) {
+            if (keepAppOpenDuringSystemShutdown || keepAppOpenDuringUpdate || markdownLifecycle.hasWindows()) {
                 mainWindow.destroy();
             } else {
                 relaunchConnection();
@@ -1938,6 +1990,9 @@ const closeUpdateKernelStage = async (ports, request) => {
 // 更新时先退出其他工作空间，再退出发起更新的工作空间，确保安装器启动前所有内核已经停止。
 // https://github.com/siyuan-note/siyuan/issues/18258
 const coordinateUpdateInstall = async (request) => {
+    if (!await markdownLifecycle.prepare("update")) {
+        throw Object.assign(new Error("Markdown windows canceled update installation"), {code: "MARKDOWN_EXIT_CANCELED"});
+    }
     const ports = Array.from(new Set(getSystemShutdownPorts().map((port) => port.toString())
         .concat(Array.from(kernelProcesses.keys()), request.initiatingPort)));
     ports.forEach((port) => expectedKernelExitPorts.add(port));
@@ -1960,6 +2015,9 @@ const coordinateUpdateInstall = async (request) => {
         throw new Error("the update install package returned by the kernel is invalid");
     }
 
+    if (!await markdownLifecycle.finish()) {
+        throw Object.assign(new Error("Markdown windows could not close for update"), {code: "MARKDOWN_EXIT_CANCELED"});
+    }
     await launchUpdateInstallPackage(installPkgPath);
     keepAppOpenDuringUpdate = false;
     app.exit();
@@ -1985,6 +2043,14 @@ const beginUpdateInstall = (event, data) => {
         writeLog("coordinate update install failed: " + error);
         keepAppOpenDuringUpdate = false;
         updateInstallPromise = undefined;
+        markdownLifecycle.cancel();
+        if (error.code === "MARKDOWN_EXIT_CANCELED" || markdownLifecycle.hasWindows()) {
+            workspaces.forEach(workspace => {
+                if (workspace.browserWindow && !workspace.browserWindow.isDestroyed()) showWindow(workspace.browserWindow);
+            });
+            markdownWindows?.focus();
+            return;
+        }
         app.relaunch();
         app.exit();
     });
@@ -2046,6 +2112,7 @@ const resetSystemShutdown = (ports) => {
     systemShutdownState = systemShutdownNone;
     gracefulSystemShutdownPromise = undefined;
     keepAppOpenDuringSystemShutdown = false;
+    markdownLifecycle.cancel();
     writeLog("system shutdown canceled because SiYuan failed to exit gracefully [ports=" + ports.join(",") + "]");
     ports.forEach((port) => {
         const workspace = workspaces.find((item) => port.toString() === item.port.toString());
@@ -2065,18 +2132,18 @@ const beginGracefulSystemShutdown = () => {
 
     systemShutdownState = systemShutdownEnding;
     const ports = getSystemShutdownPorts();
-    if (ports.length === 0) {
-        app.exit();
-        return;
-    }
-
     keepAppOpenDuringSystemShutdown = true;
-    gracefulSystemShutdownPromise = Promise.all(ports.map(async (port) => {
-        return {
-            port,
-            success: await requestGracefulKernelExit(port),
-        };
-    })).then((results) => {
+    gracefulSystemShutdownPromise = (async () => {
+        if (!await markdownLifecycle.prepare("shutdown")) {
+            resetSystemShutdown(ports);
+            return;
+        }
+        const results = await Promise.all(ports.map(async (port) => {
+            return {
+                port,
+                success: await requestGracefulKernelExit(port),
+            };
+        }));
         const succeededPorts = results.filter((item) => item.success).map((item) => item.port);
         const failedPorts = results.filter((item) => !item.success).map((item) => item.port);
         succeededPorts.forEach((port) => exitApp(port));
@@ -2090,9 +2157,13 @@ const beginGracefulSystemShutdown = () => {
             resetSystemShutdown(incompletePorts);
             return;
         }
+        if (!await markdownLifecycle.finish()) {
+            resetSystemShutdown([]);
+            return;
+        }
         keepAppOpenDuringSystemShutdown = false;
         app.exit();
-    }).catch((error) => {
+    })().catch((error) => {
         writeLog("graceful system shutdown failed: " + error);
         resetSystemShutdown(getSystemShutdownPorts());
     });
@@ -2105,6 +2176,8 @@ const beginForcedSystemShutdown = () => {
 
     systemShutdownState = systemShutdownForced;
     keepAppOpenDuringSystemShutdown = false;
+    // 系统已强制结束会话时无法等待异步保存，尽力刷新，持续草稿仍是恢复依据。
+    void markdownLifecycle.prepare("shutdown");
     getSystemShutdownPorts().forEach((port) => {
         requestKernelExit(port, {
             force: true,
@@ -3258,11 +3331,23 @@ const initRemoteKernel = async (target) => {
 app.whenReady().then(() => {
     const startupStartedAt = Date.now();
     writeLog("app ready, preparing startup window");
-    const appCrashInfo = readAppCrashInfo();
+    markdownWindows = createMarkdownWindows({app, BrowserWindow, ipcMain, dialog, shell, protocol, nativeTheme,
+        rootDirectory: appDir, configDirectory: path.join(confDir, "markdown"),
+        lang: resolveAppLanguage(getArg("--lang") ? [getArg("--lang")] : app.getPreferredSystemLanguages()),
+        platform: process.platform,
+        onEmpty: () => {
+            if (!markdownLifecycle.busy() && !BrowserWindow.getAllWindows().length &&
+                !workspaces.length && !localKernelStartups.size && !bootWindows.size &&
+                !markdownLaunchTask && !pendingMarkdownLaunches.length &&
+                !updateInstallPromise && systemShutdownState === systemShutdownNone) app.quit();
+        },
+    });
+    if (!markdownStartup) initializeWorkspaceStartup();
+    const appCrashInfo = markdownStartup ? undefined : readAppCrashInfo();
     writeLog("read app crash info [" + (Date.now() - startupStartedAt) + "ms since app ready]");
     let preparedBoot;
     // 仅普通本地启动提前创建窗口，其他启动分支使用各自的窗口。
-    if (!remoteKernelArgError && !remoteKernelTarget && !firstOpen && !appCrashInfo && !lastWorkspaceMissing) {
+    if (!markdownStartup && !remoteKernelArgError && !remoteKernelTarget && !firstOpen && !appCrashInfo && !lastWorkspaceMissing) {
         createBootWindow();
         const currentBootWindow = bootWindow;
         preparedBoot = {
@@ -3302,6 +3387,20 @@ app.whenReady().then(() => {
         },
     });
     writeLog("created connection manager [" + (Date.now() - startupStartedAt) + "ms since app ready]");
+    ipcMain.on("siyuan-open-markdown", (event) => {
+        const target = getWindowKernelTarget(event.sender.id);
+        if (!target || event.senderFrame !== event.sender.mainFrame || !initializedWindowIds.has(event.sender.id) ||
+            !workspaces.some(workspace => workspace.webContentsId === event.sender.id) ||
+            updateInstallPromise || systemShutdownState !== systemShutdownNone || markdownLifecycle.busy()) return;
+        try {
+            const url = new URL(event.senderFrame.url);
+            if (url.origin !== target.origin || url.pathname !== "/stage/build/app/") return;
+        } catch {
+            return;
+        }
+        // 主菜单只允许新建本机编辑窗口，文件授权由轻量窗口自己的原生选择器完成。
+        void markdownWindows.open().catch(error => writeLog("open Markdown editor failed: " + error.message));
+    });
     ipcMain.on("siyuan-manage-connections", (event, options) => {
         const target = getWindowKernelTarget(event.sender.id);
         const localPages = ["init.html", "workspace.html", ...(remoteKernelTarget ? ["boot.html"] : [])].map(name =>
@@ -3520,7 +3619,7 @@ app.whenReady().then(() => {
         event.returnValue = undefined;
     });
     ipcMain.on("siyuan-first-quit", () => {
-        app.exit();
+        app.quit();
     });
     installWebPageFetchIPC(ipcMain, fetchRenderedWebPage,
         sender => initializedWindowIds.has(sender.id) && !!getWindowKernelTarget(sender.id));
@@ -4556,7 +4655,9 @@ app.whenReady().then(() => {
             args,
         });
     });
-    if (remoteKernelArgError) {
+    if (markdownStartup) {
+        drainMarkdownLaunches();
+    } else if (remoteKernelArgError) {
         if (remoteKernelArgError.code === "ERR_REMOTE_UNSAFE_CHROMIUM_SWITCH") {
             showErrorWindow("远程内核启动参数不安全", "Unsafe remote kernel arguments",
                 "<div>远程内核模式不能与弱化网页或 TLS 安全的参数同时使用。</div>" +
@@ -4782,9 +4883,14 @@ app.whenReady().then(() => {
             }
         }));
     });
-    powerMonitor.on("shutdown", () => {
+    powerMonitor.on("shutdown", (event) => {
         writeLog("system shutdown");
-        beginForcedSystemShutdown();
+        if (typeof event?.preventDefault === "function") {
+            event.preventDefault();
+            beginGracefulSystemShutdown();
+        } else {
+            beginForcedSystemShutdown();
+        }
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");
@@ -4850,12 +4956,13 @@ app.on("open-url", async (event, url) => { // for macOS
     }
 });
 
-app.on("second-instance", (event, argv) => {
+app.on("second-instance", (event, argv, workingDirectory) => {
     writeLog("second-instance [" + argv + "]");
     if (updateInstallPromise) {
         writeLog("ignored second instance while installing update");
         return;
     }
+    if (routeMarkdownLaunch(argv.slice(app.isPackaged ? 1 : 2), workingDirectory || process.cwd())) return;
     if (remoteKernelArgError) {
         writeLog("ignored second instance because the primary remote kernel argument is invalid");
         return;
@@ -4946,10 +5053,16 @@ app.on("second-instance", (event, argv) => {
         showWindow(workspaces[0].browserWindow);
     } else if (!siyuanURL && localKernelStartups.size > 0) {
         showWindow(localKernelStartups.values().next().value.window);
+    } else if (!siyuanURL) {
+        markdownWindows?.focus();
     }
 });
 
 app.on("activate", () => {
+    if (markdownWindows?.hasWindows() && !workspaces.length) {
+        markdownWindows.focus();
+        return;
+    }
     if (updateInstallPromise || remoteKernelArgError) {
         return;
     }
@@ -4960,7 +5073,9 @@ app.on("activate", () => {
         }
     }
     if (BrowserWindow.getAllWindows().length === 0) {
-        if (remoteKernelTarget) {
+        if (markdownStartup) {
+            void markdownWindows.open();
+        } else if (remoteKernelTarget) {
             initRemoteKernel(remoteKernelTarget).then((result) => {
                 if (result) {
                     initMainWindow(result.target, result.authenticated);
@@ -4975,6 +5090,7 @@ app.on("activate", () => {
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     bindWebviewDevToolsShortcut(contents, getWindowKernelTarget);
     contents.setWindowOpenHandler((details) => {
+        if (markdownWindows?.owns(contents)) return {action: "deny"};
         const settings = settingsWindowPolicy(contents, details);
         if (settings) {
             return settings;
@@ -4999,6 +5115,7 @@ app.on("before-quit", (event) => {
         event.preventDefault();
         return;
     }
+    if (markdownLifecycle.beforeQuit(event)) return;
     workspaces.slice().forEach(item => {
         const pathname = getWindowPathname(item.browserWindow);
         if (!item.ownsKernel && (pathname !== "/stage/build/app/" ||

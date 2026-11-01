@@ -196,6 +196,7 @@ test("main installs the generic hook while retaining the window-open policy", ()
     const opened = [];
     vm.runInNewContext(source.slice(start, end), {
         app,
+        markdownWindows: undefined,
         bindWebviewDevToolsShortcut: (contents, getTarget) => bindWebviewDevToolsShortcut(contents, getTarget, "linux"),
         getWindowKernelTarget: id => id === host.id ? {mode: "local"} : undefined,
         settingsWindowPolicy: () => undefined,

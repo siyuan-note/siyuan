@@ -13,10 +13,28 @@ export function androidStageFiles(stageDir) {
     }
   }
   walk(stageDir);
-  for (const target of ["mobile", "desktop", "export"]) {
+  for (const target of ["mobile", "desktop", "export", "markdown"]) {
     const directory = path.join(stageDir, "build", target);
-    const names = readdirSync(directory);
+    const names = [];
+    const collect = (folder, relative = "") => {
+      for (const entry of readdirSync(folder, {withFileTypes: true})) {
+        const name = relative ? `${relative}/${entry.name}` : entry.name;
+        if (entry.isSymbolicLink()) throw new Error(`Linked Android resource: ${folder}/${entry.name}`);
+        if (entry.isDirectory()) collect(path.join(folder, entry.name), name);
+        else if (entry.isFile()) names.push(name);
+      }
+    };
+    collect(directory);
     const required = target === "export" ? ["protyle-method.js", "base.css"] : ["index.html"];
+    if (target === "markdown") {
+      required.push("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+        "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE", "vditor/licenses/KaTeX-mhchem-NOTICE",
+        "vditor/licenses/Apache-2.0-LICENSE", "vditor/licenses/diff-match-patch-LICENSE", "vditor/dist/index.css",
+        "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js", "vditor/dist/js/katex/katex.min.css",
+        "vditor/dist/js/katex/mhchem.min.js", "appearance/icons/litheness/icon.LICENSE",
+        "vditor/dist/js/highlight.js/highlight.min.js", "appearance/themes/daylight/theme.css",
+        "appearance/themes/midnight/theme.css", "appearance/icons/litheness/icon.js");
+    }
     for (const name of required) {
       if (!names.includes(name)) throw new Error(`Missing Android resource: ${directory}/${name}`);
     }
@@ -27,14 +45,14 @@ export function androidStageFiles(stageDir) {
       if (!/\.(html|js|css)$/.test(name)) continue;
       const content = readFileSync(path.join(directory, name), "utf8");
       for (const candidate of hashed) {
-        if (content.includes(candidate)) selected.add(candidate);
+        if (content.includes(candidate) || content.includes(path.posix.relative(path.posix.dirname(name), candidate))) selected.add(candidate);
       }
       for (const match of content.matchAll(/(?:main|startup|base)\.[a-f\d]{8,}\.(?:js|css)\b/gi)) {
         if (!names.includes(match[0])) throw new Error(`Missing Android resource: ${directory}/${match[0]}`);
       }
       for (const runtime of content.matchAll(/\{((?:\s*(?:\d+|["'][\w-]+["'])\s*:\s*["'][a-f\d]{8,}["']\s*,?)+)\}\s*\[[^\]]+\]\s*\+\s*["']\.(js|css)["']/gi)) {
         for (const chunk of runtime[1].matchAll(/(\d+|["'][\w-]+["'])\s*:\s*["']([a-f\d]{8,})["']/gi)) {
-          const resource = `${chunk[1].replace(/["']/g, "")}.${chunk[2]}.${runtime[2]}`;
+          const resource = path.posix.join(path.posix.dirname(name), `${chunk[1].replace(/["']/g, "")}.${chunk[2]}.${runtime[2]}`);
           if (!names.includes(resource)) throw new Error(`Missing Android resource: ${directory}/${resource}`);
           selected.add(resource);
         }

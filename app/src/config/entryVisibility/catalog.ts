@@ -750,6 +750,13 @@ const dockCatalogSection: IEntryCatalogSection = {
 };
 
 export const entryCatalog: IEntryCatalogSection[] = [
+    {
+        key: "application",
+        label: lang("mainMenu"),
+        sortable: false,
+        // 主菜单的既有项目仍为固定槽位，仅登记新增的独立编辑器入口。
+        children: [node("markdownEditor", lang("markdownEditor"), true, undefined, false)],
+    },
     topBarCatalogSection,
     {
         key: WINDOW_TOP_BAR_ROOT_PATH,

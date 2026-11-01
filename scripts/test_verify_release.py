@@ -85,11 +85,21 @@ class ReleaseTests(unittest.TestCase):
         self.resources = {
             "stage/build/mobile/index.html": b'<script src="main.js"></script>',
             "stage/build/mobile/main.js": b'Constants.SIYUAN_VERSION="3.8.4";',
+            "stage/build/markdown/index.html": b'<script src="main.js"></script>',
+            "stage/build/markdown/main.js": b'window.SIYUAN_VERSION="3.8.4";',
             "stage/build/export/protyle-method.js": b'Constants.SIYUAN_VERSION="3.8.4";',
             "appearance/langs/en.json": b"{}",
             "guide/document.sy": b"guide",
             "changelogs/v3.8.4/en.md": b"release notes",
         }
+        for asset in ("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+                      "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js",
+                      "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
+                      "vditor/dist/js/highlight.js/highlight.min.js", "appearance/themes/daylight/theme.css",
+                      "appearance/themes/midnight/theme.css", "appearance/icons/litheness/icon.js",
+                      "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE",
+                      "vditor/licenses/KaTeX-mhchem-NOTICE", "vditor/licenses/Apache-2.0-LICENSE"):
+            self.resources["stage/build/markdown/" + asset] = b"/* fixture */"
         header = bytearray(64)
         header[:6] = b"\x7fELF\x02\x01"
         release.struct.pack_into("<H", header, 18, 183)
@@ -295,10 +305,10 @@ class DirectReleaseTests(unittest.TestCase):
 
     def test_complete_desktop_frontends_pass(self):
         result = release.verify_package(self.desktop_package(self.desktop_resources()), version="3.8.4")
-        self.assertEqual(len(result["frontend_versions"]), 5)
+        self.assertEqual(len(result["frontend_versions"]), 6)
 
     def test_desktop_missing_entire_frontend_fails(self):
-        for frontend in ("app", "desktop", "mobile", "export"):
+        for frontend in ("app", "desktop", "mobile", "export", "markdown"):
             with self.subTest(frontend=frontend):
                 resources = {name: data for name, data in self.desktop_resources().items()
                              if not name.startswith(f"stage/build/{frontend}/")}
@@ -325,6 +335,14 @@ class DirectReleaseTests(unittest.TestCase):
                      if not name.startswith("stage/build/mobile/")}
         with self.assertRaisesRegex(release.VerificationError, "stage/build/mobile/index.html"):
             release.verify_package(self.package(resources=resources), version="3.8.4")
+
+    def test_markdown_missing_offline_assets_fails(self):
+        for asset in ("vditor/dist/js/lute/lute.min.js", "vditor/licenses/KaTeX-fonts-LICENSE"):
+            with self.subTest(asset=asset):
+                resources = dict(self.resources)
+                del resources["stage/build/markdown/" + asset]
+                with self.assertRaisesRegex(release.VerificationError, asset):
+                    release.verify_package(self.package(resources=resources), version="3.8.4")
 
     def matching_baseline(self, resources=None):
         resources = self.resources if resources is None else resources

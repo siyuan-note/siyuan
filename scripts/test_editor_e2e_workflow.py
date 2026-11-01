@@ -345,6 +345,10 @@ class EditorWorkflowTests(unittest.TestCase):
             desktop = app / "stage/build/desktop/index.html"
             desktop.parent.mkdir(parents=True)
             desktop.write_text("fixture", encoding="utf-8")
+            for resource in ("index.html", "vditor/dist/js/lute/lute.min.js"):
+                markdown = app / "stage/build/markdown" / resource
+                markdown.parent.mkdir(parents=True, exist_ok=True)
+                markdown.write_text("markdown fixture", encoding="utf-8")
             dependency = app / "node_modules/.pnpm/example/index.js"
             dependency.parent.mkdir(parents=True)
             dependency.write_text("fixture", encoding="utf-8")
@@ -366,6 +370,7 @@ class EditorWorkflowTests(unittest.TestCase):
                 self.assertTrue(archive.getmember("app/kernel-darwin-arm64/SiYuan-Kernel").mode & 0o111)
                 self.assertEqual(archive.getmember("app/node_modules/example").linkname, ".pnpm/example")
                 self.assertEqual(archive.extractfile("app/node_modules/.pnpm/example/index.js").read(), b"fixture")
+                self.assertEqual(archive.extractfile("app/stage/build/markdown/vditor/dist/js/lute/lute.min.js").read(), b"markdown fixture")
             check = ["shasum", "-a", "256", "--check", "SHA256SUMS"]
             self.assertEqual(subprocess.run(check, cwd=runtime, capture_output=True).returncode, 0)
             with (runtime / "runtime.tar.gz").open("ab") as archive:

@@ -8,7 +8,7 @@
 		"id": "20240530101000-hnu6o79",
 		"title": "エディタ",
 		"type": "doc",
-		"updated": "20261030103731"
+		"updated": "20261101145217"
 	},
 	"Children": [
 		{
@@ -251,6 +251,23 @@
 				"ID": "20240530101000-1wyq56l",
 				"id": "20240530101000-48icsc4"
 			}
+		},
+		{
+			"ID": "20261101145217-a2acf5f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-a2acf5f",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-93b3519",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "独立した Markdown エディタ"
+				}
+			]
 		},
 		{
 			"ID": "20260920102915-j2vppoi",

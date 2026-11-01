@@ -20,6 +20,9 @@ const setup = (overrides = {}) => {
     };
     const context = vm.createContext({
         Date, Promise, process: {platform: "win32"}, setImmediate: callback => callback(),
+        app: {getPreferredSystemLanguages: () => ["en"]}, BrowserWindow: {}, ipcMain: {}, dialog: {}, shell: {}, protocol: {}, nativeTheme: {},
+        path, appDir: "app", confDir: "conf", resolveAppLanguage: languages => languages[0],
+        createMarkdownWindows: () => ({}), markdownStartup: false, initializeWorkspaceStartup() {},
         isDevEnv: false, workspaces: ["workspace"], kernelPort: 6806,
         localKernelStartups: new Map(),
         openAsHidden: false, bootWindow: window,
@@ -52,6 +55,8 @@ test("special startup branches do not create a boot window", () => {
     for (const overrides of [
         {remoteKernelArgError: true}, {remoteKernelTarget: {}}, {firstOpen: true},
         {readAppCrashInfo: () => ({})}, {lastWorkspaceMissing: true},
+        {markdownStartup: true, initializeWorkspaceStartup: () => assert.fail("Markdown accessed workspace configuration"),
+            readAppCrashInfo: () => assert.fail("Markdown accessed workspace crash recovery")},
     ]) {
         const {context, events} = setup(overrides);
         vm.runInContext(startup, context);
@@ -264,6 +269,7 @@ test("system shutdown includes every booting workspace and closes only successfu
             bootWindows: new Set(boots), remoteKernelTarget: undefined,
             systemShutdownState: 0, systemShutdownNone: 0, systemShutdownEnding: 1, systemShutdownForced: 2,
             gracefulSystemShutdownPromise: undefined, keepAppOpenDuringSystemShutdown: false,
+            markdownLifecycle: {prepare: async () => true, finish: async () => true, cancel() {}},
             requestGracefulKernelExit: async port => port !== failedPort,
             exitApp() {}, showWindow: window => window.show(), app: {exit: () => appExits++},
         });

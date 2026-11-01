@@ -157,7 +157,7 @@ if (process.versions.electron && process.type === "browser") {
                 logger: sass.Logger.silent,
             }).css;
             const modules = ["util/escape.ts", "config/search/normalize.ts", "mobile/menu/searchFilter.ts",
-                "mobile/dock/mobileFilterInput.ts", "mobile/menu/mainMenuCollapse.ts", "mobile/menu/mainMenu.ts",
+                "mobile/dock/mobileFilterInput.ts", "mobile/menu/mainMenuCollapse.ts", "mobile/util/markdownEditor.ts", "mobile/menu/mainMenu.ts",
                 "mobile/menu/mainMenuSearch.ts"].map(compile);
             const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
             for (const theme of ["daylight", "midnight"]) {

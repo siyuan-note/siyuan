@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20261030103731"
+		"updated": "20261101145217"
 	},
 	"Children": [
 		{
@@ -245,6 +245,23 @@
 					"TextMarkBlockRefID": "20221016204105-qx2aq0g",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Heading and list layout"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-981860a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-981860a",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-38d4623",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Standalone Markdown editor"
 				}
 			]
 		},

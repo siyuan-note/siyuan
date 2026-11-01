@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const {mkdtempSync, mkdirSync, writeFileSync, rmSync} = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const {REQUIRED_ASSETS} = require("./markdown-assets");
 
 function fixture(t) {
     const root = mkdtempSync(path.join(os.tmpdir(), "siyuan-android-assets-test-"));
@@ -24,6 +25,10 @@ function fixture(t) {
     write("build/desktop/main.abcdef12.js");
     write("build/export/protyle-method.js");
     write("build/export/base.css");
+    write("build/markdown/index.html", '<script src="main.11223344.js"></script><link href="base.11223344.css">');
+    write("build/markdown/main.11223344.js");
+    write("build/markdown/base.11223344.css");
+    for (const name of REQUIRED_ASSETS) write("build/markdown/" + name);
     return {root, write};
 }
 
@@ -41,6 +46,10 @@ test("Android assets retain serving, export and shared resources without histori
         "stage/build/desktop/main.abcdef12.js",
         "stage/build/export/base.css",
         "stage/build/export/protyle-method.js",
+        "stage/build/markdown/index.html",
+        "stage/build/markdown/main.11223344.js",
+        "stage/build/markdown/base.11223344.css",
+        ...REQUIRED_ASSETS.map(name => "stage/build/markdown/" + name),
         "stage/build/mobile/base.12345678.css",
         "stage/build/mobile/chunk.12345678.js",
         "stage/build/mobile/index.html",
@@ -48,19 +57,34 @@ test("Android assets retain serving, export and shared resources without histori
         "stage/build/mobile/startup.12345678.js",
         "stage/icon.png",
         "stage/protyle/js/editor.js",
-    ]);
+    ].sort());
 });
 
 test("Android packaging rejects missing current bundles and serving/export entry points", async t => {
     const {androidStageFiles} = await import("../../scripts/android-assets.mjs");
     const {root} = fixture(t);
-    for (const name of ["build/mobile/main.12345678.js", "build/desktop/index.html", "build/export/base.css"]) {
+    for (const name of ["build/mobile/main.12345678.js", "build/desktop/index.html", "build/export/base.css",
+        "build/markdown/index.html", "build/markdown/vditor/dist/js/lute/lute.min.js"]) {
         const file = path.join(root, name);
         const content = require("node:fs").readFileSync(file);
         rmSync(file);
         assert.throws(() => androidStageFiles(root), /Missing Android resource/);
         writeFileSync(file, content);
     }
+});
+
+test("Android and Harmony assets retain nested offline Markdown resources without stale bundles or maps", async t => {
+    const {androidStageFiles} = await import("../../scripts/android-assets.mjs");
+    const {root, write} = fixture(t);
+    write("build/markdown/vditor/dist/js/katex/fonts/KaTeX_Main-Regular.woff2", "font");
+    write("build/markdown/vditor/dist/js/i18n/zh_CN.js", "language");
+    write("build/markdown/main.55667788.js", "old bundle");
+    write("build/markdown/vditor/dist/js/katex/katex.min.js.map", "map");
+    const files = androidStageFiles(root);
+    assert.ok(files.includes("stage/build/markdown/vditor/dist/js/katex/fonts/KaTeX_Main-Regular.woff2"));
+    assert.ok(files.includes("stage/build/markdown/vditor/dist/js/i18n/zh_CN.js"));
+    assert.ok(!files.includes("stage/build/markdown/main.55667788.js"));
+    assert.ok(!files.some(name => name.endsWith(".map")));
 });
 
 test("Android assets follow Webpack runtime chunk maps recursively without including old chunks", async t => {

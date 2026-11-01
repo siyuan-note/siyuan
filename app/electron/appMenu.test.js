@@ -17,7 +17,7 @@ test("startup editing menu uses requested or system language and preserves nativ
             fs, path, appDir, process: {platform: "win32"},
             app: {getPreferredSystemLanguages: () => [system]},
             getArg: name => name === "--lang" ? requested : "",
-            lastWorkspacePath: "", remoteKernelTarget: undefined,
+            lastWorkspacePath: "", remoteKernelTarget: undefined, markdownStartup: false,
             writeLog: message => assert.fail(message),
             Menu: {buildFromTemplate: template => template, setApplicationMenu: value => { menu = value; }},
         });
@@ -41,15 +41,16 @@ test("startup editing menu uses requested or system language and preserves nativ
 });
 
 test("startup menu honors saved workspace language and command-line precedence", () => {
-    for (const [requested, remote, expected] of [["", false, "en"], ["zh-TW", false, "zh-TW"], ["", true, "zh-CN"]]) {
+    for (const [requested, remote, expected, markdown = false] of [["", false, "en"], ["zh-TW", false, "zh-TW"],
+        ["", true, "zh-CN"], ["", false, "zh-CN", true]]) {
         let menu;
         const context = vm.createContext({
             fs: {readFileSync: (file, encoding) => file === path.join("workspace", "conf", "conf.json")
-                ? JSON.stringify({appearance: {lang: "en"}, lang: "en"}) : fs.readFileSync(file, encoding)},
+                ? (assert.equal(markdown, false), JSON.stringify({appearance: {lang: "en"}, lang: "en"})) : fs.readFileSync(file, encoding)},
             path, appDir, process: {platform: "win32"},
             app: {getPreferredSystemLanguages: () => ["zh-CN"]},
             getArg: name => name === "--lang" ? requested : "",
-            lastWorkspacePath: "workspace", remoteKernelTarget: remote ? {} : undefined,
+            lastWorkspacePath: "workspace", remoteKernelTarget: remote ? {} : undefined, markdownStartup: markdown,
             writeLog: message => assert.fail(message),
             Menu: {buildFromTemplate: template => template, setApplicationMenu: value => { menu = value; }},
         });

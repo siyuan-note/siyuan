@@ -272,9 +272,11 @@ test("second-instance reuses the default workspace startup and independently ope
     });
     Object.assign(state.context, {
         updateInstallPromise: undefined, remoteKernelArgError: undefined, remoteKernelTarget: undefined,
+        routeMarkdownLaunch: () => false, markdownWindows: undefined,
         getArgFrom: (argv, key) => argv.find(arg => arg.startsWith(key + "="))?.slice(key.length + 1),
         initMainWindow: port => mainPorts.push(port),
     });
+    state.context.process.cwd = () => "cwd";
     vm.runInContext(source.slice(source.indexOf('app.on("second-instance"'), source.indexOf('app.on("activate"')), state.context);
     const run = state.run();
     state.context.app.emit("second-instance", {}, ["siyuan", "--workspace=workspace"]);

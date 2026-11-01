@@ -45,6 +45,18 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("the standalone Markdown entry retains its application path and fixed menu position", () => {
+    const entry = getEntryCatalogNode("application.markdownEditor");
+    assert.equal(entry.type, "entry");
+    assert.equal(entry.simple, true);
+    assert.equal(entry.sortable, false);
+    assert.equal(getEntryParentPath("application.markdownEditor"), "application");
+    assert.deepEqual(getEntryCatalogChildren("application").map(item => item.key), ["markdownEditor"]);
+    const source = readFileSync(resolve(process.cwd(), "src/menus/workspace.ts"), "utf8");
+    assert.ok(source.indexOf('id: "workspaceList"') < source.indexOf('id: "markdownEditor"'));
+    assert.ok(source.indexOf('id: "markdownEditor"') < source.indexOf('id: "layout"'));
+});
+
 test("image OCR actions retain their configurable paths and order", t => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {languages: {}}}});

@@ -1,0 +1,615 @@
+import "vditor/dist/index.css";
+import "../assets/scss/markdown.scss";
+import type {MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
+import {createMarkdownEditor, MarkdownEditor, MarkdownEditorMode} from "./editor";
+import {MarkdownSession, MarkdownSessionState} from "./session";
+import {createNativeMarkdownBridge} from "./nativeBridge";
+import {markdownErrorKey} from "./errors";
+import {createMarkdownTree, MarkdownTree} from "./tree";
+import {MarkdownTreeLocation} from "./treeContracts";
+import {createMarkdownChoice, MarkdownChoice} from "./choiceMenu";
+
+declare const SIYUAN_VERSION: string;
+(window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
+
+interface MarkdownApplication {
+    session: MarkdownSession;
+    editor: MarkdownEditor;
+    dispatch(message: MarkdownCommand): Promise<void>;
+    destroy(): void;
+}
+
+export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = document.getElementById("markdownApp"), initial?: MarkdownBootstrap): Promise<MarkdownApplication> => {
+    const bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
+    const text = (key: string) => bootstrap.languages[key] ?? key;
+    let preferences = bootstrap.preferences;
+    let systemDark = bootstrap.dark;
+    let editor: MarkdownEditor;
+    let session: MarkdownSession;
+    let frozen = false;
+    let targetGeneration = bootstrap.recovered?.targetGeneration ?? 0;
+    let autoSave: ReturnType<typeof setTimeout>;
+    let actionMessage = "";
+    let resourceUnavailable = false;
+    let preparing = false;
+    let prepared = false;
+    let exitSequence = 0;
+    let pendingFileAction: Promise<unknown>;
+    let themeSequence = 0;
+    let editPending = false;
+    let sourceOnly = false;
+    let disposed = false;
+    let tree: MarkdownTree = undefined;
+    let modeChoice: MarkdownChoice = undefined;
+    let themeChoice: MarkdownChoice = undefined;
+    let fontChoice: MarkdownChoice = undefined;
+    let switching = false;
+    let switchTask: Promise<boolean>;
+    let pendingSwitch: {ticket: string; sessionId: string};
+    let replacement: MarkdownApplication;
+    const control = <T extends HTMLElement>(id: string) => root.querySelector<T>(`#${id}`);
+
+    document.documentElement.lang = bootstrap.lang;
+    const platforms: Record<string, string> = {darwin: "mac", win32: "windows", linux: "linux", android: "android", ios: "ios", harmony: "harmony"};
+    document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
+    root.innerHTML = `<header class="markdown-header">
+    <button type="button" class="markdown-heading" id="markdownFiles"><svg aria-hidden="true"><use href="#iconFolder"></use></svg><span id="markdownName" class="markdown-name"></span></button>
+    <details class="markdown-more" id="markdownMore">
+        <summary class="markdown-more__button" id="markdownMoreButton" aria-controls="markdownActions" aria-expanded="false"><svg aria-hidden="true"><use href="#iconMore"></use></svg></summary>
+        <div class="b3-menu markdown-menu" id="markdownActions">
+            <button type="button" class="b3-menu__item" id="markdownNew"><span class="b3-menu__label" data-label="new"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownOpen"><span class="b3-menu__label" data-label="openBy"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownOpenFolder"><span class="b3-menu__label" data-label="markdownOpenFolder"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownSave"><span class="b3-menu__label" data-label="save"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownSaveAs"><span class="b3-menu__label" data-label="saveAs"></span></button>
+            <hr class="b3-menu__separator">
+            <button type="button" class="b3-menu__item" id="markdownInsertImage"><span class="b3-menu__label" data-label="insertImage"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownResources"><span class="b3-menu__label" data-label="markdownResources"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
+            <hr class="b3-menu__separator">
+            <div id="markdownMode"></div>
+            <details class="markdown-appearance" id="markdownPreferences">
+                <summary class="b3-menu__item"><span class="b3-menu__label" data-label="appearance"></span><svg class="b3-menu__icon markdown-appearance__arrow" aria-hidden="true"><use href="#iconDown"></use></svg></summary>
+                <div class="markdown-preferences">
+                    <div id="markdownTheme"></div>
+                    <div id="markdownFont"></div>
+                </div>
+            </details>
+            <div class="markdown-policy"><p data-label="markdownPreviewPolicy"></p><p data-label="markdownPrivacy"></p><p id="markdownNotice" role="status"></p></div>
+        </div>
+    </details>
+</header>
+<div class="markdown-workspace">
+    <aside class="markdown-tree" id="markdownTree" hidden></aside>
+    <aside class="markdown-recovery" id="markdownRecoveryPanel" hidden><div class="markdown-recovery__heading"><strong data-label="markdownRecovery"></strong><button type="button" class="b3-button b3-button--text" id="markdownRecoveryClose" data-label="close"></button></div><p data-label="markdownPrivacy"></p><div id="markdownRecoveryList"></div></aside>
+    <main class="markdown-editor" id="markdownEditor" aria-busy="true"></main>
+</div>
+<footer class="markdown-footer">
+    <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
+</footer>`;
+    root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
+    const header = root.querySelector<HTMLElement>(".markdown-header");
+    header.inert = true;
+    control("markdownEditor").inert = true;
+    control("markdownMoreButton").setAttribute("aria-label", text("more"));
+    control("markdownMoreButton").setAttribute("title", text("more"));
+    const more = control<HTMLDetailsElement>("markdownMore");
+    const moreButton = control("markdownMoreButton");
+    const closeMore = (restoreFocus = true) => {
+        modeChoice?.close(); themeChoice?.close(); fontChoice?.close();
+        if (!more.open) return;
+        more.open = false;
+        moreButton.setAttribute("aria-expanded", "false");
+        if (restoreFocus && !frozen) moreButton.focus();
+    };
+    more.addEventListener("toggle", () => {
+        if (!more.open) {modeChoice?.close(); themeChoice?.close(); fontChoice?.close();}
+        if (frozen) more.open = false;
+        moreButton.setAttribute("aria-expanded", String(more.open));
+    });
+    const dismissMore = (event: Event) => {
+        if (more.open && !more.contains(event.target as Node)) closeMore(event.type === "pointerdown");
+    };
+    const menuKey = (event: KeyboardEvent) => {
+        if (event.key === "Escape" && more.open) {
+            if ((event.target as Element).closest('.markdown-choice[aria-expanded="true"]')) return;
+            event.preventDefault(); event.stopImmediatePropagation(); closeMore();
+        } else if (event.key === "ArrowDown" && event.target === moreButton && !frozen) {
+            event.preventDefault(); more.open = true; control("markdownNew").focus();
+        }
+    };
+    document.addEventListener("pointerdown", dismissMore);
+    document.addEventListener("focusin", dismissMore);
+    document.addEventListener("keydown", menuKey, true);
+    const removeMenuListeners = () => {
+        document.removeEventListener("keydown", menuKey, true);
+        document.removeEventListener("pointerdown", dismissMore);
+        document.removeEventListener("focusin", dismissMore);
+    };
+    let initializationClosing = false;
+    const initializationCommand = async (message: MarkdownCommand) => {
+        let accepted = false;
+        if (message.type === "cancel-quit") {preparing = false; prepared = false; frozen = false; return;}
+        if (message.type === "prepare-quit") {preparing = true; prepared = true; frozen = true; accepted = true;}
+        else if (message.type === "close") {
+            initializationClosing = true;
+            try {
+                await bridge.host.releaseSession({sessionId: bootstrap.sessionId, targetGeneration: bootstrap.recovered?.targetGeneration ?? 0});
+                removeMenuListeners();
+                unsubscribeInitialization();
+                accepted = true;
+            } catch {initializationClosing = false;}
+        } else if (message.type === "background") accepted = true;
+        else return;
+        await bridge.respond(message.id, accepted);
+    };
+    // 初始化期间不接受编辑；主题或编辑器资源加载失败时，窗口仍须能够安全关闭。
+    const unsubscribeInitialization = bridge.onCommand(message => { void initializationCommand(message).catch((): void => undefined); });
+
+    const applyTheme = async () => {
+        const dark = preferences.theme === "dark" || (preferences.theme === "system" && systemDark);
+        const sequence = ++themeSequence;
+        const oldLink = document.getElementById("markdownThemeStyle") as HTMLLinkElement;
+        const href = new URL(`./appearance/themes/${dark ? "midnight" : "daylight"}/theme.css`, location.href).href;
+        if (oldLink.href !== href || !oldLink.sheet) {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.media = "not all";
+            link.href = href;
+            await new Promise<void>((resolve, reject) => {
+                link.onload = () => resolve();
+                link.onerror = () => {link.remove(); reject(new Error("Markdown theme unavailable"));};
+                document.head.append(link);
+            });
+            if (sequence !== themeSequence) {link.remove(); return;}
+            oldLink.remove();
+            link.id = "markdownThemeStyle";
+            link.media = "all";
+        }
+        document.documentElement.dataset.themeMode = dark ? "dark" : "light";
+        editor?.setTheme(dark ? "dark" : "light");
+    };
+    root.style.setProperty("--markdown-font-size", `${preferences.fontSize}px`);
+
+    const render = (state: MarkdownSessionState) => {
+        if (disposed) return;
+        const statusKeys: Record<MarkdownSessionState["status"], string> = {
+            view: "markdownReadOnly", draft: "markdownDraft", dirty: "markdownUnsaved", saving: "markdownSaving",
+            saved: "markdownSaved", conflict: "markdownConflict", blocked: "markdownError", closed: "close",
+        };
+        control("markdownName").textContent = state.target?.displayName ?? text("untitled");
+        document.title = `${state.target?.displayName ?? text("untitled")} - SiYuan`;
+        const pendingStatus = editPending && ["saved", "view", "draft"].includes(state.status);
+        const statusKey = !editPending && state.status === "draft" && !state.hasUnsavedChanges ? "" :
+            pendingStatus || state.status === "draft" && state.draftRevision < state.revision ? "markdownUnsaved" :
+            statusKeys[state.status];
+        control("markdownStatus").textContent = actionMessage || text(state.recoveryError ? markdownErrorKey(state.recoveryError) :
+            state.problem?.kind === "indeterminate" ? "markdownUncertain" : state.problem?.kind === "blocked" ? markdownErrorKey(state.problem.error) : statusKey);
+        control("markdownStatus").dataset.status = actionMessage || state.recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
+        const notices = [
+            state.target && !state.target.capabilities.persistentPermission ? text("markdownTemporaryPermission") : "",
+            resourceUnavailable ? text("markdownResourceUnavailable") : "",
+            sourceOnly ? text("markdownSourceOnly") : "",
+            bootstrap.recovered ? text("markdownRecovered") : ""];
+        control("markdownNotice").textContent = notices.filter(Boolean).join(" · ");
+        control<HTMLButtonElement>("markdownRetry").hidden = !pendingSwitch && state.problem?.kind !== "indeterminate" &&
+            (state.problem?.kind !== "blocked" || !state.problem.error.recoverable);
+        control<HTMLButtonElement>("markdownReload").hidden = state.problem?.kind !== "conflict";
+        const overwrite = control<HTMLButtonElement>("markdownOverwrite");
+        overwrite.hidden = state.problem?.kind !== "conflict";
+        overwrite.disabled = frozen || state.problem?.kind !== "conflict" || !state.problem.baseline ||
+            state.problemTargetHandle !== state.target?.handle;
+        control<HTMLButtonElement>("markdownSave").disabled = frozen || state.composing;
+        control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
+        control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
+        modeChoice?.setDisabled(frozen || state.composing);
+        if (targetGeneration !== state.targetGeneration) {
+            targetGeneration = state.targetGeneration;
+            resourceUnavailable = false;
+            editor?.refreshResources();
+            void tree?.refresh();
+        }
+        const {sessionId, status, revision, savedRevision, draftRevision, targetGeneration: generation, composing} = state;
+        void bridge.state({sessionId, status, revision, savedRevision, draftRevision, targetGeneration: generation, composing}).catch((): void => undefined);
+    };
+
+    const reportError = () => {
+        if (disposed) return;
+        actionMessage = text("markdownError");
+        if (session) render(session.getState());
+    };
+    const freeze = (value: boolean) => {
+        if (disposed) return;
+        frozen = value || switching || Boolean(pendingSwitch);
+        clearTimeout(autoSave);
+        if (frozen) closeMore(false);
+        control("markdownEditor").inert = frozen;
+        more.inert = frozen;
+        control("markdownActions").inert = frozen;
+        control("markdownPreferences").inert = frozen;
+        control("markdownRecoveryPanel").inert = frozen;
+        control("markdownProblemActions").inert = frozen && !pendingSwitch;
+        tree?.freeze(frozen);
+        render(session.getState());
+    };
+
+    try {
+        if (!("inert" in HTMLElement.prototype) || typeof TextEncoder !== "function" ||
+            typeof MutationObserver !== "function" || typeof ResizeObserver !== "function" || typeof globalThis.crypto?.getRandomValues !== "function") {
+            throw new Error("Required Markdown WebView capabilities are unavailable");
+        }
+        await applyTheme();
+        if (initializationClosing) throw new Error("Markdown initialization was closed");
+        session = new MarkdownSession({...bootstrap, host: bridge.host, onChange: render});
+        render(session.getState());
+        editor = await createMarkdownEditor({
+            element: control("markdownEditor"), initialValue: bootstrap.content, sessionId: bootstrap.sessionId, mode: preferences.mode,
+            cdn: new URL("./vditor", location.href).href, lang: bootstrap.lang,
+            theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
+            resolveResource: reference => bridge.resolveResource(reference),
+            onResourceUnavailable: () => { resourceUnavailable = true; render(session.getState()); },
+            onLink: url => { void bridge.openLink(url).catch(reportError); },
+            onEditPending(pending) {
+                if (disposed) return;
+                editPending = pending;
+                if (pending) {clearTimeout(autoSave); session.invalidateReload();}
+                render(session.getState());
+            },
+            onContentTooLarge() {
+                if (disposed) return;
+                clearTimeout(autoSave);
+                actionMessage = text("markdownTooLarge");
+                render(session.getState());
+            },
+            onSourceOnlyChange(value) {
+                if (disposed) return;
+                sourceOnly = value;
+                render(session.getState());
+            },
+            onModeChange(mode) {
+                if (disposed) return;
+                modeChoice?.setValue(mode);
+                if (preferences.mode !== mode) {
+                    preferences = {...preferences, mode};
+                    void bridge.preferences({mode}).catch(reportError);
+                }
+            },
+            onEdit(snapshot) {
+                if (disposed) return;
+                if (actionMessage === text("markdownTooLarge")) actionMessage = "";
+                session.updateEditor(snapshot);
+                clearTimeout(autoSave);
+                if (!frozen && !snapshot.composing) autoSave = setTimeout(() => {
+                    void session.save().catch(reportError);
+                }, 250);
+            },
+        });
+        if (initializationClosing) {editor.destroy(); throw new Error("Markdown initialization was closed");}
+        control("markdownEditor").setAttribute("aria-busy", "false");
+        header.inert = false;
+        freeze(frozen);
+    } catch (error) {
+        control("markdownEditor").textContent = text("markdownLoadError");
+        control("markdownEditor").setAttribute("aria-busy", "false");
+        throw error;
+    }
+
+    const saveAs = async (allowFrozen = false): Promise<boolean> => {
+        if ((frozen && !allowFrozen) || editor.flush().composing) return false;
+        const wasFrozen = frozen;
+        freeze(true);
+        let candidateHandle: string;
+        try {
+            session.updateEditor(editor.flush());
+            const state = session.getState();
+            if (state.target && /!\[|<img\b/i.test(state.content) && !await bridge.confirm("save-as")) return false;
+            const choice = await bridge.chooseSaveAs(state.target?.format ?? bootstrap.format ?? {bom: false, newline: "\n"});
+            if (choice.kind !== "selected") return false;
+            candidateHandle = choice.target.handle;
+            const result = await session.saveAs(choice.target, {editor});
+            return result.kind === "saved";
+        } finally {
+            if (candidateHandle) await bridge.cancelSaveAs(candidateHandle).catch((): void => undefined);
+            if (!wasFrozen && !preparing) freeze(false);
+        }
+    };
+
+    const save = async () => {
+        if (frozen) return;
+        const state = session.getState();
+        if (!state.target || !state.target.writable) await saveAs();
+        else await session.flush(editor);
+    };
+    const runAction = (run: () => void | Promise<unknown>, fileAction = false) => {
+        const task = Promise.resolve().then(run).catch(reportError);
+        if (fileAction) {
+            pendingFileAction = task;
+            void task.finally(() => { if (pendingFileAction === task) pendingFileAction = undefined; });
+        }
+    };
+    const action = (id: string, run: () => void | Promise<unknown>) => {
+        control(id).addEventListener("click", () => {
+            if (frozen) return;
+            closeMore();
+            actionMessage = "";
+            runAction(run, ["markdownSave", "markdownSaveAs", "markdownInsertImage"].includes(id));
+        });
+    };
+    action("markdownNew", () => bridge.newDocument());
+    action("markdownOpen", () => bridge.openDocument());
+    action("markdownOpenFolder", () => tree.chooseRoot());
+    action("markdownSave", save);
+    action("markdownSaveAs", saveAs);
+    action("markdownInsertImage", async () => {
+        if (frozen || editor.flush().composing) return;
+        if (!session.getState().target?.writable && !await saveAs()) return;
+        const started = session.getState();
+        freeze(true);
+        try {
+            const result = await bridge.insertImage();
+            const current = session.getState();
+            if (result.kind === "inserted" && current.lifecycle === "open" && !preparing &&
+                current.sessionId === started.sessionId && current.targetGeneration === started.targetGeneration &&
+                current.target?.handle === started.target?.handle) {
+                if (!editor.insertImage(result.reference)) {reportError(); return;}
+                session.updateEditor(editor.flush());
+                await session.save();
+            } else if (result.kind === "blocked") reportError();
+        } finally {
+            if (!preparing) freeze(false);
+        }
+    });
+    action("markdownRetry", async () => { session.updateEditor(editor.flush()); await session.retry(); });
+    action("markdownReload", async () => {
+        if (await bridge.confirm("reload")) {
+            session.updateEditor(editor.flush());
+            if (await session.reload({discardChanges: true})) editor.setValue(session.getState().content);
+        }
+    });
+    action("markdownOverwrite", async () => {
+        session.updateEditor(editor.flush());
+        const problem = session.getState().problem;
+        if (problem?.kind === "conflict" && problem.baseline && await bridge.confirm("overwrite")) {
+            await session.overwrite(problem.baseline);
+        }
+    });
+    action("markdownResources", async () => {
+        if (await bridge.authorizeResources()) {
+            resourceUnavailable = false;
+            editor.refreshResources();
+            render(session.getState());
+        }
+    });
+
+    const showRecoveries = async (show = true) => {
+        control("markdownRecoveryPanel").hidden = !show;
+        control("markdownRecovery").setAttribute("aria-expanded", String(show));
+        if (!show) {moreButton.focus(); return;}
+        control("markdownRecoveryClose").focus();
+        const recoveries = await bridge.recoveries();
+        if (disposed) return;
+        const list = control("markdownRecoveryList");
+        list.replaceChildren();
+        if (!recoveries.length) list.textContent = text("markdownNoRecovery");
+        for (const recovery of recoveries) {
+            const row = document.createElement("div");
+            row.className = "markdown-recovery__item";
+            const title = document.createElement("strong");
+            title.textContent = recovery.displayName || text("untitled");
+            const time = document.createElement("time");
+            time.textContent = new Date(recovery.updatedAt).toLocaleString(bootstrap.lang);
+            const buttons = document.createElement("div");
+            buttons.className = "markdown-recovery__actions";
+            for (const [key, callback] of [["markdownRecovery", () => bridge.recover(recovery.id)],
+                ["delete", async () => { await bridge.discardRecovery(recovery.id); await showRecoveries(); }]] as const) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "b3-button b3-button--text";
+                button.textContent = text(key);
+                button.addEventListener("click", () => { void callback().catch(reportError); });
+                buttons.append(button);
+            }
+            row.append(title, time, buttons);
+            list.append(row);
+        }
+    };
+    action("markdownRecovery", () => showRecoveries(Boolean(control("markdownRecoveryPanel").hidden)));
+    action("markdownRecoveryClose", () => showRecoveries(false));
+
+    const updatePreferences = async (patch: Partial<MarkdownPreferences>) => {
+        if (patch.mode) {
+            editor.setMode(patch.mode);
+            // 超大恢复草稿可能拒绝富文本模式，持久化编辑器回调报告的实际模式。
+            patch = {...patch, mode: preferences.mode};
+            modeChoice.setValue(preferences.mode);
+        }
+        preferences = {...preferences, ...patch};
+        if (patch.theme) await applyTheme();
+        if (patch.fontSize) root.style.setProperty("--markdown-font-size", `${patch.fontSize}px`);
+        preferences = await bridge.preferences(patch);
+        if (disposed) return;
+        modeChoice.setValue(preferences.mode);
+        themeChoice.setValue(preferences.theme);
+        fontChoice.setValue(String(preferences.fontSize));
+    };
+    const preferenceChoice = (id: string, label: string, values: Array<[string, string]>, value: string,
+                              patch: (value: string) => Partial<MarkdownPreferences>) => createMarkdownChoice({
+        element: control(id), label: text(label), values: values.map(([value, label]) => ({value, label: text(label)})), value,
+        onChange(value) {if (!frozen) {closeMore(); void updatePreferences(patch(value)).catch(reportError);}},
+    });
+    modeChoice = preferenceChoice("markdownMode", "markdownEditMode", [["ir", "markdownModeIR"], ["wysiwyg", "wysiwyg"], ["sv", "markdownModeSV"]], preferences.mode, value => ({mode: value as MarkdownEditorMode}));
+    themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme, value => ({theme: value as MarkdownPreferences["theme"]}));
+    fontChoice = preferenceChoice("markdownFont", "fontSize", [14, 16, 18, 20, 24, 28, 32].map(value => [String(value), String(value)]), String(preferences.fontSize), value => ({fontSize: Number(value)}));
+
+    const protectExit = async (kind: "close" | "prepare-quit"): Promise<boolean> => {
+        const sequence = ++exitSequence;
+        await pendingFileAction;
+        if (disposed || sequence !== exitSequence || (preparing && !prepared)) return false;
+        if (prepared && kind === "close") {
+            const accepted = await session.close(editor);
+            if (!accepted) {preparing = false; prepared = false; freeze(false);}
+            return accepted;
+        }
+        preparing = true;
+        freeze(true);
+        let accepted = false;
+        try {
+            if (!await session.flush(editor) || session.getState().composing || sequence !== exitSequence) return false;
+            let state = session.getState();
+            if (state.problem?.kind === "indeterminate") return false;
+            if (state.hasUnsavedChanges) {
+                if (state.draftRevision < state.revision) return false;
+                const choice = await bridge.confirmClose();
+                if (sequence !== exitSequence || choice === "cancel") return false;
+                if (choice === "save-as" && !await saveAs(true)) return false;
+                if (sequence !== exitSequence) return false;
+                state = session.getState();
+                if (state.problem?.kind === "indeterminate") return false;
+            }
+            accepted = kind === "prepare-quit" || await session.close(editor);
+            prepared = accepted && kind === "prepare-quit";
+            return accepted;
+        } finally {
+            if (!accepted && sequence === exitSequence) {preparing = false; freeze(false);}
+        }
+    };
+    const completeSwitch = async (): Promise<boolean> => {
+        const candidate = pendingSwitch;
+        let next: MarkdownBootstrap;
+        try {
+            // 绑定交换可重试；回执丢失时由宿主快照确认新会话，不能恢复已释放的旧编辑器。
+            try {next = await bridge.tree.commitOpen(candidate.ticket);}
+            catch {
+                try {next = await bridge.tree.commitOpen(candidate.ticket);}
+                catch {next = await bridge.bootstrap();}
+            }
+            if (next.sessionId !== candidate.sessionId) throw new Error("Markdown switch is unconfirmed");
+        } catch {
+            actionMessage = text("markdownError"); render(session.getState());
+            control<HTMLButtonElement>("markdownRetry").hidden = false;
+            control("markdownProblemActions").inert = false;
+            return false;
+        }
+        pendingSwitch = undefined;
+        destroyCurrent();
+        replacement = await mountMarkdownApplication(bridge, root, next);
+        return true;
+    };
+    const openTreeFile = async (location: MarkdownTreeLocation): Promise<boolean> => {
+        if (frozen || disposed || switching) return false;
+        switching = true; freeze(true);
+        let ticket: string;
+        let released = false;
+        const task = (async () => {
+            try {
+                await pendingFileAction;
+                const candidate = await bridge.tree.prepareOpen(location);
+                if (candidate.kind === "current") return true;
+                if (candidate.kind !== "ready") {
+                    if (candidate.kind === "blocked") {actionMessage = text(markdownErrorKey(candidate.error)); render(session.getState());}
+                    return false;
+                }
+                ticket = candidate.ticket;
+                if (!await protectExit("close")) return false;
+                released = true;
+                pendingSwitch = candidate;
+                return await completeSwitch();
+            } finally {
+                if (ticket && !released) await bridge.tree.cancelOpen(ticket).catch(reportError);
+                switching = false;
+                if (!disposed && !released) {preparing = false; freeze(false);}
+            }
+        })();
+        switchTask = task;
+        try {return await task;} finally {if (switchTask === task) switchTask = undefined;}
+    };
+    control("markdownRetry").addEventListener("click", () => {
+        if (!pendingSwitch || switchTask || disposed) return;
+        switchTask = completeSwitch().catch(() => {reportError(); return false;}).finally(() => {switchTask = undefined;});
+    });
+    tree = createMarkdownTree({
+        element: control("markdownTree"), toggle: control<HTMLButtonElement>("markdownFiles"), bridge: bridge.tree, text,
+        mobile: ["android", "ios", "harmony"].includes(bootstrap.platform), onOpen: openTreeFile,
+        onError() {actionMessage = text("markdownFolderError"); render(session.getState());},
+    });
+    tree.freeze(frozen);
+    const checkpointBackground = async (message: MarkdownCommand) => {
+        let accepted = false;
+        try {clearTimeout(autoSave); accepted = await session.flush(editor);}
+        finally {await bridge.respond(message.id, accepted);}
+    };
+    const command = async (message: MarkdownCommand) => {
+        // 候选云文件读取可能很慢；进入后台仍先保护当前文档的已提交输入。
+        if (message.type === "background" && switchTask && session.getState().lifecycle === "open") {
+            await checkpointBackground(message);
+            return;
+        }
+        if (switchTask) {
+            if (message.type === "cancel-quit") {exitSequence++; return;}
+            try {await switchTask;}
+            catch {
+                if (["close", "prepare-quit", "background"].includes(message.type)) await bridge.respond(message.id, false);
+                return;
+            }
+            if (replacement) return replacement.dispatch(message);
+        }
+        if (disposed) return;
+        if (message.type === "tree-change") {await tree.refresh(); return;}
+        if (message.type === "background") {
+            await checkpointBackground(message);
+            return;
+        }
+        if (message.type === "theme") {
+            systemDark = message.dark;
+            await applyTheme();
+            return;
+        }
+        if (message.type === "cancel-quit") { exitSequence++; freeze(false); preparing = false; prepared = false; return; }
+        if (message.type === "external-change") {
+            void tree.refresh();
+            if (!frozen && !editPending && await session.reload()) editor.setValue(session.getState().content);
+            return;
+        }
+        let accepted = false;
+        try {
+            accepted = await protectExit(message.type);
+        } finally {
+            await bridge.respond(message.id, accepted);
+        }
+    };
+    unsubscribeInitialization();
+    const unsubscribe = bridge.onCommand(message => { void command(message).catch(reportError); });
+    const shortcut = (event: KeyboardEvent) => {
+        const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
+        if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (frozen || editor.flush().composing) return;
+        closeMore();
+        const run = event.key.toLowerCase() === "n" ? () => bridge.newDocument() :
+            event.key.toLowerCase() === "o" ? () => bridge.openDocument() : event.shiftKey ? () => saveAs() : save;
+        runAction(async () => { await run(); }, event.key.toLowerCase() === "s");
+    };
+    document.addEventListener("keydown", shortcut, true);
+    render(session.getState());
+    function destroyCurrent() {
+        if (disposed) return;
+        disposed = true; themeSequence++; exitSequence++;
+        clearTimeout(autoSave); unsubscribe();
+        document.removeEventListener("keydown", shortcut, true);
+        removeMenuListeners();
+        tree?.destroy(); modeChoice?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
+        editor.destroy();
+    }
+    return {
+        get session() {return replacement?.session ?? session;},
+        get editor() {return replacement?.editor ?? editor;},
+        dispatch: message => replacement ? replacement.dispatch(message) : command(message),
+        destroy() {if (replacement) replacement.destroy(); else destroyCurrent();},
+    };
+};
+
+const markdownBridge = createNativeMarkdownBridge(window);
+if (markdownBridge) {
+    void mountMarkdownApplication(markdownBridge).catch(error => console.error("Markdown editor initialization failed", error));
+}

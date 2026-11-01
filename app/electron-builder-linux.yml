@@ -1,3 +1,4 @@
+extends: "./electron-builder-common.yml"
 productName: "SiYuan"
 appId: "org.b3log.siyuan"
 publish: null

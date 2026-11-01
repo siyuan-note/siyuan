@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20261030103731"
+		"updated": "20261101145217"
 	},
 	"Children": [
 		{
@@ -220,6 +220,23 @@
 					"TextMarkBlockRefID": "20221016213639-1nag9jj",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "標題與列表混合排版"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-55e7aeb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-55e7aeb",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-411811d",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "獨立 Markdown 編輯器"
 				}
 			]
 		},

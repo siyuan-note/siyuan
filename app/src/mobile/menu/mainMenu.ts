@@ -16,6 +16,7 @@ import {openDataMigration} from "../../menus/dataMigration";
 import {openTemplateManager} from "../../template/manager";
 import {isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getMobileMarkdownOpener} from "../util/markdownEditor";
 import {escapeAttr} from "../../util/escape";
 import {getSettingTabDefs, settingTabToMenuId, type ISettingTabShell, type TSettingTab} from "../../config/setting/tabs";
 
@@ -126,6 +127,16 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
                 const contextID = getCurrentEditor()?.protyle.block.rootID || "";
                 closePanel();
                 openTemplateManager(contextID);
+            },
+        },
+        {
+            id: "menuMarkdownEditor",
+            icon: "iconMarkdown",
+            label: lang("markdownEditor"),
+            hidden: () => !getMobileMarkdownOpener(),
+            click() {
+                const open = getMobileMarkdownOpener();
+                if (open) { closePanel(); open(); }
             },
         },
         {

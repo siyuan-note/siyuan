@@ -63,6 +63,12 @@ type attributeViewSearchItem struct {
 	groupID string
 }
 
+// 父视图及其分组共享汇总筛选依赖，生命周期限于一次视图渲染。
+type attributeViewRowRenderContext struct {
+	cachedAttrViews          map[string]*av.AttributeView
+	rollupFurtherCollections map[string]*av.RollupRenderContext
+}
+
 func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *AttributeViewSearchTarget) {
 	waitForSyncingStorages()
 
@@ -714,8 +720,9 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 		renderTargetItemID = ""
 	}
 	var targetIndex, targetOffset int
+	rowRenderContext := &attributeViewRowRenderContext{}
 	targetIndex, targetOffset, err = renderViewableInstanceWithOrder(viewable, view, attrView, page, pageSize, ignoreRows,
-		renderTargetItemID, renderContext, orderReuse.capture, filterContext)
+		renderTargetItemID, renderContext, rowRenderContext, orderReuse.capture, filterContext)
 	if nil != err {
 		return
 	}
@@ -735,7 +742,7 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
 	if view.LayoutType != av.LayoutTypeCalendar && (!ignoreRows || len(view.Groups) > 0) {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
-			ignoreRows, writable, target, targetGroupID, renderContext, filterContext)
+			ignoreRows, writable, target, targetGroupID, renderContext, rowRenderContext, filterContext)
 	}
 	if options.TemplateHTTP != nil {
 		if err = renderContext.HTTPTemplateError(); err != nil {
@@ -754,7 +761,7 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page,
 	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
 	target *AttributeViewRenderTarget, targetGroupID string, renderContext *sql.AttributeViewRenderContext,
-	filterContext *av.FilterContext) (err error) {
+	rowRenderContext *attributeViewRowRenderContext, filterContext *av.FilterContext) (err error) {
 	if renderContext != nil && renderContext.TemplateHTTP != nil {
 		if err = renderContext.HTTPTemplateError(); err != nil {
 			return
@@ -873,8 +880,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 				groupTargetItemID = target.ItemID
 			}
 		}
-		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage,
-			groupPageSize, ignoreRows, groupTargetItemID, renderContext, filterContext)
+		targetIndex, targetOffset, renderErr := renderViewableInstanceWithOrder(groupViewable, view, attrView, groupPage,
+			groupPageSize, ignoreRows, groupTargetItemID, renderContext, rowRenderContext, nil, filterContext)
 		err = renderErr
 		if nil != err {
 			return
@@ -1227,11 +1234,13 @@ func attrViewFiltersUseRenderedValues(filters []*av.ViewFilter, renderTemplateKe
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
 	ignoreRows bool, targetItemID string,
 	renderContext *sql.AttributeViewRenderContext, filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
-	return renderViewableInstanceWithOrder(viewable, view, attrView, page, pageSize, ignoreRows, targetItemID, renderContext, nil, filterContexts...)
+	return renderViewableInstanceWithOrder(viewable, view, attrView, page, pageSize, ignoreRows, targetItemID,
+		renderContext, nil, nil, filterContexts...)
 }
 
 func renderViewableInstanceWithOrder(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
-	ignoreRows bool, targetItemID string, renderContext *sql.AttributeViewRenderContext, captureOrder func([]av.Item),
+	ignoreRows bool, targetItemID string, renderContext *sql.AttributeViewRenderContext,
+	rowRenderContext *attributeViewRowRenderContext, captureOrder func([]av.Item),
 	filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
 	timing := util.BeginPerformance("database.rows")
 	defer timing.Finish()
@@ -1253,8 +1262,16 @@ func renderViewableInstanceWithOrder(viewable av.Viewable, view *av.View, attrVi
 		}
 	}
 
-	cachedAttrViews := map[string]*av.AttributeView{}
-	rollupFurtherCollections := sql.GetFurtherCollectionsWithContext(attrView, cachedAttrViews, renderContext)
+	if rowRenderContext == nil {
+		rowRenderContext = &attributeViewRowRenderContext{}
+	}
+	if rowRenderContext.cachedAttrViews == nil {
+		rowRenderContext.cachedAttrViews = map[string]*av.AttributeView{}
+		rowRenderContext.rollupFurtherCollections = sql.GetFurtherCollectionsWithContext(
+			attrView, rowRenderContext.cachedAttrViews, renderContext)
+	}
+	cachedAttrViews := rowRenderContext.cachedAttrViews
+	rollupFurtherCollections := rowRenderContext.rollupFurtherCollections
 	var filterContext *av.FilterContext
 	if 0 < len(filterContexts) {
 		filterContext = filterContexts[0]

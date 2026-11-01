@@ -11,7 +11,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (sources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     document.head.innerHTML = `<style>${sources.css}</style>`;
-    document.body.style.cssText = "--b3-font-size:16px;--b3-font-size-editor:32px";
+    document.body.style.cssText = "--b3-font-size:16px;--b3-font-size-editor:32px;--b3-font-family:Arial;--b3-font-family-protyle:Georgia";
     document.body.innerHTML = `<div class="toolbar mobile-topbar"><button class="toolbar__button">L</button>
 <input id="toolbarName" class="toolbar__title"><span id="toolbarNameReadonly" class="toolbar__title toolbar__title--readonly"></span>
 <button class="toolbar__button">R</button></div><div id="editor"></div>`;
@@ -41,7 +41,7 @@ const browserCases = async (sources: Record<string, string>) => {
     const {updateMobileTitleReadonly: readonly} = load(sources.readonly);
     const response = (html: string) => ({code: 0, data: {id: protyle.block.rootID, notebook: protyle.notebookId,
         format: "inline-ast", text: "Summary", empty: false,
-        blockDOM: `<div data-type="NodeParagraph"><div contenteditable="true">${html}</div></div>`}});
+        blockDOM: `<div data-node-id="paragraph" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="false">${html}</div></div>`}});
     input.value = "Summary";
     update(protyle);
     readonly(protyle);
@@ -79,7 +79,18 @@ const browserCases = async (sources: Record<string, string>) => {
     }
     let opens = 0;
     let saves = 0;
-    modules["../../util/fetch"].fetchSyncPost = async () => ({code: 0, data: {...response("").data, revision: "r0"}});
+    const editingHTML = '<span>123</span><span data-type="strong">Bold</span> <span data-type="em">Italic</span>' +
+        '<span data-type="mark">Mark</span>';
+    modules["../../protyle/header/documentTitlePreview"].renderDocumentTitlePreview(label.firstElementChild, "document", "box",
+        () => true, response(editingHTML).data);
+    const textBounds = (element: Element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect();
+    };
+    const previewBounds = textBounds(label.querySelector(".document-title-preview > span"));
+    const previewWeight = getComputedStyle(label.querySelector(".document-title-preview > span")).fontWeight;
+    modules["../../util/fetch"].fetchSyncPost = async () => ({code: 0, data: {...response(editingHTML).data, revision: "r0"}});
     modules["../render/autoDirection"] = {setTitleAutoDirection: () => {}};
     modules["../util/normalizeText"] = {nbsp2space: (text: string) => text};
     modules["../../util/escape"] = {escapeHtmlTextAndAttr: (text: string) => text};
@@ -88,11 +99,11 @@ const browserCases = async (sources: Record<string, string>) => {
     modules["./documentTitleEditor"] = {DocumentTitleEditor: class {
         element = document.createElement("div");
         fragment: any;
-        constructor(_owner: unknown, host: HTMLElement, _value: unknown, onEditable: (element: HTMLElement) => void) {
-            host.classList.add("protyle-title__rich");
-            host.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg"><div data-type="NodeParagraph">' +
-                '<div class="protyle-title__input" contenteditable="true"><span data-type="strong">Inline title</span></div></div></div></div>';
+        constructor(_owner: unknown, host: HTMLElement, value: {blockDOM: string}, onEditable: (element: HTMLElement) => void) {
+            host.classList.add("protyle", "protyle-lite-fragment", "protyle-title__rich");
+            host.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg">' + value.blockDOM + "</div></div>";
             this.element = host.querySelector("[contenteditable]");
+            this.element.classList.add("protyle-title__input");
             this.fragment = {protyle: {element: host}};
             onEditable(this.element);
         }
@@ -121,6 +132,13 @@ const browserCases = async (sources: Record<string, string>) => {
     check.ok(label.getBoundingClientRect().height <= 48);
     check.equal(getComputedStyle(title.editElement).fontSize, "17px");
     const editable = title.editElement;
+    const editingBounds = textBounds(editable.firstElementChild);
+    check.ok(Math.abs(editingBounds.top - previewBounds.top) <= 1,
+        "opening the top-bar editor preserves the preview text position: " + JSON.stringify({preview: previewBounds.top, editing: editingBounds.top}));
+    check.ok(Math.abs(editingBounds.left - previewBounds.left) <= 1, "opening the top-bar editor preserves horizontal alignment");
+    check.equal(getComputedStyle(editable.firstElementChild).fontWeight, previewWeight, "ordinary text keeps its preview weight");
+    check.equal(getComputedStyle(editable).fontFamily, getComputedStyle(label).fontFamily, "the top-bar editor uses the navigation font");
+    check.equal(getComputedStyle(editable.querySelector('[data-type="strong"]')).fontWeight, "700", "explicit bold marks remain bold");
     title.setTitle("Saved summary");
     check.equal(title.editElement, editable, "summary refresh keeps the inline editor and caret");
     check.equal(label.querySelector(".mobile-document-title-editor"), inline);

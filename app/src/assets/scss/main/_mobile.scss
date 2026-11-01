@@ -303,9 +303,20 @@ body.mobile-keyboard--open {
         overflow: auto;
         cursor: text;
 
+        .protyle-wysiwyg {
+          font-size: inherit;
+          font-family: inherit;
+
+          > [data-type="NodeParagraph"] {
+            padding: 0;
+          }
+        }
+
         .protyle-title__input {
           font-size: 17px;
+          font-weight: inherit;
           line-height: 30px;
+          padding: 0;
           white-space: pre;
         }
 

@@ -60,3 +60,17 @@ test("sub-item structure changes refresh only attribute panels bound to the data
     assert.equal(relevant.refreshed(), operations.length);
     assert.equal(unrelated.refreshed(), 0);
 });
+
+test("relation and source field changes coalesce a refresh of computed panel values", () => {
+    const {panel} = setup("database", "item");
+    let queued = 0;
+    Object.assign(panel, {queueRefresh: () => { queued++; }});
+    for (const type of ["relation", "text", "date", "select", "checkbox"] as TAVCol[]) {
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "item", data: {type}});
+        panel.refreshForOperation({action: "updateAttrViewCells", avID: "database", cellUpdates: [
+            {rowID: "item", data: {type}},
+        ]} as IOperation);
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "other", data: {type}});
+    }
+    assert.equal(queued, 10);
+});

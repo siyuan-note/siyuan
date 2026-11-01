@@ -7,6 +7,8 @@ package model
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"golang.org/x/sync/errgroup"
 	"io"
@@ -17,7 +19,6 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/carddav"
@@ -86,6 +87,21 @@ var (
 
 	ErrorCardDavAddressNotFound                 = errors.New("CardDAV: address not found")
 	ErrorCardDavAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
+	ErrorCardDavBookExists                      = errors.New("CardDAV: address book already exists")
+
+	cardDavReadErrorCodes = map[error]int{
+		ErrorCardDavPathInvalid:                     http.StatusNotFound,
+		ErrorCardDavBookNotFound:                    http.StatusNotFound,
+		ErrorCardDavBookPathInvalid:                 http.StatusNotFound,
+		ErrorCardDavAddressNotFound:                 http.StatusNotFound,
+		ErrorCardDavAddressFileExtensionNameInvalid: http.StatusNotFound,
+	}
+	// PUT 到不存在的通讯录时缺少父集合（RFC 4918 §9.7.1）；对象名不合法时不允许在此创建资源
+	cardDavWriteErrorCodes = map[error]int{
+		ErrorCardDavBookNotFound:                    http.StatusConflict,
+		ErrorCardDavBookPathInvalid:                 http.StatusForbidden,
+		ErrorCardDavAddressFileExtensionNameInvalid: http.StatusForbidden,
+	}
 )
 
 // AddressBooksMetaDataFilePath returns the absolute path of the address books metadata file
@@ -98,6 +114,11 @@ func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
 	return CardDavPathDepth(len(strings.Split(urlPath, "/")) - 1)
 }
 
+// isCardDavAddressBookPath 判断路径是否为 home set 下的通讯录；通讯录只能建在这里，目录也就只会落在 storage/carddav 下。
+func isCardDavAddressBookPath(bookPath string) bool {
+	return GetCardDavPathDepth(bookPath) == cardDavPathDepth_AddressBook && strings.HasPrefix(bookPath, CardDavHomeSetPath+"/")
+}
+
 // ParseAddressPath parses address path to address book path and address ID
 func ParseAddressPath(addressPath string) (addressBookPath string, addressID string, err error) {
 	addressBookPath, addressFileName := path.Split(addressPath)
@@ -105,7 +126,7 @@ func ParseAddressPath(addressPath string) (addressBookPath string, addressID str
 	addressID = path.Base(addressFileName)
 	addressFileExt := util.Ext(addressFileName)
 
-	if GetCardDavPathDepth(addressBookPath) != cardDavPathDepth_AddressBook {
+	if !isCardDavAddressBookPath(addressBookPath) {
 		err = ErrorCardDavBookPathInvalid
 		return
 	}
@@ -118,31 +139,24 @@ func ParseAddressPath(addressPath string) (addressBookPath string, addressID str
 	return
 }
 
-// AddressPropsFilter filters address properties
+// AddressPropsFilter 按 address-data 请求只保留列出的属性（RFC 6352 §10.4.2），并保留 VERSION 使结果仍是合法的 vCard。
 func AddressPropsFilter(address *carddav.AddressObject, req *carddav.AddressDataRequest) *carddav.AddressObject {
-	var card *vcard.Card
-	card = &address.Card
-
-	// if req.AllProp {
-	// 	card = &address.Card
-	// } else {
-	// 	card = &vcard.Card{}
-	// 	for _, prop := range req.Props {
-	// 		fields := address.Card[prop]
-	// 		if fields != nil {
-	// 			for _, field := range fields {
-	// 				card.Add(prop, field)
-	// 			}
-	// 		}
-	// 	}
-	// }
+	card := address.Card
+	if nil != req && !req.AllProp && 0 < len(req.Props) {
+		card = vcard.Card{vcard.FieldVersion: address.Card[vcard.FieldVersion]}
+		for _, prop := range req.Props {
+			if fields, ok := address.Card[strings.ToUpper(prop)]; ok {
+				card[strings.ToUpper(prop)] = fields
+			}
+		}
+	}
 
 	return &carddav.AddressObject{
 		Path:          address.Path,
 		ModTime:       address.ModTime,
 		ContentLength: address.ContentLength,
 		ETag:          address.ETag,
-		Card:          *card,
+		Card:          card,
 	}
 }
 
@@ -262,7 +276,7 @@ func (c *Contacts) GetAddress(addressPath string) (addressBook *AddressBook, add
 	return
 }
 
-func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, addressObject *AddressObject, err error) {
+func (c *Contacts) DeleteAddress(addressPath string, conditions *DAVConditions) (addressBook *AddressBook, addressObject *AddressObject, err error) {
 	bookPath, addressID, err := ParseAddressPath(addressPath)
 	if err != nil {
 		logging.LogErrorf("parse address path [%s] failed: %s", addressPath, err)
@@ -283,6 +297,10 @@ func (c *Contacts) DeleteAddress(addressPath string) (addressBook *AddressBook, 
 		return
 	}
 
+	if err = conditions.check(true, addressObject.Data.ETag); err != nil {
+		return
+	}
+
 	if err = os.Remove(addressObject.FilePath); err != nil {
 		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", addressObject.FilePath, err)
@@ -297,7 +315,7 @@ func (c *Contacts) ListAddressBooks() (addressBooks []carddav.AddressBook, err e
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	for _, addressBook := range contacts.booksMetaData {
+	for _, addressBook := range c.booksMetaData {
 		addressBooks = append(addressBooks, *addressBook)
 	}
 	return
@@ -307,7 +325,7 @@ func (c *Contacts) GetAddressBook(path string) (addressBook *carddav.AddressBook
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if book, ok := contacts.books.Load(path); ok {
+	if book, ok := c.books.Load(path); ok {
 		addressBook = book.(*AddressBook).MetaData
 		return
 	}
@@ -316,72 +334,65 @@ func (c *Contacts) GetAddressBook(path string) (addressBook *carddav.AddressBook
 	return
 }
 
+// CreateAddressBook 在 home set 下创建新通讯录；RFC 4918 §9.3 要求 MKCOL 不能作用于已存在的资源，失败时恢复原状态。
 func (c *Contacts) CreateAddressBook(addressBookMetaData *carddav.AddressBook) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var addressBook *AddressBook
-
-	// update map
-	if value, ok := c.books.Load(addressBookMetaData.Path); ok {
-		// update map item
-		addressBook = value.(*AddressBook)
-		addressBook.MetaData = addressBookMetaData
-	} else {
-		// insert map item
-		addressBook = &AddressBook{
-			Changed:       false,
-			DirectoryPath: DavPath2DirectoryPath(addressBookMetaData.Path),
-			MetaData:      addressBookMetaData,
-			Addresses:     sync.Map{},
-		}
-		c.books.Store(addressBookMetaData.Path, addressBook)
+	if !isCardDavAddressBookPath(addressBookMetaData.Path) {
+		return carddav.NewPreconditionError("addressbook-collection-location-ok")
+	}
+	if _, ok := c.books.Load(addressBookMetaData.Path); ok {
+		return webdav.NewHTTPError(http.StatusMethodNotAllowed, ErrorCardDavBookExists)
 	}
 
-	var index = -1
-	for i, item := range c.booksMetaData {
-		if item.Path == addressBookMetaData.Path {
-			index = i
-			break
-		}
+	addressBook := &AddressBook{
+		Changed:       false,
+		DirectoryPath: DavPath2DirectoryPath(addressBookMetaData.Path),
+		MetaData:      addressBookMetaData,
+		Addresses:     sync.Map{},
 	}
-
-	if index >= 0 {
-		// update list
-		c.booksMetaData[index] = addressBookMetaData
-	} else {
-		// insert list
-		c.booksMetaData = append(c.booksMetaData, addressBookMetaData)
-	}
-
-	// create address book directory
-	if err = os.MkdirAll(addressBook.DirectoryPath, 0755); err != nil {
-		logging.LogErrorf("create directory [%s] failed: %s", addressBook.DirectoryPath, err)
+	_, statErr := os.Stat(addressBook.DirectoryPath)
+	createdDirectory := os.IsNotExist(statErr)
+	// 目录可能因同步或中断的操作而已经存在，载入其中的联系人以免之后被同名写入覆盖
+	if err = addressBook.load(); err != nil {
 		return
 	}
 
-	// save meta data
+	c.books.Store(addressBookMetaData.Path, addressBook)
+	c.booksMetaData = append(c.booksMetaData, addressBookMetaData)
 	if err = c.saveAddressBooksMetaData(); err != nil {
+		c.books.Delete(addressBookMetaData.Path)
+		c.booksMetaData = c.booksMetaData[:len(c.booksMetaData)-1]
+		if createdDirectory {
+			_ = os.Remove(addressBook.DirectoryPath)
+		}
 		return
 	}
-
 	return
 }
 
-func (c *Contacts) DeleteAddressBook(path string) (err error) {
+func (c *Contacts) DeleteAddressBook(path string, conditions *DAVConditions) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var addressBook *AddressBook
-
-	// delete map item
-	if value, loaded := c.books.LoadAndDelete(path); loaded {
-		addressBook = value.(*AddressBook)
-	} else {
+	value, ok := c.books.Load(path)
+	if !ok {
 		return webdav.NewHTTPError(http.StatusNotFound, ErrorCardDavBookNotFound)
 	}
+	addressBook := value.(*AddressBook)
+	if err = conditions.check(true, ""); err != nil {
+		return
+	}
 
-	// delete list item
+	// 先删除目录，失败时缓存和元数据仍与磁盘一致
+	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
+		c.loaded = false
+		logging.LogErrorf("remove directory [%s] failed: %s", addressBook.DirectoryPath, err)
+		return
+	}
+
+	c.books.Delete(path)
 	for i, item := range c.booksMetaData {
 		if item.Path == path {
 			c.booksMetaData = append(c.booksMetaData[:i], c.booksMetaData[i+1:]...)
@@ -389,14 +400,8 @@ func (c *Contacts) DeleteAddressBook(path string) (err error) {
 		}
 	}
 
-	// remove address book directory
-	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
-		logging.LogErrorf("remove directory [%s] failed: %s", addressBook.DirectoryPath, err)
-		return
-	}
-
-	// save meta data
 	if err = c.saveAddressBooksMetaData(); err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -499,6 +504,10 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 		}
 	}
 
+	if err = addressBook.validateAddress(addressID, card); err != nil {
+		return
+	}
+
 	// Do not mutate a cached object until its replacement is persisted.
 	address := &AddressObject{
 		Changed:  true,
@@ -526,11 +535,11 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 	return
 }
 
-func (c *Contacts) DeleteAddressObject(addressPath string) (err error) {
+func (c *Contacts) DeleteAddressObject(addressPath string, conditions *DAVConditions) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	_, _, err = c.DeleteAddress(addressPath)
+	_, _, err = c.DeleteAddress(addressPath, conditions)
 	if err != nil {
 		return
 	}
@@ -543,6 +552,30 @@ type AddressBook struct {
 	DirectoryPath string
 	MetaData      *carddav.AddressBook
 	Addresses     sync.Map // id -> *AddressObject
+}
+
+// validateAddress 检查 RFC 6352 §6.3.2.1 对新写入联系人的前置条件；已有数据不受影响，只校验本次写入。
+func (b *AddressBook) validateAddress(addressID string, card vcard.Card) error {
+	if err := vcard.NewEncoder(io.Discard).Encode(card); err != nil {
+		return carddav.NewPreconditionError(carddav.PreconditionValidAddressData)
+	}
+
+	// vCard 3.0 的 UID 是可选属性，没有 UID 的联系人不参与冲突检查
+	uid := card.Value(vcard.FieldUID)
+	conflict := false
+	b.Addresses.Range(func(id any, value any) bool {
+		existingUID := value.(*AddressObject).Data.Card.Value(vcard.FieldUID)
+		if id.(string) == addressID {
+			conflict = "" != existingUID && existingUID != uid
+		} else {
+			conflict = "" != uid && existingUID == uid
+		}
+		return !conflict
+	})
+	if conflict {
+		return carddav.NewPreconditionError(carddav.PreconditionNoUIDConflict)
+	}
+	return nil
 }
 
 // load an address book from multiple *.vcf files
@@ -586,6 +619,12 @@ func (b *AddressBook) load() error {
 						if err := address.update(); err != nil {
 							return err
 						}
+						// 响应体是重新编码的数据，同步或手工放入的文件不一定是规范编码；无法编码时不声明长度
+						var lengthErr error
+						if address.Data.ContentLength, lengthErr = davEncodedLength(func(w io.Writer) error { return vcard.NewEncoder(w).Encode(address.Data.Card) }); lengthErr != nil {
+							logging.LogWarnf("encode card [%s] failed: %s", addressFilePath, lengthErr)
+							address.Data.ContentLength = 0
+						}
 
 						id := path.Base(filename)
 						b.Addresses.Store(id, address)
@@ -594,7 +633,13 @@ func (b *AddressBook) load() error {
 						addressesWaitGroup := &errgroup.Group{}
 						for _, vCard := range vCards {
 							addressesWaitGroup.Go(func() error {
-								filename_ := util.AssetName(filename, ast.NewNodeID())
+								// 文件名由卡片内容决定：多台设备同步前各自拆分同一文件时得到同名同内容的文件，同步后不会重复
+								var encoded bytes.Buffer
+								if err := vcard.NewEncoder(&encoded).Encode(*vCard); err != nil {
+									return err
+								}
+								sum := sha256.Sum256(encoded.Bytes())
+								filename_ := strings.TrimSuffix(filename, VCardFileExt) + "-" + hex.EncodeToString(sum[:8]) + VCardFileExt
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
 									BookPath: b.MetaData.Path,
@@ -609,8 +654,7 @@ func (b *AddressBook) load() error {
 									return err
 								}
 
-								id := path.Base(filename)
-								b.Addresses.Store(id, address)
+								b.Addresses.Store(filename_, address)
 								return nil
 							})
 						}
@@ -721,6 +765,7 @@ func (b *CardDavBackend) GetAddressBook(ctx context.Context, bookPath string) (a
 	}
 
 	addressBook, err = contacts.GetAddressBook(bookPath)
+	err = davError(err, cardDavReadErrorCodes)
 	// logging.LogDebugf("CardDAV GetAddressBook <- addressBook: %#v, err: %s", addressBook, err)
 	return
 }
@@ -746,7 +791,7 @@ func (b *CardDavBackend) DeleteAddressBook(ctx context.Context, bookPath string)
 		return
 	}
 
-	err = contacts.DeleteAddressBook(bookPath)
+	err = contacts.DeleteAddressBook(bookPath, davConditionsFromContext(ctx))
 	// logging.LogDebugf("CardDAV DeleteAddressBook <- err: %s", err)
 	return
 }
@@ -760,6 +805,7 @@ func (b *CardDavBackend) GetAddressObject(ctx context.Context, addressPath strin
 	}
 
 	addressObject, err = contacts.GetAddressObject(addressPath, req)
+	err = davError(err, cardDavReadErrorCodes)
 	// logging.LogDebugf("CardDAV GetAddressObject <- addressObject: %#v, err: %s", addressObject, err)
 	return
 }
@@ -773,6 +819,7 @@ func (b *CardDavBackend) ListAddressObjects(ctx context.Context, bookPath string
 	}
 
 	addressObjects, err = contacts.ListAddressObjects(bookPath, req)
+	err = davError(err, cardDavReadErrorCodes)
 	// logging.LogDebugf("CardDAV ListAddressObjects <- addressObjects: %#v, err: %s", addressObjects, err)
 	return
 }
@@ -786,6 +833,7 @@ func (b *CardDavBackend) QueryAddressObjects(ctx context.Context, urlPath string
 	}
 
 	addressObjects, err = contacts.QueryAddressObjects(urlPath, query)
+	err = davError(err, cardDavReadErrorCodes)
 	// logging.LogDebugf("CardDAV QueryAddressObjects <- addressObjects: %#v, err: %s", addressObjects, err)
 	return
 }
@@ -799,8 +847,27 @@ func (b *CardDavBackend) PutAddressObject(ctx context.Context, addressPath strin
 	}
 
 	addressObject, err = contacts.PutAddressObject(addressPath, card, opts)
+	if err != nil {
+		return nil, davError(err, cardDavWriteErrorCodes)
+	}
 	// logging.LogDebugf("CardDAV PutAddressObject <- addressObject: %#v, err: %s", addressObject, err)
-	return
+	return addressObjectForPutResponse(ctx, addressObject), nil
+}
+
+// addressObjectForPutResponse 在存储内容与提交内容不是同一字节序列时去掉 ETag，
+// RFC 6352 §6.3.2.3 不允许此时在 PUT 响应中返回强 ETag，客户端需要重新获取。
+func addressObjectForPutResponse(ctx context.Context, addressObject *carddav.AddressObject) *carddav.AddressObject {
+	request := davRequestFromContext(ctx)
+	if nil == request || nil == request.Body {
+		return addressObject
+	}
+	var stored bytes.Buffer
+	if err := vcard.NewEncoder(&stored).Encode(addressObject.Card); err == nil && bytes.Equal(stored.Bytes(), request.Body) {
+		return addressObject
+	}
+	response := *addressObject
+	response.ETag = ""
+	return &response
 }
 
 func (b *CardDavBackend) DeleteAddressObject(ctx context.Context, addressPath string) (err error) {
@@ -811,7 +878,8 @@ func (b *CardDavBackend) DeleteAddressObject(ctx context.Context, addressPath st
 		return
 	}
 
-	err = contacts.DeleteAddressObject(addressPath)
+	err = contacts.DeleteAddressObject(addressPath, davConditionsFromContext(ctx))
+	err = davError(err, cardDavReadErrorCodes)
 	// logging.LogDebugf("CardDAV DeleteAddressObject <- err: %s", err)
 	return
 }

@@ -21,7 +21,7 @@ type deleteAddressBookTestBackend struct {
 }
 
 func (b *deleteAddressBookTestBackend) DeleteAddressBook(ctx context.Context, path string) error {
-	return b.contacts.DeleteAddressBook(PathCleanWithSlash(path))
+	return b.contacts.DeleteAddressBook(PathCleanWithSlash(path), nil)
 }
 
 func TestDAVDeleteMissingCollection(t *testing.T) {
@@ -54,7 +54,7 @@ func TestDAVDeleteMissingCollection(t *testing.T) {
 		})
 	}
 	for range 3 {
-		err := calendarStore.DeleteCalendar(calendarPath)
+		err := calendarStore.DeleteCalendar(calendarPath, nil)
 		if want := webdav.NewHTTPError(http.StatusNotFound, ErrorCalDavCalendarNotFound); err == nil || err.Error() != want.Error() {
 			t.Fatalf("DeleteCalendar error = %v, want %v", err, want)
 		}

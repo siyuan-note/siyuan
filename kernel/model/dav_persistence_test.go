@@ -68,7 +68,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 				}
 				return data.Data.Children[0].Props.Text(ical.PropSummary)
 			},
-			remove:  func() error { return store.DeleteCalendarObject(objectPath) },
+			remove:  func() error { return store.DeleteCalendarObject(objectPath, nil) },
 			setPath: func(file string) { _, object, _ := store.GetObject(objectPath); object.FilePath = file },
 		}
 	}
@@ -96,7 +96,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 			}
 			return data.Card.Value(vcard.FieldFormattedName), nil
 		},
-		remove:  func() error { return store.DeleteAddressObject(objectPath) },
+		remove:  func() error { return store.DeleteAddressObject(objectPath, nil) },
 		setPath: func(file string) { _, object, _ := store.GetAddress(objectPath); object.FilePath = file },
 	}
 }

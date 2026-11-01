@@ -9,9 +9,11 @@ import (
 	"context"
 	"errors"
 	"golang.org/x/sync/errgroup"
+	"io"
 	"net/http"
 	"os"
 	"path"
+	"slices"
 	"strings"
 	"sync"
 
@@ -71,9 +73,23 @@ var (
 
 	ErrorCalDavCalendarNotFound    = errors.New("CalDAV: calendar not found")
 	ErrorCalDavCalendarPathInvalid = errors.New("CalDAV: calendar path is invalid")
+	ErrorCalDavCalendarExists      = errors.New("CalDAV: calendar already exists")
 
 	ErrorCalDavCalendarObjectNotFound    = errors.New("CalDAV: calendar object not found")
 	ErrorCalDavCalendarObjectPathInvalid = errors.New("CalDAV: calendar object path is invalid")
+
+	calDavReadErrorCodes = map[error]int{
+		ErrorCalDavCalendarNotFound:          http.StatusNotFound,
+		ErrorCalDavCalendarPathInvalid:       http.StatusNotFound,
+		ErrorCalDavCalendarObjectNotFound:    http.StatusNotFound,
+		ErrorCalDavCalendarObjectPathInvalid: http.StatusNotFound,
+	}
+	// PUT 到不存在的日历时缺少父集合（RFC 4918 §9.7.1）；对象名不合法时不允许在此创建资源
+	calDavWriteErrorCodes = map[error]int{
+		ErrorCalDavCalendarNotFound:          http.StatusConflict,
+		ErrorCalDavCalendarPathInvalid:       http.StatusForbidden,
+		ErrorCalDavCalendarObjectPathInvalid: http.StatusForbidden,
+	}
 )
 
 // CalendarsMetaDataFilePath returns the absolute path of the calendars' meta data file
@@ -86,6 +102,19 @@ func GetCalDavPathDepth(urlPath string) CalDavPathDepth {
 	return CalDavPathDepth(len(strings.Split(urlPath, "/")) - 1)
 }
 
+// isCalDavCalendarPath 判断路径是否为 home set 下的日历集合；日历只能建在这里，目录也就只会落在 storage/caldav 下。
+func isCalDavCalendarPath(calendarPath string) bool {
+	return GetCalDavPathDepth(calendarPath) == calDavPathDepth_Calendar && strings.HasPrefix(calendarPath, CalDavHomeSetPath+"/")
+}
+
+// calendarWithDefaults 补齐未持久化的默认属性：旧数据没有组件集时 go-webdav 只会声明 VEVENT。
+func calendarWithDefaults(calendar caldav.Calendar) caldav.Calendar {
+	if 0 == len(calendar.SupportedComponentSet) {
+		calendar.SupportedComponentSet = append([]string(nil), calendarSupportedComponentSet...)
+	}
+	return calendar
+}
+
 // GetCardDavPathDepth parses
 func ParseCalendarObjectPath(objectPath string) (calendarPath string, objectID string, err error) {
 	calendarPath, objectFileName := path.Split(objectPath)
@@ -93,7 +122,7 @@ func ParseCalendarObjectPath(objectPath string) (calendarPath string, objectID s
 	objectID = path.Base(objectFileName)
 	objectFileExt := util.Ext(objectFileName)
 
-	if GetCalDavPathDepth(calendarPath) != calDavPathDepth_Calendar {
+	if !isCalDavCalendarPath(calendarPath) {
 		err = ErrorCalDavCalendarPathInvalid
 		return
 	}
@@ -211,7 +240,7 @@ func (c *Calendars) GetObject(objectPath string) (calendar *Calendar, calendarOb
 	return
 }
 
-func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calendarObject *CalendarObject, err error) {
+func (c *Calendars) DeleteObject(objectPath string, conditions *DAVConditions) (calendar *Calendar, calendarObject *CalendarObject, err error) {
 	calendarPath, objectID, err := ParseCalendarObjectPath(objectPath)
 	if err != nil {
 		logging.LogErrorf("parse calendar object path [%s] failed: %s", objectPath, err)
@@ -232,6 +261,10 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 		return
 	}
 
+	if err = conditions.check(true, calendarObject.Data.ETag); err != nil {
+		return
+	}
+
 	if err = os.Remove(calendarObject.FilePath); err != nil {
 		c.loaded = false
 		logging.LogErrorf("remove file [%s] failed: %s", calendarObject.FilePath, err)
@@ -242,55 +275,44 @@ func (c *Calendars) DeleteObject(objectPath string) (calendar *Calendar, calenda
 	return
 }
 
+// CreateCalendar 在 home set 下创建新日历；RFC 4918 §9.3 要求 MKCOL 不能作用于已存在的资源，失败时恢复原状态。
 func (c *Calendars) CreateCalendar(calendarMetaData *caldav.Calendar) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var calendar *Calendar
-
-	// update map
-	if value, ok := c.calendars.Load(calendarMetaData.Path); ok {
-		// update map item
-		calendar = value.(*Calendar)
-		calendar.MetaData = calendarMetaData
-	} else {
-		// insert map item
-		calendar = &Calendar{
-			Changed:       false,
-			DirectoryPath: DavPath2DirectoryPath(calendarMetaData.Path),
-			MetaData:      calendarMetaData,
-			Objects:       sync.Map{},
-		}
-		c.calendars.Store(calendarMetaData.Path, calendar)
+	if !isCalDavCalendarPath(calendarMetaData.Path) {
+		return caldav.NewPreconditionError(caldav.PreconditionCalendarCollectionLocationOk)
+	}
+	if _, ok := c.calendars.Load(calendarMetaData.Path); ok {
+		return webdav.NewHTTPError(http.StatusMethodNotAllowed, ErrorCalDavCalendarExists)
+	}
+	if 0 == len(calendarMetaData.SupportedComponentSet) {
+		calendarMetaData.SupportedComponentSet = append([]string(nil), calendarSupportedComponentSet...)
 	}
 
-	var index = -1
-	for i, item := range c.calendarsMetaData {
-		if item.Path == calendarMetaData.Path {
-			index = i
-			break
-		}
+	calendar := &Calendar{
+		Changed:       false,
+		DirectoryPath: DavPath2DirectoryPath(calendarMetaData.Path),
+		MetaData:      calendarMetaData,
+		Objects:       sync.Map{},
 	}
-
-	if index >= 0 {
-		// update list
-		c.calendarsMetaData[index] = calendarMetaData
-	} else {
-		// insert list
-		c.calendarsMetaData = append(c.calendarsMetaData, calendarMetaData)
-	}
-
-	// create calendar directory
-	if err = os.MkdirAll(calendar.DirectoryPath, 0755); err != nil {
-		logging.LogErrorf("create directory [%s] failed: %s", calendar.DirectoryPath, err)
+	_, statErr := os.Stat(calendar.DirectoryPath)
+	createdDirectory := os.IsNotExist(statErr)
+	// 目录可能因同步或中断的操作而已经存在，载入其中的对象以免之后被同名写入覆盖
+	if err = calendar.load(); err != nil {
 		return
 	}
 
-	// save meta data
+	c.calendars.Store(calendarMetaData.Path, calendar)
+	c.calendarsMetaData = append(c.calendarsMetaData, calendarMetaData)
 	if err = c.saveCalendarsMetaData(); err != nil {
+		c.calendars.Delete(calendarMetaData.Path)
+		c.calendarsMetaData = c.calendarsMetaData[:len(c.calendarsMetaData)-1]
+		if createdDirectory {
+			_ = os.Remove(calendar.DirectoryPath)
+		}
 		return
 	}
-
 	return
 }
 
@@ -299,7 +321,7 @@ func (c *Calendars) ListCalendars() (calendars []caldav.Calendar, err error) {
 	defer c.lock.Unlock()
 
 	for _, calendar := range c.calendarsMetaData {
-		calendars = append(calendars, *calendar)
+		calendars = append(calendars, calendarWithDefaults(*calendar))
 	}
 	return
 }
@@ -309,7 +331,8 @@ func (c *Calendars) GetCalendar(calendarPath string) (calendar *caldav.Calendar,
 	defer c.lock.Unlock()
 
 	if value, ok := c.calendars.Load(calendarPath); ok {
-		calendar = value.(*Calendar).MetaData
+		withDefaults := calendarWithDefaults(*value.(*Calendar).MetaData)
+		calendar = &withDefaults
 		return
 	}
 
@@ -317,20 +340,27 @@ func (c *Calendars) GetCalendar(calendarPath string) (calendar *caldav.Calendar,
 	return
 }
 
-func (c *Calendars) DeleteCalendar(calendarPath string) (err error) {
+func (c *Calendars) DeleteCalendar(calendarPath string, conditions *DAVConditions) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var calendar *Calendar
-
-	// delete map item
-	if value, loaded := c.calendars.LoadAndDelete(calendarPath); loaded {
-		calendar = value.(*Calendar)
-	} else {
+	value, ok := c.calendars.Load(calendarPath)
+	if !ok {
 		return webdav.NewHTTPError(http.StatusNotFound, ErrorCalDavCalendarNotFound)
 	}
+	calendar := value.(*Calendar)
+	if err = conditions.check(true, ""); err != nil {
+		return
+	}
 
-	// delete list item
+	// 先删除目录，失败时缓存和元数据仍与磁盘一致
+	if err = os.RemoveAll(calendar.DirectoryPath); err != nil {
+		c.loaded = false
+		logging.LogErrorf("remove directory [%s] failed: %s", calendar.DirectoryPath, err)
+		return
+	}
+
+	c.calendars.Delete(calendarPath)
 	for i, item := range c.calendarsMetaData {
 		if item.Path == calendarPath {
 			c.calendarsMetaData = append(c.calendarsMetaData[:i], c.calendarsMetaData[i+1:]...)
@@ -338,14 +368,8 @@ func (c *Calendars) DeleteCalendar(calendarPath string) (err error) {
 		}
 	}
 
-	// 删除日历目录
-	if err = os.RemoveAll(calendar.DirectoryPath); err != nil {
-		logging.LogErrorf("remove directory [%s] failed: %s", calendar.DirectoryPath, err)
-		return
-	}
-
-	// save meta data
 	if err = c.saveCalendarsMetaData(); err != nil {
+		c.loaded = false
 		return
 	}
 
@@ -378,6 +402,10 @@ func (c *Calendars) PutCalendarObject(objectPath string, calendarData *ical.Cale
 		if err = checkDAVConditions(etag, opts.IfMatch, opts.IfNoneMatch); err != nil {
 			return
 		}
+	}
+
+	if err = calendar.validateObject(objectID, calendarData); err != nil {
+		return
 	}
 
 	// Do not mutate a cached object until its replacement is persisted.
@@ -447,12 +475,34 @@ func (c *Calendars) GetCalendarObject(objectPath string, req *caldav.CalendarCom
 	return
 }
 
-func (c *Calendars) QueryCalendarObjects(calendarPath string, query *caldav.CalendarQuery) (calendarObjects []caldav.CalendarObject, err error) {
+// QueryCalendarObjects 的查询范围由 Request-URI 决定（RFC 4791 §7.8）：单个对象、单个日历，或其下的全部日历。
+func (c *Calendars) QueryCalendarObjects(urlPath string, query *caldav.CalendarQuery) (calendarObjects []caldav.CalendarObject, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	calendarObjects, err = c.listCalendarObjects(calendarPath, &query.CompRequest)
-	if err != nil {
+	switch GetCalDavPathDepth(urlPath) {
+	case calDavPathDepth_Object:
+		var object *CalendarObject
+		if _, object, err = c.GetObject(urlPath); err != nil {
+			return
+		}
+		calendarObjects = append(calendarObjects, *object.Data)
+	case calDavPathDepth_Calendar:
+		if calendarObjects, err = c.listCalendarObjects(urlPath, &query.CompRequest); err != nil {
+			return
+		}
+	case calDavPathDepth_Root, calDavPathDepth_Principals, calDavPathDepth_UserPrincipal, calDavPathDepth_HomeSet:
+		c.calendars.Range(func(calendarPath any, value any) bool {
+			if strings.HasPrefix(calendarPath.(string), urlPath+"/") {
+				value.(*Calendar).Objects.Range(func(id any, object any) bool {
+					calendarObjects = append(calendarObjects, *object.(*CalendarObject).Data)
+					return true
+				})
+			}
+			return true
+		})
+	default:
+		err = ErrorCalDavCalendarPathInvalid
 		return
 	}
 
@@ -464,11 +514,11 @@ func (c *Calendars) QueryCalendarObjects(calendarPath string, query *caldav.Cale
 	return
 }
 
-func (c *Calendars) DeleteCalendarObject(objectPath string) (err error) {
+func (c *Calendars) DeleteCalendarObject(objectPath string, conditions *DAVConditions) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	_, _, err = c.DeleteObject(objectPath)
+	_, _, err = c.DeleteObject(objectPath, conditions)
 	if err != nil {
 		return
 	}
@@ -547,8 +597,72 @@ func (o *CalendarObject) load() error {
 	if err != nil {
 		return err
 	}
+	// 响应体是重新编码的数据，同步或手工放入的文件不一定是规范编码；无法编码时不声明长度
+	if o.Data.ContentLength, err = davEncodedLength(func(w io.Writer) error { return ical.NewEncoder(w).Encode(o.Data.Data) }); err != nil {
+		logging.LogWarnf("encode iCalendar [%s] failed: %s", o.FilePath, err)
+		o.Data.ContentLength = 0
+	}
 
 	o.Changed = false
+	return nil
+}
+
+// calendarObjectUID 返回日历对象资源的 UID；RFC 4791 §4.1 要求资源内除 VTIMEZONE 外的组件共用一个 UID。
+func calendarObjectUID(data *ical.Calendar) string {
+	if nil == data {
+		return ""
+	}
+	for _, child := range data.Children {
+		if ical.CompTimezone != child.Name {
+			uid, _ := child.Props.Text(ical.PropUID)
+			return uid
+		}
+	}
+	return ""
+}
+
+// validateObject 检查 RFC 4791 §5.3.2.1 对新写入日历对象资源的前置条件；已有数据不受影响，只校验本次写入。
+func (c *Calendar) validateObject(objectID string, data *ical.Calendar) error {
+	// 编码失败（例如缺少 DTSTAMP）说明不是有效的 iCalendar 数据
+	if err := ical.NewEncoder(io.Discard).Encode(data); err != nil {
+		return caldav.NewPreconditionError(caldav.PreconditionValidCalendarData)
+	}
+	if nil != data.Props.Get(ical.PropMethod) {
+		return caldav.NewPreconditionError(caldav.PreconditionValidCalendarObjectResource)
+	}
+	componentType, uid := "", calendarObjectUID(data)
+	for _, child := range data.Children {
+		if ical.CompTimezone == child.Name {
+			continue
+		}
+		if "" == componentType {
+			componentType = child.Name
+		}
+		childUID, _ := child.Props.Text(ical.PropUID)
+		if child.Name != componentType || childUID != uid {
+			return caldav.NewPreconditionError(caldav.PreconditionValidCalendarObjectResource)
+		}
+	}
+	if "" == componentType {
+		return caldav.NewPreconditionError(caldav.PreconditionValidCalendarObjectResource)
+	}
+	if !slices.Contains(calendarWithDefaults(*c.MetaData).SupportedComponentSet, componentType) {
+		return caldav.NewPreconditionError(caldav.PreconditionSupportedCalendarComponent)
+	}
+
+	conflict := false
+	c.Objects.Range(func(id any, value any) bool {
+		existingUID := calendarObjectUID(value.(*CalendarObject).Data.Data)
+		if id.(string) == objectID {
+			conflict = "" != existingUID && existingUID != uid
+		} else {
+			conflict = "" != uid && existingUID == uid
+		}
+		return !conflict
+	})
+	if conflict {
+		return caldav.NewPreconditionError(caldav.PreconditionNoUIDConflict)
+	}
 	return nil
 }
 
@@ -647,6 +761,7 @@ func (b *CalDavBackend) GetCalendar(ctx context.Context, calendarPath string) (c
 	}
 
 	calendar, err = calendars.GetCalendar(calendarPath)
+	err = davError(err, calDavReadErrorCodes)
 	// logging.LogDebugf("CalDAV GetCalendar <- calendar: %#v, err: %s", calendar, err)
 	return
 }
@@ -659,7 +774,7 @@ func (b *CalDavBackend) DeleteCalendar(ctx context.Context, calendarPath string)
 		return
 	}
 
-	err = calendars.DeleteCalendar(calendarPath)
+	err = calendars.DeleteCalendar(calendarPath, davConditionsFromContext(ctx))
 	// logging.LogDebugf("CalDAV DeleteCalendar <- err: %s", err)
 	return
 }
@@ -673,8 +788,27 @@ func (b *CalDavBackend) PutCalendarObject(ctx context.Context, objectPath string
 	}
 
 	calendarObject, err = calendars.PutCalendarObject(objectPath, calendar, opts)
+	if err != nil {
+		return nil, davError(err, calDavWriteErrorCodes)
+	}
 	// logging.LogDebugf("CalDAV PutCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
-	return
+	return calendarObjectForPutResponse(ctx, calendarObject), nil
+}
+
+// calendarObjectForPutResponse 在存储内容与提交内容不是同一字节序列时去掉 ETag，
+// RFC 4791 §5.3.4 不允许此时在 PUT 响应中返回强 ETag，客户端需要重新获取。
+func calendarObjectForPutResponse(ctx context.Context, calendarObject *caldav.CalendarObject) *caldav.CalendarObject {
+	request := davRequestFromContext(ctx)
+	if nil == request || nil == request.Body {
+		return calendarObject
+	}
+	var stored bytes.Buffer
+	if err := ical.NewEncoder(&stored).Encode(calendarObject.Data); err == nil && bytes.Equal(stored.Bytes(), request.Body) {
+		return calendarObject
+	}
+	response := *calendarObject
+	response.ETag = ""
+	return &response
 }
 
 func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
@@ -686,6 +820,7 @@ func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, calendarPath st
 	}
 
 	calendarObjects, err = calendars.ListCalendarObjects(calendarPath, req)
+	err = davError(err, calDavReadErrorCodes)
 	// logging.LogDebugf("CalDAV ListCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
 	return
 }
@@ -699,6 +834,7 @@ func (b *CalDavBackend) GetCalendarObject(ctx context.Context, objectPath string
 	}
 
 	calendarObject, err = calendars.GetCalendarObject(objectPath, req)
+	err = davError(err, calDavReadErrorCodes)
 	// logging.LogDebugf("CalDAV GetCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
 	return
 }
@@ -712,10 +848,12 @@ func (b *CalDavBackend) QueryCalendarObjects(ctx context.Context, calendarPath s
 	}
 
 	calendarObjects, err = calendars.QueryCalendarObjects(calendarPath, query)
+	err = davError(err, calDavReadErrorCodes)
 	// logging.LogDebugf("CalDAV QueryCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
 	return
 }
 
+// DeleteCalendarObject 处理所有层级的 DELETE：go-webdav 不区分资源类型，日历集合路径在这里转为删除日历。
 func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, objectPath string) (err error) {
 	// logging.LogDebugf("CalDAV DeleteCalendarObject -> objectPath: %s", objectPath)
 	objectPath = PathCleanWithSlash(objectPath)
@@ -724,7 +862,14 @@ func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, objectPath str
 		return
 	}
 
-	err = calendars.DeleteCalendarObject(objectPath)
+	switch depth := GetCalDavPathDepth(objectPath); {
+	case calDavPathDepth_Calendar == depth:
+		return calendars.DeleteCalendar(objectPath, davConditionsFromContext(ctx))
+	case calDavPathDepth_Calendar > depth:
+		return webdav.NewHTTPError(http.StatusForbidden, errors.New("CalDAV: cannot delete resource at given location"))
+	}
+	err = calendars.DeleteCalendarObject(objectPath, davConditionsFromContext(ctx))
+	err = davError(err, calDavReadErrorCodes)
 	// logging.LogDebugf("CalDAV DeleteCalendarObject <- err: %s", err)
 	return
 }

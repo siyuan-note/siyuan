@@ -23,8 +23,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -2204,11 +2202,7 @@ func serveWebDAV(ginServer *gin.Engine) {
 }
 
 func serveCalDAV(ginServer *gin.Engine) {
-	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
-	handler := caldav.Handler{
-		Backend: &model.CalDavBackend{},
-		Prefix:  model.CalDavPrincipalsPath,
-	}
+	handler := model.NewCalDAVHandler()
 
 	ginServer.Match(CalDavMethods, "/.well-known/caldav", func(c *gin.Context) {
 		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
@@ -2239,11 +2233,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 }
 
 func serveCardDAV(ginServer *gin.Engine) {
-	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
-	handler := carddav.Handler{
-		Backend: &model.CardDavBackend{},
-		Prefix:  model.CardDavPrincipalsPath,
-	}
+	handler := model.NewCardDAVHandler()
 
 	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
 		// logging.LogDebugf("CardDAV [/.well-known/carddav]")

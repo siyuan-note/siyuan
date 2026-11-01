@@ -59,7 +59,7 @@ import {AgentStreamingMarkdown} from "./AgentStreamingMarkdown";
 import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
-import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
+import {AgentScrollStateMode, resolveAgentScrollState, resolveThinkingCardAnchor} from "./AgentScrollState";
 import {AgentSessionRuns} from "./AgentSessionRuns";
 import {AgentRunController, ManagedAgentRun, PendingAgentInteraction} from "./AgentRunController";
 import {fullscreen} from "../../../protyle/breadcrumb/action";
@@ -3334,7 +3334,7 @@ export class AgentChat extends Model {
             bodyHTML +
             "</div>";
 
-        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
+        bindThinkingCardToggle(el, () => this.anchorThinkingCard(el));
         this.insertBeforeAI(el);
         this.scrollToBottom();
         this.observeStickTarget(el);
@@ -4337,7 +4337,7 @@ export class AgentChat extends Model {
             return;
         }
         const el = createThinkingCardElement(step);
-        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
+        bindThinkingCardToggle(el, () => this.anchorThinkingCard(el));
         this.messagesContainer.appendChild(el);
     }
 
@@ -4389,7 +4389,7 @@ export class AgentChat extends Model {
             "</div>" +
             "</div>";
 
-        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
+        bindThinkingCardToggle(el, () => this.anchorThinkingCard(el));
         this.messagesContainer.appendChild(el);
         postRender(el, this.app, this.host.onNavigate);
     }
@@ -4798,6 +4798,33 @@ export class AgentChat extends Model {
             }
         };
         requestAnimationFrame(tick);
+    }
+
+    // 折叠思考卡片后把卡片顶沿对回滚动区上沿：粘性标题重新贴住面板顶部，卡片后面的输出正好落在它下面。
+    // 用户在长思考中间点标题折叠时，正文那一整段高度被抽掉，卡片会整个滑到滚动区上沿之上，
+    // 标题跟着离开视野、后面的输出也跳到看不见的位置；此时只有滚动位置能把它拉回来。
+    // bindThinkingCardToggle 的 onLayoutChange 在点击后以及折叠过渡结束时各回调一次，重复调用是空操作。
+    private anchorThinkingCard(card: HTMLElement) {
+        this.syncScrollState("reconcile");
+        if (!card.isConnected) {
+            return;
+        }
+        const cardRect = card.getBoundingClientRect();
+        const containerRect = this.messagesContainer.getBoundingClientRect();
+        const target = resolveThinkingCardAnchor({
+            cardTop: cardRect.top,
+            cardBottom: cardRect.bottom,
+            containerTop: containerRect.top,
+            scrollTop: this.messagesContainer.scrollTop,
+        });
+        if (target === undefined) {
+            return;
+        }
+        const generation = this.beginProgrammaticScroll();
+        this.messagesContainer.scrollTop = target;
+        requestAnimationFrame(() => {
+            this.finishProgrammaticScroll(generation);
+        });
     }
 
     // 思考结束后定位到思考卡片下方：让折叠后的思考卡片底部贴近容器视口顶部，

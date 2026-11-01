@@ -99,7 +99,7 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
         cb?.(ready);
         return;
     }
-    if (!reload && cloudListElement.firstElementChild && cloudListElement.firstElementChild.tagName !== "IMG") {
+    if (!reload && cloudListElement.querySelector("ul")) {
         return;
     }
     const canManage = provider === 0 || provider === 4;

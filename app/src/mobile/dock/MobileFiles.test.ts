@@ -63,6 +63,19 @@ const loadMethods = (names: string[], globals: Record<string, unknown>) => {
     return new exports.Adapter();
 };
 
+test("mobile row selection precedes expansion so it cannot cancel empty-notebook creation", () => {
+    const calls: string[] = [];
+    const adapter = loadMethods(["toggleTreeItem"], {
+        window: {siyuan: {menus: {menu: {remove() {}}}}},
+    }) as {docTree: Partial<DocTreeController>; setCurrent: () => void; getLeaf: () => void;
+        toggleTreeItem: (row: HTMLElement) => void};
+    adapter.docTree = {getItemFromElement: () => ({notebookId: "box"}) as ReturnType<DocTreeController["getItemFromElement"]>};
+    adapter.setCurrent = () => calls.push("select");
+    adapter.getLeaf = () => calls.push("expand");
+    adapter.toggleTreeItem({} as HTMLElement);
+    assert.deepEqual(calls, ["select", "expand"]);
+});
+
 test("mobile opened-file tracking keeps an offscreen selection without querying a row", async () => {
     const adapter = loadMethods(["selectOpenedFile"], {}) as {
         docTree: {getSelectedItems: () => {notebookId: string, path: string}[]};

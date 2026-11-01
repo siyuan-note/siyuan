@@ -748,8 +748,8 @@ export class MobileFiles extends Model {
     private toggleTreeItem(row: HTMLElement) {
         const item = this.docTree.getItemFromElement(row);
         if (!item) { return; }
-        this.getLeaf(row, item.notebookId);
         this.setCurrent(row, false);
+        void this.getLeaf(row, item.notebookId);
         window.siyuan.menus.menu.remove();
     }
 

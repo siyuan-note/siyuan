@@ -96,6 +96,15 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
 };
 
 describe("database item icons", () => {
+    it("uses the same bind and rebind icons in fields and database views", () => {
+        for (const detached of [true, false]) {
+            const h = createHarness("table", detached);
+            const icon = detached ? "iconRef" : "iconRefresh";
+            assert.ok(h.attributes.genAVValueHTML(h.cell.value).includes(`href="#${icon}"`));
+            assert.ok(h.api.renderCell(h.cell.value, 0, true).includes(`href="#${icon}"`));
+        }
+    });
+
     it("renders detached defaults and custom icons in every layout and honors hidden icons", () => {
         const h = createHarness();
         for (const layout of ["table", "list", "gallery", "kanban", "calendar"] as TAVView[]) {

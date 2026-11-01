@@ -47,6 +47,7 @@ var (
 	SiYuanAccessAuthCodeBypass = false // 是否跳过空锁屏密码检查
 	AttachUI                   = false // 是否绑定桌面 UI 进程生命周期（Electron 拉起时为 true，手动 serve 为 false）
 	EnablePprof                = false // 是否注册未鉴权的调试端点，仅调试时显式开启，切勿在对外开放的实例上使用
+	FixedPortEnabled           = true  // 是否启动额外的 6806 固定端口反代，不影响主服务监听端口
 )
 
 func initEnvVars() {
@@ -109,9 +110,10 @@ func InitWorkspace(workspacePath, wdPath string) {
 }
 
 // BootWithFlags 接收已解析的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁。
-func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI, safeMode, enablePprof bool) {
+func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI, safeMode, enablePprof, fixedPort bool) {
 	SafeMode = safeMode
 	EnablePprof = enablePprof
+	FixedPortEnabled = fixedPort
 	// Fallback to env vars if commandline args are not set
 	// valid only for CLI args that default to "", as the
 	// others have explicit (sane) defaults

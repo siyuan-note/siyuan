@@ -7,7 +7,7 @@
 		"id": "20240530101000-f16hpct",
 		"title": "Docker サーバー",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -361,7 +361,7 @@
 			"Properties": {
 				"ID": "20240530101000-hmjllir",
 				"id": "20240530101000-e245wms",
-				"updated": "20261016202856"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -409,6 +409,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " を明示してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261101194733-8p6nsl2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-8p6nsl2",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "メインサービスのポートが 6806 以外の場合、SiYuan は 6806 が使用可能であればプロキシも起動し、ブラウザー拡張機能が固定アドレスで接続できるようにします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " コマンドに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を追加すると、この追加プロキシを無効にできます。デフォルトは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。メインサービスは引き続き "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で指定したポートで待ち受けます。6806 を指定した場合も同様で、公開サービスにも影響しません。無効にした後は、このプロキシを利用していたクライアントの接続先をメインサービスの実際のポートに変更してください。このオプションを削除するか true に設定してカーネルを再起動すると、プロキシを再び有効にできます。"
 				}
 			]
 		},

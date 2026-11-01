@@ -18,12 +18,21 @@ import (
 )
 
 func InitFixedPortService(host string, certPath, keyPath string) {
-	if util.FixedPort != util.ServerPort {
-		if util.IsPortOpen(util.FixedPort) {
+	initFixedPortService(host, certPath, keyPath, util.FixedPort)
+}
+
+func initFixedPortService(host, certPath, keyPath, fixedPort string) {
+	// Only disable the extra proxy; the main server may still use port 6806.
+	if !util.FixedPortEnabled {
+		return
+	}
+
+	if fixedPort != util.ServerPort {
+		if util.IsPortOpen(fixedPort) {
 			return
 		}
 
-		addr := host + ":" + util.FixedPort
+		addr := host + ":" + fixedPort
 
 		// 启动一个固定 6806 端口的反向代理服务器，这样浏览器扩展才能直接使用 127.0.0.1:6806，不用配置端口
 		proxy := newFixedPortReverseProxy(util.ServerURL)

@@ -102,6 +102,12 @@ func TestDefaultWorkspacePath(t *testing.T) {
 }
 
 func TestBootHomeDir(t *testing.T) {
+	t.Run("default fixed port", func(t *testing.T) { testBootHomeDir(t, true) })
+	t.Run("disabled fixed port", func(t *testing.T) { testBootHomeDir(t, false) })
+}
+
+func testBootHomeDir(t *testing.T, fixedPort bool) {
+	t.Helper()
 	base := t.TempDir()
 	oldHome, home := filepath.Join(base, "system-home"), filepath.Join(base, "configured-home")
 	workspace, wd := filepath.Join(base, "workspace"), filepath.Join(base, "resources")
@@ -118,12 +124,15 @@ func TestBootHomeDir(t *testing.T) {
 	}
 	command := exec.Command(os.Args[0], "-test.run=^TestBootHomeDirProcess$", "--",
 		"--home-dir="+home, "--workspace="+workspace, "--wd="+wd)
+	if !fixedPort {
+		command.Args = append(command.Args, "--fixed-port=false")
+	}
 	command.Env = append(os.Environ(), "SIYUAN_TEST_BOOT_HOME="+oldHome)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("BootWithFlags failed: %v\n%s", err, output)
 	}
-	for _, expected := range []string{"HOME_DIR=" + home, "WORKSPACE=" + workspace, "WD=" + wd} {
+	for _, expected := range []string{"HOME_DIR=" + home, "WORKSPACE=" + workspace, "WD=" + wd, fmt.Sprintf("FIXED_PORT=%t", fixedPort)} {
 		if !strings.Contains(string(output), expected) {
 			t.Fatalf("missing %q in BootWithFlags output:\n%s", expected, output)
 		}
@@ -154,14 +163,16 @@ func TestBootHomeDirProcess(t *testing.T) {
 	home := flags.String("home-dir", "", "")
 	workspace := flags.String("workspace", "", "")
 	wd := flags.String("wd", "", "")
+	fixedPort := flags.Bool("fixed-port", true, "")
 	if err := flags.Parse(os.Args[1:]); err != nil {
 		t.Fatal(err)
 	}
 	if err := SetHomeDir(*home); err != nil {
 		t.Fatal(err)
 	}
-	BootWithFlags(*workspace, *wd, "0", "false", "", "", "prod", false, false, false, false)
+	BootWithFlags(*workspace, *wd, "0", "false", "", "", "prod", false, false, false, false, *fixedPort)
 	defer UnlockWorkspace()
+	fmt.Printf("FIXED_PORT=%t\n", FixedPortEnabled)
 	fmt.Printf("HOME_DIR=%s\nWORKSPACE=%s\nWD=%s\n", HomeDir, WorkspaceDir, WorkingDir)
 	cwd, err := os.Getwd()
 	if err != nil {

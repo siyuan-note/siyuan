@@ -6,7 +6,7 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20261024162311"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -1817,7 +1817,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123536-56wxe3i",
-				"updated": "20261024162311"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -12873,7 +12873,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260809180000-5cbbbae",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13014,12 +13014,67 @@
 			]
 		},
 		{
+			"ID": "20261101194733-d6pel59",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-d6pel59",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 默认为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，设置 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可关闭供浏览器扩展使用的额外 6806 端口反代。该参数不改变 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或发布服务；主服务配置为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port 6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 时仍监听 6806。原先通过该反代连接的客户端需要改用主服务的实际端口。移除该参数或将其设为 true 并重启内核即可恢复反代。"
+				}
+			]
+		},
+		{
 			"ID": "20260809180000-a25e336",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260809180000-a25e336",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13032,7 +13087,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang zh-CN --ssl\n"
+					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang zh-CN --ssl\nsiyuan serve --workspace /path/to/workspace --port 6807 --fixed-port=false\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

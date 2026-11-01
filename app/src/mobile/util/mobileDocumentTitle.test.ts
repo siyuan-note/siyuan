@@ -139,6 +139,44 @@ const browserCases = async (sources: Record<string, string>) => {
     check.equal(getComputedStyle(editable.firstElementChild).fontWeight, previewWeight, "ordinary text keeps its preview weight");
     check.equal(getComputedStyle(editable).fontFamily, getComputedStyle(label).fontFamily, "the top-bar editor uses the navigation font");
     check.equal(getComputedStyle(editable.querySelector('[data-type="strong"]')).fontWeight, "700", "explicit bold marks remain bold");
+    Object.assign(runtime.siyuan, {zIndex: 1, languages: {}});
+    Object.assign(runtime, {innerHeight: window.innerHeight, innerWidth: window.innerWidth, visualViewport: window.visualViewport});
+    modules["../layout/getTopBarHeight"] = {getTopBarHeight: () => 0};
+    modules["../../util/setPosition"] = load(sources.position);
+    modules["./selectionElementPosition"] = load(sources.selectionPosition);
+    modules["../ui/hideElements"] = {hideElements: () => {}};
+    modules["../util/inlineElementMarker"] = {stripSemanticMarkersFromRangeText: (range: Range) => range.toString()};
+    modules["../util/hasClosest"] = {hasClosestByClassName: (element: Element, name: string) => element.closest("." + name)};
+    modules["../util/selection"] = {getSelectionPosition: (_element: Element, range: Range) => {
+        const rect = range.getBoundingClientRect();
+        return {left: rect.left, top: rect.top};
+    }};
+    const {Toolbar} = load(sources.toolbar);
+    const contentToolbar = Object.assign(Object.create(Toolbar.prototype), {subElement: document.createElement("div"),
+        element: document.createElement("div"), LINE_HEIGHT: 30, clearSubElement() { this.subElement.replaceChildren(); }});
+    contentToolbar.subElement.className = "protyle-toolbar protyle-toolbar--sub";
+    document.body.append(contentToolbar.subElement);
+    const selectedRange = document.createRange();
+    selectedRange.selectNodeContents(editable.firstElementChild);
+    const menuOwner = {element: inline, wysiwyg: {element: inline.querySelector(".protyle-wysiwyg")}, disabled: false};
+    contentToolbar.showContent(menuOwner, selectedRange, editable.parentElement);
+    for (const action of [undefined, "more", "back"]) {
+        if (action) contentToolbar.subElement.querySelector(`[data-action="${action}"]`).click();
+        check.ok(contentToolbar.subElement.getBoundingClientRect().top >= selectedRange.getBoundingClientRect().bottom + 4,
+            "top-bar selection actions stay below the selected title, including More and Back: " +
+            JSON.stringify({action, menu: contentToolbar.subElement.getBoundingClientRect().toJSON(),
+                range: selectedRange.getBoundingClientRect().toJSON(), style: contentToolbar.subElement.style.cssText}));
+    }
+    const bodySelection = document.createElement("div");
+    bodySelection.style.cssText = "position:fixed;top:220px;left:40px";
+    bodySelection.textContent = "Body selection";
+    menuOwner.wysiwyg.element.append(bodySelection);
+    selectedRange.selectNodeContents(bodySelection);
+    contentToolbar.showContent(menuOwner, selectedRange, bodySelection);
+    check.ok(contentToolbar.subElement.getBoundingClientRect().bottom <= selectedRange.getBoundingClientRect().top - 4,
+        "body selections retain actions above the selected text when space is available");
+    bodySelection.remove();
+    contentToolbar.subElement.remove();
     title.setTitle("Saved summary");
     check.equal(title.editElement, editable, "summary refresh keeps the inline editor and caret");
     check.equal(label.querySelector(".mobile-document-title-editor"), inline);
@@ -196,6 +234,8 @@ test("mobile navigation edits rich titles inline, keeps compact previews and cle
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const sources = {title: source("mobileDocumentTitle.ts"), preview: source("../../protyle/header/documentTitlePreview.ts"),
+        toolbar: source("../../protyle/toolbar/index.ts"), position: source("../../util/setPosition.ts"),
+        selectionPosition: source("../../protyle/toolbar/selectionElementPosition.ts"),
         readonly: source("../../protyle/util/setEditMode.ts"),
         editorTitle: transpileModule(require("ifdef-loader/preprocessor").parse(
             readFileSync(resolve(__dirname, "../../protyle/header/Title.ts"), "utf8"), {MOBILE: true, BROWSER: false}),

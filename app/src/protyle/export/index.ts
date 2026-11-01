@@ -812,7 +812,7 @@ ${getIconScript(servePath)}
             alert(response.msg)
             return;
         }
-        document.title = response.data.name
+        document.title = response.data.name || decodeURIComponent(${JSON.stringify(encodeURIComponent(window.siyuan.languages._kernel[16]))});
         window.siyuan = {
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },

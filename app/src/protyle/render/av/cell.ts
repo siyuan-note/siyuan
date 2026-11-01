@@ -747,11 +747,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (isAVRichTextType(type)) {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field"></textarea>`;
     } else if (type === "url") {
-        const content = storedCellValue?.url?.content ?? cellElements[0].firstElementChild.getAttribute("data-href") ?? "";
+        const content = storedCellValue?.url?.content ?? cellElements[0].querySelector(".av__celltext")?.getAttribute("data-href") ?? "";
         html = `<textarea ${style} spellcheck="false" class="b3-text-field">${escapeHtml(content)}</textarea>`;
     } else if (type === "number") {
         const content = storedCellValue?.number?.isNotEmpty ? (storedCellValue.number.content ?? "").toString() :
-            cellElements[0].firstElementChild.getAttribute("data-content") || "";
+            cellElements[0].querySelector(".av__celltext")?.getAttribute("data-content") || "";
         html = `<input type="number" spellcheck="false" value="${escapeAttr(content)}" ${style} class="b3-text-field">`;
     } else {
         /// #if MOBILE
@@ -1774,7 +1774,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            item.element.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
+            const contentElement = item.element.querySelector(".av__cellcontent") || item.element;
+            contentElement.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
                 item.element.dataset.dateFormat as TAVDateFormat);
             renderCellAttr(item.element, data);
             renderAVRichTextElements(item.element);

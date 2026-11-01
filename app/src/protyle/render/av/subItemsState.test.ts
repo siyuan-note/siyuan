@@ -119,12 +119,16 @@ it("renders accessible fold and bounded previous/next child-page controls for a 
     assert.match(html, /aria-expanded="true"/);
     assert.match(html, /data-page="25"/);
     assert.match(html, /data-page="27"/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:136px;");
     view.nested.childPaging.parent.page = 51;
     const last = api.getSubItemsControlHTML(row, view);
     assert.match(last, /data-page="50"/);
     assert.doesNotMatch(last, /data-page="52"/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:112px;");
     row.hierarchy.expanded = false;
     assert.doesNotMatch(api.getSubItemsControlHTML(row, view), /data-page=/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:88px;");
+    assert.equal(api.getSubItemsCellStyle({} as IAVRow, view), "");
 });
 
 it("restores a deep expanded row inside only its group with a bounded virtual window", () => {

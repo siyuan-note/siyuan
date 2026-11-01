@@ -2207,7 +2207,8 @@ body.mobile-topbar--merged {
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
   // 容器宽度扣除了子条目缩进，操作入口随实际剩余空间切换。
-  & > .av__primary-container {
+  & > .av__primary-container,
+  & > .av__cellcontent > .av__primary-container {
     container: av-primary / inline-size;
     display: flex;
     align-items: flex-start;

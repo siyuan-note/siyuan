@@ -172,14 +172,27 @@ export const reconcileSubItems = (blockElement: HTMLElement, protyle: IProtyle, 
     });
 };
 
+const getSubItemsPaging = (row: IAVRow, data: IAVTable) => {
+    const paging = row.hierarchy?.expanded ? data.nested?.childPaging?.[row.id] : undefined;
+    return {paging, previous: Boolean(paging && paging.page > 1),
+        next: Boolean(paging && paging.page * paging.pageSize < paging.total)};
+};
+
+export const getSubItemsCellStyle = (row: IAVRow, data: IAVTable) => {
+    if (!row.hierarchy) return "";
+    const {previous, next} = getSubItemsPaging(row, data);
+    // 内容与控件之间预留 4 像素，容纳条目及关联图标的负外边距。
+    return `margin-left:${4 + row.hierarchy.depth * 20 + (1 + Number(previous) + Number(next)) * 24}px;`;
+};
+
 export const getSubItemsControlHTML = (row: IAVRow, data: IAVTable) => {
     const hierarchy = row.hierarchy;
     if (!hierarchy) {
         return "";
     }
-    const paging = data.nested?.childPaging?.[row.id];
+    const {paging, previous, next} = getSubItemsPaging(row, data);
     return `<span class="av__sub-items" style="padding-left:${hierarchy.depth * 20}px">${hierarchy.childCount ?
         `<button class="block__icon block__icon--show" data-type="av-sub-items-toggle" aria-expanded="${hierarchy.expanded}" aria-label="${window.siyuan.languages[hierarchy.expanded ? "collapse" : "expand"]}"><svg${hierarchy.expanded ? ' style="transform:rotate(90deg)"' : ""}><use xlink:href="#iconRight"></use></svg></button>` :
         '<span class="av__sub-items-space"></span>'}${hierarchy.expanded && paging ?
-        `${paging.page > 1 ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page - 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.previous}"><svg><use xlink:href="#iconLeft"></use></svg></button>` : ""}${paging.page * paging.pageSize < paging.total ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page + 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.next}"><svg><use xlink:href="#iconRight"></use></svg></button>` : ""}` : ""}</span>`;
+        `${previous ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page - 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.previous}"><svg><use xlink:href="#iconLeft"></use></svg></button>` : ""}${next ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page + 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.next}"><svg><use xlink:href="#iconRight"></use></svg></button>` : ""}` : ""}</span>`;
 };

@@ -1550,8 +1550,8 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             cellElement.parentElement.setAttribute("data-empty",
                 cellValueIsEmpty(value, true, renderTemplate).toString());
         } else {
-            const treeControls = cellElement.querySelector(".av__sub-items")?.outerHTML || "";
-            cellElement.innerHTML = treeControls + renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            const contentElement = cellElement.querySelector(".av__cellcontent") || cellElement;
+            contentElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
                 undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
         }
         if (hasDragFill) {

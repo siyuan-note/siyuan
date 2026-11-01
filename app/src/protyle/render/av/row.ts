@@ -1,5 +1,5 @@
 import {isAVTimestampType} from "./capabilities";
-import {getSubItemsControlHTML} from "./subItemsState";
+import {getSubItemsCellStyle, getSubItemsControlHTML} from "./subItemsState";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
@@ -210,6 +210,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     const tableData = options.data as IAVTable;
     const isList = options.type === "list";
     const pinIndex = isList ? -1 : options.pinIndex;
+    const treeColumnIndex = tableRow.hierarchy ? tableData.columns.findIndex(column =>
+        !column.hidden && (!isList || column.type === "block")) : -1;
 
     html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}${tableRow.hierarchy?.context ? " av__row--context" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}"${tableRow.hierarchy ? ` data-parent-id="${escapeAttr(tableRow.hierarchy.parentID || "")}" data-depth="${tableRow.hierarchy.depth}"${tableRow.hierarchy.context ? ` aria-label="${window.siyuan.languages.avSubItemsContext}"` : ""}` : ""} style="${getConditionalItemStyle(tableRow)}">`;
     if (pinIndex > -1) {
@@ -234,10 +236,11 @@ data-dtype="${column.type}"
 data-date-format="${column.dateFormat || ""}"
 ${column.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 data-align="${column.align || ""}"
+${index === treeColumnIndex ? 'data-sub-items-cell="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
 ${cell.bgColor && !tableRow.conditionalColors?.background && !tableRow.conditionalColors?.properties?.[column.id] ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${column.type === "block" && tableRow.hierarchy ? getSubItemsControlHTML(tableRow, tableData) : ""}${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${index === treeColumnIndex ? getSubItemsControlHTML(tableRow, tableData) + `<div class="av__cellcontent" style="${getSubItemsCellStyle(tableRow, tableData)}">` : ""}${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}${index === treeColumnIndex ? "</div>" : ""}</div>`;
 
         if (pinIndex === index) {
             html += "</div>";
@@ -486,7 +489,8 @@ style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' 
                     }
                     if (updateIds.includes(cellItem.dataset.colId)) {
                         const cellValue = response.data.values[cellItem.dataset.colId];
-                        cellItem.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
+                        const contentElement = cellItem.querySelector(".av__cellcontent") || cellItem;
+                        contentElement.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                         renderAVRichTextElements(cellItem);

@@ -19,7 +19,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -119,7 +119,7 @@ func QueueAIMemoryDatabaseSources(ids []string) {
 
 func memoryDatabaseSourceIDs(ctx context.Context, workspace string, databaseIDs map[string]bool) ([]string, error) {
 	ids := map[string]bool{}
-	err := memoryExistingSources(ctx, workspace, func(source memo.Source) {
+	err := memoryExistingSources(ctx, workspace, func(source memory.Source) {
 		var evidence struct {
 			Databases []struct {
 				ID string `json:"id"`
@@ -140,15 +140,15 @@ func memoryDatabaseSourceIDs(ctx context.Context, workspace string, databaseIDs 
 	return memorySortedSourceIDs(ids), nil
 }
 
-func memoryExistingSources(ctx context.Context, workspace string, visit func(memo.Source)) error {
-	store := memo.NewStore(workspace)
+func memoryExistingSources(ctx context.Context, workspace string, visit func(memory.Source)) error {
+	store := memory.NewStore(workspace)
 	for offset := 0; ; {
-		page, err := store.Search(ctx, memo.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
+		page, err := store.Search(ctx, memory.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
 		if err != nil {
 			return err
 		}
 		if len(page.Errors) > 0 {
-			return memo.ErrIncomplete
+			return memory.ErrIncomplete
 		}
 		for _, entry := range page.Entries {
 			for _, source := range entry.Record.Sources {
@@ -162,7 +162,7 @@ func memoryExistingSources(ctx context.Context, workspace string, visit func(mem
 			break
 		}
 		if len(page.Entries) == 0 {
-			return memo.ErrIncomplete
+			return memory.ErrIncomplete
 		}
 		offset += len(page.Entries)
 	}

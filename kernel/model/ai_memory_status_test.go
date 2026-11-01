@@ -14,7 +14,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 func TestAIMemoryTaskSavedStatus(t *testing.T) {
@@ -42,7 +42,7 @@ func TestAIMemoryTaskSavedStatus(t *testing.T) {
 			task := &memoryTask{cancel: cancel}
 			updatedID := ""
 			if scenario.name == "update-overview-fail" {
-				entry, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "User prefers concise answers", Sources: []memo.Source{{Kind: "user", ID: "prior", Revision: "one"}}}, "missing", "prior")
+				entry, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "User prefers concise answers", Sources: []memory.Source{{Kind: "user", ID: "prior", Revision: "one"}}}, "missing", "prior")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -89,7 +89,7 @@ func TestAIMemoryTaskSavedStatus(t *testing.T) {
 				}
 				return `{"actions":[` + action + `]}`, nil
 			}
-			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "User prefers concise answers", OperationID: "status"}, []memo.Source{{Kind: "user", ID: "status", Revision: "one", Evidence: "User prefers concise answers"}}, false, task)
+			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "User prefers concise answers", OperationID: "status"}, []memory.Source{{Kind: "user", ID: "status", Revision: "one", Evidence: "User prefers concise answers"}}, false, task)
 			saved := 0
 			for _, result := range task.status.Results {
 				if result.Saved {
@@ -117,7 +117,7 @@ func TestAIMemoryTaskSavedStatus(t *testing.T) {
 				t.Fatal("unverified model output reached task metadata")
 			}
 			if scenario.name == "unknown-target" {
-				records, searchErr := aiMemoryStore().Search(context.Background(), memo.SearchOptions{Limit: 10})
+				records, searchErr := aiMemoryStore().Search(context.Background(), memory.SearchOptions{Limit: 10})
 				if searchErr != nil || len(records.Entries) != 0 {
 					t.Fatal("unverified target produced a stored record", searchErr)
 				}

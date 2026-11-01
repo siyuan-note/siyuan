@@ -17,7 +17,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -29,7 +29,7 @@ func setupMemoryTranslationTest(t *testing.T) (*conf.AI, apicontract.AIMemoryTra
 	memoryTranslations.entries = map[string]*memoryTranslationEntry{}
 	memoryTranslations.running = 0
 	memoryTranslations.Unlock()
-	r := memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memo.Source{{Kind: "user", ID: "user", Revision: "one", Evidence: "PRIVATE_SOURCE_EVIDENCE"}}}
+	r := memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memory.Source{{Kind: "user", ID: "user", Revision: "one", Evidence: "PRIVATE_SOURCE_EVIDENCE"}}}
 	if _, err := aiMemoryStore().Save(context.Background(), r, "missing", "save"); err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func setupMemoryTranslationTest(t *testing.T) (*conf.AI, apicontract.AIMemoryTra
 
 func TestAIMemoryTranslationCachesOnlyDisplayWithoutSourceEvidenceOrWrites(t *testing.T) {
 	_, q := setupMemoryTranslationTest(t)
-	path := filepath.Join(util.DataDir, "storage/ai/memos/MEMORY.md")
+	path := filepath.Join(util.DataDir, "storage/ai/memory/MEMORY.md")
 	before, _ := os.ReadFile(path)
 	calls := 0
 	memoryComplete = func(ctx context.Context, _ *conf.AI, prompt string) (string, error) {
@@ -229,7 +229,7 @@ func TestAIMemoryGeneratedOverviewReusesRequestedLanguage(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	Conf.Lang = "en"
 	ctx := context.Background()
-	r := memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memo.Source{{Kind: "user", ID: "user", Revision: "one"}}}
+	r := memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memory.Source{{Kind: "user", ID: "user", Revision: "one"}}}
 	if _, err := aiMemoryStore().Save(ctx, r, "missing", "save"); err != nil {
 		t.Fatal(err)
 	}

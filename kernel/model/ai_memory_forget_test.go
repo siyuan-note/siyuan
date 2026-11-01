@@ -14,19 +14,19 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func memoryForgetFixture(t *testing.T, text, scope string) (*conf.AI, memo.Entry, apicontract.AIMemoryMaintainRequest, []memo.Source, memoryAction) {
+func memoryForgetFixture(t *testing.T, text, scope string) (*conf.AI, memory.Entry, apicontract.AIMemoryMaintainRequest, []memory.Source, memoryAction) {
 	t.Helper()
 	cfg := setupAIMemoryTest(t)
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: scope, State: "active", Content: "Prefers coffee", Sources: []memo.Source{{Kind: "user", ID: "original", Revision: "one", Evidence: "Prefers coffee"}}}, "missing", "original")
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: scope, State: "active", Content: "Prefers coffee", Sources: []memory.Source{{Kind: "user", ID: "original", Revision: "one", Evidence: "Prefers coffee"}}}, "missing", "original")
 	if err != nil {
 		t.Fatal(err)
 	}
 	q := apicontract.AIMemoryMaintainRequest{Text: text, OperationID: "manual-forget"}
-	sources := []memo.Source{{Kind: "user", ID: q.OperationID, Revision: memoryHash([]byte(text)), Evidence: text}}
+	sources := []memory.Source{{Kind: "user", ID: q.OperationID, Revision: memoryHash([]byte(text)), Evidence: text}}
 	a := memoryAction{Operation: "forget", Instruction: strings.TrimSpace(text), ID: entry.Record.ID, Kind: entry.Record.Kind, Subject: entry.Record.Subject, Scope: entry.Record.Scope, Content: entry.Record.Content}
 	return cfg, entry, q, sources, a
 }
@@ -76,7 +76,7 @@ func TestAIMemoryForgetMultilingualAndRetry(t *testing.T) {
 			if len(task.status.Results) != 1 || !task.status.Results[0].Saved {
 				t.Fatalf("forget failed: %+v", task.status)
 			}
-			if result, err := aiMemoryStore().Search(context.Background(), memo.SearchOptions{}); err != nil || len(result.Entries) != 0 {
+			if result, err := aiMemoryStore().Search(context.Background(), memory.SearchOptions{}); err != nil || len(result.Entries) != 0 {
 				t.Fatalf("forgotten remains: %+v %v", result, err)
 			}
 			previous := calls
@@ -152,11 +152,11 @@ func TestAIMemoryForgetAuthorizationBoundaries(t *testing.T) {
 				}
 				return nil
 			}
-			err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, automatic, memoryProposal{Actions: actions}, map[string]memo.Entry{entry.Record.ID: entry}, check)
+			err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, automatic, memoryProposal{Actions: actions}, map[string]memory.Entry{entry.Record.ID: entry}, check)
 			if err == nil {
 				t.Fatal("unsafe forget authorized")
 			}
-			if result, err := aiMemoryStore().Search(context.Background(), memo.SearchOptions{}); err != nil || len(result.Entries) != 1 {
+			if result, err := aiMemoryStore().Search(context.Background(), memory.SearchOptions{}); err != nil || len(result.Entries) != 1 {
 				t.Fatal("authorization changed records")
 			}
 		})
@@ -168,7 +168,7 @@ func TestAIMemoryForgetChangedRevisionAndCleanupPending(t *testing.T) {
 		t.Run(mode, func(t *testing.T) {
 			cfg, entry, q, sources, a := memoryForgetFixture(t, "Forget my coffee preference", "workspace")
 			key := "fixed-action"
-			task := &memoryTask{batch: &memoryBatch{proposal: memoryProposal{Actions: []memoryAction{a}}, scopes: []string{"workspace"}, revisions: map[string]memo.Entry{entry.Record.ID: entry}, keys: []string{key}, saved: map[string]apicontract.AIMemoryTaskResult{}}}
+			task := &memoryTask{batch: &memoryBatch{proposal: memoryProposal{Actions: []memoryAction{a}}, scopes: []string{"workspace"}, revisions: map[string]memory.Entry{entry.Record.ID: entry}, keys: []string{key}, saved: map[string]apicontract.AIMemoryTaskResult{}}}
 			if mode == "revision" {
 				r := entry.Record
 				r.Content = "Changed coffee fact"
@@ -179,7 +179,7 @@ func TestAIMemoryForgetChangedRevisionAndCleanupPending(t *testing.T) {
 				if _, err := aiMemoryStore().Forget(context.Background(), entry.Record.ID, entry.Revision, "prior"); err != nil {
 					t.Fatal(err)
 				}
-				path := filepath.Join(util.DataDir, "storage/ai/memos/records", entry.Record.ID+".md")
+				path := filepath.Join(util.DataDir, "storage/ai/memory/records", entry.Record.ID+".md")
 				if err := os.Mkdir(path, 0700); err != nil {
 					t.Fatal(err)
 				}
@@ -213,7 +213,7 @@ func TestAIMemoryForgetPartialRetryDoesNotRepeatAppliedAction(t *testing.T) {
 	b := a
 	b.ID = second.Record.ID
 	b.Content = second.Record.Content
-	task := &memoryTask{batch: &memoryBatch{proposal: memoryProposal{Actions: []memoryAction{a, b}}, scopes: []string{"workspace"}, revisions: map[string]memo.Entry{first.Record.ID: first, second.Record.ID: second}, keys: []string{"first", "second"}, saved: map[string]apicontract.AIMemoryTaskResult{}}}
+	task := &memoryTask{batch: &memoryBatch{proposal: memoryProposal{Actions: []memoryAction{a, b}}, scopes: []string{"workspace"}, revisions: map[string]memory.Entry{first.Record.ID: first, second.Record.ID: second}, keys: []string{"first", "second"}, saved: map[string]apicontract.AIMemoryTaskResult{}}}
 	changed := second.Record
 	changed.Content = "Changed tea preference"
 	if _, err = aiMemoryStore().Save(context.Background(), changed, second.Revision, "change-second"); err != nil {
@@ -244,7 +244,7 @@ func TestAIMemoryForgetVerifierCannotAuthorizeChangedSnapshot(t *testing.T) {
 		}
 		return `{"authorizedIDs":["` + entry.Record.ID + `"]}`, nil
 	}
-	if err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, false, memoryProposal{Actions: []memoryAction{a}}, map[string]memo.Entry{entry.Record.ID: entry}, func() error { return nil }); err == nil {
+	if err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, false, memoryProposal{Actions: []memoryAction{a}}, map[string]memory.Entry{entry.Record.ID: entry}, func() error { return nil }); err == nil {
 		t.Fatal("changed snapshot authorized")
 	}
 }
@@ -255,7 +255,7 @@ func TestAIMemorySavingCannotChangeInactiveForgetTargets(t *testing.T) {
 			cfg, entry, q, sources, a := memoryForgetFixture(t, "Update coffee preference", "workspace")
 			entry.Record.State = state
 			a.Operation = "save"
-			if err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, false, memoryProposal{Actions: []memoryAction{a}}, map[string]memo.Entry{entry.Record.ID: entry}, func() error { return nil }); err == nil {
+			if err := authorizeMemoryForgetting(context.Background(), cfg, q, sources, false, memoryProposal{Actions: []memoryAction{a}}, map[string]memory.Entry{entry.Record.ID: entry}, func() error { return nil }); err == nil {
 				t.Fatal("save gained inactive target permission")
 			}
 		})

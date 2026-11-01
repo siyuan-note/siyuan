@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func TestMemoryForgottenExplicitOperationCannotReplay(t *testing.T) {
 		}
 	}
 	checkRetries()
-	name := filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", forgot.WithdrawalID+".md")
+	name := filepath.Join(s.dataDir, "storage/ai/memory/withdrawals", forgot.WithdrawalID+".md")
 	data, err := os.ReadFile(name)
 	if err != nil {
 		t.Fatal(err)
@@ -198,7 +198,7 @@ func TestMemoryWithdrawalsAndExplicitRemember(t *testing.T) {
 	if remembered.Record.ID == entry.Record.ID || len(remembered.Record.Authorizations) == 0 {
 		t.Fatal("missing explicit new identity")
 	}
-	raw, err := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", result.WithdrawalID+".md"))
+	raw, err := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memory/withdrawals", result.WithdrawalID+".md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestMemoryCorruptIsolationAndPagination(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		saveSample(t, s, fmt.Sprint(i))
 	}
-	root := filepath.Join(s.dataDir, "storage/ai/memos/records")
+	root := filepath.Join(s.dataDir, "storage/ai/memory/records")
 	if err := os.WriteFile(filepath.Join(root, NewID()+".md"), []byte("corrupt"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -308,7 +308,7 @@ func TestMemorySymlinkAndCancellation(t *testing.T) {
 	}
 	s = newTestStore(t)
 	entry := saveSample(t, s, "op")
-	path := filepath.Join(s.dataDir, "storage/ai/memos/records", entry.Record.ID+".md")
+	path := filepath.Join(s.dataDir, "storage/ai/memory/records", entry.Record.ID+".md")
 	if err := os.Remove(path); err != nil {
 		t.Fatal(err)
 	}
@@ -337,7 +337,7 @@ func TestMemoryPreservedWithdrawalKeepsExplicitAuthorization(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", forgot.WithdrawalID+".md")
+	path := filepath.Join(s.dataDir, "storage/ai/memory/withdrawals", forgot.WithdrawalID+".md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
@@ -357,7 +357,7 @@ func TestMemorySnapshotLimitAndBoundedResults(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 	entry := saveSample(t, s, "seed")
-	dir := filepath.Join(s.dataDir, "storage/ai/memos/records")
+	dir := filepath.Join(s.dataDir, "storage/ai/memory/records")
 	for i := 0; i < MaxResults; i++ {
 		r := entry.Record
 		r.ID = NewID()

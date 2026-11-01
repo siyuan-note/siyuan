@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -47,7 +47,7 @@ func TestMemoryProjectionMigrationPreservesBothAndReentry(t *testing.T) {
 	if err != nil || p.Content != "Unique user preference\n\nUnique project convention" {
 		t.Fatalf("merged content: %+v %v", p, err)
 	}
-	dir := filepath.Join(s.dataDir, "storage/ai/memos")
+	dir := filepath.Join(s.dataDir, "storage/ai/memory")
 	if _, err = os.Stat(filepath.Join(dir, "USER.md")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("legacy entry remains")
 	}
@@ -77,7 +77,7 @@ func TestMemoryProjectionMigrationSingleFileAndInterruptedWrite(t *testing.T) {
 			saveSample(t, s, "one")
 			snap, _ := s.Snapshot(ctx, nil)
 			original := legacyProjection(t, s, name, "Only content", snap.Fingerprint)
-			dir := filepath.Join(s.dataDir, "storage/ai/memos")
+			dir := filepath.Join(s.dataDir, "storage/ai/memory")
 			blocker := filepath.Join(dir, "legacy-projections")
 			if err := os.WriteFile(blocker, []byte("blocked"), 0600); err != nil {
 				t.Fatal(err)
@@ -132,7 +132,7 @@ func TestMemoryProjectionMigrationDoesNotReviveForgottenContent(t *testing.T) {
 	if strings.Contains(p.Content, "Forgotten") {
 		t.Fatal("legacy client revived withdrawn content")
 	}
-	files, _ := os.ReadDir(filepath.Join(s.dataDir, "storage/ai/memos/legacy-projections"))
+	files, _ := os.ReadDir(filepath.Join(s.dataDir, "storage/ai/memory/legacy-projections"))
 	if len(files) != 2 {
 		t.Fatalf("backup loss or duplication: %d", len(files))
 	}
@@ -158,7 +158,7 @@ func TestMemoryProjectionMigrationRejectsUnknownFormatWithoutLoss(t *testing.T) 
 	if err = s.SaveProjection(ctx, "MEMORY.md", "replacement", snap.Fingerprint, nil); !errors.Is(err, ErrInvalid) {
 		t.Fatal(err)
 	}
-	got, _ := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memos/MEMORY.md"))
+	got, _ := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memory/MEMORY.md"))
 	if string(got) != string(data) {
 		t.Fatal("future content overwritten")
 	}

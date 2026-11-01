@@ -85,7 +85,7 @@ func TestAIMemoryOperationInMemoryReuse(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, err = os.Stat(filepath.Join(util.DataDir, "storage/ai/memos/operations")); !errors.Is(err, os.ErrNotExist) {
+			if _, err = os.Stat(filepath.Join(util.DataDir, "storage/ai/memory/operations")); !errors.Is(err, os.ErrNotExist) {
 				t.Fatalf("operation files were generated: %v", err)
 			}
 			if next := startMemoryOperation(t, q, false); next != id {

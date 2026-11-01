@@ -16,7 +16,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -47,7 +47,7 @@ func TestAIMemoryModelReadRequiresActiveValidity(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	ctx := context.Background()
 	for _, state := range []string{"candidate", "review", "disabled", "superseded", "expired", "future", "active"} {
-		r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: state, Content: "private fact", Sources: []memo.Source{{Kind: "user", ID: state, Revision: "one"}}}
+		r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: state, Content: "private fact", Sources: []memory.Source{{Kind: "user", ID: state, Revision: "one"}}}
 		if state == "expired" || state == "future" {
 			r.State = "active"
 			if state == "expired" {
@@ -112,7 +112,7 @@ func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e, err := aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "review", Content: content, Sources: []memo.Source{source}}, "missing", "prior")
+	e, err := aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "review", Content: content, Sources: []memory.Source{source}}, "missing", "prior")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func TestAIMemorySourceRevisionReconcilesExistingID(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: strings.Repeat("o", 200)}, []memo.Source{source}, false, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: strings.Repeat("o", 200)}, []memory.Source{source}, false, task)
 	if len(task.status.Results) != 1 || !task.status.Results[0].Saved || task.status.Results[0].ID != e.Record.ID {
 		t.Fatalf("reconciliation failed: %+v", task.status)
 	}
@@ -156,7 +156,7 @@ func TestAIMemoryCandidateSourceChangesDuringModelCall(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e, err := aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: content, Sources: []memo.Source{source}}, "missing", "prior")
+	e, err := aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: content, Sources: []memory.Source{source}}, "missing", "prior")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +169,7 @@ func TestAIMemoryCandidateSourceChangesDuringModelCall(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "answers", OperationID: "source-race"}, []memo.Source{{Kind: "user", ID: "source-race", Revision: "one", Evidence: "User prefers concise answers"}}, false, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "answers", OperationID: "source-race"}, []memory.Source{{Kind: "user", ID: "source-race", Revision: "one", Evidence: "User prefers concise answers"}}, false, task)
 	if len(task.status.Results) != 1 || task.status.Results[0].Saved {
 		t.Fatalf("obsolete candidate saved: %+v", task.status)
 	}
@@ -190,7 +190,7 @@ func TestAIMemoryOverviewRejectsSourceChangedDuringGeneration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: content, Sources: []memo.Source{source}}, "missing", "prior")
+	_, err = aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: content, Sources: []memory.Source{source}}, "missing", "prior")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestAIMemoryForgetCleanupPendingIsSaved(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 模拟撤回后同步残留的不可删除目标，重试仍须报告已保存撤回标记。
-	path := filepath.Join(util.DataDir, "storage", "ai", "memos", "records", saved.ID+".md")
+	path := filepath.Join(util.DataDir, "storage", "ai", "memory", "records", saved.ID+".md")
 	if err = os.Mkdir(path, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -234,14 +234,14 @@ func TestAIMemoryForgetCleanupPendingIsSaved(t *testing.T) {
 
 func TestAIMemorySourceReviewRejectsIncompleteScan(t *testing.T) {
 	setupAIMemoryTest(t)
-	path := filepath.Join(util.DataDir, "storage", "ai", "memos", "records")
+	path := filepath.Join(util.DataDir, "storage", "ai", "memory", "records")
 	if err := os.MkdirAll(path, 0700); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(path, "20261029000000-abcdefg.md"), []byte("invalid record"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := RevalidateAIMemorySources(context.Background(), nil); !errors.Is(err, memo.ErrIncomplete) {
+	if err := RevalidateAIMemorySources(context.Background(), nil); !errors.Is(err, memory.ErrIncomplete) {
 		t.Fatalf("incomplete scan accepted: %v", err)
 	}
 }
@@ -249,7 +249,7 @@ func TestAIMemorySourceReviewRejectsIncompleteScan(t *testing.T) {
 func TestAIMemoryActivationDoesNotHideRevokedSources(t *testing.T) {
 	setupAIMemoryTest(t)
 	ctx := context.Background()
-	entry, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "review", Content: "A historical fact", Sources: []memo.Source{{Kind: "conversation", ID: "conversation:session:entry", Revision: "old"}}}, "missing", "prior")
+	entry, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "review", Content: "A historical fact", Sources: []memory.Source{{Kind: "conversation", ID: "conversation:session:entry", Revision: "old"}}}, "missing", "prior")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +281,7 @@ func TestAIMemoryCommitGuardRechecksCandidateSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: original, Sources: []memo.Source{source}}, "missing", "prior")
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: original, Sources: []memory.Source{source}}, "missing", "prior")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,7 +294,7 @@ func TestAIMemoryCommitGuardRechecksCandidateSource(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: original, OperationID: "guard"}, []memo.Source{{Kind: "user", ID: "guard", Revision: "one", Evidence: original}}, false, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: original, OperationID: "guard"}, []memory.Source{{Kind: "user", ID: "guard", Revision: "one", Evidence: original}}, false, task)
 	if len(task.status.Results) != 1 || task.status.Results[0].Saved || !strings.Contains(task.status.Results[0].Error, "before commit") {
 		t.Fatalf("commit guard missed source change: %+v reads=%d", task.status, reads)
 	}
@@ -340,7 +340,7 @@ func TestAIMemoryManualLifecycle(t *testing.T) {
 		t.Fatal("correction did not retain ID", err)
 	}
 	q.OperationID = "stale-write"
-	if _, err = SaveAIMemory(ctx, q); !errors.Is(err, memo.ErrConflict) {
+	if _, err = SaveAIMemory(ctx, q); !errors.Is(err, memory.ErrConflict) {
 		t.Fatal("stale edit accepted", err)
 	}
 	forgotten, err := ForgetAIMemory(ctx, apicontract.AIMemoryForgetRequest{ID: second.ID, Revision: second.Revision, OperationID: "forget-1"})
@@ -393,11 +393,11 @@ func TestAIMemoryConfigChangeDuringModelCall(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Concise replies", OperationID: "generation-test"}, []memo.Source{{Kind: "user", ID: "generation-test", Revision: "one", Evidence: "Concise replies"}}, false, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Concise replies", OperationID: "generation-test"}, []memory.Source{{Kind: "user", ID: "generation-test", Revision: "one", Evidence: "Concise replies"}}, false, task)
 	if task.status.State != "failed" || !strings.Contains(task.status.Error, "configuration changed") {
 		t.Fatalf("obsolete task not rejected: %+v", task.status)
 	}
-	result, err := aiMemoryStore().Search(context.Background(), memo.SearchOptions{Limit: 10})
+	result, err := aiMemoryStore().Search(context.Background(), memory.SearchOptions{Limit: 10})
 	if err != nil || len(result.Entries) != 0 {
 		t.Fatal("obsolete task wrote memory", err)
 	}
@@ -412,7 +412,7 @@ func TestAIMemoryModelFailurePreservesRecords(t *testing.T) {
 	memoryComplete = func(context.Context, *conf.AI, string) (string, error) { return "", errors.New("provider unavailable") }
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "remember", OperationID: "provider-failure"}, []memo.Source{{Kind: "user", ID: "provider-failure", Revision: "one", Evidence: "remember"}}, false, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "remember", OperationID: "provider-failure"}, []memory.Source{{Kind: "user", ID: "provider-failure", Revision: "one", Evidence: "remember"}}, false, task)
 	if task.status.State != "failed" {
 		t.Fatalf("model failure hidden: %+v", task.status)
 	}
@@ -441,7 +441,7 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		task.cancel = cancel
 		task.status = apicontract.AIMemoryTaskData{}
-		runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: content, OperationID: "grounded"}, []memo.Source{{Kind: "user", ID: "grounded", Revision: "source", Evidence: content}}, false, task)
+		runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: content, OperationID: "grounded"}, []memory.Source{{Kind: "user", ID: "grounded", Revision: "source", Evidence: content}}, false, task)
 		return task
 	}
 	first := run()
@@ -477,7 +477,7 @@ func TestAIMemoryGroundedProposalAndStableRetry(t *testing.T) {
 
 func TestAIMemoryMixedSourceCannotBypassAccess(t *testing.T) {
 	setupAIMemoryTest(t)
-	r := memo.Record{Sources: []memo.Source{{Kind: "user", ID: "one", Revision: "one"}, {Kind: "unknown", ID: "two", Revision: "two"}}}
+	r := memory.Record{Sources: []memory.Source{{Kind: "user", ID: "one", Revision: "one"}, {Kind: "unknown", ID: "two", Revision: "two"}}}
 	if validateMemorySources(context.Background(), r) {
 		t.Fatal("user evidence bypassed restricted source")
 	}
@@ -501,7 +501,7 @@ func TestAIMemoryConversationPermissionAndRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := memo.Record{Sources: []memo.Source{source}}
+	r := memory.Record{Sources: []memory.Source{source}}
 	if !validateMemorySources(context.Background(), r) {
 		t.Fatal("allowed conversation invalid")
 	}
@@ -527,7 +527,7 @@ func TestAIMemoryModelReadRevocation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "PRIVATE_MEMORY", Sources: []memo.Source{source}}, "missing", "revoke-source")
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "PRIVATE_MEMORY", Sources: []memory.Source{source}}, "missing", "revoke-source")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -553,11 +553,11 @@ func TestAIMemoryOverviewValidatesPastSelection(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	ctx := context.Background()
 	for i := 0; i < 201; i++ {
-		source := memo.Source{Kind: "user", ID: "confirmed", Revision: "one"}
+		source := memory.Source{Kind: "user", ID: "confirmed", Revision: "one"}
 		if i == 200 {
 			source.Kind = "restricted"
 		}
-		_, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, ID: fmt.Sprintf("20261029000000-%07d", i), Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memo.Source{source}}, "missing", fmt.Sprintf("snapshot-%d", i))
+		_, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, ID: fmt.Sprintf("20261029000000-%07d", i), Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memory.Source{source}}, "missing", fmt.Sprintf("snapshot-%d", i))
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -13,7 +13,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 func TestAIMemoryNoteSourcesRetainValidityWithoutExtraction(t *testing.T) {
@@ -28,7 +28,7 @@ func TestAIMemoryNoteSourcesRetainValidityWithoutExtraction(t *testing.T) {
 		t.Fatal("note revalidation invoked a model")
 		return "", nil
 	}
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "existing note fact", Sources: []memo.Source{source}}, "missing", "unchanged")
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "existing note fact", Sources: []memory.Source{source}}, "missing", "unchanged")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestAIMemoryNoteSourcesRetainValidityWithoutExtraction(t *testing.T) {
 		t.Fatalf("unchanged legacy note memory modified: %+v %v", current, err)
 	}
 	source.Revision = "stale"
-	entry, err = aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "outdated note fact", Sources: []memo.Source{source}}, "missing", "stale")
+	entry, err = aiMemoryStore().Save(context.Background(), memory.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "outdated note fact", Sources: []memory.Source{source}}, "missing", "stale")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestAIMemoryDatabaseChangesUseWrittenJournal(t *testing.T) {
 func TestAIMemoryDatabaseChangeTargetsExistingSources(t *testing.T) {
 	ctx := context.Background()
 	dir := t.TempDir()
-	store := memo.NewStore(dir)
+	store := memory.NewStore(dir)
 	databaseID := "20261029000000-abcdefg"
 	wantSource := "20261029000001-abcdefg"
 	for i := 0; i < 103; i++ {
@@ -110,8 +110,8 @@ func TestAIMemoryDatabaseChangeTargetsExistingSources(t *testing.T) {
 		if i == 102 {
 			state, sourceID = "disabled", "20261029000002-abcdefg"
 		}
-		r := memo.Record{ID: fmt.Sprintf("20261029000000-%07d", i), Kind: "fact", Subject: "project", Scope: "workspace", State: state, Content: "fact",
-			Sources: []memo.Source{{Kind: "block", ID: sourceID, Revision: "previous", Evidence: evidence}}}
+		r := memory.Record{ID: fmt.Sprintf("20261029000000-%07d", i), Kind: "fact", Subject: "project", Scope: "workspace", State: state, Content: "fact",
+			Sources: []memory.Source{{Kind: "block", ID: sourceID, Revision: "previous", Evidence: evidence}}}
 		if _, err := store.Save(ctx, r, "missing", fmt.Sprint(i)); err != nil {
 			t.Fatal(err)
 		}
@@ -144,8 +144,8 @@ func TestAIMemoryDisabledConversationRevalidation(t *testing.T) {
 	t.Cleanup(func() { AIMemoryConversationReader = previous })
 	evidence := "The user prefers coffee"
 	AIMemoryConversationReader = func(context.Context, string, string) (string, error) { return evidence, nil }
-	source := memo.Source{Kind: "conversation", ID: "conversation:session:entry", Revision: memoryHash([]byte(evidence)), Evidence: evidence}
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: evidence, Sources: []memo.Source{source}}, "missing", "conversation")
+	source := memory.Source{Kind: "conversation", ID: "conversation:session:entry", Revision: memoryHash([]byte(evidence)), Evidence: evidence}
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: evidence, Sources: []memory.Source{source}}, "missing", "conversation")
 	if err != nil {
 		t.Fatal(err)
 	}

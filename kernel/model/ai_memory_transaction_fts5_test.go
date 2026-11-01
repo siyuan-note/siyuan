@@ -19,7 +19,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -46,7 +46,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entry, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: fixture.childID, State: "active", Content: "Project status", Sources: []memo.Source{source}}, "missing", "initial")
+	entry, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: fixture.childID, State: "active", Content: "Project status", Sources: []memory.Source{source}}, "missing", "initial")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestAIMemoryTransactionReconcilesChangedBlock(t *testing.T) {
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{fixture.sourceID}, OperationID: "reconcile"}, []memo.Source{rootSource}, false, task)
+	runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{fixture.sourceID}, OperationID: "reconcile"}, []memory.Source{rootSource}, false, task)
 	if task.status.State != "completed" || len(task.status.Results) != 1 || !task.status.Results[0].Saved || task.status.Results[0].ID != entry.Record.ID {
 		t.Fatalf("transaction reconciliation failed: %+v", task.status)
 	}
@@ -128,7 +128,7 @@ func TestAIMemoryLongDocumentTransactionOnlyInvalidatesExistingChild(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	entry, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: fixture.childID, State: "active", Content: "Project status", Sources: []memo.Source{source}}, "missing", "initial")
+	entry, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: fixture.childID, State: "active", Content: "Project status", Sources: []memory.Source{source}}, "missing", "initial")
 	if err != nil {
 		t.Fatal(err)
 	}

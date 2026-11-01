@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -24,7 +24,7 @@ func saveCandidateAt(t *testing.T, s *Store, r Record, updated time.Time, op str
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memos/records", entry.Record.ID+".md"), data, 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memory/records", entry.Record.ID+".md"), data, 0600); err != nil {
 		t.Fatal(err)
 	}
 	entry, err = DecodeRecord(data, entry.Record.ID)
@@ -101,7 +101,7 @@ func TestCandidateCleanupBlocksRestoreWithoutWithdrawingSource(t *testing.T) {
 	if _, err = s.Save(ctx, r, "missing", "old-operation"); !errors.Is(err, ErrWithdrawn) {
 		t.Fatalf("old request replayed: %v", err)
 	}
-	name := filepath.Join(s.dataDir, "storage/ai/memos/records", entry.Record.ID+".md")
+	name := filepath.Join(s.dataDir, "storage/ai/memory/records", entry.Record.ID+".md")
 	if err = os.WriteFile(name, raw, 0600); err != nil {
 		t.Fatal(err)
 	}

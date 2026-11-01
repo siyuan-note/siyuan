@@ -13,7 +13,7 @@ import (
 
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 func TestAIMemorySyncCausalHistory(t *testing.T) {
@@ -36,7 +36,7 @@ func TestAIMemorySyncCausalHistory(t *testing.T) {
 
 func TestAIMemorySyncPreservesProjectionBeforeRemoval(t *testing.T) {
 	dir := t.TempDir()
-	base := filepath.Join(dir, "storage/ai/memos")
+	base := filepath.Join(dir, "storage/ai/memory")
 	if err := os.MkdirAll(base, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -61,14 +61,14 @@ func TestAIMemorySyncPreservesProjectionBeforeRemoval(t *testing.T) {
 		t.Fatal("migration backup can be silently deleted by sync")
 	}
 }
-func memorySyncTestRecord() memo.Record {
-	return memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "concise answers", Sources: []memo.Source{{Kind: "manual", ID: "test", Revision: "v1"}}}
+func memorySyncTestRecord() memory.Record {
+	return memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "concise answers", Sources: []memory.Source{{Kind: "manual", ID: "test", Revision: "v1"}}}
 }
 
 func TestAIMemorySyncWithdrawalSurvivesPlan(t *testing.T) {
 	ctx := context.Background()
 	dir := t.TempDir()
-	store := memo.NewStore(dir)
+	store := memory.NewStore(dir)
 	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
 	if err != nil {
 		t.Fatal(err)
@@ -86,10 +86,10 @@ func TestAIMemorySyncWithdrawalSurvivesPlan(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 恢复旧记录必须仍被新保存的撤回引用拦截。
-	if _, err = store.Save(ctx, entry.Record, "missing", "old-retry"); !errors.Is(err, memo.ErrWithdrawn) {
+	if _, err = store.Save(ctx, entry.Record, "missing", "old-retry"); !errors.Is(err, memory.ErrWithdrawn) {
 		t.Fatalf("old memory revived: %v", err)
 	}
-	files, err := os.ReadDir(filepath.Join(dir, "storage/ai/memos/withdrawals"))
+	files, err := os.ReadDir(filepath.Join(dir, "storage/ai/memory/withdrawals"))
 	if err != nil || len(files) != 1 {
 		t.Fatalf("retained marker: %d %v", len(files), err)
 	}
@@ -101,8 +101,8 @@ func TestAIMemorySyncRejectsSymlink(t *testing.T) {
 	if err := os.Symlink(outside, filepath.Join(dir, "storage")); err != nil {
 		t.Skip(err)
 	}
-	_, err := memorySyncRead(dir, "/storage/ai/memos/records/20261029000000-abcdefg.md")
-	if !errors.Is(err, memo.ErrInvalid) {
+	_, err := memorySyncRead(dir, "/storage/ai/memory/records/20261029000000-abcdefg.md")
+	if !errors.Is(err, memory.ErrInvalid) {
 		t.Fatalf("symlink accepted: %v", err)
 	}
 }
@@ -113,7 +113,7 @@ func TestAIMemorySyncCheckoutRestoresWithoutRevival(t *testing.T) {
 	if err := os.MkdirAll(repo.DataPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store := memo.NewStore(repo.DataPath)
+	store := memory.NewStore(repo.DataPath)
 	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
 	if err != nil {
 		t.Fatal(err)
@@ -131,7 +131,7 @@ func TestAIMemorySyncCheckoutRestoresWithoutRevival(t *testing.T) {
 	if _, _, err = repo.Checkout(snapshot.ID, nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memo.ErrWithdrawn) {
+	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrWithdrawn) {
 		t.Fatalf("restored forgotten content usable: %v", err)
 	}
 }
@@ -142,12 +142,12 @@ func TestAIMemorySyncCheckoutDivergenceQuarantines(t *testing.T) {
 	if err := os.MkdirAll(repo.DataPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store := memo.NewStore(repo.DataPath)
+	store := memory.NewStore(repo.DataPath)
 	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
 	if err != nil {
 		t.Fatal(err)
 	}
-	filename := filepath.Join(repo.DataPath, "storage/ai/memos/records", entry.Record.ID+".md")
+	filename := filepath.Join(repo.DataPath, "storage/ai/memory/records", entry.Record.ID+".md")
 	original, err := os.ReadFile(filename)
 	if err != nil {
 		t.Fatal(err)
@@ -177,10 +177,10 @@ func TestAIMemorySyncCheckoutDivergenceQuarantines(t *testing.T) {
 	if _, _, err = repo.Checkout(snapshot.ID, nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memo.ErrConflict) {
+	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrConflict) {
 		t.Fatalf("divergence activated: %v", err)
 	}
-	archived, err := os.ReadDir(filepath.Join(repo.DataPath, "storage/ai/memos/conflicts", entry.Record.ID))
+	archived, err := os.ReadDir(filepath.Join(repo.DataPath, "storage/ai/memory/conflicts", entry.Record.ID))
 	if err != nil || len(archived) < 2 {
 		t.Fatalf("both versions not preserved: %d %v", len(archived), err)
 	}
@@ -222,7 +222,7 @@ func TestAIMemorySyncIgnoresObsoleteOperations(t *testing.T) {
 	}
 	// No plan reader is supplied: obsolete operation contents must not be inspected.
 	for _, plan := range []*dejavu.CheckoutPlan{
-		{Upserts: []*entity.File{{Path: name, Size: memo.MaxFileSize + 1}}},
+		{Upserts: []*entity.File{{Path: name, Size: memory.MaxFileSize + 1}}},
 		{Removes: []*entity.File{{Path: name}}},
 	} {
 		if err := memoryCheckoutPreflight(dir, plan); err != nil {

@@ -13,7 +13,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 func TestAIMemoryProposalUsesExplicitWritableScopes(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAIMemoryProposalUsesExplicitWritableScopes(t *testing.T) {
 			cfg := setupAIMemoryTest(t)
 			ctx := context.Background()
 			content := "List items do not end with periods"
-			foreign, err := aiMemoryStore().Save(ctx, memo.Record{Kind: "preference", Subject: "user", Scope: "20261031120000-abc1234", State: "active", Content: content, Sources: []memo.Source{{Kind: "user", ID: "foreign", Revision: "one", Evidence: content}}}, "missing", "foreign")
+			foreign, err := aiMemoryStore().Save(ctx, memory.Record{Kind: "preference", Subject: "user", Scope: "20261031120000-abc1234", State: "active", Content: content, Sources: []memory.Source{{Kind: "user", ID: "foreign", Revision: "one", Evidence: content}}}, "missing", "foreign")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -38,7 +38,7 @@ func TestAIMemoryProposalUsesExplicitWritableScopes(t *testing.T) {
 				proposals++
 				var input struct {
 					AllowedScopes []string
-					Candidates    []memo.Entry
+					Candidates    []memory.Entry
 				}
 				if err := json.Unmarshal([]byte(prompt[strings.LastIndex(prompt, "\n")+1:]), &input); err != nil {
 					t.Fatal(err)
@@ -66,7 +66,7 @@ func TestAIMemoryProposalUsesExplicitWritableScopes(t *testing.T) {
 			}
 			runCtx, cancel := context.WithCancel(ctx)
 			task := &memoryTask{cancel: cancel}
-			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: content, OperationID: "scope-test"}, []memo.Source{{Kind: "user", ID: "scope-test", Revision: "one", Evidence: content}}, false, task)
+			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: content, OperationID: "scope-test"}, []memory.Source{{Kind: "user", ID: "scope-test", Revision: "one", Evidence: content}}, false, task)
 			wantSaved := scope == "workspace" || scope == "partial"
 			wantState, wantError := "failed", "proposal scope is not permitted"
 			if scope == "workspace" {
@@ -77,7 +77,7 @@ func TestAIMemoryProposalUsesExplicitWritableScopes(t *testing.T) {
 			if task.status.State != wantState || task.status.Error != wantError || proposals != 1 || (overviews != 0) != wantSaved {
 				t.Fatalf("incorrect save result or unnecessary overview call: %+v proposals=%d overviews=%d", task.status, proposals, overviews)
 			}
-			workspace, err := aiMemoryStore().Search(ctx, memo.SearchOptions{Scopes: []string{"workspace"}})
+			workspace, err := aiMemoryStore().Search(ctx, memory.SearchOptions{Scopes: []string{"workspace"}})
 			if err != nil || (len(workspace.Entries) == 1) != wantSaved {
 				t.Fatalf("scope rejection changed workspace records: %+v %v", workspace, err)
 			}
@@ -117,7 +117,7 @@ func TestAIMemoryInvalidScopeRetryRegeneratesProposal(t *testing.T) {
 	if second.State != "completed" || len(second.Results) != 1 || !second.Results[0].Saved || proposals != 2 || keywords != 2 {
 		t.Fatalf("explicit retry reused a rejected proposal: %+v proposals=%d keywords=%d", second, proposals, keywords)
 	}
-	result, err := aiMemoryStore().Search(context.Background(), memo.SearchOptions{})
+	result, err := aiMemoryStore().Search(context.Background(), memory.SearchOptions{})
 	if err != nil || len(result.Entries) != 1 {
 		t.Fatalf("explicit scope retry duplicated memory: %+v %v", result, err)
 	}
@@ -125,7 +125,7 @@ func TestAIMemoryInvalidScopeRetryRegeneratesProposal(t *testing.T) {
 
 func TestAIMemoryProposalValidityRequiresExplicitEvidence(t *testing.T) {
 	from, until := "2030-01-01T00:00:00Z", "2031-01-01T00:00:00Z"
-	sources := []memo.Source{{Evidence: from + " through " + until}}
+	sources := []memory.Source{{Evidence: from + " through " + until}}
 	for _, test := range []struct {
 		from, until string
 		valid       bool
@@ -144,7 +144,7 @@ func TestAIMemoryReplacementProposalChecksTarget(t *testing.T) {
 		t.Run(scenario, func(t *testing.T) {
 			cfg := setupAIMemoryTest(t)
 			ctx := context.Background()
-			old, err := aiMemoryStore().Save(ctx, memo.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "Project status pending", Sources: []memo.Source{{Kind: "user", ID: "prior", Revision: "one"}}}, "missing", "prior")
+			old, err := aiMemoryStore().Save(ctx, memory.Record{Schema: 1, Kind: "fact", Subject: "project", Scope: "workspace", State: "active", Content: "Project status pending", Sources: []memory.Source{{Kind: "user", ID: "prior", Revision: "one"}}}, "missing", "prior")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -170,7 +170,7 @@ func TestAIMemoryReplacementProposalChecksTarget(t *testing.T) {
 			}
 			runCtx, cancel := context.WithCancel(ctx)
 			task := &memoryTask{cancel: cancel}
-			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Project status completed", OperationID: "replacement"}, []memo.Source{{Kind: "user", ID: "replacement", Revision: "two", Evidence: "Project status completed"}}, false, task)
+			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Project status completed", OperationID: "replacement"}, []memory.Source{{Kind: "user", ID: "replacement", Revision: "two", Evidence: "Project status completed"}}, false, task)
 			if len(task.status.Results) != 1 || task.status.Results[0].Saved != (scenario == "candidate") {
 				t.Fatalf("replacement result: %+v", task.status)
 			}

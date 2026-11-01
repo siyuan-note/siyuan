@@ -85,7 +85,7 @@ func TestAPIContractAIMemoryLifecycle(t *testing.T) {
 	}
 	call("save", original, -1)
 	// 撤回标记已生效，但同步残留的目标暂时不能物理删除，响应仍保留成功状态。
-	blocked := filepath.Join(util.DataDir, "storage", "ai", "memos", "records", saved.ID+".md")
+	blocked := filepath.Join(util.DataDir, "storage", "ai", "memory", "records", saved.ID+".md")
 	if err := os.Mkdir(blocked, 0700); err != nil {
 		t.Fatal(err)
 	}

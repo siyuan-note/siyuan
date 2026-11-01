@@ -2,8 +2,8 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Package memo 管理工作空间长期记忆的文件状态，不包含模型调用或权限推断。
-package memo
+// Package memory 管理工作空间长期记忆的文件状态，不包含模型调用或权限推断。
+package memory
 
 import (
 	"context"

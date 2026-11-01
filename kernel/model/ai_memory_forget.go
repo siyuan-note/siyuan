@@ -14,7 +14,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 type memoryForgetCandidate struct {
@@ -26,7 +26,7 @@ type memoryForgetCandidate struct {
 }
 
 // 忘记匹配保留完整事实和身份；来源证据、修订和操作记录仅在服务端校验。
-func memoryForgetCandidates(revisions map[string]memo.Entry) []memoryForgetCandidate {
+func memoryForgetCandidates(revisions map[string]memory.Entry) []memoryForgetCandidate {
 	candidates := make([]memoryForgetCandidate, 0, len(revisions))
 	for _, old := range revisions {
 		r := old.Record
@@ -43,7 +43,7 @@ func directMemoryInstruction(text string) bool {
 }
 
 // 删除只接受手动输入的直接意图，模型返回的身份、正文与权限字段均须独立复核。
-func authorizeMemoryForgetting(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMaintainRequest, sources []memo.Source, automatic bool, proposal memoryProposal, revisions map[string]memo.Entry, check func() error) error {
+func authorizeMemoryForgetting(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMaintainRequest, sources []memory.Source, automatic bool, proposal memoryProposal, revisions map[string]memory.Entry, check func() error) error {
 	forget := []memoryAction{}
 	seen := map[string]bool{}
 	for _, a := range proposal.Actions {
@@ -148,7 +148,7 @@ func authorizeMemoryForgetting(ctx context.Context, cfg *conf.AI, q apicontract.
 }
 
 // 模型仅选择候选 ID，删除动作的完整身份和正文由服务端快照提供。
-func decodeMemoryForgetSelection(raw, text string, revisions map[string]memo.Entry) (memoryProposal, error) {
+func decodeMemoryForgetSelection(raw, text string, revisions map[string]memory.Entry) (memoryProposal, error) {
 	proposal := memoryProposal{Actions: []memoryAction{}}
 	invalid := errors.New("invalid memory forget selection")
 	if len(raw) > 8192 {

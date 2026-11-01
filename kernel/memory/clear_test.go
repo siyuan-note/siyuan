@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func TestClearMemoryWithdrawsEveryStateAndCurrentProjections(t *testing.T) {
 		entries = append(entries, entry)
 	}
 	for _, name := range []string{"MEMORY.md", "USER.md"} {
-		if err := os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memos", name), []byte("Old summary"), 0600); err != nil {
+		if err := os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memory", name), []byte("Old summary"), 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -38,7 +38,7 @@ func TestClearMemoryWithdrawsEveryStateAndCurrentProjections(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		name := filepath.Join(s.dataDir, "storage/ai/memos/records", entry.Record.ID+".md")
+		name := filepath.Join(s.dataDir, "storage/ai/memory/records", entry.Record.ID+".md")
 		if err = os.WriteFile(name, raw, 0600); err != nil {
 			t.Fatal(err)
 		}
@@ -53,7 +53,7 @@ func TestClearMemoryWithdrawsEveryStateAndCurrentProjections(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, name := range []string{"MEMORY.md", "USER.md"} {
-		if _, err := os.Stat(filepath.Join(s.dataDir, "storage/ai/memos", name)); !errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(filepath.Join(s.dataDir, "storage/ai/memory", name)); !errors.Is(err, os.ErrNotExist) {
 			t.Fatalf("projection retained: %s %v", name, err)
 		}
 	}
@@ -62,7 +62,7 @@ func TestClearMemoryWithdrawsEveryStateAndCurrentProjections(t *testing.T) {
 func TestClearMemoryPreservesUnsupportedRecordsBeforeAnyWithdrawal(t *testing.T) {
 	s := newTestStore(t)
 	entry := saveSample(t, s, "original")
-	name := filepath.Join(s.dataDir, "storage/ai/memos/records", NewID()+".md")
+	name := filepath.Join(s.dataDir, "storage/ai/memory/records", NewID()+".md")
 	raw := []byte("unknown format")
 	if err := os.WriteFile(name, raw, 0600); err != nil {
 		t.Fatal(err)

@@ -15,7 +15,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -59,7 +59,7 @@ func TestAIMemoryClearPersistsDisableWithoutCallingModel(t *testing.T) {
 	if err = json.Unmarshal(data, &persisted); err != nil || persisted.AI.Memory.Enabled || persisted.AI.Memory.ModelID != cfg.Memory.ModelID {
 		t.Fatalf("disabled setting not persisted: %v", err)
 	}
-	result, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"candidate", "active", "review", "disabled", "superseded"}})
+	result, err := aiMemoryStore().Search(ctx, memory.SearchOptions{States: []string{"candidate", "active", "review", "disabled", "superseded"}})
 	if err != nil || len(result.Entries) != 0 {
 		t.Fatalf("clear left records: %+v %v", result, err)
 	}
@@ -81,7 +81,7 @@ func TestAIMemoryClearStopsLateModelResults(t *testing.T) {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Coffee", OperationID: "late"}, []memo.Source{{Kind: "user", ID: "late", Revision: "one", Evidence: "Coffee"}}, false, task)
+		runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{Text: "Coffee", OperationID: "late"}, []memory.Source{{Kind: "user", ID: "late", Revision: "one", Evidence: "Coffee"}}, false, task)
 	}()
 	select {
 	case <-entered:
@@ -97,7 +97,7 @@ func TestAIMemoryClearStopsLateModelResults(t *testing.T) {
 	if err != nil || !ret.Disabled || !ret.Cleared {
 		t.Fatalf("clear %+v %v", ret, err)
 	}
-	result, err := aiMemoryStore().Search(context.Background(), memo.SearchOptions{States: []string{"active", "candidate"}})
+	result, err := aiMemoryStore().Search(context.Background(), memory.SearchOptions{States: []string{"active", "candidate"}})
 	if err != nil || len(result.Entries) != 0 || task.status.State == "completed" {
 		t.Fatalf("late proposal resurrected memory: %+v %+v %v", result, task.status, err)
 	}
@@ -106,11 +106,11 @@ func TestAIMemoryClearStopsLateModelResults(t *testing.T) {
 func TestAIMemoryClearFailureKeepsFeatureDisabled(t *testing.T) {
 	setupAIMemoryClearTest(t)
 	ctx := context.Background()
-	_, err := aiMemoryStore().Save(ctx, memo.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "candidate", Content: "Candidate", Sources: []memo.Source{{Kind: "user", ID: "manual", Revision: "one"}}}, "missing", "manual")
+	_, err := aiMemoryStore().Save(ctx, memory.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "candidate", Content: "Candidate", Sources: []memory.Source{{Kind: "user", ID: "manual", Revision: "one"}}}, "missing", "manual")
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := filepath.Join(util.DataDir, "storage/ai/memos/records", "20261031000000-abcdefg.md")
+	name := filepath.Join(util.DataDir, "storage/ai/memory/records", "20261031000000-abcdefg.md")
 	if err = os.WriteFile(name, []byte("unknown format"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestAIMemoryClearRequiresPersistedDisable(t *testing.T) {
 			setupAIMemoryClearTest(t)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			entry, err := aiMemoryStore().Save(ctx, memo.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "Preserve this", Sources: []memo.Source{{Kind: "user", ID: "manual", Revision: "one"}}}, "missing", "manual")
+			entry, err := aiMemoryStore().Save(ctx, memory.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "Preserve this", Sources: []memory.Source{{Kind: "user", ID: "manual", Revision: "one"}}}, "missing", "manual")
 			if err != nil {
 				t.Fatal(err)
 			}

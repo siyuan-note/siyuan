@@ -13,7 +13,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -33,7 +33,7 @@ func TestAIMemoryCandidateReconfirmationRequiresCurrentVerbatimEvidence(t *testi
 			cfg := setupAIMemoryTest(t)
 			ctx := context.Background()
 			content := "User prefers coffee"
-			r := memo.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: tc.state, Content: content, Sources: []memo.Source{{Kind: "user", ID: "original", Revision: "one", Evidence: content}}}
+			r := memory.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: tc.state, Content: content, Sources: []memory.Source{{Kind: "user", ID: "original", Revision: "one", Evidence: content}}}
 			if tc.replacement {
 				r.Supersedes = "20261031000000-abcdefg"
 			}
@@ -56,12 +56,12 @@ func TestAIMemoryCandidateReconfirmationRequiresCurrentVerbatimEvidence(t *testi
 			}
 			runCtx, cancel := context.WithCancel(ctx)
 			task := &memoryTask{cancel: cancel}
-			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: tc.evidence, OperationID: "confirmation"}, []memo.Source{{Kind: "user", ID: "confirmation", Revision: "two", Evidence: tc.evidence}}, false, task)
+			runAIMemory(runCtx, cfg, apicontract.AIMemoryMaintainRequest{Text: tc.evidence, OperationID: "confirmation"}, []memory.Source{{Kind: "user", ID: "confirmation", Revision: "two", Evidence: tc.evidence}}, false, task)
 			current, err := aiMemoryStore().Get(ctx, entry.Record.ID)
 			if err != nil || current.Record.State != tc.want || len(task.status.Results) != 1 || !task.status.Results[0].Saved || task.status.Results[0].ID != entry.Record.ID {
 				t.Fatalf("candidate confirmation: %+v %+v %v", current, task.status, err)
 			}
-			all, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"candidate", "active", "review"}, Limit: 100})
+			all, err := aiMemoryStore().Search(ctx, memory.SearchOptions{States: []string{"candidate", "active", "review"}, Limit: 100})
 			if err != nil || len(all.Entries) != 1 {
 				t.Fatalf("equivalent candidate duplicated: %+v %v", all, err)
 			}
@@ -75,13 +75,13 @@ func TestAIMemoryCandidateCleanupRespectsEnableAndWritePermissions(t *testing.T)
 			cfg := setupAIMemoryTest(t)
 			ctx := context.Background()
 			store := aiMemoryStore()
-			auto := memo.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "candidate", Content: "Coffee", Sources: []memo.Source{{Kind: "block", ID: "20261031000000-abcdefg", Revision: "one", Evidence: "Coffee"}}}
+			auto := memory.Record{Kind: "preference", Subject: "user", Scope: "workspace", State: "candidate", Content: "Coffee", Sources: []memory.Source{{Kind: "block", ID: "20261031000000-abcdefg", Revision: "one", Evidence: "Coffee"}}}
 			entry, err := store.Save(ctx, auto, "missing", "auto")
 			if err != nil {
 				t.Fatal(err)
 			}
 			manual := auto
-			manual.Sources = []memo.Source{{Kind: "user", ID: "manual", Revision: "one", Evidence: "Coffee"}}
+			manual.Sources = []memory.Source{{Kind: "user", ID: "manual", Revision: "one", Evidence: "Coffee"}}
 			protected, err := store.Save(ctx, manual, "missing", "manual")
 			if err != nil {
 				t.Fatal(err)

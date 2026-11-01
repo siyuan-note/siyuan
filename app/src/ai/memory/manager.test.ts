@@ -54,7 +54,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         .match(/export const isOnlyMeta = [\s\S]*?(?=\nexport const isNotCtrl)/)[0];
     runInNewContext(transpileModule(metaSource, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText,
         {exports: compatibility, isMac: () => options.mac === true});
-    runInNewContext(transpileModule(readFileSync("src/ai/memos/manager.ts", "utf8"), {
+    runInNewContext(transpileModule(readFileSync("src/ai/memory/manager.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText, {
         exports: exported,
@@ -720,7 +720,7 @@ test("memory management presents one action and one overview without count or re
 });
 
 test("summary retains the shared typography, compact input and scrollable layout without inline status controls", () => {
-    const source = readFileSync("src/ai/memos/manager.ts", "utf8");
+    const source = readFileSync("src/ai/memory/manager.ts", "utf8");
     const styles = readFileSync("src/assets/scss/business/_memory-manager.scss", "utf8");
     assert.match(styles, /&__content\s*\{\s*max-height:\s*min\(360px, 40vh\);\s*overflow:\s*auto;/);
     assert.match(source, /<div class="memory-manager__content b3-typography"/);

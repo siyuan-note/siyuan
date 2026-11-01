@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 func TestAIMemoryReviewPreservesTransientErrorsAndFiltersChanges(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAIMemoryReviewPreservesTransientErrorsAndFiltersChanges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entry, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memo.Source{source}}, "missing", "create")
+	entry, err := aiMemoryStore().Save(context.Background(), memory.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memory.Source{source}}, "missing", "create")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestAIMemoryOverviewReusesSourcesWithinRequestOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 4; i++ {
-		if _, err = aiMemoryStore().Save(ctx, memo.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: fmt.Sprint("fact", i), Sources: []memo.Source{source}}, "missing", fmt.Sprint(i)); err != nil {
+		if _, err = aiMemoryStore().Save(ctx, memory.Record{Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: fmt.Sprint("fact", i), Sources: []memory.Source{source}}, "missing", fmt.Sprint(i)); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -37,7 +37,7 @@ func (s *Store) root(create bool) (*os.Root, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, part := range []string{"storage", "ai", "memos"} {
+	for _, part := range strings.Split(StorageDir, "/") {
 		if create {
 			if err = root.Mkdir(part, 0700); err != nil && !errors.Is(err, os.ErrExist) {
 				root.Close()

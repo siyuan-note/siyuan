@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package memo
+package memory
 
 import (
 	"context"
@@ -53,7 +53,7 @@ func TestMemoryWithdrawalDoesNotPreserveDuplicateFact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", forgot.WithdrawalID+".md"))
+	data, err := os.ReadFile(filepath.Join(s.dataDir, "storage/ai/memory/withdrawals", forgot.WithdrawalID+".md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestMemoryWithdrawalPreservationSurvivesRestore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := filepath.Join(s.dataDir, "storage/ai/memos/withdrawals", forgot.WithdrawalID+".md")
+	name := filepath.Join(s.dataDir, "storage/ai/memory/withdrawals", forgot.WithdrawalID+".md")
 	data, err := os.ReadFile(name)
 	if err != nil {
 		t.Fatal(err)
@@ -98,7 +98,7 @@ func TestMemoryWithdrawalPreservationSurvivesRestore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memos/records", target.Record.ID+".md"), raw, 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(s.dataDir, "storage/ai/memory/records", target.Record.ID+".md"), raw, 0600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err = s.Get(ctx, target.Record.ID); !errors.Is(err, ErrWithdrawn) {

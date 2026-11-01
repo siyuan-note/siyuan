@@ -9,7 +9,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -22,7 +22,7 @@ var AIMemoryConversationReadScope func(context.Context) context.Context
 
 type memoryReadKey struct{}
 type memorySourceRead struct {
-	source memo.Source
+	source memory.Source
 	err    error
 }
 type memoryReadScope struct {
@@ -40,9 +40,9 @@ func newMemoryReadScope(ctx context.Context) context.Context {
 	return context.WithValue(ctx, memoryReadKey{}, &memoryReadScope{workspace: util.DataDir, sources: map[string]memorySourceRead{}})
 }
 
-func memorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
+func memorySourceSnapshot(ctx context.Context, id string) (memory.Source, error) {
 	if err := ctx.Err(); err != nil {
-		return memo.Source{}, err
+		return memory.Source{}, err
 	}
 	scope, ok := ctx.Value(memoryReadKey{}).(*memoryReadScope)
 	if !ok {
@@ -51,7 +51,7 @@ func memorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
 	scope.Lock()
 	defer scope.Unlock()
 	if scope.workspace != util.DataDir {
-		return memo.Source{}, errors.New("memory workspace changed")
+		return memory.Source{}, errors.New("memory workspace changed")
 	}
 	if value, exists := scope.sources[id]; exists {
 		return value.source, value.err
@@ -64,7 +64,7 @@ func memorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
 	return source, err
 }
 
-func memoryRecordAffected(record memo.Record, changedIDs []string) bool {
+func memoryRecordAffected(record memory.Record, changedIDs []string) bool {
 	if len(changedIDs) == 0 {
 		return true
 	}

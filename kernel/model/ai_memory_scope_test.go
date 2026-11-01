@@ -11,7 +11,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -29,7 +29,7 @@ func TestAIMemoryDefaultNotebookScope(t *testing.T) {
 			if err != nil {
 				t.Fatal("ordinary notebook requires no selection", err)
 			}
-			record := memo.Record{Schema: 1, Kind: "fact", Subject: "test", Scope: "workspace", State: "active", Content: "test", Sources: []memo.Source{source}}
+			record := memory.Record{Schema: 1, Kind: "fact", Subject: "test", Scope: "workspace", State: "active", Content: "test", Sources: []memory.Source{source}}
 			if !validateMemorySources(ctx, record) || !memoryModelReadAllowed(ctx, record) {
 				t.Fatal("ordinary source failed validation or model-read authorization")
 			}

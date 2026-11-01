@@ -10,11 +10,11 @@ import (
 	"io"
 	"strings"
 
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 )
 
 // 自动采集只接受一条已提交用户消息；角色元数据、附件和引用正文不能作为用户陈述。
-func automaticMemoryConversation(sources []memo.Source) (string, bool) {
+func automaticMemoryConversation(sources []memory.Source) (string, bool) {
 	if len(sources) != 1 || sources[0].Kind != "conversation" || !strings.HasPrefix(sources[0].ID, "conversation:") {
 		return "", false
 	}

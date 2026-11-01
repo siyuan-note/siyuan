@@ -92,7 +92,7 @@ All paths below are relative to the user's SiYuan workspace, not the source repo
 ```text
 data/storage/ai/
 ├── AGENTS.md
-└── memos/
+└── memory/
     ├── MEMORY.md
     ├── legacy-projections/
     │   ├── USER-<sha256>.md
@@ -106,11 +106,11 @@ data/storage/ai/
             └── <sha256>.md
 ```
 
-`AGENTS.md` is the existing manually maintained instruction file. Memory consolidation must not rewrite it without the user's direction. `memos/` and its memory files are proposed additions. `records/` is the sole canonical source; file names use program-generated SiYuan IDs, which remain stable when titles or content change.
+`AGENTS.md` is the existing manually maintained instruction file. Memory consolidation must not rewrite it without the user's direction. `memory/` and its memory files are proposed additions. `records/` is the sole canonical source; file names use program-generated SiYuan IDs, which remain stable when titles or content change.
 
-`MEMORY.md` is the single active, system-generated overview of stable user background and preferences, common context, conventions and record references. It is derived from canonical records and bounded by relevance and context budgets, not a concatenation of all memory or a complete inventory. It persists under `memos/`, participates in normal data synchronization, and can be rebuilt when needed. The usable-memory count is computed from eligible records independently of this bounded overview.
+`MEMORY.md` is the single active, system-generated overview of stable user background and preferences, common context, conventions and record references. It is derived from canonical records and bounded by relevance and context budgets, not a concatenation of all memory or a complete inventory. It persists under `memory/`, participates in normal data synchronization, and can be rebuilt when needed. The usable-memory count is computed from eligible records independently of this bounded overview.
 
-Canonical records and overviews reuse existing snapshots and data synchronization, subject to the user's sync settings and ignore rules. The first version has no separate database or persistent retrieval index and does not create `temp/ai/memos/` in advance. If a cache becomes necessary later, that path may contain only rebuildable data; clearing it must not lose memory, corrections, or withdrawal decisions.
+Canonical records and overviews reuse existing snapshots and data synchronization, subject to the user's sync settings and ignore rules. The first version has no separate database or persistent retrieval index and does not create `temp/ai/memory/` in advance. If a cache becomes necessary later, that path may contain only rebuildable data; clearing it must not lose memory, corrections, or withdrawal decisions.
 
 Model and reasoning-effort choices belong to AI configuration, not `records/` or the overview. Follow existing configuration persistence and export rules and reuse model references rather than copying provider credentials into memory files. Synchronizing memory files does not mean the receiving device automatically has the same model configuration or service access.
 
@@ -157,7 +157,7 @@ Overview generation uses a verified record snapshot. If relevant records change 
 
 Model output is a proposed operation subject to validation, not unrestricted file-write access. The shared service must constrain the target directory, validate paths and file identities, prevent symlink escapes, and reuse existing read-only workspace and access-control rules. Memory content does not elevate source instructions or authorize other actions.
 
-Use a low-dependency `kernel/memo` package for parsing, storage, revisions, retrieval, and projection validation; `kernel/model/ai_memory.go` orchestrates sources, configuration, model calls, and sync notification. Shared AI settings and management consume typed kernel contracts, not direct filesystem access. Reading/listing, search, proposed mutations, job cancellation/status, and overview retrieval need explicit typed request/result/error contracts, including revisions, operation IDs, incomplete-search indicators, and saved-record versus pending-overview state. Route and tool spellings are implementation details; new interfaces follow the [API type contracts](API-CONTRACTS.md), including generated declarations. These are planned modules and contracts, not released APIs.
+Use a low-dependency `kernel/memory` package for parsing, storage, revisions, retrieval, and projection validation; `kernel/model/ai_memory.go` orchestrates sources, configuration, model calls, and sync notification. Shared AI settings and management consume typed kernel contracts, not direct filesystem access. Reading/listing, search, proposed mutations, job cancellation/status, and overview retrieval need explicit typed request/result/error contracts, including revisions, operation IDs, incomplete-search indicators, and saved-record versus pending-overview state. Route and tool spellings are implementation details; new interfaces follow the [API type contracts](API-CONTRACTS.md), including generated declarations. These are planned modules and contracts, not released APIs.
 
 Consumers opt in at the business entry point, reusing the same service across current and future AI features. Do not inject memory in the low-level model protocol adapter. Title generation, compaction, model connection tests, and memory-maintenance model calls must not recursively trigger memory capture.
 

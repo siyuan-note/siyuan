@@ -12,7 +12,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -45,7 +45,7 @@ func TestAIMemoryConversationKeywordContract(t *testing.T) {
 	}
 }
 
-func memoryConversationFixture(t *testing.T, content *string) memo.Source {
+func memoryConversationFixture(t *testing.T, content *string) memory.Source {
 	t.Helper()
 	previous := AIMemoryConversationReader
 	t.Cleanup(func() { AIMemoryConversationReader = previous })
@@ -77,12 +77,12 @@ func TestAIMemoryAutomaticAdmissionRejectsNonConversation(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
 		q       apicontract.AIMemoryMaintainRequest
-		sources []memo.Source
+		sources []memory.Source
 	}{
-		{"notes", apicontract.AIMemoryMaintainRequest{SourceIDs: []string{block.ID}}, []memo.Source{block}},
-		{"mixed", apicontract.AIMemoryMaintainRequest{SourceIDs: []string{block.ID, conversation.ID}}, []memo.Source{block, conversation}},
+		{"notes", apicontract.AIMemoryMaintainRequest{SourceIDs: []string{block.ID}}, []memory.Source{block}},
+		{"mixed", apicontract.AIMemoryMaintainRequest{SourceIDs: []string{block.ID, conversation.ID}}, []memory.Source{block, conversation}},
 		{"manual-text", apicontract.AIMemoryMaintainRequest{Text: content}, nil},
-		{"text-and-conversation", apicontract.AIMemoryMaintainRequest{Text: content, SourceIDs: []string{conversation.ID}}, []memo.Source{conversation}},
+		{"text-and-conversation", apicontract.AIMemoryMaintainRequest{Text: content, SourceIDs: []string{conversation.ID}}, []memory.Source{conversation}},
 		{"empty", apicontract.AIMemoryMaintainRequest{}, nil},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -100,7 +100,7 @@ func TestAIMemoryAutomaticAdmissionRejectsNonConversation(t *testing.T) {
 	}
 	for _, evidence := range []string{`{"role":"assistant","content":"preference"}`, `{"role":"user","content":" "}`, `"preference"`} {
 		conversation.Evidence = evidence
-		if _, eligible := automaticMemoryConversation([]memo.Source{conversation}); eligible {
+		if _, eligible := automaticMemoryConversation([]memory.Source{conversation}); eligible {
 			t.Fatalf("non-user content admitted: %s", evidence)
 		}
 	}
@@ -140,7 +140,7 @@ func TestAIMemoryConversationAttributionGatesWrites(t *testing.T) {
 			}
 			ctx, cancel := context.WithCancel(context.Background())
 			task := &memoryTask{cancel: cancel}
-			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: tc.name}, []memo.Source{source}, true, task)
+			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: tc.name}, []memory.Source{source}, true, task)
 			if task.status.State != tc.state || keywords != 1 {
 				t.Fatalf("task: %+v keywords=%d", task.status, keywords)
 			}
@@ -182,7 +182,7 @@ func TestAIMemoryConversationClassificationRechecksGuards(t *testing.T) {
 				}
 				return `{"intent":"remember","terms":[],"attribution":"self"}`, nil
 			}
-			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: scenario}, []memo.Source{source}, true, task)
+			runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: scenario}, []memory.Source{source}, true, task)
 			if calls != 1 || (task.status.State != "failed" && task.status.State != "cancelled") || len(task.status.Results) != 0 {
 				t.Fatalf("classification bypassed guard: %+v calls=%d", task.status, calls)
 			}
@@ -205,7 +205,7 @@ func TestAIMemoryConversationMetadataCannotActivateFact(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	task := &memoryTask{cancel: cancel}
-	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: "metadata"}, []memo.Source{source}, true, task)
+	runAIMemory(ctx, cfg, apicontract.AIMemoryMaintainRequest{SourceIDs: []string{source.ID}, OperationID: "metadata"}, []memory.Source{source}, true, task)
 	if task.status.State != "completed" || len(task.status.Results) != 1 || !task.status.Results[0].Saved {
 		t.Fatalf("task: %+v", task.status)
 	}

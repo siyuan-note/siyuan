@@ -33,7 +33,7 @@ func TestAPIContractAIMemoryClear(t *testing.T) {
 				t.Fatal(err)
 			}
 			if mode == "partial" {
-				name := filepath.Join(util.DataDir, "storage/ai/memos/records/20261031000000-abcdefg.md")
+				name := filepath.Join(util.DataDir, "storage/ai/memory/records/20261031000000-abcdefg.md")
 				if err = os.WriteFile(name, []byte("unsupported format"), 0600); err != nil {
 					t.Fatal(err)
 				}

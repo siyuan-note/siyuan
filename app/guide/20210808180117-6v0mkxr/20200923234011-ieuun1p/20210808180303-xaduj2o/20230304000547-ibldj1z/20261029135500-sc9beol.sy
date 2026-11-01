@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261101151527"
+		"updated": "20261101174653"
 	},
 	"Children": [
 		{
@@ -369,12 +369,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-lmw7mfc",
-				"updated": "20261030063122"
+				"updated": "20261101174653"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Canonical records live in data/storage/ai/memos/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories."
+					"Data": "Canonical records live in data/storage/ai/memory/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories."
 				}
 			]
 		},

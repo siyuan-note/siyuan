@@ -14,13 +14,13 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestMemoryForgetSelectionStrictCanonicalSnapshot(t *testing.T) {
 	_, entry, q, _, _ := memoryForgetFixture(t, "Forget my coffee preference", "workspace")
-	revisions := map[string]memo.Entry{entry.Record.ID: entry}
+	revisions := map[string]memory.Entry{entry.Record.ID: entry}
 	valid := `{"targetIDs":["` + entry.Record.ID + `"]}`
 	proposal, err := decodeMemoryForgetSelection(valid, q.Text, revisions)
 	if err != nil || len(proposal.Actions) != 1 {
@@ -39,12 +39,12 @@ func TestMemoryForgetSelectionStrictCanonicalSnapshot(t *testing.T) {
 
 func TestAIMemoryForgetCandidateContentBudget(t *testing.T) {
 	cfg, entry, q, sources, _ := memoryForgetFixture(t, "Forget my coffee preference", "workspace")
-	entries := []memo.Entry{entry}
+	entries := []memory.Entry{entry}
 	for i := 0; i < 4; i++ {
-		other, err := aiMemoryStore().Save(context.Background(), memo.Record{
+		other, err := aiMemoryStore().Save(context.Background(), memory.Record{
 			Schema: 1, Kind: "fact", Subject: "project", Scope: "workspace", State: "candidate",
 			Content: strings.Repeat("Unrelated project fact ", 1500),
-			Sources: []memo.Source{{Kind: "user", ID: "project-source", Revision: "one", Evidence: "Project source"}},
+			Sources: []memory.Source{{Kind: "user", ID: "project-source", Revision: "one", Evidence: "Project source"}},
 		}, "missing", fmt.Sprintf("large-content:%d", i))
 		if err != nil {
 			t.Fatal(err)
@@ -76,7 +76,7 @@ func TestAIMemoryForgetCandidateContentBudget(t *testing.T) {
 func TestAIMemoryForgetSearchOmitsCommandWords(t *testing.T) {
 	cfg, target, q, sources, _ := memoryForgetFixture(t, "Forget the coffee preference", "workspace")
 	for i := 0; i < 101; i++ {
-		_, err := aiMemoryStore().Save(context.Background(), memo.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "candidate", Content: fmt.Sprintf("The project fact %d", i), Sources: []memo.Source{{Kind: "user", ID: "project", Revision: "one", Evidence: "The project"}}}, "missing", fmt.Sprintf("command-word:%d", i))
+		_, err := aiMemoryStore().Save(context.Background(), memory.Record{Kind: "fact", Subject: "project", Scope: "workspace", State: "candidate", Content: fmt.Sprintf("The project fact %d", i), Sources: []memory.Source{{Kind: "user", ID: "project", Revision: "one", Evidence: "The project"}}}, "missing", fmt.Sprintf("command-word:%d", i))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -112,12 +112,12 @@ func TestAIMemoryForgetProductionHTTPProtocols(t *testing.T) {
 				t.Fatal(err)
 			}
 			// 少量候选也可能携带很大的来源快照，删除匹配只需要完整记忆正文。
-			others := []memo.Entry{}
+			others := []memory.Entry{}
 			for i := 0; i < 4; i++ {
-				other, saveErr := aiMemoryStore().Save(context.Background(), memo.Record{
+				other, saveErr := aiMemoryStore().Save(context.Background(), memory.Record{
 					Schema: 1, Kind: "fact", Subject: "project", Scope: "workspace", State: "candidate",
 					Content: fmt.Sprintf("Unrelated project fact %d", i),
-					Sources: []memo.Source{{Kind: "user", ID: "project-source", Revision: "one", Evidence: strings.Repeat("PRIVATE_SOURCE_EVIDENCE", 1500)}},
+					Sources: []memory.Source{{Kind: "user", ID: "project-source", Revision: "one", Evidence: strings.Repeat("PRIVATE_SOURCE_EVIDENCE", 1500)}},
 				}, "missing", fmt.Sprintf("PRIVATE_MEMORY_OPERATION:%d", i))
 				if saveErr != nil {
 					t.Fatal(saveErr)

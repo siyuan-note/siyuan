@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -22,7 +22,7 @@ func TestAIMemoryUnifiedOverviewGenerationAndInjection(t *testing.T) {
 	cfg := setupAIMemoryTest(t)
 	Conf.Lang = "zh-CN"
 	ctx := context.Background()
-	r := memo.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memo.Source{{Kind: "user", ID: "user-request", Revision: "one"}}}
+	r := memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "Concise answers", Sources: []memory.Source{{Kind: "user", ID: "user-request", Revision: "one"}}}
 	if _, err := aiMemoryStore().Save(ctx, r, "missing", "save"); err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestAIMemoryUnifiedOverviewGenerationAndInjection(t *testing.T) {
 	if err != nil || strings.Count(text, "Unified overview") != 1 {
 		t.Fatalf("context %q %v", text, err)
 	}
-	if _, err = os.Stat(filepath.Join(util.DataDir, "storage/ai/memos/USER.md")); !os.IsNotExist(err) {
+	if _, err = os.Stat(filepath.Join(util.DataDir, "storage/ai/memory/USER.md")); !os.IsNotExist(err) {
 		t.Fatal("new generation wrote USER.md")
 	}
 }
@@ -60,24 +60,24 @@ func TestAIMemoryOverviewCountTraversesAllScopesAndStates(t *testing.T) {
 	setupAIMemoryTest(t)
 	ctx := context.Background()
 	store := aiMemoryStore()
-	for i := 0; i < memo.MaxResults+3; i++ {
-		r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: fmt.Sprintf("scope-%d", i%3), State: "active", Content: fmt.Sprintf("Fact %d", i), Sources: []memo.Source{{Kind: "user", ID: fmt.Sprintf("source-%d", i), Revision: "one"}}}
+	for i := 0; i < memory.MaxResults+3; i++ {
+		r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: fmt.Sprintf("scope-%d", i%3), State: "active", Content: fmt.Sprintf("Fact %d", i), Sources: []memory.Source{{Kind: "user", ID: fmt.Sprintf("source-%d", i), Revision: "one"}}}
 		if _, err := store.Save(ctx, r, "missing", fmt.Sprintf("save-%d", i)); err != nil {
 			t.Fatal(err)
 		}
 	}
 	for _, state := range []string{"candidate", "disabled", "review", "superseded"} {
-		r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: state, Content: state, Sources: []memo.Source{{Kind: "user", ID: state, Revision: "one"}}}
+		r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: state, Content: state, Sources: []memory.Source{{Kind: "user", ID: state, Revision: "one"}}}
 		if _, err := store.Save(ctx, r, "missing", state); err != nil {
 			t.Fatal(err)
 		}
 	}
-	r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "Expired", ValidUntil: time.Now().Add(-time.Hour).UTC().Format(time.RFC3339Nano), Sources: []memo.Source{{Kind: "user", ID: "expired", Revision: "one"}}}
+	r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "Expired", ValidUntil: time.Now().Add(-time.Hour).UTC().Format(time.RFC3339Nano), Sources: []memory.Source{{Kind: "user", ID: "expired", Revision: "one"}}}
 	if _, err := store.Save(ctx, r, "missing", "expired"); err != nil {
 		t.Fatal(err)
 	}
 	count, complete := countAIMemory(ctx)
-	if count != memo.MaxResults+3 || !complete {
+	if count != memory.MaxResults+3 || !complete {
 		t.Fatalf("count %d complete %v", count, complete)
 	}
 	r.ValidUntil = ""
@@ -90,10 +90,10 @@ func TestAIMemoryOverviewCountTraversesAllScopesAndStates(t *testing.T) {
 		t.Fatal(err)
 	}
 	count, complete = countAIMemory(ctx)
-	if count != memo.MaxResults+3 || !complete {
+	if count != memory.MaxResults+3 || !complete {
 		t.Fatalf("forgotten counted %d %v", count, complete)
 	}
-	if err = os.WriteFile(filepath.Join(util.DataDir, "storage/ai/memos/records/20261029000000-abcdefg.md"), []byte("corrupt"), 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(util.DataDir, "storage/ai/memory/records/20261029000000-abcdefg.md"), []byte("corrupt"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	_, complete = countAIMemory(ctx)
@@ -113,7 +113,7 @@ func TestAIMemoryOverviewCountExcludesChangedSourcesAndMarksFailures(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memo.Source{source}}
+	r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: "fact", Sources: []memory.Source{source}}
 	if _, err = aiMemoryStore().Save(ctx, r, "missing", "save"); err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func TestAIMemoryOverviewCountExcludesChangedSourcesAndMarksFailures(t *testing.
 func TestAIMemoryLegacyOverviewReadOnlyAndMigration(t *testing.T) {
 	setupAIMemoryTest(t)
 	ctx := context.Background()
-	base := filepath.Join(util.DataDir, "storage/ai/memos")
+	base := filepath.Join(util.DataDir, "storage/ai/memory")
 	if err := os.MkdirAll(base, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -168,13 +168,13 @@ func TestAIMemoryOverviewCountConcurrentWithdrawalIsIncomplete(t *testing.T) {
 		t.Fatal(err)
 	}
 	store := aiMemoryStore()
-	for i := 0; i < memo.MaxResults+3; i++ {
-		r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: fmt.Sprintf("Fact %d", i), Sources: []memo.Source{source}}
+	for i := 0; i < memory.MaxResults+3; i++ {
+		r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "workspace", State: "active", Content: fmt.Sprintf("Fact %d", i), Sources: []memory.Source{source}}
 		if _, err = store.Save(ctx, r, "missing", fmt.Sprintf("save-%d", i)); err != nil {
 			t.Fatal(err)
 		}
 	}
-	page, err := store.Search(ctx, memo.SearchOptions{Limit: 1})
+	page, err := store.Search(ctx, memory.SearchOptions{Limit: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +204,7 @@ func TestAIMemoryProjectionReadSkipsUnrelatedScopeCount(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := memo.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "other", State: "active", Content: "Fact", Sources: []memo.Source{source}}
+	r := memory.Record{Schema: 1, Kind: "fact", Subject: "user", Scope: "other", State: "active", Content: "Fact", Sources: []memory.Source{source}}
 	if _, err = aiMemoryStore().Save(ctx, r, "missing", "save"); err != nil {
 		t.Fatal(err)
 	}

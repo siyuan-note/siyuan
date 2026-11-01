@@ -61,9 +61,9 @@ test("production model-format failures, processing budgets and incomplete reads 
 });
 
 test("every exact classified constant exists in the production memory implementation", () => {
-    const source = readFileSync("src/ai/memos/taskError.ts", "utf8");
+    const source = readFileSync("src/ai/memory/taskError.ts", "utf8");
     const production = readdirSync("../kernel/model").filter(file => /^ai_memory.*\.go$/.test(file) && !file.endsWith("_test.go"))
-        .map(file => readFileSync(`../kernel/model/${file}`, "utf8")).join("\n") + readFileSync("../kernel/memo/record.go", "utf8");
+        .map(file => readFileSync(`../kernel/model/${file}`, "utf8")).join("\n") + readFileSync("../kernel/memory/record.go", "utf8");
     for (const match of source.matchAll(/\["([^"]+)", "(?:target|changed|partial|intent|format|limit|read)"\]/g)) {
         assert.ok(production.includes(`"${match[1]}"`), `Missing production constant: ${match[1]}`);
     }

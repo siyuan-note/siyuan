@@ -3,8 +3,8 @@ import {escapeHtmlTextAndAttr as escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import {aiConfigApi, AI_CONFIG_CHANGED_EVENT} from "./aiRuntime";
-import {openMemoryManager} from "../../../ai/memos/manager";
-import {memoryModelOptions} from "../../../ai/memos/state";
+import {openMemoryManager} from "../../../ai/memory/manager";
+import {memoryModelOptions} from "../../../ai/memory/state";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
 import {genConfigItemMainHtml} from "../../render/fragments";
 

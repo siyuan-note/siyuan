@@ -19,6 +19,10 @@ const runElectron = async () => {
     });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.webContents.debugger.attach("1.3");
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+            features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+        });
         console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`));
         win.destroy();
         app.exit(0);

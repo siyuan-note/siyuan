@@ -34,6 +34,9 @@ exports.cases = async sources => {
         return modules[name];
     };
     const {DocTreeController} = load("DocTreeController");
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    // 静态选择和回收用例在减少动态效果模式下检查终态，末尾动画用例使用真实媒体查询。
+    window.matchMedia = query => query === "(prefers-reduced-motion: reduce)" ? {matches: true} : nativeMatchMedia(query);
     window.siyuan = {config: {fileTree: {docTreeBatchSize: 32}}, languages: {loading: "Loading", retry: "Retry"}};
     document.head.innerHTML = "<style>.b3-list-item{box-sizing:border-box;min-height:var(--b3-ui-list-height,28px);height:var(--b3-ui-list-height,28px);margin:1px 8px;list-style:none}ul{margin:0;padding:0}</style>";
     const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1198,6 +1201,59 @@ exports.cases = async sources => {
         source.range = range;
         release();
         await refreshing;
+        fixture.destroy();
+    }
+    {
+        window.matchMedia = nativeMatchMedia;
+        const fixture = make(12);
+        const {controller, element, directories} = fixture;
+        directories.get("")[0].subFileCount = 3;
+        directories.set("d0", [file("c0", "d0"), file("c1", "d0"), file("c2", "d0")]);
+        await controller.toggle("notebook:box", true, false);
+        await frame();
+        const parent = controller.getMountedElement("notebook:box/d0");
+        const next = controller.getMountedElement("notebook:box/d1");
+        const initialTop = next.getBoundingClientRect().top;
+        await controller.toggle("notebook:box/d0", true);
+        let group = element.querySelector("[data-tree-animation]");
+        check.ok(group, "visible user expansion has a clipped child region");
+        await new Promise(resolve => setTimeout(resolve, 80));
+        check.ok(group.isConnected, "animation survives ordinary layout frames");
+        const height = group.getBoundingClientRect().height;
+        check.ok(height > 0 && height < 90, "child region grows gradually");
+        check.ok(Math.abs(next.getBoundingClientRect().top - initialTop - height) < 1,
+            "following rows move with the clipped region without overlapping child text");
+        await new Promise(resolve => setTimeout(resolve, 180));
+        check.equal(element.querySelector("[data-tree-animation]"), null);
+        check.equal(Math.round(next.getBoundingClientRect().top - initialTop), 90);
+        await controller.toggle("notebook:box/d0", false);
+        check.equal(controller.isExpanded("notebook:box/d0"), false, "collapse is published immediately");
+        group = element.querySelector("[data-tree-animation]");
+        check.ok(group?.inert && group.getAttribute("aria-hidden") === "true");
+        check.equal(getComputedStyle(group).pointerEvents, "none");
+        check.equal(group.querySelectorAll("[data-tree-key]").length, 3, "collapse retains only mounted snapshots");
+        await controller.toggle("notebook:box/d0", true);
+        await controller.toggle("notebook:box/d0", false);
+        element.dispatchEvent(new Event("scroll"));
+        check.equal(element.querySelector("[data-tree-animation]"), null, "scroll ends the current transition");
+        await controller.toggle("notebook:box/d0", true, false);
+        check.equal(element.querySelector("[data-tree-animation]"), null, "restoration does not animate");
+        fullyVisible(parent, element);
+        fixture.destroy();
+    }
+    {
+        const fixture = make(12);
+        const {controller, element, directories} = fixture;
+        directories.get("")[0].subFileCount = 10000;
+        directories.set("d0", Array.from({length: 10000}, (_, index) => file(`child${index}`, "d0")));
+        await controller.toggle("notebook:box", true, false);
+        await frame();
+        await controller.toggle("notebook:box/d0", true);
+        const group = element.querySelector("[data-tree-animation]");
+        check.ok(group, "large child ranges animate using spacers");
+        check.ok(element.querySelectorAll("[data-tree-key]").length < 60, "animation keeps the virtual row budget");
+        element.dispatchEvent(new Event("wheel"));
+        check.equal(element.querySelector("[data-tree-animation]"), null, "scroll input ends animation before changing scrollTop");
         fixture.destroy();
     }
     return "File tree selection cases passed";

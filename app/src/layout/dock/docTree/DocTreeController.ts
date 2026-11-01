@@ -65,6 +65,7 @@ export class DocTreeController {
     private frame = 0;
     private rowHeight = 28;
     private rowSpacing = 0;
+    private finishRowAnimation: () => void;
     private mounted = new Map<string, {element: HTMLElement, signature: string, titleVersion?: string}>();
     private expanding = new Map<string, {item: IDocTreeItem}>();
     private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
@@ -98,10 +99,16 @@ export class DocTreeController {
         options.element.replaceChildren(this.list);
         controllers.set(options.element, this);
         const signal = this.events.signal;
-        options.element.addEventListener("scroll", () => this.scheduleRender(), {passive: true, signal});
+        options.element.addEventListener("scroll", () => {
+            this.finishRowAnimation?.();
+            this.scheduleRender();
+        }, {passive: true, signal});
         // 真实输入取消迟到的状态恢复；程序设置 scrollTop 不应中断自己的定位。
         for (const event of ["pointerdown", "wheel"] as const) {
-            options.element.addEventListener(event, () => this.interaction++, {passive: true, signal});
+            options.element.addEventListener(event, () => {
+                this.finishRowAnimation?.();
+                this.interaction++;
+            }, {passive: true, signal});
         }
         options.element.addEventListener("keydown", event => {
             if (event.key === "Escape" && this.selectionPending) {
@@ -362,6 +369,7 @@ export class DocTreeController {
     }
 
     public async toggle(key: string, expanded = !(this.isExpanded(key) || this.expanding.has(key)), userAction = true) {
+        this.finishRowAnimation?.();
         const item = this.getItem(key);
         if (!item || item.unavailable) {
             return;
@@ -374,6 +382,19 @@ export class DocTreeController {
         const interaction = this.interaction;
         let generation = this.generation;
         let anchor = this.getScrollAnchor();
+        let previousCount = this.model.rowCount;
+        const parentPosition = this.positionOf(key);
+        const parentRow = this.mounted.get(key)?.element;
+        const bounds = parentRow?.getBoundingClientRect();
+        const viewport = this.options.element.getBoundingClientRect();
+        const animate = userAction && bounds && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom &&
+            typeof parentRow.animate === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const snapshot = animate && !expanded ? Array.from(this.mounted, ([childKey, mounted]) => ({
+            position: this.positionOf(childKey), element: mounted.element,
+        })).filter(child => child.position > parentPosition &&
+            child.element.dataset.treeKey.startsWith(key + "/")).map(child => ({
+            position: child.position, element: child.element.cloneNode(true) as HTMLElement,
+        })) : [];
         if (expanded) {
             const expansion = {item};
             this.expanding.set(key, expansion);
@@ -399,6 +420,7 @@ export class DocTreeController {
                 if (!ready) { return; }
                 // 首批数据就绪后发布子树，等待期间保持折叠布局。
                 if (interaction !== this.interaction) { anchor = this.getScrollAnchor(); }
+                previousCount = this.model.rowCount;
                 this.model.expanded.set(key, this.getItem(key) || expansion.item);
                 this.model.project();
             } finally {
@@ -439,7 +461,78 @@ export class DocTreeController {
         if (this.disposed || generation !== this.generation) { return; }
         this.restoreScrollAnchor(anchor);
         this.render();
+        if (animate && interaction === this.interaction && this.positionOf(key) === parentPosition) {
+            this.animateRows(parentPosition + 1, Math.abs(this.model.rowCount - previousCount), expanded, snapshot);
+        }
         this.options.onExpansionChange?.();
+    }
+
+    private animateRows(start: number, count: number, expanded: boolean,
+                        snapshot: {position: number, element: HTMLElement}[]) {
+        if (!count) { return; }
+        const group = document.createElement("li");
+        group.dataset.treeAnimation = "true";
+        group.setAttribute("role", "presentation");
+        group.style.cssText = "display:flex;flex-direction:column;flex-shrink:0;overflow:clip;min-height:0";
+        const height = count * this.rowHeight;
+        if (expanded) {
+            let position = 0;
+            for (const child of Array.from(this.list.children) as HTMLElement[]) {
+                const size = child.dataset.treeSpacer ? Math.round(parseFloat(child.style.height) / this.rowHeight) : 1;
+                const overlap = Math.max(0, Math.min(position + size, start + count) - Math.max(position, start));
+                if (overlap) {
+                    if (position < start) {
+                        const before = child.cloneNode() as HTMLElement;
+                        before.style.height = `${(start - position) * this.rowHeight}px`;
+                        child.before(before);
+                    }
+                    if (position + size > start + count) {
+                        const after = child.cloneNode() as HTMLElement;
+                        after.style.height = `${(position + size - start - count) * this.rowHeight}px`;
+                        child.after(after);
+                    }
+                    if (!group.isConnected) { child.before(group); }
+                    if (child.dataset.treeSpacer) { child.style.height = `${overlap * this.rowHeight}px`; }
+                    group.append(child);
+                }
+                position += size;
+            }
+        } else {
+            group.inert = true;
+            group.setAttribute("aria-hidden", "true");
+            group.style.pointerEvents = "none";
+            group.style.position = "relative";
+            for (const child of snapshot) {
+                child.element.style.position = "absolute";
+                child.element.style.top = `${(child.position - start) * this.rowHeight}px`;
+                child.element.style.left = "0";
+                child.element.style.right = "0";
+                group.append(child.element);
+            }
+            const parent = this.model.rowAt(start - 1)?.item;
+            const row = parent && this.mounted.get(parent.occurrenceKey)?.element;
+            if (!row) { return; }
+            row.after(group);
+        }
+        if (!group.isConnected) { return; }
+        cancelAnimationFrame(this.frame);
+        this.frame = 0;
+        group.style.height = `${expanded ? height : 0}px`;
+        const animation = group.animate([{height: `${expanded ? 0 : height}px`},
+            {height: `${expanded ? height : 0}px`}], {duration: 200, easing: "cubic-bezier(0, 0, .2, 1)"});
+        const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const finish = () => {
+            if (this.finishRowAnimation !== finish) { return; }
+            this.finishRowAnimation = undefined;
+            motion.removeEventListener("change", finish);
+            animation.cancel();
+            if (expanded) { group.replaceWith(...Array.from(group.children)); }
+            else { group.remove(); }
+        };
+        this.finishRowAnimation = finish;
+        motion.addEventListener("change", finish);
+        animation.onfinish = finish;
+        animation.oncancel = finish;
     }
 
     public collapseAll() {
@@ -1313,6 +1406,7 @@ export class DocTreeController {
     }
 
     private render() {
+        this.finishRowAnimation?.();
         if (this.disposed) { return; }
         const navigation = this.navigation?.generation === this.generation &&
             this.navigation.interaction === this.interaction ? this.navigation : undefined;
@@ -1474,6 +1568,7 @@ export class DocTreeController {
     }
 
     public destroy() {
+        this.finishRowAnimation?.();
         this.disposed = true;
         this.interaction++;
         this.generation++;

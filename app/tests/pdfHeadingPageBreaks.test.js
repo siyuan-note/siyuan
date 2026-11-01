@@ -249,7 +249,7 @@ const runElectron = async () => {
         const headingSource = compile(readFileSync(path.join(__dirname, "../src/protyle/export/headingPageBreaks.ts"), "utf8"));
         const uiSource = compile(readFileSync(path.join(__dirname, "../src/protyle/export/headingPageBreaksUI.ts"), "utf8"));
         const source = readFileSync(path.join(__dirname, "../src/protyle/export/index.ts"), "utf8");
-        const desktopSource = compile(source.slice(source.indexOf("const renderPDF ="), source.indexOf("const getExportPath =")));
+        const desktopSource = compile(readFileSync(path.join(__dirname, "../src/protyle/export/scriptLiteral.ts"), "utf8").replace("export const", "const") + "\n" + source.slice(source.indexOf("const renderPDF ="), source.indexOf("const getExportPath =")));
         const mobileSource = compile(source.slice(source.indexOf("export const onExport =")).replace("export const", "const"));
         const menu = ts.createSourceFile("menu.ts", readFileSync(path.join(__dirname, "../src/menus/commonMenuItem.ts"), "utf8"),
             ts.ScriptTarget.Latest, true);

@@ -131,7 +131,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const source = readFileSync(path.join(__dirname, "../src/protyle/export/index.ts"), "utf8");
-        const renderSource = ts.transpileModule(source.slice(source.indexOf("const renderPDF ="),
+        const renderSource = ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/export/scriptLiteral.ts"), "utf8").replace("export const", "const") + "\n" + source.slice(source.indexOf("const renderPDF ="),
             source.indexOf("const getExportPath =")), {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText;
         const bootSource = readFileSync(path.join(__dirname, "../src/boot/onGetConfig.ts"), "utf8");
         const start = bootSource.indexOf("        window.siyuan.storage[Constants.LOCAL_EXPORTPDF] =");

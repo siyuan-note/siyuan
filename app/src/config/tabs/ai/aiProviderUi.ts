@@ -327,6 +327,7 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], 
                         });
                         firstVisibleItem?.classList.add("b3-list-item--focus");
                         emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
+                        window.siyuan.menus.menu.resetPosition();
                     };
                     filterModels();
                     searchInput.addEventListener("keydown", (event: KeyboardEvent) => {

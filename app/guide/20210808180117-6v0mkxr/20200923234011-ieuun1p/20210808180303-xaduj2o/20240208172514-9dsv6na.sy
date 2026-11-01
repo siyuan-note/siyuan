@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order. After binding an unbound entry in its panel, the panel opens the bound block editor when database attributes are enabled. Bound entries do not offer rebinding in the panel; use the database view to change their binding."
 				}
 			]
 		},

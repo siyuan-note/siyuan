@@ -96,11 +96,15 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
 };
 
 describe("database item icons", () => {
-    it("uses the same bind and rebind icons in fields and database views", () => {
+    it("uses the view bind icon for detached fields and omits panel rebinding", () => {
         for (const detached of [true, false]) {
             const h = createHarness("table", detached);
             const icon = detached ? "iconRef" : "iconRefresh";
-            assert.ok(h.attributes.genAVValueHTML(h.cell.value).includes(`href="#${icon}"`));
+            const field = h.attributes.genAVValueHTML(h.cell.value);
+            assert.equal(field.includes('data-type="av-bind-document"'), detached);
+            if (detached) {
+                assert.ok(field.includes(`href="#${icon}"`));
+            }
             assert.ok(h.api.renderCell(h.cell.value, 0, true).includes(`href="#${icon}"`));
         }
     });

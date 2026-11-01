@@ -976,6 +976,9 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 func formatRepoErrorMsg(err error) string {
 	msg := html.EscapeString(err.Error())
+	if errors.Is(err, treenode.ErrSpecTooNew) {
+		return Conf.Language(275) + ": " + msg
+	}
 	if errors.Is(err, cloud.ErrCloudAuthFailed) {
 		msg = Conf.Language(31)
 	} else if errors.Is(err, cloud.ErrCloudObjectNotFound) {

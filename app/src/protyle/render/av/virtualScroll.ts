@@ -252,8 +252,9 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         const toRemoveBelow: HTMLElement[] = [];
         const minRetainedRows = windowedTable ? 1 : 10;
         let galleryColumn = isTableLikeView(type) ? 1 : 0;
-        // 行高缓存，避免每帧读 offsetHeight 触发布局
-        const rowHeight = state.rowHeight || currentRows[0].offsetHeight;
+        // 列表行随窄屏布局改变高度；表格使用稳定行高缓存。
+        const rowHeight = blockElement.dataset.avType === "list" ? currentRows[0].offsetHeight :
+            state.rowHeight || currentRows[0].offsetHeight;
         state.rowHeight = rowHeight;
         const bodyRect = bodyEl.getBoundingClientRect();
         if (currentRows.length <= minRetainedRows &&

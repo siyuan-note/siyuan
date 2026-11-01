@@ -106,6 +106,20 @@ html,body {display:block;height:auto;overflow:auto;font:16px sans-serif}
             }
         }
     }
+    for (const fontSize of [16, 24]) {
+        document.body.style.fontSize = fontSize + "px";
+        for (const width of [220, 366]) {
+            document.body.innerHTML = `<div class="av" data-av-type="list" style="width:${width}px"><div class="av__container"><div class="av__body"><div class="av__row" data-id="item"><div class="av__colsticky"><div class="av__firstcol"></div></div><div class="av__cell" data-dtype="block">${primary}</div><div class="av__cell" data-dtype="text"><span class="av__celltext">Doing</span></div><div class="av__cell" data-dtype="date"><span class="av__celltext">1 December 2027</span></div></div></div></div></div>`;
+            const row = document.querySelector(".av__row");
+            const cells = [...row.querySelectorAll(":scope > .av__cell")].map(cell => cell.getBoundingClientRect());
+            check.ok(cells[1].top >= cells[0].bottom && cells[2].top >= cells[1].bottom,
+                "narrow list properties occupy separate lines");
+            for (const bounds of cells) {
+                check.ok(bounds.width >= width - 12 && bounds.right <= row.getBoundingClientRect().right + 1,
+                    "each list property uses the available row width without horizontal overflow");
+            }
+        }
+    }
     return "Database column alignment and action layout cases passed";
 };
 

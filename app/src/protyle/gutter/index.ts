@@ -1536,10 +1536,7 @@ export class Gutter {
         }
         const embedID = (element as HTMLElement).dataset.embedId;
         const viewOccurrenceID = (element as HTMLElement).dataset.viewOccurrenceId;
-        return Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-            if (!this.isMatchNode(item)) {
-                return false;
-            }
+        const candidates = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).filter(item => {
             if (viewOccurrenceID && encodeURIComponent(getViewFoldOccurrenceID(protyle, item)) !== viewOccurrenceID) {
                 return false;
             }
@@ -1550,6 +1547,11 @@ export class Gutter {
             }
             return !embedElement;
         });
+        // 完整层级的整列位置可能偏离内容行，唯一的上下文匹配直接使用块身份定位。
+        if (this.element.classList.contains("protyle-gutters--full") && candidates.length === 1) {
+            return candidates[0];
+        }
+        return candidates.find(item => this.isMatchNode(item));
     }
 
     public renderMenu(protyle: IProtyle, buttonElement: Element) {

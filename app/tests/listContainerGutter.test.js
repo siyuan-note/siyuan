@@ -10,6 +10,7 @@ const sources = (full = false) => {
     const gutter = source.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "Gutter");
     const render = gutter.members.find(node => node.name?.getText(source) === "render");
     const getNodeElement = gutter.members.find(node => node.name?.getText(source) === "getNodeElement");
+    const isMatchNode = gutter.members.find(node => node.name?.getText(source) === "isMatchNode");
     const renderMenu = gutter.members.find(node => node.name?.getText(source) === "renderMenu");
     let multiSelectAction;
     const collectMultiSelect = node => {
@@ -73,6 +74,7 @@ const sources = (full = false) => {
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, "") +
         `\nfunction bindHover(protyle) { let overAttr = false; ${pathBinding}; ${hoverBinding}; }`;
     const interactionSource = `function getNodeElement(protyle, element) ${getNodeElement.body.getText(source)}
+function isMatchNode(item) ${isMatchNode.body.getText(source)}
 function mobileMultiSelect(protyle, nodeElement) {
     ${menuType.getText(source)}
     return (${multiSelectAction.getText(source)})();
@@ -117,8 +119,8 @@ const cases = async (source, fullSource, css) => {
         toggleMenu: options => options.build(null, {show: callback => callback()}),
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));
-    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
-        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
+    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
+        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
     let mobile = false;
     window.siyuan = {languages: {fold: "Fold", rowTip: "Row", addBelowAbove: "Add"}, layout: {}, blockPanels: [],
         config: {editor: {fontSize: 16, rtl: false}, system: {workspaceDir: "test"}}};
@@ -303,7 +305,7 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     window.siyuan.menus = {menu: {element: document.createElement("div"), remove() {}, fullscreen() {}, popup() {}}};
     Object.assign(protyle, {toolbar: {range: {}}, block: {rootID: "document"}, notebookId: "notebook"});
     gutter.getNodeElement = (...args) => getNodeElement.apply(gutter, args);
-    gutter.isMatchNode = () => true;
+    gutter.isMatchNode = (...args) => isMatchNode.apply(gutter, args);
     gutter.renderMenu = (_owner, button) => clicked.push(gutter.getNodeElement(protyle, button).dataset.nodeId);
     bindInteractions.call(gutter, protyle);
     const assertTargets = ids => {
@@ -548,6 +550,10 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.ok(bounds.left >= viewport.left && bounds.right <= viewport.right && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom,
         "full indicators stay within a narrow pane with large editor fonts");
     check.equal(gutter.element.dataset.scrollable, "true", "deep chains are scrollable");
+    for (const button of gutter.element.querySelectorAll("button[data-node-id]")) {
+        check.equal(gutter.getNodeElement(protyle, button), root.querySelector(`[data-node-id="${button.dataset.nodeId}"]`),
+            "viewport-clamped columns resolve each block without using the column height as a row hit test");
+    }
     gutter.element.scrollTop = gutter.element.scrollHeight;
     const previousButton = gutter.element.querySelector("button[data-node-id]");
     const previousScrollTop = gutter.element.scrollTop;

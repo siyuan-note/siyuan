@@ -34,6 +34,56 @@ func TestCardDAVAddressDataFiltering(t *testing.T) {
 	}
 }
 
+// TestCardDAVQuery 验证 addressbook-query 的过滤、默认 Depth 和结果数限制（RFC 6352 §8.6、§10.5、§10.6）。
+func TestCardDAVQuery(t *testing.T) {
+	_, cardDAV := newDAVHandlerFixture(t)
+	book := CardDavDefaultAddressBookPath
+	for _, uid := range []string{"anna", "bert", "carl"} {
+		if response := davTestRequest(cardDAV, http.MethodPut, book+"/"+uid+".vcf", davVCardHeader, davTestCard(uid, strings.ToUpper(uid[:1])+uid[1:])); response.Code != http.StatusCreated {
+			t.Fatalf("PUT %s: status = %d", uid, response.Code)
+		}
+	}
+	query := func(filter, limit string) string {
+		return `<?xml version="1.0"?><C:addressbook-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav"><D:prop><D:getetag/><C:address-data><C:prop name="FN"/></C:address-data></D:prop>` +
+			filter + limit + `</C:addressbook-query>`
+	}
+	for _, test := range []struct {
+		name, filter, limit string
+		header              map[string]string
+		want                []string
+		truncated           bool
+	}{
+		{"starts-with", `<C:filter><C:prop-filter name="FN"><C:text-match match-type="starts-with">BE</C:text-match></C:prop-filter></C:filter>`, "", davXMLHeader, []string{"/bert.vcf"}, false},
+		{"allof", `<C:filter test="allof"><C:prop-filter name="EMAIL"><C:text-match>example.com</C:text-match></C:prop-filter><C:prop-filter name="FN"><C:text-match match-type="equals">carl</C:text-match></C:prop-filter></C:filter>`, "", davXMLHeader, []string{"/carl.vcf"}, false},
+		{"no filter", "", "", davXMLHeader, []string{"/anna.vcf", "/bert.vcf", "/carl.vcf"}, false},
+		{"Depth defaults to 0", "", "", davTestXMLOnly, nil, false},
+		{"limit", `<C:filter/>`, `<C:limit><C:nresults>2</C:nresults></C:limit>`, davXMLHeader, []string{"/anna.vcf", "/bert.vcf"}, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			response := davTestRequest(cardDAV, "REPORT", book, test.header, query(test.filter, test.limit))
+			body := response.Body.String()
+			responses := len(test.want)
+			if test.truncated {
+				responses++
+			}
+			if response.Code != http.StatusMultiStatus || strings.Count(body, "<response") != responses {
+				t.Fatalf("status = %d, responses = %d, want %v; body = %s", response.Code, strings.Count(body, "<response"), test.want, body)
+			}
+			for _, want := range test.want {
+				if !strings.Contains(body, want+"<") {
+					t.Fatalf("result lacks %s: %s", want, body)
+				}
+			}
+			if test.truncated != (strings.Contains(body, "507 Insufficient Storage") && strings.Contains(body, "number-of-matches-within-limits")) {
+				t.Fatalf("truncation must be reported with 507: %s", body)
+			}
+			if 0 < len(test.want) && (!strings.Contains(body, "FN:") || strings.Contains(body, "EMAIL")) {
+				t.Fatalf("address-data must only contain FN: %s", body)
+			}
+		})
+	}
+}
+
 // TestCardDAVSplitsMultiCardFiles 验证包含多张卡片的 .vcf 拆分后每张卡片都能访问，
 // 且不同设备拆分同一文件得到相同文件名，同步后不会出现重复联系人。
 func TestCardDAVSplitsMultiCardFiles(t *testing.T) {

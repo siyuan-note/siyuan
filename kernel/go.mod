@@ -27,7 +27,6 @@ require (
 	github.com/edsrzf/mmap-go v1.2.0
 	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/emersion/go-vcard v0.0.0-20260618161152-d854b7e0e2d3
-	github.com/emersion/go-webdav v0.7.0
 	github.com/emirpasic/gods v1.18.1
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
@@ -88,6 +87,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.13.0
+	github.com/teambition/rrule-go v1.8.2
 	github.com/tphakala/go-aac v0.7.1
 	github.com/vanng822/css v1.0.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -216,7 +216,6 @@ require (
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
-	github.com/teambition/rrule-go v1.8.2 // indirect
 	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/tiendc/go-deepcopy v1.7.2 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect

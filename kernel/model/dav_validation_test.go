@@ -35,7 +35,7 @@ func TestCalDAVPutValidation(t *testing.T) {
 		{"unsupported component", "/journal.ics", wrap("BEGIN:VJOURNAL", "UID:journal", "DTSTAMP:20261101T000000Z", "END:VJOURNAL"), http.StatusConflict, "supported-calendar-component"},
 		{"UID used by another resource", "/copy.ics", davTestEvent("existing", "Copy"), http.StatusConflict, "no-uid-conflict"},
 		{"overwrite with another UID", "/existing.ics", davTestEvent("replacement", "Other"), http.StatusConflict, "no-uid-conflict"},
-		{"overwrite with same UID", "/existing.ics", davTestEvent("existing", "Updated"), http.StatusCreated, ""},
+		{"overwrite with same UID", "/existing.ics", davTestEvent("existing", "Updated"), http.StatusNoContent, ""},
 		{"recurrence override", "/series.ics", wrap(recurrence...), http.StatusCreated, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -43,12 +43,17 @@ func TestCalDAVPutValidation(t *testing.T) {
 			if response.Code != test.status || !strings.Contains(response.Body.String(), test.precondition) {
 				t.Fatalf("status = %d, want %d with %q; body = %s", response.Code, test.status, test.precondition, response.Body.String())
 			}
-			if test.status != http.StatusCreated && test.target != "/existing.ics" {
+			if 400 <= test.status && test.target != "/existing.ics" {
 				if get := davTestRequest(calDAV, http.MethodGet, calendar+test.target, nil, ""); get.Code != http.StatusNotFound {
 					t.Fatalf("rejected PUT created the resource: GET status = %d", get.Code)
 				}
 			}
 		})
+	}
+	// RFC 4791 §5.3.2.1：no-uid-conflict 要给出已使用该 UID 的资源
+	conflict := davTestRequest(calDAV, http.MethodPut, calendar+"/copy.ics", davICalendarHeader, davTestEvent("existing", "Copy"))
+	if !strings.Contains(conflict.Body.String(), calendar+"/existing.ics</href>") {
+		t.Fatalf("no-uid-conflict lacks the conflicting href: %s", conflict.Body.String())
 	}
 }
 
@@ -66,7 +71,7 @@ func TestCardDAVPutRejectsUIDConflict(t *testing.T) {
 	}{
 		{"UID used by another resource", "/copy.vcf", davTestCard("alice", "Alice copy"), http.StatusConflict},
 		{"overwrite with another UID", "/alice.vcf", davTestCard("bob", "Bob"), http.StatusConflict},
-		{"overwrite with same UID", "/alice.vcf", davTestCard("alice", "Alice updated"), http.StatusCreated},
+		{"overwrite with same UID", "/alice.vcf", davTestCard("alice", "Alice updated"), http.StatusNoContent},
 		{"card without UID", "/no-uid.vcf", noUID, http.StatusCreated},
 		{"second card without UID", "/no-uid-2.vcf", noUID, http.StatusCreated},
 	} {

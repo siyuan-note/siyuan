@@ -5,11 +5,10 @@
 package model
 
 import (
-	"context"
+	"bytes"
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -17,12 +16,10 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/emersion/go-webdav"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/dav"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -63,35 +60,12 @@ func reloadSyncedDAV(result *dejavu.MergeResult, calendarStore *Calendars, conta
 
 // DAVConditions 是写请求携带的 If-Match / If-None-Match 前置条件。
 type DAVConditions struct {
-	IfMatch     webdav.ConditionalMatch
-	IfNoneMatch webdav.ConditionalMatch
+	IfMatch     string
+	IfNoneMatch string
 }
 
-// DAVRequest 携带 go-webdav 不会传给后端的请求信息，由 NewCalDAVHandler / NewCardDAVHandler 放入请求上下文。
-type DAVRequest struct {
-	Conditions DAVConditions
-	// Body 是 PUT 请求体的原始字节，用于判断存储内容与提交内容是否逐字节相同
-	Body []byte
-}
-
-type davRequestContextKey struct{}
-
-func withDAVRequest(ctx context.Context, request *DAVRequest) context.Context {
-	return context.WithValue(ctx, davRequestContextKey{}, request)
-}
-
-func davRequestFromContext(ctx context.Context) *DAVRequest {
-	if request, ok := ctx.Value(davRequestContextKey{}).(*DAVRequest); ok {
-		return request
-	}
-	return nil
-}
-
-func davConditionsFromContext(ctx context.Context) *DAVConditions {
-	if request := davRequestFromContext(ctx); nil != request {
-		return &request.Conditions
-	}
-	return nil
+func davConditionsOf(r *http.Request) *DAVConditions {
+	return &DAVConditions{IfMatch: r.Header.Get("If-Match"), IfNoneMatch: r.Header.Get("If-None-Match")}
 }
 
 // DAVPreconditionStatus 按 RFC 9110 §13.1.1、§13.1.2 评估 If-Match 与 If-None-Match（不含 GET/HEAD 的 304 语义）。
@@ -154,34 +128,24 @@ func matchEntityTags(field string, exists bool, etag string, strong bool) (bool,
 	}
 }
 
-// checkDAVConditions 必须在持有集合锁、修改之前调用；etag 为空表示资源不存在。
-func checkDAVConditions(etag string, ifMatch, ifNoneMatch webdav.ConditionalMatch) error {
-	return checkDAVConditionsOf("" != etag, etag, ifMatch, ifNoneMatch)
-}
-
-func checkDAVConditionsOf(exists bool, etag string, ifMatch, ifNoneMatch webdav.ConditionalMatch) error {
-	switch DAVPreconditionStatus(exists, etag, string(ifMatch), string(ifNoneMatch)) {
-	case http.StatusBadRequest:
-		return webdav.NewHTTPError(http.StatusBadRequest, errors.New("malformed If-Match or If-None-Match header"))
-	case http.StatusPreconditionFailed:
-		return webdav.NewHTTPError(http.StatusPreconditionFailed, errors.New("If-Match or If-None-Match condition failed"))
-	}
-	return nil
-}
-
-// check 评估删除请求的前置条件；集合没有 ETag，只能匹配 "*"。
+// check 必须在持有集合锁、修改之前调用；集合没有 ETag，只能匹配 "*"。
 func (conditions *DAVConditions) check(exists bool, etag string) error {
 	if nil == conditions {
 		return nil
 	}
-	return checkDAVConditionsOf(exists, etag, conditions.IfMatch, conditions.IfNoneMatch)
+	switch DAVPreconditionStatus(exists, etag, conditions.IfMatch, conditions.IfNoneMatch) {
+	case http.StatusBadRequest:
+		return dav.NewError(http.StatusBadRequest, errors.New("malformed If-Match or If-None-Match header"))
+	case http.StatusPreconditionFailed:
+		return dav.NewError(http.StatusPreconditionFailed, errors.New("If-Match or If-None-Match condition failed"))
+	}
+	return nil
 }
 
-// davError 把存储层的哨兵错误转换为 go-webdav 识别的 HTTP 错误；同一错误在读、写操作中对应的状态码不同。
-// 转换结果不能再包装：go-webdav 处理 OPTIONS 时用类型断言识别 404。
+// davError 把存储层的哨兵错误转换为带状态码的协议错误；同一错误在读、写操作中对应的状态码不同。
 func davError(err error, codes map[error]int) error {
 	if code, ok := codes[err]; ok {
-		return webdav.NewHTTPError(code, err)
+		return dav.NewError(code, err)
 	}
 	return err
 }
@@ -201,10 +165,10 @@ func DavPath2DirectoryPath(davPath string) string {
 	return PathJoinWithSlash(util.DataDir, "storage", PathCleanWithSlash(davPath))
 }
 
-func SaveMetaData[T []*caldav.Calendar | []*carddav.AddressBook](metaData T, metaDataFilePath string) error {
+func SaveMetaData[T []*CalendarMetaData | []*AddressBookMetaData | map[string][]string](metaData T, metaDataFilePath string) error {
 	data, err := gulu.JSON.MarshalIndentJSON(metaData, "", "  ")
 	if err != nil {
-		logging.LogErrorf("marshal address books meta data failed: %s", err)
+		logging.LogErrorf("marshal DAV meta data [%s] failed: %s", metaDataFilePath, err)
 		return err
 	}
 
@@ -222,33 +186,85 @@ func SaveMetaData[T []*caldav.Calendar | []*carddav.AddressBook](metaData T, met
 	return nil
 }
 
-// davEncodedLength 返回对象按 go-webdav 输出时的字节数；磁盘文件可能不是规范编码，不能用文件大小作为 Content-Length。
-func davEncodedLength(encode func(io.Writer) error) (int64, error) {
-	var counter davByteCounter
-	if err := encode(&counter); err != nil {
-		return 0, err
-	}
-	return int64(counter), nil
-}
-
-type davByteCounter int64
-
-func (c *davByteCounter) Write(p []byte) (int, error) {
-	*c += davByteCounter(len(p))
-	return len(p), nil
-}
-
 // FileETag identifies the persisted representation, including equal-size changes
 // whose timestamps may be identical after synchronization.
 func FileETag(filePath string) (string, error) {
-	file, err := os.Open(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
-	hash := sha256.New()
-	if _, err = io.Copy(hash, file); err != nil {
-		return "", err
+	return davContentETag(content), nil
+}
+
+func davContentETag(content []byte) string {
+	return fmt.Sprintf("%x", sha256.Sum256(content))
+}
+
+// loadDAVDeadProperties 读取集合的死属性（RFC 4918 §4.2）：键是集合路径，值是序列化后的 XML 元素。
+// 集合名称和描述仍保存在 calendars.json / address-books.json 中；旧版本会按自己的结构整体重写这两个文件，
+// 其他属性因此单独保存，文件不存在表示没有死属性。
+func loadDAVDeadProperties(filePath string) (map[string][]*dav.Node, error) {
+	properties := map[string][]*dav.Node{}
+	data, err := os.ReadFile(filePath)
+	if os.IsNotExist(err) {
+		return properties, nil
 	}
-	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+	if err != nil {
+		logging.LogErrorf("read DAV properties [%s] failed: %s", filePath, err)
+		return nil, err
+	}
+	var stored map[string][]string
+	if err = gulu.JSON.UnmarshalJSON(data, &stored); err != nil {
+		logging.LogErrorf("unmarshal DAV properties [%s] failed: %s", filePath, err)
+		return nil, err
+	}
+	for collectionPath, elements := range stored {
+		for _, element := range elements {
+			node, parseErr := dav.ParseXML(bytes.NewReader([]byte(element)))
+			if parseErr != nil || nil == node {
+				logging.LogWarnf("skip invalid DAV property of [%s]: %s", collectionPath, parseErr)
+				continue
+			}
+			properties[collectionPath] = append(properties[collectionPath], node)
+		}
+	}
+	return properties, nil
+}
+
+func saveDAVDeadProperties(properties map[string][]*dav.Node, filePath string) error {
+	stored := map[string][]string{}
+	for collectionPath, nodes := range properties {
+		for _, node := range nodes {
+			element, err := node.Marshal()
+			if err != nil {
+				return err
+			}
+			stored[collectionPath] = append(stored[collectionPath], string(element))
+		}
+	}
+	if _, err := os.Stat(filePath); 0 == len(stored) && os.IsNotExist(err) {
+		return nil
+	}
+	return SaveMetaData(stored, filePath)
+}
+
+func cloneDAVNodes(nodes []*dav.Node) (clones []*dav.Node) {
+	for _, node := range nodes {
+		clones = append(clones, node.Clone())
+	}
+	return
+}
+
+func sameDAVNodes(a, b []*dav.Node) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		x, errX := a[i].Marshal()
+		y, errY := b[i].Marshal()
+		if errX != nil || errY != nil || !bytes.Equal(x, y) {
+			return false
+		}
+	}
+	return true
 }

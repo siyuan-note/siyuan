@@ -5,42 +5,30 @@
 package model
 
 import (
-	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/emersion/go-webdav"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
+	"github.com/siyuan-note/siyuan/kernel/dav"
 )
 
-type deleteAddressBookTestBackend struct {
-	carddav.Backend
-	contacts *Contacts
-}
-
-func (b *deleteAddressBookTestBackend) DeleteAddressBook(ctx context.Context, path string) error {
-	return b.contacts.DeleteAddressBook(PathCleanWithSlash(path), nil)
-}
-
+// TestDAVDeleteMissingCollection 验证元数据中有记录、但没有载入的集合删除时返回 404，且不改动元数据。
 func TestDAVDeleteMissingCollection(t *testing.T) {
 	bookPath := CardDavHomeSetPath + "/missing"
-	bookMeta := &carddav.AddressBook{Path: bookPath}
-	books := &Contacts{booksMetaData: []*carddav.AddressBook{bookMeta}}
+	bookMeta := &AddressBookMetaData{Path: bookPath}
+	books := &Contacts{loaded: true, booksMetaData: []*AddressBookMetaData{bookMeta}}
 	calendarPath := CalDavHomeSetPath + "/missing"
-	calendarMeta := &caldav.Calendar{Path: calendarPath}
-	calendarStore := &Calendars{calendarsMetaData: []*caldav.Calendar{calendarMeta}}
+	calendarMeta := &CalendarMetaData{Path: calendarPath}
+	calendarStore := &Calendars{loaded: true, calendarsMetaData: []*CalendarMetaData{calendarMeta}}
 
 	for _, test := range []struct {
 		name    string
 		path    string
 		handler http.Handler
 	}{
-		{"CardDAV", bookPath, &carddav.Handler{
-			Prefix:  CardDavPrincipalsPath,
-			Backend: &deleteAddressBookTestBackend{contacts: books},
-		}},
+		{"CardDAV", bookPath, newCardDAVHandler(books)},
+		{"CalDAV", calendarPath, newCalDAVHandler(calendarStore)},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			for _, suffix := range []string{"", "/", ""} {
@@ -55,8 +43,9 @@ func TestDAVDeleteMissingCollection(t *testing.T) {
 	}
 	for range 3 {
 		err := calendarStore.DeleteCalendar(calendarPath, nil)
-		if want := webdav.NewHTTPError(http.StatusNotFound, ErrorCalDavCalendarNotFound); err == nil || err.Error() != want.Error() {
-			t.Fatalf("DeleteCalendar error = %v, want %v", err, want)
+		var davErr *dav.Error
+		if !errors.As(err, &davErr) || http.StatusNotFound != davErr.Status || !errors.Is(err, ErrorCalDavCalendarNotFound) {
+			t.Fatalf("DeleteCalendar error = %v, want 404 %v", err, ErrorCalDavCalendarNotFound)
 		}
 	}
 	if len(books.booksMetaData) != 1 || books.booksMetaData[0] != bookMeta {

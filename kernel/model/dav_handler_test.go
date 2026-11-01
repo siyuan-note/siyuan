@@ -6,7 +6,6 @@ package model
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -16,8 +15,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -39,11 +36,13 @@ func resetDAVStores() {
 	calendars.loaded = false
 	calendars.calendars.Clear()
 	calendars.calendarsMetaData = nil
+	calendars.properties = nil
 	calendars.lock.Unlock()
 	contacts.lock.Lock()
 	contacts.loaded = false
 	contacts.books.Clear()
 	contacts.booksMetaData = nil
+	contacts.properties = nil
 	contacts.lock.Unlock()
 }
 
@@ -76,6 +75,7 @@ var (
 	davICalendarHeader = map[string]string{"Content-Type": "text/calendar"}
 	davVCardHeader     = map[string]string{"Content-Type": "text/vcard"}
 	davXMLHeader       = map[string]string{"Content-Type": "application/xml", "Depth": "1"}
+	davTestXMLOnly     = map[string]string{"Content-Type": "application/xml"}
 )
 
 // rawDAVRequest 通过真实的 net/http 服务端发送原始请求行；httptest.NewRequest 无法证明服务端不会清理路径。
@@ -124,16 +124,21 @@ func TestDAVRejectsNonCanonicalPaths(t *testing.T) {
 	}
 }
 
-// TestDAVBackendConfinesCollectionPaths 验证后端只在各自的 home set 下创建集合，
-// 即使请求绕过了前置路径检查也不能在 data/storage 的其他位置建目录或注册集合。
+// TestDAVBackendConfinesCollectionPaths 验证存储只在各自的 home set 下创建集合，
+// 即使请求绕过了前置路径检查也不能在 data/storage 的其他位置建目录或注册集合，也不能占用元数据文件的路径。
 func TestDAVBackendConfinesCollectionPaths(t *testing.T) {
 	newDAVHandlerFixture(t)
-	ctx := context.Background()
-	for _, p := range []string{"/caldav/principals/main", "/petal/plugin/x", CardDavHomeSetPath + "/a/b"} {
-		if err := (&CardDavBackend{}).CreateAddressBook(ctx, &carddav.AddressBook{Path: p}); err == nil {
+	if err := contacts.Load(); err != nil {
+		t.Fatal(err)
+	}
+	if err := calendars.Load(); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"/caldav/principals/main", "/petal/plugin/x", CardDavHomeSetPath + "/a/b", CardDavAddressBooksMetaDataFilePath, CardDavAddressBooksPropertiesFilePath} {
+		if err := contacts.CreateAddressBook(&AddressBookMetaData{Path: p}, nil); err == nil {
 			t.Errorf("CreateAddressBook(%s) succeeded", p)
 		}
-		books, err := (&CardDavBackend{}).ListAddressBooks(ctx)
+		books, err := contacts.ListAddressBooks()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -143,14 +148,36 @@ func TestDAVBackendConfinesCollectionPaths(t *testing.T) {
 			}
 		}
 	}
-	for _, p := range []string{"/carddav/principals/main", "/petal/plugin/y", CalDavHomeSetPath + "/a/b"} {
-		if err := (&CalDavBackend{}).CreateCalendar(ctx, &caldav.Calendar{Path: p}); err == nil {
+	for _, p := range []string{"/carddav/principals/main", "/petal/plugin/y", CalDavHomeSetPath + "/a/b", CalDavCalendarsMetaDataFilePath, CalDavCalendarsPropertiesFilePath} {
+		if err := calendars.CreateCalendar(&CalendarMetaData{Path: p}, nil); err == nil {
 			t.Errorf("CreateCalendar(%s) succeeded", p)
 		}
 	}
 	for _, dir := range []string{"petal", filepath.Join("caldav", "principals", "main", "calendars", "a")} {
 		if _, err := os.Stat(filepath.Join(util.DataDir, "storage", dir)); err == nil {
 			t.Errorf("collection directory created at storage/%s", dir)
+		}
+	}
+}
+
+// TestDAVTrailingSlashHref 验证客户端用尾斜杠形式请求集合时，请求资源本身的 href 与请求地址一致，
+// 成员的 href 仍不带尾斜杠，客户端按请求地址查找响应时能找到对应的 response。
+func TestDAVTrailingSlashHref(t *testing.T) {
+	calDAV, _ := newDAVHandlerFixture(t)
+	if response := davTestRequest(calDAV, http.MethodPut, CalDavDefaultCalendarPath+"/a.ics", davICalendarHeader, davTestEvent("a", "A")); response.Code != http.StatusCreated {
+		t.Fatalf("PUT: status = %d", response.Code)
+	}
+	for _, test := range []struct{ target, self string }{
+		{CalDavDefaultCalendarPath + "/", CalDavDefaultCalendarPath + "/"},
+		{CalDavDefaultCalendarPath, CalDavDefaultCalendarPath},
+	} {
+		response := davTestRequest(calDAV, "PROPFIND", test.target, map[string]string{"Depth": "1"}, "")
+		body := response.Body.String()
+		if !strings.Contains(body, ">"+test.self+"</href>") || !strings.Contains(body, ">"+CalDavDefaultCalendarPath+"/a.ics</href>") {
+			t.Errorf("PROPFIND %s: body = %s", test.target, body)
+		}
+		if location := response.Header().Get("Content-Location"); strings.HasSuffix(test.target, "/") != (CalDavDefaultCalendarPath == location) {
+			t.Errorf("PROPFIND %s: Content-Location = %q", test.target, location)
 		}
 	}
 }

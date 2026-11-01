@@ -14,8 +14,6 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-vcard"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -46,7 +44,7 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 		}
 		return davPersistenceFixture{
 			calendars: store, contacts: &Contacts{},
-			handler: &caldav.Handler{Prefix: CalDavPrincipalsPath, Backend: &caldavPutTestBackend{store: store}}, urlPath: objectPath,
+			handler: newCalDAVHandler(store), urlPath: objectPath,
 			file: DavPath2DirectoryPath(objectPath), load: store.Load,
 			loaded: func() bool { return store.loaded },
 			put: func(name string) error {
@@ -58,11 +56,11 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 				event.Props.SetDateTime(ical.PropDateTimeStamp, time.Unix(1700000000, 0).UTC())
 				event.Props.SetText(ical.PropSummary, name)
 				data.Children = append(data.Children, event)
-				_, err := store.PutCalendarObject(objectPath, data, nil)
+				_, _, err := store.PutCalendarObject(objectPath, data, nil)
 				return err
 			},
 			get: func() (string, error) {
-				data, err := store.GetCalendarObject(objectPath, nil)
+				data, err := store.GetCalendarObject(objectPath)
 				if err != nil {
 					return "", err
 				}
@@ -79,18 +77,18 @@ func newDAVPersistenceFixture(t *testing.T, kind string) davPersistenceFixture {
 	}
 	return davPersistenceFixture{
 		calendars: &Calendars{}, contacts: store,
-		handler: &carddav.Handler{Prefix: CardDavPrincipalsPath, Backend: &carddavPutTestBackend{store: store}}, urlPath: objectPath,
+		handler: newCardDAVHandler(store), urlPath: objectPath,
 		file: DavPath2DirectoryPath(objectPath), load: store.Load,
 		loaded: func() bool { return store.loaded },
 		put: func(name string) error {
 			card := vcard.Card{}
 			card.SetValue(vcard.FieldVersion, "3.0")
 			card.SetValue(vcard.FieldFormattedName, name)
-			_, err := store.PutAddressObject(objectPath, card, nil)
+			_, _, err := store.PutAddressObject(objectPath, card, nil)
 			return err
 		},
 		get: func() (string, error) {
-			data, err := store.GetAddressObject(objectPath, nil)
+			data, err := store.GetAddressObject(objectPath)
 			if err != nil {
 				return "", err
 			}

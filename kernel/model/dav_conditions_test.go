@@ -6,7 +6,6 @@ package model
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,27 +15,7 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-vcard"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 )
-
-type caldavPutTestBackend struct {
-	caldav.Backend
-	store *Calendars
-}
-
-func (b *caldavPutTestBackend) PutCalendarObject(_ context.Context, p string, data *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (*caldav.CalendarObject, error) {
-	return b.store.PutCalendarObject(PathCleanWithSlash(p), data, opts)
-}
-
-type carddavPutTestBackend struct {
-	carddav.Backend
-	store *Contacts
-}
-
-func (b *carddavPutTestBackend) PutAddressObject(_ context.Context, p string, data vcard.Card, opts *carddav.PutAddressObjectOptions) (*carddav.AddressObject, error) {
-	return b.store.PutAddressObject(PathCleanWithSlash(p), data, opts)
-}
 
 func davConditionalRequest(f davPersistenceFixture, kind, header, value string) *httptest.ResponseRecorder {
 	body, contentType := "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:replacement\r\nEND:VCARD\r\n", vcard.MIMEType
@@ -58,21 +37,22 @@ func TestDAVConditionalWrites(t *testing.T) {
 			missing             bool
 			status              int
 		}{
-			{"current", "If-Match", "current", false, 201},
+			// 替换已有资源返回 204，新建资源返回 201（RFC 9110 §9.3.4）
+			{"current", "If-Match", "current", false, 204},
 			{"stale", "If-Match", "stale", false, 412},
-			{"matchAny", "If-Match", "*", false, 201},
+			{"matchAny", "If-Match", "*", false, 204},
 			{"matchMissing", "If-Match", "*", true, 412},
 			{"createExisting", "If-None-Match", "*", false, 412},
 			{"createMissing", "If-None-Match", "*", true, 201},
 			{"noneCurrent", "If-None-Match", "current", false, 412},
-			{"noneOther", "If-None-Match", "stale", false, 201},
+			{"noneOther", "If-None-Match", "stale", false, 204},
 			{"malformed", "If-Match", "unquoted", false, 400},
-			{"matchList", "If-Match", "list", false, 201},
+			{"matchList", "If-Match", "list", false, 204},
 			{"matchWeak", "If-Match", "weak", false, 412},
 			{"noneList", "If-None-Match", "list", false, 412},
 			{"noneWeak", "If-None-Match", "weak", false, 412},
-			{"noneOtherList", "If-None-Match", `"x", "y,z"`, false, 201},
-			{"unconditional", "", "", false, 201},
+			{"noneOtherList", "If-None-Match", `"x", "y,z"`, false, 204},
+			{"unconditional", "", "", false, 204},
 		} {
 			t.Run(kind+"/"+test.name, func(t *testing.T) {
 				f := newDAVPersistenceFixture(t, kind)
@@ -111,7 +91,7 @@ func TestDAVConditionalWrites(t *testing.T) {
 				if response.Code != test.status {
 					t.Fatalf("status=%d want=%d: %s", response.Code, test.status, response.Body.String())
 				}
-				if test.status != 201 {
+				if 400 <= test.status {
 					after, _ := os.ReadFile(f.file)
 					if !bytes.Equal(before, after) {
 						t.Fatal("rejected request changed disk")
@@ -143,7 +123,7 @@ func TestDAVConditionalWrites(t *testing.T) {
 			}
 			wg.Wait()
 			first, second := <-results, <-results
-			if first+second != 201+412 {
+			if first+second != 204+412 {
 				t.Fatalf("concurrent writes returned %d, %d", first, second)
 			}
 		})

@@ -12,16 +12,13 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
 )
 
 func TestDAVETagTracksContent(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "object")
 	stamp := time.Unix(1700000000, 123000000)
-	calendar := &CalendarObject{FilePath: file, Data: &caldav.CalendarObject{}}
-	address := &AddressObject{FilePath: file, Data: &carddav.AddressObject{}}
+	calendar := &CalendarObject{FilePath: file, Data: &CalendarObjectData{}}
+	address := &AddressObject{FilePath: file, Data: &AddressObjectData{}}
 	var previous string
 	for _, content := range []string{"first", "other", "other"} {
 		if err := os.WriteFile(file, []byte(content), 0600); err != nil {
@@ -82,7 +79,7 @@ func TestDAVPutETagRequiresOctetEquality(t *testing.T) {
 				t.Fatalf("PUT of re-encoded content returned strong ETag %s", etag)
 			}
 			again := davTestRequest(test.handler, http.MethodPut, test.target, test.header, stored.Body.String())
-			if etag := again.Header().Get("ETag"); again.Code != http.StatusCreated || etag == "" || etag != davTestRequest(test.handler, http.MethodGet, test.target, nil, "").Header().Get("ETag") {
+			if etag := again.Header().Get("ETag"); again.Code != http.StatusNoContent || etag == "" || etag != davTestRequest(test.handler, http.MethodGet, test.target, nil, "").Header().Get("ETag") {
 				t.Fatalf("PUT of stored form: status = %d, ETag = %q", again.Code, etag)
 			}
 		})

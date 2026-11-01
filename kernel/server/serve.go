@@ -54,6 +54,8 @@ const (
 	MethodPropFind  = "PROPFIND"
 	MethodPropPatch = "PROPPATCH"
 	MethodReport    = "REPORT"
+
+	MethodMkCalendar = "MKCALENDAR"
 )
 
 var (
@@ -95,6 +97,7 @@ var (
 		http.MethodDelete,
 
 		MethodMkCol,
+		MethodMkCalendar,
 		MethodCopy,
 		MethodMove,
 		// MethodLock,
@@ -2218,6 +2221,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 				http.MethodPut,
 				http.MethodDelete,
 				MethodMkCol,
+				MethodMkCalendar,
 				MethodCopy,
 				MethodMove,
 				MethodLock,
@@ -2257,7 +2261,6 @@ func serveCardDAV(ginServer *gin.Engine) {
 				return
 			}
 		}
-		// TODO: Can't handle Thunderbird's PROPFIND request with prop <current-user-privilege-set/>
 		handler.ServeHTTP(c.Writer, c.Request)
 		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})

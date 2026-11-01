@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const {test} = require("node:test");
-const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery} = require("./workspaceExit");
+const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery, watchWorkspaceExitProcess} = require("./workspaceExit");
 
 const fixture = (overrides = {}) => {
     let time = 1000;
@@ -11,6 +11,7 @@ const fixture = (overrides = {}) => {
         onWaiting: () => { waiting++; },
         readFile: () => JSON.stringify({version: 1, pid: 123, startedAt: 1000}),
         alive: () => polls < 4,
+        watchProcess: () => new Promise(() => {}),
         now: () => time,
         sleep: async ms => { polls++; time += ms; },
         ...overrides,
@@ -29,7 +30,8 @@ test("waits for the exiting process before allowing a new kernel", async () => {
 test("ordinary occupied workspaces and stale or invalid markers retain the normal lock check", async () => {
     for (const marker of [null, {}, {version: 3, pid: 123, startedAt: 1000},
         {version: 1, pid: -1, startedAt: 1000}, {version: 1, pid: "123", startedAt: 1000},
-        {version: 1, pid: 123, startedAt: 1001}, {version: 1, pid: 123, startedAt: -600000}]) {
+        {version: 1, pid: 123, startedAt: 1001}, {version: 1, pid: 123, startedAt: -600000},
+        ...[null, -1, "800", 800.5].map(processStartedAt => ({version: 2, pid: 123, startedAt: 1000, processStartedAt}))]) {
         const state = fixture({readFile: () => JSON.stringify(marker)});
         assert.equal(await state.run(), true);
         assert.equal(state.waiting(), 0);
@@ -45,6 +47,62 @@ test("a crashed kernel does not cause a wait", async () => {
     const state = fixture({alive: () => false});
     assert.equal(await state.run(), true);
     assert.equal(state.waiting(), 0);
+});
+
+test("a reused PID completes waiting without recovery even while the replacement is alive", async () => {
+    for (const version of [1, 2]) {
+        let signal;
+        const state = fixture({
+            readFile: () => JSON.stringify({version, pid: 123, startedAt: 1000, phase: "waiting"}),
+            alive: () => true,
+            watchProcess: async (marker, value) => { assert.equal(marker.pid, 123); signal = value; },
+            recover: () => { assert.fail("must not recover a replaced process"); },
+        });
+        assert.equal(await state.run(), true);
+        assert.equal(signal.aborted, true);
+        assert.ok(state.polls() < 5);
+    }
+});
+
+test("process identity inspection errors stop startup and abort the observer", async () => {
+    let signal;
+    const state = fixture({alive: () => true, watchProcess: async (_marker, value) => {
+        signal = value;
+        throw new Error("identity permission denied");
+    }});
+    await assert.rejects(state.run(), /identity permission denied/);
+    assert.equal(signal.aborted, true);
+});
+
+test("canceling or timing out aborts the process observer", async () => {
+    for (const cancel of [false, true]) {
+        let time = 1000;
+        let signal;
+        const state = fixture({alive: () => true, now: () => time,
+            canceled: () => cancel && !!signal,
+            sleep: async () => { time += signal ? 600000 : 200; },
+            watchProcess: (_marker, value) => { signal = value; return new Promise(() => {}); },
+        });
+        if (cancel) assert.equal(await state.run(), false);
+        else await assert.rejects(state.run(), /timed out/);
+        assert.equal(signal.aborted, true);
+    }
+});
+
+test("the observer passes identity as arguments without a shell and propagates errors", async () => {
+    const marker = {pid: 123, startedAt: 1000, processStartedAt: 800};
+    const signal = new AbortController().signal;
+    for (const error of [null, new Error("observer failed")]) {
+        const result = watchWorkspaceExitProcess("kernel with spaces", marker, signal, (file, args, options, done) => {
+            assert.equal(file, "kernel with spaces");
+            assert.deepEqual(args, ["workspace", "wait-exit", "--pid", "123", "--started-at", "1000",
+                "--process-started-at", "800"]);
+            assert.deepEqual(options, {windowsHide: true, signal});
+            done(error);
+        });
+        if (error) await assert.rejects(result, /observer failed/);
+        else await result;
+    }
 });
 
 test("closing or replacing the waiting window cancels startup", async () => {
@@ -79,6 +137,7 @@ const recoveryFixture = (overrides = {}) => {
         onWaiting: () => {},
         readFile: () => JSON.stringify({version: 2, pid: 123, startedAt: 1000, phase, port: "6806"}),
         alive: () => living,
+        watchProcess: () => new Promise(() => {}),
         now: () => time,
         sleep: async ms => { time += ms; phase = "waiting"; },
         recover: async (_marker, signal) => {
@@ -246,6 +305,13 @@ test("recovery rejects a replaced marker and permits an old but live v2 waiting 
     assert.equal(old.calls(), 1);
 });
 
+test("recovery rejects a changed process creation time at the same PID", async () => {
+    const state = recoveryFixture();
+    state.options.readFile = () => JSON.stringify({version: 2, pid: 123, startedAt: 1000,
+        processStartedAt: state.time() > 1000 ? 900 : 800, phase: "waiting", port: "6806"});
+    await assert.rejects(state.run(), /owner changed/);
+});
+
 test("recovery HTTP uses only the marked loopback port, authenticated identity and graceful options", async () => {
     for (const config of [{api: {token: "test-token"}}, {accessAuthCode: "test-password"}, {}]) {
         const controller = new AbortController();
@@ -308,6 +374,7 @@ test("a real orphan process exits only after the recovery HTTP request", {timeou
         let requests = 0;
         const ready = await waitForPreviousWorkspaceExit(workspace, {
             canceled: () => t.signal.aborted, onWaiting: () => {},
+            watchProcess: () => closed,
             recover: (marker, signal) => {
                 requests++;
                 return requestWorkspaceExitRecovery(workspace, marker, signal,

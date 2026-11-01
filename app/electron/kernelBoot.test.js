@@ -83,6 +83,9 @@ const setup = (progress, options = {}) => {
         showLocalBootWindow: (window, port, lang) => { events.push("show-boot"); events.push(["show-boot", window, port, lang]); },
         showAppleSiliconWarning: async () => true,
         waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
+        watchWorkspaceExitProcess: async (kernelPath, marker, signal) => {
+            events.push(["watch-exit-process", kernelPath, marker, signal]);
+        },
         requestWorkspaceExitRecovery: async (workspace, marker, signal, _fetch, _readFile, force) => {
             events.push(["recover-exit", workspace, marker.pid, signal, force]);
             return 1;
@@ -484,14 +487,21 @@ test("code 24 after startup success retains runtime failure handling", async () 
 });
 
 test("startup shows previous-exit waiting and spawns only after it completes", async () => {
+    const marker = {pid: 123, startedAt: 1000, processStartedAt: 800};
+    const signal = new AbortController().signal;
     let finish;
     const pending = new Promise(resolve => { finish = resolve; });
     const state = setup(() => 100, {previousExit: async (_workspace, options) => {
+        await options.watchProcess(marker, signal);
         await options.onWaiting();
         return pending;
     }});
     const run = state.run();
     await state.settleMicrotasks();
+    const observation = state.events.find(event => Array.isArray(event) && event[0] === "watch-exit-process");
+    assert.ok(observation[1].includes("SiYuan-Kernel"));
+    assert.equal(observation[2], marker);
+    assert.equal(observation[3], signal);
     assert.equal(state.versionRequests(), 0);
     assert.equal(state.events.some(event => typeof event === "string" && event.startsWith("spawned kernel")), false);
     assert.equal(state.window.previousExitWaiting, "Waiting for the previous shutdown to finish...");

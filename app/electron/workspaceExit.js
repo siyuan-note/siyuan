@@ -1,11 +1,21 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const {execFile} = require("node:child_process");
 
 const exitWaitTimeout = 10 * 60 * 1000;
 
 const validMarker = (marker, now) => marker && [1, 2].includes(marker.version) &&
     Number.isSafeInteger(marker.pid) && marker.pid > 0 && Number.isSafeInteger(marker.startedAt) &&
-    marker.startedAt > 0 && marker.startedAt <= now && (marker.version === 2 || now - marker.startedAt <= exitWaitTimeout);
+    marker.startedAt > 0 && marker.startedAt <= now &&
+    (marker.processStartedAt === undefined || (Number.isSafeInteger(marker.processStartedAt) && marker.processStartedAt > 0)) &&
+    (marker.version === 2 || now - marker.startedAt <= exitWaitTimeout);
+
+// 观察子命令不初始化工作空间；成功表示原进程已结束或 PID 已被复用。
+const watchWorkspaceExitProcess = (kernelPath, marker, signal, execute = execFile) => new Promise((resolve, reject) => {
+    execute(kernelPath, ["workspace", "wait-exit", "--pid", String(marker.pid),
+        "--started-at", String(marker.startedAt), "--process-started-at", String(marker.processStartedAt || 0)],
+    {windowsHide: true, signal}, error => error ? reject(error) : resolve());
+});
 
 // 认证材料只发送到标记中的本机端口；内核还会核对进程、退出批次及活动会话。
 const requestWorkspaceExitRecovery = async (workspace, marker, signal, fetch, readFile = fs.readFileSync, force = false) => {
@@ -57,6 +67,7 @@ const waitForPreviousWorkspaceExit = async (workspace, {
     onRecoveryFailed = async () => false,
     readFile = file => fs.readFileSync(file, "utf8"),
     alive = isProcessAlive,
+    watchProcess,
     now = Date.now,
     sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
 }) => {
@@ -79,14 +90,20 @@ const waitForPreviousWorkspaceExit = async (workspace, {
     }
     await onWaiting();
     const controller = new AbortController();
+    let ownerExited = false;
+    let inspectionError;
     let pending;
     let result;
     let nextRecovery = now() + 1000;
     let completedBatch;
     let forcedBatch;
     try {
+        Promise.resolve().then(() => watchProcess(marker, controller.signal)).then(() => {
+            ownerExited = true;
+        }, error => { inspectionError = error; });
         // 持续读取同一进程的退出阶段，接管不再有窗口处理的更新确认或同步失败。
-        while (alive(marker.pid)) {
+        while (!ownerExited && alive(marker.pid)) {
+            if (inspectionError) throw inspectionError;
             if (canceled()) {
                 return false;
             }
@@ -116,7 +133,8 @@ const waitForPreviousWorkspaceExit = async (workspace, {
                 } catch (error) {
                     if (error.code !== "ENOENT") throw error;
                 }
-                if (current && (!validMarker(current, now()) || current.pid !== marker.pid)) {
+                if (current && (!validMarker(current, now()) || current.pid !== marker.pid ||
+                    (marker.processStartedAt && current.processStartedAt !== marker.processStartedAt))) {
                     throw new Error("Workspace exit owner changed");
                 }
                 if (current?.version === 2 && current.phase === "waiting" && current.startedAt !== completedBatch &&
@@ -135,4 +153,4 @@ const waitForPreviousWorkspaceExit = async (workspace, {
     }
 };
 
-module.exports = {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery};
+module.exports = {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery, watchWorkspaceExitProcess};

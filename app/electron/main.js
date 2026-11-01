@@ -33,7 +33,7 @@ const {
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
 const {appendChromiumSwitch} = require("./chromiumSwitches");
-const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery} = require("./workspaceExit");
+const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery, watchWorkspaceExitProcess} = require("./workspaceExit");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -2792,6 +2792,7 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
             try {
                 const ready = await waitForPreviousWorkspaceExit(currentWorkspace, {
                     canceled: bootCanceled,
+                    watchProcess: (marker, signal) => watchWorkspaceExitProcess(kernelPath, marker, signal),
                     hasActiveWindow: () => workspaces.some(item => item.workspaceDir === currentWorkspace &&
                         item.browserWindow && !item.browserWindow.isDestroyed()),
                     recover: (marker, signal, force) => requestWorkspaceExitRecovery(currentWorkspace, marker, signal, net.fetch,

@@ -7,6 +7,7 @@ package model
 import (
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -202,7 +203,7 @@ func memorySource(ctx context.Context, id string) (memo.Source, error) {
 }
 
 // 来源有效性独立于自动采集开关，关闭功能不能使已有会话事实失效。
-func memorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
+func readMemorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
 	if strings.HasPrefix(id, "conversation:") {
 		cfg := Conf.LoadAI()
 		parts := strings.Split(id, ":")
@@ -222,17 +223,26 @@ func memorySourceSnapshot(ctx context.Context, id string) (memo.Source, error) {
 	if err := ctx.Err(); err != nil {
 		return memo.Source{}, err
 	}
-	bt := treenode.GetBlockTree(id)
-	if bt == nil || IsEncryptedBox(bt.BoxID) {
+	bt, lookupErr := treenode.LookupBlockTree(id)
+	if errors.Is(lookupErr, sql.ErrNoRows) {
+		return memo.Source{}, ErrAIMemorySourceMissing
+	}
+	if lookupErr != nil {
+		return memo.Source{}, lookupErr
+	}
+	if IsEncryptedBox(bt.BoxID) {
 		return memo.Source{}, errors.New("memory source is unavailable or encrypted")
 	}
 	tree, err := LoadTreeByBlockIDInExactBox(id, bt.BoxID)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return memo.Source{}, errors.Join(ErrAIMemorySourceMissing, err)
+		}
 		return memo.Source{}, err
 	}
 	node := treenode.GetNodeInTree(tree, id)
 	if node == nil {
-		return memo.Source{}, errors.New("memory source no longer exists")
+		return memo.Source{}, ErrAIMemorySourceMissing
 	}
 	data, err := memoryNativeEvidence(tree, node)
 	if err != nil {
@@ -259,6 +269,9 @@ func memorySourcesValid(ctx context.Context, r memo.Record) (bool, error) {
 			return false, nil
 		}
 		current, err := memorySourceSnapshot(ctx, s.ID)
+		if errors.Is(err, ErrAIMemorySourceMissing) {
+			return false, nil
+		}
 		if err != nil {
 			return false, err
 		}
@@ -271,6 +284,7 @@ func memorySourcesValid(ctx context.Context, r memo.Record) (bool, error) {
 
 // BuildAIMemoryContext 只返回当前范围内有效数据，不把记忆升级为系统命令或工具授权。
 func BuildAIMemoryContext(ctx context.Context, task string, sourceIDs []string, budget int) (string, error) {
+	ctx = newMemoryReadScope(ctx)
 	if Conf == nil || util.IsDisabledFeature("ai") {
 		return "", nil
 	}
@@ -687,33 +701,35 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		if automatic {
 			scopes = []string{"workspace"}
 		}
-		// 明确整理文档时，只补入该文档下已有且来源绑定相同子块的记忆范围。
-		for offset := 0; ; {
-			page, scanErr := store.Search(ctx, memo.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
-			if scanErr != nil || len(page.Errors) > 0 {
-				finish(errors.New("memory scope scan incomplete"))
-				return
-			}
-			for _, entry := range page.Entries {
-				if slices.Contains(scopes, entry.Record.Scope) {
-					continue
+		if !automatic && len(q.SourceIDs) > 0 {
+			// 明确整理文档时，只补入该文档下已有且来源绑定相同子块的记忆范围。
+			for offset := 0; ; {
+				page, scanErr := store.Search(ctx, memo.SearchOptions{States: []string{"active", "candidate", "review"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
+				if scanErr != nil || len(page.Errors) > 0 {
+					finish(errors.New("memory scope scan incomplete"))
+					return
 				}
-				bt := treenode.GetBlockTree(entry.Record.Scope)
-				if bt == nil || !slices.Contains(q.SourceIDs, bt.RootID) || IsEncryptedBox(bt.BoxID) {
-					continue
+				for _, entry := range page.Entries {
+					if slices.Contains(scopes, entry.Record.Scope) {
+						continue
+					}
+					bt := treenode.GetBlockTree(entry.Record.Scope)
+					if bt == nil || !slices.Contains(q.SourceIDs, bt.RootID) || IsEncryptedBox(bt.BoxID) {
+						continue
+					}
+					if slices.ContainsFunc(entry.Record.Sources, func(source memo.Source) bool { return source.Kind == "block" && source.ID == entry.Record.Scope }) {
+						scopes = append(scopes, entry.Record.Scope)
+					}
 				}
-				if slices.ContainsFunc(entry.Record.Sources, func(source memo.Source) bool { return source.Kind == "block" && source.ID == entry.Record.Scope }) {
-					scopes = append(scopes, entry.Record.Scope)
+				if !page.Incomplete {
+					break
 				}
+				if len(page.Entries) == 0 {
+					finish(memo.ErrIncomplete)
+					return
+				}
+				offset += len(page.Entries)
 			}
-			if !page.Incomplete {
-				break
-			}
-			if len(page.Entries) == 0 {
-				finish(memo.ErrIncomplete)
-				return
-			}
-			offset += len(page.Entries)
 		}
 		searchScopes := scopes
 		searchStates := []string{"active", "candidate", "review"}
@@ -746,8 +762,9 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 		// 固定候选快照的修订只由程序保存，模型不能伪造 CAS。
 		verified := []memo.Entry{}
 		confirmable := map[string]bool{}
+		validationCtx := newMemoryReadScope(ctx)
 		for _, e := range result.Entries {
-			confirmable[e.Record.ID] = e.Record.State == "candidate" && e.Record.Supersedes == "" && validateMemorySources(ctx, e.Record)
+			confirmable[e.Record.ID] = e.Record.State == "candidate" && e.Record.Supersedes == "" && validateMemorySources(validationCtx, e.Record)
 			// 仅用本轮已核验的相同来源身份更新版本，保留记录 ID 供纠错匹配。
 			// 其他来源失效时仍排除，不把撤权或已删除来源的缓存外传。
 			e.Record.Sources = append([]memo.Source{}, e.Record.Sources...)
@@ -768,7 +785,7 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 					}
 				}
 			}
-			if validateMemorySources(ctx, e.Record) {
+			if validateMemorySources(validationCtx, e.Record) {
 				verified = append(verified, e)
 			}
 		}
@@ -809,8 +826,9 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 			finish(err)
 			return
 		}
+		validationCtx = newMemoryReadScope(ctx)
 		for _, candidate := range result.Entries {
-			if !validateMemorySources(ctx, candidate.Record) {
+			if !validateMemorySources(validationCtx, candidate.Record) {
 				finish(errors.New("memory candidate sources changed before model request"))
 				return
 			}
@@ -1051,7 +1069,8 @@ func runAIMemory(ctx context.Context, cfg *conf.AI, q apicontract.AIMemoryMainta
 }
 
 func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() error) error {
-	if err := validateMemoryOverviewSources(ctx, cfg); err != nil {
+	ctx = newMemoryReadScope(ctx)
+	if err := validateMemoryOverviewSourcesInScope(ctx, cfg); err != nil {
 		return err
 	}
 
@@ -1093,7 +1112,7 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 		if err = check(); err != nil {
 			return err
 		}
-		if err = validateMemoryOverviewSources(ctx, cfg); err != nil {
+		if err = validateMemoryOverviewSourcesInScope(ctx, cfg); err != nil {
 			return err
 		}
 		text := ""
@@ -1123,48 +1142,63 @@ func refreshAIMemoryProjections(ctx context.Context, cfg *conf.AI, check func() 
 }
 
 // 汇总遍历全部范围，来源校验失败时只报告已确认的部分数量。
-func countAIMemory(ctx context.Context) (count int, complete bool) {
+func countAIMemory(ctx context.Context) (int, bool) {
+	count, complete, _ := inspectAIMemory(newMemoryReadScope(ctx))
+	return count, complete
+}
+
+// 数量与工作空间概览资格共用一轮来源读取，前后指纹检测并发撤回或修订。
+func inspectAIMemory(ctx context.Context) (count int, complete bool, workspaceValid bool) {
 	store := aiMemoryStore()
 	before, err := store.Snapshot(ctx, nil)
 	if errors.Is(err, os.ErrNotExist) {
-		return 0, true
+		return 0, true, true
 	}
 	if err != nil {
-		return 0, false
+		return 0, false, false
 	}
+	complete, workspaceValid = true, true
 	for offset := 0; ; {
-		page, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"active"}, Limit: memo.MaxResults, Offset: offset})
+		page, err := store.Search(ctx, memo.SearchOptions{States: []string{"active"}, Limit: memo.MaxResults, Offset: offset})
 		if err != nil || len(page.Errors) > 0 {
-			return count, false
+			return count, false, false
 		}
 		for _, entry := range page.Entries {
 			valid, sourceErr := memorySourcesValid(ctx, entry.Record)
 			if sourceErr != nil {
-				return count, false
+				complete = false
 			}
-			if valid {
+			if valid && sourceErr == nil {
 				count++
+			}
+			if entry.Record.Scope == "workspace" && (!valid || sourceErr != nil) {
+				workspaceValid = false
 			}
 		}
 		if !page.Incomplete {
 			after, snapshotErr := store.Snapshot(ctx, nil)
-			return count, snapshotErr == nil && before.Fingerprint == after.Fingerprint
+			stable := snapshotErr == nil && before.Fingerprint == after.Fingerprint
+			return count, complete && stable, workspaceValid && stable
 		}
 		if len(page.Entries) == 0 {
-			return count, false
+			return count, false, false
 		}
 		offset += len(page.Entries)
 	}
 }
 
 func ReadAIMemoryOverview(ctx context.Context) (apicontract.AIMemoryOverviewData, error) {
-	return readAIMemoryOverview(ctx, true)
+	return readAIMemoryOverview(newMemoryReadScope(ctx), true)
 }
 
 func readAIMemoryOverview(ctx context.Context, includeCount bool) (apicontract.AIMemoryOverviewData, error) {
 	ret := apicontract.AIMemoryOverviewData{}
+	if _, exists := ctx.Value(memoryReadKey{}).(*memoryReadScope); !exists {
+		ctx = newMemoryReadScope(ctx)
+	}
+	workspaceValid := true
 	if includeCount {
-		ret.Count, ret.CountComplete = countAIMemory(ctx)
+		ret.Count, ret.CountComplete, workspaceValid = inspectAIMemory(ctx)
 	}
 	if Conf == nil {
 		ret.Stale = true
@@ -1175,24 +1209,16 @@ func readAIMemoryOverview(ctx context.Context, includeCount bool) (apicontract.A
 		ret.Stale = true
 		return ret, nil
 	}
-	if sourceErr := validateMemoryOverviewSources(ctx, cfg); sourceErr != nil {
+	if !includeCount {
+		workspaceValid = validateMemoryOverviewSourcesInScope(ctx, cfg) == nil
+	}
+	if !workspaceValid {
 		ret.Stale = true
 		return ret, nil
-	}
-	snapshot, err := aiMemoryStore().Snapshot(ctx, []string{"workspace"})
-	if err != nil {
-		ret.Stale = true
-		return ret, nil
-	}
-	for _, e := range snapshot.Entries {
-		if !validateMemorySources(ctx, e.Record) {
-			ret.Stale = true
-			return ret, nil
-		}
 	}
 
 	if memoryWriteAllowed() == nil {
-		if err = aiMemoryStore().MigrateProjection(ctx, []string{"workspace"}); err != nil {
+		if err := aiMemoryStore().MigrateProjection(ctx, []string{"workspace"}); err != nil {
 			ret.Stale = true
 			return ret, nil
 		}
@@ -1264,44 +1290,57 @@ func RevalidateAIMemorySources(ctx context.Context, changedIDs []string) error {
 	if cfg == nil || cfg.Memory == nil {
 		return nil
 	}
-	offset := 0
-	for {
-		result, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"active"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
+	ctx = newMemoryReadScope(ctx)
+	workspace := util.DataDir
+	var invalid []memo.Entry
+	for offset := 0; ; {
+		page, err := aiMemoryStore().Search(ctx, memo.SearchOptions{States: []string{"active"}, IncludeInactiveValidity: true, Limit: 100, Offset: offset})
 		if err != nil {
 			return err
 		}
-		if len(result.Errors) > 0 {
+		if len(page.Errors) > 0 {
 			return memo.ErrIncomplete
 		}
-		changed := 0
-		for _, e := range result.Entries {
-			affected := false
-			for _, s := range e.Record.Sources {
-				if s.Kind == "block" || s.Kind == "conversation" {
-					affected = true
-					break
-				}
-			}
-			if !affected || validateMemorySources(ctx, e.Record) {
+		for _, entry := range page.Entries {
+			if !memoryRecordAffected(entry.Record, changedIDs) {
 				continue
 			}
-			r := e.Record
-			r.State = "review"
-			r.Reason = "source no longer verified"
-			if _, err = aiMemoryStore().Save(ctx, r, e.Revision, "review:"+ast.NewNodeID()); err != nil {
-				return err
+			valid, sourceErr := memorySourcesValid(ctx, entry.Record)
+			if sourceErr != nil {
+				return sourceErr
 			}
-			changed++
-			memoryChanged(r.ID)
+			if !valid {
+				invalid = append(invalid, entry)
+			}
 		}
-		offset += len(result.Entries) - changed
-		if !result.Incomplete {
-			return nil
+		if !page.Incomplete {
+			break
 		}
-		if len(result.Entries) == 0 {
+		if len(page.Entries) == 0 {
 			return memo.ErrIncomplete
 		}
+		offset += len(page.Entries)
 	}
+	commitCtx := newMemoryReadScope(ctx)
+	for _, entry := range invalid {
+		if util.DataDir != workspace || memoryWriteAllowed() != nil {
+			return errors.New("memory workspace or write permission changed")
+		}
+		valid, sourceErr := memorySourcesValid(commitCtx, entry.Record)
+		if sourceErr != nil {
+			return sourceErr
+		}
+		if valid {
+			continue
+		}
+		r := entry.Record
+		r.State, r.Reason = "review", "source no longer verified"
+		if _, err := aiMemoryStore().Save(ctx, r, entry.Revision, "review:"+ast.NewNodeID()); err != nil {
+			return err
+		}
+		memoryChanged(r.ID)
+	}
+	return nil
 }
 
 var memoryOverviewQueue struct {
@@ -1429,6 +1468,7 @@ func GetAIMemoryForModel(ctx context.Context, id string) (apicontract.AIMemoryGe
 	return apicontract.AIMemoryGetData{Record: dto, Revision: e.Revision}, nil
 }
 func ListAIMemoryForModel(ctx context.Context, q apicontract.AIMemoryListRequest) (apicontract.AIMemoryListData, error) {
+	ctx = newMemoryReadScope(ctx)
 	result, err := ListAIMemory(ctx, q)
 	if err != nil {
 		return result, err
@@ -1447,6 +1487,10 @@ func ListAIMemoryForModel(ctx context.Context, q apicontract.AIMemoryListRequest
 
 // 验证完整概览范围的来源权限；正文选择有界不代表只验证前一页。
 func validateMemoryOverviewSources(ctx context.Context, cfg *conf.AI) error {
+	return validateMemoryOverviewSourcesInScope(newMemoryReadScope(ctx), cfg)
+}
+
+func validateMemoryOverviewSourcesInScope(ctx context.Context, cfg *conf.AI) error {
 	if cfg == nil || cfg.Memory == nil {
 		return errors.New("memory configuration unavailable")
 	}

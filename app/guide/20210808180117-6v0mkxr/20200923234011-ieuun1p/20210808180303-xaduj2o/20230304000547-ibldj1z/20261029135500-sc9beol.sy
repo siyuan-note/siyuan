@@ -6,7 +6,7 @@
 		"id": "20261029135500-sc9beol",
 		"title": "Long-term memory",
 		"type": "doc",
-		"updated": "20261101120000"
+		"updated": "20261101151527"
 	},
 	"Children": [
 		{
@@ -240,12 +240,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261029135500-vpy6gbc",
-				"updated": "20261030063122"
+				"updated": "20261101151527"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Only active memories that pass source, scope and validity checks are used. Uncertain proposals are not automatically activated. When a source changes, is deleted or becomes inaccessible, old evidence must not be treated as a current fact. Restore source access or submit currently verified facts for organization; an old overview must not restore invalid content."
+					"Data": "Only active memories that pass source, scope and validity checks are used. Uncertain proposals are not automatically activated. Confirmed source changes or deletion mark affected memories for review. Temporary read failures only suspend the current use and preserve the record state; you do not need to add the memory again after access recovers. Inaccessible sources are not sent to the model, and an old overview cannot restore invalid content."
 				}
 			]
 		},

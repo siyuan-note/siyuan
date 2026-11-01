@@ -442,33 +442,33 @@ func GetBlockTrees(ids []string) (ret map[string]*BlockTree) {
 	return
 }
 
-func GetBlockTree(id string) (ret *BlockTree) {
-	if "" == id {
-		return
-	}
+func GetBlockTree(id string) *BlockTree {
+	ret, _ := LookupBlockTree(id)
+	return ret
+}
 
+// LookupBlockTree 区分索引读取故障与已确认不存在的块。
+func LookupBlockTree(id string) (ret *BlockTree, err error) {
+	if id == "" {
+		return nil, sql.ErrNoRows
+	}
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
-	err := scanQueryRow(queryRow(sqlStmt, id), &ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path,
+	err = scanQueryRow(queryRow(sqlStmt, id), &ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path,
 		&ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
-		ret = nil
-		if errors.Is(err, errBlockTreeDBUnavailable) {
-			return
-		}
 		if errors.Is(err, sql.ErrNoRows) {
-			// 全局 blocktree 未命中，遍历已打开的加密笔记本查找
-			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
-				if encBT := GetBlockTreeInBox(id, encBoxID); nil != encBT {
-					return encBT
+			for _, boxID := range GetOpenedEncryptedBoxIDs() {
+				if encrypted := GetBlockTreeInBox(id, boxID); encrypted != nil {
+					return encrypted, nil
 				}
 			}
-			return
+		} else if !errors.Is(err, errBlockTreeDBUnavailable) {
+			logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
 		}
-		logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
-		return
+		return nil, err
 	}
-	return
+	return ret, nil
 }
 
 // IsContainerType 按主类型缩写判断块是否为容器块（可合法接收子块）。

@@ -71,6 +71,14 @@ func (s *Store) MigrateProjection(ctx context.Context, scopes []string) error {
 		return err
 	}
 	defer root.Close()
+	if _, legacyErr := root.Lstat("USER.md"); errors.Is(legacyErr, os.ErrNotExist) {
+		if data, readErr := readFile(root, "MEMORY.md"); readErr == nil {
+			var header projectionHeader
+			if _, decodeErr := decode(data, &header); decodeErr == nil && header.Schema == 2 {
+				return nil
+			}
+		}
+	}
 	snapshot, err := s.snapshot(ctx, root, scopes)
 	if err != nil {
 		return err

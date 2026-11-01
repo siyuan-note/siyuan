@@ -1,7 +1,7 @@
 import {setEditMode} from "../util/setEditMode";
 import {isTabGutterBridge} from "../gutter/tabs";
 import {isContainerGutterBridge} from "../gutter/container";
-import {cancelGutterHover, renderGutterOnHover} from "../gutter/hover";
+import {bindGutterHover, cancelGutterHover, renderGutterOnHover} from "../gutter/hover";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -214,7 +214,7 @@ export const initUI = (protyle: IProtyle) => {
         }
     });
     let overAttr = false;
-    protyle.element.addEventListener("mouseleave", () => cancelGutterHover(protyle.gutter?.element));
+    bindGutterHover(protyle, isMobile());
     protyle.element.addEventListener(isMobile() ? "pointerover" : "mouseover", (event: PointerEvent & {
         target: HTMLElement
     }) => {

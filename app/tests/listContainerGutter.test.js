@@ -45,7 +45,8 @@ const sources = (full = false) => {
             node.declarationList.declarations.some(declaration => ["getListItemGutterContainer", "getTopAloneElement",
                 "getSbChildBlockCount", "getParentBlock", "getGutterMarginHeight", "getFixedGutterPosition",
                 "getBacklinkGutterContentTop", "getListGutterAnchorLeft", "getContainerGutterSpace", "isContainerGutterBridge",
-                "cancelGutterHover", "renderGutterOnHover", "pendingGutterHovers",
+                "cancelGutterHover", "renderGutterOnHover", "pendingGutterHovers", "gutterHoverPaths",
+                "getVerticalGutterButton", "resetGutterHover", "bindGutterHover",
                 "hasClosestBlock", "isBlockElement", "hasClosestByClassName", "hasTopClosestByClassName", "hasClosestByTag",
                 "hasClosestByAttribute", "getAutoListDirection", "listSelector", "directionAttribute",
                 "getMobileBlockSelectionElement"].includes(declaration.name.getText(source))))
@@ -54,24 +55,23 @@ const sources = (full = false) => {
     const hoverSource = ts.createSourceFile("initUI.ts", readFileSync(path.join(__dirname,
         "../src/protyle/ui/initUI.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     let hoverBinding;
-    let leaveBinding;
+    let pathBinding;
     const visit = node => {
         if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "protyle.element.addEventListener" &&
             node.arguments[0].getText(hoverSource).includes('"pointerover"')) {
             hoverBinding = node.getText(hoverSource);
         }
-        if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "protyle.element.addEventListener" &&
-            node.arguments[0].getText(hoverSource) === '"mouseleave"' && node.getText(hoverSource).includes("cancelGutterHover")) {
-            leaveBinding = node.getText(hoverSource);
+        if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "bindGutterHover") {
+            pathBinding = node.getText(hoverSource);
         }
         ts.forEachChild(node, visit);
     };
     visit(hoverSource);
     assert.ok(hoverBinding);
-    assert.ok(leaveBinding);
+    assert.ok(pathBinding);
     const events = readFileSync(path.join(__dirname, "../src/boot/globalEvent/mousemove.ts"), "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, "") +
-        `\nfunction bindHover(protyle) { let overAttr = false; ${leaveBinding}; ${hoverBinding}; }`;
+        `\nfunction bindHover(protyle) { let overAttr = false; ${pathBinding}; ${hoverBinding}; }`;
     const interactionSource = `function getNodeElement(protyle, element) ${getNodeElement.body.getText(source)}
 function mobileMultiSelect(protyle, nodeElement) {
     ${menuType.getText(source)}
@@ -205,12 +205,18 @@ const cases = async (source, fullSource, css) => {
     bindHover(protyle);
     const state = () => ({left: gutter.element.style.left, top: gutter.element.style.top,
         ids: Array.from(gutter.element.querySelectorAll("button[data-node-id]")).map(button => button.dataset.nodeId)});
-    const hover = (target, x, y) => {
+    const hover = (target, x, y, enter = true) => {
         const rect = target.getBoundingClientRect();
         x ??= rect.left + Math.min(12, rect.width / 2);
         y ??= rect.top + Math.min(16, rect.height / 2);
-        target.dispatchEvent(new PointerEvent(mobile ? "pointerover" : "mouseover",
-            {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        if (enter) {
+            target.dispatchEvent(new PointerEvent(mobile ? "pointerover" : "mouseover",
+                {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        }
+        if (mobile) {
+            target.dispatchEvent(new PointerEvent("pointermove",
+                {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        }
         target.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: x, clientY: y}));
         check.deepEqual(errors, []);
         return state();
@@ -473,6 +479,58 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
         check.deepEqual(state(), beforeLeave, "leaving the editor cancels its pending block switch");
     }
     neighbor.remove();
+    const beforePathHTML = root.innerHTML;
+    root.style.paddingLeft = "64px";
+    const pathIDs = Array.from({length: 5}, (_, index) => `path-${index}`);
+    root.innerHTML = pathIDs.reduceRight((html, id) =>
+        `<div data-node-id="list-${id}" data-type="NodeList" class="list"><div data-node-id="item-${id}" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p(id)}${html}${attr}</div>${attr}</div>`,
+        p("path-neighbor-1") + p("path-neighbor-2"));
+    const pathLeaf = root.querySelector('[data-node-id="path-4"]');
+    for (const platform of [false, true]) {
+        mobile = platform;
+        pane.dispatchEvent(new MouseEvent("mouseleave"));
+        gutter.render(protyle, pathLeaf);
+        const before = state();
+        const sourceRect = pathLeaf.getBoundingClientRect();
+        const columnRect = gutter.element.getBoundingClientRect();
+        const origin = {x: sourceRect.left + 16, y: sourceRect.top + sourceRect.height / 2};
+        const destination = {x: columnRect.left + columnRect.width / 2, y: columnRect.bottom - 17};
+        hover(pathLeaf, origin.x, origin.y);
+        let previousTarget = pathLeaf;
+        for (const progress of [0.05, 0.1, 0.2, 0.5, 0.75, 1]) {
+            const x = origin.x + (destination.x - origin.x) * progress;
+            const y = origin.y + (destination.y - origin.y) * progress;
+            const target = document.elementFromPoint(x, y);
+            check.ok(target, "the slow diagonal path stays inside the editor");
+            hover(target, x, y, target !== previousTarget);
+            previousTarget = target;
+            await pause();
+            check.deepEqual(state(), before, `slow diagonal entry retains the entire column: mobile=${mobile}, progress=${progress}`);
+        }
+        checkFullLayout(true);
+        const adjacent = root.querySelector('[data-node-id="path-neighbor-1"]');
+        hover(adjacent);
+        await pause();
+        check.deepEqual(state().ids.at(-1), "path-neighbor-1", "returning to body content releases the column");
+        gutter.render(protyle, pathLeaf);
+        hover(pathLeaf, origin.x, origin.y);
+        const adjacentRect = adjacent.getBoundingClientRect();
+        const y = adjacentRect.top + adjacentRect.height / 2;
+        const progress = (y - origin.y) / (destination.y - origin.y);
+        const x = origin.x + (destination.x - origin.x) * progress;
+        const target = document.elementFromPoint(x, y);
+        check.ok(adjacent.contains(target), "the approach crosses an adjacent paragraph");
+        hover(target, x, y);
+        await pause();
+        check.deepEqual(state(), before);
+        check.equal(document.elementFromPoint(origin.x + 8, y), target,
+            "reversing direction stays within the same DOM element");
+        hover(target, origin.x + 8, y, false);
+        await pause();
+        check.equal(state().ids.at(-1), target.closest("[data-node-id]").dataset.nodeId,
+            "moving back within the same paragraph switches without a new mouseover");
+    }
+    root.innerHTML = beforePathHTML;
     root.style.paddingLeft = "180px";
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
     checkFullLayout(false);
@@ -524,7 +582,8 @@ if (process.versions.electron && process.type === "browser") {
         const {app, BrowserWindow} = require("electron");
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
-        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        const win = new BrowserWindow({show: false, width: 1100, height: 900,
+            webPreferences: {nodeIntegration: true, contextIsolation: false}});
         await win.loadURL("data:text/html,<html><body></body></html>");
         const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "util/_function.scss"].map(file =>
             require("sass").compile(path.join(__dirname, "../src/assets/scss", file), {quietDeps: true}).css).join("\n");

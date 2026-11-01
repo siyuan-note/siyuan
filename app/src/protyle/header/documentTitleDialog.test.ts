@@ -22,6 +22,10 @@ class ElementMock {
     content = "private title";
     isConnected = true;
     listeners = new Map<string, () => void>();
+    children: ElementMock[] = [];
+    className = "";
+    querySelector() { return this.children[0]; }
+    appendChild(element: ElementMock) { this.children.push(element); }
     addEventListener(type: string, callback: () => void) { this.listeners.set(type, callback); }
     removeEventListener(type: string) { this.listeners.delete(type); }
     replaceChildren() { this.content = ""; }
@@ -36,6 +40,7 @@ const setup = (mobile: boolean) => {
     const ready: number[] = [];
     const guards: Array<{dispose: () => void, flush: () => Promise<void>, disposed: boolean}> = [];
     const instances: ProtyleMock[] = [];
+    const afters: Array<() => void> = [];
     const viewport = {top: 0, bottom: 800};
     const resizeListeners = new Set<() => void>();
     let sheetClose: () => Promise<void>;
@@ -61,10 +66,12 @@ const setup = (mobile: boolean) => {
         destroyed = 0;
         titleFlushes = 0;
         protyle: any;
-        constructor(_app: unknown, element: ElementMock, options: {blockId: string, notebookId?: string}) {
+        constructor(_app: unknown, element: ElementMock, options: {blockId: string, notebookId?: string, after: (value: ProtyleMock) => void}) {
             this.protyle = {element, notebookId: options.notebookId, block: {rootID: options.blockId}, wysiwyg: {},
-                title: {flushPendingInput: () => { this.titleFlushes++; return flushTitle(this); }}};
+                title: {flushPendingInput: () => { this.titleFlushes++; return flushTitle(this); }, openEditor: async () => {},
+                    mountEditorOnly: (field: ElementMock) => { this.protyle.field = field; }}};
             instances.push(this);
+            afters.push(() => options.after(this));
         }
         flushPendingTransactions() { return flush(this); }
         destroy() {
@@ -117,7 +124,7 @@ const setup = (mobile: boolean) => {
         runInNewContext(transpileModule(source, {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, window,
-            document: {addEventListener: () => {}, getElementById: () => keyboardToolbar},
+            document: {addEventListener: () => {}, getElementById: () => keyboardToolbar, createElement: () => new ElementMock()},
             MutationObserver: MutationObserverMock, console: {error: () => {}}});
         return exports;
     };
@@ -130,7 +137,7 @@ const setup = (mobile: boolean) => {
     const system = load("../../window/onWindowsMsg.ts");
     Object.assign(dependencies, load("documentTitleEditor.ts"));
     const titleDialog = load("documentTitleDialog.ts");
-    return {window, messages, guards, instances, ready, secondary, registry, allEditors, system,
+    return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system,
         viewport, resizeListeners, closeSheet: () => sheetClose(), resizeSheet: () => sheetResize(),
         sheetDisposals: () => sheetDisposals,
         keyboardToolbar, resizeToolbar: () => toolbarObserver(), toolbarObserved: () => toolbarObserved,
@@ -326,7 +333,25 @@ test("desktop title editing retains the centered dialog without mobile viewport 
     assert.equal(state.resizeListeners.size, 0);
 });
 
-const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: string) => {
+test("mobile rename readiness mounts one standalone field and rejects late readiness after dismissal", () => {
+    const mobile = setup(true);
+    const dialog = mobile.open();
+    mobile.afters[0]();
+    mobile.afters[0]();
+    assert.equal(dialog.host.children.length, 1);
+    assert.equal(dialog.host.children[0].className, "document-title-dialog__editor b3-text-field");
+    assert.equal(mobile.instances[0].protyle.field, dialog.host.children[0]);
+    const late = mobile.open("late");
+    late.destroy();
+    mobile.afters[1]();
+    assert.equal(late.host.children.length, 0);
+    const desktop = setup(false);
+    const desktopDialog = desktop.open();
+    desktop.afters[0]();
+    assert.equal(desktopDialog.host.children.length, 0, "desktop keeps its existing title layout");
+});
+
+const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: string, titleSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const {paddingElement, setUndo} = new Function(toolbarSource +
         "\nreturn {paddingElement: getMobileToolbarPaddingElement, setUndo: setMobileToolbarUndo};")() as {
@@ -341,8 +366,9 @@ const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: st
 <div class="b3-menu__title b3-menu__title--root"></div><div class="b3-dialog__header">Rename</div>
 <div class="b3-dialog__body"><div class="document-title-dialog protyle">
 <div class="protyle-content"><div class="protyle-top"><div class="protyle-title">
+<span class="protyle-title__icon">File</span><div class="protyle-attr">Private alias and backlinks</div>
 <div class="protyle-title__rich protyle"><div class="protyle-content"><div class="protyle-wysiwyg">
-<div data-type="NodeParagraph" class="p"><div class="protyle-title__input" contenteditable="true"></div></div>
+<div data-node-id="title-paragraph" data-type="NodeParagraph" class="p"><div class="protyle-title__input" contenteditable="true"></div><div class="protyle-attr">Paragraph badge</div></div>
 </div></div></div></div></div><div class="protyle-wysiwyg">Hidden document body</div></div></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div></div></div></div></div>`;
     const container = document.querySelector<HTMLElement>(".b3-dialog");
@@ -350,8 +376,21 @@ const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: st
     const host = document.querySelector<HTMLElement>(".document-title-dialog");
     const editable = document.querySelector<HTMLElement>("[contenteditable]");
     const action = document.querySelector<HTMLElement>(".b3-dialog__action");
+    const field = document.createElement("div");
+    field.className = "document-title-dialog__editor b3-text-field";
+    host.appendChild(field);
+    const titleExports: any = {};
+    new Function("exports", "require", titleSource)(titleExports, () => ({}));
+    const title = Object.assign(Object.create(titleExports.Title.prototype), {
+        element: host.querySelector(".protyle-title"), editElement: editable,
+        richEditor: {fragment: {protyle: {element: host.querySelector(".protyle-title__rich")}}},
+    });
+    title.mountEditorOnly(field);
+    check.equal(host.querySelector(".protyle-top"), null, "the drawer has a standalone field without a document title container");
+    check.equal(host.querySelector(".protyle-title__icon"), null, "the document block icon stays outside the drawer field");
+    check.equal(field.querySelector<HTMLElement>(".protyle-attr").offsetHeight, 0, "the field does not show block corner badges");
     const owner = {element: host, contentElement: host.firstElementChild, options: {action: [], render: {title: true}},
-        preview: {updatePadding: () => {}}, title: {element: host.querySelector(".protyle-title")},
+        preview: {updatePadding: () => {}}, title,
         wysiwyg: {element: host.querySelector(":scope > .protyle-content > .protyle-wysiwyg")}} as unknown as IProtyle;
     const setPadding = new Function("Constants", "getPadding", "BACKLINK_EDITOR_PADDING",
         paddingSource + "\nreturn setPadding;")({CB_GET_HISTORY: "history"},
@@ -376,14 +415,14 @@ const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: st
                 check.ok(button.top >= rect.top && button.bottom <= rect.bottom + 1 && button.height >= 30, context);
                 check.ok(editor.bottom <= button.top + 1 && editor.height > 0, context);
                 if (long) {
-                    check.ok(host.scrollHeight > host.clientHeight || host.firstElementChild.scrollHeight >
-                        host.firstElementChild.clientHeight, "long rich titles remain scrollable: " + context);
+                    check.ok(field.scrollWidth > field.clientWidth, "long rich titles scroll horizontally in one line: " + context);
+                    check.ok(editable.getBoundingClientRect().height < 40, "long titles do not wrap into several lines: " + context);
                 } else if (height === 800 && !large) {
                     check.ok(rect.height < 250, "short title does not reserve a full editor: " + context);
                 }
                 if (!long && height === 800) {
-                    const title = owner.title.element.getBoundingClientRect();
-                    check.ok(Math.abs((title.top - editor.top) - (editor.bottom - title.bottom)) < 1,
+                    const fieldBounds = field.getBoundingClientRect();
+                    check.ok(Math.abs((fieldBounds.top - editor.top) - (editor.bottom - fieldBounds.bottom)) < 1,
                         "short titles have symmetric vertical spacing after editor padding updates: " + context);
                 }
             }
@@ -399,21 +438,23 @@ const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: st
                 paddingElement(fragment)?.style.setProperty("padding-bottom", padding);
                 const gap = sheet.getBoundingClientRect().bottom - action.getBoundingClientRect().bottom;
                 check.ok(gap < 1, `keyboard padding cannot create a gap below Confirm: ${theme}, ${height}, ${padding}, gap=${gap}`);
-                check.equal(getComputedStyle(host).backgroundColor, getComputedStyle(sheet).backgroundColor);
-                check.equal(getComputedStyle(fragment.element).backgroundColor, getComputedStyle(sheet).backgroundColor);
+                check.equal(getComputedStyle(field).backgroundColor, getComputedStyle(host).backgroundColor,
+                    "the standalone input follows the editor background in both themes");
+                check.equal(getComputedStyle(fragment.element).backgroundColor, getComputedStyle(host).backgroundColor);
             }
         }
     }
     editable.textContent = "";
     editable.dataset.tip = "Untitled document";
     editable.focus();
+    title.mountEditorOnly(field);
     check.equal(document.activeElement, editable);
     check.equal(getComputedStyle(editable, "::after").content, '"Untitled document"');
     check.equal(document.querySelector<HTMLElement>(".document-title-dialog > .protyle-content > .protyle-wysiwyg").offsetHeight, 0);
     return "Title drawer layout passed";
 };
 
-test("native mobile title drawer keeps its action above the keyboard and scrolls long rich titles", {
+test("native mobile title drawer keeps its action above the keyboard and edits rich titles in a single standalone line", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -424,10 +465,13 @@ test("native mobile title drawer keeps its action above the keyboard and scrolls
     const paddingSource = transpileModule(uiSource.slice(uiSource.indexOf("export const setPadding ="),
         uiSource.indexOf("export const getPadding =")).replace(/^export /gm, ""),
     {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const titleSource = transpileModule(readFileSync(resolve(__dirname, "Title.ts"), "utf8"), {
+        compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+    }).outputText;
     const directory = mkdtempSync(resolve(tmpdir(), "siyuan-title-drawer-"));
     const script = resolve(directory, "run.cjs");
     const code = "const __name = value => value; (" + checkDrawerLayout.toString() + ")(" + JSON.stringify(css) + "," +
-        JSON.stringify(toolbarSource) + "," + JSON.stringify(paddingSource) + ")";
+        JSON.stringify(toolbarSource) + "," + JSON.stringify(paddingSource) + "," + JSON.stringify(titleSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(resolve(directory, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

@@ -13,7 +13,7 @@ import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 /// #endif
 
-// 重命名和移动端顶栏共用完整标题编辑器，保存失败时保留对话框中的输入。
+// 重命名使用独立草稿，保存失败时保留输入。
 export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App}) => {
     let closePending = false;
     let canClose = false;
@@ -111,6 +111,16 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             render: {background: false, title: true, titleShowTop: false, breadcrumb: false, gutter: false, scroll: false},
             after: (protyle) => {
                 if (!disposed) {
+                    /// #if MOBILE
+                    const owner = protyle.protyle;
+                    let field = owner.element.querySelector<HTMLElement>(":scope > .document-title-dialog__editor");
+                    if (!field) {
+                        field = document.createElement("div");
+                        field.className = "document-title-dialog__editor b3-text-field";
+                        owner.element.appendChild(field);
+                    }
+                    owner.title?.mountEditorOnly(field);
+                    /// #endif
                     void protyle.protyle.title?.openEditor().catch(error => console.error(error));
                 }
             },

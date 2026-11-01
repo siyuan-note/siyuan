@@ -476,6 +476,15 @@ export class Title {
         return this.richEditor?.fragment.protyle.upload?.isUploading || false;
     }
 
+    public mountEditorOnly(container: HTMLElement) {
+        const input = this.richEditor?.fragment.protyle.element || this.editElement;
+        if (!input) return;
+        if (input.parentElement !== container) container.appendChild(input);
+        const top = this.element.parentElement;
+        this.element.remove();
+        if (top?.classList.contains("protyle-top") && !top.childElementCount) top.remove();
+    }
+
     public prepareForDocumentSwitch(rootID: string) {
         const editor = this.richEditor;
         if (!editor || !rootID || rootID === this.element.dataset.nodeId) {

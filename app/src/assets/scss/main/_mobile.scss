@@ -1956,16 +1956,6 @@ body.mobile-topbar--merged {
 }
 
 .mobile-document-title-dialog {
-  .protyle-title__input {
-    // 重命名抽屉使用界面字号，避免文档标题的倍数字号挤占编辑空间。
-    font-size: var(--b3-font-size);
-  }
-
-  .document-title-dialog,
-  .protyle-title__rich {
-    background-color: var(--b3-theme-surface);
-  }
-
   .mobile-document-title-sheet {
     max-height: 100%;
   }
@@ -1974,13 +1964,46 @@ body.mobile-topbar--merged {
     min-height: 0;
     max-height: none;
     flex: 0 1 auto;
+    padding: 16px 24px;
 
     > .protyle-content {
-      flex: 0 1 auto;
+      display: none;
+    }
+  }
 
-      > .protyle-top > .protyle-title {
-        margin: 16px 24px;
+  .document-title-dialog__editor {
+    min-height: 0;
+    overflow: auto;
+    font-size: var(--b3-font-size);
+
+    .protyle-title__rich {
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .protyle-wysiwyg {
+      font-size: inherit;
+      font-family: inherit;
+
+      > [data-type="NodeParagraph"] {
+        padding: 0;
       }
+    }
+
+    .protyle-title__input {
+      font-size: inherit;
+      font-weight: inherit;
+      padding: 0;
+      white-space: nowrap;
+    }
+
+    img {
+      max-height: 1.5em;
+      width: auto;
+    }
+
+    .protyle-attr {
+      display: none;
     }
   }
 }

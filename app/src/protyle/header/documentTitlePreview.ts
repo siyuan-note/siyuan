@@ -8,6 +8,15 @@ export type DocumentTitlePreviewValue = Pick<DocumentTitleData, "id" | "notebook
 
 const requests = new WeakMap<HTMLElement, number>();
 
+// 菜单复用页签已清洗的行级预览，公式缓存未就绪时按原生渲染补齐。
+export const copyDocumentTitlePreview = (source: HTMLElement, target: HTMLElement) => {
+    if (!source?.classList.contains("document-title-preview") || !target) return;
+    target.classList.add("b3-typography", "document-title-preview");
+    target.dataset.protyleLiteRender = "safe";
+    target.replaceChildren(...Array.from(source.childNodes, node => node.cloneNode(true)));
+    void mathRender(target);
+};
+
 // 同一轮标题更新可直接提供已读取的源；仅在没有后续源投影时补查，避免页签重复读取。
 export const scheduleDocumentTitlePreview = (element: HTMLElement, id: string, notebook: string, isCurrent: () => boolean) => {
     const request = requests.get(element);

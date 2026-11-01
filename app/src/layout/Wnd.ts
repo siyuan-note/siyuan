@@ -1,4 +1,5 @@
 import {toggleMenu} from "../menus/menuToggle";
+import {copyDocumentTitlePreview} from "../protyle/header/documentTitlePreview";
 import {Layout} from "./index";
 import {genUUID} from "../util/genID";
 import {
@@ -911,6 +912,7 @@ export class Wnd {
                         iconHTML,
                         icon: graphicElement ? graphicElement.firstElementChild.getAttribute("xlink:href").substring(1) : "",
                         bind: (element) => {
+                            copyDocumentTitlePreview(item.querySelector(".item__text"), element.querySelector(".b3-menu__label"));
                             element.addEventListener("click", (itemEvent) => {
                                 if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
                                     const closed = (success: boolean) => {

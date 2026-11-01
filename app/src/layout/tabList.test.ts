@@ -30,6 +30,7 @@ const fixture = (closeAction = false) => {
     let switched: unknown;
     let closeResult: boolean | Promise<boolean> = false;
     const removedRows: number[] = [];
+    const previews: unknown[] = [];
     const menuElement = Object.assign(new Element(), {
         getAttribute: () => menuName,
         setAttribute: (_name: string, value: string) => { menuName = value; },
@@ -72,13 +73,15 @@ const fixture = (closeAction = false) => {
         "../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},
         "../protyle/util/hasClosest": {hasClosestByClassName: () => closeAction},
         "../util/setPosition": {setPosition() {}},
+        "../protyle/header/documentTitlePreview": {copyDocumentTitlePreview: (source: unknown, target: unknown) => previews.push({source, target})},
         "../menus/Menu": {MenuItem: class {
             element = new Element();
             constructor(options: any) {
                 const item = {element: this.element, options, click: undefined as ((event: any) => void) | undefined};
                 items.push(item);
                 const index = items.length - 1;
-                options.bind({addEventListener: (_type: string, callback: typeof item.click) => { item.click = callback; },
+                options.bind({querySelector: () => this.element,
+                    addEventListener: (_type: string, callback: typeof item.click) => { item.click = callback; },
                     get isConnected() { return !removedRows.includes(index); },
                     previousElementSibling: index > 0 ? {} : null,
                     nextElementSibling: index === 0 ? {} : null,
@@ -96,7 +99,7 @@ const fixture = (closeAction = false) => {
     wnd.switchTab = (tab: unknown) => { switched = tab; new Element().focus(); };
     wnd.showHeading = () => {};
     wnd.removeTab = () => closeResult;
-    return {wnd, menu, items, original, document, headers, anchor,
+    return {wnd, menu, items, original, document, headers, anchor, previews,
         removedRows, setCloseResult: (value: boolean | Promise<boolean>) => { closeResult = value; },
         popupCount: () => popupCount, switched: () => switched};
 };
@@ -107,6 +110,7 @@ describe("tab switcher keyboard entry", () => {
         f.wnd.renderTabList(undefined, true);
         assert.deepEqual(f.items.map(item => item.options.label), ["first", "second"]);
         assert.equal(f.document.activeElement, f.items[1].element);
+        assert.equal(f.previews.length, 2, "each menu label can reuse its corresponding tab preview");
         assert.equal(f.items[1].element.classList.contains("b3-menu__item--current"), true);
         f.menu.remove();
         assert.equal(f.document.activeElement, f.original);

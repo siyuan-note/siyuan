@@ -13,7 +13,8 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
     const requests: Array<{data: {id: string, notebook: string}, reply: (value: unknown) => void}> = [];
     let renders = 0;
     const exports: {renderDocumentTitlePreview?: (element: HTMLElement, id: string, notebook: string,
-        isCurrent: () => boolean, value?: any) => void} = {};
+        isCurrent: () => boolean, value?: any) => void,
+        copyDocumentTitlePreview?: (source: HTMLElement, target: HTMLElement) => void} = {};
     new Function("exports", "require", source)(exports, (name: string) => {
         if (name === "../../util/fetch") return {fetchPost: (_url: string, data: {id: string, notebook: string},
             reply: (value: unknown) => void) => requests.push({data, reply})};
@@ -53,6 +54,22 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
     check.equal(target.dataset.protyleLiteRender, "safe");
     check.equal(target.dataset.documentTitleId, "document");
     check.equal(renders, 1);
+    const menuLabel = document.createElement("span");
+    menuLabel.className = "b3-menu__label";
+    document.body.append(menuLabel);
+    exports.copyDocumentTitlePreview(target, menuLabel);
+    check.equal(menuLabel.innerHTML, target.innerHTML, "tab dropdowns preserve all inline title elements");
+    check.notEqual(menuLabel.firstChild, target.firstChild, "menu rendering keeps the tab's original DOM intact");
+    check.equal(menuLabel.dataset.protyleLiteRender, "safe");
+    check.equal(requests.length, 0, "menu previews reuse the loaded source without another request");
+    const literal = document.createElement("span");
+    literal.textContent = "**literal** <tag>";
+    menuLabel.textContent = literal.textContent;
+    menuLabel.className = "b3-menu__label";
+    exports.copyDocumentTitlePreview(literal, menuLabel);
+    check.equal(menuLabel.textContent, literal.textContent);
+    check.equal(menuLabel.classList.contains("document-title-preview"), false, "ordinary dropdown labels stay plain");
+    menuLabel.remove();
     const previous = target.innerHTML;
     const pending = request();
     check.equal(target.innerHTML, previous, "refreshing does not flash the rich label back to plain text");

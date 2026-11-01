@@ -3648,6 +3648,8 @@
 		"456": "Model pamäte vrátil neplatnú alebo neúplnú odpoveď; skúste to znova alebo vyberte iný model",
 		"457": "Požiadavka na model pamäte zlyhala; skontrolujte vybraného poskytovateľa a model",
 		"458": "Požiadavka na model pamäte bola zrušená",
-		"459": "Aktuálny prehľad spomienok teraz nemožno spracovať. Skúste to znova neskôr"
+		"459": "Aktuálny prehľad spomienok teraz nemožno spracovať. Skúste to znova neskôr",
+		"460": "Vzťahy medzi nadradenými a podradenými položkami nesmú tvoriť cyklus ani obsahovať samotnú položku [%s]",
+		"461": "Každá položka môže mať iba jednu nadradenú položku; skontrolujte relácie pre [%s]"
 	}
 }

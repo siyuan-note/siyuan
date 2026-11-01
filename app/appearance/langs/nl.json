@@ -3648,6 +3648,8 @@
 		"456": "Het geheugenmodel gaf een ongeldig of onvolledig antwoord; probeer het opnieuw of kies een ander model",
 		"457": "Verzoek aan het geheugenmodel mislukt; controleer de geselecteerde aanbieder en het model",
 		"458": "Verzoek aan het geheugenmodel geannuleerd",
-		"459": "Het huidige geheugenoverzicht kan nu niet worden verwerkt. Probeer het later opnieuw"
+		"459": "Het huidige geheugenoverzicht kan nu niet worden verwerkt. Probeer het later opnieuw",
+		"460": "Ouder-kindrelaties mogen geen cyclus vormen of het item zelf bevatten [%s]",
+		"461": "Elk item kan maar één ouder hebben; controleer de relaties voor [%s]"
 	}
 }

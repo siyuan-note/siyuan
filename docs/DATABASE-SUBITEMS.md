@@ -34,7 +34,7 @@ Automatically created fields are hidden from table columns by default. They can 
 
 Enabling the feature from a table or list switches the current view to nested display while preserving the display of other views. New views default to flat display; duplicated views retain their display mode. `View settings - Nested display` affects only the current view and does not change relations.
 
-Disabling sub-items for the database restores flat display in all views and preserves the relation fields and their values. Re-enabling requires validation of the existing relations. Disabling does not delete fields or downgrade the storage format.
+Disabling sub-items for the database restores flat display in all views and preserves the relation fields and their values. Re-enabling requires validation of the existing relations. Disabling does not delete fields or downgrade the storage format. If the designated fields were deleted or no longer form a reciprocal self-relation while disabled, automatic enabling creates a new pair without overwriting other fields or values. Rejected cycles and multiple parents report their reason and the affected item. Enabling, disabling, and changing the display keep the settings menu open; after submission, field and view metadata refresh the choices without an additional read of item contents.
 
 ### Creating and moving items
 

@@ -22,6 +22,24 @@ type SubItemsConfig struct {
 	ChildrenKeyID string `json:"childrenKeyID"`
 }
 
+type SubItemsValidationError struct {
+	Kind   string
+	ItemID string
+}
+
+func (e *SubItemsValidationError) Error() string {
+	if e.Kind == "cycle" {
+		return fmt.Sprintf("database sub-item relations contain a cycle at entry [%s]", e.ItemID)
+	}
+	return fmt.Sprintf("database entry [%s] can only have one parent", e.ItemID)
+}
+
+// HasSubItemsFields 只检查指定字段的身份及双向定义，不检查条目关系。
+func (a *AttributeView) HasSubItemsFields() bool {
+	_, _, err := a.subItemsKeys()
+	return err == nil
+}
+
 type SubItemsIndex struct {
 	Parents  map[string]string
 	Children map[string][]string
@@ -117,7 +135,7 @@ func (a *AttributeView) buildSubItemsIndex(validateInverse bool) (*SubItemsIndex
 			continue
 		}
 		if len(value.Relation.BlockIDs) != 1 {
-			return nil, fmt.Errorf("database entry [%s] can only have one parent", value.BlockID)
+			return nil, &SubItemsValidationError{Kind: "multipleParents", ItemID: value.BlockID}
 		}
 		parent := value.Relation.BlockIDs[0]
 		if _, exists := ret.Parents[parent]; !exists {
@@ -131,7 +149,7 @@ func (a *AttributeView) buildSubItemsIndex(validateInverse bool) (*SubItemsIndex
 		path := []string{}
 		for current := id; current != "" && colors[current] != 2; current = ret.Parents[current] {
 			if colors[current] == 1 {
-				return nil, fmt.Errorf("database sub-item relations contain a cycle at entry [%s]", current)
+				return nil, &SubItemsValidationError{Kind: "cycle", ItemID: current}
 			}
 			colors[current] = 1
 			path = append(path, current)

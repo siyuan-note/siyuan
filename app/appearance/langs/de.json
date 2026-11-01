@@ -3648,6 +3648,8 @@
 		"456": "Gedächtnismodell hat eine ungültige oder unvollständige Antwort geliefert; erneut versuchen oder ein anderes Modell wählen",
 		"457": "Anfrage an das Gedächtnismodell fehlgeschlagen; ausgewählten Anbieter und Modell prüfen",
 		"458": "Anfrage an das Gedächtnismodell abgebrochen",
-		"459": "Die aktuelle Erinnerungsübersicht kann derzeit nicht verarbeitet werden. Bitte versuchen Sie es später erneut"
+		"459": "Die aktuelle Erinnerungsübersicht kann derzeit nicht verarbeitet werden. Bitte versuchen Sie es später erneut",
+		"460": "Übergeordnete und untergeordnete Einträge dürfen keinen Zyklus bilden oder sich selbst enthalten [%s]",
+		"461": "Jeder Eintrag kann nur einen übergeordneten Eintrag haben; prüfe die Beziehungen für [%s]"
 	}
 }

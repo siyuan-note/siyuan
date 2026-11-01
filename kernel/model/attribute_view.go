@@ -8120,7 +8120,7 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 	}
 	if handled, updateErr := tx.updateSubItemsCells(operations, updates, attrView); handled {
 		if updateErr != nil {
-			return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: updateErr.Error()}
+			return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: updateErr.Error(), cause: updateErr}
 		}
 		return nil
 	}
@@ -8162,7 +8162,7 @@ func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) 
 	}
 	if handled, updateErr := tx.updateSubItemsCells([]*Operation{operation}, operation.CellUpdates, attrView); handled {
 		if updateErr != nil {
-			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: updateErr.Error()}
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: updateErr.Error(), cause: updateErr}
 		}
 		return nil
 	}

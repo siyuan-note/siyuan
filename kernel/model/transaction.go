@@ -186,12 +186,23 @@ func handleTxErr(tx *Transaction, txErr *TxErr) {
 	case TxErrCodeDataIsSyncing:
 		util.PushMsg(Conf.Language(222), 5000)
 	case TxErrHandleAttributeView:
-		util.PushMsg(Conf.language(258), 5000)
+		util.PushMsg(attributeViewTransactionErrorMessage(txErr), 5000)
 		logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
 	default:
 		txData, _ := gulu.JSON.MarshalJSON(tx)
 		logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
 	}
+}
+
+func attributeViewTransactionErrorMessage(err error) string {
+	var invalid *av.SubItemsValidationError
+	if errors.As(err, &invalid) {
+		if invalid.Kind == "cycle" {
+			return fmt.Sprintf(Conf.language(460), invalid.ItemID)
+		}
+		return fmt.Sprintf(Conf.language(461), invalid.ItemID)
+	}
+	return Conf.language(258)
 }
 
 func PerformTransactions(transactions *[]*Transaction) {

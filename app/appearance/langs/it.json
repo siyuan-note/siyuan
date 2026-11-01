@@ -3648,6 +3648,8 @@
 		"456": "Il modello di memoria ha restituito una risposta non valida o incompleta; riprova o seleziona un altro modello",
 		"457": "Richiesta al modello di memoria non riuscita; controlla il fornitore e il modello selezionati",
 		"458": "Richiesta al modello di memoria annullata",
-		"459": "Il riepilogo attuale dei ricordi non può essere elaborato al momento. Riprova più tardi"
+		"459": "Il riepilogo attuale dei ricordi non può essere elaborato al momento. Riprova più tardi",
+		"460": "Le relazioni padre-figlio non possono formare un ciclo o includere l’elemento stesso [%s]",
+		"461": "Ogni elemento può avere un solo padre; controlla le relazioni di [%s]"
 	}
 }

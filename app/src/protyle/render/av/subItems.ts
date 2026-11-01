@@ -172,7 +172,30 @@ export const bindSubItemsSettings = (menuElement: HTMLElement, protyle: IProtyle
     let parentKeyID: string;
     const enableButton = menuElement.querySelector<HTMLButtonElement>("[data-sub-items-enabled]");
     const choices = menuElement.querySelectorAll<HTMLButtonElement>("[data-sub-items-pair]");
-    const canEdit = () => editable(protyle, blockElement) && blockElement.dataset.avId === data.id;
+    const context = operationContext(blockElement);
+    const canEdit = () => editable(protyle, blockElement) && blockElement.dataset.avId === data.id &&
+        blockElement.dataset.nodeId === context.blockID && operationContext(blockElement).viewID === context.viewID;
+    let revision = 0;
+    const refresh = async (request: number) => {
+        const valid = () => request === revision && canEdit() && menuElement.isConnected && menuElement.contains(enableButton);
+        if (!valid()) return;
+        const response = await fetchSyncPost("/api/av/renderAttributeView", {
+            id: data.id, blockID: context.blockID, viewID: context.viewID, ignoreRows: true,
+        });
+        if (!valid() || response.code !== 0 || response.data?.id !== data.id || response.data.viewID !== data.viewID) return;
+        const display = (views: IAV["views"]) => views?.find(view => view.id === data.viewID)?.subItemsDisplay || "flat";
+        if (Boolean(response.data.subItems?.enabled) === Boolean(data.subItems?.enabled) && display(response.data.views) === display(data.views)) return;
+        Object.assign(data, response.data);
+        menuElement.innerHTML = getSubItemsSettingsHTML(data);
+        bindSubItemsSettings(menuElement, protyle, blockElement, data, false, onResize);
+        onResize?.();
+    };
+    const submit = (operation: IOperation) => {
+        const request = ++revision;
+        transaction(protyle, [operation], [{...operation}], {callback: () => {
+            void refresh(request).catch(error => showMessage(escapeHtml(error.message), 6000, "error"));
+        }});
+    };
     const previewData = () => {
         const cached = getAVData(blockElement);
         return cached?.id === data.id && cached.viewID === data.viewID ? cached : data;
@@ -221,16 +244,14 @@ ${preview.multipleParents ? `<div class="b3-menu__item b3-menu__item--readonly">
             enabled: !data.subItems?.enabled, parentKeyID, childrenKeyID: parent?.relation?.backKeyID,
             parentName: window.siyuan.languages.avParentItem, childrenName: window.siyuan.languages.avChildItems,
         }};
-        transaction(protyle, [operation], [{...operation}]);
-        menuElement.closest(".av__panel")?.remove();
+        submit(operation);
     };
     menuElement.querySelectorAll<HTMLButtonElement>("[data-sub-items-display]").forEach(button => {
         button.onclick = () => {
-            if (!editable(protyle, blockElement)) return;
+            if (!canEdit()) return;
             const operation: IOperation = {action: "setAttrViewSubItemsDisplay", ...operationContext(blockElement),
                 data: button.dataset.subItemsDisplay === "nested" ? "nested" : "flat"};
-            transaction(protyle, [operation], [{...operation}]);
-            menuElement.closest(".av__panel")?.remove();
+            submit(operation);
         };
     });
 };

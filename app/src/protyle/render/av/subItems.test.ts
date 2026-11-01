@@ -9,6 +9,9 @@ import * as relationPreview from "./subItemsRelationPreview";
 const setup = () => {
     const operations: IOperation[] = [];
     const inserted: unknown[] = [];
+    const callbacks: Array<() => void> = [];
+    const requests: Array<{path: string; payload: unknown}> = [];
+    let fetchResponse: () => Promise<unknown> = async () => ({code: -1});
     const module = {exports: {}};
     const languages = new Proxy({}, {get: (_value, key) => String(key)});
     const siyuan = {languages, isPublish: false};
@@ -17,7 +20,14 @@ const setup = () => {
     }).outputText, {module, exports: module.exports, window: {siyuan},
         require: (id: string) => ({
             "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "view"}},
-            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, values: IOperation[]) => operations.push(...values)},
+            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, values: IOperation[], _undo: IOperation[], options?: {callback?: () => void}) => {
+                operations.push(...values);
+                if (options?.callback) callbacks.push(options.callback);
+            }},
+            "../../../util/fetch": {fetchSyncPost: (path: string, payload: unknown) => {
+                requests.push({path, payload});
+                return fetchResponse();
+            }},
             "./view": {getFieldsByData: (data: IAV) => (data.view as IAVTable).columns},
             "./virtualScroll": {getAVData: (): IAV | undefined => undefined},
             "./subItemsRelationPreview": relationPreview,
@@ -31,7 +41,8 @@ const setup = () => {
     const block = {isConnected: true, dataset: {avId: "db", nodeId: "carrier"},
         hasAttribute: () => true, getAttribute: () => "view"} as unknown as HTMLElement;
     const protyle = {options: {}} as IProtyle;
-    return {api: module.exports as typeof import("./subItems"), operations, inserted, block, protyle, siyuan};
+    return {api: module.exports as typeof import("./subItems"), operations, inserted, block, protyle, siyuan,
+        callbacks, requests, setResponse: (response: () => Promise<unknown>) => { fetchResponse = response; }};
 };
 
 it("reparents a deduplicated selection with a complete-sibling anchor and refuses stale readonly actions", () => {
@@ -167,4 +178,101 @@ it("readonly settings keep their back header while disabling activation and rela
         assert.equal(action.disabled, true);
         assert.equal(h.operations.length, 0);
     }
+});
+
+const settingsMenu = () => {
+    let html = "initial";
+    let enable = {disabled: false, onclick() {}};
+    let mounted = true;
+    const display = ["flat", "nested"].map(value => ({dataset: {subItemsDisplay: value}, onclick() {}}));
+    let removed = 0;
+    const menu = {
+        get innerHTML() { return html; },
+        get isConnected() { return mounted; },
+        set innerHTML(value: string) { html = value; enable = {disabled: false, onclick() {}}; },
+        contains: (button: unknown) => button === enable,
+        querySelector: () => enable,
+        querySelectorAll: (selector: string) => selector === "[data-sub-items-display]" ? display : [],
+        closest: () => ({remove: () => { removed++; }}),
+    };
+    return {element: menu as unknown as HTMLElement, get enable() { return enable; }, display,
+        get html() { return html; }, close: () => { mounted = false; }, removed: () => removed};
+};
+const flushSettings = () => new Promise(resolve => setImmediate(resolve));
+
+it("keeps settings open and refreshes actual enabled state and display checks after each transaction", async () => {
+    const h = setup();
+    const menu = settingsMenu();
+    const data = {id: "db", viewID: "view", viewType: "table", view: {columns: []},
+        subItems: {enabled: false}, views: [{id: "view", subItemsDisplay: "flat"}]} as IAV;
+    let resized = 0;
+    h.api.bindSubItemsSettings(menu.element, h.protyle, h.block, data, false, () => { resized++; });
+    menu.enable.onclick();
+    assert.equal(menu.html, "initial");
+    h.setResponse(async () => ({code: 0, data: {...data, subItems: {enabled: true},
+        views: [{id: "view", subItemsDisplay: "nested"}]}}));
+    h.callbacks.shift()();
+    await flushSettings();
+    assert.match(menu.html, /avDisableSubItems/);
+    assert.match(menu.html, /data-sub-items-display="nested"[^]*?b3-menu__checked/);
+    assert.equal(h.requests[0].path, "/api/av/renderAttributeView");
+    assert.equal(JSON.stringify(h.requests[0].payload), JSON.stringify({id: "db", blockID: "carrier", viewID: "view", ignoreRows: true}));
+    menu.display[0].onclick();
+    h.setResponse(async () => ({code: 0, data: {...data, views: [{id: "view", subItemsDisplay: "flat"}]}}));
+    h.callbacks.shift()();
+    await flushSettings();
+    assert.match(menu.html, /data-sub-items-display="flat"[^]*?b3-menu__checked/);
+    menu.enable.onclick();
+    h.setResponse(async () => ({code: 0, data: {...data, subItems: {enabled: false}}}));
+    h.callbacks.shift()();
+    await flushSettings();
+    assert.match(menu.html, /avEnableSubItems/);
+    assert.doesNotMatch(menu.html, /data-sub-items-display/);
+    assert.equal(menu.removed(), 0);
+    assert.equal(resized, 3);
+});
+
+it("ignores settings refreshes after closing, changing view or receiving a newer transaction", async () => {
+    for (const reason of ["closed", "view", "newer", "readonly"]) {
+        const h = setup();
+        const menu = settingsMenu();
+        const data = {id: "db", viewID: "view", viewType: "table", view: {columns: []}, subItems: {enabled: true}} as IAV;
+        let finish: (value: unknown) => void;
+        h.setResponse(() => new Promise(resolve => { finish = resolve; }));
+        h.api.bindSubItemsSettings(menu.element, h.protyle, h.block, data);
+        menu.display[0].onclick();
+        h.callbacks.shift()();
+        if (reason === "closed") menu.close();
+        if (reason === "view") h.block.getAttribute = () => "other-view";
+        if (reason === "readonly") h.protyle.disabled = true;
+        if (reason === "newer") menu.display[1].onclick();
+        finish({code: 0, data});
+        await flushSettings();
+        assert.equal(menu.html, "initial");
+        assert.equal(menu.removed(), 0);
+    }
+});
+
+it("leaves the settings page intact when refreshing the committed state fails", async () => {
+    const h = setup();
+    const menu = settingsMenu();
+    h.api.bindSubItemsSettings(menu.element, h.protyle, h.block, {id: "db", view: {columns: []}} as IAV);
+    menu.enable.onclick();
+    h.callbacks.shift()();
+    await flushSettings();
+    assert.equal(menu.html, "initial");
+    assert.equal(menu.removed(), 0);
+});
+
+it("retains the existing selection when the kernel rejects a change and returns unchanged settings", async () => {
+    const h = setup();
+    const menu = settingsMenu();
+    const data = {id: "db", viewID: "view", view: {columns: []}, subItems: {enabled: false}} as IAV;
+    h.setResponse(async () => ({code: 0, data}));
+    h.api.bindSubItemsSettings(menu.element, h.protyle, h.block, data);
+    menu.enable.onclick();
+    h.callbacks.shift()();
+    await flushSettings();
+    assert.equal(menu.html, "initial");
+    assert.equal(menu.removed(), 0);
 });

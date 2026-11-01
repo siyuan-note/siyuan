@@ -3648,6 +3648,8 @@
 		"456": "Memory model returned an invalid or incomplete response; try again or select another model",
 		"457": "Memory model request failed; check the selected provider and model",
 		"458": "Memory model request was cancelled",
-		"459": "The current memory overview cannot be processed right now. Please try again later"
+		"459": "The current memory overview cannot be processed right now. Please try again later",
+		"460": "Parent-child relations cannot form a cycle or include the item itself [%s]",
+		"461": "Each item can have only one parent; check the relations for [%s]"
 	}
 }

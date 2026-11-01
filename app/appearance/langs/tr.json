@@ -3648,6 +3648,8 @@
 		"456": "Bellek modeli geçersiz veya eksik yanıt döndürdü; yeniden deneyin veya başka bir model seçin",
 		"457": "Bellek modeli isteği başarısız; seçili sağlayıcıyı ve modeli kontrol edin",
 		"458": "Bellek modeli isteği iptal edildi",
-		"459": "Geçerli anı özeti şu anda işlenemiyor. Lütfen daha sonra tekrar deneyin"
+		"459": "Geçerli anı özeti şu anda işlenemiyor. Lütfen daha sonra tekrar deneyin",
+		"460": "Üst-alt öğe ilişkileri döngü oluşturamaz veya öğenin kendisini içeremez [%s]",
+		"461": "Her öğenin yalnızca bir üst öğesi olabilir; [%s] için ilişkileri kontrol edin"
 	}
 }

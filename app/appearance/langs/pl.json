@@ -3648,6 +3648,8 @@
 		"456": "Model pamięci zwrócił nieprawidłową lub niepełną odpowiedź; spróbuj ponownie lub wybierz inny model",
 		"457": "Żądanie do modelu pamięci nie powiodło się; sprawdź wybranego dostawcę i model",
 		"458": "Żądanie do modelu pamięci anulowano",
-		"459": "Nie można teraz przetworzyć bieżącego podsumowania wspomnień. Spróbuj ponownie później"
+		"459": "Nie można teraz przetworzyć bieżącego podsumowania wspomnień. Spróbuj ponownie później",
+		"460": "Relacje nadrzędne i podrzędne nie mogą tworzyć cyklu ani obejmować samego elementu [%s]",
+		"461": "Każdy element może mieć tylko jeden element nadrzędny; sprawdź relacje dla [%s]"
 	}
 }

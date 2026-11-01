@@ -5765,7 +5765,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. Expansion state for encrypted databases is cleared when the notebook locks or closes."
+					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. If the designated fields were deleted or no longer form a reciprocal self-relation while disabled, automatic enabling creates a new pair and preserves other fields and values. Cycles and multiple parents are rejected with a specific explanation. Changing an option in the sub-items menu keeps it open and refreshes its state. Expansion state for encrypted databases is cleared when the notebook locks or closes."
 				}
 			]
 		},

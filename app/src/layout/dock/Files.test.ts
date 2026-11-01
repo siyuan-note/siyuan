@@ -5,11 +5,12 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import type {DocTreeController} from "./docTree/DocTreeController";
 import {DocTreeModel} from "./docTree/DocTreeModel";
+import type {IDocumentTabDragData} from "../../util/fileTreeMove";
 
 const source = createSourceFile("Files.ts", readFileSync("src/layout/dock/Files.ts", "utf8"), ScriptTarget.Latest, true);
 const declaration = source.statements.find(isClassDeclaration);
 const methods = declaration.members.filter(member =>
-    ["selectItem", "getLeaf", "setCurrent", "toggleLeaf"].includes(member.name?.getText(source))).map(member => member.getText(source));
+    ["selectItem", "getLeaf", "setCurrent", "toggleLeaf", "reorderSortedDocuments", "dropDocumentTab"].includes(member.name?.getText(source))).map(member => member.getText(source));
 const compiled = transpileModule(`class Adapter {${methods.join("\n")}} exports.Adapter = Adapter;`, {
     compilerOptions: {target: ScriptTarget.ES2022},
 }).outputText;
@@ -22,6 +23,8 @@ interface IAdapter {
     getLeaf: (row: Element, notebook: string, refresh?: boolean) => void;
     setCurrent: (row: HTMLElement, scroll?: boolean) => void;
     toggleLeaf: (row: Element, notebook: string) => Promise<void>;
+    reorderSortedDocuments: (sourceIDs: string[], targetID: string, after: boolean) => Promise<void>;
+    dropDocumentTab: (data: IDocumentTabDragData, row: HTMLElement) => Promise<void>;
 }
 
 const createAdapter = (globals: Record<string, unknown> = {}) => {
@@ -29,6 +32,34 @@ const createAdapter = (globals: Record<string, unknown> = {}) => {
     runInNewContext(compiled, {...globals, exports});
     return new exports.Adapter();
 };
+
+test("document drops use move and sort notifications without a duplicate full-tree reload", async () => {
+    for (const asChild of [true, false]) {
+        const calls: unknown[] = [];
+        const adapter = createAdapter({
+            fetchSyncPost: async (url: string, data: unknown) => {
+                calls.push([url, data]);
+                return {code: 0, data: {notebook: "box", path: "/source.sy"}};
+            },
+            reorderSortedFileTree: async (...args: unknown[]) => {
+                calls.push(["reorder", ...args]);
+                return {notebook: "box", parentPath: "/"};
+            },
+            isMoveTargetAllowed: () => true,
+        });
+        adapter.docTree = {
+            getItemFromElement: () => ({id: "target", notebookId: "box", path: "/target.sy"}) as ReturnType<DocTreeController["getItemFromElement"]>,
+            reload: async () => { assert.fail("The confirmed move or sort notification already refreshes the affected directories"); },
+        };
+        const row = {classList: {contains: (name: string) => name === (asChild ? "dragover" : "dragover__bottom"),
+            remove() {}}} as unknown as HTMLElement;
+        await adapter.dropDocumentTab({rootId: "source"} as IDocumentTabDragData, row);
+        assert.equal(calls.length, 2);
+        assert.equal(JSON.stringify(calls[1]), JSON.stringify(asChild ?
+            ["/api/filetree/moveDocs", {toNotebook: "box", fromPaths: ["/source.sy"], toPath: "/target.sy"}] :
+            ["reorder", ["source"], "target", true]));
+    }
+});
 
 test("public tree selection mounts a far document even when selection is unchanged", async () => {
     const adapter = createAdapter();

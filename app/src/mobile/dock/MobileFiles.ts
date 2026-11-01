@@ -481,7 +481,6 @@ export class MobileFiles extends Model {
             } else if (target.kind === "document") {
                 await reorderSortedFileTree([source.id], target.id, after);
             }
-            await this.docTree.reload();
         });
 
         const cancelTouchDrag = () => {

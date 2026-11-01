@@ -63,6 +63,39 @@ const loadMethods = (names: string[], globals: Record<string, unknown>) => {
     return new exports.Adapter();
 };
 
+test("mobile document drops use source notifications without an extra full-tree refresh", async () => {
+    const text = readFileSync("src/mobile/dock/MobileFiles.ts", "utf8");
+    const start = text.indexOf('filesElement.addEventListener("touchend", async (event: TouchEvent) => {');
+    const body = start + text.slice(start).indexOf("{") + 1;
+    const end = text.indexOf("\n        });", body);
+    assert.ok(start >= 0 && end > body);
+    for (const inside of [true, false]) {
+        const calls: string[] = [];
+        const row = {classList: {contains: (name: string) => name === (inside ? "dragover" : "dragover__bottom")}};
+        const panel = {
+            touchDragState: {isDragging: true, selectedElement: {style: {opacity: "0.5"}}, pointerX: 1, pointerY: 1},
+            element: {querySelector: () => row},
+            pinnedDocs: {element: {contains: () => false}},
+            docTree: {
+                release() {},
+                getItemFromElement: () => ({id: "target", kind: "document", notebookId: "box", path: "/target.sy"}),
+                reload: async () => { assert.fail("The move or sort notification already refreshes the affected directories"); },
+            },
+            getTouchDragSource: () => ({id: "source", kind: "document", notebookId: "box", path: "/source.sy"}),
+            clearDragIndicators() {},
+        };
+        const compiled = transpileModule(`(async function(event) {${text.slice(body, end)}}).call(panel, {changedTouches: []});`, {
+            compilerOptions: {target: ScriptTarget.ES2022},
+        }).outputText;
+        await runInNewContext(compiled, {panel, document: {elementFromPoint: () => row},
+            stopScrollAnimation() {}, isMoveTargetAllowed: () => true,
+            fetchSyncPost: async () => { calls.push("move"); },
+            reorderSortedFileTree: async () => { calls.push("reorder"); },
+        });
+        assert.deepEqual(calls, [inside ? "move" : "reorder"]);
+    }
+});
+
 test("mobile row selection precedes expansion so it cannot cancel empty-notebook creation", () => {
     const calls: string[] = [];
     const adapter = loadMethods(["toggleTreeItem"], {

@@ -872,7 +872,7 @@ export class DocTreeController {
         const interaction = this.interaction;
         const anchor = this.getScrollAnchor();
         const affected = (item: IDocTreeItem) => (!filter.notebook || item.notebookId === filter.notebook) &&
-            (filter.parentID === undefined || item.parentID === filter.parentID);
+            (filter.parentID === undefined || item.parentID === filter.parentID || !this.model.getItem(item.occurrenceKey));
         const parents = new Map<string, IDocTreeItem>();
         const affectedBranches = Array.from(this.model.expanded.values()).filter(item =>
             (!filter.notebook || item.notebookId === filter.notebook) &&
@@ -1030,7 +1030,24 @@ export class DocTreeController {
                 this.removeDocuments(new Set(data.data.ids.filter((id: unknown) => typeof id === "string")));
             }
             void this.reload();
-        } else if (["reloadFiletree", "moveDocs", "mount"].includes(data.cmd)) {
+        } else if (data.cmd === "moveDocs") {
+            const directories = new Map<string, {notebook: string, parentID: string}>();
+            const moves = data.data?.moves;
+            if (!Array.isArray(moves) || !moves.length || moves.some(move =>
+                !move || typeof move.fromNotebook !== "string" || typeof move.fromPath !== "string" ||
+                typeof move.toNotebook !== "string" || typeof move.newPath !== "string")) {
+                void this.reload();
+                return;
+            }
+            // 移动通知已包含成功落盘的源、目标路径，只恢复这些目录的展开和选择。
+            for (const move of moves) {
+                for (const [notebook, path] of [[move.fromNotebook, move.fromPath], [move.toNotebook, move.newPath]]) {
+                    const parentID = path.split("/").filter(Boolean).slice(-2, -1)[0] || "";
+                    directories.set(`${notebook}:${parentID}`, {notebook, parentID});
+                }
+            }
+            directories.forEach(filter => { void this.reload(filter); });
+        } else if (["reloadFiletree", "mount"].includes(data.cmd)) {
             void this.reload();
         }
     }

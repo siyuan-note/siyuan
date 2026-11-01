@@ -931,7 +931,6 @@ export class Files extends Model {
                         await fetchSyncPost("/api/filetree/moveDocs", {
                             toNotebook: toURL, fromPaths: getDocTreeTopPaths(files), toPath,
                         });
-                        await this.docTree.reload();
                     }
                 } else {
                     await this.reorderSortedDocuments(files.map(item => item.id), targetItem.id, after);
@@ -943,8 +942,7 @@ export class Files extends Model {
     }
 
     private async reorderSortedDocuments(sourceIDs: string[], targetID: string, after: boolean) {
-        const result = await reorderSortedFileTree(sourceIDs, targetID, after);
-        if (result) { await this.docTree.reload(); }
+        await reorderSortedFileTree(sourceIDs, targetID, after);
     }
 
     private async dropDocumentTab(documentTabData: IDocumentTabDragData, targetElement: HTMLElement) {
@@ -966,7 +964,6 @@ export class Files extends Model {
             await fetchSyncPost("/api/filetree/moveDocs", {
                 toNotebook: target.notebookId, fromPaths: [source.path], toPath: target.path,
             });
-            await this.docTree.reload();
         } else {
             await this.reorderSortedDocuments([documentTabData.rootId], target.id, after);
         }

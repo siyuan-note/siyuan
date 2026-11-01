@@ -1204,6 +1204,70 @@ exports.cases = async sources => {
         fixture.destroy();
     }
     {
+        const fixture = make(3);
+        const {controller, source, directories, requests, element} = fixture;
+        directories.get("")[0].subFileCount = 1;
+        directories.set("d0", [file("child", "d0")]);
+        controller.setRoots([...controller.model.roots, {id: "other", notebookId: "other", kind: "notebook", name: "Other", path: "/", subFileCount: 3}]);
+        await controller.toggle("notebook:box", true);
+        await controller.toggle("notebook:box/d0", true);
+        await controller.toggle("notebook:other", true);
+        await controller.select("notebook:box/d0/child");
+        requests.length = 0;
+        const range = source.range;
+        const unrelated = [];
+        source.range = request => {
+            if (request.notebook === "other") {
+                unrelated.push(request);
+                return new Promise(() => {});
+            }
+            return range(request);
+        };
+        const move = async (fromPath, newPath, toPath) => {
+            fixture.revise(newPath);
+            controller.handleMessage({cmd: "moveDocs", data: {moves: [{fromNotebook: "box", fromPath,
+                toNotebook: "box", toPath, newPath}]}});
+            await Promise.race([controller.reloadTail, new Promise((_, reject) =>
+                setTimeout(() => reject(Error("Moving a document waited for an unrelated notebook")), 1000))]);
+            check.equal(unrelated.length, 0, "moving documents never refreshes an unrelated notebook");
+            check.equal(element.querySelector("[data-tree-loading]"), null, "moving documents keeps the remaining tree populated");
+            check.equal(controller.getSelectedItems()[0]?.path, newPath, "the moved document remains selected at its new path");
+        };
+        directories.set("d0", []);
+        directories.get("").push(file("child"));
+        await move("/d0/child.sy", "/child.sy", "/");
+        check.ok(controller.getMountedElement("notebook:box/child"), "moving a child before its parent updates the root list");
+        directories.get("").pop();
+        directories.set("d0", [file("child", "d0")]);
+        await move("/child.sy", "/d0/child.sy", "/d0.sy");
+        check.ok(controller.getMountedElement("notebook:box/d0/child"), "moving into an expanded parent updates its child list");
+        check.ok(requests.every(request => request.notebook === "box" && ["", "d0"].includes(request.parentID)));
+        source.range = range;
+        fixture.destroy();
+    }
+    {
+        const fixture = make(3);
+        const {controller, directories} = fixture;
+        directories.get("")[0].subFileCount = 1;
+        directories.set("d0", [file("child", "d0", 1)]);
+        directories.set("child", [{...file("leaf"), path: "/d0/child/leaf.sy"}]);
+        await controller.toggle("notebook:box", true);
+        await controller.toggle("notebook:box/d0", true);
+        await controller.toggle("notebook:box/d0/child", true);
+        await controller.select("notebook:box/d0/child/leaf");
+        directories.set("d0", []);
+        directories.get("").push(file("child", "", 1));
+        directories.set("child", [{...file("leaf"), path: "/child/leaf.sy"}]);
+        fixture.revise("moved-subtree");
+        controller.handleMessage({cmd: "moveDocs", data: {moves: [{fromNotebook: "box", fromPath: "/d0/child.sy",
+            toNotebook: "box", toPath: "/", newPath: "/child.sy"}]}});
+        await controller.reloadTail;
+        check.ok(controller.isExpanded("notebook:box/child"), "moving an expanded subtree restores its expansion at the new path");
+        check.equal(controller.getSelectedItems()[0]?.occurrenceKey, "notebook:box/child/leaf",
+            "moving a subtree restores the selection of a descendant outside the changed sibling directories");
+        fixture.destroy();
+    }
+    {
         window.matchMedia = nativeMatchMedia;
         const fixture = make(12);
         const {controller, element, directories} = fixture;

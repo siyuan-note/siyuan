@@ -19,7 +19,9 @@ const dropDocuments = async (paths: string[], targetPath: string) => {
         compilerOptions: {target: ts.ScriptTarget.ES2020},
     }).outputText;
     await runInNewContext(script, {
-        panel: {docTree: {getSelectedItems: () => items, reload: async () => {}}},
+        panel: {docTree: {getSelectedItems: () => items, reload: async () => {
+            assert.fail("Move notifications refresh the affected directories without an extra full-tree reload");
+        }}},
         newElement: {
             getAttribute: () => targetPath,
             classList: {

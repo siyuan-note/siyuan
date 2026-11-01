@@ -13,6 +13,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func (tx *Transaction) validateAutomationTemplateReferences(source, target *av.AttributeView, key *av.Key, value *av.Value, boxID string) error {
@@ -29,10 +30,7 @@ func (tx *Transaction) validateAutomationTemplateReferences(source, target *av.A
 				return fmt.Errorf("automation related item [%s] does not exist in the target database", id)
 			}
 			// 预览标签限制长度，避免短 ID 数组放大成无界的主键文本响应。
-			content := related.GetBlockValue(id).Block.Content
-			if len(content) > 1024 {
-				content = content[:1024]
-			}
+			content := util.TruncateUTF8Bytes(related.GetBlockValue(id).Block.Content, 1024)
 			value.Relation.Contents = append(value.Relation.Contents, &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: content}})
 		}
 	}

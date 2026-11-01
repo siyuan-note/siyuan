@@ -10,11 +10,23 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
+
+func TestDoomSignaturePreservesUTF8(t *testing.T) {
+	for _, query := range []string{strings.Repeat("中", 30), strings.Repeat("😀", 30), strings.Repeat("a", 63) + "中"} {
+		sig := buildDoomSignature("search", "fulltext", map[string]any{"query": query})
+		const prefix = "search::action=fulltext::query="
+		if !utf8.ValidString(sig) || !strings.HasPrefix(sig, prefix) || !strings.HasSuffix(sig, "...") ||
+			len(sig)-len(prefix) > 67 {
+			t.Fatalf("invalid signature: %q", sig)
+		}
+	}
+}
 
 func TestConvertSchemaZodOptionalFields(t *testing.T) {
 	schema := tools.ToolSchema{

@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -151,11 +152,11 @@ func safeHTML2Text(engine *lute.Lute, htmlStr string) (result string, err error)
 }
 
 func truncateRunes(s string, maxChars int) string {
-	runes := []rune(s)
-	if len(runes) <= maxChars {
+	length := utf8.RuneCountInString(s)
+	if length <= maxChars {
 		return s
 	}
-	return string(runes[:maxChars]) + "\n\n...content truncated, total length " + fmt.Sprintf("%d", len(runes)) + " characters..."
+	return TruncateRunes(s, maxChars) + "\n\n...content truncated, total length " + fmt.Sprintf("%d", length) + " characters..."
 }
 
 func extractFilename(rawURL, contentType string) string {

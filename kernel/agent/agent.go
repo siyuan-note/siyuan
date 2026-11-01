@@ -170,7 +170,7 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
-				s = s[:64] + "..."
+				s = util.TruncateUTF8Bytes(s, 64) + "..."
 			}
 			sig.WriteString("::")
 			sig.WriteString(k)

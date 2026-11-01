@@ -13,6 +13,7 @@ const createStatusHarness = () => {
     const state = {keyboardOpen: false, hideStatusBar: false};
     const timers = new Map<number, {callback: () => void, delay: number}>();
     const exitMessages: string[] = [];
+    const reindexMessages: string[] = [];
     let timerID = 0;
     const moduleExports = {} as {onMessage: (app: unknown, data: unknown) => void};
     runInNewContext(compiled, {
@@ -31,9 +32,10 @@ const createStatusHarness = () => {
         },
         clearTimeout: (id: number) => timers.delete(id),
         require: () => ({sanitizeKernelHTML: (value: string) => value,
+            updateReindexProgressStatus: (value: string) => reindexMessages.push(value),
             updateExitProgressStatus: (value: string) => exitMessages.push(value)}),
     });
-    return {statusElement, state, timers, exitMessages, send: (data: unknown) => moduleExports.onMessage({}, data)};
+    return {statusElement, state, timers, exitMessages, reindexMessages, send: (data: unknown) => moduleExports.onMessage({}, data)};
 };
 
 test("mobile status messages appear at the bottom and hide after the timeout", () => {
@@ -62,7 +64,7 @@ test("mobile background progress stays at the bottom until tasks finish", () => 
 
 test("mobile status messages and progress respect keyboard and visibility settings", () => {
     for (const reason of ["keyboardOpen", "hideStatusBar"] as const) {
-        const {statusElement, state, timers, exitMessages, send} = createStatusHarness();
+        const {statusElement, state, timers, exitMessages, reindexMessages, send} = createStatusHarness();
         state[reason] = true;
         send({cmd: "statusbar", msg: "Index updated"});
         send({cmd: "backgroundtask", data: {tasks: [{action: "Indexing"}]}});
@@ -70,5 +72,6 @@ test("mobile status messages and progress respect keyboard and visibility settin
         assert.equal(statusElement.innerHTML, "");
         assert.equal(timers.size, 0);
         assert.deepEqual(exitMessages, ["Index updated"], "exit feedback must not depend on status bar visibility");
+        assert.deepEqual(reindexMessages, ["Index updated"], "reindex feedback must not depend on status bar visibility");
     }
 });

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
@@ -2070,9 +2071,9 @@ type encryptedBoxAwareWebdavFS struct {
 }
 
 func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
-	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀
-	rel := filepath.ToSlash(path.Clean(name))
-	rel = strings.TrimPrefix(rel, "/")
+	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀；与 webdav.Dir 一样以根路径清理，
+	// 否则 "../temp" 会被当作工作空间外的路径，而 webdav.Dir 实际把它解析为工作空间内的 temp/
+	rel := strings.TrimPrefix(path.Clean("/"+filepath.ToSlash(name)), "/")
 	parts := strings.Split(rel, "/")
 	if len(parts) < 1 || parts[0] == "" || rel == "" || rel == "." {
 		return false
@@ -2085,20 +2086,61 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	if len(parts) >= 2 && parts[0] == "data" && model.IsEncryptedBox(parts[1]) {
 		return true
 	}
-	// 防止 symlink 绕过：解析最长已存在父路径的符号链接后再次检查
-	absPath := filepath.Join(util.WorkspaceDir, name)
-	if resolved := util.ResolveLongestExistingParent(absPath); resolved != absPath {
-		resolvedRel, _ := filepath.Rel(util.WorkspaceDir, resolved)
-		resolvedRel = filepath.ToSlash(resolvedRel)
-		resolvedParts := strings.Split(resolvedRel, "/")
-		if len(resolvedParts) >= 1 && resolvedParts[0] == "temp" {
-			return true
+
+	// 大小写不敏感的文件系统、Windows 8.3 短名和符号链接都能用不同拼写指向同一目录，
+	// 因此沿真实路径逐级向上按文件身份比较，而不是比较路径字符串
+	tempInfo, _ := os.Stat(filepath.Join(util.WorkspaceDir, "temp"))
+	dataInfo, _ := os.Stat(util.DataDir)
+	p := util.ResolveLongestExistingParent(filepath.Join(util.WorkspaceDir, filepath.FromSlash(rel)))
+	var child string
+	var childInfo os.FileInfo
+	for {
+		if info, err := os.Stat(p); err == nil {
+			if nil != tempInfo && os.SameFile(info, tempInfo) {
+				return true
+			}
+			if nil != dataInfo && nil != childInfo && os.SameFile(info, dataInfo) && isEncryptedBoxDir(child, childInfo) {
+				return true
+			}
+			child, childInfo = p, info
 		}
-		if len(resolvedParts) >= 2 && resolvedParts[0] == "data" && model.IsEncryptedBox(resolvedParts[1]) {
+		parent := filepath.Dir(p)
+		if parent == p {
+			return false
+		}
+		p = parent
+	}
+}
+
+// isEncryptedBoxDir 判断 data/ 下的目录是否为加密笔记本；dir 的拼写可能不是笔记本 ID 的规范形式。
+func isEncryptedBoxDir(dir string, info os.FileInfo) bool {
+	if name := filepath.Base(dir); ast.IsNodeIDPattern(name) {
+		return model.IsEncryptedBox(name)
+	}
+	entries, err := os.ReadDir(util.DataDir)
+	if err != nil {
+		return false
+	}
+	// 只需与加密笔记本逐个比较身份；IsEncryptedBox 有运行时缓存，普通目录不会产生额外的 Stat
+	for _, entry := range entries {
+		if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) || !model.IsEncryptedBox(entry.Name()) {
+			continue
+		}
+		if entryInfo, statErr := os.Stat(filepath.Join(util.DataDir, entry.Name())); statErr == nil && os.SameFile(entryInfo, info) {
 			return true
 		}
 	}
 	return false
+}
+
+// isDataDir 判断目标是否为 data/ 本身；整体删除或移走 data/ 会连同加密笔记本一起删除或移走。
+func (fs *encryptedBoxAwareWebdavFS) isDataDir(name string) bool {
+	dataInfo, err := os.Stat(util.DataDir)
+	if err != nil {
+		return false
+	}
+	info, err := os.Stat(filepath.Join(util.WorkspaceDir, filepath.FromSlash(path.Clean("/"+name))))
+	return err == nil && os.SameFile(info, dataInfo)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
@@ -2116,14 +2158,14 @@ func (fs *encryptedBoxAwareWebdavFS) OpenFile(ctx context.Context, name string, 
 }
 
 func (fs *encryptedBoxAwareWebdavFS) RemoveAll(ctx context.Context, name string) error {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(name) || fs.isDataDir(name) {
 		return os.ErrPermission
 	}
 	return fs.inner.RemoveAll(ctx, name)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Rename(ctx context.Context, oldName, newName string) error {
-	if fs.isEncryptedBoxPath(oldName) || fs.isEncryptedBoxPath(newName) {
+	if fs.isEncryptedBoxPath(oldName) || fs.isEncryptedBoxPath(newName) || fs.isDataDir(oldName) || fs.isDataDir(newName) {
 		return os.ErrPermission
 	}
 	return fs.inner.Rename(ctx, oldName, newName)
@@ -2137,21 +2179,7 @@ func (fs *encryptedBoxAwareWebdavFS) Stat(ctx context.Context, name string) (os.
 }
 
 func serveWebDAV(ginServer *gin.Engine) {
-	// 自定义 WebDAV 文件系统包装——拒绝加密笔记本的所有访问
-	// 加密笔记本的读写必须通过 assets/serve 路由的 box-aware + 解密流程，
-	// WebDAV 直接访问原始文件系统会绕过所有这些安全控制
-	encBoxAwareFS := &encryptedBoxAwareWebdavFS{inner: webdav.Dir(util.WorkspaceDir)}
-	handler := webdav.Handler{
-		Prefix:     "/webdav/",
-		FileSystem: encBoxAwareFS,
-		LockSystem: webdav.NewMemLS(),
-		Logger: func(r *http.Request, err error) {
-			if nil != err {
-				logging.LogErrorf("WebDAV [%s %s]: %s", r.Method, r.URL.String(), err.Error())
-			}
-			// logging.LogDebugf("WebDAV [%s %s]", r.Method, r.URL.String())
-		},
-	}
+	handler := newWebDAVHandler()
 
 	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
 	// ginGroup.Any NOT support extension methods (PROPFIND etc.)

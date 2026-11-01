@@ -31,9 +31,9 @@ export const createTemplateHTTPPermissionIndicator = (allowed?: boolean) => {
 };
 
 export const templateHTTPPermissionHTML = (slot: "template" | "renderTemplate") =>
-    `<button class="b3-menu__item" data-http-permission="${slot}">
-<span class="b3-menu__label">${window.siyuan.languages.templateHTTPRevoke}</span>
-<span class="b3-menu__accelerator">${templateHTTPPermissionLabel()}</span></button>`;
+    `<button class="b3-menu__item b3-menu__item--wrap" data-http-permission="${slot}">
+<span class="b3-menu__label fn__flex-column"><span class="fn__block">${window.siyuan.languages.templateHTTPRevoke}</span>
+<span class="b3-label__text fn__block" data-http-permission-status>${templateHTTPPermissionLabel()}</span></span></button>`;
 
 export const bindTemplateHTTPPermission = (element: HTMLElement,
                                           source: Extract<TemplateHTTPPermissionSource, {kind: "av"}>) => {
@@ -41,7 +41,7 @@ export const bindTemplateHTTPPermission = (element: HTMLElement,
     if (!button) return;
     const textarea = element.querySelector<HTMLTextAreaElement>(`[data-type="${source.slot === "template" ?
         "updateTemplate" : "updateRenderTemplate"}"]`);
-    const label = button.querySelector(".b3-menu__accelerator");
+    const label = button.querySelector("[data-http-permission-status]");
     let version = 0;
     const refresh = async (action: "get" | "revoke") => {
         const current = ++version;

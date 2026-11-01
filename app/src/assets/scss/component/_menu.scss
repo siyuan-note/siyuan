@@ -506,6 +506,15 @@
       }
     }
 
+    &--wrap {
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      > .b3-menu__label {
+        min-width: 0;
+      }
+    }
+
     &--readonly {
       cursor: auto;
       color: var(--b3-theme-on-surface);

@@ -59,6 +59,7 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
         }
         const headerRect = headerElement.getBoundingClientRect();
         headerElement.style.paddingLeft = "";
+        headerElement.style.paddingRight = "";
         (headerElement.lastElementChild as HTMLElement).style.marginRight = "";
         headerElement.style.visibility = "";
         if (headerRect.top <= 0) {
@@ -76,8 +77,13 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
             }
 
             if (isWindowMode) {
-                if (headerRect.right === centerRect.right) {
-                    (headerElement.lastElementChild as HTMLElement).style.marginRight = document.querySelector(".toolbar__window").clientWidth - 4 + "px";
+                const toolbarRect = document.querySelector(".toolbar__window")?.getBoundingClientRect();
+                if (toolbarRect && headerRect.right > toolbarRect.left) {
+                    headerElement.style.paddingRight = headerRect.right - toolbarRect.left + "px";
+                    if (headerElement.lastElementChild.getBoundingClientRect().right > toolbarRect.left + 0.5) {
+                        headerElement.style.paddingRight = "";
+                        headerElement.style.visibility = "hidden";
+                    }
                 }
             } else {
                 if (headerRect.right < toolbarDragRect.right && headerRect.right === centerRect.right) {

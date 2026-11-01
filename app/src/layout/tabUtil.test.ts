@@ -17,8 +17,9 @@ const loadTabUtil = (headerTop: number) => {
     const headerElement = {
         classList: {contains: (): boolean => false, remove: (): void => undefined},
         getBoundingClientRect: (): DOMRect => ({top: headerTop, left: 0, right: 900, width: 900}) as DOMRect,
-        style: {paddingLeft: "", visibility: ""},
-        lastElementChild: {style: {marginRight: ""}},
+        style: {paddingLeft: "", paddingRight: "", visibility: ""},
+        lastElementChild: {style: {marginRight: ""},
+            getBoundingClientRect: (): {right: number} => ({right: Math.max(780, headerElement.getBoundingClientRect().left + 79)})},
         querySelector: (selector: string): unknown => {
             created.push(selector);
             return spacer;
@@ -39,7 +40,9 @@ const loadTabUtil = (headerTop: number) => {
         window: {siyuan: {layout: {layout: {element: {
             getBoundingClientRect: (): {left: number, right: number} => ({left: 0, right: 900}),
         }}}}},
-        document: {getElementById: (): null => null, querySelector: (): {clientWidth: number} => ({clientWidth: 120}),
+        document: {getElementById: (): null => null, querySelector: () => ({
+            getBoundingClientRect: () => ({left: 780, right: 900, width: 120}),
+        }),
             body: {}},
         getComputedStyle: (): {getPropertyValue: () => string} => ({getPropertyValue: (): string => "8px"}),
     });
@@ -89,6 +92,28 @@ test("padding-only updates leave the drag spacer untouched", () => {
         f.setTabPosition(true);
         assert.equal(f.created.length, 0, "padding-only layout does not resize the drag spacer");
         assert.equal(f.spacerStyle.alignSelf, undefined);
+    } finally {
+        f.restore();
+    }
+});
+
+test("standalone tab rows reserve the actual toolbar overlap across fractional split boundaries", () => {
+    const f = loadTabUtil(0);
+    try {
+        f.headerElement.getBoundingClientRect = () => ({top: 0, left: 450, right: 899.984375, width: 449.984375}) as DOMRect;
+        f.setTabPosition(true);
+        assert.equal(f.headerElement.style.paddingRight, "119.984375px");
+        assert.equal(f.headerElement.lastElementChild.style.marginRight, "");
+        f.headerElement.getBoundingClientRect = () => ({top: 0, left: 770, right: 900, width: 130}) as DOMRect;
+        f.setTabPosition(true);
+        assert.equal(f.headerElement.style.visibility, "hidden", "very narrow panes do not draw tabs over the toolbar");
+        f.headerElement.getBoundingClientRect = () => ({top: 0, left: 0, right: 450, width: 450}) as DOMRect;
+        f.setTabPosition(true);
+        assert.equal(f.headerElement.style.paddingRight, "", "uncovered panes release the reserved space");
+        assert.equal(f.headerElement.style.visibility, "");
+        f.headerElement.getBoundingClientRect = () => ({top: 40, left: 450, right: 900, width: 450}) as DOMRect;
+        f.setTabPosition(true);
+        assert.equal(f.headerElement.style.paddingRight, "", "lower tab rows remain full width");
     } finally {
         f.restore();
     }

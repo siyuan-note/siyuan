@@ -80,7 +80,8 @@ const browserCases = async (sources: Record<string, string>) => {
     let opens = 0;
     let saves = 0;
     const editingHTML = '<span>123</span><span data-type="strong">Bold</span> <span data-type="em">Italic</span>' +
-        '<span data-type="mark">Mark</span>';
+        '<span data-type="code">Code with spaces long enough to exceed the title width</span><span data-type="mark">Mark</span>';
+    label.style.maxWidth = "120px";
     modules["../../protyle/header/documentTitlePreview"].renderDocumentTitlePreview(label.firstElementChild, "document", "box",
         () => true, response(editingHTML).data);
     const textBounds = (element: Element) => {
@@ -139,6 +140,8 @@ const browserCases = async (sources: Record<string, string>) => {
     check.equal(getComputedStyle(editable.firstElementChild).fontWeight, previewWeight, "ordinary text keeps its preview weight");
     check.equal(getComputedStyle(editable).fontFamily, getComputedStyle(label).fontFamily, "the top-bar editor uses the navigation font");
     check.equal(getComputedStyle(editable.querySelector('[data-type="strong"]')).fontWeight, "700", "explicit bold marks remain bold");
+    check.equal(editable.querySelector('[data-type="code"]').getClientRects().length, 1,
+        "inline title editing does not wrap code when the toolbar is narrow");
     Object.assign(runtime.siyuan, {zIndex: 10, languages: {}});
     Object.assign(runtime, {innerHeight: window.innerHeight, innerWidth: window.innerWidth, visualViewport: window.visualViewport});
     modules["../layout/getTopBarHeight"] = {getTopBarHeight: () => 0};

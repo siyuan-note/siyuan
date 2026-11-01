@@ -30,6 +30,15 @@
   line-height: 1.625;
 }
 
+.b3-typography.document-title-preview,
+.mobile-document-title-editor .protyle-title__input,
+.mobile-document-title-dialog .protyle-title__input {
+  code:not(.hljs),
+  span[data-type~="code"] {
+    white-space: inherit;
+  }
+}
+
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
 }

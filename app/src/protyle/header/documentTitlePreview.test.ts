@@ -132,6 +132,11 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
     await Promise.resolve();
     check.equal(requests.length, 0, "the editor's source update cancels redundant tab reads in the same turn");
     const center = (bounds: DOMRect) => bounds.top + bounds.height / 2;
+    const textBoundsTop = (element: Element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect().top;
+    };
     const textOffset = (label: HTMLElement) => {
         const range = document.createRange();
         range.selectNodeContents(label.firstChild);
@@ -172,6 +177,45 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
                 container.remove();
             }
         }
+        document.body.style.cssText = "font:14px Arial;--b3-font-size:14px;--b3-font-size-editor:32px";
+        const sample = '<span data-type="strong">粗体</span> <span data-type="em">斜体</span> ' +
+            '<span data-type="code">代码块</span> <span data-type="mark">高亮</span> ' +
+            '<span data-type="s">删除线</span> <span data-type="u">下划线</span> H<span data-type="sub">2</span>O ' +
+            'x<span data-type="sup">2</span> <span data-type="kbd">Ctrl</span> <span data-type="a" data-href="https://example.com">链接</span>';
+        const surfaces = [
+            ["b3-list", "b3-list-item", "b3-list-item__text"],
+            ["layout-tab-bar", "item", "item__text"],
+            ["b3-menu", "b3-menu__item", "b3-menu__label"],
+            ...(entry === "mobile" ? [["mobile-tabs", "mobile-tabs__item", "mobile-tabs__item-title"],
+                ["toolbar mobile-topbar", "toolbar__title toolbar__title--readonly", ""]] : []),
+        ];
+        for (const [containerClass, rowClass, labelClass] of surfaces) {
+            const container = document.createElement("div");
+            container.className = containerClass;
+            container.innerHTML = `<div class="${rowClass}"><span class="${labelClass}"></span></div>`;
+            document.body.append(container);
+            const preview = container.firstElementChild.firstElementChild as HTMLElement;
+            render(preview, "document", "encrypted-box", () => true, result(sample).data);
+            const html = preview.innerHTML;
+            for (const width of [900, 120, 80, 280, 900]) {
+                container.style.width = `${width}px`;
+                const code = preview.querySelector('[data-type="code"]');
+                const mark = preview.querySelector('[data-type="mark"]');
+                const first = preview.querySelector('[data-type="strong"]');
+                check.equal(code.getClientRects().length, 1, `${entry} ${containerClass} at ${width}px keeps inline code on one line`);
+                check.ok(Math.abs(textBoundsTop(mark) - textBoundsTop(first)) <= 1,
+                    `${entry} ${containerClass} at ${width}px keeps text after code on the same line`);
+                check.equal(preview.innerHTML, html, "resizing never drops title content or styles");
+            }
+            container.remove();
+        }
+        const body = document.createElement("div");
+        body.className = "b3-typography";
+        body.style.width = "80px";
+        body.innerHTML = '<p><span data-type="code">body code with spaces that needs to wrap across several lines</span></p>';
+        document.body.append(body);
+        check.ok(body.querySelector("span").getClientRects().length > 1, "ordinary body inline code retains wrapping");
+        body.remove();
     }
     return "Outline document title cases passed";
 };

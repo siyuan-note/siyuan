@@ -310,7 +310,7 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
-管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。既有权限过滤保持不变。
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。应用快照时遇到不支持的源规格，会在应用前拒绝整批操作；请升级到支持该规格的版本后重试。既有权限过滤保持不变。
 
 * `/api/notebook/getNotebookConf`
 * 参数
@@ -343,7 +343,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。应用快照时遇到不支持的源规格，会在应用前拒绝整批操作；请升级到支持该规格的版本后重试。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
 

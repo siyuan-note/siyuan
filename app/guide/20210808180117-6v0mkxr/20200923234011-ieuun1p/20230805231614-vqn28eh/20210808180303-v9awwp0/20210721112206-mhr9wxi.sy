@@ -48,6 +48,20 @@
 			]
 		},
 		{
+			"ID": "20261102100000-9iwlyi8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102100000-9iwlyi8",
+				"updated": "20261102100000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If synchronization reports that a document was created by a newer version, the entire checkout batch is rejected before any files in that batch are written or deleted. Upgrade SiYuan to a version supporting the document format and retry. The error includes the notebook ID and document path to help locate the affected document."
+				}
+			]
+		},
+		{
 			"ID": "20210721112403-77frbcy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

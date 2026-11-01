@@ -310,7 +310,7 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
-Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
+Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. Compatibility depends on each document's source specification and title representation. If checkout encounters an unsupported source specification, the entire batch is rejected before application; upgrade to a version supporting that specification and retry. Existing permission filtering still applies.
 
 * `/api/notebook/getNotebookConf`
 * Parameters
@@ -343,7 +343,7 @@ Administrator responses may also include the read-only `documentCapabilities` ob
   }
   ```
 
-Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. Compatibility depends on each document's source specification and title representation. If checkout encounters an unsupported source specification, the entire batch is rejected before application; upgrade to a version supporting that specification and retry. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 

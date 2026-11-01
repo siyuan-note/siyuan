@@ -48,6 +48,20 @@
 			]
 		},
 		{
+			"ID": "20261102100000-zbxluob",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102100000-zbxluob",
+				"updated": "20261102100000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果同步提示文檔由較新版本建立，本次快照套用會在寫入或刪除任何檔案前整批拒絕。請將思源升級至支援該文檔格式的版本後重試。錯誤中的筆記本 ID 和文檔路徑可用於定位受影響的文檔。"
+				}
+			]
+		},
+		{
 			"ID": "20211226121454-g3niy0i",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

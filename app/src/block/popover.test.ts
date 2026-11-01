@@ -14,6 +14,7 @@ const browserCases = async (source: string, keyboardSource: string) => {
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
     const notebookRequests: {id: string, receive: (response: unknown) => void}[] = [];
+    const treeItems = new WeakMap<Element, {notebookId: string}>();
     const ocrRequests: ((text: string | undefined | {text: string, failed: boolean}) => void)[] = [];
     class Panel {
         element = document.createElement("div");
@@ -38,6 +39,7 @@ const browserCases = async (source: string, keyboardSource: string) => {
         }
     }
     const dependencies = {
+        getDocTreeItem: (element: Element) => treeItems.get(element?.closest("li[data-tree-key]")),
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
         getImageOCRResult: () => new Promise<{text: string, failed: boolean} | undefined>(resolve => ocrRequests.push(result =>
@@ -302,7 +304,8 @@ const browserCases = async (source: string, keyboardSource: string) => {
 
     const notebookRow = document.createElement("li");
     notebookRow.dataset.type = "navigation-root";
-    notebookRow.dataset.url = "notebook-id";
+    notebookRow.dataset.treeKey = "notebook:notebook-id";
+    treeItems.set(notebookRow, {notebookId: "notebook-id"});
     notebookRow.innerHTML = '<span class="b3-list-item__text ariaLabel">Notebook</span>';
     document.body.append(notebookRow);
     notebookRow.firstElementChild.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));

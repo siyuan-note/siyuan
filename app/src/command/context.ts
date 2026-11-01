@@ -4,7 +4,6 @@ import {getFrontend} from "../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
 import {
     cloneCommandRange,
-    collectCommandFileTreeMetadata,
     createCommandContextSnapshot,
     isBottomBacklinkEditorContext,
     resolveCommandFocus,
@@ -154,14 +153,7 @@ const getFileTree = (elements?: Element[]) => {
         return {model, controller, items, selectionVersion: controller.selectionVersion, elements: [],
             ids: items.map(item => item.id), paths: items.map(item => item.path)} as ICommandFileTreeContext;
     }
-    const selectedElements = elements ? [...elements] :
-        Array.from(model.element.querySelectorAll(".b3-list-item--focus"));
-    const metadata = collectCommandFileTreeMetadata(selectedElements);
-    return {
-        model,
-        elements: selectedElements,
-        ...metadata,
-    } as ICommandFileTreeContext;
+    return undefined;
 };
 /// #endif
 

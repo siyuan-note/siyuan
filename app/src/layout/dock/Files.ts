@@ -1,15 +1,15 @@
+import {renderDocTreeRow, renderDocTreeRowHTML} from "./docTree/row";
+import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "./docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "./docTree/DocTreeController";
 import type {IDocTreeItem} from "./docTree/types";
 import {createDocTreeSelectionProgress} from "./docTree/selectionProgress";
 import {config as configApi} from "../../config/util/configApi";
-import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
-import {genFileTreeDocAriaLabel} from "../../util/fileTreeTooltip";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
-import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
+import {isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {getDocTreeActionItems, getDocTreeTopPaths} from "../../menus/navigationSelection";
@@ -24,10 +24,7 @@ import {
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {restoreDocTreeState, saveDocTreeState} from "../../util/docTreeState";
 import {openEmojiPanel} from "../../emoji";
-import {
-    getFileTreeDefaultIconAttr,
-    getFileTreeIconHTML,
-} from "../../emoji/fileTreeIcon";
+
 import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {isNotCtrl, isOnlyMeta, isPhablet, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
@@ -48,11 +45,7 @@ import {
     IDocumentTabDragData,
     parseDocumentTabDragData
 } from "../../util/fileTreeMove";
-import {
-    FILE_TREE_CHILDREN_SORT_MODE,
-    type IDocSortModeChanged,
-    updateFileTreeSortMode
-} from "../../util/fileTreeSort";
+import {type IDocSortModeChanged, updateFileTreeSortMode} from "../../util/fileTreeSort";
 import {clearDocumentTabMovePreview} from "../tabDrag";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
@@ -160,13 +153,13 @@ export class Files extends Model {
                 if (target.classList.contains("b3-list-item__icon")) {
                     event.preventDefault();
                     event.stopPropagation();
-                    const notebookElement = target.closest("li[data-encrypted=true]");
-                    if (notebookElement) {
-                        openEncryptedNotebook(this.app, notebookElement.getAttribute("data-url"), notebookElement.querySelector(".b3-list-item__text").textContent);
+                    const notebookElement = target.closest("li[data-tree-key]");
+                    if (notebookElement && isEncryptedDocTreeItem(notebookElement)) {
+                        openEncryptedNotebook(this.app, getDocTreeItem(notebookElement)?.notebookId, notebookElement.querySelector(".b3-list-item__text").textContent);
                         break;
                     }
                     const rect = target.getBoundingClientRect();
-                    openEmojiPanel(target.parentElement.getAttribute("data-url"), "notebook", {
+                    openEmojiPanel(getDocTreeItem(target)?.notebookId, "notebook", {
                         x: rect.left,
                         y: rect.bottom,
                         h: rect.height,
@@ -189,10 +182,10 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "open") {
-                    const notebookId = target.getAttribute("data-url");
+                    const notebookId = getDocTreeItem(target)?.notebookId;
                     const liElement = target.closest("li");
                     // 加密笔记本关闭（锁定）时点"打开"先弹解锁框，解锁成功后再挂载
-                    if (liElement && liElement.getAttribute("data-encrypted") === "true") {
+                    if (liElement && isEncryptedDocTreeItem(liElement)) {
                         openEncryptedNotebook(this.app, notebookId, liElement.querySelector(".b3-list-item__text").textContent);
                     } else {
                         fetchPost("/api/notebook/openNotebook", {
@@ -278,10 +271,10 @@ export class Files extends Model {
             if (!target.closest(".b3-list-item__text") || !isNotCtrl(event) || event.altKey || event.shiftKey) {
                 this.parentDocClick.cancel();
             }
-            const ulElement = target.closest<HTMLElement>("li[data-notebook-id]");
+            const ulElement = target.closest<HTMLElement>("li[data-tree-key]");
             let needFocus = true;
             if (ulElement) {
-                const notebookId = ulElement.dataset.notebookId;
+                const notebookId = getDocTreeItem(ulElement)?.notebookId;
                 while (target && !target.isEqualNode(this.element)) {
                     if (isNotCtrl(event) && !event.shiftKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
@@ -290,7 +283,7 @@ export class Files extends Model {
                         const isFile = liElement.getAttribute("data-type") === "navigation-file";
                         // 单击文档图标展开或折叠下级，笔记本图标始终用于修改图标
                         if (isFile && window.siyuan.config.fileTree.docIconClickMode === 1) {
-                            if (Number(liElement.getAttribute("data-count")) > 0) {
+                            if ((getDocTreeItem(liElement)?.subFileCount || 0) > 0) {
                                 this.lastSelectedElement = liElement;
                                 this.setCurrent(liElement, false);
                                 this.toggleLeaf(liElement, notebookId);
@@ -339,7 +332,7 @@ export class Files extends Model {
                     } else if (target.classList.contains("b3-list-item__switch")) {
                         event.preventDefault();
                         event.stopPropagation();
-                        if (target.closest("[data-encrypted=true]")) {
+                        if (isEncryptedDocTreeItem(target)) {
                             break;
                         }
                         const rect = target.getBoundingClientRect();
@@ -362,7 +355,7 @@ export class Files extends Model {
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__action")) {
                         const type = target.getAttribute("data-type");
-                        const pathString = target.parentElement.getAttribute("data-path");
+                        const pathString = getDocTreeItem(target.parentElement)?.path;
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
                                 newFileInTree(options.app, notebookId, pathString);
@@ -399,7 +392,7 @@ export class Files extends Model {
                         (target.parentElement.getAttribute("data-type") === "navigation-file" ||
                             (target.parentElement.getAttribute("data-type") === "navigation-root" && target.parentElement.getAttribute("data-node-id"))) &&
                         window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
-                        Number(target.parentElement.getAttribute("data-count")) > 0) {
+                        (getDocTreeItem(target.parentElement)?.subFileCount || 0) > 0) {
                         this.lastSelectedElement = target.parentElement;
                         this.setCurrent(target.parentElement, false);
                         const row = target.parentElement;
@@ -415,10 +408,11 @@ export class Files extends Model {
                             const item = this.docTree.getItemFromElement(row);
                             if (!item) { return; }
                             const key = item.occurrenceKey;
+                            const path = item.path;
                             const expanded = this.docTree.isExpanded(key);
                             if (!expanded && !await this.docTree.itemAtDirectoryIndex(key, 0)) { return; }
                             return () => {
-                                if (this.docTree.getItem(key)?.path === item.path &&
+                                if (this.docTree.getItem(key)?.path === path &&
                                     this.docTree.isExpanded(key) === expanded &&
                                     window.siyuan.config.fileTree.parentDocTitleClickMode === 2) {
                                     void this.docTree.toggle(key);
@@ -860,7 +854,7 @@ export class Files extends Model {
             if (gutterType) {
                 const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
                 if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
-                    const sourceNotebookId = window.siyuan.dragElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") ||
+                    const sourceNotebookId = getDocTreeItem(window.siyuan.dragElement)?.notebookId ||
                         parseBlockDragData(event.dataTransfer.getData(gutterType)).notebookID;
                     if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
                         showMessage(window.siyuan.languages._kernel[391]);
@@ -1009,7 +1003,7 @@ export class Files extends Model {
             return;
         }
         const isFile = liElement.getAttribute("data-type") === "navigation-file";
-        const hasChildren = Number(liElement.getAttribute("data-count")) > 0;
+        const hasChildren = (getDocTreeItem(liElement)?.subFileCount || 0) > 0;
         // 单击文档图标展开或折叠下级，笔记本图标不参与
         const iconClickExpands = isFile && window.siyuan.config.fileTree.docIconClickMode === 1;
         const iconExpands = iconClickExpands && hasChildren;
@@ -1038,59 +1032,11 @@ export class Files extends Model {
     }
 
     private genNotebook(item: INotebook) {
-        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        const locked = item.encrypted && item.closed;
-        const iconContent = locked
-            ? getFileTreeIconHTML("", "lock")
-            : getFileTreeIconHTML(item.icon, "notebook");
-        const defaultIconAttr = getFileTreeDefaultIconAttr(locked ? "" : item.icon, locked ? "lock" : "notebook");
-        const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
-        const hasChildren = !item.closed && item.subFileCount > 0;
-        // 笔记本图标始终用于修改图标
-        const actionClasses = `${hasChildren && window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 ?
-            " file-tree__item--title-expand" : ""}`;
-        const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess && !item.encrypted ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.id}"` : ""} aria-label="${window.siyuan.languages.changeIcon}">${iconContent}</span>`;
-        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess && !item.encrypted ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
-        if (item.closed) {
-            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}${defaultIconAttr}>
-    <span class="b3-list-item__toggle fn__hidden">
-        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-    </span>
-    ${emojiHTML}
-    ${switchHTML}
-    <span class="b3-list-item__text" style="cursor: default;">${escapeHtml(item.name)}</span>
-    <span data-type="open" data-url="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
-        <svg><use xlink:href="#iconOpen"></use></svg>
-    </span>
-</li>`;
-        } else {
-            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}"${item.encrypted ? " data-encrypted=\"true\"" : ""}>
-<li class="b3-list-item b3-list-item--hide-action${actionClasses}" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""}
-style="--file-toggle-width:22px;--file-action-offset:22px"
-data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}"${defaultIconAttr}>
-    <span class="b3-list-item__toggle b3-list-item__toggle--hl${isBoxDoc && !hasChildren ? " fn__hidden" : ""}">
-        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-    </span>
-    ${emojiHTML}
-    ${switchHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE">${escapeHtml(item.name)}</span>
-    <span data-type="more-root" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
-        <svg><use xlink:href="#iconMore"></use></svg>
-    </span>
-    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
-        <svg><use xlink:href="#iconAdd"></use></svg>
-    </span>
-</li></ul>`;
-        }
+        return renderDocTreeRowHTML(notebookTreeItem(item), {mobile: false, editingPublishAccess: this.element.classList.contains("file-tree__publish-access--active")});
     }
 
     private renderTreeRow(item: IDocTreeItem): HTMLElement {
-        const template = document.createElement("template");
-        template.innerHTML = item.kind === "notebook" ? this.genNotebook(item.notebook) : this.genFileHTML(item.file);
-        const row = template.content.querySelector<HTMLElement>("li");
-        const notebook = window.siyuan.notebooks.find(value => value.id === item.notebookId);
-        if (notebook?.encrypted) { row.dataset.encrypted = "true"; }
-        return row;
+        return renderDocTreeRow(item, {mobile: false, editingPublishAccess: this.element.classList.contains("file-tree__publish-access--active")});
     }
 
     public init(init = true) {
@@ -1191,41 +1137,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (this.docTree) { saveDocTreeState(this.docTree); }
     }
 
-    private genFileHTML(item: IFile) {
-        let countHTML = "";
-        if (item.count && item.count > 0) {
-            countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
-        }
-        const ariaLabel = genFileTreeDocAriaLabel(item, true);
-        const paddingLeft = (item.path.split("/").length - 1) * 18;
-        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        const iconExpands = window.siyuan.config.fileTree.docIconClickMode === 1;
-        // 点击会修改图标时给出提示，展开或打开时不提示
-        const iconChanges = !iconExpands;
-        const actionClasses = `${iconExpands && item.subFileCount > 0 && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
-            iconExpands && item.subFileCount === 0 && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
-            window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
-        const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
-        return `<li data-node-id="${item.id}" data-name="${escapeHtmlTextAndAttr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
-data-type="navigation-file"
-style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
-class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
-    <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
-        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-    </span>
-    <span class="b3-list-item__icon${iconChanges ? " ariaLabel" : ""} popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="8east" data-id="${item.id}"${iconChanges ? ` aria-label="${window.siyuan.languages.changeIcon}"` : ""}>${getFileTreeIconHTML(item.icon, defaultIcon)}</span>
-    <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE" data-tooltip-encoding="none"
-aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
-    <span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
-        <svg><use xlink:href="#iconMore"></use></svg>
-    </span>
-    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
-        <svg><use xlink:href="#iconAdd"></use></svg>
-    </span>
-    ${countHTML}
-</li>`;
-    }
+
 
     public destroy() {
         this.disposed = true;
@@ -1340,7 +1252,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
 
     private updatePublishAccessControls(editingPublishAccess: boolean) {
         this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-            const encrypted = Boolean(item.closest("[data-encrypted=true]"));
+            const encrypted = Boolean(isEncryptedDocTreeItem(item));
             item.classList.toggle("fn__none", editingPublishAccess && !encrypted);
             const switchElement = item.nextElementSibling;
             if (switchElement) {
@@ -1359,15 +1271,9 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             return;
         }
         const ids: string[] = [];
-        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => {
-            if (!element.closest("[data-encrypted=true]")) {
-                ids.push(element.getAttribute("data-url"));
-            }
-        });
-        this.element.querySelectorAll("[data-type=\"navigation-file\"][data-node-id]").forEach((element: HTMLElement) => {
-            if (!element.closest("[data-encrypted=true]")) {
-                ids.push(element.getAttribute("data-node-id"));
-            }
+        this.element.querySelectorAll<HTMLElement>("li[data-tree-key]").forEach(element => {
+            const item = getDocTreeItem(element);
+            if (item && !isEncryptedDocTreeItem(element)) { ids.push(item.id); }
         });
         const key = ids.sort().join(",");
         if (key === this.publishAccessKey) { return; }
@@ -1378,9 +1284,10 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             fetchPost("/api/filetree/getPublishAccess", {ids}, response => {
                 if (generation !== this.publishAccessGeneration || response.code !== 0) { return; }
                 response.data.publishAccess.forEach((item: IPublishAccessItem) => {
-                    const element = this.element.querySelector(`[data-url="${item.id}"] .b3-list-item__switch`) ||
-                        this.element.querySelector(`[data-node-id="${item.id}"] .b3-list-item__switch`);
-                    if (element && !element.closest("[data-encrypted=true]")) {
+                    const row = Array.from(this.element.querySelectorAll<HTMLElement>("li[data-tree-key]"))
+                        .find(row => getDocTreeItem(row)?.id === item.id);
+                    const element = row?.querySelector(".b3-list-item__switch");
+                    if (element && !isEncryptedDocTreeItem(element)) {
                         element.innerHTML = getPublishAccessOptionByLevel(getPublishAccessLevel(item.visible, item.password, item.disable)).iconHTML;
                     }
                 });

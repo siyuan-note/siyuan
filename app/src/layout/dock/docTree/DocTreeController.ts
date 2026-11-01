@@ -1,3 +1,4 @@
+import {setDocTreeRowItem, setDocTreeAttribute} from "./rowData";
 import {DocTreeModel, getDocTreeWindow, type IDocTreeDirectory} from "./DocTreeModel";
 import {docTreeDataSource} from "./dataSource";
 import {getTransactionOperations} from "../../../util/transactionOperations";
@@ -260,14 +261,9 @@ export class DocTreeController {
     public getSelectionElements(): NodeListOf<HTMLElement> {
         const container = document.createElement("div");
         this.getSelectedItems().forEach(item => {
-            const wrapper = document.createElement("ul");
-            wrapper.dataset.url = item.notebookId;
-            wrapper.dataset.sortmode = String(item.notebook?.sortMode ?? item.effectiveSortMode);
-            wrapper.setAttribute("data-effective-sort-mode", String(item.effectiveSortMode));
             const row = this.options.renderRow(item);
             this.decorate(row, item);
-            wrapper.append(row);
-            container.append(wrapper);
+            container.append(row);
         });
         return container.querySelectorAll<HTMLElement>("[data-tree-key]");
     }
@@ -1362,36 +1358,21 @@ export class DocTreeController {
     }
 
     private decorate(row: HTMLElement, item: IDocTreeItem) {
-        row.style.flexShrink = "0";
+        if (row.style.flexShrink !== "0") { row.style.flexShrink = "0"; }
         controllers.set(row, this);
-        row.dataset.treeKey = item.occurrenceKey;
-        row.dataset.occurrenceKey = item.occurrenceKey;
-        if (item.kind === "document") {
-            row.dataset.nodeId = item.id;
-        }
-        row.dataset.notebookId = item.notebookId;
-        row.dataset.notebook = item.notebookId;
-        row.dataset.parentId = item.parentID;
-        row.dataset.path = item.path;
-        row.dataset.name = item.name;
-        row.dataset.count = String(item.subFileCount);
-        row.dataset.sortmode = String(item.effectiveSortMode);
-        row.dataset.effectiveSortMode = String(item.effectiveSortMode);
-        row.dataset.childrenSortMode = item.childrenSortMode?.toString() ?? "";
-        if (item.kind === "notebook") {
-            row.dataset.url = item.notebookId;
-        }
-        row.setAttribute("role", "treeitem");
-        row.setAttribute("aria-level", String(item.depth + 1));
-        row.setAttribute("aria-posinset", String(item.index + 1));
-        row.setAttribute("aria-setsize", String(item.setSize));
-        row.setAttribute("aria-selected", String(this.selected.has(item.occurrenceKey)));
+        setDocTreeRowItem(row, item);
+        setDocTreeAttribute(row, "data-tree-key", item.occurrenceKey);
+        setDocTreeAttribute(row, "role", "treeitem");
+        setDocTreeAttribute(row, "aria-level", String(item.depth + 1));
+        setDocTreeAttribute(row, "aria-posinset", String(item.index + 1));
+        setDocTreeAttribute(row, "aria-setsize", String(item.setSize > 0 ? item.setSize : -1));
+        setDocTreeAttribute(row, "aria-selected", String(this.selected.has(item.occurrenceKey)));
         row.classList.toggle("b3-list-item--focus", this.selected.has(item.occurrenceKey));
-        row.tabIndex = item.occurrenceKey === this.focused ? 0 : -1;
+        setDocTreeAttribute(row, "tabindex", item.occurrenceKey === this.focused ? "0" : "-1");
         if (item.subFileCount > 0 || item.kind === "notebook") {
-            row.setAttribute("aria-expanded", String(this.isExpanded(item.occurrenceKey)));
+            setDocTreeAttribute(row, "aria-expanded", String(this.isExpanded(item.occurrenceKey)));
         } else {
-            row.removeAttribute("aria-expanded");
+            setDocTreeAttribute(row, "aria-expanded");
         }
         const expanded = this.isExpanded(item.occurrenceKey);
         const directory = this.model.directories.get(docTreeDirectoryKey(item.notebookId, docTreeParentID(item)));
@@ -1400,7 +1381,7 @@ export class DocTreeController {
         const showIndicator = pending.some(request => request.showIndicator);
         const retry = !this.expanding.has(item.occurrenceKey) &&
             Boolean(directory && this.errors.has(directory.key));
-        row.setAttribute("aria-busy", String(pending.length > 0));
+        setDocTreeAttribute(row, "aria-busy", pending.length > 0 ? "true" : undefined);
         const arrow = row.querySelector(".b3-list-item__arrow");
         arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
         arrow?.classList.toggle("fn__none", showIndicator);

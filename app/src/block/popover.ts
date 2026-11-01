@@ -1,3 +1,4 @@
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 import {BlockPanel} from "./Panel";
 import {isAbove} from "../util/zIndex";
 import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
@@ -52,7 +53,7 @@ export const suspendBlockPopover = (root: HTMLElement, event: PointerEvent) => {
 };
 
 const getPopoverNotebookId = () => {
-    const notebookId = popoverTargetElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") || "";
+    const notebookId = getDocTreeItem(popoverTargetElement)?.notebookId || popoverTargetElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") || "";
     return isEncryptedBox(notebookId) ? notebookId : "";
 };
 // 异步获取信息后再显示 tooltip，鼠标已移走时需中断请求 https://github.com/siyuan-note/siyuan/issues/14823
@@ -371,7 +372,7 @@ export const initBlockPopover = (app: App) => {
                 tooltipAbortController = new AbortController();
                 const signal = tooltipAbortController.signal;
                 const capturedController = tooltipAbortController;
-                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.closest("[data-url]")?.getAttribute("data-url")}, (response) => {
+                fetchPost("/api/notebook/getNotebookInfo", {notebook: getDocTreeItem(notebookItemElement)?.notebookId}, (response) => {
                     if (signal.aborted || !notebookItemElement.isConnected) {
                         return;
                     }

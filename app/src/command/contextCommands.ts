@@ -20,7 +20,6 @@ import {deleteFile} from "../editor/deleteFile";
 import {newFileInTree} from "../util/newFile";
 import {newNotebook} from "../util/mount";
 import {pathPosix} from "../util/pathName";
-import {isCustomFileTreeList} from "../util/fileTreeSort";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Tab} from "../layout/Tab";
@@ -125,8 +124,7 @@ export const ensureContextCommands = (app: App) => {
         if (item) {
             return item.effectiveSortMode === 6;
         }
-        const element = context.fileTree?.elements[0];
-        return Boolean(element && isCustomFileTreeList(element.parentElement));
+        return false;
     }, context => {
         const doc = getCommandDocument(context);
         newFileInTree(app, doc.notebookId, pathPosix().dirname(doc.path), {

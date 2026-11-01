@@ -2,13 +2,6 @@ import type {ICommandContextSnapshot, TCommandFocus} from "./types";
 
 export const cloneCommandRange = <T extends {cloneRange: () => T}>(range?: T) => range?.cloneRange();
 
-export const collectCommandFileTreeMetadata = <T extends {getAttribute: (name: string) => string | null}>(
-    elements: T[],
-) => ({
-    ids: elements.map(item => item.getAttribute("data-node-id") || "").filter(Boolean),
-    paths: elements.map(item => item.getAttribute("data-path") || "").filter(Boolean),
-});
-
 export const isBottomBacklinkEditorContext = (
     bottomBacklink: Pick<Element, "contains">,
     closestProtyle?: Element | false,

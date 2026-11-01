@@ -1,3 +1,5 @@
+import {renderDocTreeRow} from "./docTree/row";
+import {getDocTreeItem, isEncryptedDocTreeItem} from "./docTree/rowData";
 import {DocTreeController, getDocTreeController} from "./docTree/DocTreeController";
 import type {IDocTreeItem, IDocTreeExpansion} from "./docTree/types";
 import {setStorageVal} from "../../protyle/util/compatibility";
@@ -7,10 +9,8 @@ import {Constants} from "../../constants";
 import {fetchSyncPost} from "../../util/fetch";
 import {pinnedDocIDs, updatePinnedDocs} from "../../util/pinnedDocs";
 import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
-import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
+
 import {openEmojiPanel} from "../../emoji";
-import {escapeTooltipTextAttr, escapeHtml} from "../../util/escape";
-import {genFileTreeDocAriaLabel} from "../../util/fileTreeTooltip";
 import {initFileMenu} from "../../menus/navigation";
 import {toggleMenu} from "../../menus/menuToggle";
 import {globalClickHideMenu} from "../../menus/menuClick";
@@ -20,7 +20,6 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {MenuItem} from "../../menus/Menu";
 import {newFileInTree} from "../../util/newFile";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
-import {FILE_TREE_CHILDREN_SORT_MODE} from "../../util/fileTreeSort";
 import {setFileTreeVisibility} from "./fileTreeAnimation";
 import {ParentDocClick} from "./parentDocClick";
 import {hideDragTip, setDragTipGhost, showDragTip} from "../../protyle/util/dragTip";
@@ -97,8 +96,8 @@ export class PinnedDocs {
         this.element.addEventListener("contextmenu", event => this.contextMenu(event));
         this.element.addEventListener("dragstart", event => {
             this.parentDocClick.cancel();
-            const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
-            if (!row || row.dataset.unavailable === "true" || window.siyuan.config.readonly) {
+            const row = (event.target as Element).closest<HTMLElement>("li[data-tree-key]");
+            if (!row || getDocTreeItem(row)?.unavailable || window.siyuan.config.readonly) {
                 event.preventDefault();
                 return;
             }
@@ -210,10 +209,10 @@ export class PinnedDocs {
 
     public updateDocActions() {
         // 直接更新现有图标提示，保留展开状态并避开文档快照缓存。
-        this.list.querySelectorAll<HTMLElement>("[data-pin-row]").forEach(row => {
+        this.list.querySelectorAll<HTMLElement>("li[data-tree-key]").forEach(row => {
             const icon = row.querySelector<HTMLElement>(".b3-list-item__icon");
             if (!icon) { return; }
-            const label = this.getDocIconLabel(Number(row.dataset.count));
+            const label = this.getDocIconLabel((getDocTreeItem(row)?.subFileCount || 0));
             icon.classList.toggle("ariaLabel", Boolean(label));
             if (label) {
                 icon.setAttribute("aria-label", label);
@@ -293,42 +292,7 @@ export class PinnedDocs {
 
     private renderRow(item: IDocTreeItem): HTMLElement {
         const doc = {...item.file, notebook: item.notebookId, unavailable: item.unavailable};
-        const key = item.occurrenceKey;
-        const depth = item.depth;
-        const row = document.createElement("li");
-        row.className = "b3-list-item b3-list-item--hide-action";
-        row.dataset.pinRow = key;
-        row.dataset.pinRoot = String(depth === 0);
-        row.dataset.nodeId = doc.id;
-        row.dataset.notebook = doc.notebook;
-        row.dataset.sortmode = String(window.siyuan.notebooks.find(notebook => notebook.id === doc.notebook)?.sortMode ?? 15);
-        row.dataset.path = doc.path;
-        row.dataset.name = doc.name;
-        row.dataset.count = String(doc.subFileCount);
-        row.dataset.type = "navigation-file";
-        row.setAttribute(FILE_TREE_CHILDREN_SORT_MODE, doc.childrenSortMode?.toString() || "");
-        row.dataset.unavailable = String(Boolean(doc.unavailable));
-        row.draggable = !this.mobile && !doc.unavailable && !window.siyuan.config.readonly;
-        row.tabIndex = 0;
-        const paddingLeft = (depth + 1) * (this.mobile ? 20 : 18);
-        row.style.setProperty("--file-toggle-width", `${paddingLeft + 18}px`);
-        row.style.setProperty("--file-action-offset", `${paddingLeft + 20}px`);
-        row.setAttribute("aria-disabled", String(Boolean(doc.unavailable)));
-        if (doc.subFileCount) { row.setAttribute("aria-expanded", "false"); }
-        // 桌面端点击会修改图标时给出提示，移动端保留无障碍标签
-        const iconLabel = this.getDocIconLabel(doc.subFileCount);
-        const ariaLabel = doc.unavailable || !doc.hSize ? escapeTooltipTextAttr(doc.name +
-            (doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : "")) : genFileTreeDocAriaLabel(doc, true);
-        if (!doc.icon) { row.dataset.defaultIcon = doc.subFileCount ? "folder" : "file"; }
-        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE" data-tooltip-encoding="none" aria-label="${ariaLabel}">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" data-menu="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
-        if (!doc.unavailable && !window.siyuan.config.readonly) {
-            const add = document.createElement("span");
-            add.className = "b3-list-item__action";
-            add.dataset.pinNew = "true";
-            add.setAttribute("aria-label", window.siyuan.languages.newSubDoc);
-            add.innerHTML = '<svg><use xlink:href="#iconAdd"></use></svg>';
-            row.append(add);
-        }
+        const row = renderDocTreeRow(item, {mobile: this.mobile, pinned: true});
         row.addEventListener("keydown", event => {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -349,7 +313,7 @@ export class PinnedDocs {
 
     private async toggle(row: HTMLElement, expand?: boolean) {
         this.parentDocClick.cancel();
-        if (row.dataset.unavailable === "true" || row.dataset.count === "0") { return; }
+        if (getDocTreeItem(row)?.unavailable || !getDocTreeItem(row)?.subFileCount) { return; }
         const item = this.docTree.getItemFromElement(row);
         if (item) { await this.docTree.toggle(item.occurrenceKey, expand); }
     }
@@ -376,7 +340,7 @@ export class PinnedDocs {
             this.saveState();
             return;
         }
-        const row = target.closest<HTMLElement>("[data-pin-row]");
+        const row = target.closest<HTMLElement>("li[data-tree-key]");
         if (!row) { return; }
         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
             event.preventDefault();
@@ -393,22 +357,22 @@ export class PinnedDocs {
                 }
             });
         } else if (target.closest("[data-pin-new]")) {
-            newFileInTree(this.app, row.dataset.notebook, row.dataset.path);
+            newFileInTree(this.app, getDocTreeItem(row)?.notebookId, getDocTreeItem(row)?.path);
         } else if (target.closest("[data-pin-toggle]")) {
             this.toggle(row);
-        } else if (target.closest(".b3-list-item__icon") && row.dataset.unavailable !== "true") {
+        } else if (target.closest(".b3-list-item__icon") && !getDocTreeItem(row)?.unavailable) {
             if (this.mobile || window.siyuan.config.fileTree.docIconClickMode === 1) {
                 this.selectRow(row);
-                if (Number(row.dataset.count) > 0) { this.toggle(row); } else { this.open(row.dataset.nodeId, row.dataset.notebook); }
+                if ((getDocTreeItem(row)?.subFileCount || 0) > 0) { this.toggle(row); } else { this.open(row.dataset.nodeId, getDocTreeItem(row)?.notebookId); }
             } else if (!window.siyuan.config.readonly) {
                 const icon = target.closest<HTMLElement>(".b3-list-item__icon");
                 const rect = icon.getBoundingClientRect();
                 openEmojiPanel(row.dataset.nodeId, "doc", {x: rect.left, y: rect.bottom, h: rect.height, w: rect.width},
                     undefined, icon.querySelector("img"));
             }
-        } else if (row.dataset.unavailable !== "true") {
+        } else if (!getDocTreeItem(row)?.unavailable) {
             this.selectRow(row);
-            if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && Number(row.dataset.count) > 0) {
+            if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && (getDocTreeItem(row)?.subFileCount || 0) > 0) {
                 if (!target.closest(".b3-list-item__text") ||
                     event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
                     window.siyuan.config.fileTree.parentDocTitleClickMode !== 2) {
@@ -417,26 +381,26 @@ export class PinnedDocs {
                 }
                 this.parentDocClick.click(row, async () => {
                     const generation = this.generation;
-                    const path = row.dataset.path;
+                    const path = getDocTreeItem(row)?.path;
                     const key = row.dataset.treeKey;
                     const expanded = this.docTree.isExpanded(key);
                     if (!expanded) { await this.docTree.itemAtDirectoryIndex(key, 0); }
                     return () => {
-                        if (generation !== this.generation || row.dataset.path !== path ||
+                        if (generation !== this.generation || getDocTreeItem(row)?.path !== path ||
                             this.docTree.isExpanded(key) !== expanded ||
                             window.siyuan.config.fileTree.parentDocTitleClickMode !== 2) { return; }
                         void this.toggle(row, !expanded);
                     };
-                }, () => this.open(row.dataset.nodeId, row.dataset.notebook));
+                }, () => this.open(row.dataset.nodeId, getDocTreeItem(row)?.notebookId));
                 return;
             }
             this.parentDocClick.cancel();
-            this.open(row.dataset.nodeId, row.dataset.notebook);
+            this.open(row.dataset.nodeId, getDocTreeItem(row)?.notebookId);
         }
     }
 
     private menu(row: HTMLElement, position: IPosition) {
-        if (row.dataset.unavailable === "true") {
+        if (getDocTreeItem(row)?.unavailable) {
             const menu = window.siyuan.menus.menu;
             menu.remove();
             menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
@@ -452,7 +416,7 @@ export class PinnedDocs {
             }
             return;
         }
-        const menu = initFileMenu(this.app, row.dataset.notebook, row.dataset.path, row);
+        const menu = initFileMenu(this.app, getDocTreeItem(row)?.notebookId, getDocTreeItem(row)?.path, row);
         if (this.mobile) { menu.fullscreen("bottom"); } else { menu.popup(position); }
     }
 
@@ -478,19 +442,19 @@ export class PinnedDocs {
         if (!target || window.siyuan.config.readonly) { return rejectDrop(); }
         const source = allowSource && this.sourceTree.contains(target);
         if (!this.element.contains(target) && !source) { return rejectDrop(); }
-        const row = target.closest<HTMLElement>(source ? "li[data-type]" : "[data-pin-row]");
-        if (source && (!row || row.closest("[data-encrypted=true]"))) { return rejectDrop(); }
+        const row = target.closest<HTMLElement>(source ? "li[data-type]" : "li[data-tree-key]");
+        if (source && (!row || isEncryptedDocTreeItem(row))) { return rejectDrop(); }
         if (!row) {
             if (!target.closest("[data-pin-heading]")) { return rejectDrop(); }
             this.dropTarget = {id: "", position: "pin-before"};
             this.heading.classList.add("dragover");
         } else {
-            if (row.dataset.unavailable === "true") { return rejectDrop(); }
+            if (getDocTreeItem(row)?.unavailable) { return rejectDrop(); }
             const rect = row.getBoundingClientRect();
             const position = source && row.dataset.type === "navigation-root" ? "inside" :
-                getPinnedDropPosition(row.dataset.pinRoot === "true", (y - rect.top) / rect.height);
+                getPinnedDropPosition(getDocTreeItem(row)?.depth === 0, (y - rect.top) / rect.height);
             const id = source && row.dataset.type === "navigation-root" ?
-                row.dataset.notebookId : row.dataset.nodeId;
+                getDocTreeItem(row)?.notebookId : row.dataset.nodeId;
             const draggedIDs = this.touch ? [this.touch.id] :
                 (window.siyuan.dragElement?.innerText || this.draggedRow?.dataset.nodeId || "").split(",");
             if (!id || draggedIDs.includes(id)) { return rejectDrop(); }
@@ -540,7 +504,7 @@ export class PinnedDocs {
     private contextMenu(event: MouseEvent) {
         this.parentDocClick.cancel();
         event.stopPropagation();
-        const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
+        const row = (event.target as Element).closest<HTMLElement>("li[data-tree-key]");
         if (row) {
             event.preventDefault();
             // 触摸长按由拖拽处理，避免弹出菜单中断手势。
@@ -563,8 +527,8 @@ export class PinnedDocs {
     private bindTouch() {
         this.element.addEventListener("touchstart", event => {
             this.cancelTouch();
-            const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
-            if (!row || row.dataset.unavailable === "true" || window.siyuan.config.readonly || event.touches.length !== 1) { return; }
+            const row = (event.target as Element).closest<HTMLElement>("li[data-tree-key]");
+            if (!row || getDocTreeItem(row)?.unavailable || window.siyuan.config.readonly || event.touches.length !== 1) { return; }
             const touch = event.touches[0];
             const state = {id: row.dataset.nodeId, x: touch.clientX, y: touch.clientY, timer: 0, dragging: false, ghost: undefined as HTMLElement};
             this.touch = state;

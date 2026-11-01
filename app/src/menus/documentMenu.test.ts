@@ -53,6 +53,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                     deleteDocTreeItems: (items: unknown[]) => treeDeletions.push(items)},
                 "../layout/tabUtil": {getDockByType: (): undefined => undefined},
                 "../layout/dock/docTree/DocTreeController": {getDocTreeController: () => controller},
+                "../layout/dock/docTree/rowData": {getDocTreeItem: (element: Element) => controller?.getItemFromElement?.(element)},
                 "./navigationSelection": navigationSelection,
                 "../history/doc": {openDocHistory: (options: typeof histories[number]) => histories.push(options)},
                 "./util": {openEditorTab: () => menu.append({id: "openBy"})},
@@ -161,12 +162,11 @@ test("notebook documents do not expose regular document deletion, moving, renami
 });
 
 test("document tree adapter preserves its real selection in plugin events", () => {
-    const {exports, options, events} = setup();
-    const row = {tree: {querySelectorAll: () => rows}, classList: {contains: () => true},
-        getAttribute: (name: string) => ({"data-node-id": "doc", "data-name": "Document.sy", "data-count": "2",
-            "data-type": "navigation-file", "data-notebook-id": "notebook", "data-path": "/doc.sy"})[name],
-        querySelector: (): null => null, parentElement: {getAttribute: (): null => null}};
+    const item: Partial<import("../layout/dock/docTree/types").IDocTreeItem> = {id: "doc", notebookId: "notebook", path: "/doc.sy", name: "Document.sy", kind: "document", subFileCount: 2, childrenSortMode: null, effectiveSortMode: 0, occurrenceKey: "doc"};
+    const row = {} as HTMLElement;
     const rows = [row] as unknown as NodeListOf<HTMLElement>;
+    const controller = {getItemFromElement: () => item, getSelectedItems: () => [item], getSelectionElements: () => rows} as unknown as Partial<DocTreeController>;
+    const {exports, options, events} = setup(false, false, controller);
     exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/doc.sy", row as unknown as Element);
     assert.equal(events[0].detail.elements, rows);
     assert.equal(events[0].detail.items[0].id, options.id);

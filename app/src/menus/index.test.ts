@@ -1,3 +1,5 @@
+import * as rowData from "../layout/dock/docTree/rowData";
+import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -11,21 +13,20 @@ const compiled = transpileModule(parse(readFileSync("src/menus/index.ts", "utf8"
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-for (const [label, attribute] of [["virtual row", "data-notebook-id"], ["pinned row", "data-notebook"], ["legacy row", ""]]) {
+for (const label of ["virtual row", "pinned row"]) {
     test(`document context menu retains notebook identity from a ${label}`, () => {
         const calls: unknown[] = [];
         let positioned = false;
         let contextmenu: (event: unknown) => void;
         const body = {};
         const container = {isEqualNode: () => false};
-        const attributes: Record<string, string> = {"data-type": "navigation-file", "data-node-id": "doc", "data-path": "/doc.sy"};
-        if (attribute) { attributes[attribute] = "box"; }
-        const legacyRoot = attribute ? undefined : {getAttribute: () => "box"};
+        const attributes: Record<string, string> = {"data-type": "navigation-file", "data-node-id": "doc"};
         const row = {parentElement: container, isEqualNode: () => false,
             getAttribute: (name: string) => attributes[name] ?? null,
-            closest: (selector: string) => selector === "ul[data-url]" ? legacyRoot : null,
+            closest: () => row,
             getBoundingClientRect: () => ({bottom: 30, height: 28}),
         };
+        rowData.setDocTreeRowItem(row as unknown as Element, {id: "doc", notebookId: "box", path: "/doc.sy", kind: "document"} as IDocTreeItem);
         const child = {parentElement: row, getAttribute: (): null => null, hasAttribute: () => false,
             classList: {contains: () => false}, closest: (): null => null};
         const exported: {Menus?: new (app: unknown) => unknown} = {};
@@ -38,6 +39,7 @@ for (const [label, attribute] of [["virtual row", "data-notebook-id"], ["pinned 
                 const dependencies: Record<string, unknown> = {
                     "./Menu": {Menu: class {}}, "./menuClick": {bindTouchMenuDismiss() {}},
                     "./navigationSelection": {getDocTreeMenuItems},
+                    "../layout/dock/docTree/rowData": rowData,
                     "../protyle/util/hasClosest": {hasClosestByClassName: (): null => null},
                     "../layout/util": {setPanelFocus() {}},
                     "./navigation": {initFileMenu: (_app: unknown, notebook: string, path: string, target: unknown) => {

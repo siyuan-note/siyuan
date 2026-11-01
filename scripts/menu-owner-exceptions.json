@@ -43,7 +43,7 @@
     "count": 1,
     "reason": "右键在当前指针位置重新打开，不参与按钮开关"
   },
-  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initFileMenu(app, this.getDir(target), target.getAttribute(\"data-path\"), target) | popup": {
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initFileMenu(app, this.getDir(target), getDocTreeItem(target)?.path, target) | popup": {
     "count": 1,
     "reason": "右键在当前指针位置重新打开，不参与按钮开关"
   },

@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {App} from "../index";
+import * as rowData from "../layout/dock/docTree/rowData";
 
 class TestElement {
     attributes: Record<string, string> = {};
@@ -52,7 +53,7 @@ const loadModule = (filename: string, globals: Record<string, unknown>, dependen
     const exports: Record<string, unknown> = {};
     runInNewContext(transpileModule(readFileSync(filename, "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports, require: (name: string) => dependencies[name] || {}, ...globals});
+    }).outputText, {exports, require: (name: string) => name.endsWith("/rowData") ? rowData : dependencies[name] || {}, ...globals});
     return exports;
 };
 

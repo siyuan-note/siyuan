@@ -5,6 +5,7 @@ exports.sources = () => {
     const ts = require("typescript");
     const files = {
         types: "../src/layout/dock/docTree/types.ts",
+        rowData: "../src/layout/dock/docTree/rowData.ts",
         DocTreeModel: "../src/layout/dock/docTree/DocTreeModel.ts",
         DocTreeController: "../src/layout/dock/docTree/DocTreeController.ts",
         transactionOperations: "../src/util/transactionOperations.ts",
@@ -91,6 +92,7 @@ exports.cases = async sources => {
                 const row = document.createElement("li");
                 row.className = "b3-list-item";
                 row.dataset.type = item.kind === "notebook" ? "navigation-root" : "navigation-file";
+                if (item.kind === "document") { row.dataset.nodeId = item.id; }
                 row.innerHTML = '<span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__text"></span>';
                 row.querySelector(".b3-list-item__text").textContent = item.name;
                 if (titleTooltips) {
@@ -623,7 +625,7 @@ exports.cases = async sources => {
         await frame();
         check.equal(element.querySelector("[data-tree-loading]"), null, "failed refresh retains the previous directory instead of empty retry rows");
         const root = controller.getMountedElement("notebook:box");
-        check.equal(root.getAttribute("aria-busy"), "false", "a failed range stops the loading arrow");
+        check.equal(root.getAttribute("aria-busy"), null, "a failed range stops the loading arrow");
         check.equal(root.querySelector("[data-tree-indicator]"), null);
         let retry;
         source.range = async request => {
@@ -642,7 +644,7 @@ exports.cases = async sources => {
         check.equal(element.querySelector("[data-tree-loading]"), null, "retrying preserves existing rows");
         retry();
         await frame();
-        check.equal(root.getAttribute("aria-busy"), "false");
+        check.equal(root.getAttribute("aria-busy"), null);
         check.ok(controller.getMountedElement("notebook:box/d0"));
         fixture.destroy();
     }
@@ -796,7 +798,7 @@ exports.cases = async sources => {
                 expanded: arrow.classList.contains("b3-list-item__arrow--open"), hidden: arrow.classList.contains("fn__none")};
         };
         const busy = {busy: "true", spinning: true, icon: "#iconRight", expanded: false, hidden: true};
-        const idle = {busy: "false", spinning: false, icon: "#iconRight", expanded: true, hidden: false};
+        const idle = {busy: null, spinning: false, icon: "#iconRight", expanded: true, hidden: false};
         const rowCount = controller.model.rowCount;
         const siblingTop = controller.getMountedElement("notebook:box/d2").getBoundingClientRect().top;
         const first = controller.toggle("notebook:box/d0", true);
@@ -880,7 +882,7 @@ exports.cases = async sources => {
         await Promise.all([first, second]);
         await frame();
         for (const key of ["first", "second"]) {
-            check.equal(controller.getMountedElement(key).getAttribute("aria-busy"), "false");
+            check.equal(controller.getMountedElement(key).getAttribute("aria-busy"), null);
             check.ok(controller.getMountedElement(key + "/child"));
         }
         fixture.destroy();
@@ -901,7 +903,7 @@ exports.cases = async sources => {
         fixture.revise("two");
         await controller.locate("box", "d0");
         await frame();
-        check.equal(controller.getMountedElement("notebook:box").getAttribute("aria-busy"), "false",
+        check.equal(controller.getMountedElement("notebook:box").getAttribute("aria-busy"), null,
             "obsolete pages cannot keep a revised directory's loading arrow spinning");
         release();
         await oldPage;

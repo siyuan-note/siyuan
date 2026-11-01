@@ -1,3 +1,5 @@
+import {setDocTreeRowItem} from "../layout/dock/docTree/rowData";
+import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -14,33 +16,16 @@ const createItem = (type: "navigation-file" | "navigation-root", options: {
     notebookId?: string,
     path: string,
     flat?: boolean,
-}) => ({
-    getAttribute(name: string) {
-        if (name === "data-type") {
-            return type;
-        }
-        if (name === "data-node-id") {
-            return options.id || null;
-        }
-        if (name === "data-path") {
-            return options.path;
-        }
-        if (name === "data-notebook-id" && options.flat) {
-            return options.notebookId;
-        }
-        return null;
-    },
-    closest(selector: string) {
-        if (options.flat || selector !== "ul[data-url]") {
-            return null;
-        }
-        return {
-            getAttribute(name: string) {
-                return name === "data-url" ? options.notebookId || null : null;
-            }
-        };
-    },
-}) as unknown as HTMLElement;
+}) => {
+    const row = {getAttribute: (name: string) => name === "data-type" ? type : null,
+        closest: () => row} as unknown as HTMLElement;
+    const id = type === "navigation-root" ? options.notebookId : options.id;
+    if (id && options.notebookId) {
+        setDocTreeRowItem(row, {id, notebookId: options.notebookId, path: options.path,
+            kind: type === "navigation-root" ? "notebook" : "document"} as IDocTreeItem);
+    }
+    return row;
+};
 
 const doc1 = createItem("navigation-file", {id: "doc-1", notebookId: "notebook-1", path: "/doc-1.sy"});
 const doc2 = createItem("navigation-file", {id: "doc-2", notebookId: "notebook-2", path: "/doc-2.sy"});

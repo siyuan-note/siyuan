@@ -1,3 +1,4 @@
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 /// #if !MOBILE
 import {getInstanceById, setPanelFocus} from "../layout/util";
 import {Tab} from "../layout/Tab";
@@ -105,7 +106,7 @@ export class Menus {
                     this.unselect();
                     const rect = target.getBoundingClientRect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
-                    initFileMenu(app, this.getDir(target), target.getAttribute("data-path"), target).popup({
+                    initFileMenu(app, this.getDir(target), getDocTreeItem(target)?.path, target).popup({
                         x: event.clientX,
                         y: rect.bottom,
                         h: rect.height,

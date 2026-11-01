@@ -1,6 +1,7 @@
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 import {saveNotebookConf, saveNotebookConfSync} from "../config/util/resourceConfig";
 import type {BlockQueryRequestInput} from "../types/api";
-import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
+import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu} from "./commonMenuItem";
 /// #if !BROWSER
 import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
@@ -22,7 +23,7 @@ import {popSearch} from "../mobile/menu/search";
 /// #endif
 import {Constants} from "../constants";
 import {newFileInTree} from "../util/newFile";
-import {hasClosestByTag} from "../protyle/util/hasClosest";
+
 import {deleteFile, deleteDocTreeItems, deleteNotebooks} from "../editor/deleteFile";
 /// #if !MOBILE
 import {openFileById} from "../editor/util";
@@ -42,12 +43,8 @@ import {emitOpenMenu} from "../plugin/EventBus";
 import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addBlocksToDatabase} from "../protyle/render/av/addToDatabase";
-import {getDocTreeActionItems, getDocTreeMenuItems, getDocTreeTopPaths} from "./navigationSelection";
-import {
-    FILE_TREE_CHILDREN_SORT_MODE,
-    getConfiguredChildrenSortMode,
-    isCustomFileTreeList
-} from "../util/fileTreeSort";
+import {getDocTreeActionItems, getDocTreeTopPaths} from "./navigationSelection";
+import {getConfiguredChildrenSortMode} from "../util/fileTreeSort";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
@@ -92,40 +89,15 @@ type IDocTreeMenuItem = Pick<IDocTreeItem, "id" | "notebookId" | "path" | "kind"
 
 const getMenuSelection = (liElement: Element) => {
     const controller = getDocTreeController(liElement);
-    const fileElement = hasClosestByTag(liElement, "DIV") || undefined;
-    if (!fileElement && !controller) {
-        return;
+    if (!controller) { return; }
+    const item = controller.getItemFromElement(liElement);
+    if (!item) { return; }
+    if (!controller.getSelectedItems().some(value => value.occurrenceKey === item.occurrenceKey)) {
+        void controller.select(item.occurrenceKey);
     }
-    let selected: IDocTreeItem[];
-    let items: IDocTreeMenuItem[];
-    let elements: () => NodeListOf<HTMLElement>;
-    if (controller) {
-        const item = controller.getItemFromElement(liElement);
-        if (!item) { return; }
-        if (item && !controller.getSelectedItems().some(value => value.occurrenceKey === item.occurrenceKey)) {
-            void controller.select(item.occurrenceKey);
-        }
-        selected = controller.getSelectedItems();
-        items = selected.map(item => ({...item, sortMode: item.notebook?.sortMode}));
-        elements = () => controller.getSelectionElements();
-    } else {
-        if (!liElement.classList.contains("b3-list-item--focus")) {
-            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-                item.classList.remove("b3-list-item--focus");
-                item.removeAttribute("select-end");
-                item.removeAttribute("select-start");
-            });
-            liElement.classList.add("b3-list-item--focus");
-        }
-        const rows = fileElement.querySelectorAll<HTMLElement>(".b3-list-item--focus");
-        items = Array.from(rows).flatMap(row => getDocTreeMenuItems([row]).map(item => ({...item,
-            kind: row.getAttribute("data-type") === "navigation-root" ? "notebook" as const : "document" as const,
-            name: row.querySelector(".b3-list-item__text")?.textContent || "",
-            occurrenceKey: "",
-            sortMode: parseInt(row.getAttribute("data-sortmode") || row.parentElement?.getAttribute("data-sortmode")),
-        })));
-        elements = () => rows;
-    }
+    const selected = controller.getSelectedItems();
+    const items: IDocTreeMenuItem[] = selected.map(item => ({...item, sortMode: item.notebook?.sortMode}));
+    const elements = () => controller.getSelectionElements();
     return {controller, selected, items, elements, version: controller?.selectionVersion, target: liElement as HTMLElement};
 };
 
@@ -484,11 +456,11 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         return initMultiMenu(selection, app);
     }
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
-    const notebookId = liElement.getAttribute("data-notebook-id") || liElement.parentElement.getAttribute("data-url");
+    const notebookId = getDocTreeItem(liElement).notebookId;
     const name = getNotebookName(notebookId);
     const boxDocID = liElement.getAttribute("data-node-id");
     if (boxDocID && window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
-        Number(liElement.getAttribute("data-count")) > 0) {
+        getDocTreeItem(liElement).subFileCount > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
             label: window.siyuan.languages.openDocument,
@@ -555,8 +527,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 click: () => { updatePinnedDocs([notebookId], pinned ? "unpin" : "pin"); },
             }).element);
         }
-        const subMenu = sortMenu("notebook", parseInt(liElement.getAttribute("data-sortmode") ||
-            liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
+        const subMenu = sortMenu("notebook", getDocTreeItem(liElement).notebook?.sortMode, (sort) => {
             if (sort === null) {
                 return;
             }
@@ -566,7 +537,6 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 if (response.code !== 0) {
                     return;
                 }
-                liElement.setAttribute("data-sortmode", sort.toString());
                 let files;
                 /// #if MOBILE
                 files = window.siyuan.mobile.docks.file;
@@ -780,14 +750,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         return initMultiMenu(selection, app);
     }
     return initDocumentMenu(app, {
-        id: liElement.getAttribute("data-node-id"),
+        id: selection.items[0].id,
         notebookId,
         path: pathString,
-        name: getDisplayName(liElement.getAttribute("data-name"), false, true),
-        subFileCount: Number(liElement.getAttribute("data-count")),
+        name: getDisplayName(getDocTreeItem(liElement).name, false, true),
+        subFileCount: getDocTreeItem(liElement).subFileCount,
         childrenSortMode: getConfiguredChildrenSortMode(liElement),
-        customSort: selection.controller ? selection.controller.getItemFromElement(liElement)?.effectiveSortMode === 6 :
-            isCustomFileTreeList(liElement.getAttribute("data-pin-root") === "true" ? liElement : liElement.parentElement),
+        customSort: getDocTreeItem(liElement).effectiveSortMode === 6,
         target: liElement as HTMLElement,
         elements: selection.elements,
         treeElement: liElement,
@@ -968,7 +937,7 @@ export const initDocumentMenu = (app: App, options: {
                 if (response.code !== 0) {
                     return;
                 }
-                options.treeElement?.setAttribute(FILE_TREE_CHILDREN_SORT_MODE, sortMode?.toString() || "");
+
                 let files;
                 /// #if MOBILE
                 files = window.siyuan.mobile.docks.file;

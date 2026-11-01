@@ -7,9 +7,9 @@ import type {IDatabaseRowOpenData} from "../protyle/render/av/openDatabaseRow";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const createPreview = async (mobile: boolean) => {
+const createPreview = async (mobile: boolean, detached = true) => {
     const data: IDatabaseRowOpenData = {avID: "database", databaseBlockID: "carrier", notebookID: "notebook",
-        itemID: "first", valueID: "first-value", title: "First", isDetached: true,
+        itemID: "first", valueID: "first-value", title: "First", isDetached: detached,
         navigation: {viewID: "view", query: ""}};
     const title = {textContent: "", style: {}};
     const content = {scrollTop: 25};
@@ -156,7 +156,7 @@ const createPreview = async (mobile: boolean) => {
     let model: Custom;
     if (mobile) {
         await load<typeof import("../protyle/render/av/openDatabaseRow")>("protyle/render/av/openDatabaseRow")
-            .openDatabaseRowByData({app: {}} as Pick<IProtyle, "app">, data);
+            .openDatabaseRowByData({app: {}} as Pick<IProtyle, "app">, data, {standalone: true});
     } else {
         const api = load<typeof import("./databaseRow")>("editor/databaseRow");
         model = api.newDatabaseRowModel({app: {} as never, tab: tab as never,
@@ -178,6 +178,14 @@ const createPreview = async (mobile: boolean) => {
 };
 
 for (const mobile of [false, true]) {
+    test(`explicit standalone bound panels stay open on refresh (${mobile ? "mobile" : "desktop"})`, async () => {
+        const preview = await createPreview(mobile, false);
+        preview.refresh();
+        preview.requests[1].element.boundID = "bound-block";
+        preview.complete(1);
+        assert.deepEqual(preview.openedBlocks, []);
+        assert.equal(preview.closed(), 0);
+    });
     test(`binding refresh opens the bound editor once (${mobile ? "mobile" : "desktop"})`, async () => {
         const preview = await createPreview(mobile);
         preview.refresh();

@@ -110,7 +110,7 @@ export const newDatabaseRowModel = (options: {
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
             const primaryValue: IAVCellValue = primaryElement?.dataset.cellValue ?
                 JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) : undefined;
-            if (!switching && !openingBoundID && primaryValue?.block?.id && !primaryValue.isDetached &&
+            if (!switching && data.isDetached !== false && !openingBoundID && primaryValue?.block?.id && !primaryValue.isDetached &&
                 window.siyuan.config.editor.databaseAttrShow) {
                 openingBoundID = primaryValue.block.id;
                 void switchDesktopDatabaseRowPreview(custom, {...data, databaseBlockID: data.blockID,

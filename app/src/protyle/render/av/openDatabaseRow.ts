@@ -149,7 +149,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
             if (primaryElement?.dataset.cellValue) {
                 const value = JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) as IAVCellValue;
-                if (!switching && !openingBoundID && value.block?.id && !value.isDetached &&
+                if (!switching && renderData.isDetached && !openingBoundID && value.block?.id && !value.isDetached &&
                     window.siyuan.config.editor.databaseAttrShow) {
                     openingBoundID = value.block.id;
                     void openDatabaseRowByData(contextProtyle, {...data, boundBlockID: value.block.id, isDetached: false})

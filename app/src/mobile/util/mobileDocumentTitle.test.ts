@@ -139,7 +139,7 @@ const browserCases = async (sources: Record<string, string>) => {
     check.equal(getComputedStyle(editable.firstElementChild).fontWeight, previewWeight, "ordinary text keeps its preview weight");
     check.equal(getComputedStyle(editable).fontFamily, getComputedStyle(label).fontFamily, "the top-bar editor uses the navigation font");
     check.equal(getComputedStyle(editable.querySelector('[data-type="strong"]')).fontWeight, "700", "explicit bold marks remain bold");
-    Object.assign(runtime.siyuan, {zIndex: 1, languages: {}});
+    Object.assign(runtime.siyuan, {zIndex: 10, languages: {}});
     Object.assign(runtime, {innerHeight: window.innerHeight, innerWidth: window.innerWidth, visualViewport: window.visualViewport});
     modules["../layout/getTopBarHeight"] = {getTopBarHeight: () => 0};
     modules["../../util/setPosition"] = load(sources.position);
@@ -154,8 +154,12 @@ const browserCases = async (sources: Record<string, string>) => {
     const {Toolbar} = load(sources.toolbar);
     const contentToolbar = Object.assign(Object.create(Toolbar.prototype), {subElement: document.createElement("div"),
         element: document.createElement("div"), LINE_HEIGHT: 30, clearSubElement() { this.subElement.replaceChildren(); }});
-    contentToolbar.subElement.className = "protyle-toolbar protyle-toolbar--sub";
+    contentToolbar.subElement.className = "protyle-util protyle-util--mobile";
     document.body.append(contentToolbar.subElement);
+    const breadcrumb = document.createElement("div");
+    breadcrumb.className = "protyle-breadcrumb";
+    breadcrumb.style.cssText = "position:absolute;top:48px;left:0;width:100%;height:42px;z-index:5";
+    document.body.append(breadcrumb);
     const selectedRange = document.createRange();
     selectedRange.selectNodeContents(editable.firstElementChild);
     const menuOwner = {element: inline, wysiwyg: {element: inline.querySelector(".protyle-wysiwyg")}, disabled: false};
@@ -166,6 +170,9 @@ const browserCases = async (sources: Record<string, string>) => {
             "top-bar selection actions stay below the selected title, including More and Back: " +
             JSON.stringify({action, menu: contentToolbar.subElement.getBoundingClientRect().toJSON(),
                 range: selectedRange.getBoundingClientRect().toJSON(), style: contentToolbar.subElement.style.cssText}));
+        const menuRect = contentToolbar.subElement.getBoundingClientRect();
+        check.ok(contentToolbar.subElement.contains(document.elementFromPoint(menuRect.left + 20, menuRect.top + 25)),
+            "top-bar selection actions receive hits above the transformed breadcrumb bar");
     }
     const bodySelection = document.createElement("div");
     bodySelection.style.cssText = "position:fixed;top:220px;left:40px";
@@ -177,6 +184,7 @@ const browserCases = async (sources: Record<string, string>) => {
         "body selections retain actions above the selected text when space is available");
     bodySelection.remove();
     contentToolbar.subElement.remove();
+    breadcrumb.remove();
     title.setTitle("Saved summary");
     check.equal(title.editElement, editable, "summary refresh keeps the inline editor and caret");
     check.equal(label.querySelector(".mobile-document-title-editor"), inline);

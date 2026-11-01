@@ -92,24 +92,29 @@ const markAsDraft = (state: EditorState) => {
 };
 
 test("rename construction retains local undo and toolbar history while inline titles keep automatic saving", async () => {
-    for (const {draft, preview} of [{draft: false, preview: false}, {draft: true, preview: false}, {draft: false, preview: true}]) {
+    for (const {draft, preview, inline} of [{draft: false, preview: false, inline: false},
+        {draft: true, preview: false, inline: false}, {draft: false, preview: true, inline: false},
+        {draft: false, preview: false, inline: true}]) {
         let changed: () => void;
         let toolbarOwner: unknown;
         let toolbarUndo: (redo: boolean) => void;
         let scheduled = 0;
         let localUndos = 0;
         let disabled = false;
+        let floating = false;
+        let cleared = false;
+        const subElement = {remove: () => { floating = false; }, replaceChildren: () => { cleared = true; }};
         const listeners = new Map<string, () => void>();
         const editable = {classList: {contains: () => true}, dataset: {tip: "Untitled"}};
         const localUndo = {undo: () => localUndos++, redo: () => {}, clear: () => {}};
-        const fragment = {protyle: {block: {}, undo: localUndo, wysiwyg: {flushPendingInput: async () => {}}},
-            wysiwyg: {querySelector: () => editable}, getBlockHTML: () => "initial",
+        const fragment = {protyle: {block: {}, undo: localUndo, toolbar: {subElement}, wysiwyg: {flushPendingInput: async () => {}}},
+            wysiwyg: {querySelector: () => editable, replaceChildren: () => {}}, getBlockHTML: () => "initial", destroy: () => {},
             instance: {enable: () => { disabled = false; }, disable: () => { disabled = true; }}};
         const owner = {element: {classList: {contains: () => draft}}, block: {rootID: "doc"},
             preview: {element: {classList: {contains: () => !preview}}}};
-        const host = {classList: {add: () => {}}, dataset: {},
+        const host = {classList: {add: () => {}}, dataset: {}, closest: () => inline ? {} : null,
             addEventListener: (type: string, listener: () => void) => listeners.set(type, listener)};
-        const moduleExports: {DocumentTitleEditor?: new (...args: unknown[]) => unknown} = {};
+        const moduleExports: {DocumentTitleEditor?: new (...args: unknown[]) => {destroy: () => void}} = {};
         const dependencies = {
             isMobile: () => true, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
             getDocumentTitleLute: () => ({}), getAgentLute: () => ({}),
@@ -129,9 +134,11 @@ test("rename construction retains local undo and toolbar history while inline ti
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports: moduleExports, require: () => dependencies, clearTimeout: () => {},
             Lute: {NewNodeID: () => "paragraph"},
+            document: {body: {appendChild: (element: unknown) => { assert.equal(element, subElement); floating = true; }}},
             window: {setTimeout: () => ++scheduled, siyuan: {languages: {_kernel: {16: "Untitled"}},
                 mobile: preview ? {editor: {protyle: owner}} : {}}}});
-        new moduleExports.DocumentTitleEditor(owner, host, {blockDOM: "initial", revision: "r0"}, () => {}, () => {});
+        const editor = new moduleExports.DocumentTitleEditor(owner, host, {blockDOM: "initial", revision: "r0"}, () => {}, () => {});
+        assert.equal(floating, inline, "only top-bar title menus escape their clipping and stacking ancestors");
         assert.equal(toolbarOwner, draft ? fragment.protyle : owner);
         assert.equal(fragment.protyle.undo === localUndo, draft);
         assert.equal(disabled, preview, "late source loading keeps preview-mode titles readonly");
@@ -144,6 +151,9 @@ test("rename construction retains local undo and toolbar history while inline ti
             assert.equal(localUndos, 1);
             assert.equal(scheduled, 0);
         }
+        editor.destroy();
+        assert.equal(floating, false, "destroy removes the top-bar menu from the page");
+        assert.equal(cleared, inline, "destroy clears a detached top-bar menu's content");
     }
 });
 

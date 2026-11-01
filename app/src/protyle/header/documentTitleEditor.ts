@@ -70,6 +70,7 @@ export class DocumentTitleEditor {
     private applying = false;
     private conflictDialog?: Dialog;
     private updateConflict?: () => Promise<void>;
+    private floatingMenu?: HTMLElement;
     private readonly blockID = Lute.NewNodeID();
 
     constructor(private owner: IProtyle, private host: HTMLElement, initial: DocumentTitleEditorValue,
@@ -115,6 +116,11 @@ export class DocumentTitleEditor {
         this.fragment.protyle.block.rootID = owner.block.rootID;
         this.fragment.protyle.block.parentID = owner.block.rootID;
         this.fragment.protyle.path = owner.path;
+        if (host.closest(".mobile-document-title-editor")) {
+            // 顶栏的变换与裁切边界限制浮层，菜单挂到页面并随标题编辑器清理。
+            this.floatingMenu = this.fragment.protyle.toolbar.subElement;
+            document.body.appendChild(this.floatingMenu);
+        }
         this.saved = this.fingerprint();
         this.updateEditable();
         this.syncReadonly();
@@ -540,6 +546,9 @@ export class DocumentTitleEditor {
         this.conflictDialog?.element.querySelector('[data-type="latest"]')?.replaceChildren();
         this.conflictDialog?.destroy();
         this.fragment.destroy();
+        this.floatingMenu?.remove();
+        this.floatingMenu?.replaceChildren();
+        this.floatingMenu = undefined;
         this.fragment.wysiwyg.replaceChildren();
     }
 }

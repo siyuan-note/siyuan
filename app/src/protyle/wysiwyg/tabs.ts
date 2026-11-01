@@ -11,6 +11,7 @@ import {Menu} from "../../plugin/Menu";
 import {processRender} from "../util/processCode";
 import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
+import {lineNumberRender} from "../render/highlightRender";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {remapListMindmapIDs} from "../render/listMindmap/model";
@@ -296,6 +297,12 @@ export const initEditorTabs = (protyle: IProtyle) => {
                 }
             });
             processRender(item);
+            // 隐藏正文没有布局尺寸，页签显示后按实际高度重算代码行号。
+            item.querySelectorAll<HTMLElement>(".code-block .protyle-linenumber__rows").forEach(rows => {
+                if (!isHiddenTabContent(rows)) {
+                    lineNumberRender(rows.parentElement);
+                }
+            });
             avRender(item, protyle);
             protyle.contentElement?.dispatchEvent(new Event("scroll"));
         }),

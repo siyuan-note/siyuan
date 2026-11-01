@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
+const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string, escapeSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     const dialogs: {element: HTMLElement, destroy: () => void}[] = [];
@@ -18,8 +18,11 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
         _attrView: {dateCalendar: "Calendar", solarCalendar: "Gregorian", lunarCalendar: "Chinese lunar"},
     }}});
+    const {escapeHtmlTextAndAttr} = new Function(escapeSource + "\nreturn {escapeHtmlTextAndAttr};")() as {
+        escapeHtmlTextAndAttr: (value: unknown) => string
+    };
     const Panel = new Function("cancelHeightAnimation", "escapeHtmlTextAndAttr", source + "\nreturn AVAttributePanel;")(
-        () => {}, (value: string) => value);
+        () => {}, escapeHtmlTextAndAttr);
     const style = document.createElement("style");
     style.textContent = css + ".fn__none {display:none} .av__row {display:flex}";
     document.head.append(style);
@@ -278,7 +281,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
         "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
         "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", "checkFold", "openFileById", "Constants",
-        blockSource + "\nreturn renderAVAttribute;")(
+        "escapeHtmlTextAndAttr", blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
@@ -292,7 +295,18 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         (_app: unknown, link: string) => openedLinks.push(link),
         (_id: string, callback: (zoomIn: boolean, action: string[], isRoot: boolean) => void) =>
             callback(foldedTarget, foldedTarget ? ["all"] : ["context", "scroll"], false),
-        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"});
+        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"}, escapeHtmlTextAndAttr);
+    const xssPayload = "<img src=x onerror=\"globalThis.__siyuanAVPanelXss=1\">";
+    tables[0].avName = xssPayload;
+    const xssBody = document.createElement("div");
+    xssBody.className = "custom-attr protyle-db-attr__body";
+    document.body.append(xssBody);
+    renderAttributes(xssBody, "document", {disabled: false});
+    const xssHeader = xssBody.querySelector<HTMLElement>('[data-av-id="database-a"] .custom-attr__avheader .fn__ellipsis');
+    check.equal(xssBody.querySelector("img"), null, "database names must not become elements in the attribute panel header");
+    check.equal(xssHeader.textContent, xssPayload, "database names are shown as text in the attribute panel header");
+    xssBody.remove();
+    tables[0].avName = "database-a";
     for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
         const body = document.createElement("div");
         body.className = className;
@@ -392,7 +406,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     return "Attribute panel visibility cases passed";
 };
 
-test("attribute panel field rules preserve global defaults and reveal hidden fields for editing", {
+test("attribute panel field rules preserve global defaults, reveal hidden fields, and escape database names", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -421,9 +435,12 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
     const calendarSource = transpileModule(readFileSync(path.resolve(__dirname, "dateCalendarMenu.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const escapeSource = transpileModule(readFileSync("src/util/escape.ts", "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + "," + JSON.stringify(escapeSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

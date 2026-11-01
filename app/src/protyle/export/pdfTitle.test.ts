@@ -4,6 +4,7 @@ import * as path from "node:path";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {toScriptLiteral} from "./scriptLiteral";
 
 test("PDF preview titles use each language's unnamed document label and preserve named titles", async () => {
     const text = readFileSync(path.join(__dirname, "index.ts"), "utf8");
@@ -32,6 +33,7 @@ test("PDF preview titles use each language's unnamed document label and preserve
             getSnippetJS: () => "",
             getIconScript: () => "",
             getExportLanguages: () => "{}",
+            toScriptLiteral,
             headingPageBreakControls: () => "",
             fetchPost: (url: string, data: {content: string}) => {
                 assert.equal(url, "/api/export/exportTempContent");

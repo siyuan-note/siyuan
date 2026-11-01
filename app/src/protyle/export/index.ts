@@ -19,6 +19,7 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
 import {normalizeHeadingPageBreakLevels} from "./headingPageBreaks";
 import {headingPageBreakControls} from "./headingPageBreaksUI";
+import {toScriptLiteral} from "./scriptLiteral";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 
 const getExportLanguages = () => {
@@ -30,9 +31,7 @@ const getExportLanguages = () => {
     ]);
     const languages = Object.fromEntries(Object.entries(window.siyuan.languages)
         .filter(([key]) => keys.has(key) || key.startsWith("listMindmap")));
-    // 转义脚本边界和行分隔符，保留各语言文案中的引号与换行。
-    return JSON.stringify(languages).replace(/</g, "\\u003c")
-        .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+    return toScriptLiteral(languages);
 };
 
 const getPluginStyle = async () => {
@@ -767,7 +766,7 @@ ${getIconScript(servePath)}
         Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
         await Protyle.renderExportJSEmbeds(wysElement, {
             disabled: ${window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel},
-            disabledTip: decodeURIComponent(${JSON.stringify(encodeURIComponent(window.siyuan.languages.safeModeJSTip))}),
+            disabledTip: ${toScriptLiteral(window.siyuan.languages.safeModeJSTip)},
             rootID: "${id}",
             headingMode: ${window.siyuan.config.editor.headingEmbedMode},
         }, async (url, data) => {
@@ -812,7 +811,7 @@ ${getIconScript(servePath)}
             alert(response.msg)
             return;
         }
-        document.title = response.data.name || decodeURIComponent(${JSON.stringify(encodeURIComponent(window.siyuan.languages._kernel[16]))});
+        document.title = response.data.name || ${toScriptLiteral(window.siyuan.languages._kernel[16])};
         window.siyuan = {
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
@@ -987,7 +986,7 @@ ${getIconScript(servePath)}
             // https://www.electronjs.org/docs/latest/api/web-contents#contentsprinttopdfoptions
             // https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-printToPDF
             return {
-                title: "${window.siyuan.languages.export} PDF",
+                title: ${toScriptLiteral(`${window.siyuan.languages.export} PDF`)},
                 pdfOptions: {
                     printBackground: true,
                     landscape: actionElement.querySelector("#landscape").checked,
@@ -1045,11 +1044,11 @@ ${getIconScript(servePath)}
                 }
             }
             const {ipcRenderer}  = require("electron");
-            const defaultPath = decodeURIComponent(${JSON.stringify(encodeURIComponent(defaultExportPath))});
+            const defaultPath = ${toScriptLiteral(defaultExportPath)};
             const dialogOptions = {
                 cmd: "showOpenDialog",
-                title: "${window.siyuan.languages.export} PDF",
-                buttonLabel: ${JSON.stringify(window.siyuan.languages.save)},
+                title: ${toScriptLiteral(`${window.siyuan.languages.export} PDF`)},
+                buttonLabel: ${toScriptLiteral(window.siyuan.languages.save)},
                 properties: ["createDirectory", "openDirectory"],
             };
             if (defaultPath) {

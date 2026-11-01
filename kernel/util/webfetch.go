@@ -88,14 +88,9 @@ func readWebFetchResponse(resp *http.Response, rawURL, format string) (string, e
 	}
 
 	if !isText {
-		importDir := filepath.Join(TempDir, "import")
-		if merr := os.MkdirAll(importDir, 0755); merr != nil {
-			return "", errors.New("create import dir failed: " + merr.Error())
-		}
-		filename := extractFilename(rawURL, contentType)
-		filePath := filepath.Join(importDir, filename)
-		if werr := os.WriteFile(filePath, body, 0644); werr != nil {
-			return "", errors.New("write file failed: " + werr.Error())
+		filePath, werr := saveImportedFile(rawURL, contentType, body)
+		if werr != nil {
+			return "", werr
 		}
 		return fmt.Sprintf("Saved to: %s (%d bytes)", filePath, len(body)), nil
 	}
@@ -168,14 +163,51 @@ func extractFilename(rawURL, contentType string) string {
 	if err != nil {
 		return gulu.Rand.String(7) + extByContentType(contentType)
 	}
-	name := path.Base(u.Path)
-	if name == "" || name == "." || name == "/" {
+	// 反斜杠在 Windows 上是路径分隔符，而 path.Base 只按 "/" 切分，先归一再取基名。
+	name := path.Base(strings.ReplaceAll(u.Path, `\`, "/"))
+	if !isValidImportName(name) {
 		name = gulu.Rand.String(7) + extByContentType(contentType)
 	}
 	if filepath.Ext(name) == "" {
 		name += extByContentType(contentType)
 	}
 	return name
+}
+
+// saveImportedFile 把下载内容写入 temp/import 后返回文件路径。
+// 文件名可能来自远端 URL，写入前必须确认最终路径仍在该目录内，避免写出目录。
+func saveImportedFile(rawURL, contentType string, body []byte) (string, error) {
+	importDir := filepath.Join(TempDir, "import")
+	if err := os.MkdirAll(importDir, 0755); err != nil {
+		return "", errors.New("create import dir failed: " + err.Error())
+	}
+	filePath := filepath.Join(importDir, extractFilename(rawURL, contentType))
+	if !gulu.File.IsSubPath(importDir, filePath) {
+		return "", errors.New("import path is not sub path of import dir")
+	}
+	if err := os.WriteFile(filePath, body, 0644); err != nil {
+		return "", errors.New("write file failed: " + err.Error())
+	}
+	return filePath, nil
+}
+
+// isValidImportName 判断下载文件名是否为单个普通文件名，拒绝分隔符、上级目录和 Windows 特殊名称。
+func isValidImportName(name string) bool {
+	if name == "" || name == "." || name == ".." || name != strings.TrimSpace(name) ||
+		strings.ContainsAny(name, `/\:`) || strings.Contains(name, "..") || strings.HasSuffix(name, ".") {
+		return false
+	}
+	for _, r := range name {
+		if r < 0x20 || r == 0x7f {
+			return false
+		}
+	}
+	switch strings.ToUpper(strings.TrimSuffix(name, filepath.Ext(name))) {
+	case "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+		"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9":
+		return false
+	}
+	return true
 }
 
 func extByContentType(contentType string) string {

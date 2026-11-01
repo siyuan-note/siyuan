@@ -15,8 +15,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -349,14 +347,9 @@ func HTTPRequest(method, rawURL string, headers map[string]string, body string) 
 
 	// 二进制响应落盘，返回文件路径，供智能体按需进一步处理。
 	if !isTextContentType(contentType) {
-		importDir := filepath.Join(TempDir, "import")
-		if merr := os.MkdirAll(importDir, 0755); merr != nil {
-			return statusCode, contentType, "", errors.New("create import dir failed: " + merr.Error())
-		}
-		filename := extractFilename(rawURL, contentType)
-		filePath := filepath.Join(importDir, filename)
-		if werr := os.WriteFile(filePath, respBody, 0644); werr != nil {
-			return statusCode, contentType, "", errors.New("write file failed: " + werr.Error())
+		filePath, werr := saveImportedFile(rawURL, contentType, respBody)
+		if werr != nil {
+			return statusCode, contentType, "", werr
 		}
 		return statusCode, contentType, fmt.Sprintf("Saved to: %s (%d bytes)", filePath, len(respBody)), nil
 	}

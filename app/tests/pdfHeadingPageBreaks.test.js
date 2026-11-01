@@ -109,7 +109,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     const config = {appearance: {themeLight: "daylight"}, editor: {}, export: {addTitle: true}, system: {}};
     window.siyuan = {config, storage: {pdf: {paged: true, scale: 1, mergeSubdocs: false,
         mergeDocHeadingMode: "flat", mergeContentHeadingMode: "preserve", headingPageBreakLevels: [2, 6]}},
-    languages: new Proxy({}, {get: (_object, key) => String(key)})};
+    languages: new Proxy({}, {get: (_object, key) => key === "_kernel" ? {16: "Untitled"} : String(key)})};
     const renderPDF = new Function("Constants", "ipcRenderer", "getAvailableExportPath", "getHostCapabilities",
         "getIconScript", "getSnippetCSS", "getSnippetJS", "getExportLanguages", "setInlineStyle", "getCustomFontStyle",
         "getPluginStyle", "fetchPost", "headingPageBreakControls", desktopSource + ";return renderPDF;")(
@@ -189,7 +189,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
 
     const persist = new Function("Constants", "setStorageVal", "ipcData", persistSource);
     const ipcData = {titleImage: false, pdfOptions: {margins: {}}, headingPageBreakLevels: [2, 6]};
-    window.siyuan = {config, storage: {pdf: {}}, languages: {}};
+    window.siyuan = {config, storage: {pdf: {}}, languages: {_kernel: {16: "Untitled"}}};
     persist(Constants, (key, value) => saved = {key, value}, ipcData);
     check.equal(saved.value.titleImage, false);
     await renderPDF("root");
@@ -198,7 +198,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     persist(Constants, () => {}, {...ipcData, titleImage: undefined});
     check.equal(window.siyuan.storage.pdf.titleImage, true, "Older export messages preserve the default");
 
-    window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {}};
+    window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {_kernel: {16: "Untitled"}}};
     const onExport = new Function("Constants", "isInMobileApp", "getScreenWidth", "getThemeMode", "setInlineStyle",
         "getPluginStyle", "getSnippetCSS", "getSnippetJS", "getIconScript", "getExportLanguages", "normalizeHeadingPageBreakLevels",
         mobileSource + ";return onExport;")(Constants, () => true, () => 390, () => "light", async () => "",
@@ -215,7 +215,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
 
     let mobileRequest;
     let printed;
-    window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {}};
+    window.siyuan = {config, storage: {pdf: {headingPageBreakLevels: [2, 6]}}, languages: {_kernel: {16: "Untitled"}}};
     window.JSAndroid = {print: (name, content) => printed = {name, content}};
     window.siyuan.storage.pdf.titleImage = false;
     const mobilePrint = new Function("openHeadingPageBreakDialog", "showMessage", "Constants", "id", "fetchPost",

@@ -15,7 +15,7 @@ const createPreview = mode => {
         "getIconScript", "getSnippetCSS", "getSnippetJS", "getExportLanguages", "setInlineStyle", "getCustomFontStyle",
         "getPluginStyle", "fetchPost", "headingPageBreakControls", "Date", compiled + ";return renderPDF;")(
         {siyuan: {config: {appearance: {themeLight: "daylight"}, editor: {}, export: {}, system: {}},
-            storage: {pdf: {paged: true}}, languages: {}}},
+            storage: {pdf: {paged: true}}, languages: {_kernel: {16: "Untitled"}}}},
         {LOCAL_EXPORTPDF: "pdf", SIYUAN_VERSION: "test", NODE_ENV: mode}, {invoke: async () => 0},
         async () => "", () => ({}), () => "", () => "", () => "", () => "{}", async () => "", async () => "",
         async () => "", (_url, data) => html = data.content, () => "", {now: () => ++time});

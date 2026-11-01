@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, tabSource: string, styles: Record<string, string>) => {
+const browserCases = async (source: string, tabSource: string, styles: Record<string, string>, themes: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const requests: Array<{data: {id: string, notebook: string}, reply: (value: unknown) => void}> = [];
     let renders = 0;
@@ -166,6 +166,8 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
                 const rich = list.lastElementChild.firstElementChild as HTMLElement;
                 for (const content of ["<span>Aligned</span>", '<span data-type="strong em">Aligned</span> <span data-type="code">Code</span>']) {
                     render(rich, "document", "encrypted-box", () => true, result(content).data);
+                    check.equal(getComputedStyle(rich).fontSize, getComputedStyle(plain).fontSize,
+                        `${entry} ${labelClass} at ${fontSize}px uses the same default font size for rich and plain titles`);
                     check.ok(Math.abs(textOffset(rich) - textOffset(plain)) <= 1,
                         `${entry} ${labelClass} at ${fontSize}px keeps rich and plain text vertically aligned: ` +
                         JSON.stringify({rich: textOffset(rich), plain: textOffset(plain)}));
@@ -196,6 +198,40 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
             document.body.append(container);
             const preview = container.firstElementChild.firstElementChild as HTMLElement;
             render(preview, "document", "encrypted-box", () => true, result(sample).data);
+            const plain = document.createElement("span");
+            plain.className = labelClass;
+            plain.textContent = "Plain title";
+            container.firstElementChild.append(plain);
+            const themeStyle = document.createElement("style");
+            const snippet = document.createElement("style");
+            document.head.append(themeStyle, snippet);
+            for (const [theme, themeCSS] of Object.entries(themes)) {
+                themeStyle.textContent = themeCSS;
+                for (const outline of labelClass === "b3-list-item__text" ? [false, true] : [false]) {
+                    preview.classList.toggle("outline-document-title", outline);
+                    const defaultFontSize = getComputedStyle(plain).fontSize;
+                    for (const fontSize of ["", "15.5px", "20px", ""]) {
+                        snippet.textContent = labelClass && fontSize ? `.${labelClass} {font-size: ${fontSize}}` : "";
+                        const expected = getComputedStyle(plain).fontSize;
+                        if (labelClass === "b3-list-item__text") {
+                            check.equal(expected, fontSize || defaultFontSize,
+                                `${entry} ${theme} tree labels apply single-class font overrides`);
+                        }
+                        check.equal(getComputedStyle(preview).fontSize, expected,
+                            `${entry} ${theme} ${labelClass} outline=${outline} respects single-class font overrides and disabling snippets`);
+                        check.equal(getComputedStyle(preview.querySelector('[data-type="strong"]')).fontSize, expected);
+                        for (const type of ["sub", "sup"]) {
+                            check.ok(Math.abs(parseFloat(getComputedStyle(preview.querySelector(`[data-type="${type}"]`)).fontSize) -
+                                parseFloat(expected) * 0.75) < 0.01, "inline scripts retain their relative font sizes");
+                        }
+                        check.equal(getComputedStyle(preview.querySelector('[data-type="strong"]')).fontWeight, "700");
+                    }
+                }
+            }
+            preview.classList.remove("outline-document-title");
+            themeStyle.remove();
+            snippet.remove();
+            plain.remove();
             const html = preview.innerHTML;
             for (const width of [900, 120, 80, 280, 900]) {
                 container.style.width = `${width}px`;
@@ -220,7 +256,7 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
     return "Outline document title cases passed";
 };
 
-test("document title previews preserve vertical alignment, native inline content and notebook-bound request lifetimes", {
+test("document title previews preserve custom font sizes, vertical alignment, inline content and notebook-bound request lifetimes", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -232,9 +268,13 @@ test("document title previews preserve vertical alignment, native inline content
     }).outputText;
     const css = (file: string) => compile(path.join(__dirname, file), {logger: {warn() {}, debug() {}}}).css;
     const styles = {base: css("../../assets/scss/base.scss"), mobile: css("../../assets/scss/mobile.scss")};
+    const themes = {
+        daylight: readFileSync(path.join(__dirname, "../../../appearance/themes/daylight/theme.css"), "utf8"),
+        midnight: readFileSync(path.join(__dirname, "../../../appearance/themes/midnight/theme.css"), "utf8"),
+    };
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-outline-title-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + "," + JSON.stringify(styles) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + "," + JSON.stringify(styles) + "," + JSON.stringify(themes) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

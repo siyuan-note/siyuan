@@ -821,6 +821,12 @@
   }
 }
 
+// 标题预览默认继承所在界面的字号，单类主题或片段规则可直接覆盖。
+:where(.b3-typography).outline-document-title,
+:where(.b3-typography).document-title-preview {
+  font-size: inherit;
+}
+
 .protyle {
 
   &-icons {

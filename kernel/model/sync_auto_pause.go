@@ -19,7 +19,7 @@ import (
 
 // recordAutoSyncFailure 用户取消和本地编辑竞态不属于云端连续失败。
 func recordAutoSyncFailure(err error) {
-	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) {
+	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) || errors.Is(err, errSyncCheckoutBusy) {
 		return
 	}
 	autoSyncErrCount.Add(1)

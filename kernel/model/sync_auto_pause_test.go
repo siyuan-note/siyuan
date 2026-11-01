@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -30,6 +31,7 @@ func TestAutoSyncPauseExcludesCancellationAndPreparationRetry(t *testing.T) {
 	for range 10 {
 		recordAutoSyncFailure(errors.Join(errors.New("network request stopped"), context.Canceled))
 		recordAutoSyncFailure(dejavu.ErrIndexFileChanged)
+		recordAutoSyncFailure(fmt.Errorf("wrapped: %w", errSyncCheckoutBusy))
 	}
 	if autoSyncErrCount.Load() != 7 {
 		t.Fatal("user cancellation or active editing triggered automatic backoff")

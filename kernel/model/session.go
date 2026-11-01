@@ -214,9 +214,9 @@ func CheckReadonly(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		// 同步控制接口会在实际应用阶段取得写租约，不跨整轮网络请求持有读租约。
+		// 同步控制接口在应用阶段取得写租约，MCP 在实际工具调用期间取得读租约。
 		switch c.Request.URL.Path {
-		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks":
+		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks", "/mcp":
 			dataImportAccess.RUnlock()
 			released = true
 		}

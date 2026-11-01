@@ -273,10 +273,10 @@ func TestSyncCheckoutPreparationRetriesWithAdmittedWrite(t *testing.T) {
 	dataImportAccess.RLock()
 	err := task.prepareApply()
 	dataImportAccess.RUnlock()
-	if !errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
+	if !errors.Is(err, errSyncCheckoutBusy) || errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
 		t.Fatalf("preparation waited on a write holding the sync lock: %v", err)
 	}
-	if !strings.Contains(err.Error(), "Write requests are still running; retry later") {
+	if !strings.Contains(formatRepoErrorMsg(err), "Write requests are still running; retry later") {
 		t.Fatalf("write contention was reported as an editor save failure: %v", err)
 	}
 }

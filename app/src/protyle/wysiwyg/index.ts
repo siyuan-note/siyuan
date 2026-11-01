@@ -409,6 +409,7 @@ export class WYSIWYG {
     private preventInput: boolean;
     private copyAsRichText = false;
     private mouseDownTarget: EventTarget | null = null;
+    private mouseDownWithMeta = false;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, {
         callback: () => void | Promise<void>;
@@ -1264,6 +1265,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            this.mouseDownWithMeta = event.button === 0 && isOnlyMeta(event);
             if (this.tableControl?.hasTouchSelection() && (event.target as Element).closest("td, th")) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -4893,6 +4895,8 @@ export class WYSIWYG {
         });
         let mobileBlur = false;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+            const mouseDownWithMeta = this.mouseDownWithMeta;
+            this.mouseDownWithMeta = false;
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -5260,7 +5264,8 @@ export class WYSIWYG {
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
-                if (event.shiftKey || event.altKey || ctrlIsPressed) {
+                // Ctrl 或 Command 须在鼠标按下时已按住，避免划选文字后准备复制时触发跳转。
+                if (event.shiftKey || event.altKey || ctrlIsPressed && mouseDownWithMeta && event.detail > 0) {
                     const embedId = embedItemElement.getAttribute("data-id");
                     checkFold(embedId, (zoomIn, action) => {
                         /// #if MOBILE

@@ -107,7 +107,7 @@ const rendererSource = () => {
         condition => condition === "event.altKey", 'toggleListFold(protyle, foldElement, "children")')};
         export const clickDot = (protyle, actionElement) => ${extractClick("wysiwyg/index",
         condition => condition === "event.altKey && !protyle.disabled")};
-        export const clickEmbed = (protyle, event) => {
+        export const clickEmbed = (protyle, event, mouseDownWithMeta = false) => {
             const ctrlIsPressed = event.ctrlKey || event.metaKey;
             const checkFold = (id, callback) => callback(false, []);
             const openFileById = options => protyle.opened.push(options);
@@ -459,9 +459,9 @@ const runCases = async () => {
         }
         byID("embedded-list").setAttribute("data-subtype", marker === "number" ? "o" : marker === "task" ? "t" : "u");
         const click = (target, modifiers = {}) => clickEmbed(protyle, {
-            target, button: 0, altKey: true, shiftKey: false, ctrlKey: false, metaKey: false,
+            target, button: 0, detail: 1, altKey: true, shiftKey: false, ctrlKey: false, metaKey: false,
             stopPropagation() {}, preventDefault() {}, ...modifiers,
-        });
+        }, !!(modifiers.ctrlKey || modifiers.metaKey));
         const caret = byID("embedded-after").querySelector('[contenteditable="true"]').firstChild;
         getSelection().collapse(caret, 2);
         const mouseDown = new MouseEvent("mousedown", {button: 0, altKey: true, bubbles: true, cancelable: true});

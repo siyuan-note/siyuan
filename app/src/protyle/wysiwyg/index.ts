@@ -1143,7 +1143,6 @@ export class WYSIWYG {
                         .map(item => getPlainText(item as HTMLElement).trimEnd())
                         .filter(Boolean).join("\n") : undefined;
                     const textWithoutAttr = this.clearAttrContent(tempElement);
-                    this.emojiToMd(tempElement);
                     const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
                     if (inlineMathElement) {
                         // 表格内复制数学公式 https://ld246.com/article/1631708573504
@@ -1151,6 +1150,8 @@ export class WYSIWYG {
                     } else {
                         html = tempElement.innerHTML;
                     }
+                    // 内部剪贴板保留表情节点，仅在提取纯文本时转为别名；跨块粘贴不会重新解析 Markdown。
+                    this.emojiToMd(tempElement);
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
                     textPlain = crossBlockTextPlain ?? getTextWithoutSemanticMarkers(tempElement);
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {

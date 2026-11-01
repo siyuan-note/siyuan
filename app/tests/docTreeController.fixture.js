@@ -46,7 +46,7 @@ exports.cases = async sources => {
     const file = (id, parent = "", children = 0) => ({id, name: id, path: `/${parent ? parent + "/" : ""}${id}.sy`,
         subFileCount: children, icon: "", name1: "", alias: "", memo: "", bookmark: "", count: 0,
         hMtime: "", hCtime: "", hSize: ""});
-    const make = (size = 100000) => {
+    const make = (size = 100000, titleTooltips = false) => {
         const directories = new Map([["", Array.from({length: size}, (_, index) => file("d" + index))]]);
         const requests = [];
         const locates = [];
@@ -90,14 +90,18 @@ exports.cases = async sources => {
                 row.dataset.type = item.kind === "notebook" ? "navigation-root" : "navigation-file";
                 row.innerHTML = '<span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__text"></span>';
                 row.querySelector(".b3-list-item__text").textContent = item.name;
+                if (titleTooltips) {
+                    row.querySelector(".b3-list-item__text").classList.add("ariaLabel");
+                    row.querySelector(".b3-list-item__text").setAttribute("aria-label", `${item.file?.hMtime || ""} ${item.file?.hSize || ""}`);
+                }
                 return row;
             }, onSelectionProgress: (loaded, total, cancel) => progress.push({loaded, total, cancel}),
         });
         return {controller, element, directories, requests, locates, source, progress,
             revise: value => { revision = value; }, destroy: () => { controller.destroy(); element.remove(); }};
     };
-    {
-        const fixture = make(128);
+    for (const titleTooltips of [false, true]) {
+        const fixture = make(128, titleTooltips);
         const {controller, directories, element} = fixture;
         directories.get("")[0].titleFormat = "inline-ast";
         directories.get("")[0].titleRevision = "r1";
@@ -106,9 +110,38 @@ exports.cases = async sources => {
         await controller.toggle("notebook:box", true);
         await frame();
         check.deepEqual(titleReads.map(item => item.data.id), ["d0"], "only mounted rich titles request a preview");
+        const pendingTitle = controller.getMountedElement("notebook:box/d0").querySelector(".b3-list-item__text");
+        controller.handleMessage({cmd: "reloadDocInfo", data: {box: "box", rootID: "d0", hMtime: "body edit", hSize: "1 KB"}});
+        await frame();
+        check.equal(controller.getMountedElement("notebook:box/d0").querySelector(".b3-list-item__text"), pendingTitle,
+            "body metadata refresh keeps the title node while its source request is pending");
+        check.equal(titleReads.length, 1, "body edits do not restart a pending title read");
         const response = text => ({code: 0, data: {id: "d0", notebook: "box", format: "inline-ast", text,
-            blockDOM: `<div data-type="NodeParagraph"><div contenteditable="true"><span data-type="strong">${text}</span></div></div>`}});
+            blockDOM: `<div data-type="NodeParagraph"><div contenteditable="true"><span data-type="strong">${text}</span><span data-type="inline-math" data-render="true">x²</span><img alt="title image"></div></div>`}});
         titleReads.shift().reply(response("Styled title"));
+        check.equal(pendingTitle.querySelector('[data-type="strong"]').textContent, "Styled title",
+            "a pending preview still renders after the surrounding row changes");
+        const titleChildren = Array.from(pendingTitle.childNodes);
+        const titleChanges = [];
+        const titleObserver = new MutationObserver(changes => titleChanges.push(...changes));
+        titleObserver.observe(pendingTitle, {childList: true, subtree: true});
+        for (let index = 0; index < 3; index++) {
+            controller.handleMessage({cmd: "reloadDocInfo", data: {box: "box", rootID: "d0", titleFormat: "inline-ast",
+                titleRevision: "r1", hMtime: `body edit ${index}`, hSize: `${index + 2} KB`, count: index + 1}});
+            await frame();
+            const currentTitle = controller.getMountedElement("notebook:box/d0").querySelector(".b3-list-item__text");
+            check.equal(currentTitle, pendingTitle, "body saves keep the rendered title node");
+            check.deepEqual(Array.from(currentTitle.childNodes), titleChildren, "body saves preserve styled text, formula and image nodes");
+            check.ok(currentTitle.classList.contains("document-title-preview"));
+            if (titleTooltips) {
+                check.equal(currentTitle.getAttribute("aria-label"), `body edit ${index} ${index + 2} KB`,
+                    "the retained desktop title receives the current metadata tooltip");
+                check.ok(currentTitle.classList.contains("ariaLabel"));
+            }
+            check.equal(titleReads.length, 0, "unchanged titles need no additional source or formula rendering");
+        }
+        titleObserver.disconnect();
+        check.equal(titleChanges.length, 0, "body edits never replace rich title content with a plain summary");
         const focusedRow = controller.getMountedElement("notebook:box/d0");
         check.equal(focusedRow.querySelector('[data-type="strong"]').textContent, "Styled title");
         focusedRow.focus();

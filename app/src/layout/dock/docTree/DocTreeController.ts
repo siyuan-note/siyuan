@@ -1371,27 +1371,45 @@ export class DocTreeController {
             const item = projected?.item;
             if (item) {
                 const signature = JSON.stringify([item.file, item.notebook, item.name, item.path, item.index, item.setSize, item.unavailable]);
+                const titleVersion = JSON.stringify([item.file?.titleFormat, item.file?.titleRevision, item.name, item.file?.titleEmpty]);
                 let mounted = this.mounted.get(item.occurrenceKey);
                 if (!mounted || (mounted.signature !== signature && !mounted.element.contains(document.activeElement) &&
                     item.occurrenceKey !== this.dragging)) {
                     if (mounted) { this.observer.unobserve(mounted.element); }
-                    mounted = {element: this.options.renderRow(item), signature};
+                    const element = this.options.renderRow(item);
+                    const previousTitle = mounted?.element.querySelector<HTMLElement>(".b3-list-item__text");
+                    const nextTitle = element.querySelector(".b3-list-item__text");
+                    let retainedTitleVersion: string;
+                    if (item.file?.titleFormat === "inline-ast" && mounted?.titleVersion === titleVersion && previousTitle && nextTitle) {
+                        // 正文元数据刷新时保留标题节点和在途请求，提示属性使用当前行的值。
+                        const rich = previousTitle.classList.contains("document-title-preview");
+                        Array.from(previousTitle.attributes).forEach(attribute => {
+                            if (!["data-document-title-id", "data-notebook-id", "data-protyle-lite-render"].includes(attribute.name)) {
+                                previousTitle.removeAttribute(attribute.name);
+                            }
+                        });
+                        Array.from(nextTitle.attributes).forEach(attribute => previousTitle.setAttribute(attribute.name, attribute.value));
+                        if (rich) { previousTitle.classList.add("b3-typography", "document-title-preview"); }
+                        nextTitle.replaceWith(previousTitle);
+                        retainedTitleVersion = titleVersion;
+                    }
+                    mounted = {element, signature, titleVersion: retainedTitleVersion};
                     this.mounted.set(item.occurrenceKey, mounted);
                 }
-                const titleVersion = JSON.stringify([item.file?.titleFormat, item.file?.titleRevision, item.name, item.file?.titleEmpty]);
                 if (mounted.titleVersion !== titleVersion) {
                     mounted.titleVersion = titleVersion;
                     const row = mounted.element;
+                    const title = row.querySelector<HTMLElement>(".b3-list-item__text");
                     queueMicrotask(() => {
-                        if (!row.isConnected || this.disposed || this.mounted.get(item.occurrenceKey)?.element !== row ||
-                            this.mounted.get(item.occurrenceKey)?.titleVersion !== titleVersion) return;
+                        const isCurrent = () => !this.disposed &&
+                            this.mounted.get(item.occurrenceKey)?.element.querySelector(".b3-list-item__text") === title &&
+                            this.mounted.get(item.occurrenceKey)?.titleVersion === titleVersion;
+                        if (!title?.isConnected || !isCurrent()) return;
                         if (item.kind === "document" && item.file?.titleFormat === "inline-ast") {
-                            renderDocumentTitlePreview(row.querySelector(".b3-list-item__text"), item.id, item.notebookId,
-                                () => !this.disposed && this.mounted.get(item.occurrenceKey)?.element === row &&
-                                    this.mounted.get(item.occurrenceKey)?.titleVersion === titleVersion);
+                            renderDocumentTitlePreview(title, item.id, item.notebookId, isCurrent);
                         } else if (row.querySelector(".document-title-preview")) {
-                            renderDocumentTitlePreview(row.querySelector(".b3-list-item__text"), item.id, item.notebookId,
-                                () => !this.disposed, {id: item.id, notebook: item.notebookId, format: "plain",
+                            renderDocumentTitlePreview(title, item.id, item.notebookId,
+                                isCurrent, {id: item.id, notebook: item.notebookId, format: "plain",
                                     text: item.name, empty: !!item.file?.titleEmpty, blockDOM: ""});
                         }
                     });

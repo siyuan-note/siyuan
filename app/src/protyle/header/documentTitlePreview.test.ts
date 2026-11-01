@@ -5,9 +5,10 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
+import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, tabSource: string) => {
+const browserCases = async (source: string, tabSource: string, styles: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const requests: Array<{data: {id: string, notebook: string}, reply: (value: unknown) => void}> = [];
     let renders = 0;
@@ -113,10 +114,52 @@ const browserCases = async (source: string, tabSource: string) => {
     render(label, "document", "encrypted-box", () => true, result('<span data-type="em">Already loaded</span>').data);
     await Promise.resolve();
     check.equal(requests.length, 0, "the editor's source update cancels redundant tab reads in the same turn");
+    const center = (bounds: DOMRect) => bounds.top + bounds.height / 2;
+    const textOffset = (label: HTMLElement) => {
+        const range = document.createRange();
+        range.selectNodeContents(label.firstChild);
+        return center(range.getBoundingClientRect()) - center(label.parentElement.getBoundingClientRect());
+    };
+    for (const [entry, css] of Object.entries(styles)) {
+        document.head.innerHTML = `<style>${css}</style>`;
+        document.body.innerHTML = "";
+        for (const [fontSize, rowHeight] of [[14, 28], [20, 40]]) {
+            document.body.style.cssText = `font: ${fontSize}px Arial;--b3-font-size:${fontSize}px;--b3-font-size-editor:72px;` +
+                `--b3-ui-list-height:${rowHeight}px;--b3-ui-tab-min-height:${rowHeight}px`;
+            const containers = [
+                ["b3-list", "b3-list-item", "b3-list-item__text"],
+                entry === "base" ? ["layout-tab-bar", "item", "item__text"] :
+                    ["mobile-tabs", "mobile-tabs__item", "mobile-tabs__item-title"],
+            ];
+            for (const [containerClass, rowClass, labelClass] of containers) {
+                const container = document.createElement("div");
+                container.className = containerClass;
+                container.style.width = "300px";
+                const rows = `<div class="${rowClass}"><span class="${labelClass}"><span>Aligned</span></span></div>` +
+                    `<div class="${rowClass}"><span class="${labelClass}"></span></div>`;
+                container.innerHTML = containerClass === "mobile-tabs" ? `<div class="mobile-tabs__list">${rows}</div>` : rows;
+                document.body.append(container);
+                const list = containerClass === "mobile-tabs" ? container.firstElementChild : container;
+                const plain = list.firstElementChild.firstElementChild as HTMLElement;
+                const rich = list.lastElementChild.firstElementChild as HTMLElement;
+                for (const content of ["<span>Aligned</span>", '<span data-type="strong em">Aligned</span> <span data-type="code">Code</span>']) {
+                    render(rich, "document", "encrypted-box", () => true, result(content).data);
+                    check.ok(Math.abs(textOffset(rich) - textOffset(plain)) <= 1,
+                        `${entry} ${labelClass} at ${fontSize}px keeps rich and plain text vertically aligned: ` +
+                        JSON.stringify({rich: textOffset(rich), plain: textOffset(plain)}));
+                    check.ok(Math.abs(rich.parentElement.getBoundingClientRect().height - plain.parentElement.getBoundingClientRect().height) <= 1,
+                        `${entry} ${labelClass} at ${fontSize}px preserves row height: ` +
+                        JSON.stringify({rich: rich.parentElement.getBoundingClientRect().height,
+                            plain: plain.parentElement.getBoundingClientRect().height}));
+                }
+                container.remove();
+            }
+        }
+    }
     return "Outline document title cases passed";
 };
 
-test("document title previews preserve native inline content, literal names and notebook-bound request lifetimes", {
+test("document title previews preserve vertical alignment, native inline content and notebook-bound request lifetimes", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -126,9 +169,11 @@ test("document title previews preserve native inline content, literal names and 
     const tabSource = transpileModule(readFileSync(path.join(__dirname, "../../layout/Tab.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
+    const css = (file: string) => compile(path.join(__dirname, file), {logger: {warn() {}, debug() {}}}).css;
+    const styles = {base: css("../../assets/scss/base.scss"), mobile: css("../../assets/scss/mobile.scss")};
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-outline-title-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + "," + JSON.stringify(styles) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

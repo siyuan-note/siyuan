@@ -1353,6 +1353,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 					}
 					if toolInputErr == nil {
+						toolInputErr = preflightCapabilitySnapshot(registration, action)
+					}
+					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
 					}
@@ -1868,6 +1871,15 @@ func needsCapabilitySnapshot(registration *capabilityRegistration, action string
 		return false
 	}
 	return needsLocalSnapshot(registration.ModelName, action)
+}
+
+// 本地写入必须先具备快照密钥；在请求确认前返回前置条件，允许本轮继续执行只读工具。
+func preflightCapabilitySnapshot(registration *capabilityRegistration, action string) error {
+	repo := kernelModel.Conf.Repo.Load()
+	if needsCapabilitySnapshot(registration, action) && (repo == nil || len(repo.Key) == 0) {
+		return errors.New(kernelModel.Conf.Language(26))
+	}
+	return nil
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {

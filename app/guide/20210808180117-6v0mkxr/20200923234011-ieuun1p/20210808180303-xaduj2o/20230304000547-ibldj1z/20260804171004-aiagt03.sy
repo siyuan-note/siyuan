@@ -1389,7 +1389,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
+					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. Initialize a local data repository key before requesting workspace writes; no cloud account is required. Without a key, the agent reports this prerequisite before requesting write confirmation, and read operations remain available. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
 				}
 			]
 		},

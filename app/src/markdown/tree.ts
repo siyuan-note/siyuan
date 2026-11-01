@@ -19,12 +19,10 @@ export const createMarkdownTree = (options: {
     onError(): void;
 }) => {
     const {element, toggle, bridge, text} = options;
-    element.innerHTML = `<div class="markdown-tree__heading"><svg aria-hidden="true"><use href="#iconFolder"></use></svg><span></span></div>
-<div class="markdown-tree__notice" role="status"></div>
+    element.innerHTML = `<div class="markdown-tree__notice" role="status"></div>
 <div class="markdown-tree__viewport" role="tree" tabindex="0"><div class="b3-list b3-list--background"></div></div>
 <button type="button" class="b3-button b3-button--text markdown-tree__choose"></button>
 <div class="markdown-tree__resize" role="separator" tabindex="0" aria-orientation="vertical"></div>`;
-    const heading = element.querySelector<HTMLElement>(".markdown-tree__heading span");
     const notice = element.querySelector<HTMLElement>(".markdown-tree__notice");
     const viewport = element.querySelector<HTMLElement>(".markdown-tree__viewport");
     const list = viewport.firstElementChild as HTMLElement;
@@ -189,20 +187,19 @@ export const createMarkdownTree = (options: {
         selected = next.currentNodeId;
         if (!focused || changed) focused = selected || next.rootId;
         state = next;
-        heading.textContent = text("markdownFiles");
         notice.textContent = next.kind === "permission-required" ? text("markdownFolderPermission") :
             next.kind === "blocked" ? text("markdownFolderError") : "";
         notice.hidden = !notice.textContent;
         choose.hidden = next.kind === "ready";
         viewport.hidden = next.kind !== "ready";
         updateVisibility(); project();
-        if (next.kind === "ready" && shown() && expanded.has(next.rootId)) void load(next.rootId, force);
+        if (next.kind === "ready" && shown() && expanded.has(next.rootId)) return load(next.rootId, force);
     };
     const refresh = async () => {
         const sequence = ++refreshSequence;
         try {
             const next = await bridge.state();
-            if (!disposed && sequence === refreshSequence) applyState(next, true);
+            if (!disposed && sequence === refreshSequence) await applyState(next, true);
         } catch {if (!disposed && sequence === refreshSequence) {notice.hidden = false; notice.textContent = text("markdownFolderError"); choose.hidden = false;}}
     };
     const chooseRoot = async () => {
@@ -215,7 +212,7 @@ export const createMarkdownTree = (options: {
             const next = await bridge.chooseRoot();
             if (!disposed && next.kind !== "cancelled") {
                 // 宿主可能先通知目录变化再返回选择结果；刷新后的数据仍保留用户展开面板的意图。
-                if (sequence === refreshSequence) applyState(next, true);
+                if (sequence === refreshSequence) await applyState(next, true);
                 else await refresh();
                 if (disposed) return;
                 if (drawer()) drawerOpen = true; else desktopVisible = true;
@@ -246,11 +243,17 @@ export const createMarkdownTree = (options: {
         if (retry && !frozen) {children.delete(retry.dataset.retry); void load(retry.dataset.retry); return;}
         const item = (event.target as Element).closest<HTMLElement>("[data-row]");
         if (!item || !(event.target as Element).closest("[data-node-id]")) return;
-        viewport.focus(); void activate(rows[Number(item.dataset.row)]);
+        const row = rows[Number(item.dataset.row)];
+        viewport.focus(); void activate(row);
     }, {signal});
     viewport.addEventListener("scroll", () => {cancelAnimationFrame(frame); frame = requestAnimationFrame(renderWindow);}, {passive: true, signal});
-    viewport.addEventListener("focus", renderWindow, {signal});
-    viewport.addEventListener("blur", renderWindow, {signal});
+    const updateFocus = () => {
+        const active = document.activeElement === viewport;
+        viewport.querySelectorAll<HTMLElement>("[data-node-id]").forEach(item =>
+            item.classList.toggle("markdown-tree__row--focused", active && item.dataset.nodeId === focused));
+    };
+    viewport.addEventListener("focus", updateFocus, {signal});
+    viewport.addEventListener("blur", updateFocus, {signal});
     viewport.addEventListener("keydown", event => {
         if (frozen) return;
         const navigable = rows.filter(row => row.node);
@@ -312,8 +315,10 @@ export const createMarkdownTree = (options: {
     const resizeObserver = new ResizeObserver(() => {updateVisibility(); renderWindow();});
     resizeObserver.observe(viewport);
     narrow.addEventListener("change", () => {updateVisibility(); renderWindow(); if (shown()) void refresh();}, {signal});
-    updateVisibility(); void refresh();
+    updateVisibility();
+    const ready = refresh();
     return {
+        ready,
         refresh,
         chooseRoot,
         freeze(value: boolean) {frozen = value; element.inert = value; toggle.disabled = value; updateVisibility();},

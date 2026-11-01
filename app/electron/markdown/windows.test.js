@@ -36,6 +36,12 @@ const fixture = async (t, options = {}) => {
         }
         isDestroyed() { return this.destroyed || false; }
         isMinimized() { return false; }
+        isMaximized() { return this.maximized || false; }
+        isFullScreen() { return this.fullscreen || false; }
+        minimize() { this.minimized = true; }
+        maximize() { this.maximized = true; this.emit("maximize"); }
+        unmaximize() { this.maximized = false; this.emit("unmaximize"); }
+        setTitleBarOverlay(style) { this.overlay = {...this.overlay, ...style}; }
         show() { this.shown = true; }
         focus() { this.focused = true; }
         setMenu() {}
@@ -61,7 +67,7 @@ const fixture = async (t, options = {}) => {
     const manager = createMarkdownWindows({app: {getLocale: () => "en"}, BrowserWindow,
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
         shell: {openExternal: async url => opens.push(url)}, rootDirectory: appDirectory,
-        configDirectory: path.join(directory, "config"), host, onEmpty: () => emptied++});
+        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++});
     const call = (window, action, payload, event = {}) => receive({sender: window.webContents,
         senderFrame: window.webContents.mainFrame, ...event}, action, payload);
     t.after(async () => {
@@ -111,6 +117,37 @@ test("independent windows are sandboxed, deny navigation and reject foreign brid
     await assert.rejects(call(window, "bootstrap", null, {sender: {id: window.webContents.id}}));
     await assert.rejects(call(window, "host:releaseSession", {sessionId: "foreign", targetGeneration: 0}));
     await assert.rejects(call(window, "host:unknown", {}));
+});
+
+test("frameless platform controls stay scoped to their window and preserve close protection", async t => {
+    for (const platform of ["win32", "darwin", "linux"]) {
+        const {manager, call} = await fixture(t, {platform});
+        const window = await manager.open();
+        assert.equal(window.options.title, "SiYuan");
+        assert.equal(window.options.frame, platform === "darwin");
+        assert.equal(window.options.titleBarStyle, "hidden");
+        assert.deepEqual(window.options.titleBarOverlay, platform === "win32" ? {color: "#00000000", symbolColor: "#808080", height: 52} : false);
+        await assert.rejects(call(window, "window-control", "destroy"));
+        await assert.rejects(call(window, "window-control", "minimize", {senderFrame: {url: window.url}}));
+        assert.equal(window.minimized, undefined);
+        await call(window, "window-control", "minimize"); assert.equal(window.minimized, true);
+        const notifications = [];
+        window.webContents.on("send", (_channel, command) => {
+            notifications.push(command);
+            if (command.type === "close") void call(window, "response", {id: command.id, accepted: false});
+        });
+        await call(window, "window-control", "maximize");
+        assert.equal((await call(window, "window-state")).maximized, true);
+        assert.equal(notifications.at(-1).windowState.maximized, true);
+        await call(window, "window-control", "maximize");
+        assert.equal((await call(window, "window-state")).maximized, false);
+        assert.equal(await call(window, "window-overlay", {height: 60, symbolColor: "#eeeeee"}), platform === "win32");
+        if (platform === "win32") assert.deepEqual(window.overlay, {color: "#00000000", height: 60, symbolColor: "#eeeeee"});
+        await call(window, "window-control", "close");
+        await new Promise(resolve => setTimeout(resolve, 0));
+        assert.equal(notifications.some(command => command.type === "close"), true);
+        assert.equal(window.isDestroyed(), false, "cancelled close keeps the native window");
+    }
 });
 
 test("static protocol rejects traversal, cross-session resources and all external requests", async t => {

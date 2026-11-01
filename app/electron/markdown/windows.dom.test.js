@@ -83,31 +83,39 @@ const runElectron = async options => {
         })()`);
         assert.equal(await fs.readFile(options.document, "utf8"), "# Saved through sandbox\n");
         const switchThroughTree = async (filename, pendingContent, expectedContent) => {
-            return window.webContents.executeJavaScript(`(async () => {
+            const point = await window.webContents.executeJavaScript(`(async () => {
                 const input = document.querySelector('textarea.vditor-sv');
+                input.focus();
                 input.value = ${JSON.stringify(pendingContent)};
                 input.dispatchEvent(new InputEvent('input', {bubbles:true,inputType:'insertText'}));
-                await new Promise((resolve,reject) => {
+                return new Promise((resolve,reject) => {
                     const deadline = Date.now() + 10000;
                     const click = () => {
                         const row = [...document.querySelectorAll('.markdown-tree [data-node-id]')].find(item => item.querySelector('.b3-list-item__text')?.textContent === ${JSON.stringify(filename)});
-                        if (row) { row.click(); resolve(); return; }
+                        if (row) {const rect=row.getBoundingClientRect();resolve({x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)});return;}
                         if (Date.now() > deadline) {reject(new Error('File tree did not list the destination')); return;}
                         setTimeout(click,25);
                     }; click();
                 });
+            })()`);
+            window.webContents.sendInputEvent({type:"mouseDown",...point,button:"left",clickCount:1});
+            window.webContents.sendInputEvent({type:"mouseUp",...point,button:"left",clickCount:1});
+            return window.webContents.executeJavaScript(`(async () => {
                 await new Promise((resolve,reject) => {
                     const deadline = Date.now() + 15000;
                     const check = () => {
                         const input = document.querySelector('textarea.vditor-sv');
                         if (document.querySelector('#markdownName').textContent === ${JSON.stringify(filename)} &&
-                            document.querySelector('#markdownEditor[aria-busy="false"]') && input?.value === ${JSON.stringify(expectedContent)}) {resolve(); return;}
+                            document.querySelector('#markdownEditor[aria-busy="false"]') && document.getElementById('markdownApp').getAttribute('aria-busy') !== 'true' && input?.value === ${JSON.stringify(expectedContent)}) {resolve(); return;}
                         if (Date.now() > deadline) {reject(new Error('Tree switch did not finish: '+document.body.innerText)); return;}
                         setTimeout(check,25);
                     }; check();
                 });
                 if (document.querySelectorAll('.markdown-header').length !== 1) throw new Error('Switch duplicated the editor header');
                 if (!document.getElementById('vditor-icon-bold')) throw new Error('Switch lost the shared formatting icons');
+                const preview = document.querySelector('.vditor-preview .vditor-reset');
+                if (preview.textContent.trim() !== ${JSON.stringify(expectedContent.replace(/^# /, "").trim())}) throw new Error('Switch exposed an empty or stale preview');
+                if (document.querySelectorAll('.markdown-tree [data-node-id]').length < 3) throw new Error('Switch exposed an unloaded directory');
                 return {sessionId: (await window.siyuanMarkdown.bootstrap()).sessionId, origin: location.href};
             })()`);
         };

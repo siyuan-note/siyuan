@@ -9,6 +9,7 @@ const {importMarkdownImage, imageExtensions} = require("./imageImport");
 const {parseMarkdownLaunch} = require("./launch");
 const {MarkdownTree, treeFailure} = require("./tree");
 const {createMarkdownTreeView} = require("./treeView");
+const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("../windowControlsOverlay");
 
 const scheme = "siyuan-markdown";
 const csp = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; " +
@@ -68,7 +69,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
     const closeCrashed = async record => {
         if (record.crashApproved) return true;
         await host.recovery.list();
-        const decision = await dialog.showMessageBox(record.window, {type: "warning", title: text("markdownEditor"),
+        const decision = await dialog.showMessageBox(record.window, {type: "warning", title: "SiYuan",
             message: text("markdownLoadError"), detail: text("markdownPrivacy"),
             buttons: [text("markdownKeepDraft"), text("cancel")], defaultId: 1, cancelId: 1, noLink: true});
         if (decision.response !== 0) return false;
@@ -101,7 +102,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         const key = {permission: "markdownPermissionDenied", readonly: "markdownReadOnly", offline: "markdownFileOffline",
             unavailable: "markdownFileUnavailable", deleted: "markdownFileDeleted", "identity-changed": "markdownFileReplaced",
             encoding: "agentSkillEncodingTip", size: "markdownTooLarge", space: "markdownNoSpace"}[error?.code] || "markdownError";
-        await dialog.showMessageBox(record?.window, {type: "error", title: text("markdownEditor"),
+        await dialog.showMessageBox(record?.window, {type: "error", title: "SiYuan",
             message: text(key), buttons: [text("confirm")], noLink: true});
     };
     const closeApproved = record => new Promise(resolve => {
@@ -209,7 +210,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         try {
             await fs.access(path.join(directory, "index.html"));
         } catch {
-            await dialog.showMessageBox({type: "error", title: text("markdownEditor"), message: text("markdownLoadError"), buttons: [text("confirm")]});
+            await dialog.showMessageBox({type: "error", title: "SiYuan", message: text("markdownLoadError"), buttons: [text("confirm")]});
             return;
         }
         if (quitting) return;
@@ -234,7 +235,9 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return;
         }
         const window = new BrowserWindow({width: 1000, height: 760, minWidth: 380, minHeight: 300,
-            title: text("markdownEditor"), show: false, autoHideMenuBar: true,
+            title: "SiYuan", show: false, autoHideMenuBar: true,
+            frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 18},
+            titleBarOverlay: getTitleBarOverlayOptions(platform, 52), icon: path.join(rootDirectory, "stage", "icon-large.png"),
             backgroundColor: nativeTheme?.shouldUseDarkColors ? "#1e1e1e" : "#fff",
             webPreferences: {preload: path.join(__dirname, "preload.js"), partition: "siyuan-markdown-" + sessionId,
                 sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true,
@@ -305,6 +308,10 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             browsing.protocol.unhandle(scheme);
         });
         window.on("focus", () => { notify(record, "external-change"); notify(record, "tree-change"); });
+        for (const event of ["maximize", "unmaximize", "enter-full-screen", "leave-full-screen"]) {
+            window.on(event, () => notify(record, "window-state", {windowState: {
+                maximized: window.isMaximized?.() || false, fullscreen: window.isFullScreen?.() || false}}));
+        }
         const rendererUnavailable = () => {
             // 正文持续写入私有草稿；崩溃后不释放可能仍在写入的句柄，也不影响其他窗口。
             record.crashed = true;
@@ -327,7 +334,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             // use the same native close protection as a terminated renderer.
             rendererUnavailable();
             focus(record);
-            await dialog.showMessageBox(window, {type: "error", title: text("markdownEditor"),
+            await dialog.showMessageBox(window, {type: "error", title: "SiYuan",
                 message: text("markdownLoadError"), buttons: [text("confirm")], noLink: true});
         }
         return window;
@@ -346,7 +353,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         return task;
     };
     const messageBox = async (record, message, buttons) => (await dialog.showMessageBox(record.window,
-        {type: "question", title: text("markdownEditor"), message, buttons, cancelId: buttons.length - 1, defaultId: buttons.length - 1, noLink: true})).response;
+        {type: "question", title: "SiYuan", message, buttons, cancelId: buttons.length - 1, defaultId: buttons.length - 1, noLink: true})).response;
     const prepareTreeOpen = (record, location) => {
         if (quitting || record.closing || record.crashed || record.treeTask || record.imageTask || record.candidate) {
             return {kind: "blocked", error: {code: "unavailable", recoverable: true}};
@@ -424,6 +431,16 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return result;
         }
         switch (action) {
+            case "window-state": return {maximized: record.window.isMaximized?.() || false, fullscreen: record.window.isFullScreen?.() || false};
+            case "window-control": {
+                if (!["minimize", "maximize", "close"].includes(payload)) throw new Error("Markdown window request rejected");
+                if (payload === "minimize") record.window.minimize();
+                else if (payload === "close") record.window.close();
+                else if (record.window.isMaximized()) record.window.unmaximize(); else record.window.maximize();
+                return;
+            }
+            case "window-overlay": return updateTitleBarOverlay(record.window, {...payload,
+                height: Math.round(payload?.height * (record.window.webContents.getZoomFactor?.() || 1))}, platform);
             case "bootstrap": {
                 return bootstrap(record.initial);
             }
@@ -557,9 +574,8 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             case "state": {
                 if (!payload || payload.sessionId !== record.sessionId || !statuses.has(payload.status) || !Number.isSafeInteger(payload.revision)) return;
                 record.state = payload;
-                const name = currentTarget(record)?.descriptor.selection;
                 const dirty = payload.revision > payload.savedRevision;
-                record.window.setTitle((dirty ? "* " : "") + (name ? path.basename(name) : text("untitled")) + " - " + text("markdownEditor"));
+                record.window.setTitle("SiYuan");
                 record.window.setDocumentEdited?.(dirty);
                 return;
             }

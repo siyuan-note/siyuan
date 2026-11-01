@@ -23,11 +23,19 @@ export interface MarkdownBootstrap {
 
 export interface MarkdownCommand {
     id: string;
-    type: "close" | "prepare-quit" | "cancel-quit" | "external-change" | "theme" | "background" | "tree-change";
+    type: "close" | "prepare-quit" | "cancel-quit" | "external-change" | "theme" | "background" | "tree-change" | "window-state";
     dark?: boolean;
+    windowState?: MarkdownWindowState;
 }
 
+export interface MarkdownWindowState {maximized: boolean; fullscreen: boolean;}
+
 export interface MarkdownBridge {
+    window?: {
+        state(): Promise<MarkdownWindowState>;
+        control(action: "minimize" | "maximize" | "close"): Promise<void>;
+        overlay(style: {height: number; symbolColor: string}): Promise<boolean>;
+    };
     host: MarkdownHost;
     tree: MarkdownTreeBridge;
     bootstrap(): Promise<MarkdownBootstrap>;

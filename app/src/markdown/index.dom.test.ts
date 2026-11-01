@@ -24,6 +24,7 @@ const browserCases = async (languages: Record<string, string>) => {
     let newDocuments = 0;
     let openedDocuments = 0;
     let closeConfirmations = 0;
+    let cancelledCandidates = 0;
     let failWrite = false;
     let delayRead = false;
     let reads = 0;
@@ -59,7 +60,7 @@ const browserCases = async (languages: Record<string, string>) => {
             languages, lang: "zh-CN", platform: "win32", dark: false}),
         newDocument: async () => { newDocuments++; }, openDocument: async () => {openedDocuments++;},
         chooseSaveAs: async () => ({kind: "selected", target: {...target, handle: "copy", identity: "copy", displayName: "README-copy.md"}}),
-        cancelSaveAs: async () => {}, authorizeResources: async () => true, resolveResource: async () => undefined,
+        cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => true, resolveResource: async () => undefined,
         insertImage: async () => ({kind: "inserted", reference: "images/example%20photo.png"}),
         openLink: async () => {}, preferences: async patch => {preferenceUpdates.push({...patch}); storedPreferences = {...storedPreferences, ...patch}; return {...storedPreferences};},
         confirm: async () => true, confirmClose: async () => {closeConfirmations++; return "keep";},
@@ -112,6 +113,7 @@ const browserCases = async (languages: Record<string, string>) => {
                 preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);
+            check.equal(document.querySelector(".vditor-toolbar").getBoundingClientRect().height, 0);
             if (mode === "ir") await ipcRenderer.invoke("markdown-screenshot", `initial-${startup.theme}`);
             if (startup.theme === "system") {
                 onCommand({id: `light-${mode}`, type: "theme", dark: false});
@@ -146,8 +148,12 @@ const browserCases = async (languages: Record<string, string>) => {
     };
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
+    check.equal(document.title, "SiYuan");
+    check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
-        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownFiles", "markdownMoreButton"]);
+        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownUndo").disabled, true);
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownRedo").disabled, true);
     check.equal(document.querySelector(".markdown-footer .markdown-policy"), null);
     check.equal(document.querySelector("#markdownSave").checkVisibility(), false, "file actions start collapsed");
     check.equal(application.session.getState().status, "saved");
@@ -156,7 +162,8 @@ const browserCases = async (languages: Record<string, string>) => {
     const firstTreeRows = Array.from(document.querySelectorAll(".markdown-tree [data-node-id]"));
     check.equal(firstTreeRows[1].getBoundingClientRect().top - firstTreeRows[0].getBoundingClientRect().top,
         firstTreeRows[0].getBoundingClientRect().height + 2, "virtual row pitch matches actual rendered row spacing");
-    (document.querySelector('[data-node-id="folder"]') as HTMLElement).click(); await tick();
+    moreButton.focus();
+    await ipcRenderer.invoke("markdown-pointer-click", '[data-node-id="folder"]'); await tick();
     check.ok(document.querySelector('[data-node-id="nested"]'), "folders expand lazily");
     const contentFont = getComputedStyle(document.querySelector(".vditor-ir pre p")).fontFamily;
     check.ok(contentFont.includes("Microsoft Yahei"), contentFont);
@@ -198,12 +205,24 @@ const browserCases = async (languages: Record<string, string>) => {
     for (let attempt = 0; attempt < 5 && document.querySelector("#markdownStatus").textContent !== languages.markdownSaved; attempt++) await tick();
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownSaved,
         "a successful provider save uses the normal saved status without a cloud sync warning");
-    textarea.value += "\nAuto-save after toolbar\n";
+    const undo = document.querySelector<HTMLButtonElement>("#markdownUndo");
+    const redo = document.querySelector<HTMLButtonElement>("#markdownRedo");
+    for (let attempt = 0; attempt < 5 && undo.disabled; attempt++) await tick();
+    check.equal(undo.disabled, false, "header undo becomes available after a source edit");
+    const mouseDown = new MouseEvent("mousedown", {bubbles: true, cancelable: true});
+    undo.dispatchEvent(mouseDown); check.equal(mouseDown.defaultPrevented, true, "history buttons preserve editor focus");
+    undo.click(); await new Promise(resolve => setTimeout(resolve, 750));
+    check.equal(application.session.getState().content.includes("A committed edit"), false, "header undo removes the last edit");
+    check.equal(writes.at(-1).content.includes("A committed edit"), false, "undo is automatically saved");
+    check.equal(redo.disabled, false, "header redo becomes available after undo");
+    redo.click(); await new Promise(resolve => setTimeout(resolve, 750));
+    check.ok(writes.at(-1).content.includes("A committed edit"), "redo is automatically saved");
+    textarea.value += "\nAuto-save after unavailable redo\n";
     textarea.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText"}));
     await new Promise(resolve => setTimeout(resolve, 350));
-    document.querySelector(".vditor-toolbar button").dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    textarea.dispatchEvent(new KeyboardEvent("keydown", {key: "y", code: "KeyY", ctrlKey: true, bubbles: true, cancelable: true}));
     await new Promise(resolve => setTimeout(resolve, 750));
-    check.ok(writes.at(-1).content.includes("Auto-save after toolbar"), "a menu-only toolbar action must resume dirty auto-save");
+    check.ok(writes.at(-1).content.includes("Auto-save after unavailable redo"), "a no-op history shortcut must resume dirty auto-save");
     const originalSavePicker = bridge.chooseSaveAs;
     bridge.chooseSaveAs = async () => ({kind: "cancelled"});
     textarea.value += "\nAuto-save after cancelled Save As\n";
@@ -229,6 +248,7 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     check.equal(application.session.getState().target.handle, "copy");
     check.equal(writes.at(-1).target.handle, "copy");
+    check.equal(cancelledCandidates, 0, "a committed binding must not be cancelled as an unused candidate");
     menuAction("markdownInsertImage");
     await tick();
     check.ok(writes.at(-1).content.includes("images/example%20photo.png"));
@@ -267,6 +287,7 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     check.ok(document.documentElement.scrollWidth <= window.innerWidth + 1);
     check.ok(document.querySelector("#markdownMoreButton").getBoundingClientRect().height >= 44);
+    for (const id of ["markdownUndo", "markdownRedo"]) check.ok(document.getElementById(id).getBoundingClientRect().height >= 44);
     check.ok(document.querySelector("#markdownFiles").getBoundingClientRect().height >= 44);
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "narrow tree starts as a collapsed drawer");
     await ipcRenderer.invoke("markdown-screenshot", "narrow-recovery");
@@ -540,6 +561,41 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(storedPreferences.mode, "sv", "only the actual source mode is persisted for oversized recovery");
     check.ok(preferenceUpdates.slice(preferencesBefore).every(patch => patch.mode === undefined || patch.mode === "sv"));
     largeRecovery.destroy();
+    for (const platform of ["win32", "darwin", "linux"]) {
+        const controls: string[] = [];
+        const overlays: Array<{height: number; symbolColor: string}> = [];
+        bridge.window = {state: async () => ({maximized: false, fullscreen: false}),
+            control: async action => {controls.push(action);}, overlay: async value => {overlays.push(value); return true;}};
+        bridge.bootstrap = async () => ({...bootstrap, sessionId: `chrome-${platform}`, platform});
+        const chrome = await api.mountMarkdownApplication(bridge); await tick();
+        const root = document.getElementById("markdownApp");
+        const header = root.querySelector<HTMLElement>(".markdown-header");
+        const placeholder = root.querySelector<HTMLElement>(".markdown-caption-placeholder");
+        check.equal(root.dataset.windowControls, platform === "win32" ? "overlay" : platform === "darwin" ? "mac" : "custom");
+        check.equal(getComputedStyle(header).getPropertyValue("-webkit-app-region"), "drag");
+        check.equal(getComputedStyle(document.getElementById("markdownFiles")).getPropertyValue("-webkit-app-region"), "no-drag");
+        check.equal(placeholder === header.firstElementChild, platform === "darwin");
+        if (platform === "win32") check.ok(overlays.some(value => value.height > 0 && value.symbolColor.length > 0));
+        if (platform === "linux") {
+            for (const button of root.querySelectorAll<HTMLButtonElement>(".markdown-caption__button")) button.click();
+            await tick(); check.deepEqual(controls, ["minimize", "maximize", "close"]);
+            onCommand({id: "chrome-prepare", type: "prepare-quit"}); await tick();
+            check.equal(document.getElementById("markdownMore").inert, true);
+            check.equal(root.querySelector(".markdown-caption").closest("[inert]"), null, "native controls remain usable during exit protection");
+        }
+        onCommand({id: "chrome-state", type: "window-state", windowState: {maximized: true, fullscreen: true}}); await tick();
+        check.equal(getComputedStyle(placeholder).display, "none");
+        if (platform === "linux") {
+            const maximize = root.querySelector<HTMLButtonElement>('[data-action="maximize"]');
+            check.equal(maximize.title, languages.restore);
+            check.equal(maximize.querySelector("use").getAttribute("href"), "#iconRestore");
+            onCommand({id: "chrome-cancel", type: "cancel-quit"}); await tick();
+        }
+        chrome.destroy();
+        check.equal(root.querySelector(".markdown-caption-placeholder"), null);
+        check.equal(root.dataset.windowControls, undefined);
+    }
+    delete bridge.window;
     const beforeFailureClear = clears;
     const failureBootstrap = await bridge.bootstrap();
     bridge.bootstrap = async () => ({...failureBootstrap, dark: true, sessionId: "failed-ui", recovered: {revision: 7, targetGeneration: 3}});
@@ -574,7 +630,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "tree.ts", "choiceMenu.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")
@@ -607,6 +663,11 @@ app.whenReady().then(async () => {
     const origin="http://127.0.0.1:"+server.address().port;
     const win = new BrowserWindow({show:false,width:1100,height:850,webPreferences:{nodeIntegration:true,contextIsolation:false,offscreen:true}});
     ipcMain.handle("markdown-resize", (_event,width,height)=>{win.setSize(width,height);});
+    ipcMain.handle("markdown-pointer-click", async (_event, selector) => {
+        const point = await win.webContents.executeJavaScript('(()=>{const rect=document.querySelector('+JSON.stringify(selector)+').getBoundingClientRect();return {x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)};})()');
+        win.webContents.sendInputEvent({type:"mouseDown",...point,button:"left",clickCount:1});
+        win.webContents.sendInputEvent({type:"mouseUp",...point,button:"left",clickCount:1});
+    });
     ipcMain.handle("markdown-screenshot", async (_event,name)=>{fs.writeFileSync(path.join(${JSON.stringify(artifacts)},name+".png"),(await win.webContents.capturePage()).toPNG());});
     try {
         await win.loadURL(origin+"/");

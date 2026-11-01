@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261101175356"
+		"updated": "20261102001717"
 	},
 	"Children": [
 		{
@@ -93,12 +93,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261101171827"
+				"updated": "20261102001717"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The header keeps the filename and "
+					"Data": "The window is named SiYuan. Its header shows the filename, Undo, Redo, and the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -107,7 +107,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed."
+					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed."
 				}
 			]
 		},

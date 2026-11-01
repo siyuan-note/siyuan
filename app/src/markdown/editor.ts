@@ -21,6 +21,7 @@ interface VditorInstance {
         wysiwyg: VditorSurface;
         sv: VditorSurface;
         toolbar: {element: HTMLElement};
+        undo: {addToUndoStack(vditor: unknown): void};
         hint?: {timeId?: number};
         preview?: {render(vditor: unknown): void};
     };
@@ -48,6 +49,7 @@ export interface MarkdownEditorOptions {
     onContentTooLarge?(): void;
     onModeChange?(mode: MarkdownEditorMode): void;
     onSourceOnlyChange?(sourceOnly: boolean): void;
+    onHistoryChange?(state: {canUndo: boolean; canRedo: boolean}): void;
     onLink?(url: string): void;
     resolveResource?: MarkdownResourceResolver;
     onResourceUnavailable?(): void;
@@ -58,6 +60,8 @@ export interface MarkdownEditor {
     setValue(value: string): void;
     setMode(mode: MarkdownEditorMode): void;
     setTheme(theme: "light" | "dark"): void;
+    undo(): void;
+    redo(): void;
     refreshResources(): void;
     insertImage(reference: string): boolean;
     focus(): void;
@@ -133,6 +137,27 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     let rendered = "";
     let emitted: MarkdownEditorSnapshot = {content: committed, edited: false, composing: false};
     const listeners: Array<[string, EventListener]> = [];
+    const historyButton = (action: "undo" | "redo") =>
+        instance?.vditor.toolbar.element.querySelector<HTMLButtonElement>(`button[data-type="${action}"]`);
+    const canHistory = (action: "undo" | "redo") => {
+        const button = historyButton(action);
+        return Boolean(button && !button.classList.contains("vditor-menu--disabled"));
+    };
+    let emittedHistory = {canUndo: false, canRedo: false};
+    let finishInitialPreview: () => void;
+    const notifyHistory = () => {
+        if (destroyed) return;
+        const state = {canUndo: canHistory("undo"), canRedo: canHistory("redo")};
+        if (state.canUndo === emittedHistory.canUndo && state.canRedo === emittedHistory.canRedo) return;
+        emittedHistory = state;
+        options.onHistoryChange?.(state);
+    };
+    const historyObserver = new MutationObserver(notifyHistory);
+    const runHistory = (action: "undo" | "redo") => {
+        if (destroyed || !ready || isComposing() || !canHistory(action)) return;
+        const type = document.defaultView.navigator.userAgent.includes("iPhone") ? "touchstart" : "click";
+        historyButton(action).dispatchEvent(new Event(type, {bubbles: true, cancelable: true}));
+    };
 
     const activeSurface = () => instance?.vditor[instance.getCurrentMode()];
     const syncMode = () => {
@@ -142,7 +167,11 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         rendered = instance.getValue();
         cachedInput = undefined;
         userPending = false;
-        if (changed) options.onModeChange?.(next);
+        if (changed) {
+            // 切换模式后立即记录基线，首笔输入不能抢在延迟快照之前覆盖它。
+            instance.vditor.undo.addToUndoStack(instance.vditor);
+            options.onModeChange?.(next);
+        }
     };
     const inEditor = (event: Event) => event.target instanceof Node &&
         (Boolean(activeSurface()?.element.contains(event.target)) || (event.target instanceof Element &&
@@ -410,6 +439,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         clearTimeout(maximumNotificationTimer);
         clearInternalTimers();
         observer.disconnect();
+        historyObserver.disconnect();
         policy.destroy();
         listeners.forEach(([type, handler]) => element.removeEventListener(type, handler, true));
         if (instance?.vditor) instance.destroy();
@@ -433,7 +463,14 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
                     theme: {current: dark ? "dark" : "light"}, hljs: {style: dark ? "github-dark" : "github"},
                     math: {engine: "KaTeX"}, render: {media: {enable: false}}, transform: policy.sanitize,
-                    parse: () => policy.hydrate(element)},
+                    parse: () => {
+                        policy.hydrate(element);
+                        if (finishInitialPreview) {
+                            const complete = finishInitialPreview;
+                            finishInitialPreview = undefined;
+                            queueMicrotask(complete);
+                        }
+                    }},
                 link: {isOpen: false, click: followLink}, image: {isPreview: false},
                 input: (value: string) => {
                     if (!userPending || programmatic || isComposing()) return;
@@ -444,11 +481,9 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                     try {
                         if (destroyed) return;
                         if (instance.version !== "4.0.1") throw new Error("Unsupported Markdown editor version");
-                        // Retain Vditor's mode controls for its official switching path;
-                        // the shared page supplies the visible selector on every platform.
-                        const modeMenu = instance.vditor.toolbar.element.querySelector("button[data-mode]")
-                            ?.closest<HTMLElement>(".vditor-toolbar__item");
-                        if (modeMenu) modeMenu.hidden = true;
+                        // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
+                        instance.vditor.toolbar.element.hidden = true;
+                        historyObserver.observe(instance.vditor.toolbar.element, {subtree: true, attributes: true, attributeFilter: ["class"]});
                         const lute = instance.vditor.lute;
                         new Set([...renderedMethods, ...htmlInputMethods]).forEach(name => {
                             const original = lute[name];
@@ -460,13 +495,16 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                             };
                         });
                         ready = true;
+                        if (mode === "sv" && !recoverySourceOnly && options.initialValue.trim()) {
+                            finishInitialPreview = () => {clearTimeout(timeout); resolve();};
+                        }
                         setValue(options.initialValue);
+                        notifyHistory();
                         if (recoverySourceOnly) {
                             options.onModeChange?.("sv");
                             options.onSourceOnlyChange?.(true);
                         }
-                        clearTimeout(timeout);
-                        resolve();
+                        if (!finishInitialPreview) {clearTimeout(timeout); resolve();}
                     } catch (error) {
                         clearTimeout(timeout);
                         destroy();
@@ -500,6 +538,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         setTheme(theme) {
             if (!destroyed) instance.setTheme(theme === "dark" ? "dark" : "classic", theme, theme === "dark" ? "github-dark" : "github");
         },
+        undo() {runHistory("undo");},
+        redo() {runHistory("redo");},
         refreshResources() { if (!destroyed) policy.refresh(element); },
         insertImage(reference) {
             if (destroyed || isComposing() || !isRelativeMarkdownResource(reference) || /[<>]/.test(reference)) return false;

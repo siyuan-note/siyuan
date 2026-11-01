@@ -8,6 +8,7 @@ import {markdownErrorKey} from "./errors";
 import {createMarkdownTree, MarkdownTree} from "./tree";
 import {MarkdownTreeLocation} from "./treeContracts";
 import {createMarkdownChoice, MarkdownChoice} from "./choiceMenu";
+import {createMarkdownWindowChrome} from "./windowChrome";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -15,6 +16,7 @@ declare const SIYUAN_VERSION: string;
 interface MarkdownApplication {
     session: MarkdownSession;
     editor: MarkdownEditor;
+    treeReady: Promise<void>;
     dispatch(message: MarkdownCommand): Promise<void>;
     destroy(): void;
 }
@@ -37,6 +39,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let pendingFileAction: Promise<unknown>;
     let themeSequence = 0;
     let editPending = false;
+    let history = {canUndo: false, canRedo: false};
     let sourceOnly = false;
     let disposed = false;
     let tree: MarkdownTree = undefined;
@@ -54,6 +57,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
     root.innerHTML = `<header class="markdown-header">
     <button type="button" class="markdown-heading" id="markdownFiles"><svg aria-hidden="true"><use href="#iconFolder"></use></svg><span id="markdownName" class="markdown-name"></span></button>
+    <div class="markdown-header__drag" aria-hidden="true"></div>
+    <button type="button" class="block__icon block__icon--show markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
     <details class="markdown-more" id="markdownMore">
         <summary class="markdown-more__button" id="markdownMoreButton" aria-controls="markdownActions" aria-expanded="false"><svg aria-hidden="true"><use href="#iconMore"></use></svg></summary>
         <div class="b3-menu markdown-menu" id="markdownActions">
@@ -93,6 +99,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     control("markdownEditor").inert = true;
     control("markdownMoreButton").setAttribute("aria-label", text("more"));
     control("markdownMoreButton").setAttribute("title", text("more"));
+    for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"]]) {
+        control(id).setAttribute("aria-label", text(label));
+        control(id).setAttribute("title", text(label));
+        control(id).addEventListener("mousedown", event => event.preventDefault());
+    }
     const more = control<HTMLDetailsElement>("markdownMore");
     const moreButton = control("markdownMoreButton");
     const closeMore = (restoreFocus = true) => {
@@ -168,6 +179,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         }
         document.documentElement.dataset.themeMode = dark ? "dark" : "light";
         editor?.setTheme(dark ? "dark" : "light");
+        windowChrome?.refresh();
     };
     root.style.setProperty("--markdown-font-size", `${preferences.fontSize}px`);
 
@@ -178,7 +190,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             saved: "markdownSaved", conflict: "markdownConflict", blocked: "markdownError", closed: "close",
         };
         control("markdownName").textContent = state.target?.displayName ?? text("untitled");
-        document.title = `${state.target?.displayName ?? text("untitled")} - SiYuan`;
+        document.title = "SiYuan";
         const pendingStatus = editPending && ["saved", "view", "draft"].includes(state.status);
         const statusKey = !editPending && state.status === "draft" && !state.hasUnsavedChanges ? "" :
             pendingStatus || state.status === "draft" && state.draftRevision < state.revision ? "markdownUnsaved" :
@@ -200,6 +212,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         overwrite.disabled = frozen || state.problem?.kind !== "conflict" || !state.problem.baseline ||
             state.problemTargetHandle !== state.target?.handle;
         control<HTMLButtonElement>("markdownSave").disabled = frozen || state.composing;
+        control<HTMLButtonElement>("markdownUndo").disabled = frozen || state.composing || !history.canUndo;
+        control<HTMLButtonElement>("markdownRedo").disabled = frozen || state.composing || !history.canRedo;
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
         control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
         modeChoice?.setDisabled(frozen || state.composing);
@@ -241,6 +255,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (!frozen) scheduleAutoSave();
     };
 
+    const windowChrome = createMarkdownWindowChrome({root, header, bridge: bridge.window, platform: bootstrap.platform, text, onError: reportError});
     try {
         if (!("inert" in HTMLElement.prototype) || typeof TextEncoder !== "function" ||
             typeof MutationObserver !== "function" || typeof ResizeObserver !== "function" || typeof globalThis.crypto?.getRandomValues !== "function") {
@@ -254,6 +269,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             element: control("markdownEditor"), initialValue: bootstrap.content, sessionId: bootstrap.sessionId, mode: preferences.mode,
             cdn: new URL("./vditor", location.href).href, lang: bootstrap.lang,
             theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
+            onHistoryChange(state) {history = state; if (!disposed) render(session.getState());},
             resolveResource: reference => bridge.resolveResource(reference),
             onResourceUnavailable: () => { resourceUnavailable = true; render(session.getState()); },
             onLink: url => { void bridge.openLink(url).catch(reportError); },
@@ -314,6 +330,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             if (choice.kind !== "selected") return false;
             candidateHandle = choice.target.handle;
             const result = await session.saveAs(choice.target, {editor});
+            if (result.kind === "saved") candidateHandle = undefined;
             return result.kind === "saved";
         } finally {
             if (candidateHandle) await bridge.cancelSaveAs(candidateHandle).catch((): void => undefined);
@@ -346,6 +363,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownOpen", () => bridge.openDocument());
     action("markdownOpenFolder", () => tree.chooseRoot());
     action("markdownSave", save);
+    action("markdownUndo", () => editor.undo());
+    action("markdownRedo", () => editor.redo());
     action("markdownSaveAs", saveAs);
     action("markdownInsertImage", async () => {
         if (frozen || editor.flush().composing) return;
@@ -498,8 +517,19 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             return false;
         }
         pendingSwitch = undefined;
-        destroyCurrent();
-        replacement = await mountMarkdownApplication(bridge, root, next);
+        root.setAttribute("aria-busy", "true");
+        const swap = async () => {
+            destroyCurrent(); replacement = await mountMarkdownApplication(bridge, root, next);
+            await replacement.treeReady;
+        };
+        if (document.startViewTransition) {
+            const transition = document.startViewTransition(swap);
+            void transition.ready.catch((): void => undefined);
+            const finished = transition.finished.catch((): void => undefined);
+            await transition.updateCallbackDone;
+            await finished;
+        } else await swap();
+        root.setAttribute("aria-busy", "false");
         return true;
     };
     const openTreeFile = async (location: MarkdownTreeLocation): Promise<boolean> => {
@@ -551,6 +581,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         finally {await bridge.respond(message.id, accepted);}
     };
     const command = async (message: MarkdownCommand) => {
+        if (message.type === "window-state") {windowChrome?.update(message.windowState); return;}
         // 候选云文件读取可能很慢；进入后台仍先保护当前文档的已提交输入。
         if (message.type === "background" && switchTask && session.getState().lifecycle === "open") {
             await checkpointBackground(message, true);
@@ -611,9 +642,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         document.removeEventListener("keydown", shortcut, true);
         removeMenuListeners();
         tree?.destroy(); modeChoice?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
+        windowChrome?.destroy();
         editor.destroy();
     }
     return {
+        treeReady: tree.ready,
         get session() {return replacement?.session ?? session;},
         get editor() {return replacement?.editor ?? editor;},
         dispatch: message => replacement ? replacement.dispatch(message) : command(message),

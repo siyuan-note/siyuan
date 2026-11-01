@@ -39,10 +39,13 @@ const browserCases = async (cdn: string, lutePath: string) => {
         const edits: Array<{content: string; edited: boolean; composing: boolean}> = [];
         const pending: boolean[] = [];
         const modes: string[] = [];
+        const history: Array<{canUndo: boolean; canRedo: boolean}> = [];
         const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath, lang: "en-US",
             resolveResource: reference => reference === "assets/photo.png" ? imageURL : undefined,
             onEdit: snapshot => edits.push(snapshot), onEditPending: value => pending.push(value),
-            onModeChange: value => modes.push(value), onLink: url => links.push(url)});
+            onModeChange: value => modes.push(value), onLink: url => links.push(url), onHistoryChange: state => history.push(state)});
+        check.equal(element.querySelector<HTMLElement>(".vditor-toolbar").hidden, true);
+        if (mode === "sv") check.ok(element.querySelector(".vditor-preview .vditor-reset").textContent.includes("End"), "initial source preview is ready before revealing the editor");
         check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
         check.equal(edits.length, 0);
         await tick();
@@ -78,6 +81,13 @@ const browserCases = async (cdn: string, lutePath: string) => {
         check.equal((window as unknown as {markdownExecuted?: boolean}).markdownExecuted, undefined);
         check.equal(immediate.content.includes("blob:"), false);
         await new Promise(resolve => setTimeout(resolve, 350));
+        check.equal(history.at(-1).canUndo, true, `history becomes available in ${mode}`);
+        editor.undo(); await tick();
+        check.equal(editor.flush().content.includes("Edited now"), false, `undo in ${mode}`);
+        check.equal(history.at(-1).canRedo, true);
+        editor.redo(); await tick();
+        check.ok(editor.flush().content.includes("Edited now"), `redo in ${mode}`);
+        await new Promise(resolve => setTimeout(resolve, 350));
         check.ok(edits.length > 0);
         check.equal(pending.at(-1), false);
         const count = edits.length;
@@ -103,6 +113,9 @@ const browserCases = async (cdn: string, lutePath: string) => {
         textarea.dispatchEvent(new InputEvent("input", {bubbles: true, isComposing: true, inputType: "insertCompositionText"}));
         check.equal(editor.flush().composing, true);
         check.equal(editor.flush().content, immediate.content);
+        const composingValue = textarea.value;
+        editor.undo(); editor.redo();
+        check.equal(textarea.value, composingValue, "history controls cannot interrupt composition");
         textarea.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true, data: "composition"}));
         await tick();
         check.equal(editor.flush().composing, false);
@@ -141,7 +154,7 @@ const browserCases = async (cdn: string, lutePath: string) => {
         onContentTooLarge: () => oversizedPastes++,
         onEdit: () => { throw new Error("touch mode switching became an edit"); }});
     check.equal(window.localStorage, undefined);
-    check.equal(touchElement.querySelector("button[data-mode]").closest<HTMLElement>(".vditor-toolbar__item").hidden, true);
+    check.equal(touchElement.querySelector<HTMLElement>(".vditor-toolbar").hidden, true);
     for (const mode of ["sv", "wysiwyg", "ir"] as const) {
         touchEditor.setMode(mode);
         check.equal(touchEditor.flush().content, source, `touch ${mode}`);

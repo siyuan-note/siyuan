@@ -7,6 +7,11 @@ for (const method of ["read", "write", "reconcileWrite", "reserveSaveAs", "prepa
     host[method] = request => invoke("host:" + method, request);
 }
 contextBridge.exposeInMainWorld("siyuanMarkdown", Object.freeze({
+    window: Object.freeze({
+        state: () => invoke("window-state"),
+        control: action => invoke("window-control", action),
+        overlay: style => invoke("window-overlay", style),
+    }),
     host: Object.freeze(host),
     tree: Object.freeze({
         state: () => invoke("tree-state"),

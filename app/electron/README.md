@@ -86,6 +86,8 @@
 
 `initKernel()`（`kernel/kernelBoot.ts`）先确定工作空间的三级回退：命令行 `--workspace` → `SIYUAN_WORKSPACE_PATH` → 上次工作空间；三者皆空时记录日志并返回。若同一工作空间已有启动记录或主窗口，则仅显示该窗口，不重复启动。实际启动内核时依次执行：Apple 芯片提示与内核程序存在性检查 → 分配端口 → 等待上一个工作空间退出（仅限本进程启动的内核）→ 启动进程 → 轮询 `/api/system/version` → 轮询 `/api/system/bootProgress` → 交回端口。失败一律以 `undefined` 结束。
 
+单次尝试的等待 Promise 必须由三条路径之一结算：就绪轮询返回、内核进程 `close` 回调、`before-quit` 取消；尝试本身抛出异常时同样结算为失败，否则调用方会永久等待。`settle` 只生效一次，后到的路径不覆盖已交回的结果。
+
 `initMainWindow()`（`window/mainWindow.ts`）以隐藏状态创建窗口，取得网络配置后载入主界面，登记窗口账本并清除启动记录，待前端回传 `siyuan-event` 后才显示窗口并关闭启动页；命令行中的 `siyuan://` 深链亦在此时转交界面。
 
 ## 运行期状态
@@ -172,6 +174,7 @@
   - 参数中出现 `x = electron.x` / `x = paths.y` 且无测试消费者时，删除参数改为就地读取
 - `install*` 为既有惯例：安装器接收安装目标（`installKernelRequestLog(session, ...)`、`installWebPageFetchIPC(ipcMain, ...)`），此类参数保留。`register*` 与 `create*` 不接收 Electron 成员，需要时自行 import；跨层能力仍由参数传入。唯一例外为 `remote/webPageFetch.createWebPageFetcher`，其测试需在纯 Node 与真实 Electron 中双跑
 - 持有跨调用可变状态的协作者采用工厂函数（如 `createSettingsWindows`），其余写为模块导出函数。工厂仅在三种情形下保留：需跨调用保存状态、需注入跨层能力、测试需替换副作用
+- 跨层登记的单例只保留一份引用：持有方（`remote/connectionRuntime.ts` 的连接管理器）自行保存实例，`shared/` 只登记它所需的那个函数（`setRemoteErrorPresenter`），不再复制一份结构相同但语义更窄的副本
 - 同一固定值只写一次：窗口最小尺寸、应用图标、User-Agent、本机页 `webPreferences` 均位于 `shared/desktopDefaults.ts`，不应在调用点复制字面量
 
 ### 导入写法

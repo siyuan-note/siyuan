@@ -59,7 +59,7 @@ const mainWindowSetup = (t: any) => {
     const processStub = {platform: "win32", argv: []} satisfies Pick<NodeJS.Process, "platform" | "argv">;
     const netStub = {fetch: () => new Promise(() => {})} satisfies Pick<typeof electron.net, "fetch">;
     // readFileSync 有重载，简单桩无法通过 satisfies，注入处再转换。
-    const fsStub = {readFileSync: () => "{}", writeFileSync() {}};
+    const fsStub = {readFileSync: () => "{}"};
     const context = {
         app: appStub,
         getKernelTarget: port => ({port: String(port), mode: "local", ownsKernel: true} as KernelTarget),
@@ -106,7 +106,7 @@ const mainWindowSetup = (t: any) => {
     const initMainWindow = createMainWindow({
         platform: {
             process: processStub as unknown as Pick<NodeJS.Process, "platform" | "argv">,
-            remote: context.remote, fs: fsStub as unknown as Pick<typeof nodeFs, "readFileSync" | "writeFileSync">,
+            remote: context.remote, fs: fsStub as unknown as Pick<typeof nodeFs, "readFileSync">,
         },
         clock: {
             scheduleTimer: callback => { const key = {}; timers.set(key, callback); return key; },

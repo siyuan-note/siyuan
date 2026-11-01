@@ -40,8 +40,8 @@ const PLAIN_TEXT_HEADERS = {"Content-Type": "text/plain; charset=utf-8"};
 // 错误响应一律不缓存：切换连接后版本与认证状态都会变。
 const NO_STORE_TEXT_HEADERS = {"Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8"};
 
-// 远端内核的前端仍由本机提供，因此协议处理器只需要安装一次。
-let installed = false;
+// 远端内核的前端仍由本机提供，协议处理器只能安装一次；这里记录已接管的目标。
+let installedOrigin: string | undefined;
 
 // 只映射本机的 stage 与 appearance 资源，其余一律拒绝，避免路径穿越读到任意文件。
 const getLocalRemoteResource = (pathname: string): string | undefined => {
@@ -127,7 +127,11 @@ const isRemoteKernelAuthenticated = (target: KernelTarget): Promise<boolean> =>
     });
 
 const installRemoteFrontendProtocol = (target: KernelTarget): void => {
-    if (installed) {
+    if (installedOrigin !== undefined) {
+        if (installedOrigin !== target.origin) {
+            writeLog("ignored a second remote frontend handler [installed=" + installedOrigin +
+                ", requested=" + target.origin + "]");
+        }
         return;
     }
     const scheme = new URL(target.origin).protocol.slice(0, -1);
@@ -323,7 +327,7 @@ const installRemoteFrontendProtocol = (target: KernelTarget): void => {
         }
         return response as unknown as Response;
     });
-    installed = true;
+    installedOrigin = target.origin;
     writeLog("installed local frontend handler for remote kernel [origin=" + target.origin + "]");
 };
 

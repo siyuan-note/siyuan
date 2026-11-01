@@ -3,7 +3,7 @@
 import * as path from "node:path";
 import {app, BrowserWindow} from "electron";
 import {paths, state, isSystemShuttingDown, writeLog as defaultWriteLog} from "../shared/runtime";
-import {setConnectionManager} from "../shared/errorWindow";
+import {setRemoteErrorPresenter} from "../shared/errorWindow";
 import {APP_PAGE, WINDOW_PAGE} from "../shared/pagePaths";
 import {createConnectionManager} from "./connectionManager";
 import {closeConnectionWindows, connectionArgs} from "./connectionStore";
@@ -57,7 +57,7 @@ const createConnectionRuntime = ({
     });
     connectionManager = manager;
     // 远端模式下的启动失败与连接错误由连接管理窗口展示。
-    setConnectionManager(manager);
+    setRemoteErrorPresenter((options) => manager.show(options));
     return manager;
 };
 

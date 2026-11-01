@@ -109,9 +109,11 @@ const getWorkspaceLogPath = (path: Pick<typeof nodePath, "resolve">, workspace: 
 
 // 一次尝试可能从三条路径结束：就绪轮询返回、内核进程 close 回调、before-quit 取消。
 // settle 只生效一次，后到的路径不会覆盖已经交回的结果。
+// 尝试抛出异常时必须在这里结算，否则调用方会永久等待。
 const initKernelAttempt = (startup: KernelStartup, request: KernelStartRequest,
     runAttempt: (startup: KernelStartup, request: KernelStartRequest,
-        settle: (result: string | number | false) => void) => Promise<void>): Promise<string | number | false> =>
+        settle: (result: string | number | false) => void) => Promise<void>,
+    log: (message: string) => void): Promise<string | number | false> =>
     new Promise<string | number | false>((resolve) => {
         let settled = false;
         const settle = (result: string | number | false): void => {
@@ -121,7 +123,10 @@ const initKernelAttempt = (startup: KernelStartup, request: KernelStartRequest,
             settled = true;
             resolve(result);
         };
-        void runAttempt(startup, request, settle);
+        void runAttempt(startup, request, settle).catch((error: unknown) => {
+            log("kernel startup attempt failed: " + errorMessage(error));
+            settle(false);
+        });
     });
 
 /** 生产依赖：kernel 不能引用 window 目录，这两组能力只能由入口注入。 */
@@ -609,7 +614,7 @@ const createKernelBoot = ({
     }): Promise<string | number | false> => {
         let retryDeadline: number | undefined;
         for (; ;) {
-            const result = await initKernelAttempt(startup, request, runKernelAttempt);
+            const result = await initKernelAttempt(startup, request, runKernelAttempt, writeLog);
             if (result !== "workspace-locked") {
                 return result;
             }

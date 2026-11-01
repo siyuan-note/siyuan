@@ -62,13 +62,12 @@ type MainWindowLaunch = {
 };
 
 const readSavedWindowState = (file: string,
-    windowFs: Pick<typeof nodeFs, "readFileSync" | "writeFileSync">,
+    windowFs: Pick<typeof nodeFs, "readFileSync">,
     log: LogFunction): Partial<MainWindowState> => {
     try {
         return JSON.parse(windowFs.readFileSync(file, "utf8"));
     } catch (error) {
         log("read window state failed: " + error);
-        windowFs.writeFileSync(file, "{}");
         return {};
     }
 };
@@ -278,7 +277,7 @@ const attachMainWindowReady = ({
 type MainWindowPlatform = {
     process?: Pick<NodeJS.Process, "platform" | "argv">;
     remote?: {enable: (contents: WebContents) => void};
-    fs?: Pick<typeof nodeFs, "readFileSync" | "writeFileSync">;
+    fs?: Pick<typeof nodeFs, "readFileSync">;
 };
 
 // 全部注入项都是测试接缝：每项默认取真实实现，生产不传即行为不变。

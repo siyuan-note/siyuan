@@ -3,24 +3,23 @@ import * as path from "node:path";
 import {paths, state, getArg} from "./runtime";
 import {appIconPath, LOCAL_PAGE_WEB_PREFERENCES} from "./desktopDefaults";
 
-type ConnectionManager = {
-    show: (options: {lang?: string; error: string}) => void;
-};
+/** 远端模式下的错误展示：由连接管理窗口接管，其余情况使用本地错误页。 */
+type RemoteErrorPresenter = (options: {lang?: string; error: string}) => void;
 
 /** 错误窗口的可选呈现细节。 */
 type ErrorWindowOptions = {emoji?: string; logPath?: string};
 
-// 连接管理器在 app 就绪后创建；远端模式下错误交给它显示，因此只做一次登记。
-let connectionManager: ConnectionManager | undefined;
+// 连接管理器在 app 就绪后创建，这里只登记它的展示入口。
+let presentRemoteError: RemoteErrorPresenter | undefined;
 
-const setConnectionManager = (manager: ConnectionManager): void => {
-    connectionManager = manager;
+const setRemoteErrorPresenter = (presenter: RemoteErrorPresenter): void => {
+    presentRemoteError = presenter;
 };
 
 const showErrorWindow = (titleZh: string, titleEn: string, content: string,
     {emoji = "⚠️", logPath = ""}: ErrorWindowOptions = {}): number | undefined => {
-    if (connectionManager && (state.startup.remoteKernelTarget || state.startup.remoteKernelArgError)) {
-        connectionManager.show({
+    if (presentRemoteError && (state.startup.remoteKernelTarget || state.startup.remoteKernelArgError)) {
+        presentRemoteError({
             lang: getArg("--lang"),
             error: titleZh + "\n" + titleEn + "\n" + content.replace(/<[^>]*>/g, " "),
         });
@@ -52,5 +51,5 @@ const showErrorWindow = (titleZh: string, titleEn: string, content: string,
     return errWindow.id;
 };
 
-export {setConnectionManager, showErrorWindow};
+export {setRemoteErrorPresenter, showErrorWindow};
 export type {ErrorWindowOptions};

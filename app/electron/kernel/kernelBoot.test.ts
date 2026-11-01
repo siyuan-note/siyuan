@@ -123,6 +123,7 @@ const setup = (t: any, progress, options: {
     previousExit?: (workspace: string, options: PreviousExitOptions) => Promise<unknown>;
     recoveryResponse?: number;
     onSleep?: (ms: number, fixture: KernelBootFixture) => unknown;
+    appleSiliconWarning?: () => Promise<boolean>;
 } = {}) => {
     const events: unknown[] = [];
     const waits: number[] = [];
@@ -185,7 +186,7 @@ const setup = (t: any, progress, options: {
             return current;
         },
         showLocalBootWindow: (window, port, lang) => { events.push("show-boot"); events.push(["show-boot", window, port, lang]); },
-        showAppleSiliconWarning: async () => true,
+        showAppleSiliconWarning: options.appleSiliconWarning || (async () => true),
         waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
         watchWorkspaceExitProcess: async (kernelPath, marker, signal) => {
             events.push(["watch-exit-process", kernelPath, marker, signal]);
@@ -317,6 +318,18 @@ test("kernel startup clears stale exit evidence and records its own process clos
     state.closeKernel(0);
     assert.equal(state.context.exitedKernelPorts.has("6806"), true);
     assert.equal(state.context.kernelProcesses.has("6806"), false);
+});
+
+test("a throwing attempt ends the startup instead of waiting forever", async (t) => {
+    const state = setup(t, () => 100, {
+        appleSiliconWarning: async () => {
+            throw new Error("warning dialog failed");
+        },
+    });
+    // 没有这次补结算，initKernel 会永久挂起，主窗口也永远不会出现。
+    assert.equal(await state.run(), undefined);
+    assert.ok(state.events.includes("kernel startup attempt failed: warning dialog failed"));
+    assert.equal(state.context.localKernelStartups.size, 0);
 });
 
 test("repeated requests reuse startup before port allocation and during kernel boot", async (t) => {

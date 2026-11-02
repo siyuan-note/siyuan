@@ -253,3 +253,31 @@ func TestCalDAVFreeBusyQuery(t *testing.T) {
 		t.Fatalf("free-busy-query on an object: status = %d", forbidden.Code)
 	}
 }
+
+func TestCalDAVExpandTodoOverrideWithoutStart(t *testing.T) {
+	calDAV, _ := newDAVHandlerFixture(t)
+	object := CalDavDefaultCalendarPath + "/todo.ics"
+	body := davCRLF("BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//SiYuan test//EN",
+		"BEGIN:VTODO", "UID:todo", "DTSTAMP:20261101T000000Z", "DTSTART:20261101T090000Z", "DUE:20261101T100000Z", "RRULE:FREQ=DAILY;COUNT=3", "END:VTODO",
+		"BEGIN:VTODO", "UID:todo", "DTSTAMP:20261101T000000Z", "RECURRENCE-ID;RANGE=THISANDFUTURE:20261102T090000Z", "DUE:20261102T120000Z", "SUMMARY:Due only", "END:VTODO", "END:VCALENDAR")
+	if response := davTestRequest(calDAV, http.MethodPut, object, davICalendarHeader, body); response.Code != http.StatusCreated {
+		t.Fatalf("PUT: status = %d; body = %s", response.Code, response.Body.String())
+	}
+	report := `<?xml version="1.0"?><C:calendar-multiget xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav"><D:prop><C:calendar-data><C:expand start="20261102T000000Z" end="20261103T000000Z"/></C:calendar-data></D:prop><D:href>` + object + `</D:href></C:calendar-multiget>`
+	response := davTestRequest(calDAV, "REPORT", CalDavDefaultCalendarPath, davXMLHeader, report)
+	expanded := response.Body.String()
+	if response.Code != http.StatusMultiStatus || strings.Count(expanded, "BEGIN:VTODO") != 1 {
+		t.Fatalf("expanded REPORT: status = %d; body = %s", response.Code, expanded)
+	}
+	for _, want := range []string{"RECURRENCE-ID:20261102T090000Z", "DUE:20261102T120000Z", "SUMMARY:Due only"} {
+		if !strings.Contains(expanded, want) {
+			t.Fatalf("expanded REPORT lacks %s: %s", want, expanded)
+		}
+	}
+	if strings.Contains(expanded, "DTSTART") || strings.Contains(expanded, "RANGE=") {
+		t.Fatalf("expanded REPORT changed the due-only instance: %s", expanded)
+	}
+	if get := davTestRequest(calDAV, http.MethodGet, object, nil, ""); get.Code != http.StatusOK || !strings.Contains(get.Body.String(), "RANGE=THISANDFUTURE") {
+		t.Fatalf("expansion mutated the stored calendar: status = %d; body = %s", get.Code, get.Body.String())
+	}
+}

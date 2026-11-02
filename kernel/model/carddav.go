@@ -691,10 +691,21 @@ func (b *AddressBook) load() error {
 								filename_ := strings.TrimSuffix(filename, VCardFileExt) + "-" + hex.EncodeToString(sum[:8]) + VCardFileExt
 								filePath := path.Join(b.DirectoryPath, filename_)
 								// 同名文件只能来自此前对同一张卡片的拆分（同步或中断的拆分会让原文件与它并存），之后可能已被修改，
-								// 原卡片是它修改前的版本，因此保留它，由该文件自己的载入任务读取
+								// 原卡片是它修改前的版本，因此保留它；确认仍能读取单张卡片后才允许删除原文件
 								if info, statErr := os.Lstat(filePath); statErr == nil {
 									if !info.Mode().IsRegular() {
 										return fmt.Errorf("CardDAV: split destination [%s] is not a regular file", filePath)
+									}
+									content, readErr := os.ReadFile(filePath)
+									if readErr != nil {
+										return readErr
+									}
+									cards, decodeErr := decodeCards(content)
+									if decodeErr != nil {
+										return decodeErr
+									}
+									if len(cards) != 1 {
+										return fmt.Errorf("CardDAV: split destination [%s] must contain one card", filePath)
 									}
 									return nil
 								} else if !os.IsNotExist(statErr) {

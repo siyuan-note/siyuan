@@ -150,6 +150,30 @@ func TestCalendarDataExpandThisAndFuture(t *testing.T) {
 	}
 }
 
+func TestCalendarDataExpandTodoOverrideWithoutStart(t *testing.T) {
+	for _, test := range []struct {
+		name, recurrenceID, due, wantID, wantDue string
+	}{
+		{"UTC", "RECURRENCE-ID;RANGE=THISANDFUTURE:20261102T090000Z", "DUE:20261102T120000Z", "RECURRENCE-ID:20261102T090000Z", "DUE:20261102T120000Z"},
+		{"floating", "RECURRENCE-ID;RANGE=THISANDFUTURE:20261102T090000", "DUE:20261102T120000", "RECURRENCE-ID:20261102T090000", "DUE:20261102T120000"},
+		{"date", "RECURRENCE-ID;VALUE=DATE;RANGE=THISANDFUTURE:20261102", "DUE;VALUE=DATE:20261102", "RECURRENCE-ID;VALUE=DATE:20261102", "DUE;VALUE=DATE:20261102"},
+		{"time zone", "RECURRENCE-ID;TZID=Asia/Shanghai;RANGE=THISANDFUTURE:20261102T090000", "DUE;TZID=Asia/Shanghai:20261102T120000", "RECURRENCE-ID:20261102T010000Z", "DUE:20261102T040000Z"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			calendar := testCalendar(t, "BEGIN:VTODO", "UID:todo", "DTSTAMP:20261101T000000Z", test.recurrenceID, test.due, "END:VTODO")
+			got := testCalendarData(t, `<C:expand start="20261101T000000Z" end="20261104T000000Z"/>`).Render(calendar, time.FixedZone("floating", 2*60*60))
+			for _, want := range []string{test.wantID + "\r\n", test.wantDue + "\r\n"} {
+				if !strings.Contains(got, want) {
+					t.Fatalf("expanded data lacks %q:\n%s", want, got)
+				}
+			}
+			if strings.Count(got, "BEGIN:VTODO") != 1 || strings.Contains(got, "DTSTART") || strings.Contains(got, "RANGE=") || strings.Contains(got, "TZID=") {
+				t.Fatalf("expanded data changed the due-only instance:\n%s", got)
+			}
+		})
+	}
+}
+
 func TestCalendarDataLimitRecurrenceSet(t *testing.T) {
 	calendar := testCalendar(t, "BEGIN:VEVENT", "UID:x", "DTSTAMP:20261101T000000Z", "DTSTART:20261102T090000Z", "DTEND:20261102T100000Z",
 		"RRULE:FREQ=DAILY;COUNT=10", "END:VEVENT",

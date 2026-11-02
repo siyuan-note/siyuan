@@ -5,12 +5,17 @@
 package model
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/emersion/go-vcard"
 )
 
 // TestCardDAVAddressDataFiltering 验证 address-data 中列出属性时只返回这些属性和 VERSION（RFC 6352 §10.4.2）。
@@ -180,5 +185,66 @@ func TestCardDAVSplitKeepsExistingFiles(t *testing.T) {
 	}
 	if get := davTestRequest(cardDAV, http.MethodGet, book+"/"+alice, nil, ""); get.Code != http.StatusOK || !strings.Contains(get.Body.String(), "FN:Alice Updated") {
 		t.Fatalf("updated contact was overwritten: status = %d; body = %s", get.Code, get.Body.String())
+	}
+}
+
+func TestCardDAVSplitKeepsSourceOnInvalidDestination(t *testing.T) {
+	for _, invalid := range []struct{ name, content string }{
+		{"empty", ""},
+		{"not a card", "corrupted"},
+		{"truncated", "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Alice\r\n"},
+	} {
+		t.Run(invalid.name, func(t *testing.T) {
+			_, cardDAV := newDAVHandlerFixture(t)
+			book := CardDavDefaultAddressBookPath
+			dir := DavPath2DirectoryPath(book)
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			alice := davTestCard("u1", "Alice")
+			card, err := vcard.NewDecoder(strings.NewReader(alice)).Decode()
+			if err != nil {
+				t.Fatal(err)
+			}
+			var encoded bytes.Buffer
+			if err = vcard.NewEncoder(&encoded).Encode(card); err != nil {
+				t.Fatal(err)
+			}
+			sum := sha256.Sum256(encoded.Bytes())
+			destination := filepath.Join(dir, "multi-"+hex.EncodeToString(sum[:8])+VCardFileExt)
+			source := filepath.Join(dir, "multi.vcf")
+			multi := alice + davTestCard("u2", "Bob")
+			if err = os.WriteFile(source, []byte(multi), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(destination, []byte(invalid.content), 0644); err != nil {
+				t.Fatal(err)
+			}
+			response := davTestRequest(cardDAV, "PROPFIND", book, map[string]string{"Depth": "1"}, "")
+			if response.Code != http.StatusInternalServerError {
+				t.Fatalf("PROPFIND: status = %d, want 500; body = %s", response.Code, response.Body.String())
+			}
+			if content, err := os.ReadFile(source); err != nil || string(content) != multi {
+				t.Fatalf("failed split lost the source: %q, %v", content, err)
+			}
+			if content, err := os.ReadFile(destination); err != nil || string(content) != invalid.content {
+				t.Fatalf("failed split changed the destination: %q, %v", content, err)
+			}
+
+			if err = os.WriteFile(destination, []byte(davTestCard("u1", "Alice Recovered")), 0644); err != nil {
+				t.Fatal(err)
+			}
+			resetDAVStores()
+			response = davTestRequest(cardDAV, "PROPFIND", book, map[string]string{"Depth": "1"}, "")
+			if response.Code != http.StatusMultiStatus || strings.Count(response.Body.String(), "<response") != 3 {
+				t.Fatalf("retry PROPFIND: status = %d; body = %s", response.Code, response.Body.String())
+			}
+			if _, err = os.Stat(source); !os.IsNotExist(err) {
+				t.Fatalf("successful split retained the source: %v", err)
+			}
+			if content, err := os.ReadFile(destination); err != nil || !strings.Contains(string(content), "FN:Alice Recovered") {
+				t.Fatalf("retry overwrote the recovered contact: %q, %v", content, err)
+			}
+		})
 	}
 }

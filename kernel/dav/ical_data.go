@@ -217,6 +217,10 @@ func (c *icalContext) expand(calendar *ical.Component, r *TimeRange) *ical.Compo
 			}
 			if nil != rid || !t.recurrenceID.Equal(first.start) {
 				start := instance.Props.Get(ical.PropDateTimeStart)
+				// VTODO 可以没有 DTSTART，此时实例标识仍遵循原 RECURRENCE-ID 的日期和时区形式
+				if nil == start {
+					start = rid
+				}
 				recurrenceID := ical.NewProp(ical.PropRecurrenceID)
 				recurrenceID.Value, _ = c.instanceTimeValue(start, t.recurrenceID)
 				if isDateValue(start) {

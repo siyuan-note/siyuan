@@ -82,7 +82,7 @@
     "dayjs": "^1.11.23",
     "electron": "44.10.0",
     "electron-builder": "26.15.7",
-    "encoding": "^0.1.13",
+    "encoding": "^0.1.14",
     "esbuild-loader": "^4.5.0",
     "eslint": "^10.13.0",
     "file-loader": "^6.2.0",

@@ -7,7 +7,7 @@ import {createNativeMarkdownBridge} from "./nativeBridge";
 import {markdownErrorKey} from "./errors";
 import {createMarkdownTree, MarkdownTree} from "./tree";
 import {MarkdownTreeLocation} from "./treeContracts";
-import {createMarkdownChoice, MarkdownChoice} from "./choiceMenu";
+import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./choiceMenu";
 import {createMarkdownWindowChrome} from "./windowChrome";
 
 declare const SIYUAN_VERSION: string;
@@ -46,6 +46,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let modeChoice: MarkdownChoice = undefined;
     let themeChoice: MarkdownChoice = undefined;
     let fontChoice: MarkdownChoice = undefined;
+    let appearanceMenu: ReturnType<typeof createMarkdownSubmenu> = undefined;
     let switching = false;
     let switchTask: Promise<boolean>;
     let pendingSwitch: {ticket: string; sessionId: string};
@@ -56,31 +57,26 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const platforms: Record<string, string> = {darwin: "mac", win32: "windows", linux: "linux", android: "android", ios: "ios", harmony: "harmony"};
     document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
     root.innerHTML = `<header class="markdown-header">
-    <button type="button" class="markdown-heading" id="markdownFiles"><svg aria-hidden="true"><use href="#iconFolder"></use></svg><span id="markdownName" class="markdown-name"></span></button>
+    <button type="button" class="block__icon block__icon--show markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
+    <button type="button" class="markdown-heading" id="markdownFiles"><span id="markdownName" class="markdown-name"></span></button>
     <div class="markdown-header__drag" aria-hidden="true"></div>
     <button type="button" class="block__icon block__icon--show markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
     <button type="button" class="block__icon block__icon--show markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
     <details class="markdown-more" id="markdownMore">
         <summary class="markdown-more__button" id="markdownMoreButton" aria-controls="markdownActions" aria-expanded="false"><svg aria-hidden="true"><use href="#iconMore"></use></svg></summary>
         <div class="b3-menu markdown-menu" id="markdownActions">
-            <button type="button" class="b3-menu__item" id="markdownNew"><span class="b3-menu__label" data-label="new"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownOpen"><span class="b3-menu__label" data-label="openBy"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownOpenFolder"><span class="b3-menu__label" data-label="markdownOpenFolder"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownSave"><span class="b3-menu__label" data-label="save"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownSaveAs"><span class="b3-menu__label" data-label="saveAs"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownNew"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconAddDoc"></use></svg><span class="b3-menu__label" data-label="new"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownOpen"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFileText"></use></svg><span class="b3-menu__label" data-label="openBy"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownOpenFolder"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFolder"></use></svg><span class="b3-menu__label" data-label="markdownOpenFolder"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownSave"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSave"></use></svg><span class="b3-menu__label" data-label="save"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownSaveAs"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconDownloadAssets"></use></svg><span class="b3-menu__label" data-label="saveAs"></span></button>
             <hr class="b3-menu__separator">
-            <button type="button" class="b3-menu__item" id="markdownInsertImage"><span class="b3-menu__label" data-label="insertImage"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownResources"><span class="b3-menu__label" data-label="markdownResources"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownInsertImage"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconImage"></use></svg><span class="b3-menu__label" data-label="insertImage"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownResources"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconKey"></use></svg><span class="b3-menu__label" data-label="markdownResources"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconHistory"></use></svg><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
             <hr class="b3-menu__separator">
             <div id="markdownMode"></div>
-            <details class="markdown-appearance" id="markdownPreferences">
-                <summary class="b3-menu__item"><span class="b3-menu__label" data-label="appearance"></span><svg class="b3-menu__icon markdown-appearance__arrow" aria-hidden="true"><use href="#iconDown"></use></svg></summary>
-                <div class="markdown-preferences">
-                    <div id="markdownTheme"></div>
-                    <div id="markdownFont"></div>
-                </div>
-            </details>
+            <div id="markdownPreferences"><div id="markdownTheme"></div><div id="markdownFont"></div></div>
             <div class="markdown-policy"><p data-label="markdownPreviewPolicy"></p><p data-label="markdownPrivacy"></p><p id="markdownNotice" role="status"></p></div>
         </div>
     </details>
@@ -107,14 +103,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const more = control<HTMLDetailsElement>("markdownMore");
     const moreButton = control("markdownMoreButton");
     const closeMore = (restoreFocus = true) => {
-        modeChoice?.close(); themeChoice?.close(); fontChoice?.close();
+        modeChoice?.close(); appearanceMenu?.close();
         if (!more.open) return;
         more.open = false;
         moreButton.setAttribute("aria-expanded", "false");
         if (restoreFocus && !frozen) moreButton.focus();
     };
     more.addEventListener("toggle", () => {
-        if (!more.open) {modeChoice?.close(); themeChoice?.close(); fontChoice?.close();}
+        if (!more.open) {modeChoice?.close(); appearanceMenu?.close();}
         if (frozen) more.open = false;
         moreButton.setAttribute("aria-expanded", String(more.open));
     });
@@ -458,10 +454,15 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         themeChoice.setValue(preferences.theme);
         fontChoice.setValue(String(preferences.fontSize));
     };
-    const preferenceChoice = (id: string, label: string, values: Array<[string, string]>, value: string,
+    const preferenceChoice = (id: "markdownMode" | "markdownTheme" | "markdownFont", label: string, values: Array<[string, string]>, value: string,
                               patch: (value: string) => Partial<MarkdownPreferences>) => createMarkdownChoice({
         element: control(id), label: text(label), values: values.map(([value, label]) => ({value, label: text(label)})), value,
+        icon: {markdownMode: "iconEdit", markdownTheme: "iconMode", markdownFont: "iconFont"}[id],
         onChange(value) {if (!frozen) {closeMore(); void updatePreferences(patch(value)).catch(reportError);}},
+    });
+    appearanceMenu = createMarkdownSubmenu({
+        element: control("markdownPreferences"), label: text("appearance"), icon: "iconTheme",
+        onClose() {themeChoice?.close(); fontChoice?.close();},
     });
     modeChoice = preferenceChoice("markdownMode", "markdownEditMode", [["ir", "markdownModeIR"], ["wysiwyg", "wysiwyg"], ["sv", "markdownModeSV"]], preferences.mode, value => ({mode: value as MarkdownEditorMode}));
     themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme, value => ({theme: value as MarkdownPreferences["theme"]}));
@@ -566,7 +567,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         switchTask = completeSwitch().catch(() => {reportError(); return false;}).finally(() => {switchTask = undefined;});
     });
     tree = createMarkdownTree({
-        element: control("markdownTree"), toggle: control<HTMLButtonElement>("markdownFiles"), bridge: bridge.tree, text,
+        element: control("markdownTree"), toggles: [control<HTMLButtonElement>("markdownTreeToggle"), control<HTMLButtonElement>("markdownFiles")],
+        bridge: bridge.tree, text,
         mobile: ["android", "ios", "harmony"].includes(bootstrap.platform), onOpen: openTreeFile,
         onError() {actionMessage = text("markdownFolderError"); render(session.getState());},
     });
@@ -641,7 +643,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         clearTimeout(autoSave); unsubscribe();
         document.removeEventListener("keydown", shortcut, true);
         removeMenuListeners();
-        tree?.destroy(); modeChoice?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
+        tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
         windowChrome?.destroy();
         editor.destroy();
     }

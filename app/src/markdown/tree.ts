@@ -1,4 +1,5 @@
 import {getDocTreeWindow} from "../layout/dock/docTree/DocTreeModel";
+import {animateMarkdownTreeRows} from "./treeAnimation";
 import type {MarkdownTreeBridge, MarkdownTreeLocation, MarkdownTreeNode, MarkdownTreeState, MarkdownTreeView} from "./treeContracts";
 
 interface TreeRow {
@@ -11,14 +12,15 @@ interface TreeRow {
 
 export const createMarkdownTree = (options: {
     element: HTMLElement;
-    toggle: HTMLButtonElement;
+    toggles: HTMLButtonElement[];
     bridge: MarkdownTreeBridge;
     text(key: string): string;
     mobile: boolean;
     onOpen(location: MarkdownTreeLocation): Promise<boolean>;
     onError(): void;
 }) => {
-    const {element, toggle, bridge, text} = options;
+    const {element, toggles, bridge, text} = options;
+    let activeToggle = toggles[0];
     element.innerHTML = `<div class="markdown-tree__notice" role="status"></div>
 <div class="markdown-tree__viewport" role="tree" tabindex="0"><div class="b3-list b3-list--background"></div></div>
 <button type="button" class="b3-button b3-button--text markdown-tree__choose"></button>
@@ -31,8 +33,11 @@ export const createMarkdownTree = (options: {
     viewport.setAttribute("aria-label", text("markdownFiles"));
     resize.setAttribute("aria-label", text("markdownFiles"));
     choose.textContent = text("markdownOpenFolder");
-    toggle.setAttribute("aria-label", text("markdownFiles"));
-    toggle.setAttribute("aria-controls", element.id);
+    for (const toggle of toggles) {
+        toggle.setAttribute("aria-label", text("markdownFiles"));
+        toggle.setAttribute("aria-controls", element.id);
+        toggle.title = text("markdownFiles");
+    }
     const events = new AbortController();
     const {signal} = events;
     const narrow = matchMedia("(max-width: 700px)");
@@ -49,18 +54,24 @@ export const createMarkdownTree = (options: {
     let selected: string;
     let focused: string;
     let frame = 0;
+    let interaction = 0;
+    let finishAnimation: () => void;
     let saveTimer: ReturnType<typeof setTimeout>;
     let state: MarkdownTreeState = {kind: "empty", generation: 0, expanded: [], width, visible: true};
     let expanded = new Set<string>();
     const children = new Map<string, MarkdownTreeNode[]>();
     const errors = new Map<string, string>();
-    const pending = new Map<string, object>();
+    const pending = new Map<string, {done: Promise<void>}>();
+    const expanding = new Map<string, object>();
     let rows: TreeRow[] = [];
     const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
     const location = (nodeId: string): MarkdownTreeLocation => ({rootId: state.rootId, generation: state.generation, nodeId});
     const shown = () => drawer() ? drawerOpen : desktopVisible;
+    const stopAnimation = () => {finishAnimation?.(); finishAnimation = undefined;};
+    const rowHeight = () => Math.max(28, parseFloat(getComputedStyle(element).getPropertyValue("--b3-ui-list-height")) || (drawer() ? 44 : 28)) + 2;
     const updateVisibility = () => {
         const visible = shown();
+        if (!visible) stopAnimation();
         element.hidden = !visible;
         element.dataset.drawer = String(drawer());
         element.style.setProperty("--markdown-tree-width", `${width}px`);
@@ -68,7 +79,7 @@ export const createMarkdownTree = (options: {
         for (const sibling of Array.from(element.parentElement.children)) {
             if (sibling !== element) (sibling as HTMLElement).inert = frozen || drawer() && visible;
         }
-        toggle.setAttribute("aria-expanded", String(visible));
+        for (const toggle of toggles) toggle.setAttribute("aria-expanded", String(visible));
         resize.hidden = drawer();
         resize.setAttribute("aria-valuenow", String(width));
         resize.setAttribute("aria-valuemin", "180");
@@ -84,12 +95,13 @@ export const createMarkdownTree = (options: {
     const scheduleSave = () => {clearTimeout(saveTimer); saveTimer = setTimeout(saveView, 150);};
     const renderWindow = () => {
         if (disposed) return;
+        stopAnimation();
         const active = viewport.contains(document.activeElement);
-        const height = Math.max(28, parseFloat(getComputedStyle(element).getPropertyValue("--b3-ui-list-height")) || (drawer() ? 44 : 28)) + 2;
+        const height = rowHeight();
         const range = getDocTreeWindow(rows.length, viewport.scrollTop, viewport.clientHeight, height);
         const fragment = document.createDocumentFragment();
         viewport.removeAttribute("aria-activedescendant");
-        const spacer = (size: number) => {const item = document.createElement("div"); item.style.height = `${size}px`; item.setAttribute("role", "presentation"); fragment.append(item);};
+        const spacer = (size: number) => {const item = document.createElement("div"); item.dataset.treeSpacer = "true"; item.style.height = `${size}px`; item.setAttribute("role", "presentation"); fragment.append(item);};
         spacer(range.before);
         rows.slice(range.start, range.end).forEach((row, offset) => {
             const item = document.createElement("div");
@@ -111,7 +123,10 @@ export const createMarkdownTree = (options: {
                 item.setAttribute("role", "treeitem");
                 item.setAttribute("aria-level", String(row.depth + 1));
                 item.setAttribute("aria-selected", String(node.id === selected));
-                if (directory) item.setAttribute("aria-expanded", String(expanded.has(node.id)));
+                if (directory) {
+                    item.setAttribute("aria-expanded", String(expanded.has(node.id)));
+                    item.setAttribute("aria-busy", String(pending.has(node.id)));
+                }
                 item.classList.toggle("b3-list-item--focus", node.id === selected);
                 item.classList.toggle("markdown-tree__row--focused", node.id === focused && active);
                 item.innerHTML = `<span class="b3-list-item__toggle"><svg class="b3-list-item__arrow${expanded.has(node.id) ? " b3-list-item__arrow--open" : ""}"${directory ? "" : ' style="visibility:hidden"'}><use href="#iconRight"></use></svg></span><svg class="b3-list-item__graphic" aria-hidden="true"><use href="#${directory ? "iconFolder" : "iconMarkdown"}"></use></svg><span class="b3-list-item__text"></span>`;
@@ -131,10 +146,9 @@ export const createMarkdownTree = (options: {
             if (depth > 64 || seen.has(node.id) || rows.length > 20000) return;
             seen.add(node.id);
             rows.push({node, depth});
-            if (node.kind !== "directory" || !expanded.has(node.id)) return;
+            if (node.kind !== "directory" || !expanded.has(node.id) || expanding.has(node.id)) return;
             if (errors.has(node.id)) rows.push({depth: depth + 1, parent: node.id, message: errors.get(node.id), retry: true});
             else if (!children.has(node.id)) rows.push({depth: depth + 1, message: text("loading")});
-            else if (!children.get(node.id).length) rows.push({depth: depth + 1, message: text("empty")});
             else children.get(node.id).forEach(child => visit(child, depth + 1));
         };
         if (state.kind === "ready") visit({id: state.rootId, name: state.rootName, kind: "directory"}, 0);
@@ -142,14 +156,17 @@ export const createMarkdownTree = (options: {
     };
     const discard = (nodeId: string) => {
         const previous = children.get(nodeId);
-        children.delete(nodeId); pending.delete(nodeId); errors.delete(nodeId); expanded.delete(nodeId);
+        children.delete(nodeId); pending.delete(nodeId); errors.delete(nodeId); expanded.delete(nodeId); expanding.delete(nodeId);
         previous?.forEach(child => {if (child.kind === "directory") discard(child.id);});
     };
     const load = async (nodeId: string, force = false) => {
-        if (disposed || state.kind !== "ready" || pending.has(nodeId) || (!force && children.has(nodeId))) return;
+        if (disposed || state.kind !== "ready") return;
+        if (pending.has(nodeId)) return pending.get(nodeId).done;
+        if (!force && children.has(nodeId)) return;
         const expected = version;
         const request = location(nodeId);
-        const token = {};
+        let complete: () => void;
+        const token = {done: new Promise<void>(resolve => {complete = resolve;})};
         pending.set(nodeId, token); errors.delete(nodeId); project();
         try {
             const result = await bridge.list(request);
@@ -172,12 +189,13 @@ export const createMarkdownTree = (options: {
         finally {
             if (pending.get(nodeId) === token) pending.delete(nodeId);
             if (!disposed && version === expected) project();
+            complete();
         }
     };
     const applyState = (next: MarkdownTreeState, force = false) => {
         const changed = state.rootId !== next.rootId || state.generation !== next.generation;
         if (!initialized) {width = Math.max(180, Math.min(480, next.width || 240)); desktopVisible = next.visible; initialized = true;}
-        if (changed || force) {version++; pending.clear(); errors.clear();}
+        if (changed || force) {version++; pending.clear(); errors.clear(); expanding.clear(); interaction++;}
         if (changed) {children.clear(); viewport.scrollTop = 0;}
         if (changed) expanded = new Set(next.expanded.slice(-256));
         if (changed || selected !== next.currentNodeId) {
@@ -225,9 +243,44 @@ export const createMarkdownTree = (options: {
     };
     const fold = (id: string, open = !expanded.has(id)) => {
         if (frozen) return;
-        if (open) {expanded.add(id); void load(id, true);} else expanded.delete(id);
+        stopAnimation();
+        const action = ++interaction;
+        const expected = version;
+        const position = rows.findIndex(row => row.node?.id === id);
+        if (position < 0) return;
+        const subtreeSize = () => {
+            let end = position + 1;
+            while (end < rows.length && rows[end].depth > rows[position].depth) end++;
+            return end - position - 1;
+        };
+        const animate = (count: number, snapshot: Array<{position: number; element: HTMLElement}> = []) => {
+            const bounds = list.querySelector<HTMLElement>(`[data-row="${position}"]`)?.getBoundingClientRect();
+            const view = viewport.getBoundingClientRect();
+            if (action === interaction && bounds && bounds.top >= view.top && bounds.bottom <= view.bottom) {
+                finishAnimation = animateMarkdownTreeRows(list, position + 1, count, open, rowHeight(), snapshot);
+            }
+        };
+        if (open) {
+            if (expanded.has(id)) return;
+            const intent = {};
+            expanding.set(id, intent);
+            expanded.add(id);
+            void load(id, true).then(() => {
+                if (disposed || expected !== version || expanding.get(id) !== intent) return;
+                expanding.delete(id);
+                project();
+                if (rows[position]?.node?.id === id && shown() && !frozen) animate(subtreeSize());
+            });
+        } else {
+            const count = subtreeSize();
+            const snapshot = Array.from(list.querySelectorAll<HTMLElement>("[data-row]")).map(item => ({position: Number(item.dataset.row), element: item}))
+                .filter(item => item.position > position && item.position <= position + count)
+                .map(item => ({position: item.position, element: item.element.cloneNode(true) as HTMLElement}));
+            expanded.delete(id); expanding.delete(id);
+            project(); animate(count, snapshot);
+        }
         if (expanded.size > 256) expanded.delete(expanded.values().next().value);
-        project(); scheduleSave();
+        scheduleSave();
     };
     const activate = async (row: TreeRow) => {
         if (frozen || !row.node) return;
@@ -246,7 +299,7 @@ export const createMarkdownTree = (options: {
         const row = rows[Number(item.dataset.row)];
         viewport.focus(); void activate(row);
     }, {signal});
-    viewport.addEventListener("scroll", () => {cancelAnimationFrame(frame); frame = requestAnimationFrame(renderWindow);}, {passive: true, signal});
+    viewport.addEventListener("scroll", () => {stopAnimation(); interaction++; cancelAnimationFrame(frame); frame = requestAnimationFrame(renderWindow);}, {passive: true, signal});
     const updateFocus = () => {
         const active = document.activeElement === viewport;
         viewport.querySelectorAll<HTMLElement>("[data-node-id]").forEach(item =>
@@ -261,6 +314,8 @@ export const createMarkdownTree = (options: {
         if (index < 0) index = 0;
         const row = navigable[index];
         if (!row) return;
+        const folding = event.key === "ArrowRight" && row.node.kind === "directory" || event.key === "ArrowLeft" && expanded.has(row.node.id) ||
+            ["Enter", " "].includes(event.key) && row.node.kind === "directory";
         if (event.key === "ArrowDown") index = Math.min(index + 1, navigable.length - 1);
         else if (event.key === "ArrowUp") index = Math.max(0, index - 1);
         else if (event.key === "Home") index = 0;
@@ -274,23 +329,25 @@ export const createMarkdownTree = (options: {
         event.preventDefault(); event.stopPropagation();
         focused = navigable[index].node.id;
         const position = rows.findIndex(value => value.node?.id === focused);
-        const height = Math.max(28, parseFloat(getComputedStyle(element).getPropertyValue("--b3-ui-list-height")) || (drawer() ? 44 : 28)) + 2;
+        const height = rowHeight();
         if (position * height < viewport.scrollTop) viewport.scrollTop = position * height;
         else if ((position + 1) * height > viewport.scrollTop + viewport.clientHeight) viewport.scrollTop = (position + 1) * height - viewport.clientHeight;
-        renderWindow();
+        if (folding) updateFocus(); else renderWindow();
     }, {signal});
-    const hideDrawer = (restoreFocus = true) => {if (drawerOpen) {drawerOpen = false; updateVisibility(); if (restoreFocus) toggle.focus();}};
+    const hideDrawer = (restoreFocus = true) => {if (drawerOpen) {drawerOpen = false; updateVisibility(); if (restoreFocus) activeToggle.focus();}};
+    const insideToggle = (target: EventTarget) => toggles.some(toggle => toggle.contains(target as Node));
     document.addEventListener("focusin", event => {
-        if (drawer() && drawerOpen && !element.contains(event.target as Node) && !toggle.contains(event.target as Node)) hideDrawer(false);
+        if (drawer() && drawerOpen && !element.contains(event.target as Node) && !insideToggle(event.target)) hideDrawer(false);
     }, {signal});
     document.addEventListener("pointerdown", event => {
-        if (drawer() && drawerOpen && !element.contains(event.target as Node) && !toggle.contains(event.target as Node)) hideDrawer();
+        if (drawer() && drawerOpen && !element.contains(event.target as Node) && !insideToggle(event.target)) hideDrawer();
     }, {signal});
     document.addEventListener("keydown", event => {
         if (event.key === "Escape" && drawer() && drawerOpen) {event.preventDefault(); hideDrawer();}
     }, {signal});
-    toggle.addEventListener("click", () => {
+    for (const toggle of toggles) toggle.addEventListener("click", () => {
         if (frozen) return;
+        activeToggle = toggle;
         if (drawer()) drawerOpen = !drawerOpen; else {desktopVisible = !desktopVisible; scheduleSave();}
         updateVisibility(); if (shown()) {void refresh(); viewport.focus();}
     }, {signal});
@@ -321,10 +378,10 @@ export const createMarkdownTree = (options: {
         ready,
         refresh,
         chooseRoot,
-        freeze(value: boolean) {frozen = value; element.inert = value; toggle.disabled = value; updateVisibility();},
+        freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; toggles.forEach(toggle => {toggle.disabled = value;}); updateVisibility();},
         destroy() {
             if (disposed) return;
-            saveView(); disposed = true; version++; refreshSequence++;
+            saveView(); disposed = true; version++; refreshSequence++; stopAnimation(); expanding.clear();
             clearTimeout(saveTimer); cancelAnimationFrame(frame); events.abort(); resizeObserver.disconnect();
             element.parentElement?.classList.remove("markdown-workspace--drawer");
             if (element.parentElement) for (const sibling of Array.from(element.parentElement.children)) {

@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261102134047"
+		"updated": "20261102140506"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261102134047"
+				"updated": "20261102140506"
 			},
 			"Children": [
 				{
@@ -93,12 +93,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261102134047"
+				"updated": "20261102140506"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The window is named SiYuan. Its header shows the filename, Undo, Redo, and the "
+					"Data": "The window is named SiYuan. Its header shows a file panel button, the filename, Undo, Redo, and the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -231,7 +231,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-eb329f4",
-				"updated": "20261101171827"
+				"updated": "20261102140506"
 			},
 			"Children": [
 				{
@@ -245,12 +245,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-c7e4443",
-				"updated": "20261101171827"
+				"updated": "20261102140506"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md."
+					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md. Folders expand and collapse with a smooth transition that respects the system’s reduced motion setting. Empty folders have no placeholder child row."
 				}
 			]
 		},
@@ -259,12 +259,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-4756559",
-				"updated": "20261101171827"
+				"updated": "20261102140506"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On desktop, click the filename to show or hide the sidebar and drag its divider to adjust the width. On mobile, tap the filename to open the file drawer. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
+					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. Clicking the filename also toggles the panel. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
 				}
 			]
 		},

@@ -54,7 +54,6 @@ button {
 .markdown-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex: 0 1 auto;
   min-width: 0;
   border: 0;
@@ -73,13 +72,6 @@ button {
 
   &:focus-visible {
     outline: 1px solid var(--b3-theme-primary);
-  }
-
-  > svg {
-    width: 16px;
-    height: 16px;
-    color: var(--b3-theme-on-surface);
-    flex-shrink: 0;
   }
 
 }
@@ -107,6 +99,7 @@ button {
   }
 
   .markdown-heading,
+  .markdown-tree-toggle,
   .markdown-history,
   .markdown-more,
   .markdown-caption {
@@ -141,10 +134,23 @@ button {
   justify-content: center;
 }
 
-.markdown-history {
+.markdown-history,
+.markdown-tree-toggle {
   min-width: 28px;
   min-height: 28px;
   justify-content: center;
+}
+
+.markdown-tree-toggle {
+  > svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &[aria-expanded="true"] {
+    color: var(--b3-theme-on-background);
+    background-color: var(--b3-list-icon-hover);
+  }
 }
 
 .markdown-more {
@@ -182,6 +188,7 @@ button {
 
 .markdown-more summary:focus-visible,
 .markdown-history:focus-visible,
+.markdown-tree-toggle:focus-visible,
 .markdown-menu button:focus-visible,
 .markdown-choice:focus-visible {
   outline: 1px solid var(--b3-theme-primary);
@@ -217,20 +224,6 @@ button {
     opacity: .38;
     cursor: not-allowed;
   }
-}
-
-.markdown-appearance__arrow {
-  width: 12px;
-  height: 12px;
-  margin-inline: 8px 0;
-}
-
-.markdown-appearance[open] .markdown-appearance__arrow {
-  transform: rotate(180deg);
-}
-
-.markdown-preferences {
-  padding-inline-start: 12px;
 }
 
 .markdown-choice[aria-disabled="true"] {
@@ -304,6 +297,18 @@ button {
     z-index: 2;
     box-shadow: var(--b3-dialog-shadow);
     --b3-ui-list-height: 44px;
+  }
+}
+
+.markdown-tree__animation {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: clip;
+  min-height: 0;
+
+  > * {
+    flex-shrink: 0;
   }
 }
 
@@ -406,6 +411,12 @@ button {
   font-family: var(--b3-font-family-code);
 }
 
+// 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。
+.markdown-editor .vditor-ir .vditor-reset > :is(h1, h2, h3, h4, h5, h6),
+.markdown-editor .vditor-wysiwyg > .vditor-reset > :is(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.25em;
+}
+
 .markdown-footer {
   flex-shrink: 0;
   border-top: 1px solid var(--b3-border-color);
@@ -480,12 +491,14 @@ button {
   }
 
   .markdown-app .b3-button,
+  .markdown-tree-toggle,
   .markdown-heading,
   .markdown-menu .b3-menu__item {
     min-height: 44px;
   }
 
   .markdown-more__button,
+  .markdown-tree-toggle,
   .markdown-history {
     width: 44px;
     height: 44px;

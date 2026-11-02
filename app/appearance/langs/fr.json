@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "La source de synchronisation a changé. Local : ${local} fichiers ; source : ${cloud} fichiers, ${time}, appareil : ${device}. Envoi : ${upload} fichiers. Restauration : écrasement de ${overwrite} fichiers locaux, suppression de ${remove}. Choisissez une direction ; la fusion automatique est suspendue",
 	"markdownSourceOnly": "Fichier volumineux : édition du texte source uniquement ; aperçu désactivé",
 	"markdownFiles": "Fichiers Markdown",
 	"markdownOpenFolder": "Ouvrir un dossier",
@@ -3651,6 +3652,8 @@
 		"459": "Le résumé actuel des souvenirs ne peut pas être traité pour le moment. Veuillez réessayer plus tard",
 		"460": "Les relations parent-enfant ne peuvent pas former de cycle ni inclure l’élément lui-même [%s]",
 		"461": "Chaque élément ne peut avoir qu’un seul parent ; vérifiez les relations de [%s]",
-		"462": "La synchronisation reste en pause. Vérifiez les données restaurées, puis réactivez-la dans Paramètres - Compte et synchronisation"
+		"462": "La synchronisation reste en pause. Vérifiez les données restaurées, puis réactivez-la dans Paramètres - Compte et synchronisation",
+		"463": "La source de synchronisation a changé ; cliquez sur Synchroniser et choisissez un envoi ou une restauration",
+		"464": "La source ou les données ont changé après l’aperçu ; cliquez sur Synchroniser pour vérifier à nouveau"
 	}
 }

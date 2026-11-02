@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "Zdroj synchronizácie sa zmenil. Lokálne: ${local} súborov; zdroj: ${cloud} súborov, ${time}, zariadenie: ${device}. Odoslanie: ${upload} súborov. Obnovenie: prepísanie ${overwrite} a odstránenie ${remove} lokálnych súborov. Vyberte smer; automatické zlúčenie je pozastavené",
 	"markdownSourceOnly": "Veľký súbor: iba úprava zdroja; náhľad je vypnutý",
 	"markdownFiles": "Súbory Markdown",
 	"markdownOpenFolder": "Otvoriť priečinok",
@@ -3651,6 +3652,8 @@
 		"459": "Aktuálny prehľad spomienok teraz nemožno spracovať. Skúste to znova neskôr",
 		"460": "Vzťahy medzi nadradenými a podradenými položkami nesmú tvoriť cyklus ani obsahovať samotnú položku [%s]",
 		"461": "Každá položka môže mať iba jednu nadradenú položku; skontrolujte relácie pre [%s]",
-		"462": "Synchronizácia zostáva pozastavená. Skontrolujte obnovené údaje a znova ju zapnite v Nastavenia - Účet a synchronizácia"
+		"462": "Synchronizácia zostáva pozastavená. Skontrolujte obnovené údaje a znova ju zapnite v Nastavenia - Účet a synchronizácia",
+		"463": "Zdroj synchronizácie sa zmenil; kliknite na Synchronizovať a vyberte odoslanie alebo obnovenie",
+		"464": "Zdroj alebo údaje sa po náhľade zmenili; kliknite na Synchronizovať a skontrolujte ich znova"
 	}
 }

@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "La fuente de sincronización cambió. Local: ${local} archivos; fuente: ${cloud} archivos, ${time}, dispositivo: ${device}. Subir: ${upload} archivos. Restaurar: sobrescribir ${overwrite} y eliminar ${remove} archivos locales. Elija una dirección; la combinación automática está en pausa",
 	"markdownSourceOnly": "Archivo grande: solo edición del código fuente; vista previa desactivada",
 	"markdownFiles": "Archivos Markdown",
 	"markdownOpenFolder": "Abrir carpeta",
@@ -3651,6 +3652,8 @@
 		"459": "El resumen actual de recuerdos no se puede procesar en este momento. Inténtalo de nuevo más tarde",
 		"460": "Las relaciones entre elementos principales y secundarios no pueden formar ciclos ni incluir al propio elemento [%s]",
 		"461": "Cada elemento solo puede tener un elemento principal; revisa las relaciones de [%s]",
-		"462": "La sincronización sigue pausada. Compruebe los datos restaurados y vuelva a activarla en Ajustes - Cuenta y sincronización"
+		"462": "La sincronización sigue pausada. Compruebe los datos restaurados y vuelva a activarla en Ajustes - Cuenta y sincronización",
+		"463": "La fuente de sincronización cambió; pulse Sincronizar y elija subir o restaurar para continuar",
+		"464": "La fuente o los datos cambiaron después de la vista previa; pulse Sincronizar para revisarlos"
 	}
 }

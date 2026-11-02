@@ -1037,6 +1037,17 @@ var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData
 var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveCloudSyncDir = define[SyncNameRequest, string]("removeCloudSyncDir", "/api/sync/removeCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync", Mode: SettingSelfManaged}}, "POST")
 var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir", "/api/sync/listCloudSyncDir", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// GetSyncSourceState previews a changed, nonempty source after saving editors and indexing current data.
+// It reads authenticated remote metadata without applying files. Empty targets need no direction choice.
+// Counts describe one-way upload files and one-way download overwrites/removals; ignored assets are preserved.
+// The returned source/localID/cloudID must accompany an explicit performSync direction; stale previews are rejected.
+var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceState", "/api/sync/getSyncSourceState", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// PerformSync retains automatic and fully manual mode behavior when source is omitted.
+// A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
+// The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+// Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
 var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。

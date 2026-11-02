@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "Sync source changed. Local: ${local} files; source: ${cloud} files, ${time}, device: ${device}. Upload: ${upload} files. Restore: overwrite ${overwrite}, delete ${remove} local files. Choose a direction; automatic merging is paused",
 	"markdownSourceOnly": "Large file: source editing only; preview disabled",
 	"markdownFiles": "Markdown files",
 	"markdownOpenFolder": "Open folder",
@@ -3651,6 +3652,8 @@
 		"459": "The current memory overview cannot be processed right now. Please try again later",
 		"460": "Parent-child relations cannot form a cycle or include the item itself [%s]",
 		"461": "Each item can have only one parent; check the relations for [%s]",
-		"462": "Sync remains paused. After checking the restored data, re-enable it in Settings - Account & Sync"
+		"462": "Sync remains paused. After checking the restored data, re-enable it in Settings - Account & Sync",
+		"463": "The sync source changed; click Sync and choose upload or restore before continuing",
+		"464": "The source or data changed after preview; click Sync to review again"
 	}
 }

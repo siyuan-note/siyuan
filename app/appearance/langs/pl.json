@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "Źródło synchronizacji zmieniło się. Lokalnie: ${local} plików; źródło: ${cloud} plików, ${time}, urządzenie: ${device}. Przesłanie: ${upload} plików. Przywrócenie: nadpisanie ${overwrite} i usunięcie ${remove} plików lokalnych. Wybierz kierunek; automatyczne scalanie jest wstrzymane",
 	"markdownSourceOnly": "Duży plik: tylko edycja źródła; podgląd wyłączony",
 	"markdownFiles": "Pliki Markdown",
 	"markdownOpenFolder": "Otwórz folder",
@@ -3651,6 +3652,8 @@
 		"459": "Nie można teraz przetworzyć bieżącego podsumowania wspomnień. Spróbuj ponownie później",
 		"460": "Relacje nadrzędne i podrzędne nie mogą tworzyć cyklu ani obejmować samego elementu [%s]",
 		"461": "Każdy element może mieć tylko jeden element nadrzędny; sprawdź relacje dla [%s]",
-		"462": "Synchronizacja pozostaje wstrzymana. Sprawdź przywrócone dane i włącz ją ponownie w Ustawienia - Konto i synchronizacja"
+		"462": "Synchronizacja pozostaje wstrzymana. Sprawdź przywrócone dane i włącz ją ponownie w Ustawienia - Konto i synchronizacja",
+		"463": "Źródło synchronizacji zmieniło się; kliknij Synchronizuj i wybierz przesłanie lub przywrócenie",
+		"464": "Źródło lub dane zmieniły się po podglądzie; kliknij Synchronizuj, aby sprawdzić ponownie"
 	}
 }

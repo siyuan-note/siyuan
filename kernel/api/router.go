@@ -564,6 +564,7 @@ func registerSyncRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/removeCloudSyncDir", contractRouteHandlers(apicontract.RemoveCloudSyncDir, removeCloudSyncDir)...)
 	ginServer.Handle("POST", "/api/sync/listCloudSyncDir", contractRouteHandlers(apicontract.ListCloudSyncDir, listCloudSyncDir)...)
 	ginServer.Handle("POST", "/api/sync/performSync", contractRouteHandlers(apicontract.PerformSync, performSync)...)
+	ginServer.Handle("POST", "/api/sync/getSyncSourceState", contractRouteHandlers(apicontract.GetSyncSourceState, getSyncSourceState)...)
 	ginServer.Handle("POST", "/api/sync/cancelSyncCheckout", contractRouteHandlers(apicontract.CancelSyncCheckout, cancelSyncCheckout)...)
 	ginServer.Handle("POST", "/api/sync/getSyncCheckout", contractRouteHandlers(apicontract.GetSyncCheckout, getSyncCheckout)...)
 	ginServer.Handle("POST", "/api/sync/confirmSyncCheckout", contractRouteHandlers(apicontract.ConfirmSyncCheckout, confirmSyncCheckout)...)

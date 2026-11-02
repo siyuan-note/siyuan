@@ -26,6 +26,9 @@ func ClearSyncProviderConfig(provider int) error {
 		if err := requireCompleteAssetDownloads(); err != nil {
 			return err
 		}
+		if err := prepareSyncSourceChange(); err != nil {
+			return err
+		}
 		if err := clearAssetDownloadState(); err != nil {
 			return err
 		}

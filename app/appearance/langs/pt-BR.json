@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "A origem da sincronização mudou. Local: ${local} arquivos; origem: ${cloud} arquivos, ${time}, dispositivo: ${device}. Enviar: ${upload} arquivos. Restaurar: sobrescrever ${overwrite} e excluir ${remove} arquivos locais. Escolha uma direção; a mesclagem automática está pausada",
 	"markdownSourceOnly": "Arquivo grande: apenas edição do código-fonte; prévia desativada",
 	"markdownFiles": "Arquivos Markdown",
 	"markdownOpenFolder": "Abrir pasta",
@@ -3651,6 +3652,8 @@
 		"459": "O resumo atual das memórias não pode ser processado no momento. Tente novamente mais tarde",
 		"460": "As relações entre itens pais e filhos não podem formar ciclos nem incluir o próprio item [%s]",
 		"461": "Cada item pode ter apenas um pai; verifique as relações de [%s]",
-		"462": "A sincronização permanece pausada. Verifique os dados restaurados e reative-a em Configurações - Conta e sincronização"
+		"462": "A sincronização permanece pausada. Verifique os dados restaurados e reative-a em Configurações - Conta e sincronização",
+		"463": "A origem da sincronização mudou; clique em Sincronizar e escolha enviar ou restaurar",
+		"464": "A origem ou os dados mudaram após a prévia; clique em Sincronizar para verificar novamente"
 	}
 }

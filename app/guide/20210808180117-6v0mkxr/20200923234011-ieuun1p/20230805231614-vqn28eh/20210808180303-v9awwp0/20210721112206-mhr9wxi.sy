@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261102160000"
+		"updated": "20261102113000"
 	},
 	"Children": [
 		{
@@ -433,6 +433,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "For S3 and WebDAV endpoints without a protocol, dotted hostnames use HTTPS by default; IP addresses, localhost, and single-label hostnames use HTTP. To connect to an HTTP-only service using a dotted hostname, enter http:// explicitly. Explicit http:// and https:// addresses are preserved, including saved configurations."
+				}
+			]
+		},
+		{
+			"ID": "20261102113000-c64909d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102113000-c64909d",
+				"updated": "20261102113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before changing the sync provider, endpoint, or directory, SiYuan saves open editors and creates a complete snapshot of the current data. When the new source is nonempty, automatic merging stops. Click Sync to review the local and source file counts, source time and device, and the number of files to upload, overwrite, or delete. Choose either upload from local data or restore from the source; neither direction is selected by default. Uploading publishes the current local snapshot without deleting extra stored objects in the source; restoring replaces local data according to the source. An empty source receives local data directly. A failed first sync keeps the source unconfirmed; review it again before retrying. The snapshot created before the change remains available in Data history."
 				}
 			]
 		},

@@ -16,6 +16,7 @@ const browserCases = (sources: string[]) => {
             document.body.innerHTML = "";
             const requests: {url: string, data: unknown, reply: (response: unknown) => void}[] = [];
             const confirmations: (() => void)[] = [];
+			const messages: string[] = [];
             const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main"},
                 repo: {key: initializeKey ? "" : "fixture-key"}};
             class Dialog {
@@ -29,6 +30,8 @@ const browserCases = (sources: string[]) => {
             }
             const dependencies: Record<string, unknown> = {
                 "../dialog": {Dialog},
+                "../dialog/message": {showMessage: (message: string) => messages.push(message)},
+                "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
                 "./checkoutProgress": {openSyncCheckoutProgress: () => false},
                 "../util/functions": {isMobile: () => !!mobile},
@@ -48,7 +51,8 @@ const browserCases = (sources: string[]) => {
                 renderSyncCloudList: (element: Element, reload: boolean) => void};
             new Function("exports", "require", "window", "document", code)(guide,
                 (name: string) => dependencies[name] || {},
-                {siyuan: {config, languages: new Proxy({}, {get: (_target, name) => String(name)})}}, document);
+                {siyuan: {config, languages: new Proxy({}, {get: (_target, name) => name === "syncSourcePreview" ?
+                    "Local ${local}; cloud ${cloud}; ${device}; upload ${upload}; overwrite ${overwrite}; remove ${remove}" : String(name)})}}, document);
             guide.syncGuide();
             if (initializeKey) {
                 document.querySelectorAll<HTMLInputElement>(".b3-text-field").forEach(input => { input.value = "test"; });
@@ -99,7 +103,32 @@ const browserCases = (sources: string[]) => {
             check.equal(requests.length, 0, "sync waits for user confirmation");
             check.equal(confirmations.length, 1);
             confirmations.shift()();
-            check.equal(requests[0].url, "/api/sync/performSync");
+            check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+            requests.shift().reply({data: {pending: initializeKey, source: "new-source", localID: "local", cloudID: "cloud",
+                localFiles: 12, cloudFiles: 10, cloudCreated: 1, cloudDevice: "<img src=x>", uploadFiles: 3, overwriteFiles: 1, removeFiles: 2}});
+            if (initializeKey) {
+                check.equal(requests.length, 0, "changed sources require an explicit direction");
+                check.equal(document.querySelector('input[name="upload"]:checked'), null);
+                check.match(document.body.textContent, /Local 12; cloud 10; <img src=x>; upload 3; overwrite 1; remove 2/);
+                check.equal(document.querySelector("img"), null, "device names are escaped");
+                const buttons = document.querySelectorAll<HTMLButtonElement>(".b3-dialog__action button");
+                buttons[1].click();
+                check.deepEqual(messages, ["plsChoose"]);
+                check.equal(requests.length, 0);
+                document.querySelector<HTMLInputElement>(`input[name="upload"][value="${!mobile}"]`).checked = true;
+                buttons[1].click();
+                check.equal(requests[0].url, "/api/sync/performSync");
+                check.deepEqual(requests[0].data, {upload: !mobile, source: "new-source", localID: "local", cloudID: "cloud"});
+            } else {
+                check.equal(requests[0].url, "/api/sync/performSync");
+                check.deepEqual(requests[0].data, {});
+                requests.shift();
+                guide.syncGuide();
+                check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+                requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
+                check.equal(requests[0].url, "/api/sync/performSync");
+                check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "local", cloudID: ""});
+            }
         }
     }
     return "Sync setup directory cases passed";

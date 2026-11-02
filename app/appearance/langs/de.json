@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "Synchronisationsquelle geändert. Lokal: ${local} Dateien; Quelle: ${cloud} Dateien, ${time}, Gerät: ${device}. Hochladen: ${upload} Dateien. Wiederherstellen: ${overwrite} lokale Dateien überschreiben, ${remove} löschen. Wählen Sie eine Richtung; automatisches Zusammenführen ist pausiert",
 	"markdownSourceOnly": "Große Datei: nur Quelltextbearbeitung; Vorschau deaktiviert",
 	"markdownFiles": "Markdown-Dateien",
 	"markdownOpenFolder": "Ordner öffnen",
@@ -3651,6 +3652,8 @@
 		"459": "Die aktuelle Erinnerungsübersicht kann derzeit nicht verarbeitet werden. Bitte versuchen Sie es später erneut",
 		"460": "Übergeordnete und untergeordnete Einträge dürfen keinen Zyklus bilden oder sich selbst enthalten [%s]",
 		"461": "Jeder Eintrag kann nur einen übergeordneten Eintrag haben; prüfe die Beziehungen für [%s]",
-		"462": "Die Synchronisierung bleibt pausiert. Prüfen Sie die wiederhergestellten Daten und aktivieren Sie sie unter Einstellungen - Konto und Synchronisierung erneut"
+		"462": "Die Synchronisierung bleibt pausiert. Prüfen Sie die wiederhergestellten Daten und aktivieren Sie sie unter Einstellungen - Konto und Synchronisierung erneut",
+		"463": "Die Synchronisationsquelle wurde geändert; klicken Sie auf Synchronisieren und wählen Sie Hochladen oder Wiederherstellen",
+		"464": "Quelle oder Daten wurden nach der Vorschau geändert; klicken Sie auf Synchronisieren, um erneut zu prüfen"
 	}
 }

@@ -1784,7 +1784,7 @@ export type PatchSyncSettingInput = { "assetDownloadMode"?: number | null; "clou
 
 export type PatchSystemSettingInput = { "autoLaunch2"?: number | null; "encryptedNotebookFollowSystemLock"?: boolean | null; "lockScreenMode"?: number | null; "networkProxy"?: NetworkProxyInput | null; "networkServe"?: boolean | null; "networkServeTLS"?: boolean | null; "settingsWindow"?: boolean | null; };
 
-export type PerformSyncRequestInput = { "mobileSwitch"?: boolean | null; "upload"?: boolean; };
+export type PerformSyncRequestInput = { "cloudID"?: string; "localID"?: string; "mobileSwitch"?: boolean | null; "source"?: string; "upload"?: boolean; };
 
 export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number; "session"?: string; "transactions": Array<TransactionInput | null>; };
 
@@ -2465,6 +2465,8 @@ export type SyncS3 = { "accessKey": string; "bucket": string; "concurrentReqs": 
 export type SyncS3Data = { "s3": SyncS3 | null; };
 
 export type SyncS3Input = { "accessKey"?: string | null; "bucket"?: string | null; "concurrentReqs"?: number | null; "endpoint"?: string | null; "pathStyle"?: boolean | null; "region"?: string | null; "secretKey"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; };
+
+export type SyncSourceState = { "cloudCreated": number; "cloudDevice": string; "cloudFiles": number; "cloudID": string; "localFiles": number; "localID": string; "overwriteFiles": number; "pending": boolean; "removeFiles": number; "source": string; "uploadFiles": number; };
 
 export type SyncWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
 
@@ -8211,6 +8213,19 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * previews a changed, nonempty source after saving editors and indexing current data.
+     * It reads authenticated remote metadata without applying files. Empty targets need no direction choice.
+     * Counts describe one-way upload files and one-way download overwrites/removals; ignored assets are preserved.
+     * The returned source/localID/cloudID must accompany an explicit performSync direction; stale previews are rejected.
+     */
+    "/api/sync/getSyncSourceState": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncSourceState; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/sync/importSyncProviderS3": {
         request: SyncProviderImportRequestInput;
         response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "s3"?: never; }) | null | (SyncS3Data & { "closeTimeout"?: never; }); "msg": string; };
@@ -8242,6 +8257,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * retains automatic and fully manual mode behavior when source is omitted.
+     * A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
+     * The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+     * Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
+     */
     "/api/sync/performSync": {
         request: PerformSyncRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -2047,7 +2047,9 @@ func formatSyncRepoErrorMsg(err error) string {
 	return fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 }
 
-func syncRepoDownload() (err error) {
+func syncRepoDownload() error { return syncRepoDownloadWithDecision(nil) }
+
+func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2081,10 +2083,22 @@ func syncRepoDownload() (err error) {
 	}
 	checkoutTask := startSyncCheckout(repo)
 	defer checkoutTask.finish(repo, &err)
+	if len(decisions) > 0 {
+		if checkoutTask == nil {
+			return checkoutPrepareRetry()
+		}
+		if err = checkoutTask.prepareApply(); err != nil {
+			return
+		}
+	}
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync0(repo)
+	if len(decisions) > 0 {
+		err = indexRepoForSourceDecision(repo, false)
+	} else {
+		_, _, err = indexRepoBeforeCloudSync0(repo)
+	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2101,6 +2115,9 @@ func syncRepoDownload() (err error) {
 
 	syncContext := newSyncContext()
 	cloudStart := time.Now()
+	if err = applySyncSourceDecision(syncContext, decisions); err != nil {
+		return
+	}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
@@ -2138,7 +2155,9 @@ func syncRepoDownload() (err error) {
 	return
 }
 
-func syncRepoUpload() (err error) {
+func syncRepoUpload() error { return syncRepoUploadWithDecision(nil) }
+
+func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2168,10 +2187,22 @@ func syncRepoUpload() (err error) {
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "u", true)
 	checkoutTask := startSyncCheckout(repo)
 	defer checkoutTask.finish(repo, &err)
+	if len(decisions) > 0 {
+		if checkoutTask == nil {
+			return checkoutPrepareRetry()
+		}
+		if err = checkoutTask.prepareApply(); err != nil {
+			return
+		}
+	}
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	if len(decisions) > 0 {
+		err = indexRepoForSourceDecision(repo, true)
+	} else {
+		_, _, err = indexRepoBeforeCloudSync(repo)
+	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2188,6 +2219,9 @@ func syncRepoUpload() (err error) {
 
 	syncContext := newSyncContext()
 	cloudStart := time.Now()
+	if err = applySyncSourceDecision(syncContext, decisions); err != nil {
+		return
+	}
 	trafficStat, err := repo.SyncUpload(syncContext)
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
@@ -3234,6 +3268,12 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		}
 	}
 	ret.SetCheckoutHooks(documentAddressingCheckoutHooks(ret))
+	if err = ret.ConfigureSyncSource(syncSourceIdentity(confSyncSnapshot.Provider, cloudConf)); err != nil {
+		return
+	}
+	if err = ret.BindLegacySyncSource(); err != nil {
+		return
+	}
 	err = ret.ConfigureAssetDownloads(confSyncSnapshot.AssetDownloadMode == 1, assetDownloadStatePath(), scope)
 	return
 }

@@ -1,4 +1,5 @@
 {
+	"syncSourcePreview": "Eşitleme kaynağı değişti. Yerel: ${local} dosya; kaynak: ${cloud} dosya, ${time}, cihaz: ${device}. Yükleme: ${upload} dosya. Geri yükleme: ${overwrite} yerel dosyanın üzerine yazar, ${remove} dosyayı siler. Bir yön seçin; otomatik birleştirme duraklatıldı",
 	"markdownSourceOnly": "Büyük dosya: yalnızca kaynak düzenleme; önizleme kapalı",
 	"markdownFiles": "Markdown dosyaları",
 	"markdownOpenFolder": "Klasör aç",
@@ -3651,6 +3652,8 @@
 		"459": "Geçerli anı özeti şu anda işlenemiyor. Lütfen daha sonra tekrar deneyin",
 		"460": "Üst-alt öğe ilişkileri döngü oluşturamaz veya öğenin kendisini içeremez [%s]",
 		"461": "Her öğenin yalnızca bir üst öğesi olabilir; [%s] için ilişkileri kontrol edin",
-		"462": "Eşitleme duraklatılmış olarak kalır. Geri yüklenen verileri kontrol ettikten sonra Ayarlar - Hesap ve Eşitleme bölümünden yeniden etkinleştirin"
+		"462": "Eşitleme duraklatılmış olarak kalır. Geri yüklenen verileri kontrol ettikten sonra Ayarlar - Hesap ve Eşitleme bölümünden yeniden etkinleştirin",
+		"463": "Eşitleme kaynağı değişti; Eşitle’ye tıklayıp yüklemeyi veya geri yüklemeyi seçin",
+		"464": "Önizlemeden sonra kaynak veya veriler değişti; yeniden incelemek için Eşitle’ye tıklayın"
 	}
 }

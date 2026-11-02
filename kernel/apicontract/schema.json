@@ -38230,6 +38230,12 @@
     "PerformSyncRequestInput": {
       "type": "object",
       "properties": {
+        "cloudID": {
+          "type": "string"
+        },
+        "localID": {
+          "type": "string"
+        },
         "mobileSwitch": {
           "anyOf": [
             {
@@ -38239,6 +38245,9 @@
               "type": "null"
             }
           ]
+        },
+        "source": {
+          "type": "string"
         },
         "upload": {
           "type": "boolean"
@@ -54818,6 +54827,58 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SyncSourceState": {
+      "type": "object",
+      "properties": {
+        "cloudCreated": {
+          "type": "integer"
+        },
+        "cloudDevice": {
+          "type": "string"
+        },
+        "cloudFiles": {
+          "type": "integer"
+        },
+        "cloudID": {
+          "type": "string"
+        },
+        "localFiles": {
+          "type": "integer"
+        },
+        "localID": {
+          "type": "string"
+        },
+        "overwriteFiles": {
+          "type": "integer"
+        },
+        "pending": {
+          "type": "boolean"
+        },
+        "removeFiles": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string"
+        },
+        "uploadFiles": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cloudCreated",
+        "cloudDevice",
+        "cloudFiles",
+        "cloudID",
+        "localFiles",
+        "localID",
+        "overwriteFiles",
+        "pending",
+        "removeFiles",
+        "source",
+        "uploadFiles"
+      ],
       "additionalProperties": false
     },
     "SyncWebDAV": {
@@ -177570,6 +177631,86 @@
               },
               "data": {
                 "$ref": "#/$defs/SyncProviderConfigRulesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/getSyncSourceState",
+      "handler": "getSyncSourceState",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SyncSourceState"
               },
               "msg": {
                 "type": "string"

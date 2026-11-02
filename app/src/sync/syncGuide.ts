@@ -226,13 +226,31 @@ export const syncGuide = (app?: App) => {
 };
 
 const syncNow = () => {
-    if (window.siyuan.config.sync.mode !== 3) {
-        fetchPost("/api/sync/performSync", {});
-        return;
-    }
+    fetchPost("/api/sync/getSyncSourceState", {}, response => {
+		if (response.data.source && !response.data.cloudID) {
+			fetchPost("/api/sync/performSync", {upload: true, source: response.data.source,
+				localID: response.data.localID, cloudID: ""});
+			return;
+		}
+        if (!response.data.pending && window.siyuan.config.sync.mode !== 3) {
+            fetchPost("/api/sync/performSync", {});
+            return;
+        }
+        chooseSyncDirection(response.data);
+    });
+};
+
+const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
+    const values: Record<string, string | number> = {
+        local: state.localFiles, cloud: state.cloudFiles, time: new Date(state.cloudCreated).toLocaleString(),
+        device: state.cloudDevice, upload: state.uploadFiles, overwrite: state.overwriteFiles, remove: state.removeFiles,
+    };
+    const preview = state.pending ? window.siyuan.languages.syncSourcePreview.replace(/\$\{(\w+)\}/g,
+        (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
     const manualDialog = new Dialog({
         title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
+    ${preview ? `<div class="b3-label">${preview}</div>` : ""}
     <label class="fn__flex b3-label">
         <input type="radio" name="upload" value="true">
         <span class="fn__space"></span>
@@ -267,7 +285,10 @@ const syncNow = () => {
             showMessage(window.siyuan.languages.plsChoose);
             return;
         }
-        fetchPost("/api/sync/performSync", {upload: uploadElement.value === "true"});
+        fetchPost("/api/sync/performSync", {
+            upload: uploadElement.value === "true",
+            ...(state.pending ? {source: state.source, localID: state.localID, cloudID: state.cloudID} : {}),
+        });
         manualDialog.destroy();
     });
 };

@@ -182,6 +182,8 @@ func TestAPIContractSyncPermissionBeforeBody(t *testing.T) {
 		"/api/sync/setSyncProviderS3":       setSyncProviderS3,
 		"/api/sync/clearSyncProviderConfig": clearSyncProviderConfig,
 		"/api/sync/setSyncProvider":         setSyncProvider,
+		"/api/sync/getSyncSourceState":      getSyncSourceState,
+		"/api/sync/performSync":             performSync,
 	} {
 		for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
 			engine := gin.New()

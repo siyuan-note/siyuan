@@ -45,7 +45,7 @@ func publishSyncResult(code int, syncErr error) {
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
 }
 
-func SyncDataDownload() (err error) {
+func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync download did not complete")
 	defer logging.Recover()
 
@@ -58,17 +58,17 @@ func SyncDataDownload() (err error) {
 		return
 	}
 	defer unlock()
-	err = syncDataDownloadLocked()
+	err = syncDataDownloadLocked(decisions...)
 	return
 }
 
-func syncDataDownloadLocked() (err error) {
+func syncDataDownloadLocked(decisions ...SyncSourceDecision) (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
-	err = syncRepoDownloadWithDNSRetry()
+	err = syncRepoDownloadWithDNSRetry(decisions...)
 	code := 1
 	if err != nil {
 		code = 2
@@ -120,7 +120,7 @@ func completeCurrentSyncRemoteRequest(scope string) {
 	syncRemoteRequests.complete(scope, latest.ID)
 }
 
-func SyncDataUpload() (err error) {
+func SyncDataUpload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync upload did not complete")
 	defer logging.Recover()
 
@@ -139,7 +139,7 @@ func SyncDataUpload() (err error) {
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
-	err = syncRepoUploadWithDNSRetry()
+	err = syncRepoUploadWithDNSRetry(decisions...)
 	code := 1
 	if err != nil {
 		code = 2
@@ -646,6 +646,9 @@ func SetCloudSyncDir(name string) error {
 		return err
 	}
 
+	if err := prepareSyncSourceChange(); err != nil {
+		return err
+	}
 	UpdateSyncConf(func(s *conf.Sync) { s.CloudName = name })
 	refreshLANSyncManager()
 	return nil
@@ -709,6 +712,9 @@ func SetSyncProvider(provider int, completeAssets bool) (err error) {
 		if err != nil {
 			return
 		}
+		if err = prepareSyncSourceChange(); err != nil {
+			return
+		}
 	}
 	UpdateSyncConf(func(s *conf.Sync) { s.Provider = provider })
 	refreshLANSyncManager()
@@ -733,6 +739,9 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	if Conf.Sync.Load().Provider == conf.ProviderS3 && (Conf.Sync.Load().S3 == nil ||
 		Conf.Sync.Load().S3.Endpoint != s3.Endpoint || Conf.Sync.Load().S3.Bucket != s3.Bucket) {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -811,6 +820,9 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
+		if err = prepareSyncSourceChange(); err != nil {
+			return
+		}
 	}
 
 	UpdateSyncConf(func(s *conf.Sync) { s.WebDAV = webdav })
@@ -833,6 +845,9 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	if Conf.Sync.Load().Provider == conf.ProviderLocal && (Conf.Sync.Load().Local == nil ||
 		filepath.Clean(Conf.Sync.Load().Local.Endpoint) != filepath.Clean(local.Endpoint)) {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -889,6 +904,9 @@ func RemoveCloudSyncDir(name string) (err error) {
 	defer release()
 	if name == Conf.Sync.Load().CloudName {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -977,6 +995,12 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 func formatRepoErrorMsg(err error) string {
 	msg := html.EscapeString(err.Error())
+	if errors.Is(err, dejavu.ErrSyncSourceChanged) {
+		return Conf.Language(463)
+	}
+	if errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
+		return Conf.Language(464)
+	}
 	if errors.Is(err, treenode.ErrSpecTooNew) {
 		return Conf.Language(275) + ": " + msg
 	}
@@ -1100,19 +1124,19 @@ func syncRepoWithDNSRetryContext(ctx context.Context, exit, byHand bool) (cloudP
 }
 
 // syncRepoDownloadWithDNSRetry 仅下载同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
-func syncRepoDownloadWithDNSRetry() (err error) {
-	err = syncRepoDownload()
+func syncRepoDownloadWithDNSRetry(decisions ...SyncSourceDecision) (err error) {
+	err = syncRepoDownloadWithDecision(decisions)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		err = syncRepoDownload()
+		err = syncRepoDownloadWithDecision(decisions)
 	}
 	return
 }
 
 // syncRepoUploadWithDNSRetry 仅上传同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
-func syncRepoUploadWithDNSRetry() (err error) {
-	err = syncRepoUpload()
+func syncRepoUploadWithDNSRetry(decisions ...SyncSourceDecision) (err error) {
+	err = syncRepoUploadWithDecision(decisions)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		err = syncRepoUpload()
+		err = syncRepoUploadWithDecision(decisions)
 	}
 	return
 }

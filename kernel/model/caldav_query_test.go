@@ -102,6 +102,30 @@ func TestCalDAVQueryReleasesLock(t *testing.T) {
 	}
 }
 
+// TestCalDAVQueryTimeZone 验证 calendar-query 的 CALDAV:timezone 决定浮动时间的时区（RFC 4791 §9.8），
+// 没有 IANA 名称的 VTIMEZONE 按其中的规则解析。
+func TestCalDAVQueryTimeZone(t *testing.T) {
+	calDAV, _ := newDAVHandlerFixture(t)
+	calendar := CalDavDefaultCalendarPath
+	floating := davCRLF("BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//SiYuan test//EN", "BEGIN:VEVENT", "UID:floating",
+		"DTSTAMP:20261101T000000Z", "DTSTART:20261102T090000", "DTEND:20261102T100000", "END:VEVENT", "END:VCALENDAR")
+	if response := davTestRequest(calDAV, http.MethodPut, calendar+"/floating.ics", davICalendarHeader, floating); response.Code != http.StatusCreated {
+		t.Fatalf("PUT: status = %d; body = %s", response.Code, response.Body.String())
+	}
+	// 选用不常见的偏移，避免与运行测试的机器时区（浮动时间的默认时区）相同
+	zone := davCRLF("BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//SiYuan test//EN", "BEGIN:VTIMEZONE", "TZID:Nepal Standard Time",
+		"BEGIN:STANDARD", "DTSTART:16010101T000000", "TZOFFSETFROM:+0545", "TZOFFSETTO:+0545", "END:STANDARD", "END:VTIMEZONE", "END:VCALENDAR")
+	query := func(start, end string) int {
+		body := davTestRequest(calDAV, "REPORT", calendar, davXMLHeader, `<?xml version="1.0"?><C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav"><D:prop><D:getetag/></D:prop>`+
+			`<C:filter><C:comp-filter name="VCALENDAR"><C:comp-filter name="VEVENT"><C:time-range start="`+start+`" end="`+end+`"/></C:comp-filter></C:comp-filter></C:filter>`+
+			`<C:timezone>`+zone+`</C:timezone></C:calendar-query>`).Body.String()
+		return strings.Count(body, "<response")
+	}
+	if 1 != query("20261102T031500Z", "20261102T034500Z") || 0 != query("20261102T090000Z", "20261102T093000Z") {
+		t.Fatal("floating time must be resolved with the VTIMEZONE rules of CALDAV:timezone")
+	}
+}
+
 // TestCalDAVQueryFilters 验证 calendar-query 的过滤条件：只有一端的时间区间、重复实例、提醒触发时间、
 // is-not-defined、negate-condition 与排序规则（RFC 4791 §9.7、§9.9）。
 func TestCalDAVQueryFilters(t *testing.T) {

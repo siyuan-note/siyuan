@@ -875,7 +875,7 @@ func (s *calDAVService) collectionProps(collection *davCollection) []davProp {
 	}
 }
 
-// calendarTimeZone 解析 CALDAV:calendar-timezone 或 CALDAV:timezone 中的 VTIMEZONE；TZID 无法识别时返回 nil 时区。
+// calendarTimeZone 解析 CALDAV:calendar-timezone 或 CALDAV:timezone 中的 VTIMEZONE；无法解析时区时返回 nil 时区。
 func calendarTimeZone(text string) (*time.Location, error) {
 	calendar, err := ical.NewDecoder(strings.NewReader(text)).Decode()
 	if err != nil {
@@ -890,12 +890,7 @@ func calendarTimeZone(text string) (*time.Location, error) {
 	if 1 != len(zones) {
 		return nil, errors.New("CalDAV: time zone must contain exactly one VTIMEZONE")
 	}
-	tzid, _ := zones[0].Props.Text(ical.PropTimezoneID)
-	if loc := dav.ResolveTimeZone(tzid); nil != loc {
-		return loc, nil
-	}
-	location, _ := zones[0].Props.Text("X-LIC-LOCATION")
-	return dav.ResolveTimeZone(location), nil
+	return dav.VTimeZoneLocation(zones[0]), nil
 }
 
 func (s *calDAVService) validateProperty(prop *dav.Node) error {

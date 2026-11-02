@@ -110,14 +110,7 @@ func newICalContext(calendar *ical.Component, floating *time.Location) *icalCont
 			continue
 		}
 		tzid, _ := child.Props.Text(ical.PropTimezoneID)
-		loc := ResolveTimeZone(tzid)
-		if nil == loc {
-			// Lightning 等客户端在 VTIMEZONE 中用 X-LIC-LOCATION 给出 IANA 名称
-			if location, _ := child.Props.Text("X-LIC-LOCATION"); "" != location {
-				loc = ResolveTimeZone(location)
-			}
-		}
-		if nil != loc {
+		if loc := VTimeZoneLocation(child); nil != loc {
 			ctx.zones[tzid] = loc
 		}
 	}

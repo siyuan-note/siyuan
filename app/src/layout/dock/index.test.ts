@@ -154,6 +154,41 @@ it("touch compatibility hover skips dock timers while mouse hover remains availa
     assert.equal(timers.length, 2);
 });
 
+for (const position of ["Left", "Right", "Bottom"]) {
+    it(`${position} floating doc tree stays open during dragging and resumes hiding after cleanup`, () => {
+        let dragging = false;
+        const timers: Array<() => void> = [];
+        const prototype = loadDockPrototype([], {querySelector: (): null => null}, () => {}, () => {},
+            () => false, timers);
+        const classList = {contains: () => false};
+        const items = {parentElement: {classList}, querySelector: (): null => null};
+        const style = {opacity: "1", transform: ""};
+        const dock = Object.assign(Object.create(prototype), {
+            position, panelVisible: true, showDockTimeout: 0, hideDockTimeout: 0,
+            elements: [items, items],
+            layout: {element: {style, querySelector: (selector: string) =>
+                selector === ".sy__file--disablehover" && dragging ? {} : null}},
+            isFloating: () => true, getCurrentSize: () => 260,
+        }) as {hideDockByHover(): void, hideDock(reset?: boolean): void};
+
+        dock.hideDockByHover();
+        assert.equal(timers.length, 1);
+        dragging = true;
+        timers.shift()();
+        assert.equal(style.opacity, "1");
+        assert.equal(style.transform, "");
+        dock.hideDock();
+        assert.equal(style.opacity, "1");
+
+        dragging = false;
+        dock.hideDockByHover();
+        timers.shift()();
+        assert.equal(style.opacity, "0");
+        assert.equal(style.transform, position === "Bottom" ? "translateY(268px)" :
+            position === "Left" ? "translateX(-268px)" : "translateX(268px)");
+    });
+}
+
 describe("dock panel opening", () => {
     it("shows a panel after responsive layout changes it to floating", () => {
         const frames: Array<() => void> = [];

@@ -1966,6 +1966,10 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
+        // 菜单动作可能替换或删除标签，此时关闭菜单只清理状态。
+        if (!nodeElement.contains(tagElement)) {
+            return;
+        }
         tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
             removeSemanticInlineExternalBoundaries(tagElement);
@@ -2108,12 +2112,14 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconTrashcan",
         label: window.siyuan.languages.remove,
         click() {
+            const scrollTop = protyle.contentElement.scrollTop;
             removeSemanticInlineExternalBoundaries(tagElement);
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
+            protyle.contentElement.scrollTop = scrollTop;
+            updateTransaction(protyle, nodeElement, oldHTML);
         }
     }).element);
 

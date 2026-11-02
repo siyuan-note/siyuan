@@ -22,9 +22,10 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
         }
         destroy() { this.element.remove(); this.options.destroyCallback(); }
     }
+    let mobile = false;
     const confirmation = {exports: {}};
     new Function("require", "module", "exports", confirmationCode)((dependency: string) => ({
-        "../util/functions": {isMobile: () => false}, "./index": {Dialog}, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
+        "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
     })[dependency], confirmation, confirmation.exports);
     let response: {code: number, data: unknown[], msg: string} = {code: 0, data: [], msg: ""};
     const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
@@ -59,18 +60,38 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
         cleanup: {ruleVersion: "version", automaticOnly: true, items: [{itemID: "item", blockID: id}]}}));
     check.deepEqual(await api.confirmTagRemoval([]), []);
     let pending = api.confirmTagRemoval(groups);
-    check.equal(active.element.querySelectorAll("input:checked").length, 0);
+    check.equal(active.element.querySelectorAll('input[type="checkbox"]:checked').length, 2);
     check.equal(active.element.querySelector("img"), null);
     check.equal(document.activeElement.id, "confirmDialogConfirmBtn");
+    check.equal(document.activeElement.textContent, "Remove selected entries too");
     (active.element.querySelector("#confirmDialogConfirmBtn") as HTMLElement).click();
-    check.deepEqual(await pending, []);
+    check.deepEqual(await pending, groups);
+    for (mobile of [false, true]) {
+        pending = api.confirmTagRemoval(groups);
+        active.element.dispatchEvent(new CustomEvent("click", {detail: "Enter"}));
+        check.deepEqual(await pending, groups);
+    }
+    mobile = false;
     pending = api.confirmTagRemoval(groups);
     active.element.dispatchEvent(new CustomEvent("click", {detail: "Escape"}));
     check.equal(await pending, null);
     pending = api.confirmTagRemoval(groups);
-    (active.element.querySelector('[data-tag-removal-av="second"]') as HTMLInputElement).checked = true;
-    (active.element.querySelector("#extraDialogConfirmBtn") as HTMLElement).click();
+    (active.element.querySelector('[data-tag-removal-av="first"]') as HTMLInputElement).checked = false;
+    (active.element.querySelector("#confirmDialogConfirmBtn") as HTMLElement).click();
     check.deepEqual((await pending).map(group => group.avID), ["second"]);
+    pending = api.confirmTagRemoval(groups);
+    check.equal(active.element.querySelector("#extraDialogConfirmBtn").textContent, "Delete tags only");
+    (active.element.querySelector("#extraDialogConfirmBtn") as HTMLElement).click();
+    check.deepEqual(await pending, []);
+    pending = api.confirmTagRemoval(groups);
+    active.element.querySelectorAll<HTMLInputElement>("input").forEach(input => input.checked = false);
+    (active.element.querySelector("#confirmDialogConfirmBtn") as HTMLElement).click();
+    check.deepEqual(await pending, []);
+    pending = api.confirmTagRemoval([], "Delete this tag?");
+    check.equal(active.element.querySelector("#extraDialogConfirmBtn"), null);
+    check.equal(document.activeElement.textContent, "Delete tags only");
+    (active.element.querySelector("#confirmDialogConfirmBtn") as HTMLElement).click();
+    check.deepEqual(await pending, []);
     const large = {...groups[0], cleanup: {...groups[0].cleanup,
         items: Array.from({length: 201}, (_, index) => ({itemID: String(index), blockID: id}))}};
     const operations = api.tagRemovalOperations([large]);

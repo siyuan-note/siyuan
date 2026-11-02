@@ -2571,6 +2571,12 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         const changes = getTagRemovalChanges(doOperations, undoOperations);
         if (changes.length) {
             const wasDisabled = protyle.disabled;
+            const wasInert = protyle.element.inert;
+            const content = protyle.contentElement;
+            const scrollTop = content.scrollTop;
+            const overflowAnchor = content.style.getPropertyValue("overflow-anchor");
+            const anchorPriority = content.style.getPropertyPriority("overflow-anchor");
+            content.style.setProperty("overflow-anchor", "none");
             const selection = getSelection();
             const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
                 selection.rangeCount ? selection.getRangeAt(0) : undefined);
@@ -2593,7 +2599,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                 }
             };
             focusContext = focusContext || operationFocus(doOperations);
-            disabledProtyle(protyle);
+            // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
+            selection.removeAllRanges();
+            protyle.element.inert = true;
             void (async () => {
                 let sourceRestored = false;
                 let entriesRemoved = false;
@@ -2618,12 +2626,19 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                     showMessage(error.message);
                     await restore();
                 } finally {
-                    if (!wasDisabled) {
-                        enableProtyle(protyle);
+                    protyle.element.inert = wasInert;
+                    if (!wasDisabled && !wasInert) {
                         if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
                             protyle.wysiwyg.element.focus({preventScroll: true});
                             restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
                         }
+                    }
+                    content.scrollTop = scrollTop;
+                    protyle.scroll.lastScrollTop = scrollTop;
+                    if (overflowAnchor) {
+                        content.style.setProperty("overflow-anchor", overflowAnchor, anchorPriority);
+                    } else {
+                        content.style.removeProperty("overflow-anchor");
                     }
                 }
             })();

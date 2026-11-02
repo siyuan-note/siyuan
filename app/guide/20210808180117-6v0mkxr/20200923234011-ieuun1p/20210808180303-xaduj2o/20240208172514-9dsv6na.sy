@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261102195537"
+		"updated": "20261102214741"
 	},
 	"Children": [
 		{
@@ -5417,12 +5417,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261102195537-zlurrk5",
-				"updated": "20261102195537"
+				"updated": "20261102214741"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Delete tags only is the default and keeps all database entries. To also remove entries and their field values, select the databases and choose Also remove selected entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
+					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags and removes the selected entries and their field values. Deselect a database to keep its entries, or choose Delete tags only to keep all database entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
 				}
 			]
 		},

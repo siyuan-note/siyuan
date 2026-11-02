@@ -19,7 +19,15 @@ for (const mode of ["cancel", "cancelWithoutRange", "tagsOnly", "withEntries", "
         let history = 0;
         let focusRestored = 0;
         const messages: string[] = [];
-        const protyle = {disabled: false, undo: {add: () => history++}, wysiwyg: {element: {focus() {}, querySelectorAll: (): Element[] => []}}};
+        const styles = new Map([["overflow-anchor", "auto"]]);
+        const protyle = {disabled: false, element: {inert: false}, undo: {add: () => history++},
+            contentElement: {scrollTop: 120, style: {
+                getPropertyValue: (name: string) => styles.get(name) || "",
+                getPropertyPriority: () => "important",
+                setProperty: (name: string, value: string) => { styles.set(name, value); },
+                removeProperty: (name: string) => { styles.delete(name); },
+            }}, scroll: {lastScrollTop: 120},
+            wysiwyg: {element: {focus() {}, querySelectorAll: (): Element[] => []}}};
         const cleanup: IOperation = {action: "cleanupAttrViewBlocks", avID: "database", data: {ruleVersion: "version", items: []}};
         const dependencies = {
             window: {siyuan: {config: {fileTree: {openFilesUseCurrentTab: false}}}},
@@ -27,7 +35,7 @@ for (const mode of ["cancel", "cancelWithoutRange", "tagsOnly", "withEntries", "
                 createElement: () => ({innerHTML: "", querySelector: () => ({})}),
                 createRange: () => ({setStartBefore() {}, collapse() {}}),
             },
-            getSelection: () => ({rangeCount: 1, getRangeAt: () => ({})}),
+            getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {}}),
             getEditorFocusRange: () => ({}),
             getUndoFocusContext: (element: unknown) => mode === "cancelWithoutRange" && element === protyle.wysiwyg.element ? undefined :
                 {undoFocusId: "block", undoFocusStart: element === protyle.wysiwyg.element ? "4" : "5"},
@@ -40,7 +48,6 @@ for (const mode of ["cancel", "cancelWithoutRange", "tagsOnly", "withEntries", "
             cleanBlockSelectionModeOperations() {}, cleanHeadingNumberOperations() {}, restoreInlineElementBoundaryHTML: (html: string) => html,
             retainTableCellRichMetadata: (html: string) => html,
             getTagRemovalChanges: () => [{id: "block", tags: ["todo"]}],
-            disabledProtyle: () => protyle.disabled = true, enableProtyle: () => protyle.disabled = false,
             waitForPendingTransactions: async () => {},
             previewTagRemoval: async () => { const result = await preview; if (mode === "error") { throw new Error("failed"); } return result; },
             tagRemovalOperations: (groups: unknown[]) => groups.length ? [cleanup] : [],
@@ -56,12 +63,19 @@ for (const mode of ["cancel", "cancelWithoutRange", "tagsOnly", "withEntries", "
         const operations: IOperation[] = [{action: "update", id: "block", data: "after"}];
         const undo: IOperation[] = [{action: "update", id: "block", data: "before<wbr>"}];
         transaction(protyle, operations, undo);
-        assert.equal(protyle.disabled, true);
+        assert.equal(protyle.disabled, false);
+        assert.equal(protyle.element.inert, true);
+        assert.equal(styles.get("overflow-anchor"), "none");
         assert.equal(history, 0);
         assert.equal(writes.length, 0);
+        protyle.contentElement.scrollTop = 80;
         settle(mode.startsWith("cancel") ? null : mode === "withEntries" ? [{}] : []);
         await new Promise(resolve => setTimeout(resolve, 0));
         assert.equal(protyle.disabled, false);
+        assert.equal(protyle.element.inert, false);
+        assert.equal(protyle.contentElement.scrollTop, 120);
+        assert.equal(protyle.scroll.lastScrollTop, 120);
+        assert.equal(styles.get("overflow-anchor"), "auto");
         assert.equal(focusRestored, 1);
         if (mode.startsWith("cancel") || mode === "error") {
             assert.equal(writes.length, 0);

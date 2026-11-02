@@ -111,7 +111,7 @@ func newWebDAVHandler() http.Handler {
 			// logging.LogDebugf("WebDAV [%s %s]", r.Method, r.URL.String())
 		},
 	}
-	return model.RejectNonCanonicalDAVPath(withWebDAVGuardCache(webdavPreconditions(encBoxAwareFS, handler)))
+	return model.RejectNonCanonicalWebDAVPath(withWebDAVGuardCache(webdavPreconditions(encBoxAwareFS, handler)))
 }
 
 // webdavPreconditions 为写请求评估 RFC 9110 §13 的前置条件；x/net/webdav 不处理这些请求头，

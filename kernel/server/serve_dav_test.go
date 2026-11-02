@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -204,5 +205,30 @@ func TestWebDAVRejectsNonCanonicalPaths(t *testing.T) {
 	}
 	if status := request("/webdav/data/" + webdavGuardNormalBoxID + "/doc.sy"); status != http.StatusOK {
 		t.Fatalf("GET canonical path: status = %d", status)
+	}
+	if status := request("/webdav/data/" + webdavGuardNormalBoxID + "/doc%00.sy"); status != http.StatusBadRequest {
+		t.Errorf("GET path with NUL: status = %d, want 400", status)
+	}
+}
+
+// TestWebDAVBackslashFileNames 验证反斜杠只在 Windows 上被拒绝，其他系统上可以读写文件名含反斜杠的文件。
+func TestWebDAVBackslashFileNames(t *testing.T) {
+	ws := newWebDAVGuardWorkspace(t)
+	h := newWebDAVHandler()
+	put := serveWebDAVTestRequest(h, http.MethodPut, "/webdav/a%5Cb.txt", nil, "content")
+	if "windows" == runtime.GOOS {
+		if put.Code != http.StatusBadRequest {
+			t.Fatalf("PUT with a backslash on Windows: status = %d, want 400", put.Code)
+		}
+		return
+	}
+	if put.Code != http.StatusCreated {
+		t.Fatalf("PUT with a backslash: status = %d", put.Code)
+	}
+	if data, err := os.ReadFile(filepath.Join(ws, `a\b.txt`)); err != nil || "content" != string(data) {
+		t.Fatalf("file with a backslash: %q, %v", data, err)
+	}
+	if get := serveWebDAVTestRequest(h, http.MethodGet, "/webdav/a%5Cb.txt", nil, ""); get.Code != http.StatusOK || "content" != get.Body.String() {
+		t.Fatalf("GET with a backslash: status = %d, body = %q", get.Code, get.Body.String())
 	}
 }

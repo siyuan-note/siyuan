@@ -446,34 +446,22 @@ func (c *Calendars) DeleteCalendar(calendarPath string, conditions *DAVCondition
 		return
 	}
 
-	// 先删除目录，失败时缓存和元数据仍与磁盘一致
-	if err = os.RemoveAll(calendar.DirectoryPath); err != nil {
-		c.loaded = false
-		logging.LogErrorf("remove directory [%s] failed: %s", calendar.DirectoryPath, err)
-		return
-	}
-
-	c.calendars.Delete(calendarPath)
-	for i, item := range c.calendarsMetaData {
-		if item.Path == calendarPath {
-			c.calendarsMetaData = append(c.calendarsMetaData[:i], c.calendarsMetaData[i+1:]...)
-			break
-		}
-	}
-
-	if err = c.saveCalendarsMetaData(); err != nil {
-		c.loaded = false
-		return
-	}
-	if _, ok = c.properties[calendarPath]; ok {
+	return deleteDAVCollection(calendar.DirectoryPath, func() error {
+		previousMetaData := c.calendarsMetaData
+		previousProperties, hadProperties := c.properties[calendarPath]
+		c.calendarsMetaData = slices.DeleteFunc(slices.Clone(c.calendarsMetaData), func(item *CalendarMetaData) bool { return item.Path == calendarPath })
 		delete(c.properties, calendarPath)
-		if err = saveDAVDeadProperties(c.properties, CalendarsPropertiesFilePath()); err != nil {
+		if err := c.saveCollections(true, hadProperties); err != nil {
+			c.calendarsMetaData = previousMetaData
+			if hadProperties {
+				c.properties[calendarPath] = previousProperties
+			}
 			c.loaded = false
-			return
+			return err
 		}
-	}
-
-	return nil
+		c.calendars.Delete(calendarPath)
+		return nil
+	})
 }
 
 // PutCalendarObject 写入日历对象；created 表示请求前该资源不存在（RFC 9110 §9.3.4 据此区分 201 与 204）。

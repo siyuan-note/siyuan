@@ -464,34 +464,22 @@ func (c *Contacts) DeleteAddressBook(path string, conditions *DAVConditions) (er
 		return
 	}
 
-	// 先删除目录，失败时缓存和元数据仍与磁盘一致
-	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
-		c.loaded = false
-		logging.LogErrorf("remove directory [%s] failed: %s", addressBook.DirectoryPath, err)
-		return
-	}
-
-	c.books.Delete(path)
-	for i, item := range c.booksMetaData {
-		if item.Path == path {
-			c.booksMetaData = append(c.booksMetaData[:i], c.booksMetaData[i+1:]...)
-			break
-		}
-	}
-
-	if err = c.saveAddressBooksMetaData(); err != nil {
-		c.loaded = false
-		return
-	}
-	if _, ok = c.properties[path]; ok {
+	return deleteDAVCollection(addressBook.DirectoryPath, func() error {
+		previousMetaData := c.booksMetaData
+		previousProperties, hadProperties := c.properties[path]
+		c.booksMetaData = slices.DeleteFunc(slices.Clone(c.booksMetaData), func(item *AddressBookMetaData) bool { return item.Path == path })
 		delete(c.properties, path)
-		if err = saveDAVDeadProperties(c.properties, AddressBooksPropertiesFilePath()); err != nil {
+		if err := c.saveCollections(true, hadProperties); err != nil {
+			c.booksMetaData = previousMetaData
+			if hadProperties {
+				c.properties[path] = previousProperties
+			}
 			c.loaded = false
-			return
+			return err
 		}
-	}
-
-	return nil
+		c.books.Delete(path)
+		return nil
+	})
 }
 
 func (c *Contacts) GetAddressObject(addressPath string) (addressObject *AddressObjectData, err error) {

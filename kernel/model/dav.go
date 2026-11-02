@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
@@ -302,6 +303,35 @@ func saveDAVFiles(saves ...davFileSave) error {
 				}
 			}
 			return err
+		}
+	}
+	return nil
+}
+
+// deleteDAVCollection 删除集合目录，commit 从元数据中移除集合并在失败时恢复内存与元数据文件。目录先改名为同级的
+// 隐藏目录，commit 成功后才删除；commit 失败时改回原名，集合连同其中的对象保持不变，不会出现元数据仍列出集合、
+// 目录却已删除的状态（重新载入后集合以空集合的形式出现）。
+func deleteDAVCollection(dir string, commit func() error) error {
+	trash := filepath.Join(filepath.Dir(dir), fmt.Sprintf(".%s.deleting-%d", filepath.Base(dir), time.Now().UnixNano()))
+	if err := os.Rename(dir, trash); err != nil {
+		if !os.IsNotExist(err) {
+			logging.LogErrorf("move directory [%s] failed: %s", dir, err)
+			return err
+		}
+		trash = ""
+	}
+	if err := commit(); err != nil {
+		if "" != trash {
+			if restoreErr := os.Rename(trash, dir); restoreErr != nil {
+				logging.LogErrorf("restore directory [%s] from [%s] failed: %s", dir, trash, restoreErr)
+			}
+		}
+		return err
+	}
+	if "" != trash {
+		// 集合已从元数据中删除，残留的隐藏目录不会再被载入
+		if err := os.RemoveAll(trash); err != nil {
+			logging.LogWarnf("remove deleted collection directory [%s] failed: %s", trash, err)
 		}
 	}
 	return nil

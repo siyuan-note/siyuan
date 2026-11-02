@@ -19,6 +19,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -2071,7 +2072,68 @@ type encryptedBoxAwareWebdavFS struct {
 	inner webdav.FileSystem
 }
 
-func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
+type webdavGuardCacheKey struct{}
+
+// webdavGuardCache 保存一个 WebDAV 请求内守卫比较用的目录身份。PROPFIND 对每个成员要检查数次，
+// 每次都重新读取 data/ 会让大目录的列举慢一倍以上；请求进行中笔记本加密状态的变化由之后的请求生效。
+type webdavGuardCache struct {
+	dirsOnce              sync.Once
+	workspace, temp, data os.FileInfo
+	encryptedBoxesOnce    sync.Once
+	encryptedBoxes        []os.FileInfo
+}
+
+// withWebDAVGuardCache 为每个请求创建独立的守卫缓存；x/net/webdav 以请求上下文调用文件系统。
+func withWebDAVGuardCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), webdavGuardCacheKey{}, &webdavGuardCache{})))
+	})
+}
+
+func webdavGuardCacheFrom(ctx context.Context) *webdavGuardCache {
+	if cache, ok := ctx.Value(webdavGuardCacheKey{}).(*webdavGuardCache); ok {
+		return cache
+	}
+	return &webdavGuardCache{}
+}
+
+func (c *webdavGuardCache) dirs() (workspace, temp, data os.FileInfo) {
+	c.dirsOnce.Do(func() {
+		c.workspace, _ = os.Stat(util.WorkspaceDir)
+		c.temp, _ = os.Stat(filepath.Join(util.WorkspaceDir, "temp"))
+		c.data, _ = os.Stat(util.DataDir)
+	})
+	return c.workspace, c.temp, c.data
+}
+
+// isEncryptedBoxDir 判断 data/ 下的目录是否为加密笔记本；dir 的拼写可能不是笔记本 ID 的规范形式。
+func (c *webdavGuardCache) isEncryptedBoxDir(dir string, info os.FileInfo) bool {
+	if name := filepath.Base(dir); ast.IsNodeIDPattern(name) {
+		return model.IsEncryptedBox(name)
+	}
+	c.encryptedBoxesOnce.Do(func() {
+		entries, err := os.ReadDir(util.DataDir)
+		if err != nil {
+			return
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) || !model.IsEncryptedBox(entry.Name()) {
+				continue
+			}
+			if entryInfo, statErr := os.Stat(filepath.Join(util.DataDir, entry.Name())); statErr == nil {
+				c.encryptedBoxes = append(c.encryptedBoxes, entryInfo)
+			}
+		}
+	})
+	for _, boxInfo := range c.encryptedBoxes {
+		if os.SameFile(boxInfo, info) {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(ctx context.Context, name string) bool {
 	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀；与 webdav.Dir 一样以根路径清理，
 	// 否则 "../temp" 会被当作工作空间外的路径，而 webdav.Dir 实际把它解析为工作空间内的 temp/
 	rel := strings.TrimPrefix(path.Clean("/"+filepath.ToSlash(name)), "/")
@@ -2089,9 +2151,9 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	}
 
 	// 大小写不敏感的文件系统、Windows 8.3 短名和符号链接都能用不同拼写指向同一目录，
-	// 因此沿真实路径逐级向上按文件身份比较，而不是比较路径字符串
-	tempInfo, _ := os.Stat(filepath.Join(util.WorkspaceDir, "temp"))
-	dataInfo, _ := os.Stat(util.DataDir)
+	// 因此沿真实路径逐级向上按文件身份比较，而不是比较路径字符串；工作空间之上不会再有 temp/ 或笔记本目录
+	cache := webdavGuardCacheFrom(ctx)
+	workspaceInfo, tempInfo, dataInfo := cache.dirs()
 	p := util.ResolveLongestExistingParent(filepath.Join(util.WorkspaceDir, filepath.FromSlash(rel)))
 	var child string
 	var childInfo os.FileInfo
@@ -2100,8 +2162,11 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 			if nil != tempInfo && os.SameFile(info, tempInfo) {
 				return true
 			}
-			if nil != dataInfo && nil != childInfo && os.SameFile(info, dataInfo) && isEncryptedBoxDir(child, childInfo) {
+			if nil != dataInfo && nil != childInfo && os.SameFile(info, dataInfo) && cache.isEncryptedBoxDir(child, childInfo) {
 				return true
+			}
+			if nil != workspaceInfo && os.SameFile(info, workspaceInfo) {
+				return false
 			}
 			child, childInfo = p, info
 		}
@@ -2113,31 +2178,10 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	}
 }
 
-// isEncryptedBoxDir 判断 data/ 下的目录是否为加密笔记本；dir 的拼写可能不是笔记本 ID 的规范形式。
-func isEncryptedBoxDir(dir string, info os.FileInfo) bool {
-	if name := filepath.Base(dir); ast.IsNodeIDPattern(name) {
-		return model.IsEncryptedBox(name)
-	}
-	entries, err := os.ReadDir(util.DataDir)
-	if err != nil {
-		return false
-	}
-	// 只需与加密笔记本逐个比较身份；IsEncryptedBox 有运行时缓存，普通目录不会产生额外的 Stat
-	for _, entry := range entries {
-		if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) || !model.IsEncryptedBox(entry.Name()) {
-			continue
-		}
-		if entryInfo, statErr := os.Stat(filepath.Join(util.DataDir, entry.Name())); statErr == nil && os.SameFile(entryInfo, info) {
-			return true
-		}
-	}
-	return false
-}
-
 // isDataDir 判断目标是否为 data/ 本身；整体删除或移走 data/ 会连同加密笔记本一起删除或移走。
-func (fs *encryptedBoxAwareWebdavFS) isDataDir(name string) bool {
-	dataInfo, err := os.Stat(util.DataDir)
-	if err != nil {
+func (fs *encryptedBoxAwareWebdavFS) isDataDir(ctx context.Context, name string) bool {
+	_, _, dataInfo := webdavGuardCacheFrom(ctx).dirs()
+	if nil == dataInfo {
 		return false
 	}
 	info, err := os.Stat(filepath.Join(util.WorkspaceDir, filepath.FromSlash(path.Clean("/"+name))))
@@ -2145,35 +2189,35 @@ func (fs *encryptedBoxAwareWebdavFS) isDataDir(name string) bool {
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return os.ErrPermission
 	}
 	return fs.inner.Mkdir(ctx, name, perm)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) OpenFile(ctx context.Context, name string, flag int, perm os.FileMode) (webdav.File, error) {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return nil, os.ErrPermission
 	}
 	return fs.inner.OpenFile(ctx, name, flag, perm)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) RemoveAll(ctx context.Context, name string) error {
-	if fs.isEncryptedBoxPath(name) || fs.isDataDir(name) {
+	if fs.isEncryptedBoxPath(ctx, name) || fs.isDataDir(ctx, name) {
 		return os.ErrPermission
 	}
 	return fs.inner.RemoveAll(ctx, name)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Rename(ctx context.Context, oldName, newName string) error {
-	if fs.isEncryptedBoxPath(oldName) || fs.isEncryptedBoxPath(newName) || fs.isDataDir(oldName) || fs.isDataDir(newName) {
+	if fs.isEncryptedBoxPath(ctx, oldName) || fs.isEncryptedBoxPath(ctx, newName) || fs.isDataDir(ctx, oldName) || fs.isDataDir(ctx, newName) {
 		return os.ErrPermission
 	}
 	return fs.inner.Rename(ctx, oldName, newName)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Stat(ctx context.Context, name string) (os.FileInfo, error) {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return nil, os.ErrPermission
 	}
 	return fs.inner.Stat(ctx, name)

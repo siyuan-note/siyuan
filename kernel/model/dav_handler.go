@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -47,8 +48,24 @@ func newCardDAVHandler(store *Contacts) http.Handler {
 // RejectNonCanonicalDAVPath 拒绝含 "."、".." 段、反斜杠或 NUL 的请求路径。
 // net/http 与 gin 都不清理请求路径，后端清理后可能跳到另一个 DAV 命名空间；Windows 上反斜杠也是路径分隔符。
 func RejectNonCanonicalDAVPath(next http.Handler) http.Handler {
+	return rejectNonCanonicalPath(next, davInvalidPathChars)
+}
+
+// RejectNonCanonicalWebDAVPath 与 RejectNonCanonicalDAVPath 相同，但只在 Windows 上拒绝反斜杠：WebDAV 直接映射工作空间文件，
+// 其他系统上反斜杠是文件名中的普通字符。
+func RejectNonCanonicalWebDAVPath(next http.Handler) http.Handler {
+	invalid := "\x00"
+	if '\\' == filepath.Separator {
+		invalid = davInvalidPathChars
+	}
+	return rejectNonCanonicalPath(next, invalid)
+}
+
+const davInvalidPathChars = "\\\x00"
+
+func rejectNonCanonicalPath(next http.Handler, invalid string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !isCanonicalDAVPath(r.URL.Path) {
+		if !isCanonicalPath(r.URL.Path, invalid) {
 			http.Error(w, "DAV: request path must not contain dot segments, backslashes or NUL", http.StatusBadRequest)
 			return
 		}
@@ -57,7 +74,11 @@ func RejectNonCanonicalDAVPath(next http.Handler) http.Handler {
 }
 
 func isCanonicalDAVPath(p string) bool {
-	if strings.ContainsAny(p, "\\\x00") {
+	return isCanonicalPath(p, davInvalidPathChars)
+}
+
+func isCanonicalPath(p, invalid string) bool {
+	if strings.ContainsAny(p, invalid) {
 		return false
 	}
 	for _, segment := range strings.Split(p, "/") {

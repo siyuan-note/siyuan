@@ -464,34 +464,22 @@ func (c *Contacts) DeleteAddressBook(path string, conditions *DAVConditions) (er
 		return
 	}
 
-	// 先删除目录，失败时缓存和元数据仍与磁盘一致
-	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
-		c.loaded = false
-		logging.LogErrorf("remove directory [%s] failed: %s", addressBook.DirectoryPath, err)
-		return
-	}
-
-	c.books.Delete(path)
-	for i, item := range c.booksMetaData {
-		if item.Path == path {
-			c.booksMetaData = append(c.booksMetaData[:i], c.booksMetaData[i+1:]...)
-			break
-		}
-	}
-
-	if err = c.saveAddressBooksMetaData(); err != nil {
-		c.loaded = false
-		return
-	}
-	if _, ok = c.properties[path]; ok {
+	return deleteDAVCollection(addressBook.DirectoryPath, func() error {
+		previousMetaData := c.booksMetaData
+		previousProperties, hadProperties := c.properties[path]
+		c.booksMetaData = slices.DeleteFunc(slices.Clone(c.booksMetaData), func(item *AddressBookMetaData) bool { return item.Path == path })
 		delete(c.properties, path)
-		if err = saveDAVDeadProperties(c.properties, AddressBooksPropertiesFilePath()); err != nil {
+		if err := c.saveCollections(true, hadProperties); err != nil {
+			c.booksMetaData = previousMetaData
+			if hadProperties {
+				c.properties[path] = previousProperties
+			}
 			c.loaded = false
-			return
+			return err
 		}
-	}
-
-	return nil
+		c.books.Delete(path)
+		return nil
+	})
 }
 
 func (c *Contacts) GetAddressObject(addressPath string) (addressObject *AddressObjectData, err error) {
@@ -938,11 +926,12 @@ func (s *cardDAVService) deleteCollection(p string, conditions *DAVConditions) e
 }
 
 func (s *cardDAVService) putObject(p string, body []byte, conditions *DAVConditions) (*davObject, bool, error) {
-	card, err := vcard.NewDecoder(bytes.NewReader(body)).Decode()
-	if err != nil {
+	// 联系人资源只能包含一张 vCard（RFC 6352 §5.1），多出的卡片写入时会丢失，因此视为无效数据
+	cards, err := decodeCards(body)
+	if err != nil || 1 != len(cards) {
 		return nil, false, cardDAVPrecondition("valid-address-data")
 	}
-	object, created, err := s.store.PutAddressObject(p, card, conditions)
+	object, created, err := s.store.PutAddressObject(p, cards[0], conditions)
 	if err != nil {
 		return nil, false, davError(err, cardDavWriteErrorCodes)
 	}

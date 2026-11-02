@@ -37,6 +37,9 @@ func TestCalDAVPutValidation(t *testing.T) {
 		{"overwrite with another UID", "/existing.ics", davTestEvent("replacement", "Other"), http.StatusConflict, "no-uid-conflict"},
 		{"overwrite with same UID", "/existing.ics", davTestEvent("existing", "Updated"), http.StatusNoContent, ""},
 		{"recurrence override", "/series.ics", wrap(recurrence...), http.StatusCreated, ""},
+		{"two calendar objects", "/two.ics", davTestEvent("first", "First") + davTestEvent("second", "Second"), http.StatusConflict, "valid-calendar-data"},
+		{"trailing data", "/trailing.ics", davTestEvent("trailing", "T") + "BEGIN:VEVENT\r\n", http.StatusConflict, "valid-calendar-data"},
+		{"trailing blank lines", "/blank.ics", davTestEvent("blank", "B") + "\r\n\r\n", http.StatusCreated, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			response := davTestRequest(calDAV, http.MethodPut, calendar+test.target, davICalendarHeader, test.body)
@@ -85,5 +88,22 @@ func TestCardDAVPutRejectsUIDConflict(t *testing.T) {
 				t.Fatalf("status = %d, want %d with %q; body = %s", response.Code, test.status, want, response.Body.String())
 			}
 		})
+	}
+}
+
+// TestCardDAVPutRejectsMultipleCards 验证一个联系人资源只能包含一张 vCard（RFC 6352 §5.1），
+// 多出的卡片不会在写入时被静默丢弃。
+func TestCardDAVPutRejectsMultipleCards(t *testing.T) {
+	_, cardDAV := newDAVHandlerFixture(t)
+	book := CardDavDefaultAddressBookPath
+	response := davTestRequest(cardDAV, http.MethodPut, book+"/two.vcf", davVCardHeader, davTestCard("alice", "Alice")+davTestCard("bob", "Bob"))
+	if response.Code != http.StatusConflict || !strings.Contains(response.Body.String(), "valid-address-data") {
+		t.Fatalf("PUT with two cards: status = %d; body = %s", response.Code, response.Body.String())
+	}
+	if get := davTestRequest(cardDAV, http.MethodGet, book+"/two.vcf", nil, ""); get.Code != http.StatusNotFound {
+		t.Fatalf("rejected PUT created the resource: GET status = %d", get.Code)
+	}
+	if response := davTestRequest(cardDAV, http.MethodPut, book+"/one.vcf", davVCardHeader, davTestCard("alice", "Alice")+"\r\n"); response.Code != http.StatusCreated {
+		t.Fatalf("PUT with one card and a trailing blank line: status = %d; body = %s", response.Code, response.Body.String())
 	}
 }

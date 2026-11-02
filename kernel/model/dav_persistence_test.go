@@ -185,6 +185,96 @@ func TestDAVFailedPersistence(t *testing.T) {
 	}
 }
 
+// TestDAVFailedCollectionDeletion 验证删除集合时元数据或死属性保存失败，集合连同其中的对象和属性保持不变，
+// 之后重试可以删除，且不留下临时目录。
+func TestDAVFailedCollectionDeletion(t *testing.T) {
+	kinds := []struct {
+		name                 string
+		handler              func(calDAV, cardDAV http.Handler) http.Handler
+		collection, object   string
+		body                 string
+		header               map[string]string
+		metaData, properties func() string
+	}{
+		{"calendar", func(calDAV, _ http.Handler) http.Handler { return calDAV }, CalDavDefaultCalendarPath, "/kept.ics", davTestEvent("kept", "Kept"),
+			davICalendarHeader, CalendarsMetaDataFilePath, CalendarsPropertiesFilePath},
+		{"contact", func(_, cardDAV http.Handler) http.Handler { return cardDAV }, CardDavDefaultAddressBookPath, "/kept.vcf", davTestCard("kept", "Kept"),
+			davVCardHeader, AddressBooksMetaDataFilePath, AddressBooksPropertiesFilePath},
+	}
+	for _, kind := range kinds {
+		for _, failing := range []string{"metadata", "properties"} {
+			t.Run(kind.name+"/"+failing, func(t *testing.T) {
+				handler := kind.handler(newDAVHandlerFixture(t))
+				if response := davTestRequest(handler, "PROPPATCH", kind.collection, davTestXMLOnly, davTestPropPatch(`<A:calendar-color>#000000FF</A:calendar-color>`, "")); response.Code != http.StatusMultiStatus {
+					t.Fatalf("PROPPATCH: status = %d", response.Code)
+				}
+				if response := davTestRequest(handler, http.MethodPut, kind.collection+kind.object, kind.header, kind.body); response.Code != http.StatusCreated {
+					t.Fatalf("PUT: status = %d; body = %s", response.Code, response.Body.String())
+				}
+				directory := DavPath2DirectoryPath(kind.collection)
+				leftovers := func() (names []string) {
+					entries, _ := os.ReadDir(filepath.Dir(directory))
+					for _, entry := range entries {
+						if strings.HasPrefix(entry.Name(), "."+filepath.Base(directory)) {
+							names = append(names, entry.Name())
+						}
+					}
+					return
+				}
+				metaDataBefore, _ := os.ReadFile(kind.metaData())
+				propertiesBefore, _ := os.ReadFile(kind.properties())
+				target := kind.metaData()
+				if "properties" == failing {
+					target = kind.properties()
+				}
+
+				originalWrite := writeDAVFile
+				t.Cleanup(func() { writeDAVFile = originalWrite })
+				writeDAVFile = func(file string, data []byte, mode os.FileMode) error {
+					if filepath.Clean(file) == filepath.Clean(target) {
+						return errors.New("injected " + failing + " failure")
+					}
+					return originalWrite(file, data, mode)
+				}
+				if response := davTestRequest(handler, http.MethodDelete, kind.collection, nil, ""); response.Code != http.StatusInternalServerError {
+					t.Fatalf("DELETE: status = %d, want 500", response.Code)
+				}
+				writeDAVFile = originalWrite
+				if after, _ := os.ReadFile(kind.metaData()); !bytes.Equal(after, metaDataBefore) {
+					t.Fatalf("failed DELETE changed the metadata:\n%s", after)
+				}
+				if after, _ := os.ReadFile(kind.properties()); !bytes.Equal(after, propertiesBefore) {
+					t.Fatalf("failed DELETE changed the properties:\n%s", after)
+				}
+				if names := leftovers(); 0 < len(names) {
+					t.Fatalf("failed DELETE left directories: %v", names)
+				}
+
+				resetDAVStores()
+				if response := davTestRequest(handler, http.MethodGet, kind.collection+kind.object, nil, ""); response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "Kept") {
+					t.Fatalf("object after failed DELETE: status = %d; body = %s", response.Code, response.Body.String())
+				}
+				if propfind := davTestRequest(handler, "PROPFIND", kind.collection, map[string]string{"Depth": "0"}, "").Body.String(); !strings.Contains(propfind, "#000000FF") {
+					t.Fatalf("collection properties after failed DELETE: %s", propfind)
+				}
+
+				if response := davTestRequest(handler, http.MethodDelete, kind.collection, nil, ""); response.Code != http.StatusNoContent {
+					t.Fatalf("retry DELETE: status = %d; body = %s", response.Code, response.Body.String())
+				}
+				if _, err := os.Stat(directory); !os.IsNotExist(err) {
+					t.Fatalf("collection directory remains: %v", err)
+				}
+				if names := leftovers(); 0 < len(names) {
+					t.Fatalf("DELETE left directories: %v", names)
+				}
+				if after, _ := os.ReadFile(kind.properties()); strings.Contains(string(after), "#000000FF") {
+					t.Fatalf("properties of the deleted collection remain: %s", after)
+				}
+			})
+		}
+	}
+}
+
 // TestDAVFailedCollectionPersistence 验证集合的死属性保存失败时，PROPPATCH 与创建集合不会在元数据文件中留下部分更新
 // （RFC 4918 §9.2、RFC 4791 §5.3.1、RFC 5689 §3）。
 func TestDAVFailedCollectionPersistence(t *testing.T) {

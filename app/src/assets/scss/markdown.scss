@@ -260,6 +260,7 @@ button {
 .markdown-choice__menu {
   width: min(220px, calc(100vw - 16px));
   box-sizing: border-box;
+  padding-inline: 6px;
   overflow: auto;
   overscroll-behavior: contain;
   z-index: 4;
@@ -466,6 +467,9 @@ button {
 }
 
 .markdown-footer {
+  // 通过后置顺序盖住同层抽屉的底部阴影，同时保持标题栏菜单在上方。
+  position: relative;
+  z-index: 2;
   flex-shrink: 0;
   border-top: 1px solid var(--b3-border-color);
   padding: 0 8px;

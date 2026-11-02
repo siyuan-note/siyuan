@@ -22,7 +22,7 @@ interface MarkdownApplication {
 }
 
 export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = document.getElementById("markdownApp"), initial?: MarkdownBootstrap): Promise<MarkdownApplication> => {
-    const bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
+    let bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
     const text = (key: string) => bootstrap.languages[key] ?? key;
     let preferences = bootstrap.preferences;
     let systemDark = bootstrap.dark;
@@ -50,7 +50,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let switching = false;
     let switchTask: Promise<boolean>;
     let pendingSwitch: {ticket: string; sessionId: string};
-    let replacement: MarkdownApplication;
+    let documentGeneration = 0;
     const control = <T extends HTMLElement>(id: string) => root.querySelector<T>(`#${id}`);
 
     document.documentElement.lang = bootstrap.lang;
@@ -279,6 +279,96 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     };
 
     const windowChrome = createMarkdownWindowChrome({root, header, bridge: bridge.window, platform: bootstrap.platform, text, onError: reportError});
+    // 窗口外壳独立于文档存活；仅重建编辑器，隔离同窗口不同文档的撤销历史和资源权限。
+    const initializeDocument = async (next: MarkdownBootstrap) => {
+        const generation = ++documentGeneration;
+        const current = () => !disposed && generation === documentGeneration;
+        clearTimeout(autoSave);
+        editor?.destroy();
+        editor = undefined;
+        bootstrap = next;
+        targetGeneration = next.recovered?.targetGeneration ?? 0;
+        actionMessage = "";
+        resourceUnavailable = false;
+        editPending = false;
+        sourceOnly = false;
+        history = {canUndo: false, canRedo: false};
+        control("markdownRecoveryPanel").hidden = true;
+        control("markdownRecovery").setAttribute("aria-expanded", "false");
+        control("markdownRecoveryList").replaceChildren();
+        const element = control("markdownEditor");
+        element.replaceChildren();
+        element.className = "markdown-editor";
+        element.inert = true;
+        element.setAttribute("aria-busy", "true");
+        const documentSession = new MarkdownSession({...next, host: bridge.host,
+            onChange: state => {if (current()) render(state);}});
+        session = documentSession;
+        render(documentSession.getState());
+        try {
+            const nextEditor = await createMarkdownEditor({
+                element: control("markdownEditor"), initialValue: next.content, sessionId: next.sessionId, mode: preferences.mode,
+                cdn: new URL("./vditor", location.href).href, lang: next.lang,
+                theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
+                onHistoryChange(state) {if (!current()) return; history = state; render(documentSession.getState());},
+                resolveResource: async reference => {
+                    if (!current()) return undefined;
+                    const result = await bridge.resolveResource(reference);
+                    return current() ? result : undefined;
+                },
+                onResourceUnavailable: () => {if (current()) {resourceUnavailable = true; render(documentSession.getState());}},
+                onLink: url => {if (current()) void bridge.openLink(url).catch(() => {if (current()) reportError();});},
+                onEditPending(pending) {
+                    if (!current()) return;
+                    editPending = pending;
+                    if (pending) {clearTimeout(autoSave); documentSession.invalidateReload();}
+                    else scheduleAutoSave();
+                    render(documentSession.getState());
+                },
+                onContentTooLarge() {
+                    if (!current()) return;
+                    clearTimeout(autoSave);
+                    actionMessage = text("markdownTooLarge");
+                    render(documentSession.getState());
+                    scheduleAutoSave();
+                },
+                onSourceOnlyChange(value) {
+                    if (!current()) return;
+                    sourceOnly = value;
+                    render(documentSession.getState());
+                },
+                onModeChange(mode) {
+                    if (!current()) return;
+                    modeChoice?.setValue(mode);
+                    if (preferences.mode !== mode) {
+                        preferences = {...preferences, mode};
+                        void bridge.preferences({mode}).catch(reportError);
+                    }
+                },
+                onEdit(snapshot) {
+                    if (!current()) return;
+                    if (actionMessage === text("markdownTooLarge")) actionMessage = "";
+                    documentSession.updateEditor(snapshot);
+                    scheduleAutoSave();
+                },
+            });
+            if (!current() || initializationClosing) {
+                nextEditor.destroy();
+                throw new Error("Markdown document initialization was superseded");
+            }
+            editor = nextEditor;
+            modeChoice?.setValue(preferences.mode);
+        } catch (error) {
+            if (current()) {
+                documentGeneration++;
+                element.className = "markdown-editor";
+                element.textContent = text("markdownLoadError");
+            }
+            throw error;
+        } finally {
+            if (!disposed && session === documentSession) element.setAttribute("aria-busy", "false");
+        }
+    };
     try {
         if (!("inert" in HTMLElement.prototype) || typeof TextEncoder !== "function" ||
             typeof MutationObserver !== "function" || typeof ResizeObserver !== "function" || typeof globalThis.crypto?.getRandomValues !== "function") {
@@ -286,52 +376,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         }
         await applyTheme();
         if (initializationClosing) throw new Error("Markdown initialization was closed");
-        session = new MarkdownSession({...bootstrap, host: bridge.host, onChange: render});
-        render(session.getState());
-        editor = await createMarkdownEditor({
-            element: control("markdownEditor"), initialValue: bootstrap.content, sessionId: bootstrap.sessionId, mode: preferences.mode,
-            cdn: new URL("./vditor", location.href).href, lang: bootstrap.lang,
-            theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
-            onHistoryChange(state) {history = state; if (!disposed) render(session.getState());},
-            resolveResource: reference => bridge.resolveResource(reference),
-            onResourceUnavailable: () => { resourceUnavailable = true; render(session.getState()); },
-            onLink: url => { void bridge.openLink(url).catch(reportError); },
-            onEditPending(pending) {
-                if (disposed) return;
-                editPending = pending;
-                if (pending) {clearTimeout(autoSave); session.invalidateReload();}
-                else scheduleAutoSave();
-                render(session.getState());
-            },
-            onContentTooLarge() {
-                if (disposed) return;
-                clearTimeout(autoSave);
-                actionMessage = text("markdownTooLarge");
-                render(session.getState());
-                scheduleAutoSave();
-            },
-            onSourceOnlyChange(value) {
-                if (disposed) return;
-                sourceOnly = value;
-                render(session.getState());
-            },
-            onModeChange(mode) {
-                if (disposed) return;
-                modeChoice?.setValue(mode);
-                if (preferences.mode !== mode) {
-                    preferences = {...preferences, mode};
-                    void bridge.preferences({mode}).catch(reportError);
-                }
-            },
-            onEdit(snapshot) {
-                if (disposed) return;
-                if (actionMessage === text("markdownTooLarge")) actionMessage = "";
-                session.updateEditor(snapshot);
-                scheduleAutoSave();
-            },
-        });
-        if (initializationClosing) {editor.destroy(); throw new Error("Markdown initialization was closed");}
-        control("markdownEditor").setAttribute("aria-busy", "false");
+        await initializeDocument(bootstrap);
         header.inert = false;
         freeze(frozen);
     } catch (error) {
@@ -370,8 +415,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const runAction = (run: () => void | Promise<unknown>, fileAction = false) => {
         const task = Promise.resolve().then(run).catch(reportError);
         if (fileAction) {
-            pendingFileAction = task;
-            void task.finally(() => { if (pendingFileAction === task) pendingFileAction = undefined; });
+            const pending = Promise.all([pendingFileAction, task]);
+            pendingFileAction = pending;
+            void pending.finally(() => {if (pendingFileAction === pending) pendingFileAction = undefined;});
         }
     };
     const action = (id: string, run: () => void | Promise<unknown>) => {
@@ -379,7 +425,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             if (frozen) return;
             closeMore();
             actionMessage = "";
-            runAction(run, ["markdownSave", "markdownSaveAs", "markdownInsertImage"].includes(id));
+            runAction(run, ["markdownSave", "markdownSaveAs", "markdownInsertImage", "markdownRetry", "markdownReload", "markdownOverwrite", "markdownResources"].includes(id));
         });
     };
     action("markdownNew", () => bridge.newDocument());
@@ -410,20 +456,27 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     });
     action("markdownRetry", async () => { session.updateEditor(editor.flush()); await session.retry(); });
     action("markdownReload", async () => {
-        if (await bridge.confirm("reload")) {
-            session.updateEditor(editor.flush());
-            if (await session.reload({discardChanges: true})) editor.setValue(session.getState().content);
+        const generation = documentGeneration;
+        const currentSession = session;
+        const currentEditor = editor;
+        if (await bridge.confirm("reload") && !disposed && generation === documentGeneration) {
+            currentSession.updateEditor(currentEditor.flush());
+            if (await currentSession.reload({discardChanges: true}) && !disposed && generation === documentGeneration) {
+                currentEditor.setValue(currentSession.getState().content);
+            }
         }
     });
     action("markdownOverwrite", async () => {
-        session.updateEditor(editor.flush());
-        const problem = session.getState().problem;
-        if (problem?.kind === "conflict" && problem.baseline && await bridge.confirm("overwrite")) {
-            await session.overwrite(problem.baseline);
-        }
+        const generation = documentGeneration;
+        const currentSession = session;
+        currentSession.updateEditor(editor.flush());
+        const problem = currentSession.getState().problem;
+        if (problem?.kind === "conflict" && problem.baseline && await bridge.confirm("overwrite") &&
+            !disposed && generation === documentGeneration) await currentSession.overwrite(problem.baseline);
     });
     action("markdownResources", async () => {
-        if (await bridge.authorizeResources()) {
+        const generation = documentGeneration;
+        if (await bridge.authorizeResources() && !disposed && generation === documentGeneration) {
             resourceUnavailable = false;
             editor.refreshResources();
             render(session.getState());
@@ -435,8 +488,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownRecovery").setAttribute("aria-expanded", String(show));
         if (!show) {moreButton.focus(); return;}
         control("markdownRecoveryClose").focus();
+        const generation = documentGeneration;
         const recoveries = await bridge.recoveries();
-        if (disposed) return;
+        if (disposed || generation !== documentGeneration) return;
         const list = control("markdownRecoveryList");
         list.replaceChildren();
         if (!recoveries.length) list.textContent = text("markdownNoRecovery");
@@ -539,26 +593,35 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             }
             if (next.sessionId !== candidate.sessionId) throw new Error("Markdown switch is unconfirmed");
         } catch {
+            if (disposed) return false;
             actionMessage = text("markdownError"); render(session.getState());
             control<HTMLButtonElement>("markdownRetry").hidden = false;
             control("markdownProblemActions").inert = false;
             return false;
         }
-        pendingSwitch = undefined;
+        if (disposed) return false;
         root.setAttribute("aria-busy", "true");
-        const swap = async () => {
-            destroyCurrent(); replacement = await mountMarkdownApplication(bridge, root, next);
-            await replacement.treeReady;
-        };
-        if (document.startViewTransition) {
-            const transition = document.startViewTransition(swap);
-            void transition.ready.catch((): void => undefined);
-            const finished = transition.finished.catch((): void => undefined);
-            await transition.updateCallbackDone;
-            await finished;
-        } else await swap();
-        root.setAttribute("aria-busy", "false");
-        return true;
+        try {
+            await initializeDocument(next);
+            if (disposed) return false;
+            await tree.syncSelection();
+            pendingSwitch = undefined;
+            preparing = false;
+            prepared = false;
+            switching = false;
+            freeze(false);
+            return true;
+        } catch {
+            if (!disposed) {
+                actionMessage = text("markdownLoadError");
+                render(session.getState());
+                control<HTMLButtonElement>("markdownRetry").hidden = false;
+                control("markdownProblemActions").inert = false;
+            }
+            return false;
+        } finally {
+            if (!disposed) root.setAttribute("aria-busy", "false");
+        }
     };
     const openTreeFile = async (location: MarkdownTreeLocation): Promise<boolean> => {
         if (frozen || disposed || switching) return false;
@@ -578,6 +641,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 ticket = candidate.ticket;
                 if (!await protectExit("close")) return false;
                 released = true;
+                // 宿主切换资源绑定前，先使已释放编辑器的回调失效。
+                documentGeneration++;
+                clearTimeout(autoSave);
                 pendingSwitch = candidate;
                 return await completeSwitch();
             } finally {
@@ -612,20 +678,28 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const command = async (message: MarkdownCommand) => {
         if (message.type === "window-state") {windowChrome?.update(message.windowState); return;}
         // 候选云文件读取可能很慢；进入后台仍先保护当前文档的已提交输入。
-        if (message.type === "background" && switchTask && session.getState().lifecycle === "open") {
+        if (message.type === "background" && switchTask && !pendingSwitch && session.getState().lifecycle === "open") {
             await checkpointBackground(message, true);
             return;
         }
         if (switchTask) {
             if (message.type === "cancel-quit") {exitSequence++; return;}
-            try {await switchTask;}
+            try {
+                if (!await switchTask) {
+                    if (["close", "prepare-quit", "background"].includes(message.type)) await bridge.respond(message.id, false);
+                    return;
+                }
+            }
             catch {
                 if (["close", "prepare-quit", "background"].includes(message.type)) await bridge.respond(message.id, false);
                 return;
             }
-            if (replacement) return replacement.dispatch(message);
         }
         if (disposed) return;
+        if (pendingSwitch) {
+            if (["close", "prepare-quit", "background"].includes(message.type)) await bridge.respond(message.id, false);
+            return;
+        }
         if (message.type === "tree-change") {await tree.refresh(); return;}
         if (message.type === "background") {
             await checkpointBackground(message);
@@ -639,7 +713,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (message.type === "cancel-quit") { exitSequence++; freeze(false); preparing = false; prepared = false; return; }
         if (message.type === "external-change") {
             void tree.refresh();
-            if (!frozen && !editPending && await session.reload()) editor.setValue(session.getState().content);
+            const generation = documentGeneration;
+            const currentSession = session;
+            const currentEditor = editor;
+            if (!frozen && !editPending && await currentSession.reload() && !disposed && generation === documentGeneration) {
+                currentEditor.setValue(currentSession.getState().content);
+            }
             return;
         }
         let accepted = false;
@@ -666,20 +745,20 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     render(session.getState());
     function destroyCurrent() {
         if (disposed) return;
-        disposed = true; themeSequence++; exitSequence++;
+        disposed = true; documentGeneration++; themeSequence++; exitSequence++;
         clearTimeout(autoSave); unsubscribe();
         document.removeEventListener("keydown", shortcut, true);
         removeMenuListeners();
         tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
         windowChrome?.destroy();
-        editor.destroy();
+        editor?.destroy();
     }
     return {
         treeReady: tree.ready,
-        get session() {return replacement?.session ?? session;},
-        get editor() {return replacement?.editor ?? editor;},
-        dispatch: message => replacement ? replacement.dispatch(message) : command(message),
-        destroy() {if (replacement) replacement.destroy(); else destroyCurrent();},
+        get session() {return session;},
+        get editor() {return editor;},
+        dispatch: command,
+        destroy: destroyCurrent,
     };
 };
 

@@ -245,6 +245,34 @@ export const createMarkdownTree = (options: {
             if (!disposed && sequence === refreshSequence) await applyState(next, true);
         } catch {if (!disposed && sequence === refreshSequence) {notice.hidden = false; notice.textContent = text("markdownFolderError"); choose.hidden = false;}}
     };
+    // 在同一授权根目录中切文档只更新选中状态；已加载时保留行节点、展开目录及滚动位置。
+    const syncSelection = async () => {
+        const sequence = ++refreshSequence;
+        try {
+            const next = await bridge.state();
+            if (disposed || sequence !== refreshSequence) return;
+            const sameRoot = state.kind === "ready" && next.kind === "ready" &&
+                state.rootId === next.rootId && state.generation === next.generation;
+            const pathReady = sameRoot && (next.currentPath ?? []).every(id => expanded.has(id) && children.has(id));
+            if (!pathReady) {
+                await applyState(next, !sameRoot);
+                if (sameRoot) await Promise.all((next.currentPath ?? []).map(id => load(id)));
+                return;
+            }
+            state = next;
+            selected = next.currentNodeId;
+            if (rows.some(row => row.node?.id === selected)) focused = selected;
+            viewport.querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
+                const active = item.dataset.nodeId === selected;
+                item.setAttribute("aria-selected", String(active));
+                item.classList.toggle("b3-list-item--focus", active);
+            });
+            const focus = Array.from(viewport.querySelectorAll<HTMLElement>("[data-node-id]")).find(item => item.dataset.nodeId === focused);
+            if (focus) viewport.setAttribute("aria-activedescendant", focus.id);
+            else viewport.removeAttribute("aria-activedescendant");
+            updateFocus();
+        } catch {if (!disposed && sequence === refreshSequence) options.onError();}
+    };
     const chooseRoot = async () => {
         if (frozen || disposed || choosing) return;
         choosing = true;
@@ -402,6 +430,7 @@ export const createMarkdownTree = (options: {
     return {
         ready,
         refresh,
+        syncSelection,
         chooseRoot,
         freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; toggles.forEach(toggle => {toggle.disabled = value;}); updateVisibility();},
         destroy() {

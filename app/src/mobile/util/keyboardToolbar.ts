@@ -459,19 +459,22 @@ const updateKeyboardPanelHeight = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     // 与展开入口保持相同高度口径，避免边框和整数取整导致交接时上下跳动。
     const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").clientHeight;
-    const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight);
+    const native = isInMobileApp();
+    const bottomOffset = native ? parseFloat(getComputedStyle(toolbarElement).bottom) || 0 : 0;
+    const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight, bottomOffset);
     if (keyboardPanelClosing && height <= barHeight) {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         return;
     }
     // 原生端占位随视口同步变化，避免等待 resize 时编辑器短暂增高，导致滚动位置被截断。
-    const panelHeight = isInMobileApp() ?
-        `max(${barHeight}px, calc(100vh - ${keyboardPanelTop}px))` : `${height}px`;
+    const panelHeight = native ?
+        `max(${barHeight}px, calc(100vh - var(--android-navigation-bar-height, 0px) - ${keyboardPanelTop}px))` : `${height}px`;
     toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", panelHeight);
+        const padding = native ? `calc(${panelHeight} + var(--android-navigation-bar-height, 0px))` : panelHeight;
+        getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", padding);
     }
 };
 

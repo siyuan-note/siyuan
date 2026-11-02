@@ -52,6 +52,40 @@ const browserCases = ({css, mobile}) => {
                     footer.remove();
                     keyboard.remove();
                 }
+                // 长列表滚到底时末项可完整离开手势区，既有间距只补偿一次。
+                const rows = Array.from({length: 60}, (_, index) => `<li class="b3-list-item">Row ${index}</li>`).join("");
+                for (const type of ["file", "file-pins", "bookmark", "tag", "inbox", "backlink", "backlink-only", "outline"]) {
+                    const kind = type.split("-")[0];
+                    const list = `<ul class="b3-list b3-list--background"${kind === "inbox" ? ' style="padding:8px 0"' : ""}>${rows}</ul>`;
+                    let content = `<div class="fn__flex-1 ${kind === "bookmark" ? "bookmarkList" : kind === "tag" ? "tagList" : ""}">${list}</div>`;
+                    if (type === "file-pins") {
+                        content = `<div class="fn__flex-column b3-list" style="min-height:0;flex:1"><div class="fn__flex-shrink">Pins</div>${content}</div>`;
+                    } else if (kind === "backlink") {
+                        content = `<div class="backlinkList fn__flex-1">${list}</div><div class="block__icons backlinkMList__header">Mentions</div><div class="backlinkMList fn__flex-1">${list}</div>`;
+                    } else if (kind === "outline") {
+                        content = `<div class="fn__flex-1" style="padding:8px 0 calc(8px + var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)))">${list}</div>`;
+                    }
+                    document.body.innerHTML = `<div class="side-panel fn__flex-column" style="transform:none"><div class="toolbar">Docks</div><div class="fn__flex-1 b3-list--mobile"><div class="fn__flex-column ${kind === "backlink" ? "sy__backlink" : ""} ${type === "backlink-only" ? "sy__backlink--only-backlinks" : ""}" data-type="sidebar-${kind}"><div class="toolbar">Panel</div>${content}</div></div></div>`;
+                    const scroller = document.querySelector(kind === "backlink" ?
+                        (type === "backlink-only" ? ".backlinkList" : ".backlinkMList") :
+                        type === "file-pins" ? '[data-type="sidebar-file"] > .b3-list > .fn__flex-1' : "[data-type] > .fn__flex-1");
+                    let initialGap;
+                    for (const bottom of [0, 16, 32, 15.75, 0]) {
+                        document.documentElement.style.setProperty("--android-navigation-bar-height", `${bottom}px`);
+                        scroller.scrollTop = scroller.scrollHeight;
+                        check.ok(scroller.scrollTop > 0, `${type} has scrollable content`);
+                        check.ok(Math.abs(scroller.getBoundingClientRect().bottom - innerHeight) < 1, `${type} reaches the viewport bottom`);
+                        const rowBottom = scroller.querySelector("li:last-child").getBoundingClientRect().bottom;
+                        const gap = innerHeight - rowBottom;
+                        initialGap ??= gap;
+                        check.ok(rowBottom <= innerHeight - bottom + 1, `${type}/${bottom} last row is above the gesture area`);
+                        check.ok(Math.abs(gap - initialGap - bottom) < 1, `${type}/${bottom} preserves spacing without double compensation`);
+                    }
+                    if (kind === "backlink") {
+                        document.querySelector(".side-panel").classList.remove("side-panel");
+                        check.equal(getComputedStyle(scroller, "::after").content, "none", "non-sidebar backlinks have no extra spacer");
+                    }
+                }
                 document.documentElement.style.removeProperty("--android-navigation-bar-height");
                 for (const color of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
                     document.body.style.setProperty("--b3-theme-background", color);

@@ -19,3 +19,18 @@ test("viewport offsets and fractional heights retain the handoff position", () =
     const height = getKeyboardPanelHeight(620.5, 452.25, 48);
     assert.equal(620.5 - height, 452.25);
 });
+
+test("gesture navigation restoration preserves the panel top through both keyboard transitions", () => {
+    for (const [viewport, inset] of [[500, 0], [550, 0], [700, 24], [800, 24], [700, 24], [550, 0], [500, 0]]) {
+        const height = getKeyboardPanelHeight(viewport, 452, 48, inset);
+        assert.equal(viewport - inset - height, 452);
+        assert.equal(viewport - (height + inset), 452);
+    }
+});
+
+test("minimum toolbar height and fractional gesture insets remain above the navigation area", () => {
+    assert.equal(getKeyboardPanelHeight(500, 452, 48, 24), 48);
+    assert.equal(getKeyboardPanelHeight(400, 452, 48, 24), 48);
+    const height = getKeyboardPanelHeight(620.5, 452.25, 48, 15.75);
+    assert.equal(620.5 - 15.75 - height, 452.25);
+});

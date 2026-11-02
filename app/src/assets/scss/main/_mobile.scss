@@ -33,6 +33,18 @@ html[data-frontend="mobile"] body.body--android {
     z-index: 5;
   }
 
+  .side-panel > .b3-list--mobile {
+    > [data-type="sidebar-bookmark"] > .bookmarkList::after,
+    > [data-type="sidebar-tag"] > .tagList::after,
+    > [data-type="sidebar-inbox"] > .fn__flex-1:last-child::after,
+    > [data-type="sidebar-backlink"] > .backlinkList::after,
+    > [data-type="sidebar-backlink"] > .backlinkMList::after {
+      display: block;
+      height: var(--mobile-bottom-bar-safe-area);
+      content: "";
+    }
+  }
+
   // 背景延伸到手势导航区域，渐变使滚动内容平滑过渡到系统手势条。
   &::after {
     position: fixed;

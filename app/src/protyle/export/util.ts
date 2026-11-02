@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 /// #if !BROWSER
 import {escapeHtml} from "../../util/escape";
 import * as path from "path";
@@ -6,7 +7,6 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {renderExportJSEmbeds} from "./jsEmbed";
 import {ContractFormData} from "../../util/contractFormData";
-import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -39,7 +39,8 @@ export const exportImage = (id: string, copyOnly = false) => {
         return;
     }
     let stopObservingLayout: () => void;
-    const exportDialog = new Dialog({
+    const exportDialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         disableAnimation: true,
         destroyCallback() {
             stopObservingLayout?.();

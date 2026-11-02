@@ -36,8 +36,8 @@ const setup = () => {
                     return new Promise((resolve, reject) => requests.push({resolve, reject}));
                 }};
             }
-            if (name === "../../dialog/confirmDialog") {
-                return {confirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => {
+            if (name === "../../dialog/mobileConfirmDialog") {
+                return {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => {
                     confirmations.push({confirm, cancel});
                 }};
             }

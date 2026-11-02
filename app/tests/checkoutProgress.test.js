@@ -114,7 +114,16 @@ const run = async () => {
                     }
                 }));
                 const runtime = {};
+                let activeSheetLayouts = 0;
                 new Function("exports","require","window",${JSON.stringify(source)})(runtime, name => {
+                    if (name === "../util/functions") return {isMobile:() => ${width <= 640}};
+                    if (name === "../mobile/util/mobileSheetLayout") return {bindMobileSheetLayout: (root, panel, options) => {
+                        assert.equal(options.standalone,true);
+                        assert.equal(panel.getAttribute("role"),"dialog");
+                        activeSheetLayouts++;
+                        let disposed = false;
+                        return {dispose:() => { assert.equal(disposed,false); disposed=true; activeSheetLayouts--; }};
+                    }};
                     if (name.includes("escape")) return escapeExports;
                     if (name === "../dialog/progress") return progressExports;
                     if (name.includes("constants")) return {Constants:{SIYUAN_APPID:"app"}};
@@ -137,10 +146,12 @@ const run = async () => {
                     message:"<img src=x onerror='window.compromised=true'>",...extra}});
                 progress("first",0,1,"background");
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
+                assert.equal(activeSheetLayouts,0);
                 assert.equal(document.activeElement,editor);
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),true);
                 assert.equal(runtime.openSyncCheckoutProgress(),true);
                 let root = document.getElementById("sync-checkout-progress");
+                assert.equal(activeSheetLayouts,${width <= 640 ? 1 : 0});
                 assert.equal(root.querySelector('[role="dialog"]').getAttribute("aria-modal"),"false");
                 assert.equal(document.activeElement,editor);
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__scrim")).display,"none");

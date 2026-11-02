@@ -1,5 +1,5 @@
 import {showMessage} from "../dialog/message";
-import {openInputDialog} from "../dialog/inputDialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
@@ -12,6 +12,7 @@ import {showTooltip} from "../dialog/tooltip";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
+import {isMobile} from "../util/functions";
 
 export const validateName = (name: string, targetElement?: HTMLElement) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t/.test(name)) {
@@ -83,21 +84,36 @@ export const rename = (options: {
     const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
         value: initialName,
+        awaitConfirm: true,
         destroyCallback() {
             if (options.range) {
                 focusByRange(options.range);
             }
         },
-        onConfirm: (value, dialog) => {
+        onConfirm: async (value, dialog) => {
             if (!validateName(value)) {
-                return;
+                return false;
             }
             let name = value.trim();
             if (name === initialName) {
                 dialog.destroy();
-                return;
+                return true;
             }
             name = options.type === "notebook" ? normalizeNotebookName(name) : normalizeDocumentTitle(name);
+            if (isMobile()) {
+                if (options.type === "notebook") {
+                    name ||= window.siyuan.languages.untitled;
+                    const response = await fetchSyncPost("/api/notebook/renameNotebook", {notebook: options.notebookId, name});
+                    if (response.code !== 0) return false;
+                    setNotebookName(options.notebookId, name);
+                } else {
+                    const response = await fetchSyncPost("/api/filetree/renameDoc", {
+                        notebook: options.notebookId, path: options.path, title: name,
+                    });
+                    if (response.code !== 0) return false;
+                }
+                return true;
+            }
             if (options.type === "notebook") {
                 if (!name) {
                     name = window.siyuan.languages.untitled;
@@ -116,6 +132,7 @@ export const rename = (options: {
                 });
             }
             dialog.destroy();
+            return true;
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAME);
@@ -127,15 +144,18 @@ export const renameAsset = (assetPath: string) => {
         title: window.siyuan.languages.rename,
         value: oldName,
         description: window.siyuan.languages.renameAssetTip,
+        awaitConfirm: true,
         onConfirm: async (value, dialog) => {
             if (value === oldName || !value) {
                 dialog.destroy();
-                return;
+                return true;
             }
 
             if (await renameAssetFile(assetPath, value)) {
                 dialog.destroy();
+                return true;
             }
+            return false;
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEASSETS);

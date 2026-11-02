@@ -1,4 +1,4 @@
-import {Dialog} from "../dialog";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {escapeHtml} from "../util/escape";
@@ -29,6 +29,7 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
         }
     };
     const dialog = new Dialog({
+        mobileSheet: {expandable: true},
         title: `${lang.import} Data`,
         hideCloseIcon: true,
         beforeClose: () => !busy || committed,
@@ -100,6 +101,7 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
             dialog.destroy();
             // 先展示跳过清单，用户关闭结果后再刷新，避免自动重载吞掉结果提示。
             const completed = new Dialog({
+                mobileSheet: {expandable: true},
                 title: lang.imported,
                 width: isMobile() ? "92vw" : "560px",
                 containerClassName: "data-import",

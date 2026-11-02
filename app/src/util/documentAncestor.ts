@@ -1,10 +1,11 @@
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeHtml} from "./escape";
 import {movePathTo} from "./pathName";
 import {documentParentID} from "./documentCreate";
 import {fetchSyncPost} from "./fetch";
 import {showMessage} from "../dialog/message";
-import type {Dialog} from "../dialog";
+import type {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {isMobile} from "./functions";
 import type {DocumentAncestorAmbiguity, DocumentPath} from "../types/api";
 
 /** 默认选中第一个候选，确认后用于当前创建计划，关闭对话框即取消。 */
@@ -88,5 +89,6 @@ ${ambiguity.candidates.map((candidate, index) =>
     const confirm = current.element.querySelector<HTMLButtonElement>("#confirmDialogConfirmBtn");
     select.value = ambiguity.candidates.length ? "0" : "";
     confirm.disabled = ambiguity.candidates.length === 0;
-    select.focus();
+    if (isMobile()) current.focusWhenReady(() => select);
+    else select.focus();
 });

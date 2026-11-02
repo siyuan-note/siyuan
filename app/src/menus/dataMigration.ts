@@ -1,9 +1,9 @@
 import {importConfiguration} from "../config/util/resourceConfig";
-import {openInputDialog} from "../dialog/inputDialog";
-import {Dialog} from "../dialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import type {APICallbackResponse, APIPOSTRoutes} from "../types/api";
 import {showMessage} from "../dialog/message";
@@ -16,6 +16,7 @@ import {afterExport} from "../protyle/export/util";
 /// #endif
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {importDataFile} from "./importData";
+import {isMobile} from "../util/functions";
 
 interface IDataMigrationOptions {
     mode?: "manage" | "onboarding";
@@ -37,13 +38,15 @@ const openRepoKeyImport = (onComplete?: () => void) => {
         value: "",
         placeholder: window.siyuan.languages.keyPlaceholder,
         width: "520px",
-        onConfirm: (value, dialog) => {
-            fetchPost("/api/repo/importRepoKey", {key: value}, (response) => {
-                window.siyuan.config.repo.key = response.data.key;
-                dialog.destroy();
-                showMessage(window.siyuan.languages.imported);
-                onComplete?.();
-            });
+        awaitConfirm: true,
+        onConfirm: async (value, dialog) => {
+            const response = await fetchSyncPost("/api/repo/importRepoKey", {key: value});
+            if (response.code !== 0) return false;
+            window.siyuan.config.repo.key = response.data.key;
+            dialog.destroy();
+            showMessage(window.siyuan.languages.imported);
+            onComplete?.();
+            return true;
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
@@ -101,6 +104,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
 </button>` : "";
     /// #endif
     const dialog = new Dialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.dataMigration,
         content: `<div class="b3-dialog__content">
     <div class="b3-label__text">SiYuan</div>
@@ -176,13 +180,14 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         options.onContentImportComplete?.();
     };
     let targetNotebookID = selectedNotebookID || "";
-    const selectTargetNotebook = (callback: (notebookID: string) => void, onCancel?: () => void) => {
+    const selectTargetNotebook = (callback: (notebookID: string) => void | Promise<boolean>, onCancel?: () => void) => {
         if (notebooks.length === 0) {
             onCancel?.();
             showMessage(window.siyuan.languages.newFileTip);
             return;
         }
         const targetDialog = new Dialog({
+            mobileSheet: {expandable: true},
             title: window.siyuan.languages.targetNotebook,
             content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${notebookOptions}</select>
@@ -204,6 +209,14 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         buttons[0].addEventListener("click", () => targetDialog.destroy());
         buttons[1].addEventListener("click", () => {
             targetNotebookID = selectElement.value;
+            if (isMobile()) {
+                void targetDialog.runPending(async () => {
+                    if (await callback(targetNotebookID) === false) return false;
+                    targetDialog.data = {confirmed: true};
+                    return true;
+                });
+                return;
+            }
             targetDialog.data = {confirmed: true};
             targetDialog.destroy();
             callback(targetNotebookID);
@@ -214,6 +227,16 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         const formData = new FormData();
         formData.append("file", file);
         Object.entries(extra).forEach(([key, value]) => formData.append(key, value));
+        if (isMobile()) {
+            let result: IWebSocketData;
+            void dialog.runPending(async () => {
+                result = await fetchSyncPost(url, formData);
+                return result.code === 0;
+            }, {close: false}).then(success => {
+                if (success) callback(result);
+            });
+            return;
+        }
         fetchPost(url, formData, callback);
     };
     const bindFileInput = (type: string, callback: (file: File, input: HTMLInputElement) => void) => {
@@ -235,6 +258,13 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
                 return;
             }
             selectTargetNotebook((notebookID) => {
+                if (isMobile()) {
+                    return fetchSyncPost("/api/import/continueImportSY", {token, notebook: notebookID}).then(result => {
+                        if (result.code !== 0) return false;
+                        completeContentImport();
+                        return true;
+                    });
+                }
                 fetchPost("/api/import/continueImportSY", {token, notebook: notebookID}, completeContentImport);
             }, () => {
                 fetchPost("/api/import/cancelImportSY", {token});
@@ -248,7 +278,15 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         });
     });
     bindFileInput("data", (file, input) => {
-        void importDataFile(file, completeContentImport);
+        if (isMobile()) {
+            void dialog.runPending(async () => {
+                await importDataFile(file, completeContentImport);
+                // 预检流程由独立子面板接管，父面板不提交或关闭。
+                return false;
+            }, {close: false});
+        } else {
+            void importDataFile(file, completeContentImport);
+        }
         input.value = "";
     });
     bindFileInput("conf", (file, input) => {

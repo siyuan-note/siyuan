@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
@@ -22,7 +23,6 @@ import {Constants} from "../../../constants";
 import dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne, isMobile} from "../../../util/functions";
-import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
@@ -1496,7 +1496,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         if (relResponse.code !== 0) {
                             return;
                         }
-                        const dialog = new Dialog({
+                        const dialog = new MobileDialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField
@@ -1554,7 +1554,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 target = target.parentElement;
                             }
                         });
-                        dialog.element.querySelector("button").focus();
+                        dialog.focusWhenReady(() => dialog.element.querySelector("button"));
                         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                         return;
                     }

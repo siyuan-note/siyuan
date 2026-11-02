@@ -7,12 +7,13 @@ export const getMobileSheetMaxHeight = (fullHeight: number, availableHeight: num
     Math.min(Math.max(0, availableHeight), mode === "expanded" ? Math.max(0, availableHeight) : Math.max(0, fullHeight) * .56);
 
 export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
-                                     options: {mode?: MobileSheetMode, onResize?: () => void} = {}) => {
+                                     options: {mode?: MobileSheetMode, onResize?: () => void, standalone?: boolean} = {}) => {
     let mode = options.mode || "standard";
     let frozen = false;
     let disposed = false;
     const toolbar = document.getElementById("keyboardToolbar");
     overlay.classList.add("mobile-sheet-layout");
+    if (options.standalone) overlay.classList.add("mobile-sheet-layout--standalone");
     sheet.classList.add("mobile-sheet-panel");
     const resize = () => {
         if (disposed || !overlay.isConnected) return;

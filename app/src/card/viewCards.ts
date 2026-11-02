@@ -1,7 +1,8 @@
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../dialog/mobileDialog";
 import dayjs from "dayjs";
 import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
-import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {getDisplayName, getNotebookName} from "../util/pathName";
@@ -11,7 +12,6 @@ import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
 import type {App} from "../index";
-import {confirmDialog} from "../dialog/confirmDialog";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
     let pageIndex = 1;
@@ -26,7 +26,8 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+            mobileSheet: {mode: "expanded"},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
@@ -230,7 +231,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     event.preventDefault();
                     break;
                 } else if (type === "resetAll") {
-                    confirmDialog(window.siyuan.languages.reset,
+                    mobileConfirmDialog(window.siyuan.languages.reset,
                         window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent), () => {
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: deckType === "" ? "deck" : deckType.toLowerCase(),

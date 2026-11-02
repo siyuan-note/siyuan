@@ -169,12 +169,12 @@ for (const file of ["src/history/doc.ts", "src/history/history.ts"]) {
         const pages: number[] = [];
         let messages = 0;
         const visit = (node: import("typescript").Node) => {
-            if (isCallExpression(node) && node.expression.getText(source) === "openInputDialog" &&
+            if (isCallExpression(node) && node.expression.getText(source) === "mobileInputDialog" &&
                 node.arguments[0].getText(source).includes("jumpToPage")) {
                 runInNewContext(transpileModule(node.getText(source), {
                     compilerOptions: {target: ScriptTarget.ES2020},
                 }).outputText, {
-                    openInputDialog: (options: typeof dialogs[number]) => dialogs.push(options),
+                    mobileInputDialog: (options: typeof dialogs[number]) => dialogs.push(options),
                     window: {siyuan: {languages: {jumpToPage: "Page ${x}"}}},
                     readonly: false, totalPage: 5, currentPage: 2, pageNumElement: {textContent: "2"}, target: {textContent: "2"},
                     options: {id: "doc"}, fileElement: {}, repoElement: {}, firstPanelElement: {},

@@ -232,8 +232,8 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
     };
     const escape = (value: string) => value.replace(/[&<>"']/g, character =>
         ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"})[character]);
-    const {confirmDialog}: typeof import("../dialog/confirmDialog") = require("../dialog/confirmDialog");
-    execution.dialog = confirmDialog(lang.templateHTTPConfirm,
+    const {mobileConfirmDialog}: typeof import("../dialog/mobileConfirmDialog") = require("../dialog/mobileConfirmDialog");
+    execution.dialog = mobileConfirmDialog(lang.templateHTTPConfirm,
         `${escape(lang.templateHTTPTemplateWarning)}<br>${escape(data.sourceLabel || "")}<br><br><code>${escape(data.method || "GET")} ${escape(data.url || "")}</code>` +
         (data.headerNames?.length ? `<br><code>${escape(data.headerNames.join(", "))}</code>` : ""),
         () => respond(true), () => respond(false), false, data.canPersist ? {

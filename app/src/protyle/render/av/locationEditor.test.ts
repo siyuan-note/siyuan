@@ -372,4 +372,19 @@ describe("database location editor", () => {
         assert.equal(editor.lifecycle.includes("blur"), true);
     });
 
+    it("blocks passive mobile dismissal during save but owner invalidation still cleans up", async () => {
+        let save: () => void;
+        const editor = createEditor({mobile: true, save: () => new Promise<void>(resolve => save = resolve)});
+        editor.fields.name.value = "Office";
+        editor.buttons.save.dispatch("click");
+        await editor.closeSheet();
+        assert.equal(editor.lifecycle.includes("destroy"), false);
+        editor.owner.isConnected = false;
+        editor.ownerChanged();
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+        save();
+        await editor.settle();
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+    });
+
 });

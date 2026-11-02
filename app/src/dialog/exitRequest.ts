@@ -1,9 +1,9 @@
-import {Dialog} from "./index";
+import {MobileDialog as Dialog} from "./mobileDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {withFetchTimeout} from "../util/fetchTimeout";
 import {escapeHtml} from "../util/escape";
 import {progressLoading} from "./progress";
-import {confirmDialog} from "./confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
 import {sanitizeKernelHTML} from "../util/hostCapabilities";
 
 let pendingExit: Promise<void>;
@@ -117,7 +117,7 @@ export const requestSystemExit = (options: {
             errorDialog.destroy();
             void requestSystemExit(options, onResponse);
         });
-        buttons[1].focus();
+        errorDialog.focusWhenReady(() => buttons[1]);
         return undefined;
     }).finally(() => {
         settled = true;

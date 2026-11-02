@@ -1,5 +1,5 @@
+import {mobileInputDialog} from "../../../../dialog/mobileInputDialog";
 import dayjs from "dayjs";
-import {openInputDialog} from "../../../../dialog/inputDialog";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getCalendarRange, getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday} from "./date";
 
@@ -9,7 +9,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
     const currentWeek = rowWeek.year < 1 ? {year: 1, week: 1} : rowWeek.year > 9999 ?
         {year: 9999, week: getISOWeeksInYear(9999)} : rowWeek;
     const languages = window.siyuan.languages;
-    const dialog = openInputDialog({
+    const dialog = mobileInputDialog({
         title: languages.calendarJump,
         type: "date",
         value: dayjs(anchor).format("YYYY-MM-DD"),

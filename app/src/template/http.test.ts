@@ -38,7 +38,7 @@ const loadHTTP = () => {
                     showMessage: (...args: unknown[]) => messages.push(args),
                     hideMessage: (value: string) => hidden.push(value),
                 };
-                case "../dialog/confirmDialog": return {confirmDialog: (_title: string, text: string,
+                case "../dialog/mobileConfirmDialog": return {mobileConfirmDialog: (_title: string, text: string,
                                                                           approve: () => void, reject: () => void, _delete: boolean,
                                                                           extra?: {callback: () => void}) => {
                     const dialog = {text, approve, reject, always: extra?.callback, destroyed: false};

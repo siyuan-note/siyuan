@@ -1,4 +1,4 @@
-import {openInputDialog} from "../dialog/inputDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {clearAIEditorHistory, startAIWriting} from "./editor";
 import {showMessage} from "../dialog/message";
 import {isDisabledFeature} from "../protyle/util/compatibility";
@@ -7,7 +7,7 @@ export const AIChat = (protyle: IProtyle, element: HTMLElement) => {
     if (isDisabledFeature("ai")) {
         return;
     }
-    openInputDialog({
+    mobileInputDialog({
         title: "✨ " + window.siyuan.languages.aiWriting,
         value: "",
         multiline: true,

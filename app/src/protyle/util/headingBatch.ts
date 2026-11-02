@@ -1,4 +1,4 @@
-import {Dialog} from "../../dialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {fetchPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
 import {isMobile} from "../../util/functions";
@@ -33,7 +33,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
         let counts: number[] = response.data.counts;
         let withSubheadingCounts: number[] = response.data.withSubheadingCounts;
         let closed = false;
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: languages.headingBatch,
             width: isMobile() ? "92vw" : "420px",
             content: `<div class="b3-dialog__content">

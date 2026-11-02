@@ -102,7 +102,7 @@ const createCoverHarness = (mobile: boolean) => {
         options.build(menu);
         options.show(menu);
     };
-    const Background = new Function("window", "toggleMenu", "assetMenu", "openInputDialog", "openCoverPicker",
+    const Background = new Function("window", "toggleMenu", "assetMenu", "mobileInputDialog", "openCoverPicker",
         "bindPopoverDialog", "Constants", "fetchPost", "hideElements", transpileModule(
             `class Background {${methods.join("\n")} bind(protyle) {${listener}}} return Background;`,
             {compilerOptions: {target: ScriptTarget.ES2021}}).outputText)(window, toggleMenu,

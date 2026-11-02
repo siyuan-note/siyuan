@@ -263,7 +263,7 @@ const runCases = async (appDirectory, mode, capture) => {
     const cancelConfirm = async () => {
         const prompt = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
         assert.notEqual(prompt, dialog);
-        assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), false);
+        assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), mobile);
         prompt.element.querySelector('[data-action="cancel"]').click();
         await tick();
     };
@@ -341,7 +341,7 @@ const runCases = async (appDirectory, mode, capture) => {
     await tick();
     const prompt = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
     assert.notEqual(prompt, next);
-    assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), false);
+    assert.equal(prompt.element.classList.contains("mobile-bottom-sheet-dialog"), mobile);
     prompt.element.querySelector("[data-input-cancel]").click();
     await tick();
     const nextButton = action => nextHost.querySelector(`[data-action="${action}"]`);
@@ -392,6 +392,26 @@ const runCases = async (appDirectory, mode, capture) => {
             await tick();
         }
     };
+    if (mobile) {
+        await returnToList();
+        nextButton("newFile").click();
+        await tick();
+        const inputDialog = window.siyuan.dialogs.at(-1);
+        const input = inputDialog.element.querySelector("input");
+        input.value = "retry.yaml";
+        conflict = true;
+        inputDialog.element.querySelector("[data-input-confirm]").click();
+        await tick();
+        await tick();
+        assert.ok(inputDialog.element.isConnected, "failed mobile create keeps its sheet open");
+        assert.equal(input.value, "retry.yaml", "failed mobile create preserves its draft");
+        assert.equal(inputDialog.element.querySelector("[data-input-confirm]").disabled, false);
+        conflict = false;
+        inputDialog.element.querySelector("[data-input-confirm]").click();
+        for (let i = 0; i < 10; i++) await tick();
+        assert.ok(textFiles.has("directory-id/retry.yaml"));
+        assert.equal(inputDialog.element.isConnected, false);
+    }
     for (const name of ["settings.yaml", "LICENSE"]) {
         await nameAction("newFile", name);
         assert.ok(textFiles.has("directory-id/" + name), "new text files keep their chosen extension or lack of one");

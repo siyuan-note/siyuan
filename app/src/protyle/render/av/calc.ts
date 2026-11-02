@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {isAVDateType} from "./capabilities";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
@@ -6,7 +7,6 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
-import {Dialog} from "../../../dialog";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {getAVTemplateHTML} from "./attributeValue";
 
@@ -489,7 +489,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         label: getNameByOperator("Template", !!panelData?.data),
         click() {
             menu.close();
-            const dialog = new Dialog({
+            const dialog = new MobileDialog({
                 title: window.siyuan.languages.calcOperatorTemplate,
                 content: `<div class="b3-dialog__content">
     <textarea spellcheck="false" class="fn__block b3-text-field" placeholder="${escapeAttr(window.siyuan.languages.rollupTemplateTip)}" rows="8" style="resize: vertical;font-family: var(--b3-font-family-code);">${escapeHtml(currentTemplate)}</textarea>
@@ -512,7 +512,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
                 dialog.destroy();
             });
             dialog.bindInput(textarea, confirm);
-            textarea.focus();
+            dialog.focusWhenReady(() => textarea);
         }
     });
     const calcRect = calcElement.getBoundingClientRect();

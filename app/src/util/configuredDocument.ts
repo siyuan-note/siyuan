@@ -3,7 +3,7 @@ import {documentParentID} from "./documentCreate";
 import {DocumentCreationAttempt} from "./documentCreationPlan";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "./escape";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import type {Dialog} from "../dialog";
 import type {DocumentCreatePlan, PlanDocCreateRequestInput, DocumentSelectionInput, DocumentSelectionFailure} from "../types/api";
 import {selectDocumentAncestor} from "./documentAncestor";

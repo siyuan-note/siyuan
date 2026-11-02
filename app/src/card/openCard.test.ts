@@ -32,7 +32,7 @@ const createReview = async () => {
         fetchPost: (url: string, payload: Record<string, unknown>, callback: (response: unknown) => void) => new Promise<void>(resolve => { requests.push({url, payload, callback, resolve}); }),
         Menu: class {addItem(item: IMenu) {menuItems.set(item.id, item);} addSeparator() {} fullscreen() {} open() {}},
         hasClosestByAttribute: (target: {type: string}, _name: string, value: string) => target.type === value ? target : null,
-        openInputDialog: (options: {onConfirm: typeof confirmDue}) => { confirmDue = options.onConfirm; },
+        mobileInputDialog: (options: {onConfirm: typeof confirmDue}) => { confirmDue = options.onConfirm; },
         onGet: (options: typeof renders[number]) => renders.push(options), hasFlashcardAnswer: () => true,
         forEachPluginSubscriber: () => {},
     }, {get: (target, key) => key in target ? Reflect.get(target, key) : () => {}});

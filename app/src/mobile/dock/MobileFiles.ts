@@ -26,7 +26,7 @@ import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";

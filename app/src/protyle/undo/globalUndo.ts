@@ -1,6 +1,6 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -323,7 +323,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             let confirmed = false;
             try {
                 confirmed = await new Promise<boolean>((resolve) => {
-                    confirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
+                    mobileConfirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
                         `<div data-undo-confirmation="true">${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div></div>`,
                         () => resolve(true),
                         () => resolve(false));

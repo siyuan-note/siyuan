@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {isSameOriginAPIRequest, SIYUAN_APP_ID_HEADER} from "../../util/fetchAppId";
 import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -489,7 +490,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
     } else {
         formData.append("id", options.document.rootID);
     }
-    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+    mobileConfirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
         try {
             if (!callbacks.isTargetAvailable()) {
                 hideMessage(validateResult.msgId);

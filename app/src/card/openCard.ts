@@ -1,6 +1,7 @@
+import {MobileDialog} from "../dialog/mobileDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost} from "../util/fetch";
 import {fetchDueCards} from "./fetchDueCards";
 import {isMobile} from "../util/functions";
@@ -414,7 +415,7 @@ export const bindCardEvent = async (options: {
                             icon: "iconClock",
                             label: window.siyuan.languages.setDueTime,
                             click() {
-                                openInputDialog({
+                                mobileInputDialog({
                                     title: window.siyuan.languages.setDueTime,
                                     label: window.siyuan.languages.showCardDay,
                                     value: "1",
@@ -894,7 +895,8 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     for (let i = 0; i < app.plugins.length; i++) {
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {mode: "expanded"},
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
@@ -936,7 +938,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     };
     /// #if !MOBILE
     const focusElement = dialog.element.querySelector(".block__icons button.block__icon") as HTMLElement;
-    focusElement.focus();
+    dialog.focusWhenReady(() => focusElement);
     const range = document.createRange();
     range.selectNodeContents(focusElement);
     range.collapse();

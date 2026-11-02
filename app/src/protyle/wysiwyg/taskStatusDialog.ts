@@ -1,4 +1,4 @@
-import {openInputDialog} from "../../dialog/inputDialog";
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
 import {showMessage} from "../../dialog/message";
 import {isTaskListMarker} from "./taskListMarker";
 
@@ -25,7 +25,7 @@ export const getTaskStatusItems = (marker: string, setMarker: (marker: string) =
 };
 
 export const openTaskStatusDialog = (marker: string, setMarker: (marker: string) => void) => {
-    openInputDialog({
+    mobileInputDialog({
         title: window.siyuan.languages.customTaskStatus,
         value: marker || " ",
         maxLength: 1,

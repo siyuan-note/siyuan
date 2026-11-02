@@ -37,6 +37,8 @@ export const saveNotebookConfSync = (notebook: string, conf: NotebookRequest["co
 
 export const removeSearchCriterion = (name: string) => fetchPost("/api/storage/removeCriterion", {name});
 
+export const removeSearchCriterionSync = (name: string) => fetchSyncPost("/api/storage/removeCriterion", {name});
+
 export const saveOutlineState = (docID: string, expandIds: string[]) =>
     fetchPost("/api/storage/setOutlineStorage", {docID, val: {expandIds}});
 

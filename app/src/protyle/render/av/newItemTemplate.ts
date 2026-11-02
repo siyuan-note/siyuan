@@ -361,12 +361,14 @@ export const openNewItemTemplateDialog = (options: {
     /// #if MOBILE
     const destroyDialog = dialog.destroy.bind(dialog);
     dialog.destroy = (destroyOptions?: IObject) => {
+        disposeSheet.freeze();
         if (dialog.element.contains(document.activeElement)) {
             activeBlur(true);
         }
         destroyDialog(destroyOptions);
     };
-    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined,
+        {mode: "standard", expandable: true});
     /// #endif
     const root = dialog.element;
     const listElement = root.querySelector('[data-role="template-list"]') as HTMLElement;

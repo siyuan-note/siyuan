@@ -1,7 +1,7 @@
 import {toggleMenu} from "../menus/menuToggle";
 import * as path from "path";
 import {fetchPost} from "./fetch";
-import {Dialog} from "../dialog";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {genFileTreeDocAriaLabel} from "./fileTreeTooltip";
 import {isMobile} from "./functions";

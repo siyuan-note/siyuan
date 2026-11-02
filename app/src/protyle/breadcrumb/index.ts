@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import type {BlockBreadcrumbRequestInput, BlockQueryRequestInput, TreeStatRequestInput} from "../../types/api";
@@ -27,7 +28,6 @@ import {ipcRenderer} from "electron";
 import {onGet} from "../util/onGet";
 import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {hideElements} from "../ui/hideElements";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
 import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
@@ -947,7 +947,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                             icon: "iconUploadAssets",
                             click() {
                                 if (!needSubscribe()) {
-                                    confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
+                                    mobileConfirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
                                         fetchPost("/api/asset/uploadCloud", {id: protyle.block.id});
                                     });
                                 }
@@ -962,7 +962,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                                     if (!getHostCapabilities().importExport) {
                                         return;
                                     }
-                                    confirmDialog("🤩 " + window.siyuan.languages.share2Liandi,
+                                    mobileConfirmDialog("🤩 " + window.siyuan.languages.share2Liandi,
                                         window.siyuan.languages.share2LiandiConfirmTip.replace("${accountServer}", getCloudURL("")), () => {
                                             fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
                                         });

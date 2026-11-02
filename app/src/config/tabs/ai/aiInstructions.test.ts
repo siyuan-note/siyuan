@@ -19,8 +19,8 @@ const setup = () => {
         TextEncoder,
         window: {siyuan: {languages: {agentInstructionsTooLarge: "too large"}}},
         require: (name: string) => {
-            if (name.endsWith("/inputDialog")) {
-                return {openInputDialog: (value: typeof options) => { options = value; return dialog; }};
+            if (name.endsWith("/mobileInputDialog")) {
+                return {mobileInputDialog: (value: typeof options) => { options = value; return dialog; }};
             }
             if (name.endsWith("/message")) {
                 return {showMessage: (value: string) => messages.push(value)};

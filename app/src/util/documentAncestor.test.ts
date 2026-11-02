@@ -26,10 +26,11 @@ function setup(lookup = async () => ({code: 0, data: {documents: [candidate("unl
     const methods = loadModule<typeof import("./documentAncestor")>("src/util/documentAncestor.ts", {
         window: {siyuan: {languages: {newFile: "New", documentAncestorAmbiguous: "Choose parent", documentAncestorMore: "Other"}}},
         require: (name: string) => ({
-            "../dialog/confirmDialog": {confirmDialog: (_title: string, text: string, yes: () => void,
+            "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, text: string, yes: () => void,
                 no: () => void, _isDelete: boolean, action: {callback: () => void}) => {
                 html = text; confirm = yes; cancel = no; extra = action; return dialog;
             }},
+            "./functions": {isMobile: () => false},
             "./escape": {escapeHtml: (text: string) => text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
             "./pathName": {movePathTo: (options: typeof picker) => { picker = options; return pickerDialog; }},
             "./documentCreate": {documentParentID: (path: string) => path === "/" ? null : path.split("/").pop().replace(/\.sy$/, "")},

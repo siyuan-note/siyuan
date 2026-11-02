@@ -63,7 +63,8 @@ const openParentPicker = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: 
     observer.observe(protyle.element, {childList: true, subtree: true});
     observer.observe(blockElement, {attributes: true, attributeFilter: ["data-av-id", "data-node-id", Constants.CUSTOM_SY_AV_VIEW]});
     if (isMobile()) {
-        disposeSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); });
+        disposeSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, undefined, undefined,
+            {mode: "standard"});
     }
     const input = dialog.element.querySelector("input");
     const results = dialog.element.querySelector<HTMLElement>("[data-results]");

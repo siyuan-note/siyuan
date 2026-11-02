@@ -122,12 +122,10 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
             title: window.siyuan.languages.viewRefContent,
             content: '<div class="mobile-reference-editor fn__flex-1"></div>',
             width: "100vw",
-            height: "60%",
             hideCloseIcon: true,
             containerClassName: "mobile-reference-sheet",
             destroyCallback: () => {
                 disposeSheet();
-                window.removeEventListener("resize", resize);
                 sheet.disposeEditor();
                 if (current === sheet) {
                     current = undefined;
@@ -231,15 +229,10 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
         dialog.register();
         const resize = () => {
             const viewport = getVisibleViewportBounds();
-            const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
-            container.style.top = `${viewport.top}px`;
-            container.style.height = `${viewport.bottom - viewport.top}px`;
             dialog.element.classList.toggle("mobile-reference-dialog--compact", viewport.bottom - viewport.top < 400);
             restoreScroll();
         };
-        const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), resize);
-        window.addEventListener("resize", resize);
-        resize();
+        const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), resize, undefined, {mode: "standard", expandable: true});
     } catch (error) {
         showMessage(escapeHtml(String(error)));
     }

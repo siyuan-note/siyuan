@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import {clearAVAttributeDropTarget, getAVAttributeDropTarget, getAVAttributePreviousID, getAVAttributeSort, IAVAttributeDropTarget} from "./attributePanelDrag";
 import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePanelLayout";
 import {isAVTextType} from "./capabilities";
@@ -21,7 +22,6 @@ import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openAVBindBlock} from "./bindBlock";
 import {preserveAVBindingRange} from "./binding";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {
     createEmptyAVValue,
     genAVAttributeRowHTML,
@@ -572,7 +572,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }];
                         const restoreEditorRange = () => restoreEditorFocusRange(protyle.wysiwyg.element,
                             editorRange);
-                        confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
+                        mobileConfirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
                             if (protyle.disabled) {
                                 return;
                             }

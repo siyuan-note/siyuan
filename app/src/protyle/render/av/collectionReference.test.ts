@@ -8,7 +8,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
 import type {AVAutomationBlockSourceInput} from "../../../types/api";
-import type {openInputDialog} from "../../../dialog/inputDialog";
+import type {mobileInputDialog} from "../../../dialog/mobileInputDialog";
 
 const compiled = transpileModule(readFileSync("src/protyle/render/av/collectionReference.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
@@ -29,7 +29,7 @@ test("reference targets accept block IDs and block links without matching arbitr
 const browserCases = async (sourceCode: string, languages: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const api = {} as typeof import("./collectionReference");
-    let inputOptions: Parameters<typeof openInputDialog>[0];
+    let inputOptions: Parameters<typeof mobileInputDialog>[0];
     const target = "20261026000000-target1";
     const rootID = "20261026000000-source1";
     const pendingNames: Array<(value: unknown) => void> = [];
@@ -37,7 +37,7 @@ const browserCases = async (sourceCode: string, languages: Record<string, string
     Object.assign(window, {siyuan: {languages, blockPanels: []}});
     new Function("exports", "require", sourceCode)(api, (name: string) => ({
         "../../../util/escape": {escapeAttr: String, escapeHtml: String},
-        "../../../dialog/inputDialog": {openInputDialog: (options: typeof inputOptions) => { inputOptions = options; }},
+        "../../../dialog/mobileInputDialog": {mobileInputDialog: (options: typeof inputOptions) => { inputOptions = options; }},
         "../../../util/fetch": {fetchSyncPost: async (url: string, body: {id: string}) => {
             if (url === "/api/block/getBlockInfo") {
                 if (body.id === "20261026000000-pending") { return new Promise(resolve => { pendingSelection = resolve; }); }

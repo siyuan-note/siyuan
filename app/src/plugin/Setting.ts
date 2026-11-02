@@ -1,3 +1,4 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {getFrontend, isMobile} from "../util/functions";
 import {Dialog} from "../dialog";
 import {closeNativeSettings, openNativeSettings} from "../config/setting/nativeWindow";
@@ -68,7 +69,8 @@ export class Setting {
             return;
         }
         const windowRoot = isSettingsWindow() && window.siyuan.dialogs.length === 0;
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
             title: name,
             content: `<div class="b3-dialog__content">
 </div>
@@ -136,7 +138,7 @@ export class Setting {
                 }
             }
         });
-        (contentElement.querySelector("input, textarea") as HTMLElement)?.focus();
+        dialog.focusWhenReady(() => contentElement.querySelector<HTMLElement>("input, textarea"));
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();

@@ -1999,6 +1999,22 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
 }
 
+.mobile-sheet-layout--standalone {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  > .mobile-sheet-panel {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+  }
+}
+
 .mobile-sheet-panel {
   min-height: 0;
   overflow: auto;
@@ -2012,6 +2028,18 @@ body.mobile-topbar--merged {
     overflow: auto;
     flex: 0 1 auto;
   }
+}
+
+.mobile-sheet-actions {
+  flex-shrink: 0;
+}
+
+.mobile-av-richtext-sheet .av__richtext-editor--sheet {
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  max-height: none;
+  flex: 1;
 }
 
 .mobile-document-title-dialog {

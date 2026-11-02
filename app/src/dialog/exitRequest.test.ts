@@ -45,7 +45,7 @@ const fixture = () => {
                 }
                 if (action) actions.set(id, action.callback);
             }};
-            if (name === "./confirmDialog") return {confirmDialog: (_title: string, text: string,
+            if (name === "./mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, text: string,
                 confirm: () => void, cancel: () => void, _delete: boolean, _extra: unknown, label: string) => {
                 assert.equal(label, "Skip sync and exit");
                 assert.match(text, /Unsynced/);
@@ -69,7 +69,7 @@ const fixture = () => {
                     expire = () => fail(new Error("Timeout"));
                 })]);
             }};
-            if (name === "./index") return {Dialog: class {
+            if (name === "./mobileDialog") return {MobileDialog: class {
                 state = {
                     destroyed: false,
                     buttons: [0, 1].map(() => ({
@@ -88,6 +88,7 @@ const fixture = () => {
                     this.state.content.innerHTML = options.content;
                     dialogs.push(this.state);
                 }
+                focusWhenReady(target: () => {focus: () => void}) { target().focus(); }
                 destroy() { this.state.destroyed = true; }
             }};
             throw new Error(name);

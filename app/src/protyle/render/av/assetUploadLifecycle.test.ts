@@ -121,6 +121,13 @@ const createHarness = (standalone = true) => {
                 yes();
             }
         }},
+        "../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _message: string, yes: () => void) => {
+            if (delayConfirmation) {
+                confirmations.push(yes);
+            } else {
+                yes();
+            }
+        }},
         "../../util/fetch": {fetchSyncPost: (_url: string, data: {id: string, assetPaths: string[]}) =>
             new Promise(resolve => requests.push({id: data.id, respond: () => resolve(response(data.assetPaths[0].split("/").pop()))}))},
         "./pluginEvent": {prepareAssetUpload: ({input}: {input: IAssetUploadInput}) => new Promise(resolve => {

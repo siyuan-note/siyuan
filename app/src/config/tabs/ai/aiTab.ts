@@ -1,5 +1,5 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import type {SettingTabBuilder} from "../../setting/builder";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {
@@ -313,7 +313,7 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         icon: "iconRefresh",
         afterMount: (root) => {
             root.querySelector("#rebuildEmbeddingIndex")?.addEventListener("click", () => {
-                confirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
+                mobileConfirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
                     window.siyuan.languages.rebuildEmbeddingIndexConfirmTip, () => {
                     fetchPost("/api/ai/reindexEmbedding", {}, () => {
                         showMessage(window.siyuan.languages.rebuildEmbeddingIndexStarted);

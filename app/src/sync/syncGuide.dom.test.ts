@@ -9,7 +9,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const browserCases = (sources: string[]) => {
+const browserCases = async (sources: string[]) => {
     const check: typeof assert = require("node:assert/strict");
     for (const [mobile, code] of sources.entries()) {
         for (const initializeKey of [false, true]) {
@@ -27,9 +27,15 @@ const browserCases = (sources: string[]) => {
                     document.body.append(this.element);
                 }
                 destroy() { this.element.remove(); }
+                focusWhenReady(target: () => HTMLElement) { target()?.focus(); }
+                async runPending(task: () => Promise<boolean>, options: {close?: boolean} = {}) {
+                    const result = await task();
+                    if (result && options.close !== false) this.destroy();
+                    return result;
+                }
             }
             const dependencies: Record<string, unknown> = {
-                "../dialog": {Dialog},
+                "../dialog/mobileDialog": {MobileDialog: Dialog},
                 "../dialog/message": {showMessage: (message: string) => messages.push(message)},
                 "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
@@ -38,10 +44,11 @@ const browserCases = (sources: string[]) => {
                 "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
-                "../dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, confirm: () => void) =>
+                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) =>
                     confirmations.push(confirm)},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
-                    requests.push({url, data, reply})},
+                    requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>
+                    new Promise(resolve => requests.push({url, data, reply: resolve}))},
                 "../config/util/configApi": {config: {set: (name: string, value: unknown, applied: () => void) => {
                     requests.push({url: "/api/setting/patch", data: {[name]: value}, reply: applied});
                     return Promise.resolve();
@@ -65,6 +72,7 @@ const browserCases = (sources: string[]) => {
                 const initialize = requests.shift();
                 check.equal(initialize.url, "/api/repo/initRepoKeyFromPassphrase");
                 initialize.reply({code: 0, data: {key: "fixture-key"}});
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
             const list = document.querySelector(".b3-dialog__content").lastElementChild;
             const enable = document.querySelector<HTMLButtonElement>(".b3-dialog__action button");

@@ -1,4 +1,4 @@
-import {Dialog} from "../dialog";
+import {MobileDialog} from "../dialog/mobileDialog";
 import {showMessage} from "../dialog/message";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -44,7 +44,8 @@ export const openOCRImportModelsDialog = (options: {
     const files = getOCRModelFiles();
     let busy = false;
     let closed = false;
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: languages.ocrImportModelsTitle,
         width: isMobile() ? "92vw" : "520px",
         destroyCallback: () => {

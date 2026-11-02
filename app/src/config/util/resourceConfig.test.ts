@@ -48,6 +48,7 @@ test("resource writes preserve desktop and mobile payloads and both failure prot
     await f.api.saveNotebookConf("notebook", {sortMode: 2});
     assert.equal((await f.api.saveNotebookConfSync("notebook", {sortMode: 3})).code, 0);
     await f.api.removeSearchCriterion("Saved search");
+    assert.equal((await f.api.removeSearchCriterionSync("Checked search")).code, 0);
     await f.api.saveOutlineState("document", ["heading"]);
     assert.deepEqual(JSON.parse(JSON.stringify(f.requests)), [
         {url: "/api/system/setWorkspaceDir", body: {path: "workspace"}},
@@ -57,6 +58,7 @@ test("resource writes preserve desktop and mobile payloads and both failure prot
         {url: "/api/notebook/setNotebookConf", body: {notebook: "notebook", conf: {sortMode: 2}}},
         {url: "/api/notebook/setNotebookConf", body: {notebook: "notebook", conf: {sortMode: 3}}},
         {url: "/api/storage/removeCriterion", body: {name: "Saved search"}},
+        {url: "/api/storage/removeCriterion", body: {name: "Checked search"}},
         {url: "/api/storage/setOutlineStorage", body: {docID: "document", val: {expandIds: ["heading"]}}},
     ]);
     assert.deepEqual(f.events, [["exit", false], "open other"]);

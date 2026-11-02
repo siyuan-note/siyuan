@@ -25,21 +25,40 @@ const browserCases = async (source: string) => {
         class FakeDialog {
             element: HTMLElement;
             closed = false;
-            constructor(public options: {content: string; destroyCallback?: (options?: IObject) => void}) {
+            pending = false;
+            checking = false;
+            constructor(public options: {content: string; destroyCallback?: (options?: IObject) => void;
+                mobileSheet?: {beforeClose: () => Promise<boolean>}}) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
                 document.body.appendChild(this.element);
                 dialogs.push(this);
             }
             destroy(options?: IObject) {
-                if (this.closed) return;
-                this.closed = true;
+                if (this.closed || this.pending || this.checking) return;
                 const finish = () => {
+                    this.closed = true;
                     this.element.remove();
                     this.options.destroyCallback?.(options);
                 };
-                if (delayClose) setTimeout(finish, 20);
-                else finish();
+                const close = () => {
+                    if (delayClose) setTimeout(finish, 20);
+                    else finish();
+                };
+                if (mobile && this.options.mobileSheet?.beforeClose) {
+                    this.checking = true;
+                    void this.options.mobileSheet.beforeClose().then(allowed => { if (allowed) close(); })
+                        .finally(() => { this.checking = false; });
+                } else close();
+            }
+            async runPending(task: () => Promise<boolean>, options: {close?: boolean} = {}) {
+                if (this.pending || this.checking || this.closed) return false;
+                this.pending = true;
+                let success = false;
+                try { success = await task(); }
+                finally { this.pending = false; }
+                if (success && options.close !== false) this.destroy();
+                return success;
             }
         }
         Object.defineProperty(window, "siyuan", {configurable: true, writable: true, value: {
@@ -51,10 +70,10 @@ const browserCases = async (source: string) => {
                 settingsWrites++;
                 Object.assign(window.siyuan.config.snippet, value);
             }},
-            Dialog: FakeDialog, isMobile: () => mobile,
+            MobileDialog: FakeDialog, isMobile: () => mobile,
             Constants: {DIALOG_SNIPPETS: "snippets"},
             objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
-            confirmDialog: (_title: string, _text: string, confirm: () => void) => confirm(),
+            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) => confirm(),
             showMessage: (text: string) => messages.push(text),
             refreshHeadingNumberMeasurements: () => {},
             getHostCapabilities: () => ({customAppearance: true}),
@@ -99,7 +118,8 @@ const browserCases = async (source: string) => {
         });
         dialog.destroy();
         await settle();
-        check.notEqual(current(), dialog, "closing before a conflict must restore a draft editor");
+        if (mobile) check.equal(current(), dialog, "mobile closing failure keeps the same draft editor");
+        else check.notEqual(current(), dialog, "desktop closing before a conflict restores a draft editor");
         check.equal(current().element.isConnected, true);
         check.deepEqual(Array.from(current().element.querySelectorAll("textarea")).map(item => item.value), ["code-0", "code-1", "code-2"]);
         check.deepEqual(Array.from(current().element.querySelectorAll<HTMLInputElement>("[data-id] input.b3-text-field")).map(item => item.value), ["draft-0", "draft-1", "draft-2"]);

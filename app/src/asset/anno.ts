@@ -1,3 +1,4 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -6,10 +7,9 @@ import {patchAppearancePreference} from "../config/tabs/appearancePreferences";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
-import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {filesize} from "filesize";
 import md5 from "blueimp-md5";
@@ -565,7 +565,8 @@ const setRelation = (pdf: any) => {
     if (!configItem.ids) {
         configItem.ids = [];
     }
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.relation,
         content: `<div class="b3-dialog__content">
     <div class="fn__flex">
@@ -1064,17 +1065,17 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
                         .replace("${y}", filesize(imageData.blob.size, {standard: "iec"}));
                 }
-                confirmDialog(msg ? window.siyuan.languages.upload : "", msg, async () => {
+                mobileConfirmDialog(msg ? window.siyuan.languages.upload : "", msg, async () => {
                     if (!await canCopy()) {
-                        return;
+                        return false;
                     }
                     const imageName = getRectImageName(content, imageData.rotation, positionHash,
                         PDF_RECT_CAPTURE_PROFILE);
                     const assetsDirPath = getPdfAnnotationAssetsDirPath(pdf.appConfig.file, location.origin);
                     if (assetsDirPath === null) {
-                        return;
+                        return false;
                     }
-                    void uploadStandaloneAssetFiles([
+                    const response = await uploadStandaloneAssetFiles([
                         new File([imageData.blob], imageName, {type: imageData.blob.type}),
                     ], {
                         source: "programmatic",
@@ -1084,14 +1085,15 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                             skipIfDuplicated: "true",
                             ...(assetsDirPath ? {assetsDirPath} : {}),
                         },
-                    }).then(async response => {
-                        const path = getAssetUploadSuccesses(response?.data)[0]?.path;
-                        if (path && await canCopy()) {
-                            writeText(`<<${idPath} "${content}">>
-![](${path}){: style="width: ${imageData.displayWidth}px;"}`);
-                        }
                     });
-                });
+                    const path = getAssetUploadSuccesses(response?.data)[0]?.path;
+                    if (path && await canCopy()) {
+                        writeText(`<<${idPath} "${content}">>
+![](${path}){: style="width: ${imageData.displayWidth}px;"}`);
+                        return true;
+                    }
+                    return false;
+                }, undefined, false, undefined, undefined, {awaitConfirm: true});
             }).catch((error) => {
                 if (isActive()) {
                     console.error(error);
@@ -1185,7 +1187,7 @@ const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
         }
         const count = response.data.refDefs.length;
         if (count > 0) {
-            confirmDialog(window.siyuan.languages.deleteOpConfirm,
+            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
                 window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()), remove,
                 undefined, true);
         } else {

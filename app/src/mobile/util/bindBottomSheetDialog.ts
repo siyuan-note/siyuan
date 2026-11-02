@@ -3,8 +3,8 @@ import {bindBottomSheetDrag} from "./bindBottomSheetDrag";
 import {waitForSheetViewport} from "../../menus/sheetOpen";
 import type {MobileSheetMode} from "./mobileSheetLayout";
 
-export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode}) => {
+export const bindBottomSheetDialog = (dialog: Dialog, close: (reason?: "drag" | "close") => Promise<void>, afterResize?: () => void,
+                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, expandable?: boolean, disableClose?: boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     // 初始定位不参与过渡，等待视口恢复后再从底部展开。
@@ -14,6 +14,30 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
     sheet.classList.add("mobile-bottom-sheet");
     const layout = layoutOptions ? (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
         sheet, {...layoutOptions, onResize: afterResize}) : undefined;
+    let mode = layoutOptions?.mode || "standard";
+    let actions: HTMLElement;
+    const setMode = (next: MobileSheetMode) => {
+        mode = next;
+        layout?.setMode(next);
+        if (actions) {
+            (require("../../menus/sheetActions") as typeof import("../../menus/sheetActions"))
+                .setSheetExpanded(dialog.element, next === "expanded");
+        }
+    };
+    if (layout && (layoutOptions.expandable || mode === "expanded")) {
+        const {getSheetActionsHTML} = require("../../menus/sheetActions") as typeof import("../../menus/sheetActions");
+        actions = document.createElement("div");
+        actions.className = "mobile-sheet-actions";
+        actions.innerHTML = getSheetActionsHTML();
+        sheet.append(actions);
+        actions.querySelector('[data-type="sheet-expand"]').addEventListener("click", () => {
+            setMode(mode === "expanded" ? "standard" : "expanded");
+        });
+        const closeButton = actions.querySelector<HTMLButtonElement>('[data-type="sheet-close"]');
+        closeButton.disabled = !!layoutOptions.disableClose;
+        closeButton.addEventListener("click", () => { void close("close").catch(error => console.error(error)); });
+        setMode(mode);
+    }
     // 底部面板只支持下拉关闭，不参与通用对话框的移动和缩放。
     sheet.querySelector(".b3-dialog__header")?.classList.remove("resize__move");
     sheet.querySelectorAll(":scope > .resize__rd, :scope > .resize__ld, :scope > .resize__lt, :scope > .resize__rt, " +
@@ -77,16 +101,18 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
     const observer = new MutationObserver(updateOpen);
     observer.observe(dialog.element, {attributes: true, attributeFilter: ["class"]});
     updateOpen();
-    const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), close);
+    const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), () => close("drag"));
     const dispose = () => {
         cancelOpen?.();
         layout?.dispose();
         observer.disconnect();
         disposeDrag();
         handle.remove();
+        actions?.remove();
         window.visualViewport?.removeEventListener("resize", resize);
         window.visualViewport?.removeEventListener("scroll", resize);
     };
     dispose.freeze = () => layout?.freeze();
+    dispose.setMode = setMode;
     return dispose;
 };

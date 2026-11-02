@@ -8,6 +8,7 @@ import {isAbove} from "../../util/zIndex";
 import {getMobileSelectMenuElement} from "./nativeSelect";
 import {closeAnchoredInput, getAnchoredInputMask} from "../../dialog/anchoredInput";
 import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
+import {requestMobileDialogClose} from "../../dialog/mobileDialog";
 
 export const pushBack = () => {
     window.siyuan.mobile.tabs?.pushCurrent();
@@ -40,6 +41,7 @@ export const goBack = () => {
         return;
     } else if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none") && isAboveAVEditors(activeMenu) &&
+        (!topDialog || isAbove(activeMenu, topDialog.element.querySelector(".b3-dialog"))) &&
         (!richTextElement || !isAbove(richTextElement, activeMenu))) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
@@ -60,7 +62,7 @@ export const goBack = () => {
         avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
-        window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
+        requestMobileDialogClose(window.siyuan.dialogs[window.siyuan.dialogs.length - 1], "back");
         return;
     } else if (window.siyuan.mobile.agentChatController?.handleBack()) {
         return;

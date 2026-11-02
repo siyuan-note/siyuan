@@ -1,5 +1,5 @@
 import {toggleMenu} from "../menus/menuToggle";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
@@ -285,10 +285,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             const items = Array.from(state.selected.values());
             const summary = lang.repoBatchSelection.replace("${x}", String(items.filter(item => item.source === "local").length)).replace("${y}", String(items.filter(item => item.source === "cloud").length));
             const details = `<p>${summary}</p>` + ["local", "cloud"].map(source => `<div>${source === "local" ? lang.localSnapshot : lang.cloudSnapshot}</div><ul>${items.filter(item => item.source === source).map(item => `<li>${escapeHtml(item.tag)}</li>`).join("")}</ul>`).join("");
-            confirmDialog(lang.deleteOpConfirm, `${details}<p>${lang.repoRemoveTagsTip}</p>`, async () => {
+            const completed = new Set<string>();
+            mobileConfirmDialog(lang.deleteOpConfirm, `${details}<p>${lang.repoRemoveTagsTip}</p>`, async () => {
                 setBusy(true);
                 try {
-                    const removed = await removeSelectedRepoTags(items, async item => {
+                    const removed = await removeSelectedRepoTags(items.filter(item => !completed.has(repoSelectionKey(item))), async item => {
                         const response = await fetchSyncPost(item.source === "local" ? "/api/repo/removeRepoTagSnapshot" : "/api/repo/removeCloudRepoTagSnapshot", {tag: item.tag});
                         return response.code === 0;
                     }, async source => {
@@ -298,13 +299,17 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                         }
                         return response.data.snapshots;
                     });
-                    removed.forEach(key => state.selected.delete(key));
-                    message(lang.repoBatchResult.replace("${x}", String(removed.size)).replace("${y}", String(items.length - removed.size)));
+                    removed.forEach(key => {
+                        completed.add(key);
+                        state.selected.delete(key);
+                    });
+                    message(lang.repoBatchResult.replace("${x}", String(completed.size)).replace("${y}", String(items.length - completed.size)));
                     refresh();
+                    return completed.size === items.length;
                 } finally {
                     setBusy(false);
                 }
-            }, undefined, true);
+            }, undefined, true, undefined, undefined, {awaitConfirm: true});
         } else if (action === "purge") {
             const pane = button.closest<HTMLElement>("[data-repo-source]");
             const source = pane.dataset.repoSource as RepoSource;
@@ -314,21 +319,23 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                 return;
             }
             const local = source === "local";
-            confirmDialog(local ? lang.dataRepoPurge : lang.cloudStoragePurge, local ? lang.dataRepoPurgeConfirm : lang.cloudStoragePurgeConfirm, async () => {
+            mobileConfirmDialog(local ? lang.dataRepoPurge : lang.cloudStoragePurge, local ? lang.dataRepoPurgeConfirm : lang.cloudStoragePurgeConfirm, async () => {
                 if (!local && (provider !== window.siyuan.config.sync.provider || !canPurgeRepo(source, window.siyuan.config.sync.provider))) {
                     updateRepoSelection(pane);
-                    return;
+                    return false;
                 }
                 setBusy(true);
                 try {
-                    await fetchSyncPost(local ? "/api/repo/purgeRepo" : "/api/repo/purgeCloudRepo", {});
+                    const response = await fetchSyncPost(local ? "/api/repo/purgeRepo" : "/api/repo/purgeCloudRepo", {});
+                    return response.code === 0;
                 } catch (error) {
                     message(String(error));
+                    return false;
                 } finally {
                     setBusy(false);
                     render(pane, 1);
                 }
-            });
+            }, undefined, false, undefined, undefined, {awaitConfirm: true});
         }
     });
     const observer = new ResizeObserver(entries => {

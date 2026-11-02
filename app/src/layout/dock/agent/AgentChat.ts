@@ -18,7 +18,7 @@ import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/
 import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
 import {setPosition} from "../../../util/setPosition";
 import {fetchPost} from "../../../util/fetch";
-import {confirmDialog} from "../../../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../../dialog/message";
 import dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";

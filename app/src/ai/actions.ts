@@ -1,8 +1,8 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {markMenuInnerScroll} from "../menus/Menu";
 import {fetchPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selectionOffsets";
-import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../util/escape";
@@ -19,7 +19,8 @@ interface IAIEditorAction {
 }
 
 const editDialog = (item: IAIEditorAction) => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.update,
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
@@ -63,11 +64,12 @@ const editDialog = (item: IAIEditorAction) => {
             dialog.destroy();
         });
     });
-    nameElement.focus();
+    dialog.focusWhenReady(() => nameElement);
 };
 
 const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range) => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.aiCustomAction,
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" value="" placeholder="${window.siyuan.languages.memo}">
@@ -111,7 +113,7 @@ const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range)
             dialog.destroy();
         });
     });
-    nameElement.focus();
+    dialog.focusWhenReady(() => nameElement);
 };
 
 const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {

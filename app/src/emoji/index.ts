@@ -878,7 +878,7 @@ export const openEmojiPanel = (
         }
     };
 
-    let disposeSheet: (() => void) | undefined;
+    let disposeSheet: ReturnType<typeof bindBottomSheetDialog> | undefined;
     let disposeSelection: (() => void) | undefined;
     const dialog = new Dialog({
         disableAnimation: !isMobile(),
@@ -1053,12 +1053,13 @@ export const openEmojiPanel = (
     if (isMobile()) {
         const destroyDialog = dialog.destroy.bind(dialog);
         dialog.destroy = (destroyOptions?: IObject) => {
+            disposeSheet?.freeze();
             if (dialog.element.contains(document.activeElement)) {
                 activeBlur(true);
             }
             destroyDialog(destroyOptions);
         };
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined, {mode: "standard"});
         if (type === "insert" && options?.insertRange) {
             disposeSelection = bindEmojiSheetSelection(
                 dialog.element.querySelector(".b3-dialog__container"), options.insertRange.cloneRange());

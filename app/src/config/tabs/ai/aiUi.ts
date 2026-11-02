@@ -1,5 +1,5 @@
-import {Dialog} from "../../../dialog";
-import {confirmDialog} from "../../../dialog/confirmDialog";
+import {MobileDialog} from "../../../dialog/mobileDialog";
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import {isMobile} from "../../../util/functions";
@@ -321,7 +321,7 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
 };
 
 const showDeleteConfirm = (title: string, onConfirm: () => void) => {
-    confirmDialog(
+    mobileConfirmDialog(
         window.siyuan.languages.deleteOpConfirm,
         window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
         onConfirm,
@@ -546,7 +546,7 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
         if (type === "disconnectAiMcpOAuth") {
             const serverID = getMcpServerID(actionEl);
             if (serverID) {
-                confirmDialog(window.siyuan.languages.mcpDisconnectAuthorization,
+                mobileConfirmDialog(window.siyuan.languages.mcpDisconnectAuthorization,
                     window.siyuan.languages.mcpDisconnectAuthorizationConfirm, () => {
                         fetchPost("/api/ai/mcpOAuthDisconnect", {id: serverID}, (response) => {
                             if (response.code !== 0) {
@@ -747,7 +747,8 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         ? ""
         : JSON.stringify(initialServer.headers, null, 2);
 
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: isNew ? window.siyuan.languages.addAiMcpServer : window.siyuan.languages.aiMcpServerSettings,
         width: isMobile() ? "92vw" : "520px",
         height: "80vh",
@@ -907,6 +908,13 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         const nextServers = isNew
             ? [...servers, nextServer]
             : servers.map((item) => item.name !== serverName ? item : nextServer);
+        if (isMobile()) {
+            void dialog.runPending(async () => {
+                await saveMcpServers(root, nextServers);
+                return true;
+            }, {close: true});
+            return;
+        }
         saveMcpServers(root, nextServers);
         dialog.destroy();
     });
@@ -922,5 +930,5 @@ const findMcpServer = (serverName: string) =>
     window.siyuan.config.ai.mcp.servers.find((server) => server.name === serverName);
 
 const saveMcpServers = (root: HTMLElement, servers: Config.IMCPServer[]) => {
-    aiConfigApi.patch("mcp.servers", servers, () => renderMcpServerList(root));
+    return aiConfigApi.patch("mcp.servers", servers, () => renderMcpServerList(root));
 };

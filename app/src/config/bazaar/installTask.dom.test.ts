@@ -64,7 +64,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "./rating": {syncRatingUser: () => false},
         "../../protyle/util/hasClosest": {hasClosestByAttribute: (element: HTMLElement, attribute: string) => element.closest(`[${attribute}]`)},
         "../../util/functions": {getFrontend: () => "browser-mobile"},
-        "../../dialog/confirmDialog": {confirmDialog: (title: string, _text: string, confirm: () => void) => {
+        "../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (title: string, _text: string, confirm: () => void) => {
             if (title.startsWith("⬆️")) {
                 confirm();
             } else {

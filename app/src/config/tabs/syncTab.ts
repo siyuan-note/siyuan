@@ -1,9 +1,9 @@
-import {openInputDialog} from "../../dialog/inputDialog";
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import type {SettingTabBuilder} from "../setting/builder";
 import {registerAccountGroup} from "./accountUi";
 import {Constants} from "../../constants";
-import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
 import {processSync} from "../../dialog/processSystem";
 import {writeText} from "../../protyle/util/compatibility";
@@ -239,7 +239,7 @@ const registerRepoGroup = (tab: SettingTabBuilder) => {
         ],
         afterMount: (root) => {
             root.querySelector("#purgeRepo")?.addEventListener("click", () => {
-                confirmDialog("♻️ " + window.siyuan.languages.dataRepoPurge, window.siyuan.languages.dataRepoPurgeConfirm, () => {
+                mobileConfirmDialog("♻️ " + window.siyuan.languages.dataRepoPurge, window.siyuan.languages.dataRepoPurgeConfirm, () => {
                     fetchPost("/api/repo/purgeRepo");
                 });
             });
@@ -280,7 +280,7 @@ const registerRepoGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: (root) => {
             root.querySelector("#purgeCloudData")?.addEventListener("click", () => {
-                confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
+                mobileConfirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
                     fetchPost("/api/repo/purgeCloudRepo");
                 });
             });
@@ -298,23 +298,24 @@ const mountRepoKey = (root: HTMLElement) => {
     };
     toggleRepoKeyActions();
     root.querySelector("#importKey")?.addEventListener("click", () => {
-        const passwordDialog = openInputDialog({
+        const passwordDialog = mobileInputDialog({
+            awaitConfirm: true,
             title: "🔑 " + window.siyuan.languages.key,
             value: "",
             placeholder: window.siyuan.languages.keyPlaceholder,
             width: "520px",
-            onConfirm: (value, passwordDialog) => {
-                fetchPost("/api/repo/importRepoKey", {key: value}, (response) => {
-                    window.siyuan.config.repo.key = response.data.key;
-                    toggleRepoKeyActions();
-                    passwordDialog.destroy();
-                });
+            onConfirm: async (value) => {
+                const response = await fetchSyncPost("/api/repo/importRepoKey", {key: value});
+                if (response.code !== 0) return false;
+                window.siyuan.config.repo.key = response.data.key;
+                toggleRepoKeyActions();
+                return true;
             },
         });
         passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
     });
     root.querySelector("#initKey")?.addEventListener("click", () => {
-        confirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {
+        mobileConfirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {
             fetchPost("/api/repo/initRepoKey", {}, (response) => {
                 window.siyuan.config.repo.key = response.data.key;
                 toggleRepoKeyActions();
@@ -331,7 +332,7 @@ const mountRepoKey = (root: HTMLElement) => {
         showMessage(window.siyuan.languages.copied);
     });
     root.querySelector("#resetRepo")?.addEventListener("click", () => {
-        confirmDialog("⚠️ " + window.siyuan.languages.resetRepo, window.siyuan.languages.resetRepoTip, () => {
+        mobileConfirmDialog("⚠️ " + window.siyuan.languages.resetRepo, window.siyuan.languages.resetRepoTip, () => {
             fetchPost("/api/repo/resetRepo", {}, () => {
                 window.siyuan.config.repo.key = "";
                 window.siyuan.config.sync.enabled = false;

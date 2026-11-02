@@ -36,7 +36,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     let saving = false;
     let closing = false;
     let composing = false;
-    let disposeSheet: (() => void) | undefined;
+    let disposeSheet: ReturnType<typeof bindBottomSheetDialog> | undefined;
     let ownerObserver: MutationObserver | undefined;
     const endEditorSession = options.ownerElement ? beginAVEditorSession(options.ownerElement) : undefined;
     const dialog = new Dialog({
@@ -66,7 +66,11 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     <span class="fn__space"></span>
     <button type="button" class="b3-button b3-button--text" data-action="save">${escapeHtml(languages.save)}</button>
 </div>`,
-        destroyCallback: () => options.onDestroy?.(),
+        destroyCallback: () => {
+            disposeSheet?.();
+            endEditorSession?.();
+            options.onDestroy?.();
+        },
     });
     const root = dialog.element;
     root.dataset.avLocationEditor = "true";
@@ -74,7 +78,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         root.dataset.avBlockId = options.avBlockID;
     }
     const container = root.querySelector<HTMLElement>(".b3-dialog__container");
-    container.style.maxHeight = mobile ? "min(80vh, 100%)" : "90vh";
+    if (!mobile) container.style.maxHeight = "90vh";
     const nameInput = root.querySelector<HTMLInputElement>('[data-field="name"]');
     const latitudeInput = root.querySelector<HTMLInputElement>('[data-field="latitude"]');
     const longitudeInput = root.querySelector<HTMLInputElement>('[data-field="longitude"]');
@@ -91,19 +95,18 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     };
     const destroy = dialog.destroy.bind(dialog);
     dialog.destroy = (destroyOptions?: IObject) => {
-        if (closing) {
+        if (closing || mobile && saving && destroyOptions?.mobileCloseReason !== "invalidated") {
             return;
         }
         closing = true;
         ownerObserver?.disconnect();
-        disposeSheet?.();
+        disposeSheet?.freeze?.();
         /// #if MOBILE
         if (mobile && root.contains(document.activeElement)) {
             activeBlur(true);
         }
         /// #endif
         destroy(destroyOptions);
-        endEditorSession?.();
     };
 
     const isOwnerConnected = () => (!options.ownerElement || options.ownerElement.isConnected) &&
@@ -148,6 +151,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         setError();
         try {
             await options.onSave(value);
+            saving = false;
             dialog.destroy();
         } catch (error) {
             if (!closing) {
@@ -191,19 +195,20 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     root.querySelector('[data-action="clear"]').addEventListener("click", () => void submit(true));
     root.querySelector('[data-action="save"]').addEventListener("click", () => void submit());
     if (mobile) {
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined,
+            {mode: "standard"});
     } else {
         nameInput.focus();
     }
     if (options.ownerElement) {
         ownerObserver = new MutationObserver(() => {
             if (!isOwnerConnected()) {
-                dialog.destroy();
+                dialog.destroy({mobileCloseReason: "invalidated"});
             }
         });
         ownerObserver.observe(document.body, {childList: true, subtree: true});
         if (!isOwnerConnected()) {
-            dialog.destroy();
+            dialog.destroy({mobileCloseReason: "invalidated"});
         }
     }
     return dialog;

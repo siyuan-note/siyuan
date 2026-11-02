@@ -1,9 +1,10 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {config as configApi} from "./configApi";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
 import {isMobile, objEquals} from "../../util/functions";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
@@ -115,7 +116,20 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
             jsHTML += genSnippet(item);
         }
     });
-    const dialog = new Dialog({
+    let discard = false;
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true, beforeClose: async () => {
+            if (discard || completedSnippetSaves.has(dialog)) return true;
+            if (savingSnippets.has(dialog)) return false;
+            const snippets = readSnippetDraft(dialog);
+            if (objEquals(oldSnippets, snippets) && objEquals(initialSettings, snippetSettings(dialog))) return true;
+            return new Promise<boolean>(resolve => {
+                mobileConfirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
+                    void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings, false)
+                        .then(resolve);
+                }, () => resolve(true));
+            });
+        }},
         width: isMobile() ? "100vw" : "50vw",
         height: isMobile() ? "100vh" : "80vh",
         content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="${isMobile() ? "padding-right: 38px;" : ""}border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
@@ -153,6 +167,7 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         destroyCallback: (options) => {
+            if (isMobile()) return;
             if (options?.cancel === "true") {
                 return;
             }
@@ -160,6 +175,11 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
         }
     });
     const positions: Record<string, number> = {css: 0, js: 0};
+    const destroy = dialog.destroy.bind(dialog);
+    dialog.destroy = options => {
+        if (options?.cancel === "true") discard = true;
+        destroy(options);
+    };
     draft.forEach((item: ISnippet) => {
         const row = dialog.element.querySelectorAll(`[data-id][data-type="${item.type}"]`)[positions[item.type]++];
         const nameElement = (row.querySelector("input.b3-text-field") as HTMLInputElement);
@@ -185,6 +205,7 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-button--cancel")) {
+                discard = true;
                 dialog.destroy({cancel: "true"});
                 event.stopPropagation();
                 event.preventDefault();
@@ -280,13 +301,16 @@ const snippetSettings = (dialog: Dialog) => ({
     enabledJS: (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked,
 });
 
-const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: string[], revision: string,
-                              oldSnippets: ISnippet[], initialSettings: ReturnType<typeof snippetSettings>) => {
-    if (savingSnippets.has(dialog)) return;
+const setSnippetPost = async (dialog: MobileDialog, snippets: ISnippet[], removeIds: string[], revision: string,
+                              oldSnippets: ISnippet[], initialSettings: ReturnType<typeof snippetSettings>, close = true) => {
+    if (savingSnippets.has(dialog)) return false;
     savingSnippets.add(dialog);
     const settings = snippetSettings(dialog);
+    const controls = isMobile() ? Array.from(dialog.element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>("input, textarea, button"))
+        .filter(control => !control.disabled) : [];
+    controls.forEach(control => { control.disabled = true; });
     const restoreDraft = () => {
-        if (!dialog.element.isConnected) {
+        if (!isMobile() && !dialog.element.isConnected) {
             openSnippetDialog(oldSnippets, revision, readSnippetDraft(dialog), snippetSettings(dialog), initialSettings);
         }
     };
@@ -295,7 +319,7 @@ const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: s
         if (!revision) {
             restoreDraft();
             showMessage(window.siyuan.languages.snippetConflict, 0, "error");
-            return;
+            return false;
         }
         const response = await fetchSyncPost("/api/snippet/setSnippet", {
             snippets: snippets.map(item => ({...item, id: item.id || ""})), revision,
@@ -303,7 +327,7 @@ const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: s
         if (response.code !== 0) {
             restoreDraft();
             showMessage(response.msg === "snippet revision conflict" ? window.siyuan.languages.snippetConflict : response.msg, 0, "error");
-            return;
+            return false;
         }
         let cssChanged = false;
         removeIds.forEach(item => {
@@ -318,12 +342,15 @@ const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: s
         }
         await configApi.set("snippet", settings);
         completedSnippetSaves.add(dialog);
-        dialog.destroy({cancel: "true"});
+        if (close) dialog.destroy({cancel: "true"});
+        return true;
     } catch (error) {
         restoreDraft();
         showMessage(String(error), 0, "error");
+        return false;
     } finally {
         savingSnippets.delete(dialog);
+        controls.forEach(control => { if (control.isConnected) control.disabled = false; });
     }
 };
 
@@ -342,7 +369,7 @@ const readSnippetDraft = (dialog: Dialog): ISnippet[] => {
     return snippets;
 };
 
-const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[], revision: string,
+const setSnippet = (dialog: MobileDialog, oldSnippets: ISnippet[], removeIds: string[], revision: string,
                     initialSettings: ReturnType<typeof snippetSettings>, confirm = false) => {
     if (savingSnippets.has(dialog) || completedSnippetSaves.has(dialog)) return;
     const snippets = readSnippetDraft(dialog);
@@ -352,11 +379,16 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
         dialog.destroy({cancel: "true"});
     } else {
         if (confirm) {
-            confirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
+            mobileConfirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
                 void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
             });
         } else {
-            void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
+            if (isMobile()) {
+                void dialog.runPending(() => setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings, false),
+                    {close: true});
+            } else {
+                void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
+            }
         }
     }
 };

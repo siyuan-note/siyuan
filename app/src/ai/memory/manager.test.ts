@@ -76,14 +76,14 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "../../protyle/util/compatibility") { return compatibility; }
             if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { rendered.push(markdown); element.textContent = markdown; }}; }
             if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
-            if (name === "../../dialog") { return {Dialog: class {
+            if (name === "../../dialog/mobileDialog") { return {MobileDialog: class {
                 element = root;
                 constructor(spec: {title: string; content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
                     title = spec.title; content = spec.content; beforeClose = spec.beforeClose; destroy = spec.destroyCallback;
                 }
                 destroy() { if (beforeClose()) { destroyed++; destroy(); } }
             }}; }
-            if (name.endsWith("/confirmDialog")) { return {confirmDialog: (_title: string, _message: string, callback: () => void) => { confirmations.push(callback); }}; }
+            if (name.endsWith("/mobileConfirmDialog")) { return {mobileConfirmDialog: (_title: string, _message: string, callback: () => void) => { confirmations.push(callback); }}; }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
                 requests.push({url, data, signal});
                 const response = await respond?.(url, data);

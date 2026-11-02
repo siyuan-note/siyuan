@@ -1,5 +1,5 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import type {SearchAssetMatchInput} from "../types/api";
-import {Dialog} from "../dialog";
 import {fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {getAssetExtension, getAssetName} from "../util/pathName";
@@ -24,7 +24,8 @@ export const openAssetPicker = (options: AssetPickerOptions = {}): Promise<Asset
         let closed = false;
         let requestID = 0;
         let controller: AbortController;
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
             title: window.siyuan.languages.assets,
             content: `<div class="asset-picker${isMobile() ? " asset-picker--mobile" : ""}">
     <div class="asset-picker__search"><input class="b3-text-field fn__block" type="search" spellcheck="false"></div>

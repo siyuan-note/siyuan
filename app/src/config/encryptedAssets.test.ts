@@ -52,7 +52,7 @@ const setup = (mobile = false) => {
         languages: {loading: "Loading", emptyContent: "Empty", clearAll: "Confirm cleanup"}};
     const exports = {} as typeof import("./encryptedAssets");
     const dependencies = {
-        Dialog: class {
+        MobileDialog: class {
             element = {isConnected: true, dataset: {} as Record<string, string>,
                 querySelector: (selector: string) => controls[selector.match(/data-type="([^"]+)"/)[1]]};
             constructor(private options: {destroyCallback: () => void}) {
@@ -75,7 +75,7 @@ const setup = (mobile = false) => {
             }
             return response;
         },
-        confirmDialog: (_title: string, _content: string, confirm: () => void) => { callbacks.push(confirm); },
+        mobileConfirmDialog: (_title: string, _content: string, confirm: () => void) => { callbacks.push(confirm); },
         showMessage: () => {},
         trackNotebookHistoryDialog: () => {},
         forgetNotebookHistoryDialog: () => {},

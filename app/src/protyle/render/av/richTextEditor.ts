@@ -1,4 +1,5 @@
 import {escapeHtml} from "../../../util/escape";
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {isMobile} from "../../../util/functions";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {hintRef, hintSlash} from "../../hint/extend";
@@ -87,8 +88,6 @@ const hintAVSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, so
 
 const setPanelPosition = (panelElement: HTMLElement, anchorElement: HTMLElement) => {
     if (isMobile()) {
-        panelElement.classList.add("av__richtext-editor--mobile");
-        panelElement.removeAttribute("style");
         return;
     }
     positionAVRichTextEditor(panelElement, anchorElement);
@@ -102,21 +101,33 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     void activeEditor?.finish(false);
 
     const mobile = isMobile();
-    const maskElement = document.createElement("div");
-    maskElement.className = "av__mask av__richtext-mask";
-    maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
-    maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
-    maskElement.innerHTML = `<div class="av__richtext-editor" role="dialog">
+    let cleanup = () => {};
+    const content = `<div class="av__richtext-editor${mobile ? " av__richtext-editor--sheet" : ""}"${mobile ? "" : ' role="dialog"'}>
     ${mobile ? `<div class="av__richtext-actions">
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}
     <div class="av__richtext-host"></div>
 </div>`;
-    document.body.appendChild(maskElement);
+    const dialog = mobile ? new MobileDialog({
+        title: window.siyuan.languages.text,
+        content,
+        containerClassName: "mobile-av-richtext-sheet",
+        mobileSheet: {expandable: true, beforeClose: () => saveMobile()},
+        destroyCallback: () => cleanup(),
+    }) : undefined;
+    const maskElement = dialog?.element || document.createElement("div");
+    if (!mobile) {
+        maskElement.className = "av__mask av__richtext-mask";
+        maskElement.style.zIndex = (++window.siyuan.zIndex).toString();
+        maskElement.innerHTML = content;
+        document.body.appendChild(maskElement);
+    }
+    maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
     // 独立记录详情使用未挂载的编辑器上下文，浮层生命周期跟随实际可见的详情面板。
     const ownerElement = options.nodeElement.closest<HTMLElement>(".protyle-db-row") || options.protyle.element;
     const endEditorSession = beginAVEditorSession(ownerElement);
-    const panelElement = maskElement.firstElementChild as HTMLElement;
+    const panelElement = mobile ? maskElement.querySelector<HTMLElement>(".av__richtext-editor") :
+        maskElement.firstElementChild as HTMLElement;
     const hostElement = panelElement.querySelector<HTMLElement>(".av__richtext-host");
     hostElement.dataset.protyleLiteRender = "safe";
     setPanelPosition(panelElement, options.anchorElement);
@@ -163,6 +174,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
 
     let finished = false;
+    let finishing = false;
     let cancelled = false;
     const isOwnerConnected = () => {
         if (!ownerElement.isConnected || !options.nodeElement.isConnected) {
@@ -204,38 +216,60 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     });
     ownerObserver.observe(document.body, {childList: true, subtree: true});
 
+    cleanup = () => {
+        if (finished) return;
+        finished = true;
+        ownerObserver.disconnect();
+        panelResizeObserver?.disconnect();
+        window.removeEventListener("resize", resize);
+        fragment.destroy();
+        if (!mobile) maskElement.remove();
+        if (activeEditor?.finish === finish) activeEditor = undefined;
+        endEditorSession();
+        options.onDestroy?.();
+    };
+    const saveContent = async () => {
+        await fragment.protyle.wysiwyg.flushPendingInput();
+        if (cancelled || !isOwnerConnected()) return;
+        const serialized = serializeAVRichTextBlockDOM(fragment.getBlockHTML());
+        if (serialized.markdown !== initialMarkdown) {
+            await options.onSave(createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
+                options.nodeElement, options.stableCells);
+        }
+    };
+    const saveMobile = async () => {
+        panelElement.inert = true;
+        try {
+            if (!finished) await saveContent();
+            return true;
+        } catch (error) {
+            if (!finished) panelElement.inert = false;
+            throw error;
+        }
+    };
     const finish = async (save: boolean, restoreFocus = false) => {
         if (!save) {
             cancelled = true;
         }
-        if (finished) {
+        if (mobile) {
+            if (save) await dialog.requestClose("confirm");
+            else {
+                // 目标失效立即清空敏感编辑内容，不等待关闭动画或未完成的保存。
+                cleanup();
+                dialog.invalidate();
+            }
             return;
         }
-        finished = true;
+        if (finished || finishing) {
+            return;
+        }
+        // 桌面保存期间阻止重复结束，但允许失效标记取消迟到提交。
+        finishing = true;
         try {
-            if (save) {
-                await fragment.protyle.wysiwyg.flushPendingInput();
-                if (cancelled || !isOwnerConnected()) {
-                    return;
-                }
-                const serialized = serializeAVRichTextBlockDOM(fragment.getBlockHTML());
-                if (serialized.markdown !== initialMarkdown) {
-                    await options.onSave(createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
-                        options.nodeElement, options.stableCells);
-                }
-            }
+            if (save) await saveContent();
         } finally {
-            ownerObserver.disconnect();
-            panelResizeObserver?.disconnect();
-            window.removeEventListener("resize", resize);
-            fragment.destroy();
-            maskElement.remove();
-            if (activeEditor?.finish === finish) {
-                activeEditor = undefined;
-            }
-            endEditorSession();
-            options.onDestroy?.();
-            if (restoreFocus && !mobile && !cancelled && !activeEditor && isOwnerConnected() &&
+            cleanup();
+            if (restoreFocus && !cancelled && !activeEditor && isOwnerConnected() &&
                 options.protyle.wysiwyg.element.contains(options.nodeElement)) {
                 focusBlock(options.nodeElement);
             }
@@ -244,7 +278,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
 
     activeEditor = {finish};
     maskElement.addEventListener("mousedown", (event) => {
-        if (event.target === maskElement) {
+        if (!mobile && event.target === maskElement) {
             void finish(true);
         }
     });
@@ -258,8 +292,16 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             void finish(true, true);
         }
     }, true);
-    fragment.focus(true);
+    if (mobile) {
+        dialog.focusWhenReady(() => {
+            fragment.focus(true);
+            callMobileAppShowKeyboard();
+            return fragment.protyle.wysiwyg.element;
+        });
+    } else {
+        fragment.focus(true);
+    }
     // 浮层编辑器自行接管焦点，编辑区收不到块级点击，需在此按所属数据库块同步大纲高亮
     updateOutlineCurrentBlock(options.protyle, options.nodeElement);
-    callMobileAppShowKeyboard();
+    if (!mobile) callMobileAppShowKeyboard();
 };

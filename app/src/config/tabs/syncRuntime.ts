@@ -1,8 +1,8 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchSyncPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateAccountPanelVisibility} from "./accountUi";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {refreshSyncCloudDirBlock} from "../../sync/syncGuide";
@@ -37,7 +37,7 @@ const setSyncProvider = async (provider: Config.ISync["provider"]) => {
     let started = false;
     try {
         const confirmed = await new Promise<boolean>((resolve) => {
-            confirmDialog(window.siyuan.languages.syncProvider, window.siyuan.languages.syncProviderChangeConfirm,
+            mobileConfirmDialog(window.siyuan.languages.syncProvider, window.siyuan.languages.syncProviderChangeConfirm,
                 () => resolve(true), () => resolve(false), false, undefined, window.siyuan.languages.syncProviderChangeContinue);
         });
         if (!confirmed) {

@@ -38,14 +38,14 @@ test("notebook rename sends the original slashes and updates the displayed name"
     let closed = false;
     let displayedName = "";
     const activeDialog = {element: {setAttribute: () => {}}, destroy: () => { closed = true; }};
-    const renameNotebook = new Function("window", "Constants", "openInputDialog", "fetchPost", "setNotebookName",
+    const renameNotebook = new Function("window", "Constants", "openInputDialog", "fetchPost", "setNotebookName", "isMobile",
         source + "\nreturn rename;")(runtime, {SIZE_TITLE: 512},
         (options: {onConfirm: typeof confirm}) => { confirm = options.onConfirm; return activeDialog; },
         (url: string, body: {notebook: string, name: string}, callback: () => void) => {
             assert.equal(url, "/api/notebook/renameNotebook");
             assert.deepEqual(body, {notebook: "notebook-id", name: "Research/2026／Notes"});
             callback();
-        }, (id: string, name: string) => { assert.equal(id, "notebook-id"); displayedName = name; });
+        }, (id: string, name: string) => { assert.equal(id, "notebook-id"); displayedName = name; }, () => false);
     renameNotebook({path: "/", notebookId: "notebook-id", name: "Old", type: "notebook"});
     confirm(" Research/2026／Notes ", activeDialog);
     assert.equal(displayedName, "Research/2026／Notes");
@@ -70,6 +70,45 @@ test("document rename opens complete rich title source instead of editing the de
     await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(opened.length, 1);
     assert.deepEqual(JSON.parse(JSON.stringify(opened[0])), {id: "document", notebook: "box"});
+});
+
+test("mobile notebook rename waits for a confirmed response and preserves the draft on failure", async () => {
+    const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8"),
+        {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
+    let options: {awaitConfirm: boolean, onConfirm: (value: string, dialog: object) => Promise<boolean>};
+    let respond: (value: {code: number}) => void;
+    let closes = 0;
+    const displayed: string[] = [];
+    const dialog = {element: {setAttribute() {}}, destroy: () => closes++};
+    const api: {rename: (options: object) => void} = {} as never;
+    runInNewContext(source, {
+        exports: api,
+        window: {siyuan: {config: {readonly: false}, languages: {rename: "Rename"}}},
+        require: (name: string) => ({
+            "../dialog/mobileInputDialog": {mobileInputDialog: (value: typeof options) => { options = value; return dialog; }},
+            "../util/functions": {isMobile: () => true},
+            "../constants": {Constants: {SIZE_TITLE: 512}},
+            "../util/pathName": {setNotebookName: (_id: string, name: string) => displayed.push(name)},
+            "../util/fetch": {
+                fetchPost: () => assert.fail("mobile renaming must not queue a request and close immediately"),
+                fetchSyncPost: () => new Promise(resolve => { respond = resolve; }),
+            },
+        })[name] || {},
+    });
+    api.rename({path: "/", notebookId: "box", name: "Before", type: "notebook"});
+    assert.equal(options.awaitConfirm, true);
+    const failure = options.onConfirm("Draft", dialog);
+    assert.equal(closes, 0);
+    assert.deepEqual(displayed, []);
+    respond({code: -1});
+    assert.equal(await failure, false);
+    assert.equal(closes, 0);
+    assert.deepEqual(displayed, []);
+    const success = options.onConfirm("Retry", dialog);
+    respond({code: 0});
+    assert.equal(await success, true);
+    assert.deepEqual(displayed, ["Retry"]);
+    assert.equal(closes, 0, "the input wrapper owns successful mobile closure");
 });
 
 test("failed asset rename keeps the dialog open and does not update or reload editors", async () => {

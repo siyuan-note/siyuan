@@ -1,5 +1,5 @@
-import {openInputDialog} from "../dialog/inputDialog";
-import {fetchPost} from "./fetch";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {fetchPost, fetchSyncPost} from "./fetch";
 import {Constants} from "../constants";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
@@ -39,19 +39,21 @@ export const renameTag = (labelName: string) => {
         title: window.siyuan.languages.rename,
         value: labelName,
         bindInput: false,
+        awaitConfirm: true,
         extraContent: `<div class="b3-list fn__flex-1 b3-list--background fn__none protyle-hint" style="position: absolute;width: calc(100% - 48px);">
         <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>`,
-        onConfirm: (value, dialog) => {
-            fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: value}, () => {
-                dialog.destroy();
-                /// #if MOBILE
-                window.siyuan.mobile.docks.tag.update();
-                /// #else
-                const dockTag = getDockByType("tag");
-                (dockTag.data.tag as Tag).update();
-                /// #endif
-            });
+        onConfirm: async (value, dialog) => {
+            const response = await fetchSyncPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: value});
+            if (response.code !== 0) return false;
+            dialog.destroy();
+            /// #if MOBILE
+            window.siyuan.mobile.docks.tag.update();
+            /// #else
+            const dockTag = getDockByType("tag");
+            (dockTag.data.tag as Tag).update();
+            /// #endif
+            return true;
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMETAG);

@@ -62,8 +62,8 @@ const loadJump = () => {
             if (name === "../../../../util/escape") {
                 return {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value};
             }
-            if (name === "../../../../dialog/inputDialog") {
-                return {openInputDialog: (options: {
+            if (name === "../../../../dialog/mobileInputDialog") {
+                return {mobileInputDialog: (options: {
                     value: string; min: string; max: string; prefixContent: string; extraContent: string;
                     onConfirm: (value: string, dialog: unknown) => void;
                 }) => {

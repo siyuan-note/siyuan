@@ -1,5 +1,5 @@
-import {Dialog} from "../dialog";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../dialog/mobileDialog";
 import {showMessage} from "../dialog/message";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "../history/notebookDialogs";
 import {escapeHtml} from "../util/escape";
@@ -21,7 +21,8 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
     let busy = false;
     let disposed = false;
     let items: AssetUnusedItem[] = [];
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: `${escapeHtml(getNotebookName(notebook))} - ${lang.cleanUnusedAssets}`,
         width: isMobile() ? "92vw" : "720px",
         height: "72vh",
@@ -126,7 +127,7 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
         if (!paths.length) {
             return;
         }
-        confirmDialog(lang.deleteOpConfirm, `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`, () => {
+        mobileConfirmDialog(lang.deleteOpConfirm, `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`, () => {
             if (!active() || busy) {
                 return;
             }

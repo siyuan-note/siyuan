@@ -1,7 +1,7 @@
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {getTableRowOpeningHTML} from "./tableRowHeight";
-import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
     focusBlock,
@@ -816,7 +816,7 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
     const captionElement = nodeElement.querySelector("caption");
     window.siyuan.menus.menu.remove();
     const html = nodeElement.outerHTML;
-    openInputDialog({
+    mobileInputDialog({
         title: window.siyuan.languages.table,
         label: window.siyuan.languages.title,
         value: captionElement?.textContent || "",

@@ -1,9 +1,9 @@
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {config as configApi} from "./util/configApi";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import type {APIPOSTRoutes} from "../types/api";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
 import {getFrontend, isBrowser, isMobile} from "../util/functions";
@@ -1638,7 +1638,7 @@ type="checkbox">
             const data = response.data;
             if (response.code !== 0) {
                 if (data && "reason" in data && data.reason === "package-exists" && data.packageName) {
-                    confirmDialog("⚠️ " + window.siyuan.languages.update,
+                    mobileConfirmDialog("⚠️ " + window.siyuan.languages.update,
                         window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", escapeHtml(data.packageName)), () => {
                             bazaar._installLocalPackage(file, app, mount, true);
                         });
@@ -1665,9 +1665,9 @@ type="checkbox">
             }
             if (data.packageType === "plugins" && !data.updated) {
                 if (window.siyuan.config.bazaar.petalDisabled) {
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                 } else {
-                    confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
+                    mobileConfirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
                         bazaar._setPluginEnabled(app, {name: data.packageName, enabled: false}, true, () => {
                             if (bazaar._isMountCurrent(mount)) {
                                 bazaar._genMyHTML("plugins", app, false);

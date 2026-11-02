@@ -82,7 +82,7 @@ const createPreview = async (mobile: boolean, detached = true) => {
         "../../header/backgroundActions": {updateBackgroundActions: (protyle: {element: {dataset: {databaseRowId: string}}}) => {
             backgroundUpdates.push(protyle.element.dataset.databaseRowId);
         }},
-        "../../../dialog": {Dialog: class {
+        "../../../dialog/mobileDialog": {MobileDialog: class {
             public element = root;
             constructor(options: {destroyCallback: () => void}) { destroy = options.destroyCallback; dialogs.push(this); }
             public destroy() { hiddenOnClose = hidden; closed++; destroy(); }

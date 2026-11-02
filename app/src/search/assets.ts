@@ -1,3 +1,4 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
@@ -6,7 +7,6 @@ import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {genQueryHTML} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
-import {Dialog} from "../dialog";
 import {addClearButton} from "../util/addClearButton";
 import {saveAssetKeyList} from "./toggleHistory";
 import {genAssetSearchResultItemHTML, IAssetSearchResultItem} from "./assetsResult";
@@ -344,7 +344,8 @@ const filterTypesHTML = (types: IObject) => {
 
 export const assetFilterMenu = (assetsElement: Element) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
-    const filterDialog = new Dialog({
+    const filterDialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content">${filterTypesHTML(localData)}</div>
 <div class="b3-dialog__action">

@@ -1,14 +1,15 @@
-import {removeSearchCriterion} from "../config/util/resourceConfig";
+import {MobileDialog} from "../dialog/mobileDialog";
+import {removeSearchCriterion, removeSearchCriterionSync} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {isMobile, objEquals} from "../util/functions";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isDisabledFeature, isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {bindSearchSubtypeFilters} from "./subTypes";
 import {getDefaultSubType, normalizeSearchTypes} from "./getDefault";
@@ -29,7 +30,8 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         return;
     }
     config.types = normalizeSearchTypes(config.types);
-    const filterDialog = new Dialog({
+    const filterDialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
     ${(["mindmap", "mindmapItem"] as const).map(type => `<label class="fn__flex b3-label"><svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#${type === "mindmap" ? "iconMindmap" : "iconListItem"}"></use></svg><span class="fn__space"></span><div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[type]} <sup>[1]</sup></div><input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox"${config.types[type] ? " checked" : ""}></label>`).join("")}
@@ -283,7 +285,8 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
     <input class="b3-switch fn__flex-center" data-type="${key}" type="checkbox"${config.replaceTypes[key] ? " checked" : ""}>
 </label>`;
     });
-    const filterDialog = new Dialog({
+    const filterDialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.replaceType,
         content: `<div class="b3-dialog__content">${html}</div>
 <div class="b3-dialog__action">
@@ -381,7 +384,30 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
                            criteriaData: Config.IUILayoutTabSearchConfig[],
                            element: Element,
                            value: string,
-                           saveDialog: Dialog) => {
+                           saveDialog: Dialog, removeNames: string[] = []) => {
+    if (isMobile()) {
+        void (saveDialog as MobileDialog).runPending(async () => {
+            const criterion = {...config, removed: false, name: value};
+            if ((await fetchSyncPost("/api/storage/setCriterion", {criterion})).code !== 0) return false;
+            for (const name of removeNames.filter(name => name !== value)) {
+                if ((await removeSearchCriterionSync(name)).code !== 0) return false;
+            }
+            Object.assign(config, criterion);
+            removeCriterionData(criteriaData, [value, ...removeNames]);
+            criteriaData.push({...criterion});
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = {...config};
+            setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+            const criteriaElement = element.querySelector("#criteria").firstElementChild;
+            Array.from(criteriaElement.children).forEach(item => {
+                if ([value, ...removeNames].includes(item.textContent)) item.remove();
+            });
+            criteriaElement.classList.remove("fn__none");
+            criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
+            criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${escapeHtml(criterion.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconClose"></use></svg></div>`);
+            return true;
+        });
+        return;
+    }
     config.removed = false;
     const criterion = config;
     criterion.name = value;
@@ -404,7 +430,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
     if (isSensitiveSearchConfig(config)) {
         return;
     }
-    const saveDialog = openInputDialog({
+    const saveDialog = mobileInputDialog({
         title: window.siyuan.languages.saveCriterion,
         value: element.querySelector("#criteria .b3-chip--current")?.textContent || "",
         placeholder: window.siyuan.languages.memo,
@@ -435,7 +461,11 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
             });
             inputElement.blur();
             if (hasSameName && !hasSameConfig) {
-                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
+                mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
+                    if (isMobile()) {
+                        saveCriterionData(config, criteriaData, element, value, saveDialog);
+                        return;
+                    }
                     Array.from(criteriaElement.children).forEach(item => {
                         if (item.textContent === value) {
                             item.remove();
@@ -449,7 +479,11 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     saveDialog.destroy();
                 } else {
                     const removeName = hasSameName === value ? hasSameConfig : hasSameName;
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)), () => {
+                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)), () => {
+                        if (isMobile()) {
+                            saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig, hasSameName]);
+                            return;
+                        }
                         Array.from(criteriaElement.children).forEach(item => {
                             if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
                                 item.remove();
@@ -461,7 +495,11 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     });
                 }
             } else if (!hasSameName && hasSameConfig) {
-                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)), () => {
+                mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)), () => {
+                    if (isMobile()) {
+                        saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig]);
+                        return;
+                    }
                     Array.from(criteriaElement.children).forEach(item => {
                         if (item.textContent === hasSameConfig) {
                             item.remove();

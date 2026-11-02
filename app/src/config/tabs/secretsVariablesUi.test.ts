@@ -17,6 +17,9 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     window.cancelAnimationFrame = id => window.clearTimeout(id);
     let mobile = false;
     let native = true;
+    const fullHeight = window.innerHeight;
+    const fullHeightDescriptor = Object.getOwnPropertyDescriptor(window, "innerHeight");
+    Object.defineProperty(window, "innerHeight", {configurable: true, get: () => mobile && native ? viewport.height : fullHeight});
     let clipboardReads = 0;
     let clipboard: () => string | undefined | Promise<string> = () => "pasted-secret";
     const messages: string[] = [];
@@ -34,9 +37,12 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
         destroyDialogBlockPanels: () => {},
         getDialogBlockPanel: (): undefined => undefined,
         getAnchoredInputMask: (): undefined => undefined,
+        isIOSPlatform: () => false,
+        isNotCtrl: () => true,
     };
     Object.defineProperty(window, "siyuan", {configurable: true, writable: true, value: {
         config: {secrets: {items: []}, variables: {items: []}},
+        mobile: {size: {isLandscape: false, portrait: {height1: fullHeight}, landscape: {height1: fullHeight}}},
         dialogs: [], storage: {}, zIndex: 0, languages,
         menus: {menu: {element: document.createElement("div")}},
     }});
@@ -68,8 +74,8 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     const input = (element: HTMLElement, id: string) => element.querySelector<HTMLInputElement>(`#${id}`);
     const visible = (element: Element) => {
         const rect = element.getBoundingClientRect();
-        const top = viewport.offsetTop;
-        const bottom = Math.min(window.innerHeight, top + viewport.height);
+        const top = native ? 0 : viewport.offsetTop;
+        const bottom = native ? window.innerHeight : Math.min(window.innerHeight, top + viewport.height);
         check.ok(rect.height > 0 && rect.top >= top - 1 && rect.bottom <= bottom + 1,
             `${element.id || element.className} must fit in ${top}..${bottom}, got ${rect.top}..${rect.bottom}`);
         check.ok(rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1,
@@ -157,7 +163,7 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
             name: native ? "native-key" : "browser-key", value: "pasted-secret",
             allowedHosts: ["api.example.com", "api.other.test"],
         });
-        viewport.height = window.innerHeight;
+        viewport.height = fullHeight;
         viewport.offsetTop = 0;
         viewport.dispatchEvent(new Event("resize"));
         await settle();
@@ -208,6 +214,7 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     check.deepEqual(writes.at(-1), {namespace: "variables", items: [{name: "variable-name", value: "variable-draft"}]});
     root.remove();
     Object.defineProperty(window, "innerHeight", initialHeightDescriptor);
+    Object.defineProperty(window, "innerHeight", fullHeightDescriptor);
     check.equal(window.siyuan.dialogs.length, 0);
     return "Secrets and variables input cases passed";
 };
@@ -216,7 +223,9 @@ test("secrets and variables dialogs preserve input through keyboard resizing and
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "dialog/index", "config/tabs/secretsVariablesUi"]
+    const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "mobile/util/orientation",
+        "menus/sheetOpen", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog",
+        "dialog/index", "dialog/mobileDialog", "config/tabs/secretsVariablesUi"]
         .map(id => transpileModule(readFileSync(path.resolve("src", id + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText);

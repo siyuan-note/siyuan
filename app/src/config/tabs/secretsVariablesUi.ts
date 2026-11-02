@@ -1,12 +1,11 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {bindPasswordIconaToggle} from "../render/fragments";
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
 import {readText} from "../../protyle/util/compatibility";
-import {scrollInputIntoView} from "../../mobile/util/visibleViewport";
 import {secretsConfigApi, variablesConfigApi} from "./secretsVariablesRuntime";
 
 interface NamedItem {
@@ -108,7 +107,7 @@ const saveSecrets = (root: HTMLElement, items: NamedItem[]) => {
         value: item.value,
         allowedHosts: item.allowedHosts ?? [],
     }));
-    secretsConfigApi.patch("items", normalized, () => renderSecretList(root));
+    return secretsConfigApi.patch("items", normalized, () => renderSecretList(root));
 };
 
 const getSecretName = (el: HTMLElement): string | undefined =>
@@ -202,7 +201,7 @@ const renderVariableList = (root: HTMLElement) => {
 };
 
 const saveVariables = (root: HTMLElement, items: Config.IVariable[]) => {
-    variablesConfigApi.patch("items", items, () => renderVariableList(root));
+    return variablesConfigApi.patch("items", items, () => renderVariableList(root));
 };
 
 const getVariableName = (el: HTMLElement): string | undefined =>
@@ -298,11 +297,10 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 </div>`
         : "";
 
-    let disposeViewport: () => void;
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: titleKey,
         width: mobile ? "92vw" : "520px",
-        destroyCallback: () => disposeViewport?.(),
         content: `<div class="b3-dialog__content">
     <div class="b3-label b3-label--inner">
         <div class="config-name">${isSecret ? window.siyuan.languages.secretName : window.siyuan.languages.variableName}</div>
@@ -350,10 +348,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
             }
         });
     }
-    if (mobile) {
-        disposeViewport = bindItemDialogViewport(dialog.element);
-    }
-    dialog.element.querySelector<HTMLInputElement>("#itemName").select();
+    dialog.focusWhenReady(() => dialog.element.querySelector<HTMLInputElement>("#itemName"), {select: true});
 
     const btns = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btns[0].addEventListener("click", () => dialog.destroy());
@@ -380,6 +375,13 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
         const nextItems = isNew
             ? [...configItems, next]
             : configItems.map((item) => item.name !== existingName ? item : next);
+        if (mobile) {
+            void dialog.runPending(async () => {
+                await (isSecret ? saveSecrets(root, nextItems) : saveVariables(root, nextItems));
+                return true;
+            }, {close: true});
+            return;
+        }
         if (isSecret) {
             saveSecrets(root, nextItems);
         } else {
@@ -389,49 +391,8 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
     });
 };
 
-// 随键盘动画调整弹窗可用高度，只滚动弹窗内的输入区域，保留焦点、选区和草稿。
-const bindItemDialogViewport = (element: HTMLElement) => {
-    const container = element.querySelector<HTMLElement>(".b3-dialog");
-    const viewport = window.visualViewport;
-    let frame = 0;
-    const update = () => {
-        frame = 0;
-        if (!element.isConnected || element.dataset.dialogClosing) {
-            return;
-        }
-        const top = Math.max(0, viewport?.offsetTop ?? 0);
-        const bottom = Math.min(window.innerHeight, viewport ? viewport.offsetTop + viewport.height : window.innerHeight);
-        if (bottom <= top) {
-            return;
-        }
-        container.style.top = `${top}px`;
-        container.style.height = `${bottom - top}px`;
-        const activeElement = document.activeElement;
-        if (element.contains(activeElement) && activeElement.matches("input, textarea")) {
-            scrollInputIntoView(activeElement);
-        }
-    };
-    const schedule = () => {
-        if (!frame) {
-            frame = requestAnimationFrame(update);
-        }
-    };
-    window.addEventListener("resize", schedule);
-    viewport?.addEventListener("resize", schedule);
-    viewport?.addEventListener("scroll", schedule);
-    element.addEventListener("focusin", schedule);
-    update();
-    return () => {
-        cancelAnimationFrame(frame);
-        window.removeEventListener("resize", schedule);
-        viewport?.removeEventListener("resize", schedule);
-        viewport?.removeEventListener("scroll", schedule);
-        element.removeEventListener("focusin", schedule);
-    };
-};
-
 const showDeleteConfirm = (title: string, onConfirm: () => void) => {
-    confirmDialog(
+    mobileConfirmDialog(
         window.siyuan.languages.deleteOpConfirm,
         window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
         onConfirm,

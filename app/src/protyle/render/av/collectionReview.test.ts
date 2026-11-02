@@ -36,6 +36,7 @@ const setup = (unmatched = 1) => {
         addEventListener: (name: string, callback: (event?: unknown) => void) => listeners.set(`root:${name}`, callback),
     };
     const performed: {do: IOperation[], undo: IOperation[]}[] = [];
+    let failReview = false;
     const requests: {page: number, status?: string, ruleID?: string}[] = [];
     const confirmations: {confirm: () => Promise<void>, cancel: () => void}[] = [];
     let items = [
@@ -48,8 +49,8 @@ const setup = (unmatched = 1) => {
     runInNewContext(compiled, {
         exports: methods, window: {siyuan: {languages}},
         require: (name: string) => ({
-            "../../../dialog": {Dialog: class {element = root;}},
-            "../../../dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, confirm: () => Promise<void>, cancel: () => void) => confirmations.push({confirm, cancel})},
+            "../../../dialog/mobileDialog": {MobileDialog: class {element = root;}},
+            "../../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => Promise<void>, cancel: () => void) => confirmations.push({confirm, cancel})},
             "../../../util/functions": {isMobile: () => true},
             "../../../util/escape": {escapeAttr: String, escapeHtml: (value: string) => value.replace(/</g, "&lt;")},
             "../../util/transactionQueue": {waitForPendingTransactions: async () => {}},
@@ -65,6 +66,7 @@ const setup = (unmatched = 1) => {
                     ]}};
                 }
                 assert.equal(path, "/api/av/reviewAttributeViewCollection");
+                if (failReview) throw new Error("refresh failed");
                 const selected = items.filter(item => item.status === request.status);
                 return {code: 0, data: {items: selected.slice((request.page - 1) * 100, request.page * 100), ruleVersion: "reviewed-rules",
                     hasMore: selected.length > request.page * 100, matched: 1, unknown: items.some(item => item.status === "unknown") ? 1 : 0,
@@ -87,7 +89,7 @@ const setup = (unmatched = 1) => {
         await tick();
     };
     return {open: () => methods.openCollectionManager({} as IProtyle, "database", "carrier"), root, elements, listeners,
-        performed, confirmations, requests, click, languages};
+        performed, confirmations, requests, click, languages, setFailReview: (value: boolean) => { failReview = value; }};
 };
 
 test("collection manager filters before paging, remembers category pages and confirms only this page's cleanup", async () => {
@@ -157,4 +159,17 @@ test("collection manager chooses unknown when no entries are unmatched and ignor
     state.root.isConnected = false;
     await state.confirmations[0].confirm();
     assert.equal(state.performed.length, 0);
+});
+
+
+test("collection cleanup retry after refresh failure never resubmits a committed transaction", async () => {
+    const state = setup(2);
+    await state.open();
+    await state.listeners.get("[data-cleanup]:click")();
+    state.setFailReview(true);
+    await assert.rejects(state.confirmations[0].confirm(), /refresh failed/);
+    assert.equal(state.performed.length, 1);
+    state.setFailReview(false);
+    await state.confirmations[0].confirm();
+    assert.equal(state.performed.length, 1);
 });

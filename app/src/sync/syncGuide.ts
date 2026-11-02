@@ -1,10 +1,11 @@
+import {MobileDialog} from "../dialog/mobileDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {config as configApi} from "../config/util/configApi";
 import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
 import {openSyncCheckoutProgress} from "./checkoutProgress";
@@ -29,16 +30,17 @@ const openSyncSetting = (app?: App) => {
 };
 
 export const addCloudName = (cloudListElement: Element) => {
-    const dialog = openInputDialog({
+    const dialog = mobileInputDialog({
+        awaitConfirm: true,
         title: window.siyuan.languages.cloudSyncDir,
         value: "main",
         description: window.siyuan.languages.reposTip,
-        onConfirm: (value, dialog) => {
+        onConfirm: async (value) => {
             cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
-            fetchPost("/api/sync/createCloudSyncDir", {name: value}, () => {
-                dialog.destroy();
-                renderSyncCloudList(cloudListElement, true);
-            });
+            const response = await fetchSyncPost("/api/sync/createCloudSyncDir", {name: value});
+            if (response.code !== 0) return false;
+            renderSyncCloudList(cloudListElement, true);
+            return true;
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCADDCLOUDDIR);
@@ -58,7 +60,7 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
                         addCloudName(cloudListElement);
                         break;
                     case "removeCloud":
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`, () => {
+                        mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`, () => {
                             cloudListElement.innerHTML = '<div class="fn__flex" style="height:100%;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>';
                             fetchPost("/api/sync/removeCloudSyncDir", {name: target.parentElement.getAttribute("data-name")}, (response) => {
                                 window.siyuan.config.sync.cloudName = response.data;
@@ -247,7 +249,8 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
     };
     const preview = state.pending ? window.siyuan.languages.syncSourcePreview.replace(/\$\{(\w+)\}/g,
         (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
-    const manualDialog = new Dialog({
+    const manualDialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
     ${preview ? `<div class="b3-label">${preview}</div>` : ""}
@@ -311,7 +314,8 @@ const setSync = (key?: string, dialog?: Dialog) => {
             dialog.element.querySelector(".b3-dialog__header").innerHTML = "🗂️ " + window.siyuan.languages.cloudSyncDir;
             dialog.element.querySelector(".b3-dialog__body").innerHTML = listHTML;
         } else {
-            dialog = new Dialog({
+            dialog = new MobileDialog({
+                mobileSheet: {expandable: true},
                 title: "🗂️ " + window.siyuan.languages.cloudSyncDir,
                 content: listHTML,
                 width: isMobile() ? "92vw" : "520px",
@@ -330,7 +334,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
             configApi.set("sync.enabled", true, () => {
                 window.siyuan.config.sync.enabled = true;
                 processSync();
-                confirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
+                mobileConfirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
                     syncNow();
                 });
             });
@@ -339,14 +343,15 @@ const setSync = (key?: string, dialog?: Dialog) => {
         if (dialog) {
             dialog.destroy();
         }
-        confirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
+        mobileConfirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
             syncNow();
         });
     }
 };
 
 export const setKey = (isSync: boolean, cb?: () => void) => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {expandable: true},
         title: "🔑 " + window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>
@@ -394,7 +399,21 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
+        mobileConfirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
+            if (isMobile()) {
+                void dialog.runPending(async () => {
+                    const response = await fetchSyncPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value});
+                    if (response.code !== 0) return false;
+                    window.siyuan.config.repo.key = response.data.key;
+                    cb?.();
+                    return true;
+                }, {close: false}).then(success => {
+                    if (!success) return;
+                    if (isSync) setSync(window.siyuan.config.repo.key, dialog);
+                    else dialog.destroy();
+                });
+                return;
+            }
             if (!isSync) {
                 dialog.destroy();
             }
@@ -409,5 +428,5 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
             });
         });
     });
-    inputElements[0].focus();
+    dialog.focusWhenReady(() => inputElements[0]);
 };

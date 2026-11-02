@@ -81,7 +81,7 @@ class PasswordPrompt {
       this.#reason === PasswordResponses.INCORRECT_PASSWORD;
 
     if (!this._isViewerEmbedded || passwordIncorrect) {
-      this.input.focus();
+      if (!this.overlayManager.focus(this.input)) this.input.focus();
     }
     // NOTE
     this.label.textContent = window.siyuan.languages[`password_${passwordIncorrect ? 'invalid' : 'label'}`]

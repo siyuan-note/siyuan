@@ -1,3 +1,5 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
@@ -20,7 +22,6 @@ import {openLink} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genListSwitchItemHtml} from "../render/fragments";
@@ -537,7 +538,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                             }
                             if (target.closest('[data-type="delete-font"]')) {
                                 const id = itemElement.dataset.id;
-                                confirmDialog(
+                                mobileConfirmDialog(
                                     window.siyuan.languages.deleteOpConfirm,
                                     window.siyuan.languages.deleteFontConfirm.replace(
                                         "${x}", `<b>${escapeHtml(itemEl.dataset.name)}</b>`),
@@ -1197,7 +1198,8 @@ const readStatusBarMsgFromDialog = (root: HTMLElement): Config.IAppearanceStatus
 
 const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     root.querySelector("#statusBarSetting")?.addEventListener("click", () => {
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+            mobileSheet: {expandable: true},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔇 " + window.siyuan.languages.appearance18,
@@ -1255,7 +1257,8 @@ const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotif
 
 const mountAppearanceSetNotifications = (root: HTMLElement) => {
     root.querySelector("#notificationsSetting")?.addEventListener("click", () => {
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+            mobileSheet: {expandable: true},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔔 " + window.siyuan.languages.notifications,

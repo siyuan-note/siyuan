@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {prepareInlineElementBoundaryMutation} from "./inlineElementBoundary";
 import {
     hasClosestBlock,
@@ -58,7 +59,6 @@ import {
 import {isAVReadonlyType} from "../render/av/capabilities";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
-import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
@@ -253,7 +253,7 @@ const confirmAVPasteHeader = () => {
                 resolve(useHeader);
             }
         };
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: window.siyuan.languages.avPasteHeaderTitle,
             content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${window.siyuan.languages.avPasteHeaderTip}</div>
@@ -289,7 +289,7 @@ const confirmAVPasteHeader = () => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
-        (dialog.element.querySelector('[data-action="header"]') as HTMLButtonElement).focus();
+        dialog.focusWhenReady(() => dialog.element.querySelector<HTMLButtonElement>('[data-action="header"]'));
     });
 };
 

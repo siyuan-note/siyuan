@@ -1,4 +1,4 @@
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {escapeHtml} from "../../util/escape";
 import {fetchSyncPost} from "../../util/fetch";
@@ -13,7 +13,7 @@ export const openPluginPublishData = async (packageName: string) => {
         showMessage(window.siyuan.languages.pluginPublishDataUnavailable);
         return;
     }
-    confirmDialog(window.siyuan.languages.pluginPublishData,
+    mobileConfirmDialog(window.siyuan.languages.pluginPublishData,
         `<div>${escapeHtml(packageName)}</div>` +
         escapeHtml(granted ? window.siyuan.languages.pluginPublishDataRevokeTip :
             window.siyuan.languages.pluginPublishDataGrantTip) +

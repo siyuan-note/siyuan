@@ -1027,7 +1027,7 @@ func formatRepoErrorMsg(err error) string {
 		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 			msg = Conf.Language(135)
 		} else if isDNSError(msgLowerCase) {
-			msg = Conf.Language(24)
+			msg = Conf.Language(408)
 		} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
 			msg = Conf.Language(24)
 		} else if strings.Contains(msgLowerCase, "connection") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") || strings.Contains(msgLowerCase, "eof") || strings.Contains(msgLowerCase, "closed") || strings.Contains(msgLowerCase, "network") {
@@ -1053,9 +1053,15 @@ var (
 	lastDNSFlushTimeMu sync.Mutex
 )
 
-// flushAndRetryOnDNSError 在确认是 DNS 类错误且距上次刷新超过 5 分钟时，刷新系统 DNS 缓存并返回 true
-// 以触发上层重试一次同步；否则返回 false。节流是为了避免高频自动同步反复 fork 系统命令。
+// flushAndRetryOnDNSError 在 DNS 类错误后请求上层重试一次，成功刷新后节流五分钟。
 func flushAndRetryOnDNSError(err error) bool {
+	return flushAndRetryOnDNSErrorWithFlush(err, flushDNS)
+}
+
+func flushAndRetryOnDNSErrorWithFlush(err error, flush func() error) bool {
+	if err == nil {
+		return false
+	}
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return false
 	}
@@ -1069,10 +1075,12 @@ func flushAndRetryOnDNSError(err error) bool {
 		logging.LogInfof("sync failed with DNS error, but DNS cache was flushed recently, skip retry")
 		return false
 	}
+	if flushErr := flush(); flushErr != nil {
+		logging.LogInfof("sync failed with DNS error [%s], DNS cache was not flushed [%s], retrying once", err, flushErr)
+		return true
+	}
 	lastDNSFlushTime = time.Now()
-
-	logging.LogInfof("sync failed with DNS error [%s], flushing DNS cache and retrying once", err)
-	flushDNS()
+	logging.LogInfof("sync failed with DNS error [%s], flushed DNS cache, retrying once", err)
 	return true
 }
 

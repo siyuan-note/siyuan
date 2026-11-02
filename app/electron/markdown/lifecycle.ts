@@ -1,5 +1,4 @@
 import type {MarkdownWindows} from "./windows";
-import {errorMessage} from "../shared/errors";
 
 const createMarkdownLifecycle = ({getManager, quit, log = () => {}}: {
     getManager: () => MarkdownWindows | undefined;
@@ -15,7 +14,7 @@ const createMarkdownLifecycle = ({getManager, quit, log = () => {}}: {
         try {
             return method === "prepareQuit" ? await manager.prepareQuit(reason) : await manager.closeAll();
         } catch (error) {
-            log("Markdown " + method + " failed: " + errorMessage(error));
+            log("Markdown " + method + " failed: " + (error instanceof Error ? error.message : String(error)));
             return false;
         }
     };

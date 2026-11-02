@@ -12,8 +12,9 @@ const appRoot = path.join(__dirname, "..");
 const channelsFile = path.join(electronRoot, "shared", "channels.ts");
 const staticDir = path.join(electronRoot, "static");
 
-// 这三个字符串不是 IPC 通道：前两个是会话分区名，最后一个是设置窗口的 frameName 前缀。
-const nonChannelLiterals = new Set(["siyuan-connection-manager", "siyuan-web-fetch-", "siyuan-settings-"]);
+// 会话分区名、frameName 前缀与 Markdown 协议名不是 IPC 通道。
+const nonChannelLiterals = new Set(["siyuan-connection-manager", "siyuan-web-fetch-", "siyuan-settings-",
+    "siyuan-markdown", "siyuan-markdown-"]);
 
 // 从源码读出的字面量是普通字符串，因此集合按 string 归纳，而不是 Channel 的字面量联合类型。
 const channelValues: Set<string> = new Set(Object.values(Channel));

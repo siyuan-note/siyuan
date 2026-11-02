@@ -1,8 +1,4 @@
-// 目录级依赖方向检查。`README.md` 的「约定」一节声明了允许的方向：
-// shared 不引用其他目录，kernel 只依赖 shared，remote 依赖 shared 与 kernel，
-// window 可以依赖 kernel 与 remote，markdown 是独立的叶子能力（保持 CommonJS），
-// ipc 与 startup 可以依赖全部，只有 main.ts 负责装配。
-// 新增 import 时这条测试会直接指出违规的那一条边。
+// 依赖边界以 README.md 的「依赖方向」为准，新模块不能借助间接导入绕过分层约束。
 import {test} from "node:test";
 const assert = require("node:assert/strict");
 const fs = require("node:fs");

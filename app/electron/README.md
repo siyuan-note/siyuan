@@ -1,6 +1,6 @@
 # 桌面端主进程（`app/electron`）
 
-本目录存放 Electron 主进程源码。webpack 以 `main.ts` 为入口打包为 `electron-dist/main.js`；测试与源码同目录，不进入安装包。
+本目录存放严格 TypeScript 的 Electron 主进程与独立 Markdown 宿主源码。webpack 将 `main.ts` 与 `markdown/preload.ts` 分别编译为 `electron-dist/main.js` 和 `electron-dist/preload.js`；测试与源码同目录，不进入安装包。
 
 `main.ts` 仅承担两项职责：以副作用导入 `./environment`，使环境变量早于启动依赖图求值；以及调用 `startup/bootstrap.ts` 的 `bootstrap()`。装配与启动流程均位于 `startup/`，**装配点不在 `main.ts`**。
 
@@ -13,6 +13,7 @@
 | `window/` | 窗口的创建、导航与生命周期 | `mainWindow`、`bootWindows`、`openWindow`、`windowLookup`（按 id 与焦点查找）、`windowVisibility`（显隐切换）、`appExit`（工作空间与应用退出）、`windowRegistry`、`windowLifecycle`、`windowNavigation`、`windowPreferences`、`windowGeometry`、`windowControlsOverlay`、`windowMessaging`、`windowWorkspaces`、`settingsWindows`、`settingsTaskBridge`、`appMenu`、`appMenuSession`、`trayMenu`、`blockDrag`、`globalShortcutBindings`、`rendererCrash` |
 | `kernel/` | 本机内核：进程启动、就绪探测与退出编排 | `kernelBoot`、`kernelBootBudget`、`kernelExit`、`kernelEndpoint`、`kernelExitCodes`、`kernelRequestLog`、`kernelDiagnostics`、`localKernelRequest`、`previousKernelExit`（上一次内核的退出等待与恢复）、`workspaceInfo`、`notebookSystemLock`、`appleSiliconWarning` |
 | `remote/` | 远端内核：连接管理、认证、协议处理与页面获取 | `connectionManager`、`connectionRuntime`、`connectionStore`、`remoteBoot`、`remoteKernel`、`remoteDocument`（内联脚本识别与 CSP）、`remoteKernelAuth`、`remoteProtocol`、`sessionHeaders`、`webPageFetch`、`webPageNetwork`、`remoteExport` |
+| `markdown/` | 独立 Markdown 窗口、文件事务与恢复；不依赖其他主进程层，标题栏等宿主能力由入口注入 | `windows`、`preload`、`host`、`disk`、`registry`、`recoveryStore`、`resources`、`imageImport`、`tree`、`treeView`、`preferences`、`codec`、`launch`、`lifecycle`、`replaceFile` |
 | `ipc/` | IPC 通道注册，按通道域拆分；以入参校验与转交为主，剪贴板编解码与文件对话框的实现亦保留在这一层。`getChannel` 仅负责远程内核拦截、上下文组装与分派，领域处理器按对象展开合并；`register` 是全部通道的装配点 | `getChannel`+`getContract` 与四张领域表（`clipboard`/`windowCommands`/`systemSettings`/`connectionCommands`）、`workspace`、`appEvents`、`commandChannel`、`dialogs`、`exportPreview`、`shellIntegration`、`register`、`clipboardFormat`、`richClipboard` |
 | `static/` | 不经 webpack 打包、由 `loadFile` 或本机协议处理器直接加载的页面 | `boot.html`、`init.html` 与 `workspace.html`、`connections.html`、`remote-auth.html`、`error.html`，以及 `window.js`/`window.css`、`connections.js`、`connectionEntry.js`、语言包、图标 |
 
@@ -28,6 +29,7 @@
 | `kernel` | `shared`、`kernel` |
 | `remote` | `shared`、`kernel`、`remote` |
 | `window` | `shared`、`kernel`、`remote`、`window` |
+| `markdown` | 仅 `markdown`；通过类型导入复用 `src/markdown/` 的跨平台契约 |
 | `ipc` | 以上再加 `startup` |
 | `startup` | 全部 |
 | `main.ts` | 全部，且不被任何生产模块引用 |

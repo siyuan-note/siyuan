@@ -159,7 +159,8 @@ const main = () => {
     createRequire(import.meta.url)("electron");
     const concurrency = Math.min(4, availableParallelism());
     const result = spawnSync(process.execPath, [
-        "--import", "tsx", "--test", `--test-concurrency=${concurrency}`, ...relative,
+        "--import", "tsx", "--experimental-test-module-mocks", "--test", `--test-concurrency=${concurrency}`,
+        ...relative,
     ], {cwd: appRoot, stdio: "inherit"});
     return result.status ?? 1;
 };

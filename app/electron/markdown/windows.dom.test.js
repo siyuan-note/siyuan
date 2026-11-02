@@ -11,6 +11,7 @@ const runElectron = async options => {
     const fs = require("node:fs/promises");
     const assert = require("node:assert/strict");
     const {createMarkdownWindows, registerMarkdownSchemes} = require(options.manager);
+    const {windowControls} = require(options.windowControlsStub);
     registerMarkdownSchemes(protocol);
     app.setPath("userData", options.profile);
     app.commandLine.appendSwitch("disable-gpu");
@@ -29,7 +30,7 @@ const runElectron = async options => {
     let window;
     try {
         const manager = createMarkdownWindows({app, BrowserWindow: HiddenWindow, ipcMain, nativeTheme,
-            rootDirectory: options.root, configDirectory: options.config,
+            rootDirectory: options.root, configDirectory: options.config, windowControls,
             dialog: {showMessageBox: async () => ({response: 0})}, shell: {openExternal: async () => { throw new Error("Unexpected link"); }}});
         window = await manager.open(options.document);
         await window.webContents.executeJavaScript(`new Promise((resolve,reject) => {
@@ -171,7 +172,8 @@ test("the real sandboxed page saves and switches A to B to A through its restric
         fs.writeFileSync(secondDocument, "# Second document\n");
         const script = path.join(temporary, "run.cjs");
         fs.writeFileSync(script, `(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument,
-            manager: path.join(__dirname, "windows.js"), profile: path.join(temporary, "profile"), config: path.join(temporary, "config")})});`);
+    manager: path.join(__dirname, "windows.js"), windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
+    profile: path.join(temporary, "profile"), config: path.join(temporary, "config")})});`);
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const result = await promisify(execFile)(require("electron"), [script], {env, windowsHide: true, timeout: 40000});

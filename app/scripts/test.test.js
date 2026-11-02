@@ -25,7 +25,7 @@ test("test runner prepares Electron before workers and stops on installation fai
         module.exports = "electron";
     `);
     // 每类测试均检查父进程已完成准备，不能依靠某个测试抢先安装。
-    for (const name of ["src/worker.test.ts", "tests/worker.test.js", "electron/worker.test.js", "scripts/worker.test.js"]) {
+    for (const name of ["src/worker.test.ts", "tests/worker.test.js", "electron/worker.test.ts", "scripts/worker.test.js"]) {
         write(name, `
             const fs = require("node:fs");
             require("node:assert/strict").equal(fs.readFileSync("installations", "utf8"), "prepared\\n");

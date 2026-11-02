@@ -340,7 +340,7 @@ if (process.versions.electron && process.type === "browser") {
         });
         let context;
         try {
-            for (const file of ["stage/auth.html", "electron/remote-auth.html"]) {
+            for (const file of ["stage/auth.html", "electron/static/remote-auth.html"]) {
                 for (const [width, height] of [[1200, 800], [320, 640], [640, 320], [320, 280]]) {
                     win.setContentSize(width, height);
                     for (const dark of [false, true]) {

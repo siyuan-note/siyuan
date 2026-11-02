@@ -1,3 +1,5 @@
+// 本文件会在真实 Electron 中重新执行，那里没有外部的 tsx 钩子，需自行注册后才能加载 TS 模块。
+require("tsx/cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -163,7 +165,7 @@ const runCase = async (sources, options) => {
 
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain} = require("electron");
-    const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("../electron/windowControlsOverlay");
+    const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("../electron/window/windowControlsOverlay");
     const {createServer} = require("node:http");
     const {once} = require("node:events");
     app.on("window-all-closed", () => {});
@@ -191,10 +193,18 @@ if (process.versions.electron && process.type === "browser") {
             "module evaluation must not show a window while its loading screen is present");
             sources.ready[name] = source.slice(source.indexOf("await initWindowWithLoading("), source.indexOf("                        onSetaccount();"));
         }
-        const main = fs.readFileSync(path.join(__dirname, "../electron/main.js"), "utf8");
-        const bindReady = new Function("ipcMain", "isOpenAsHidden", "writeLog",
-            main.slice(main.indexOf("const bindMainWindowReady ="), main.indexOf("const showWindow =")) + ";return bindMainWindowReady;")(
-            ipcMain, () => false, () => {});
+        // 主进程模块已是 TypeScript：锚点仍按源码文本选取，但执行前必须先去掉类型标注。
+        const main = fs.readFileSync(path.join(__dirname, "../electron/window/mainWindow.ts"), "utf8");
+        const attachReadySource = main.slice(main.indexOf("const attachMainWindowReady ="),
+            main.indexOf("const createMainWindow ="));
+        const attachReady = new Function("electron", "devToolsDock", "Channel",
+            ts.transpileModule(attachReadySource, {compilerOptions: {module: ts.ModuleKind.CommonJS,
+                target: ts.ScriptTarget.ES2022}}).outputText + ";return attachMainWindowReady;")(
+            require("electron"), {openDevTools() {}}, require("../electron/shared/channels").Channel);
+        const bindReady = (win, boot, windowState) => attachReady({
+            window: win, bootWindow: boot, windowState,
+            isOpenAsHidden: () => false, scheduleTimer: setTimeout, cancelTimer: clearTimeout, log: () => {},
+        });
         ipcMain.on("cmd", (event, data) => {
             if (data?.cmd === "setTitleBarOverlay") updateTitleBarOverlay(BrowserWindow.fromWebContents(event.sender), data);
         });

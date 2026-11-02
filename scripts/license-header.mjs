@@ -22,7 +22,7 @@ export const THIRD_PARTY_PREFIXES = [
 ];
 
 // Electron 主进程入口是桌面端唯一随安装包分发的可读源码，单独保留文件头。
-export const KEPT_NON_GO_HEADERS = new Set(["app/electron/main.js"]);
+export const KEPT_NON_GO_HEADERS = new Set(["app/electron/main.ts"]);
 
 const inThirdParty = file => THIRD_PARTY_PREFIXES.some(prefix => file.startsWith(prefix));
 

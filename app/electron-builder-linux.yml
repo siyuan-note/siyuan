@@ -10,11 +10,11 @@ toolsets:
 copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
 artifactName: "siyuan-${version}-${os}.${ext}"
 extraMetadata:
-  main: "electron/main.js"
+  main: "electron-dist/main.js"
 directories:
   output: "build"
 files:
-  - "electron"
+  - "electron-dist"
 afterPack: "./scripts/afterPack.js"
 beforePack: "./scripts/beforePack.js"
 extraFiles:

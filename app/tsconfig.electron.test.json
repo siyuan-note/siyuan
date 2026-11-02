@@ -1,0 +1,12 @@
+{
+  // 测试文件的类型门禁。生产代码由 tsconfig.electron.json 严格检查，这里只覆盖 *.test.ts。
+  // strict 关闭是有意的：测试夹具大量使用无注解的桩，逐个补注解不改变正确性；本配置拦的是
+  // 结构错误——属性不存在、参数个数不符、回调签名漂移，这些会让用例声称的契约与实际不符。
+  "extends": "./tsconfig.electron.json",
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "include": ["electron/**/*.test.ts"],
+  "exclude": ["node_modules", "electron-dist"]
+}

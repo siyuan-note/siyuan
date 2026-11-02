@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Nespĺňa pravidlá",
 	"automationCollectionUnknown": "Nedá sa určiť",
 	"blockGutterMode": "Zobraziť všetky indikátory blokov",
-	"blockGutterModeTip": "Po zapnutí zobrazuje všetky indikátory aktuálneho bloku a jeho kontajnerov; po vypnutí používa zjednodušené zobrazenie",
+	"blockGutterModeTip": "Po zapnutí zobrazuje aj indikátory blokov skryté zjednodušeným zobrazením na aktuálnej úrovni; po vypnutí používa zjednodušené zobrazenie",
 	"automationCollectionTarget": "Objekt zbierania",
 	"automationCollectionTargetBlock": "Blok obsahujúci značku",
 	"automationCollectionTargetContainer": "Kontajnerový blok",

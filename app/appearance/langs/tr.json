@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Kurallara uymuyor",
 	"automationCollectionUnknown": "Belirlenemiyor",
 	"blockGutterMode": "Tüm blok göstergelerini göster",
-	"blockGutterModeTip": "Etkinleştirildiğinde geçerli bloğun ve kapsayıcılarının tüm göstergelerini gösterir; devre dışı bırakıldığında sade bir görünüm kullanır",
+	"blockGutterModeTip": "Etkinleştirildiğinde geçerli düzeyde sade görünümün gizlediği blok göstergelerini de gösterir; devre dışı bırakıldığında sade görünümü kullanır",
 	"automationCollectionTarget": "Toplanacak nesne",
 	"automationCollectionTargetBlock": "Etiketi içeren blok",
 	"automationCollectionTargetContainer": "Kapsayıcı blok",

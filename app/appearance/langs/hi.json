@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "नियमों से मेल नहीं खाती",
 	"automationCollectionUnknown": "निर्धारित नहीं किया जा सकता",
 	"blockGutterMode": "सभी ब्लॉक संकेतक दिखाएँ",
-	"blockGutterModeTip": "सक्षम होने पर वर्तमान ब्लॉक और उसके सभी कंटेनर के संकेतक दिखते हैं; अक्षम होने पर संक्षिप्त रूप में दिखते हैं",
+	"blockGutterModeTip": "सक्षम होने पर वर्तमान स्तर पर संक्षिप्त दृश्य में छिपे ब्लॉक संकेतक भी दिखते हैं; अक्षम होने पर संक्षिप्त दृश्य का उपयोग होता है",
 	"automationCollectionTarget": "संग्रह लक्ष्य",
 	"automationCollectionTargetBlock": "टैग वाला ब्लॉक",
 	"automationCollectionTargetContainer": "कंटेनर ब्लॉक",

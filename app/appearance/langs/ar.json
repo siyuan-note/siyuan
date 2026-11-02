@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "لا يطابق القواعد",
 	"automationCollectionUnknown": "يتعذر التحديد",
 	"blockGutterMode": "إظهار مؤشرات الكتل كاملة",
-	"blockGutterModeTip": "عند التفعيل، تظهر جميع مؤشرات الكتلة الحالية وحاوياتها، وعند التعطيل يكون العرض مختصرًا",
+	"blockGutterModeTip": "عند التفعيل، تظهر مؤشرات الكتل المخفية في العرض المختصر على المستوى الحالي؛ وعند التعطيل يكون العرض مختصرًا",
 	"automationCollectionTarget": "هدف التجميع",
 	"automationCollectionTargetBlock": "الكتلة التي تحتوي على الوسم",
 	"automationCollectionTargetContainer": "كتلة الحاوية",

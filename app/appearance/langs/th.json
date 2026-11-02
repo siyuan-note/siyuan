@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "ไม่ตรงตามกฎ",
 	"automationCollectionUnknown": "ไม่สามารถระบุได้",
 	"blockGutterMode": "แสดงตัวบ่งชี้บล็อกทั้งหมด",
-	"blockGutterModeTip": "เมื่อเปิดใช้งานจะแสดงตัวบ่งชี้ทั้งหมดของบล็อกปัจจุบันและคอนเทนเนอร์ที่ครอบบล็อกนั้น เมื่อปิดใช้งานจะแสดงแบบย่อ",
+	"blockGutterModeTip": "เมื่อเปิดใช้งานจะแสดงตัวบ่งชี้บล็อกที่ถูกซ่อนโดยการแสดงแบบย่อในระดับปัจจุบันด้วย เมื่อปิดใช้งานจะแสดงแบบย่อ",
 	"automationCollectionTarget": "เป้าหมายการรวบรวม",
 	"automationCollectionTargetBlock": "บล็อกที่มีแท็ก",
 	"automationCollectionTargetContainer": "บล็อกคอนเทนเนอร์",

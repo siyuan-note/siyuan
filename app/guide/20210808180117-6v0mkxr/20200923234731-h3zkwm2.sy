@@ -1087,7 +1087,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "By default, block indicators are simplified. Lists with only one item retain both the list and list item indicators. To show indicators for the current block and all its containers, turn on "
+					"Data": "By default, block indicators are simplified. Lists with only one item retain both the list and list item indicators. To also show indicators hidden by the simplified display along the current block's first-child chain, turn on "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "不符合规则",
 	"automationCollectionUnknown": "无法判断",
 	"blockGutterMode": "显示完整块标",
-	"blockGutterModeTip": "启用后显示当前块及其所属容器的全部块标，关闭时精简显示",
+	"blockGutterModeTip": "启用后补全当前层级被精简隐藏的块标，关闭时精简显示",
 	"automationCollectionTarget": "收集对象",
 	"automationCollectionTargetBlock": "标签所在块",
 	"automationCollectionTargetContainer": "容器块",

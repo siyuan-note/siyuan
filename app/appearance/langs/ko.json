@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "규칙에 불일치",
 	"automationCollectionUnknown": "판단할 수 없음",
 	"blockGutterMode": "블록 아이콘 모두 표시",
-	"blockGutterModeTip": "활성화하면 현재 블록과 이를 포함하는 컨테이너의 모든 블록 아이콘을 표시하고, 비활성화하면 간소화하여 표시합니다",
+	"blockGutterModeTip": "활성화하면 현재 계층에서 간소화된 표시로 숨겨진 블록 아이콘도 표시하고, 비활성화하면 간소화하여 표시합니다",
 	"automationCollectionTarget": "수집 대상",
 	"automationCollectionTargetBlock": "태그가 있는 블록",
 	"automationCollectionTargetContainer": "컨테이너 블록",

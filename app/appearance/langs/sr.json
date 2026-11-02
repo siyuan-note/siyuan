@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Не испуњава правила",
 	"automationCollectionUnknown": "Није могуће одредити",
 	"blockGutterMode": "Прикажи све ознаке блокова",
-	"blockGutterModeTip": "Када је омогућено, приказује све ознаке тренутног блока и његових контејнера; када је онемогућено, користи сажети приказ",
+	"blockGutterModeTip": "Када је омогућено, приказује и ознаке блокова скривене сажетим приказом на тренутном нивоу; када је онемогућено, користи сажети приказ",
 	"automationCollectionTarget": "Објекат прикупљања",
 	"automationCollectionTargetBlock": "Блок који садржи ознаку",
 	"automationCollectionTargetContainer": "Контејнерски блок",

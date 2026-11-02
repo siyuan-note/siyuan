@@ -384,9 +384,11 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
                 container.setAttribute("custom-sy-list-mindmap", "1");
             }
             gutter.render(protyle, container, container);
-            assertTargets(["list", "item", "container"]);
+            const firstChain = type === "NodeSuperBlock" || type === "NodeBlockquote" ? ["child"] :
+                type === "NodeList" && !content.includes("mindmap-view") ? ["nested-item", "child"] : [];
+            assertTargets(["list", "item", "container", ...firstChain]);
             gutter.render(protyle, root.querySelector('[data-node-id="after"]'));
-            assertTargets(["list", "item", "after"]);
+            assertTargets(["after"]);
         }
         for (const subtype of ["u", "o", "t"]) {
             root.innerHTML = `<div data-node-id="list" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>`;
@@ -417,12 +419,37 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
             }
         }
     }
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const subtype of ["u", "o", "t"]) {
+            const levels = Array.from({length: 6}, (_, index) => index);
+            root.innerHTML = levels.reduceRight((html, level) =>
+                `<div data-node-id="level-list-${level}" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="level-item-${level}" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p(`level-p-${level}`)}${html}${attr}</div>${attr}</div>`, "");
+            for (const level of levels) {
+                const list = root.querySelector(`[data-node-id="level-list-${level}"]`);
+                const item = root.querySelector(`[data-node-id="level-item-${level}"]`);
+                const paragraph = root.querySelector(`[data-node-id="level-p-${level}"]`);
+                window.siyuan.config.editor.blockGutterMode = false;
+                gutter.render(protyle, paragraph);
+                assertTargets([`level-list-${level}`, `level-item-${level}`]);
+                window.siyuan.config.editor.blockGutterMode = true;
+                for (const entry of [paragraph, item, list, item.firstElementChild]) {
+                    gutter.render(protyle, entry);
+                    assertTargets([`level-list-${level}`, `level-item-${level}`, `level-p-${level}`]);
+                }
+                item.setAttribute("fold", "1");
+                gutter.render(protyle, item.firstElementChild);
+                assertTargets([`level-list-${level}`, `level-item-${level}`]);
+                item.removeAttribute("fold");
+            }
+        }
+    }
     window.siyuan.config.editor.rtl = false;
     window.siyuan.config.editor.blockGutterMode = true;
 
     root.innerHTML = `<div data-node-id="outer-list" data-type="NodeList" class="list"><div data-node-id="outer-item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("first")}<div data-node-id="quote" data-type="NodeBlockquote" class="bq">${p("qfirst")}<div data-node-id="tabs" data-type="NodeTabs" class="tabs"><div class="tabs-header">Tabs</div><div data-node-id="tab" data-type="NodeTabItem" class="tab-item"><div class="tab-item-content">${p("leaf")}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>`;
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
-    assertTargets(["outer-list", "outer-item", "quote", "tabs", "tab", "leaf"]);
+    assertTargets(["tab", "leaf"]);
     const nestedState = state();
     const leafRect = root.querySelector('[data-node-id="leaf"]').getBoundingClientRect();
     check.deepEqual(hover(root.querySelector('[data-node-id="quote"]'),
@@ -433,6 +460,11 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.equal(gutter.element.querySelectorAll('[draggable="true"]').length, 0, "read-only icons remain non-draggable");
     protyle.disabled = false;
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+
+    root.innerHTML = ["quote-a", "quote-b", "quote-c", "quote-d"].reduceRight((html, id) =>
+        `<div data-node-id="${id}" data-type="NodeBlockquote" class="bq">${html}${attr}</div>`, p("leaf"));
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    assertTargets(["quote-a", "quote-b", "quote-c", "quote-d", "leaf"]);
 
     const checkFullLayout = vertical => {
         const buttons = Array.from(gutter.element.querySelectorAll("button[data-node-id], button[data-type='fold']"));
@@ -483,11 +515,11 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     neighbor.remove();
     const beforePathHTML = root.innerHTML;
     root.style.paddingLeft = "64px";
-    const pathIDs = Array.from({length: 5}, (_, index) => `path-${index}`);
+    const pathIDs = Array.from({length: 8}, (_, index) => `path-${index}`);
     root.innerHTML = pathIDs.reduceRight((html, id) =>
-        `<div data-node-id="list-${id}" data-type="NodeList" class="list"><div data-node-id="item-${id}" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p(id)}${html}${attr}</div>${attr}</div>`,
-        p("path-neighbor-1") + p("path-neighbor-2"));
-    const pathLeaf = root.querySelector('[data-node-id="path-4"]');
+        `<div data-node-id="${id}" data-type="NodeBlockquote" class="bq">${html}${attr}</div>`,
+        p("path-leaf") + p("path-neighbor-1") + p("path-neighbor-2"));
+    const pathLeaf = root.querySelector('[data-node-id="path-leaf"]');
     for (const platform of [false, true]) {
         mobile = platform;
         pane.dispatchEvent(new MouseEvent("mouseleave"));

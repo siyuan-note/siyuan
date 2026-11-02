@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Voldoet niet aan de regels",
 	"automationCollectionUnknown": "Niet te bepalen",
 	"blockGutterMode": "Alle blokindicatoren tonen",
-	"blockGutterModeTip": "Toont bij inschakeling alle indicatoren van het huidige blok en de bijbehorende containers; gebruikt bij uitschakeling een vereenvoudigde weergave",
+	"blockGutterModeTip": "Toont bij inschakeling ook de blokindicatoren die op het huidige niveau door de vereenvoudigde weergave worden verborgen; gebruikt bij uitschakeling de vereenvoudigde weergave",
 	"automationCollectionTarget": "Verzameldoel",
 	"automationCollectionTargetBlock": "Blok met de tag",
 	"automationCollectionTargetContainer": "Containerblok",

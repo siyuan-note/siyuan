@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Entspricht nicht den Regeln",
 	"automationCollectionUnknown": "Nicht bestimmbar",
 	"blockGutterMode": "Vollständige Blockmarkierungen anzeigen",
-	"blockGutterModeTip": "Zeigt bei Aktivierung alle Markierungen des aktuellen Blocks und seiner Container an; bei Deaktivierung wird eine vereinfachte Darstellung verwendet",
+	"blockGutterModeTip": "Zeigt bei Aktivierung auch die in der vereinfachten Darstellung ausgeblendeten Blockmarkierungen der aktuellen Ebene an; verwendet bei Deaktivierung die vereinfachte Darstellung",
 	"automationCollectionTarget": "Sammelziel",
 	"automationCollectionTargetBlock": "Block mit dem Tag",
 	"automationCollectionTargetContainer": "Containerblock",

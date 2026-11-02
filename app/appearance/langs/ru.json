@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Не соответствует правилам",
 	"automationCollectionUnknown": "Невозможно определить",
 	"blockGutterMode": "Показывать все значки блоков",
-	"blockGutterModeTip": "При включении показывает все значки текущего блока и его контейнеров; при отключении используется упрощённое отображение",
+	"blockGutterModeTip": "При включении также показывает значки блоков, скрытые упрощённым отображением на текущем уровне; при отключении используется упрощённое отображение",
 	"automationCollectionTarget": "Объект сбора",
 	"automationCollectionTargetBlock": "Блок с тегом",
 	"automationCollectionTargetContainer": "Блок-контейнер",

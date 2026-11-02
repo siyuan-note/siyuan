@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Tidak sesuai aturan",
 	"automationCollectionUnknown": "Tidak dapat ditentukan",
 	"blockGutterMode": "Tampilkan indikator blok lengkap",
-	"blockGutterModeTip": "Saat diaktifkan, menampilkan semua indikator blok saat ini dan wadahnya; saat dinonaktifkan, menggunakan tampilan ringkas",
+	"blockGutterModeTip": "Saat diaktifkan, juga menampilkan indikator blok yang disembunyikan oleh tampilan ringkas pada tingkat saat ini; saat dinonaktifkan, menggunakan tampilan ringkas",
 	"automationCollectionTarget": "Objek pengumpulan",
 	"automationCollectionTargetBlock": "Blok yang berisi tag",
 	"automationCollectionTargetContainer": "Blok wadah",

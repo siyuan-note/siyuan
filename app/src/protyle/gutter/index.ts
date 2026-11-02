@@ -3703,10 +3703,24 @@ export class Gutter {
         const fullGutter = !isMultiSelect && window.siyuan.config.editor.blockGutterMode;
         let html = "";
         let nodeElement = selectedElement || element;
+        const foldedListItem = fullGutter ? nodeElement.closest('[data-type="NodeListItem"][fold="1"]') : null;
+        if (foldedListItem) {
+            nodeElement = foldedListItem;
+        }
         const listItemContainer = isMultiSelect ? undefined : getListItemGutterContainer(nodeElement, fullGutter);
-        if (listItemContainer && (nodeElement === listItemContainer.parentElement ||
+        if (listItemContainer && !foldedListItem && (nodeElement === listItemContainer.parentElement ||
             nodeElement.classList.contains("protyle-action"))) {
             nodeElement = listItemContainer;
+        }
+        if (fullGutter) {
+            while (["NodeList", "NodeListItem", "NodeBlockquote", "NodeSuperBlock"].includes(nodeElement.getAttribute("data-type")) &&
+                nodeElement.getAttribute("fold") !== "1" && nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
+                const first = nodeElement.querySelector(":scope > [data-node-id]");
+                if (!first) {
+                    break;
+                }
+                nodeElement = first;
+            }
         }
         const mindmapElement = (nodeElement.getAttribute("data-type") === "NodeMindmap" ||
             nodeElement.getAttribute("data-type") === "NodeList" &&
@@ -3879,12 +3893,11 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 while (previousBlock && !previousBlock.getAttribute("data-node-id")) {
                     previousBlock = previousBlock.previousElementSibling;
                 }
-                // 精简模式的正文块标只显示到当前页签项，页签栏用于操作整个容器。
+                // 页签栏和提示标题有独立的操作入口，正文块标在所属内容边界结束。
                 const isTabItemBoundary = type === "NodeTabItem" && nodeElement.parentElement.classList.contains("tabs");
                 if ((previousBlock && previousBlock.getAttribute("data-node-id")) ||
                     nodeElement.parentElement.classList.contains("callout-content") || isTabItemBoundary) {
-                    // 前一个块存在时，精简模式只显示到当前层级。
-                    hideParent = !fullGutter;
+                    hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
                     if (parentElement && parentElement.getAttribute("fold") === "1") {
                         return;

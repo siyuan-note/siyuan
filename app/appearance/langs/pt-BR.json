@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Não atende às regras",
 	"automationCollectionUnknown": "Não foi possível determinar",
 	"blockGutterMode": "Mostrar todos os indicadores de bloco",
-	"blockGutterModeTip": "Quando ativado, mostra todos os indicadores do bloco atual e de seus contêineres; quando desativado, usa uma exibição simplificada",
+	"blockGutterModeTip": "Quando ativado, mostra também os indicadores de bloco ocultos pela exibição simplificada no nível atual; quando desativado, usa a exibição simplificada",
 	"automationCollectionTarget": "Objeto da coleta",
 	"automationCollectionTargetBlock": "Bloco que contém a etiqueta",
 	"automationCollectionTargetContainer": "Bloco contêiner",

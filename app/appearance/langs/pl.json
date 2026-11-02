@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Nie spełnia reguł",
 	"automationCollectionUnknown": "Nie można ustalić",
 	"blockGutterMode": "Pokaż wszystkie wskaźniki bloków",
-	"blockGutterModeTip": "Po włączeniu pokazuje wszystkie wskaźniki bieżącego bloku i jego kontenerów; po wyłączeniu używa uproszczonego widoku",
+	"blockGutterModeTip": "Po włączeniu pokazuje także wskaźniki bloków ukryte w uproszczonym widoku na bieżącym poziomie; po wyłączeniu używa uproszczonego widoku",
 	"automationCollectionTarget": "Obiekt zbierania",
 	"automationCollectionTargetBlock": "Blok zawierający tag",
 	"automationCollectionTargetContainer": "Blok kontenera",

@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "Does not match rules",
 	"automationCollectionUnknown": "Cannot determine",
 	"blockGutterMode": "Show full block indicators",
-	"blockGutterModeTip": "When enabled, shows all indicators for the current block and its containers; when disabled, uses a simplified display",
+	"blockGutterModeTip": "When enabled, also shows block indicators hidden by the simplified display at the current level; when disabled, uses a simplified display",
 	"automationCollectionTarget": "Collect",
 	"automationCollectionTargetBlock": "Block containing the tag",
 	"automationCollectionTargetContainer": "Container block",

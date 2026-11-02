@@ -294,7 +294,7 @@
 	"automationCollectionUnmatched": "אינו תואם לכללים",
 	"automationCollectionUnknown": "לא ניתן לקבוע",
 	"blockGutterMode": "הצגת כל סמני הבלוקים",
-	"blockGutterModeTip": "כאשר האפשרות מופעלת, מוצגים כל הסמנים של הבלוק הנוכחי והמכלים שלו; כאשר היא מושבתת, נעשה שימוש בתצוגה מצומצמת",
+	"blockGutterModeTip": "כאשר האפשרות מופעלת, מוצגים גם סמני הבלוקים שמוסתרים בתצוגה המצומצמת ברמה הנוכחית; כאשר היא מושבתת, נעשה שימוש בתצוגה המצומצמת",
 	"automationCollectionTarget": "יעד האיסוף",
 	"automationCollectionTargetBlock": "בלוק המכיל את התגית",
 	"automationCollectionTargetContainer": "בלוק מכל",

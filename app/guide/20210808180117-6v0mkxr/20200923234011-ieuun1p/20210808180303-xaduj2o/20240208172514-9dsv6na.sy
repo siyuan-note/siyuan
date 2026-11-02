@@ -5682,7 +5682,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
+					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Items without children show a non-interactive gray dash in place of the expansion button, keeping items at the same level aligned. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
 				}
 			]
 		},

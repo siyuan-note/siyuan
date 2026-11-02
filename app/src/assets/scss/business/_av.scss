@@ -3457,7 +3457,18 @@ img.av__cellassetimg {
   }
 
   .av__sub-items-space {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 24px;
+    height: 24px;
+    color: var(--b3-theme-on-surface);
+    pointer-events: none;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 }
 

@@ -131,6 +131,23 @@ it("renders accessible fold and bounded previous/next child-page controls for a 
     assert.equal(api.getSubItemsCellStyle({} as IAVRow, view), "");
 });
 
+it("marks leaves at each depth without exposing an expansion control or changing peer alignment", () => {
+    const {api} = setup();
+    const view = {columns: [], rows: []} as IAVTable;
+    for (const depth of [0, 2]) {
+        const leaf = {id: "leaf", hierarchy: {depth, childCount: 0, expanded: false, context: false}} as IAVRow;
+        const parent = {...leaf, hierarchy: {...leaf.hierarchy, childCount: 2}};
+        const html = api.getSubItemsControlHTML(leaf, view);
+        assert.match(html, /aria-hidden="true"/);
+        assert.match(html, /xlink:href="#iconMin"/);
+        assert.doesNotMatch(html, /<button|data-type=|aria-expanded=|tabindex=/);
+        assert.equal(api.getSubItemsCellStyle(leaf, view), api.getSubItemsCellStyle(parent, view));
+        assert.match(api.getSubItemsControlHTML(parent, view), /data-type="av-sub-items-toggle"/);
+        assert.doesNotMatch(api.getSubItemsControlHTML(parent, view), /#iconMin/);
+    }
+    assert.equal(api.getSubItemsControlHTML({} as IAVRow, view), "");
+});
+
 it("restores a deep expanded row inside only its group with a bounded virtual window", () => {
     const {api} = setup();
     const element = block().element;

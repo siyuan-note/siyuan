@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261102001717"
+		"updated": "20261102134047"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261101171827"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -93,7 +93,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261102001717"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -107,7 +107,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed."
+					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed. On desktop, toggle developer tools with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (Windows/Linux) or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Alt+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (macOS)."
 				}
 			]
 		},

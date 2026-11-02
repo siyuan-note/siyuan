@@ -23,6 +23,8 @@ const runElectron = async options => {
     const fs = require("node:fs/promises");
     const assert = require("node:assert/strict");
     const {createMarkdownWindows, registerMarkdownSchemes} = require(options.manager);
+    const {isDevToolsShortcut, toggleDevTools} = require(options.devTools);
+    const {once} = require("node:events");
     const {windowControls} = require(options.windowControlsStub);
     registerMarkdownSchemes(protocol);
     app.setPath("userData", options.profile);
@@ -43,6 +45,7 @@ const runElectron = async options => {
     try {
         const manager = createMarkdownWindows({app, BrowserWindow: HiddenWindow, ipcMain, nativeTheme,
             rootDirectory: options.root, configDirectory: options.config, windowControls,
+            devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},
             dialog: {showMessageBox: async () => ({response: 0})}, shell: {openExternal: async () => { throw new Error("Unexpected link"); }}});
         window = await manager.open(options.document);
         await window.webContents.executeJavaScript(`new Promise((resolve,reject) => {
@@ -63,6 +66,16 @@ const runElectron = async options => {
         assert.equal(security.process, "undefined");
         assert.equal(security.host, "function");
         assert.equal(security.unsafe, "undefined");
+        for (const opened of [true, false]) {
+            const changed = once(window.webContents, opened ? "devtools-opened" : "devtools-closed", {signal: AbortSignal.timeout(10000)});
+            const modifiers = process.platform === "darwin" ? ["meta", "alt"] : ["control", "shift"];
+            window.webContents.sendInputEvent({type: "keyDown", keyCode: "I", modifiers});
+            window.webContents.sendInputEvent({type: "keyUp", keyCode: "I", modifiers});
+            await changed;
+            assert.equal(window.webContents.isDevToolsOpened(), opened);
+        }
+        // 恢复页面焦点，再等待停靠面板收起后的可见树行，避免点击隐藏行的零坐标。
+        window.webContents.focus();
         assert.match(security.origin, /^siyuan-markdown:\/\/[a-f\d-]+\/index.html$/);
         assert.match(security.text, /Original document/);
         assert.match(security.contentTheme, /\/dark\.css$/);
@@ -105,7 +118,7 @@ const runElectron = async options => {
                     const deadline = Date.now() + 10000;
                     const click = () => {
                         const row = [...document.querySelectorAll('.markdown-tree [data-node-id]')].find(item => item.querySelector('.b3-list-item__text')?.textContent === ${JSON.stringify(filename)});
-                        if (row) {const rect=row.getBoundingClientRect();resolve({x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)});return;}
+                        if (row?.checkVisibility()) {const rect=row.getBoundingClientRect();resolve({x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)});return;}
                         if (Date.now() > deadline) {reject(new Error('File tree did not list the destination')); return;}
                         setTimeout(click,25);
                     }; click();
@@ -176,6 +189,7 @@ test("the real sandboxed page saves and switches A to B to A through its restric
         const electronConfig = require("../../webpack.electron");
         await compile({...electronConfig, context: path.resolve(__dirname, "../.."), entry: {
             windows: {import: path.join(__dirname, "windows.ts"), library: {type: "commonjs2"}},
+            devTools: {import: path.join(__dirname, "../window/devToolsDock.ts"), library: {type: "commonjs2"}},
             preload: path.join(__dirname, "preload.ts"),
         }, output: {...electronConfig.output, path: runtime}});
         fs.copyFileSync(path.join(__dirname, "replaceFile.ps1"), path.join(runtime, "replaceFile.ps1"));
@@ -187,7 +201,8 @@ test("the real sandboxed page saves and switches A to B to A through its restric
         fs.writeFileSync(secondDocument, "# Second document\n");
         const script = path.join(temporary, "run.cjs");
         fs.writeFileSync(script, `const __name = value => value;\n(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument,
-    manager: path.join(runtime, "windows.js"), windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
+    manager: path.join(runtime, "windows.js"), devTools: path.join(runtime, "devTools.js"),
+    windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
     profile: path.join(temporary, "profile"), config: path.join(temporary, "config")})});`);
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

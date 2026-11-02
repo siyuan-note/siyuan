@@ -7,6 +7,7 @@ const os = require("node:os");
 const {createMarkdownWindows, registerMarkdownSchemes} = require("./windows");
 const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
+const {isDevToolsShortcut, toggleDevTools} = require("../window/devToolsDock");
 
 const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
@@ -71,6 +72,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
+        devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},
     });
     const call = (window, action, payload?: unknown, event = {}) => receive({sender: window.webContents,
         senderFrame: window.webContents.mainFrame, ...event}, action, payload);
@@ -130,7 +132,8 @@ test("frameless platform controls stay scoped to their window and preserve close
         assert.equal(window.options.title, "SiYuan");
         assert.equal(window.options.frame, platform === "darwin");
         assert.equal(window.options.titleBarStyle, "hidden");
-        assert.deepEqual(window.options.titleBarOverlay, platform === "win32" ? {color: "#00000000", symbolColor: "#808080", height: 52} : false);
+        assert.deepEqual(window.options.trafficLightPosition, {x: 8, y: 8});
+        assert.deepEqual(window.options.titleBarOverlay, platform === "win32" ? {color: "#00000000", symbolColor: "#808080", height: 32} : false);
         await assert.rejects(call(window, "window-control", "destroy"));
         await assert.rejects(call(window, "window-control", "minimize", {senderFrame: {url: window.url}}));
         assert.equal(window.minimized, undefined);
@@ -151,6 +154,42 @@ test("frameless platform controls stay scoped to their window and preserve close
         await new Promise(resolve => setTimeout(resolve, 0));
         assert.equal(notifications.some(command => command.type === "close"), true);
         assert.equal(window.isDestroyed(), false, "cancelled close keeps the native window");
+    }
+});
+
+test("DevTools shortcuts toggle only the receiving window and ignore repeats and other keys", async t => {
+    for (const platform of ["win32", "darwin", "linux"] as const) {
+        const {manager} = await fixture(t, {platform});
+        const windows = [await manager.open(), await manager.open()];
+        const opened = [false, false];
+        const modes = [];
+        for (const [index, window] of windows.entries()) {
+            Object.assign(window.webContents, {
+                isDestroyed: () => window.isDestroyed(),
+                isDevToolsOpened: () => opened[index],
+                openDevTools: options => { opened[index] = true; modes.push(options); },
+                closeDevTools: () => { opened[index] = false; },
+            });
+        }
+        const input = {type: "keyDown", key: "i", code: "KeyI", isAutoRepeat: false,
+            control: platform !== "darwin", shift: platform !== "darwin", meta: platform === "darwin", alt: platform === "darwin"};
+        const send = (window, value = input) => {
+            let prevented = false;
+            window.webContents.emit("before-input-event", {preventDefault: () => { prevented = true; }}, value);
+            return prevented;
+        };
+        for (const value of [{...input, type: "keyUp"}, {...input, isAutoRepeat: true},
+            {...input, key: "j", code: "KeyJ"}, {...input, control: false, shift: false, meta: false, alt: false}]) {
+            assert.equal(send(windows[0], value), false);
+            assert.deepEqual(opened, [false, false]);
+        }
+        assert.equal(send(windows[0]), true);
+        assert.deepEqual(opened, [true, false]);
+        assert.deepEqual(modes, [platform === "win32" ? {mode: "bottom"} : undefined]);
+        assert.equal(send(windows[0]), true);
+        assert.deepEqual(opened, [false, false]);
+        assert.equal(send(windows[1], {...input, key: "非拉丁键", code: "KeyI"}), true);
+        assert.deepEqual(opened, [false, true]);
     }
 });
 

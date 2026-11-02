@@ -10,6 +10,7 @@ import {errorMessage} from "../shared/errors";
 import {resolveAppLanguage} from "../shared/language";
 import {getArgFrom} from "../shared/argv";
 import {getTitleBarOverlayOptions, updateTitleBarOverlay} from "../window/windowControlsOverlay";
+import {isDevToolsShortcut, toggleDevTools} from "../window/devToolsDock";
 import {getBootWindows} from "../window/windowRegistry";
 import type {MarkdownLaunchRequest} from "../shared/types";
 
@@ -97,6 +98,7 @@ const createMarkdownEditors = (): void => {
             [getArgFrom(process.argv, "--lang") as string] : app.getPreferredSystemLanguages()),
         platform: process.platform,
         windowControls: {getOptions: getTitleBarOverlayOptions, update: updateTitleBarOverlay},
+        devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},
         onEmpty: quitIfMarkdownStartupLeftNothing,
     });
 

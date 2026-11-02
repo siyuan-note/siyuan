@@ -37,13 +37,15 @@ button {
 }
 
 .markdown-header {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+  height: 32px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--b3-border-color);
   background: var(--b3-theme-surface);
-  padding: 8px 16px;
+  padding: 0 6px;
   min-width: 0;
   position: relative;
   z-index: 3;
@@ -60,8 +62,9 @@ button {
   color: inherit;
   text-align: start;
   border-radius: var(--b3-border-radius);
-  padding: 6px;
-  min-height: 36px;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  min-height: 28px;
   cursor: pointer;
 
   &:hover {
@@ -73,8 +76,8 @@ button {
   }
 
   > svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     color: var(--b3-theme-on-surface);
     flex-shrink: 0;
   }
@@ -92,7 +95,7 @@ button {
 .markdown-header__drag {
   flex: 1;
   min-width: 16px;
-  height: 36px;
+  height: 28px;
 }
 
 .markdown-app[data-window-controls] {
@@ -134,13 +137,13 @@ button {
 
 .markdown-caption__button {
   width: 46px;
-  height: var(--markdown-caption-height, 52px);
+  height: var(--markdown-caption-height, 32px);
   justify-content: center;
 }
 
 .markdown-history {
-  min-width: 36px;
-  min-height: 36px;
+  min-width: 28px;
+  min-height: 28px;
   justify-content: center;
 }
 
@@ -153,8 +156,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   box-sizing: border-box;
   border-radius: var(--b3-border-radius);
   cursor: pointer;
@@ -162,8 +165,8 @@ button {
   list-style: none;
 
   > svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -406,7 +409,7 @@ button {
 .markdown-footer {
   flex-shrink: 0;
   border-top: 1px solid var(--b3-border-color);
-  padding: 4px 16px;
+  padding: 0 8px;
   background: var(--b3-theme-surface);
   font-size: 12px;
   max-height: 25%;
@@ -416,7 +419,12 @@ button {
 
 .markdown-status {
   justify-content: space-between;
-  min-height: 28px;
+  min-height: 23px;
+  line-height: 22px;
+}
+
+.markdown-status__actions .b3-button {
+  padding: 1px 6px;
 }
 
 .markdown-status [data-status="blocked"],
@@ -454,15 +462,6 @@ button {
 }
 
 @media (max-width: 640px) {
-  .markdown-header {
-    padding: 6px 12px;
-    gap: 8px;
-  }
-
-  .markdown-footer {
-    padding: 4px 12px;
-  }
-
   .markdown-workspace {
     flex-direction: column;
   }
@@ -476,6 +475,10 @@ button {
 }
 
 @mixin touch-controls {
+  .markdown-header {
+    height: 48px;
+  }
+
   .markdown-app .b3-button,
   .markdown-heading,
   .markdown-menu .b3-menu__item {

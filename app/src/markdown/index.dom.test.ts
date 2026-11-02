@@ -155,6 +155,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector<HTMLButtonElement>("#markdownUndo").disabled, true);
     check.equal(document.querySelector<HTMLButtonElement>("#markdownRedo").disabled, true);
     check.equal(document.querySelector(".markdown-footer .markdown-policy"), null);
+    check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 32, "desktop header stays at the main toolbar height");
+    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 24, "ordinary save status uses a compact footer");
     check.equal(document.querySelector("#markdownSave").checkVisibility(), false, "file actions start collapsed");
     check.equal(application.session.getState().status, "saved");
     check.equal(writes.length, 0);
@@ -288,6 +290,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(document.documentElement.scrollWidth <= window.innerWidth + 1);
     check.ok(document.querySelector("#markdownMoreButton").getBoundingClientRect().height >= 44);
     for (const id of ["markdownUndo", "markdownRedo"]) check.ok(document.getElementById(id).getBoundingClientRect().height >= 44);
+    check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 48, "touch header removes extra padding around touch targets");
+    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 24, "touch save status keeps the compact resting height");
     check.ok(document.querySelector("#markdownFiles").getBoundingClientRect().height >= 44);
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "narrow tree starts as a collapsed drawer");
     await ipcRenderer.invoke("markdown-screenshot", "narrow-recovery");
@@ -575,7 +579,8 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(getComputedStyle(header).getPropertyValue("-webkit-app-region"), "drag");
         check.equal(getComputedStyle(document.getElementById("markdownFiles")).getPropertyValue("-webkit-app-region"), "no-drag");
         check.equal(placeholder === header.firstElementChild, platform === "darwin");
-        if (platform === "win32") check.ok(overlays.some(value => value.height > 0 && value.symbolColor.length > 0));
+        check.equal(header.getBoundingClientRect().height, 32);
+        if (platform === "win32") check.ok(overlays.some(value => value.height === 32 && value.symbolColor.length > 0));
         if (platform === "linux") {
             for (const button of root.querySelectorAll<HTMLButtonElement>(".markdown-caption__button")) button.click();
             await tick(); check.deepEqual(controls, ["minimize", "maximize", "close"]);

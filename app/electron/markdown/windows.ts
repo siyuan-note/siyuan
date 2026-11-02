@@ -9,7 +9,7 @@ import {importMarkdownImage, imageExtensions} from "./imageImport";
 import {parseMarkdownLaunch} from "./launch";
 import {MarkdownTree, treeFailure} from "./tree";
 import {createMarkdownTreeView} from "./treeView";
-import type {App, BrowserWindow as ElectronWindow, Dialog, IpcMain, IpcMainInvokeEvent, MessageBoxOptions, NativeTheme, Protocol,
+import type {App, BrowserWindow as ElectronWindow, Dialog, Input, IpcMain, IpcMainInvokeEvent, MessageBoxOptions, NativeTheme, Protocol,
     Shell, TitleBarOverlay, WebContents} from "electron";
 import type {FSWatcher} from "node:fs";
 import type {MarkdownInitial} from "./host";
@@ -21,11 +21,15 @@ export type MarkdownWindowControls = {
     getOptions: (platform: NodeJS.Platform, height: number) => TitleBarOverlay | false;
     update: (window: ElectronWindow, style: {height?: unknown; symbolColor?: unknown}, platform?: NodeJS.Platform) => boolean;
 };
+type MarkdownDevTools = {
+    isShortcut: (input: Input, platform: NodeJS.Platform) => boolean;
+    toggle: (contents: WebContents, platform: NodeJS.Platform) => void;
+};
 export type MarkdownWindowsOptions = {
     app: Pick<App, "getLocale">; BrowserWindow: typeof ElectronWindow; ipcMain: Pick<IpcMain, "handle">;
     dialog: Dialog; shell: Pick<Shell, "openExternal">; protocol?: Protocol; nativeTheme?: NativeTheme;
     rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
-    onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls;
+    onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
 export type MarkdownWindows = {
     open: (file?: string) => Promise<ElectronWindow | void>;
@@ -73,7 +77,7 @@ const trustedEvent = (event: Pick<IpcMainInvokeEvent, "sender" | "senderFrame">,
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls}: MarkdownWindowsOptions): MarkdownWindows => {
+    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
@@ -278,14 +282,20 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         }
         const window = new BrowserWindow({width: 1000, height: 760, minWidth: 380, minHeight: 300,
             title: "SiYuan", show: false, autoHideMenuBar: true,
-            frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 18},
-            titleBarOverlay: windowControls.getOptions(platform, 52), icon: path.join(rootDirectory, "stage", "icon-large.png"),
+            frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 8},
+            titleBarOverlay: windowControls.getOptions(platform, 32), icon: path.join(rootDirectory, "stage", "icon-large.png"),
             backgroundColor: nativeTheme?.shouldUseDarkColors ? "#1e1e1e" : "#fff",
             webPreferences: {preload: path.join(__dirname, "preload.js"), partition: "siyuan-markdown-" + sessionId,
                 sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true,
                 allowRunningInsecureContent: false, webviewTag: false, spellcheck: true}});
         (window.webContents as WebContents & {__siyuanMarkdown?: boolean}).__siyuanMarkdown = true;
         window.setMenu?.(null);
+        window.webContents.on("before-input-event", (event, input) => {
+            if (input.type === "keyDown" && !input.isAutoRepeat && devTools.isShortcut(input, platform)) {
+                event.preventDefault();
+                devTools.toggle(window.webContents, platform);
+            }
+        });
         const record = {window, containerId: sessionId,
             current: {sessionId, initial, resources: new MarkdownResources(sessionId), epoch: 0}, pending: new Map(), approved: false} as MarkdownWindowRecord;
         Object.defineProperties(record, {

@@ -6,7 +6,7 @@
 		"id": "20261101145217-411811d",
 		"title": "獨立 Markdown 編輯器",
 		"type": "doc",
-		"updated": "20261102001717"
+		"updated": "20261102134047"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-7be9a0a",
-				"updated": "20261101171827"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -93,7 +93,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-d20d136",
-				"updated": "20261102001717"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -107,7 +107,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 選單。內文不單獨顯示格式工具列，桌面視窗採用無邊框標題列。新建、開啟、儲存、另存為、編輯模式、插入圖片、授權資源目錄、復原草稿，以及佈景主題與字型大小設定均收在此處。狀態列僅在需要時顯示處理操作。"
+					"Data": " 選單。內文不單獨顯示格式工具列，桌面視窗採用無邊框標題列。新建、開啟、儲存、另存為、編輯模式、插入圖片、授權資源目錄、復原草稿，以及佈景主題與字型大小設定均收在此處。狀態列僅在需要時顯示處理操作。桌面端使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切換開發者工具，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Alt+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

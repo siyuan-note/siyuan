@@ -6,7 +6,7 @@
 		"id": "20261101145217-402153c",
 		"title": "独立 Markdown 编辑器",
 		"type": "doc",
-		"updated": "20261102001717"
+		"updated": "20261102134047"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-9478b69",
-				"updated": "20261101171827"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -93,7 +93,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-d4791f0",
-				"updated": "20261102001717"
+				"updated": "20261102134047"
 			},
 			"Children": [
 				{
@@ -107,7 +107,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 菜单。正文不单独显示格式工具栏，桌面窗口采用无边框标题栏。新建、打开、保存、另存为、编辑模式、插入图片、授权资源目录、恢复草稿以及主题和字号设置均收在此处。状态栏仅在需要时显示处理操作。"
+					"Data": " 菜单。正文不单独显示格式工具栏，桌面窗口采用无边框标题栏。新建、打开、保存、另存为、编辑模式、插入图片、授权资源目录、恢复草稿以及主题和字号设置均收在此处。状态栏仅在需要时显示处理操作。桌面端使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换开发者工具，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Alt+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

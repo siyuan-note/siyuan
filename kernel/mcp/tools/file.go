@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -32,14 +33,14 @@ var FileTool = &Tool{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":           {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "edit", "delete", "rename", "copy", "grep", "find", "stat"}},
-			"path":             {Type: "string", Description: "Relative path within workspace (for list, read, write, edit, delete, grep, find, stat)"},
+			"path":             {Type: "string", Description: "Workspace-relative path (for list, read, write, edit, delete, grep, find, stat); absolute paths, drive prefixes and paths escaping the workspace are rejected for all file operations"},
 			"data":             {Type: "string", Description: "File content (for write)"},
 			"offset":           {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
 			"limit":            {Type: "number", Description: "Maximum lines/files/entries to return (for read, list, find, grep). Default: 200 lines when offset and limit are both 0 for read, 200 for list/find/grep. Use 0 or negative for unlimited."},
-			"old":              {Type: "string", Description: "Source path (for rename)"},
-			"new":              {Type: "string", Description: "Destination path (for rename)"},
-			"src":              {Type: "string", Description: "Source path (for copy)"},
-			"dst":              {Type: "string", Description: "Destination path (for copy)"},
+			"old":              {Type: "string", Description: "Workspace-relative source path (for rename)"},
+			"new":              {Type: "string", Description: "Workspace-relative destination path (for rename)"},
+			"src":              {Type: "string", Description: "Workspace-relative source path (for copy)"},
+			"dst":              {Type: "string", Description: "Workspace-relative destination path (for copy)"},
 			"pattern":          {Type: "string", Description: "Regex pattern to search for (for grep)"},
 			"include":          {Type: "string", Description: "File glob pattern to filter files (for grep, find; e.g. \"*.go\", \"*.{ts,tsx}\")"},
 			"context":          {Type: "number", Description: "Number of context lines before and after each match (for grep, default 0)"},
@@ -119,6 +120,14 @@ func fileContextHandler(ctx context.Context, args map[string]any) (CallToolResul
 }
 
 func resolvePath(rel string) (string, error) {
+	portable := strings.ReplaceAll(rel, "\\", "/")
+	cleaned := path.Clean(portable)
+	hasDrive := len(portable) >= 2 && portable[1] == ':' &&
+		((portable[0] >= 'A' && portable[0] <= 'Z') || (portable[0] >= 'a' && portable[0] <= 'z'))
+	if strings.HasPrefix(portable, "/") || filepath.VolumeName(rel) != "" ||
+		hasDrive || cleaned == ".." || strings.HasPrefix(cleaned, "../") {
+		return "", fmt.Errorf("expected a workspace-relative path without an absolute root, drive prefix or parent traversal outside the workspace: %s", rel)
+	}
 	rel = filepath.Clean(strings.ReplaceAll(rel, "/", string(os.PathSeparator)))
 	abs := filepath.Join(util.WorkspaceDir, rel)
 	if err := authorizePath(abs, rel); err != nil {

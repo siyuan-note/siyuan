@@ -6,7 +6,7 @@
 		"id": "20260804223001-mcpsv02",
 		"title": "MCP 服務",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261102193936"
 	},
 	"Children": [
 		{"ID": "20260804223201-mcptw01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223201-mcptw01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
@@ -66,8 +66,8 @@
 			]},
 		{"ID": "20260804223206-mcptw06", "Type": "NodeCodeBlock", "IsFencedCodeBlock": true, "CodeBlockFenceChar": 96, "CodeBlockFenceLen": 3, "CodeBlockOpenFence": "YGBg", "CodeBlockInfo": "anNvbg==", "CodeBlockCloseFence": "YGBg", "Properties": {"id": "20260804223206-mcptw06", "updated": "20260804230000"}, "Children": [{"Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3}, {"Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "anNvbg=="}, {"Type": "NodeCodeBlockCode", "Data": "{\n  \"mcpServers\": {\n    \"siyuan\": {\n      \"url\": \"http://127.0.0.1:6806/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Token {Your API Token}\"\n      }\n    }\n  }\n}\n"}, {"Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3}]},
 		{"ID": "20260804223207-mcptw07", "Type": "NodeParagraph", "Properties": {"id": "20260804223207-mcptw07", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "以上是通用設定範例，不同 MCP 用戶端使用的設定檔位置和欄位名稱可能不同，請以用戶端文件為準。核心設定是 Streamable HTTP 位址和鑑權請求標頭。"}]},
-		{"ID": "20260804223208-mcptw08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223208-mcptw08", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "工具能力"}]},
-		{"ID": "20260804223209-mcptw09", "Type": "NodeParagraph", "Properties": {"id": "20260804223209-mcptw09", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "連線成功後，用戶端會動態探索目前可用工具。內建工具涵蓋搜尋、文件、內容區塊、筆記本、資料庫、資源檔案、歷史、匯入匯出和同步等能力。工具集合可能隨思源版本和執行環境變化，應以用戶端實際探索的結果為準。"}]},
+		{"ID": "20260804223208-mcptw08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223208-mcptw08", "updated": "20261102193936"}, "Children": [{"Type": "NodeText", "Data": "工具能力"}]},
+		{"ID": "20260804223209-mcptw09", "Type": "NodeParagraph", "Properties": {"id": "20260804223209-mcptw09", "updated": "20261102193936"}, "Children": [{"Type": "NodeText", "Data": "連線成功後，用戶端會動態探索目前可用工具。內建工具涵蓋搜尋、文件、內容區塊、筆記本、資料庫、資源檔案、歷史、匯入匯出和同步等能力。工具集合可能隨思源版本和執行環境變化，應以用戶端實際探索的結果為準。file 工具要求傳入工作空間相對路徑，例如 temp/siyuan.log。絕對路徑、含磁碟機代號的路徑以及超出工作空間的父層路徑均會被拒絕；重新命名和複製的來源路徑、目標路徑也遵循此規則。"}]},
 		{"ID": "20260804223210-mcptw10", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223210-mcptw10", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "權限和安全"}]},
 		{"ID": "20260804223211-mcptw11", "Type": "NodeParagraph", "Properties": {"id": "20260804223211-mcptw11", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "MCP 端點只允許通過鑑權的管理員存取。API token 代表工作空間的管理員權限，連線的用戶端可以讀取資料，也可能修改或刪除資料、存取工作空間檔案、執行 SQL 或觸發同步等操作，因此只應連線可信任的用戶端。"}]},
 		{"ID": "20260804223212-mcptw12", "Type": "NodeParagraph", "Properties": {"id": "20260804223212-mcptw12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "唯讀模式會拒絕 MCP 的 POST 和 DELETE 請求，因此無法正常呼叫工具。不要直接將思源服務連接埠暴露到不可信任的網路；遠端使用時應設定 HTTPS、反向代理或防火牆，並在 token 洩露後立即更換。"}]},

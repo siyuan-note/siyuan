@@ -170,7 +170,10 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
 
 ## 3. Coding conventions
 
-1. **Comments:** Write in Chinese, wrap at 120 characters, and state the behavior in effect now; do not narrate how the code got there or describe it relative to a previous implementation (`不再创建`、`保留旧行为`), and drop any comment that only restates the next line
+1. **Comments:** Write in Chinese, wrap at 120 characters, and state the behavior in effect now; do not narrate how the code got there or describe it relative to a previous implementation (`不再创建`、`保留旧行为`)
+   - A comment must add something the code does not already say. Drop it when it only restates the next line or the following block, when it merely lists what a named function body does, or when it only labels a position in a sequence (for example `以下步骤只服务于本次存活的进程`); a name, a condition, or an ordering already visible in the code is not information
+   - Place a comment by what it explains: implementation details belong beside the function definition, and flow reasons (ordering constraints, why this call happens here) belong beside the call site
+   - Never repeat the same fact in both places. When a function needs one reason at the definition and another at the call site, give each place only the half that applies there instead of restating the whole rule
    - Keep an issue link only when it explains why the current rule exists
    - Legacy **data** is the exception: deprecated fields and format migrations must still say which older shape they read
 2. **Punctuation:** Use language-appropriate punctuation in UI text, comments, user guides, and documentation (e.g. Chinese punctuation ，。：；！？「」 for Chinese). Keep UI text and its punctuation in i18n language files rather than hard-coding them in code
@@ -206,7 +209,7 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - Do not derive the frontend platform from the kernel reported container or from `data-backend`: a remote kernel reports its own host, so both differ from the platform of the current frontend
    - `data-frontend` on the root element reports the frontend form (`desktop`, `desktop-window`, `mobile`, `browser-desktop`, `browser-mobile`) and may be used by built-in styles and third-party theme CSS; `data-backend` on the root element is for third-party JavaScript only and must not appear in built-in CSS
 
-11. **Source file headers:** `kernel/**/*.go` and `app/electron/main.js` start with exactly these three lines, then one blank line
+11. **Source file headers:** `kernel/**/*.go` and `app/electron/main.ts` start with exactly these three lines, then one blank line
     ```
     // SiYuan - https://github.com/siyuan-note/siyuan
     // Copyright (c) 2020-present, b3log.org

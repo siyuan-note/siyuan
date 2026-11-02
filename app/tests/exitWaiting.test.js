@@ -82,7 +82,7 @@ if (process.versions.electron && process.type === "browser") {
                 win.webContents.on("console-message", event => {
                     if (event.level === "error") console.error(event.message);
                 });
-                await win.loadFile(path.join(root, "electron/boot.html"), {query: {lang: "zh-CN", v: "test",
+                await win.loadFile(path.join(root, "electron/static/boot.html"), {query: {lang: "zh-CN", v: "test",
                     previousExitWaiting: languages.previousExitWaiting}});
                 const startup = await win.webContents.executeJavaScript(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
                     logo: !!document.querySelector("#bg svg"), message: document.getElementById("details").textContent,

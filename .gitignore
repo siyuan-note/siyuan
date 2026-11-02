@@ -13,6 +13,7 @@
 .eslintcache
 app/node_modules
 app/stage/build
+app/electron-dist
 app/build
 app/src/types/dist
 app/kernel*

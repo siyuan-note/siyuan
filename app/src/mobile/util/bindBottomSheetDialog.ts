@@ -3,10 +3,11 @@ import {bindBottomSheetDrag} from "./bindBottomSheetDrag";
 import {waitForSheetViewport} from "../../menus/sheetOpen";
 import type {MobileSheetMode} from "./mobileSheetLayout";
 
-export const bindBottomSheetDialog = (dialog: Dialog, close: (reason?: "drag" | "close") => Promise<void>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, expandable?: boolean, disableClose?: boolean}) => {
+export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>, afterResize?: () => void,
+                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, expandable?: boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
+    sheet.querySelector(".b3-dialog__close")?.remove();
     // 初始定位不参与过渡，等待视口恢复后再从底部展开。
     sheet.style.transition = "none";
     sheet.style.transform = "translateY(100%)";
@@ -16,6 +17,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: (reason?: "drag" | 
         sheet, {...layoutOptions, onResize: afterResize}) : undefined;
     let mode = layoutOptions?.mode || "standard";
     let actions: HTMLElement;
+    let disposeActions: () => void;
     const setMode = (next: MobileSheetMode) => {
         mode = next;
         layout?.setMode(next);
@@ -25,17 +27,24 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: (reason?: "drag" | 
         }
     };
     if (layout && (layoutOptions.expandable || mode === "expanded")) {
-        const {getSheetActionsHTML} = require("../../menus/sheetActions") as typeof import("../../menus/sheetActions");
-        actions = document.createElement("div");
-        actions.className = "mobile-sheet-actions";
-        actions.innerHTML = getSheetActionsHTML();
-        sheet.append(actions);
+        const {getSheetActionsHTML, getSheetExpandButtonHTML} = require("../../menus/sheetActions") as typeof import("../../menus/sheetActions");
+        actions = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body > .b3-dialog__action");
+        if (actions) {
+            const expand = document.createElement("div");
+            expand.className = "fn__flex-1";
+            expand.innerHTML = getSheetExpandButtonHTML();
+            actions.prepend(expand);
+            disposeActions = () => expand.remove();
+        } else {
+            actions = document.createElement("div");
+            actions.className = "mobile-sheet-actions";
+            actions.innerHTML = getSheetActionsHTML(true);
+            sheet.append(actions);
+            disposeActions = () => actions.remove();
+        }
         actions.querySelector('[data-type="sheet-expand"]').addEventListener("click", () => {
             setMode(mode === "expanded" ? "standard" : "expanded");
         });
-        const closeButton = actions.querySelector<HTMLButtonElement>('[data-type="sheet-close"]');
-        closeButton.disabled = !!layoutOptions.disableClose;
-        closeButton.addEventListener("click", () => { void close("close").catch(error => console.error(error)); });
         setMode(mode);
     }
     // 底部面板只支持下拉关闭，不参与通用对话框的移动和缩放。
@@ -101,14 +110,14 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: (reason?: "drag" | 
     const observer = new MutationObserver(updateOpen);
     observer.observe(dialog.element, {attributes: true, attributeFilter: ["class"]});
     updateOpen();
-    const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), () => close("drag"));
+    const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), close);
     const dispose = () => {
         cancelOpen?.();
         layout?.dispose();
         observer.disconnect();
         disposeDrag();
         handle.remove();
-        actions?.remove();
+        disposeActions?.();
         window.visualViewport?.removeEventListener("resize", resize);
         window.visualViewport?.removeEventListener("scroll", resize);
     };

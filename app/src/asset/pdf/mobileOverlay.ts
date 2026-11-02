@@ -6,11 +6,20 @@ export const openPdfMobileOverlay = (element: HTMLElement, onClose: () => void) 
     const placeholder = document.createComment("pdf-dialog");
     element.before(placeholder);
     element.classList.add("pdf-mobile-dialog", "b3-dialog__content");
+    const actions = element.querySelector<HTMLElement>(".buttonRow");
+    const actionPlaceholder = document.createComment("pdf-dialog-actions");
+    actions?.before(actionPlaceholder);
+    actions?.classList.add("b3-dialog__action");
+    actions?.remove();
     let resolveClosed: () => void;
     const closed = new Promise<void>(resolve => { resolveClosed = resolve; });
     const dialog = new MobileDialog({
         content: "",
         destroyCallback: () => {
+            if (actions) {
+                actionPlaceholder.replaceWith(actions);
+                actions.classList.remove("b3-dialog__action");
+            }
             placeholder.replaceWith(element);
             element.classList.remove("pdf-mobile-dialog", "b3-dialog__content", "dialog--open");
             onClose();
@@ -20,5 +29,6 @@ export const openPdfMobileOverlay = (element: HTMLElement, onClose: () => void) 
         },
     });
     dialog.element.querySelector(".b3-dialog__body").append(element);
+    if (actions && element.id === "passwordDialog") dialog.element.querySelector(".b3-dialog__body").append(actions);
     return {dialog, closed};
 };

@@ -270,7 +270,9 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     menu.fullscreen("bottom");
     await settle();
     check.ok(menuElement.querySelector('[data-type="sheet-expand"]'), "other expandable menus keep their fullscreen button");
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    check.equal(menuElement.querySelector('[data-type="sheet-close"]'), null);
+    menuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+    await settle();
     check.ok(menuElement.classList.contains("fn__none"));
     return "Font menu touch and layout cases passed";
 };

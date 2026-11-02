@@ -5,6 +5,7 @@ import {escapeHtml} from "../util/escape";
 import {progressLoading} from "./progress";
 import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
 import {sanitizeKernelHTML} from "../util/hostCapabilities";
+import {isMobile} from "../util/functions";
 
 let pendingExit: Promise<void>;
 
@@ -106,7 +107,7 @@ export const requestSystemExit = (options: {
             width: "480px",
             content: `<div class="b3-dialog__content" role="alert">${escapeHtml(languages.exitWaitFailed)}</div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${escapeHtml(languages.close)}</button>
+    <button class="b3-button b3-button--cancel">${escapeHtml(isMobile() ? languages.cancel : languages.close)}</button>
     <div class="fn__space"></div>
     <button class="b3-button b3-button--text">${escapeHtml(languages.retry)}</button>
 </div>`,

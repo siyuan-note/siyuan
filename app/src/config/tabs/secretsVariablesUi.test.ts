@@ -224,7 +224,7 @@ test("secrets and variables dialogs preserve input through keyboard resizing and
     timeout: 45000,
 }, async () => {
     const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "mobile/util/orientation",
-        "menus/sheetOpen", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog",
+        "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog",
         "dialog/index", "dialog/mobileDialog", "config/tabs/secretsVariablesUi"]
         .map(id => transpileModule(readFileSync(path.resolve("src", id + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
@@ -245,7 +245,7 @@ app.whenReady().then(async () => {
         for (const [theme, width, height, fontSize] of [["daylight", 390, 844, 16], ["midnight", 320, 640, 20], ["daylight", 640, 390, 16]]) {
             win.setSize(width, height);
             await win.webContents.insertCSS(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/themes"))} + "/" + theme + "/theme.css", "utf8"));
-            await win.webContents.insertCSS("body {font-size:" + fontSize + "px} .b3-dialog__container {transition:none}");
+            await win.webContents.insertCSS("body {font-size:" + fontSize + "px} .b3-dialog__container, .mobile-bottom-sheet-dialog .mobile-bottom-sheet {transition:none}");
             console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `var __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(languages)})`)}));
         }

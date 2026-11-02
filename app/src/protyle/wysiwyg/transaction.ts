@@ -274,6 +274,7 @@ const promiseTransaction = (options: {
     callback?: () => void,
     templateDocTreePlanID?: string,
     trackedRangeInsertion?: ITrackedRangeInsertion,
+    awaitResponse?: boolean,
 }) => {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
@@ -713,26 +714,41 @@ const promiseTransaction = (options: {
             options.callback?.();
         },
     };
-    const submitTransactions = (items: typeof queuedTransaction[]) => fetchPost("/api/transactions", {
-        reqId: Date.now(),
-        session: protyle.id,
-        app: Constants.SIYUAN_APPID,
-        transactions: items.map(item => item.transaction),
-    }, (response) => {
-        items.forEach((item, index) => {
-            const result = response.data?.[index];
-            if (result) {
-                item.callback(getEditorTransaction(result));
-            }
-        });
-    });
+    const submitTransactions = (items: typeof queuedTransaction[]) => {
+        const request = {
+            reqId: Date.now(),
+            session: protyle.id,
+            app: Constants.SIYUAN_APPID,
+            transactions: items.map(item => item.transaction),
+        };
+        const applied = (response: Awaited<ReturnType<typeof fetchSyncPost<"/api/transactions">>>) => {
+            if (!Array.isArray(response.data)) return;
+            const transactions = response.data;
+            items.forEach((item, index) => {
+                const result = transactions[index];
+                if (result) {
+                    item.callback(getEditorTransaction(result));
+                }
+            });
+        };
+        if (options.awaitResponse) {
+            return fetchSyncPost("/api/transactions", request).then(response => {
+                if (response.code !== 0) throw new Error(response.msg);
+                if (response.data?.length !== items.length || response.data.some(item => !Array.isArray(item.doOperations))) {
+                    throw new Error(window.siyuan.languages.transactionSaveUnconfirmed);
+                }
+                applied(response);
+            });
+        }
+        return fetchPost("/api/transactions", request, applied);
+    };
     // 仅批量提交无回调的普通块更新，结构事务需要保持逐笔提交语义。
-    const batchable = !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
+    const batchable = !options.awaitResponse && !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
         options.doOperations[0].action === "update";
     if (batchable) {
-        queueTransactionBatch(protyle, "blockUpdates", queuedTransaction, submitTransactions);
+        return queueTransactionBatch(protyle, "blockUpdates", queuedTransaction, submitTransactions);
     } else {
-        queueTransaction(protyle, () => submitTransactions([queuedTransaction]));
+        return queueTransaction(protyle, () => submitTransactions([queuedTransaction]));
     }
 };
 
@@ -2536,11 +2552,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
                                 tagRemovalConfirmed?: boolean,
-                            }) => {
+                                awaitResponse?: boolean,
+                            }): Promise<void> | void => {
     const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
     if (owner && !owner.lite && owner !== protyle) {
-        transaction(owner, doOperations, undoOperations, options);
-        return;
+        return transaction(owner, doOperations, undoOperations, options);
     }
     if (protyle) {
         const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
@@ -2662,7 +2678,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             protyle.model.headElement.classList.remove("item--unupdate");
         }
         protyle.updated = true;
-        protyle.undo.add(doOperations, undoOperations, protyle);
+        if (!options?.awaitResponse) protyle.undo.add(doOperations, undoOperations, protyle);
     }
     // 本地插入和正在编辑的块保留现有 DOM，立即补充图片文件名和提示文本。
     doOperations.forEach(operation => {
@@ -2677,7 +2693,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         }
         return;
     }
-    promiseTransaction({
+    const pending = promiseTransaction({
         protyle: protyle,
         doOperations: doOperations,
         undoOperations: undoOperations,
@@ -2685,6 +2701,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         callback: options?.callback,
         templateDocTreePlanID: options?.templateDocTreePlanID,
         trackedRangeInsertion: options?.trackedRangeInsertion,
+        awaitResponse: options?.awaitResponse,
     });
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {
@@ -2693,6 +2710,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             return true;
         }
     });
+    if (options?.awaitResponse) {
+        return pending.then(() => {
+            if (undoOperations) protyle.undo.add(doOperations, undoOperations, protyle);
+        });
+    }
 };
 
 const restoreGutterAfterFold = (protyle: IProtyle, id: string) => {

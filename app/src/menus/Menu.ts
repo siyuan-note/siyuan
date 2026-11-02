@@ -134,8 +134,6 @@ export class Menu {
                     if (sheetAction === "sheet-expand") {
                         setSheetExpanded(this.element, !this.element.classList.contains("b3-menu--expanded"));
                         this.setSheetHeight();
-                    } else {
-                        this.closeSheet();
                     }
                     return;
                 }

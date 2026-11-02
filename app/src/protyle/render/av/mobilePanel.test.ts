@@ -144,13 +144,12 @@ test("the expand button toggles full height without closing the panel", () => {
     assert.equal(panel.closes(), 0);
 });
 
-test("the close and back controls use the database panel action entry", () => {
+test("the back control uses the database panel action entry", () => {
     const panel = createPanel();
-    panel.click("sheet-close");
     panel.setBackTarget();
     assert.equal(panel.backButtonClasses.has("fn__none"), false);
     panel.click("sheet-back");
-    assert.deepEqual(panel.actions, ["close", "back"]);
+    assert.deepEqual(panel.actions, ["back"]);
 });
 
 test("sorting the first view downward does not move or dismiss the database panel", () => {

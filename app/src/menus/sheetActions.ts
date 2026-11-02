@@ -1,10 +1,11 @@
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAttr} from "../util/escape";
 
-export const getSheetActionsHTML = () => `<div class="b3-menu__actions">
-    <button type="button" class="block__icon block__icon--show block__icon--touch ariaLabel" data-type="sheet-expand" aria-expanded="false" aria-label="${escapeAttr(window.siyuan.languages.fullscreen)}">
+export const getSheetExpandButtonHTML = () => `<button type="button" class="block__icon block__icon--show block__icon--touch ariaLabel" data-type="sheet-expand" aria-expanded="false" aria-label="${escapeAttr(window.siyuan.languages.fullscreen)}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
-    </button>
-    <button type="button" class="b3-button b3-button--text" data-type="sheet-close">${escapeHtml(window.siyuan.languages.close)}</button>
+    </button>`;
+
+export const getSheetActionsHTML = (dialog = false) => `<div class="${dialog ? "b3-dialog__action" : "b3-menu__actions"}">
+    ${getSheetExpandButtonHTML()}${dialog ? '<div class="fn__flex-1"></div>' : ""}
 </div>`;
 
 export const setSheetExpanded = (menuElement: HTMLElement, expanded: boolean) => {

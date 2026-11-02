@@ -192,8 +192,8 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         if (action === "sheet-expand") {
             setSheetExpanded(menuElement, !menuElement.classList.contains("b3-menu--expanded"));
             updateHeight();
-        } else {
-            panelElement.dispatchEvent(new CustomEvent("click", {detail: action === "sheet-back" ? "back" : "close"}));
+        } else if (action === "sheet-back") {
+            panelElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         }
     }, true);
 

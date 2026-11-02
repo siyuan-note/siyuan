@@ -2,9 +2,10 @@ import {isInMobileApp} from "../../protyle/util/compatibility";
 
 export const getVisibleViewportBounds = () => {
     if (!isInMobileApp() && window.visualViewport) {
+        const top = Math.max(0, Math.min(window.innerHeight, window.visualViewport.offsetTop));
         return {
-            top: window.visualViewport.offsetTop,
-            bottom: window.visualViewport.offsetTop + window.visualViewport.height,
+            top,
+            bottom: Math.max(top, Math.min(window.innerHeight, window.visualViewport.offsetTop + window.visualViewport.height)),
         };
     }
     return {

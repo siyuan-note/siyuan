@@ -1,5 +1,6 @@
 import {escapeHtml} from "../../../util/escape";
 import {MobileDialog} from "../../../dialog/mobileDialog";
+import {showMessage} from "../../../dialog/message";
 import {isMobile} from "../../../util/functions";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {hintRef, hintSlash} from "../../hint/extend";
@@ -103,11 +104,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     const mobile = isMobile();
     let cleanup = () => {};
     const content = `<div class="av__richtext-editor${mobile ? " av__richtext-editor--sheet" : ""}"${mobile ? "" : ' role="dialog"'}>
-    ${mobile ? `<div class="av__richtext-actions">
-        <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
-    </div>` : ""}
     <div class="av__richtext-host"></div>
-</div>`;
+</div>${mobile ? `<div class="b3-dialog__action">
+        <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
+    </div>` : ""}`;
     const dialog = mobile ? new MobileDialog({
         title: window.siyuan.languages.text,
         content,
@@ -267,12 +267,16 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         finishing = true;
         try {
             if (save) await saveContent();
-        } finally {
             cleanup();
             if (restoreFocus && !cancelled && !activeEditor && isOwnerConnected() &&
                 options.protyle.wysiwyg.element.contains(options.nodeElement)) {
                 focusBlock(options.nodeElement);
             }
+        } catch (error) {
+            console.error(error);
+            if (!finished) showMessage(window.siyuan.languages.settingsPendingSaveError);
+        } finally {
+            finishing = false;
         }
     };
 
@@ -282,7 +286,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             void finish(true);
         }
     });
-    panelElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
+    if (mobile) {
+        maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
+    }
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&

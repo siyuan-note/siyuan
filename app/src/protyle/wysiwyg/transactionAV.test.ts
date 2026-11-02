@@ -12,6 +12,8 @@ const fixture = () => {
         {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
     ];
     let finish: (success: boolean) => void;
+    let finishSave: (response: unknown) => void;
+    const undo: IOperation[][] = [];
     const dependencies = {
         getTagRemovalChanges: (): [] => [],
         getEditorTransaction,
@@ -47,10 +49,11 @@ const fixture = () => {
                     resolve();
                 };
             }),
+        fetchSyncPost: () => new Promise(resolve => { finishSave = resolve; }),
     };
     const exports = loadModule<any>("src/protyle/wysiwyg/transaction.ts", {
         require: () => dependencies,
-        window: {siyuan: {config: {sync: {provider: 0}}}},
+        window: {siyuan: {config: {sync: {provider: 0}, fileTree: {}}, languages: {transactionSaveUnconfirmed: "Unconfirmed save"}}},
         getSelection: () => ({rangeCount: 0}),
     }, ScriptTarget.ES2021);
     const element = {
@@ -59,12 +62,46 @@ const fixture = () => {
             carriers.filter(item => item.isConnected) : [],
         querySelector: () => carriers[0],
     };
-    const protyle = {wysiwyg: {element}, options: {}} as unknown as IProtyle;
+    const protyle = {wysiwyg: {element}, options: {}, undo: {add: (operations: IOperation[]) => undo.push(operations)}} as unknown as IProtyle;
     const insert = () => exports.transaction(protyle, [{
         action: "insert", id: "carrier", previousID: "paragraph", data: '<div data-type="NodeAttributeView"></div>',
     }]);
-    return {protyle, carriers, rendered, insert, finish: (success: boolean) => finish(success)};
+    const save = () => exports.transaction(protyle, [{action: "updateAttrViewCell", id: "value", avID: "av",
+        keyID: "key", rowID: "row", data: {type: "text", text: {content: "saved"}}}], [],
+    {awaitResponse: true, skipSync: true}) as Promise<void>;
+    return {protyle, carriers, rendered, insert, save, undo, finishSave: (response: unknown) => finishSave(response),
+        finish: (success: boolean) => finish(success)};
 };
+
+test("awaited database saves wait for acknowledgement and record undo only after success", async () => {
+    const f = fixture();
+    let completed = false;
+    const saving = f.save().then(() => { completed = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(completed, false);
+    assert.equal(f.undo.length, 0);
+    f.finishSave({code: 0, data: [{doOperations: []}]});
+    await saving;
+    assert.equal(completed, true);
+    assert.equal(f.undo.length, 1);
+});
+
+test("awaited database saves reject failed and malformed acknowledgements and permit retry", async () => {
+    for (const response of [{code: -1, msg: "Save failed"}, {code: 0, data: {closeTimeout: 1}}, {code: 0, data: [] as unknown[]}]) {
+        const f = fixture();
+        const saving = f.save();
+        const rejected = assert.rejects(saving);
+        await new Promise(resolve => setImmediate(resolve));
+        f.finishSave(response);
+        await rejected;
+        assert.equal(f.undo.length, 0);
+        const retry = f.save();
+        await new Promise(resolve => setImmediate(resolve));
+        f.finishSave({code: 0, data: [{doOperations: []}]});
+        await retry;
+        assert.equal(f.undo.length, 1);
+    }
+});
 
 test("本地模板数据库及其副本在插入事务成功后才渲染", async () => {
     const f = fixture();

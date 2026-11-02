@@ -53,6 +53,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         onDestroy: () => lifecycle.push("callback"),
     };
     const modules: Record<string, unknown> = {
+        "../../../dialog/message": {showMessage: () => lifecycle.push("save-error")},
         "../../../dialog/mobileDialog": {MobileDialog: class {
             element: unknown;
             private closed = false;
@@ -199,6 +200,22 @@ describe("database rich text editor Escape focus", () => {
         await editor.settle();
         assert.equal(editor.lifecycle.includes("save"), false);
         assert.equal(editor.lifecycle.filter(item => item === "callback").length, 1);
+    });
+
+    it("keeps the desktop draft after a failed save and retries without destroying the editor", async () => {
+        let fail = true;
+        const editor = createEditor({changed: true, save: async () => {
+            if (fail) throw new Error("save failed");
+        }});
+        editor.clickOutside();
+        await editor.settle();
+        assert.equal(editor.lifecycle.includes("save-error"), true);
+        assert.equal(editor.lifecycle.includes("destroy"), false);
+        fail = false;
+        editor.clickOutside();
+        await editor.settle();
+        assert.equal(editor.lifecycle.filter(item => item === "save").length, 2);
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
     });
 
     for (const changed of [false, true]) {

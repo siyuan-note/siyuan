@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261103014800"
 	},
 	"Children": [
 		{
@@ -394,6 +394,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261103014800-u8mtv2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103014800-u8mtv2k",
+				"updated": "20261103014800"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Bottom sheets have no X icon or Close button. Confirmation and cancellation buttons appear below the content when the form needs them. Dismiss an ordinary sheet with Back, by pulling it down, or by tapping outside it. Saving and mandatory prompts may temporarily prevent dismissal; follow the available actions."
 				}
 			]
 		},

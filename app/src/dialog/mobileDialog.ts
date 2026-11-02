@@ -76,34 +76,22 @@ const createMobileDialogClass = () => {
                 const active = document.activeElement;
                 if (active && this.element.contains(active)) scrollInputIntoView(active);
             };
-            this.disposeSheet = bindBottomSheetDialog(this, async reason => {
-                await this.requestClose(reason === "close" ? "scrim" : "drag");
+            this.disposeSheet = bindBottomSheetDialog(this, async () => {
+                await this.requestClose("drag");
             }, scrollActive, () => {
                 this.ready = true;
                 this.focusTask?.();
                 this.focusTask = undefined;
-            }, {mode: this.sheetOptions.mode, expandable: this.sheetOptions.expandable, disableClose: this.blocked});
-            const closeIcon = this.element.querySelector<SVGElement>(".b3-dialog__close");
-            if (!options.hideCloseIcon && !options.disableClose) {
-                closeIcon?.setAttribute("role", "button");
-                closeIcon?.setAttribute("tabindex", "0");
-                closeIcon?.setAttribute("aria-label", window.siyuan.languages.close);
-            }
+            }, {mode: this.sheetOptions.mode, expandable: this.sheetOptions.expandable});
             const click = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
-                if (target.closest(".b3-dialog__scrim, .b3-dialog__close")) {
+                if (target.closest(".b3-dialog__scrim")) {
                     event.preventDefault();
                     event.stopImmediatePropagation();
                     void this.requestClose("scrim");
                 }
             };
             const keydown = (event: KeyboardEvent) => {
-                if (!event.defaultPrevented && event.target === closeIcon && (event.key === "Enter" || event.key === " ")) {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    void this.requestClose("scrim");
-                    return;
-                }
                 if (event.defaultPrevented || event.key !== "Escape" || event.isComposing || event.keyCode === 229 || !this.topmost()) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();

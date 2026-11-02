@@ -61,6 +61,7 @@ const runCases = async (appDirectory, mode, capture) => {
     ];
     window.siyuan = {
         dialogs: [], zIndex: 1, storage: {},
+        mobile: {size: {isLandscape: false, portrait: {height1: window.innerHeight}, landscape: {height1: window.innerWidth}}},
         languages: JSON.parse(fs.readFileSync(path.join(appDirectory, "appearance/langs/en.json"), "utf8")),
         config: {system: {dataDir: "D:/workspace/data"}},
         menus: {menu: {element: document.createElement("div"), remove() {}}},
@@ -71,7 +72,7 @@ const runCases = async (appDirectory, mode, capture) => {
         "dialog/moveResize": {moveResize() {}},
         "util/functions": {isMobile: () => mobile, isBrowser: () => mode === "browser"},
         "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: mode !== "remote"})},
-        "protyle/util/compatibility": {isNotCtrl: () => true},
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => false},
         "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
         "editor/util": {openBy: (...args) => opened.push(args)},
         "editor/rename": {replaceFileName: value => value.replace(/\//g, "\uff0f")},

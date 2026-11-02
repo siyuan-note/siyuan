@@ -58,7 +58,6 @@ class ElementMock extends EventTargetMock {
     set innerHTML(value: string) {
         if (value.includes("sheet-expand")) {
             this.children.set('[data-type="sheet-expand"]', new ElementMock());
-            this.children.set('[data-type="sheet-close"]', new ElementMock());
         }
     }
     append(element: ElementMock) { this.children.set("actions", element); }
@@ -178,7 +177,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         "./mobileSheetLayout": sheetLayoutAPI,
         "./orientation": {isMobileLandscape: () => false},
         "./bindBottomSheetDrag": {bindBottomSheetDrag: () => () => { disposedBindings++; }},
-        "../../menus/sheetActions": {getSheetActionsHTML: () => "sheet-expand sheet-close",
+        "../../menus/sheetActions": {getSheetActionsHTML: () => "sheet-expand",
             setSheetExpanded: (element: ElementMock, expanded: boolean) => element.classList.toggle("b3-menu--expanded", expanded)},
         "../../menus/sheetOpen": {waitForSheetViewport: (options: {open: () => void}) => {
             if (!deferSheetOpen) {

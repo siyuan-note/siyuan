@@ -162,7 +162,7 @@ class PDFDocumentProperties {
       version: info.PDFFormatVersion,
       pageCount: this.pdfDocument.numPages,
       pageSize,
-      linearized: this.#parseLinearization(info.IsLinearized),
+      linearized: await this.#parseLinearization(info.IsLinearized),
       _currentPageNumber: currentPageNumber,
       _pagesRotation: pagesRotation,
     });

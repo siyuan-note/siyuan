@@ -729,9 +729,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 anchorElement: cellElements[0],
                 value: stableCells[0].cell.value,
                 stableCells,
-                onSave: (value, nodeElement, selectedCells) => {
-                    updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
-                        false, false, false, selectedCells);
+                onSave: async (value, nodeElement, selectedCells) => {
+                    await updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
+                        false, false, false, selectedCells, true, true);
                 },
                 onDestroy: options?.destroyCallback,
             });
@@ -1054,9 +1054,10 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
                                        cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
                                        forceOperation = false, replaceSelectValues = false,
-                                       stableCells?: IAVSelectedCell[], updateElements = true) => {
+                                       stableCells?: IAVSelectedCell[], updateElements = true, awaitSave = false) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    const updateSavedElements: Array<() => void> = [];
 
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
@@ -1328,12 +1329,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 rowID,
                 data: oldValue
             }));
-            if (updateElements) {
+            const update = () => {
                 if (!isCustomAttr && item) {
                     updateAttrViewCellAnimation(item, cellValue);
                 }
                 updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
                 updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
+            };
+            if (updateElements) {
+                if (awaitSave) updateSavedElements.push(update);
+                else update();
             }
         }
     }
@@ -1354,7 +1359,12 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             id,
             data: nodeElement.getAttribute("updated"),
         });
-        transaction(protyle, doOperations, undoOperations);
+        if (awaitSave) {
+            await transaction(protyle, doOperations, undoOperations, {awaitResponse: true});
+            if (nodeElement.isConnected) updateSavedElements.forEach(update => update());
+        } else {
+            transaction(protyle, doOperations, undoOperations);
+        }
     }
     return {text: text.substring(0, text.length - 2), json};
 };

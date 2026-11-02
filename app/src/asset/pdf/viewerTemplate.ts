@@ -265,11 +265,11 @@ export const getPdfViewerHTML = ({maximize = true}: {maximize?: boolean} = {}) =
               <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
             </div>
             <div class="row">
-              <input type="password" id="password" class="toolbarField">
+              <input type="password" id="password" class="b3-text-field fn__block">
             </div>
             <div class="buttonRow">
-              <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
-              <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
+              <button id="passwordCancel" class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+              <button id="passwordSubmit" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
             </div>
         </div>
         <div class="dialog" id="documentPropertiesDialog">

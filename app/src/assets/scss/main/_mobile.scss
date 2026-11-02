@@ -2025,8 +2025,8 @@ body.mobile-topbar--merged {
 
   > .b3-dialog__body {
     min-height: 0;
-    overflow: auto;
-    flex: 0 1 auto;
+    overflow: hidden;
+    flex: 1 1 auto;
   }
 }
 

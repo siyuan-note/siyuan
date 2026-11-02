@@ -202,9 +202,12 @@
 | 完整检查 | `pnpm run lint`（含类型检查、ESLint 自动修复，以及 CSS、菜单、启动语言检查） |
 | 仅类型检查 | `pnpm run typecheck`（同时覆盖 `tsconfig.electron.json` 与 `tsconfig.electron.test.json`） |
 | 改动相关测试 | `pnpm run test:affected`；仅查看将执行哪些用例时使用 `pnpm run test:changed` |
+| 指定文件测试 | `pnpm run test:focused scripts/test-changed.test.js`；可传多个现存测试文件 |
 | 全量测试 | `pnpm run test` |
 
-单独执行某个测试文件时须带上钩子与开关，否则 `require("./x")` 无法解析 `.ts`，Electron 替身也不会生效：
+先用 `pnpm run test:changed --explain` 查看基准、文件数量及代表性依赖链，再决定是否执行 `test:affected`。清单写入标准输出，统计和解释写入标准错误；解释不会缩减选测范围。公共依赖可能合理地选出大量测试。默认基准是 `HEAD`，检查已提交的分支改动时须显式指定 `--base <基准>`。未找到关联测试不代表已确认没有影响，动态加载等静态分析盲区仍需人工判断。
+
+`test:focused` 自动带上钩子与开关，只接受显式 `.test.ts`、`.test.js` 或 `.test.mjs` 文件，不接受运行参数或未展开的 glob；空列表、错误路径会在启动测试前失败。它不追加全量范围。`pnpm test` 仍是全量入口，不要通过向它传文件来筛选。直接调用 Node 时须带上钩子与开关，否则 `require("./x")` 无法解析 `.ts`，Electron 替身也不会生效：
 
 ```
 node --import tsx --experimental-test-module-mocks --test electron/<路径>.test.ts

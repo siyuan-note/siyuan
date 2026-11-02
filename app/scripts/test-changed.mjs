@@ -81,13 +81,15 @@ export const buildGraph = (files, root = appRoot, knownFiles = new Set(files)) =
 };
 
 // 从改动文件出发反向遍历，找出直接或间接引用它们的测试文件。
-export const selectTests = (changedFiles, allFiles, root = appRoot) => {
+export const selectTests = (changedFiles, allFiles, root = appRoot, reasons = new Map()) => {
     const changed = new Set(changedFiles.map(file => path.resolve(file)));
     // 依赖与转译配置影响所有测试，不能仅靠源码引用图推导。
     if ([...changed].some(file => path.dirname(file) === root &&
         (/^tsconfig(?:\..+)?\.json$/.test(path.basename(file)) ||
             ["package.json", "pnpm-lock.yaml"].includes(path.basename(file))))) {
-        return allFiles.filter(isTestFile).sort();
+        const tests = allFiles.filter(isTestFile).sort();
+        tests.forEach(file => reasons.set(file, "dependency or TypeScript configuration changed (full selection)"));
+        return tests;
     }
     const reverse = new Map();
     // 删除的源文件也保留依赖边，避免删除操作被误报为没有受影响的测试。
@@ -99,17 +101,22 @@ export const selectTests = (changedFiles, allFiles, root = appRoot) => {
         }
     }
     const selected = new Set([...changed].filter(file => isTestFile(file) && existsSync(file)));
+    const chains = new Map([...changed].map(file => [file, [file]]));
+    selected.forEach(file => reasons.set(file, [file]));
     const visited = new Set(changed);
     const queue = [...changed];
     while (queue.length > 0) {
-        for (const referrer of reverse.get(queue.pop()) ?? []) {
+        const target = queue.pop();
+        for (const referrer of reverse.get(target) ?? []) {
             if (visited.has(referrer)) {
                 continue;
             }
             visited.add(referrer);
+            chains.set(referrer, [...chains.get(target), referrer]);
             queue.push(referrer);
             if (isTestFile(referrer)) {
                 selected.add(referrer);
+                reasons.set(referrer, chains.get(referrer));
             }
         }
     }
@@ -134,24 +141,48 @@ export const changedFiles = (base, root = repositoryRoot) => {
     return files.map(file => path.resolve(root, file));
 };
 
+export const parseArguments = arguments_ => {
+    const options = {base: "HEAD", run: false, explain: false};
+    for (let index = 0; index < arguments_.length; index++) {
+        const argument = arguments_[index];
+        if (argument === "--run") {
+            options.run = true;
+        } else if (argument === "--explain") {
+            options.explain = true;
+        } else if (argument === "--base" && arguments_[index + 1] && !arguments_[index + 1].startsWith("-")) {
+            options.base = arguments_[++index];
+        } else {
+            throw new Error(`Unknown argument or missing value: ${argument}`);
+        }
+    }
+    return options;
+};
+
 const main = () => {
     const arguments_ = process.argv.slice(2);
-    const baseIndex = arguments_.indexOf("--base");
-    const base = baseIndex >= 0 ? arguments_[baseIndex + 1] : "HEAD";
+    const {base, run, explain} = parseArguments(arguments_);
     const touched = changedFiles(base).filter(file =>
         file.startsWith(appRoot + path.sep));
     if (touched.length === 0) {
-        console.log("src/tests/electron/scripts 没有改动");
+        console.error("app/ 没有改动；未运行测试");
         return 0;
     }
-    const selected = selectTests(touched, listFiles());
+    const reasons = new Map();
+    const selected = selectTests(touched, listFiles(), appRoot, reasons);
+    console.error(`基准 ${base}；改动 ${touched.length} 个文件；选中 ${selected.length} 个测试文件`);
     if (selected.length === 0) {
-        console.log("改动没有影响任何测试");
+        console.error("未找到关联测试；未运行测试，不代表已确认没有影响");
         return 0;
     }
     const relative = selected.map(file => path.relative(appRoot, file).replaceAll("\\", "/"));
     relative.forEach(file => console.log(file));
-    if (!arguments_.includes("--run")) {
+    if (explain) {
+        for (const file of selected) {
+            const reason = reasons.get(file);
+            console.error(`${path.relative(appRoot, file)}: ${Array.isArray(reason) ? reason.map(item => path.relative(appRoot, item)).join(" -> ") : reason}`);
+        }
+    }
+    if (!run) {
         return 0;
     }
     // 不能复用 scripts/test.mjs：它把四组 glob 无条件追加在参数之后，传文件等于跑全量。

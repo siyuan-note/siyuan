@@ -4,7 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 const {test} = require("node:test");
 const {execFileSync} = require("node:child_process");
-const {selectTests, scanReferences, changedFiles} = require("./test-changed.mjs");
+const {selectTests, scanReferences, changedFiles, parseArguments} = require("./test-changed.mjs");
 
 const fixture = t => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-"));
@@ -44,6 +44,10 @@ test("changed sources select tests that reach them through other sources", t => 
     const all = [leaf, middle, direct, indirect, stringLoader, unrelated];
 
     assert.deepEqual(selectTests([leaf], all, root), [direct, indirect, stringLoader].sort());
+    const reasons = new Map();
+    assert.deepEqual(selectTests([leaf], all, root, reasons), [direct, indirect, stringLoader].sort());
+    assert.deepEqual(reasons.get(indirect), [leaf, middle, indirect]);
+    assert.deepEqual(reasons.get(stringLoader), [leaf, middle, stringLoader]);
     // 改动测试文件本身时只选它自己。
     assert.deepEqual(selectTests([unrelated], all, root), [unrelated]);
     // 改动没有被引用的源文件时不选任何测试。
@@ -111,6 +115,42 @@ test("dependency and transpiler configuration changes select the whole suite", t
     const second = write("tests/second.test.js", "");
     const source = write("src/unrelated.ts", "export {};");
     for (const name of ["package.json", "pnpm-lock.yaml", "tsconfig.json", "tsconfig.typecheck.json"]) {
-        assert.deepEqual(selectTests([path.join(root, name)], [first, second, source], root), [first, second].sort());
+        const reasons = new Map();
+        assert.deepEqual(selectTests([path.join(root, name)], [first, second, source], root, reasons), [first, second].sort());
+        assert.match(reasons.get(first), /full selection/);
     }
+});
+
+test("affected arguments reject misspellings and missing baselines", () => {
+    assert.deepEqual(parseArguments(["--base", "origin/dev", "--explain", "--run"]),
+        {base: "origin/dev", explain: true, run: true});
+    for (const args of [["--base"], ["--base", "--run"], ["--explan"]]) {
+        assert.throws(() => parseArguments(args));
+    }
+});
+
+test("affected CLI distinguishes no changes from an unmapped change without claiming coverage", t => {
+    const {root, write} = fixture(t);
+    const script = write("app/scripts/test-changed.mjs", fs.readFileSync(path.join(__dirname, "test-changed.mjs")));
+    const run = (...args) => execFileSync("git", args, {cwd: root});
+    run("init", "--quiet");
+    run("add", ".");
+    const tree = run("write-tree").toString("utf8").trim();
+    const {spawnSync} = require("node:child_process");
+    const invoke = () => spawnSync(process.execPath, [script, "--base", tree, "--run"], {encoding: "utf8"});
+    const unchanged = invoke();
+    assert.equal(unchanged.status, 0, unchanged.stderr);
+    assert.match(unchanged.stderr, /没有改动/);
+    write("app/src/isolated.ts", "export {};");
+    const unmapped = invoke();
+    assert.equal(unmapped.status, 0, unmapped.stderr);
+    assert.equal(unmapped.stdout, "");
+    assert.match(unmapped.stderr, /未找到关联测试/);
+    assert.doesNotMatch(unmapped.stderr, /改动没有影响任何测试/);
+    write("app/src/isolated.test.js", 'readFileSync("src/isolated.ts", "utf8");');
+    const preview = spawnSync(process.execPath, [script, "--base", tree, "--explain"], {encoding: "utf8"});
+    assert.equal(preview.status, 0, preview.stderr);
+    assert.equal(preview.stdout.trim(), "src/isolated.test.js");
+    assert.match(preview.stderr, /选中 1 个测试文件/);
+    assert.match(preview.stderr, /isolated\.test\.js:/);
 });

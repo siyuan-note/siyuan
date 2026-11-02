@@ -957,7 +957,6 @@
   position: relative;
   font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
-  padding-left: 2px;
   border-radius: var(--b3-border-radius);
 
   &:hover .protyle-title__icon {
@@ -999,7 +998,7 @@
     font-size: 2em;
     font-weight: bold;
     line-height: 1.625;
-    padding: 0 4px 0 2px;
+    padding: 0 4px;
     white-space: break-spaces;
 
     &:empty::after {
@@ -1035,11 +1034,13 @@
 
   .protyle-wysiwyg > [data-type="NodeParagraph"] {
     margin: 0;
-    padding: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .protyle-wysiwyg > [data-type="NodeParagraph"] > .protyle-title__input {
     min-height: 1.625em;
+    padding: 0;
   }
 
   .img {

@@ -69,7 +69,7 @@
     left: 0;
     z-index: 9;
     width: auto;
-    padding: 20px max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    padding: 20px max(20px, env(safe-area-inset-right)) max(20px, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom))) max(20px, env(safe-area-inset-left));
     border-width: 1px 0 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
   }

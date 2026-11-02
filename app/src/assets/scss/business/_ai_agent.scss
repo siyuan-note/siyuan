@@ -1302,7 +1302,7 @@
   }
 
   .agent-chat__input-area {
-    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(env(safe-area-inset-bottom) + 8px)) max(8px, env(safe-area-inset-left));
+    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)) + 8px)) max(8px, env(safe-area-inset-left));
   }
 
   .agent-chat__button-options {

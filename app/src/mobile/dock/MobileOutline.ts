@@ -82,7 +82,7 @@ export class MobileOutline extends Model {
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconExpandLevel"></use></svg>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
-<div class="fn__flex-1" style="padding: 3px 0 calc(8px + env(safe-area-inset-bottom))"></div>`;
+<div class="fn__flex-1" style="padding: 3px 0 calc(8px + var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)))"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         const showSearch = bindPanelSearch(inputElement,
             this.element.querySelector('[data-type="search"]'), () => this.setFilter(), {

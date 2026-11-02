@@ -19,7 +19,32 @@ body {
 }
 
 html[data-frontend="mobile"] body.body--android {
+  --android-navigation-overlay: 1;
+  --mobile-bottom-bar-safe-area: var(--android-navigation-bar-height, 0px);
   --mobile-top-safe-area: 0px;
+
+  .toolbar--bottom {
+    box-sizing: border-box;
+    height: calc(48px + var(--android-navigation-bar-height, 0px));
+    padding-bottom: var(--android-navigation-bar-height, 0px);
+  }
+
+  .status {
+    z-index: 5;
+  }
+
+  // 背景延伸到手势导航区域，渐变使滚动内容平滑过渡到系统手势条。
+  &::after {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    height: calc(var(--android-navigation-bar-height, 0px) * 2);
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--b3-theme-background));
+    content: "";
+  }
 
   .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
     // 继承父节点的编辑状态，避免原生光标经过公式时断开输入法连接；输入前由编辑器校正公式边界。
@@ -751,7 +776,7 @@ body.mobile-topbar--merged {
     // 列表延伸到屏幕底边，末尾留白确保最后一个页签可滚到操作区上方。
     &::after {
       display: block;
-      height: calc(100px + env(safe-area-inset-bottom));
+      height: calc(100px + var(--mobile-bottom-bar-safe-area));
       content: "";
     }
   }
@@ -864,7 +889,7 @@ body.mobile-topbar--merged {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: max(12px, env(safe-area-inset-bottom));
+    margin-bottom: max(12px, var(--mobile-bottom-bar-safe-area));
     padding: 12px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
     background-color: var(--b3-theme-surface);
     border-top: 1px solid var(--b3-border-color);
@@ -917,7 +942,7 @@ body.mobile-topbar--merged {
     > [data-type="sidebar-file"] > .fn__flex-1::after,
     > [data-type="sidebar-file"] > .b3-list > .fn__flex-1::after {
       display: block;
-      height: env(safe-area-inset-bottom);
+      height: var(--mobile-bottom-bar-safe-area);
       content: "";
     }
   }
@@ -979,7 +1004,7 @@ body.mobile-topbar--merged {
 
     &.config--mobile-items {
       background-color: var(--b3-theme-surface);
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
     > .config-bazaar,
@@ -992,7 +1017,7 @@ body.mobile-topbar--merged {
       box-sizing: border-box;
       margin: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)) !important;
       overflow-y: auto;
-      padding: 8px 0 max(16px, env(safe-area-inset-bottom));
+      padding: 8px 0 max(16px, var(--mobile-bottom-bar-safe-area));
       -webkit-overflow-scrolling: touch;
 
       > .fn__flex-1 {
@@ -1036,7 +1061,7 @@ body.mobile-topbar--merged {
 
       &__panel {
         overscroll-behavior: contain;
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        padding-bottom: max(16px, var(--mobile-bottom-bar-safe-area));
         -webkit-overflow-scrolling: touch;
       }
 
@@ -1264,7 +1289,7 @@ body.mobile-topbar--merged {
               box-shadow: 0 -1px 0 var(--b3-theme-surface-lighter);
               box-sizing: border-box;
               flex-shrink: 0;
-              padding: 8px max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+              padding: 8px max(16px, env(safe-area-inset-right)) max(8px, var(--mobile-bottom-bar-safe-area)) max(16px, env(safe-area-inset-left));
               width: 100%;
               z-index: 2;
             }
@@ -1275,7 +1300,7 @@ body.mobile-topbar--merged {
             flex: none;
             margin-left: 0;
             overflow: visible;
-            padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            padding: 0 max(16px, env(safe-area-inset-right)) max(16px, var(--mobile-bottom-bar-safe-area)) max(16px, env(safe-area-inset-left));
             width: 100%;
           }
 
@@ -1429,7 +1454,7 @@ body.mobile-topbar--merged {
 
 .keyboard {
   position: fixed;
-  bottom: 0;
+  bottom: var(--android-navigation-bar-height, 0px);
   width: 100%;
   box-sizing: border-box;
   height: 48px;
@@ -1711,7 +1736,7 @@ body.mobile-topbar--merged {
       max-height: none;
       min-height: 0;
       box-sizing: border-box;
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
     .b3-chips {
@@ -1898,7 +1923,7 @@ body.mobile-topbar--merged {
 }
 
 .b3-dialog {
-  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
 }
 
 .mobile-bottom-sheet-dialog {

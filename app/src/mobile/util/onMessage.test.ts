@@ -41,7 +41,7 @@ const createStatusHarness = () => {
 test("mobile status messages appear at the bottom and hide after the timeout", () => {
     const {statusElement, timers, send} = createStatusHarness();
     send({cmd: "statusbar", msg: "Index updated"});
-    assert.equal(statusElement.style.bottom, "0");
+    assert.equal(statusElement.style.bottom, "var(--android-navigation-bar-height, 0px)");
     assert.equal(statusElement.innerHTML, "Index updated");
     assert.equal(timers.size, 1);
     const timer = timers.values().next().value;
@@ -54,7 +54,7 @@ test("mobile background progress stays at the bottom until tasks finish", () => 
     const {statusElement, timers, send} = createStatusHarness();
     send({cmd: "statusbar", msg: "Index updated"});
     send({cmd: "backgroundtask", data: {tasks: [{action: "Indexing"}]}});
-    assert.equal(statusElement.style.bottom, "0");
+    assert.equal(statusElement.style.bottom, "var(--android-navigation-bar-height, 0px)");
     assert.match(statusElement.innerHTML, /Indexing/);
     assert.match(statusElement.innerHTML, /fn__progress/);
     assert.equal(timers.size, 0);

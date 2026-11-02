@@ -29,6 +29,38 @@ const browserCases = ({css, mobile}) => {
             document.body.innerHTML = '<div class="mobile-safe-area"></div><div class="mobile-topbar"></div>';
             check.equal(getComputedStyle(document.querySelector(".mobile-safe-area")).height, scenario.inset + "px", label);
             check.equal(getComputedStyle(document.querySelector(".mobile-topbar")).top, scenario.inset + "px", label);
+            if (frontend === "mobile" && platform === "android") {
+                check.equal(getComputedStyle(document.body).getPropertyValue("--android-navigation-overlay").trim(), "1");
+                document.body.innerHTML += '<div class="mobile-bottom-bar"></div><div class="b3-dialog"></div><div class="b3-menu b3-menu--fullscreen"><div class="b3-menu__items--menu"></div></div><div id="sidebar" class="side-panel"><div class="b3-list--mobile"><div data-type="sidebar-file"><div class="fn__flex-1"></div></div></div></div>';
+                for (const bottom of [0, 16, 32, 0]) {
+                    const footer = document.createElement("div");
+                    footer.className = "toolbar toolbar--bottom";
+                    const keyboard = document.createElement("div");
+                    keyboard.className = "keyboard";
+                    document.body.append(footer, keyboard);
+                    document.documentElement.style.setProperty("--android-navigation-bar-height", `${bottom}px`);
+                    check.equal(getComputedStyle(footer).height, `${48 + bottom}px`);
+                    check.equal(footer.getBoundingClientRect().height, 48 + bottom);
+                    check.equal(getComputedStyle(footer).paddingBottom, `${bottom}px`);
+                    check.equal(getComputedStyle(keyboard).bottom, `${bottom}px`);
+                    check.equal(getComputedStyle(document.body, "::after").height, `${bottom * 2}px`, "gesture protection follows the native inset");
+                    check.equal(getComputedStyle(document.body, "::after").pointerEvents, "none");
+                    check.equal(getComputedStyle(document.querySelector(".mobile-bottom-bar")).bottom, `${Math.max(24, bottom) + 8}px`);
+                    check.equal(getComputedStyle(document.querySelector(".b3-dialog")).paddingBottom, `${bottom}px`);
+                    check.equal(getComputedStyle(document.querySelector(".b3-menu__items--menu")).paddingBottom, `${Math.max(16, bottom)}px`);
+                    check.equal(getComputedStyle(document.querySelector('#sidebar [data-type="sidebar-file"] > .fn__flex-1'), "::after").height, `${bottom}px`);
+                    footer.remove();
+                    keyboard.remove();
+                }
+                document.documentElement.style.removeProperty("--android-navigation-bar-height");
+                for (const color of ["rgb(255, 255, 255)", "rgb(30, 30, 30)"]) {
+                    document.body.style.setProperty("--b3-theme-background", color);
+                    check.ok(getComputedStyle(document.body, "::after").backgroundImage.includes(color), "gesture protection follows the theme");
+                }
+                document.body.style.removeProperty("--b3-theme-background");
+            } else {
+                check.notEqual(getComputedStyle(document.body).getPropertyValue("--android-navigation-overlay").trim(), "1", label);
+            }
         } else {
             document.body.innerHTML = `<div class="toolbar${frontend === "browser-desktop" ? " toolbar--browser" : ""}"></div>
                 <div class="sy__globalGraph fullscreen"><div class="block__icons">

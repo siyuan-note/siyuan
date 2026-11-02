@@ -1006,6 +1006,11 @@ test("table block width actions keep current-column and whole-table scopes toget
 });
 
 test("table catalog follows the menu arrays and conditional declarations", () => {
+    for (const parent of ["gutter.single.table", "inline.text"]) {
+        const keys = getEntryCatalogChildren(parent).map(item => item.key);
+        assert.equal(keys.indexOf("insertTableHeaderRow") + 1, keys.indexOf("insertRowAbove"));
+        assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
+    }
     const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
     const table = source.slice(source.indexOf("export const tableMenu ="));
     const pushedIDs = (array: string) => Array.from(table.matchAll(

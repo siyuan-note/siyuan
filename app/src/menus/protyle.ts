@@ -22,6 +22,7 @@ import {
     insertColumn,
     insertRow,
     insertRowAbove,
+    insertTableHeaderRow,
     isTableHeaderEnabled,
     moveColumnToLeft,
     moveColumnToRight,
@@ -2607,6 +2608,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         }
     });
     const insertMenus = [];
+    if (cellElement.parentElement.parentElement.tagName === "THEAD") {
+        insertMenus.push({
+            id: "insertTableHeaderRow",
+            icon: "iconBefore",
+            label: window.siyuan.languages.insertTableHeaderRow,
+            click: () => insertTableHeaderRow(protyle, range, cellElement, nodeElement),
+        });
+    }
     insertMenus.push({
         id: "insertRowAbove",
         icon: "iconBefore",

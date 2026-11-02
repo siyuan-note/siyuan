@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Insertar fila de encabezado",
 	"syncSourcePreview": "La fuente de sincronización cambió. Local: ${local} archivos; fuente: ${cloud} archivos, ${time}, dispositivo: ${device}. Subir: ${upload} archivos. Restaurar: sobrescribir ${overwrite} y eliminar ${remove} archivos locales. Elija una dirección; la combinación automática está en pausa",
 	"markdownSourceOnly": "Archivo grande: solo edición del código fuente; vista previa desactivada",
 	"markdownFiles": "Archivos Markdown",

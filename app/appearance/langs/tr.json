@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Başlık satırı ekle",
 	"syncSourcePreview": "Eşitleme kaynağı değişti. Yerel: ${local} dosya; kaynak: ${cloud} dosya, ${time}, cihaz: ${device}. Yükleme: ${upload} dosya. Geri yükleme: ${overwrite} yerel dosyanın üzerine yazar, ${remove} dosyayı siler. Bir yön seçin; otomatik birleştirme duraklatıldı",
 	"markdownSourceOnly": "Büyük dosya: yalnızca kaynak düzenleme; önizleme kapalı",
 	"markdownFiles": "Markdown dosyaları",

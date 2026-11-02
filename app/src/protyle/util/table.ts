@@ -232,7 +232,18 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     scrollToView(nodeElement, newRowElement, protyle);
 };
 
-export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element, count = 1) => {
+export const insertTableHeaderRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
+    if (protyle.disabled || cellElement.parentElement.parentElement.tagName !== "THEAD") {
+        return;
+    }
+    insertRowAbove(protyle, range, cellElement, nodeElement, 1, true);
+};
+
+export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element,
+                               count = 1, header = false) => {
+    const colIndex = getColIndex(cellElement);
+    const replaceHeader = !header && cellElement.parentElement.parentElement.tagName === "THEAD" &&
+        !cellElement.parentElement.previousElementSibling;
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
@@ -267,8 +278,13 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
         }
     }
     cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`.repeat(count));
-    const newRowElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
-    range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
+    let newRowElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
+    if (replaceHeader) {
+        const table = nodeElement.querySelector("table");
+        normalizeTableSections(table, 1);
+        newRowElement = table.rows[0];
+    }
+    range.selectNodeContents(newRowElement.cells[colIndex]);
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement, html);

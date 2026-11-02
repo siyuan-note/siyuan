@@ -2185,6 +2185,15 @@ export class TableControl {
             const below = indexes[indexes.length - 1] + 1;
             const canInsertAbove = this.canInsertAtBoundary(grid, "row", above);
             const canInsertBelow = this.canInsertAtBoundary(grid, "row", below);
+            if (above < (selection.table.tHead?.rows.length || 0)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "insertTableHeaderRow",
+                    icon: "iconBefore",
+                    label: window.siyuan.languages.insertTableHeaderRow,
+                    disabled: !canInsertAbove,
+                    click: () => this.insertRowAt(selection.node, selection.table, above, 1, true),
+                }).element);
+            }
             this.appendInsertMenu("iconBefore", window.siyuan.languages.insertRowBefore, canInsertAbove, count => {
                 this.insertRowAt(selection.node, selection.table, above, count);
             });
@@ -2251,7 +2260,7 @@ export class TableControl {
         return html;
     }
 
-    private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number, count = 1) {
+    private insertRowAt(node: HTMLElement, table: HTMLTableElement, index: number, count = 1, header = false) {
         const grid = buildTableGrid(table);
         if (!this.canInsertAtBoundary(grid, "row", index)) {
             return;
@@ -2282,7 +2291,7 @@ export class TableControl {
             (table.tBodies[0] || table.createTBody()).append(...rows);
         }
         if (index === 0) {
-            normalizeTableSections(table);
+            normalizeTableSections(table, header ? undefined : 1);
         }
         if (rows[0]?.cells[0]) {
             const range = document.createRange();

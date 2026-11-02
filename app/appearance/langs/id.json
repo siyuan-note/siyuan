@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Sisipkan baris header",
 	"syncSourcePreview": "Sumber sinkronisasi berubah. Lokal: ${local} berkas; sumber: ${cloud} berkas, ${time}, perangkat: ${device}. Unggah: ${upload} berkas. Pulihkan: timpa ${overwrite} dan hapus ${remove} berkas lokal. Pilih arah; penggabungan otomatis dijeda",
 	"markdownSourceOnly": "Berkas besar: hanya penyuntingan sumber; pratinjau dinonaktifkan",
 	"markdownFiles": "Berkas Markdown",

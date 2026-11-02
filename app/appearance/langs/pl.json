@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Wstaw wiersz nagłówka",
 	"syncSourcePreview": "Źródło synchronizacji zmieniło się. Lokalnie: ${local} plików; źródło: ${cloud} plików, ${time}, urządzenie: ${device}. Przesłanie: ${upload} plików. Przywrócenie: nadpisanie ${overwrite} i usunięcie ${remove} plików lokalnych. Wybierz kierunek; automatyczne scalanie jest wstrzymane",
 	"markdownSourceOnly": "Duży plik: tylko edycja źródła; podgląd wyłączony",
 	"markdownFiles": "Pliki Markdown",

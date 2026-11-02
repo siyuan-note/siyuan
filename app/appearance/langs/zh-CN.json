@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "插入表头",
 	"syncSourcePreview": "同步来源已变化。本地 ${local} 个文件；来源 ${cloud} 个文件，时间 ${time}，设备 ${device}。上传将发送 ${upload} 个文件；恢复将覆盖 ${overwrite} 个、删除 ${remove} 个本地文件。请选择方向，自动合并已暂停",
 	"markdownSourceOnly": "大文件使用源码编辑，预览已关闭",
 	"markdownFiles": "Markdown 文件",

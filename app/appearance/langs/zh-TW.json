@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "插入標題列",
 	"syncSourcePreview": "同步來源已變更。本機 ${local} 個檔案；來源 ${cloud} 個檔案，時間 ${time}，裝置 ${device}。上傳將傳送 ${upload} 個檔案；還原將覆寫 ${overwrite} 個、刪除 ${remove} 個本機檔案。請選擇方向，自動合併已暫停",
 	"markdownSourceOnly": "大檔案使用原始碼編輯，預覽已關閉",
 	"markdownFiles": "Markdown 檔案",

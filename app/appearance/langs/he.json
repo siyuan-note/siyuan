@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "הוספת שורת כותרת",
 	"syncSourcePreview": "מקור הסנכרון השתנה. מקומי: ${local} קבצים; מקור: ${cloud} קבצים, ${time}, מכשיר: ${device}. העלאה: ${upload} קבצים. שחזור: החלפת ${overwrite} קבצים מקומיים ומחיקת ${remove}. יש לבחור כיוון; המיזוג האוטומטי מושהה",
 	"markdownSourceOnly": "קובץ גדול: עריכת מקור בלבד; התצוגה המקדימה כבויה",
 	"markdownFiles": "קובצי Markdown",

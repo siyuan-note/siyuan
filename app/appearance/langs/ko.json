@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "머리글 행 삽입",
 	"syncSourcePreview": "동기화 원본이 변경되었습니다. 로컬: ${local}개 파일, 원본: ${cloud}개 파일, 시간: ${time}, 기기: ${device}. 업로드: ${upload}개 파일. 복원: 로컬 파일 ${overwrite}개 덮어쓰기, ${remove}개 삭제. 방향을 선택하세요. 자동 병합은 일시 중지되었습니다",
 	"markdownSourceOnly": "큰 파일은 소스 편집만 지원하며 미리 보기가 꺼져 있습니다",
 	"markdownFiles": "Markdown 파일",

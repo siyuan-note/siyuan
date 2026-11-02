@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Koprij invoegen",
 	"syncSourcePreview": "Synchronisatiebron gewijzigd. Lokaal: ${local} bestanden; bron: ${cloud} bestanden, ${time}, apparaat: ${device}. Uploaden: ${upload} bestanden. Herstellen: ${overwrite} lokale bestanden overschrijven, ${remove} verwijderen. Kies een richting; automatisch samenvoegen is gepauzeerd",
 	"markdownSourceOnly": "Groot bestand: alleen bronbewerking; voorbeeld uitgeschakeld",
 	"markdownFiles": "Markdown-bestanden",

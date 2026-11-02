@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Inserisci riga di intestazione",
 	"syncSourcePreview": "Sorgente di sincronizzazione cambiata. Locale: ${local} file; sorgente: ${cloud} file, ${time}, dispositivo: ${device}. Caricamento: ${upload} file. Ripristino: sovrascrive ${overwrite} file locali ed elimina ${remove} file. Scegli una direzione; l’unione automatica è sospesa",
 	"markdownSourceOnly": "File grande: solo modifica del sorgente; anteprima disattivata",
 	"markdownFiles": "File Markdown",

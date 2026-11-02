@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Kopfzeile einfügen",
 	"syncSourcePreview": "Synchronisationsquelle geändert. Lokal: ${local} Dateien; Quelle: ${cloud} Dateien, ${time}, Gerät: ${device}. Hochladen: ${upload} Dateien. Wiederherstellen: ${overwrite} lokale Dateien überschreiben, ${remove} löschen. Wählen Sie eine Richtung; automatisches Zusammenführen ist pausiert",
 	"markdownSourceOnly": "Große Datei: nur Quelltextbearbeitung; Vorschau deaktiviert",
 	"markdownFiles": "Markdown-Dateien",

@@ -1,4 +1,5 @@
 {
+	"insertTableHeaderRow": "Insérer une ligne d’en-tête",
 	"syncSourcePreview": "La source de synchronisation a changé. Local : ${local} fichiers ; source : ${cloud} fichiers, ${time}, appareil : ${device}. Envoi : ${upload} fichiers. Restauration : écrasement de ${overwrite} fichiers locaux, suppression de ${remove}. Choisissez une direction ; la fusion automatique est suspendue",
 	"markdownSourceOnly": "Fichier volumineux : édition du texte source uniquement ; aperçu désactivé",
 	"markdownFiles": "Fichiers Markdown",

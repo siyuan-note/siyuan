@@ -507,9 +507,9 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             const range = getEditorRange(f.cell(0, 0));
             const before = transactions.length;
             if (source === "control") {
-                f.invoke("insertRowAt", node, f.table, 0, 2);
+                f.invoke("insertRowAt", node, f.table, 0, 2, true);
             } else {
-                tableAPI.insertRowAbove(f.owner, range, f.cell(0, 0), node, 2);
+                tableAPI.insertRowAbove(f.owner, range, f.cell(0, 0), node, 2, true);
             }
             check.equal(transactions.length, before + 1);
             check.equal(f.table.tHead.rows.length, 3, "prepending rows expands rather than replaces the header");
@@ -522,6 +522,42 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             tableAPI.insertRow(f.owner, getEditorRange(f.cell(4, 0)), f.cell(4, 0), node);
             check.equal(f.table.tHead.rows.length, 5, "inserting after the last header row creates a body row");
             check.equal(f.cell(5, 0).tagName, "TD");
+            f.dispose();
+        }
+        for (const source of ["control", "cell"]) {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.invoke("selectFromCell", "row", f.cell(0, 1), false, false);
+            f.invoke("openMenu", 0, 0);
+            const insertHeader = items.find(item => item.id === "insertTableHeaderRow");
+            check.ok(insertHeader, "header row menus expose explicit header insertion on both platforms");
+            if (source === "control") {
+                insertHeader.click(undefined, undefined);
+            } else {
+                tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(0, 1)), f.cell(0, 1), node);
+            }
+            check.equal(f.table.tHead.rows.length, 2);
+            check.equal(f.cell(1, 0).textContent, "H1");
+            if (source === "control") {
+                f.invoke("insertRowAt", node, f.table, 0, 2);
+            } else {
+                tableAPI.insertRowAbove(f.owner, getEditorRange(f.cell(0, 1)), f.cell(0, 1), node, 2);
+                const caret = getSelection().anchorNode;
+                check.equal((caret instanceof Element ? caret : caret.parentElement).closest("th"), f.cell(0, 1),
+                    "ordinary insertion retains the caret column after changing cell tags");
+            }
+            check.equal(f.table.tHead.rows.length, 1, "ordinary insertion replaces the header instead of expanding it");
+            check.equal(f.cell(3, 0).textContent, "H1");
+            check.equal(f.cell(3, 0).tagName, "TD");
+            f.invoke("selectFromCell", "row", f.cell(3, 0), false, false);
+            f.invoke("openMenu", 0, 0);
+            check.equal(items.some(item => item.id === "insertTableHeaderRow"), false, "body menus omit header insertion");
+            const original = node.outerHTML;
+            tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(3, 0)), f.cell(3, 0), node);
+            check.equal(node.outerHTML, original, "header insertion rejects body targets");
+            f.owner.disabled = true;
+            tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(0, 0)), f.cell(0, 0), node);
+            check.equal(node.outerHTML, original, "header insertion respects readonly mode");
             f.dispose();
         }
         {
@@ -540,7 +576,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         {
             const f = fixture();
             const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
-            f.invoke("insertRowAt", node, f.table, 0);
+            f.invoke("insertRowAt", node, f.table, 0, 1, true);
             f.cell(0, 0).textContent = "top";
             const rich = Buffer.from(JSON.stringify({spec: 1, format: "kramdown", content: "kept"})).toString("base64url");
             f.cell(1, 0).setAttribute("data-sy-table-cell-rich", rich);

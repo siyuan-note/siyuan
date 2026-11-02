@@ -156,6 +156,9 @@ func documentTargetFailure(err error) CallToolResult {
 func resolveDocumentTarget(notebook string, args map[string]any, create, defaultRoot bool) (*documentTarget, error) {
 	parent, hasParent := args["parentID"]
 	legacy, hasPath := args["path"]
+	if _, ok := parent.(string); ok && legacy == "" {
+		hasPath = false
+	}
 	if hasParent && hasPath {
 		return nil, errors.New("parentID and path cannot be combined")
 	}

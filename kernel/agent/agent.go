@@ -136,7 +136,7 @@ var toolSignatureKeys = map[string][]string{
 
 	"attr":      {"id", "ids"},
 	"block":     {"id", "ids", "parentID", "nextID", "previousID"},
-	"document":  {"id", "path", "notebook", "keyword"},
+	"document":  {"id", "parentID", "path", "notebook", "keyword"},
 	"database":  {"id", "notebook", "parentID", "previousID", "nextID", "keyID", "itemID", "itemIDs", "keyword"},
 	"ref":       {"id", "keyword"},
 	"notebook":  {"id", "name"},

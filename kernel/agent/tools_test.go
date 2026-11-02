@@ -168,6 +168,31 @@ func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
 	}
 }
 
+func TestDoomLoopTracksDocumentParents(t *testing.T) {
+	var tracker doomLoopTracker
+	args := map[string]any{"notebook": "box", "parentID": "parent-a", "path": ""}
+	for range doomLoopWarnThreshold {
+		tracker.record("document", "create", args, true)
+	}
+	if tracker.count != doomLoopWarnThreshold {
+		t.Fatalf("repeated document failure was not tracked: %#v", tracker)
+	}
+	args["parentID"] = "parent-b"
+	tracker.record("document", "create", args, true)
+	if tracker.count != 1 {
+		t.Fatalf("different parent was treated as a repeated failure: %#v", tracker)
+	}
+	args["parentID"] = ""
+	tracker.record("document", "create", args, true)
+	if tracker.count != 1 {
+		t.Fatalf("notebook root was treated as the previous parent: %#v", tracker)
+	}
+	tracker.record("document", "create", args, false)
+	if tracker.count != 0 {
+		t.Fatalf("successful document call did not reset tracker: %#v", tracker)
+	}
+}
+
 func TestResultToStringUsesStructuredContent(t *testing.T) {
 	result := resultToString(tools.CallToolResult{
 		StructuredContent: map[string]any{"status": "ok"},

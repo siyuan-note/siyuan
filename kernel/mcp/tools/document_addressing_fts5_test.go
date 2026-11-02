@@ -130,6 +130,8 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	}
 	for _, invalid := range []map[string]any{
 		{"parentID": literal.ID, "path": "/A/B"}, {"parentID": nil}, {"parentID": 1},
+		{"parentID": literal.ID, "path": " "}, {"parentID": literal.ID, "path": nil},
+		{"parentID": literal.ID, "path": 1}, {"parentID": nil, "path": ""}, {"parentID": 1, "path": ""},
 		{"parentID": "invalid"}, {"parentID": ast.NewNodeID()}, {"parentID": literal.Root.FirstChild.ID},
 	} {
 		if target, err := resolveDocumentTarget(box.ID, invalid, false, false); err == nil {
@@ -170,6 +172,40 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	}
 	if _, err := resolveDocumentTarget(box.ID, map[string]any{"path": ""}, false, true); err != nil {
 		t.Fatal("empty listing path no longer selects root", err)
+	}
+	previousCreated := ""
+	for _, parentID := range []string{literal.ID, ""} {
+		createdID := ""
+		for _, action := range []string{"create", "list", "move"} {
+			args := map[string]any{"action": action, "notebook": box.ID, "parentID": parentID,
+				"path": "", "title": "Empty legacy path", "id": source.ID}
+			result, err := documentHandler(args)
+			if err != nil || result.IsError {
+				t.Fatalf("%s with parent %q and empty legacy path: %+v, %v", action, parentID, result, err)
+			}
+			if value, ok := args["path"]; !ok || value != "" {
+				t.Fatal("target resolution mutated the caller's arguments")
+			}
+			if action == "list" {
+				if !strings.Contains(result.Content[0].Text, createdID) || previousCreated != "" && strings.Contains(result.Content[0].Text, previousCreated) {
+					t.Fatalf("listing used the wrong parent: %+v", result)
+				}
+				continue
+			}
+			id := source.ID
+			if action == "create" {
+				id = strings.Fields(result.Content[0].Text)[2]
+				createdID = id
+			}
+			docs, missing, err := model.GetDocPaths(box.ID, []string{id})
+			if err != nil || len(missing) != 0 || len(docs) != 1 {
+				t.Fatalf("%s result missing: %+v, %v", action, docs, err)
+			}
+			if parentID == "" && docs[0].ParentID != nil || parentID != "" && (docs[0].ParentID == nil || *docs[0].ParentID != parentID) {
+				t.Fatalf("%s used the wrong parent: %+v", action, docs[0])
+			}
+		}
+		previousCreated = createdID
 	}
 	foreign := &model.Box{ID: ast.NewNodeID()}
 	if err := foreign.SaveConf(boxConf); err != nil {

@@ -8966,6 +8966,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
+     * 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
      */
     "/api/tag/previewTagRemoval": {
         request: TagRemovalPreviewRequestInput;

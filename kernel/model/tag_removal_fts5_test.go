@@ -90,6 +90,16 @@ func TestTagRemovalContainerRetainsOtherSources(t *testing.T) {
 	if err != nil || len(groups) != 1 || len(groups[0].Cleanup.Items) != 1 || groups[0].Cleanup.Items[0].BlockID != quote.ID {
 		t.Fatalf("container preview: %+v %v", groups, err)
 	}
+	old = util.NewLute().RenderNodeBlockDOM(quote)
+	first.FirstChild.TextMarkTextContent = "t"
+	second.FirstChild.TextMarkTextContent = "other"
+	if err = PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "update", ID: quote.ID, Data: util.NewLute().RenderNodeBlockDOM(quote)}}, UndoOperations: []*Operation{{Action: "update", ID: quote.ID, Data: old}}}); err != nil {
+		t.Fatal(err)
+	}
+	groups, err = PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Changes: []*apicontract.TagRemovalChange{{ID: first.ID, Tags: []string{"t"}}}})
+	if err != nil || len(groups) != 1 || len(groups[0].Cleanup.Items) != 1 || groups[0].Cleanup.Items[0].BlockID != quote.ID {
+		t.Fatalf("renamed container source preview: %+v %v", groups, err)
+	}
 }
 
 func TestTagRemovalPreviewAndAtomicUndo(t *testing.T) {
@@ -137,6 +147,58 @@ func TestTagRemovalPreviewAndAtomicUndo(t *testing.T) {
 	}
 	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) != nil {
 		t.Fatal("redo did not remove row")
+	}
+}
+
+func TestTagRemovalAfterIncrementalRename(t *testing.T) {
+	for _, mode := range []string{"automatic", "manual", "otherRule", "absentTag"} {
+		t.Run(mode, func(t *testing.T) {
+			fixture, view, _ := setupBlockCollectionTest(t)
+			if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo")); err != nil {
+				t.Fatal(err)
+			}
+			for _, tag := range []string{"tod", "to", "t"} {
+				if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, tag)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			view = readAttributeViewItemsTest(t, view.ID)
+			if mode == "manual" {
+				view.GetBlockValueByBoundID(fixture.sourceID).Block.CollectionRuleID = ""
+			}
+			if mode == "otherRule" {
+				rule := *view.Automations.Rules[0]
+				rule.ID = ast.NewNodeID()
+				source := *rule.BlockSource
+				source.Tags = nil
+				rule.BlockSource = &source
+				view.Automations.Rules = append(view.Automations.Rules, &rule)
+			}
+			if err := av.SaveAttributeView(view); err != nil {
+				t.Fatal(err)
+			}
+			label := "t"
+			if mode == "absentTag" {
+				label = "todo"
+			}
+			groups, err := PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Changes: []*apicontract.TagRemovalChange{{ID: fixture.sourceID, Tags: []string{label}}}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if mode != "automatic" {
+				if len(groups) != 0 {
+					t.Fatal("protected entry appeared", groups)
+				}
+				return
+			}
+			if len(groups) != 1 || len(groups[0].Cleanup.Items) != 1 {
+				t.Fatal("incrementally renamed tag did not offer cleanup", groups)
+			}
+			tx, err := RemoveTagWithCollections(apicontract.RemoveTagWithCollectionsRequest{Label: label, Collections: groups})
+			if err != nil || tx == nil || readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(fixture.sourceID) != nil {
+				t.Fatal("incrementally renamed tag cleanup failed", err)
+			}
+		})
 	}
 }
 

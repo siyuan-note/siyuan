@@ -12,7 +12,8 @@ type TagRemovalChange struct {
 
 // TagRemovalPreviewRequest 的 label 与 changes 二选一。
 // label 查找全工作区同名标签；changes 用于编辑器中即将提交的删除。
-// 只返回此前匹配、删除后不再符合任何启用规则的自动收集条目；手动条目和未知状态保留。
+// 返回本次移除标签涉及、删除后不再符合任何启用规则的自动收集条目，包括逐字改名后移除的标签。
+// 手动条目、未实际移除的标签和未知状态保留。
 type TagRemovalPreviewRequest struct {
 	Label   string              `json:"label,omitempty" api:"optional"`
 	Changes []*TagRemovalChange `json:"changes,omitempty" api:"optional"`

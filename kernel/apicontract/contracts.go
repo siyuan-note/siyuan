@@ -1627,6 +1627,7 @@ var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AV
 var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
+// 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
 var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。

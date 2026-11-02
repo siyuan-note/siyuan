@@ -64,6 +64,22 @@ func TestAPIContractTagRemovalPreview(t *testing.T) {
 	if err != nil || stored.Root.IALAttr("tags") != "todo" {
 		t.Fatal("preview changed source", err)
 	}
+	stored.Root.SetIALAttr("tags", "t")
+	if _, err = filesys.WriteTree(stored); err != nil {
+		t.Fatal(err)
+	}
+	for _, label := range []string{"t", "todo"} {
+		response = callAttributeViewContextFilterAPI(t, path, map[string]any{"changes": []map[string]any{{"id": tree.ID, "tags": []string{label}}}}, previewTagRemoval)
+		requireAPIContract(t, http.MethodPost, path, response)
+		decodeAttributeViewContextFilterAPIResponse(t, response, &envelope)
+		want := 0
+		if label == "t" {
+			want = 1
+		}
+		if envelope.Code != 0 || len(envelope.Data) != want {
+			t.Fatalf("renamed tag %q preview: %s", label, response.Body.String())
+		}
+	}
 	treenode.UpsertBlockTree(stored)
 }
 

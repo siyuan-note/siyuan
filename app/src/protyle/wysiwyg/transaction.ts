@@ -98,6 +98,7 @@ import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {getTagRemovalChanges, previewTagRemoval, tagRemovalOperations} from "../util/tagRemoval";
 import {showMessage} from "../../dialog/message";
+import {getEditorFocusRange, restoreEditorFocusRange} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -2570,9 +2571,37 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         const changes = getTagRemovalChanges(doOperations, undoOperations);
         if (changes.length) {
             const wasDisabled = protyle.disabled;
+            const selection = getSelection();
+            const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
+                selection.rangeCount ? selection.getRangeAt(0) : undefined);
+            let focusContext = getUndoFocusContext(protyle.wysiwyg.element, focusRange, true);
+            const operationFocus = (operations?: IOperation[]) => {
+                const operation = operations?.find(item => item.action === "update" &&
+                    (!focusContext || item.id === focusContext.undoFocusId) &&
+                    typeof item.data === "string" && item.data.includes("<wbr"));
+                if (!operation || typeof operation.data !== "string") {
+                    return;
+                }
+                const container = document.createElement("div");
+                container.innerHTML = operation.data;
+                const marker = container.querySelector("wbr");
+                if (marker) {
+                    const range = document.createRange();
+                    range.setStartBefore(marker);
+                    range.collapse(true);
+                    return getUndoFocusContext(container, range, true);
+                }
+            };
+            focusContext = focusContext || operationFocus(doOperations);
             disabledProtyle(protyle);
             void (async () => {
-                const restore = () => new Promise<void>(resolve => reloadProtyle(protyle, true, false, resolve, resolve));
+                let sourceRestored = false;
+                let entriesRemoved = false;
+                const restore = () => new Promise<void>(resolve => {
+                    sourceRestored = true;
+                    focusContext = operationFocus(undoOperations) || focusContext;
+                    reloadProtyle(protyle, false, false, resolve, resolve);
+                });
                 try {
                     await waitForPendingTransactions(protyle);
                     const groups = await previewTagRemoval(changes);
@@ -2581,6 +2610,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                         return;
                     }
                     const cleanup = tagRemovalOperations(groups);
+                    entriesRemoved = cleanup.length > 0;
                     transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
                         {...options, tagRemovalConfirmed: true});
                     await waitForPendingTransactions(protyle);
@@ -2588,7 +2618,13 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                     showMessage(error.message);
                     await restore();
                 } finally {
-                    if (!wasDisabled) { enableProtyle(protyle); }
+                    if (!wasDisabled) {
+                        enableProtyle(protyle);
+                        if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                            protyle.wysiwyg.element.focus({preventScroll: true});
+                            restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
+                        }
+                    }
                 }
             })();
             return;

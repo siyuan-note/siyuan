@@ -130,10 +130,10 @@ func PreviewTagRemoval(request apicontract.TagRemovalPreviewRequest) ([]*apicont
 	if err != nil {
 		return nil, err
 	}
-	return previewTagRemovalTrees(before, after)
+	return previewTagRemovalTrees(before, after, changes)
 }
 
-func previewTagRemovalTrees(before, after map[string]*parse.Tree) ([]*apicontract.TagRemovalCollection, error) {
+func previewTagRemovalTrees(before, after map[string]*parse.Tree, changes []*apicontract.TagRemovalChange) ([]*apicontract.TagRemovalCollection, error) {
 	if len(before) == 0 {
 		return []*apicontract.TagRemovalCollection{}, nil
 	}
@@ -166,12 +166,29 @@ func previewTagRemovalTrees(before, after map[string]*parse.Tree) ([]*apicontrac
 			Cleanup: apicontract.AVCollectionCleanup{RuleVersion: review.version, AutomaticOnly: true, Items: []*apicontract.AVCollectionCleanupItem{}}}
 		for rootID, oldTree := range before {
 			was, now := map[string]bool{}, map[string]bool{}
+			var removedLabels []string
+			for _, change := range changes {
+				if treenode.GetNodeInTree(oldTree, change.ID) != nil {
+					removedLabels = append(removedLabels, change.Tags...)
+				}
+			}
 			for _, rule := range review.rules {
 				for id := range collectionMatches(rule.BlockSource, oldTree) {
 					was[id] = true
 				}
 				for id := range collectionMatches(rule.BlockSource, after[rootID]) {
 					now[id] = true
+				}
+				// 逐字退格会先改名；以本次实际移除的标签定位原有自动条目的收集对象。
+				if len(rule.BlockSource.Tags) > 0 && len(removedLabels) > 0 {
+					source := *rule.BlockSource
+					source.Tags, source.TagMatch = removedLabels, "or"
+					remaining := collectionMatches(&source, after[rootID])
+					for id := range collectionMatches(&source, oldTree) {
+						if !remaining[id] {
+							was[id] = true
+						}
+					}
 				}
 			}
 			for _, row := range view.GetBlockKeyValues().Values {
@@ -207,7 +224,7 @@ func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsReques
 		if err != nil {
 			return result{err: err}
 		}
-		eligible, err := previewTagRemovalTrees(before, after)
+		eligible, err := previewTagRemovalTrees(before, after, changes)
 		if err != nil {
 			return result{err: err}
 		}

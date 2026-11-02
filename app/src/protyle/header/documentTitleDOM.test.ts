@@ -117,8 +117,40 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     const editor = Object.assign(Object.create(Editor.prototype), {fragment: {wysiwyg}, onEditable: () => {}});
     const style = document.createElement("style");
     document.head.appendChild(style);
+    const plainTitle = document.createElement("div");
+    plainTitle.className = "protyle-title";
+    plainTitle.innerHTML = '<div class="protyle-title__input" data-tip="Untitled document"></div>';
+    const plainInput = plainTitle.firstElementChild as HTMLElement;
+    const bodyParagraph = document.createElement("div");
+    bodyParagraph.className = "protyle-wysiwyg";
+    bodyParagraph.innerHTML = paragraph("Body text");
+    document.body.append(plainTitle, bodyParagraph);
     for (const css of styles) {
         style.textContent = css;
+        for (const fontSize of [16, 32]) {
+            document.body.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+            for (const width of [240, 720]) {
+                container.style.width = plainTitle.style.width = `${width}px`;
+                for (const content of ["", "Named title", '<span data-type="strong">Formatted title </span>'.repeat(12)]) {
+                    wysiwyg.innerHTML = lute.SpinBlockDOM(paragraph(content));
+                    editor.updateEditable();
+                    const editable = editor.editable as HTMLElement;
+                    plainInput.innerHTML = editable.innerHTML;
+                    const context = JSON.stringify({fontSize, width, content});
+                    const actual = editable.getBoundingClientRect();
+                    const expected = plainInput.getBoundingClientRect();
+                    check.ok(Math.abs(actual.left - expected.left) < 1,
+                        "rich title text aligns with the plain title: " + context);
+                    check.ok(Math.abs(actual.top - container.getBoundingClientRect().top) < 1,
+                        "the title paragraph adds no vertical inset: " + context);
+                    check.ok(Math.abs(container.getBoundingClientRect().height - actual.height) < 1,
+                        "rich title height follows its content without paragraph padding: " + context);
+                    check.ok(Math.abs(actual.width - expected.width) < 1, "title wrapping uses the same width: " + context);
+                    check.equal(getComputedStyle(bodyParagraph.firstElementChild).padding, "4px",
+                        "ordinary body paragraphs retain their spacing");
+                }
+            }
+        }
         // Loading, clearing and restoring a title all replace its temporary paragraph.
         for (const content of ["", "Named title", "", "image", ""]) {
             wysiwyg.innerHTML = lute.SpinBlockDOM(content === "image" ? lute.Md2BlockDOM("![](assets/p.png)") : paragraph(content));
@@ -188,11 +220,13 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         check.notEqual(fingerprint(draft), saved);
     }
     container.remove();
+    plainTitle.remove();
+    bodyParagraph.remove();
     style.remove();
     return "Document title DOM cases passed";
 };
 
-test("native document title DOM preserves inline content, parsing, placeholders and readonly sync handoff", {
+test("native document title DOM preserves inline content, alignment, parsing, placeholders and readonly sync handoff", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {

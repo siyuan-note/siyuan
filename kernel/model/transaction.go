@@ -2869,6 +2869,7 @@ type Transaction struct {
 	flashcardBefore               map[string]*flashcardDeckBefore
 	writeFlashcardFile            func(string, []byte, []byte) error
 	attributeViewRollback         *attributeViewRollback
+	historyRecovery               *attributeViewHistoryRecovery
 	attributeViewAutomations      *attributeViewAutomationState
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState

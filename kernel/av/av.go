@@ -914,6 +914,16 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 }
 
 func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
+	return parseAttributeViewDataWithRecovery(avID, data, normalizeRichText, false)
+}
+
+// ParseAttributeViewRecoveryData 解析已认证的恢复前数据，仅容许列表或日历布局缺失。
+// 返回值只供历史恢复计算变化，不能用于正常渲染或直接保存。
+func ParseAttributeViewRecoveryData(avID string, data []byte) (*AttributeView, error) {
+	return parseAttributeViewDataWithRecovery(avID, data, true, true)
+}
+
+func parseAttributeViewDataWithRecovery(avID string, data []byte, normalizeRichText, recovery bool) (ret *AttributeView, err error) {
 	// 仅处理已认证明文的开头 BOM；缓存和条件写入保留原始字节以检测外部修改。
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
@@ -973,6 +983,9 @@ func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (r
 			return
 		}
 	}
+	if err == nil && recovery {
+		err = ret.validateRecoveryStructure(avID)
+	}
 	if nil == err {
 		err = CheckSpec(ret)
 	}
@@ -980,7 +993,7 @@ func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (r
 		err = ret.Automations.ValidateSpec()
 	}
 	if nil == err {
-		err = ret.ValidateLayouts()
+		err = ret.validateLayouts(recovery)
 	}
 	if nil == err && normalizeRichText {
 		err = ret.NormalizeRichText()
@@ -1131,7 +1144,12 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 			if readErr != nil {
 				return readErr
 			}
-			if _, readErr = ParseAttributeViewData(av.ID, plain); readErr != nil {
+			if value.(*sourceWriteRecord).recovery {
+				_, readErr = ParseAttributeViewRecoveryData(av.ID, plain)
+			} else {
+				_, readErr = ParseAttributeViewData(av.ID, plain)
+			}
+			if readErr != nil {
 				return readErr
 			}
 		}

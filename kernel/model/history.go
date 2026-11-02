@@ -379,12 +379,22 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	if encrypted && tree.Root.ID+".sy" != filepath.Base(historyPath) {
 		return errors.New("encrypted document history root ID does not match its filename")
 	}
-	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
-	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
+	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}, historyRecovery: newAttributeViewHistoryRecovery()}
+	defer boundRecovery.finishHistoryRecovery(&err)
 	if nil != tree {
 		historyDir := filepath.Join(util.HistoryDir, parts[0])
 
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+		for _, avNode := range avNodes {
+			avBoxID := ""
+			if encrypted {
+				avBoxID = boxID
+			}
+			if err = boundRecovery.preflightEmbeddedAttributeViewHistory(
+				boundAttributeViewHistoryPath(historyDir, avBoxID, avNode.AttributeViewID), avBoxID, avNode.AttributeViewID); err != nil {
+				return
+			}
+		}
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
 			// 加密笔记本的 AV 定义在笔记本级目录
@@ -471,7 +481,10 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 			return
 		}
 	}
-	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc); err != nil {
+	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc, boundRecovery.historyRecovery); err != nil {
+		return
+	}
+	if err = boundRecovery.historyRecovery.commit(); err != nil {
 		return
 	}
 	invalidateDocumentHistory(tree.ID)
@@ -826,9 +839,15 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
-	recovery := &Transaction{trees: map[string]*parse.Tree{}}
-	defer func() { recovery.finishAttributeViewMutation(err != nil) }()
+	recovery := &Transaction{trees: map[string]*parse.Tree{}, historyRecovery: newAttributeViewHistoryRecovery()}
+	defer recovery.finishHistoryRecovery(&err)
+	if err = recovery.preflightEmbeddedAttributeViewHistory(from, avBoxID, avID); err != nil {
+		return
+	}
 	if err = recovery.restoreEmbeddedAttributeViewHistory(from, avBoxID, avID); err != nil {
+		return
+	}
+	if err = recovery.historyRecovery.commit(); err != nil {
 		return
 	}
 	queueExternalAttributeViewRefIndex(avID, avBoxID)

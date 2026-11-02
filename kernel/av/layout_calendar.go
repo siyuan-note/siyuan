@@ -253,13 +253,17 @@ func (view *View) TableLayouts() []*LayoutTable {
 }
 
 func (attrView *AttributeView) ValidateCalendarLayouts() error {
+	return attrView.validateCalendarLayouts(false)
+}
+
+func (attrView *AttributeView) validateCalendarLayouts(recovery bool) error {
 	var validate func(*View) error
 	validate = func(view *View) error {
 		if nil == view {
 			return nil
 		}
-		if LayoutTypeCalendar == view.LayoutType && nil == view.Calendar {
-			return fmt.Errorf("calendar layout missing in view [%s]", view.ID)
+		if LayoutTypeCalendar == view.LayoutType && nil == view.Calendar && !recovery {
+			return &MissingLayoutError{Type: LayoutTypeCalendar, ViewID: view.ID}
 		}
 		if layout := view.Calendar; nil != layout {
 			if nil == layout.LayoutTable || nil == layout.BaseLayout || layout.Settings.WeekStart < 0 ||

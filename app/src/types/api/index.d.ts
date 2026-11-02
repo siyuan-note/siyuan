@@ -6276,6 +6276,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 恢复完整数据库历史；当前数据库仅缺失日历或列表布局时仍可恢复。
+     * 受损原始文件及加密恢复材料保存在 conf/document-source-recovery；未知格式或认证失败保留原件并报错。
+     */
     "/api/history/rollbackAttributeViewHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6283,6 +6287,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 恢复文档及其内嵌数据库历史；当前数据库仅缺失日历或列表布局时，保留原始文件后恢复。
+     * 历史、当前数据均须通过格式与加密认证校验；写入失败补偿本次变化，外部修改保留并报错。
+     */
     "/api/history/rollbackDocHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

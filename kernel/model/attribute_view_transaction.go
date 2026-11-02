@@ -43,7 +43,12 @@ func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string)
 		}
 		tx.attributeViewRollback.leases[boxID] = true
 	}
-	current, err := av.ParseAttributeViewForIndexInBox(avID, boxID)
+	var current *av.AttributeView
+	if tx.historyRecovery != nil {
+		current, err = tx.historyRecovery.readCurrent(avID, boxID)
+	} else {
+		current, err = av.ParseAttributeViewForIndexInBox(avID, boxID)
+	}
 	if err == nil && current == nil {
 		err = av.ErrViewNotFound
 	}
@@ -77,18 +82,7 @@ func (tx *Transaction) rememberAttributeViewMutationTree(blockID string) error {
 }
 
 func syncAttributeViewRelationIndexes(before, after *av.AttributeView) {
-	targets := func(view *av.AttributeView) map[string]bool {
-		ret := map[string]bool{}
-		if view != nil {
-			for _, kv := range view.KeyValues {
-				if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID != "" {
-					ret[kv.Key.Relation.AvID] = true
-				}
-			}
-		}
-		return ret
-	}
-	beforeTargets, afterTargets := targets(before), targets(after)
+	beforeTargets, afterTargets := attributeViewRelationTargets(before), attributeViewRelationTargets(after)
 	for id := range beforeTargets {
 		if !afterTargets[id] {
 			av.RemoveAvRel(after.ID, id)
@@ -97,6 +91,35 @@ func syncAttributeViewRelationIndexes(before, after *av.AttributeView) {
 	for id := range afterTargets {
 		av.UpsertAvBackRel(after.ID, id)
 	}
+}
+
+func attributeViewRelationTargets(view *av.AttributeView) map[string]bool {
+	ret := map[string]bool{}
+	if view != nil {
+		for _, kv := range view.KeyValues {
+			if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID != "" {
+				ret[kv.Key.Relation.AvID] = true
+			}
+		}
+	}
+	return ret
+}
+
+func syncAttributeViewRelationIndexesWithErr(before, after *av.AttributeView) error {
+	beforeTargets, afterTargets := attributeViewRelationTargets(before), attributeViewRelationTargets(after)
+	for id := range beforeTargets {
+		if !afterTargets[id] {
+			if err := av.RemoveAvRelWithErr(after.ID, id); err != nil {
+				return err
+			}
+		}
+	}
+	for id := range afterTargets {
+		if err := av.UpsertAvBackRelWithErr(after.ID, id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // 非编辑器变更在提交成功后清理失效历史；无事务的写入在保存后立即清理。

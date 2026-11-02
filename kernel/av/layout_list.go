@@ -57,13 +57,17 @@ func TableFromViewable(viewable Viewable) *Table {
 
 // ValidateListLayouts 校验列表布局的结构，拒绝损坏数据并保留原始文件。
 func (attrView *AttributeView) ValidateListLayouts() error {
+	return attrView.validateListLayouts(false)
+}
+
+func (attrView *AttributeView) validateListLayouts(recovery bool) error {
 	var validate func(*View) error
 	validate = func(view *View) error {
 		if nil == view {
 			return nil
 		}
-		if LayoutTypeList == view.LayoutType && nil == view.List {
-			return fmt.Errorf("list layout missing in view [%s]", view.ID)
+		if LayoutTypeList == view.LayoutType && nil == view.List && !recovery {
+			return &MissingLayoutError{Type: LayoutTypeList, ViewID: view.ID}
 		}
 		if nil != view.List {
 			if nil == view.List.BaseLayout {

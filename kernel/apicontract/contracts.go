@@ -835,12 +835,16 @@ var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory",
 
 var CreateAssetHistory = define[CreateAssetHistoryRequest, Null]("createAssetHistory", "/api/history/createAssetHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// RollbackDocHistory 恢复文档及其内嵌数据库历史；当前数据库仅缺失日历或列表布局时，保留原始文件后恢复。
+// 历史、当前数据均须通过格式与加密认证校验；写入失败补偿本次变化，外部修改保留并报错。
 var RollbackDocHistory = define[HistoryPathRequest, Null]("rollbackDocHistory", "/api/history/rollbackDocHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var RollbackAssetsHistory = define[HistoryPathRequest, Null]("rollbackAssetsHistory", "/api/history/rollbackAssetsHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var RollbackNotebookHistory = define[HistoryPathRequest, Null]("rollbackNotebookHistory", "/api/history/rollbackNotebookHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// RollbackAttributeViewHistory 恢复完整数据库历史；当前数据库仅缺失日历或列表布局时仍可恢复。
+// 受损原始文件及加密恢复材料保存在 conf/document-source-recovery；未知格式或认证失败保留原件并报错。
 var RollbackAttributeViewHistory = define[HistoryPathRequest, Null]("rollbackAttributeViewHistory", "/api/history/rollbackAttributeViewHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var DiffDocVersions = define[DiffDocVersionsRequest, *DocVersionDiffResult]("diffDocVersions", "/api/history/diffDocVersions", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")

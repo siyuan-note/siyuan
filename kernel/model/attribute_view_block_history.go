@@ -76,6 +76,20 @@ func readBoundAttributeViewHistory(filename, boxID, avID string) (*av.AttributeV
 }
 
 // 内嵌数据库也先认证历史，并与绑定条目恢复一起纳入失败回滚。
+func (tx *Transaction) preflightEmbeddedAttributeViewHistory(filename, boxID, avID string) error {
+	if _, err := readBoundAttributeViewHistory(filename, boxID, avID); err != nil {
+		if boxID == "" && os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	_, err := tx.readAttributeViewForMutation(avID, "", boxID)
+	if errors.Is(err, av.ErrViewNotFound) {
+		return nil
+	}
+	return err
+}
+
 func (tx *Transaction) restoreEmbeddedAttributeViewHistory(filename, boxID, avID string) error {
 	historical, err := readBoundAttributeViewHistory(filename, boxID, avID)
 	if err != nil {

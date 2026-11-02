@@ -1,12 +1,12 @@
 const assert = require("node:assert/strict");
 const {execFile} = require("node:child_process");
-const {mkdtempSync, rmSync} = require("node:fs");
+const {mkdtempSync, readFileSync, rmSync} = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const {promisify} = require("node:util");
 
 // 使用真实样式验证前端形态与设备平台组合，保留原生窗口占位和浏览器安全区。
-const browserCases = ({css, mobile}) => {
+const browserCases = ({css, mobile, inboxDetailHTML}) => {
     const check = require("node:assert/strict");
     const style = document.createElement("style");
     style.textContent = css;
@@ -84,6 +84,27 @@ const browserCases = ({css, mobile}) => {
                     if (kind === "backlink") {
                         document.querySelector(".side-panel").classList.remove("side-panel");
                         check.equal(getComputedStyle(scroller, "::after").content, "none", "non-sidebar backlinks have no extra spacer");
+                    }
+                }
+                document.body.innerHTML = `<div class="side-panel fn__flex-column" style="transform:none"><div class="toolbar">Docks</div><div class="fn__flex-1 b3-list--mobile"><div class="fn__flex-column" data-type="sidebar-inbox"><div class="toolbar">Inbox</div><div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height:auto">${inboxDetailHTML}</div><div class="fn__flex-1 inboxList"><ul style="padding:8px 0" class="b3-list">${rows}</ul></div></div></div></div>`;
+                const details = document.querySelector(".inboxDetails");
+                const inboxList = document.querySelector(".inboxList");
+                for (const bottom of [0, 24, 32, 15.75, 0]) {
+                    document.documentElement.style.setProperty("--android-navigation-bar-height", `${bottom}px`);
+                    for (const showDetails of [false, true, false]) {
+                        details.classList.toggle("fn__none", !showDetails);
+                        inboxList.classList.toggle("fn__none", showDetails);
+                        const scroller = showDetails ? details : inboxList;
+                        scroller.scrollTop = scroller.scrollHeight;
+                        check.ok(scroller.scrollTop > 0, "inbox view has scrollable content");
+                        check.ok(Math.abs(scroller.getBoundingClientRect().bottom - innerHeight) < 1, "inbox view reaches the viewport bottom");
+                        const last = scroller.querySelector(showDetails ? "img" : "li:last-child");
+                        check.ok(last.getBoundingClientRect().bottom <= innerHeight - bottom + 1, "inbox list and detail content clear the gesture area");
+                        if (showDetails) {
+                            const content = details.querySelector(".b3-typography");
+                            check.equal(getComputedStyle(content).paddingBottom, `${8 + bottom}px`, "inbox details preserve their spacing and add the inset once");
+                            check.ok(Math.abs(innerHeight - last.getBoundingClientRect().bottom - bottom - 8) < 1, "inbox detail image can scroll fully above the gesture area");
+                        }
                     }
                 }
                 document.documentElement.style.removeProperty("--android-navigation-bar-height");
@@ -168,13 +189,19 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.debugger.sendCommand("Emulation.setSafeAreaInsetsOverride", {
                 insets: {top: 32, left: 0, right: 0, bottom: 0},
             });
+            const inboxSource = readFileSync(path.join(__dirname, "../src/layout/dock/Inbox.ts"), "utf8");
+            const detailTemplate = inboxSource.match(/return sanitizeKernelHTML\(`(<div class="toolbar">[\s\S]*?)`\);/);
+            assert.ok(detailTemplate, "mobile inbox detail template exists");
+            const inboxDetailHTML = detailTemplate[1].replace("${data.shorthandTitle}", "Inbox detail")
+                .replace("${linkHTML}", "")
+                .replace("${data.shorthandContent}", '<img alt="Detail end" style="height:1600px;width:100px;flex-shrink:0" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">');
             for (const mobile of [true, false]) {
                 const css = sass.compile(path.join(__dirname, `../src/assets/scss/${mobile ? "mobile" : "base"}.scss`), {
                     logger: sass.Logger.silent,
                 }).css;
                 await win.loadURL("data:text/html,<html><head><meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover'></head><body></body></html>");
                 const error = await win.webContents.executeJavaScript(`(() => {
-                    try { (${browserCases.toString()})(${JSON.stringify({css, mobile})}); }
+                    try { (${browserCases.toString()})(${JSON.stringify({css, mobile, inboxDetailHTML})}); }
                     catch (error) { return error.stack; }
                 })()`);
                 assert.equal(error, undefined);

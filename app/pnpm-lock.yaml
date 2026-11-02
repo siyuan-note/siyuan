@@ -210,8 +210,8 @@ importers:
         specifier: ^7.1.2
         version: 7.1.4(webpack@5.106.2)
       dayjs:
-        specifier: ^1.11.5
-        version: 1.11.20
+        specifier: ^1.11.23
+        version: 1.11.23
       electron:
         specifier: 44.10.0
         version: 44.10.0(supports-color@8.1.1)
@@ -1586,8 +1586,8 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  dayjs@1.11.20:
-    resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
+  dayjs@1.11.23:
+    resolution: {integrity: sha512-QDTCU0M0MxR3hQfnlDJfwekQiaanm1ubOD231u73WBckQ/fsamwRLiE2GBz6D3a/xF1NgfiDLJjXBa1hYOYTtQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -4489,7 +4489,7 @@ snapshots:
 
   cssesc@3.0.0: {}
 
-  dayjs@1.11.20: {}
+  dayjs@1.11.23: {}
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:

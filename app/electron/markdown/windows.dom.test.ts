@@ -181,6 +181,9 @@ test("the real sandboxed page saves and switches A to B to A through its restric
     try {
         fs.mkdirSync(path.join(root, "appearance/langs"), {recursive: true});
         fs.copyFileSync(path.resolve(__dirname, "../../appearance/langs/en.json"), path.join(root, "appearance/langs/en.json"));
+        const sharedLute = path.join(root, "stage/protyle/js/lute/lute.min.js");
+        fs.mkdirSync(path.dirname(sharedLute), {recursive: true});
+        fs.copyFileSync(path.resolve(__dirname, "../../stage/protyle/js/lute/lute.min.js"), sharedLute);
         const config = require("../../webpack.markdown")({}, {mode: "development"});
         config.context = path.resolve(__dirname, "../.."); config.watch = false; config.devtool = false;
         config.output = {...config.output, path: output};

@@ -1113,7 +1113,9 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("turnIntoRef", lang("ref")),
             node("turnIntoText", lang("text")),
             separator("separator_2"),
-            node("openBy", lang("openBy")),
+            node("openBy", lang("openBy"), true, [
+                node("openMarkdownEditor", lang("openMarkdownEditor")),
+            ]),
             node("export", lang("export")),
             node("copyFile", lang("copyFile")),
         ],

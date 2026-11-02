@@ -79,7 +79,22 @@ export const createMarkdownTree = (options: {
         for (const sibling of Array.from(element.parentElement.children)) {
             if (sibling !== element) (sibling as HTMLElement).inert = frozen || drawer() && visible;
         }
-        for (const toggle of toggles) toggle.setAttribute("aria-expanded", String(visible));
+        for (const toggle of toggles) {
+            const labelOnly = toggle.dataset.drawerToggle === "true" && !drawer();
+            toggle.disabled = frozen || labelOnly;
+            toggle.tabIndex = labelOnly ? -1 : 0;
+            toggle.classList.toggle("markdown-heading--label", labelOnly);
+            if (labelOnly) {
+                toggle.removeAttribute("aria-label");
+                toggle.removeAttribute("aria-controls");
+                toggle.removeAttribute("aria-expanded");
+            } else {
+                toggle.setAttribute("aria-label", text("markdownFiles"));
+                toggle.setAttribute("aria-controls", element.id);
+                toggle.setAttribute("aria-expanded", String(visible));
+            }
+            toggle.title = labelOnly ? (state.rootName ?? "") : text("markdownFiles");
+        }
         resize.hidden = drawer();
         resize.setAttribute("aria-valuenow", String(width));
         resize.setAttribute("aria-valuemin", "180");
@@ -151,7 +166,14 @@ export const createMarkdownTree = (options: {
             else if (!children.has(node.id)) rows.push({depth: depth + 1, message: text("loading")});
             else children.get(node.id).forEach(child => visit(child, depth + 1));
         };
-        if (state.kind === "ready") visit({id: state.rootId, name: state.rootName, kind: "directory"}, 0);
+        if (state.kind === "ready") {
+            if (errors.has(state.rootId)) rows.push({depth: 0, parent: state.rootId, message: errors.get(state.rootId), retry: true});
+            else if (!children.has(state.rootId)) rows.push({depth: 0, message: text("loading")});
+            else children.get(state.rootId).forEach(child => visit(child, 0));
+        }
+        if (!rows.some(row => row.node?.id === focused)) {
+            focused = rows.find(row => row.node?.id === selected)?.node?.id ?? rows.find(row => row.node)?.node?.id;
+        }
         renderWindow();
     };
     const discard = (nodeId: string) => {
@@ -205,6 +227,9 @@ export const createMarkdownTree = (options: {
         selected = next.currentNodeId;
         if (!focused || changed) focused = selected || next.rootId;
         state = next;
+        if (next.rootId) expanded.add(next.rootId);
+        viewport.setAttribute("aria-label", next.rootName ? `${text("markdownFiles")}: ${next.rootName}` : text("markdownFiles"));
+        viewport.title = next.rootName ?? "";
         notice.textContent = next.kind === "permission-required" ? text("markdownFolderPermission") :
             next.kind === "blocked" ? text("markdownFolderError") : "";
         notice.hidden = !notice.textContent;
@@ -346,7 +371,7 @@ export const createMarkdownTree = (options: {
         if (event.key === "Escape" && drawer() && drawerOpen) {event.preventDefault(); hideDrawer();}
     }, {signal});
     for (const toggle of toggles) toggle.addEventListener("click", () => {
-        if (frozen) return;
+        if (frozen || toggle.disabled) return;
         activeToggle = toggle;
         if (drawer()) drawerOpen = !drawerOpen; else {desktopVisible = !desktopVisible; scheduleSave();}
         updateVisibility(); if (shown()) {void refresh(); viewport.focus();}

@@ -1,6 +1,7 @@
 import type {MarkdownIOError} from "./types";
 import {createHash} from "node:crypto";
 import {MarkdownDiskService} from "./disk";
+import type {ExpectedMarkdownFile} from "./disk";
 import {encodeMarkdown} from "./codec";
 import {createMarkdownRecoveryStore} from "./recoveryStore";
 import type {MarkdownRecoveryStore} from "./recoveryStore";
@@ -44,7 +45,21 @@ class MarkdownDesktopHost implements MarkdownHost {
         this.disk = disk;
         this.recovery = recovery || createMarkdownRecoveryStore(directory!);
         this.sessions = new Map();
-        this.startup = this.recovery.collectCompleted();
+        const store = this.recovery;
+        const registry = this.disk.registry;
+        const sessions = this.sessions;
+        this.startup = (async () => {
+            await store.collectCompleted();
+            const {records} = await store.list();
+            const historicalIds = records.map(record => record.watermark.sessionId);
+            registry.reserveIds(historicalIds);
+            // createSession remains synchronous. An early caller may have minted
+            // an ID before recovery discovery finishes; never let that collision
+            // reinterpret an old draft as a newer revision of the new session.
+            if (historicalIds.some(id => sessions.has(id))) {
+                throw Object.assign(new Error("Markdown session conflicts with an existing recovery record"), {code: "EEXIST"});
+            }
+        })();
         this.startup.catch(() => undefined);
     }
 
@@ -81,12 +96,12 @@ class MarkdownDesktopHost implements MarkdownHost {
             identity: entry.descriptor.identity, baseline: entry.descriptor.baseline};
     }
 
-    async authorizeOpen(sessionId: string, filePath: string) {
+    async authorizeOpen(sessionId: string, filePath: string, expected?: ExpectedMarkdownFile) {
         const session = this.session(sessionId);
         if (session.target || session.opening) throw protocolError();
         session.opening = true;
         try {
-            const result = await this.disk.authorizeOpen(sessionId, filePath);
+            const result = await this.disk.authorizeOpen(sessionId, filePath, expected);
             if (result.kind === "opened") session.target = result.target;
             return result;
         } finally {
@@ -280,6 +295,7 @@ class MarkdownDesktopHost implements MarkdownHost {
         let outcome: MarkdownSaveAsCommitResult | undefined;
         let session: MarkdownHostSession | undefined;
         try {
+            await this.startup;
             const copy = snapshot(request);
             const {operation, receipt} = copy;
             session = this.session(operation.sessionId);
@@ -333,6 +349,7 @@ class MarkdownDesktopHost implements MarkdownHost {
             (entry.operationId && entry.operationId !== operationId)) throw protocolError();
         entry.releasing = true;
         try {
+            await this.startup;
             await this.recovery.abortSaveAs({sessionId, operationId});
             if (!this.disk.releaseSaveAs({sessionId, target: this.disk.target(entry), reservationId})) throw protocolError();
         } finally {
@@ -372,7 +389,10 @@ class MarkdownDesktopHost implements MarkdownHost {
         const copy = snapshot(watermark);
         const session = this.session(copy.sessionId);
         if (copy.targetGeneration > session.generation) throw protocolError();
-        return this.trackDraft(session, () => this.recovery.clearDraft(copy));
+        return this.trackDraft(session, async () => {
+            await this.startup;
+            await this.recovery.clearDraft(copy);
+        });
     }
 
     async listRecoveries() {
@@ -443,6 +463,7 @@ class MarkdownDesktopHost implements MarkdownHost {
             entries.some(entry => entry.pending || entry.state !== "bound")) throw protocolError();
         session.closing = true;
         try {
+            await this.startup;
             await Promise.all(session.draftTasks);
             await this.recovery.finishSession(sessionId);
             if (!this.disk.closeSession(sessionId)) throw protocolError();

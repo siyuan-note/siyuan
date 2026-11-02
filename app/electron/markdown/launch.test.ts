@@ -15,7 +15,18 @@ test("explicit Markdown flags support a new document and file arguments", () => 
     assert.deepEqual(parseMarkdownLaunch(["--markdown", "a.md", "--markdown=b.markdown"], "/home/user", {platform: "linux"}),
         {requested: true, files: ["/home/user/a.md", "/home/user/b.markdown"], newDocument: false});
     assert.deepEqual(parseMarkdownLaunch(["--markdown=", "a.md"], "/home/user", {platform: "linux"}),
-        {requested: true, files: ["/home/user/a.md"], newDocument: true});
+        {requested: true, files: ["/home/user/a.md"], newDocument: false});
+});
+
+test("reordered and repeated entry flags never add a blank window to a file request", () => {
+    for (const argv of [["siyuan.exe", "C:\\docs\\a.md", "--markdown"],
+        ["siyuan.exe", "--markdown", "--", "C:\\docs\\a.md"],
+        ["siyuan.exe", "--markdown=", "C:\\docs\\a.md", "--markdown"]]) {
+        assert.deepEqual(parseMarkdownLaunch(argv, "C:\\", {platform: "win32"}),
+            {requested: true, files: ["C:\\docs\\a.md"], newDocument: false});
+    }
+    assert.deepEqual(parseMarkdownLaunch(["--markdown=invalid.txt"], "/home/user", {platform: "linux"}),
+        {requested: true, files: [], newDocument: true});
 });
 
 test("normal workspace arguments, URLs and the development entry point never open Markdown", () => {

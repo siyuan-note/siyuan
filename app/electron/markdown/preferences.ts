@@ -1,6 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import {randomUUID} from "node:crypto";
+import {createMarkdownTemporaryFile} from "./temporaryFile";
 import type {MarkdownPreferences} from "../../src/markdown/bridge";
 import type {MarkdownIOError} from "./types";
 
@@ -39,10 +39,10 @@ const createMarkdownPreferences = (directory: string) => {
                 const current = await read();
                 const preferences = normalize({...current, ...copy});
                 await fs.mkdir(directory, {recursive: true, mode: 0o700});
-                const temporary = file + "." + randomUUID() + ".tmp";
-                let handle: fs.FileHandle | undefined;
+                const staged = await createMarkdownTemporaryFile(file + ".", 0o600);
+                const temporary = staged.path;
+                let handle: fs.FileHandle | undefined = staged.handle;
                 try {
-                    handle = await fs.open(temporary, "wx", 0o600);
                     await handle.writeFile(JSON.stringify({version: 1, ...preferences}), "utf8");
                     await handle.sync();
                     await handle.close();

@@ -12,7 +12,6 @@ const parseMarkdownLaunch = (argv: string[], cwd: string,
     const files: string[] = [];
     const seen = new Set<string>();
     let requested = false;
-    let newDocument = false;
     let positional = false;
     const add = (raw: string): void => {
         let file = raw;
@@ -46,8 +45,6 @@ const parseMarkdownLaunch = (argv: string[], cwd: string,
             } else if (argument === "--markdown" && typeof argv[index + 1] === "string" &&
                 !argv[index + 1].startsWith("-") && isMarkdownPath(argv[index + 1])) {
                 add(argv[++index]);
-            } else {
-                newDocument = true;
             }
             continue;
         }
@@ -59,7 +56,8 @@ const parseMarkdownLaunch = (argv: string[], cwd: string,
         }
     }
     // 明确要求轻量入口但路径无效时仍进入空白编辑器，由用户重新选择文件。
-    return {requested, files, newDocument: requested && (newDocument || files.length === 0)};
+    // Chromium 可以重排开关；有效文件与轻量入口标记属于同一次打开请求，不能额外新建空白窗口。
+    return {requested, files, newDocument: requested && files.length === 0};
 };
 
 export {isMarkdownPath, parseMarkdownLaunch};

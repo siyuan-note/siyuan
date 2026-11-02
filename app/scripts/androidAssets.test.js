@@ -29,6 +29,7 @@ function fixture(t) {
     write("build/markdown/main.11223344.js");
     write("build/markdown/base.11223344.css");
     for (const name of REQUIRED_ASSETS) write("build/markdown/" + name);
+    write("protyle/js/lute/lute.min.js", "shared Lute");
     return {root, write};
 }
 
@@ -57,6 +58,7 @@ test("Android assets retain serving, export and shared resources without histori
         "stage/build/mobile/startup.12345678.js",
         "stage/icon.png",
         "stage/protyle/js/editor.js",
+        "stage/protyle/js/lute/lute.min.js",
     ].sort());
 });
 
@@ -64,13 +66,27 @@ test("Android packaging rejects missing current bundles and serving/export entry
     const {androidStageFiles} = await import("../../scripts/android-assets.mjs");
     const {root} = fixture(t);
     for (const name of ["build/mobile/main.12345678.js", "build/desktop/index.html", "build/export/base.css",
-        "build/markdown/index.html", "build/markdown/vditor/dist/js/lute/lute.min.js"]) {
+        "build/markdown/index.html", "protyle/js/lute/lute.min.js"]) {
         const file = path.join(root, name);
         const content = require("node:fs").readFileSync(file);
         rmSync(file);
         assert.throws(() => androidStageFiles(root), /Missing Android resource/);
         writeFileSync(file, content);
     }
+});
+
+test("Android and Harmony packaging reject an obsolete duplicate Markdown Lute", async t => {
+    const {androidStageFiles} = await import("../../scripts/android-assets.mjs");
+    const {root, write} = fixture(t);
+    write("build/markdown/vditor/dist/js/lute/lute.min.js", "old copy");
+    assert.throws(() => androidStageFiles(root), /Duplicate Markdown Lute/);
+});
+
+test("Android and Harmony packaging reject stale image emoji", async t => {
+    const {androidStageFiles} = await import("../../scripts/android-assets.mjs");
+    const {root, write} = fixture(t);
+    write("build/markdown/vditor/dist/images/emoji/doge.png", "old emoji");
+    assert.throws(() => androidStageFiles(root), /Obsolete Markdown emoji/);
 });
 
 test("Android and Harmony assets retain nested offline Markdown resources without stale bundles or maps", async t => {

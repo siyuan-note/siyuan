@@ -1,4 +1,5 @@
 {
+	"openMarkdownEditor": "فتح باستخدام محرر Markdown المدمج",
 	"insertTableHeaderRow": "إدراج صف رأس",
 	"syncSourcePreview": "تغيّر مصدر المزامنة. محليًا: ${local} ملف؛ المصدر: ${cloud} ملف، ${time}، الجهاز: ${device}. الرفع: ${upload} ملف. الاستعادة: استبدال ${overwrite} ملف محلي وحذف ${remove} ملف. اختر اتجاهًا؛ الدمج التلقائي متوقف مؤقتًا",
 	"markdownSourceOnly": "ملف كبير: تحرير المصدر فقط؛ المعاينة معطلة",

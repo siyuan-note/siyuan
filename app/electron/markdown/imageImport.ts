@@ -2,7 +2,8 @@ import type {MarkdownIOError} from "./types";
 import * as fs from "node:fs/promises";
 import {constants} from "node:fs";
 import * as path from "node:path";
-import {randomUUID, createHash} from "node:crypto";
+import {createHash} from "node:crypto";
+import {createMarkdownTemporaryFile} from "./temporaryFile";
 import type {BigIntStats} from "node:fs";
 import type {MarkdownErrorCode} from "../../src/markdown/contracts";
 
@@ -78,8 +79,9 @@ const importMarkdownImage = async ({source, destination, targetPath}: {source: s
         if (await io.realpath(source) !== canonicalSource || !stable(await io.stat(canonicalSource, {bigint: true}), original.stat)) {
             throw error("identity-changed");
         }
-        temporary = path.join(parent, ".siyuan-image-" + randomUUID() + ".tmp");
-        const file = await io.open(temporary, "wx", 0o600);
+        const staged = await createMarkdownTemporaryFile(path.join(parent, ".siyuan-image-"), 0o600, io);
+        temporary = staged.path;
+        const file = staged.handle;
         try {
             await file.writeFile(original.bytes);
             await file.sync();

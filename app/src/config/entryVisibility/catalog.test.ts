@@ -1491,3 +1491,9 @@ test("database block menu groups actions after its stable separator", () => {
     const section = source.slice(source.indexOf("const submenu: IMenu[] = [];", source.indexOf('type === "NodeAttributeView"')));
     assert.ok(section.indexOf('id: "exportCSV"') < section.indexOf('id: "showDatabaseInFolder"'));
 });
+
+
+test("the built-in Markdown asset action has a stable nested link menu identity", () => {
+    assert.ok(getEntryCatalogNode("inline.link.openBy.openMarkdownEditor"));
+    assert.deepEqual(getEntryCatalogChildren("inline.link.openBy").map(item => item.key), ["openMarkdownEditor"]);
+});

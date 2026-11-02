@@ -4,6 +4,8 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const os = require("node:os");
 const {MarkdownDesktopHost} = require("./host");
+const {MarkdownDiskService} = require("./disk");
+const {MarkdownTargetRegistry} = require("./registry");
 
 const fixture = async t => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-host-recovery-"));
@@ -96,4 +98,47 @@ test("failed recovery migration retains the source record", async t => {
     await assert.rejects(restarted.restoreRecovery(id), /no space/);
     assert.equal((await restarted.recovery.read(id)).draft.content, "unsaved draft");
     assert.equal(restarted.sessions.size, 0);
+});
+
+test("startup reserves persisted session IDs before allocating a new session", async t => {
+    const {host, recovery} = await fixture(t);
+    const id = await draft(host);
+    const next = "20261102180000-new0001";
+    const ids = [id, next];
+    const restarted = new MarkdownDesktopHost({directory: recovery,
+        disk: new MarkdownDiskService({registry: new MarkdownTargetRegistry({createId: () => ids.shift() || next})})});
+    await restarted.startup;
+    assert.equal(restarted.createSession(), next);
+    assert.equal((await restarted.recovery.read(id)).draft.content, "unsaved draft");
+    assert.equal((await restarted.listRecoveries()).records.length, 1);
+});
+
+test("a pre-startup session collision fails closed without writing or clearing the old draft", async t => {
+    const {host, recovery} = await fixture(t);
+    const id = await draft(host);
+    const before = await host.recovery.read(id);
+    const restarted = new MarkdownDesktopHost({directory: recovery,
+        disk: new MarkdownDiskService({registry: new MarkdownTargetRegistry({createId: () => id})})});
+    assert.equal(restarted.createSession(), id);
+    const clear = restarted.clearDraft({sessionId: id, targetGeneration: 0, revision: 100});
+    const release = restarted.releaseSession({sessionId: id, targetGeneration: 0});
+    const write = restarted.putDraft({sessionId: id, operationId: id + ":new:1", targetGeneration: 0, revision: 100,
+        content: "must not replace old draft", format: {bom: false, newline: "\n"}});
+    const results = await Promise.allSettled([restarted.startup, clear, release, write]);
+    assert.ok(results.every(result => result.status === "rejected"));
+    assert.deepEqual(await restarted.recovery.read(id), before);
+});
+
+test("persisted SiYuan recovery IDs restore into a fresh session", async t => {
+    const {host, recovery} = await fixture(t);
+    await host.startup;
+    const persisted = "20261102180000-draft01";
+    await host.recovery.putDraft({sessionId: persisted, operationId: persisted + ":previous:1", targetGeneration: 0, revision: 1,
+        content: "persisted content", format: {bom: false, newline: "\n"}});
+    const restarted = new MarkdownDesktopHost({directory: recovery});
+    assert.equal((await restarted.listRecoveries()).records[0].watermark.sessionId, persisted);
+    const restored = await restarted.restoreRecovery(persisted);
+    assert.match(restored.sessionId, /^\d{14}-[a-z0-9]{7}$/);
+    assert.equal(restored.content, "persisted content");
+    assert.equal(await restarted.recovery.read(persisted), undefined);
 });

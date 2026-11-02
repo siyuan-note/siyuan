@@ -58,7 +58,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
     root.innerHTML = `<header class="markdown-header">
     <button type="button" class="block__icon block__icon--show markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
-    <button type="button" class="markdown-heading" id="markdownFiles"><span id="markdownName" class="markdown-name"></span></button>
+    <button type="button" class="markdown-heading" id="markdownFiles" data-drawer-toggle="true"><span id="markdownName" class="markdown-name"></span></button>
     <div class="markdown-header__drag" aria-hidden="true"></div>
     <button type="button" class="block__icon block__icon--show markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
     <button type="button" class="block__icon block__icon--show markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
@@ -77,7 +77,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <hr class="b3-menu__separator">
             <div id="markdownMode"></div>
             <div id="markdownPreferences"><div id="markdownTheme"></div><div id="markdownFont"></div></div>
-            <div class="markdown-policy"><p data-label="markdownPreviewPolicy"></p><p data-label="markdownPrivacy"></p><p id="markdownNotice" role="status"></p></div>
+            <div class="markdown-policy"><p id="markdownNotice" role="status"></p></div>
         </div>
     </details>
 </header>
@@ -90,6 +90,33 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
 </footer>`;
     root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
+    // Contextual explanations remain available to keyboard and touch users, not only hover.
+    for (const [id, label, explanation] of [["markdownResources", "markdownResources", "markdownPreviewPolicy"],
+        ["markdownRecovery", "markdownRecovery", "markdownPrivacy"]]) {
+        const action = control(id);
+        const row = document.createElement("div");
+        row.className = "markdown-menu__row";
+        const info = document.createElement("button");
+        info.type = "button";
+        info.className = "block__icon block__icon--show markdown-menu__info";
+        info.id = `${id}Info`;
+        info.title = text(explanation);
+        info.setAttribute("aria-label", `${text(label)}: ${text("about")}`);
+        info.setAttribute("aria-expanded", "false");
+        info.setAttribute("aria-controls", `${id}Explanation`);
+        info.innerHTML = '<svg aria-hidden="true"><use href="#iconInfo"></use></svg>';
+        const description = document.createElement("p");
+        description.id = `${id}Explanation`;
+        description.className = "markdown-menu__explanation";
+        description.textContent = text(explanation);
+        description.hidden = true;
+        info.addEventListener("click", () => {
+            description.hidden = !description.hidden;
+            info.setAttribute("aria-expanded", String(!description.hidden));
+        });
+        action.replaceWith(row);
+        row.append(action, info, description);
+    }
     const header = root.querySelector<HTMLElement>(".markdown-header");
     header.inert = true;
     control("markdownEditor").inert = true;
@@ -186,7 +213,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             saved: "markdownSaved", conflict: "markdownConflict", blocked: "markdownError", closed: "close",
         };
         control("markdownName").textContent = state.target?.displayName ?? text("untitled");
-        document.title = "SiYuan";
+        document.title = state.target?.displayName ?? text("untitled");
         const pendingStatus = editPending && ["saved", "view", "draft"].includes(state.status);
         const statusKey = !editPending && state.status === "draft" && !state.hasUnsavedChanges ? "" :
             pendingStatus || state.status === "draft" && state.draftRevision < state.revision ? "markdownUnsaved" :

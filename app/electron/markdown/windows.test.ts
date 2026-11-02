@@ -97,6 +97,33 @@ test("Markdown scheme registration grants only required local browser capabiliti
     assert.deepEqual(registered[0].privileges, {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true});
 });
 
+test("file launches with reordered switches reuse one window and never add an untitled editor", async t => {
+    const {directory, manager, windows, call} = await fixture(t);
+    const file = path.join(directory, "example.md");
+    await fs.writeFile(file, "example");
+    assert.equal(await manager.handleLaunch(["siyuan", file, "--markdown"], directory), true);
+    assert.equal(windows.length, 1);
+    assert.equal(windows[0].options.title, "example.md");
+    assert.equal((await call(windows[0], "bootstrap")).content, "example");
+    await manager.handleLaunch(["siyuan", "--markdown=", file], directory);
+    assert.equal(windows.length, 1);
+    assert.equal(windows[0].focused, true);
+    await manager.handleLaunch(["siyuan", "--markdown"], directory);
+    assert.equal(windows.length, 2);
+    assert.equal(windows[1].options.title, "Untitled");
+});
+
+test("native titles use the authorized current filename instead of renderer state", async t => {
+    const {directory, manager, call} = await fixture(t);
+    const file = path.join(directory, "example.md");
+    await fs.writeFile(file, "example");
+    const window = await manager.open(file);
+    const initial = await call(window, "bootstrap");
+    await call(window, "state", {sessionId: initial.sessionId, status: "dirty", revision: 1,
+        savedRevision: 0, target: {displayName: "untrusted.md"}});
+    assert.equal(window.title, "example.md");
+});
+
 test("independent windows are sandboxed, deny navigation and reject foreign bridge frames", async t => {
     const {manager, call} = await fixture(t);
     const window = await manager.open();
@@ -129,7 +156,7 @@ test("frameless platform controls stay scoped to their window and preserve close
     for (const platform of ["win32", "darwin", "linux"] as const) {
         const {manager, call} = await fixture(t, {platform});
         const window = await manager.open();
-        assert.equal(window.options.title, "SiYuan");
+        assert.equal(window.options.title, "Untitled");
         assert.equal(window.options.frame, platform === "darwin");
         assert.equal(window.options.titleBarStyle, "hidden");
         assert.deepEqual(window.options.trafficLightPosition, {x: 8, y: 8});
@@ -217,6 +244,35 @@ test("static protocol rejects traversal, cross-session resources and all externa
     let cancelled;
     window.network({url: window.url}, result => { cancelled = result.cancel; });
     assert.equal(cancelled, false);
+});
+
+test("Markdown Lute URL serves only the single installed shared runtime with the page CSP", async t => {
+    const {directory, build, manager} = await fixture(t);
+    const shared = path.join(directory, "app/stage/protyle/js/lute/lute.min.js");
+    await fs.mkdir(path.dirname(shared), {recursive: true});
+    await fs.writeFile(shared, "globalThis.Lute = {shared: true};");
+    const window = await manager.open();
+    const origin = window.url.slice(0, window.url.lastIndexOf("/"));
+    const url = origin + "/vditor/dist/js/lute/lute.min.js";
+    const response = await window.request({url, method: "GET"});
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "globalThis.Lute = {shared: true};");
+    assert.match(response.headers.get("content-type"), /javascript/);
+    assert.match(response.headers.get("content-security-policy"), /script-src 'self'/);
+    await assert.rejects(fs.stat(path.join(build, "vditor/dist/js/lute/lute.min.js")), {code: "ENOENT"});
+    for (const target of [origin + "/stage/protyle/js/lute/lute.min.js", origin + "/vditor/dist/js/lute/other.js",
+        origin + "/vditor/dist/js/lute/%2e%2e%2fprivate.js", url.replace(new URL(window.url).hostname, "foreign")]) {
+        assert.notEqual((await window.request({url: target, method: "GET"})).status, 200);
+    }
+    assert.equal((await window.request({url, method: "POST"})).status, 403);
+    await fs.unlink(shared);
+    assert.equal((await window.request({url, method: "GET"})).status, 404, "no fallback copy or network request");
+    if (process.platform !== "win32") {
+        const outside = path.join(directory, "private.js");
+        await fs.writeFile(outside, "private");
+        await fs.symlink(outside, shared);
+        assert.equal((await window.request({url, method: "GET"})).status, 403, "installed alias cannot escape through a symlink");
+    }
 });
 
 test("relative images require a separate directory grant and remain scoped to the session", async t => {
@@ -424,6 +480,7 @@ test("tree switching keeps the native container and root while preserving the ol
         operationId: initial.sessionId + ":test:2", target: initial.target}));
     await call(window, "state", {sessionId: next.sessionId, status: "saved", revision: 0, savedRevision: 0});
     const title = window.title;
+    assert.equal(title, "second.md");
     await call(window, "state", {sessionId: initial.sessionId, status: "dirty", revision: 99, savedRevision: 0});
     assert.equal(window.title, title);
     await manager.open(second);
@@ -571,6 +628,8 @@ test("Save As retains an enclosing root and follows the parent when saving outsi
     assert.equal((await call(window, "tree-state")).rootId, root.rootId);
     await saveAsThroughBridge({call, window, dialog, sessionId: initial.sessionId, target: next,
         generation: 1, sequence: 2, file: path.join(other, "copy.md")});
+    await call(window, "state", {sessionId: initial.sessionId, status: "saved", revision: 2, savedRevision: 2});
+    assert.equal(window.title, "copy.md");
     const after = await call(window, "tree-state");
     assert.equal(after.rootName, "other");
     assert.notEqual(after.rootId, root.rootId);
@@ -677,4 +736,20 @@ test("native destruction drains a candidate read, retains the durable draft and 
     assert.equal(host.sessions.size, 0);
     assert.equal(host.disk.registry.entries.size, 0);
     assert.equal((await host.recovery.read(initial.sessionId)).draft.content, "durable content");
+});
+
+test("workspace asset opens preserve expected identity through window creation and reject mismatches", async t => {
+    const {directory, manager, host, windows} = await fixture(t);
+    const file = path.join(directory, "asset.md");
+    await fs.writeFile(file, "# Asset");
+    const expected = await host.disk.describe(file);
+    await manager.open(file, {...expected, identity: "changed"});
+    assert.equal(windows.length, 0);
+    assert.equal(host.sessions.size, 0);
+    assert.equal(host.disk.registry.entries.size, 0);
+    await manager.open(file, expected);
+    assert.equal(windows.length, 1);
+    await manager.open(file, {...expected, path: path.join(directory, "other.md")});
+    assert.equal(windows.length, 1);
+    assert.equal(host.sessions.size, 1);
 });

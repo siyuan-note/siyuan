@@ -12,6 +12,7 @@ import {getArgFrom} from "../shared/argv";
 import {getTitleBarOverlayOptions, updateTitleBarOverlay} from "../window/windowControlsOverlay";
 import {isDevToolsShortcut, toggleDevTools} from "../window/devToolsDock";
 import {getBootWindows} from "../window/windowRegistry";
+import type {ExpectedMarkdownFile} from "../markdown/disk";
 import type {MarkdownLaunchRequest} from "../shared/types";
 
 // 文件请求来自轻量入口：`--markdown[=file]`、位置参数里的 Markdown 路径，以及 macOS 的文件打开事件。
@@ -129,6 +130,12 @@ const openMarkdownEditor = (): void => {
     void windows.open().catch((error: unknown) => writeLog("open Markdown editor failed: " + errorMessage(error)));
 };
 
+// Called only after the IPC asset resolver has authorized a local workspace asset.
+const openMarkdownAsset = async (file: ExpectedMarkdownFile): Promise<void> => {
+    if (!state.markdown.windows) throw new Error("Markdown editor is unavailable");
+    await state.markdown.windows.open(file.path, file);
+};
+
 /** 正在执行一次 Markdown 退出协调。 */
 const isMarkdownBusy = (): boolean => state.markdown.lifecycle?.busy() ?? false;
 
@@ -156,6 +163,7 @@ export {
     closeMarkdownEditors,
     cancelMarkdownQuit,
     openMarkdownEditor,
+    openMarkdownAsset,
     isMarkdownBusy,
     hasPendingMarkdownWork,
     ownsMarkdownWindow,

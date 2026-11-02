@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import {watch} from "node:fs";
 import * as path from "node:path";
-import {randomUUID} from "node:crypto";
+import {createAvailableMarkdownId, createMarkdownInstanceId} from "../../src/markdown/identity";
 import {MarkdownDesktopHost} from "./host";
 import {MarkdownResources, inside} from "./resources";
 import {createMarkdownPreferences, defaults} from "./preferences";
@@ -12,6 +12,7 @@ import {createMarkdownTreeView} from "./treeView";
 import type {App, BrowserWindow as ElectronWindow, Dialog, Input, IpcMain, IpcMainInvokeEvent, MessageBoxOptions, NativeTheme, Protocol,
     Shell, TitleBarOverlay, WebContents} from "electron";
 import type {FSWatcher} from "node:fs";
+import type {ExpectedMarkdownFile} from "./disk";
 import type {MarkdownInitial} from "./host";
 import type {MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "../../src/markdown/bridge";
 import type {MarkdownFailure, MarkdownFormat, MarkdownHost, MarkdownSaveAsCommitResult, MarkdownWriteRequest} from "../../src/markdown/contracts";
@@ -32,7 +33,7 @@ export type MarkdownWindowsOptions = {
     onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
 export type MarkdownWindows = {
-    open: (file?: string) => Promise<ElectronWindow | void>;
+    open: (file?: string, expected?: ExpectedMarkdownFile) => Promise<ElectronWindow | void>;
     handleLaunch: (argv: string[], cwd: string) => Promise<boolean>;
     hasWindows: () => boolean; hasPendingWork: () => boolean; owns: (contents: Pick<WebContents, "id">) => boolean;
     focus: () => void; prepareQuit: (reason?: string) => Promise<boolean>;
@@ -106,7 +107,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         record.window.focus();
     };
     const notify = (record: MarkdownWindowRecord, type: MarkdownCommand["type"], extra: Partial<Omit<MarkdownCommand, "id" | "type">> = {}): void => {
-        if (!record.window.isDestroyed() && !record.crashed) record.window.webContents.send("siyuan-markdown:command", {id: randomUUID(), type, ...extra});
+        if (!record.window.isDestroyed() && !record.crashed) record.window.webContents.send("siyuan-markdown:command", {id: createMarkdownInstanceId(), type, ...extra});
     };
     const closeCrashed = async (record: MarkdownWindowRecord): Promise<boolean> => {
         if (record.crashApproved) return true;
@@ -135,7 +136,9 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             closeCrashed(record).then(resolve, () => resolve(false));
             return;
         }
-        const id = randomUUID();
+        let id: string;
+        try { id = createAvailableMarkdownId(value => record.pending.has(value)); }
+        catch { resolve(false); return; }
         const timeout = setTimeout(() => { record.pending.delete(id); resolve(false); }, 30000);
         record.pending.set(id, value => { clearTimeout(timeout); resolve(value); });
         record.window.webContents.send("siyuan-markdown:command", {id, type});
@@ -237,6 +240,15 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 if (record.current !== current) return new Response(null, {status: 404});
                 return resource ? new Response(resource.bytes, {headers: {...headers, "Content-Type": resource.type}}) : new Response(null, {status: 404});
             }
+            // One installed Lute serves both editors. This is an exact trusted
+            // asset alias, not permission to resolve arbitrary paths outside the page.
+            if (url.pathname === "/vditor/dist/js/lute/lute.min.js") {
+                const appRoot = await fs.realpath(rootDirectory);
+                const shared = path.join(appRoot, "stage", "protyle", "js", "lute", "lute.min.js");
+                const canonical = await fs.realpath(shared);
+                if (canonical !== shared || !(await fs.stat(canonical)).isFile()) return new Response(null, {status: 403});
+                return new Response(await fs.readFile(canonical), {headers: {...headers, "Content-Type": "application/javascript"}});
+            }
             const root = await fs.realpath(directory);
             const file = path.resolve(root, "." + decodeURIComponent(url.pathname));
             if (!inside(root, file)) return new Response(null, {status: 403});
@@ -247,7 +259,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return new Response(null, {status: 404});
         }
     };
-    const openDocument = async (filePath?: string, restored?: MarkdownInitial): Promise<ElectronWindow | void> => {
+    const openDocument = async (filePath?: string, restored?: MarkdownInitial, expected?: ExpectedMarkdownFile): Promise<ElectronWindow | void> => {
         if (quitting) {
             if (restored) await host.releaseSession({sessionId: restored.sessionId, targetGeneration: restored.recovered?.targetGeneration ?? 0});
             return;
@@ -265,7 +277,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             const sessionId = host.createSession();
             initial = {sessionId, content: ""};
             if (filePath) {
-                const result = await host.authorizeOpen(sessionId, filePath);
+                const result = await host.authorizeOpen(sessionId, filePath, expected);
                 if (result.kind !== "opened") {
                     await host.releaseSession({sessionId, targetGeneration: 0});
                     if (result.kind === "occupied" && owner(result.sessionId)) focus(owner(result.sessionId));
@@ -281,7 +293,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return;
         }
         const window = new BrowserWindow({width: 1000, height: 760, minWidth: 380, minHeight: 300,
-            title: "SiYuan", show: false, autoHideMenuBar: true,
+            title: initial.target?.displayName || text("untitled"), show: false, autoHideMenuBar: true,
             frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 8},
             titleBarOverlay: windowControls.getOptions(platform, 32), icon: path.join(rootDirectory, "stage", "icon-large.png"),
             backgroundColor: nativeTheme?.shouldUseDarkColors ? "#1e1e1e" : "#fff",
@@ -432,7 +444,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 const initial = {sessionId: candidateSession, content: opened.content, target: opened.target};
                 const value = await bootstrap(initial);
                 if (quitting || record.closing || record.crashed || record.current !== current || record.window.isDestroyed()) throw new Error("Markdown switch cancelled");
-                const ticket = randomUUID();
+                const ticket = createAvailableMarkdownId(value => record.candidate?.ticket === value || record.committedSwitch?.ticket === value);
                 record.candidate = {ticket, initial, bootstrap: value, current};
                 candidateSession = undefined;
                 return {kind: "ready", ticket, sessionId: initial.sessionId};
@@ -638,7 +650,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 if (!state || state.sessionId !== record.sessionId || !statuses.has(state.status) || !Number.isSafeInteger(state.revision)) return;
                 record.state = state;
                 const dirty = state.revision > state.savedRevision;
-                record.window.setTitle("SiYuan");
+                record.window.setTitle(host.sessions.get(record.sessionId)?.target?.displayName || text("untitled"));
                 record.window.setDocumentEdited?.(dirty);
                 return;
             }
@@ -654,7 +666,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
     });
     nativeTheme?.on("updated", () => records.forEach(record => notify(record, "theme", {dark: nativeTheme.shouldUseDarkColors})));
     return {
-        open,
+        open: (file, expected) => open(file, undefined, expected),
         hasWindows: () => records.size > 0,
         hasPendingWork: () => records.size > 0 || pendingOpens.size > 0 || recoverTasks.size > 0,
         owns: contents => byContents.has(contents.id),

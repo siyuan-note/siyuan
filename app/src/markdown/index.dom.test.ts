@@ -154,22 +154,25 @@ const browserCases = async (languages: Record<string, string>) => {
     };
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
-    check.equal(document.title, "SiYuan");
+    check.equal(document.title, "README.md");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
     const panelToggle = document.querySelector<HTMLButtonElement>("#markdownTreeToggle");
     check.equal(panelToggle.title, languages.markdownFiles);
     check.equal(panelToggle.querySelector("use").getAttribute("href"), "#iconPanelLeft");
-    for (const id of ["markdownTreeToggle", "markdownFiles"]) {
+    for (const id of ["markdownTreeToggle"]) {
         check.equal(document.getElementById(id).getAttribute("aria-controls"), "markdownTree");
         check.equal(document.getElementById(id).getAttribute("aria-expanded"), "true");
     }
     await ipcRenderer.invoke("markdown-pointer-click", "#markdownTreeToggle"); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "dedicated panel button collapses the tree");
-    check.equal(document.querySelector("#markdownFiles").getAttribute("aria-expanded"), "false");
+    check.equal(document.querySelector("#markdownFiles").getAttribute("aria-expanded"), null);
+    check.equal(document.querySelector("#markdownFiles").getAttribute("aria-label"), null, "desktop filename retains its visible accessible name");
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, true, "desktop filename is a non-action label");
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
-    check.equal(panelToggle.getAttribute("aria-expanded"), "true", "filename toggle keeps the panel button state in sync");
+    check.equal(panelToggle.getAttribute("aria-expanded"), "false", "desktop filename cannot toggle the tree");
+    panelToggle.click(); await tick();
     check.equal(document.querySelector<HTMLButtonElement>("#markdownUndo").disabled, true);
     check.equal(document.querySelector<HTMLButtonElement>("#markdownRedo").disabled, true);
     check.equal(document.querySelector(".markdown-footer .markdown-policy"), null);
@@ -178,7 +181,13 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector("#markdownSave").checkVisibility(), false, "file actions start collapsed");
     check.equal(application.session.getState().status, "saved");
     check.equal(writes.length, 0);
-    check.deepEqual(Array.from(document.querySelectorAll(".markdown-tree [data-node-id]")).map(row => row.getAttribute("data-node-id")), ["root", "folder", "note2", "note10", "original"]);
+    check.deepEqual(Array.from(document.querySelectorAll(".markdown-tree [data-node-id]")).map(row => row.getAttribute("data-node-id")), ["folder", "note2", "note10", "original"]);
+    check.equal(document.querySelector(".markdown-tree__viewport").getAttribute("aria-label"), `${languages.markdownFiles}: Notes`);
+    check.equal(getComputedStyle(document.querySelector(".markdown-tree__viewport")).userSelect, "none");
+    check.equal(document.querySelector('[data-node-id="folder"]').getAttribute("aria-level"), "1");
+    const resizeHandle = document.querySelector(".markdown-tree__resize");
+    check.equal(resizeHandle.getBoundingClientRect().width, 6, "thin resize line retains its pointer hit area");
+    check.equal(getComputedStyle(resizeHandle, "::after").width, "2px");
     const firstTreeRows = Array.from(document.querySelectorAll(".markdown-tree [data-node-id]"));
     check.equal(firstTreeRows[1].getBoundingClientRect().top - firstTreeRows[0].getBoundingClientRect().top,
         firstTreeRows[0].getBoundingClientRect().height + 2, "virtual row pitch matches actual rendered row spacing");
@@ -238,6 +247,9 @@ const browserCases = async (languages: Record<string, string>) => {
     modeItem.click();
     check.equal(modeItem.getAttribute("aria-expanded"), "true");
     check.equal(modeItem.querySelector('[data-value="ir"]').getAttribute("aria-checked"), "true");
+    const modeMenu = modeItem.querySelector<HTMLElement>(".markdown-choice__menu");
+    check.ok(modeMenu.scrollHeight <= modeMenu.clientHeight, "a short submenu has no spurious vertical scrollbar");
+    check.ok(modeMenu.scrollWidth <= modeMenu.clientWidth, "a short submenu has no horizontal scrollbar");
     await ipcRenderer.invoke("markdown-screenshot", "mode-menu");
     modeItem.click();
     check.equal(document.querySelector("#markdownTheme").checkVisibility(), false, "appearance starts collapsed");
@@ -268,9 +280,22 @@ const browserCases = async (languages: Record<string, string>) => {
     document.querySelector("#markdownEditor").dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
     check.equal(more.open, false, "outside pointer closes the menu");
     openMore();
-    (document.querySelector("#markdownFiles") as HTMLElement).focus();
+    panelToggle.focus();
     await tick();
-    check.equal(more.open, false, "moving focus outside closes the menu"); check.equal(document.activeElement.id, "markdownFiles");
+    check.equal(more.open, false, "moving focus outside closes the menu"); check.equal(document.activeElement, panelToggle);
+    for (const id of ["markdownResources", "markdownRecovery"]) {
+        openMore();
+        const info = document.querySelector<HTMLButtonElement>(`#${id}Info`);
+        const explanation = document.querySelector<HTMLElement>(`#${id}Explanation`);
+        check.equal(explanation.hidden, true);
+        info.focus(); info.click();
+        check.equal(explanation.hidden, false, "contextual explanations can be opened without hover");
+        check.equal(info.getAttribute("aria-expanded"), "true");
+        check.ok(info.title.length > 0);
+        check.equal(more.open, true, "reading an explanation does not execute its adjacent action");
+        info.click();
+        check.equal(explanation.hidden, true);
+    }
     for (const [id, value] of [["markdownTheme", "dark"], ["markdownTheme", "light"], ["markdownTheme", "system"], ["markdownFont", "20"], ["markdownFont", "16"]]) {
         openMore(); appearanceItem.click();
         const item = document.getElementById(id);
@@ -389,6 +414,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 48, "touch header removes extra padding around touch targets");
     check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 24, "touch save status keeps the compact resting height");
     check.ok(document.querySelector("#markdownFiles").getBoundingClientRect().height >= 44);
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, false, "drawer filename remains interactive");
     check.ok(document.querySelector("#markdownTreeToggle").getBoundingClientRect().height >= 44);
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "narrow tree starts as a collapsed drawer");
     await ipcRenderer.invoke("markdown-screenshot", "narrow-recovery");
@@ -572,7 +598,7 @@ const browserCases = async (languages: Record<string, string>) => {
     unknownSwitch.destroy();
 
     let treeState: import("./treeContracts").MarkdownTreeState = {kind: "ready", rootId: "old-root", generation: 1,
-        rootName: "Old folder", expanded: ["old-root"], width: 240, visible: true};
+        rootName: "Old folder", currentNodeId: "outside-root", expanded: ["old-root"], width: 240, visible: true};
     let finishList: (value: import("./treeContracts").MarkdownTreeListing) => void;
     let treeLists = 0;
     let tooMany = false;
@@ -595,9 +621,11 @@ const browserCases = async (languages: Record<string, string>) => {
     finishList({kind: "listed", rootId: "old-root", generation: 1, nodeId: "old-root", entries: [{id: "stale", name: "Stale.md", kind: "file"}]});
     await tick();
     check.equal(document.querySelector('[data-node-id="stale"]'), null, "a late old-root listing cannot populate the new tree");
-    check.ok(document.querySelector('[data-node-id="new-root"]'));
+    check.equal(document.querySelector('[data-node-id="new-root"]'), null, "root is not a redundant collapsible row");
     check.ok(document.querySelectorAll("#markdownTree [data-node-id]").length < 100, "large directories render a bounded visible range");
     const treeViewport = document.querySelector<HTMLElement>(".markdown-tree__viewport");
+    check.equal(document.getElementById(treeViewport.getAttribute("aria-activedescendant"))?.dataset.nodeId, "file-0",
+        "a current file outside the chosen root gives keyboard focus to the first actual child");
     treeViewport.focus();
     treeViewport.dispatchEvent(new KeyboardEvent("keydown", {key: "End", bubbles: true, cancelable: true}));
     await tick();
@@ -609,20 +637,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector(".markdown-tree__animation"), null, "polling does not animate restored folders");
     treeViewport.dispatchEvent(new KeyboardEvent("keydown", {key: "Home", bubbles: true, cancelable: true})); await tick();
     treeViewport.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", bubbles: true, cancelable: true}));
-    const largeExit = document.querySelector<HTMLElement>(".markdown-tree__animation");
-    check.ok(largeExit, "keyboard collapse animates");
-    check.ok(largeExit.childElementCount < 100, "large exits snapshot only mounted rows");
-    largeExit.getAnimations()[0].finish(); await tick();
-    treeViewport.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
-    await new Promise(resolve => setTimeout(resolve, 0));
-    const largeEnter = document.querySelector<HTMLElement>(".markdown-tree__animation");
-    check.ok(largeEnter);
-    check.ok(largeEnter.querySelector("[data-tree-spacer]"), "virtual spacers participate in the height transition");
-    check.ok(document.querySelectorAll("#markdownTree [data-node-id]").length < 100);
-    largeEnter.getAnimations()[0].pause();
-    await ipcRenderer.invoke("markdown-reduced-motion", true); await tick();
-    check.equal(largeEnter.isConnected, false, "turning on reduced motion settles an in-progress transition");
-    await ipcRenderer.invoke("markdown-reduced-motion", false);
+    check.ok(document.querySelector('[data-node-id="file-0"]'), "root children cannot all be collapsed by folding a redundant root");
+    check.equal(document.querySelector(".markdown-tree__animation"), null);
     tooMany = true;
     treeViewport.scrollTop = 0;
     await testTree.refresh(); await tick();
@@ -635,7 +651,7 @@ const browserCases = async (languages: Record<string, string>) => {
     chosen = {kind: "cancelled"};
     await testTree.chooseRoot();
     check.equal(treeLists, listsBeforeCancel, "cancelled directory authorization never enumerates a parent");
-    (document.querySelector("#markdownFiles") as HTMLButtonElement).click();
+    panelToggle.click();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true);
     let finishChoose: (value: import("./treeContracts").MarkdownTreeState) => void;
     const choiceBridge = bridge.tree.chooseRoot;
@@ -655,8 +671,8 @@ const browserCases = async (languages: Record<string, string>) => {
     finishChoose(treeState);
     await choosing; await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false, "choosing a folder shows the tree even when its change notification arrives first");
-    check.ok(document.querySelector('[data-node-id="chosen-root"]'));
-    check.equal(document.querySelectorAll("#markdownTree [data-row]").length, 1, "an empty expanded folder has no placeholder child row");
+    check.equal(document.querySelector(".markdown-tree__viewport").getAttribute("title"), "Chosen");
+    check.equal(document.querySelectorAll("#markdownTree [data-row]").length, 0, "an empty root has no redundant collapsible row");
     raceTree.destroy();
     bridge.tree.chooseRoot = choiceBridge;
 
@@ -701,7 +717,7 @@ const browserCases = async (languages: Record<string, string>) => {
         const placeholder = root.querySelector<HTMLElement>(".markdown-caption-placeholder");
         check.equal(root.dataset.windowControls, platform === "win32" ? "overlay" : platform === "darwin" ? "mac" : "custom");
         check.equal(getComputedStyle(header).getPropertyValue("-webkit-app-region"), "drag");
-        check.equal(getComputedStyle(document.getElementById("markdownFiles")).getPropertyValue("-webkit-app-region"), "no-drag");
+        check.equal(getComputedStyle(document.getElementById("markdownFiles")).getPropertyValue("-webkit-app-region"), "drag", "desktop filename remains a draggable label");
         check.equal(getComputedStyle(document.getElementById("markdownTreeToggle")).getPropertyValue("-webkit-app-region"), "no-drag");
         check.equal(placeholder === header.firstElementChild, platform === "darwin");
         check.equal(header.getBoundingClientRect().height, 32);

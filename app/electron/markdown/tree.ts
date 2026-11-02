@@ -2,7 +2,7 @@ import type {MarkdownIOError} from "./types";
 import * as fs from "node:fs/promises";
 import {watch} from "node:fs";
 import * as path from "node:path";
-import {createHash} from "node:crypto";
+import {createMarkdownInstanceId} from "../../src/markdown/identity";
 import {inside} from "./resources";
 import type {BigIntStats, FSWatcher} from "node:fs";
 import type {MarkdownErrorCode, MarkdownFailure} from "../../src/markdown/contracts";
@@ -32,16 +32,21 @@ class MarkdownTree {
     width: number;
     visible: boolean;
     readonly nodes: Map<string, TreeEntry>;
+    readonly nodeIds = new Map<string, string>();
+    readonly issuedIds = new Set<string>();
+    readonly createId: () => string;
     expanded: string[];
     readonly watchers: Map<string, FSWatcher>;
     closed: boolean;
     root?: MarkdownTreeRoot & {selection: string};
     timer?: NodeJS.Timeout;
 
-    constructor({view, notify = () => {}, fileSystem = fs, watchDirectory = watch}: {
+    constructor({view, notify = () => {}, fileSystem = fs, watchDirectory = watch, createId = createMarkdownInstanceId}: {
         view: MarkdownTreeViewStore; notify?: () => void; fileSystem?: typeof fs; watchDirectory?: typeof watch;
+        createId?: () => string;
     }) {
         this.view = view;
+        this.createId = createId;
         this.fs = fileSystem;
         this.notify = notify;
         this.watchDirectory = watchDirectory;
@@ -55,7 +60,21 @@ class MarkdownTree {
         this.closed = false;
     }
 
-    id(relative: string): string { return relative ? createHash("sha256").update(this.root!.id + "\0" + relative).digest("hex") : this.root!.id; }
+    id(relative: string): string {
+        if (!relative) return this.root!.id;
+        const previous = this.nodeIds.get(relative);
+        if (previous) return previous;
+        if (this.nodeIds.size >= 9999) throw fail("size");
+        for (let attempt = 0; attempt < 32; attempt++) {
+            const id = this.createId();
+            if (!/^\d{14}-[a-z0-9]{7}$/.test(id)) throw fail("protocol");
+            if (this.issuedIds.has(id)) continue;
+            this.issuedIds.add(id);
+            this.nodeIds.set(relative, id);
+            return id;
+        }
+        throw fail("io");
+    }
 
     async setRoot(selection: string): Promise<void> {
         const sequence = ++this.rootSequence;
@@ -68,14 +87,19 @@ class MarkdownTree {
         this.root = {...saved.root, selection, path: canonical};
         this.generation++;
         this.nodes.clear();
+        this.nodeIds.clear();
+        this.issuedIds.clear();
+        this.issuedIds.add(this.root.id);
         this.width = saved.width;
         this.visible = saved.visible;
         this.expanded = [];
         this.nodes.set(this.root.id, {id: this.root.id, relative: "", name: path.basename(canonical) || canonical,
             kind: "directory", selection, path: canonical, identity: identity(stat)});
         for (const relative of saved.root.expanded) {
+            if (this.closed || sequence !== this.rootSequence) throw fail("unavailable");
             try {
                 const node = await this.resolve(relative);
+                if (this.closed || sequence !== this.rootSequence) throw fail("unavailable");
                 if (node.kind === "directory") { this.nodes.set(node.id, node); this.expanded.push(node.id); }
             } catch { /* 已删除目录不影响其余展开状态恢复。 */ }
         }
@@ -92,17 +116,20 @@ class MarkdownTree {
 
     async resolve(relative: string): Promise<TreeEntry> {
         if (!this.root || typeof relative !== "string" || path.isAbsolute(relative) || relative.includes("\0")) throw fail("protocol");
+        const root = this.root;
+        const generation = this.generation;
         const parts = relative ? relative.split(path.sep) : [];
         if (parts.length > 64 || parts.some(part => !part || part === "." || part === "..")) throw fail("size");
         await this.checkRoot();
-        let selection = this.root.path;
-        const ancestors = new Set([this.root.identity]);
+        if (root !== this.root || generation !== this.generation || this.closed) throw fail("unavailable");
+        let selection = root.path;
+        const ancestors = new Set([root.identity]);
         let canonical = selection;
         let stat = await this.fs.stat(canonical, {bigint: true});
         for (let index = 0; index < parts.length; index++) {
             selection = path.join(selection, parts[index]);
             canonical = await this.fs.realpath(selection);
-            if (!inside(this.root.path, canonical)) throw fail("permission");
+            if (!inside(root.path, canonical)) throw fail("permission");
             stat = await this.fs.stat(canonical, {bigint: true});
             if (stat.isDirectory()) {
                 if (ancestors.has(identity(stat))) throw fail("permission");
@@ -110,6 +137,7 @@ class MarkdownTree {
             } else if (!stat.isFile() || index !== parts.length - 1) throw fail("permission");
         }
         if (!stat.isDirectory() && !/\.(md|markdown)$/i.test(selection)) throw fail("permission");
+        if (root !== this.root || generation !== this.generation || this.closed) throw fail("unavailable");
         return {id: this.id(relative), relative, name: parts.at(-1) || path.basename(canonical) || canonical,
             kind: stat.isDirectory() ? "directory" : "file", selection, path: canonical, identity: identity(stat)};
     }
@@ -202,6 +230,7 @@ class MarkdownTree {
                         const pieces = relative.split(path.sep);
                         for (let index = 0; index < pieces.length; index++) {
                             const node = await this.resolve(pieces.slice(0, index).join(path.sep));
+                            if (root !== this.root || generation !== this.generation || this.closed) throw fail("unavailable");
                             if (!this.nodes.has(node.id) && this.nodes.size >= 10000) throw fail("size");
                             this.nodes.set(node.id, node);
                             parents.push(node.id);

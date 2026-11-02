@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261102140506"
+		"updated": "20261102172700"
 	},
 	"Children": [
 		{
@@ -93,12 +93,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261102140506"
+				"updated": "20261102172500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The window is named SiYuan. Its header shows a file panel button, the filename, Undo, Redo, and the "
+					"Data": "The window title shows the current filename, or Untitled for a new document that has not been saved. Its header shows a file panel button, the filename, Undo, Redo, and the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -126,6 +126,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " (macOS)."
+				}
+			]
+		},
+		{
+			"ID": "20261102172700-0ood6fh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102172700-0ood6fh",
+				"updated": "20261102172700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For ordinary Markdown resource links in a local workspace, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open in built-in Markdown editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to edit the original resource file. This entry is unavailable for remote workspaces, encrypted notebook resources, and external file links, so remote paths and decrypted temporary copies are not mistaken for the original file."
 				}
 			]
 		},
@@ -259,12 +291,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-4756559",
-				"updated": "20261102140506"
+				"updated": "20261102172500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. Clicking the filename also toggles the panel. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
+					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. The filename toggles the panel only in the mobile or narrow-screen drawer layout; it is not clickable in the desktop sidebar layout. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
 				}
 			]
 		},

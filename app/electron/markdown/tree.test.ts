@@ -43,7 +43,23 @@ test("tree lists real directories and Markdown lazily with natural ordering and 
     assert.equal((await tree.list({...location(), generation: 0})).kind, "blocked");
 });
 
-test("tree view remembers width, visibility and expanded directories with stable IDs", async t => {
+test("tree never lists atomic-save temporary or backup files while they appear and disappear", async t => {
+    const {root, tree, location} = await fixture(t);
+    await fs.writeFile(path.join(root, "note.md"), "original");
+    const names = async () => (await tree.list(location())).entries.map(entry => entry.name);
+    assert.deepEqual(await names(), ["note.md"]);
+    const temporary = ".siyuan-markdown-1a5b7f10-81e1-428a-9691-001400000000.tmp";
+    for (const name of [temporary, temporary + ".backup", "note.md.tmp", "note.markdown.backup"]) {
+        await fs.writeFile(path.join(root, name), "partial content");
+    }
+    assert.deepEqual(await names(), ["note.md"]);
+    for (const name of [temporary, temporary + ".backup", "note.md.tmp", "note.markdown.backup"]) {
+        await fs.unlink(path.join(root, name));
+    }
+    assert.deepEqual(await names(), ["note.md"]);
+});
+
+test("tree view remembers roots and expanded paths while regenerating session node IDs", async t => {
     const {root, config, tree, location} = await fixture(t);
     await fs.mkdir(path.join(root, "child"));
     const child = (await tree.list(location())).entries[0];
@@ -54,13 +70,70 @@ test("tree view remembers width, visibility and expanded directories with stable
     await reopened.setRoot(root);
     const state = await reopened.state();
     assert.equal(state.rootId, tree.root.id);
-    assert.deepEqual(state.expanded, [tree.root.id, child.id]);
+    const reopenedChild = await reopened.resolve("child");
+    assert.deepEqual(state.expanded, [tree.root.id, reopenedChild.id]);
+    assert.notEqual(reopenedChild.id, child.id);
+    assert.match(reopenedChild.id, /^\d{14}-[a-z0-9]{7}$/);
     assert.equal(state.width, 310);
     assert.equal(state.visible, false);
     await assert.rejects(tree.saveView({width: 481}));
     await assert.rejects(tree.saveView({rootId: tree.root.id, generation: 0, expanded: []}));
     await assert.rejects(tree.saveView({rootId: tree.root.id, generation: tree.generation, expanded: ["foreign"]}));
     await assert.rejects(tree.saveView({rootId: tree.root.id, generation: tree.generation, expanded: Array(257).fill(tree.root.id)}));
+});
+
+test("tree node IDs stay stable during refresh and reset on root switching", async t => {
+    const {directory, root, tree, location} = await fixture(t);
+    await fs.writeFile(path.join(root, "note.md"), "note");
+    const first = (await tree.list(location())).entries[0];
+    assert.match(first.id, /^\d{14}-[a-z0-9]{7}$/);
+    assert.equal((await tree.resolve("note.md")).id, first.id);
+    assert.equal((await tree.list(location())).entries[0].id, first.id);
+    const oldLocation = location(first.id);
+    const rootId = tree.root.id;
+    const other = path.join(directory, "other"); await fs.mkdir(other);
+    await tree.setRoot(other);
+    assert.equal(tree.nodeIds.size, 0);
+    await tree.setRoot(root);
+    assert.equal(tree.root.id, rootId, "root selection preserves its persisted SiYuan ID");
+    const next = (await tree.list(location())).entries[0];
+    assert.notEqual(next.id, first.id);
+    assert.equal((await tree.list(oldLocation)).kind, "blocked");
+});
+
+test("tree ID generation retries collisions without reusing a root or another node ID", async t => {
+    const a = "20261102100000-aaaaaaa", b = "20261102100000-bbbbbbb";
+    const candidates: string[] = [];
+    const {root, tree} = await fixture(t, {createId: () => candidates.shift() ?? a});
+    for (const name of ["a.md", "b.md", "c.md"]) await fs.writeFile(path.join(root, name), "content");
+    candidates.push(tree.root.id, a, a, b);
+    assert.equal((await tree.resolve("a.md")).id, a);
+    assert.equal((await tree.resolve("b.md")).id, b);
+    await assert.rejects(tree.resolve("c.md"), error => error.markdownCode === "io");
+    assert.equal((await tree.resolve("a.md")).id, a);
+    assert.equal(tree.nodeIds.size, 2);
+});
+
+test("a late root resolution cannot allocate an ID in the next root generation", async t => {
+    const selected: {path?: string} = {};
+    let finish: () => void;
+    let started: () => void;
+    const reached = new Promise<void>(resolve => {started = resolve;});
+    const delayed = new Promise<void>(resolve => {finish = resolve;});
+    const fake = {...fs, stat: async (file, options) => {
+        if (file === selected.path) {started(); await delayed;}
+        return fs.stat(file, options);
+    }};
+    const {directory, root, tree} = await fixture(t, {fileSystem: fake});
+    selected.path = path.join(root, "late.md"); await fs.writeFile(selected.path, "content");
+    const resolving = tree.resolve("late.md");
+    const rejected = assert.rejects(resolving, error => error.markdownCode === "unavailable");
+    await reached;
+    const other = path.join(directory, "other"); await fs.mkdir(other);
+    await tree.setRoot(other);
+    finish(); await rejected;
+    assert.equal(tree.nodeIds.size, 0);
+    assert.equal(tree.nodes.size, 1);
 });
 
 test("tree root selection preserves manual roots and rejects replaced identities and old locations", async t => {

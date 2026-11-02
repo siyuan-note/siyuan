@@ -1,4 +1,4 @@
-import {randomUUID} from "node:crypto";
+import {createAvailableMarkdownId, createMarkdownInstanceId} from "../../src/markdown/identity";
 import type {MarkdownFormat} from "../../src/markdown/contracts";
 
 export type MarkdownFileDescriptor = {
@@ -20,16 +20,32 @@ class MarkdownTargetRegistry {
     readonly sessions: Set<string>;
     readonly entries: Map<string, MarkdownEntry>;
     readonly keys: Map<string, string>;
-    constructor() {
+    private readonly issuedIds = new Set<string>();
+    private readonly createId: () => string;
+    constructor({createId = createMarkdownInstanceId}: {createId?: () => string} = {}) {
+        this.createId = createId;
         this.sessions = new Set();
         this.entries = new Map();
         this.keys = new Map();
     }
 
-    createSession(sessionId: string = randomUUID()): string {
+    // Keep issued identities until this host is destroyed: closed sessions may
+    // still own a window origin or have delayed replies/recovery records.
+    reserveIds(ids: Iterable<string>): void {
+        for (const id of ids) this.issuedIds.add(id);
+    }
+
+    private allocateId(): string {
+        const id = createAvailableMarkdownId(value => this.issuedIds.has(value), this.createId);
+        this.issuedIds.add(id);
+        return id;
+    }
+
+    createSession(sessionId: string = this.allocateId()): string {
         if (typeof sessionId !== "string" || !sessionId || this.sessions.has(sessionId)) {
             throw new Error("Invalid or duplicate Markdown session");
         }
+        this.issuedIds.add(sessionId);
         this.sessions.add(sessionId);
         return sessionId;
     }
@@ -49,8 +65,8 @@ class MarkdownTargetRegistry {
                 return {kind: "occupied", sessionId: occupied.sessionId};
             }
         }
-        const entry: MarkdownEntry = {handle: randomUUID(), targetIdentity: randomUUID(), sessionId, descriptor, state: reserved ? "reserved" : "bound",
-            reservationId: reserved ? randomUUID() : undefined, pending: 0};
+        const entry: MarkdownEntry = {handle: this.allocateId(), targetIdentity: this.allocateId(), sessionId, descriptor, state: reserved ? "reserved" : "bound",
+            reservationId: reserved ? this.allocateId() : undefined, pending: 0};
         this.entries.set(entry.handle, entry);
         descriptor.keys.forEach(key => this.keys.set(key, entry.handle));
         return {kind: "claimed", entry};

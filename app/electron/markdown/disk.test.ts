@@ -32,6 +32,32 @@ test("authorized handles are owner-bound and do not disclose paths or overwrite 
     assert.deepEqual(await fs.readFile(selected), bytes);
 });
 
+test("temporary ID collisions retry without overwriting or removing another writer's files", async t => {
+    for (const exhausted of [false, true]) {
+        const occupied: string[] = [];
+        const io = {...fs, open: async (name, flags, mode) => {
+            if (flags === "wx" && (exhausted || occupied.length === 0)) {
+                occupied.push(name);
+                await fs.writeFile(name, "another writer", {flag: "wx"});
+                throw Object.assign(new Error("occupied"), {code: "EEXIST"});
+            }
+            return fs.open(name, flags, mode);
+        }};
+        const {service, file} = await setup(t, io);
+        const selected = file("note.md");
+        await fs.writeFile(selected, "original");
+        const opened = await service.authorizeOpen("a", selected);
+        const result = await service.write(request(opened.target, "edited"));
+        assert.equal(result.kind, exhausted ? "blocked" : "committed");
+        assert.equal(occupied.length, exhausted ? 8 : 1);
+        assert.equal(await fs.readFile(selected, "utf8"), exhausted ? "original" : "edited");
+        for (const name of occupied) {
+            assert.match(path.basename(name), /^\.siyuan-markdown-\d{14}-[a-z0-9]{7}\.tmp$/);
+            assert.equal(await fs.readFile(name, "utf8"), "another writer");
+        }
+    }
+});
+
 test("parallel opens and hard-link aliases focus the existing owner", async t => {
     const {service, file} = await setup(t);
     await fs.writeFile(file("source.md"), "original");
@@ -352,4 +378,38 @@ test("symbolic-link grants preserve the link and reject a changed link target", 
     await fs.symlink(file("second.md"), file("alias.md"));
     assert.equal((await service.write(request(opened.target, "wrong"))).kind, "blocked");
     assert.equal(await fs.readFile(file("second.md"), "utf8"), "second");
+});
+
+test("asset authorization binds the verified identity before occupied reuse and after asynchronous reading", async t => {
+    const {service, file} = await setup(t);
+    const selected = file("asset.md");
+    await fs.writeFile(selected, "original");
+    const expected = await service.describe(selected);
+    const opened = await service.authorizeOpen("a", selected, expected);
+    assert.equal(opened.kind, "opened");
+    assert.equal((await service.authorizeOpen("b", selected, {...expected, identity: "other"})).kind, "blocked");
+    assert.equal((await service.authorizeOpen("b", selected, expected)).kind, "occupied");
+    service.closeSession("a");
+    const snapshot = service.snapshot.bind(service);
+    service.snapshot = async (...args) => {
+        await fs.rename(selected, file("previous.md"));
+        await fs.writeFile(selected, "replacement");
+        return snapshot(...args);
+    };
+    assert.equal((await service.authorizeOpen("b", selected, expected)).kind, "blocked");
+    assert.equal(service.registry.entries.size, 0);
+});
+
+test("asset authorization rejects symlink replacement before granting an outside file", async t => {
+    if (process.platform === "win32") return t.skip("symlink creation requires additional Windows privileges");
+    const {service, file} = await setup(t);
+    const selected = file("asset.md");
+    await fs.writeFile(selected, "original");
+    const expected = await service.describe(selected);
+    const outside = file("outside.md");
+    await fs.writeFile(outside, "private");
+    await fs.unlink(selected);
+    await fs.symlink(outside, selected);
+    assert.equal((await service.authorizeOpen("a", selected, expected)).kind, "blocked");
+    assert.equal(service.registry.entries.size, 0);
 });

@@ -29,7 +29,7 @@ const browserCases = async (cdn: string, lutePath: string) => {
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const source = '[Text][ref]\n\n[ref]: https://example.com "Title"\n\n![Local](assets/photo.png)\n\n![Remote](https://invalid.example/track.png)\n\n' +
         '<iframe src="https://invalid.example/preserved"></iframe>\n\n<script>window.markdownExecuted = true</script>\n\n' +
-        '```echarts\n{"title":{"text":"static diagram"}}\n```\n\nEnd\n';
+        '```echarts\n{"title":{"text":"static diagram"}}\n```\n\n:doge: 🐶 👨‍👩‍👧‍👦\n\nEnd\n';
     const imageURL = URL.createObjectURL(new Blob([new Uint8Array([137, 80, 78, 71])], {type: "image/png"}));
     const links: string[] = [];
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
@@ -78,6 +78,8 @@ const browserCases = async (cdn: string, lutePath: string) => {
         check.ok(immediate.content.includes('<iframe src="https://invalid.example/preserved"></iframe>'), mode);
         check.ok(immediate.content.includes("<script>window.markdownExecuted = true</script>"), mode);
         check.ok(immediate.content.includes("```echarts"), mode);
+        check.ok(immediate.content.includes(":doge:"), `existing image emoji shortcode survives edits in ${mode}`);
+        check.ok(immediate.content.includes("🐶 👨‍👩‍👧‍👦"), `Unicode emoji survive edits in ${mode}`);
         check.equal((window as unknown as {markdownExecuted?: boolean}).markdownExecuted, undefined);
         check.equal(immediate.content.includes("blob:"), false);
         await new Promise(resolve => setTimeout(resolve, 350));
@@ -125,6 +127,18 @@ const browserCases = async (cdn: string, lutePath: string) => {
         await new Promise(resolve => setTimeout(resolve, 850));
         check.deepEqual(editor.flush(), {content: "Reloaded\n", edited: false, composing: false});
         check.equal(edits.length, afterReload);
+        if (mode !== "sv") {
+            editor.setMode(mode);
+            editor.setValue("");
+            editor.focus();
+            document.execCommand("insertText", false, ":do");
+            await new Promise(resolve => setTimeout(resolve, 350));
+            const hint = element.querySelector<HTMLElement>(".vditor-hint");
+            check.ok(hint && hint.style.display !== "none", `emoji completion is visible in ${mode}`);
+            check.ok(hint.textContent.includes("dog"), `Unicode dog remains suggested in ${mode}`);
+            check.equal(hint.querySelector("img"), null, `image emoji are not suggested in ${mode}`);
+            check.equal(hint.textContent.includes("doge"), false, `nonportable shortcode is not suggested in ${mode}`);
+        }
         editor.destroy();
         element.remove();
     }

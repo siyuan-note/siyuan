@@ -1,7 +1,8 @@
 import * as fs from "node:fs/promises";
 import {constants} from "node:fs";
 import * as path from "node:path";
-import {createHash, randomUUID} from "node:crypto";
+import {createHash} from "node:crypto";
+import {createMarkdownTemporaryFile} from "./temporaryFile";
 import {MarkdownTargetRegistry} from "./registry";
 import {decodeMarkdown, encodeMarkdown} from "./codec";
 import {replaceFile, preserveOwnership, syncDirectory} from "./replaceFile";
@@ -10,6 +11,8 @@ import type {MarkdownEntry, MarkdownFileDescriptor, MarkdownSnapshot} from "./re
 import type {MarkdownIOError} from "./types";
 import type {MarkdownBlocked, MarkdownErrorCode, MarkdownFailure, MarkdownFormat, MarkdownReadRequest,
     MarkdownReadResult, MarkdownTarget, MarkdownWriteRequest, MarkdownWriteResult} from "../../src/markdown/contracts";
+
+export type ExpectedMarkdownFile = Pick<MarkdownFileDescriptor, "path" | "identity">;
 
 type Occupied = {kind: "occupied"; sessionId: string};
 export type MarkdownOpenAuthorization = {kind: "opened"; target: MarkdownTarget; content: string} | Occupied | MarkdownBlocked;
@@ -138,9 +141,9 @@ class MarkdownDiskService {
                 conditionalWrite: false, atomicReplace: true, coordinatedAccess: false}};
     }
 
-    grant(sessionId: string, filePath: string, reserved: false, format?: MarkdownFormat): Promise<MarkdownOpenAuthorization>;
-    grant(sessionId: string, filePath: string, reserved: true, format?: MarkdownFormat): Promise<MarkdownSaveAsAuthorization>;
-    async grant(sessionId: string, filePath: string, reserved: boolean, format?: MarkdownFormat):
+    grant(sessionId: string, filePath: string, reserved: false, format?: MarkdownFormat, expected?: ExpectedMarkdownFile): Promise<MarkdownOpenAuthorization>;
+    grant(sessionId: string, filePath: string, reserved: true, format?: MarkdownFormat, expected?: ExpectedMarkdownFile): Promise<MarkdownSaveAsAuthorization>;
+    async grant(sessionId: string, filePath: string, reserved: boolean, format?: MarkdownFormat, expected?: ExpectedMarkdownFile):
         Promise<MarkdownOpenAuthorization | MarkdownSaveAsAuthorization> {
         format = format && {...format};
         let entry: MarkdownEntry | undefined;
@@ -148,6 +151,9 @@ class MarkdownDiskService {
         try {
             this.registry.assertSession(sessionId);
             const descriptor = await this.describe(filePath, reserved);
+            if (expected && (descriptor.path !== expected.path || descriptor.identity !== expected.identity)) {
+                throw diskError("identity-changed", "Markdown authorization target changed");
+            }
             const claimed = this.registry.claim(sessionId, descriptor, reserved);
             if (claimed.kind === "occupied") return claimed;
             entry = claimed.entry;
@@ -155,6 +161,9 @@ class MarkdownDiskService {
             entry.pending++;
             held = true;
             const snapshot = await this.snapshot(descriptor, reserved);
+            if (expected && (snapshot.path !== expected.path || snapshot.identity !== expected.identity)) {
+                throw diskError("identity-changed", "Markdown authorization target changed while reading");
+            }
             const decoded = snapshot.bytes ? decodeMarkdown(snapshot.bytes) : {content: "", format: {bom: false, newline: "\n" as const}};
             this.registry.update(entry, snapshot);
             entry.format = format || decoded.format;
@@ -173,8 +182,8 @@ class MarkdownDiskService {
         }
     }
 
-    authorizeOpen(sessionId: string, filePath: string) {
-        return this.grant(sessionId, filePath, false);
+    authorizeOpen(sessionId: string, filePath: string, expected?: ExpectedMarkdownFile) {
+        return this.grant(sessionId, filePath, false, undefined, expected);
     }
 
     authorizeSaveAs(sessionId: string, filePath: string, format?: MarkdownFormat) {
@@ -241,8 +250,9 @@ class MarkdownDiskService {
             }
             if (!original.writable) throw diskError("readonly", "Markdown target is read-only");
             if (original.baseline !== request.expectedBaseline) return {kind: "conflict", baseline: original.baseline};
-            temporaryPath = path.join(path.dirname(entry.descriptor.path), ".siyuan-markdown-" + randomUUID() + ".tmp");
-            const file = await this.fs.open(temporaryPath, "wx", original.mode);
+            const staged = await createMarkdownTemporaryFile(path.join(path.dirname(entry.descriptor.path), ".siyuan-markdown-"), original.mode, this.fs);
+            temporaryPath = staged.path;
+            const file = staged.handle;
             try {
                 await file.writeFile(bytes);
                 await preserveOwnership(file, original);

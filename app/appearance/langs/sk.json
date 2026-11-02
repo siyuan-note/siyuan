@@ -1,4 +1,5 @@
 {
+	"openMarkdownEditor": "Otvoriť vo vstavanom editore Markdown",
 	"insertTableHeaderRow": "Vložiť riadok hlavičky",
 	"syncSourcePreview": "Zdroj synchronizácie sa zmenil. Lokálne: ${local} súborov; zdroj: ${cloud} súborov, ${time}, zariadenie: ${device}. Odoslanie: ${upload} súborov. Obnovenie: prepísanie ${overwrite} a odstránenie ${remove} lokálnych súborov. Vyberte smer; automatické zlúčenie je pozastavené",
 	"markdownSourceOnly": "Veľký súbor: iba úprava zdroja; náhľad je vypnutý",

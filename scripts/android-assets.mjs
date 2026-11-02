@@ -13,6 +13,9 @@ export function androidStageFiles(stageDir) {
     }
   }
   walk(stageDir);
+  if (!result.includes("stage/protyle/js/lute/lute.min.js")) {
+    throw new Error(`Missing Android resource: ${stageDir}/protyle/js/lute/lute.min.js`);
+  }
   for (const target of ["mobile", "desktop", "export", "markdown"]) {
     const directory = path.join(stageDir, "build", target);
     const names = [];
@@ -27,7 +30,9 @@ export function androidStageFiles(stageDir) {
     collect(directory);
     const required = target === "export" ? ["protyle-method.js", "base.css"] : ["index.html"];
     if (target === "markdown") {
-      required.push("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+      if (names.includes("vditor/dist/js/lute/lute.min.js")) throw new Error(`Duplicate Markdown Lute resource: ${directory}`);
+      if (names.some(name => name.startsWith("vditor/dist/images/emoji/"))) throw new Error(`Obsolete Markdown emoji resource: ${directory}`);
+      required.push("vditor/LICENSE", "vditor/dist/js/i18n/en_US.js",
         "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE", "vditor/licenses/KaTeX-mhchem-NOTICE",
         "vditor/licenses/Apache-2.0-LICENSE", "vditor/licenses/diff-match-patch-LICENSE", "vditor/dist/index.css",
         "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js", "vditor/dist/js/katex/katex.min.css",

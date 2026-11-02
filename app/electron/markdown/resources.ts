@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import {constants} from "node:fs";
 import * as path from "node:path";
-import {randomUUID} from "node:crypto";
+import {createMarkdownCapabilityToken} from "../../src/markdown/identity";
 import type {BigIntStats} from "node:fs";
 
 const imageTypes: Record<string, string> = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
@@ -69,7 +69,7 @@ class MarkdownResources {
                 }
             }
             if (this.entries.size >= 1024) return undefined;
-            const token = randomUUID();
+            const token = createMarkdownCapabilityToken();
             this.entries.set(token, {selection, canonical, type, identity: identity(stat), modified: stat.mtimeNs});
             return `siyuan-markdown://${this.sessionId}/resource/${token}`;
         } catch {

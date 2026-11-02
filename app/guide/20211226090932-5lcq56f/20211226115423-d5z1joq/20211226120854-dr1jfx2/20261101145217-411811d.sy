@@ -6,7 +6,7 @@
 		"id": "20261101145217-411811d",
 		"title": "獨立 Markdown 編輯器",
 		"type": "doc",
-		"updated": "20261102140531"
+		"updated": "20261102172700"
 	},
 	"Children": [
 		{
@@ -93,12 +93,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-d20d136",
-				"updated": "20261102140531"
+				"updated": "20261102172500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "視窗名稱為 SiYuan，標題列顯示檔案面板按鈕、檔名、撤銷、重做與 "
+					"Data": "視窗名稱顯示目前檔名，尚未儲存的新文件顯示「未命名」。標題列顯示檔案面板按鈕、檔名、撤銷、重做與 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -126,6 +126,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261102172700-b0ka4sf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102172700-b0ka4sf",
+				"updated": "20261102172700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在本機工作空間中，一般 Markdown 資源連結的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用內建 Markdown 編輯器開啟"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選單可直接編輯原始資源檔案。遠端工作空間、加密筆記本資源與外部檔案連結不提供此入口，以免將遠端路徑或解密暫存副本誤認為原始檔案。"
 				}
 			]
 		},
@@ -259,12 +291,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-1940643",
-				"updated": "20261102140531"
+				"updated": "20261102172500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點擊左上角的檔案面板按鈕可開啟或關閉桌面側欄或行動端檔案抽屜，點擊檔名也可切換面板。桌面端拖曳分隔線可以調整寬度。如果行動平台只授予單一檔案的權限，請依提示選擇檔案所在目錄以啟用檔案樹。取消目錄授權不會影響目前文件的編輯。檔案樹授權不會同時授權本機圖片。"
+					"Data": "點擊左上角的檔案面板按鈕可開啟或關閉桌面側欄或行動端檔案抽屜，檔名僅在行動端或窄螢幕的抽屜版面中用於切換面板，桌面側欄版面中的檔名無法點擊。桌面端拖曳分隔線可以調整寬度。如果行動平台只授予單一檔案的權限，請依提示選擇檔案所在目錄以啟用檔案樹。取消目錄授權不會影響目前文件的編輯。檔案樹授權不會同時授權本機圖片。"
 				}
 			]
 		},

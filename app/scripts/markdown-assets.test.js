@@ -4,7 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 const {spawnSync} = require("node:child_process");
 const {test} = require("node:test");
-const {markdownAssetFiles, prepareMarkdownAssets, MarkdownAssetsPlugin, REQUIRED_ASSETS} = require("./markdown-assets");
+const {markdownAssetFiles, prepareMarkdownAssets, MarkdownAssetsPlugin, REQUIRED_ASSETS, SHARED_LUTE_ASSET, LEGACY_LUTE_ASSET} = require("./markdown-assets");
 
 const temporary = t => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-markdown-assets-"));
@@ -15,15 +15,17 @@ const temporary = t => {
     return root;
 };
 
-test("offline Markdown assets include every enabled runtime and use the shared Lute build", t => {
+test("offline Markdown assets include enabled renderers without duplicating the installed shared Lute", t => {
     const output = temporary(t);
     const names = prepareMarkdownAssets(output);
     for (const name of REQUIRED_ASSETS) assert.ok(names.includes(name), name);
-    assert.deepEqual(fs.readFileSync(path.join(output, "vditor/dist/js/lute/lute.min.js")),
-        fs.readFileSync(path.join(__dirname, "../stage/protyle/js/lute/lute.min.js")));
+    assert.equal(fs.existsSync(path.join(output, LEGACY_LUTE_ASSET)), false);
     assert.ok(names.some(name => name.startsWith("vditor/dist/js/katex/fonts/")));
     assert.ok(!names.some(name => /\.(?:map|d\.ts)$/.test(name)));
     assert.ok(!names.some(name => /\/(?:mermaid|echarts|mathjax|plantuml)\//.test(name)));
+    assert.ok(!names.some(name => name.startsWith("vditor/dist/images/emoji/")), "nonportable image emoji are not bundled");
+    const luteAssets = markdownAssetFiles().filter(file => file.name.endsWith("/lute.min.js"));
+    assert.equal(luteAssets.length, 0, "native hosts serve the single installed Lute through an exact URL alias");
     for (const file of names.filter(name => name.endsWith(".css"))) {
         const css = fs.readFileSync(path.join(output, file), "utf8");
         for (const match of css.matchAll(/url\(["']?([^\s"')]+)["']?\)/g)) {
@@ -33,6 +35,31 @@ test("offline Markdown assets include every enabled runtime and use the shared L
             assert.ok(names.includes(referenced), `${file}: missing ${referenced}`);
         }
     }
+});
+
+test("asset preparation removes a legacy Lute copy without deleting unrelated output", t => {
+    const root = temporary(t);
+    const legacy = path.join(root, LEGACY_LUTE_ASSET);
+    fs.mkdirSync(path.dirname(legacy), {recursive: true});
+    fs.writeFileSync(legacy, "old copy");
+    const emoji = path.join(root, "vditor/dist/images/emoji/doge.png");
+    fs.mkdirSync(path.dirname(emoji), {recursive: true});
+    fs.writeFileSync(emoji, "old emoji");
+    fs.writeFileSync(path.join(root, "open-window.js"), "keep");
+    prepareMarkdownAssets(root);
+    assert.equal(fs.existsSync(legacy), false);
+    assert.equal(fs.existsSync(emoji), false);
+    assert.equal(fs.readFileSync(path.join(root, "open-window.js"), "utf8"), "keep");
+});
+
+test("legacy cleanup never follows an output directory link outside its root", {skip: process.platform === "win32"}, t => {
+    const root = temporary(t);
+    const outside = temporary(t);
+    fs.mkdirSync(path.join(root, "vditor/dist/js"), {recursive: true});
+    fs.writeFileSync(path.join(outside, "lute.min.js"), "private");
+    fs.symlinkSync(outside, path.join(root, "vditor/dist/js/lute"), "dir");
+    assert.throws(() => prepareMarkdownAssets(root), /Linked obsolete Markdown asset/);
+    assert.equal(fs.readFileSync(path.join(outside, "lute.min.js"), "utf8"), "private");
 });
 
 test("offline preparation rejects a missing shared Lute before creating output", t => {
@@ -50,20 +77,25 @@ test("standalone asset CLI prepares a requested directory without Webpack", t =>
     assert.ok(!fs.existsSync(path.join(output, "index.html")), "asset preparation must not pretend to build the page");
 });
 
-test("Webpack emits the same offline manifest and watches the shared sources", () => {
+test("Webpack emits the same offline manifest and watches the shared sources", t => {
     let compilationHook;
     let assetsHook;
+    let afterEmit;
     const emitted = new Map();
     const compilation = {fileDependencies: new Set(),
         hooks: {processAssets: {tap: (options, callback) => { assetsHook = callback; }}},
         emitAsset: (name, source) => emitted.set(name, source.data)};
-    const compiler = {hooks: {thisCompilation: {tap: (name, callback) => { compilationHook = callback; }}},
-        webpack: {Compilation: {PROCESS_ASSETS_STAGE_ADDITIONAL: 0}, sources: {RawSource: class {constructor(data) {this.data = data;}}}}};
+    const compiler = {options: {output: {path: temporary(t)}}, hooks: {
+        thisCompilation: {tap: (name, callback) => { compilationHook = callback; }},
+        afterEmit: {tap: (name, callback) => {afterEmit = callback;}},
+    }, webpack: {Compilation: {PROCESS_ASSETS_STAGE_ADDITIONAL: 0}, sources: {RawSource: class {constructor(data) {this.data = data;}}}}};
     new MarkdownAssetsPlugin().apply(compiler);
     compilationHook(compilation);
     assetsHook();
     const files = markdownAssetFiles();
     assert.deepEqual([...emitted.keys()], files.map(file => file.name));
+    assert.ok(compilation.fileDependencies.has(path.resolve(__dirname, "..", SHARED_LUTE_ASSET)));
+    afterEmit();
     for (const file of files) {
         assert.ok(compilation.fileDependencies.has(file.source));
         assert.deepEqual(emitted.get(file.name), fs.readFileSync(file.source));
@@ -99,7 +131,21 @@ test("the real standalone Webpack dependency graph compiles in an isolated outpu
         const stats = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
         assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
         assert.ok(fs.existsSync(path.join(config.output.path, "index.html")));
+        assert.equal(fs.existsSync(path.join(config.output.path, LEGACY_LUTE_ASSET)), false);
         const modules = stats.toJson({all: false, modules: true}).modules;
         for (const name of ["DocTreeModel.ts", "menuPosition.ts"]) assert.ok(modules.some(value => value.name?.includes(name)), name);
+        // Simulate stale output from a previous build while watch preservation is active.
+        const legacy = path.join(config.output.path, LEGACY_LUTE_ASSET);
+        fs.mkdirSync(path.dirname(legacy), {recursive: true});
+        fs.writeFileSync(legacy, "obsolete copy");
+        const emoji = path.join(config.output.path, "vditor/dist/images/emoji/doge.png");
+        fs.mkdirSync(path.dirname(emoji), {recursive: true});
+        fs.writeFileSync(emoji, "obsolete image");
+        fs.writeFileSync(path.join(config.output.path, "open-window.js"), "keep");
+        const rebuilt = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
+        assert.equal(rebuilt.hasErrors(), false, rebuilt.toString({all: false, errors: true}));
+        assert.equal(fs.existsSync(legacy), false);
+        assert.equal(fs.existsSync(emoji), false);
+        assert.equal(fs.existsSync(path.join(config.output.path, "open-window.js")), true);
     } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
 });

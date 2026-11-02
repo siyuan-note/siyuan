@@ -1,4 +1,5 @@
 {
+	"openMarkdownEditor": "Open in built-in Markdown editor",
 	"insertTableHeaderRow": "Insert header row",
 	"syncSourcePreview": "Sync source changed. Local: ${local} files; source: ${cloud} files, ${time}, device: ${device}. Upload: ${upload} files. Restore: overwrite ${overwrite}, delete ${remove} local files. Choose a direction; automatic merging is paused",
 	"markdownSourceOnly": "Large file: source editing only; preview disabled",

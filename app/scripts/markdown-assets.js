@@ -4,25 +4,27 @@ const {createRequire} = require("node:module");
 
 const VDITOR_VERSION = "4.0.1";
 const appRoot = path.resolve(__dirname, "..");
-const LUTE_ASSET = "vditor/dist/js/lute/lute.min.js";
-const VDITOR_DIRECTORIES = ["css/content-theme", "js/i18n", "js/highlight.js", "js/katex", "images/emoji"];
+const LEGACY_LUTE_ASSET = "vditor/dist/js/lute/lute.min.js";
+const SHARED_LUTE_ASSET = "stage/protyle/js/lute/lute.min.js";
+const VDITOR_DIRECTORIES = ["css/content-theme", "js/i18n", "js/highlight.js", "js/katex"];
 const APPEARANCE_FILES = ["themes/daylight/theme.css", "themes/midnight/theme.css", "icons/litheness/icon.js", "icons/litheness/icon.LICENSE"];
 const REQUIRED_ASSETS = ["vditor/LICENSE", "vditor/dist/index.css", "vditor/dist/js/i18n/en_US.js",
     "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE", "vditor/licenses/KaTeX-mhchem-NOTICE",
     "vditor/licenses/Apache-2.0-LICENSE", "vditor/licenses/diff-match-patch-LICENSE",
     "vditor/dist/js/icons/ant.js", "vditor/dist/js/highlight.js/highlight.min.js",
     "vditor/dist/js/katex/katex.min.js", "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
-    LUTE_ASSET, ...APPEARANCE_FILES.map(name => "appearance/" + name)];
+    ...APPEARANCE_FILES.map(name => "appearance/" + name)];
 
 // Vditor resolves optional renderers, fonts, icons and languages below cdn/dist.
 // Keep that layout intact so an offline document never falls back to a CDN.
 const markdownAssetFiles = ({
     packageRoot = path.dirname(require.resolve("vditor/package.json")),
-    lutePath = path.join(appRoot, "stage/protyle/js/lute/lute.min.js"),
+    lutePath = path.join(appRoot, SHARED_LUTE_ASSET),
     appearanceRoot = path.join(appRoot, "appearance"),
 } = {}) => {
     const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, "package.json"), "utf8"));
     if (pkg.version !== VDITOR_VERSION) throw new Error(`Expected Vditor ${VDITOR_VERSION}, found ${pkg.version}`);
+    if (!fs.statSync(lutePath).isFile()) throw new Error(`Invalid shared Lute asset: ${lutePath}`);
     const files = [];
     const walk = (directory, relative) => {
         for (const entry of fs.readdirSync(directory, {withFileTypes: true})) {
@@ -30,7 +32,7 @@ const markdownAssetFiles = ({
             const name = `${relative}/${entry.name}`;
             if (entry.isSymbolicLink()) throw new Error(`Linked Markdown asset is not supported: ${source}`);
             if (entry.isDirectory()) walk(source, name);
-            else if (entry.isFile() && !/\.(?:map|d\.ts)$/.test(entry.name) && name !== LUTE_ASSET) {
+            else if (entry.isFile() && !/\.(?:map|d\.ts)$/.test(entry.name) && name !== LEGACY_LUTE_ASSET) {
                 files.push({name, source});
             }
         }
@@ -54,9 +56,8 @@ const markdownAssetFiles = ({
     for (const name of APPEARANCE_FILES) {
         files.push({name: "appearance/" + name, source: path.join(appearanceRoot, name)});
     }
-    // The npm bundle contains an older Lute. Always use the reviewed SiYuan build,
-    // including the reference-definition title preservation fixes.
-    files.push({name: LUTE_ASSET, source: lutePath});
+    // Native hosts map the exact Vditor Lute URL to SHARED_LUTE_ASSET in the
+    // same installation. Neither the npm copy nor another physical copy is emitted.
     for (const name of REQUIRED_ASSETS) {
         if (!files.some(file => file.name === name)) throw new Error(`Missing Markdown asset: ${name}`);
     }
@@ -66,10 +67,30 @@ const markdownAssetFiles = ({
     return files.sort((a, b) => a.name.localeCompare(b.name, "en"));
 };
 
+const removeLegacyMarkdownAssets = outputDirectory => {
+    // Reused outputs may contain removed assets. Remove only these two fixed
+    // locations, never follow an output subdirectory symlink elsewhere.
+    for (const name of [LEGACY_LUTE_ASSET, "vditor/dist/images/emoji"]) {
+        const legacy = path.join(outputDirectory, name);
+        try {
+            const root = fs.realpathSync(outputDirectory);
+            const parent = fs.realpathSync(path.dirname(legacy));
+            if (parent !== path.join(root, path.dirname(name))) {
+                throw new Error(`Linked obsolete Markdown asset: ${legacy}`);
+            }
+            // rm removes a target symlink itself; it never recurses into its destination.
+            fs.rmSync(path.join(parent, path.basename(legacy)), {recursive: true, force: true});
+        } catch (error) {
+            if (error.code !== "ENOENT") throw error;
+        }
+    }
+};
+
 // Also usable by resource/package checks without running Webpack or touching a
 // live development bundle. Callers can prepare an isolated output directory.
 const prepareMarkdownAssets = (outputDirectory, options) => {
     const files = markdownAssetFiles(options);
+    removeLegacyMarkdownAssets(outputDirectory);
     for (const file of files) {
         const destination = path.join(outputDirectory, file.name);
         fs.mkdirSync(path.dirname(destination), {recursive: true});
@@ -80,7 +101,11 @@ const prepareMarkdownAssets = (outputDirectory, options) => {
 
 class MarkdownAssetsPlugin {
     apply(compiler) {
+        // The clean plugin caches its previous file inventory. Explicitly remove
+        // the obsolete runtime and image emoji after every preserved watch build.
+        compiler.hooks.afterEmit.tap("MarkdownAssetsPlugin", () => removeLegacyMarkdownAssets(compiler.options.output.path));
         compiler.hooks.thisCompilation.tap("MarkdownAssetsPlugin", compilation => {
+            compilation.fileDependencies.add(path.join(appRoot, SHARED_LUTE_ASSET));
             compilation.hooks.processAssets.tap({
                 name: "MarkdownAssetsPlugin",
                 stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
@@ -100,4 +125,5 @@ if (require.main === module) {
     console.log(`Prepared ${files.length} offline Markdown assets in ${directory}`);
 }
 
-module.exports = {VDITOR_VERSION, REQUIRED_ASSETS, markdownAssetFiles, prepareMarkdownAssets, MarkdownAssetsPlugin};
+module.exports = {VDITOR_VERSION, REQUIRED_ASSETS, SHARED_LUTE_ASSET, LEGACY_LUTE_ASSET,
+    markdownAssetFiles, prepareMarkdownAssets, MarkdownAssetsPlugin};

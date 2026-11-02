@@ -1,4 +1,5 @@
 {
+	"openMarkdownEditor": "Отвори у уграђеном Markdown уређивачу",
 	"insertTableHeaderRow": "Umetni red zaglavlja",
 	"syncSourcePreview": "Извор синхронизације је промењен. Локално: ${local} датотека; извор: ${cloud} датотека, ${time}, уређај: ${device}. Отпремање: ${upload} датотека. Враћање: преписује ${overwrite} и брише ${remove} локалних датотека. Изаберите смер; аутоматско спајање је паузирано",
 	"markdownSourceOnly": "Велика датотека: само уређивање извора; преглед је искључен",

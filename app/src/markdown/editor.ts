@@ -4,6 +4,12 @@ import {createMarkdownResourcePolicy, isExternalMarkdownLink, isRelativeMarkdown
 
 export type MarkdownEditorMode = "ir" | "wysiwyg" | "sv";
 
+// Only the completion list is filtered. The parser keeps its original emoji map
+// so opening and editing an existing document never deletes image shortcodes.
+export const markdownUnicodeEmojiHints = (emojis: Record<string, string>): Record<string, string> =>
+    Object.fromEntries(Object.entries(emojis).filter(([, value]) =>
+        /^(?:\p{Extended_Pictographic}|\p{Emoji_Component})+$/u.test(value)));
+
 interface VditorSurface {
     element: HTMLElement;
     composingLock?: boolean;
@@ -16,7 +22,8 @@ interface VditorInstance {
     version: string;
     vditor: {
         currentMode: MarkdownEditorMode;
-        lute: Record<string, (...args: string[]) => string>;
+        lute: Record<string, (...args: string[]) => string> & {GetEmojis(): Record<string, string>};
+        options: {hint: {emoji: Record<string, string>}};
         ir: VditorSurface;
         wysiwyg: VditorSurface;
         sv: VditorSurface;
@@ -485,6 +492,9 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                         instance.vditor.toolbar.element.hidden = true;
                         historyObserver.observe(instance.vditor.toolbar.element, {subtree: true, attributes: true, attributeFilter: ["class"]});
                         const lute = instance.vditor.lute;
+                        const getEmojis = lute.GetEmojis.bind(lute);
+                        lute.GetEmojis = () => markdownUnicodeEmojiHints(getEmojis());
+                        instance.vditor.options.hint.emoji = markdownUnicodeEmojiHints(instance.vditor.options.hint.emoji);
                         new Set([...renderedMethods, ...htmlInputMethods]).forEach(name => {
                             const original = lute[name];
                             if (typeof original !== "function") return;

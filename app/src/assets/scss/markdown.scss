@@ -66,7 +66,7 @@ button {
   min-height: 28px;
   cursor: pointer;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--b3-list-hover);
   }
 
@@ -74,6 +74,11 @@ button {
     outline: 1px solid var(--b3-theme-primary);
   }
 
+}
+
+.markdown-heading--label {
+  cursor: default;
+  -webkit-app-region: drag;
 }
 
 .markdown-name {
@@ -98,7 +103,7 @@ button {
     user-select: none;
   }
 
-  .markdown-heading,
+  .markdown-heading:not(.markdown-heading--label),
   .markdown-tree-toggle,
   .markdown-history,
   .markdown-more,
@@ -199,7 +204,7 @@ button {
   position: absolute;
   inset-inline-end: 0;
   top: calc(100% + 6px);
-  width: min(304px, calc(100vw - 24px));
+  width: min(260px, calc(100vw - 24px));
   max-height: calc(100vh - 80px);
   max-height: calc(100dvh - 80px);
   overflow-y: auto;
@@ -207,16 +212,13 @@ button {
   padding: 6px;
 
   .b3-menu__item {
-    min-height: 34px;
     align-items: center;
-    font: inherit;
+    font-size: inherit;
     list-style: none;
   }
 
   .b3-menu__label {
     white-space: normal;
-    line-height: 1.5;
-    padding: 4px 0;
     min-width: 0;
   }
 
@@ -224,6 +226,30 @@ button {
     opacity: .38;
     cursor: not-allowed;
   }
+}
+
+.markdown-menu__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  > .b3-menu__item {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.markdown-menu__info {
+  flex-shrink: 0;
+}
+
+.markdown-menu__explanation {
+  flex-basis: 100%;
+  margin: 4px 8px 8px;
+  color: var(--b3-theme-on-surface);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: normal;
 }
 
 .markdown-choice[aria-disabled="true"] {
@@ -332,6 +358,7 @@ button {
 }
 
 .markdown-tree__viewport {
+  user-select: none;
   flex: 1;
   overflow: auto;
   min-height: 0;
@@ -370,10 +397,21 @@ button {
   touch-action: none;
   z-index: 1;
 
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 2px;
+    width: 2px;
+  }
+
   &:hover,
   &:focus-visible {
-    background: var(--b3-theme-primary);
     outline: none;
+
+    &::after {
+      background: var(--b3-theme-primary);
+    }
   }
 }
 
@@ -509,7 +547,8 @@ button {
 
   .markdown-more__button,
   .markdown-tree-toggle,
-  .markdown-history {
+  .markdown-history,
+  .markdown-menu__info {
     width: 44px;
     height: 44px;
   }

@@ -88,11 +88,12 @@ class ReleaseTests(unittest.TestCase):
             "stage/build/markdown/index.html": b'<script src="main.js"></script>',
             "stage/build/markdown/main.js": b'window.SIYUAN_VERSION="3.8.4";',
             "stage/build/export/protyle-method.js": b'Constants.SIYUAN_VERSION="3.8.4";',
+            "stage/protyle/js/lute/lute.min.js": b"/* shared Lute */",
             "appearance/langs/en.json": b"{}",
             "guide/document.sy": b"guide",
             "changelogs/v3.8.4/en.md": b"release notes",
         }
-        for asset in ("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+        for asset in ("vditor/LICENSE", "vditor/dist/js/i18n/en_US.js",
                       "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js",
                       "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
                       "vditor/dist/js/highlight.js/highlight.min.js", "appearance/themes/daylight/theme.css",
@@ -337,12 +338,24 @@ class DirectReleaseTests(unittest.TestCase):
             release.verify_package(self.package(resources=resources), version="3.8.4")
 
     def test_markdown_missing_offline_assets_fails(self):
-        for asset in ("vditor/dist/js/lute/lute.min.js", "vditor/licenses/KaTeX-fonts-LICENSE"):
+        for asset in ("stage/protyle/js/lute/lute.min.js", "stage/build/markdown/vditor/licenses/KaTeX-fonts-LICENSE"):
             with self.subTest(asset=asset):
                 resources = dict(self.resources)
-                del resources["stage/build/markdown/" + asset]
+                del resources[asset]
                 with self.assertRaisesRegex(release.VerificationError, asset):
                     release.verify_package(self.package(resources=resources), version="3.8.4")
+
+    def test_duplicate_markdown_lute_fails(self):
+        resources = dict(self.resources)
+        resources["stage/build/markdown/vditor/dist/js/lute/lute.min.js"] = b"/* obsolete copy */"
+        with self.assertRaisesRegex(release.VerificationError, "stage/build/markdown/vditor/dist/js/lute/lute.min.js"):
+            release.verify_package(self.package(resources=resources), version="3.8.4")
+
+    def test_obsolete_markdown_emoji_fails(self):
+        resources = dict(self.resources)
+        resources["stage/build/markdown/vditor/dist/images/emoji/doge.png"] = b"obsolete emoji"
+        with self.assertRaisesRegex(release.VerificationError, "stage/build/markdown/vditor/dist/images/emoji/"):
+            release.verify_package(self.package(resources=resources), version="3.8.4")
 
     def matching_baseline(self, resources=None):
         resources = self.resources if resources is None else resources

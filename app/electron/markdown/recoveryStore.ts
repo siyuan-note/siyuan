@@ -2,6 +2,7 @@ import type {MarkdownIOError} from "./types";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as crypto from "node:crypto";
+import {createMarkdownTemporaryFile} from "./temporaryFile";
 import type {MarkdownDraft, MarkdownDraftWatermark, MarkdownSaveAsCommit, MarkdownTarget} from "../../src/markdown/contracts";
 import type {MarkdownHostData, MarkdownSaveAsPreparation} from "./types";
 
@@ -127,10 +128,10 @@ const createMarkdownRecoveryStore = (directory: string, options: {fs?: typeof fs
             throw storeError("ENOSPC", "Markdown recovery capacity exceeded");
         }
         await io.mkdir(directory, {recursive: true, mode: 0o700});
-        const temporary = file + "." + crypto.randomBytes(16).toString("hex") + ".tmp";
-        let handle: fs.FileHandle | undefined;
+        const staged = await createMarkdownTemporaryFile(file + ".", 0o600, io);
+        const temporary = staged.path;
+        let handle: fs.FileHandle | undefined = staged.handle;
         try {
-            handle = await io.open(temporary, "wx", 0o600);
             await handle.writeFile(data, "utf8");
             await handle.sync();
             await handle.close();

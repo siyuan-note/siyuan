@@ -1,7 +1,8 @@
 import type {MarkdownIOError} from "./types";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import {randomUUID} from "node:crypto";
+import {createAvailableMarkdownId} from "../../src/markdown/identity";
+import {createMarkdownTemporaryFile} from "./temporaryFile";
 import type {MarkdownTreeView} from "../../src/markdown/treeContracts";
 
 export type MarkdownTreeRoot = {id: string; path: string; identity: string; expanded: string[]};
@@ -49,10 +50,10 @@ const createMarkdownTreeView = (directory: string) => {
             const serialized = JSON.stringify(data);
             if (Buffer.byteLength(serialized) > 1024 * 1024) throw invalid();
             await fs.mkdir(directory, {recursive: true, mode: 0o700});
-            const temporary = file + "." + randomUUID() + ".tmp";
-            let handle: fs.FileHandle | undefined;
+            const staged = await createMarkdownTemporaryFile(file + ".", 0o600);
+            const temporary = staged.path;
+            let handle: fs.FileHandle | undefined = staged.handle;
             try {
-                handle = await fs.open(temporary, "wx", 0o600);
                 await handle.writeFile(serialized);
                 await handle.sync();
                 await handle.close();
@@ -72,7 +73,8 @@ const createMarkdownTreeView = (directory: string) => {
         root(descriptor: Pick<MarkdownTreeRoot, "path" | "identity">) {
             return update(data => {
                 const index = data.roots.findIndex(root => root.path === descriptor.path && root.identity === descriptor.identity);
-                const root = index < 0 ? {id: randomUUID(), path: descriptor.path, identity: descriptor.identity, expanded: [""]} : data.roots.splice(index, 1)[0];
+                const root = index < 0 ? {id: createAvailableMarkdownId(id => data.roots.some(root => root.id === id)),
+                    path: descriptor.path, identity: descriptor.identity, expanded: [""]} : data.roots.splice(index, 1)[0];
                 data.roots.unshift(root);
                 data.roots.length = Math.min(data.roots.length, 16);
                 return {root: {...root, expanded: [...root.expanded]}, width: data.width, visible: data.visible};

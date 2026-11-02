@@ -406,7 +406,13 @@ def check_frontend_entries(paths, mobile):
         entries.extend(("stage/build/app/index.html", "stage/build/app/window.html",
                         "stage/build/desktop/index.html"))
     errors = [f"缺少前端入口：{entry}" for entry in entries if entry not in paths]
-    for asset in ("vditor/LICENSE", "vditor/dist/js/lute/lute.min.js", "vditor/dist/js/i18n/en_US.js",
+    if "stage/protyle/js/lute/lute.min.js" not in paths:
+        errors.append("缺少共享 Lute 资源：stage/protyle/js/lute/lute.min.js")
+    if "stage/build/markdown/vditor/dist/js/lute/lute.min.js" in paths:
+        errors.append("重复的 Markdown Lute 资源：stage/build/markdown/vditor/dist/js/lute/lute.min.js")
+    if any(name.startswith("stage/build/markdown/vditor/dist/images/emoji/") for name in paths):
+        errors.append("残留的 Markdown 图片表情资源：stage/build/markdown/vditor/dist/images/emoji/")
+    for asset in ("vditor/LICENSE", "vditor/dist/js/i18n/en_US.js",
                   "vditor/dist/js/icons/ant.js", "vditor/dist/js/katex/katex.min.js",
                   "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
                   "vditor/dist/js/highlight.js/highlight.min.js", "appearance/themes/daylight/theme.css",

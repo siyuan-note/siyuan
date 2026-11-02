@@ -30,8 +30,12 @@ export const createMarkdownSubmenu = (options: {
         element.classList.add("b3-menu__item--show");
         element.setAttribute("aria-expanded", "true");
         const anchor = element.getBoundingClientRect();
+        // scrollHeight excludes borders; include them in the border-box height to
+        // avoid an always-visible scrollbar. Clear a previous viewport constraint.
+        menu.style.maxHeight = "none";
         const bounds = menu.getBoundingClientRect();
-        const position = getAnchoredMenuPosition(anchor.top, 0, menu.scrollHeight, innerHeight - 8, 8);
+        const border = menu.offsetHeight - menu.clientHeight;
+        const position = getAnchoredMenuPosition(anchor.top, 0, Math.ceil(menu.scrollHeight + border), innerHeight - 8, 8);
         menu.style.top = `${Math.max(8, position.top)}px`;
         menu.style.maxHeight = `${position.height}px`;
         const right = anchor.right;

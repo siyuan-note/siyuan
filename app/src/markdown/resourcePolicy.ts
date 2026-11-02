@@ -1,4 +1,4 @@
-import {createMarkdownInstanceId} from "./identity";
+import {createMarkdownCapabilityToken} from "./identity";
 
 export type MarkdownResourceResolver = (reference: string) => string | undefined | Promise<string | undefined>;
 
@@ -43,7 +43,7 @@ export const isExternalMarkdownLink = (reference: string): boolean =>
 // 显示替换只存在于该编辑器实例；转换回 Markdown 前在惰性副本中还原原属性。
 export const createMarkdownResourcePolicy = (document: Document, resolveResource?: MarkdownResourceResolver,
     onUnavailable?: () => void, sessionId?: string) => {
-    const scope = createMarkdownInstanceId();
+    const scope = createMarkdownCapabilityToken();
     let generation = 0;
     let disposed = false;
     const resources = new Map<string, Promise<string | undefined>>();

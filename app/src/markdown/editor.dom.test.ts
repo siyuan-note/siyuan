@@ -27,6 +27,43 @@ const browserCases = async (cdn: string, lutePath: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+    for (const mobile of [false, true]) {
+        const element = document.createElement("div");
+        document.body.append(element);
+        const content = "Language<Alt+Enter>\n";
+        const editor = await api.createMarkdownEditor({element, initialValue: content, mode: "wysiwyg", cdn, lutePath,
+            mobile, onEdit: () => { throw new Error("Popover label updates must not edit the document"); }});
+        const panel = element.querySelector<HTMLElement>(".vditor-wysiwyg > .vditor-panel");
+        const wrapper = document.createElement("span");
+        wrapper.setAttribute("aria-label", "语言<Alt+Enter>");
+        const input = document.createElement("input");
+        input.placeholder = "语言<Alt+Enter>";
+        input.value = "text<Alt+Enter>";
+        wrapper.append(input);
+        panel.append(wrapper);
+        const documentLabel = element.querySelector<HTMLElement>(".vditor-wysiwyg pre");
+        documentLabel.setAttribute("aria-label", "Document<Alt+Enter>");
+        await tick();
+        check.equal(input.placeholder, mobile ? "语言" : "语言<Alt+Enter>");
+        check.equal(wrapper.getAttribute("aria-label"), mobile ? "语言" : "语言<Alt+Enter>");
+        check.equal(input.value, "text<Alt+Enter>");
+        check.equal(documentLabel.getAttribute("aria-label"), "Document<Alt+Enter>");
+        check.equal(editor.flush().content, content);
+        input.placeholder = "ID<⌥Enter>";
+        await tick();
+        check.equal(input.placeholder, mobile ? "ID" : "ID<⌥Enter>", "dynamic attribute updates are normalized");
+        let hotkeyReceived = false;
+        input.addEventListener("keydown", event => { hotkeyReceived = event.altKey && event.key === "Enter"; });
+        const hotkey = new KeyboardEvent("keydown", {key: "Enter", altKey: true, bubbles: true, cancelable: true});
+        input.dispatchEvent(hotkey);
+        check.equal(hotkeyReceived, true);
+        check.equal(hotkey.defaultPrevented, false, "hint suppression does not disable external keyboards");
+        editor.destroy();
+        input.placeholder = "Language<Alt+Enter>";
+        await tick();
+        check.equal(input.placeholder, "Language<Alt+Enter>", "destroy disconnects the observer");
+        element.remove();
+    }
     const source = '[Text][ref]\n\n[ref]: https://example.com "Title"\n\n![Local](assets/photo.png)\n\n![Remote](https://invalid.example/track.png)\n\n' +
         '<iframe src="https://invalid.example/preserved"></iframe>\n\n<script>window.markdownExecuted = true</script>\n\n' +
         '```echarts\n{"title":{"text":"static diagram"}}\n```\n\n:doge: 🐶 👨‍👩‍👧‍👦\n\nEnd\n';

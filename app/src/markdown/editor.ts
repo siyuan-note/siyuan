@@ -10,8 +10,21 @@ export const markdownUnicodeEmojiHints = (emojis: Record<string, string>): Recor
     Object.fromEntries(Object.entries(emojis).filter(([, value]) =>
         /^(?:\p{Extended_Pictographic}|\p{Emoji_Component})+$/u.test(value)));
 
+const popoverHotkeys = new Set([
+    "⌥Enter", "Alt+Enter", "⌘=", "Ctrl+=", "⌘-", "Ctrl+-",
+    "⇧⌘=", "⇧⌘+", "Ctrl+Shift++", "⇧⌘-", "⇧⌘_", "Ctrl+Shift+_",
+    ...["L", "C", "R", "F", "G", "U", "D", "X"].flatMap(key => [`⇧⌘${key}`, `Ctrl+Shift+${key}`]),
+]);
+
+export const markdownPopoverLabel = (label: string): string => {
+    const start = label.lastIndexOf("<");
+    return start > 0 && label.endsWith(">") && popoverHotkeys.has(label.slice(start + 1, -1)) ?
+        label.slice(0, start) : label;
+};
+
 interface VditorSurface {
     element: HTMLElement;
+    popover?: HTMLElement;
     composingLock?: boolean;
     processTimeoutId?: number;
     afterRenderTimeoutId?: number;
@@ -51,6 +64,7 @@ export interface MarkdownEditorOptions {
     lutePath?: string;
     lang?: string;
     theme?: "light" | "dark";
+    mobile?: boolean;
     onEdit(snapshot: MarkdownEditorSnapshot): void;
     onEditPending?(pending: boolean): void;
     onContentTooLarge?(): void;
@@ -160,6 +174,18 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         options.onHistoryChange?.(state);
     };
     const historyObserver = new MutationObserver(notifyHistory);
+    const normalizePopoverLabels = () => {
+        // 只处理编辑器生成的浮动控件，正文属性、输入值和快捷键事件均保持原样。
+        instance?.vditor.wysiwyg.popover?.querySelectorAll("[aria-label], [placeholder]").forEach(control => {
+            for (const attribute of ["aria-label", "placeholder"]) {
+                const value = control.getAttribute(attribute);
+                if (value === null) continue;
+                const label = markdownPopoverLabel(value);
+                if (label !== value) control.setAttribute(attribute, label);
+            }
+        });
+    };
+    const popoverObserver = options.mobile ? new MutationObserver(normalizePopoverLabels) : undefined;
     const runHistory = (action: "undo" | "redo") => {
         if (destroyed || !ready || isComposing() || !canHistory(action)) return;
         const type = document.defaultView.navigator.userAgent.includes("iPhone") ? "touchstart" : "click";
@@ -447,6 +473,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         clearInternalTimers();
         observer.disconnect();
         historyObserver.disconnect();
+        popoverObserver?.disconnect();
         policy.destroy();
         listeners.forEach(([type, handler]) => element.removeEventListener(type, handler, true));
         if (instance?.vditor) instance.destroy();
@@ -490,6 +517,11 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                         if (instance.version !== "4.0.1") throw new Error("Unsupported Markdown editor version");
                         // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
                         instance.vditor.toolbar.element.hidden = true;
+                        if (popoverObserver && instance.vditor.wysiwyg.popover) {
+                            popoverObserver.observe(instance.vditor.wysiwyg.popover, {childList: true, subtree: true,
+                                attributes: true, attributeFilter: ["aria-label", "placeholder"]});
+                            normalizePopoverLabels();
+                        }
                         historyObserver.observe(instance.vditor.toolbar.element, {subtree: true, attributes: true, attributeFilter: ["class"]});
                         const lute = instance.vditor.lute;
                         const getEmojis = lute.GetEmojis.bind(lute);

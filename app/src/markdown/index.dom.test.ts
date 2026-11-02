@@ -436,6 +436,28 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false);
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "drawer mask also excludes the editor from keyboard focus");
     check.ok(document.querySelector("#markdownTree").getBoundingClientRect().width <= window.innerWidth - 48);
+    const editorSurface = document.querySelector<HTMLElement>("#markdownEditor");
+    check.equal(getComputedStyle(editorSurface).isolation, "isolate");
+    const drawerBounds = document.querySelector("#markdownTree").getBoundingClientRect();
+    const popupProbe = document.createElement("div");
+    popupProbe.className = "vditor-panel";
+    popupProbe.style.cssText = `display:block;position:fixed;left:${drawerBounds.left + 12}px;top:${drawerBounds.top + 12}px;width:80px;height:40px;z-index:1000000;animation:none`;
+    editorSurface.append(popupProbe);
+    // 暂时解除 inert，确保命中验证的是层叠关系，而非抽屉的交互屏蔽。
+    editorSurface.inert = false;
+    try {
+        const hit = document.elementFromPoint(drawerBounds.left + 20, drawerBounds.top + 20);
+        check.ok(document.querySelector("#markdownTree").contains(hit), "editor popovers cannot cover the open drawer even with a high child z-index");
+    } finally {
+        popupProbe.remove();
+        editorSurface.inert = true;
+    }
+    const themeFeedback = document.createElement("span");
+    themeFeedback.style.color = "var(--b3-list-hover)";
+    document.body.append(themeFeedback);
+    check.equal(getComputedStyle(document.getElementById("markdownMode")).getPropertyValue("-webkit-tap-highlight-color"),
+        getComputedStyle(themeFeedback).color, "tap feedback inherits the current theme instead of native blue");
+    themeFeedback.remove();
     await ipcRenderer.invoke("markdown-screenshot", "narrow-tree");
     (document.querySelector('[data-node-id="note2"]') as HTMLElement).click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "successful file selection closes the drawer");

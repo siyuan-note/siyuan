@@ -309,6 +309,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             const nextEditor = await createMarkdownEditor({
                 element: control("markdownEditor"), initialValue: next.content, sessionId: next.sessionId, mode: preferences.mode,
                 cdn: new URL("./vditor", location.href).href, lang: next.lang,
+                mobile: ["android", "ios", "harmony"].includes(next.platform),
                 theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
                 onHistoryChange(state) {if (!current()) return; history = state; render(documentSession.getState());},
                 resolveResource: async reference => {

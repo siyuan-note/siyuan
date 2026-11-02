@@ -9,7 +9,7 @@ const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 const {isDevToolsShortcut, toggleDevTools} = require("../window/devToolsDock");
 
-const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean} = {}) => {
+const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
     const appDirectory = path.join(directory, "app");
     const build = path.join(appDirectory, "stage", "build", "markdown");
@@ -17,6 +17,10 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     await fs.writeFile(path.join(build, "index.html"), "<!doctype html><title>Markdown</title>");
     await fs.mkdir(path.join(appDirectory, "appearance", "langs"), {recursive: true});
     await fs.writeFile(path.join(appDirectory, "appearance", "langs", "en.json"), JSON.stringify({markdownEditor: "Markdown editor", untitled: "Untitled"}));
+    if (options.theme) {
+        await fs.mkdir(path.join(directory, "config"), {recursive: true});
+        await fs.writeFile(path.join(directory, "config", "preferences.json"), JSON.stringify({version: 1, mode: "ir", fontSize: 16, theme: options.theme}));
+    }
     const windows = [];
     let id = 0;
     class BrowserWindow extends EventEmitter {
@@ -67,6 +71,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     const host = new MarkdownDesktopHost({directory: path.join(directory, "config", "recovery")});
     let emptied = 0;
     const manager = createMarkdownWindows({app: {getLocale: () => "en"}, BrowserWindow,
+        nativeTheme: Object.assign(new EventEmitter(), {shouldUseDarkColors: options.dark ?? false}),
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
         shell: {openExternal: async url => opens.push(url)}, rootDirectory: appDirectory,
         configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
@@ -95,6 +100,54 @@ test("Markdown scheme registration grants only required local browser capabiliti
     assert.equal(registered.length, 1);
     assert.equal(registered[0].scheme, "siyuan-markdown");
     assert.deepEqual(registered[0].privileges, {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true});
+});
+
+test("initial window and served page use the effective theme before rendering", async t => {
+    for (const [theme, systemDark, expectedDark] of [["dark", false, true], ["light", true, false], ["system", true, true], ["system", false, false]] as const) {
+        await t.test(`${theme}, system dark ${systemDark}`, async t => {
+            const {build, manager} = await fixture(t, {theme, dark: systemDark});
+            const html = '<!doctype html><link id="markdownThemeStyle" rel="stylesheet" href="./appearance/themes/daylight/theme.css">';
+            await fs.writeFile(path.join(build, "index.html"), html);
+            await fs.writeFile(path.join(build, "unchanged.js"), 'const theme = "./appearance/themes/daylight/theme.css";');
+            const window = await manager.open();
+            assert.equal(window.options.backgroundColor, expectedDark ? "#1e1e1e" : "#fff");
+            const response = await window.request(new Request(window.url));
+            assert.equal(response.status, 200);
+            assert.equal(await response.text(), expectedDark ? html.replace("/daylight/", "/midnight/") : html);
+            assert.match(response.headers.get("Content-Security-Policy"), /script-src 'self'/);
+            const script = await window.request(new Request(new URL("unchanged.js", window.url)));
+            assert.match(await script.text(), /daylight/);
+        });
+    }
+});
+
+test("invalid startup preferences show an error without allocating an editor session", async t => {
+    const {directory, manager, dialog, windows, host} = await fixture(t);
+    await fs.mkdir(path.join(directory, "config"), {recursive: true});
+    await fs.writeFile(path.join(directory, "config", "preferences.json"), "invalid");
+    let errors = 0;
+    dialog.showMessageBox = async () => {errors++; return {response: 0};};
+    await manager.open();
+    assert.equal(errors, 1);
+    assert.equal(windows.length, 0);
+    assert.equal(host.sessions.size, 0);
+});
+
+test("invalid preferences during recovery keep the migrated durable draft available", async t => {
+    const {directory, manager, host, call, windows} = await fixture(t);
+    const window = await manager.open();
+    const {sessionId} = await call(window, "bootstrap");
+    await call(window, "host:putDraft", {sessionId, operationId: sessionId + ":test:1", targetGeneration: 0,
+        revision: 1, content: "recoverable content", format: {bom: false, newline: "\n"}});
+    window.webContents.emit("render-process-gone");
+    const controller = await manager.open();
+    await fs.writeFile(path.join(directory, "config", "preferences.json"), "invalid");
+    await call(controller, "recover", sessionId);
+    assert.equal(windows.length, 2);
+    const {records} = await host.listRecoveries();
+    assert.equal(records.length, 1);
+    assert.notEqual(records[0].watermark.sessionId, sessionId);
+    assert.equal((await host.recovery.read(records[0].watermark.sessionId)).draft.content, "recoverable content");
 });
 
 test("file launches with reordered switches reuse one window and never add an untitled editor", async t => {

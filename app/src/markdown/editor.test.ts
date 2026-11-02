@@ -1,6 +1,18 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {markdownUnicodeEmojiHints} from "./editor";
+import {markdownPopoverLabel, markdownUnicodeEmojiHints} from "./editor";
+
+test("mobile popover labels remove only known terminal shortcut hints and retain accessible names", () => {
+    const hotkeys = ["⌥Enter", "Alt+Enter", "⌘=", "Ctrl+=", "⌘-", "Ctrl+-",
+        "⇧⌘=", "⇧⌘+", "Ctrl+Shift++", "⇧⌘-", "⇧⌘_", "Ctrl+Shift+_",
+        ...["L", "C", "R", "F", "G", "U", "D", "X"].flatMap(key => [`⇧⌘${key}`, `Ctrl+Shift+${key}`])];
+    for (const label of ["语言", "Language", "脚注", "ID", "Remove"]) {
+        for (const hotkey of hotkeys) assert.equal(markdownPopoverLabel(`${label}<${hotkey}>`), label);
+    }
+    for (const value of ["", "Language", "<Alt+Enter>", "Language<unknown>", "Language<Alt+Enter> extra", "<b>text</b>"]) {
+        assert.equal(markdownPopoverLabel(value), value);
+    }
+});
 
 test("Markdown emoji completion keeps Unicode sequences without modifying the parser map", () => {
     const source = {dog: "🐶", dog2: "🐕", family: "👨‍👩‍👧‍👦", flag: "🇨🇳", skin: "👍🏽", keycap: "1️⃣", heart: "❤️",

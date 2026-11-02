@@ -62,3 +62,47 @@ test("Markdown footer covers the drawer's bottom shadow without clipping editor 
     assert.ok(workspaceStart >= 0 && footerStart > workspaceStart,
         "the equally layered footer must follow the drawer workspace in document order");
 });
+
+
+test("Markdown touch feedback follows the theme and preserves keyboard focus indicators", () => {
+    const css = postcss.parse(sass.compile(path.join(__dirname, "../src/assets/scss/markdown.scss"), {
+        logger: sass.Logger.silent,
+    }).css);
+    let tapHighlight;
+    css.walkRules(".markdown-app", rule => rule.walkDecls("-webkit-tap-highlight-color", declaration => {
+        tapHighlight = declaration.value;
+    }));
+    assert.equal(tapHighlight, "var(--b3-list-hover)");
+    const reset = readFileSync(path.join(__dirname, "../src/assets/scss/util/_reset.scss"), "utf8");
+    assert.ok(reset.includes(`-webkit-tap-highlight-color: ${tapHighlight}`), "standalone feedback matches the main app");
+    const focus = [];
+    css.walkRules(rule => {
+        if (rule.selectors.includes(".markdown-choice:focus-visible") || rule.selectors.includes(".markdown-menu button:focus-visible")) {
+            rule.walkDecls("outline", declaration => focus.push(declaration.value));
+        }
+    });
+    assert.ok(focus.includes("1px solid var(--b3-theme-primary)"), "keyboard focus remains visible");
+});
+
+test("Markdown editor popovers stay below the drawer and menus without clipping their contents", () => {
+    const css = postcss.parse(sass.compile(path.join(__dirname, "../src/assets/scss/markdown.scss"), {
+        logger: sass.Logger.silent,
+    }).css);
+    const declarations = selector => {
+        const values = new Map();
+        css.walkRules(selector, rule => rule.walkDecls(declaration => values.set(declaration.prop, declaration.value)));
+        return values;
+    };
+    const editor = declarations(".markdown-editor.vditor");
+    assert.equal(editor.get("isolation"), "isolate", "child popup z-index is local to the editor");
+    assert.equal(editor.has("z-index"), false, "do not raise the editor context above the shell");
+    assert.equal(declarations(".markdown-tree[data-drawer=true]").get("z-index"), "2");
+    assert.equal(declarations(".markdown-workspace--drawer::after").get("z-index"), "1");
+    assert.equal(declarations(".markdown-header").get("z-index"), "3");
+    for (const selector of [".markdown-editor.vditor", ".markdown-workspace"]) {
+        const values = declarations(selector);
+        for (const property of ["overflow", "overflow-x", "overflow-y", "clip-path", "contain", "transform"]) {
+            assert.equal(values.has(property), false, `${selector} must not clip or reposition editor overlays`);
+        }
+    }
+});

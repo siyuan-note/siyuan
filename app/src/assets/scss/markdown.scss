@@ -30,6 +30,7 @@ button {
 }
 
 .markdown-app {
+  -webkit-tap-highlight-color: var(--b3-list-hover);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -417,6 +418,7 @@ button {
 }
 
 .markdown-editor.vditor {
+  isolation: isolate;
   flex: 1;
   min-height: 0;
   min-width: 0;

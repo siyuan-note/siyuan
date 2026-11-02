@@ -254,6 +254,13 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             if (!inside(root, file)) return new Response(null, {status: 403});
             const canonical = await fs.realpath(file);
             if (!inside(root, canonical) || !(await fs.stat(canonical)).isFile()) return new Response(null, {status: 403});
+            if (url.pathname === "/index.html") {
+                const theme = (await preferences.read()).theme;
+                const dark = theme === "dark" || theme === "system" && nativeTheme?.shouldUseDarkColors;
+                const html = await fs.readFile(canonical, "utf8");
+                return new Response(dark ? html.replace("./appearance/themes/daylight/theme.css", "./appearance/themes/midnight/theme.css") : html,
+                    {headers: {...headers, "Content-Type": "text/html"}});
+            }
             return new Response(await fs.readFile(canonical), {headers: {...headers, "Content-Type": staticTypes[path.extname(canonical)] || "application/octet-stream"}});
         } catch {
             return new Response(null, {status: 404});
@@ -272,6 +279,16 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return;
         }
         if (quitting) return;
+        let theme: MarkdownPreferences["theme"];
+        try { theme = (await preferences.read()).theme; }
+        catch {
+            const restoredSession = restored && host.sessions.get(restored.sessionId);
+            if (restoredSession) restoredSession.crashed = true;
+            await dialog.showMessageBox({type: "error", title: "SiYuan", message: text("markdownLoadError"), buttons: [text("confirm")]});
+            return;
+        }
+        if (quitting) return;
+        const dark = theme === "dark" || theme === "system" && nativeTheme?.shouldUseDarkColors;
         let initial = restored;
         if (!initial) {
             const sessionId = host.createSession();
@@ -296,7 +313,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             title: initial.target?.displayName || text("untitled"), show: false, autoHideMenuBar: true,
             frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 8},
             titleBarOverlay: windowControls.getOptions(platform, 32), icon: path.join(rootDirectory, "stage", "icon-large.png"),
-            backgroundColor: nativeTheme?.shouldUseDarkColors ? "#1e1e1e" : "#fff",
+            backgroundColor: dark ? "#1e1e1e" : "#fff",
             webPreferences: {preload: path.join(__dirname, "preload.js"), partition: "siyuan-markdown-" + sessionId,
                 sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true,
                 allowRunningInsecureContent: false, webviewTag: false, spellcheck: true}});

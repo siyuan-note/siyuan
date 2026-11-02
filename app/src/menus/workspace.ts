@@ -458,7 +458,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "templateManager",
                             label: window.siyuan.languages.templateManager,
-                            icon: "iconMarkdown",
+                            icon: "iconLayoutGrid",
                             click: () => {
                                 const editor = getAllModels().editor.find(item =>
                                     item.parent.headElement.classList.contains("item--focus"));

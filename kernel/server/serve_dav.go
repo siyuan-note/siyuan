@@ -8,7 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -21,8 +24,76 @@ import (
 
 const webdavPrefix = "/webdav/"
 
-// webdavWriteLock 串行化 WebDAV 写请求，使前置条件检查与随后的写入之间没有其他写入插入
-var webdavWriteLock sync.Mutex
+// webdavWriteLocks 让写请求按路径互斥：前置条件检查与随后的写入之间，同一资源及其祖先、后代上没有其他写入插入，
+// 其他路径上的写入（包括慢速上传）不受影响
+var webdavWriteLocks = newWebDAVPathLocks()
+
+type webdavPathLocks struct {
+	mu     sync.Mutex
+	cond   *sync.Cond
+	active []string
+}
+
+func newWebDAVPathLocks() *webdavPathLocks {
+	locks := &webdavPathLocks{}
+	locks.cond = sync.NewCond(&locks.mu)
+	return locks
+}
+
+// lock 等到 paths 与正在写入的路径都不重叠后登记它们，返回释放函数。
+func (l *webdavPathLocks) lock(paths []string) (unlock func()) {
+	l.mu.Lock()
+	for l.overlaps(paths) {
+		l.cond.Wait()
+	}
+	l.active = append(l.active, paths...)
+	l.mu.Unlock()
+	return func() {
+		l.mu.Lock()
+		for _, p := range paths {
+			if i := slices.Index(l.active, p); 0 <= i {
+				l.active = slices.Delete(l.active, i, i+1)
+			}
+		}
+		l.cond.Broadcast()
+		l.mu.Unlock()
+	}
+}
+
+func (l *webdavPathLocks) overlaps(paths []string) bool {
+	for _, p := range paths {
+		for _, active := range l.active {
+			if webdavPathsOverlap(p, active) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// webdavPathsOverlap 判断两个已清理的路径是否相同或互为祖先。
+func webdavPathsOverlap(a, b string) bool {
+	if len(a) > len(b) {
+		a, b = b, a
+	}
+	return a == b || "/" == a || strings.HasPrefix(b, a+"/")
+}
+
+// webdavWritePaths 返回写请求影响的路径：请求目标，COPY 与 MOVE 还有 Destination。路径按小写比较，
+// 大小写不敏感的文件系统上大小写不同的路径是同一资源，大小写敏感的系统上只是多等待。
+func webdavWritePaths(r *http.Request) []string {
+	paths := []string{webdavLockPath(r.URL.Path)}
+	if destination := r.Header.Get("Destination"); "" != destination {
+		if u, err := url.Parse(destination); err == nil {
+			paths = append(paths, webdavLockPath(u.Path))
+		}
+	}
+	return paths
+}
+
+func webdavLockPath(p string) string {
+	return strings.ToLower(path.Clean("/" + strings.TrimPrefix(p, strings.TrimSuffix(webdavPrefix, "/"))))
+}
 
 func newWebDAVHandler() http.Handler {
 	// 自定义 WebDAV 文件系统包装——拒绝加密笔记本的所有访问
@@ -54,8 +125,8 @@ func webdavPreconditions(fs webdav.FileSystem, next http.Handler) http.Handler {
 			return
 		}
 
-		webdavWriteLock.Lock()
-		defer webdavWriteLock.Unlock()
+		unlock := webdavWriteLocks.lock(webdavWritePaths(r))
+		defer unlock()
 		if status := webdavPreconditionStatus(fs, r); 0 != status {
 			http.Error(w, http.StatusText(status), status)
 			return

@@ -7,6 +7,7 @@ package server
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -67,6 +68,113 @@ func TestWebDAVPreconditions(t *testing.T) {
 	etag = serveWebDAVTestRequest(h, http.MethodGet, "/webdav/note.txt", nil, "").Header().Get("ETag")
 	if response := serveWebDAVTestRequest(h, http.MethodDelete, "/webdav/note.txt", map[string]string{"If-Match": etag}, ""); response.Code != http.StatusNoContent {
 		t.Fatalf("DELETE with current ETag: status = %d", response.Code)
+	}
+}
+
+// TestWebDAVWriteConcurrency 验证上传未完成时，其他文件的写请求无论是否带条件头都并发执行；同一文件与祖先目录上的写请求
+// 等上传结束后才执行，带条件头的请求据此检查条件。
+func TestWebDAVWriteConcurrency(t *testing.T) {
+	ws := newWebDAVGuardWorkspace(t)
+	h := newWebDAVHandler()
+	serve := func(method, target string, header map[string]string, body io.Reader) <-chan int {
+		done := make(chan int, 1)
+		go func() {
+			request := httptest.NewRequest(method, target, body)
+			for k, v := range header {
+				request.Header.Set(k, v)
+			}
+			response := httptest.NewRecorder()
+			h.ServeHTTP(response, request)
+			done <- response.Code
+		}()
+		return done
+	}
+	wait := func(done <-chan int, timeout time.Duration) (int, bool) {
+		select {
+		case status := <-done:
+			return status, true
+		case <-time.After(timeout):
+			return 0, false
+		}
+	}
+
+	dir := "/webdav/data/" + webdavGuardNormalBoxID
+	uploaded := filepath.Join(ws, "data", webdavGuardNormalBoxID, "upload.bin")
+	reader, writer := io.Pipe()
+	upload := serve(http.MethodPut, dir+"/upload.bin", nil, reader)
+	if _, err := writer.Write([]byte("partial")); err != nil {
+		t.Fatal(err)
+	}
+	// 写入的数据被读走说明上传请求已经打开目标文件，正在持有锁
+	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		if info, err := os.Stat(uploaded); err == nil && 0 < info.Size() {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("upload did not start")
+		}
+	}
+
+	// 带条件头的请求在前，用来确认它既不等上传结束，也不挡住之后的请求
+	for _, test := range []struct {
+		name, target string
+		header       map[string]string
+	}{
+		{"conditional PUT of another file", dir + "/new.txt", map[string]string{"If-None-Match": "*"}},
+		{"unconditional PUT of another file", dir + "/other.txt", nil},
+	} {
+		if status, ok := wait(serve(http.MethodPut, test.target, test.header, strings.NewReader("other")), 5*time.Second); !ok || status != http.StatusCreated {
+			t.Fatalf("%s during an upload: finished = %v, status = %d", test.name, ok, status)
+		}
+	}
+	sameFile := serve(http.MethodPut, dir+"/upload.bin", map[string]string{"If-None-Match": "*"}, strings.NewReader("replaced"))
+	parent := serve(MethodMkCol, dir, nil, nil)
+	for name, done := range map[string]<-chan int{"conditional PUT of the same file": sameFile, "MKCOL of the parent directory": parent} {
+		if status, ok := wait(done, 300*time.Millisecond); ok {
+			t.Fatalf("%s finished with status %d while the upload was in progress", name, status)
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if status, ok := wait(upload, 5*time.Second); !ok || status != http.StatusCreated {
+		t.Fatalf("upload: finished = %v, status = %d", ok, status)
+	}
+	if status, ok := wait(sameFile, 5*time.Second); !ok || status != http.StatusPreconditionFailed {
+		t.Fatalf("conditional PUT of the same file after the upload: finished = %v, status = %d", ok, status)
+	}
+	if status, ok := wait(parent, 5*time.Second); !ok || status != http.StatusMethodNotAllowed {
+		t.Fatalf("MKCOL of the parent directory after the upload: finished = %v, status = %d", ok, status)
+	}
+	if data, _ := os.ReadFile(uploaded); "partial" != string(data) {
+		t.Fatalf("upload content = %q", data)
+	}
+}
+
+// TestWebDAVPathsOverlap 验证写请求的路径锁：相同路径、祖先与后代互斥，前缀相同的兄弟路径不互斥，大小写不同的路径视为相同。
+func TestWebDAVPathsOverlap(t *testing.T) {
+	for _, test := range []struct {
+		a, b string
+		want bool
+	}{
+		{"/data/a", "/data/a", true},
+		{"/data", "/data/a/b.sy", true},
+		{"/", "/data", true},
+		{"/data/a", "/data/ab", false},
+		{"/data/a", "/data/b", false},
+	} {
+		if got := webdavPathsOverlap(test.a, test.b); got != test.want {
+			t.Errorf("overlap(%s, %s) = %v, want %v", test.a, test.b, got, test.want)
+		}
+		if got := webdavPathsOverlap(test.b, test.a); got != test.want {
+			t.Errorf("overlap(%s, %s) = %v, want %v", test.b, test.a, got, test.want)
+		}
+	}
+	request := httptest.NewRequest("MOVE", "/webdav/Data/A.sy", nil)
+	request.Header.Set("Destination", "http://localhost/webdav/data/b/../c.sy")
+	if got := webdavWritePaths(request); 2 != len(got) || "/data/a.sy" != got[0] || "/data/c.sy" != got[1] {
+		t.Fatalf("write paths = %v", got)
 	}
 }
 

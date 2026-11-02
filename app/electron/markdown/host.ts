@@ -1,38 +1,67 @@
-const {createHash} = require("node:crypto");
-const {MarkdownDiskService} = require("./disk");
-const {encodeMarkdown} = require("./codec");
-const {createMarkdownRecoveryStore} = require("./recoveryStore");
+import type {MarkdownIOError} from "./types";
+import {createHash} from "node:crypto";
+import {MarkdownDiskService} from "./disk";
+import {encodeMarkdown} from "./codec";
+import {createMarkdownRecoveryStore} from "./recoveryStore";
+import type {MarkdownRecoveryStore} from "./recoveryStore";
+import type {MarkdownEntry} from "./registry";
+import type {MarkdownHostData, MarkdownSaveAsPreparation} from "./types";
+import type {MarkdownBootstrap} from "../../src/markdown/bridge";
+import type {MarkdownBlocked, MarkdownDraft, MarkdownDraftWatermark, MarkdownErrorCode, MarkdownFormat, MarkdownHost,
+    MarkdownOperation, MarkdownReadRequest, MarkdownReadResult, MarkdownSaveAsCommit, MarkdownSaveAsCommitResult,
+    MarkdownTarget, MarkdownWriteRequest, MarkdownWriteResult} from "../../src/markdown/contracts";
+
+type HostOperation = {signature: string; promise?: Promise<MarkdownWriteResult>; result?: MarkdownWriteResult};
+type HostTransfer = {
+    sourceGeneration: number; targetGeneration: number; sourceHandle?: string; target: MarkdownTarget;
+    persistence: "source" | "unknown" | "committed"; completed: Promise<MarkdownSaveAsCommitResult | undefined>;
+};
+export type MarkdownHostSession = {
+    generation: number; target?: MarkdownTarget; operations: Map<string, HostOperation>;
+    commits: Map<string, {signature: string; promise: Promise<MarkdownSaveAsCommitResult>}>;
+    draftTasks: Set<Promise<void>>; readTasks: Set<Promise<MarkdownReadResult>>; lastWriteSequence: number;
+    instanceId?: string; opening?: boolean; selecting?: boolean; closing?: boolean; crashed?: boolean;
+    transferring?: boolean; transfer?: HostTransfer; committedOperationId?: string;
+};
+export type MarkdownInitial = Pick<MarkdownBootstrap, "sessionId" | "content" | "target" | "format" | "recovered">;
 
 const protocolError = () => Object.assign(new Error("Invalid Markdown host operation"), {code: "EPROTO"});
-const blocked = code => ({kind: "blocked", error: {code, recoverable: code !== "protocol"}});
-const snapshot = value => JSON.parse(JSON.stringify(value));
-const counter = value => Number.isSafeInteger(value) && value >= 0;
-const fingerprint = request => createHash("sha256").update(JSON.stringify(request)).digest("hex");
+const blocked = (code: MarkdownErrorCode): MarkdownBlocked => ({kind: "blocked", error: {code, recoverable: code !== "protocol"}});
+const snapshot = <Value>(value: Value): Value => JSON.parse(JSON.stringify(value));
+const counter = (value: number): boolean => Number.isSafeInteger(value) && value >= 0;
+const fingerprint = (request: unknown): string => createHash("sha256").update(JSON.stringify(request)).digest("hex");
 
 // 对话框和系统文件入口调用 authorize*；渲染进程只能使用已授权的会话接口。
-class MarkdownDesktopHost {
-    constructor({directory, disk = new MarkdownDiskService(), recovery} = {}) {
+class MarkdownDesktopHost implements MarkdownHost {
+    readonly disk: MarkdownDiskService;
+    readonly recovery: MarkdownRecoveryStore;
+    readonly sessions: Map<string, MarkdownHostSession>;
+    readonly startup: Promise<void>;
+
+    constructor({directory, disk = new MarkdownDiskService(), recovery}: {
+        directory?: string; disk?: MarkdownDiskService; recovery?: MarkdownRecoveryStore;
+    } = {}) {
         this.disk = disk;
-        this.recovery = recovery || createMarkdownRecoveryStore(directory);
+        this.recovery = recovery || createMarkdownRecoveryStore(directory!);
         this.sessions = new Map();
         this.startup = this.recovery.collectCompleted();
         this.startup.catch(() => undefined);
     }
 
-    createSession() {
+    createSession(): string {
         const sessionId = this.disk.createSession();
         this.sessions.set(sessionId, {generation: 0, target: undefined, operations: new Map(), commits: new Map(),
             draftTasks: new Set(), readTasks: new Set(), lastWriteSequence: 0});
         return sessionId;
     }
 
-    session(sessionId) {
+    session(sessionId: string): MarkdownHostSession {
         const session = this.sessions.get(sessionId);
         if (!session || session.closing) throw protocolError();
         return session;
     }
 
-    operationSequence(request) {
+    operationSequence(request: Pick<MarkdownOperation, "sessionId" | "operationId">): number {
         const session = this.session(request.sessionId);
         const prefix = request.sessionId + ":";
         if (typeof request.operationId !== "string" || !request.operationId.startsWith(prefix)) throw protocolError();
@@ -45,14 +74,14 @@ class MarkdownDesktopHost {
         return sequence;
     }
 
-    hostData(sessionId, target) {
+    hostData(sessionId: string, target?: MarkdownTarget): MarkdownHostData | undefined {
         if (!target) return undefined;
         const entry = this.disk.registry.get(sessionId, target.handle);
         return {selection: entry.descriptor.selection, path: entry.descriptor.path,
             identity: entry.descriptor.identity, baseline: entry.descriptor.baseline};
     }
 
-    async authorizeOpen(sessionId, filePath) {
+    async authorizeOpen(sessionId: string, filePath: string) {
         const session = this.session(sessionId);
         if (session.target || session.opening) throw protocolError();
         session.opening = true;
@@ -65,7 +94,7 @@ class MarkdownDesktopHost {
         }
     }
 
-    async authorizeSaveAs(sessionId, filePath, format) {
+    async authorizeSaveAs(sessionId: string, filePath: string, format?: MarkdownFormat) {
         const session = this.session(sessionId);
         if (session.selecting || [...this.disk.registry.entries.values()].some(entry =>
             entry.sessionId === sessionId && entry.state !== "bound")) return blocked("protocol");
@@ -77,19 +106,19 @@ class MarkdownDesktopHost {
         }
     }
 
-    cancelAuthorizedSaveAs(sessionId, targetHandle) {
+    cancelAuthorizedSaveAs(sessionId: string, targetHandle: string): void {
         this.session(sessionId);
         const entry = this.disk.registry.get(sessionId, targetHandle);
         // 会话状态机接管预留后，只能由对应事务的 releaseSaveAs 释放。
         if (entry.state !== "reserved" || entry.operationId || entry.pending || entry.written) throw protocolError();
-        if (!this.disk.releaseSaveAs({sessionId, target: this.disk.target(entry), reservationId: entry.reservationId})) {
+        if (!this.disk.releaseSaveAs({sessionId, target: this.disk.target(entry), reservationId: entry.reservationId!})) {
             throw protocolError();
         }
     }
 
-    async read(request) {
-        let task;
-        let session;
+    async read(request: MarkdownReadRequest): Promise<MarkdownReadResult> {
+        let task: Promise<MarkdownReadResult> | undefined;
+        let session: MarkdownHostSession | undefined;
         try {
             session = this.session(request.sessionId);
             this.operationSequence(request);
@@ -103,11 +132,11 @@ class MarkdownDesktopHost {
         } catch {
             return blocked("protocol");
         } finally {
-            if (task) session.readTasks.delete(task);
+            if (task) session!.readTasks.delete(task);
         }
     }
 
-    async reserveSaveAs(request) {
+    async reserveSaveAs(request: Parameters<MarkdownHost["reserveSaveAs"]>[0]): ReturnType<MarkdownHost["reserveSaveAs"]> {
         try {
             this.operationSequence(request);
             const entry = this.disk.registry.get(request.sessionId, request.target?.handle);
@@ -116,13 +145,13 @@ class MarkdownDesktopHost {
             encodeMarkdown("", request.format);
             entry.format = {...request.format};
             entry.operationId = request.operationId;
-            return {kind: "reserved", reservation: {id: entry.reservationId, target: this.disk.target(entry)}};
+            return {kind: "reserved", reservation: {id: entry.reservationId!, target: this.disk.target(entry)}};
         } catch {
             return blocked("protocol");
         }
     }
 
-    validateWrite(request) {
+    validateWrite(request: MarkdownWriteRequest): {session: MarkdownHostSession; sequence: number; entry: MarkdownEntry} {
         const session = this.session(request.sessionId);
         const sequence = this.operationSequence(request);
         if (!counter(request.targetGeneration) || !counter(request.revision) || typeof request.content !== "string" ||
@@ -143,7 +172,7 @@ class MarkdownDesktopHost {
         return {session, sequence, entry};
     }
 
-    async prepareSaveAs(request) {
+    async prepareSaveAs(request: MarkdownSaveAsPreparation): Promise<void> {
         const copy = snapshot(request);
         await this.startup;
         const {session, entry} = this.validateWrite(copy.operation);
@@ -159,11 +188,11 @@ class MarkdownDesktopHost {
         }
     }
 
-    async write(request) {
-        let copy;
-        let session;
-        let entry;
-        let signature;
+    async write(request: MarkdownWriteRequest): Promise<MarkdownWriteResult> {
+        let copy: MarkdownWriteRequest;
+        let session: MarkdownHostSession;
+        let entry: MarkdownEntry;
+        let signature: string;
         try {
             copy = snapshot(request);
             const validated = this.validateWrite(copy);
@@ -171,21 +200,23 @@ class MarkdownDesktopHost {
             entry = validated.entry;
             signature = fingerprint(copy);
             const prior = session.operations.get(copy.operationId);
-            if (prior) return prior.signature === signature ? (prior.promise || prior.result) : blocked("protocol");
+            if (prior) return prior.signature === signature ? (prior.promise || prior.result!) : blocked("protocol");
             if (validated.sequence <= session.lastWriteSequence ||
                 (copy.reservationId && entry.preparedOperation !== signature)) return blocked("protocol");
             session.lastWriteSequence = validated.sequence;
         } catch {
             return blocked("protocol");
         }
-        const operation = {signature};
+        const operation: HostOperation = {signature};
         session.operations.set(copy.operationId, operation);
         operation.promise = (async () => {
             if (!copy.reservationId) {
                 try {
                     await this.startup;
                     await this.recovery.putDraft({...copy, format: copy.target.format}, this.hostData(copy.sessionId, copy.target));
-                } catch (error) {
+                } catch (caught) {
+                    const error = caught as MarkdownIOError;
+
                     return blocked(error.code === "ENOSPC" ? "space" : "io");
                 }
             }
@@ -207,13 +238,13 @@ class MarkdownDesktopHost {
         return operation.result;
     }
 
-    async reconcileWrite(request) {
+    async reconcileWrite(request: MarkdownWriteRequest): Promise<MarkdownWriteResult> {
         try {
             const {session} = this.validateWrite(request);
             const operation = session.operations.get(request.operationId);
             if (!operation || operation.signature !== fingerprint(request)) return blocked("protocol");
             if (operation.promise) return await operation.promise;
-            if (operation.result.kind !== "indeterminate") return operation.result;
+            if (operation.result!.kind !== "indeterminate") return operation.result!;
             operation.result = await this.disk.reconcileWrite(snapshot(request));
             return operation.result;
         } catch {
@@ -221,7 +252,7 @@ class MarkdownDesktopHost {
         }
     }
 
-    async commitSaveAs(request) {
+    async commitSaveAs(request: MarkdownSaveAsCommit): Promise<MarkdownSaveAsCommitResult> {
         try {
             const copy = snapshot(request);
             const session = this.session(copy.operation.sessionId);
@@ -243,11 +274,11 @@ class MarkdownDesktopHost {
         }
     }
 
-    async commitTransfer(request) {
-        let transfer;
-        let complete;
-        let outcome;
-        let session;
+    async commitTransfer(request: MarkdownSaveAsCommit): Promise<MarkdownSaveAsCommitResult> {
+        let transfer: HostTransfer | undefined;
+        let complete: ((result: MarkdownSaveAsCommitResult | undefined) => void) | undefined;
+        let outcome: MarkdownSaveAsCommitResult | undefined;
+        let session: MarkdownHostSession | undefined;
         try {
             const copy = snapshot(request);
             const {operation, receipt} = copy;
@@ -271,7 +302,7 @@ class MarkdownDesktopHost {
             await this.recovery.commitSaveAs(copy, this.hostData(operation.sessionId, operation.target));
             transfer.persistence = "committed";
             const target = this.disk.commitSaveAs({sessionId: operation.sessionId, target: operation.target,
-                reservationId: operation.reservationId, previousTarget: copy.previousTarget});
+                reservationId: operation.reservationId!, previousTarget: copy.previousTarget});
             session.target = target;
             session.generation = operation.targetGeneration;
             session.committedOperationId = operation.operationId;
@@ -290,12 +321,12 @@ class MarkdownDesktopHost {
             outcome = {kind: "indeterminate", error: {code: "io", recoverable: true}};
             return outcome;
         } finally {
-            if (transfer) session.transferring = false;
+            if (transfer) session!.transferring = false;
             if (complete) complete(outcome);
         }
     }
 
-    async releaseSaveAs({sessionId, reservationId, operationId}) {
+    async releaseSaveAs({sessionId, reservationId, operationId}: Parameters<MarkdownHost["releaseSaveAs"]>[0]): Promise<void> {
         this.operationSequence({sessionId, operationId});
         const entry = [...this.disk.registry.entries.values()].find(value => value.sessionId === sessionId && value.reservationId === reservationId);
         if (!entry || entry.pending || entry.written || entry.preparing || entry.releasing || entry.state === "indeterminate" ||
@@ -309,7 +340,7 @@ class MarkdownDesktopHost {
         }
     }
 
-    async putDraft(draft) {
+    async putDraft(draft: MarkdownDraft): Promise<void> {
         let copy = snapshot(draft);
         const session = this.session(draft.sessionId);
         return this.trackDraft(session, async () => {
@@ -330,14 +361,14 @@ class MarkdownDesktopHost {
         });
     }
 
-    trackDraft(session, operation) {
+    trackDraft(session: MarkdownHostSession, operation: () => Promise<void>): Promise<void> {
         const task = Promise.resolve().then(operation);
         session.draftTasks.add(task);
         task.then(() => session.draftTasks.delete(task), () => session.draftTasks.delete(task));
         return task;
     }
 
-    async clearDraft(watermark) {
+    async clearDraft(watermark: MarkdownDraftWatermark): Promise<void> {
         const copy = snapshot(watermark);
         const session = this.session(copy.sessionId);
         if (copy.targetGeneration > session.generation) throw protocolError();
@@ -348,25 +379,28 @@ class MarkdownDesktopHost {
         await this.startup;
         const result = await this.recovery.list();
         return {records: result.records.filter(record => !this.sessions.has(record.watermark.sessionId) ||
-            this.sessions.get(record.watermark.sessionId).crashed), errors: result.errors};
+            this.sessions.get(record.watermark.sessionId)!.crashed), errors: result.errors};
     }
 
-    async restoreRecovery(id) {
+    async restoreRecovery(id: string): Promise<MarkdownInitial> {
         await this.startup;
         const previousSession = this.sessions.get(id);
         if (previousSession && !previousSession.crashed) throw protocolError();
         if (previousSession) {
-            await Promise.allSettled([...previousSession.operations.values()].map(value => value.promise).filter(Boolean)
-                .concat([...previousSession.draftTasks], [...previousSession.readTasks], [...previousSession.commits.values()].map(value => value.promise)));
+            await Promise.allSettled([
+                ...[...previousSession.operations.values()].map(value => value.promise).filter(Boolean),
+                ...previousSession.draftTasks, ...previousSession.readTasks,
+                ...[...previousSession.commits.values()].map(value => value.promise),
+            ]);
             try { await this.releaseSession({sessionId: id, targetGeneration: previousSession.generation}); } catch { /* 未决目标仍保留占用，恢复内容可另存为副本。 */ }
         }
         const record = await this.recovery.read(id);
         if (!record || (!record.draft && !record.intent)) throw protocolError();
         const operation = record.intent?.operation;
         const draft = record.draft && (!operation || record.draft.revision >= operation.revision) ? record.draft :
-            {...operation, format: operation.target.format};
+            {...operation!, format: operation!.target.format};
         const sessionId = this.createSession();
-        let target;
+        let target: MarkdownTarget | undefined;
         try {
             // 只有权限、身份及基线均未改变的原文件才重新绑定；其他情况恢复为副本，绝不自动覆盖。
             if (!record.intent && record.hostData?.selection && draft.target) {
@@ -394,14 +428,14 @@ class MarkdownDesktopHost {
         }
     }
 
-    async discardRecovery(id) {
+    async discardRecovery(id: string): Promise<void> {
         await this.startup;
         if (this.sessions.has(id)) throw protocolError();
         const record = await this.recovery.read(id);
         if (record) await this.recovery.discard(record.watermark);
     }
 
-    async releaseSession({sessionId, targetGeneration}) {
+    async releaseSession({sessionId, targetGeneration}: Parameters<MarkdownHost["releaseSession"]>[0]): Promise<void> {
         const session = this.session(sessionId);
         const entries = [...this.disk.registry.entries.values()].filter(entry => entry.sessionId === sessionId);
         if (session.generation !== targetGeneration || session.opening || session.selecting ||
@@ -420,4 +454,4 @@ class MarkdownDesktopHost {
     }
 }
 
-module.exports = {MarkdownDesktopHost};
+export {MarkdownDesktopHost};

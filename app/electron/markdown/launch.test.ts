@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {parseMarkdownLaunch} = require("./launch");
 
 test("Markdown launch resolves Windows files against the sender working directory", () => {

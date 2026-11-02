@@ -1,29 +1,67 @@
-const fs = require("node:fs/promises");
-const {watch} = require("node:fs");
-const path = require("node:path");
-const {randomUUID} = require("node:crypto");
-const {MarkdownDesktopHost} = require("./host");
-const {MarkdownResources, inside} = require("./resources");
-const {createMarkdownPreferences, defaults} = require("./preferences");
-const {importMarkdownImage, imageExtensions} = require("./imageImport");
-const {parseMarkdownLaunch} = require("./launch");
-const {MarkdownTree, treeFailure} = require("./tree");
-const {createMarkdownTreeView} = require("./treeView");
+import * as fs from "node:fs/promises";
+import {watch} from "node:fs";
+import * as path from "node:path";
+import {randomUUID} from "node:crypto";
+import {MarkdownDesktopHost} from "./host";
+import {MarkdownResources, inside} from "./resources";
+import {createMarkdownPreferences, defaults} from "./preferences";
+import {importMarkdownImage, imageExtensions} from "./imageImport";
+import {parseMarkdownLaunch} from "./launch";
+import {MarkdownTree, treeFailure} from "./tree";
+import {createMarkdownTreeView} from "./treeView";
+import type {App, BrowserWindow as ElectronWindow, Dialog, IpcMain, IpcMainInvokeEvent, MessageBoxOptions, NativeTheme, Protocol,
+    Shell, TitleBarOverlay, WebContents} from "electron";
+import type {FSWatcher} from "node:fs";
+import type {MarkdownInitial} from "./host";
+import type {MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "../../src/markdown/bridge";
+import type {MarkdownFailure, MarkdownFormat, MarkdownHost, MarkdownSaveAsCommitResult, MarkdownWriteRequest} from "../../src/markdown/contracts";
+import type {MarkdownTreeLocation, MarkdownTreeOpen, MarkdownTreeView} from "../../src/markdown/treeContracts";
+
+export type MarkdownWindowControls = {
+    getOptions: (platform: NodeJS.Platform, height: number) => TitleBarOverlay | false;
+    update: (window: ElectronWindow, style: {height?: unknown; symbolColor?: unknown}, platform?: NodeJS.Platform) => boolean;
+};
+export type MarkdownWindowsOptions = {
+    app: Pick<App, "getLocale">; BrowserWindow: typeof ElectronWindow; ipcMain: Pick<IpcMain, "handle">;
+    dialog: Dialog; shell: Pick<Shell, "openExternal">; protocol?: Protocol; nativeTheme?: NativeTheme;
+    rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
+    onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls;
+};
+export type MarkdownWindows = {
+    open: (file?: string) => Promise<ElectronWindow | void>;
+    handleLaunch: (argv: string[], cwd: string) => Promise<boolean>;
+    hasWindows: () => boolean; hasPendingWork: () => boolean; owns: (contents: Pick<WebContents, "id">) => boolean;
+    focus: () => void; prepareQuit: (reason?: string) => Promise<boolean>;
+    closeAll: () => Promise<boolean>; cancelQuit: () => void;
+};
+type CurrentDocument = {sessionId: string; initial: MarkdownInitial; resources: MarkdownResources; epoch: number};
+type MarkdownWindowRecord = {
+    window: ElectronWindow; containerId: string; current: CurrentDocument;
+    readonly sessionId: string; readonly initial: MarkdownInitial; readonly resources: MarkdownResources;
+    pending: Map<string, (accepted: boolean) => void>; approved: boolean; tree: MarkdownTree;
+    crashed?: boolean; crashApproved?: boolean; closing?: boolean; followTreePending?: boolean;
+    watcher?: FSWatcher; watchTimer?: NodeJS.Timeout; cleanup?: Promise<void>; treeError?: MarkdownFailure;
+    imageTask?: ReturnType<MarkdownBridge["insertImage"]>; treeTask?: Promise<unknown>;
+    state?: Parameters<MarkdownBridge["state"]>[0];
+    candidate?: {ticket: string; initial: MarkdownInitial; bootstrap: MarkdownBootstrap; current: CurrentDocument; cancelling?: Promise<void>};
+    committedSwitch?: {ticket: string; bootstrap: MarkdownBootstrap};
+};
 
 const scheme = "siyuan-markdown";
 const csp = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; " +
     "font-src 'self' data:; connect-src 'self'; media-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
-const staticTypes = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+const staticTypes: Record<string, string> = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
     ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".gif": "image/gif", ".jpg": "image/jpeg",
     ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf", ".map": "application/json"};
 const hostMethods = new Set(["read", "write", "reconcileWrite", "reserveSaveAs", "prepareSaveAs", "commitSaveAs",
     "releaseSaveAs", "putDraft", "clearDraft", "releaseSession"]);
 const statuses = new Set(["view", "draft", "dirty", "saving", "saved", "conflict", "blocked", "closed"]);
 
-const registerMarkdownSchemes = protocol => protocol.registerSchemesAsPrivileged([
+const registerMarkdownSchemes = (protocol: Pick<Protocol, "registerSchemesAsPrivileged">): void => protocol.registerSchemesAsPrivileged([
     {scheme, privileges: {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true}},
 ]);
-const trustedEvent = (event, record) => {
+const trustedEvent = (event: Pick<IpcMainInvokeEvent, "sender" | "senderFrame">,
+    record: MarkdownWindowRecord | undefined): record is MarkdownWindowRecord => {
     if (!record || record.window.isDestroyed() || event.sender !== record.window.webContents ||
         !event.senderFrame || event.senderFrame !== event.sender.mainFrame) return false;
     try {
@@ -35,37 +73,38 @@ const trustedEvent = (event, record) => {
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls}) => {
+    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls}: MarkdownWindowsOptions): MarkdownWindows => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
     const treeView = createMarkdownTreeView(configDirectory);
-    const records = new Map();
-    const byContents = new Map();
-    const recoverTasks = new Map();
-    const pendingOpens = new Set();
+    const records = new Map<string, MarkdownWindowRecord>();
+    const byContents = new Map<number, MarkdownWindowRecord>();
+    const recoverTasks = new Map<string, Promise<ElectronWindow | void>>();
+    const pendingOpens = new Set<Promise<unknown>>();
     let quitting = false;
-    let languages;
-    let language;
-    const owner = sessionId => [...records.values()].find(record => record.sessionId === sessionId || record.candidate?.initial.sessionId === sessionId);
-    const loadLanguages = async () => {
+    let languages: Record<string, string> | undefined;
+    let language: string | undefined;
+    const owner = (sessionId: string): MarkdownWindowRecord | undefined =>
+        [...records.values()].find(record => record.sessionId === sessionId || record.candidate?.initial.sessionId === sessionId);
+    const loadLanguages = async (): Promise<void> => {
         if (languages) return;
         const selected = (typeof lang === "function" ? lang() : lang) || app.getLocale();
         const available = new Set((await fs.readdir(path.join(rootDirectory, "appearance", "langs"))).filter(name => name.endsWith(".json")).map(name => name.slice(0, -5)));
         language = available.has(selected) ? selected : available.has(selected.split("-")[0]) ? selected.split("-")[0] : "en";
         languages = JSON.parse(await fs.readFile(path.join(rootDirectory, "appearance", "langs", language + ".json"), "utf8"));
     };
-    const text = key => languages?.[key] || key;
-    const focus = record => {
+    const text = (key: string): string => languages?.[key] || key;
+    const focus = (record?: MarkdownWindowRecord): void => {
         if (!record || record.window.isDestroyed()) return;
         if (record.window.isMinimized()) record.window.restore();
         record.window.show();
         record.window.focus();
     };
-    const notify = (record, type, extra = {}) => {
+    const notify = (record: MarkdownWindowRecord, type: MarkdownCommand["type"], extra: Partial<Omit<MarkdownCommand, "id" | "type">> = {}): void => {
         if (!record.window.isDestroyed() && !record.crashed) record.window.webContents.send("siyuan-markdown:command", {id: randomUUID(), type, ...extra});
     };
-    const closeCrashed = async record => {
+    const closeCrashed = async (record: MarkdownWindowRecord): Promise<boolean> => {
         if (record.crashApproved) return true;
         await host.recovery.list();
         const decision = await dialog.showMessageBox(record.window, {type: "warning", title: "SiYuan",
@@ -74,17 +113,19 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         if (decision.response !== 0) return false;
         const session = host.sessions.get(record.sessionId);
         if (session) {
-            await Promise.allSettled([...session.operations.values()].map(value => value.promise).filter(Boolean)
-                .concat([...session.draftTasks], [...session.readTasks], [...session.commits.values()].map(value => value.promise)));
+            await Promise.allSettled([
+                ...[...session.operations.values()].map(value => value.promise).filter(Boolean),
+                ...session.draftTasks, ...session.readTasks, ...[...session.commits.values()].map(value => value.promise),
+            ]);
             try { await host.releaseSession({sessionId: record.sessionId, targetGeneration: session.generation}); } catch { /* 未决句柄保留至进程退出，正文和意图留在恢复存储。 */ }
         }
         record.crashApproved = true;
         return true;
     };
-    const command = async (record, type) => {
+    const command = async (record: MarkdownWindowRecord, type: "close" | "prepare-quit"): Promise<boolean> => {
         if (record.imageTask) await record.imageTask.catch(() => undefined);
         if (record.treeTask) await record.treeTask.catch(() => undefined);
-        return new Promise(resolve => {
+        return new Promise<boolean>(resolve => {
         if (record.window.isDestroyed()) return resolve(true);
         if (record.crashed) {
             closeCrashed(record).then(resolve, () => resolve(false));
@@ -96,15 +137,17 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         record.window.webContents.send("siyuan-markdown:command", {id, type});
         });
     };
-    const failure = async (record, error) => {
+    const failure = async (record: MarkdownWindowRecord | undefined, error?: MarkdownFailure): Promise<void> => {
         await loadLanguages();
-        const key = {permission: "markdownPermissionDenied", readonly: "markdownReadOnly", offline: "markdownFileOffline",
+        const key = ({permission: "markdownPermissionDenied", readonly: "markdownReadOnly", offline: "markdownFileOffline",
             unavailable: "markdownFileUnavailable", deleted: "markdownFileDeleted", "identity-changed": "markdownFileReplaced",
-            encoding: "agentSkillEncodingTip", size: "markdownTooLarge", space: "markdownNoSpace"}[error?.code] || "markdownError";
-        await dialog.showMessageBox(record?.window, {type: "error", title: "SiYuan",
-            message: text(key), buttons: [text("confirm")], noLink: true});
+            encoding: "agentSkillEncodingTip", size: "markdownTooLarge", space: "markdownNoSpace"} as Record<string, string>)[error?.code ?? ""] || "markdownError";
+        const options: MessageBoxOptions = {type: "error", title: "SiYuan",
+            message: text(key), buttons: [text("confirm")], noLink: true};
+        if (record) await dialog.showMessageBox(record.window, options);
+        else await dialog.showMessageBox(options);
     };
-    const closeApproved = record => new Promise(resolve => {
+    const closeApproved = (record: MarkdownWindowRecord): Promise<boolean> => new Promise<boolean>(resolve => {
         if (record.window.isDestroyed()) return resolve(true);
         const closed = () => { clearTimeout(timeout); Promise.resolve(record.cleanup).then(() => resolve(true)); };
         const timeout = setTimeout(() => {
@@ -116,18 +159,18 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         record.approved = true;
         record.window.close();
     });
-    const currentTarget = record => {
+    const currentTarget = (record: MarkdownWindowRecord) => {
         const session = host.sessions.get(record.sessionId);
         if (!session?.target) return undefined;
         return host.disk.registry.get(record.sessionId, session.target.handle);
     };
-    const bootstrap = async initial => {
+    const bootstrap = async (initial: MarkdownInitial): Promise<MarkdownBootstrap> => {
         let values;
         try { values = await preferences.read(); } catch { values = {...defaults}; }
-        return {...initial, preferences: values, languages, lang: language, platform,
+        return {...initial, preferences: values, languages: languages!, lang: language!, platform,
             dark: nativeTheme?.shouldUseDarkColors ?? false};
     };
-    const cancelCandidate = async (record, ticket) => {
+    const cancelCandidate = async (record: MarkdownWindowRecord, ticket?: string): Promise<void> => {
         if (record.treeTask) await record.treeTask.catch(() => undefined);
         const candidate = record.candidate;
         if (!candidate || (ticket && candidate.ticket !== ticket)) return;
@@ -143,7 +186,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             }
         } catch (error) { candidate.cancelling = undefined; throw error; }
     };
-    const followTreeTarget = async record => {
+    const followTreeTarget = async (record: MarkdownWindowRecord): Promise<void> => {
         const entry = currentTarget(record);
         if (!entry || (record.tree.root && inside(record.tree.root.path, entry.descriptor.path))) return;
         // 关闭旧文档期间的另存为不得把已准备的树内切换带离其根目录。
@@ -154,7 +197,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         } catch (error) { record.treeError = treeFailure(error); }
         notify(record, "tree-change");
     };
-    const updateWatch = record => {
+    const updateWatch = (record: MarkdownWindowRecord): void => {
         record.watcher?.close();
         record.watcher = undefined;
         clearTimeout(record.watchTimer);
@@ -179,7 +222,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             // 无法观察的文件仍在每次聚焦和写入前核验版本。
         }
     };
-    const readProtocol = async (record, request) => {
+    const readProtocol = async (record: MarkdownWindowRecord, request: Request): Promise<Response> => {
         const headers = {"Content-Security-Policy": csp, "X-Content-Type-Options": "nosniff", "Cache-Control": "no-store"};
         try {
             const url = new URL(request.url);
@@ -200,7 +243,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return new Response(null, {status: 404});
         }
     };
-    const openDocument = async (filePath, restored) => {
+    const openDocument = async (filePath?: string, restored?: MarkdownInitial): Promise<ElectronWindow | void> => {
         if (quitting) {
             if (restored) await host.releaseSession({sessionId: restored.sessionId, targetGeneration: restored.recovered?.targetGeneration ?? 0});
             return;
@@ -222,7 +265,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 if (result.kind !== "opened") {
                     await host.releaseSession({sessionId, targetGeneration: 0});
                     if (result.kind === "occupied" && owner(result.sessionId)) focus(owner(result.sessionId));
-                    else await failure(undefined, result.error);
+                    else await failure(undefined, result.kind === "blocked" ? result.error : undefined);
                     return;
                 }
                 initial = {sessionId, content: result.content, target: result.target};
@@ -241,10 +284,10 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             webPreferences: {preload: path.join(__dirname, "preload.js"), partition: "siyuan-markdown-" + sessionId,
                 sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true,
                 allowRunningInsecureContent: false, webviewTag: false, spellcheck: true}});
-        window.webContents.__siyuanMarkdown = true;
+        (window.webContents as WebContents & {__siyuanMarkdown?: boolean}).__siyuanMarkdown = true;
         window.setMenu?.(null);
         const record = {window, containerId: sessionId,
-            current: {sessionId, initial, resources: new MarkdownResources(sessionId), epoch: 0}, pending: new Map(), approved: false};
+            current: {sessionId, initial, resources: new MarkdownResources(sessionId), epoch: 0}, pending: new Map(), approved: false} as MarkdownWindowRecord;
         Object.defineProperties(record, {
             sessionId: {get: () => record.current.sessionId}, initial: {get: () => record.current.initial},
             resources: {get: () => record.current.resources},
@@ -294,8 +337,10 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             const cleanup = (async () => {
                 await cancelCandidate(record);
                 if (!orphan) return;
-                await Promise.allSettled([...orphan.operations.values()].map(value => value.promise).filter(Boolean)
-                    .concat([...orphan.draftTasks], [...orphan.readTasks], [...orphan.commits.values()].map(value => value.promise)));
+                await Promise.allSettled([
+                    ...[...orphan.operations.values()].map(value => value.promise).filter(Boolean),
+                    ...orphan.draftTasks, ...orphan.readTasks, ...[...orphan.commits.values()].map(value => value.promise),
+                ]);
                 // 原生窗口销毁后只释放已结算句柄；未决写入继续保留占用和恢复记录。
                 await host.releaseSession({sessionId: record.sessionId, targetGeneration: orphan.generation});
             })().catch(() => undefined);
@@ -307,10 +352,12 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             browsing.protocol.unhandle(scheme);
         });
         window.on("focus", () => { notify(record, "external-change"); notify(record, "tree-change"); });
-        for (const event of ["maximize", "unmaximize", "enter-full-screen", "leave-full-screen"]) {
-            window.on(event, () => notify(record, "window-state", {windowState: {
-                maximized: window.isMaximized?.() || false, fullscreen: window.isFullScreen?.() || false}}));
-        }
+        const notifyWindowState = () => notify(record, "window-state", {windowState: {
+            maximized: window.isMaximized?.() || false, fullscreen: window.isFullScreen?.() || false}});
+        window.on("maximize", notifyWindowState);
+        window.on("unmaximize", notifyWindowState);
+        window.on("enter-full-screen", notifyWindowState);
+        window.on("leave-full-screen", notifyWindowState);
         const rendererUnavailable = () => {
             // 正文持续写入私有草稿；崩溃后不释放可能仍在写入的句柄，也不影响其他窗口。
             record.crashed = true;
@@ -329,8 +376,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         try {
             await window.loadURL(`${scheme}://${sessionId}/index.html`);
         } catch {
-            // A failed page cannot acknowledge close commands. Retain its recovery state and
-            // use the same native close protection as a terminated renderer.
+            // 页面加载失败时无法应答关闭命令，必须保留恢复记录并使用原生关闭保护。
             rendererUnavailable();
             focus(record);
             await dialog.showMessageBox(window, {type: "error", title: "SiYuan",
@@ -338,28 +384,28 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         }
         return window;
     };
-    const open = (...args) => {
+    const open = (...args: Parameters<typeof openDocument>): Promise<ElectronWindow | void> => {
         const task = openDocument(...args);
         pendingOpens.add(task);
         task.then(() => pendingOpens.delete(task), () => pendingOpens.delete(task));
         return task;
     };
-    const recover = (id, parent) => {
-        if (recoverTasks.has(id)) return recoverTasks.get(id);
+    const recover = (id: string, parent?: MarkdownWindowRecord): Promise<ElectronWindow | void> => {
+        if (recoverTasks.has(id)) return recoverTasks.get(id)!;
         const task = host.restoreRecovery(id).then(initial => open(undefined, initial)).catch(() => failure(parent))
             .finally(() => recoverTasks.delete(id));
         recoverTasks.set(id, task);
         return task;
     };
-    const messageBox = async (record, message, buttons) => (await dialog.showMessageBox(record.window,
+    const messageBox = async (record: MarkdownWindowRecord, message: string, buttons: string[]): Promise<number> => (await dialog.showMessageBox(record.window,
         {type: "question", title: "SiYuan", message, buttons, cancelId: buttons.length - 1, defaultId: buttons.length - 1, noLink: true})).response;
-    const prepareTreeOpen = (record, location) => {
+    const prepareTreeOpen = (record: MarkdownWindowRecord, location: MarkdownTreeLocation): MarkdownTreeOpen | Promise<MarkdownTreeOpen> => {
         if (quitting || record.closing || record.crashed || record.treeTask || record.imageTask || record.candidate) {
             return {kind: "blocked", error: {code: "unavailable", recoverable: true}};
         }
         const current = record.current;
-        let candidateSession;
-        const task = (async () => {
+        let candidateSession: string | undefined;
+        const task = (async (): Promise<MarkdownTreeOpen> => {
             try {
                 const node = await record.tree.file(location);
                 if (currentTarget(record)?.descriptor.path === node.path) return {kind: "current"};
@@ -389,7 +435,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         task.finally(() => { if (record.treeTask === task) record.treeTask = undefined; }).catch(() => undefined);
         return task;
     };
-    const commitTreeOpen = (record, ticket) => {
+    const commitTreeOpen = (record: MarkdownWindowRecord, ticket: unknown): MarkdownBootstrap => {
         if (typeof ticket !== "string") throw new Error("Invalid Markdown switch ticket");
         if (record.committedSwitch?.ticket === ticket) return record.committedSwitch.bootstrap;
         const candidate = record.candidate;
@@ -409,20 +455,22 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         notify(record, "tree-change");
         return candidate.bootstrap;
     };
-    ipcMain.handle("siyuan-markdown:request", async (event, action, payload) => {
+    ipcMain.handle("siyuan-markdown:request", async (event: IpcMainInvokeEvent, action: unknown, payload: unknown): Promise<unknown> => {
         const record = byContents.get(event.sender.id);
         if (!trustedEvent(event, record) || typeof action !== "string") throw new Error("Markdown request rejected");
         const current = record.current;
         const stillCurrent = () => record.current === current && !record.window.isDestroyed() && !record.crashed;
         if (action.startsWith("host:")) {
-            const method = action.slice(5);
+            const method = action.slice(5) as keyof MarkdownHost;
             if (!hostMethods.has(method) || !payload || typeof payload !== "object") throw new Error("Markdown request rejected");
-            const request = {...payload};
+            const request = {...payload} as {operation?: MarkdownWriteRequest; sessionId?: string};
             if (request.operation) request.operation = {...request.operation};
             const operation = request.operation || request;
             if (operation.sessionId !== record.sessionId) throw new Error("Markdown request rejected");
-            const result = await host[method](request);
-            if (method === "commitSaveAs" && result.kind === "committed" && stillCurrent()) {
+            // IPC 参数由宿主各方法继续核验，会话、版本和目标权限不能只依赖页面类型。
+            const handler = host[method] as (request: unknown) => Promise<unknown>;
+            const result = await handler.call(host, request);
+            if (method === "commitSaveAs" && (result as MarkdownSaveAsCommitResult).kind === "committed" && stillCurrent()) {
                 record.resources.clear();
                 updateWatch(record);
                 await followTreeTarget(record);
@@ -432,14 +480,18 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         switch (action) {
             case "window-state": return {maximized: record.window.isMaximized?.() || false, fullscreen: record.window.isFullScreen?.() || false};
             case "window-control": {
-                if (!["minimize", "maximize", "close"].includes(payload)) throw new Error("Markdown window request rejected");
+                if (typeof payload !== "string" || !["minimize", "maximize", "close"].includes(payload)) throw new Error("Markdown window request rejected");
                 if (payload === "minimize") record.window.minimize();
                 else if (payload === "close") record.window.close();
                 else if (record.window.isMaximized()) record.window.unmaximize(); else record.window.maximize();
                 return;
             }
-            case "window-overlay": return windowControls.update(record.window, {...payload,
-                height: Math.round(payload?.height * (record.window.webContents.getZoomFactor?.() || 1))}, platform);
+            case "window-overlay": {
+                const style = payload as {height?: number; symbolColor?: unknown} | undefined;
+                const height = style?.height;
+                return windowControls.update(record.window, {...style,
+                    height: Math.round((height === undefined ? NaN : height) * (record.window.webContents.getZoomFactor?.() || 1))}, platform);
+            }
             case "bootstrap": {
                 return bootstrap(record.initial);
             }
@@ -448,9 +500,9 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                     width: record.tree.width, visible: record.tree.visible, error: record.treeError};
                 return record.tree.state(currentTarget(record)?.descriptor.path);
             }
-            case "tree-list": return record.tree.list(payload);
-            case "tree-save-view": return record.tree.saveView(payload);
-            case "tree-prepare-open": return prepareTreeOpen(record, payload);
+            case "tree-list": return record.tree.list(payload as MarkdownTreeLocation);
+            case "tree-save-view": return record.tree.saveView(payload as MarkdownTreeView);
+            case "tree-prepare-open": return prepareTreeOpen(record, payload as MarkdownTreeLocation);
             case "tree-commit-open": return commitTreeOpen(record, payload);
             case "tree-cancel-open": {
                 if (typeof payload !== "string") throw new Error("Invalid Markdown switch ticket");
@@ -495,12 +547,12 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                     filters: [{name: "Markdown", extensions: ["md", "markdown"]}]});
                 if (chosen.canceled || !chosen.filePath) return {kind: "cancelled"};
                 if (!stillCurrent()) return {kind: "cancelled"};
-                const result = await host.authorizeSaveAs(current.sessionId, chosen.filePath, payload);
+                const result = await host.authorizeSaveAs(current.sessionId, chosen.filePath, payload as MarkdownFormat);
                 if (result.kind === "occupied") { focus(owner(result.sessionId)); return {kind: "occupied"}; }
                 if (result.kind === "blocked") await failure(record, result.error);
                 return result.kind === "reserved" ? {kind: "selected", target: result.target} : {kind: "blocked"};
             }
-            case "cancel-save-as": host.cancelAuthorizedSaveAs(record.sessionId, payload); return;
+            case "cancel-save-as": host.cancelAuthorizedSaveAs(record.sessionId, payload as string); return;
             case "authorize-resources": {
                 const chosen = await dialog.showOpenDialog(record.window, {title: text("markdownResources"), properties: ["openDirectory"]});
                 if (chosen.canceled || !chosen.filePaths[0]) return false;
@@ -510,11 +562,11 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             }
             case "insert-image": {
                 if (quitting || record.imageTask || !currentTarget(record)) return {kind: "blocked"};
-                const entry = currentTarget(record);
+                const entry = currentTarget(record)!;
                 const generation = host.session(record.sessionId).generation;
                 const valid = () => stillCurrent() &&
                     host.sessions.get(record.sessionId)?.generation === generation && currentTarget(record) === entry;
-                const task = (async () => {
+                const task = (async (): ReturnType<MarkdownBridge["insertImage"]> => {
                     const chosen = await dialog.showOpenDialog(record.window, {title: text("insertImage"), properties: ["openFile"],
                         filters: [{name: text("image"), extensions: [...imageExtensions].map(extension => extension.slice(1))}]});
                     if (chosen.canceled || !chosen.filePaths[0]) return {kind: "cancelled"};
@@ -546,11 +598,12 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 return;
             }
             case "preferences": {
-                if (!payload || Object.keys(payload).some(key => !["mode", "theme", "fontSize"].includes(key))) throw new Error("Invalid Markdown preferences");
-                return preferences.update(payload);
+                const patch = payload as Partial<MarkdownPreferences> | undefined;
+                if (!patch || Object.keys(patch).some(key => !["mode", "theme", "fontSize"].includes(key))) throw new Error("Invalid Markdown preferences");
+                return preferences.update(patch);
             }
             case "confirm": {
-                const key = {reload: "markdownReloadConfirm", overwrite: "markdownOverwriteConfirm", "save-as": "markdownRelativeLinks"}[payload];
+                const key = ({reload: "markdownReloadConfirm", overwrite: "markdownOverwriteConfirm", "save-as": "markdownRelativeLinks"} as Record<string, string>)[payload as string];
                 if (!key) return false;
                 return await messageBox(record, text(key), [text("confirm"), text("cancel")]) === 0;
             }
@@ -565,23 +618,25 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 return result.records.map(item => ({id: item.watermark.sessionId, updatedAt: item.updatedAt,
                     displayName: item.draft?.target?.displayName || item.intent?.operation.target.displayName || text("untitled")}));
             }
-            case "recover": await recover(payload, record); return;
+            case "recover": await recover(payload as string, record); return;
             case "discard-recovery": {
-                if (await messageBox(record, text("discardUnsavedChanges"), [text("confirmDelete"), text("cancel")]) === 0) await host.discardRecovery(payload);
+                if (await messageBox(record, text("discardUnsavedChanges"), [text("confirmDelete"), text("cancel")]) === 0) await host.discardRecovery(payload as string);
                 return;
             }
             case "state": {
-                if (!payload || payload.sessionId !== record.sessionId || !statuses.has(payload.status) || !Number.isSafeInteger(payload.revision)) return;
-                record.state = payload;
-                const dirty = payload.revision > payload.savedRevision;
+                const state = payload as Parameters<MarkdownBridge["state"]>[0] | undefined;
+                if (!state || state.sessionId !== record.sessionId || !statuses.has(state.status) || !Number.isSafeInteger(state.revision)) return;
+                record.state = state;
+                const dirty = state.revision > state.savedRevision;
                 record.window.setTitle("SiYuan");
                 record.window.setDocumentEdited?.(dirty);
                 return;
             }
             case "response": {
-                if (typeof payload?.id !== "string" || typeof payload.accepted !== "boolean") return;
-                const finish = record.pending.get(payload.id);
-                if (finish) { record.pending.delete(payload.id); finish(payload.accepted); }
+                const response = payload as {id?: unknown; accepted?: unknown} | undefined;
+                if (typeof response?.id !== "string" || typeof response.accepted !== "boolean") return;
+                const finish = record.pending.get(response.id);
+                if (finish) { record.pending.delete(response.id); finish(response.accepted); }
                 return;
             }
             default: throw new Error("Markdown request rejected");
@@ -638,4 +693,4 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
     };
 };
 
-module.exports = {createMarkdownWindows, registerMarkdownSchemes, trustedEvent};
+export {createMarkdownWindows, registerMarkdownSchemes, trustedEvent};

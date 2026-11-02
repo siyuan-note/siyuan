@@ -1,5 +1,9 @@
 // 独立 Markdown 编辑器的接线（`startup/markdownEditors.ts`）：队列串行、启动判定与进程退出条件。
 import {test} from "node:test";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import type {IpcMain} from "electron";
 import * as runtime from "../shared/runtime";
 import {mockElectron, resetElectronStub} from "../fixtures/electronStub";
 import type {MarkdownWindows} from "../markdown/windows";
@@ -37,13 +41,25 @@ const setup = (t: any, windows?: MarkdownWindows) => {
 
 const setupStartup = (t: any, argv: string[], windows: MarkdownWindows) => {
     const editors = setup(t);
+    const originalPaths = {...runtime.paths};
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-markdown-startup-"));
+    runtime.paths.appDir = directory;
+    runtime.paths.confDir = directory;
+    t.after(() => {
+        Object.assign(runtime.paths, originalPaths);
+        assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()));
+        fs.rmSync(directory, {recursive: true, force: true});
+    });
     const originalArgv = process.argv;
     process.argv = ["electron", "main.ts", ...argv];
     t.after(() => { process.argv = originalArgv; });
     runtime.state.markdown.windows = undefined;
-    mockElectron(t, {app: {...require("electron").app, quit: () => undefined}});
-    t.mock.method(require("../markdown/windows"), "createMarkdownWindows", () => windows);
-    return editors;
+    mockElectron(t, {app: {...require("electron").app, quit: () => undefined},
+        ipcMain: {handle: () => undefined} as unknown as IpcMain, nativeTheme: {on: () => undefined}});
+    return {...editors, createMarkdownEditors: () => {
+        editors.createMarkdownEditors();
+        t.mock.method(runtime.state.markdown.windows, "handleLaunch", windows.handleLaunch);
+    }};
 };
 
 test("startup preserves the command-line request before early file-open events", async (t: any) => {

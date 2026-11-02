@@ -1,27 +1,29 @@
-const normalizeNewlines = content => content.replace(/\r\n|\r/g, "\n");
+import type {MarkdownFormat} from "../../src/markdown/contracts";
 
-const decodeMarkdown = bytes => {
+const normalizeNewlines = (content: string): string => content.replace(/\r\n|\r/g, "\n");
+
+const decodeMarkdown = (bytes: Uint8Array): {content: string; format: MarkdownFormat} => {
     if (!(bytes instanceof Uint8Array)) {
         throw new TypeError("Markdown input must be bytes");
     }
     const bom = bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
     const text = new TextDecoder("utf-8", {fatal: true, ignoreBOM: true}).decode(bom ? bytes.subarray(3) : bytes);
-    const counts = new Map();
+    const counts = new Map<string, number>();
     for (const match of text.matchAll(/\r\n|\r|\n/g)) {
         counts.set(match[0], (counts.get(match[0]) || 0) + 1);
     }
-    let newline = "\n";
+    let newline: MarkdownFormat["newline"] = "\n";
     let maximum = 0;
     for (const [kind, count] of counts) {
         if (count > maximum) {
-            newline = kind;
+            newline = kind as MarkdownFormat["newline"];
             maximum = count;
         }
     }
     return {content: normalizeNewlines(text), format: {bom, newline}};
 };
 
-const encodeMarkdown = (content, format) => {
+const encodeMarkdown = (content: string, format: MarkdownFormat): Uint8Array => {
     if (typeof content !== "string" || typeof format?.bom !== "boolean" ||
         !["\n", "\r\n", "\r"].includes(format.newline)) {
         throw new TypeError("Invalid Markdown content or format");
@@ -40,4 +42,4 @@ const encodeMarkdown = (content, format) => {
         normalizeNewlines(content).replace(/\n/g, format.newline));
 };
 
-module.exports = {decodeMarkdown, encodeMarkdown};
+export {decodeMarkdown, encodeMarkdown};

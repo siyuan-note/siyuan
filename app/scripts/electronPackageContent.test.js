@@ -7,7 +7,7 @@ const appRoot = path.join(__dirname, "..");
 // 打包输入必须是构建产物目录：源码目录 electron/ 与测试同目录，直接打包会把测试带入安装包。
 const OUTPUT_DIR = "electron-dist";
 // 产物清单与构建脚本共用同一份来源，漏项会在构建与校验两侧同时暴露。
-const {rendererScripts, staticAssets, markdownRuntimeAssets} = require("./electronPackageContent");
+const {rendererScripts, staticAssets, markdownRuntimeAssets, bundledEntries} = require("./electronPackageContent");
 // electron-builder-common.yml 只被 extends 引用，本身不含入口与 files，不是独立的打包配置。
 const SHARED_BUILDER_CONFIG = "electron-builder-common.yml";
 const builderConfigs = fs.readdirSync(appRoot)
@@ -68,9 +68,11 @@ test("build output excludes tests and ships every runtime asset", (t) => {
     const names = fs.readdirSync(outputDir);
     assert.deepEqual(names.filter(name => /\.test\./.test(name)), [], "产物目录不能包含测试文件");
     assert.equal(names.includes("fixtures"), false, "产物目录不能包含仅测试使用的 fixtures");
-    // 静态资源与渲染脚本位于 static/，主进程入口仍在产物根目录。
-    assert.ok(fs.existsSync(path.join(outputDir, "main.js")), "产物缺少 main.js");
-    assert.ok(fs.statSync(path.join(outputDir, "main.js")).size > 0, "产物中的 main.js 为空");
+    for (const entry of Object.keys(bundledEntries)) {
+        const file = path.join(outputDir, entry + ".js");
+        assert.ok(fs.existsSync(file), `产物缺少 ${entry}.js`);
+        assert.ok(fs.statSync(file).size > 0, `产物中的 ${entry}.js 为空`);
+    }
     const staticDir = path.join(outputDir, "static");
     assert.ok(fs.existsSync(staticDir), "产物缺少 static 目录");
     const staticNames = fs.readdirSync(staticDir);
@@ -80,7 +82,7 @@ test("build output excludes tests and ships every runtime asset", (t) => {
         assert.ok(fs.existsSync(file), `产物缺少 static/${name}`);
         assert.ok(fs.statSync(file).size > 0, `产物中的 static/${name} 为空`);
     }
-    // Markdown 模块按 __dirname 加载这两份文件，因此它们必须与 main.js 同目录。
+    // Markdown 模块按 __dirname 加载替换脚本，脚本必须与 main.js 同目录。
     for (const name of markdownRuntimeAssets) {
         const file = path.join(outputDir, name);
         assert.ok(fs.existsSync(file), `产物缺少 ${name}`);

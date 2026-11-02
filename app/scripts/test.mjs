@@ -9,12 +9,11 @@ createRequire(import.meta.url)("electron");
 const concurrency = Math.min(4, availableParallelism());
 // --experimental-test-module-mocks 供 electron 替身使用：纯 Node 下 require("electron") 只得到可执行文件路径，
 // 主进程模块因此靠 `t.mock.module` 把这个依赖换掉，见 electron/fixtures/electronStub.ts。
-// electron 目录仍有未迁移的 CommonJS 模块（如 markdown/），两类扩展名都要纳入发现范围。
 const result = spawnSync(process.execPath, [
     "--import", "tsx", "--experimental-test-module-mocks", "--test",
     `--test-concurrency=${concurrency}`,
     ...process.argv.slice(2),
-    "src/**/*.test.ts", "tests/**/*.test.js", "electron/**/*.test.ts", "electron/**/*.test.js",
+    "src/**/*.test.ts", "tests/**/*.test.js", "electron/**/*.test.ts",
     "scripts/**/*.test.js",
 ], {stdio: "inherit"});
 if (result.error) {

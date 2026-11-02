@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const os = require("node:os");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {execFile} = require("node:child_process");
 const {promisify} = require("node:util");
 const {replaceFile, preserveOwnership, syncDirectory} = require("./replaceFile");

@@ -1,39 +1,45 @@
-const fs = require("node:fs/promises");
-const {constants} = require("node:fs");
-const path = require("node:path");
-const {randomUUID} = require("node:crypto");
+import * as fs from "node:fs/promises";
+import {constants} from "node:fs";
+import * as path from "node:path";
+import {randomUUID} from "node:crypto";
+import type {BigIntStats} from "node:fs";
 
-const imageTypes = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
+const imageTypes: Record<string, string> = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
     ".webp": "image/webp", ".svg": "image/svg+xml", ".avif": "image/avif", ".bmp": "image/bmp", ".ico": "image/x-icon"};
-const inside = (directory, candidate) => {
+const inside = (directory: string, candidate: string): boolean => {
     const relative = path.relative(directory, candidate);
     return relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
 };
-const identity = stat => `${stat.dev}:${stat.ino}`;
+const identity = (stat: BigIntStats): string => `${stat.dev}:${stat.ino}`;
 
 class MarkdownResources {
-    constructor(sessionId) {
+    readonly sessionId: string;
+    readonly directories: Map<string, {canonical: string; identity: string}>;
+    readonly files: Map<string, string>;
+    readonly entries: Map<string, {selection: string; canonical: string; type: string; identity: string; modified: bigint}>;
+
+    constructor(sessionId: string) {
         this.sessionId = sessionId;
         this.directories = new Map();
         this.files = new Map();
         this.entries = new Map();
     }
 
-    async authorizeDirectory(directory) {
+    async authorizeDirectory(directory: string): Promise<void> {
         const canonical = await fs.realpath(directory);
         const stat = await fs.stat(canonical, {bigint: true});
         if (!stat.isDirectory()) throw new Error("Invalid Markdown resource directory");
         this.directories.set(path.resolve(directory), {canonical, identity: identity(stat)});
     }
 
-    async authorizeFile(file) {
+    async authorizeFile(file: string): Promise<void> {
         const canonical = await fs.realpath(file);
         const stat = await fs.stat(canonical, {bigint: true});
         if (!stat.isFile() || !imageTypes[path.extname(canonical).toLowerCase()]) throw new Error("Invalid Markdown resource file");
         this.files.set(canonical, identity(stat));
     }
 
-    async authorized(canonical, fileIdentity) {
+    async authorized(canonical: string, fileIdentity: string): Promise<boolean> {
         if (this.files.get(canonical) === fileIdentity) return true;
         for (const [selection, grant] of this.directories) {
             if (!inside(grant.canonical, canonical)) continue;
@@ -45,7 +51,7 @@ class MarkdownResources {
         return false;
     }
 
-    async resolve(reference, targetPath) {
+    async resolve(reference: unknown, targetPath?: string): Promise<string | undefined> {
         if (typeof reference !== "string" || reference.length > 8192 || !targetPath ||
             /^[a-z][\w+.-]*:/i.test(reference) || reference.startsWith("/") || reference.startsWith("\\") || reference.includes("\0")) return undefined;
         try {
@@ -71,7 +77,7 @@ class MarkdownResources {
         }
     }
 
-    async read(token) {
+    async read(token: string): Promise<{bytes: Buffer<ArrayBuffer>; type: string} | undefined> {
         const entry = this.entries.get(token);
         if (!entry || await fs.realpath(entry.selection) !== entry.canonical || !await this.authorized(entry.canonical, entry.identity)) return undefined;
         const file = await fs.open(entry.canonical, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
@@ -94,9 +100,9 @@ class MarkdownResources {
         }
     }
 
-    clear() {
+    clear(): void {
         this.entries.clear();
     }
 }
 
-module.exports = {MarkdownResources, inside};
+export {MarkdownResources, inside};

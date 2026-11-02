@@ -2,10 +2,10 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {MarkdownDiskService} = require("./disk");
 
-const setup = async (t, fileSystem) => {
+const setup = async (t, fileSystem?: typeof fs) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-"));
     t.after(() => fs.rm(directory, {recursive: true, force: true}));
     const service = new MarkdownDiskService({fileSystem,
@@ -142,12 +142,11 @@ test("save writes UTF-8 BOM and selected newlines through atomic replacement", a
 });
 
 test("new target creation never overwrites a file appearing after the final check", async t => {
-    let destination;
     const {service, file} = await setup(t, {...fs, link: async (from, to) => {
         await fs.writeFile(to, "external");
         return fs.link(from, to);
     }});
-    destination = file("new.md");
+    const destination = file("new.md");
     const reserved = await service.authorizeSaveAs("a", destination);
     const result = await service.write(request(reserved.target, "mine", {reservationId: reserved.reservationId}));
     assert.equal(result.kind, "conflict");
@@ -226,7 +225,6 @@ test("the 8 MiB boundary counts UTF-8 and BOM bytes and rejects an oversized wri
 });
 
 test("changes during staging are checked again before replacing the destination", async t => {
-    let selected;
     let changed = false;
     const {service, file, directory} = await setup(t, {...fs, open: async (name, ...args) => {
         const handle = await fs.open(name, ...args);
@@ -240,7 +238,7 @@ test("changes during staging are checked again before replacing the destination"
         }, stat: options => handle.stat(options), chown: (...args) => handle.chown(...args),
         chmod: mode => handle.chmod(mode), sync: () => handle.sync(), close: () => handle.close()};
     }});
-    selected = file("source.md");
+    const selected = file("source.md");
     await fs.writeFile(selected, "original");
     const opened = await service.authorizeOpen("a", selected);
     assert.equal((await service.write(request(opened.target, "mine"))).kind, "conflict");

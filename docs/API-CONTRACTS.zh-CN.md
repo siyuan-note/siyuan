@@ -199,4 +199,4 @@ go test -tags "fts5 sqlcipher" ./... -count=1
 
 预发布工作流 `.github/workflows/cd.yml` 执行语言校验、契约和类型检查，在 Linux 上运行所有内核包的测试，在 Windows 上运行前端、Electron 和打包脚本测试。它仅由预发布标签推送（`*-alpha*`、`*-beta*`、`*-rc*`）或手动调度触发，普通分支推送和 PR 不触发该工作流。部分测试步骤，包括 Linux 内核全量测试和前端测试，设置了 `continue-on-error: true`。因此，任务成功或版本发布不代表所有测试通过；报告验证结果前，应检查实际步骤结果、日志和测试报告。此处说明不改变工作流的发布门禁。
 
-前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。
+前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.ts` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。

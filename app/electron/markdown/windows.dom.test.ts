@@ -1,10 +1,22 @@
-const {test} = require("node:test");
+import {test} from "node:test";
+import type {Configuration, Stats} from "webpack";
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const {execFile} = require("node:child_process");
 const {promisify} = require("node:util");
+
+const compile = async (config: Configuration): Promise<void> => {
+    const compiler = require("webpack")(config);
+    try {
+        const stats = await new Promise<Stats>((resolve, reject) =>
+            compiler.run((error, value) => error ? reject(error) : resolve(value)));
+        assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
+    } finally {
+        await new Promise<void>((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));
+    }
+};
 
 const runElectron = async options => {
     const {app, BrowserWindow, ipcMain, protocol, nativeTheme} = require("electron");
@@ -159,11 +171,14 @@ test("the real sandboxed page saves and switches A to B to A through its restric
         const config = require("../../webpack.markdown")({}, {mode: "development"});
         config.context = path.resolve(__dirname, "../.."); config.watch = false; config.devtool = false;
         config.output = {...config.output, path: output};
-        const compiler = require("webpack")(config);
-        try {
-            const stats = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
-            assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
-        } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
+        await compile(config);
+        const runtime = path.join(temporary, "electron");
+        const electronConfig = require("../../webpack.electron");
+        await compile({...electronConfig, context: path.resolve(__dirname, "../.."), entry: {
+            windows: {import: path.join(__dirname, "windows.ts"), library: {type: "commonjs2"}},
+            preload: path.join(__dirname, "preload.ts"),
+        }, output: {...electronConfig.output, path: runtime}});
+        fs.copyFileSync(path.join(__dirname, "replaceFile.ps1"), path.join(runtime, "replaceFile.ps1"));
         const documents = path.join(temporary, "documents");
         fs.mkdirSync(documents);
         const document = path.join(documents, "A.md");
@@ -171,8 +186,8 @@ test("the real sandboxed page saves and switches A to B to A through its restric
         fs.writeFileSync(document, "# Original document\n");
         fs.writeFileSync(secondDocument, "# Second document\n");
         const script = path.join(temporary, "run.cjs");
-        fs.writeFileSync(script, `(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument,
-    manager: path.join(__dirname, "windows.js"), windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
+        fs.writeFileSync(script, `const __name = value => value;\n(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument,
+    manager: path.join(runtime, "windows.js"), windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
     profile: path.join(temporary, "profile"), config: path.join(temporary, "config")})});`);
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

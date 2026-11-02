@@ -1,4 +1,4 @@
-const {test} = require("node:test");
+import {test} from "node:test";
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -14,7 +14,7 @@ const fixture = async t => {
     const recovery = path.join(directory, "recovery");
     return {directory, recovery, host: new MarkdownDesktopHost({directory: recovery})};
 };
-const draft = async (host, file) => {
+const draft = async (host, file?: string) => {
     const sessionId = host.createSession();
     const opened = file ? await host.authorizeOpen(sessionId, file) : undefined;
     if (opened) assert.equal(opened.kind, "opened");

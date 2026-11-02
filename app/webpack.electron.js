@@ -1,14 +1,15 @@
 const path = require("path");
+const {bundledEntries} = require("./scripts/electronPackageContent");
 
 // 桌面端主进程源码位于 electron/，与测试同目录；打包只读取 electron-dist/，测试因此不会进入安装包。
 // 产物目录与 electron/ 同层，运行时 __dirname 的 ../ 语义保持不变。
 module.exports = {
     mode: "production",
     target: "node",
-    entry: "./electron/main.ts",
+    entry: bundledEntries,
     output: {
         path: path.resolve(__dirname, "electron-dist"),
-        filename: "main.js",
+        filename: "[name].js",
     },
     // 保留运行时的 __dirname 与 __filename，不替换成打包期的固定值。
     node: {
@@ -23,7 +24,6 @@ module.exports = {
         return callback(null, "commonjs " + request);
     },
     resolve: {
-        // 主进程模块逐步迁移为 TypeScript，解析时优先使用 .ts。
         extensions: [".ts", ".js"],
     },
     module: {

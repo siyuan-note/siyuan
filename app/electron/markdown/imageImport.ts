@@ -1,19 +1,29 @@
-const fs = require("node:fs/promises");
-const {constants} = require("node:fs");
-const path = require("node:path");
-const {randomUUID, createHash} = require("node:crypto");
+import type {MarkdownIOError} from "./types";
+import * as fs from "node:fs/promises";
+import {constants} from "node:fs";
+import * as path from "node:path";
+import {randomUUID, createHash} from "node:crypto";
+import type {BigIntStats} from "node:fs";
+import type {MarkdownErrorCode} from "../../src/markdown/contracts";
+
+type ImageErrorCode = MarkdownErrorCode | "occupied" | "cross-volume";
+type ImageImportResult = {kind: "imported"; reference: string} |
+    {kind: "blocked" | "indeterminate"; error: {code: ImageErrorCode; recoverable: boolean}};
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif", ".bmp", ".ico"]);
-const identity = stat => `${stat.dev}:${stat.ino}`;
-const stable = (before, after) => identity(before) === identity(after) && before.size === after.size &&
+const identity = (stat: BigIntStats): string => `${stat.dev}:${stat.ino}`;
+const stable = (before: BigIntStats, after: BigIntStats): boolean => identity(before) === identity(after) && before.size === after.size &&
     before.mtimeNs === after.mtimeNs && before.ctimeNs === after.ctimeNs;
-const hash = bytes => createHash("sha256").update(bytes).digest("hex");
-const error = code => Object.assign(new Error("Markdown image import failed"), {markdownCode: code});
-const failure = (kind, cause) => ({kind, error: {code: cause.markdownCode ||
-    ({EEXIST: "occupied", ENOENT: "deleted", EACCES: "permission", EPERM: "permission", ENOSPC: "space"})[cause.code] || "io",
-recoverable: true}});
+const hash = (bytes: Uint8Array): string => createHash("sha256").update(bytes).digest("hex");
+const error = (code: ImageErrorCode) => Object.assign(new Error("Markdown image import failed"), {markdownCode: code});
+const failure = (kind: "blocked" | "indeterminate", caught: unknown): Exclude<ImageImportResult, {kind: "imported"}> => {
+    const cause = caught as MarkdownIOError<ImageErrorCode>;
+    return {kind, error: {code: cause.markdownCode ||
+        ({EEXIST: "occupied", ENOENT: "deleted", EACCES: "permission", EPERM: "permission", ENOSPC: "space"} as
+            Record<string, ImageErrorCode>)[cause.code ?? ""] || "io", recoverable: true}};
+};
 
-const readImage = async (io, canonical, maximumBytes) => {
+const readImage = async (io: typeof fs, canonical: string, maximumBytes: number): Promise<{bytes: Buffer; stat: BigIntStats}> => {
     const selected = await io.stat(canonical, {bigint: true});
     const file = await io.open(canonical, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
     try {
@@ -21,7 +31,7 @@ const readImage = async (io, canonical, maximumBytes) => {
         if (!before.isFile()) throw error("protocol");
         if (!stable(selected, before)) throw error("identity-changed");
         if (before.size > BigInt(maximumBytes)) throw error("size");
-        const chunks = [];
+        const chunks: Buffer[] = [];
         let total = 0;
         while (true) {
             const bytes = Buffer.allocUnsafe(Math.min(64 * 1024, maximumBytes + 1 - total));
@@ -39,10 +49,11 @@ const readImage = async (io, canonical, maximumBytes) => {
 };
 
 // 路径只能来自宿主原生选择器和当前授权文档，不接受渲染层自行提供的路径。
-const importMarkdownImage = async ({source, destination, targetPath}, {fileSystem: io = fs, maximumBytes = 32 * 1024 * 1024} = {}) => {
-    let temporary;
+const importMarkdownImage = async ({source, destination, targetPath}: {source: string; destination: string; targetPath: string},
+    {fileSystem: io = fs, maximumBytes = 32 * 1024 * 1024}: {fileSystem?: typeof fs; maximumBytes?: number} = {}): Promise<ImageImportResult> => {
+    let temporary: string | undefined;
     let attempted = false;
-    let canonicalDestination;
+    let canonicalDestination: string | undefined;
     try {
         if (![source, destination, targetPath].every(value => typeof value === "string" && path.isAbsolute(value)) ||
             !imageExtensions.has(path.extname(source).toLowerCase()) || !imageExtensions.has(path.extname(destination).toLowerCase()) ||
@@ -57,7 +68,9 @@ const importMarkdownImage = async ({source, destination, targetPath}, {fileSyste
         try {
             await io.lstat(canonicalDestination);
             throw error("occupied");
-        } catch (cause) {
+        } catch (caught) {
+            const cause = caught as MarkdownIOError;
+
             if (cause.code !== "ENOENT") throw cause;
         }
         const canonicalSource = await io.realpath(source);
@@ -86,12 +99,16 @@ const importMarkdownImage = async ({source, destination, targetPath}, {fileSyste
             try { await directory.sync(); } finally { await directory.close(); }
         }
         return {kind: "imported", reference: relative.split(path.sep).map(encodeURIComponent).join("/")};
-    } catch (cause) {
+    } catch (caught) {
+        const cause = caught as MarkdownIOError;
+
         if (attempted && cause.code !== "EEXIST") {
             try {
-                await io.lstat(canonicalDestination);
+                await io.lstat(canonicalDestination!);
                 return failure("indeterminate", cause);
-            } catch (check) {
+            } catch (caught) {
+                const check = caught as MarkdownIOError;
+
                 if (check.code !== "ENOENT") return failure("indeterminate", cause);
             }
         }
@@ -101,4 +118,4 @@ const importMarkdownImage = async ({source, destination, targetPath}, {fileSyste
     }
 };
 
-module.exports = {importMarkdownImage, imageExtensions};
+export {importMarkdownImage, imageExtensions};

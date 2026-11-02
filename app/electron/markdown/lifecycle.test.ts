@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {createMarkdownLifecycle} = require("./lifecycle");
 
 test("ordinary workspace quitting passes through when no Markdown windows exist", () => {

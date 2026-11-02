@@ -1,17 +1,20 @@
-const path = require("node:path");
-const {fileURLToPath} = require("node:url");
+import * as path from "node:path";
+import {fileURLToPath} from "node:url";
 
-const isMarkdownPath = value => typeof value === "string" && /\.(?:md|markdown)$/i.test(value);
+export type MarkdownLaunch = {requested: boolean; files: string[]; newDocument: boolean};
+
+const isMarkdownPath = (value: unknown): value is string => typeof value === "string" && /\.(?:md|markdown)$/i.test(value);
 
 // 仅解释文件入口，不把工作空间参数中的 .md 或网页地址误当成本机文件。
-const parseMarkdownLaunch = (argv, cwd, {startIndex = 0, platform = process.platform} = {}) => {
+const parseMarkdownLaunch = (argv: string[], cwd: string,
+    {startIndex = 0, platform = process.platform}: {startIndex?: number; platform?: NodeJS.Platform} = {}): MarkdownLaunch => {
     const paths = platform === "win32" ? path.win32 : path.posix;
-    const files = [];
-    const seen = new Set();
+    const files: string[] = [];
+    const seen = new Set<string>();
     let requested = false;
     let newDocument = false;
     let positional = false;
-    const add = raw => {
+    const add = (raw: string): void => {
         let file = raw;
         if (/^file:/i.test(file)) {
             try {
@@ -59,4 +62,4 @@ const parseMarkdownLaunch = (argv, cwd, {startIndex = 0, platform = process.plat
     return {requested, files, newDocument: requested && (newDocument || files.length === 0)};
 };
 
-module.exports = {isMarkdownPath, parseMarkdownLaunch};
+export {isMarkdownPath, parseMarkdownLaunch};

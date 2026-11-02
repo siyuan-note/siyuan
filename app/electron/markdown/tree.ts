@@ -1,18 +1,46 @@
-const fs = require("node:fs/promises");
-const {watch} = require("node:fs");
-const path = require("node:path");
-const {createHash} = require("node:crypto");
-const {inside} = require("./resources");
+import type {MarkdownIOError} from "./types";
+import * as fs from "node:fs/promises";
+import {watch} from "node:fs";
+import * as path from "node:path";
+import {createHash} from "node:crypto";
+import {inside} from "./resources";
+import type {BigIntStats, FSWatcher} from "node:fs";
+import type {MarkdownErrorCode, MarkdownFailure} from "../../src/markdown/contracts";
+import type {MarkdownTreeListing, MarkdownTreeLocation, MarkdownTreeNode, MarkdownTreeState, MarkdownTreeView} from "../../src/markdown/treeContracts";
+import type {MarkdownTreeRoot, MarkdownTreeViewStore} from "./treeView";
 
-const identity = stat => `${stat.dev}:${stat.ino}`;
-const fail = code => Object.assign(new Error("Markdown directory unavailable"), {markdownCode: code});
-const failure = error => ({code: error.markdownCode || ({EPROTO: "protocol", ENOENT: "deleted", EACCES: "permission", EPERM: "permission"})[error.code] || "io", recoverable: true});
+type TreeEntry = MarkdownTreeNode & {relative: string; selection: string; path: string; identity: string};
+
+const identity = (stat: BigIntStats): string => `${stat.dev}:${stat.ino}`;
+const fail = (code: MarkdownErrorCode) => Object.assign(new Error("Markdown directory unavailable"), {markdownCode: code});
+const failure = (caught: unknown): MarkdownFailure => {
+    const error = caught as MarkdownIOError;
+    return {code: error.markdownCode || ({EPROTO: "protocol", ENOENT: "deleted", EACCES: "permission", EPERM: "permission"} as
+        Record<string, MarkdownErrorCode>)[error.code ?? ""] || "io", recoverable: true};
+};
 const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
-const compare = (left, right) => (left.kind === right.kind ? 0 : left.kind === "directory" ? -1 : 1) ||
+const compare = (left: MarkdownTreeNode, right: MarkdownTreeNode): number => (left.kind === right.kind ? 0 : left.kind === "directory" ? -1 : 1) ||
     collator.compare(left.name, right.name) || (left.name < right.name ? -1 : left.name > right.name ? 1 : 0);
 
 class MarkdownTree {
-    constructor({view, notify = () => {}, fileSystem = fs, watchDirectory = watch}) {
+    readonly view: MarkdownTreeViewStore;
+    readonly fs: typeof fs;
+    readonly notify: () => void;
+    readonly watchDirectory: typeof watch;
+    generation: number;
+    rootSequence: number;
+    width: number;
+    visible: boolean;
+    readonly nodes: Map<string, TreeEntry>;
+    expanded: string[];
+    readonly watchers: Map<string, FSWatcher>;
+    closed: boolean;
+    root?: MarkdownTreeRoot & {selection: string};
+    timer?: NodeJS.Timeout;
+
+    constructor({view, notify = () => {}, fileSystem = fs, watchDirectory = watch}: {
+        view: MarkdownTreeViewStore; notify?: () => void; fileSystem?: typeof fs; watchDirectory?: typeof watch;
+    }) {
         this.view = view;
         this.fs = fileSystem;
         this.notify = notify;
@@ -27,9 +55,9 @@ class MarkdownTree {
         this.closed = false;
     }
 
-    id(relative) { return relative ? createHash("sha256").update(this.root.id + "\0" + relative).digest("hex") : this.root.id; }
+    id(relative: string): string { return relative ? createHash("sha256").update(this.root!.id + "\0" + relative).digest("hex") : this.root!.id; }
 
-    async setRoot(selection) {
+    async setRoot(selection: string): Promise<void> {
         const sequence = ++this.rootSequence;
         const canonical = await this.fs.realpath(selection);
         const stat = await this.fs.stat(canonical, {bigint: true});
@@ -55,14 +83,14 @@ class MarkdownTree {
         this.updateWatches();
     }
 
-    async checkRoot() {
+    async checkRoot(): Promise<void> {
         if (!this.root || this.closed) throw fail("unavailable");
         const canonical = await this.fs.realpath(this.root.selection);
         const stat = await this.fs.stat(canonical, {bigint: true});
         if (canonical !== this.root.path || !stat.isDirectory() || identity(stat) !== this.root.identity) throw fail("identity-changed");
     }
 
-    async resolve(relative) {
+    async resolve(relative: string): Promise<TreeEntry> {
         if (!this.root || typeof relative !== "string" || path.isAbsolute(relative) || relative.includes("\0")) throw fail("protocol");
         const parts = relative ? relative.split(path.sep) : [];
         if (parts.length > 64 || parts.some(part => !part || part === "." || part === "..")) throw fail("size");
@@ -86,13 +114,13 @@ class MarkdownTree {
             kind: stat.isDirectory() ? "directory" : "file", selection, path: canonical, identity: identity(stat)};
     }
 
-    location(location) {
+    location(location: MarkdownTreeLocation): TreeEntry {
         if (!location || this.closed || location.rootId !== this.root?.id || location.generation !== this.generation ||
             typeof location.nodeId !== "string" || !this.nodes.has(location.nodeId)) throw fail("protocol");
-        return this.nodes.get(location.nodeId);
+        return this.nodes.get(location.nodeId)!;
     }
 
-    async checked(location) {
+    async checked(location: MarkdownTreeLocation): Promise<TreeEntry> {
         const original = this.location(location);
         const current = await this.resolve(original.relative);
         this.location(location);
@@ -100,11 +128,11 @@ class MarkdownTree {
         return current;
     }
 
-    async list(location) {
+    async list(location: MarkdownTreeLocation): Promise<MarkdownTreeListing> {
         try {
             const directory = await this.checked(location);
             if (directory.kind !== "directory") throw fail("protocol");
-            const entries = [];
+            const entries: TreeEntry[] = [];
             let total = 0;
             const opened = await this.fs.opendir(directory.path);
             try {
@@ -114,16 +142,18 @@ class MarkdownTree {
                     try {
                         const node = await this.resolve(path.join(directory.relative, item.name));
                         entries.push(node);
-                    } catch (error) {
+                    } catch (caught) {
+                        const error = caught as MarkdownIOError;
+
                         if (error.markdownCode === "size") throw error;
-                        if (!["ENOENT", "EACCES", "EPERM"].includes(error.code) && !["permission"].includes(error.markdownCode)) throw error;
+                        if (!["ENOENT", "EACCES", "EPERM"].includes(error.code ?? "") && !["permission"].includes(error.markdownCode ?? "")) throw error;
                     }
                 }
-            } finally { await opened.close().catch(error => { if (error.code !== "ERR_DIR_CLOSED") throw error; }); }
+            } finally { await opened.close().catch((error: MarkdownIOError) => { if (error.code !== "ERR_DIR_CLOSED") throw error; }); }
             const after = await this.checked(location);
             if (after.identity !== directory.identity) throw fail("identity-changed");
             const names = new Set(entries.map(node => node.relative));
-            const obsolete = [];
+            const obsolete: string[] = [];
             for (const [id, node] of this.nodes) {
                 if (!node.relative || node.relative === directory.relative) continue;
                 const relative = path.relative(directory.relative || ".", node.relative);
@@ -144,13 +174,13 @@ class MarkdownTree {
         } catch (error) { return {kind: "blocked", error: failure(error)}; }
     }
 
-    async file(location) {
+    async file(location: MarkdownTreeLocation): Promise<TreeEntry> {
         const node = await this.checked(location);
         if (node.kind !== "file") throw fail("protocol");
         return node;
     }
 
-    async state(currentPath) {
+    async state(currentPath?: string): Promise<MarkdownTreeState> {
         const basic = () => ({generation: this.generation, expanded: [...this.expanded], width: this.width, visible: this.visible});
         try {
             if (!this.root) {
@@ -162,13 +192,13 @@ class MarkdownTree {
             const root = this.root;
             const generation = this.generation;
             await this.checkRoot();
-            const result = {kind: "ready", ...basic(), rootId: root.id, rootName: path.basename(root.path) || root.path};
+            const result: MarkdownTreeState = {kind: "ready", ...basic(), rootId: root.id, rootName: path.basename(root.path) || root.path};
             if (currentPath && inside(root.path, currentPath)) {
                 const relative = path.relative(root.path, currentPath);
                 if (relative) {
                     try {
                         const file = await this.resolve(relative);
-                        const parents = [];
+                        const parents: string[] = [];
                         const pieces = relative.split(path.sep);
                         for (let index = 0; index < pieces.length; index++) {
                             const node = await this.resolve(pieces.slice(0, index).join(path.sep));
@@ -182,10 +212,12 @@ class MarkdownTree {
                             result.currentNodeId = file.id;
                             result.currentPath = parents;
                         }
-                    } catch (error) {
+                    } catch (caught) {
+                        const error = caught as MarkdownIOError;
+
                         // 当前文件被删除或撤权时，仍允许导航其余可访问文件。
-                        if (!["ENOENT", "EACCES", "EPERM"].includes(error.code) &&
-                            !["permission", "identity-changed"].includes(error.markdownCode)) throw error;
+                        if (!["ENOENT", "EACCES", "EPERM"].includes(error.code ?? "") &&
+                            !["permission", "identity-changed"].includes(error.markdownCode ?? "")) throw error;
                     }
                 }
             }
@@ -195,13 +227,13 @@ class MarkdownTree {
         } catch (error) { return {kind: "blocked", ...basic(), error: failure(error)}; }
     }
 
-    async saveView(patch) {
+    async saveView(patch: MarkdownTreeView): Promise<void> {
         if (!patch || Object.keys(patch).some(key => !["rootId", "generation", "expanded", "width", "visible"].includes(key))) throw fail("protocol");
         const copy = {...patch};
         if (copy.width !== undefined && (!Number.isInteger(copy.width) || copy.width < 180 || copy.width > 480)) throw fail("protocol");
         if (copy.visible !== undefined && typeof copy.visible !== "boolean") throw fail("protocol");
         if (copy.expanded !== undefined) {
-            this.location({rootId: copy.rootId, generation: copy.generation, nodeId: copy.rootId});
+            this.location({rootId: copy.rootId!, generation: copy.generation!, nodeId: copy.rootId!});
             if (!Array.isArray(copy.expanded) || copy.expanded.length > 256 || new Set(copy.expanded).size !== copy.expanded.length) throw fail("protocol");
             copy.expanded = copy.expanded.map(id => {
                 const node = this.nodes.get(id);
@@ -217,7 +249,7 @@ class MarkdownTree {
         this.updateWatches();
     }
 
-    updateWatches() {
+    updateWatches(): void {
         this.stopWatches();
         if (this.closed || !this.root) return;
         const generation = this.generation;
@@ -238,8 +270,8 @@ class MarkdownTree {
         }
     }
 
-    stopWatches() { for (const watcher of this.watchers.values()) watcher.close(); this.watchers.clear(); clearTimeout(this.timer); }
-    close() { this.closed = true; this.rootSequence++; this.stopWatches(); }
+    stopWatches(): void { for (const watcher of this.watchers.values()) watcher.close(); this.watchers.clear(); clearTimeout(this.timer); }
+    close(): void { this.closed = true; this.rootSequence++; this.stopWatches(); }
 }
 
-module.exports = {MarkdownTree, treeFailure: failure};
+export {MarkdownTree, failure as treeFailure};

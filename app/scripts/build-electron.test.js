@@ -5,7 +5,7 @@ const path = require("node:path");
 const {spawn} = require("node:child_process");
 const {setTimeout: delay} = require("node:timers/promises");
 const {test} = require("node:test");
-const {rendererScripts, staticAssets, markdownRuntimeAssets} = require("./electronPackageContent");
+const {rendererScripts, staticAssets, markdownRuntimeAssets, bundledEntries} = require("./electronPackageContent");
 
 test("watch copies every runtime asset without a main-process edit", {timeout: 60000}, async t => {
     const appRoot = path.join(__dirname, "..");
@@ -49,7 +49,9 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
         fs.writeFileSync(path.join(root, asset.source), "initial " + asset.source);
     }
     const entry = path.join(root, "electron", "main.ts");
-    fs.writeFileSync(entry, "const value: number = 1;\nconsole.log(value);\n");
+    for (const source of Object.values(bundledEntries)) {
+        fs.writeFileSync(path.join(root, source), "const value: number = 1;\nconsole.log(value);\n");
+    }
     const env = {...process.env};
     delete env.NODE_TEST_CONTEXT;
     child = spawn(process.execPath, ["scripts/build-electron.mjs", "--watch"], {
@@ -75,6 +77,11 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     fs.writeFileSync(entry, "const value: number = 2;\nconsole.log(value);\n");
     await waitFor(() => fs.readFileSync(main, "utf8") !== initialBundle, "main-process watch compilation");
     const bundle = fs.readFileSync(main, "utf8");
+    const preload = path.join(root, "electron-dist", "preload.js");
+    const initialPreload = fs.readFileSync(preload, "utf8");
+    fs.writeFileSync(path.join(root, bundledEntries.preload), "const value: number = 3;\nconsole.log(value);\n");
+    await waitFor(() => fs.readFileSync(preload, "utf8") !== initialPreload, "sandbox preload watch compilation");
+    const preloadBundle = fs.readFileSync(preload, "utf8");
 
     // 所有资源均单独修改，避免其他主进程改动触发重建而掩盖监听缺项。
     for (const asset of assets) {
@@ -84,4 +91,5 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
             "runtime asset was not copied: " + asset.source);
     }
     assert.equal(fs.readFileSync(main, "utf8"), bundle);
+    assert.equal(fs.readFileSync(preload, "utf8"), preloadBundle);
 });

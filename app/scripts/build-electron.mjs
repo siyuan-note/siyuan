@@ -1,4 +1,4 @@
-// 构建桌面端打包输入 electron-dist：主进程打成单文件，渲染脚本与静态资源原样复制。
+// 构建桌面端打包输入 electron-dist：主进程与沙箱 preload 分别编译，渲染脚本与静态资源原样复制。
 // 源码与测试保留在 electron/，electron-builder 只读取 electron-dist，测试不会进入安装包。
 import fs from "node:fs";
 import path from "node:path";
@@ -20,7 +20,7 @@ const copyAssets = () => {
     for (const name of [...rendererScripts, ...staticAssets]) {
         fs.copyFileSync(path.join(staticSourceDir, name), path.join(staticOutputDir, name));
     }
-    // Markdown 模块按 __dirname 加载这两份运行期文件，合并后 __dirname 就是产物目录。
+    // Markdown 模块按 __dirname 加载替换脚本，__dirname 对应产物目录。
     for (const name of markdownRuntimeAssets) {
         fs.copyFileSync(path.join(markdownSourceDir, name), path.join(outputDir, name));
     }

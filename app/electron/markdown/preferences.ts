@@ -1,39 +1,46 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const {randomUUID} = require("node:crypto");
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import {randomUUID} from "node:crypto";
+import type {MarkdownPreferences} from "../../src/markdown/bridge";
+import type {MarkdownIOError} from "./types";
 
-const defaults = Object.freeze({mode: "ir", theme: "system", fontSize: 16});
-const normalize = data => {
-    if (!data || !["ir", "wysiwyg", "sv"].includes(data.mode) || !["system", "light", "dark"].includes(data.theme) ||
-        !Number.isInteger(data.fontSize) || data.fontSize < 12 || data.fontSize > 32) throw new Error("Invalid Markdown preferences");
-    return {mode: data.mode, theme: data.theme, fontSize: data.fontSize};
+const defaults: Readonly<MarkdownPreferences> = Object.freeze({mode: "ir", theme: "system", fontSize: 16});
+const normalize = (value: unknown): MarkdownPreferences => {
+    const data = value as Record<string, unknown> | undefined;
+    if (!data || typeof data.mode !== "string" || !["ir", "wysiwyg", "sv"].includes(data.mode) ||
+        typeof data.theme !== "string" || !["system", "light", "dark"].includes(data.theme) ||
+        typeof data.fontSize !== "number" || !Number.isInteger(data.fontSize) || data.fontSize < 12 || data.fontSize > 32) {
+        throw new Error("Invalid Markdown preferences");
+    }
+    return {mode: data.mode as MarkdownPreferences["mode"], theme: data.theme as MarkdownPreferences["theme"], fontSize: data.fontSize};
 };
 
-const createMarkdownPreferences = directory => {
+const createMarkdownPreferences = (directory: string) => {
     const file = path.join(directory, "preferences.json");
-    let queue = Promise.resolve();
-    const read = async () => {
+    let queue: Promise<unknown> = Promise.resolve();
+    const read = async (): Promise<MarkdownPreferences> => {
         try {
             const stat = await fs.stat(file);
             if (stat.size > 4096) throw new Error("Invalid Markdown preferences size");
             const data = JSON.parse(await fs.readFile(file, "utf8"));
             if (data.version !== 1) throw new Error("Unsupported Markdown preferences version");
             return normalize(data);
-        } catch (error) {
+        } catch (caught) {
+            const error = caught as MarkdownIOError;
             if (error.code === "ENOENT") return {...defaults};
             throw error;
         }
     };
     return {
         read: () => queue.then(read),
-        update(patch) {
+        update(patch: Partial<MarkdownPreferences>) {
             const copy = {...patch};
             const task = queue.then(async () => {
                 const current = await read();
                 const preferences = normalize({...current, ...copy});
                 await fs.mkdir(directory, {recursive: true, mode: 0o700});
                 const temporary = file + "." + randomUUID() + ".tmp";
-                let handle;
+                let handle: fs.FileHandle | undefined;
                 try {
                     handle = await fs.open(temporary, "wx", 0o600);
                     await handle.writeFile(JSON.stringify({version: 1, ...preferences}), "utf8");
@@ -44,7 +51,7 @@ const createMarkdownPreferences = directory => {
                     return preferences;
                 } finally {
                     if (handle) await handle.close().catch(() => undefined);
-                    await fs.unlink(temporary).catch(error => { if (error.code !== "ENOENT") throw error; });
+                    await fs.unlink(temporary).catch((error: MarkdownIOError) => { if (error.code !== "ENOENT") throw error; });
                 }
             });
             queue = task.catch(() => undefined);
@@ -53,4 +60,4 @@ const createMarkdownPreferences = directory => {
     };
 };
 
-module.exports = {createMarkdownPreferences, defaults};
+export {createMarkdownPreferences, defaults};

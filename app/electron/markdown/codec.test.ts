@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {decodeMarkdown, encodeMarkdown} = require("./codec");
 
 test("Markdown codec rejects invalid UTF-8 and unpaired Unicode surrogates", () => {

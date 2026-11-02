@@ -1,28 +1,39 @@
-const fs = require("node:fs/promises");
-const {constants} = require("node:fs");
-const path = require("node:path");
-const {createHash, randomUUID} = require("node:crypto");
-const {MarkdownTargetRegistry} = require("./registry");
-const {decodeMarkdown, encodeMarkdown} = require("./codec");
-const {replaceFile, preserveOwnership, syncDirectory} = require("./replaceFile");
+import * as fs from "node:fs/promises";
+import {constants} from "node:fs";
+import * as path from "node:path";
+import {createHash, randomUUID} from "node:crypto";
+import {MarkdownTargetRegistry} from "./registry";
+import {decodeMarkdown, encodeMarkdown} from "./codec";
+import {replaceFile, preserveOwnership, syncDirectory} from "./replaceFile";
+import type {BigIntStats} from "node:fs";
+import type {MarkdownEntry, MarkdownFileDescriptor, MarkdownSnapshot} from "./registry";
+import type {MarkdownIOError} from "./types";
+import type {MarkdownBlocked, MarkdownErrorCode, MarkdownFailure, MarkdownFormat, MarkdownReadRequest,
+    MarkdownReadResult, MarkdownTarget, MarkdownWriteRequest, MarkdownWriteResult} from "../../src/markdown/contracts";
 
-const hash = bytes => createHash("sha256").update(bytes).digest("hex");
-const identity = stat => `${stat.dev}:${stat.ino}`;
+type Occupied = {kind: "occupied"; sessionId: string};
+export type MarkdownOpenAuthorization = {kind: "opened"; target: MarkdownTarget; content: string} | Occupied | MarkdownBlocked;
+export type MarkdownSaveAsAuthorization = {kind: "reserved"; target: MarkdownTarget; content: string; reservationId: string} |
+    Occupied | MarkdownBlocked;
+
+const hash = (bytes: string | Uint8Array): string => createHash("sha256").update(bytes).digest("hex");
+const identity = (stat: BigIntStats): string => `${stat.dev}:${stat.ino}`;
 const maximumBytes = 8 * 1024 * 1024;
 // macOS 也可能使用区分大小写的卷；保守合并这些路径只会拒绝重复打开，不会允许覆盖。
-const pathKey = value => "path:" + (["win32", "darwin"].includes(process.platform) ? value.toLowerCase() : value);
-const sameStat = (left, right) => identity(left) === identity(right) && left.size === right.size &&
+const pathKey = (value: string): string => "path:" + (["win32", "darwin"].includes(process.platform) ? value.toLowerCase() : value);
+const sameStat = (left: BigIntStats, right: BigIntStats): boolean => identity(left) === identity(right) && left.size === right.size &&
     left.mtimeNs === right.mtimeNs && left.ctimeNs === right.ctimeNs;
-const diskError = (code, message) => Object.assign(new Error(message), {markdownCode: code});
-const failure = (kind, error) => {
+const diskError = (code: MarkdownErrorCode, message: string): MarkdownIOError => Object.assign(new Error(message), {markdownCode: code});
+const failure = <Kind extends "blocked" | "indeterminate">(kind: Kind, cause: unknown): {kind: Kind; error: MarkdownFailure} => {
+    const error = cause as MarkdownIOError;
     const code = error.markdownCode || ({ENOENT: "deleted", EACCES: "permission", EPERM: "permission", EROFS: "readonly",
-        ENOSPC: "space", EDQUOT: "space", EIO: "io", ENETDOWN: "offline", ENETUNREACH: "offline"})[error.code] ||
+        ENOSPC: "space", EDQUOT: "space", EIO: "io", ENETDOWN: "offline", ENETUNREACH: "offline"} as Record<string, MarkdownErrorCode>)[error.code ?? ""] ||
         (error instanceof TypeError ? "encoding" : "io");
     return {kind, error: {code, recoverable: !["encoding", "size", "protocol"].includes(code)}};
 };
 
-const readBounded = async file => {
-    const chunks = [];
+const readBounded = async (file: fs.FileHandle): Promise<Buffer> => {
+    const chunks: Buffer[] = [];
     let size = 0;
     while (true) {
         const chunk = Buffer.allocUnsafe(Math.min(64 * 1024, maximumBytes + 1 - size));
@@ -35,8 +46,16 @@ const readBounded = async file => {
 };
 
 class MarkdownDiskService {
+    readonly fs: typeof fs;
+    readonly replace: typeof replaceFile;
+    readonly registry: MarkdownTargetRegistry;
+    readonly synchronizeDirectory: (directory: string) => Promise<void>;
+    readonly queues: Map<string, Promise<MarkdownWriteResult>>;
     constructor({fileSystem = fs, registry = new MarkdownTargetRegistry(), replace = replaceFile,
-        synchronizeDirectory = directory => syncDirectory(directory, {fileSystem})} = {}) {
+        synchronizeDirectory = directory => syncDirectory(directory, {fileSystem})}: {
+            fileSystem?: typeof fs; registry?: MarkdownTargetRegistry; replace?: typeof replaceFile;
+            synchronizeDirectory?: (directory: string) => Promise<void>;
+        } = {}) {
         this.fs = fileSystem;
         this.replace = replace;
         this.registry = registry;
@@ -44,25 +63,29 @@ class MarkdownDiskService {
         this.queues = new Map();
     }
 
-    createSession(sessionId) {
+    createSession(sessionId?: string): string {
         return this.registry.createSession(sessionId);
     }
 
     // 仅限原生对话框、系统 open-file 和经过宿主确认的拖放入口调用。
-    async describe(filePath, allowMissing = false) {
+    async describe(filePath: string, allowMissing = false): Promise<MarkdownFileDescriptor> {
         if (typeof filePath !== "string" || !path.isAbsolute(filePath) || !/\.(md|markdown)$/i.test(filePath)) {
             throw diskError("protocol", "Invalid Markdown file selection");
         }
         let realPath;
         try {
             realPath = await this.fs.realpath(filePath);
-        } catch (error) {
+        } catch (caught) {
+            const error = caught as MarkdownIOError;
+
             if (!allowMissing || error.code !== "ENOENT") throw error;
             // 不允许把失效符号链接当成新文件；只允许最后一级文件不存在。
             try {
                 await this.fs.lstat(filePath);
-                throw new Error("Markdown target is a broken link", {cause: error});
-            } catch (linkError) {
+                throw new Error("Markdown target is a broken link", {cause: caught});
+            } catch (caught) {
+                const linkError = caught as MarkdownIOError;
+
                 if (linkError.code !== "ENOENT") throw linkError;
             }
             realPath = path.join(await this.fs.realpath(path.dirname(filePath)), path.basename(filePath));
@@ -75,8 +98,10 @@ class MarkdownDiskService {
         if (writable) {
             try {
                 await this.fs.access(realPath, constants.W_OK);
-            } catch (error) {
-                if (!["EACCES", "EPERM", "EROFS"].includes(error.code)) throw error;
+            } catch (caught) {
+                const error = caught as MarkdownIOError;
+
+                if (!["EACCES", "EPERM", "EROFS"].includes(error.code ?? "")) throw error;
                 writable = false;
             }
         }
@@ -84,10 +109,10 @@ class MarkdownDiskService {
             identity: identity(stat), mode: Number(stat.mode) & 0o777, uid: Number(stat.uid), gid: Number(stat.gid), writable};
     }
 
-    async snapshot(descriptor, allowMissing = false) {
+    async snapshot(descriptor: MarkdownFileDescriptor, allowMissing = false): Promise<MarkdownSnapshot> {
         const current = await this.describe(descriptor.selection, allowMissing);
         if (current.path !== descriptor.path) throw diskError("identity-changed", "Markdown target path changed");
-        if (current.identity === "missing") return current;
+        if (current.identity === "missing") return current as MarkdownSnapshot;
         const file = await this.fs.open(current.path, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
         try {
             const before = await file.stat({bigint: true});
@@ -106,16 +131,19 @@ class MarkdownDiskService {
         }
     }
 
-    target(entry) {
+    target(entry: MarkdownEntry): MarkdownTarget {
         return {handle: entry.handle, identity: entry.targetIdentity,
-            displayName: path.basename(entry.descriptor.selection), baseline: entry.descriptor.baseline,
-            writable: entry.descriptor.writable, format: {...entry.format}, capabilities: {persistentPermission: false,
+            displayName: path.basename(entry.descriptor.selection), baseline: entry.descriptor.baseline!,
+            writable: entry.descriptor.writable, format: {...entry.format!}, capabilities: {persistentPermission: false,
                 conditionalWrite: false, atomicReplace: true, coordinatedAccess: false}};
     }
 
-    async grant(sessionId, filePath, reserved, format) {
+    grant(sessionId: string, filePath: string, reserved: false, format?: MarkdownFormat): Promise<MarkdownOpenAuthorization>;
+    grant(sessionId: string, filePath: string, reserved: true, format?: MarkdownFormat): Promise<MarkdownSaveAsAuthorization>;
+    async grant(sessionId: string, filePath: string, reserved: boolean, format?: MarkdownFormat):
+        Promise<MarkdownOpenAuthorization | MarkdownSaveAsAuthorization> {
         format = format && {...format};
-        let entry;
+        let entry: MarkdownEntry | undefined;
         let held = false;
         try {
             this.registry.assertSession(sessionId);
@@ -127,34 +155,34 @@ class MarkdownDiskService {
             entry.pending++;
             held = true;
             const snapshot = await this.snapshot(descriptor, reserved);
-            const decoded = snapshot.bytes ? decodeMarkdown(snapshot.bytes) : {content: "", format: {bom: false, newline: "\n"}};
+            const decoded = snapshot.bytes ? decodeMarkdown(snapshot.bytes) : {content: "", format: {bom: false, newline: "\n" as const}};
             this.registry.update(entry, snapshot);
             entry.format = format || decoded.format;
             encodeMarkdown("", entry.format);
-            return {kind: reserved ? "reserved" : "opened", target: this.target(entry), content: decoded.content,
-                ...(reserved ? {reservationId: entry.reservationId} : {})};
+            return reserved ? {kind: "reserved", target: this.target(entry), content: decoded.content, reservationId: entry.reservationId!} :
+                {kind: "opened", target: this.target(entry), content: decoded.content};
         } catch (error) {
             if (held) {
-                entry.pending--;
+                entry!.pending--;
                 held = false;
-                this.registry.release(entry);
+                this.registry.release(entry!);
             }
             return failure("blocked", error);
         } finally {
-            if (held) entry.pending--;
+            if (held) entry!.pending--;
         }
     }
 
-    authorizeOpen(sessionId, filePath) {
+    authorizeOpen(sessionId: string, filePath: string) {
         return this.grant(sessionId, filePath, false);
     }
 
-    authorizeSaveAs(sessionId, filePath, format) {
+    authorizeSaveAs(sessionId: string, filePath: string, format?: MarkdownFormat) {
         return this.grant(sessionId, filePath, true, format);
     }
 
-    async read({sessionId, target}) {
-        let entry;
+    async read({sessionId, target}: MarkdownReadRequest): Promise<MarkdownReadResult> {
+        let entry: MarkdownEntry | undefined;
         let reading = false;
         try {
             entry = this.registry.get(sessionId, target.handle);
@@ -165,19 +193,19 @@ class MarkdownDiskService {
             if (snapshot.identity !== entry.descriptor.identity) {
                 throw diskError("identity-changed", "Markdown target was replaced outside this session");
             }
-            const decoded = decodeMarkdown(snapshot.bytes);
+            const decoded = decodeMarkdown(snapshot.bytes!);
             // 读取结果是否成为新基线由会话版本校验决定，此处不推进宿主保存基线。
             return {kind: "read", content: decoded.content,
                 target: {...this.target(entry), baseline: snapshot.baseline, format: decoded.format}};
         } catch (error) {
             return failure("blocked", error);
         } finally {
-            if (reading) entry.pending--;
+            if (reading) entry!.pending--;
         }
     }
 
-    write(request) {
-        let entry;
+    write(request: MarkdownWriteRequest): Promise<MarkdownWriteResult> {
+        let entry: MarkdownEntry;
         try {
             entry = this.registry.get(request.sessionId, request.target.handle);
             if (entry.state === "indeterminate" || (entry.state === "reserved" && entry.reservationId !== request.reservationId)) {
@@ -198,11 +226,11 @@ class MarkdownDiskService {
         return pending;
     }
 
-    async writeSnapshot(entry, request) {
-        let temporaryPath;
-        let backupPath;
+    async writeSnapshot(entry: MarkdownEntry, request: MarkdownWriteRequest): Promise<MarkdownWriteResult> {
+        let temporaryPath: string | undefined;
+        let backupPath: string | undefined;
         let attempted = false;
-        let original;
+        let original: MarkdownSnapshot | undefined;
         try {
             if (entry.state === "indeterminate") throw new Error("Markdown write outcome is unresolved");
             const bytes = encodeMarkdown(request.content, request.target.format);
@@ -249,14 +277,16 @@ class MarkdownDiskService {
             entry.format = {...request.target.format};
             entry.written = true;
             return {kind: "committed", baseline: saved.baseline, durability: "local"};
-        } catch (error) {
-            if (attempted && original.identity === "missing" && error.code === "EEXIST") {
+        } catch (caught) {
+            const error = caught as MarkdownIOError;
+
+            if (attempted && original!.identity === "missing" && error.code === "EEXIST") {
                 return {kind: "conflict"};
             }
             if (attempted) {
                 try {
                     const current = await this.snapshot(entry.descriptor, true);
-                    if (current.baseline === original.baseline) return failure("blocked", error);
+                    if (current.baseline === original!.baseline) return failure("blocked", error);
                 } catch { /* 无法证实原文件未变更时必须保留占用。 */ }
                 entry.uncertain = {operationId: request.operationId, expectedBaseline: request.expectedBaseline,
                     hash: hash(encodeMarkdown(request.content, request.target.format)),
@@ -275,8 +305,8 @@ class MarkdownDiskService {
         }
     }
 
-    async reconcileWrite(request) {
-        let entry;
+    async reconcileWrite(request: MarkdownWriteRequest): Promise<MarkdownWriteResult> {
+        let entry: MarkdownEntry | undefined;
         let checking = false;
         try {
             entry = this.registry.get(request.sessionId, request.target.handle);
@@ -289,7 +319,7 @@ class MarkdownDiskService {
             entry.pending++;
             checking = true;
             const current = await this.snapshot(entry.descriptor, true);
-            let result;
+            let result: MarkdownWriteResult;
             if (current.bytes && hash(current.bytes) === uncertain.hash) {
                 await this.synchronizeDirectory(path.dirname(entry.descriptor.path));
                 this.registry.update(entry, current);
@@ -315,21 +345,23 @@ class MarkdownDiskService {
         } catch (error) {
             return failure(entry?.state === "indeterminate" ? "indeterminate" : "blocked", error);
         } finally {
-            if (checking) entry.pending--;
+            if (checking) entry!.pending--;
         }
     }
 
-    commitSaveAs({sessionId, target, reservationId, previousTarget}) {
+    commitSaveAs({sessionId, target, reservationId, previousTarget}: {
+        sessionId: string; target: MarkdownTarget; reservationId: string; previousTarget?: MarkdownTarget;
+    }): MarkdownTarget {
         return this.target(this.registry.commitSaveAs(sessionId, target.handle, reservationId, previousTarget?.handle));
     }
 
-    releaseSaveAs({sessionId, target, reservationId}) {
+    releaseSaveAs({sessionId, target, reservationId}: {sessionId: string; target: MarkdownTarget; reservationId: string}): boolean {
         return this.registry.releaseSaveAs(sessionId, target.handle, reservationId);
     }
 
-    closeSession(sessionId) {
+    closeSession(sessionId: string): boolean {
         return this.registry.closeSession(sessionId);
     }
 }
 
-module.exports = {MarkdownDiskService};
+export {MarkdownDiskService};

@@ -1,4 +1,4 @@
-const {test} = require("node:test");
+import {test} from "node:test";
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -19,7 +19,7 @@ const fixture = async (t, options = {}) => {
         await fs.rm(directory, {recursive: true, force: true, maxRetries: 3});
     });
     await tree.setRoot(root);
-    const location = nodeId => ({rootId: tree.root.id, generation: tree.generation, nodeId: nodeId || tree.root.id});
+    const location = (nodeId?: string) => ({rootId: tree.root.id, generation: tree.generation, nodeId: nodeId || tree.root.id});
     return {directory, root, config, tree, location};
 };
 

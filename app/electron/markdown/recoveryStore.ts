@@ -1,22 +1,33 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const crypto = require("node:crypto");
+import type {MarkdownIOError} from "./types";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as crypto from "node:crypto";
+import type {MarkdownDraft, MarkdownDraftWatermark, MarkdownSaveAsCommit, MarkdownTarget} from "../../src/markdown/contracts";
+import type {MarkdownHostData, MarkdownSaveAsPreparation} from "./types";
+
+type RecoveryLimits = {documentBytes: number; totalBytes: number; records: number};
+export type MarkdownRecoveryRecord = {
+    watermark: MarkdownDraftWatermark; cleared: boolean; updatedAt: number; draft?: MarkdownDraft;
+    intent?: MarkdownSaveAsPreparation & {hostData?: MarkdownHostData}; hostData?: MarkdownHostData;
+    binding?: MarkdownTarget; committedOperationId?: string;
+};
 
 // 草稿不自动过期或淘汰，达到容量上限时明确报错，由用户处理恢复记录。
 const RECOVERY_LIMITS = Object.freeze({documentBytes: 16 * 1024 * 1024, totalBytes: 256 * 1024 * 1024, records: 1024});
-const hash = value => crypto.createHash("sha256").update(value).digest("hex");
-const storeError = (code, message) => Object.assign(new Error(message), {code});
-const validId = value => typeof value === "string" && /^[\w:-]{1,256}$/.test(value);
-const validCounter = value => Number.isSafeInteger(value) && value >= 0;
-const validateStamp = value => {
+const hash = (value: string): string => crypto.createHash("sha256").update(value).digest("hex");
+const storeError = (code: string, message: string) => Object.assign(new Error(message), {code});
+const validId = (value: unknown): value is string => typeof value === "string" && /^[\w:-]{1,256}$/.test(value);
+const validCounter = (value: number): boolean => Number.isSafeInteger(value) && value >= 0;
+const validateStamp = (value: MarkdownDraftWatermark): void => {
     if (!value || !validId(value.sessionId) || !validCounter(value.targetGeneration) || !validCounter(value.revision)) {
         throw storeError("EINVAL", "Invalid Markdown recovery version");
     }
 };
-const compare = (a, b) => a.targetGeneration - b.targetGeneration || a.revision - b.revision;
-const stamp = value => ({sessionId: value.sessionId, targetGeneration: value.targetGeneration, revision: value.revision});
-const clone = value => JSON.parse(JSON.stringify(value));
-const validateDraft = (value, limits) => {
+const compare = (a: MarkdownDraftWatermark, b: MarkdownDraftWatermark): number => a.targetGeneration - b.targetGeneration || a.revision - b.revision;
+const stamp = (value: MarkdownDraftWatermark): MarkdownDraftWatermark =>
+    ({sessionId: value.sessionId, targetGeneration: value.targetGeneration, revision: value.revision});
+const clone = <Value>(value: Value): Value => JSON.parse(JSON.stringify(value));
+const validateDraft = (value: MarkdownDraft, limits: RecoveryLimits): void => {
     validateStamp(value);
     if (!validId(value.operationId) || typeof value.content !== "string" || !value.format ||
         typeof value.format.bom !== "boolean" || !["\n", "\r\n", "\r"].includes(value.format.newline)) {
@@ -28,28 +39,30 @@ const validateDraft = (value, limits) => {
 };
 
 // 每个进程仅创建一个宿主存储实例；单实例锁负责防止多个进程同时拥有此目录。
-const createMarkdownRecoveryStore = (directory, options = {}) => {
+const createMarkdownRecoveryStore = (directory: string, options: {fs?: typeof fs; limits?: Partial<RecoveryLimits>} = {}) => {
     if (!path.isAbsolute(directory)) {
         throw storeError("EINVAL", "Markdown recovery directory must be absolute");
     }
     const io = options.fs || fs;
     const limits = {...RECOVERY_LIMITS, ...options.limits};
-    let queue = Promise.resolve();
-    const enqueue = operation => {
+    let queue: Promise<unknown> = Promise.resolve();
+    const enqueue = <Result>(operation: () => Result | Promise<Result>): Promise<Result> => {
         const result = queue.then(operation);
         queue = result.catch(() => undefined);
         return result;
     };
-    const fileFor = sessionId => path.join(directory, hash(sessionId) + ".json");
-    const readFile = async file => {
-        let bytes;
+    const fileFor = (sessionId: string): string => path.join(directory, hash(sessionId) + ".json");
+    const readFile = async (file: string): Promise<MarkdownRecoveryRecord | undefined> => {
+        let bytes: Buffer;
         try {
             const stat = await io.stat(file);
             if (stat.size > limits.totalBytes) {
                 throw storeError("EFBIG", "Markdown recovery record limit exceeded");
             }
             bytes = await io.readFile(file);
-        } catch (error) {
+        } catch (caught) {
+            const error = caught as MarkdownIOError;
+
             if (error.code === "ENOENT") {
                 return undefined;
             }
@@ -60,7 +73,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
             if (envelope.version !== 1 || typeof envelope.payload !== "string" || hash(envelope.payload) !== envelope.checksum) {
                 throw new Error("checksum");
             }
-            const record = JSON.parse(envelope.payload);
+            const record: MarkdownRecoveryRecord = JSON.parse(envelope.payload);
             validateStamp(record.watermark);
             if (path.basename(file) !== path.basename(fileFor(record.watermark.sessionId)) ||
                 typeof record.cleared !== "boolean" || !Number.isSafeInteger(record.updatedAt)) {
@@ -84,17 +97,19 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
             throw storeError("ECORRUPT", "Invalid Markdown recovery record: " + path.basename(file));
         }
     };
-    const entries = async () => {
+    const entries = async (): Promise<string[]> => {
         try {
             return (await io.readdir(directory)).filter(name => /^[a-f0-9]{64}\.json$/.test(name));
-        } catch (error) {
+        } catch (caught) {
+            const error = caught as MarkdownIOError;
+
             if (error.code === "ENOENT") {
                 return [];
             }
             throw error;
         }
     };
-    const write = async record => {
+    const write = async (record: MarkdownRecoveryRecord): Promise<void> => {
         const file = fileFor(record.watermark.sessionId);
         const payload = JSON.stringify(record);
         const data = JSON.stringify({version: 1, checksum: hash(payload), payload});
@@ -113,7 +128,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
         }
         await io.mkdir(directory, {recursive: true, mode: 0o700});
         const temporary = file + "." + crypto.randomBytes(16).toString("hex") + ".tmp";
-        let handle;
+        let handle: fs.FileHandle | undefined;
         try {
             handle = await io.open(temporary, "wx", 0o600);
             await handle.writeFile(data, "utf8");
@@ -134,17 +149,17 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
             if (handle) {
                 await handle.close().catch(() => undefined);
             }
-            await io.unlink(temporary).catch(error => {
+            await io.unlink(temporary).catch((error: MarkdownIOError) => {
                 if (error.code !== "ENOENT") {
                     throw error;
                 }
             });
         }
     };
-    const fresh = value => ({watermark: stamp(value), cleared: false, updatedAt: Date.now()});
+    const fresh = (value: MarkdownDraftWatermark): MarkdownRecoveryRecord => ({watermark: stamp(value), cleared: false, updatedAt: Date.now()});
 
     return {
-        putDraft(draft, hostData) {
+        putDraft(draft: MarkdownDraft, hostData?: MarkdownHostData) {
             validateDraft(draft, limits);
             const snapshot = clone(draft);
             const metadata = hostData === undefined ? undefined : clone(hostData);
@@ -157,7 +172,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 await write({...current, ...fresh(snapshot), draft: snapshot, hostData: metadata ?? current?.hostData});
             });
         },
-        clearDraft(watermark) {
+        clearDraft(watermark: MarkdownDraftWatermark) {
             validateStamp(watermark);
             const snapshot = stamp(watermark);
             return enqueue(async () => {
@@ -169,7 +184,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 await write({...current, ...fresh(snapshot), cleared: true, draft: undefined});
             });
         },
-        prepareSaveAs(request, hostData) {
+        prepareSaveAs(request: MarkdownSaveAsPreparation, hostData?: MarkdownHostData) {
             const intent = clone({...request, hostData});
             const {operation} = intent;
             validateDraft({...operation, format: operation.target?.format}, limits);
@@ -193,7 +208,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 await write({...record, intent, updatedAt: Date.now()});
             });
         },
-        commitSaveAs(request, hostData) {
+        commitSaveAs(request: MarkdownSaveAsCommit & {receipt: MarkdownSaveAsCommit["receipt"] & {identity?: string}}, hostData?: MarkdownHostData) {
             const snapshot = clone(request);
             const metadata = hostData === undefined ? undefined : clone(hostData);
             return enqueue(async () => {
@@ -214,7 +229,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 const record = {
                     ...current,
                     watermark: {sessionId: operation.sessionId, targetGeneration: nextTargetGeneration, revision},
-                    draft: newerDraft ? {...current.draft, target, targetGeneration: nextTargetGeneration} : undefined,
+                    draft: newerDraft ? {...current.draft!, target, targetGeneration: nextTargetGeneration} : undefined,
                     cleared: !newerDraft,
                     binding: target,
                     hostData: metadata ?? current.intent.hostData,
@@ -225,7 +240,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 await write(record);
             });
         },
-        abortSaveAs({sessionId, operationId}) {
+        abortSaveAs({sessionId, operationId}: {sessionId: string; operationId: string}) {
             if (!validId(sessionId) || !validId(operationId)) {
                 throw storeError("EINVAL", "Invalid Markdown transaction identity");
             }
@@ -241,13 +256,13 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 await write({...current, intent: undefined, updatedAt: Date.now()});
             });
         },
-        read(sessionId) {
+        read(sessionId: string) {
             if (!validId(sessionId)) {
                 throw storeError("EINVAL", "Invalid Markdown session identity");
             }
             return enqueue(() => readFile(fileFor(sessionId)));
         },
-        finishSession(sessionId) {
+        finishSession(sessionId: string) {
             if (!validId(sessionId)) throw storeError("EINVAL", "Invalid Markdown session identity");
             return enqueue(async () => {
                 const record = await readFile(fileFor(sessionId));
@@ -255,7 +270,7 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
                 if (record?.cleared && !record.draft && !record.intent) await io.unlink(fileFor(sessionId));
             });
         },
-        discard(watermark) {
+        discard(watermark: MarkdownDraftWatermark) {
             validateStamp(watermark);
             const expected = stamp(watermark);
             return enqueue(async () => {
@@ -281,15 +296,17 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
         },
         list() {
             return enqueue(async () => {
-                const records = [];
-                const errors = [];
+                const records: MarkdownRecoveryRecord[] = [];
+                const errors: {file: string; code: string}[] = [];
                 for (const name of await entries()) {
                     try {
                         const record = await readFile(path.join(directory, name));
                         if (record?.draft || record?.intent) {
                             records.push(record);
                         }
-                    } catch (error) {
+                    } catch (caught) {
+                        const error = caught as MarkdownIOError;
+
                         errors.push({file: name, code: error.code || "EIO"});
                     }
                 }
@@ -299,4 +316,5 @@ const createMarkdownRecoveryStore = (directory, options = {}) => {
     };
 };
 
-module.exports = {createMarkdownRecoveryStore, RECOVERY_LIMITS};
+export {createMarkdownRecoveryStore, RECOVERY_LIMITS};
+export type MarkdownRecoveryStore = ReturnType<typeof createMarkdownRecoveryStore>;

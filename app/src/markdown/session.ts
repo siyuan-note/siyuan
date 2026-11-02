@@ -496,7 +496,7 @@ export class MarkdownSession {
 
     private async release(pending: PendingWrite): Promise<void> {
         await this.host.releaseSaveAs({
-            sessionId: this.sessionId, operationId: pending.request.operationId, reservationId: pending.reservation.id,
+            sessionId: this.sessionId, operationId: pending.request.operationId, reservationId: pending.reservation!.id,
         });
     }
 

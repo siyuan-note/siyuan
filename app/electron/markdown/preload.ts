@@ -1,19 +1,30 @@
-const {contextBridge, ipcRenderer, webUtils} = require("electron");
+import {contextBridge, ipcRenderer, webUtils} from "electron";
+import type {IpcRendererEvent} from "electron";
+import type {MarkdownBridge, MarkdownCommand} from "../../src/markdown/bridge";
+import type {MarkdownHost} from "../../src/markdown/contracts";
 
-const invoke = (action, payload) => ipcRenderer.invoke("siyuan-markdown:request", action, payload);
-const host = {};
-for (const method of ["read", "write", "reconcileWrite", "reserveSaveAs", "prepareSaveAs", "commitSaveAs",
-    "releaseSaveAs", "putDraft", "clearDraft", "releaseSession"]) {
-    host[method] = request => invoke("host:" + method, request);
-}
-contextBridge.exposeInMainWorld("siyuanMarkdown", Object.freeze({
-    window: Object.freeze({
+const invoke = <Result = void>(action: string, payload?: unknown): Promise<Result> =>
+    ipcRenderer.invoke("siyuan-markdown:request", action, payload);
+const host: MarkdownHost = {
+    read: request => invoke("host:read", request),
+    write: request => invoke("host:write", request),
+    reconcileWrite: request => invoke("host:reconcileWrite", request),
+    reserveSaveAs: request => invoke("host:reserveSaveAs", request),
+    prepareSaveAs: request => invoke("host:prepareSaveAs", request),
+    commitSaveAs: request => invoke("host:commitSaveAs", request),
+    releaseSaveAs: request => invoke("host:releaseSaveAs", request),
+    putDraft: request => invoke("host:putDraft", request),
+    clearDraft: request => invoke("host:clearDraft", request),
+    releaseSession: request => invoke("host:releaseSession", request),
+};
+const bridge: MarkdownBridge = {
+    window: Object.freeze<NonNullable<MarkdownBridge["window"]>>({
         state: () => invoke("window-state"),
         control: action => invoke("window-control", action),
         overlay: style => invoke("window-overlay", style),
     }),
     host: Object.freeze(host),
-    tree: Object.freeze({
+    tree: Object.freeze<MarkdownBridge["tree"]>({
         state: () => invoke("tree-state"),
         list: location => invoke("tree-list", location),
         chooseRoot: () => invoke("tree-choose-root"),
@@ -40,11 +51,12 @@ contextBridge.exposeInMainWorld("siyuanMarkdown", Object.freeze({
     state: state => invoke("state", state),
     respond: (id, accepted) => invoke("response", {id, accepted}),
     onCommand(listener) {
-        const callback = (_event, command) => listener(command);
+        const callback = (_event: IpcRendererEvent, command: MarkdownCommand) => listener(command);
         ipcRenderer.on("siyuan-markdown:command", callback);
         return () => ipcRenderer.removeListener("siyuan-markdown:command", callback);
     },
-}));
+};
+contextBridge.exposeInMainWorld("siyuanMarkdown", Object.freeze(bridge));
 
 // 只有真实系统拖放的 File 才能由 Electron 提取路径，普通脚本构造的文件没有路径权限。
 window.addEventListener("dragover", event => {
@@ -54,7 +66,7 @@ window.addEventListener("drop", event => {
     if (!event.dataTransfer?.files.length) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    const files = [...event.dataTransfer.files].map(file => webUtils.getPathForFile(file))
+    const files = Array.from(event.dataTransfer.files).map(file => webUtils.getPathForFile(file))
         .filter(file => /\.(md|markdown)$/i.test(file));
     if (files.length) invoke("drop", files).catch(() => undefined);
 }, true);

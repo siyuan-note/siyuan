@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const {test} = require("node:test");
+import {test} from "node:test";
 const {EventEmitter} = require("node:events");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -8,7 +8,7 @@ const {createMarkdownWindows, registerMarkdownSchemes} = require("./windows");
 const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 
-const fixture = async (t, options = {}) => {
+const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
     const appDirectory = path.join(directory, "app");
     const build = path.join(appDirectory, "stage", "build", "markdown");
@@ -72,7 +72,7 @@ const fixture = async (t, options = {}) => {
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
     });
-    const call = (window, action, payload, event = {}) => receive({sender: window.webContents,
+    const call = (window, action, payload?: unknown, event = {}) => receive({sender: window.webContents,
         senderFrame: window.webContents.mainFrame, ...event}, action, payload);
     t.after(async () => {
         for (const window of windows) {
@@ -124,7 +124,7 @@ test("independent windows are sandboxed, deny navigation and reject foreign brid
 });
 
 test("frameless platform controls stay scoped to their window and preserve close protection", async t => {
-    for (const platform of ["win32", "darwin", "linux"]) {
+    for (const platform of ["win32", "darwin", "linux"] as const) {
         const {manager, call} = await fixture(t, {platform});
         const window = await manager.open();
         assert.equal(window.options.title, "SiYuan");

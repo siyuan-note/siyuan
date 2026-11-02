@@ -91,7 +91,7 @@ const constants = {CB_GET_FOCUS: "focus", CB_GET_HL: "highlight", CB_GET_ALL: "a
 const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) => {
     const parser = createParser(URLClass);
     const requests: {url: string, id: string}[] = [];
-    const opens: {id: string, action: string[]}[] = [];
+    const opens: {id: string, action: string[], position?: string, keepCursor?: boolean, zoomIn?: boolean}[] = [];
     const events: {type: string, url: string}[] = [];
     const bazaar: {type: string, name: string, from: string}[] = [];
     const messages: string[] = [];
@@ -140,6 +140,49 @@ test("reported agent block links reach document navigation in both desktop and m
                 assert.deepEqual(context.events, [{type: "open-siyuan-url-block", url: uri}]);
                 assert.deepEqual(context.messages, []);
             }
+        }
+    }
+});
+
+test("mind map block links carry split and background modifiers through the shared link opener", () => {
+    const cases = [
+        {shiftKey: false, altKey: false, ctrl: false, position: undefined, keepCursor: false},
+        {shiftKey: false, altKey: true, ctrl: false, position: "right", keepCursor: false},
+        {shiftKey: true, altKey: false, ctrl: false, position: "bottom", keepCursor: false},
+        {shiftKey: true, altKey: true, ctrl: true, position: "bottom", keepCursor: false},
+        {shiftKey: false, altKey: true, ctrl: true, position: "right", keepCursor: false},
+        {shiftKey: false, altKey: false, ctrl: true, position: undefined, keepCursor: true},
+    ];
+    for (const mobile of [false, true]) {
+        for (const item of cases) {
+            const context = createDispatcher(URL, mobile);
+            const exports = {} as typeof import("../editor/openLink");
+            runInNewContext(compile("src/editor/openLink.ts", mobile), {
+                exports,
+                Lute: {UnEscapeHTMLStr: (value: string) => value},
+                window: {siyuan: {config: {fileTree: {}, editor: {}}}},
+                require: () => ({
+                    processSiYuanUri: context.exports.processSiYuanUri,
+                    isLocalPath: () => false,
+                    getAssetExtension: () => "",
+                    Constants: {SIYUAN_ASSETS_EXTS: [] as string[]},
+                    resolveAssetOpenAction: () => "app",
+                    resolveExecutableAssetOpenAction: () => "app",
+                    resolveAvailableAssetOpenAction: () => "app",
+                    getHostCapabilities: () => ({localFileSystem: false}),
+                    resolveOpenLinkEvent: (): undefined => undefined,
+                }),
+            });
+            const event = {shiftKey: item.shiftKey, altKey: item.altKey} as MouseEvent;
+            exports.openLink(context.app, `siyuan://blocks/${blockID}?focus=1&fullscreen=1`, event, item.ctrl);
+            assert.equal(context.opens.length, 1);
+            assert.equal(context.opens[0].position, mobile ? undefined : item.position);
+            assert.equal(context.opens[0].keepCursor, mobile ? undefined : item.keepCursor);
+            assert.deepEqual(Array.from(context.opens[0].action), ["focus", "highlight", "all"]);
+            if (!mobile) {
+                assert.equal(context.opens[0].zoomIn, true);
+            }
+            assert.equal(context.events[0].type, "open-siyuan-url-block");
         }
     }
 });

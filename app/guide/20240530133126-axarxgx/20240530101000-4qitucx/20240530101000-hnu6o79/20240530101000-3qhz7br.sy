@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261101195702"
+		"updated": "20261103001257"
 	},
 	"Children": [
 		{
@@ -2237,6 +2237,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "マインドマップ上のマウスホイールと 1 本指のスワイプは、初期状態では文書をスクロールします。デスクトップではマップをクリック、タッチ画面ではマップを 1 回タップするとキャンバスを操作できます。操作中は枠が強調表示され、ホイールまたはマウスの右ボタンを押したドラッグでキャンバスを移動します。"
+				}
+			]
+		},
+		{
+			"ID": "20261103001257-vjh9t0u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103001257-vjh9t0u",
+				"updated": "20261103001257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップでは、Alt（macOS では ⌥）を押しながらマインドマップ内のブロック参照または思源ブロックリンクをクリックすると、右側の分割ペインで開きます。Shift を押しながらクリックすると、下側の分割ペインで開きます。"
 				}
 			]
 		},

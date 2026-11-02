@@ -3650,6 +3650,7 @@
 		"458": "Bellek modeli isteği iptal edildi",
 		"459": "Geçerli anı özeti şu anda işlenemiyor. Lütfen daha sonra tekrar deneyin",
 		"460": "Üst-alt öğe ilişkileri döngü oluşturamaz veya öğenin kendisini içeremez [%s]",
-		"461": "Her öğenin yalnızca bir üst öğesi olabilir; [%s] için ilişkileri kontrol edin"
+		"461": "Her öğenin yalnızca bir üst öğesi olabilir; [%s] için ilişkileri kontrol edin",
+		"462": "Eşitleme duraklatılmış olarak kalır. Geri yüklenen verileri kontrol ettikten sonra Ayarlar - Hesap ve Eşitleme bölümünden yeniden etkinleştirin"
 	}
 }

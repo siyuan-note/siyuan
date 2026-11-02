@@ -3650,6 +3650,7 @@
 		"458": "Požiadavka na model pamäte bola zrušená",
 		"459": "Aktuálny prehľad spomienok teraz nemožno spracovať. Skúste to znova neskôr",
 		"460": "Vzťahy medzi nadradenými a podradenými položkami nesmú tvoriť cyklus ani obsahovať samotnú položku [%s]",
-		"461": "Každá položka môže mať iba jednu nadradenú položku; skontrolujte relácie pre [%s]"
+		"461": "Každá položka môže mať iba jednu nadradenú položku; skontrolujte relácie pre [%s]",
+		"462": "Synchronizácia zostáva pozastavená. Skontrolujte obnovené údaje a znova ju zapnite v Nastavenia - Účet a synchronizácia"
 	}
 }

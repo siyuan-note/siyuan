@@ -3650,6 +3650,7 @@
 		"458": "Verzoek aan het geheugenmodel geannuleerd",
 		"459": "Het huidige geheugenoverzicht kan nu niet worden verwerkt. Probeer het later opnieuw",
 		"460": "Ouder-kindrelaties mogen geen cyclus vormen of het item zelf bevatten [%s]",
-		"461": "Elk item kan maar één ouder hebben; controleer de relaties voor [%s]"
+		"461": "Elk item kan maar één ouder hebben; controleer de relaties voor [%s]",
+		"462": "Synchronisatie blijft gepauzeerd. Controleer de herstelde gegevens en schakel deze weer in via Instellingen - Account en synchronisatie"
 	}
 }

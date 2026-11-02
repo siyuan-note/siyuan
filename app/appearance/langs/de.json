@@ -3650,6 +3650,7 @@
 		"458": "Anfrage an das Gedächtnismodell abgebrochen",
 		"459": "Die aktuelle Erinnerungsübersicht kann derzeit nicht verarbeitet werden. Bitte versuchen Sie es später erneut",
 		"460": "Übergeordnete und untergeordnete Einträge dürfen keinen Zyklus bilden oder sich selbst enthalten [%s]",
-		"461": "Jeder Eintrag kann nur einen übergeordneten Eintrag haben; prüfe die Beziehungen für [%s]"
+		"461": "Jeder Eintrag kann nur einen übergeordneten Eintrag haben; prüfe die Beziehungen für [%s]",
+		"462": "Die Synchronisierung bleibt pausiert. Prüfen Sie die wiederhergestellten Daten und aktivieren Sie sie unter Einstellungen - Konto und Synchronisierung erneut"
 	}
 }

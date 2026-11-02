@@ -3650,6 +3650,7 @@
 		"458": "Memory model request was cancelled",
 		"459": "The current memory overview cannot be processed right now. Please try again later",
 		"460": "Parent-child relations cannot form a cycle or include the item itself [%s]",
-		"461": "Each item can have only one parent; check the relations for [%s]"
+		"461": "Each item can have only one parent; check the relations for [%s]",
+		"462": "Sync remains paused. After checking the restored data, re-enable it in Settings - Account & Sync"
 	}
 }

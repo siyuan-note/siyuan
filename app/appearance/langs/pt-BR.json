@@ -3650,6 +3650,7 @@
 		"458": "Solicitação ao modelo de memória cancelada",
 		"459": "O resumo atual das memórias não pode ser processado no momento. Tente novamente mais tarde",
 		"460": "As relações entre itens pais e filhos não podem formar ciclos nem incluir o próprio item [%s]",
-		"461": "Cada item pode ter apenas um pai; verifique as relações de [%s]"
+		"461": "Cada item pode ter apenas um pai; verifique as relações de [%s]",
+		"462": "A sincronização permanece pausada. Verifique os dados restaurados e reative-a em Configurações - Conta e sincronização"
 	}
 }

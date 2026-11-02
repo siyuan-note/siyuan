@@ -3650,6 +3650,7 @@
 		"458": "Permintaan model memori dibatalkan",
 		"459": "Ringkasan ingatan saat ini belum dapat diproses. Silakan coba lagi nanti",
 		"460": "Relasi induk-anak tidak boleh membentuk siklus atau menyertakan item itu sendiri [%s]",
-		"461": "Setiap item hanya boleh memiliki satu induk; periksa relasi untuk [%s]"
+		"461": "Setiap item hanya boleh memiliki satu induk; periksa relasi untuk [%s]",
+		"462": "Sinkronisasi tetap dijeda. Periksa data yang dipulihkan, lalu aktifkan kembali di Pengaturan - Akun dan Sinkronisasi"
 	}
 }

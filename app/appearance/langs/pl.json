@@ -3650,6 +3650,7 @@
 		"458": "Żądanie do modelu pamięci anulowano",
 		"459": "Nie można teraz przetworzyć bieżącego podsumowania wspomnień. Spróbuj ponownie później",
 		"460": "Relacje nadrzędne i podrzędne nie mogą tworzyć cyklu ani obejmować samego elementu [%s]",
-		"461": "Każdy element może mieć tylko jeden element nadrzędny; sprawdź relacje dla [%s]"
+		"461": "Każdy element może mieć tylko jeden element nadrzędny; sprawdź relacje dla [%s]",
+		"462": "Synchronizacja pozostaje wstrzymana. Sprawdź przywrócone dane i włącz ją ponownie w Ustawienia - Konto i synchronizacja"
 	}
 }

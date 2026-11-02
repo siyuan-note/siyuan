@@ -1427,20 +1427,19 @@ func checkoutRepo(id string) (err error) {
 
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
-		logging.LogErrorf("new repository failed: %s", err)
-		util.PushErrMsg(Conf.Language(141), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("open repository: %w", err), false)
 		return
 	}
 	if err = ensureAllSyncAssets(); err == nil {
 		err = ensureRepoSnapshotComplete(repo, id)
 	}
 	if err != nil {
-		util.PushErrMsg(err.Error(), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("prepare assets: %w", err), false)
 		return
 	}
 	checkoutTask, err := prepareRepoCheckout(repo)
 	if err != nil {
-		util.PushErrMsg(err.Error(), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("prepare editors: %w", err), false)
 		return err
 	}
 	defer checkoutTask.finish(repo, &err)
@@ -1457,35 +1456,22 @@ func checkoutRepo(id string) (err error) {
 	CloseWatchThemes()
 	defer WatchThemes()
 
-	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
-	syncEnabled := Conf.Sync.Load().Enabled
-	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-	if syncEnabled {
-		util.PushMsg(Conf.Language(134), 0)
-	}
-
-	// 回滚快照时默认为当前数据创建一个快照
-	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
-	if err = processAssetDownloadRecovery(repo, true); err != nil {
-		return
-	}
-	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
-		release()
-		fullReindexWithTxFlush(false)
-		if checkoutErr != nil {
-			util.ReloadUI()
-			return
+	err = withRepoCheckoutSyncPaused(repo, func() error {
+		if recoveryErr := processAssetDownloadRecovery(repo, true); recoveryErr != nil {
+			return fmt.Errorf("recover pending assets: %w", recoveryErr)
 		}
-		appendAgentRollbackEntries()
-		time.Sleep(time.Second)
-		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+		return checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
+			release()
+			fullReindexWithTxFlush(false)
+			if checkoutErr != nil {
+				util.ReloadUI()
+				return
+			}
+			appendAgentRollbackEntries()
+			time.Sleep(time.Second)
+			task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+		})
 	})
-	if err != nil {
-		logging.LogErrorf("checkout repository failed: %s", err)
-		util.PushClearProgress()
-		util.PushErrMsg(Conf.Language(141), 7000)
-		return
-	}
 
 	return
 }
@@ -1518,13 +1504,15 @@ func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) err
 	if _, err := repo.IndexWithOptions("Backup before checkout", false,
 		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},
 		dejavu.IndexOptions{FullCheck: true}); err != nil {
-		return err
+		return &dejavu.CheckoutError{Stage: "backup", Err: err}
 	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
-	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
-	refreshAppearancePackages(themes, icons)
-	refresh(err)
+	if err == nil || !repoCheckoutFailedBeforeApply(err) {
+		memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+		themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+		refreshAppearancePackages(themes, icons)
+		refresh(err)
+	}
 	return err
 }
 

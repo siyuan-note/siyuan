@@ -3650,6 +3650,7 @@
 		"458": "Requête au modèle de mémoire annulée",
 		"459": "Le résumé actuel des souvenirs ne peut pas être traité pour le moment. Veuillez réessayer plus tard",
 		"460": "Les relations parent-enfant ne peuvent pas former de cycle ni inclure l’élément lui-même [%s]",
-		"461": "Chaque élément ne peut avoir qu’un seul parent ; vérifiez les relations de [%s]"
+		"461": "Chaque élément ne peut avoir qu’un seul parent ; vérifiez les relations de [%s]",
+		"462": "La synchronisation reste en pause. Vérifiez les données restaurées, puis réactivez-la dans Paramètres - Compte et synchronisation"
 	}
 }

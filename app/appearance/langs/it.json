@@ -3650,6 +3650,7 @@
 		"458": "Richiesta al modello di memoria annullata",
 		"459": "Il riepilogo attuale dei ricordi non può essere elaborato al momento. Riprova più tardi",
 		"460": "Le relazioni padre-figlio non possono formare un ciclo o includere l’elemento stesso [%s]",
-		"461": "Ogni elemento può avere un solo padre; controlla le relazioni di [%s]"
+		"461": "Ogni elemento può avere un solo padre; controlla le relazioni di [%s]",
+		"462": "La sincronizzazione resta in pausa. Controlla i dati ripristinati e riattivala in Impostazioni - Account e sincronizzazione"
 	}
 }

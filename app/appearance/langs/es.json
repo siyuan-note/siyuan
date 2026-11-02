@@ -3650,6 +3650,7 @@
 		"458": "Se canceló la solicitud al modelo de memoria",
 		"459": "El resumen actual de recuerdos no se puede procesar en este momento. Inténtalo de nuevo más tarde",
 		"460": "Las relaciones entre elementos principales y secundarios no pueden formar ciclos ni incluir al propio elemento [%s]",
-		"461": "Cada elemento solo puede tener un elemento principal; revisa las relaciones de [%s]"
+		"461": "Cada elemento solo puede tener un elemento principal; revisa las relaciones de [%s]",
+		"462": "La sincronización sigue pausada. Compruebe los datos restaurados y vuelva a activarla en Ajustes - Cuenta y sincronización"
 	}
 }

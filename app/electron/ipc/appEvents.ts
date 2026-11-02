@@ -1,4 +1,4 @@
-// 应用级通道：窗口生命周期事件登记、连接管理窗口、macOS 应用菜单同步与立即退出。
+// 应用级通道：窗口生命周期事件登记、连接管理窗口、macOS 应用菜单同步与应用退出。
 import * as path from "node:path";
 import {pathToFileURL} from "node:url";
 import * as electron from "electron";
@@ -90,7 +90,7 @@ const registerAppEventIpc = (): void => {
     });
 
     electron.ipcMain.on(Channel.SIYUAN_FIRST_QUIT, () => {
-        electron.app.exit();
+        electron.app.quit();
     });
 };
 

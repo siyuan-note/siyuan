@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -43,14 +44,20 @@ func newWebDAVPathLocks() *webdavPathLocks {
 // lock 等到 paths 与正在写入的路径都不重叠后登记它们，返回释放函数。
 func (l *webdavPathLocks) lock(paths []string) (unlock func()) {
 	l.mu.Lock()
-	for l.overlaps(paths) {
+	var keys []string
+	for {
+		// 等待期间目录可能被移动，必须根据当前文件系统重新解析别名。
+		keys = webdavLockKeys(paths)
+		if !l.overlaps(keys) {
+			break
+		}
 		l.cond.Wait()
 	}
-	l.active = append(l.active, paths...)
+	l.active = append(l.active, keys...)
 	l.mu.Unlock()
 	return func() {
 		l.mu.Lock()
-		for _, p := range paths {
+		for _, p := range keys {
 			if i := slices.Index(l.active, p); 0 <= i {
 				l.active = slices.Delete(l.active, i, i+1)
 			}
@@ -76,11 +83,10 @@ func webdavPathsOverlap(a, b string) bool {
 	if len(a) > len(b) {
 		a, b = b, a
 	}
-	return a == b || "/" == a || strings.HasPrefix(b, a+"/")
+	return a == b || strings.HasPrefix(b, strings.TrimSuffix(a, "/")+"/")
 }
 
-// webdavWritePaths 返回写请求影响的路径：请求目标，COPY 与 MOVE 还有 Destination。路径按小写比较，
-// 大小写不敏感的文件系统上大小写不同的路径是同一资源，大小写敏感的系统上只是多等待。
+// webdavWritePaths 返回写请求影响的路径：请求目标，COPY 与 MOVE 还有 Destination。
 func webdavWritePaths(r *http.Request) []string {
 	paths := []string{webdavLockPath(r.URL.Path)}
 	if destination := r.Header.Get("Destination"); "" != destination {
@@ -92,7 +98,23 @@ func webdavWritePaths(r *http.Request) []string {
 }
 
 func webdavLockPath(p string) string {
-	return strings.ToLower(path.Clean("/" + strings.TrimPrefix(p, strings.TrimSuffix(webdavPrefix, "/"))))
+	return path.Clean("/" + strings.TrimPrefix(p, strings.TrimSuffix(webdavPrefix, "/")))
+}
+
+// webdavLockKeys 同时锁定请求位置和真实位置：目录移动要与经该目录访问的请求互斥，符号链接、目录联接和短文件名
+// 也要与真实目标互斥。尚未创建的文件按最长已存在父目录解析；保留原始大小写解析后再统一锁键的大小写。
+// 大小写敏感的文件系统上，大小写不同的资源可能多等待，但不会错过冲突。
+func webdavLockKeys(paths []string) (keys []string) {
+	for _, p := range paths {
+		absolute := filepath.Join(util.WorkspaceDir, filepath.FromSlash(p))
+		for _, name := range []string{absolute, util.ResolveLongestExistingParent(absolute)} {
+			key := strings.ToLower(filepath.ToSlash(filepath.Clean(name)))
+			if !slices.Contains(keys, key) {
+				keys = append(keys, key)
+			}
+		}
+	}
+	return
 }
 
 func newWebDAVHandler() http.Handler {

@@ -929,14 +929,18 @@ func (s *calDAVService) putObject(p string, body []byte, conditions *DAVConditio
 }
 
 // isSingleICalendarObject 判断第一个 iCalendar 对象之后只有空白。解码器在下一个对象缺少结尾时也报告 io.EOF，
-// 因此按行判断：VCALENDAR 不能嵌套，以 END: 开头的行也不是折叠的续行，第一个 END:VCALENDAR 行就是第一个对象的结尾。
+// 因此按逻辑行判断：先按 RFC 5545 §3.1 展开折行，第一个 END:VCALENDAR 之后只允许空白。
 func isSingleICalendarObject(body []byte) bool {
+	body = bytes.ReplaceAll(body, []byte("\r\n "), nil)
+	body = bytes.ReplaceAll(body, []byte("\r\n\t"), nil)
+	body = bytes.ReplaceAll(body, []byte("\n "), nil)
+	body = bytes.ReplaceAll(body, []byte("\n\t"), nil)
 	for line, rest, found := bytes.Cut(body, []byte("\n")); ; line, rest, found = bytes.Cut(rest, []byte("\n")) {
 		if bytes.EqualFold(bytes.TrimRight(line, "\r"), []byte("END:VCALENDAR")) {
 			return 0 == len(bytes.TrimSpace(rest))
 		}
 		if !found {
-			return true
+			return false
 		}
 	}
 }

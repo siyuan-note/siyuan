@@ -24,6 +24,9 @@ func TestCalDAVPutValidation(t *testing.T) {
 		return append(append([]string{"BEGIN:VEVENT", "UID:" + uid, "DTSTAMP:20261101T000000Z", "DTSTART:20261102T090000Z"}, extra...), "END:VEVENT")
 	}
 	recurrence := append(event("series", "RRULE:FREQ=DAILY;COUNT=3"), event("series", "RECURRENCE-ID:20261103T090000Z")...)
+	foldedEvent := func(uid, fold string) string {
+		return strings.Replace(davTestEvent(uid, uid), "END:VCALENDAR", "END:VCAL"+fold+"ENDAR", 1)
+	}
 	for _, test := range []struct {
 		name, target, body string
 		status             int
@@ -40,6 +43,14 @@ func TestCalDAVPutValidation(t *testing.T) {
 		{"two calendar objects", "/two.ics", davTestEvent("first", "First") + davTestEvent("second", "Second"), http.StatusConflict, "valid-calendar-data"},
 		{"trailing data", "/trailing.ics", davTestEvent("trailing", "T") + "BEGIN:VEVENT\r\n", http.StatusConflict, "valid-calendar-data"},
 		{"trailing blank lines", "/blank.ics", davTestEvent("blank", "B") + "\r\n\r\n", http.StatusCreated, ""},
+		{"folded calendar end", "/folded.ics", foldedEvent("folded", "\r\n "), http.StatusCreated, ""},
+		{"tab-folded calendar end", "/tab-folded.ics", foldedEvent("tab-folded", "\r\n\t"), http.StatusCreated, ""},
+		{"LF-folded calendar end", "/lf-folded.ics", foldedEvent("lf-folded", "\n "), http.StatusCreated, ""},
+		{"folded end before another calendar", "/folded-two.ics", foldedEvent("folded-first", "\r\n ") + davTestEvent("folded-second", "Second"), http.StatusConflict, "valid-calendar-data"},
+		{"two folded calendar ends", "/both-folded.ics", foldedEvent("both-first", "\r\n ") + foldedEvent("both-second", "\r\n\t"), http.StatusConflict, "valid-calendar-data"},
+		{"folded end before trailing data", "/folded-trailing.ics", foldedEvent("folded-trailing", "\r\n ") + "BEGIN:VEVENT\r\n", http.StatusConflict, "valid-calendar-data"},
+		{"folded end with blank lines", "/folded-blank.ics", foldedEvent("folded-blank", "\r\n\t") + "\r\n\r\n", http.StatusCreated, ""},
+		{"multiple calendars cannot overwrite", "/existing.ics", foldedEvent("existing", "\r\n ") + davTestEvent("extra", "Extra"), http.StatusConflict, "valid-calendar-data"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			response := davTestRequest(calDAV, http.MethodPut, calendar+test.target, davICalendarHeader, test.body)
@@ -49,6 +60,12 @@ func TestCalDAVPutValidation(t *testing.T) {
 			if 400 <= test.status && test.target != "/existing.ics" {
 				if get := davTestRequest(calDAV, http.MethodGet, calendar+test.target, nil, ""); get.Code != http.StatusNotFound {
 					t.Fatalf("rejected PUT created the resource: GET status = %d", get.Code)
+				}
+			}
+			if test.name == "multiple calendars cannot overwrite" {
+				get := davTestRequest(calDAV, http.MethodGet, calendar+test.target, nil, "")
+				if get.Code != http.StatusOK || !strings.Contains(get.Body.String(), "SUMMARY:Updated") {
+					t.Fatalf("rejected PUT changed existing object: status = %d; body = %s", get.Code, get.Body.String())
 				}
 			}
 		})

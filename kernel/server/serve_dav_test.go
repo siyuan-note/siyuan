@@ -12,11 +12,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 )
 
 // TestWebDAVPreconditions 验证 WebDAV 写请求按 RFC 9110 §13 执行 If-Match、If-None-Match 与 If-Unmodified-Since。
@@ -102,6 +105,8 @@ func TestWebDAVWriteConcurrency(t *testing.T) {
 	dir := "/webdav/data/" + webdavGuardNormalBoxID
 	uploaded := filepath.Join(ws, "data", webdavGuardNormalBoxID, "upload.bin")
 	reader, writer := io.Pipe()
+	defer reader.Close()
+	defer writer.Close()
 	upload := serve(http.MethodPut, dir+"/upload.bin", nil, reader)
 	if _, err := writer.Write([]byte("partial")); err != nil {
 		t.Fatal(err)
@@ -153,6 +158,204 @@ func TestWebDAVWriteConcurrency(t *testing.T) {
 	}
 }
 
+func newWebDAVDirectoryAlias(t *testing.T, alias, target string) {
+	t.Helper()
+	if "windows" == runtime.GOOS {
+		if output, err := exec.Command("cmd", "/d", "/c", "mklink", "/J", alias, target).CombinedOutput(); err != nil {
+			t.Fatalf("create directory junction: %s: %v", output, err)
+		}
+	} else if err := os.Symlink(target, alias); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Remove(alias) })
+}
+
+// TestWebDAVWriteAliases 验证目录别名下的 PUT、COPY/MOVE 目标和祖先删除都等待真实路径上的上传，
+// 条件 PUT 在上传完成后重新检查 ETag，拒绝过时写入并保持上传内容完整。
+func TestWebDAVWriteAliases(t *testing.T) {
+	for _, method := range []string{http.MethodPut, MethodCopy, MethodMove, http.MethodDelete} {
+		t.Run(method, func(t *testing.T) {
+			ws := newWebDAVGuardWorkspace(t)
+			realDir := filepath.Join(ws, "data", webdavGuardNormalBoxID)
+			newWebDAVDirectoryAlias(t, filepath.Join(ws, "Alias"), realDir)
+			if err := os.Mkdir(filepath.Join(realDir, "nested"), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(ws, "source.bin"), []byte("replacement"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			h := newWebDAVHandler()
+			reader, writer := io.Pipe()
+			upload := make(chan int, 1)
+			uploadFinished := make(chan struct{})
+			t.Cleanup(func() {
+				_ = writer.Close()
+				_ = reader.Close()
+				select {
+				case <-uploadFinished:
+				case <-time.After(5 * time.Second):
+					t.Error("upload cleanup stalled")
+				}
+			})
+			go func() {
+				defer close(uploadFinished)
+				response := httptest.NewRecorder()
+				h.ServeHTTP(response, httptest.NewRequest(http.MethodPut, "/webdav/data/"+webdavGuardNormalBoxID+"/nested/upload.bin", reader))
+				upload <- response.Code
+			}()
+			if _, err := writer.Write([]byte("partial")); err != nil {
+				t.Fatal(err)
+			}
+			file := filepath.Join(realDir, "nested", "upload.bin")
+			var info os.FileInfo
+			for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+				info, _ = os.Stat(file)
+				if info != nil && info.Size() == 7 {
+					break
+				}
+				if time.Now().After(deadline) {
+					t.Fatal("upload did not start")
+				}
+			}
+			target := "/webdav/Alias/nested/upload.bin"
+			header := map[string]string{}
+			want := http.StatusNoContent
+			switch method {
+			case http.MethodPut:
+				header["If-Match"] = fmt.Sprintf(`"%x%x"`, info.ModTime().UnixNano(), info.Size())
+				want = http.StatusPreconditionFailed
+			case MethodCopy, MethodMove:
+				header["Destination"] = target
+				header["Overwrite"] = "T"
+				target = "/webdav/source.bin"
+			case http.MethodDelete:
+				target = "/webdav/Alias/nested"
+			}
+			second := make(chan int, 1)
+			go func() { second <- serveWebDAVTestRequest(h, method, target, header, "replacement").Code }()
+			select {
+			case status := <-second:
+				t.Fatalf("%s through alias finished during upload: status = %d", method, status)
+			case <-time.After(300 * time.Millisecond):
+			}
+			if _, err := writer.Write([]byte("-tail")); err != nil {
+				t.Fatal(err)
+			}
+			if err := writer.Close(); err != nil {
+				t.Fatal(err)
+			}
+			for _, result := range []struct {
+				name string
+				done <-chan int
+				want int
+			}{{"upload", upload, http.StatusCreated}, {"alias request", second, want}} {
+				select {
+				case status := <-result.done:
+					if status != result.want {
+						t.Fatalf("%s: status = %d, want %d", result.name, status, result.want)
+					}
+				case <-time.After(5 * time.Second):
+					t.Fatalf("%s stalled", result.name)
+				}
+			}
+			data, err := os.ReadFile(file)
+			if method == http.MethodDelete {
+				if !os.IsNotExist(err) {
+					t.Fatalf("deleted directory remains: %v", err)
+				}
+			} else {
+				content := "replacement"
+				if method == http.MethodPut {
+					content = "partial-tail"
+				}
+				if err != nil || string(data) != content {
+					t.Fatalf("file content = %q, want %q; err = %v", data, content, err)
+				}
+			}
+		})
+	}
+}
+
+// TestWebDAVAliasLockKeys 验证别名下尚未创建的文件按真实父目录互斥，同时保留别名自身的目录移动锁。
+func TestWebDAVAliasLockKeys(t *testing.T) {
+	ws := newWebDAVGuardWorkspace(t)
+	realDir := filepath.Join(ws, "MixedCase")
+	if err := os.Mkdir(realDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	newWebDAVDirectoryAlias(t, filepath.Join(ws, "Alias"), realDir)
+	locks := newWebDAVPathLocks()
+	unlock := locks.lock([]string{"/Alias/missing/file.bin"})
+	defer unlock()
+	for _, p := range []string{"/MixedCase/missing/file.bin", "/MixedCase", "/Alias"} {
+		if !locks.overlaps(webdavLockKeys([]string{p})) {
+			t.Errorf("%s does not overlap the active alias write", p)
+		}
+	}
+	if locks.overlaps(webdavLockKeys([]string{"/MixedCase/other.bin"})) {
+		t.Fatal("unrelated file overlaps the alias write")
+	}
+	t.Run("short parent name", func(t *testing.T) {
+		short := filepath.Base(testutil.ShortPath(t, realDir))
+		if !locks.overlaps(webdavLockKeys([]string{"/" + short + "/missing/file.bin"})) {
+			t.Fatal("short parent name does not overlap the alias write")
+		}
+	})
+}
+
+// TestWebDAVWaitingAliasResolvesAgain 验证等待期间目录别名被重新指向后，等待者按新目标参与互斥。
+func TestWebDAVWaitingAliasResolvesAgain(t *testing.T) {
+	ws := newWebDAVGuardWorkspace(t)
+	first, second := filepath.Join(ws, "first"), filepath.Join(ws, "second")
+	for _, dir := range []string{first, second} {
+		if err := os.Mkdir(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	alias := filepath.Join(ws, "Alias")
+	newWebDAVDirectoryAlias(t, alias, first)
+	locks := newWebDAVPathLocks()
+	releaseAlias := locks.lock([]string{"/Alias"})
+	defer func() {
+		if releaseAlias != nil {
+			releaseAlias()
+		}
+	}()
+	acquired := make(chan func(), 1)
+	go func() { acquired <- locks.lock([]string{"/Alias/file.bin"}) }()
+	assertWaiting := func() {
+		t.Helper()
+		select {
+		case release := <-acquired:
+			release()
+			t.Fatal("alias write did not wait for the overlapping write")
+		case <-time.After(300 * time.Millisecond):
+		}
+	}
+	assertWaiting()
+	if err := os.Remove(alias); err != nil {
+		t.Fatal(err)
+	}
+	newWebDAVDirectoryAlias(t, alias, second)
+	releaseSecond := locks.lock([]string{"/second/file.bin"})
+	defer func() {
+		if releaseSecond != nil {
+			releaseSecond()
+		}
+	}()
+	releaseAlias()
+	releaseAlias = nil
+	assertWaiting()
+	releaseSecond()
+	releaseSecond = nil
+	select {
+	case release := <-acquired:
+		release()
+	case <-time.After(5 * time.Second):
+		t.Fatal("alias write stalled after both overlapping writes finished")
+	}
+}
+
 // TestWebDAVPathsOverlap 验证写请求的路径锁：相同路径、祖先与后代互斥，前缀相同的兄弟路径不互斥，大小写不同的路径视为相同。
 func TestWebDAVPathsOverlap(t *testing.T) {
 	for _, test := range []struct {
@@ -162,6 +365,7 @@ func TestWebDAVPathsOverlap(t *testing.T) {
 		{"/data/a", "/data/a", true},
 		{"/data", "/data/a/b.sy", true},
 		{"/", "/data", true},
+		{"c:/", "c:/data", true},
 		{"/data/a", "/data/ab", false},
 		{"/data/a", "/data/b", false},
 	} {
@@ -174,7 +378,7 @@ func TestWebDAVPathsOverlap(t *testing.T) {
 	}
 	request := httptest.NewRequest("MOVE", "/webdav/Data/A.sy", nil)
 	request.Header.Set("Destination", "http://localhost/webdav/data/b/../c.sy")
-	if got := webdavWritePaths(request); 2 != len(got) || "/data/a.sy" != got[0] || "/data/c.sy" != got[1] {
+	if got := webdavWritePaths(request); 2 != len(got) || "/Data/A.sy" != got[0] || "/data/c.sy" != got[1] {
 		t.Fatalf("write paths = %v", got)
 	}
 }

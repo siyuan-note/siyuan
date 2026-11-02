@@ -916,8 +916,9 @@ func (s *calDAVService) deleteCollection(p string, conditions *DAVConditions) er
 }
 
 func (s *calDAVService) putObject(p string, body []byte, conditions *DAVConditions) (*davObject, bool, error) {
+	// 日历对象资源只能是一个 iCalendar 对象（RFC 4791 §4.1），之后的对象或数据写入时会丢失，因此视为无效数据
 	data, err := ical.NewDecoder(bytes.NewReader(body)).Decode()
-	if err != nil {
+	if err != nil || !isSingleICalendarObject(body) {
 		return nil, false, calDAVPrecondition("valid-calendar-data")
 	}
 	object, created, err := s.store.PutCalendarObject(p, data, conditions)
@@ -925,6 +926,19 @@ func (s *calDAVService) putObject(p string, body []byte, conditions *DAVConditio
 		return nil, false, davError(err, calDavWriteErrorCodes)
 	}
 	return calendarDAVObject(object), created, nil
+}
+
+// isSingleICalendarObject 判断第一个 iCalendar 对象之后只有空白。解码器在下一个对象缺少结尾时也报告 io.EOF，
+// 因此按行判断：VCALENDAR 不能嵌套，以 END: 开头的行也不是折叠的续行，第一个 END:VCALENDAR 行就是第一个对象的结尾。
+func isSingleICalendarObject(body []byte) bool {
+	for line, rest, found := bytes.Cut(body, []byte("\n")); ; line, rest, found = bytes.Cut(rest, []byte("\n")) {
+		if bytes.EqualFold(bytes.TrimRight(line, "\r"), []byte("END:VCALENDAR")) {
+			return 0 == len(bytes.TrimSpace(rest))
+		}
+		if !found {
+			return true
+		}
+	}
 }
 
 func (s *calDAVService) deleteObject(p string, conditions *DAVConditions) error {

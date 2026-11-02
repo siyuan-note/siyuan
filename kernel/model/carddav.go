@@ -926,11 +926,12 @@ func (s *cardDAVService) deleteCollection(p string, conditions *DAVConditions) e
 }
 
 func (s *cardDAVService) putObject(p string, body []byte, conditions *DAVConditions) (*davObject, bool, error) {
-	card, err := vcard.NewDecoder(bytes.NewReader(body)).Decode()
-	if err != nil {
+	// 联系人资源只能包含一张 vCard（RFC 6352 §5.1），多出的卡片写入时会丢失，因此视为无效数据
+	cards, err := decodeCards(body)
+	if err != nil || 1 != len(cards) {
 		return nil, false, cardDAVPrecondition("valid-address-data")
 	}
-	object, created, err := s.store.PutAddressObject(p, card, conditions)
+	object, created, err := s.store.PutAddressObject(p, cards[0], conditions)
 	if err != nil {
 		return nil, false, davError(err, cardDavWriteErrorCodes)
 	}

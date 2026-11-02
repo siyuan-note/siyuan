@@ -181,5 +181,3 @@ test("原生窗口和页面使用同一实际主题颜色，非法颜色使用�
         assert.equal(params.get("windowThemeMode"), dark ? "dark" : "light");
     }
 });
-
-

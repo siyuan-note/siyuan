@@ -24,6 +24,10 @@ const isMarkdownLaunchRequested = (argv: string[]): boolean =>
  */
 const detectMarkdownStartup = (argv: string[]): void => {
     state.markdown.startup = isMarkdownLaunchRequested(argv);
+    // 初始命令行请求必须先入队，避免 ready 前的文件打开事件覆盖它。
+    if (state.markdown.startup) {
+        state.markdown.pendingLaunches.push({argv: [...argv], cwd: process.cwd()});
+    }
 };
 
 // 自定义协议只能在 app ready 之前登记，因此与启动判定一起在入口早期完成。
@@ -101,12 +105,6 @@ const createMarkdownEditors = (): void => {
         quit: () => app.quit(),
         log: writeLog,
     });
-    // 启动判定先于窗口创建：命令行与 macOS 文件事件可能在 ready 之前就已入队。
-    if (state.markdown.startup && state.markdown.pendingLaunches.length === 0) {
-        state.markdown.pendingLaunches.push({
-            argv: process.argv.slice(app.isPackaged ? 1 : 2), cwd: process.cwd(),
-        });
-    }
 };
 
 // 退出前请求所有 Markdown 窗口保存；取消时返回 false，调用方必须放弃本次退出。

@@ -186,4 +186,3 @@ const registerCommandIpc = (): void => {
 };
 
 export {registerCommandIpc};
-

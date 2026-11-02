@@ -973,4 +973,3 @@ test("TCP diagnosis does not delay boot failure or run on other platforms", asyn
         assert.equal(commands, platform === "win32" ? 1 : 0);
     }
 });
-

@@ -125,4 +125,3 @@ test("DevTools shortcut falls back to the physical key and tolerates a missing k
     assert.equal(isDevToolsShortcut({...others, code: "KeyJ"} as never, "win32"), false);
     assert.equal(isDevToolsShortcut({...others} as never, "win32"), false);
 });
-

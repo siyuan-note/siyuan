@@ -124,5 +124,3 @@ test("保存失败或窗口无响应时取消退出并清理监听器", async (t
         assert.equal(ipc.listenerCount("siyuan-window-workspace-saved"), 0);
     }
 });
-
-

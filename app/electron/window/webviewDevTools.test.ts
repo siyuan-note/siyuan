@@ -217,7 +217,3 @@ test("main installs the generic hook while retaining the window-open policy", ()
     assert.equal(guest.windowOpenHandler({url: "https://example.com"}).action, "deny");
     assert.deepEqual(opened, ["https://example.com"]);
 });
-
-
-
-

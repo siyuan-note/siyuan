@@ -60,4 +60,3 @@ test("registerProtocolClient ignores development arguments outside electron main
     });
     assert.deepStrictEqual(app.calls, [["set", "siyuan"]]);
 });
-

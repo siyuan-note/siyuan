@@ -74,4 +74,3 @@ test("main and detached windows enable local webviews and disable remote webview
         assert.equal(preferences.session, mode === "remote" ? remoteSession : undefined);
     }
 });
-

@@ -451,5 +451,3 @@ for (const failure of ["did-fail-load", "render-process-gone"]) {
         assert.equal(open({token: "retry-token"}).create, true);
     });
 }
-
-

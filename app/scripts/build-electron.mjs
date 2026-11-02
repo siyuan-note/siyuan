@@ -43,13 +43,24 @@ const report = (error, stats) => {
     console.log(stats.toString({all: false, assets: true, timings: true}));
 };
 
-if (process.argv.includes("--watch")) {
-    copyAssets();
-    webpack(config).watch({}, report);
-} else {
+const watch = process.argv.includes("--watch");
+if (!watch) {
     fs.rmSync(outputDir, {recursive: true, force: true});
-    copyAssets();
-    const compiler = webpack(config);
+}
+copyAssets();
+const compiler = webpack(config);
+// 复制资源不参与模块导入，需显式登记才能触发监听重建。
+compiler.hooks.afterCompile.tap("ElectronRuntimeAssets", compilation => {
+    for (const name of [...rendererScripts, ...staticAssets]) {
+        compilation.fileDependencies.add(path.join(staticSourceDir, name));
+    }
+    for (const name of markdownRuntimeAssets) {
+        compilation.fileDependencies.add(path.join(markdownSourceDir, name));
+    }
+});
+if (watch) {
+    compiler.watch({}, report);
+} else {
     compiler.run((error, stats) => {
         report(error, stats);
         compiler.close(() => {});

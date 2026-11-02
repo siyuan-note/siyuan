@@ -115,4 +115,3 @@ test("failed native caption updates do not poison later retries", () => {
     assert.equal(updateTitleBarOverlay(win, style, "win32"), true);
     assert.equal(calls, 3);
 });
-

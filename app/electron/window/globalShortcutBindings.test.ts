@@ -95,4 +95,3 @@ test("recording suspends all workspace shortcuts and restores their bindings aft
     f.update(0, ["a"]);
     assert.deepEqual([...f.callbacks.keys()].sort(), ["A", "C"]);
 });
-

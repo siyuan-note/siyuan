@@ -109,5 +109,3 @@ test("异步退出全屏后才恢复边界和全屏状态", async () => {
     assert.deepEqual(f.calls, [["fullscreen", false], {x: 100, y: 80, width: 900, height: 700}, ["fullscreen", true]]);
     assert.equal(f.window.listenerCount("leave-full-screen"), 0);
 });
-
-

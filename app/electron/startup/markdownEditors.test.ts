@@ -35,6 +35,67 @@ const setup = (t: any, windows?: MarkdownWindows) => {
     return editors;
 };
 
+const setupStartup = (t: any, argv: string[], windows: MarkdownWindows) => {
+    const editors = setup(t);
+    const originalArgv = process.argv;
+    process.argv = ["electron", "main.ts", ...argv];
+    t.after(() => { process.argv = originalArgv; });
+    runtime.state.markdown.windows = undefined;
+    mockElectron(t, {app: {...require("electron").app, quit: () => undefined}});
+    t.mock.method(require("../markdown/windows"), "createMarkdownWindows", () => windows);
+    return editors;
+};
+
+test("startup preserves the command-line request before early file-open events", async (t: any) => {
+    const launches: {argv: string[]; cwd: string}[] = [];
+    const windows = managerStub({handleLaunch: async (argv, cwd) => {
+        launches.push({argv: [...argv], cwd});
+        return true;
+    }});
+    const argv = ["--markdown=first.md"];
+    const cwd = process.cwd();
+    const editors = setupStartup(t, argv, windows);
+    editors.detectMarkdownStartup(argv);
+    argv[0] = "--markdown=replaced.md";
+    editors.acceptMarkdownFileOpen();
+    editors.routeMarkdownLaunch(["--markdown=second.md"], "finder");
+    editors.routeMarkdownLaunch(["--markdown=third.md"], "finder");
+    editors.createMarkdownEditors();
+    editors.drainMarkdownLaunches();
+    await runtime.state.markdown.launchTask;
+
+    assert.deepEqual(launches, [
+        {argv: ["--markdown=first.md"], cwd},
+        {argv: ["--markdown=second.md"], cwd: "finder"},
+        {argv: ["--markdown=third.md"], cwd: "finder"},
+    ]);
+    assert.deepEqual(runtime.state.markdown.pendingLaunches, []);
+});
+
+test("startup opens the command-line request only once", async (t: any) => {
+    const launches: string[][] = [];
+    const windows = managerStub({handleLaunch: async argv => { launches.push([...argv]); return true; }});
+    const editors = setupStartup(t, ["--markdown"], windows);
+    editors.detectMarkdownStartup(["--markdown"]);
+    editors.createMarkdownEditors();
+    editors.drainMarkdownLaunches();
+    await runtime.state.markdown.launchTask;
+    assert.deepEqual(launches, [["--markdown"]]);
+});
+
+test("early file-open startup does not add a blank command-line editor", async (t: any) => {
+    const launches: string[][] = [];
+    const windows = managerStub({handleLaunch: async argv => { launches.push([...argv]); return true; }});
+    const editors = setupStartup(t, [], windows);
+    editors.detectMarkdownStartup([]);
+    editors.acceptMarkdownFileOpen();
+    editors.routeMarkdownLaunch(["--markdown=opened.md"]);
+    editors.createMarkdownEditors();
+    editors.drainMarkdownLaunches();
+    await runtime.state.markdown.launchTask;
+    assert.deepEqual(launches, [["--markdown=opened.md"]]);
+});
+
 test("queued file launches run one at a time and the process quits only after the queue drains", async (t: any) => {
     const events: string[] = [];
     let releaseFirst: (() => void) | undefined;
@@ -84,10 +145,12 @@ test("startup detection follows the file entry rather than any positional path",
     const editors = setup(t);
     editors.detectMarkdownStartup(["notes.md"]);
     assert.equal(runtime.state.markdown.startup, true);
-    runtime.state.markdown.startup = false;
+    assert.deepEqual(runtime.state.markdown.pendingLaunches, [{argv: ["notes.md"], cwd: process.cwd()}]);
+    runtime.resetRuntimeState();
     // 工作空间参数里的 .md 不构成文件入口。
     editors.detectMarkdownStartup(["--workspace=/notes.md"]);
     assert.equal(runtime.state.markdown.startup, false);
+    assert.deepEqual(runtime.state.markdown.pendingLaunches, []);
 });
 
 test("quit coordination degrades to a no-op before the editor runtime exists", async (t: any) => {

@@ -1,4 +1,4 @@
-import {test} from "node:test";
+import {test, afterEach} from "node:test";
 import {EventEmitter} from "node:events";
 import type {createKernelBoot} from "./kernelBoot";
 import type {App} from "electron";
@@ -7,6 +7,9 @@ import {paths as runtimePaths, state as runtimeState, resetRuntimeState, configu
 import {mockElectron, resetElectronStub} from "../fixtures/electronStub";
 const assert = require("node:assert/strict");
 const path = require("node:path");
+const actualPlatform = Object.getOwnPropertyDescriptor(process, "platform");
+
+afterEach(() => Object.defineProperty(process, "platform", actualPlatform));
 
 // 被测模块在测试内 require：它从 electron 取值，首次加载时必须已经换成替身。
 const kernelBootModule = () => require("./kernelBoot");
@@ -238,6 +241,8 @@ const setup = (t: any, progress, options: {
                 {code: 0, data: {progress: result}}};
         }},
     };
+    // 共享模块直接读取 process.platform，须与注入的内核启动平台一致。
+    Object.defineProperty(process, "platform", {value: context.process.platform, configurable: true});
     // 夹具保持扁平字段便于断言，这些字段桥接回共享运行期状态，模块与用例读写同一份数据。
     resetRuntimeState();
     resetElectronStub();
@@ -332,7 +337,7 @@ test("a throwing attempt ends the startup instead of waiting forever", async (t)
     assert.equal(state.context.localKernelStartups.size, 0);
 });
 
-test("repeated requests reuse startup before port allocation and during kernel boot", async (t) => {
+test("repeated Windows requests reuse startup before port allocation and during kernel boot", {timeout: 5000}, async (t) => {
     let allocate;
     let version;
     const state = setup(t, () => 100, {
@@ -356,7 +361,7 @@ test("repeated requests reuse startup before port allocation and during kernel b
     assert.equal(state.windows.length, 1);
 });
 
-test("a main window awaiting frontend initialization also prevents duplicate startup", async (t) => {
+test("a Windows main window awaiting frontend initialization also prevents duplicate startup", async (t) => {
     const state = setup(t, () => 100);
     state.context.workspaces.push({workspaceDir: path.resolve("workspace"), browserWindow: state.window});
     assert.equal(await state.run("WORKSPACE"), undefined);
@@ -364,6 +369,24 @@ test("a main window awaiting frontend initialization also prevents duplicate sta
     assert.equal(state.spawns(), 0);
     assert.deepEqual(state.events, ["show-existing"]);
 });
+
+for (const platform of ["linux", "darwin"]) {
+    test("differently cased workspace paths remain distinct on " + platform, async t => {
+        let port = 6805;
+        const state = setup(t, () => 100, {platform, allocatePort: async () => ++port});
+        assert.deepEqual(await Promise.all([state.run("workspace"), state.run("WORKSPACE")]), [6806, 6807]);
+        assert.equal(state.windows.length, 2);
+        assert.equal(state.spawns(), 2);
+        assert.equal(state.events.includes("show-existing"), false);
+
+        const opened = setup(t, () => 100, {platform});
+        opened.context.workspaces.push({workspaceDir: path.resolve("workspace"), browserWindow: opened.window});
+        assert.equal(await opened.run("WORKSPACE"), 6806);
+        assert.equal(opened.windows.length, 1);
+        assert.equal(opened.spawns(), 1);
+        assert.equal(opened.events.includes("show-existing"), false);
+    });
+}
 
 test("different workspaces retain their own windows, ports and languages in either completion order", async (t) => {
     for (const first of ["6806", "6807"]) {

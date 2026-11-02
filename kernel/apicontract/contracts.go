@@ -990,9 +990,12 @@ var SetSyncMode = define[SyncModeRequest, Null]("setSyncMode", "/api/sync/setSyn
 // 省略、null 与 false 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。
 // 确认后的操作通过全局进度遮罩显示检查与补齐阶段，成功或失败均关闭遮罩。
 var SetSyncProvider = define[SyncProviderRequest, Null]("setSyncProvider", "/api/sync/setSyncProvider", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
+
+// SetSyncProviderS3 保存同步配置；省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP，显式协议保持不变。
 var SetSyncProviderS3 = define[SetSyncS3Request, SyncS3Data]("setSyncProviderS3", "/api/sync/setSyncProviderS3", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
-// SetSyncProviderWebDAV 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时补为 HTTPS，保留协议占位符兼容。
+// SetSyncProviderWebDAV 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP。
+// 显式协议保持不变，保留协议占位符兼容。
 // 用户名和密码允许为空以支持匿名访问；校验失败保留原配置，更换来源仍须补齐资源和历史快照。
 var SetSyncProviderWebDAV = define[SetSyncWebDAVRequest, SyncWebDAVData]("setSyncProviderWebDAV", "/api/sync/setSyncProviderWebDAV", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 

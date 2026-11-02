@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261101195843"
+		"updated": "20261102160000"
 	},
 	"Children": [
 		{
@@ -419,6 +419,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained."
+				}
+			]
+		},
+		{
+			"ID": "20261102160000-9592b55",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102160000-9592b55",
+				"updated": "20261102160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For S3 and WebDAV endpoints without a protocol, dotted hostnames use HTTPS by default; IP addresses, localhost, and single-label hostnames use HTTP. To connect to an HTTP-only service using a dotted hostname, enter http:// explicitly. Explicit http:// and https:// addresses are preserved, including saved configurations."
 				}
 			]
 		},

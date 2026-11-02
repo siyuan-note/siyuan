@@ -8335,6 +8335,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 保存同步配置；省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP，显式协议保持不变。
+     */
     "/api/sync/setSyncProviderS3": {
         request: SetSyncS3RequestInput;
         response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8343,7 +8346,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时补为 HTTPS，保留协议占位符兼容。
+     * 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP。
+     * 显式协议保持不变，保留协议占位符兼容。
      * 用户名和密码允许为空以支持匿名访问；校验失败保留原配置，更换来源仍须补齐资源和历史快照。
      */
     "/api/sync/setSyncProviderWebDAV": {

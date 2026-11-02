@@ -7,6 +7,7 @@ package util
 import (
 	"bytes"
 	"io/fs"
+	"net/netip"
 	"net/url"
 	"os"
 	"path"
@@ -227,7 +228,15 @@ func NormalizeEndpoint(endpoint string) string {
 	endpoint = strings.Replace(endpoint, "http://http(s)://", "https://", 1)
 	endpoint = strings.Replace(endpoint, "http(s)://", "https://", 1)
 	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
-		endpoint = "http://" + endpoint
+		scheme := "http://"
+		if address, err := url.Parse("//" + endpoint); err == nil {
+			host := address.Hostname()
+			// 含点的域名默认使用 TLS；IP 和单标签主机保留本地服务的 HTTP 默认值。
+			if _, ipErr := netip.ParseAddr(host); ipErr != nil && strings.Contains(host, ".") {
+				scheme = "https://"
+			}
+		}
+		endpoint = scheme + endpoint
 	}
 	if idx := strings.Index(endpoint, "://"); 0 <= idx {
 		head := endpoint[:idx+len("://")]

@@ -12,6 +12,37 @@ import (
 	"testing"
 )
 
+func TestNormalizeEndpoint(t *testing.T) {
+	for _, test := range []struct{ input, want string }{
+		{"", ""},
+		{"  \t", ""},
+		{"oss-cn-qingdao.aliyuncs.com", "https://oss-cn-qingdao.aliyuncs.com/"},
+		{"nas.example.lan:9000/dav", "https://nas.example.lan:9000/dav/"},
+		{"example.com./path", "https://example.com./path/"},
+		{"192.168.1.5:9000", "http://192.168.1.5:9000/"},
+		{"127.0.0.1", "http://127.0.0.1/"},
+		{"[::1]:9000", "http://[::1]:9000/"},
+		{"[::ffff:192.168.1.5]:9000", "http://[::ffff:192.168.1.5]:9000/"},
+		{"[fe80::1%eth0]:9000", "http://[fe80::1%eth0]:9000/"},
+		{"localhost:9000", "http://localhost:9000/"},
+		{"minio:9000", "http://minio:9000/"},
+		{"http://example.com/path", "http://example.com/path/"},
+		{"https://localhost:9000/", "https://localhost:9000/"},
+		{"http(s)://example.com//dav///", "https://example.com/dav/"},
+		{"http://http(s)://example.com", "https://example.com/"},
+		{" \u200bexample.com//dav \u200b", "https://example.com/dav/"},
+	} {
+		t.Run(test.input, func(t *testing.T) {
+			if got := NormalizeEndpoint(test.input); got != test.want {
+				t.Fatalf("got %q, want %q", got, test.want)
+			}
+			if got := NormalizeEndpoint(test.want); got != test.want {
+				t.Fatalf("normalizing twice changed endpoint: %q", got)
+			}
+		})
+	}
+}
+
 func TestFilterSelfChildDocsPreservesInputOrder(t *testing.T) {
 	paths := []string{
 		"/20260810000001-abcdefg/20260810000002-abcdefg.sy",

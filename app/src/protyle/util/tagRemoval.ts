@@ -2,6 +2,7 @@ import type {TagRemovalChangeInput, TagRemovalCollection} from "../../types/api"
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {fetchSyncPost} from "../../util/fetch";
+import {getSemanticInlineVisibleText} from "./inlineElementMarker";
 
 const operationTags = (operations: IOperation[]) => {
     const result = new Map<string, Set<string>>();
@@ -19,7 +20,7 @@ const operationTags = (operations: IOperation[]) => {
                 const tags = new Set<string>();
                 block.querySelectorAll('[data-type~="tag"]').forEach(tag => {
                     if (tag.closest("[data-node-id]") === block) {
-                        tags.add(tag.textContent.trim());
+                        tags.add(getSemanticInlineVisibleText(tag).trim());
                     }
                 });
                 result.set(block.getAttribute("data-node-id"), tags);

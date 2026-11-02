@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (code: string, confirmationCode: string) => {
+const browserCases = async (code: string, confirmationCode: string, markerCode: string) => {
     const check: typeof assert = require("node:assert/strict");
     Object.assign(window, {siyuan: {languages: {cancel: "Cancel", delete: "Delete", deleteOpConfirm: "Delete tags",
         tagRemovalDatabaseTip: "Remove entries and field values; source is kept and undo is available",
@@ -29,16 +29,24 @@ const browserCases = async (code: string, confirmationCode: string) => {
     let response: {code: number, data: unknown[], msg: string} = {code: 0, data: [], msg: ""};
     const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
     const module = {exports: {} as typeof import("./tagRemoval")};
+    const marker = {exports: {}};
+    new Function("require", "module", "exports", markerCode)(() => ({}), marker, marker.exports);
     new Function("require", "module", "exports", code)((dependency: string) => ({
         "../../dialog/confirmDialog": confirmation.exports,
         "../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../util/fetch": {fetchSyncPost: async () => response},
+        "./inlineElementMarker": marker.exports,
     })[dependency], module, module.exports);
     const api = module.exports;
     const id = "20261102000000-abcdefg";
     const html = (body: string) => `<div data-node-id="${id}" data-type="NodeParagraph"><div contenteditable="true">${body}</div></div>`;
     const update = (body: string): IOperation[] => [{action: "update", id, data: html(body)}];
     check.deepEqual(api.getTagRemovalChanges(update("text"), update('<span data-type="tag">todo</span>')), [{id, tags: ["todo"]}]);
+    for (const prefix of ["\u2060", "\u200b", "\ufeff", "\u200b\u2060"]) {
+        check.deepEqual(api.getTagRemovalChanges(update("111 "), update(`<span data-type="tag">${prefix}todo</span>`)), [{id, tags: ["todo"]}]);
+        check.deepEqual(api.getTagRemovalChanges(update('<span data-type="tag">todo</span>'), update(`<span data-type="tag">${prefix}todo</span>`)), []);
+    }
+    check.deepEqual(api.getTagRemovalChanges(update(""), update('<span data-type="tag">\u2060to\u2060do</span>')), [{id, tags: ["to\u2060do"]}]);
     check.deepEqual(api.getTagRemovalChanges(update('<span data-type="tag">todo</span>'),
         update('<span data-type="tag">todo</span><span data-type="tag">todo</span>')), []);
     check.deepEqual(api.getTagRemovalChanges(update('<span data-type="tag">done</span>'), update('<span data-type="tag">todo</span>')), []);
@@ -81,7 +89,8 @@ test("tag removal detects deletions and offers safe, escaped per-database choice
     }).outputText;
     const code = compile(path.join(__dirname, "tagRemoval.ts"));
     const confirmation = compile(path.join(__dirname, "../../dialog/confirmDialog.ts"));
-    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)})`;
+    const marker = compile(path.join(__dirname, "inlineElementMarker.ts"));
+    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-tag-removal-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

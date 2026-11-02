@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261028114540"
+		"updated": "20261102182107"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-qxi11l2",
-				"updated": "20260816130653"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-wp08ijl",
-				"updated": "20260804180000"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -924,6 +924,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " 地址或 ZIP 地址。技能会影响智能体的执行方式，请只安装和使用可信来源的内容。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " GitHub 子目录 tree 地址只安装指定目录下的技能；单技能目录安装一个，集合目录安装其下的技能，不会安装其他目录中的技能。"
 				}
 			]
 		},

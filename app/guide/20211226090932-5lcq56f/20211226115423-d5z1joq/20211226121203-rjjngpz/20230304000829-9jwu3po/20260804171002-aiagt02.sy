@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261028114540"
+		"updated": "20261102182107"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-vzu9h83",
-				"updated": "20260816130653"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-5bb3f3k",
-				"updated": "20260804180000"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -924,6 +924,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " 位址或 ZIP 位址。技能會影響智能體的執行方式，請只安裝和使用可信來源的內容。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " GitHub 子目錄 tree 位址只安裝指定目錄下的技能；單技能目錄安裝一個，集合目錄安裝其下的技能，不會安裝其他目錄中的技能。"
 				}
 			]
 		},

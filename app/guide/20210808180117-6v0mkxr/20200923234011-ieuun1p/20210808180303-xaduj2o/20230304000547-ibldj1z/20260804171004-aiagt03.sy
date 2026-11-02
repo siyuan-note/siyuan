@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261028114540"
+		"updated": "20261102182107"
 	},
 	"Children": [
 		{
@@ -846,7 +846,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-oqdi4d2",
-				"updated": "20260816130653"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -947,7 +947,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-2qtiajj",
-				"updated": "20260804180000"
+				"updated": "20261102182107"
 			},
 			"Children": [
 				{
@@ -980,6 +980,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " URL, or a ZIP URL. Skills affect how the agent operates, so install and use content only from trusted sources."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " A GitHub subdirectory tree URL installs only skills within that directory: one for a single-skill directory, or the skills within a collection directory. Skills in other directories are excluded."
 				}
 			]
 		},

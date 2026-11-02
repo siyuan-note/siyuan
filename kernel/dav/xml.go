@@ -179,16 +179,21 @@ func ParseXML(r io.Reader) (*Node, error) {
 	return root, nil
 }
 
-func (n *Node) encode(encoder *xml.Encoder) error {
+// encode 写出节点，defaultNS 是父元素生效的默认命名空间。encoding/xml 用默认命名空间声明元素名，
+// 没有命名空间的元素位于带命名空间的元素中时要声明 xmlns=""，否则读取时会继承父元素的命名空间。
+func (n *Node) encode(encoder *xml.Encoder, defaultNS string) error {
 	if !n.IsElement() {
 		return encoder.EncodeToken(xml.CharData(n.CharData))
 	}
 	start := xml.StartElement{Name: n.XMLName, Attr: n.Attrs}
+	if "" == n.XMLName.Space && "" != defaultNS {
+		start.Attr = append([]xml.Attr{{Name: xml.Name{Local: "xmlns"}}}, n.Attrs...)
+	}
 	if err := encoder.EncodeToken(start); err != nil {
 		return err
 	}
 	for _, child := range n.Nodes {
-		if err := child.encode(encoder); err != nil {
+		if err := child.encode(encoder, n.XMLName.Space); err != nil {
 			return err
 		}
 	}
@@ -199,7 +204,7 @@ func (n *Node) encode(encoder *xml.Encoder) error {
 func (n *Node) Marshal() ([]byte, error) {
 	var buf bytes.Buffer
 	encoder := xml.NewEncoder(&buf)
-	if err := n.encode(encoder); err != nil {
+	if err := n.encode(encoder, ""); err != nil {
 		return nil, err
 	}
 	if err := encoder.Flush(); err != nil {

@@ -51,6 +51,36 @@ func TestNodeRoundTrip(t *testing.T) {
 	}
 }
 
+// TestNodeRoundTripWithoutNamespace 验证没有命名空间的元素放在带命名空间的元素中序列化后，读取时仍没有命名空间。
+func TestNodeRoundTripWithoutNamespace(t *testing.T) {
+	root, err := ParseXML(strings.NewReader(`<D:prop xmlns:D="DAV:"><plain xmlns="">v<X:inner xmlns:X="urn:x"><leaf xmlns=""/></X:inner></plain></D:prop>`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := root.Marshal()
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := ParseXML(strings.NewReader(string(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain := parsed.Child(xml.Name{Local: "plain"})
+	if nil == plain || "v" != plain.Text() {
+		t.Fatalf("no-namespace element lost its name in %s", data)
+	}
+	inner := plain.Child(xml.Name{Space: "urn:x", Local: "inner"})
+	if nil == inner || nil == inner.Child(xml.Name{Local: "leaf"}) {
+		t.Fatalf("nested elements changed namespace in %s", data)
+	}
+	if again, _ := parsed.Marshal(); string(again) != string(data) {
+		t.Fatalf("second round trip changed %s into %s", data, again)
+	}
+	if standalone, _ := plain.Marshal(); strings.Contains(string(standalone), `<plain xmlns=""`) {
+		t.Fatalf("a root element without namespace needs no declaration: %s", standalone)
+	}
+}
+
 func TestMultistatus(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	var props PropstatSet

@@ -245,6 +245,20 @@ func (c *Contacts) saveAddressBooksMetaData() error {
 	return SaveMetaData(c.booksMetaData, AddressBooksMetaDataFilePath())
 }
 
+// saveCollections 保存通讯录元数据和（或）死属性，任一失败时两个文件都恢复为保存前的内容。
+func (c *Contacts) saveCollections(metaData, properties bool) error {
+	var saves []davFileSave
+	if metaData {
+		saves = append(saves, davFileSave{path: AddressBooksMetaDataFilePath(), save: c.saveAddressBooksMetaData})
+	}
+	if properties {
+		saves = append(saves, davFileSave{path: AddressBooksPropertiesFilePath(), save: func() error {
+			return saveDAVDeadProperties(c.properties, AddressBooksPropertiesFilePath())
+		}})
+	}
+	return saveDAVFiles(saves...)
+}
+
 func (c *Contacts) Load() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -374,12 +388,8 @@ func (c *Contacts) CreateAddressBook(addressBookMetaData *AddressBookMetaData, p
 	} else {
 		delete(c.properties, addressBookMetaData.Path)
 	}
-	if err = c.saveAddressBooksMetaData(); err == nil {
-		if err = saveDAVDeadProperties(c.properties, AddressBooksPropertiesFilePath()); err != nil {
-			c.loaded = false
-		}
-	}
-	if err != nil {
+	if err = c.saveCollections(true, true); err != nil {
+		c.loaded = false
 		c.books.Delete(addressBookMetaData.Path)
 		c.booksMetaData = c.booksMetaData[:len(c.booksMetaData)-1]
 		if hadProperties {
@@ -395,7 +405,7 @@ func (c *Contacts) CreateAddressBook(addressBookMetaData *AddressBookMetaData, p
 	return
 }
 
-// UpdateAddressBook 在持有锁时修改通讯录的元数据和死属性；update 返回错误时不做任何修改，保存失败时恢复内存状态。
+// UpdateAddressBook 在持有锁时修改通讯录的元数据和死属性；update 返回错误时不做任何修改，保存失败时内存与磁盘都恢复原状。
 func (c *Contacts) UpdateAddressBook(bookPath string, update func(metaData *AddressBookMetaData, properties *[]*dav.Node) error) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -424,13 +434,7 @@ func (c *Contacts) UpdateAddressBook(bookPath string, update func(metaData *Addr
 	} else {
 		delete(c.properties, bookPath)
 	}
-	var err error
-	if metaDataChanged {
-		err = c.saveAddressBooksMetaData()
-	}
-	if err == nil && propertiesChanged {
-		err = saveDAVDeadProperties(c.properties, AddressBooksPropertiesFilePath())
-	}
+	err := c.saveCollections(metaDataChanged, propertiesChanged)
 	if err != nil {
 		*addressBook.MetaData = previousMetaData
 		c.properties[bookPath] = previousProperties

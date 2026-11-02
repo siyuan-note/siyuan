@@ -220,6 +220,20 @@ func (c *Calendars) saveCalendarsMetaData() error {
 	return SaveMetaData(c.calendarsMetaData, CalendarsMetaDataFilePath())
 }
 
+// saveCollections 保存日历元数据和（或）死属性，任一失败时两个文件都恢复为保存前的内容。
+func (c *Calendars) saveCollections(metaData, properties bool) error {
+	var saves []davFileSave
+	if metaData {
+		saves = append(saves, davFileSave{path: CalendarsMetaDataFilePath(), save: c.saveCalendarsMetaData})
+	}
+	if properties {
+		saves = append(saves, davFileSave{path: CalendarsPropertiesFilePath(), save: func() error {
+			return saveDAVDeadProperties(c.properties, CalendarsPropertiesFilePath())
+		}})
+	}
+	return saveDAVFiles(saves...)
+}
+
 func (c *Calendars) Load() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -328,12 +342,8 @@ func (c *Calendars) CreateCalendar(calendarMetaData *CalendarMetaData, propertie
 	} else {
 		delete(c.properties, calendarMetaData.Path)
 	}
-	if err = c.saveCalendarsMetaData(); err == nil {
-		if err = saveDAVDeadProperties(c.properties, CalendarsPropertiesFilePath()); err != nil {
-			c.loaded = false
-		}
-	}
-	if err != nil {
+	if err = c.saveCollections(true, true); err != nil {
+		c.loaded = false
 		c.calendars.Delete(calendarMetaData.Path)
 		c.calendarsMetaData = c.calendarsMetaData[:len(c.calendarsMetaData)-1]
 		if hadProperties {
@@ -349,7 +359,7 @@ func (c *Calendars) CreateCalendar(calendarMetaData *CalendarMetaData, propertie
 	return
 }
 
-// UpdateCalendar 在持有锁时修改日历的元数据和死属性；update 返回错误时不做任何修改，保存失败时恢复内存状态。
+// UpdateCalendar 在持有锁时修改日历的元数据和死属性；update 返回错误时不做任何修改，保存失败时内存与磁盘都恢复原状。
 func (c *Calendars) UpdateCalendar(calendarPath string, update func(metaData *CalendarMetaData, properties *[]*dav.Node) error) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -382,13 +392,7 @@ func (c *Calendars) UpdateCalendar(calendarPath string, update func(metaData *Ca
 	} else {
 		delete(c.properties, calendarPath)
 	}
-	var err error
-	if metaDataChanged {
-		err = c.saveCalendarsMetaData()
-	}
-	if err == nil && propertiesChanged {
-		err = saveDAVDeadProperties(c.properties, CalendarsPropertiesFilePath())
-	}
+	err := c.saveCollections(metaDataChanged, propertiesChanged)
 	if err != nil {
 		*calendar.MetaData = previousMetaData
 		c.properties[calendarPath] = previousProperties

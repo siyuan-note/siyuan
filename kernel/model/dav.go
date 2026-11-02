@@ -248,6 +248,65 @@ func saveDAVDeadProperties(properties map[string][]*dav.Node, filePath string) e
 	return SaveMetaData(stored, filePath)
 }
 
+// davFileSave 是一次集合操作中要写入的一个文件。
+type davFileSave struct {
+	path string
+	save func() error
+}
+
+// davFileSnapshot 是文件写入前的内容；existed 为 false 表示文件原本不存在。
+type davFileSnapshot struct {
+	path    string
+	content []byte
+	mode    os.FileMode
+	existed bool
+}
+
+func (s *davFileSnapshot) restore() error {
+	if !s.existed {
+		if err := os.Remove(s.path); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
+	return writeDAVFile(s.path, s.content, s.mode)
+}
+
+// saveDAVFiles 先记录所有文件的当前内容再依次写入，任一写入失败时把全部文件恢复为写入前的内容。集合的元数据与死属性
+// 分存在两个文件中，借此一起更新或都不变：RFC 4918 §9.2 要求 PROPPATCH 的指令全部生效或全部不生效，
+// RFC 4791 §5.3.1 与 RFC 5689 §3 要求创建集合失败时恢复原状态。
+func saveDAVFiles(saves ...davFileSave) error {
+	snapshots := make([]*davFileSnapshot, 0, len(saves))
+	for _, save := range saves {
+		snapshot := &davFileSnapshot{path: save.path, mode: 0644}
+		info, err := os.Stat(save.path)
+		if err == nil {
+			if !info.Mode().IsRegular() {
+				return fmt.Errorf("DAV file [%s] is not a regular file", save.path)
+			}
+			if snapshot.content, err = os.ReadFile(save.path); err != nil {
+				return err
+			}
+			snapshot.mode, snapshot.existed = info.Mode().Perm(), true
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+		snapshots = append(snapshots, snapshot)
+	}
+	for i, save := range saves {
+		if err := save.save(); err != nil {
+			// 写入失败的文件也要恢复：写入可能已经完成，只是之后报错
+			for j := i; 0 <= j; j-- {
+				if restoreErr := snapshots[j].restore(); restoreErr != nil {
+					logging.LogErrorf("restore DAV file [%s] failed: %s", snapshots[j].path, restoreErr)
+				}
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 func cloneDAVNodes(nodes []*dav.Node) (clones []*dav.Node) {
 	for _, node := range nodes {
 		clones = append(clones, node.Clone())

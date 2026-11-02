@@ -123,11 +123,57 @@ func TestDocumentTitleLegacyLiteralAndEmptySource(t *testing.T) {
 	if err = SetDocumentTitleParagraph(tree.Root, &ast.Node{Type: ast.NodeParagraph}); err != nil {
 		t.Fatal(err)
 	}
-	if title := ReadDocumentTitle(tree.Root); !title.Empty || title.Text != "" || title.Format != "inline-ast" {
+	if title := ReadDocumentTitle(tree.Root); !title.Empty || title.Text != "" || title.Format != "plain" || tree.Root.DocumentTitle != nil {
 		t.Fatalf("empty source acquired placeholder: %+v", title)
 	}
 	if data, _ := json.Marshal(tree.Root.DocumentTitle); strings.Contains(string(data), "Untitled") {
 		t.Fatal("placeholder persisted")
+	}
+}
+
+func TestDocumentTitlePlainWritesPreserveRichReadersAndDocumentIdentity(t *testing.T) {
+	tree := NewTree("20261025000000-box0001", "/20261025000000-title01.sy", "/Title", "Title")
+	body := tree.Root.FirstChild
+	for _, value := range []string{"", "A/B", "**literal** <tag> &amp; ", "日本語 中文 😄"} {
+		paragraph := &ast.Node{Type: ast.NodeParagraph}
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(value)})
+		if err := SetDocumentTitleParagraph(tree.Root, paragraph); err != nil {
+			t.Fatal(err)
+		}
+		if tree.Root.DocumentTitle != nil || ReadDocumentTitle(tree.Root).Format != "plain" || tree.Root.IALAttr("title") != value {
+			t.Fatalf("plain source unnecessarily promoted: %q", value)
+		}
+		restored, err := DocumentTitleParagraph(tree.Root)
+		if err != nil || DocumentTitleText(restored) != value || tree.Root.FirstChild != body {
+			t.Fatalf("plain round trip changed content or body: %v", err)
+		}
+	}
+	if err := SetDocumentTitleParagraph(tree.Root, richTitleTestParagraph()); err != nil {
+		t.Fatal(err)
+	}
+	UpgradeSpec(tree)
+	if tree.Root.DocumentTitle == nil {
+		t.Fatal("rich content lost its authoritative source")
+	}
+	paragraph := &ast.Node{Type: ast.NodeParagraph}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Plain again")})
+	if err := SetDocumentTitleParagraph(tree.Root, paragraph); err != nil {
+		t.Fatal(err)
+	}
+	UpgradeSpec(tree)
+	if tree.Root.DocumentTitle != nil || tree.Root.Spec != RichDocumentTitleSpec || tree.Root.FirstChild != body {
+		t.Fatal("removing rich styling must retain the document specification and body")
+	}
+	// 已保存的旧纯文字行级源仍可认证读取，读取本身不触发折叠或迁移。
+	source, err := render.NewDocumentTitle(paragraph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Root.DocumentTitle = source
+	data := render.NewJSONRenderer(tree, util.NewLute().RenderOptions, util.NewLute().ParseOptions).Render()
+	restored, _, err := ParseJSON(data, util.NewLute().ParseOptions)
+	if err != nil || restored.Root.DocumentTitle == nil || restored.Root.DocumentTitle.Content != source.Content {
+		t.Fatalf("existing inline source reader changed: %v", err)
 	}
 }
 
@@ -158,5 +204,29 @@ func TestDocumentTitleMetadataTracksStyleOnlyChanges(t *testing.T) {
 				t.Fatalf("style-only metadata change lost: %v", err)
 			}
 		})
+	}
+}
+
+func TestDocumentTitleSummaryIgnoresCaretPlaceholdersWithoutChangingSource(t *testing.T) {
+	paragraph := &ast.Node{Type: ast.NodeParagraph}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Start \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "kbd", TextMarkTextContent: "Ctrl"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b / \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "code", TextMarkTextContent: "Code"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b / \u200b")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: "Tag"})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("\u200b word\u2060joiner")})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: "Link",
+		TextMarkAHref: "assets/file\u200bname.txt"})
+	before, err := render.NewDocumentTitle(paragraph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := DocumentTitleText(paragraph); got != "Start Ctrl / Code / Tag word\u2060joinerLink" {
+		t.Fatalf("caret placeholders entered the visible summary: %q", got)
+	}
+	after, err := render.NewDocumentTitle(paragraph)
+	if err != nil || before.Content != after.Content || !strings.Contains(after.Content, "file\u200bname.txt") {
+		t.Fatalf("summary extraction changed the source or resource address: %v", err)
 	}
 }

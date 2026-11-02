@@ -26,6 +26,7 @@ const browserCases = (transactionSource: string, displaySource: string, luteSour
     let queued = 0;
     const identity = (html: string) => html;
     const dependencies = {
+        getTagRemovalChanges: (): [] => [],
         renderImageDisplay,
         Constants: {ATTRIBUTE_EDITING: "data-editing"},
         prepareViewFoldTransaction: (_protyle: unknown, doOperations: unknown, undoOperations: unknown) =>

@@ -886,7 +886,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg>
         </div>
     </div>
-    <div class="toolbar">
+    <div class="toolbar toolbar--bottom">
         <span class="fn__flex-1"></span>
         <svg data-type="toggle-replace" class="toolbar__icon${window.siyuan.isPublish ? " fn__none" : ""}${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
         <svg ${enableIncludeChild ? "" : "disabled"} data-type="include" class="toolbar__icon${includeChild ? " toolbar__icon--active" : ""}"><use xlink:href="#iconInclude"></use></svg>
@@ -915,7 +915,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
         </div>
         <div id="searchAssetList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
         <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px;border-bottom: 1px solid var(--b3-border-color);"></div>
-        <div class="toolbar">
+        <div class="toolbar toolbar--bottom">
             <span class="fn__flex-1"></span>
             <svg data-type="queryAsset" class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
             <svg data-type="filterAsset" class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>
@@ -933,7 +933,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <svg data-type="unRefNext" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
         </div>
         <div id="searchUnRefList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
-        <div class="toolbar">
+        <div class="toolbar toolbar--bottom">
             <span class="fn__flex-1"></span>
             <svg data-type="refreshUnRef" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
             <svg data-type="goSearch" class="toolbar__icon"><use xlink:href="#iconBack"></use></svg>

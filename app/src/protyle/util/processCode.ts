@@ -22,6 +22,20 @@ import {renderBlockDirection} from "../render/blockDirection";
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
     tempElement.innerHTML = html;
+    const preElement = tempElement.querySelector("pre");
+    if (preElement) {
+        // IDE 识别仅用于独立代码片段，混合内容保留 HTML 中的段落和代码块结构。
+        let element: Element = preElement;
+        while (element !== tempElement) {
+            const parent = element.parentElement;
+            if (Array.from(parent.childNodes).some(node => node !== element &&
+                (node.nodeType === Node.ELEMENT_NODE ||
+                    node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""))) {
+                return false;
+            }
+            element = parent;
+        }
+    }
     let isCode = false;
     if (tempElement.childElementCount === 1 &&
         (tempElement.lastElementChild as HTMLElement).style.fontFamily.indexOf("monospace") > -1) {

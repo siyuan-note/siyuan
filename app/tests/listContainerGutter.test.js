@@ -10,6 +10,7 @@ const sources = (full = false) => {
     const gutter = source.statements.find(node => ts.isClassDeclaration(node) && node.name.text === "Gutter");
     const render = gutter.members.find(node => node.name?.getText(source) === "render");
     const getNodeElement = gutter.members.find(node => node.name?.getText(source) === "getNodeElement");
+    const isMatchNode = gutter.members.find(node => node.name?.getText(source) === "isMatchNode");
     const renderMenu = gutter.members.find(node => node.name?.getText(source) === "renderMenu");
     let multiSelectAction;
     const collectMultiSelect = node => {
@@ -45,7 +46,8 @@ const sources = (full = false) => {
             node.declarationList.declarations.some(declaration => ["getListItemGutterContainer", "getTopAloneElement",
                 "getSbChildBlockCount", "getParentBlock", "getGutterMarginHeight", "getFixedGutterPosition",
                 "getBacklinkGutterContentTop", "getListGutterAnchorLeft", "getContainerGutterSpace", "isContainerGutterBridge",
-                "cancelGutterHover", "renderGutterOnHover", "pendingGutterHovers",
+                "cancelGutterHover", "renderGutterOnHover", "pendingGutterHovers", "gutterHoverPaths",
+                "getVerticalGutterButton", "resetGutterHover", "bindGutterHover",
                 "hasClosestBlock", "isBlockElement", "hasClosestByClassName", "hasTopClosestByClassName", "hasClosestByTag",
                 "hasClosestByAttribute", "getAutoListDirection", "listSelector", "directionAttribute",
                 "getMobileBlockSelectionElement"].includes(declaration.name.getText(source))))
@@ -54,25 +56,25 @@ const sources = (full = false) => {
     const hoverSource = ts.createSourceFile("initUI.ts", readFileSync(path.join(__dirname,
         "../src/protyle/ui/initUI.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     let hoverBinding;
-    let leaveBinding;
+    let pathBinding;
     const visit = node => {
         if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "protyle.element.addEventListener" &&
             node.arguments[0].getText(hoverSource).includes('"pointerover"')) {
             hoverBinding = node.getText(hoverSource);
         }
-        if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "protyle.element.addEventListener" &&
-            node.arguments[0].getText(hoverSource) === '"mouseleave"' && node.getText(hoverSource).includes("cancelGutterHover")) {
-            leaveBinding = node.getText(hoverSource);
+        if (ts.isCallExpression(node) && node.expression.getText(hoverSource) === "bindGutterHover") {
+            pathBinding = node.getText(hoverSource);
         }
         ts.forEachChild(node, visit);
     };
     visit(hoverSource);
     assert.ok(hoverBinding);
-    assert.ok(leaveBinding);
+    assert.ok(pathBinding);
     const events = readFileSync(path.join(__dirname, "../src/boot/globalEvent/mousemove.ts"), "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, "") +
-        `\nfunction bindHover(protyle) { let overAttr = false; ${leaveBinding}; ${hoverBinding}; }`;
+        `\nfunction bindHover(protyle) { let overAttr = false; ${pathBinding}; ${hoverBinding}; }`;
     const interactionSource = `function getNodeElement(protyle, element) ${getNodeElement.body.getText(source)}
+function isMatchNode(item) ${isMatchNode.body.getText(source)}
 function mobileMultiSelect(protyle, nodeElement) {
     ${menuType.getText(source)}
     return (${multiSelectAction.getText(source)})();
@@ -117,8 +119,8 @@ const cases = async (source, fullSource, css) => {
         toggleMenu: options => options.build(null, {show: callback => callback()}),
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));
-    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
-        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
+    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
+        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
     let mobile = false;
     window.siyuan = {languages: {fold: "Fold", rowTip: "Row", addBelowAbove: "Add"}, layout: {}, blockPanels: [],
         config: {editor: {fontSize: 16, rtl: false}, system: {workspaceDir: "test"}}};
@@ -205,12 +207,18 @@ const cases = async (source, fullSource, css) => {
     bindHover(protyle);
     const state = () => ({left: gutter.element.style.left, top: gutter.element.style.top,
         ids: Array.from(gutter.element.querySelectorAll("button[data-node-id]")).map(button => button.dataset.nodeId)});
-    const hover = (target, x, y) => {
+    const hover = (target, x, y, enter = true) => {
         const rect = target.getBoundingClientRect();
         x ??= rect.left + Math.min(12, rect.width / 2);
         y ??= rect.top + Math.min(16, rect.height / 2);
-        target.dispatchEvent(new PointerEvent(mobile ? "pointerover" : "mouseover",
-            {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        if (enter) {
+            target.dispatchEvent(new PointerEvent(mobile ? "pointerover" : "mouseover",
+                {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        }
+        if (mobile) {
+            target.dispatchEvent(new PointerEvent("pointermove",
+                {bubbles: true, pointerType: "mouse", clientX: x, clientY: y}));
+        }
         target.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: x, clientY: y}));
         check.deepEqual(errors, []);
         return state();
@@ -297,7 +305,7 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     window.siyuan.menus = {menu: {element: document.createElement("div"), remove() {}, fullscreen() {}, popup() {}}};
     Object.assign(protyle, {toolbar: {range: {}}, block: {rootID: "document"}, notebookId: "notebook"});
     gutter.getNodeElement = (...args) => getNodeElement.apply(gutter, args);
-    gutter.isMatchNode = () => true;
+    gutter.isMatchNode = (...args) => isMatchNode.apply(gutter, args);
     gutter.renderMenu = (_owner, button) => clicked.push(gutter.getNodeElement(protyle, button).dataset.nodeId);
     bindInteractions.call(gutter, protyle);
     const assertTargets = ids => {
@@ -376,9 +384,11 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
                 container.setAttribute("custom-sy-list-mindmap", "1");
             }
             gutter.render(protyle, container, container);
-            assertTargets(["list", "item", "container"]);
+            const firstChain = type === "NodeSuperBlock" || type === "NodeBlockquote" ? ["child"] :
+                type === "NodeList" && !content.includes("mindmap-view") ? ["nested-item", "child"] : [];
+            assertTargets(["list", "item", "container", ...firstChain]);
             gutter.render(protyle, root.querySelector('[data-node-id="after"]'));
-            assertTargets(["list", "item", "after"]);
+            assertTargets(["after"]);
         }
         for (const subtype of ["u", "o", "t"]) {
             root.innerHTML = `<div data-node-id="list" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="item" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p("paragraph")}${attr}</div>${attr}</div>`;
@@ -409,12 +419,37 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
             }
         }
     }
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const subtype of ["u", "o", "t"]) {
+            const levels = Array.from({length: 6}, (_, index) => index);
+            root.innerHTML = levels.reduceRight((html, level) =>
+                `<div data-node-id="level-list-${level}" data-type="NodeList" data-subtype="${subtype}" class="list"><div data-node-id="level-item-${level}" data-type="NodeListItem" data-subtype="${subtype}" class="li"><div class="protyle-action">-</div>${p(`level-p-${level}`)}${html}${attr}</div>${attr}</div>`, "");
+            for (const level of levels) {
+                const list = root.querySelector(`[data-node-id="level-list-${level}"]`);
+                const item = root.querySelector(`[data-node-id="level-item-${level}"]`);
+                const paragraph = root.querySelector(`[data-node-id="level-p-${level}"]`);
+                window.siyuan.config.editor.blockGutterMode = false;
+                gutter.render(protyle, paragraph);
+                assertTargets([`level-list-${level}`, `level-item-${level}`]);
+                window.siyuan.config.editor.blockGutterMode = true;
+                for (const entry of [paragraph, item, list, item.firstElementChild]) {
+                    gutter.render(protyle, entry);
+                    assertTargets([`level-list-${level}`, `level-item-${level}`, `level-p-${level}`]);
+                }
+                item.setAttribute("fold", "1");
+                gutter.render(protyle, item.firstElementChild);
+                assertTargets([`level-list-${level}`, `level-item-${level}`]);
+                item.removeAttribute("fold");
+            }
+        }
+    }
     window.siyuan.config.editor.rtl = false;
     window.siyuan.config.editor.blockGutterMode = true;
 
     root.innerHTML = `<div data-node-id="outer-list" data-type="NodeList" class="list"><div data-node-id="outer-item" data-type="NodeListItem" class="li"><div class="protyle-action">-</div>${p("first")}<div data-node-id="quote" data-type="NodeBlockquote" class="bq">${p("qfirst")}<div data-node-id="tabs" data-type="NodeTabs" class="tabs"><div class="tabs-header">Tabs</div><div data-node-id="tab" data-type="NodeTabItem" class="tab-item"><div class="tab-item-content">${p("leaf")}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>${attr}</div>`;
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
-    assertTargets(["outer-list", "outer-item", "quote", "tabs", "tab", "leaf"]);
+    assertTargets(["tab", "leaf"]);
     const nestedState = state();
     const leafRect = root.querySelector('[data-node-id="leaf"]').getBoundingClientRect();
     check.deepEqual(hover(root.querySelector('[data-node-id="quote"]'),
@@ -425,6 +460,11 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.equal(gutter.element.querySelectorAll('[draggable="true"]').length, 0, "read-only icons remain non-draggable");
     protyle.disabled = false;
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+
+    root.innerHTML = ["quote-a", "quote-b", "quote-c", "quote-d"].reduceRight((html, id) =>
+        `<div data-node-id="${id}" data-type="NodeBlockquote" class="bq">${html}${attr}</div>`, p("leaf"));
+    gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
+    assertTargets(["quote-a", "quote-b", "quote-c", "quote-d", "leaf"]);
 
     const checkFullLayout = vertical => {
         const buttons = Array.from(gutter.element.querySelectorAll("button[data-node-id], button[data-type='fold']"));
@@ -473,6 +513,58 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
         check.deepEqual(state(), beforeLeave, "leaving the editor cancels its pending block switch");
     }
     neighbor.remove();
+    const beforePathHTML = root.innerHTML;
+    root.style.paddingLeft = "64px";
+    const pathIDs = Array.from({length: 8}, (_, index) => `path-${index}`);
+    root.innerHTML = pathIDs.reduceRight((html, id) =>
+        `<div data-node-id="${id}" data-type="NodeBlockquote" class="bq">${html}${attr}</div>`,
+        p("path-leaf") + p("path-neighbor-1") + p("path-neighbor-2"));
+    const pathLeaf = root.querySelector('[data-node-id="path-leaf"]');
+    for (const platform of [false, true]) {
+        mobile = platform;
+        pane.dispatchEvent(new MouseEvent("mouseleave"));
+        gutter.render(protyle, pathLeaf);
+        const before = state();
+        const sourceRect = pathLeaf.getBoundingClientRect();
+        const columnRect = gutter.element.getBoundingClientRect();
+        const origin = {x: sourceRect.left + 16, y: sourceRect.top + sourceRect.height / 2};
+        const destination = {x: columnRect.left + columnRect.width / 2, y: columnRect.bottom - 17};
+        hover(pathLeaf, origin.x, origin.y);
+        let previousTarget = pathLeaf;
+        for (const progress of [0.05, 0.1, 0.2, 0.5, 0.75, 1]) {
+            const x = origin.x + (destination.x - origin.x) * progress;
+            const y = origin.y + (destination.y - origin.y) * progress;
+            const target = document.elementFromPoint(x, y);
+            check.ok(target, "the slow diagonal path stays inside the editor");
+            hover(target, x, y, target !== previousTarget);
+            previousTarget = target;
+            await pause();
+            check.deepEqual(state(), before, `slow diagonal entry retains the entire column: mobile=${mobile}, progress=${progress}`);
+        }
+        checkFullLayout(true);
+        const adjacent = root.querySelector('[data-node-id="path-neighbor-1"]');
+        hover(adjacent);
+        await pause();
+        check.deepEqual(state().ids.at(-1), "path-neighbor-1", "returning to body content releases the column");
+        gutter.render(protyle, pathLeaf);
+        hover(pathLeaf, origin.x, origin.y);
+        const adjacentRect = adjacent.getBoundingClientRect();
+        const y = adjacentRect.top + adjacentRect.height / 2;
+        const progress = (y - origin.y) / (destination.y - origin.y);
+        const x = origin.x + (destination.x - origin.x) * progress;
+        const target = document.elementFromPoint(x, y);
+        check.ok(adjacent.contains(target), "the approach crosses an adjacent paragraph");
+        hover(target, x, y);
+        await pause();
+        check.deepEqual(state(), before);
+        check.equal(document.elementFromPoint(origin.x + 8, y), target,
+            "reversing direction stays within the same DOM element");
+        hover(target, origin.x + 8, y, false);
+        await pause();
+        check.equal(state().ids.at(-1), target.closest("[data-node-id]").dataset.nodeId,
+            "moving back within the same paragraph switches without a new mouseover");
+    }
+    root.innerHTML = beforePathHTML;
     root.style.paddingLeft = "180px";
     gutter.render(protyle, root.querySelector('[data-node-id="leaf"]'));
     checkFullLayout(false);
@@ -490,6 +582,10 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.ok(bounds.left >= viewport.left && bounds.right <= viewport.right && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom,
         "full indicators stay within a narrow pane with large editor fonts");
     check.equal(gutter.element.dataset.scrollable, "true", "deep chains are scrollable");
+    for (const button of gutter.element.querySelectorAll("button[data-node-id]")) {
+        check.equal(gutter.getNodeElement(protyle, button), root.querySelector(`[data-node-id="${button.dataset.nodeId}"]`),
+            "viewport-clamped columns resolve each block without using the column height as a row hit test");
+    }
     gutter.element.scrollTop = gutter.element.scrollHeight;
     const previousButton = gutter.element.querySelector("button[data-node-id]");
     const previousScrollTop = gutter.element.scrollTop;
@@ -524,7 +620,8 @@ if (process.versions.electron && process.type === "browser") {
         const {app, BrowserWindow} = require("electron");
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
-        const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        const win = new BrowserWindow({show: false, width: 1100, height: 900,
+            webPreferences: {nodeIntegration: true, contextIsolation: false}});
         await win.loadURL("data:text/html,<html><body></body></html>");
         const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "util/_function.scss"].map(file =>
             require("sass").compile(path.join(__dirname, "../src/assets/scss", file), {quietDeps: true}).css).join("\n");

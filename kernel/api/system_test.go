@@ -31,6 +31,7 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 	for _, mode := range []string{"new", "bound", "remembered", "expired"} {
 		t.Run(mode, func(t *testing.T) {
 			model.Conf = model.NewAppConf()
+			model.Conf.CookieKey = "desktop-setting-test-cookie-key"
 			model.Conf.AccessAuthCode = "old-password"
 			engine := gin.New()
 			engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("desktop-setting-test-key"))))
@@ -38,7 +39,7 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 				session := util.GetSession(c)
 				ws := util.GetWorkspaceSession(session)
 				if mode != "new" {
-					ws.AccessAuthCode = model.Conf.AccessAuthCode
+					model.SetAccessCodeSession(ws, model.Conf.AccessAuthCode)
 					model.BindDesktopSession(c, ws, mode == "remembered")
 					if mode == "expired" {
 						ws.DesktopSessionID = "previous-boot"
@@ -72,11 +73,15 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 				t.Fatalf("setting password failed: %s, %v", result.Body.String(), err)
 			}
 			var ws util.WorkspaceSession
-			if err := json.Unmarshal(call("GET", "/session", "", result.Result().Cookies()).Body.Bytes(), &ws); err != nil {
+			sessionBody := call("GET", "/session", "", result.Result().Cookies()).Body.Bytes()
+			if err := json.Unmarshal(sessionBody, &ws); err != nil {
 				t.Fatal(err)
 			}
 			if (ws.DesktopSessionID != "") != (mode != "remembered") || !model.IsAccessCodeSessionAuthenticated(&ws) {
 				t.Fatalf("password setting lost session policy: %+v", ws)
+			}
+			if strings.Contains(string(sessionBody), "new-password") {
+				t.Fatalf("session stores the access authorization code: %s", sessionBody)
 			}
 		})
 	}

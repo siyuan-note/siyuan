@@ -80,7 +80,7 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
     const block = {querySelector: (selector: string) => selector === '[data-action="config"]' ? configButton : null};
     const elementList = {
         innerHTML: "",
-        firstElementChild: null as Element | null,
+        querySelector: (selector: string) => selector === "ul" && /<ul\b/.test(elementList.innerHTML) ? {} : null,
         classList: createClassList(listClasses),
         addEventListener: (_name: string, cb: (event: Event) => void) => {
             click = cb;
@@ -167,7 +167,6 @@ for (const mobile of [false, true]) {
     test(`S3 refreshes the configured bucket and escapes its name (mobile=${mobile})`, () => {
         const guide = loadSyncGuide(mobile, 2);
         guide.render();
-        Object.defineProperty(guide.list, "firstElementChild", {value: {tagName: "DIV"}});
         guide.sync.s3.bucket = "<img src=x onerror=alert(1)>&";
         guide.renderSyncCloudList(guide.list, false, ready => guide.readiness.push(ready));
         assert.match(guide.list.innerHTML, /&lt;img src=x onerror=alert\(1\)>&amp;/);

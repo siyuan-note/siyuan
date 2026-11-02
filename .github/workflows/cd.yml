@@ -553,6 +553,9 @@ jobs:
           tar -xzf editor-runtime/runtime.tar.gz -C runtime
           test -x runtime/app/kernel-darwin-arm64/SiYuan-Kernel
           test -s runtime/app/stage/build/desktop/index.html
+          test -s runtime/app/stage/build/markdown/index.html
+          test -s runtime/app/stage/protyle/js/lute/lute.min.js
+          test ! -e runtime/app/stage/build/markdown/vditor/dist/js/lute/lute.min.js
           test -d runtime/app/node_modules
 
       - name: Validate editor groups and test coverage

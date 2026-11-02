@@ -1,0 +1,12 @@
+{
+    // 供编辑器使用：electron/ 下的生产代码与测试都归入主进程项目，避免 .test.ts 落入推断项目后
+    // 报「找不到 require」之类的噪声。测试夹具使用大量无注解桩，因此这里关闭 strict；
+    // 生产代码的严格检查由 ../tsconfig.electron.json、测试的结构错误由 ../tsconfig.electron.test.json 负责。
+    "extends": "../tsconfig.electron.json",
+    "compilerOptions": {
+        "strict": false,
+        "noImplicitAny": false
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["node_modules"]
+}

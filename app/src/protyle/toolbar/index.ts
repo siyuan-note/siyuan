@@ -50,6 +50,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isEndOfBl
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
+import {takeTemplateHTTPConfirmation} from "../../template/httpConfirmHandoff";
 import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
 /// #endif
@@ -2212,7 +2213,9 @@ export class Toolbar {
             }
             if (event.key === "Enter") {
                 if (!isEmpty) {
-                    hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    const path = decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"));
+                    hintRenderTemplate(path, protyle, nodeElement,
+                        takeTemplateHTTPConfirmation(previewElement, path, protyle.block.parentID));
                 } else {
                     focusByRange(this.range);
                 }
@@ -2294,7 +2297,9 @@ export class Toolbar {
             }
             const listElement = hasClosestByClassName(target, "b3-list-item");
             if (listElement) {
-                hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                const path = decodeURIComponent(listElement.getAttribute("data-value"));
+                hintRenderTemplate(path, protyle, nodeElement,
+                    takeTemplateHTTPConfirmation(previewElement, path, protyle.block.parentID));
                 event.stopPropagation();
             }
         });
@@ -2423,8 +2428,20 @@ export class Toolbar {
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
         const setContentPosition = () => {
             const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left,
-                rangePosition.top - this.subElement.clientHeight - 8, this.LINE_HEIGHT);
+            const rangeRect = range.getBoundingClientRect();
+            const viewport = window.visualViewport;
+            // 顶部选区上方空间不足时向下展开，菜单切换也避让选中的文字。
+            const top = getSelectionElementY({
+                elementHeight: this.subElement.clientHeight,
+                rangeTop: rangePosition.top,
+                rangeBottom: rangeRect.bottom,
+                topBoundary: (viewport?.offsetTop || 0) + 8,
+                bottomBoundary: Math.min(window.innerHeight,
+                    viewport ? viewport.offsetTop + viewport.height : window.innerHeight) - 8,
+                gap: 8,
+                isBottom: false,
+            });
+            setPosition(this.subElement, rangePosition.left, top, this.LINE_HEIGHT);
         };
         this.subElement.lastElementChild.addEventListener("pointerdown", (event) => {
             if (hasClosestByClassName(event.target as HTMLElement, "keyboard__action")) {

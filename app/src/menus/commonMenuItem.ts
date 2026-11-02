@@ -26,6 +26,7 @@ import {bindAliasInput} from "./aliasInput";
 import {focusBlock, getEditorRange} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 /// #if !MOBILE
+import {canOpenMarkdownAsset, openMarkdownAsset} from "../editor/markdownAsset";
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
@@ -1071,6 +1072,14 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             /// #endif
         } else {
             /// #if !BROWSER
+            if (canOpenMarkdownAsset(src)) {
+                submenu.push({
+                    id: "openMarkdownEditor",
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.openMarkdownEditor,
+                    click: () => { void openMarkdownAsset(src); }
+                });
+            }
             if (getHostCapabilities().localFileSystem) {
                 submenu.push({
                     id: "useDefault",

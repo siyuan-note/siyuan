@@ -16,6 +16,7 @@ import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
 import {saveMobileStorage} from "../util/saveLayout";
 import {canCloseTab, moveTab, orderTabsForOverview, toggleTabPin, trimTabsToLimit} from "./mobileTabsState";
+import {renderDocumentTitlePreview} from "../../protyle/header/documentTitlePreview";
 
 const MAX_HISTORY = 32;
 
@@ -924,6 +925,14 @@ export class MobileTabs {
     </div>
 </div>`,
             bindEvent: (element) => {
+                this.state.tabs.forEach(tab => {
+                    const entry = tab.current;
+                    if (!entry?.rootID || entry.rootID === entry.notebookID) return;
+                    const row = Array.from(element.querySelectorAll<HTMLElement>("[data-tab-id]"))
+                        .find(item => item.dataset.tabId === tab.id);
+                    renderDocumentTitlePreview(row?.querySelector(".mobile-tabs__item-title"), entry.rootID, entry.notebookID,
+                        () => this.state.tabs.includes(tab) && tab.current === entry);
+                });
                 this.bindOverviewEvents(element.firstElementChild as HTMLElement);
             },
             destroyCallback: () => {

@@ -3,7 +3,7 @@ import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePane
 import {isAVTextType} from "./capabilities";
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
-import {escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {cellValueIsEmpty, openAVCellIcon, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {unicode2Emoji} from "../../../emoji";
@@ -149,7 +149,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
-        <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
+        <span class="fn__ellipsis">${table.avName ? escapeHtmlTextAndAttr(table.avName) : window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
     ${element.classList.contains("protyle-db-attr__body") ? "" : `<button type="button" data-type="toggle-panel-visibility" class="block__icon block__icon--show ariaLabel${hasHiddenFields ? "" : " fn__none"}" data-position="4west" aria-label="${window.siyuan.languages.edit}" aria-pressed="${showAll}"><svg><use xlink:href="#iconEdit"></use></svg></button>`}
@@ -764,7 +764,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.preventDefault();
             break;
         } else if ((isAVTextType(type) && type !== "template") &&
-            (target.querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template") ||
+            (target.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template") ||
                 (type === "text" && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
             event.stopPropagation();

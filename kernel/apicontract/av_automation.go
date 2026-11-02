@@ -202,4 +202,6 @@ type AVCollectionCleanupItem struct {
 type AVCollectionCleanup struct {
 	RuleVersion string                     `json:"ruleVersion"`
 	Items       []*AVCollectionCleanupItem `json:"items"`
+	// automaticOnly 为 true 时仅处理仍带收集来源标记的条目，供删除标签确认使用。
+	AutomaticOnly bool `json:"automaticOnly,omitempty" api:"optional"`
 }

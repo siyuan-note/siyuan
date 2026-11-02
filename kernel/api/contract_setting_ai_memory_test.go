@@ -5,6 +5,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 
@@ -25,38 +26,32 @@ func TestAPIContractSettingAIMemory(t *testing.T) {
 	if code != 0 {
 		t.Fatal(message)
 	}
+	if bytes.Contains(data, []byte(`"sources"`)) || bytes.Contains(data, []byte(`"autoMaintain"`)) || bytes.Contains(data, []byte(`"conversations"`)) {
+		t.Fatalf("obsolete memory controls returned: %s", data)
+	}
 	var result apicontract.SettingAI
 	if err := json.Unmarshal(data, &result); err != nil || result.Memory == nil || !result.Memory.Enabled ||
-		result.Memory.AutoMaintain || !result.Memory.Conversations || result.Memory.ModelID != "missing-model" || result.Memory.ReasoningEffort != "high" || len(result.Memory.Sources) != 1 {
+		result.Memory.ModelID != "missing-model" || result.Memory.ReasoningEffort != "high" {
 		t.Fatalf("memory setting not preserved: %s %v", data, err)
 	}
 	code, message, _ = settingContractRequest(t, "setAI", setAI, `{"agent":{"maxRetries":2}}`)
 	memory := model.Conf.AI.Load().Memory
-	if code != 0 || memory.ModelID != "missing-model" || !memory.Conversations || !memory.Enabled || memory.ReasoningEffort != "high" {
+	if code != 0 || memory.ModelID != "missing-model" || !memory.Enabled || memory.ReasoningEffort != "high" {
 		t.Fatalf("omitted memory reset: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "patch", patchSetting, `{"ai":{"memory":{"enabled":false}}}`)
 	memory = model.Conf.AI.Load().Memory
-	if code != 0 || memory.Enabled || !memory.Conversations || memory.ModelID != "missing-model" || memory.ReasoningEffort != "high" || len(memory.Sources) != 1 {
+	if code != 0 || memory.Enabled || memory.ModelID != "missing-model" || memory.ReasoningEffort != "high" {
 		t.Fatalf("partial save lost independent fields or explicit false: %s", message)
-	}
-	code, message, _ = settingContractRequest(t, "patch", patchSetting, `{"ai":{"memory":{"conversations":false}}}`)
-	memory = model.Conf.AI.Load().Memory
-	if code != 0 || memory.Conversations || memory.ModelID != "missing-model" {
-		t.Fatalf("explicit conversation exclusion was lost: %s", message)
-	}
-	code, message, _ = settingContractRequest(t, "setAI", setAI, `{"memory":{"conversations":true}}`)
-	if code != 0 || !model.Conf.AI.Load().Memory.Conversations {
-		t.Fatalf("conversation opt-in failed: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "setAI", setAI, `{"memory":{"reasoningEffort":null,"sources":null,"conversations":null}}`)
 	memory = model.Conf.AI.Load().Memory
-	if code != 0 || memory.ReasoningEffort != "" || memory.Conversations || memory.ModelID != "missing-model" || len(memory.Sources) != 0 || memory.Sources == nil {
+	if code != 0 || memory.ReasoningEffort != "" || memory.ModelID != "missing-model" {
 		t.Fatalf("null field did not restore defaults: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "setAI", setAI, `{"memory":null}`)
 	memory = model.Conf.AI.Load().Memory
-	if code != 0 || memory.Enabled || memory.AutoMaintain || memory.Conversations || memory.ModelID != "" || memory.ReasoningEffort != "" || memory.Sources == nil {
+	if code != 0 || memory.Enabled || memory.ModelID != "" || memory.ReasoningEffort != "" {
 		t.Fatalf("null memory did not restore safe defaults: %s", message)
 	}
 }

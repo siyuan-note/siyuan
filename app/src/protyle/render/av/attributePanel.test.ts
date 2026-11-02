@@ -5,6 +5,8 @@ import {loadModule} from "../../../testSupport/loadModule";
 
 const exports = loadModule<typeof import("./attributePanel")>("src/protyle/render/av/attributePanel.ts", {
     require: () => ({}),
+    setTimeout,
+    clearTimeout,
 }, ScriptTarget.ES2021);
 
 const setup = (database = "", item = "") => {
@@ -59,4 +61,20 @@ test("sub-item structure changes refresh only attribute panels bound to the data
     });
     assert.equal(relevant.refreshed(), operations.length);
     assert.equal(unrelated.refreshed(), 0);
+});
+
+test("relation and source field changes coalesce a refresh of computed panel values", async () => {
+    const {panel, refreshed} = setup("database", "item");
+    for (const type of ["relation", "text", "date", "select", "checkbox"] as TAVCol[]) {
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "item", data: {type}});
+        panel.refreshForOperation({action: "updateAttrViewCells", avID: "database", cellUpdates: [
+            {rowID: "item", data: {type}},
+        ]} as IOperation);
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "other", data: {type}});
+    }
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(refreshed(), 1);
+    panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "other", data: {type: "relation"}});
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(refreshed(), 1, "unrelated rows do not schedule another refresh");
 });

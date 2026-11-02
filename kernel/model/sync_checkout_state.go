@@ -6,6 +6,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync/atomic"
 	"time"
@@ -19,6 +20,8 @@ import (
 )
 
 var syncCheckoutRevision atomic.Int64
+
+var errSyncCheckoutBusy = errors.New("sync checkout write admission is busy")
 
 type syncCheckoutClient struct {
 	token     string
@@ -179,7 +182,7 @@ func (task *syncCheckoutTask) prepareApply() error {
 	}
 	// 等待同步锁的写请求会持有读租约，不能反向等待；此次应用稍后重试。
 	if !dataImportAccess.TryLock() {
-		return fmt.Errorf("%w: %s", dejavu.ErrIndexFileChanged, Conf.Language(239))
+		return errSyncCheckoutBusy
 	}
 	task.Lock()
 	task.releaseWrites = dataImportAccess.Unlock

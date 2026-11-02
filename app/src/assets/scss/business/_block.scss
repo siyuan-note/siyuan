@@ -20,6 +20,15 @@
       opacity: 1;
     }
 
+    &--backlinks {
+      height: 70vh;
+
+      > .block__content {
+        overflow: hidden;
+        min-height: 0;
+      }
+    }
+
     & > .block__icons {
       border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
 
@@ -27,6 +36,19 @@
         height: var(--b3-ui-panel-height, 42px);
         touch-action: none;
       }
+    }
+  }
+
+  &__backlinks {
+    min-height: 0;
+
+    > .backlinkMList__header,
+    > .backlinkMList {
+      display: none;
+    }
+
+    > .backlinkList__header {
+      flex-wrap: wrap;
     }
   }
 

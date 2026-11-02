@@ -4,13 +4,29 @@
 
 package av
 
+import "fmt"
+
+// MissingLayoutError 标识布局类型已保存、布局配置缺失的数据。
+type MissingLayoutError struct {
+	Type   LayoutType
+	ViewID string
+}
+
+func (err *MissingLayoutError) Error() string {
+	return fmt.Sprintf("%s layout missing in view [%s]", err.Type, err.ViewID)
+}
+
 // ValidateLayouts 统一校验日历和列表布局，拒绝损坏数据并保留原始文件。
 func (attrView *AttributeView) ValidateLayouts() error {
+	return attrView.validateLayouts(false)
+}
+
+func (attrView *AttributeView) validateLayouts(recovery bool) error {
 	attrView.restoreLegacyMapColumns()
-	if err := attrView.ValidateCalendarLayouts(); err != nil {
+	if err := attrView.validateCalendarLayouts(recovery); err != nil {
 		return err
 	}
-	return attrView.ValidateListLayouts()
+	return attrView.validateListLayouts(recovery)
 }
 
 // BaseLayout 描述了布局的基础结构。

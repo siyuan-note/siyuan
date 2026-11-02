@@ -16,6 +16,13 @@ import (
 
 const docTreeOrderMaxBytes = 32 << 20
 const docTreeOrderMaxEntries = 32
+const docTreeCountMaxEntries = 4096
+
+type docTreeCount struct {
+	box, directory string
+	count          int
+	used           uint64
+}
 
 // DocTreeVersion 同时记录源、批量替换和引用索引版本，构建期间发生写入时不能发布旧顺序。
 type DocTreeVersion struct {
@@ -97,8 +104,9 @@ var docTreeOrders = struct {
 	writers             map[string]int
 	versions            map[string]uint64
 	entries             map[string]*DocTreeOrder
+	counts              map[string]docTreeCount
 	bytes               int
-}{writers: map[string]int{}, versions: map[string]uint64{}, entries: map[string]*DocTreeOrder{}}
+}{writers: map[string]int{}, versions: map[string]uint64{}, entries: map[string]*DocTreeOrder{}, counts: map[string]docTreeCount{}}
 
 func docTreeVersionLocked(box string, refs bool) (DocTreeVersion, bool) {
 	version := DocTreeVersion{Global: docTreeOrders.global, Source: docTreeOrders.versions[box]}
@@ -115,6 +123,15 @@ func DocTreeSourceVersion(box string, refs bool) (DocTreeVersion, bool) {
 }
 
 func invalidateDocTreeLocked(box string) {
+	invalidateDocTreeOrdersLocked(box)
+	for key, count := range docTreeOrders.counts {
+		if box == "" || count.box == box {
+			delete(docTreeOrders.counts, key)
+		}
+	}
+}
+
+func invalidateDocTreeOrdersLocked(box string) {
 	if box == "" {
 		docTreeOrders.global++
 	} else {
@@ -131,9 +148,34 @@ func invalidateDocTreeLocked(box string) {
 // BeginDocTreeMutation 覆盖源写入的整个范围，包括失败后可能已经落盘的部分变更。
 // 只持锁修改版本，不在文件、数据库或生命周期锁的等待过程中持有缓存锁。
 func BeginDocTreeMutation(box string) func() {
+	return beginDocTreeMutation(box, func() { invalidateDocTreeLocked(box) })
+}
+
+// BeginDocTreeCreation 保留其他目录的已认证计数，源写入前后都使目标目录失效。
+// 仅用于写入前确认目标文件不存在的创建操作；替换、移动和删除仍走完整失效。
+func BeginDocTreeCreation(box, documentPath string) func() {
+	directory := path.Dir(documentPath)
+	createdDirectory := strings.TrimSuffix(documentPath, ".sy")
+	return beginDocTreeMutation(box, func() {
+		invalidateDocTreeOrdersLocked(box)
+		for key, count := range docTreeOrders.counts {
+			if count.box == box && (count.directory == directory || count.directory == createdDirectory ||
+				strings.HasPrefix(count.directory, createdDirectory+"/")) {
+				delete(docTreeOrders.counts, key)
+			}
+		}
+	})
+}
+
+// BeginDocTreeSortMutation 只改排序文件，目录成员及可见性未变，可以复用已认证计数。
+func BeginDocTreeSortMutation() func() {
+	return beginDocTreeMutation("", func() { invalidateDocTreeOrdersLocked("") })
+}
+
+func beginDocTreeMutation(box string, invalidate func()) func() {
 	docTreeOrders.Lock()
 	docTreeOrders.writers[box]++
-	invalidateDocTreeLocked(box)
+	invalidate()
 	docTreeOrders.Unlock()
 	return func() {
 		docTreeOrders.Lock()
@@ -141,12 +183,19 @@ func BeginDocTreeMutation(box string) func() {
 		if docTreeOrders.writers[box] == 0 {
 			delete(docTreeOrders.writers, box)
 		}
-		invalidateDocTreeLocked(box)
+		invalidate()
 		docTreeOrders.Unlock()
 	}
 }
 
 func advanceDocTreeDocumentLocked(box, documentPath string, change DocTreeDocumentChange) {
+	if change.Structure {
+		for key, count := range docTreeOrders.counts {
+			if count.box == box {
+				delete(docTreeOrders.counts, key)
+			}
+		}
+	}
 	docTreeOrders.versions[box]++
 	version := docTreeOrders.versions[box]
 	for key, order := range docTreeOrders.entries {
@@ -231,6 +280,47 @@ func DocTreeOrderCurrent(order *DocTreeOrder) bool {
 	defer docTreeOrders.Unlock()
 	version, stable := docTreeVersionLocked(order.box, order.refs)
 	return stable && version == order.version
+}
+
+// 计数按查询访问策略及目录缓存，排序快照重建不必重新读取未改变的子文档源。
+func GetDocTreeChildCount(key, box, directory string) (int, bool) {
+	docTreeOrders.Lock()
+	defer docTreeOrders.Unlock()
+	if _, stable := docTreeVersionLocked(box, true); !stable {
+		return 0, false
+	}
+	cacheKey := key + "\x00" + directory
+	count, ok := docTreeOrders.counts[cacheKey]
+	if !ok || count.box != box {
+		return 0, false
+	}
+	docTreeOrders.clock++
+	count.used = docTreeOrders.clock
+	docTreeOrders.counts[cacheKey] = count
+	return count.count, true
+}
+
+func PutDocTreeChildCount(key, box, directory string, version DocTreeVersion, count int) {
+	docTreeOrders.Lock()
+	defer docTreeOrders.Unlock()
+	current, stable := docTreeVersionLocked(box, true)
+	if !stable || current != version || count < 0 {
+		return
+	}
+	cacheKey := key + "\x00" + directory
+	if _, exists := docTreeOrders.counts[cacheKey]; !exists && len(docTreeOrders.counts) >= docTreeCountMaxEntries {
+		var oldestKey string
+		var oldest uint64 = ^uint64(0)
+		for candidate, entry := range docTreeOrders.counts {
+			if entry.used < oldest {
+				oldestKey, oldest = candidate, entry.used
+			}
+		}
+		delete(docTreeOrders.counts, oldestKey)
+	}
+	docTreeOrders.clock++
+	docTreeOrders.counts[cacheKey] = docTreeCount{box: strings.Clone(box), directory: strings.Clone(directory),
+		count: count, used: docTreeOrders.clock}
 }
 
 // PutDocTreeOrder 限制条目和内存总量，旧构建不能在失效后写回。

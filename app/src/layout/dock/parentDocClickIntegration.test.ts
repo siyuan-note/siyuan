@@ -36,11 +36,12 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     const calls: string[] = [];
     const config = {parentDocTitleClickMode: mode};
     const attributes: Record<string, string> = {
-        "data-type": "navigation-file", "data-path": "/doc.sy", "data-node-id": "doc", "data-count": "4",
+        "data-type": "navigation-file", "data-node-id": "doc",
     };
+    const item = {id: "doc", notebookId: "box", occurrenceKey: "box/doc", path: "/doc.sy", subFileCount: 4};
     const expansion = {value: expanded};
     const row = {isConnected: true, getAttribute: (key: string) => attributes[key],
-        dataset: {notebookId: "box"}};
+        dataset: {treeKey: "box/doc"}};
     const text = {tagName: "SPAN", parentElement: row, closest: (selector: string) => selector.startsWith("li[") ? row : text,
         classList: {contains: (name: string) => name === "b3-list-item__text"}, isEqualNode: () => false};
     const event = {target: text, button: 0, preventDefault() {}, stopPropagation() {}};
@@ -53,8 +54,8 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
         element: {}, app: {}, parentDocClick,
         setCurrent() {}, toggleLeaf: toggle, toggleTreeItem: toggle,
         docTree: {
-            getItemFromElement: () => ({id: "doc", occurrenceKey: "box/doc", path: attributes["data-path"]}),
-            getItem: () => ({path: attributes["data-path"]}),
+            getItemFromElement: () => item,
+            getItem: () => item,
             isExpanded: () => expansion.value,
             itemAtDirectoryIndex: (key: string, index: number) => {
                 assert.equal(key, "box/doc");
@@ -67,11 +68,12 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     };
     const click = loadClick(mobile, {
         window: {siyuan: {config: {fileTree: config}, menus: {menu: {remove() {}}}}},
+        getDocTreeItem: () => item,
         options: {app: {}}, Constants: {SIYUAN_APPID: "app"},
         isNotCtrl: () => true, isPhablet: () => false, setPanelFocus() {},
         openFileById: () => calls.push("open"), openMobileFileById: () => calls.push("open"),
     });
-    return {calls, config, attributes, row, expansion,
+    return {calls, config, attributes, item, row, expansion,
         click: () => click.call(panel, ...(mobile ? [row, "box"] : [event])),
         resolve: (code = 0) => resolveRequest({...response, code})};
 };
@@ -119,7 +121,7 @@ test("prefetch results cannot apply after settings, paths, attachment or expansi
         const h = harness(mobile, 2);
         h.click();
         if (change === 0) { h.config.parentDocTitleClickMode = 1; }
-        if (change === 1) { h.attributes["data-path"] = "/moved.sy"; }
+        if (change === 1) { h.item.path = "/moved.sy"; }
         if (change === 2) { h.row.isConnected = false; }
         if (change === 3) { h.expansion.value = true; }
         h.resolve();

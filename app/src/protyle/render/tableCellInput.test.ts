@@ -9,7 +9,7 @@ import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, is
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
                             transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string,
-                            commandSource: string) => {
+                            commandSource: string, columnResizeSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -62,14 +62,14 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, isNativeTextSelectionHandleTouch, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
-        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, " +
+        "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, finishTableCellEditing, TABLE_DEFAULT_COLUMN_WIDTH, " +
         "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
         typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") &
-        typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu");
+        typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu") & typeof import("../util/tableColumnWidth");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -540,7 +540,17 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         owner.selectElement = document.createElement("div");
         owner.toolbar.isMultiSelectMode = absent;
         const selectedRanges: HTMLTableCellElement[][] = [];
-        owner.wysiwyg.tableControl = {setHidden: noop, clear: noop, hasTouchSelection: absent, selectCellRange: (...cells: HTMLTableCellElement[]) => {
+        const resizeServices = {...services, finishTableCellEditing: api.finishTableCellEditing,
+            restoreTableVirtualizationDOM: api.restoreTableVirtualizationDOM, TABLE_DEFAULT_COLUMN_WIDTH: api.TABLE_DEFAULT_COLUMN_WIDTH};
+        const resizeColumn = new Function(...Object.keys(resizeServices), "getTableNode", columnResizeSource +
+            "\nreturn ColumnResizeController.prototype.startColumnResize;")(...Object.values(resizeServices),
+            (cell: HTMLTableCellElement) => cell?.closest('[data-type="NodeTable"]'));
+        owner.wysiwyg.tableControl = {protyle: owner, wysiwygElement: wysiwyg, touch: mobile ? {} : undefined,
+            startColumnResize: resizeColumn, clearCellSelection: noop, blurTouchEditor: noop,
+            showDimensionFeedback: noop, clearDimensionFeedback: noop, scheduleRender: noop,
+            getColumnRect: (table: HTMLTableElement, _grid: unknown, index: number) =>
+                table.querySelectorAll("col")[index].getBoundingClientRect(),
+            setHidden: noop, clear: noop, hasTouchSelection: absent, selectCellRange: (...cells: HTMLTableCellElement[]) => {
             selectedRanges.push(cells);
             return true;
         }} as unknown as IProtyle["wysiwyg"]["tableControl"];
@@ -1075,10 +1085,15 @@ test("table cell editors preserve input and alignment, and consume table menu En
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
-        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../wysiwyg/tableVirtualization.ts",
+        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
+    const tableControl = createSourceFile("tableControl.ts", read("../util/tableControl.ts"), ScriptTarget.Latest, true);
+    const columnResize = tableControl.statements.find(isClassDeclaration).members.find(member =>
+        member.name?.getText(tableControl) === "startColumnResize");
+    assert.ok(columnResize);
+    const columnResizeSource = compile("class ColumnResizeController {" + columnResize.getText(tableControl) + "}");
     const members = wysiwyg.statements.find(isClassDeclaration).members.filter(member =>
         ["inputTimeout", "pendingInputTimeouts", "runningInputTasks", "scheduleInput", "runInput", "flushPendingInput"]
             .includes(member.name?.getText(wysiwyg)));
@@ -1144,7 +1159,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource, columnResizeSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

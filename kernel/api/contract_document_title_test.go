@@ -6,6 +6,7 @@ package api
 
 import (
 	"encoding/json"
+	"html"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -93,5 +94,17 @@ func testAPIContractDocumentTitle(t *testing.T, engine *gin.Engine, boxID, docID
 	tree, err := model.LoadTreeByBlockID(docID)
 	if err != nil || treenode.DocumentTitleRevision(tree.Root) != current.Revision {
 		t.Fatal("response preceded source commit")
+	}
+	for _, text := range []string{"**literal** A/B", "中文 😄 & <literal>", ""} {
+		operation["data"] = map[string]any{"expectedRevision": current.Revision,
+			"blockDOM": `<div data-type="NodeParagraph"><div contenteditable="true">` + html.EscapeString(text) + `</div></div>`}
+		body = post("/api/transactions", payload)
+		if err := json.Unmarshal(body, &saved); err != nil || saved.Code != 0 {
+			t.Fatalf("plain title write failed: %s %v", body, err)
+		}
+		current = read()
+		if current.Source != nil || current.Format != "plain" || current.Text != text || current.Empty != (text == "") {
+			t.Fatalf("plain title contract created an inline source: %+v", current)
+		}
 	}
 }

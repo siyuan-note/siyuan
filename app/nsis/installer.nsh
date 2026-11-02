@@ -2,6 +2,33 @@
 !include FileFunc.nsh
 Caption "${PRODUCT_NAME} ${VERSION}"
 
+!define MARKDOWN_PROG_ID "org.b3log.siyuan.markdown"
+
+!macro RegisterMarkdownOpenWith
+    # 只加入打开方式，不修改扩展名默认值或用户的 UserChoice。
+    WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}" "" "SiYuan Markdown"
+    WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\DefaultIcon" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}",0'
+    WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\shell\open\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --markdown "%1"'
+    WriteRegNone SHELL_CONTEXT "Software\Classes\.md\OpenWithProgids" "${MARKDOWN_PROG_ID}"
+    WriteRegNone SHELL_CONTEXT "Software\Classes\.markdown\OpenWithProgids" "${MARKDOWN_PROG_ID}"
+    System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
+!macroend
+
+!macro UnregisterMarkdownOpenWith
+    # 旧安装器不得移除已指向其他安装目录的登记，也不清理其他应用的键。
+    Push $R9
+    ReadRegStr $R9 SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\shell\open\command" ""
+    ${If} $R9 == '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --markdown "%1"'
+        DeleteRegValue SHELL_CONTEXT "Software\Classes\.md\OpenWithProgids" "${MARKDOWN_PROG_ID}"
+        DeleteRegValue SHELL_CONTEXT "Software\Classes\.markdown\OpenWithProgids" "${MARKDOWN_PROG_ID}"
+        DeleteRegKey /ifempty SHELL_CONTEXT "Software\Classes\.md\OpenWithProgids"
+        DeleteRegKey /ifempty SHELL_CONTEXT "Software\Classes\.markdown\OpenWithProgids"
+        DeleteRegKey SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}"
+        System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
+    ${EndIf}
+    Pop $R9
+!macroend
+
 !macro WriteInstallLog Stage
     Push "${Stage}"
     Call AppendInstallLog
@@ -134,6 +161,7 @@ FunctionEnd
 !macroend
 
 !macro customInstall
+    !insertmacro RegisterMarkdownOpenWith
     !insertmacro WriteInstallLog "payload-extracted version=${VERSION} target=$INSTDIR"
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
     nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
@@ -146,6 +174,9 @@ FunctionEnd
 !macroend
 
 !macro customUnInstall
+    ${IfNot} ${isUpdated}
+        !insertmacro UnregisterMarkdownOpenWith
+    ${EndIf}
     ${IfNot} ${isUpdated}
         # 真正卸载时清理共用安装包，更新安装期间保留缓存。
         RMDir /r "$PROFILE\.config\siyuan\install"

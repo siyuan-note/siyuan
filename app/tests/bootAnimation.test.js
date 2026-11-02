@@ -15,7 +15,7 @@ if (process.versions.electron && process.type === "browser") {
             await win.loadURL("about:blank");
             win.webContents.debugger.attach("1.3");
             await win.webContents.debugger.sendCommand("Page.enable");
-            for (const page of ["electron/boot.html", "appearance/boot/index.html"]) {
+            for (const page of ["electron/static/boot.html", "appearance/boot/index.html"]) {
                 for (const [index, name] of ["original", "left", "inward", "right"].entries()) {
                     const script = `let calls = 0; Math.random = () => calls++ === 0 ? ${index / 4 + 0.01} : 0.5;
                         window.fetch = () => new Promise(() => {});

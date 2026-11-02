@@ -661,7 +661,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	renameRootTitles := map[string]string{}
-	richRootTitles := map[string]treenode.DocumentTitle{}
+	sourceRootTitles := map[string]treenode.DocumentTitle{}
 	cachedTrees := map[string]*parse.Tree{}
 	originals := map[string][]byte{}
 
@@ -753,18 +753,19 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 
 			title := treenode.ReadDocumentTitle(node).Text
 			tags := node.IALAttr("tags")
-			if node.DocumentTitle != nil {
+			sourceAware := node.DocumentTitle != nil || !IsBoxDoc(tree.Box, node.ID)
+			if sourceAware {
 				previous := treenode.ReadDocumentTitle(node)
 				changed, replaceErr := replaceDocumentTitleText(node, method, keyword, replacement, r)
 				if replaceErr != nil {
 					return replaceErr
 				}
 				if changed {
-					richRootTitles[node.ID] = previous
+					sourceRootTitles[node.ID] = previous
 				}
 			}
 			if 0 == method {
-				if newTitle, matched := replaceSearchText(title, method, keyword, replacement, r); matched && node.DocumentTitle == nil {
+				if newTitle, matched := replaceSearchText(title, method, keyword, replacement, r); matched && !sourceAware {
 					renameRootTitles[node.ID] = newTitle
 				}
 
@@ -775,7 +776,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 					ReloadTag()
 				}
 			} else if 3 == method {
-				if nil != r && r.MatchString(title) && node.DocumentTitle == nil {
+				if nil != r && r.MatchString(title) && !sourceAware {
 					renameRootTitles[node.ID] = r.ReplaceAllString(title, replacement)
 				}
 
@@ -1092,11 +1093,11 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	for _, rootID := range changedRoots {
 		tree := cachedTrees[rootID]
 		title, rename := renameRootTitles[rootID]
-		var richTitleBefore *treenode.DocumentTitle
-		if previous, changed := richRootTitles[rootID]; changed {
-			richTitleBefore = &previous
+		var sourceTitleBefore *treenode.DocumentTitle
+		if previous, changed := sourceRootTitles[rootID]; changed {
+			sourceTitleBefore = &previous
 		}
-		if err = writeReplacementTree(tree, originals[rootID], title, rename, richTitleBefore); err != nil {
+		if err = writeReplacementTree(tree, originals[rootID], title, rename, sourceTitleBefore); err != nil {
 			return
 		}
 		reloadTreeIDs = append(reloadTreeIDs, rootID)
@@ -1106,7 +1107,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 }
 
 // 每个文档只提交一次；文件、缓存、索引及撤销失效与编辑器事务串行，标题也使用同一份扫描基线。
-func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool, richTitleBefore *treenode.DocumentTitle) error {
+func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool, sourceTitleBefore *treenode.DocumentTitle) error {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
@@ -1119,9 +1120,9 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	}
 	var size uint64
 	var titleChanged, emptyAttrUpdated bool
-	if richTitleBefore != nil {
+	if sourceTitleBefore != nil {
 		current := treenode.ReadDocumentTitle(tree.Root)
-		titleChanged, emptyAttrUpdated = current.Text != richTitleBefore.Text, current.Empty != richTitleBefore.Empty
+		titleChanged, emptyAttrUpdated = current.Text != sourceTitleBefore.Text, current.Empty != sourceTitleBefore.Empty
 		if titleChanged {
 			parentHPath, pathErr := documentParentDisplayPath(tree.Box, tree.Path)
 			if pathErr != nil {
@@ -1163,7 +1164,7 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	}
 	invalidateDocumentHistory(tree.ID)
 	publishDocRename(tree, titleChanged, emptyAttrUpdated)
-	if richTitleBefore != nil && !titleChanged && !emptyAttrUpdated {
+	if sourceTitleBefore != nil && !titleChanged && !emptyAttrUpdated {
 		IncSync()
 	}
 	if rename && IsBoxDocPath(tree.Box, tree.Path) {
@@ -2425,7 +2426,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 		return
 	}
 
-	quotedKeyword := stringQuery(keyword)
+	quotedKeyword := strings.ReplaceAll(stringQuery(keyword), "'", "''")
 	table := "blocks_fts"
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
@@ -3480,7 +3481,6 @@ func stringQuery(query string) string {
 	}
 
 	query = strings.ReplaceAll(query, "\"", "\"\"")
-	query = strings.ReplaceAll(query, "'", "''")
 
 	if strings.Contains(trimmedQuery, " ") {
 		buf := bytes.Buffer{}

@@ -75,11 +75,7 @@ func recoverDocumentMetadata(boxID string) (err error) {
 		return err
 	}
 	for _, doc := range missing {
-		tree, readErr := filesys.ReadDocumentMetadataTree(boxID, doc.Path)
-		if readErr != nil {
-			return readErr
-		}
-		if err = treenode.RecoverDocumentMetadata(tree); err != nil {
+		if err = filesys.RecoverDocumentMetadataWrite(doc); err != nil {
 			return err
 		}
 	}
@@ -88,6 +84,11 @@ func recoverDocumentMetadata(boxID string) (err error) {
 
 func recoverOpenedDocumentMetadata() {
 	for _, box := range Conf.GetOpenedBoxes() {
+		if treenode.DocumentMetadataState(box.ID) == "error" {
+			// 错误状态须重新枚举并认证全部源，不能只凭已有块树行发布就绪。
+			indexBox(box.ID)
+			continue
+		}
 		if err := recoverDocumentMetadata(box.ID); err != nil {
 			logging.LogErrorf("recover document metadata [%s] failed: %s", box.ID, err)
 		}

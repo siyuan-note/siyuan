@@ -16,7 +16,7 @@ const compile = (file: string, flags: Flags) => transpileModule(require("ifdef-l
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const loadOpenMenu = (flags: Flags) => {
+const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
     const calls: Array<{name: string; args: unknown[]}> = [];
     const window = {siyuan: {config: {editor: {}, fileTree: {}}, languages: {}}};
     // 未显式提供的依赖统一替换为记录调用的空函数
@@ -41,6 +41,8 @@ const loadOpenMenu = (flags: Flags) => {
         "../constants": constants,
         "../util/imageURL": imageURL,
         "../editor/pdfAssetLink": pdfAssetLink,
+        "../editor/markdownAsset": {canOpenMarkdownAsset: () => markdownAvailable,
+            openMarkdownAsset: (...args: unknown[]) => calls.push({name: "openMarkdownAsset", args})},
     });
     return {openMenu: menu.openMenu, calls};
 };
@@ -81,3 +83,16 @@ for (const {name, flags, newWindow} of [
             [{name: "openAsset", args: [app, "assets/video.mp4#t=10", undefined]}]);
     });
 }
+
+
+test("local Markdown assets expose the built-in editor action without replacing default open", () => {
+    const {openMenu, calls} = loadOpenMenu({MOBILE: false, BROWSER: false}, true);
+    const items = openMenu(app, "assets/note.md", true, false);
+    assert.ok(items.some((item: {id: string}) => item.id === "useDefault"));
+    items.find((item: {id: string}) => item.id === "openMarkdownEditor").click();
+    assert.deepEqual(calls.filter(call => call.name === "openMarkdownAsset"), [{name: "openMarkdownAsset", args: ["assets/note.md"]}]);
+    const unavailable = loadOpenMenu({MOBILE: false, BROWSER: false}).openMenu(app, "assets/note.md", true, false);
+    assert.equal(unavailable.some((item: {id: string}) => item.id === "openMarkdownEditor"), false);
+    const browser = loadOpenMenu({MOBILE: false, BROWSER: true}, true).openMenu(app, "assets/note.md", true, false);
+    assert.equal(browser.some((item: {id: string}) => item.id === "openMarkdownEditor"), false);
+});

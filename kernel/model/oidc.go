@@ -923,7 +923,7 @@ func oidcClaimValues(value any) []string {
 func authenticateOIDCSession(c *gin.Context, rememberMe bool) error {
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
-	workspaceSession.AccessAuthCode = ""
+	workspaceSession.AccessAuthCodeVersion = ""
 	applyAuthenticatedSession(c, workspaceSession, rememberMe)
 	util.WrongAuthCount = 0
 	util.AuthThrottleReset(c.ClientIP())

@@ -438,7 +438,7 @@ class ListMindmapController {
                     if (ids.length === 1 && canEdit(owner, list)) {
                         menu.addItem({label: window.siyuan.languages.mindmapPasteChild, icon: "iconPaste",
                             click: () => void this.pasteNodes(ids[0], "child")});
-                        if (!this.model.nodes.get(ids[0])?.virtual) {
+                        if (this.model.nodes.get(ids[0])?.parentId) {
                             menu.addItem({label: window.siyuan.languages.mindmapPasteSibling, icon: "iconPaste",
                                 click: () => void this.pasteNodes(ids[0], "sibling")});
                         }
@@ -735,6 +735,7 @@ class ListMindmapController {
                     ...(query?.dataset.nodeId ? {undoFocusEmbedId: query.dataset.nodeId} : {})};
             };
             const undoFocus = focusContext(selectedID, model);
+            const undoViewport = this.view.captureHistoryViewport();
             if (change() === false) {
                 return false;
             }
@@ -750,6 +751,7 @@ class ListMindmapController {
                 updateTransaction(this.owner, this.list, before, {
                     undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
                     mindmapSnapshotId: this.list.dataset.nodeId,
+                    undoFocusMindmapViewport: undoViewport,
                     ...undoFocus,
                     ...(selection?.undo ? {undoFocusMindmapSelection: JSON.stringify(selection.undo)} : {}),
                 }, {doOperations: [], undoOperations: [], context: {
@@ -847,6 +849,9 @@ class ListMindmapController {
     }
 
     private async pasteNodes(id: string, kind: "child" | "sibling", data?: IClipboardData) {
+        if (kind === "sibling" && !this.model.nodes.get(id)?.parentId) {
+            return;
+        }
         const rootID = this.owner.block.rootID;
         const before = cleanListMindmapHTML(this.list.outerHTML);
         const current = () => !this.disposed && canEdit(this.owner, this.list) &&
@@ -1101,6 +1106,7 @@ class ListMindmapController {
             return;
         }
         const id = candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id;
+        this.view.restoreHistoryViewport(selection?.undoFocusMindmapViewport);
         this.view.focusNode(id, false);
         const node = this.model.nodes.get(id);
         const content = selection && node && !node.virtual && this.view.getContentHost(id);

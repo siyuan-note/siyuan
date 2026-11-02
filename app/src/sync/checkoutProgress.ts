@@ -114,9 +114,9 @@ const render = () => {
     panel.setAttribute("aria-modal", String(state.blocking));
     root.classList.toggle("sync-checkout--background", !state.blocking);
     root.classList.toggle("sync-checkout--compact", state.compact || !state.blocking);
-    root.querySelector(".sync-checkout__details").classList.toggle("fn__none", state.compact);
-    root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking);
-    updateProgressContent(root, state.message, state.current, state.total, "percent");
+    root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking || state.compact);
+    updateProgressContent(root, state.compact ? window.siyuan.languages._kernel[81] : state.message,
+        state.current, state.total, "percent");
     root.querySelector('[data-action="toggle"] span').textContent = state.compact ?
         window.siyuan.languages.expand : window.siyuan.languages.collapseSyncDetails;
     root.querySelector<HTMLButtonElement>('[data-action="cancel"]').disabled = state.canceling;
@@ -223,7 +223,8 @@ export const syncCheckoutProgress = (data: IWebSocketData) => {
     const next: CheckoutState = {...incoming, phase: incoming.phase || "applying", blocking: incoming.blocking !== false,
         message: incoming.message || data.msg || "", current: Number(incoming.current) || 0, total: Number(incoming.total) || 0,
         canceling: Boolean(incoming.canceling), upsertRootIDs: incoming.upsertRootIDs || [], removeRootIDs: incoming.removeRootIDs || [],
-        compact: same ? state.compact : false, expanded: same ? state.expanded : false};
+        compact: same && (state.blocking || state.expanded) ? state.compact : true,
+        expanded: same ? state.expanded : false};
     if (same && state.blocking && !next.blocking) {
         finish({...state, revision: nextRevision, upsertRootIDs: next.upsertRootIDs, removeRootIDs: next.removeRootIDs}, next);
         return;

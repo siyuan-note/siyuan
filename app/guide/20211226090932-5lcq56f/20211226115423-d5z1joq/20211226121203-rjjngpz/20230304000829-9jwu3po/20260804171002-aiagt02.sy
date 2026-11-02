@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261028114540"
+		"updated": "20261102193434"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-vzu9h83",
-				"updated": "20260816130653"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-5bb3f3k",
-				"updated": "20260804180000"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -928,12 +928,251 @@
 			]
 		},
 		{
+			"ID": "20261102182306-xsba3zf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-xsba3zf",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝外部技能"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-7w4a8gh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-7w4a8gh",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和儲存庫位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）會按整個儲存庫安裝，先嘗試 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，下載失敗後嘗試 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。命令形式只用於擷取儲存庫名稱，不會執行命令，也不會套用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等篩選參數。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-sqlbjea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-sqlbjea",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分支層級的 tree 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）安裝該引用的儲存庫技能；子目錄 tree 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安裝該目錄下的技能。單技能目錄安裝一個，集合目錄安裝其下的技能。支援名稱包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的分支；解析時優先選擇最長有效引用前綴，也支援標籤和提交引用。指定目錄不存在或沒有技能時會回報錯誤，不會改為整庫安裝。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-932vszx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-932vszx",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存庫封存檔和 release ZIP 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）會解壓縮並遞迴尋找技能目錄中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，集合儲存庫可能一次安裝多個技能。找到技能目錄後不再向其內部尋找其他技能；會複製該技能目錄及配套資源。下載大小上限為 10 MB，子目錄 tree 安裝仍需下載儲存庫封存檔。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-htnm61d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-htnm61d",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "blob 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和 raw 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安裝單個 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不會下載配套的指令碼或參考資料。單檔安裝要求 Front Matter 中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。需要配套資源時請使用技能目錄的 tree 位址或 ZIP。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-r1rmrth",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-r1rmrth",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝會依技能名稱寫入工作空間技能目錄：ZIP 安裝會取代同名技能的整個目錄；blob/raw 單檔安裝只覆寫同名技能的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，保留既有的其他檔案。重新安裝前請備份本機修改。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-7w0fcb0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-7w0fcb0",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前沒有檢查技能更新的入口；請自行比對上游版本，確認後重新安裝。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170054-vppxnqj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-vppxnqj",
-				"updated": "20261026182118"
+				"updated": "20261102193434"
 			},
 			"Children": [
 				{
@@ -947,12 +1186,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026182118-ra8a1vy",
-				"updated": "20261026182118"
+				"updated": "20261102193434"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "外部 MCP 工具按需載入。智能體預設只接收服務清單，需要時載入指定服務的工具定義，從下一輪模型請求開始可用；你也可以在訊息中指明要使用的服務。載入狀態僅保留在目前使用者請求及其工具執行輪次中，傳送下一則訊息時重新開始；可同時載入多個服務，不設固定數量上限，模型可卸載不再需要的服務以節省上下文。已停用的工具不會被載入，執行確認策略仍然生效。在智能體能力設定中停用內建 mcp 工具可恢復傳送全部外部工具定義，重新啟用則恢復按需載入。"
+					"Data": "外部 MCP 工具按需載入。智能體預設只接收服務清單，需要時載入指定服務的工具定義，從下一輪模型請求開始可用；你也可以在訊息中指明要使用的服務。載入狀態僅保留在目前使用者請求及其工具執行輪次中，傳送下一則訊息時重新開始；可同時載入多個服務，不設固定數量上限，模型可卸載不再需要的服務以節省上下文。已停用的工具不會被載入，執行確認策略仍然生效。在智能體能力設定中停用內建 mcp 工具可恢復傳送全部外部工具定義，重新啟用則恢復按需載入。呼叫 mcp 探索工具時，應使用精確的服務 ID，而非顯示名稱。使用 action=list 且不傳 server 可列出可用服務的 ID；失敗提示會區分服務名稱、未知 ID、服務停用、連線或工具可用性問題以及能力策略限制。"
 				}
 			]
 		},
@@ -1305,7 +1544,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "智能體在一輪任務中首次寫入工作空間資料前會自動建立資料快照，每輪最多建立一次。確認修改結果不符合預期時，可以在會話中的快照提示上執行回滾。"
+					"Data": "智能體在一輪任務中首次寫入工作空間資料前會自動建立資料快照，每輪最多建立一次。請求寫入前須先初始化本機資料倉庫金鑰，無需雲端帳號。尚未初始化時，智能體會在請求寫入確認前提示此前置條件，唯讀操作仍然可用。確認修改結果不符合預期時，可以在會話中的快照提示上執行回滾。"
 				}
 			]
 		},

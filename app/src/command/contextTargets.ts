@@ -10,12 +10,7 @@ export const hasCommandFileTreeTarget = (context: ICommandContextSnapshot) => {
     if (context.focus !== "fileTree" || !tree) {
         return false;
     }
-    if (tree.controller) {
-        return Boolean(tree.items && tree.controller.validateSelection(tree.selectionVersion, tree.items));
-    }
-    return tree.elements.every((element, index) => element.isConnected &&
-        element.getAttribute("data-node-id") === tree.ids[index] &&
-        element.getAttribute("data-path") === tree.paths[index]);
+    return Boolean(tree.controller && tree.items && tree.controller.validateSelection(tree.selectionVersion, tree.items));
 };
 
 export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
@@ -55,21 +50,7 @@ export const getCommandDocument = (context: ICommandContextSnapshot) => {
             const {id, path, notebookId} = items[0];
             return {id, path, notebookId};
         }
-        const elements = context.fileTree?.elements;
-        if (elements?.length !== 1) {
-            return undefined;
-        }
-        const element = elements[0];
-        if (!element.isConnected || element.getAttribute("data-type") !== "navigation-file" ||
-            element.getAttribute("data-node-id") !== context.fileTree.ids[0] ||
-            element.getAttribute("data-path") !== context.fileTree.paths[0]) {
-            return undefined;
-        }
-        return {
-            id: context.fileTree.ids[0],
-            path: context.fileTree.paths[0],
-            notebookId: element.getAttribute("data-notebook-id") || element.closest("ul[data-url]")?.getAttribute("data-url"),
-        };
+        return undefined;
     }
     const protyle = context.protyle;
     const doc = context.document;

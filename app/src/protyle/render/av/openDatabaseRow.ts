@@ -74,6 +74,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
     let unregisterRefresh: () => void;
     let renderVersion = 0;
     let destroyed = false;
+    let openingBoundID = "";
     let contextProtyle: IProtyle;
     let pendingRow: {data: IDatabaseRowOpenData, resolve: (opened: boolean) => void};
     const dialog = new Dialog({
@@ -148,6 +149,13 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
             if (primaryElement?.dataset.cellValue) {
                 const value = JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) as IAVCellValue;
+                if (!switching && renderData.isDetached && !openingBoundID && value.block?.id && !value.isDetached &&
+                    window.siyuan.config.editor.databaseAttrShow) {
+                    openingBoundID = value.block.id;
+                    void openDatabaseRowByData(contextProtyle, {...data, boundBlockID: value.block.id, isDetached: false})
+                        .catch(error => console.warn("Failed to open bound database row:", error))
+                        .finally(() => { openingBoundID = ""; });
+                }
                 const currentTitle = value.block?.content || window.siyuan.languages.untitled;
                 data.title = currentTitle;
                 rowElement.querySelector(".protyle-db-row__title span").textContent = currentTitle;
@@ -247,112 +255,116 @@ const getCustomRowData = (data: IDatabaseRowOpenData) => ({
 export const mountDesktopDatabaseRowNavigation = (model: Editor | Custom, data: IDatabaseRowOpenData,
                                             source: Partial<IProtyle>) => {
     const container = model instanceof Custom ? model.element.querySelector(".protyle-db-row") : model.editor.protyle.element;
-    mountDatabaseRowNavigation(container, data, async next => {
-        const tab = model.parent;
-        const wnd = tab.parent;
-        const options: IOpenFileOptions = {app: model.app};
-        if (next.isDetached || !window.siyuan.config.editor.databaseAttrShow) {
-            if (model instanceof Custom) {
-                const opened = await switchDatabaseRow(model, getCustomRowData(next));
-                if (opened) {
-                    mountDesktopDatabaseRowNavigation(model, next, source);
-                }
-                return opened;
+    mountDatabaseRowNavigation(container, data, next => switchDesktopDatabaseRowPreview(model, next, source),
+        model instanceof Custom ? undefined : model.editor.protyle.breadcrumb?.element.parentElement);
+};
+
+export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, next: IDatabaseRowOpenData,
+                                                     source: Partial<IProtyle>) => {
+    const tab = model.parent;
+    const wnd = tab.parent;
+    const options: IOpenFileOptions = {app: model.app};
+    if (next.isDetached || !window.siyuan.config.editor.databaseAttrShow) {
+        if (model instanceof Custom) {
+            const opened = await switchDatabaseRow(model, getCustomRowData(next));
+            if (opened) {
+                mountDesktopDatabaseRowNavigation(model, next, source);
             }
-            options.custom = {id: "siyuan-database-row", icon: "iconDatabase",
-                title: next.title || window.siyuan.languages.untitled, data: getCustomRowData(next)};
-        } else {
-            const response = await fetchSyncPost("/api/block/getBlockInfo", {id: next.boundBlockID});
-            if (response.code !== 0) {
+            return opened;
+        }
+        options.custom = {id: "siyuan-database-row", icon: "iconDatabase",
+            title: next.title || window.siyuan.languages.untitled, data: getCustomRowData(next)};
+    } else {
+        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: next.boundBlockID});
+        if (response.code !== 0) {
+            return false;
+        }
+        Object.assign(options, {id: next.boundBlockID, rootID: response.data.rootID,
+            fileName: response.data.rootTitle, rootTitleEmpty: response.data.rootTitleEmpty,
+            rootIcon: response.data.rootIcon, zoomIn: next.boundBlockID !== response.data.rootID});
+    }
+    if (!tab.panelElement.isConnected || tab.model !== model) {
+        return false;
+    }
+    if (model instanceof Editor && model.editor.isUploading()) {
+        showMessage(window.siyuan.languages.uploading);
+        return false;
+    }
+    let documentLoaded: () => void;
+    const loaded = new Promise<void>(resolve => { documentLoaded = resolve; });
+    const opened = newTab({...options, keepCursor: true}, () => documentLoaded());
+    opened.parent = wnd;
+    opened.panelElement.classList.add("fn__none");
+    document.body.append(opened.panelElement);
+    let preparing = true;
+    let cancel: () => void;
+    const cancelled = new Promise<boolean>(resolve => { cancel = () => resolve(false); });
+    const observer = new MutationObserver(() => {
+        if (!tab.panelElement.isConnected || tab.model !== model || tab.parent !== wnd) {
+            cancel();
+        }
+    });
+    observer.observe(document.body, {childList: true, subtree: true});
+    const timeout = window.setTimeout(cancel, 60000);
+    let ready = false;
+    try {
+        // 在布局之外加载目标预览，正文和属性就绪前保留当前页签及其内容。
+        opened.callback(opened);
+        opened.callback = undefined;
+        ready = await Promise.race([cancelled, (async () => {
+            if (opened.model instanceof Custom) {
+                opened.model.element.dispatchEvent(new CustomEvent("database-row-readonly", {detail: source}));
+                opened.model.update();
+                return whenDatabaseRowReady(opened.model);
+            }
+            await loaded;
+            if (!preparing || !(opened.model instanceof Editor)) {
                 return false;
             }
-            Object.assign(options, {id: next.boundBlockID, rootID: response.data.rootID,
-                fileName: response.data.rootTitle, rootTitleEmpty: response.data.rootTitleEmpty,
-                rootIcon: response.data.rootIcon, zoomIn: next.boundBlockID !== response.data.rootID});
-        }
-        if (!tab.panelElement.isConnected || tab.model !== model) {
-            return false;
-        }
-        if (model instanceof Editor && model.editor.isUploading()) {
-            showMessage(window.siyuan.languages.uploading);
-            return false;
-        }
-        let documentLoaded: () => void;
-        const loaded = new Promise<void>(resolve => { documentLoaded = resolve; });
-        const opened = newTab({...options, keepCursor: true}, () => documentLoaded());
-        opened.parent = wnd;
-        opened.panelElement.classList.add("fn__none");
-        document.body.append(opened.panelElement);
-        let preparing = true;
-        let cancel: () => void;
-        const cancelled = new Promise<boolean>(resolve => { cancel = () => resolve(false); });
-        const observer = new MutationObserver(() => {
-            if (!tab.panelElement.isConnected || tab.model !== model || tab.parent !== wnd) {
-                cancel();
-            }
-        });
-        observer.observe(document.body, {childList: true, subtree: true});
-        const timeout = window.setTimeout(cancel, 60000);
-        let ready = false;
-        try {
-            // 在布局之外加载目标预览，正文和属性就绪前保留当前页签及其内容。
-            opened.callback(opened);
-            opened.callback = undefined;
-            ready = await Promise.race([cancelled, (async () => {
-                if (opened.model instanceof Custom) {
-                    opened.model.element.dispatchEvent(new CustomEvent("database-row-readonly", {detail: source}));
-                    opened.model.update();
-                    return whenDatabaseRowReady(opened.model);
+            const protyle = opened.model.editor.protyle;
+            inheritDatabaseRowReadonly(protyle, source);
+            protyle.databaseAttributePanel?.expand(next.avID);
+            return new Promise<boolean>(resolve => {
+                if (!protyle.databaseAttributePanel) {
+                    resolve(false);
+                    return;
                 }
-                await loaded;
-                if (!preparing || !(opened.model instanceof Editor)) {
-                    return false;
-                }
-                const protyle = opened.model.editor.protyle;
-                inheritDatabaseRowReadonly(protyle, source);
-                protyle.databaseAttributePanel?.expand(next.avID);
-                return new Promise<boolean>(resolve => {
-                    if (!protyle.databaseAttributePanel) {
-                        resolve(false);
-                        return;
-                    }
-                    protyle.databaseAttributePanel.afterRender(element => {
-                        resolve(!!element.querySelector(`[data-av-id="${next.avID}"]`));
-                    });
+                protyle.databaseAttributePanel.afterRender(element => {
+                    resolve(!!element.querySelector(`[data-av-id="${next.avID}"]`));
                 });
-            })()]);
-            ready = ready && tab.panelElement.isConnected && tab.model === model && tab.parent === wnd;
-            if (model instanceof Editor && model.editor.isUploading()) {
-                ready = false;
-                showMessage(window.siyuan.languages.uploading);
-            }
-        } finally {
-            preparing = false;
-            observer.disconnect();
-            window.clearTimeout(timeout);
-            if (!ready) {
-                opened.model?.destroy();
-                opened.model?.send("closews", {});
-                opened.panelElement.remove();
-            }
+            });
+        })()]);
+        ready = ready && tab.panelElement.isConnected && tab.model === model && tab.parent === wnd;
+        if (model instanceof Editor && model.editor.isUploading()) {
+            ready = false;
+            showMessage(window.siyuan.languages.uploading);
         }
+    } finally {
+        preparing = false;
+        observer.disconnect();
+        window.clearTimeout(timeout);
         if (!ready) {
-            return false;
+            opened.model?.destroy();
+            opened.model?.send("closews", {});
+            opened.panelElement.remove();
         }
-        opened.panelElement.classList.remove("fn__none");
-        // 复用来源预览所在的分屏，不依赖异步请求完成时用户正激活哪个分屏。
-        wnd.addTab(opened, false, true, undefined, tab.id);
-        if (opened.model instanceof Custom) {
-            opened.model.resize();
-            mountDesktopDatabaseRowNavigation(opened.model, next, source);
-        } else if (opened.model instanceof Editor) {
-            opened.model.editor.resize();
-            showDatabaseRowPreview(opened.model, next, source);
-            updatePanelByEditor({protyle: opened.model.editor.protyle,
-                focus: false, pushBackStack: false, reload: false, resize: false});
-        }
-        return true;
-    }, model instanceof Custom ? undefined : model.editor.protyle.breadcrumb?.element.parentElement);
+    }
+    if (!ready) {
+        return false;
+    }
+    opened.panelElement.classList.remove("fn__none");
+    // 复用来源预览所在的分屏，不依赖异步请求完成时用户正激活哪个分屏。
+    wnd.addTab(opened, false, true, undefined, tab.id);
+    if (opened.model instanceof Custom) {
+        opened.model.resize();
+        mountDesktopDatabaseRowNavigation(opened.model, next, source);
+    } else if (opened.model instanceof Editor) {
+        opened.model.editor.resize();
+        showDatabaseRowPreview(opened.model, next, source);
+        updatePanelByEditor({protyle: opened.model.editor.protyle,
+            focus: false, pushBackStack: false, reload: false, resize: false});
+    }
+    return true;
 };
 /// #endif
 

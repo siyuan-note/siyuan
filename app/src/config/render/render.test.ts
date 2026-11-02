@@ -94,6 +94,29 @@ describe("genStackHtml", () => {
         assert.match(html, /class="b3-label__text">Setting description<\/div>/);
     });
 
+    it("hides optional stack buttons before mounting while keeping ordinary buttons visible", () => {
+        for (const hidden of [undefined, false, true]) {
+            const html = genStackHtml([{
+                left: {kind: "desc", text: "Setting description"},
+                right: {kind: "button", id: "setting", label: "Configure", icon: "iconSettings", hidden},
+            }]);
+            assert.equal(/class="[^"]*\bfn__none\b[^"]*" id="setting"/.test(html), hidden === true);
+            assert.match(html, /b3-button b3-button--outline/);
+            assert.match(html, /Setting description/);
+        }
+    });
+
+    it("reads dynamic button visibility on every render", () => {
+        let hidden = true;
+        const lines = [{
+            left: {kind: "desc" as const, text: "Setting description"},
+            right: {kind: "button" as const, id: "setting", label: "Configure", icon: "iconSettings", hidden: () => hidden},
+        }];
+        assert.match(genStackHtml(lines), /fn__none/);
+        hidden = false;
+        assert.doesNotMatch(genStackHtml(lines), /fn__none/);
+    });
+
     it("keeps titles with controls styled as configuration names", () => {
         const html = genStackHtml([{
             left: {kind: "title", text: "Setting title"},

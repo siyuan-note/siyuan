@@ -778,6 +778,7 @@ export const movePathTo = (options: {
         inputElement.focus();
         /// #endif
     });
+    return dialog;
 };
 
 const getLeaf = (liElement: HTMLElement, flashcard: boolean, onRender?: (root: Element) => void) => {

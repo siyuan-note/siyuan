@@ -203,7 +203,9 @@ func registerAiRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/memory/get", contractRouteHandlers(apicontract.AIMemoryGet, getAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/save", contractRouteHandlers(apicontract.AIMemorySave, saveAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/forget", contractRouteHandlers(apicontract.AIMemoryForget, forgetAIMemory)...)
+	ginServer.Handle("POST", "/api/ai/memory/clear", contractRouteHandlers(apicontract.AIMemoryClear, clearAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/overview", contractRouteHandlers(apicontract.AIMemoryOverview, overviewAIMemory)...)
+	ginServer.Handle("POST", "/api/ai/memory/translate", contractRouteHandlers(apicontract.AIMemoryTranslate, translateAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/maintain", contractRouteHandlers(apicontract.AIMemoryMaintain, maintainAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/task", contractRouteHandlers(apicontract.AIMemoryTask, taskAIMemory)...)
 	ginServer.Handle("POST", "/api/ai/memory/cancel", contractRouteHandlers(apicontract.AIMemoryCancel, cancelAIMemory)...)
@@ -391,6 +393,8 @@ func registerTagRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/tag/getTag", contractRouteHandlers(apicontract.GetTag, getTag)...)
 	ginServer.Handle("POST", "/api/tag/renameTag", contractRouteHandlers(apicontract.RenameTag, renameTag)...)
 	ginServer.Handle("POST", "/api/tag/removeTag", contractRouteHandlers(apicontract.RemoveTag, removeTag)...)
+	ginServer.Handle("POST", "/api/tag/previewTagRemoval", contractRouteHandlers(apicontract.PreviewTagRemoval, previewTagRemoval)...)
+	ginServer.Handle("POST", "/api/tag/removeTagWithCollections", contractRouteHandlers(apicontract.RemoveTagWithCollections, removeTagWithCollections)...)
 }
 
 // registerLuteRoutes 注册本域的契约路由。
@@ -563,6 +567,7 @@ func registerSyncRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/removeCloudSyncDir", contractRouteHandlers(apicontract.RemoveCloudSyncDir, removeCloudSyncDir)...)
 	ginServer.Handle("POST", "/api/sync/listCloudSyncDir", contractRouteHandlers(apicontract.ListCloudSyncDir, listCloudSyncDir)...)
 	ginServer.Handle("POST", "/api/sync/performSync", contractRouteHandlers(apicontract.PerformSync, performSync)...)
+	ginServer.Handle("POST", "/api/sync/getSyncSourceState", contractRouteHandlers(apicontract.GetSyncSourceState, getSyncSourceState)...)
 	ginServer.Handle("POST", "/api/sync/cancelSyncCheckout", contractRouteHandlers(apicontract.CancelSyncCheckout, cancelSyncCheckout)...)
 	ginServer.Handle("POST", "/api/sync/getSyncCheckout", contractRouteHandlers(apicontract.GetSyncCheckout, getSyncCheckout)...)
 	ginServer.Handle("POST", "/api/sync/confirmSyncCheckout", contractRouteHandlers(apicontract.ConfirmSyncCheckout, confirmSyncCheckout)...)
@@ -697,6 +702,9 @@ func registerConvertRoutes(ginServer *gin.Engine) {
 
 // registerTemplateRoutes 注册本域的契约路由。
 func registerTemplateRoutes(ginServer *gin.Engine) {
+	ginServer.Handle("POST", "/api/template/respondHTTP", contractRouteHandlers(apicontract.RespondTemplateHTTP, respondTemplateHTTP)...)
+	ginServer.Handle("POST", "/api/template/httpPermission", contractRouteHandlers(apicontract.TemplateHTTPPermission, templateHTTPPermission)...)
+	ginServer.Handle("POST", "/api/template/cancelHTTP", contractRouteHandlers(apicontract.CancelTemplateHTTP, cancelTemplateHTTP)...)
 	ginServer.Handle("POST", "/api/template/render", contractRouteHandlers(apicontract.RenderTemplate, renderTemplate)...)
 	ginServer.Handle("POST", "/api/template/manage", contractRouteHandlers(apicontract.ManageTemplateFiles, manageTemplateFiles)...)
 	ginServer.Handle("POST", "/api/template/getDocSaveAsTemplateInfo", contractRouteHandlers(apicontract.GetDocSaveAsTemplateInfo, getDocSaveAsTemplateInfo)...)

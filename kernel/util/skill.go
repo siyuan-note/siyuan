@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -21,7 +22,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
 
@@ -535,6 +535,8 @@ type normalizedSkillSource struct {
 	downloadURL string // 实际 GET 的地址
 	isZip       bool   // 是否按 zip 解压处理（codeload / release zip / Content-Type 判定为 zip）
 	branch      string // codeload 分支，空表示无需回退；main 失败回退 master
+	treeRepo    string // GitHub tree URL 的仓库
+	treePath    string // 尚未拆分的引用/子目录，引用名可能包含 /
 }
 
 // InstallSkill 从 GitHub 仓库或直链下载并安装 skill 到 SkillsDir()。
@@ -551,7 +553,13 @@ func InstallSkill(rawURL string) (*InstallSkillResult, error) {
 		return nil, err
 	}
 
-	data, contentType, err := downloadSkillSource(src)
+	var data []byte
+	var contentType, subdir string
+	if src.treeRepo != "" {
+		data, contentType, subdir, err = downloadGitHubTreeSource(src)
+	} else {
+		data, contentType, err = downloadSkillSource(src)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +569,7 @@ func InstallSkill(rawURL string) (*InstallSkillResult, error) {
 		strings.HasPrefix(contentType, "application/x-zip-compressed")
 
 	if isZip {
-		return installFromZip(data)
+		return installFromZip(data, subdir)
 	}
 
 	// 文本：当作单个 SKILL.md
@@ -644,7 +652,15 @@ func normalizeGitHubURL(u *url.URL) (normalizedSkillSource, error) {
 				downloadURL: "https://raw.githubusercontent.com/" + ownerRepo + "/" + branch + "/" + rawPath,
 			}, nil
 		}
-		return codeloadSource(ownerRepo, branch), nil
+		treePath := strings.Join(parts[3:], "/")
+		for _, part := range parts[3:] {
+			if part == "" || part == "." || part == ".." || strings.ContainsAny(part, "\\:\x00") {
+				return normalizedSkillSource{}, errors.New("invalid GitHub tree path")
+			}
+		}
+		src := codeloadSource(ownerRepo, branch)
+		src.treeRepo, src.treePath = ownerRepo, treePath
+		return src, nil
 	}
 
 	// commit/<sha>
@@ -658,6 +674,35 @@ func normalizeGitHubURL(u *url.URL) (normalizedSkillSource, error) {
 
 	// 纯仓库地址：默认 main，失败回退 master
 	return codeloadSource(ownerRepo, "main"), nil
+}
+
+// downloadGitHubTreeSource 从最长引用前缀开始尝试，兼容含 / 的分支、标签和提交。
+// 只有不存在的引用（404）才缩短前缀；其他下载错误不能改变安装范围。
+func downloadGitHubTreeSource(src normalizedSkillSource) ([]byte, string, string, error) {
+	parts := strings.Split(src.treePath, "/")
+	for end := len(parts); end > 0; end-- {
+		candidate := normalizedSkillSource{
+			downloadURL: "https://codeload.github.com/" + src.treeRepo + "/zip/" + url.PathEscape(strings.Join(parts[:end], "/")),
+			isZip:       true,
+		}
+		data, contentType, err := downloadSkillSource(candidate)
+		if err == nil {
+			return data, contentType, strings.Join(parts[end:], "/"), nil
+		}
+		var statusErr *skillDownloadStatusError
+		if !errors.As(err, &statusErr) || statusErr.status != http.StatusNotFound {
+			return nil, "", "", err
+		}
+	}
+	return nil, "", "", errors.New("GitHub tree reference not found")
+}
+
+type skillDownloadStatusError struct {
+	status int
+}
+
+func (err *skillDownloadStatusError) Error() string {
+	return fmt.Sprintf("download failed: HTTP %d", err.status)
 }
 
 // downloadSkillSource 下载 skill 源，返回字节、Content-Type
@@ -691,14 +736,14 @@ func downloadSkillSource(src normalizedSkillSource) (data []byte, contentType st
 
 // fetchBytes 执行带大小限制的 GET
 func fetchBytes(rawURL string) (data []byte, contentType string, err error) {
-	resp, err := httpclient.NewBrowserRequest().Get(rawURL)
+	resp, err := skillDownloadHTTPClient().Get(rawURL)
 	if err != nil {
 		return nil, "", errors.New("download failed: " + err.Error())
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return nil, "", fmt.Errorf("download failed: HTTP %d", resp.StatusCode)
+		return nil, "", &skillDownloadStatusError{status: resp.StatusCode}
 	}
 
 	contentType = resp.Header.Get("Content-Type")
@@ -712,8 +757,29 @@ func fetchBytes(rawURL string) (data []byte, contentType string, err error) {
 	return body, contentType, nil
 }
 
+// skillDownloadHTTPClient 返回 skill 下载专用客户端：沿用 ssrfSafeClient 在拨号期固定已校验公网 IP 的行为，
+// 并对每一跳重定向复查目标，避免安装来源把请求引向内网。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-6pg3-pqxw-jm82
+func skillDownloadHTTPClient() *http.Client {
+	client := *ssrfSafeClient
+	client.CheckRedirect = checkSkillDownloadRedirect
+	return &client
+}
+
+// checkSkillDownloadRedirect 复查每一跳重定向：限制跳数与协议，并在发起请求前拦下内网目标。
+// 连接层的拨号校验仍是最终防线，此处用于提前失败。
+func checkSkillDownloadRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 5 {
+		return errors.New("too many redirects")
+	}
+	if scheme := req.URL.Scheme; scheme != "http" && scheme != "https" {
+		return errors.New("redirect scheme is not allowed")
+	}
+	return CheckHostSSRF(req.URL.Hostname())
+}
+
 // installFromZip 解压 zip 并安装其中的 skill
-func installFromZip(data []byte) (*InstallSkillResult, error) {
+func installFromZip(data []byte, subdir string) (*InstallSkillResult, error) {
 	tmpRoot := filepath.Join(TempDir, "ai", "skill-install", gulu.Rand.String(7))
 	if err := os.MkdirAll(tmpRoot, 0755); err != nil {
 		return nil, err
@@ -733,7 +799,32 @@ func installFromZip(data []byte) (*InstallSkillResult, error) {
 		return nil, errors.New("unzip failed: " + err.Error())
 	}
 
-	skillDirs := findSkillDirs(unzipDir)
+	searchRoot := unzipDir
+	if subdir != "" {
+		cleaned, err := normalizeSkillResourcePath(subdir)
+		if err != nil {
+			return nil, err
+		}
+		// GitHub codeload 归档恰有一层仓库包裹目录。
+		entries, err := os.ReadDir(unzipDir)
+		if err != nil || len(entries) != 1 || !entries[0].IsDir() {
+			return nil, errors.New("invalid GitHub repository archive")
+		}
+		searchRoot = filepath.Join(unzipDir, entries[0].Name(), filepath.FromSlash(cleaned))
+		info, err := os.Stat(searchRoot)
+		if err != nil || !info.IsDir() {
+			return nil, errors.New("GitHub tree directory not found in the archive")
+		}
+	}
+	skillDirs := findSkillDirs(searchRoot)
+	// 保留相对解压根的目录名，让无 name 的单技能目录仍可用目录名兜底。
+	for i, dir := range skillDirs {
+		rel, err := filepath.Rel(unzipDir, filepath.Join(searchRoot, dir))
+		if err != nil {
+			return nil, err
+		}
+		skillDirs[i] = rel
+	}
 	if len(skillDirs) == 0 {
 		return nil, errors.New("no SKILL.md found in the archive")
 	}

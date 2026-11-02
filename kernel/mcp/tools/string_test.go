@@ -23,6 +23,9 @@ func TestTruncateText(t *testing.T) {
 		{name: "Chinese below limit", text: strings.Repeat("中", 80), maxLen: 200, want: strings.Repeat("中", 80)},
 		{name: "Chinese truncated", text: strings.Repeat("中", 201), maxLen: 200, want: strings.Repeat("中", 200) + "..."},
 		{name: "emoji truncated", text: strings.Repeat("😀", 201), maxLen: 200, want: strings.Repeat("😀", 200) + "..."},
+		{name: "mixed characters", text: "a中😀尾", maxLen: 3, want: "a中😀..."},
+		{name: "zero limit", text: "中", maxLen: 0, want: "..."},
+		{name: "invalid bytes in truncated text", text: "a\xff中尾", maxLen: 3, want: "a�中..."},
 	}
 
 	for _, test := range tests {

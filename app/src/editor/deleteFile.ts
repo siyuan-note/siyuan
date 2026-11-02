@@ -5,7 +5,8 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
-import {getDocTreeActionItems, getDocTreeMenuItems} from "../menus/navigationSelection";
+import {getDocTreeActionItems} from "../menus/navigationSelection";
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 
 export const deleteFile = async (notebookId: string, pathString: string) => {
     const hasRef = await checkBlockRef({
@@ -76,11 +77,10 @@ export const deleteNotebooks = async (notebookIds: string[]) => {
     }, undefined, true);
 };
 
-export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liElements.flatMap(element =>
-    getDocTreeMenuItems([element]).map(item => ({...item,
-        kind: element.getAttribute("data-type") === "navigation-root" ? "notebook" : "document",
-        name: element.querySelector(".b3-list-item__text")?.textContent?.trim() || "",
-    }))));
+export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liElements.flatMap(element => {
+    const item = getDocTreeItem(element);
+    return item ? [item] : [];
+}));
 
 export const deleteDocTreeItems = async (selected: readonly {
     id: string, notebookId: string, path: string, kind: string, name: string,

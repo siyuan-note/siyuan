@@ -1,60 +1,166 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readFileSync, readdirSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
+import {genConfigItemMainHtml} from "../../render/fragments";
 
 class ControlStub {
+    isConnected = true;
     value = "";
     disabled = false;
-    checked = false;
     innerHTML = "";
     textContent = "";
-    children: ControlStub[] = [];
     listeners = new Map<string, () => void>();
     addEventListener(name: string, callback: () => void) { this.listeners.set(name, callback); }
-    append(...children: ControlStub[]) { this.children.push(...children); }
-    replaceChildren() { this.children = []; }
 }
 
-test("memory settings expose independent use, maintenance and conversation permission without changing defaults", () => {
+test("memory descriptions are independently localized without semicolons or trailing sentence punctuation", () => {
+    for (const file of readdirSync("appearance/langs").filter(name => name.endsWith(".json"))) {
+        const languages = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
+        for (const key of ["aiMemoryEnabledTip", "aiMemoryServiceTip"]) {
+            assert.equal(typeof languages[key], "string", `${file}: ${key}`);
+            assert.ok(languages[key].trim(), `${file}: ${key}`);
+            assert.doesNotMatch(languages[key], /[;；؛]|[.。।]$/, `${file}: ${key}`);
+        }
+    }
+});
+
+test("memory settings expose one enable switch without changing defaults", () => {
     const switches: string[] = [];
-    const memory = {enabled: false, autoMaintain: false, conversations: false, modelId: "", reasoningEffort: "", sources: new Array<string>()};
+    const memory = {enabled: false, modelId: "", reasoningEffort: ""};
     const code = transpileModule(readFileSync("src/config/tabs/ai/aiMemory.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
     const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
     let writes = 0;
+    let html = "";
     runInNewContext(code, {
         exports: exported,
         window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {ai: {memory}}}},
-        require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} : {},
+        require: (name: string) => name.endsWith("/aiRuntime") ? {aiConfigApi: {patch: () => { writes++; }}} :
+            name.endsWith("/fragments") ? {genConfigItemMainHtml} : {},
     });
     exported.registerAiMemoryGroup({group: () => ({
-        switch: (id: string) => switches.push(id), slot: () => {}, button: () => {},
+        stack: (_spec: unknown, configure: (stack: unknown) => void) => {
+            const stack = {switch: (id: string) => switches.push(id), desc: () => stack, button: () => {}};
+            configure(stack);
+        },
+        slot: (spec: {html: () => string}) => { html += spec.html(); }, button: () => {},
     })});
-    assert.deepEqual(switches, ["ai.memory.enabled", "ai.memory.autoMaintain", "ai.memory.conversations"]);
+    assert.deepEqual(switches, ["ai.memory.enabled"]);
     assert.equal(writes, 0);
+    assert.ok(!html.includes("data-memory-sources"));
+    assert.ok(html.includes("data-memory-model"));
+    assert.ok(html.includes("data-memory-effort"));
+    assert.equal((html.match(/class="fn__flex b3-label config-item"/g) || []).length, 2);
     assert.equal(memory.modelId, "");
-    assert.equal(memory.autoMaintain, false);
-    assert.equal(memory.conversations, false);
+    assert.equal(memory.enabled, false);
 });
 
-test("model selection cannot restore queued opt-outs and source selection serializes acknowledged state", async () => {
-    const memory = {enabled: true, autoMaintain: true, conversations: true, modelId: "old", reasoningEffort: "", sources: new Array<string>()};
+test("memory settings pair descriptions with controls and show management only while enabled", () => {
+    for (const enabled of [false, true]) {
+        const memory = {enabled};
+        const languages = {aiMemory: "memory", manage: "manage", aiMemoryEnabledTip: "enabled description", aiMemoryServiceTip: "service description"};
+        let mount: (root: unknown) => void;
+        let opened = 0;
+        let writes = 0;
+        let isHidden: () => boolean;
+        const lines: Array<{desc: string; id?: string}> = [];
+        const classes = new Set<string>();
+        const manage = Object.assign(new ControlStub(), {classList: {toggle: (name: string, force: boolean) => {
+            if (force) { classes.add(name); } else { classes.delete(name); }
+        }}});
+        const events = new Map<string, () => void>();
+        const root = {
+            isConnected: true,
+            querySelector: (selector: string) => {
+                assert.equal(selector, "#manageMemory");
+                return manage;
+            },
+        };
+        const stack = {
+            switch: (id: string, spec: {desc: string}) => { lines.push({desc: spec.desc, id}); },
+            desc: (desc: string) => { lines.push({desc}); return stack; },
+            button: (spec: {id: string; label: string; icon: string; hidden: () => boolean}) => {
+                assert.equal(spec.label, languages.manage);
+                assert.equal(spec.icon, "iconSettings");
+                isHidden = spec.hidden;
+                assert.equal(isHidden(), !enabled, "disabled memory is hidden before asynchronous mounting");
+                lines.at(-1).id = spec.id;
+            },
+        };
+        const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
+        runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiMemory.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS},
+        }).outputText, {
+            exports: exported,
+            window: {siyuan: {languages, config: {ai: {memory}}},
+                addEventListener: (name: string, listener: () => void) => { events.set(name, listener); },
+                removeEventListener: (name: string, listener: () => void) => {
+                    assert.equal(events.get(name), listener); events.delete(name);
+                }},
+            require: (name: string) => {
+                if (name.endsWith("/aiRuntime")) { return {AI_CONFIG_CHANGED_EVENT: "ai-config-changed", aiConfigApi: {patch: () => { writes++; }}}; }
+                if (name.endsWith("/manager")) { return {openMemoryManager: () => { opened++; }}; }
+                return {};
+            },
+        });
+        exported.registerAiMemoryGroup({group: () => ({
+            stack: (spec: {afterMount: (root: unknown) => void; keywords: string[]}, configure: (stack: unknown) => void) => {
+                assert.ok(spec.keywords.includes(languages.manage));
+                assert.ok(spec.keywords.includes(languages.aiMemoryEnabledTip));
+                assert.ok(spec.keywords.includes(languages.aiMemoryServiceTip));
+                mount = spec.afterMount;
+                configure(stack);
+            },
+            slot: () => {},
+        })});
+        assert.deepEqual(lines, [
+            {desc: languages.aiMemoryEnabledTip, id: "ai.memory.enabled"},
+            {desc: languages.aiMemoryServiceTip, id: "manageMemory"},
+        ]);
+        mount(root);
+        assert.equal(manage.disabled, false);
+        assert.equal(classes.has("fn__none"), !enabled);
+        manage.listeners.get("click")();
+        assert.equal(opened, enabled ? 1 : 0);
+        for (const nextEnabled of [true, false, true]) {
+            memory.enabled = nextEnabled;
+            assert.equal(isHidden(), !nextEnabled, "a later render reads the current setting rather than its registration snapshot");
+            events.get("ai-config-changed")();
+            assert.equal(classes.has("fn__none"), !nextEnabled);
+            const previous: number = opened;
+            manage.listeners.get("click")();
+            assert.equal(opened, previous + (nextEnabled ? 1 : 0));
+        }
+        manage.isConnected = false;
+        events.get("ai-config-changed")();
+        assert.equal(events.size, 0, "replaced controls release listeners even while their settings root stays connected");
+        const previous: number = opened;
+        manage.listeners.get("click")();
+        assert.equal(opened, previous);
+        assert.equal(writes, 0);
+        assert.equal(memory.enabled, true);
+    }
+});
+
+test("memory model placeholder preserves empty selection and model changes preserve queued opt-outs", async () => {
+    const memory = {enabled: true, modelId: "old", reasoningEffort: ""};
+    const languages = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));
     const model = new ControlStub();
     const effort = new ControlStub();
-    const sources = new ControlStub();
-    const root = {isConnected: true, querySelector: (selector: string) => selector.includes("model") ? model : selector.includes("effort") ? effort : sources};
+    const requests: string[] = [];
+    const root = {isConnected: true, querySelector: (selector: string) => selector.includes("model") ? model : selector.includes("effort") ? effort : null};
     let mount: (root: unknown) => void;
-    const patches: Array<{path: string; value: Record<string, unknown> | string[]; finish: () => void}> = [];
-    const patch = (path: string, value: Record<string, unknown> | string[], applied?: () => void) => {
+    const patches: Array<{path: string; value: Record<string, unknown>; finish: () => void}> = [];
+    const patch = (path: string, value: Record<string, unknown>, applied?: () => void) => {
         let resolve: () => void;
         const pending = new Promise<void>(done => { resolve = done; });
         patches.push({path, value, finish: resolve});
         return pending.then(() => {
             if (path === "memory") { Object.assign(memory, value); }
-            if (path === "memory.sources") { memory.sources = value as string[]; }
             applied?.();
         });
     };
@@ -64,25 +170,35 @@ test("model selection cannot restore queued opt-outs and source selection serial
     const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
     runInNewContext(code, {
         exports: exported,
-        window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {ai: {memory, providers: new Array<string>()}}}},
+        window: {siyuan: {languages, config: {ai: {memory, providers: new Array<string>()}}}},
         document: {createElement: () => new ControlStub()},
         require: (name: string) => {
             if (name.endsWith("/aiRuntime")) { return {aiConfigApi: {patch}}; }
             if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr: String}; }
             if (name.endsWith("/state")) { return {memoryModelOptions: () => new Array<{id: string; label: string}>()}; }
             if (name.endsWith("/reasoningEffort")) { return {getReasoningEffortOptions: () => [{value: "", label: "default"}]}; }
-            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string) => url.endsWith("capabilities") ?
-                {code: 0, data: {efforts: new Array<string>()}} : {code: 0, data: {notebooks: [
-                    {id: "A", name: "A", encrypted: false, closed: false}, {id: "B", name: "B", encrypted: false, closed: false},
-                ]}}}; }
+            if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string) => {
+                requests.push(url);
+                assert.equal(url, "/api/ai/memory/capabilities");
+                return {code: 0, data: {efforts: new Array<string>()}};
+            }}; }
             if (name.endsWith("/message")) { return {showMessage: (error: string) => { throw new Error(error); }}; }
             return {};
         },
     });
-    exported.registerAiMemoryGroup({group: () => ({switch: () => {}, button: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
+    exported.registerAiMemoryGroup({group: () => ({stack: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
     mount(root);
     const flush = async () => { for (let i = 0; i < 12; i++) { await Promise.resolve(); } };
     await flush();
+    assert.equal(model.value, "old");
+    memory.modelId = "";
+    model.listeners.get("focus")();
+    assert.equal(model.innerHTML, '<option value="">请选择模型</option>');
+    assert.equal(model.value, "");
+    assert.equal(memory.modelId, "");
+    assert.equal(patches.length, 0, "rendering an unconfigured model does not save a selection");
+    model.listeners.get("focus")();
+    assert.equal(model.innerHTML, '<option value="">请选择模型</option>');
     model.value = "new";
     model.listeners.get("change")();
     assert.equal(effort.disabled, true);
@@ -90,27 +206,90 @@ test("model selection cannot restore queued opt-outs and source selection serial
     effort.listeners.get("change")();
     assert.equal(patches.length, 1, "old model effort cannot be queued during model change");
     assert.deepEqual(Object.keys(patches[0].value).sort(), ["modelId", "reasoningEffort"]);
-    memory.autoMaintain = false;
-    memory.conversations = false;
+    memory.enabled = false;
     patches[0].finish();
     await flush();
-    assert.equal(memory.autoMaintain, false);
-    assert.equal(memory.conversations, false);
-    const a = sources.children[0].children[1];
-    const b = sources.children[1].children[1];
-    a.checked = true;
-    a.listeners.get("change")();
-    assert.equal(b.disabled, true);
-    b.checked = true;
-    b.listeners.get("change")();
-    assert.equal(patches.length, 2);
-    patches[1].finish();
+    assert.equal(model.value, "new");
+    assert.equal(memory.reasoningEffort, "");
+    assert.equal(memory.enabled, false);
+    assert.ok(requests.length > 0);
+    assert.ok(requests.every(url => url === "/api/ai/memory/capabilities"));
+    assert.equal(patches.length, 1);
+});
+
+
+test("memory reasoning uses Agent options and saves, resets, and reloads model selections", async () => {
+    const options = getReasoningEffortOptions({});
+    const memory = {modelId: "deepseek-flash", reasoningEffort: "high"};
+    const model = new ControlStub();
+    const effort = new ControlStub();
+    const root = {isConnected: true, querySelector: (selector: string) => selector.includes("model") ? model : effort};
+    const patches: Array<{path: string; value: unknown}> = [];
+    const responses: Array<(value: unknown) => void> = [];
+    let mount: (root: unknown) => void;
+    const exported = {} as {registerAiMemoryGroup: (tab: unknown) => void};
+    runInNewContext(transpileModule(readFileSync("src/config/tabs/ai/aiMemory.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText, {
+        exports: exported,
+        window: {siyuan: {languages: {}, config: {ai: {memory, providers: []}}}},
+        require: (name: string) => {
+            if (name.endsWith("/aiRuntime")) { return {aiConfigApi: {patch: async (path: string, value: unknown) => {
+                patches.push({path, value});
+                if (path === "memory") { Object.assign(memory, value); }
+                if (path === "memory.reasoningEffort") { memory.reasoningEffort = value as string; }
+            }}}; }
+            if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr: String}; }
+            if (name.endsWith("/state")) { return {memoryModelOptions: () => [
+                {id: "deepseek-flash", label: "DeepSeek / deepseek-flash"},
+                {id: "claude-opus-4-6", label: "Anthropic / claude-opus-4-6"},
+            ]}; }
+            if (name.endsWith("/reasoningEffort")) { return {getReasoningEffortOptions}; }
+            if (name.endsWith("/fetch")) { return {fetchSyncPost: () => new Promise(resolve => responses.push(resolve))}; }
+            if (name.endsWith("/message")) { return {showMessage: (error: string) => { throw new Error(error); }}; }
+            return {};
+        },
+    });
+    exported.registerAiMemoryGroup({group: () => ({stack: () => {}, slot: (spec: {afterMount: (root: unknown) => void}) => { mount = spec.afterMount; }})});
+    const flush = async () => { for (let i = 0; i < 12; i++) { await Promise.resolve(); } };
+    const complete = async () => {
+        responses.shift()({code: 0, data: {efforts: options.filter(option => option.value).map(option => option.value)}});
+        await flush();
+    };
+    mount(root);
+    assert.equal(effort.disabled, true);
+    await complete();
+    assert.equal(effort.disabled, false, "DeepSeek must not be blocked by a model-name whitelist");
+    assert.equal(effort.value, "high");
+    assert.equal(effort.innerHTML, options.map(option => `<option value="${option.value}">${option.label}</option>`).join(""));
+    for (const {value} of options) {
+        effort.value = value;
+        effort.listeners.get("change")();
+        await flush();
+        assert.equal(memory.reasoningEffort, value);
+        assert.equal(patches.at(-1).path, "memory.reasoningEffort");
+    }
+    model.value = "claude-opus-4-6";
+    model.listeners.get("change")();
+    assert.equal(effort.disabled, true);
     await flush();
-    assert.equal(b.checked, false);
-    assert.equal(b.disabled, false);
-    b.checked = true;
-    b.listeners.get("change")();
-    assert.equal(JSON.stringify(patches[2].value), JSON.stringify(["A", "B"]));
-    patches[2].finish();
+    await complete();
+    assert.equal(memory.modelId, "claude-opus-4-6");
+    assert.equal(memory.reasoningEffort, "");
+    assert.equal(effort.value, "");
+    assert.equal(effort.disabled, false);
+    effort.value = "xhigh";
+    effort.listeners.get("change")();
     await flush();
+    mount(root);
+    await complete();
+    assert.equal(effort.value, "xhigh", "saved reasoning is restored on remount");
+    model.value = "";
+    model.listeners.get("change")();
+    await flush();
+    responses.shift()({code: 0, data: {efforts: []}});
+    await flush();
+    assert.equal(memory.modelId, "");
+    assert.equal(memory.reasoningEffort, "");
+    assert.equal(effort.disabled, true, "unconfigured model stays disabled without fallback");
 });

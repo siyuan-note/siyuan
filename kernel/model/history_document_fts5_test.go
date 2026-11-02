@@ -26,9 +26,13 @@ import (
 )
 
 func TestHistoryDocumentRelocationFailureRollsBack(t *testing.T) {
-	for _, encrypted := range []bool{false, true} {
-		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
+	for _, scenario := range []struct{ encrypted, missingLayout bool }{{}, {encrypted: true}, {missingLayout: true}, {encrypted: true, missingLayout: true}} {
+		encrypted, missingLayout := scenario.encrypted, scenario.missingLayout
+		t.Run(map[bool]string{false: "plain/", true: "encrypted/"}[encrypted]+map[bool]string{false: "intact", true: "missing-calendar"}[missingLayout], func(t *testing.T) {
 			fixture, historicalAV, _ := setupAttributeViewDeletedBlockTest(t, "container")
+			oldQueue, oldConf := util.QueueDir, util.ConfDir
+			util.QueueDir, util.ConfDir = t.TempDir(), t.TempDir()
+			t.Cleanup(func() { util.QueueDir, util.ConfDir = oldQueue, oldConf })
 			boxID, avBoxID := fixture.box.ID, ""
 			if encrypted {
 				var trees []*parse.Tree
@@ -144,6 +148,25 @@ func TestHistoryDocumentRelocationFailureRollsBack(t *testing.T) {
 			if err = av.SaveAttributeView(currentAV); err != nil {
 				t.Fatal(err)
 			}
+			liveAVPath := boundAttributeViewHistoryPath(util.DataDir, avBoxID, currentAV.ID)
+			if missingLayout {
+				currentAV.Views[0].LayoutType, currentAV.Views[0].Calendar = av.LayoutTypeCalendar, nil
+				data, encodeErr := json.Marshal(currentAV)
+				if avBoxID != "" && encodeErr == nil {
+					data, encodeErr = av.EncryptAVData(avBoxID, currentAV.ID, data)
+				}
+				if encodeErr != nil {
+					t.Fatal(encodeErr)
+				}
+				if err = os.WriteFile(liveAVPath, data, 0600); err != nil {
+					t.Fatal(err)
+				}
+				cache.ClearAVCache()
+			}
+			currentAVSource, err := os.ReadFile(liveAVPath)
+			if err != nil {
+				t.Fatal(err)
+			}
 			readAV := func() *av.AttributeView {
 				view, err := av.ParseAttributeViewForIndexInBox(historicalAV.ID, avBoxID)
 				if err != nil {
@@ -181,7 +204,11 @@ func TestHistoryDocumentRelocationFailureRollsBack(t *testing.T) {
 			if bt := treenode.GetBlockTreeInBox(tree.ID, boxID); bt == nil || bt.Path != tree.Path {
 				t.Fatal("failed restoration retained the new metadata path")
 			}
-			assertAttributeViewFieldsTest(t, currentAV, readAV())
+			if missingLayout {
+				requireHistoryRecoveryBytes(t, liveAVPath, currentAVSource)
+			} else {
+				assertAttributeViewFieldsTest(t, currentAV, readAV())
+			}
 			if undo, redo, _ := GlobalUndoLog.State(tree.ID); !undo || !redo {
 				t.Fatal("failed restoration discarded current undo history")
 			}

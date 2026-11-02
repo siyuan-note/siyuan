@@ -115,13 +115,21 @@ func IsMirror(avID string) bool {
 }
 
 func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret bool) {
+	ret, err := RemoveBlockRelWithError(avID, blockID, existBlockTree)
+	if err != nil {
+		logging.LogErrorf("remove database mirror relation failed: %s", err)
+	}
+	return ret
+}
+
+// RemoveBlockRelWithError 删除数据库块映射，读取或保存失败时由调用方中止事务。
+func RemoveBlockRelWithError(avID, blockID string, existBlockTree func(string) bool) (ret bool, err error) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
 	_, boxID := FindAttributeViewPath(avID)
 	avBlocks, err := readMirrorBlocksWithErr(boxID)
 	if err != nil {
-		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 
@@ -141,11 +149,46 @@ func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret
 	avBlocks[avID] = newBlockIDs
 	ret = len(newBlockIDs) != len(blockIDs)
 
-	if err := writeMirrorBlocks(boxID, avBlocks); err != nil {
-		logging.LogErrorf("write attribute view blocks failed: %s", err)
-		return
-	}
+	err = writeMirrorBlocks(boxID, avBlocks)
 	return
+}
+
+// ReconcileBlockRels 按实际源恢复本次事务触及的映射，保留其他数据库和镜像节点。
+func ReconcileBlockRels(nodes []BlockRelRecovery, present map[string]string) error {
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
+	byBox := map[string][]BlockRelRecovery{}
+	for _, node := range nodes {
+		_, box := FindAttributeViewPath(node.AttributeViewID)
+		if !isSameCryptoBoundary(box, node.BoxID) {
+			return fmt.Errorf("cross-boundary database mirror recovery")
+		}
+		byBox[box] = append(byBox[box], node)
+	}
+	for box, scoped := range byBox {
+		rels, err := readMirrorBlocksWithErr(box)
+		if err != nil {
+			return err
+		}
+		for _, node := range scoped {
+			ids := gulu.Str.RemoveElem(rels[node.AttributeViewID], node.ID)
+			if present[node.ID] == node.AttributeViewID {
+				ids = append(ids, node.ID)
+			}
+			rels[node.AttributeViewID] = ids
+		}
+		if err = writeMirrorBlocks(box, rels); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// BlockRelRecovery 保留源笔记本边界，节点已从索引移除时仍可校验恢复目标。
+type BlockRelRecovery struct {
+	ID              string
+	AttributeViewID string
+	BoxID           string
 }
 
 func BatchUpsertBlockRel(nodes []*ast.Node) {

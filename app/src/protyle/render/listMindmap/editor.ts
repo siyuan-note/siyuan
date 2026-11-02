@@ -583,7 +583,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             `[data-type="NodeAttributeView"][data-node-id="${avOverlay.dataset.avBlockId}"]`)) {
             return true;
         }
-        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog, .protyle-breadcrumb__history");
+        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog") ||
+            isMobile() && !!target.closest(".protyle-breadcrumb [data-type=\"more\"]");
     };
     document.addEventListener("pointerdown", event => {
         if (options.isPanTarget?.(event)) {

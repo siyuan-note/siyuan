@@ -13,6 +13,8 @@ import {ipcRenderer} from "electron";
 import {layoutToJSON, saveLayout} from "./util";
 import {setTitle} from "../util/processTitle";
 import {clearTabDragPreview} from "./tabDrag";
+import type {Editor} from "../editor";
+import {scheduleDocumentTitlePreview} from "../protyle/header/documentTitlePreview";
 
 type TTabHeaderOptions = Pick<ITab, "title" | "icon" | "docIcon"> & {
     id?: string,
@@ -69,7 +71,7 @@ export class Tab {
     constructor(options: ITab) {
         this.id = genUUID();
         this.callback = options.callback;
-        if (options.title || options.icon) {
+        if (typeof options.title === "string" || options.icon) {
             this.title = options.title;
             this.icon = options.icon;
             this.docIcon = options.docIcon;
@@ -176,7 +178,20 @@ export class Tab {
 
     public updateTitle(title: string) {
         this.title = title;
-        this.headElement.querySelector(".item__text").innerHTML = escapeHtml(title);
+        const label = this.headElement.querySelector<HTMLElement>(".item__text");
+        const protyle = (this.model as Editor)?.editor?.protyle;
+        if (protyle && label.classList.contains("document-title-preview") &&
+            label.dataset.documentTitleId === protyle.block.rootID && label.dataset.notebookId === protyle.notebookId) {
+            const id = protyle.block.rootID;
+            const notebook = protyle.notebookId;
+            scheduleDocumentTitlePreview(label, id, notebook,
+                () => (this.model as Editor)?.editor?.protyle === protyle &&
+                    protyle.block.rootID === id && protyle.notebookId === notebook);
+        } else {
+            label.textContent = title;
+            label.classList.remove("b3-typography", "document-title-preview");
+            delete label.dataset.protyleLiteRender;
+        }
         this.updateWindowTitle();
     }
 

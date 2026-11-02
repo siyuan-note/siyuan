@@ -13,7 +13,7 @@
   height: 100%;
   min-height: 0;
   flex-direction: column;
-  padding: var(--mobile-top-safe-area, 0px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: var(--mobile-top-safe-area, 0px) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)) env(safe-area-inset-left);
   overflow: hidden;
   border-radius: 0;
   background-color: var(--b3-theme-background);

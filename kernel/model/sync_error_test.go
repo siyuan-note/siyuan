@@ -18,6 +18,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
 )
@@ -141,6 +142,31 @@ func TestFormatRepoPermissionError(t *testing.T) {
 			err := &os.LinkError{Op: "rename", Old: "private.jpg.tmp", New: "private.jpg", Err: errors.New(message)}
 			want := "check workspace permissions (Provider: " + conf.ProviderToStr(conf.ProviderS3) + ")"
 			if got := formatRepoErrorMsg(err); got != want {
+				t.Fatalf("got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestFormatRepoDocumentSpecError(t *testing.T) {
+	previousConf, previousLangs := Conf, util.Langs
+	t.Cleanup(func() { Conf, util.Langs = previousConf, previousLangs })
+	Conf = &AppConf{Lang: "en", Sync: NewConfSection(&conf.Sync{Provider: conf.ProviderS3})}
+	util.Langs = map[string]map[int]string{"en": {275: "Please upgrade to the latest version and try again"}}
+	for _, test := range []struct {
+		name string
+		err  error
+		want string
+	}{
+		{"direct", treenode.ErrSpecTooNew, treenode.ErrSpecTooNew.Error()},
+		{"document path", fmt.Errorf("document [notebook/parent/document.sy]: %w", treenode.ErrSpecTooNew),
+			"document [notebook/parent/document.sy]: " + treenode.ErrSpecTooNew.Error()},
+		{"escaped context", fmt.Errorf("document [<document>.sy]: %w", treenode.ErrSpecTooNew),
+			"document [&lt;document&gt;.sy]: " + treenode.ErrSpecTooNew.Error()},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			want := util.Langs["en"][275] + ": " + test.want
+			if got := formatRepoErrorMsg(test.err); got != want {
 				t.Fatalf("got %q, want %q", got, want)
 			}
 		})

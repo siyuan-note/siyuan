@@ -30,40 +30,43 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
-	resetTreeData(tree, titleSuffix, removeAvBinding)
+func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) error {
+	if err := resetTreeData(tree, titleSuffix, removeAvBinding); err != nil {
+		return err
+	}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && n.Type == ast.NodeAttributeView {
 			av.UpsertBlockRel(n.AttributeViewID, n.ID)
 		}
 		return ast.WalkContinue
 	})
+	return nil
 }
 
 // resetTreeData prepares identities without publishing database mirror side effects.
-func resetTreeData(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
+func resetTreeData(tree *parse.Tree, titleSuffix string, removeAvBinding bool) error {
 	oldRootID := tree.Root.ID
-	tree.ID = ast.NewNodeID()
-	tree.Root.ID = tree.ID
+	newID := ast.NewNodeID()
 	title := treenode.ReadDocumentTitle(tree.Root).Text
 	if "" != titleSuffix {
-		if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
+		if t, parseErr := time.Parse("20060102150405", util.TimeFromID(newID)); nil == parseErr {
 			titleSuffix += " " + t.Format("2006-01-02 15:04:05")
 		} else {
 			titleSuffix = "Duplicated " + time.Now().Format("2006-01-02 15:04:05")
 		}
 		titleSuffix = "(" + titleSuffix + ")"
 		titleSuffix = " " + titleSuffix
-		if Conf.language(16) == title {
-			titleSuffix = ""
-		}
 	}
+	if err := appendDuplicateDocumentTitle(tree.Root, titleSuffix); err != nil {
+		return err
+	}
+	tree.ID = newID
+	tree.Root.ID = tree.ID
 	tree.Root.SetIALAttr("id", tree.ID)
-	tree.Root.SetIALAttr("title", title+titleSuffix)
 	tree.Root.RemoveIALAttr("scroll")
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
-	tree.HPath = tree.HPath + titleSuffix
+	tree.HPath += strings.TrimPrefix(treenode.ReadDocumentTitle(tree.Root).Text, title)
 
 	// 重置块 ID
 	blockIDs := map[string]string{oldRootID: tree.ID}
@@ -86,6 +89,25 @@ func resetTreeData(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 		// 清空文档绑定的数据库
 		tree.Root.RemoveIALAttr(av.NodeAttrNameAvs)
 	}
+	return nil
+}
+
+// Duplicate suffixes belong to the title source; localized placeholders are not empty-title markers.
+func appendDuplicateDocumentTitle(root *ast.Node, suffix string) error {
+	title := treenode.ReadDocumentTitle(root)
+	if suffix == "" || title.Empty || title.Text == "" {
+		return nil
+	}
+	if root.DocumentTitle == nil {
+		root.SetIALAttr("title", title.Text+suffix)
+		return nil
+	}
+	paragraph, err := treenode.DocumentTitleParagraph(root)
+	if err != nil {
+		return err
+	}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(suffix)})
+	return treenode.SetDocumentTitleParagraph(root, paragraph)
 }
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {

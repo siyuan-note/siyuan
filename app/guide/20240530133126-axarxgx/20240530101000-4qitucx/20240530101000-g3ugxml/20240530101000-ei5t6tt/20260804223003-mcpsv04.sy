@@ -6,7 +6,7 @@
 		"id": "20260804223003-mcpsv04",
 		"title": "MCP サービス",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261102193936"
 	},
 	"Children": [
 		{"ID": "20260804223301-mcpja01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223301-mcpja01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概要"}]},
@@ -62,8 +62,8 @@
 			]},
 		{"ID": "20260804223306-mcpja06", "Type": "NodeCodeBlock", "IsFencedCodeBlock": true, "CodeBlockFenceChar": 96, "CodeBlockFenceLen": 3, "CodeBlockOpenFence": "YGBg", "CodeBlockInfo": "anNvbg==", "CodeBlockCloseFence": "YGBg", "Properties": {"id": "20260804223306-mcpja06", "updated": "20260804230000"}, "Children": [{"Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3}, {"Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "anNvbg=="}, {"Type": "NodeCodeBlockCode", "Data": "{\n  \"mcpServers\": {\n    \"siyuan\": {\n      \"url\": \"http://127.0.0.1:6806/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Token {Your API Token}\"\n      }\n    }\n  }\n}\n"}, {"Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3}]},
 		{"ID": "20260804223307-mcpja07", "Type": "NodeParagraph", "Properties": {"id": "20260804223307-mcpja07", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "上記は一般的な設定例です。設定ファイルの場所やフィールド名は MCP クライアントによって異なるため、クライアントのドキュメントを参照してください。必要な設定は Streamable HTTP の URL と認証ヘッダーです。"}]},
-		{"ID": "20260804223308-mcpja08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223308-mcpja08", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "ツール機能"}]},
-		{"ID": "20260804223309-mcpja09", "Type": "NodeParagraph", "Properties": {"id": "20260804223309-mcpja09", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "接続後、クライアントは利用可能なツールを動的に検出します。組み込みツールは検索、ドキュメント、コンテンツブロック、ノートブック、データベース、アセット、履歴、インポートとエクスポート、同期などを扱います。ツールの構成は SiYuan のバージョンや実行環境によって異なる場合があるため、クライアントが実際に検出した結果を確認してください。"}]},
+		{"ID": "20260804223308-mcpja08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223308-mcpja08", "updated": "20261102193936"}, "Children": [{"Type": "NodeText", "Data": "ツール機能"}]},
+		{"ID": "20260804223309-mcpja09", "Type": "NodeParagraph", "Properties": {"id": "20260804223309-mcpja09", "updated": "20261102193936"}, "Children": [{"Type": "NodeText", "Data": "接続後、クライアントは利用可能なツールを動的に検出します。組み込みツールは検索、ドキュメント、コンテンツブロック、ノートブック、データベース、アセット、履歴、インポートとエクスポート、同期などを扱います。ツールの構成は SiYuan のバージョンや実行環境によって異なる場合があるため、クライアントが実際に検出した結果を確認してください。file ツールには、temp/siyuan.log のようなワークスペースからの相対パスを指定します。絶対パス、ドライブ指定付きパス、ワークスペース外に出る親ディレクトリへのパスは拒否されます。名前変更とコピーのコピー元・コピー先にも同じ規則が適用されます。"}]},
 		{"ID": "20260804223310-mcpja10", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223310-mcpja10", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "権限とセキュリティ"}]},
 		{"ID": "20260804223311-mcpja11", "Type": "NodeParagraph", "Properties": {"id": "20260804223311-mcpja11", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "MCP エンドポイントには、認証済みの管理者だけがアクセスできます。API トークンはワークスペースの管理者権限を表します。接続したクライアントはデータを読み取るだけでなく、データの変更や削除、ワークスペースファイルへのアクセス、SQL の実行、同期の開始などを行えるため、信頼できるクライアントだけを接続してください。"}]},
 		{"ID": "20260804223312-mcpja12", "Type": "NodeParagraph", "Properties": {"id": "20260804223312-mcpja12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "読み取り専用モードでは MCP の POST と DELETE リクエストが拒否されるため、ツールを通常どおり使用できません。SiYuan のサービスポートを信頼できないネットワークへ直接公開しないでください。リモートで使用する場合は HTTPS、リバースプロキシ、またはファイアウォールを設定し、トークンが漏えいした場合は直ちに変更してください。"}]},

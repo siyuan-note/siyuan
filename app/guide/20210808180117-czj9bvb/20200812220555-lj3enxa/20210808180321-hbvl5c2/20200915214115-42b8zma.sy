@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261030095654"
 	},
 	"Children": [
 		{
@@ -2042,6 +2042,44 @@
 				{
 					"Type": "NodeText",
 					"Data": " 分别控制图片悬浮提示中的 OCR 文本、无 OCR 文本提示和识别失败提示。默认显示文本预览，另外两项默认关闭。这些选择按设备保存，独立于自动 OCR 开关；隐藏提示不会删除文本或改变搜索结果。无 OCR 文本不一定表示识别失败。失败提示反映本次运行期间的识别失败，成功识别或保存文本后清除，重启内核后不保留。移动端不显示这类悬浮提示。"
+				}
+			]
+		},
+		{
+			"ID": "20261030095654-uyj6394",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030095654-uyj6394",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "题头图"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030095654-e9th9y1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030095654-e9th9y1",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文档标题上方点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "添加题头图"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，先选择上传、链接、资源或内置，再选择图片或确认链接后保存题头图。关闭菜单或取消选择不会修改文档，也不会导入图片。要复用已有图片而不再次上传，请选择“资源”。"
 				}
 			]
 		}

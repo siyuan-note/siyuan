@@ -830,6 +830,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			}
 		}
 
+		// 导入来源不继承本机已有来源身份，包括相同 ID 和相同字节的覆盖。
+		if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+			return
+		}
 		// 加密笔记本的 AV 定义不能拷到全局目录（明文泄漏 + 路由冲突），
 		// 需要先加密写入 <boxID>/storage/av/，后续 mirror/relation 操作才能正确路由
 		if !IsEncryptedBox(boxID) {
@@ -1157,6 +1161,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		return nil
 	})
 
+	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+		return
+	}
 	if err = filelock.Copy(unzipRootPath, targetDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
@@ -1417,6 +1424,9 @@ func ImportData(zipPath string) (err error) {
 	importedEncryptedBoxIDs, err := validateImportedNotebookIdentities(tmpDataPath)
 	if err != nil {
 		return err
+	}
+	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+		return
 	}
 	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)

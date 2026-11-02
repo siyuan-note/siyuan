@@ -13,7 +13,8 @@ import {
     setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
-import {progressLoading} from "../../dialog/progress";
+import {progressLoading, updateReindexProgressStatus} from "../../dialog/progress";
+import {updateExitProgressStatus} from "../../dialog/exitRequest";
 import {syncCheckoutProgress} from "../../sync/checkoutProgress";
 import type {App} from "../../index";
 import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
@@ -73,7 +74,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 } else {
                     clearTimeout(statusTimeout);
                     statusElement.innerHTML = `<div class="fn__flex">${sanitizeKernelHTML(data.data.tasks[0].action)}<div class="fn__progress"><div></div></div>`;
-                    statusElement.style.bottom = "0";
+                    statusElement.style.bottom = "var(--android-navigation-bar-height, 0px)";
                 }
                 break;
             case "setAppearance":
@@ -234,13 +235,15 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 transactionError(data.msg);
                 break;
             case"statusbar":
+                updateExitProgressStatus(data.msg);
+                updateReindexProgressStatus(sanitizeKernelHTML(data.msg));
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
                     window.siyuan.config.appearance.hideStatusBar) {
                     return;
                 }
                 clearTimeout(statusTimeout);
                 statusElement.innerHTML = sanitizeKernelHTML(data.msg);
-                statusElement.style.bottom = "0";
+                statusElement.style.bottom = "var(--android-navigation-bar-height, 0px)";
                 statusTimeout = window.setTimeout(() => {
                     statusElement.style.bottom = "";
                 }, 12000);

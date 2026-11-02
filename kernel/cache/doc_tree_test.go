@@ -162,3 +162,79 @@ func TestDocTreeCacheChildCounts(t *testing.T) {
 		t.Fatal("visibility mutation retained an old count or admitted a late result")
 	}
 }
+
+func TestDocTreeChildCountCreationAndSortInvalidation(t *testing.T) {
+	InvalidateDocTree("")
+	t.Cleanup(func() { InvalidateDocTree("") })
+	version, _ := DocTreeSourceVersion("box", true)
+	for _, directory := range []string{"/", "/large", "/new", "/new/nested"} {
+		PutDocTreeChildCount("policy", "box", directory, version, 10000)
+	}
+	PutDocTreeChildCount("other-policy", "box", "/large", version, 4)
+	finish := BeginDocTreeCreation("box", "/new.sy")
+	if _, ok := GetDocTreeChildCount("policy", "box", "/large"); ok {
+		t.Fatal("pending creation exposed cached counts")
+	}
+	finish()
+	for _, directory := range []string{"/", "/new", "/new/nested"} {
+		if _, ok := GetDocTreeChildCount("policy", "box", directory); ok {
+			t.Fatalf("creation retained affected count %s", directory)
+		}
+	}
+	for key, want := range map[string]int{"policy": 10000, "other-policy": 4} {
+		if count, ok := GetDocTreeChildCount(key, "box", "/large"); !ok || count != want {
+			t.Fatalf("unrelated directory or access policy count lost: %s %d %v", key, count, ok)
+		}
+	}
+	PutDocTreeChildCount("late", "box", "/large", version, 1)
+	if _, ok := GetDocTreeChildCount("late", "box", "/large"); ok {
+		t.Fatal("old builder published after creation")
+	}
+	finish = BeginDocTreeSortMutation()
+	if _, ok := GetDocTreeChildCount("policy", "box", "/large"); ok {
+		t.Fatal("pending sort write exposed counts")
+	}
+	finish()
+	if count, ok := GetDocTreeChildCount("policy", "box", "/large"); !ok || count != 10000 {
+		t.Fatal("sort-only write discarded authenticated counts")
+	}
+	finish = BeginDocTreeCreation("box", "/large/child.sy")
+	finish()
+	if _, ok := GetDocTreeChildCount("policy", "box", "/large"); ok {
+		t.Fatal("new child retained its parent's old count")
+	}
+	version, _ = DocTreeSourceVersion("box", true)
+	PutDocTreeChildCount("policy", "box", "/large", version, 10001)
+	finish = BeginDocTreeDocumentMutation("box", "/large/child.sy", DocTreeDocumentChange{Structure: true})
+	finish()
+	if _, ok := GetDocTreeChildCount("policy", "box", "/large"); ok {
+		t.Fatal("visibility mutation retained an old count")
+	}
+	version, _ = DocTreeSourceVersion("box", true)
+	PutDocTreeChildCount("policy", "box", "/large", version, 10000)
+	finish = BeginDocTreeMutation("box")
+	finish()
+	if _, ok := GetDocTreeChildCount("policy", "box", "/large"); ok {
+		t.Fatal("bulk mutation retained a count")
+	}
+}
+
+func TestDocTreeChildCountBounds(t *testing.T) {
+	InvalidateDocTree("")
+	t.Cleanup(func() { InvalidateDocTree("") })
+	version, _ := DocTreeSourceVersion("box", true)
+	for index := 0; index <= docTreeCountMaxEntries; index++ {
+		PutDocTreeChildCount("policy", "box", fmt.Sprintf("/%d", index), version, index)
+	}
+	if _, ok := GetDocTreeChildCount("policy", "box", "/0"); ok {
+		t.Fatal("oldest count was not evicted")
+	}
+	if count, ok := GetDocTreeChildCount("policy", "box", fmt.Sprintf("/%d", docTreeCountMaxEntries)); !ok || count != docTreeCountMaxEntries {
+		t.Fatal("newest count was not retained")
+	}
+	docTreeOrders.Lock()
+	defer docTreeOrders.Unlock()
+	if len(docTreeOrders.counts) > docTreeCountMaxEntries {
+		t.Fatal("count cache exceeded its bound")
+	}
+}

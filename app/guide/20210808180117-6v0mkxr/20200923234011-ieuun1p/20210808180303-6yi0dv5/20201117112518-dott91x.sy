@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed content blocks",
 		"type": "doc",
-		"updated": "20261028115947"
+		"updated": "20261030073929"
 	},
 	"Children": [
 		{
@@ -694,7 +694,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261028115947-x0bgqn9",
-				"updated": "20261028115947"
+				"updated": "20261030073929"
 			},
 			"Children": [
 				{
@@ -717,7 +717,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to replace the embed with independent copies of its current results, in display order. Formatting and child blocks, including folded content, are retained. Heading content follows the embed display mode and keeps the source heading levels. Nested references, embeds, and databases retain their own behavior; this operation does not freeze all linked data."
+					"Data": " to replace the embed with independent copies of its current results, in display order. Formatting and child blocks, including folded content, are retained. Heading content follows the embed display mode and keeps the source heading levels. Nested references, embeds, and databases retain their own behavior; this operation does not freeze all linked data. Inserted headings follow normal document folding rules, so later blocks may become part of their folded sections."
 				}
 			]
 		},

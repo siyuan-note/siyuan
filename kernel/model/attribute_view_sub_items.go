@@ -31,7 +31,7 @@ type attributeViewCreatedSubItemsSnapshot struct {
 
 func (tx *Transaction) doAttributeViewSubItems(op *Operation) *TxErr {
 	if err := tx.changeAttributeViewSubItems(op); err != nil {
-		return &TxErr{code: TxErrHandleAttributeView, id: op.AvID, msg: err.Error()}
+		return &TxErr{code: TxErrHandleAttributeView, id: op.AvID, msg: err.Error(), cause: err}
 	}
 	return nil
 }
@@ -76,7 +76,7 @@ func (tx *Transaction) changeAttributeViewSubItems(op *Operation) error {
 			}
 			break
 		}
-		if data.ParentKeyID == "" && data.ChildrenKeyID == "" && current.SubItems != nil {
+		if data.ParentKeyID == "" && data.ChildrenKeyID == "" && current.HasSubItemsFields() {
 			data.ParentKeyID, data.ChildrenKeyID = current.SubItems.ParentKeyID, current.SubItems.ChildrenKeyID
 		}
 		if (data.ParentKeyID == "") != (data.ChildrenKeyID == "") {
@@ -518,7 +518,7 @@ func subItemsCellChanges(source *av.AttributeView, cells []*AttrViewCellUpdate) 
 		ids := value.Relation.BlockIDs
 		if cell.KeyID == source.SubItems.ParentKeyID {
 			if len(ids) > 1 {
-				return nil, fmt.Errorf("database entry [%s] can only have one parent", cell.RowID)
+				return nil, &av.SubItemsValidationError{Kind: "multipleParents", ItemID: cell.RowID}
 			}
 			parent := ""
 			if len(ids) == 1 {

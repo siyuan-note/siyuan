@@ -1,3 +1,5 @@
+// 被测模块已迁移为 TypeScript，Electron 子进程也需要 tsx 才能解析 .ts 入口。
+require("tsx/cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -463,8 +465,8 @@ const runCases = async (sources) => {
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain, screen} = require("electron");
     const {createServer} = require("node:http");
-    const {createSettingsWindows} = require("../electron/settingsWindows");
-    const {updateTitleBarOverlay} = require("../electron/windowControlsOverlay");
+        const {createSettingsWindows} = require("../electron/window/settingsWindows");
+        const {updateTitleBarOverlay} = require("../electron/window/windowControlsOverlay");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
         let owner;
@@ -543,7 +545,7 @@ if (process.versions.electron && process.type === "browser") {
         });
         await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
         const origin = "http://127.0.0.1:" + server.address().port;
-        const policy = createSettingsWindows({ipcMain, screen,
+        const policy = createSettingsWindows({screen,
             getTarget: id => owner?.webContents.id === id || [...otherOwners].some(win => win.webContents.id === id) ?
                 {origin, mode: "local"} : undefined,
             getWindows: () => [...(owner ? [owner] : []), ...otherOwners],

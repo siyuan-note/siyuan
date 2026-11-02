@@ -6,10 +6,12 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
+import {compile} from "sass";
 
-const browserCases = (sources: string[], lutePath: string) => {
+const browserCases = async (sources: string[], lutePath: string, styles: string[]) => {
     const check: typeof assert = require("node:assert/strict");
-    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only"}}});
+    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only", settingsPendingSaveError: "Save failed",
+        _kernel: {16: "Untitled document"}}}});
     const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
     const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
     const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
@@ -87,21 +89,185 @@ const browserCases = (sources: string[], lutePath: string) => {
     check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 2);
     check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "**literal** [link](url) $x$");
     check.equal(template.content.querySelector('[data-type~="strong"]').getAttribute("style"), "color: red");
+    const liveTitle = document.createElement("div");
+    liveTitle.innerHTML = paragraph('<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'data-render="true" class="render-node"><span class="katex">Rendered equation</span></span>');
+    const stableLute = wrap(lute, () => liveTitle);
+    const formula = '<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'contenteditable="false" class="render-node"></span>';
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula + "123"));
+    check.equal(template.content.querySelector(".katex").textContent, "Rendered equation");
+    check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-render"), "true");
+    check.equal(template.content.querySelector("[contenteditable]").classList.contains("protyle-title__input"), true);
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("x^2", "x^3")));
+    check.equal(template.content.querySelector(".katex"), null, "changed formula must render its new source");
+    liveTitle.replaceChildren();
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("</span>",
+        '<span class="katex">Untrusted cache</span></span>')));
+    check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
+
+    const Editor = new Function("getDocumentTitleDOMFingerprint", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint);
+    const Title = new Function(sources[4] + "\nreturn Title;")();
+    const disable = new Function(sources[5] + "\nreturn disabledWYSIWYG;")();
+    const root = document.createElement("div");
+    root.className = "protyle";
+    root.innerHTML = '<div class="protyle-content" data-padding-mode="responsive"><div class="protyle-top">' +
+        '<div class="protyle-title"><div class="protyle-title__rich protyle protyle-lite-fragment">' +
+        '<div class="protyle-content" data-padding-mode="responsive" data-fullwidth="true">' +
+        '<div class="protyle-wysiwyg"></div></div></div></div></div></div>';
+    document.body.appendChild(root);
+    const contentElement = root.firstElementChild as HTMLElement;
+    const container = root.querySelector<HTMLElement>(".protyle-title");
+    const wysiwyg = container.querySelector<HTMLElement>(".protyle-wysiwyg");
+    const editor = Object.assign(Object.create(Editor.prototype), {fragment: {wysiwyg}, onEditable: () => {}});
+    const style = document.createElement("style");
+    document.head.appendChild(style);
+    const plainTitle = document.createElement("div");
+    plainTitle.className = "protyle-title";
+    plainTitle.innerHTML = '<div class="protyle-title__input" data-tip="Untitled document"></div>';
+    const plainInput = plainTitle.firstElementChild as HTMLElement;
+    const bodyParagraph = document.createElement("div");
+    bodyParagraph.className = "protyle-wysiwyg";
+    bodyParagraph.innerHTML = paragraph("Body text");
+    container.parentElement.appendChild(plainTitle);
+    contentElement.appendChild(bodyParagraph);
+    const bodyInput = bodyParagraph.querySelector<HTMLElement>("[contenteditable]");
+    const textStart = (element: HTMLElement) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getClientRects()[0]?.left ?? element.getBoundingClientRect().left +
+            parseFloat(getComputedStyle(element).paddingLeft);
+    };
+    const textWidth = (element: HTMLElement) => {
+        const computed = getComputedStyle(element);
+        return element.clientWidth - parseFloat(computed.paddingLeft) - parseFloat(computed.paddingRight);
+    };
+    for (const css of styles) {
+        style.textContent = css;
+        for (const fontSize of [16, 32]) {
+            document.body.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+            for (const width of [240, 720, 1000]) {
+                root.style.width = `${width}px`;
+                for (const fullWidth of [false, true]) {
+                    contentElement.toggleAttribute("data-fullwidth", fullWidth);
+                    for (const horizontalPadding of [4, 0, 8]) {
+                        style.textContent = css + `.protyle-wysiwyg > [data-type="NodeParagraph"] {
+padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
+                        for (const content of ["", "Named title", '<span data-type="strong">Formatted title </span>'.repeat(12)]) {
+                            wysiwyg.innerHTML = lute.SpinBlockDOM(paragraph(content));
+                            editor.updateEditable();
+                            const editable = editor.editable as HTMLElement;
+                            plainInput.innerHTML = editable.innerHTML;
+                            const context = JSON.stringify({fontSize, width, fullWidth, horizontalPadding, content});
+                            const actual = editable.getBoundingClientRect();
+                            check.ok(Math.abs(textStart(editable) - textStart(bodyInput)) < 1,
+                                "rich title text aligns with body text, including theme paragraph spacing: " + context);
+                            if (horizontalPadding === 4) {
+                                check.ok(Math.abs(textStart(editable) - textStart(plainInput)) < 1,
+                                    "loading the title source preserves its text origin: " + context);
+                            }
+                            check.ok(Math.abs(actual.top - container.getBoundingClientRect().top) < 1,
+                                "the title paragraph adds no vertical inset: " + context);
+                            check.ok(Math.abs(container.getBoundingClientRect().height - actual.height) < 1,
+                                "rich title height follows its content without paragraph padding: " + context);
+                            check.ok(Math.abs(textWidth(editable) - textWidth(bodyInput)) < 1,
+                                "title wrapping uses the body's text column width: " + context);
+                            check.equal(getComputedStyle(bodyParagraph.firstElementChild).paddingTop, "4px",
+                                "ordinary body paragraphs retain their vertical spacing");
+                        }
+                    }
+                }
+            }
+        }
+        style.textContent = css;
+        // Loading, clearing and restoring a title all replace its temporary paragraph.
+        for (const content of ["", "Named title", "", "image", ""]) {
+            wysiwyg.innerHTML = lute.SpinBlockDOM(content === "image" ? lute.Md2BlockDOM("![](assets/p.png)") : paragraph(content));
+            if (content === "image") check.ok(wysiwyg.querySelector("img"), "the native empty-alt image remains in the title");
+            const savedFingerprint = fingerprint(wysiwyg.innerHTML);
+            editor.updateEditable();
+            const editable = editor.editable as HTMLElement;
+            check.equal(editable.dataset.tip, "Untitled document");
+            const placeholder = getComputedStyle(editable, "::after").content;
+            if (content === "") {
+                check.equal(placeholder, '"Untitled document"', "empty titles retain the localized placeholder");
+                editable.contentEditable = "false";
+                check.equal(getComputedStyle(editable, "::after").content, placeholder, "readonly titles retain the placeholder");
+            } else {
+                check.ok(placeholder === "none" || placeholder === "normal",
+                    `text and empty-alt images are not empty titles: ${JSON.stringify({content, placeholder, html: editable.innerHTML})}`);
+            }
+            check.equal(fingerprint(wysiwyg.innerHTML), savedFingerprint, "placeholder decoration cannot dirty the title source");
+            check.ok(!prepare(wysiwyg.innerHTML).includes("data-tip"), "placeholder text is not serialized into title content");
+            const observer = new MutationObserver(() => {});
+            observer.observe(editable, {attributes: true});
+            editor.updateEditable();
+            check.equal(observer.takeRecords().length, 0, "repeated decoration cannot create an observer feedback loop");
+            observer.disconnect();
+        }
+    }
+    for (const initiallyReadonly of [false, true]) {
+        wysiwyg.innerHTML = paragraph('<span data-type="strong" style="color: red">Title</span>');
+        const owner = {disabled: initiallyReadonly};
+        const saved = fingerprint(wysiwyg.innerHTML);
+        const richEditor = Object.assign(Object.create(Editor.prototype), {
+            owner, saved, disposed: false, composing: false,
+            fragment: {
+                wysiwyg, getBlockHTML: () => wysiwyg.innerHTML, protyle: {},
+                instance: {
+                    disable: () => disable(wysiwyg),
+                    enable: () => {
+                        wysiwyg.style.userSelect = "";
+                        wysiwyg.querySelectorAll("[spellcheck]").forEach(element => element.setAttribute("contenteditable", "true"));
+                    },
+                },
+            },
+        });
+        const title = Object.assign(Object.create(Title.prototype), {
+            protyle: owner, richEditor, editElement: richEditor.editable,
+        });
+        title.setReadonly(initiallyReadonly);
+        check.equal(fingerprint(wysiwyg.innerHTML), saved, "initial readonly decoration preserves the saved title");
+        for (let cycle = 0; cycle < 2; cycle++) {
+            owner.disabled = true;
+            title.setReadonly(true);
+            check.equal(title.editElement.contentEditable, "false");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "locking an unchanged title cannot block sync preparation");
+            await richEditor.flush();
+            owner.disabled = false;
+            title.setReadonly(false);
+            check.equal(title.editElement.contentEditable, "true");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "unlocking cannot create a title save");
+        }
+        title.editElement.querySelector("span").style.color = "blue";
+        const draft = wysiwyg.innerHTML;
+        owner.disabled = true;
+        title.setReadonly(true);
+        await check.rejects(richEditor.flush(), /Save failed/, "a real formatting draft still blocks sync while readonly");
+        check.equal(title.editElement.querySelector("span").style.color, "blue", "readonly handoff retains the draft");
+        check.equal(richEditor.saved, saved);
+        check.notEqual(fingerprint(draft), saved);
+    }
+    root.remove();
+    style.remove();
     return "Document title DOM cases passed";
 };
 
-test("native document title DOM preserves every inline family, format edits and paragraph-only parsing", {
+test("native document title DOM preserves inline content, alignment, parsing, placeholders and readonly sync handoff", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts"].map(file =>
+    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
+        "Title.ts", "../util/disabledWYSIWYG.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
     const script = path.join(temporary, "run.cjs");
+    const styles = ["base", "mobile"].map(entry => compile(path.resolve(__dirname,
+        "../../assets/scss", `${entry}.scss`), {logger: {warn() {}, debug() {}}}).css);
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," +
-        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + ")";
+        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + "," + JSON.stringify(styles) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

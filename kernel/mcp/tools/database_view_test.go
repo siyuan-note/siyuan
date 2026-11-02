@@ -5,9 +5,19 @@
 package tools
 
 import (
+	"encoding/json"
+	"path/filepath"
+	"slices"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestDatabaseViewActionsAndArguments(t *testing.T) {
@@ -15,7 +25,7 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 	if nil != err {
 		t.Fatal(err)
 	}
-	for _, action := range []string{"view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+	for _, action := range []string{"view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_field_move", "view_visibility_set",
 		"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set"} {
 		effects, ok := DatabaseTool.EffectsFor(action)
 		if !ok || !effects.LocalWrite {
@@ -29,6 +39,7 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 		{"action": "view_add", "layout": "future-layout", "name": "New view"},
 		{"action": "view_update", "name": "New name", "icon": "", "desc": ""},
 		{"action": "view_move", "previousID": ""},
+		{"action": "view_field_move", "keyID": "key", "previousID": ""},
 		{"action": "view_visibility_set", "viewIDs": []any{"view-a"}},
 		{"action": "view_filters_set", "revision": "rev", "filters": []any{map[string]any{"combination": "and", "filters": []any{}}}},
 		{"action": "view_sorts_set", "revision": "rev", "sorts": []any{map[string]any{"column": "key", "order": "ASC"}}},
@@ -40,6 +51,98 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 	}
 	if err = validator.ValidateInput(map[string]any{"action": "view_filters_set", "filters": "[]"}); nil == err {
 		t.Fatal("string encoded filters must be rejected")
+	}
+}
+
+func TestDatabaseViewFieldMovePersistence(t *testing.T) {
+	previousData, previousDB, previousConf := util.DataDir, util.BlockTreeDBPath, model.Conf
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		cache.ClearTreeCache()
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath, model.Conf = previousData, previousDB, previousConf
+		if previousDB != "" {
+			treenode.InitBlockTree(false)
+		}
+	})
+	boxID, rootID, avID, blockID := ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()
+	if err := (&model.Box{ID: boxID}).SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	attrView := &av.AttributeView{ID: avID, Spec: av.PlainTextSpec, Views: []*av.View{{ID: ast.NewNodeID(), LayoutType: av.LayoutTypeTable, Table: &av.LayoutTable{}}}}
+	view := &av.View{ID: ast.NewNodeID(), LayoutType: av.LayoutTypeTable, Table: &av.LayoutTable{Columns: []*av.ViewTableColumn{
+		{BaseField: &av.BaseField{ID: "primary"}}, {BaseField: &av.BaseField{ID: "hidden", Hidden: true}, Width: "234px"},
+	}}}
+	attrView.Views = append(attrView.Views, view)
+	if err := av.SaveAttributeView(attrView); err != nil {
+		t.Fatal(err)
+	}
+	tree := treenode.NewTree(boxID, "/"+rootID+".sy", "/Database", "Database")
+	node := util.NewLute().BlockDOM2Tree(`<div class="av" data-type="NodeAttributeView" data-node-id="` + blockID + `" data-av-id="` + avID + `" data-av-type="table"></div>`).Root.FirstChild
+	tree.Root.AppendChild(node)
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	validator, err := CompileToolValidator(DatabaseTool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	call := func(action string, extra map[string]any, want []string) {
+		t.Helper()
+		args := map[string]any{"action": action, "id": avID, "blockID": blockID, "viewID": view.ID}
+		for key, value := range extra {
+			args[key] = value
+		}
+		result, err := databaseHandler(args)
+		if err != nil || result.IsError {
+			t.Fatalf("%s: %+v, %v", action, result, err)
+		}
+		if err = validator.ValidateOutput(result); err != nil {
+			t.Fatal(err)
+		}
+		var output struct {
+			Data struct {
+				FieldIDs []string `json:"fieldIDs"`
+			} `json:"data"`
+		}
+		if err = json.Unmarshal([]byte(result.Content[0].Text), &output); err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Equal(output.Data.FieldIDs, want) {
+			t.Fatalf("unexpected field order: %v", output.Data.FieldIDs)
+		}
+	}
+	call("view_get", nil, []string{"primary", "hidden"})
+	call("view_field_move", map[string]any{"keyID": "primary", "previousID": "hidden"}, []string{"hidden", "primary"})
+	for _, extra := range []map[string]any{
+		{"keyID": "primary"}, {"keyID": "primary", "previousID": nil},
+		{"previousID": ""}, {"keyID": "missing", "previousID": ""},
+		{"keyID": "primary", "previousID": "missing"}, {"keyID": "primary", "previousID": "", "viewID": "missing"},
+	} {
+		args := map[string]any{"action": "view_field_move", "id": avID, "blockID": blockID, "viewID": view.ID}
+		for key, value := range extra {
+			args[key] = value
+		}
+		if result, err := databaseHandler(args); err != nil || !result.IsError {
+			t.Fatalf("invalid move accepted: %+v, %v", result, err)
+		}
+	}
+	call("view_get", nil, []string{"hidden", "primary"})
+	call("view_field_move", map[string]any{"keyID": "primary", "previousID": ""}, []string{"primary", "hidden"})
+	stored, err := av.ParseAttributeView(avID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !stored.GetView(view.ID).Table.Columns[1].Hidden || stored.GetView(view.ID).Table.Columns[1].Width != "234px" {
+		t.Fatal("column configuration changed")
+	}
+	if stored.Views[0].ID != attrView.Views[0].ID {
+		t.Fatal("view order changed")
 	}
 }
 

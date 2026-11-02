@@ -105,7 +105,7 @@ test("desktop and mobile settings cancel theme previews and persist one undoable
         runInNewContext(compiled, context);
         const target = new context.Controller();
         Object.assign(target, {list, owner: {}, model: context.readListMindmap(),
-            view: {getSelectedId: () => "root", update: (model: import("./model").ListMindmapModel) => rendered.push(model)},
+            view: {captureHistoryViewport: () => "{}", getSelectedId: () => "root", update: (model: import("./model").ListMindmapModel) => rendered.push(model)},
             refresh: () => target.model = context.readListMindmap()});
         const choose = (style: string) => (item.submenu as IMenu[]).find(entry => entry.id === style).click(undefined, undefined);
         target.onSettingsMenu(anchor);

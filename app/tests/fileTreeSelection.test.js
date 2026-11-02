@@ -6,13 +6,23 @@ const os = require("node:os");
 const {sources, cases} = require("./docTreeController.fixture");
 
 const runElectron = async () => {
-    const {app, BrowserWindow} = require("electron");
+    const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    const win = new BrowserWindow({show: false,
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
+    ipcMain.handle("file-tree-click", (event, point) => {
+        for (const type of ["mouseMove", "mouseDown", "mouseUp"]) {
+            event.sender.sendInputEvent({type, ...point, button: "left", clickCount: 1});
+        }
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.webContents.debugger.attach("1.3");
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+            features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+        });
         console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`));
         win.destroy();
         app.exit(0);
@@ -31,14 +41,14 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").test("virtual document trees preserve bounded rendering, selection, expansion, and notebook isolation", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 45000,
+        timeout: 60000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-file-tree-selection-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
             assert.match(stdout, /File tree selection cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

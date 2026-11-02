@@ -17,9 +17,10 @@ const runElectron = async () => {
             assert.ok(offset >= 0 && limit > offset);
             return source.slice(offset, limit);
         };
-        const prepare = section("    const fixBlockWidth =", "    const setPadding =") +
+        const prepare = section("    const getPageSizeDimensions =", "    const setPadding =") +
             section("        const buildExportConfig =", "        const reserveEmbeddedAssetSpace =")
-                .replaceAll("${currentWindowId}", "0") +
+                .replaceAll("${currentWindowId}", "0")
+                .replaceAll("${toScriptLiteral(`${window.siyuan.languages.export} PDF`)}", '"Export PDF"') +
             section("            const isPaged =", "            exportConfig.filePaths =");
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/export.scss")).css;
         const desktopCSS = section("        body {", "        ${await setInlineStyle(false, servePath)}");

@@ -1,0 +1,48 @@
+KaTeX 0.16.9 is distributed under the MIT license.
+License source: https://github.com/KaTeX/KaTeX/blob/v0.16.9/LICENSE
+Bundled fonts are under OFL-1.1; see KaTeX-fonts-LICENSE.
+The Apache-2.0 license for the original mhchem code is in Apache-2.0-LICENSE.
+
+The following notice is retained from contrib/mhchem/mhchem.js in KaTeX 0.16.9:
+https://github.com/KaTeX/KaTeX/blob/v0.16.9/contrib/mhchem/mhchem.js
+
+/*************************************************************
+ *
+ *  KaTeX mhchem.js
+ *
+ *  This file implements a KaTeX version of mhchem version 3.3.0.
+ *  It is adapted from MathJax/extensions/TeX/mhchem.js
+ *  It differs from the MathJax version as follows:
+ *    1. The interface is changed so that it can be called from KaTeX, not MathJax.
+ *    2. \rlap and \llap are replaced with \mathrlap and \mathllap.
+ *    3. Four lines of code are edited in order to use \raisebox instead of \raise.
+ *    4. The reaction arrow code is simplified. All reaction arrows are rendered
+ *       using KaTeX extensible arrows instead of building non-extensible arrows.
+ *    5. \tripledash vertical alignment is slightly adjusted.
+ *
+ *    This code, as other KaTeX code, is released under the MIT license.
+ *
+ * /*************************************************************
+ *
+ *  MathJax/extensions/TeX/mhchem.js
+ *
+ *  Implements the \ce command for handling chemical formulas
+ *  from the mhchem LaTeX package.
+ *
+ *  ---------------------------------------------------------------------
+ *
+ *  Copyright (c) 2011-2015 The MathJax Consortium
+ *  Copyright (c) 2015-2018 Martin Hensel
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */

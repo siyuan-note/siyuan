@@ -19,7 +19,44 @@ body {
 }
 
 html[data-frontend="mobile"] body.body--android {
+  --android-navigation-overlay: 1;
+  --mobile-bottom-bar-safe-area: var(--android-navigation-bar-height, 0px);
   --mobile-top-safe-area: 0px;
+
+  .toolbar--bottom {
+    box-sizing: border-box;
+    height: calc(48px + var(--android-navigation-bar-height, 0px));
+    padding-bottom: var(--android-navigation-bar-height, 0px);
+  }
+
+  .status {
+    z-index: 5;
+  }
+
+  .side-panel > .b3-list--mobile {
+    > [data-type="sidebar-bookmark"] > .bookmarkList::after,
+    > [data-type="sidebar-tag"] > .tagList::after,
+    > [data-type="sidebar-inbox"] > .fn__flex-1:last-child::after,
+    > [data-type="sidebar-backlink"] > .backlinkList::after,
+    > [data-type="sidebar-backlink"] > .backlinkMList::after {
+      display: block;
+      height: var(--mobile-bottom-bar-safe-area);
+      content: "";
+    }
+  }
+
+  // 背景延伸到手势导航区域，渐变使滚动内容平滑过渡到系统手势条。
+  &::after {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    height: calc(var(--android-navigation-bar-height, 0px) * 2);
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--b3-theme-background));
+    content: "";
+  }
 
   .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
     // 继承父节点的编辑状态，避免原生光标经过公式时断开输入法连接；输入前由编辑器校正公式边界。
@@ -42,10 +79,6 @@ body.mobile-keyboard--open {
 .protyle-breadcrumb {
   -webkit-user-select: none;
   user-select: none;
-
-  &__history {
-    flex-shrink: 0;
-  }
 
   > .protyle-breadcrumb__icon {
     min-width: 0;
@@ -294,6 +327,41 @@ body.mobile-keyboard--open {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+
+      > .document-title-preview {
+        max-height: 30px;
+        overflow: hidden;
+        line-height: inherit;
+        text-overflow: ellipsis;
+      }
+
+      > .mobile-document-title-editor {
+        max-height: 30px;
+        overflow: auto;
+        cursor: text;
+
+        .protyle-wysiwyg {
+          font-size: inherit;
+          font-family: inherit;
+
+          > [data-type="NodeParagraph"] {
+            padding: 0;
+          }
+        }
+
+        .protyle-title__input {
+          font-size: 17px;
+          font-weight: inherit;
+          line-height: 30px;
+          padding: 0;
+          white-space: pre;
+        }
+
+        img {
+          max-height: 1.5em;
+          width: auto;
+        }
+      }
     }
   }
 
@@ -394,7 +462,7 @@ body.mobile-keyboard--open {
     }
 
     .b3-list-item {
-      font-size: 14px;
+      font-size: 16px;
 
       &__icon,
       &__switch {
@@ -720,7 +788,7 @@ body.mobile-topbar--merged {
     // 列表延伸到屏幕底边，末尾留白确保最后一个页签可滚到操作区上方。
     &::after {
       display: block;
-      height: calc(100px + env(safe-area-inset-bottom));
+      height: calc(100px + var(--mobile-bottom-bar-safe-area));
       content: "";
     }
   }
@@ -833,7 +901,7 @@ body.mobile-topbar--merged {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: max(12px, env(safe-area-inset-bottom));
+    margin-bottom: max(12px, var(--mobile-bottom-bar-safe-area));
     padding: 12px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
     background-color: var(--b3-theme-surface);
     border-top: 1px solid var(--b3-border-color);
@@ -886,7 +954,7 @@ body.mobile-topbar--merged {
     > [data-type="sidebar-file"] > .fn__flex-1::after,
     > [data-type="sidebar-file"] > .b3-list > .fn__flex-1::after {
       display: block;
-      height: env(safe-area-inset-bottom);
+      height: var(--mobile-bottom-bar-safe-area);
       content: "";
     }
   }
@@ -948,7 +1016,7 @@ body.mobile-topbar--merged {
 
     &.config--mobile-items {
       background-color: var(--b3-theme-surface);
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
     > .config-bazaar,
@@ -961,7 +1029,7 @@ body.mobile-topbar--merged {
       box-sizing: border-box;
       margin: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)) !important;
       overflow-y: auto;
-      padding: 8px 0 max(16px, env(safe-area-inset-bottom));
+      padding: 8px 0 max(16px, var(--mobile-bottom-bar-safe-area));
       -webkit-overflow-scrolling: touch;
 
       > .fn__flex-1 {
@@ -1005,7 +1073,7 @@ body.mobile-topbar--merged {
 
       &__panel {
         overscroll-behavior: contain;
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        padding-bottom: max(16px, var(--mobile-bottom-bar-safe-area));
         -webkit-overflow-scrolling: touch;
       }
 
@@ -1233,7 +1301,7 @@ body.mobile-topbar--merged {
               box-shadow: 0 -1px 0 var(--b3-theme-surface-lighter);
               box-sizing: border-box;
               flex-shrink: 0;
-              padding: 8px max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+              padding: 8px max(16px, env(safe-area-inset-right)) max(8px, var(--mobile-bottom-bar-safe-area)) max(16px, env(safe-area-inset-left));
               width: 100%;
               z-index: 2;
             }
@@ -1244,7 +1312,7 @@ body.mobile-topbar--merged {
             flex: none;
             margin-left: 0;
             overflow: visible;
-            padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            padding: 0 max(16px, env(safe-area-inset-right)) max(16px, var(--mobile-bottom-bar-safe-area)) max(16px, env(safe-area-inset-left));
             width: 100%;
           }
 
@@ -1398,7 +1466,7 @@ body.mobile-topbar--merged {
 
 .keyboard {
   position: fixed;
-  bottom: 0;
+  bottom: var(--android-navigation-bar-height, 0px);
   width: 100%;
   box-sizing: border-box;
   height: 48px;
@@ -1680,7 +1748,7 @@ body.mobile-topbar--merged {
       max-height: none;
       min-height: 0;
       box-sizing: border-box;
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
     .b3-chips {
@@ -1867,7 +1935,7 @@ body.mobile-topbar--merged {
 }
 
 .b3-dialog {
-  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
 }
 
 .mobile-bottom-sheet-dialog {
@@ -1880,6 +1948,8 @@ body.mobile-topbar--merged {
     box-sizing: border-box;
     bottom: auto;
     height: 100%;
+    // 退出位移不能越过键盘上方的可见区域。
+    overflow: clip;
   }
 
   .mobile-bottom-sheet {
@@ -1921,6 +1991,88 @@ body.mobile-topbar--merged {
   .b3-dialog__body {
     min-height: 0;
     overflow: hidden;
+  }
+}
+
+.mobile-sheet-layout {
+  box-sizing: border-box;
+  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
+}
+
+.mobile-sheet-panel {
+  min-height: 0;
+  overflow: auto;
+
+  > .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  > .b3-dialog__body {
+    min-height: 0;
+    overflow: auto;
+    flex: 0 1 auto;
+  }
+}
+
+.mobile-document-title-dialog {
+  .mobile-document-title-sheet {
+    max-height: 100%;
+    overflow: auto;
+  }
+
+  .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  .b3-dialog__body {
+    overflow: auto;
+  }
+
+  .document-title-dialog {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    padding: 16px 24px;
+
+    > .protyle-content {
+      display: none;
+    }
+  }
+
+  .document-title-dialog__editor {
+    min-height: 0;
+    overflow: auto;
+    font-size: var(--b3-font-size);
+
+    .protyle-title__rich {
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .protyle-wysiwyg {
+      font-size: inherit;
+      font-family: inherit;
+
+      > [data-type="NodeParagraph"] {
+        padding: 0;
+      }
+    }
+
+    .protyle-title__input {
+      font-size: inherit;
+      font-weight: inherit;
+      padding: 0;
+      white-space: nowrap;
+    }
+
+    img {
+      max-height: 1.5em;
+      width: auto;
+    }
+
+    .protyle-attr {
+      display: none;
+    }
   }
 }
 
@@ -2122,24 +2274,69 @@ body.mobile-topbar--merged {
 }
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
-  // 按钮留白放在内容内层，避免外层内边距撑大窄列，导致表头与正文错位。
-  & > .av__cellprimary {
-    display: block;
-    padding-right: 69px;
+  // 容器宽度扣除了子条目缩进，操作入口随实际剩余空间切换。
+  & > .av__primary-container,
+  & > .av__cellcontent > .av__primary-container {
+    container: av-primary / inline-size;
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
   }
 
-  & > .av__row-actions {
+  .av__cellprimary {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .av__row-actions {
+    align-self: center;
+    position: static;
+    transform: none;
+    padding: 0;
     opacity: 1;
     pointer-events: auto;
+    max-width: 100%;
+    overflow: hidden;
+
+    .av__row-action {
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .av__row-more {
+      display: inline-flex;
+    }
   }
 
-  &[data-align="center"] > .av__cellprimary {
-    padding-left: 69px;
+  &[data-align="right"] .av__row-actions {
+    order: -1;
   }
 
-  &[data-align="right"] > .av__cellprimary {
-    padding-left: 69px;
-    padding-right: 0;
+  &[data-wrap="true"] .av__cellprimary {
+    overflow-wrap: anywhere;
+  }
+}
+
+@container av-primary (min-width: calc(64px + 4em)) {
+  .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions {
+    .av__row-action {
+      display: inline-flex;
+    }
+
+    .av__row-more {
+      display: none;
+    }
+  }
+}
+
+@container av-primary (max-width: calc(32px + 1em)) {
+  .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions {
+    display: none;
   }
 }
 

@@ -105,7 +105,7 @@ export function main(args = process.argv.slice(2), execute = spawnSync, root = r
   --device=<key>        HDC connect key; required when multiple devices are connected
   --wsl-distro=<name>   WSL distribution for kernel compilation on Windows
   --wsl-user=<name>     WSL user (default: distribution default user)
-  --skip-ui            Reuse existing stage/build/{mobile,desktop,export}
+  --skip-ui            Reuse existing stage/build/{mobile,desktop,export,markdown}
   --skip-kernel        Copy existing kernel/harmony/libkernel.so and libkernel.h
   --skip-hvigor        Only reinstall and launch the existing signed debug HAP
   -h, --help           Show help
@@ -145,10 +145,12 @@ No uninstall is attempted if installation fails.`);
         const env = createBuildEnvironment(options.deveco, node);
         if (!options.skipUi) {
             // 使用现有开发资源目录，不运行会清空整个 stage 的总构建命令。
-            if (process.platform === "win32") {
-                run(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", "pnpm run build:mobile"], {cwd: app, stdio: "inherit"});
-            } else {
-                run("pnpm", ["run", "build:mobile"], {cwd: app, stdio: "inherit"});
+            for (const target of ["mobile", "markdown"]) {
+                if (process.platform === "win32") {
+                    run(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", `pnpm run build:${target}`], {cwd: app, stdio: "inherit"});
+                } else {
+                    run("pnpm", ["run", `build:${target}`], {cwd: app, stdio: "inherit"});
+                }
             }
         }
         const stageFiles = androidStageFiles(path.join(app, "stage"))

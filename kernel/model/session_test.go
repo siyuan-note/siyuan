@@ -181,6 +181,7 @@ func TestCheckAuthSessionCrossSiteFetchSite(t *testing.T) {
 	originalConf := Conf
 	originalWorkspaceDir := util.WorkspaceDir
 	Conf = NewAppConf()
+	Conf.CookieKey = "test-cookie-key"
 	Conf.AccessAuthCode = "test-access-auth-code"
 	util.WorkspaceDir = "test-workspace"
 	t.Cleanup(func() {
@@ -194,7 +195,7 @@ func TestCheckAuthSessionCrossSiteFetchSite(t *testing.T) {
 	engine.GET("/login", func(c *gin.Context) {
 		session := util.GetSession(c)
 		workspaceSession := util.GetWorkspaceSession(session)
-		workspaceSession.AccessAuthCode = Conf.AccessAuthCode
+		SetAccessCodeSession(workspaceSession, Conf.AccessAuthCode)
 		if err := session.Save(c); err != nil {
 			c.Status(http.StatusInternalServerError)
 			return
@@ -243,6 +244,7 @@ func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
 	originalConf := Conf
 	originalWorkspaceDir := util.WorkspaceDir
 	Conf = NewAppConf()
+	Conf.CookieKey = "test-cookie-key"
 	Conf.AccessAuthCode = "test-access-auth-code"
 	util.WorkspaceDir = "test-workspace"
 	t.Cleanup(func() {
@@ -256,7 +258,7 @@ func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
 	engine.GET("/login", func(c *gin.Context) {
 		session := util.GetSession(c)
 		workspaceSession := util.GetWorkspaceSession(session)
-		workspaceSession.AccessAuthCode = Conf.AccessAuthCode
+		SetAccessCodeSession(workspaceSession, Conf.AccessAuthCode)
 		if err := session.Save(c); err != nil {
 			c.Status(http.StatusInternalServerError)
 			return
@@ -385,6 +387,7 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 	originalConf := Conf
 	originalWorkspaceDir := util.WorkspaceDir
 	Conf = NewAppConf()
+	Conf.CookieKey = "test-cookie-key"
 	Conf.AccessAuthCode = "test-access-auth-code"
 	util.WorkspaceDir = "test-workspace"
 	t.Cleanup(func() {
@@ -396,7 +399,7 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 	engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("test-session-cookie-key"))))
 	engine.GET("/login", func(c *gin.Context) {
 		session := util.GetSession(c)
-		util.GetWorkspaceSession(session).AccessAuthCode = Conf.AccessAuthCode
+		SetAccessCodeSession(util.GetWorkspaceSession(session), Conf.AccessAuthCode)
 		if err := session.Save(c); err != nil {
 			t.Fatal(err)
 		}
@@ -476,6 +479,7 @@ func newLoginAuthTestEngine(t *testing.T) (engine *gin.Engine, store ginSessions
 
 	originalConf, originalWorkspaceDir, originalWrongAuthCount, originalLangs := Conf, util.WorkspaceDir, util.WrongAuthCount, util.Langs
 	Conf = NewAppConf()
+	Conf.CookieKey = "test-cookie-key"
 	Conf.AccessAuthCode = loginAuthTestAccessCode
 	Conf.Lang = "en"
 	util.WorkspaceDir = "test-login-auth-workspace"

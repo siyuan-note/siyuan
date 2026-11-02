@@ -1,3 +1,4 @@
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 export type TDocTreeMenuType = "doc" | "docs" | "notebook" | "notebooks" | "items";
 
 export const getDocTreeActionItems = <T extends {id: string, notebookId: string}>(items: readonly T[]): T[] =>
@@ -39,16 +40,10 @@ export const getDocTreeMenuType = (elements: Element[]): TDocTreeMenuType => {
 
 export const isDocTreeDragSelectionAllowed = (elements: Element[]) => getDocTreeMenuType(elements) !== "items";
 
-export const getDocTreeMenuItems = (elements: Element[]) => elements.map((item) => {
-    const notebookId = item.getAttribute("data-notebook-id") || item.getAttribute("data-notebook") ||
-        item.closest("ul[data-url]")?.getAttribute("data-url");
-    return {
-        id: item.getAttribute("data-type") === "navigation-root" ? notebookId : item.getAttribute("data-node-id"),
-        path: item.getAttribute("data-path"),
-        notebookId,
-    };
-}).filter((item): item is { id: string, path: string, notebookId: string } =>
-    Boolean(item.id && item.path && item.notebookId));
+export const getDocTreeMenuItems = (elements: Element[]) => elements.flatMap(element => {
+    const item = getDocTreeItem(element);
+    return item ? [{id: item.id, path: item.path, notebookId: item.notebookId}] : [];
+});
 
 export const getDocTreeDeleteTargets = (elements: Element[]) => {
     const items = getDocTreeMenuItems(elements);

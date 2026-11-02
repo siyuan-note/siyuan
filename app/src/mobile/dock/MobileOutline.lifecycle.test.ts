@@ -12,11 +12,12 @@ const compiled = transpileModule(readFileSync("src/mobile/dock/MobileOutline.ts"
 const setup = () => {
     const attributes = new Map<string, string>();
     const hidden = new Set<string>();
+    const label = {dataset: {}, classList: {add: () => {}}};
     const title = {
         innerHTML: "",
         insertAdjacentHTML(_position: string, html: string) { this.innerHTML += html; },
         classList: {add: (name: string) => hidden.add(name), remove: (name: string) => hidden.delete(name)},
-        querySelector: (): null => null,
+        querySelector: (selector: string) => selector === ".b3-list-item__text" ? label : null,
         setAttribute: (key: string, value: string) => attributes.set(key, value),
         removeAttribute: (key: string) => attributes.delete(key),
     };
@@ -39,6 +40,7 @@ const setup = () => {
         require: (id: string) => {
             switch (id) {
                 case "../../layout/Model": return {Model: class {}};
+                case "../../protyle/header/documentTitlePreview": return {renderDocumentTitlePreview: () => {}};
                 case "../../util/pathName": return {getDocDisplayName: (value: string) => value, isEncryptedBox: (box: string) => box === "secret-box"};
                 case "../../util/escape": return {escapeHtml};
                 case "../../emoji/fileTreeIcon": return {getFileTreeIconHTML: () => ""};

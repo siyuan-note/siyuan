@@ -186,12 +186,23 @@ func handleTxErr(tx *Transaction, txErr *TxErr) {
 	case TxErrCodeDataIsSyncing:
 		util.PushMsg(Conf.Language(222), 5000)
 	case TxErrHandleAttributeView:
-		util.PushMsg(Conf.language(258), 5000)
+		util.PushMsg(attributeViewTransactionErrorMessage(txErr), 5000)
 		logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
 	default:
 		txData, _ := gulu.JSON.MarshalJSON(tx)
 		logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
 	}
+}
+
+func attributeViewTransactionErrorMessage(err error) string {
+	var invalid *av.SubItemsValidationError
+	if errors.As(err, &invalid) {
+		if invalid.Kind == "cycle" {
+			return fmt.Sprintf(Conf.language(460), invalid.ItemID)
+		}
+		return fmt.Sprintf(Conf.language(461), invalid.ItemID)
+	}
+	return Conf.language(258)
 }
 
 func PerformTransactions(transactions *[]*Transaction) {
@@ -1518,12 +1529,16 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (delete
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
 	tx.collectDeletedAttributeViewBlocks(node, nodeTree, delChildrenWhenDelParent)
 
-	for _, avID := range tx.syncDelete2Block(node, nodeTree) {
+	avIDs, err := tx.syncDelete2Block(node, nodeTree)
+	if err != nil {
+		tx.sourceErr = err
+	}
+	for _, avID := range avIDs {
 		ReloadAttrView(avID)
 	}
 }
 
-func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (changedAvIDs []string) {
+func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (changedAvIDs []string, err error) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
@@ -1531,7 +1546,15 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 
 		avID := n.AttributeViewID
 		isMirror := av.IsMirror(avID)
-		if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
+		if tx != nil {
+			tx.sourceMirrors = append(tx.sourceMirrors, av.BlockRelRecovery{ID: n.ID, AttributeViewID: avID, BoxID: nodeTree.Box})
+		}
+		changed, removeErr := av.RemoveBlockRelWithError(avID, n.ID, treenode.ExistBlockTree)
+		if removeErr != nil {
+			err = removeErr
+			return ast.WalkStop
+		}
+		if changed {
 			changedAvIDs = append(changedAvIDs, avID)
 		}
 
@@ -1540,13 +1563,19 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 			return ast.WalkContinue
 		}
 
-		attrView, err := av.ParseAttributeView(avID)
-		if err != nil {
-			return ast.WalkContinue
+		attrView, loadErr := av.ParseAttributeView(avID)
+		if loadErr != nil {
+			err = loadErr
+			return ast.WalkStop
 		}
 
 		trees, nodes := tx.getAttrViewBoundNodes(attrView)
+		if tx != nil && tx.sourceErr != nil {
+			err = tx.sourceErr
+			return ast.WalkStop
+		}
 		for _, toChangNode := range nodes {
+			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
 			avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
 			if "" != avs {
 				avIDs := strings.Split(avs, ",")
@@ -1558,14 +1587,21 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 				}
 			}
 			avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
-			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
 			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-			pushBlockAttrs(oldAttrs, toChangNode)
+			if tx != nil {
+				tx.stageSourceBlockAttrs(oldAttrs, toChangNode)
+			} else {
+				pushBlockAttrs(oldAttrs, toChangNode)
+			}
 		}
 
 		for _, tree := range trees {
 			if nodeTree.ID != tree.ID {
-				indexWriteTreeUpsertQueue(tree)
+				if tx != nil {
+					tx.writeTree(tree)
+				} else if err = indexWriteTreeUpsertQueue(tree); err != nil {
+					return ast.WalkStop
+				}
 			}
 		}
 		return ast.WalkContinue
@@ -2819,6 +2855,7 @@ type Transaction struct {
 	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
+	tagRemovalSources             map[string][]byte
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
 	sourceLeases                  map[string]bool
@@ -2827,10 +2864,13 @@ type Transaction struct {
 	sourceWatchers                []func()
 	sourceDatabaseBefore          map[string]*documentSourceFile
 	sourceRelationBoundaries      map[string]bool
+	sourceMirrors                 []av.BlockRelRecovery
+	sourceBlockAttrs              map[string]*Operation
 	flashcardLocked               bool
 	flashcardBefore               map[string]*flashcardDeckBefore
 	writeFlashcardFile            func(string, []byte, []byte) error
 	attributeViewRollback         *attributeViewRollback
+	historyRecovery               *attributeViewHistoryRecovery
 	attributeViewAutomations      *attributeViewAutomationState
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState
@@ -2911,6 +2951,7 @@ func (tx *Transaction) WaitForCommit() {
 
 func (tx *Transaction) begin() (err error) {
 	tx.sourceJournal, tx.sourceLeases = nil, nil
+	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	tx.sourceDatabaseBefore = nil
 	tx.sourceRelationBoundaries = nil
 	tx.sourceErr, tx.sourceRollbackErr = nil, nil
@@ -3200,6 +3241,7 @@ func (tx *Transaction) commit() (err error) {
 	tx.mutatedRootIDs = tx.GetMutatedRootIDs()
 	memoryDatabaseIDs := tx.memoryChangedDatabaseIDs()
 	tx.appendAutomationBlockAttrs()
+	tx.publishSourceBlockAttrs()
 	tx.state.Store(2)
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
@@ -3225,6 +3267,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
+	tx.tagRemovalSources = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
@@ -3245,6 +3288,7 @@ func (tx *Transaction) releaseCommittedResources() {
 
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
+	tx.tagRemovalSources = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()

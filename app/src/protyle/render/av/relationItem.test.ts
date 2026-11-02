@@ -111,7 +111,7 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputNa
         dispatchEvent: (event: {type: string}) => events.push(event.type),
     };
     const node = {dataset: {avId: "source", nodeId: "source-carrier"}, contains: () => true};
-    const protyle = {app: {appId: "app"}, id: "editor"};
+    const protyle = {app: {appId: "app"}, id: "editor", block: {rootID: "root"}};
     const previews = new WeakMap([[menu, {keyword: "Task A", preview}]]);
     const {setRelationCell} = load(["genCreatedRelationRowHTML", "setRelationCell"], {
         relationItemPreviews: previews,
@@ -133,6 +133,7 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputNa
             requests.push(data);
             return response;
         },
+        fetchWithDocumentSelection: (submit: () => Promise<unknown>) => submit(),
         Lute: {NewNodeID: () => "pending"},
         getAVBlockIconHTML: ({isDetached}: {isDetached: boolean}) => isDetached ? "detached-icon" : "document-icon",
         escapeAttr, escapeHtml, escapeHtmlTextAndAttr,

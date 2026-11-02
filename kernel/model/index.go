@@ -202,7 +202,13 @@ func indexBox(boxID string) {
 		treeCount++
 		i := treeCount
 		lock.Unlock()
-		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
+		var tree *parse.Tree
+		var err error
+		if recoveringSources {
+			tree, _, err = filesys.ReadTreeSnapshot(box.ID, file.path)
+		} else {
+			tree, err = filesys.LoadTree(box.ID, file.path, luteEngine)
+		}
 		if err != nil {
 			lock.Lock()
 			sourceFailed = true
@@ -216,12 +222,14 @@ func indexBox(boxID string) {
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
 			docIAL["updated"] = updated
-			if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
-				logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
-				lock.Lock()
-				sourceFailed = true
-				lock.Unlock()
-				return
+			if !recoveringSources {
+				if _, writeErr := filesys.WriteTree(tree); writeErr != nil {
+					logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
+					lock.Lock()
+					sourceFailed = true
+					lock.Unlock()
+					return
+				}
 			}
 		}
 
@@ -295,13 +303,11 @@ func indexBox(boxID string) {
 	}
 	flushBatch()
 	if !sourceFailed {
-		if recoveringSources {
-			paths := make([]string, 0, len(files))
-			for _, file := range files {
-				paths = append(paths, file.path)
-			}
-			treenode.ClearRedundantBlockTrees(boxID, paths)
+		paths := make([]string, 0, len(files))
+		for _, file := range files {
+			paths = append(paths, file.path)
 		}
+		treenode.ClearRedundantBlockTrees(boxID, paths)
 		pending, pendingErr := treenode.PendingDocumentMetadata(boxID)
 		for _, doc := range pending {
 			if pendingErr = filesys.RecoverDocumentMetadataWrite(doc); pendingErr != nil {

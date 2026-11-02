@@ -43,7 +43,7 @@ test("node width changes and mixed-width restoration save one undoable snapshot 
             updateTransaction: (_owner: unknown, _list: unknown, before: string) => history.push({before, after: list.outerHTML}),
             showMessage: () => messages++, window: {siyuan: {languages: {listMindmapStale: "stale"}}}};
         runInNewContext(compiled, context);
-        const target = Object.assign(new context.Controller(), {list, owner: {}, view: {getSelectedId: () => "a"}, refresh: () => {}});
+        const target = Object.assign(new context.Controller(), {list, owner: {}, view: {captureHistoryViewport: () => "{}", getSelectedId: () => "a"}, refresh: () => {}});
         const original = [{id: "a", width: 0}, {id: "b", width: 480}];
         const changed = [{id: "a", width: 320}, {id: "b", width: 320}];
         assert.equal(await target.onNodeWidths(changed, JSON.stringify(original)), true);

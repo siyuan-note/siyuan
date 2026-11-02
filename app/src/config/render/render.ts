@@ -100,8 +100,8 @@ const genSwitchQueryItemHtml = (item: SwitchQueryItem): string => {
     }
 };
 
-export const genButtonHtml = (id: string, label: string, icon: string): string =>
-    `<button class="b3-button b3-button--outline fn__flex-center fn__size200" id="${id}">
+export const genButtonHtml = (id: string, label: string, icon: string, hidden = false): string =>
+    `<button class="b3-button b3-button--outline fn__flex-center fn__size200${hidden ? " fn__none" : ""}" id="${id}">
         <svg><use xlink:href="#${icon}"></use></svg>
         ${label}
     </button>`;
@@ -141,7 +141,7 @@ export const genTextPairHtml = (
 const genStackRight = (r: StackRight): string => {
     switch (r.kind) {
         case "button":
-            return genButtonHtml(r.id, r.label, r.icon);
+            return genButtonHtml(r.id, r.label, r.icon, typeof r.hidden === "function" ? r.hidden() : r.hidden);
         case "select":
             return genSelectOptionsHtml(r.id, r.options, r.readConfig() as number | string);
         case "number":

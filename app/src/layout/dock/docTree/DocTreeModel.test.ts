@@ -81,3 +81,42 @@ test("viewport size remains bounded at the beginning, middle, and end of a large
         }
     }
 });
+
+test("navigation projects a staged child without publishing its directory snapshot", () => {
+    const model = new DocTreeModel();
+    model.setRoots([{id: "box", notebookId: "box", path: "/", name: "Box", kind: "notebook", subFileCount: 1}]);
+    const root = model.roots[0];
+    const directory = model.directory(root);
+    model.applyRange(directory, range([file("old")], 1));
+    const snapshot = {...directory, total: 100, effectiveSortMode: 3,
+        files: new Map([[90, file("target")]]), indices: new Map([["target", 90]])};
+    const child = model.child(root, 90, snapshot);
+    assert.equal(child.id, "target");
+    assert.equal(child.setSize, 100);
+    assert.equal(child.effectiveSortMode, 3);
+    assert.equal(child.occurrenceKey, "notebook:box/target");
+    assert.equal(directory.total, 1);
+    assert.equal(directory.files.get(0).id, "old");
+    assert.equal(model.getItem(child.occurrenceKey), undefined);
+    assert.equal(model.rowCount, 1);
+});
+
+test("refresh retains a complete old directory until replacement and deletion compacts cached ranges", () => {
+    const model = new DocTreeModel();
+    model.setRoots([{id: "box", notebookId: "box", path: "/", name: "Box", kind: "notebook", subFileCount: 6}]);
+    const root = model.roots[0];
+    model.expanded.set(root.occurrenceKey, root);
+    model.applyRange(model.directory(root), range([file("a"), file("b"), file("c", 1)], 6));
+    model.applyRange(model.directory(root), range([file("f")], 6, 5));
+    const c = model.child(root, 2);
+    model.expanded.set(c.occurrenceKey, c);
+    model.applyRange(model.directory(c), range([file("child")], 1));
+    model.invalidate("box", undefined, true);
+    assert.equal(model.rowAt(2).item.id, "b", "waiting for refresh retains visible source metadata");
+    model.removeDocuments(new Set(["a", "b"]));
+    assert.equal(model.rowCount, 6);
+    assert.equal(model.rowAt(1).item.id, "c");
+    assert.equal(model.rowAt(2).item.id, "child", "remaining expanded branches follow their compacted parent index");
+    assert.equal(model.directory(root).indices.get("f"), 3, "sparse cached pages shift without allocating their holes");
+    assert.equal(model.getItem("notebook:box/a"), undefined);
+});

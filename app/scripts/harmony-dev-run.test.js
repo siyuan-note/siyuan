@@ -158,6 +158,8 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
     write("app/stage/build/desktop/index.html");
     write("app/stage/build/export/protyle-method.js");
     write("app/stage/build/export/base.css");
+    write("app/stage/build/markdown/index.html");
+    for (const name of require("./markdown-assets").REQUIRED_ASSETS) write("app/stage/build/markdown/" + name);
     write("app/stage/ocr/models/tiny/det/inference.onnx");
     write("app/stage/ocr/models/tiny/rec/inference.onnx");
     write("app/stage/ocr/runtime/desktop/lib.so");
@@ -209,6 +211,7 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
             const files = readFileSync(list, "utf8");
             assert.match(files, /stage\/build\/desktop\/index.html/);
             assert.match(files, /stage\/build\/export\/base.css/);
+            assert.match(files, /stage\/build\/markdown\/vditor\/dist\/js\/lute\/lute.min.js/);
             assert.doesNotMatch(files, /ocr\/runtime/);
             writeFileSync(argv[argv.indexOf("-cf") + 1], "zip");
         }
@@ -243,6 +246,7 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
     assert.equal(readFileSync(originalWork, "utf8"), "original workspace");
     if (temporaryWork) assert.equal(existsSync(temporaryWork), false);
     assert.equal(calls.some(([command, argv]) => command === "pnpm" || argv.includes("pnpm run build:mobile")), !reuse);
+    assert.equal(calls.some(([, argv]) => argv.includes("build:markdown") || argv.includes("pnpm run build:markdown")), !reuse);
     assert.equal(calls.some(([command]) => command === "wsl.exe" || command === "bash"), !reuse);
 });
 }

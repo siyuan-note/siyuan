@@ -67,7 +67,7 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 	activeSyncCheckout.Unlock()
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
 		Context: ctx, Apply: task.prepareApply, Applied: task.completeApply, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
-		Preflight: documentAddressingPreflight(repo),
+		Preflight: syncDocumentPreflight(repo),
 		Progress: func(progress dejavu.CheckoutProgress) {
 			task.Lock()
 			newFile := task.progress.Path != progress.Path

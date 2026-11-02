@@ -107,9 +107,9 @@ func replaceDocumentTitleText(root *ast.Node, method int, keyword, replacement s
 			}
 		}
 	}
-	before := root.DocumentTitle.Content
+	before := treenode.DocumentTitleRevision(root)
 	if err = treenode.SetDocumentTitleParagraph(root, paragraph); err != nil {
 		return false, err
 	}
-	return before != root.DocumentTitle.Content, nil
+	return before != treenode.DocumentTitleRevision(root), nil
 }

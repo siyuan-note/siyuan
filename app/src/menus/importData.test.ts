@@ -85,7 +85,8 @@ const setup = (encrypted = ["box"], conflicts = ["box"], commitWait = Promise.re
     };
     runInNewContext(compiled, {exports, require: () => dependencies, window: {siyuan: {languages: {
         import: "Import", imported: "Imported", dataImportConflicts: "Conflicts", dataImportSkip: "Skip",
-        dataImportOverwrite: "Overwrite", dataImportSkipped: "Skipped notebooks", masterPassword: "Password",
+        dataImportOverwrite: "Overwrite", dataImportSkipped: "Skipped notebooks",
+        dataImportMasterPassword: "Encrypted notebook master password", dataImportPasswordTip: "Verify imported encrypted notebooks",
         importDataTip: "Overwrite by path", cancel: "Cancel", confirm: "Confirm",
     }}}});
     return {exports, requests, dialogs, messages,
@@ -107,7 +108,7 @@ test("Data.zip defaults to skip and shows skipped IDs before reloading", async (
     await dialog.control("import").dispatch("click");
     const commit = state.requests.find((item) => item.url.endsWith("commitDataImport"));
     assert.equal(commit.data.mode, "skip");
-    assert.equal(commit.data.password, "");
+    assert.equal(Object.hasOwn(commit.data, "password"), false);
     assert.equal(state.dialogs.length, 2);
     assert.match(state.dialogs[1].options.content, /Skipped notebooks.*&lt;box&gt;/);
     assert.equal(completed, 0);
@@ -116,6 +117,50 @@ test("Data.zip defaults to skip and shows skipped IDs before reloading", async (
     assert.equal(completed, 1);
     assert.equal(state.requests.some((item) => item.url.endsWith("reloadUI")), true);
     assert.equal(state.requests.some((item) => item.url.endsWith("cancelDataImport")), false);
+});
+
+test("Data.zip without encrypted notebooks omits the password in both import modes", async () => {
+    for (const mode of ["skip", "overwrite"]) {
+        const state = setup([], ["ordinary"]);
+        await state.exports.importDataFile({} as File);
+        const dialog = state.dialogs[0];
+        state.selectMode(mode);
+        await dialog.modes[0].dispatch("change");
+        assert.equal(dialog.control("password-label").hidden, true);
+        await dialog.control("import").dispatch("click");
+        const commit = state.requests.find(item => item.url.endsWith("commitDataImport"));
+        assert.equal(commit.data.mode, mode);
+        assert.equal(Object.hasOwn(commit.data, "password"), false);
+    }
+});
+
+test("Data.zip requires a password for a new encrypted notebook even while skipping conflicts", async () => {
+    const state = setup(["existing", "incoming"], ["existing"]);
+    await state.exports.importDataFile({} as File);
+    const dialog = state.dialogs[0];
+    assert.equal(dialog.control("password-label").hidden, false);
+    assert.equal(dialog.control("import").disabled, true);
+    dialog.control("password").value = " secret ";
+    await dialog.control("password").dispatch("input");
+    await dialog.control("import").dispatch("click");
+    const commit = state.requests.find(item => item.url.endsWith("commitDataImport"));
+    assert.equal(commit.data.mode, "skip");
+    assert.equal(commit.data.password, "secret");
+});
+
+test("Data.zip omits a previously entered password after switching back to skip", async () => {
+    const state = setup();
+    await state.exports.importDataFile({} as File);
+    const dialog = state.dialogs[0];
+    state.selectMode("overwrite");
+    await dialog.modes[1].dispatch("change");
+    dialog.control("password").value = "secret";
+    await dialog.control("password").dispatch("input");
+    state.selectMode("skip");
+    await dialog.modes[0].dispatch("change");
+    await dialog.control("import").dispatch("click");
+    const commit = state.requests.find(item => item.url.endsWith("commitDataImport"));
+    assert.equal(Object.hasOwn(commit.data, "password"), false);
 });
 
 test("Data.zip overwrite requires a password and failed authentication remains retryable", async () => {

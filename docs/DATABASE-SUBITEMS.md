@@ -28,17 +28,17 @@ Task dependencies express ordering or blocking between tasks and are outside thi
 
 ### Enabling and displaying sub-items
 
-Enable the feature under `Database settings - Sub-items` to create the `Parent` and `Sub-items` self-relation fields, or select existing self-relation fields. Existing fields must pass checks for a single parent, valid targets, cycles, and reverse-relation consistency. A failed check identifies the affected items and preserves the original data; it must not automatically choose a parent or remove relations.
+Select `Enable sub-items` under `Database settings - Sub-items` to create the `Parent` and `Sub-items` self-relation fields automatically on first activation. To reuse existing relations, open `Use existing relation fields`, select a reciprocal self-relation pair, and check the hierarchy preview using real items. Use `Reverse direction` if needed, then confirm enabling. Reciprocal fields appear as one choice; the entry is hidden when no eligible pair exists. The preview examines at most 100 items already loaded by the current view and shows up to three groups with three children each, without an additional full-database read; unavailable examples have an explicit empty state. Selecting, previewing, and reversing do not write data. Directions with observed multiple parents cannot be enabled. Enabling still validates the complete data for a single parent, valid targets, cycles, and reverse-relation consistency. A failed check identifies the affected items and preserves the original data; it must not automatically choose a parent or remove relations.
 
 Automatically created fields are hidden from table columns by default. They can be shown through property settings and viewed or edited in the item property panel. Fields are identified by ID, so renaming does not change their role. While the feature is enabled, the designated fields cannot be deleted, converted to another type, or retargeted to another database. Replacing the designated fields requires validation of the complete replacement before committing.
 
 Enabling the feature from a table or list switches the current view to nested display while preserving the display of other views. New views default to flat display; duplicated views retain their display mode. `View settings - Nested display` affects only the current view and does not change relations.
 
-Disabling sub-items for the database restores flat display in all views and preserves the relation fields and their values. Re-enabling requires validation of the existing relations. Disabling does not delete fields or downgrade the storage format.
+Disabling sub-items for the database restores flat display in all views and preserves the relation fields and their values. Re-enabling requires validation of the existing relations. Disabling does not delete fields or downgrade the storage format. If the designated fields were deleted or no longer form a reciprocal self-relation while disabled, automatic enabling creates a new pair without overwriting other fields or values. Rejected cycles and multiple parents report their reason and the affected item. Enabling, disabling, and changing the display keep the settings menu open; after submission, field and view metadata refresh the choices without an additional read of item contents.
 
 ### Creating and moving items
 
-Table and list views show indentation and an expansion control before the primary field. The item menu provides `Add sub-item`, `Change parent`, and `Promote one level`. The parent selector excludes the current item and its descendants, and supports clearing the parent to move the item to the root level.
+Table views show indentation and expansion controls before the first visible field, following field order and visibility; list views show these controls before the primary field. Item icons stay in the primary field. The item menu provides `Add sub-item`, `Change parent`, and `Promote one level`. The parent selector excludes the current item and its descendants, and supports clearing the parent to move the item to the root level.
 
 | Operation | Result |
 |---|---|
@@ -187,7 +187,7 @@ Maintain tests and fixtures alongside each implementation step. Data, interactio
 
 ### Format and disabling
 
-Sub-items use database format version `Spec 14`. Only databases that actually enable the feature upgrade their format; merely opening or reading an unaffected database must not upgrade it. Older kernels without format support must reject rewriting it, preventing configuration loss or bypassed constraints. The enable control should explain that devices accessing the database need support for the new format.
+Sub-items use database format version `Spec 14`. Only databases that actually enable the feature upgrade their format; merely opening or reading an unaffected database must not upgrade it. Older kernels without format support must reject rewriting it, preventing configuration loss or bypassed constraints.
 
 Save a recoverable original state before enabling, and commit configuration and format changes only after validation. Interruptions, write failures, and unsupported source formats must preserve original data rather than clearing relations to complete an upgrade. Hiding nested display or disabling the feature does not automatically downgrade the format. Reverting to an older version uses matching backups or history sources, not an older kernel ignoring added fields.
 

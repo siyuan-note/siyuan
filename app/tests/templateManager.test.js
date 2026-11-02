@@ -120,6 +120,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             if (url === "/api/block/getBlockInfo") {
                 return sourceUnavailable ? {code: -1} : {code: 0, data: {rootID: data.id, box: "notebook"}};
             }
+            if (url === "/api/template/httpPermission") {return {code: 0, data: {allowed: false}};}
             assert.equal(url, "/api/template/manage");
             if (data.action === "list") {
                 return {code: 0, data: Array.from(files, ([path, file]) => ({path, isDir: !!file.isDir, isPackage: file.isPackage}))};
@@ -333,7 +334,7 @@ if (process.versions.electron && process.type === "browser") {
                     icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                     languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"),
                 };
-                for (const name of ["menus/menuToggle", "template/manager", "template/actionState", "util/fileTree", "util/escape"]) {
+                for (const name of ["menus/menuToggle", "template/manager", "template/actionState", "template/httpPermission", "template/httpConfirmHandoff", "util/fileTree", "util/escape"]) {
                     sources[name] = ts.transpileModule(preprocess(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
                         {MOBILE: mobile, BROWSER: false}, false, true), {
                         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

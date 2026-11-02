@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20261016202856"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -294,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227201751-5d6snqe",
-				"updated": "20261016202856"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -345,6 +345,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " explicitly when supplying kernel parameters."
+				}
+			]
+		},
+		{
+			"ID": "20261101194733-x7aoem3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-x7aoem3",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When the main service uses a port other than 6806, SiYuan also starts a proxy on port 6806 if that port is available, allowing browser extensions to use a stable address. Add "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " command to disable this extra proxy; the default is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The main service still listens on the port selected by "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", including 6806, and the publish service is unaffected. After disabling the proxy, clients that used it must connect to the actual main service port. Remove the option or set it to true and restart the kernel to restore the proxy."
 				}
 			]
 		},

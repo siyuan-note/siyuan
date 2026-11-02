@@ -20,6 +20,9 @@ Plugin resource declarations, data authorization, and publishing APIs are docume
     * [Save notebook configuration](#Save-notebook-configuration)
 * [Documents](#Documents)
     * [Create a document with Markdown](#Create-a-document-with-Markdown)
+    * [Create a document by parent ID](#create-a-document-by-parent-id)
+    * [Resolve a document path by title segments](#resolve-a-document-path-by-title-segments)
+    * [Get document paths by IDs](#get-document-paths-by-ids)
     * [Rename a document](#Rename-a-document)
     * [Remove a document](#Remove-a-document)
     * [Move documents](#Move-documents)
@@ -307,7 +310,7 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 ### Get notebook configuration
 
-Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. Existing permission filtering still applies.
+Administrator responses may also include the read-only `documentCapabilities` object. It reports structured API support, supported title formats, index readiness and a capability revision. All notebooks follow structured title rules without a mode setting or migration. `literalSlash` is true only when indexes are ready. Compatibility depends on each document's source specification and title representation. Synchronization transfers document bytes without interpreting unsupported source formats. Reading, indexing, and editing still require a compatible version; snapshot restoration retains source-specification preflight checks. Existing permission filtering still applies.
 
 * `/api/notebook/getNotebookConf`
 * Parameters
@@ -340,7 +343,7 @@ Administrator responses may also include the read-only `documentCapabilities` ob
   }
   ```
 
-Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. All sync devices must upgrade to versions supporting this feature before use. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
+Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. Compatibility depends on each document's source specification and title representation. Synchronization transfers document bytes without interpreting unsupported source formats. Reading, indexing, and editing still require a compatible version; snapshot restoration retains source-specification preflight checks. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
 
@@ -383,7 +386,7 @@ Administrator responses also include the optional read-only `documentCapabilitie
 
 ### Create a document with Markdown
 
-Legacy string creation checks every parent prefix before writing. Slash or empty-title ancestors return `code: -1` with `data.reason: "pathAmbiguous"`. Multiple clean parents require a valid matching `parentID`; otherwise they also return `pathAmbiguous`. Unready metadata returns `indexUnavailable`. Prefer `/api/filetree/createDocByParent` with a separate parent identity and title.
+Legacy string creation checks every parent prefix before writing. Slash or empty-title ancestors return `code: -1` with `data.reason: "pathAmbiguous"`. Multiple clean parents require a valid matching `parentID`; otherwise they also return `pathAmbiguous`. Unready metadata returns `indexUnavailable`. Prefer [creating a document by parent ID](#create-a-document-by-parent-id) with a separate parent identity and title.
 
 * `/api/filetree/createDocWithMd`
 * Parameters
@@ -414,6 +417,245 @@ Legacy string creation checks every parent prefix before writing. Slash or empty
 
     * `data`: Created document ID
     * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten
+
+### Create a document by parent ID
+
+Creates one document under an existing parent. Requires administrator access, a writable workspace, and an opened notebook with ready document metadata; encrypted notebooks must be unlocked.
+
+* `/api/filetree/createDocByParent`
+* Parameters
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "parentID": null,
+    "id": "20261030150000-abc1234",
+    "title": {
+      "format": "plain",
+      "text": "C/C++"
+    },
+    "markdown": "Hello"
+  }
+  ```
+
+    * `notebook`: Destination notebook ID
+    * `parentID`: Existing parent document ID in that notebook, or `null` for root; required and cannot be an empty string
+    * `id`: New document ID generated and saved before sending; the SiYuan frontend can use `Lute.NewNodeID()`; replace the example ID for each new document
+    * `title`: Title object; `format` must be `plain` and `text` is required; Markdown syntax is literal text and `/` is part of the title
+    * `title.text`: At most 512 Unicode code points; empty text creates an empty-title marker and a display placeholder; leading/trailing whitespace, invalid characters, `.` and `..` are rejected
+    * `markdown`: GFM body content; may be an empty string
+    * `expectedParentRevision`: Parent version from a path query, optional; for root use `resolveDocPath`'s `data.start.revision`; a mismatch returns `planChanged`
+    * `nameConditions`: Array of up to 128 `{parentID, title, expectedID}` objects, optional; all three fields are required; `parentID: null` means root; `expectedID: null` requires no same-title child, otherwise exactly one same-title child with that ID is required; conditions apply to the destination parent and its ancestors
+    * `expectedTarget`: `{notebook, purpose, revision}` from a configuration-based creation plan, optional; `purpose` is `document`, `reference`, or `dailyNote`; changed configuration returns `planChanged`
+    * `tags`: Comma-separated document tags, optional, default empty string; subject to notebook restrictions
+    * `withMath`: Enable inline math parsing, optional, default `false`
+    * `clippingHref`: Clipping source URL, optional, default empty string; recognized community article URLs enable their Markdown syntax options
+    * `sorts`: Array of sibling storage paths in custom order, optional, default `[]`; cannot be combined with `sortTargetID`
+    * `sortTargetID`: Sibling document ID used for relative sorting, optional; requires `sortPosition`
+    * `sortPosition`: `before` or `after`, optional; requires `sortTargetID`; without sorting options, notebook creation-order settings apply
+    * `docCreateTemplatePath`: Body template path, optional, default empty string; applied only when `markdown` is empty
+    * `listDocTree`: Document-tree refresh flag in the creation notification, optional, default `false`
+    * Only `parentID` accepts `null`; unknown fields such as `path` and `hPath` are rejected
+    * Missing parents are not created automatically; invalid parent IDs, content-block IDs, and parents in other notebooks return an error
+    * Existing IDs return `documentIDConflict`; same-title documents with different IDs are allowed unless a name condition prevents them
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20261030150000-abc1234",
+      "document": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": "20261030150000-abc1234",
+        "parentID": null,
+        "path": "/20261030150000-abc1234.sy",
+        "title": {
+          "format": "plain",
+          "text": "C/C++",
+          "empty": false
+        },
+        "segments": [
+          {
+            "id": "20261030150000-abc1234",
+            "text": "C/C++",
+            "empty": false
+          }
+        ],
+        "depth": 1,
+        "displayPath": "/C/C++",
+        "revision": "opaque-revision"
+      }
+    }
+  }
+  ```
+
+    * `data.id`: Created document ID
+    * `data.document`: Document metadata, also used by the path-query endpoints below
+    * `data.document.parentID`: Parent document ID, or `null` at root
+    * `data.document.path`: ID-based `.sy` storage path
+    * `data.document.title`: Title summary; `format` is `plain` or `inline-ast`, `text` is display text, and `empty` marks an explicitly empty title
+    * `data.document.segments`: Ancestor chain including the current document; each entry contains `id`, `text`, and `empty`
+    * `data.document.depth`: Number of path segments
+    * `data.document.displayPath`: Display path; titles may contain `/`, so it cannot be split to recover document IDs
+    * `data.document.revision`: Version string for subsequent checks; use the actual returned value instead of `opaque-revision` in the example
+
+Example parameters for creating a child under the document above:
+
+```json
+{
+  "notebook": "20210817205410-2kvfpfn",
+  "parentID": "20261030150000-abc1234",
+  "id": "20261030150001-def5678",
+  "title": {
+    "format": "plain",
+    "text": "Child"
+  },
+  "markdown": "Child content",
+  "expectedParentRevision": "opaque-revision",
+  "nameConditions": [
+    {
+      "parentID": "20261030150000-abc1234",
+      "title": "Child",
+      "expectedID": null
+    }
+  ]
+}
+```
+
+Replace `expectedParentRevision` with the returned parent version. The name condition requires that `Child` does not exist. For multiple missing levels, use [path resolution](#resolve-a-document-path-by-title-segments).
+
+* Creation failures return `code: -1`. When available, `data` describes the failed step
+
+  ```json
+  {
+    "code": -1,
+    "msg": "parent document changed after planning",
+    "data": {
+      "reason": "planChanged",
+      "commitState": "none",
+      "stage": "source",
+      "completed": []
+    }
+  }
+  ```
+
+    * `data.reason`: Error reason
+        * `invalidTitle`: Invalid title
+        * `unsupportedTitleFormat`: Creation format is not `plain`
+        * `parentUnavailable`: Parent is unavailable
+        * `planChanged`: Parent version, name conditions, configuration target, or sort target changed
+        * `documentIDConflict`: ID is already in use
+        * `indexUnavailable`: Metadata is not ready or is inconsistent
+        * `writeFailed`: Other creation, sorting, or template error
+    * `data.commitState`: `none` means this call did not save the document; `committed` means the document was saved but later steps may have failed; `unknown` means persistence could not be determined
+    * `data.id`: Optional ID of a document confirmed saved
+    * `data.stage`: Failed phase, such as `validate`, `source`, `sort`, or `template`
+    * `data.completed`: Completed phases, such as `source` and `sort`
+    * Request parsing, authentication, and notebook-access errors may return only the normal error envelope
+
+Sorting or template failure keeps the saved document. After a timeout, lost response, or `unknown` result, [query the original ID](#get-document-paths-by-ids) once metadata is ready and check the parent, title, body, and unfinished steps before retrying. A matching ID alone does not confirm that all steps succeeded; keep the original ID and avoid repeating templates or falling back to legacy writes automatically.
+
+### Resolve a document path by title segments
+
+Resolves titles under a specified starting location without creating documents. Requires administrator access and an opened, unlocked notebook with ready document metadata.
+
+* `/api/filetree/resolveDocPath`
+* Parameters
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "start": {
+      "kind": "root"
+    },
+    "segments": [
+      "Notes",
+      "C/C++"
+    ]
+  }
+  ```
+
+    * `notebook`: Notebook ID
+    * `start`: `{kind: "root"}` for root, without `id`, or `{kind: "document", id: "existing-document-id"}` for an existing document; the notebook root document ID is treated as logical root
+    * `segments`: Array of 0 to 128 nonempty titles, matched exactly under each parent; `/` within a title is literal; no Unicode normalization, full-width conversion, or percent decoding is performed
+    * Use a document ID as the start to address an empty-title document; an empty segment array returns the starting document or root
+* Return value
+
+  The following result assumes that `Notes` does not exist.
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "status": "missing",
+      "start": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": null,
+        "revision": "opaque-root-revision"
+      },
+      "resolved": null,
+      "nextIndex": 0,
+      "candidates": [],
+      "candidatesTruncated": false,
+      "nameConditions": [
+        {
+          "parentID": null,
+          "title": "Notes",
+          "expectedID": null
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.status`: `resolved`, `missing`, or `ambiguous`; all three return `code: 0`
+    * `data.start`: Starting notebook, document ID (`null` for root), and version
+    * `data.resolved`: Last uniquely resolved document, using the metadata structure above, or `null` at root
+    * `data.nextIndex`: Zero-based missing or ambiguous segment index; equals `segments.length` when fully resolved
+    * `data.candidates`: Same-title candidates for an ambiguous segment, ordered by ID, up to 128 entries; selection requires an explicit document ID
+    * `data.candidatesTruncated`: Whether more candidates exist
+    * `data.nameConditions`: Unique matches and the first missing name; pass these conditions when creating to check for intervening changes
+    * Errors return `code: -1` and may include `data.reason`; an error does not mean that the document is missing
+
+To import `/Notes/2026-10-30/Article`, use parent segments `["Notes", "2026-10-30"]` and final title `"Article"`:
+
+1. Resolve the parent segments from root; for `ambiguous`, select the parent by ID
+2. For `missing`, create `segments[nextIndex]` with `markdown: ""`; use `resolved.id` as `parentID`, or `start.id` if `resolved` is `null`; pass the corresponding version as `expectedParentRevision` and the returned `nameConditions`, and save the allocated document ID
+3. After success, resolve the parent segments again and repeat until fully resolved; refresh the name conditions after each creation
+4. Create `Article` under the resolved parent with its version and the final Markdown body; to require a unique final title, add `{parentID, title: "Article", expectedID: null}`, keeping the total conditions within 128
+
+Each document is saved separately. A later failure preserves existing parents; check the failed step's outcome before continuing. The whole path is not committed or rolled back as one operation.
+
+### Get document paths by IDs
+
+Reads document metadata by ID. Requires administrator access and an opened, unlocked notebook with ready document metadata.
+
+* `/api/filetree/getDocPaths`
+* Parameters
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "ids": [
+      "20261030150000-abc1234",
+      "20261030150001-def5678"
+    ]
+  }
+  ```
+
+    * `notebook`: Notebook ID
+    * `ids`: Array of 1 to 128 valid document IDs; duplicates are removed in first-occurrence order
+* Return value
+
+    * `data.documents`: Array of document metadata objects described in [creation results](#create-a-document-by-parent-id), in request order
+    * `data.missingIDs`: IDs that are missing, belong to another notebook, or identify content blocks
+    * Either array may be empty; unavailable or inconsistent metadata returns an error rather than a missing result
+    * Each document is read consistently; the batch does not promise a single snapshot
+
+This endpoint does not return body content. To check an uncertain creation result, locate the retained ID here, then read the body separately and verify any unfinished sorting, template, or import steps.
 
 ### Rename a document
 
@@ -1358,6 +1600,8 @@ Block-writing APIs can return after their block-tree transaction is committed bu
 ### Render a template
 
 * `/api/template/render`
+
+Without a live interactive window, `httpGet` returns `interaction_required` and performs no network request. “Allow this time” authorizes the current execution's template version to access multiple public targets, including subsequent requests and redirects, and to send note content it is permitted to read to external services without gaining additional read access. Persistent permission is available only for kernel-identified file or database field template sources and content versions; it applies locally within the current workspace, not just the current target document or unlocked notebook, is not included in built-in export or sync, and can be revoked in template management or database field settings. Referenced child template files do not inherit their parent's permission. Editing, copying, or importing requires confirmation again. Background execution, published pages, and locked notebooks cannot use these permissions to bypass interaction or access checks.
 * Parameters
 
   ```json
@@ -1371,6 +1615,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
     * `id`: The ID of the document where the rendering is called
     * `path`: Template file absolute path
     * `mode`: Optional rendering mode. Currently supports `"preview"` and `"editorInsert"` only. Preview mode produces a document tree plan without writing files; editor-insert mode produces a plan that can be confirmed and applied with the corresponding editor transaction
+    * `httpConfirmToken`: Optional approval token returned by a successful preview; always-allow permission is not required. Pass it with `mode: "editorInsert"` within 30 seconds for one insertion in the same window, with unchanged template source and dependencies, target document/notebook, and actual requests. Only approvals are reused; insertion fetches fresh data. Changed or revoked context, expiry, or an already-used token returns to normal template permission checks. Closing or switching the preview, locking the notebook, or disconnecting invalidates the handoff; `/api/template/cancelHTTP` also accepts the optional `httpConfirmToken` to revoke it. This handoff does not apply to database or daily-note executions
     * When `mode` is omitted, the legacy `preview` Boolean parameter remains supported: `preview: true` is equivalent to `mode: "preview"`; otherwise the template is rendered as ordinary content and `createDocTree` is disabled
 * Return value
 
@@ -1405,6 +1650,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
   }
   ```
 
+    * `httpConfirmToken`: Optional one-time approval token issued after a successful interactive preview; see the request field for its scope and 30-second validity
     * `docTreePlan`: Present when the template declares a child document tree with `createDocTree`
         * `id`: Empty in preview mode, which never writes files. In editor-insert mode, this is a short-lived, one-time plan token; after confirmation, submit it as the top-level `templateDocTreePlanID` field of the corresponding transaction object
         * `count`: Total number of child documents in the plan
@@ -2831,6 +3077,8 @@ Reorders a field (column) globally — moves `keyID` to the position after `prev
 ### Set per-view field sort
 
 Reorders a column within a single view's layout (e.g. a table's column order), without changing the global field ordering.
+
+Unknown view IDs or field IDs return an error. Moving a field preserves its width and visibility, field types and stored values.
 
 * `/api/av/sortAttributeViewViewKey`
 * Parameters

@@ -75,9 +75,9 @@ func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, err
 	case reflect.TypeFor[AVRenderResult]():
 		members = []reflect.Type{reflect.TypeFor[AVRenderData](), reflect.TypeFor[AVViewNotFound]()}
 	case reflect.TypeFor[AVCreateItemResult]():
-		members = []reflect.Type{reflect.TypeFor[AVCreateAttributeViewItemResult](), reflect.TypeFor[AVUnavailableNotebook]()}
+		members = []reflect.Type{reflect.TypeFor[AVCreateAttributeViewItemResult](), reflect.TypeFor[AVUnavailableNotebook](), reflect.TypeFor[DocumentSelectionFailure]()}
 	case reflect.TypeFor[AVCreateItemDocsResult]():
-		members = []reflect.Type{reflect.TypeFor[AVCreateAttributeViewItemDocsResult](), reflect.TypeFor[AVUnavailableNotebook]()}
+		members = []reflect.Type{reflect.TypeFor[AVCreateAttributeViewItemDocsResult](), reflect.TypeFor[AVUnavailableNotebook](), reflect.TypeFor[DocumentSelectionFailure]()}
 	default:
 		return nil, nil
 	}
@@ -162,8 +162,13 @@ func (value AVRenderResult) MarshalJSON() ([]byte, error) {
 }
 
 type AVCreateItemResult struct {
-	success *AVCreateAttributeViewItemResult
-	failure *AVUnavailableNotebook
+	selection *DocumentSelectionFailure
+	success   *AVCreateAttributeViewItemResult
+	failure   *AVUnavailableNotebook
+}
+
+func NewAVCreateItemSelectionFailure(value DocumentSelectionFailure) AVCreateItemResult {
+	return AVCreateItemResult{selection: &value}
 }
 
 func NewAVCreateItemResult(value AVCreateAttributeViewItemResult) AVCreateItemResult {
@@ -173,6 +178,9 @@ func NewAVCreateItemResultError(value AVUnavailableNotebook) AVCreateItemResult 
 	return AVCreateItemResult{failure: &value}
 }
 func (value AVCreateItemResult) MarshalJSON() ([]byte, error) {
+	if value.selection != nil {
+		return json.Marshal(value.selection)
+	}
 	if value.success != nil {
 		return json.Marshal(value.success)
 	}
@@ -183,8 +191,13 @@ func (value AVCreateItemResult) MarshalJSON() ([]byte, error) {
 }
 
 type AVCreateItemDocsResult struct {
-	success *AVCreateAttributeViewItemDocsResult
-	failure *AVUnavailableNotebook
+	selection *DocumentSelectionFailure
+	success   *AVCreateAttributeViewItemDocsResult
+	failure   *AVUnavailableNotebook
+}
+
+func NewAVCreateItemDocsSelectionFailure(value DocumentSelectionFailure) AVCreateItemDocsResult {
+	return AVCreateItemDocsResult{selection: &value}
 }
 
 func NewAVCreateItemDocsResult(value AVCreateAttributeViewItemDocsResult) AVCreateItemDocsResult {
@@ -194,6 +207,9 @@ func NewAVCreateItemDocsResultError(value AVUnavailableNotebook) AVCreateItemDoc
 	return AVCreateItemDocsResult{failure: &value}
 }
 func (value AVCreateItemDocsResult) MarshalJSON() ([]byte, error) {
+	if value.selection != nil {
+		return json.Marshal(value.selection)
+	}
 	if value.success != nil {
 		return json.Marshal(value.success)
 	}

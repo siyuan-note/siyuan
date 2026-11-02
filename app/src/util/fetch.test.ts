@@ -9,7 +9,8 @@ import {flushSettingSaves, settingSaveFailures, trackSettingRequest} from "../co
 import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() => {}),
-                       processResponse: (response: IWebSocketData) => boolean = () => true) => {
+                       processResponse: (response: IWebSocketData) => boolean = () => true,
+                       templateRequest?: {signal: AbortSignal; headers: Record<string, string>; isCurrent: () => boolean; finish: () => void}) => {
     const sends: unknown[][] = [];
     const timeouts: number[] = [];
     const notifications: unknown[][] = [];
@@ -26,6 +27,7 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         require: (name: string) => {
             switch (name) {
                 case "./fetchWithAppId": return {fetchWithAppId: fetchImplementation};
+                case "../template/http": return {beginTemplateHTTPRequest: () => templateRequest};
                 case "../constants": return {Constants: {SIYUAN_QUIT: "quit"}};
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
@@ -62,6 +64,31 @@ it("invokes the failure callback once when a request stalls", async () => {
         }, undefined, 30000);
     assert.equal(failures, 1);
     assert.equal(sends.length, 0);
+});
+
+it("checks template ownership synchronously before callbacks and sync response consumers", async () => {
+    for (const mode of ["callback", "sync"]) {
+        const controller = new AbortController();
+        let checks = 0;
+        let finished = 0;
+        const state = loadFetchPost(async () => new Response(JSON.stringify({code: 0, msg: "", data: {content: "old"}}), {
+            headers: {"Content-Type": "application/json"},
+        }), () => true, {signal: controller.signal, headers: {}, isCurrent: () => {
+            checks++;
+            controller.abort();
+            return false;
+        }, finish: () => {finished++;}});
+        if (mode === "callback") {
+            await state.fetchPost("/api/template/render", {id: "old"}, () => assert.fail("obsolete response applied"));
+        } else {
+            const response = await state.fetchSyncPost("/api/av/renderAttributeView", {id: "old"});
+            assert.equal(response.code, -1);
+            assert.equal(response.data, null);
+        }
+        assert.equal(checks, 1);
+        assert.equal(finished, 1);
+        assert.equal(controller.signal.aborted, true);
+    }
 });
 
 it("keeps positive business errors in the callback and filters negative errors", async () => {

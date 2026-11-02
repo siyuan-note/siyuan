@@ -289,6 +289,8 @@ func documentAddressingSchema(b *schemaBuilder, t reflect.Type, input bool) (*Sc
 		valueType, failureType = reflect.TypeFor[LegacyDocumentTarget](), reflect.TypeFor[StructuredDocumentTarget]()
 	case reflect.TypeFor[CreateDocByParentResult]():
 		valueType, failureType = reflect.TypeFor[CreatedDocumentData](), reflect.TypeFor[DocumentCreateFailure]()
+	case reflect.TypeFor[DailyNoteCreateResult]():
+		valueType, failureType = reflect.TypeFor[FileTreeCreateData](), reflect.TypeFor[DocumentSelectionFailure]()
 	case reflect.TypeFor[DocumentPathsResult]():
 		valueType = reflect.TypeFor[DocumentPathsData]()
 	case reflect.TypeFor[ResolveDocPathResult]():

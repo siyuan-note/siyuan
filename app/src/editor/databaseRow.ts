@@ -10,7 +10,7 @@ import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
 import {saveLayout, setPanelFocus} from "../layout/util";
 import {preserveAVBindingRange} from "../protyle/render/av/binding";
 import {inheritDatabaseRowReadonly} from "../protyle/render/av/rowReadonly";
-import {IDatabaseRowOpenData, mountDesktopDatabaseRowNavigation} from "../protyle/render/av/openDatabaseRow";
+import {IDatabaseRowOpenData, mountDesktopDatabaseRowNavigation, switchDesktopDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
 
 type TDatabaseRowData = Parameters<typeof newDatabaseRowModel>[0]["data"];
 const rowSwitchers = new WeakMap<Custom, (data: TDatabaseRowData) => Promise<boolean>>();
@@ -50,6 +50,7 @@ export const newDatabaseRowModel = (options: {
     let resizeObserver: ResizeObserver;
     let unregisterRefresh: () => void;
     let destroyed = false;
+    let openingBoundID = "";
     let renderVersion = 0;
     let pendingRow: {data: TDatabaseRowData, resolve: (opened: boolean) => void};
     let resolveReady: (ready: boolean) => void;
@@ -105,6 +106,17 @@ export const newDatabaseRowModel = (options: {
                 custom.tab.parent.removeTab(custom.tab.id);
                 resolveReady(false);
                 return;
+            }
+            const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
+            const primaryValue: IAVCellValue = primaryElement?.dataset.cellValue ?
+                JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) : undefined;
+            if (!switching && data.isDetached !== false && !openingBoundID && primaryValue?.block?.id && !primaryValue.isDetached &&
+                window.siyuan.config.editor.databaseAttrShow) {
+                openingBoundID = primaryValue.block.id;
+                void switchDesktopDatabaseRowPreview(custom, {...data, databaseBlockID: data.blockID,
+                    notebookID: data.notebookId, boundBlockID: primaryValue.block.id, isDetached: false}, contextProtyle)
+                    .catch(error => console.warn("Failed to open bound database row:", error))
+                    .finally(() => { openingBoundID = ""; });
             }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             const restoreBindingRange = switching ? undefined : preserveAVBindingRange(contextProtyle, previousBodyElement);

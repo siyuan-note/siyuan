@@ -43,6 +43,14 @@ func saveAIMemoryContract(c *gin.Context, q apicontract.AIMemorySaveRequest) api
 
 var forgetAIMemory = contractHandler(apicontract.AIMemoryForget, forgetAIMemoryContract)
 
+var clearAIMemory = contractHandler(apicontract.AIMemoryClear, clearAIMemoryContract)
+
+func clearAIMemoryContract(c *gin.Context, q apicontract.EmptyRequest) apicontract.Response[apicontract.AIMemoryClearData] {
+	return withSettingLock("ai", func() apicontract.Response[apicontract.AIMemoryClearData] {
+		return memoryResponse(model.ClearAIMemory(c.Request.Context()))
+	})
+}
+
 func forgetAIMemoryContract(c *gin.Context, q apicontract.AIMemoryForgetRequest) apicontract.Response[apicontract.AIMemoryForgetData] {
 	r, err := model.ForgetAIMemory(c.Request.Context(), q)
 	if err == nil {
@@ -55,6 +63,12 @@ var overviewAIMemory = contractHandler(apicontract.AIMemoryOverview, overviewAIM
 
 func overviewAIMemoryContract(c *gin.Context, q apicontract.EmptyRequest) apicontract.Response[apicontract.AIMemoryOverviewData] {
 	return memoryResponse(model.ReadAIMemoryOverview(c.Request.Context()))
+}
+
+var translateAIMemory = contractHandler(apicontract.AIMemoryTranslate, translateAIMemoryContract)
+
+func translateAIMemoryContract(c *gin.Context, q apicontract.AIMemoryTranslateRequest) apicontract.Response[apicontract.AIMemoryTranslateData] {
+	return memoryResponse(model.TranslateAIMemoryOverview(c.Request.Context(), q))
 }
 
 var maintainAIMemory = contractHandler(apicontract.AIMemoryMaintain, maintainAIMemoryContract)

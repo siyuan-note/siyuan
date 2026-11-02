@@ -579,7 +579,8 @@ export class Dock {
     public showDockByHover() {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
-        const canRevealBar = (this.position === "Left" || this.position === "Right") && window.siyuan.config.uiLayout.hideDock;
+        const canRevealBar = (this.position === "Left" || this.position === "Right") &&
+            window.siyuan.config.appearance?.showFloatingDockBar !== false && window.siyuan.config.uiLayout.hideDock;
         const needsBar = canRevealBar && (!this.elements[0].parentElement.classList.contains("dock--float") ||
             this.elements[0].parentElement.classList.contains("dock--closing"));
         if (isTouchHoverInput() || this.showDockTimeout || !this.isFloating() ||
@@ -589,7 +590,8 @@ export class Dock {
         this.showDockTimeout = window.setTimeout(() => {
             this.showDockTimeout = 0;
             this.showDock();
-            if (canRevealBar && window.siyuan.config.uiLayout.hideDock && this.isFloating()) {
+            if (canRevealBar && window.siyuan.config.appearance?.showFloatingDockBar !== false &&
+                window.siyuan.config.uiLayout.hideDock && this.isFloating()) {
                 this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
                 setDockBarHover(this.elements[0].parentElement, true);
             }
@@ -690,6 +692,10 @@ export class Dock {
 
     public hideDock(reset = false, preferredSize?: number) {
         this.clearDockHoverTimeout();
+        // 原生拖拽会触发指针离开事件，文档树作为拖拽来源时仍需保持可见以完成放置。
+        if (!reset && this.layout.element.querySelector(".sy__file--disablehover")) {
+            return;
+        }
         const barVisible = this.position !== "Bottom" && this.elements[0].parentElement.classList.contains("dock--float");
         if (!reset && (this.layout.element.style.opacity === "0" && !barVisible || !this.isFloating())) {
             return;

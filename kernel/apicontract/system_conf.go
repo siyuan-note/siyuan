@@ -149,13 +149,16 @@ type SystemNetworkProxy struct {
 }
 
 type SystemSync struct {
-	CloudName           string         `json:"cloudName" api:"optional,nullable"`
-	Enabled             bool           `json:"enabled" api:"optional,nullable"`
-	Perception          bool           `json:"perception" api:"optional,nullable"`
-	Mode                int            `json:"mode" api:"optional,nullable"`
-	Interval            int            `json:"interval" api:"optional,nullable"`
-	Synced              int64          `json:"synced" api:"optional,nullable"`
-	Stat                string         `json:"stat" api:"optional,nullable"`
+	CloudName  string `json:"cloudName" api:"optional,nullable"`
+	Enabled    bool   `json:"enabled" api:"optional,nullable"`
+	Perception bool   `json:"perception" api:"optional,nullable"`
+	Mode       int    `json:"mode" api:"optional,nullable"`
+	Interval   int    `json:"interval" api:"optional,nullable"`
+	Synced     int64  `json:"synced" api:"optional,nullable"`
+	Stat       string `json:"stat" api:"optional,nullable"`
+	// LastResult is kernel-maintained: 0 unknown (including older configurations), 1 success, 2 failure or automatic pause.
+	// An in-progress operation does not replace the last completed result.
+	LastResult          int            `json:"lastResult" api:"optional,nullable"`
 	GenerateConflictDoc bool           `json:"generateConflictDoc" api:"optional,nullable"`
 	AssetDownloadMode   int            `json:"assetDownloadMode" api:"optional,nullable"`
 	Provider            int            `json:"provider" api:"optional,nullable"`

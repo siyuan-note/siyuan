@@ -78,7 +78,7 @@ class ElementMock extends EventTargetMock {
     replaceChildren() { this.cleared = true; this.children.clear(); }
 }
 
-const setup = (readonly = false) => {
+const setup = (readonly = false, deferSheetOpen = false) => {
     const requests: Array<ReturnType<typeof deferred<any>> & {id: string}> = [];
     const messages: string[] = [];
     const dialogs: DialogMock[] = [];
@@ -89,6 +89,7 @@ const setup = (readonly = false) => {
     const refreshed: any[] = [];
     const titleEvents: string[] = [];
     const cellMasks: ElementMock[] = [];
+    const sheetOpeners: Array<() => void> = [];
     let flush: (editor: ProtyleMock) => Promise<void> = () => Promise.resolve();
     let disposedBindings = 0;
     const viewport = {top: 0, bottom: 800};
@@ -166,8 +167,15 @@ const setup = (readonly = false) => {
         "./bindBottomSheetDialog": sheetAPI,
         "./bindBottomSheetDrag": {bindBottomSheetDrag: () => () => { disposedBindings++; }},
         "../../menus/sheetOpen": {waitForSheetViewport: (options: {open: () => void}) => {
-            options.open();
-            return () => {};
+            if (!deferSheetOpen) {
+                options.open();
+                return () => {};
+            }
+            sheetOpeners.push(options.open);
+            return () => {
+                const index = sheetOpeners.indexOf(options.open);
+                if (index !== -1) sheetOpeners.splice(index, 1);
+            };
         }},
         "./keyboardToolbar": {activeBlur: () => { document.activeElement = new ElementMock(); }},
         "./secondaryEditors": {
@@ -200,7 +208,8 @@ const setup = (readonly = false) => {
         answer(requests.length - 1, rootID);
         await opening;
     };
-    return {...api, ...dialogAPI, ...saveAPI, ...editorSessionAPI, ...cellEditorAPI,
+    return {...api, ...dialogAPI, ...saveAPI, ...editorSessionAPI, ...cellEditorAPI, ...sheetAPI,
+        Dialog: DialogMock, finishSheetOpen: () => sheetOpeners.shift()?.(),
         source, requests, messages, editors, registered, flushes, refreshed, titleEvents, cellMasks, viewport,
         window, document, answer, open,
         dialogs: dialogs as Array<DialogMock & import("./MobileEditorDialog").MobileEditorDialog>,
@@ -208,6 +217,32 @@ const setup = (readonly = false) => {
         finishDestroy: () => { destroyCallbacks.splice(0).forEach(callback => callback()); },
         disposedBindings: () => disposedBindings};
 };
+
+test("bottom sheet readiness runs after reveal and is cancelled on dismissal or disposal", () => {
+    const fixture = setup(false, true);
+    let opened = 0;
+    const dialog = new fixture.Dialog({});
+    const sheet = dialog.element.querySelector(".b3-dialog__container");
+    const dispose = fixture.bindBottomSheetDialog(dialog as any, async () => {}, undefined, () => {
+        assert.equal(sheet.style.visibility, "");
+        assert.equal(sheet.style.transform, "");
+        opened++;
+    });
+    assert.equal(sheet.style.visibility, "hidden");
+    assert.equal(opened, 0);
+    fixture.finishSheetOpen();
+    assert.equal(opened, 1);
+    dispose();
+    for (const reason of ["dismiss", "dispose"]) {
+        const late = new fixture.Dialog({});
+        const cleanup = fixture.bindBottomSheetDialog(late as any, async () => {}, undefined, () => { opened++; });
+        if (reason === "dismiss") late.element.classList.remove("b3-dialog--open");
+        else cleanup();
+        fixture.finishSheetOpen();
+        assert.equal(opened, 1);
+        if (reason === "dismiss") cleanup();
+    }
+});
 
 test("only the latest resolved reference opens, without changing the original document or scroll", async () => {
     const fixture = setup();

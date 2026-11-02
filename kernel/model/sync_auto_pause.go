@@ -19,7 +19,7 @@ import (
 
 // recordAutoSyncFailure 用户取消和本地编辑竞态不属于云端连续失败。
 func recordAutoSyncFailure(err error) {
-	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) {
+	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) || errors.Is(err, errSyncCheckoutBusy) {
 		return
 	}
 	autoSyncErrCount.Add(1)
@@ -57,6 +57,7 @@ func notifyAutoSyncPaused() bool {
 	if Conf.Sync.Load().Stat != msg {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
+		publishSyncResult(2, nil)
 	}
 	if autoSyncPauseNotice.messageID == "" {
 		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")

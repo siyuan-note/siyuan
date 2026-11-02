@@ -110,7 +110,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		return apicontract.Failure[apicontract.Null](code, Conf.Language(83))
 	}
 
-	workspaceSession.AccessAuthCode = authCode
+	SetAccessCodeSession(workspaceSession, authCode)
 	workspaceSession.OIDCSessionVersion = ""
 	BindDesktopSession(c, workspaceSession, request.RememberMe)
 	util.WrongAuthCount = 0
@@ -214,9 +214,9 @@ func CheckReadonly(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		// 同步控制接口会在实际应用阶段取得写租约，不跨整轮网络请求持有读租约。
+		// 同步控制接口在应用阶段取得写租约，MCP 在实际工具调用期间取得读租约。
 		switch c.Request.URL.Path {
-		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks":
+		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks", "/mcp":
 			dataImportAccess.RUnlock()
 			released = true
 		}
@@ -593,8 +593,8 @@ func ControlConcurrency(c *gin.Context) {
 
 	reqPath := c.Request.URL.Path
 
-	// 插件 RPC 独立处理各次调用，避免单个调用阻塞其他插件或信息查询。
-	if reqPath == "/api/plugin/rpc" {
+	// 插件 RPC 独立调用；日记创建使用内部身份锁，联网确认期间不能持有接口写入锁。
+	if reqPath == "/api/plugin/rpc" || reqPath == "/api/filetree/createDailyNote" {
 		c.Next()
 		return
 	}

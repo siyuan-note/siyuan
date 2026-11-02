@@ -182,7 +182,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
-    width: min(560px, calc(100vw - 32px));
+    width: min(720px, calc(100vw - 32px));
     max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
     overflow: auto;
@@ -197,6 +197,16 @@
   &__progress-label {
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  &__loading-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+
+    .b3-button {
+      max-width: 100%;
+    }
   }
 
   &__progress {

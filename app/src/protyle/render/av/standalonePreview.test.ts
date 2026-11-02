@@ -15,6 +15,7 @@ for (const layout of ["table", "gallery", "kanban"]) {
             getPageSize: () => ({unGroupPage: 3, unGroupPageSize: 50, groupPageSize: {}}),
             getSubItemsRequest: () => nested,
             isCurrentAVRender: () => false,
+            guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose: () => {}}),
             fetchSyncPost: async (url: string, request: typeof requests[number]) => {
                 assert.equal(url, "/api/av/renderAttributeView");
                 requests.push(request);

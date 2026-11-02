@@ -10,13 +10,72 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCheckoutRepoSnapshotSkipsRefreshBeforeApply(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	if err := repo.EnsureAllAssets(nil); err != nil {
+		t.Fatal(err)
+	}
+	id, _, err := repo.AssetDownloadChanges()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = repo.AcknowledgeAssetDownloadChanges(id); err != nil {
+		t.Fatal(err)
+	}
+	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = true })
+	refreshed := false
+	err = withRepoCheckoutSyncPaused(repo, func() error {
+		return checkoutRepoSnapshot(repo, strings.Repeat("f", 40), func(error) { refreshed = true })
+	})
+	if err == nil || !repoCheckoutFailedBeforeApply(err) || refreshed || !Conf.Sync.Load().Enabled {
+		t.Fatalf("read-only failure: err=%v, refreshed=%v, sync=%v", err, refreshed, Conf.Sync.Load().Enabled)
+	}
+}
+
+func TestCheckoutRepoSnapshotRefreshesHydratedAssetsOnFailure(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = true })
+	refreshed := false
+	err := withRepoCheckoutSyncPaused(repo, func() error {
+		return checkoutRepoSnapshot(repo, strings.Repeat("f", 40), func(error) { refreshed = true })
+	})
+	if err == nil || repoCheckoutFailedBeforeApply(err) || !refreshed || Conf.Sync.Load().Enabled {
+		t.Fatalf("hydration failure: err=%v, refreshed=%v, sync=%v", err, refreshed, Conf.Sync.Load().Enabled)
+	}
+}
+
+func TestCheckoutRepoSyncStateAfterFailure(t *testing.T) {
+	for _, test := range []struct {
+		name          string
+		err           error
+		enabled, want bool
+	}{
+		{"success pauses", nil, true, false},
+		{"backup failure restores", &dejavu.CheckoutError{Stage: "backup", Err: errors.New("disk full")}, true, true},
+		{"possible partial apply pauses", &dejavu.CheckoutError{Stage: "apply files", MayHaveApplied: true, Err: errors.New("write failed")}, true, false},
+		{"unknown failure pauses", errors.New("unknown"), true, false},
+		{"disabled remains disabled", &dejavu.CheckoutError{Stage: "target files", Err: errors.New("invalid file")}, false, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			_, repo, _ := prepareAssetDownloadRepoTest(t)
+			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = test.enabled })
+			err := withRepoCheckoutSyncPaused(repo, func() error { return test.err })
+			if !errors.Is(err, test.err) || Conf.Sync.Load().Enabled != test.want {
+				t.Fatalf("sync=%v, want %v; err=%v", Conf.Sync.Load().Enabled, test.want, err)
+			}
+		})
+	}
+}
 
 func TestCheckoutRepoSnapshotBacksUpPreservedAttributes(t *testing.T) {
 	for _, scope := range []string{"repository", "file"} {

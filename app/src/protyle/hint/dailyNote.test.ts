@@ -17,6 +17,8 @@ const createContext = () => {
     let choose: ((notebook: string) => void) | undefined;
     let fail = false;
     let existed = true;
+    let deferResponses = false;
+    const pending: Array<() => void> = [];
     const selected: string[] = [];
     const storage: Record<string, string> = {};
     const appWindow = {siyuan: {
@@ -26,11 +28,13 @@ const createContext = () => {
         languages: {dailyNote: "Daily Note", fileTree11: "New daily note", plsChoose: "Choose a notebook"},
     }};
     const mocks: Record<string, unknown> = {
+        "../../util/documentSelectionRequest": {fetchWithDocumentSelection: (submit: () => Promise<unknown>) => submit()},
         "../../constants": {Constants: {LOCAL_DAILYNOTEID: "last", SIYUAN_APPID: "app"}},
         "../../util/dailyNote": {canReferenceDailyNoteNotebook, getLastDailyNoteNotebookId},
         "../../util/dailyNoteDate": {parseDailyNoteDate},
         "../../util/escape": {escapeAttr, escapeHtml},
         "../util/compatibility": {setStorageVal() {}},
+        "../../template/http": {guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose: () => {}})},
         "../../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted"},
         "../../util/mount": {selectDailyNoteNotebook: (notebooks: {id: string}[], callback: (id: string) => void) => {
             selected.push(...notebooks.map(item => item.id));
@@ -38,13 +42,24 @@ const createContext = () => {
         }},
         "../../util/fetch": {fetchSyncPost: async (path: string, body: {notebook?: string, date?: string}) => {
             calls.push({path, body});
+            if (path.endsWith("createDailyNote")) {
+                const result = fail ? {code: -1} : {code: 0, data: {id: "existing"}};
+                if (deferResponses) return new Promise(resolve => pending.push(() => resolve(result)));
+                return result;
+            }
             return fail ? {code: -1} : {code: 0, data: {id: existed ? "existing" : "", existed,
                 title: existed ? "Renamed <note>" : "Sep 25, 2026", hPath: existed ? "/Moved/Renamed <note>" : "/Daily/Sep 25, 2026"}};
         }, fetchPost: (path: string, body: {notebook?: string, date?: string, id?: string},
                                        callback: (response: unknown) => void) => {
             calls.push({path, body});
-            callback(fail ? {code: -1} : path.endsWith("getDocInfo") ?
-                {code: 0, data: {name: "Renamed daily note", ial: {title: "Date"}}} : {code: 0, data: {id: "existing"}});
+            assert.equal(path, "/api/block/getDocInfo");
+            const respond = () => callback(fail ? {code: -1} :
+                {code: 0, data: {name: "Renamed daily note", ial: {title: "Date"}}});
+            if (deferResponses) {
+                return new Promise<void>(resolve => pending.push(() => {respond(); resolve();}));
+            }
+            respond();
+            return Promise.resolve();
         }},
     };
     const exported = {};
@@ -54,10 +69,12 @@ const createContext = () => {
         createDailyNoteReference: (protyle: unknown, date: string, notebook: string, callback: (id: string, title: string) => void) => void,
     };
     return {functions, calls, storage, selected, appWindow, choose: (id: string) => choose?.(id),
+        defer: () => {deferResponses = true;}, respond: () => pending.shift()?.(),
         setFail: () => { fail = true; }, setMissing: () => { existed = false; }};
 };
 
-const protyle = {notebookId: "normal", hint: {splitChar: "[["}};
+const protyle = {notebookId: "normal", hint: {splitChar: "[["}, block: {rootID: "source"},
+    wysiwyg: {element: {isConnected: true, closest: (): Element => null}}};
 
 test("daily note candidates show authenticated names and full paths without creating documents", async () => {
     const context = createContext();
@@ -88,11 +105,12 @@ test("missing daily notes display resolved creation titles and calendar-plus ico
     assert.ok(!hint.html.includes("popover__block"));
 });
 
-test("selecting a date reuses its previewed notebook and inserts the real document title", () => {
+test("selecting a date reuses its previewed notebook and inserts the real document title", async () => {
     const context = createContext();
     context.storage.last = "normal";
     let inserted = "";
     context.functions.createDailyNoteReference(protyle, "2026-09-25", "daily", (id, title) => { inserted = `${id}:${title}`; });
+    await new Promise(resolve => setImmediate(resolve));
     assert.equal(context.calls[0].body.notebook, "daily");
     assert.equal(context.calls[0].body.date, "2026-09-25");
     assert.equal(inserted, "existing:Renamed daily note");
@@ -121,4 +139,24 @@ test("an unselected notebook offers actual paths and preserves encrypted boundar
     const candidates = await undecided.functions.getDailyNoteHints("2026-09-25", protyle);
     assert.equal(candidates.length, 2);
     assert.ok(undecided.calls.every(call => call.path.endsWith("getDailyNoteInfo")));
+});
+
+test("daily-note creation never inserts a reference into a newer document", async () => {
+    for (const stage of ["creation", "title"]) {
+        const context = createContext();
+        context.defer();
+        const source = {...protyle, block: {rootID: "original"}};
+        context.functions.createDailyNoteReference(source, "2026-09-25", "daily", () => {
+            assert.fail("obsolete daily note reference inserted");
+        });
+        if (stage === "title") {
+            context.respond();
+            await new Promise(resolve => setImmediate(resolve));
+            assert.equal(context.calls.length, 2);
+        }
+        source.block.rootID = "new-document";
+        context.respond();
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(context.calls.length, stage === "creation" ? 1 : 2);
+    }
 });

@@ -168,6 +168,7 @@ interface Window {
     webkit: {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
+            openMarkdownEditor?: { postMessage: (data: string) => void }
             finishKeyboardComposition?: { postMessage: (data: string) => Promise<boolean> }
             showTextMenu?: { postMessage: (data: string) => Promise<boolean> }
             pickPhotos?: { postMessage: (data: string) => Promise<Array<{
@@ -205,6 +206,7 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
+        openMarkdownEditor?(): void
         openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void
@@ -233,6 +235,7 @@ interface Window {
         logInputEvent?(details: string): void
     };
     JSHarmony: {
+        openMarkdownEditor?(): void
         getSystemFonts?(): Promise<string>
         openAuthURL(url: string): void
         showKeyboard(): void
@@ -930,6 +933,8 @@ interface IFile {
     path: string;
     name: string;
     titleEmpty?: boolean;
+    titleFormat?: "plain" | "inline-ast";
+    titleRevision?: string;
     hMtime: string;
     hCtime: string;
     hSize: string;

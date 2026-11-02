@@ -2,7 +2,7 @@ import {toggleMenu} from "../menus/menuToggle";
 /// #if !MOBILE
 import {getDockByType} from "./tabUtil";
 import {applyStatusBarEntryVisibility} from "../config/entryVisibility/runtime";
-import {toggleDockBar} from "./dock/util";
+import {getDockBarToggleTip, toggleDockBar} from "./dock/util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
@@ -12,7 +12,6 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {escapeAriaLabel} from "../util/escape";
 import {openLink} from "../editor/openLink";
 import {waitForPendingTransactions} from "../protyle/util/transactionQueue";
@@ -21,7 +20,7 @@ export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
     let barDockHTML = "";
     if (!isWindow) {
-        barDockHTML = `<div id="barDock" data-statusbar-entry="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
+        barDockHTML = `<div id="barDock" data-statusbar-entry="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${escapeAriaLabel(getDockBarToggleTip())}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>

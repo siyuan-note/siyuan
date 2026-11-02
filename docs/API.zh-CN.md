@@ -20,6 +20,9 @@
     * [保存笔记本配置](#保存笔记本配置)
 * [文档](#文档)
     * [通过 Markdown 创建文档](#通过-markdown-创建文档)
+    * [通过父文档 ID 创建文档](#通过父文档-id-创建文档)
+    * [通过标题段解析文档路径](#通过标题段解析文档路径)
+    * [通过 IDs 获取文档路径](#通过-ids-获取文档路径)
     * [重命名文档](#重命名文档)
     * [删除文档](#删除文档)
     * [移动文档](#移动文档)
@@ -307,7 +310,7 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
-管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。既有权限过滤保持不变。
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。同步按原始字节传输文档，不解释不支持的源格式。读取、索引和编辑仍需要支持该格式的版本；快照恢复继续保留源规格预检。既有权限过滤保持不变。
 
 * `/api/notebook/getNotebookConf`
 * 参数
@@ -340,7 +343,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。同步按原始字节传输文档，不解释不支持的源格式。读取、索引和编辑仍需要支持该格式的版本；快照恢复继续保留源规格预检。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
 
@@ -383,7 +386,7 @@ if (response.code === 0 && response.data) {
 
 ### 通过 Markdown 创建文档
 
-旧字符串创建接口在写入前检查全部父路径前缀。祖先含斜杠或空标题时返回 `code: -1`、`data.reason: "pathAmbiguous"`；多个干净父级需要有效且匹配的 `parentID`，否则同样报歧义。元数据未就绪返回 `indexUnavailable`。建议使用 `/api/filetree/createDocByParent`，分别传递父身份和标题。
+旧字符串创建接口在写入前检查全部父路径前缀。祖先含斜杠或空标题时返回 `code: -1`、`data.reason: "pathAmbiguous"`；多个干净父级需要有效且匹配的 `parentID`，否则同样报歧义。元数据未就绪返回 `indexUnavailable`。建议[通过父文档 ID 创建文档](#通过父文档-id-创建文档)，分别传递父身份和标题。
 
 * `/api/filetree/createDocWithMd`
 * 参数
@@ -414,6 +417,245 @@ if (response.code === 0 && response.data) {
 
     * `data`：创建好的文档 ID
     * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档
+
+### 通过父文档 ID 创建文档
+
+在已有父文档下创建一个文档。需要管理员权限、可写工作空间，以及已打开且文档元数据就绪的笔记本；加密笔记本须已解锁。
+
+* `/api/filetree/createDocByParent`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "parentID": null,
+    "id": "20261030150000-abc1234",
+    "title": {
+      "format": "plain",
+      "text": "C/C++"
+    },
+    "markdown": "Hello"
+  }
+  ```
+
+    * `notebook`：目标笔记本 ID
+    * `parentID`：该笔记本中已有父文档的 ID，根位置传 `null`；必填，不能传空字符串
+    * `id`：发送前生成并保存的新文档 ID，思源前端可使用 `Lute.NewNodeID()`；每个新文档须替换示例 ID
+    * `title`：标题对象，`format` 必须为 `plain`，`text` 必填；Markdown 标记按字面文字处理，`/` 保留在标题中
+    * `title.text`：最多 512 个 Unicode 码点；空文字会生成空标题标记和显示占位文字；首尾空白、无效字符、`.` 和 `..` 会被拒绝
+    * `markdown`：GFM 正文内容，可为空字符串
+    * `expectedParentRevision`：路径查询返回的父文档版本，可选；根位置使用 `resolveDocPath` 的 `data.start.revision`；不匹配时返回 `planChanged`
+    * `nameConditions`：最多 128 个 `{parentID, title, expectedID}` 对象，可选；每个对象的三个字段均必填；`parentID: null` 表示根位置；`expectedID: null` 要求不存在同名子文档，否则要求只有一个同名子文档且 ID 匹配；条件范围为目标父级及其祖先
+    * `expectedTarget`：根据配置生成的创建计划中的 `{notebook, purpose, revision}`，可选；`purpose` 为 `document`、`reference` 或 `dailyNote`；配置变化时返回 `planChanged`
+    * `tags`：逗号分隔的文档标签，可选，默认为空字符串，受笔记本功能限制
+    * `withMath`：是否开启行内公式解析，可选，默认为 `false`
+    * `clippingHref`：剪藏来源地址，可选，默认为空字符串；社区文章地址会启用对应 Markdown 语法选项
+    * `sorts`：按自定义顺序排列的兄弟文档存储路径数组，可选，默认为 `[]`；不能与 `sortTargetID` 同时使用
+    * `sortTargetID`：相对排序的目标兄弟文档 ID，可选，须与 `sortPosition` 一起提供
+    * `sortPosition`：`before` 或 `after`，可选，须与 `sortTargetID` 一起提供；未指定排序选项时使用笔记本的新建文档排序设置
+    * `docCreateTemplatePath`：正文模板路径，可选，默认为空字符串，仅在 `markdown` 为空时应用
+    * `listDocTree`：创建通知中的文档树刷新标记，可选，默认为 `false`
+    * 只有 `parentID` 接受 `null`，`path`、`hPath` 等未知字段会被拒绝
+    * 缺失的父文档不会自动创建；父 ID 无效、指向正文块或属于其他笔记本时返回错误
+    * 已有 ID 返回 `documentIDConflict`；未受名称条件限制时，不同 ID 可以创建同名文档
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20261030150000-abc1234",
+      "document": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": "20261030150000-abc1234",
+        "parentID": null,
+        "path": "/20261030150000-abc1234.sy",
+        "title": {
+          "format": "plain",
+          "text": "C/C++",
+          "empty": false
+        },
+        "segments": [
+          {
+            "id": "20261030150000-abc1234",
+            "text": "C/C++",
+            "empty": false
+          }
+        ],
+        "depth": 1,
+        "displayPath": "/C/C++",
+        "revision": "opaque-revision"
+      }
+    }
+  }
+  ```
+
+    * `data.id`：创建好的文档 ID
+    * `data.document`：文档元数据，后文的路径查询接口也使用该结构
+    * `data.document.parentID`：父文档 ID，根位置为 `null`
+    * `data.document.path`：基于 ID 的 `.sy` 存储路径
+    * `data.document.title`：标题摘要，`format` 为 `plain` 或 `inline-ast`，`text` 为显示文字，`empty` 表示显式空标题
+    * `data.document.segments`：包含当前文档的祖先链，每段包含 `id`、`text`、`empty`
+    * `data.document.depth`：路径段数
+    * `data.document.displayPath`：显示路径；标题可含 `/`，不能拆分后反推文档 ID
+    * `data.document.revision`：后续校验使用的版本字符串，调用时须用实际返回值替换示例中的 `opaque-revision`
+
+在上述文档下创建子文档的参数示例：
+
+```json
+{
+  "notebook": "20210817205410-2kvfpfn",
+  "parentID": "20261030150000-abc1234",
+  "id": "20261030150001-def5678",
+  "title": {
+    "format": "plain",
+    "text": "Child"
+  },
+  "markdown": "Child content",
+  "expectedParentRevision": "opaque-revision",
+  "nameConditions": [
+    {
+      "parentID": "20261030150000-abc1234",
+      "title": "Child",
+      "expectedID": null
+    }
+  ]
+}
+```
+
+`expectedParentRevision` 使用返回的父文档版本。名称条件要求 `Child` 尚不存在。多级父文档的补建参见[路径解析](#通过标题段解析文档路径)。
+
+* 创建失败返回 `code: -1`，可提供失败步骤信息时返回以下 `data`
+
+  ```json
+  {
+    "code": -1,
+    "msg": "parent document changed after planning",
+    "data": {
+      "reason": "planChanged",
+      "commitState": "none",
+      "stage": "source",
+      "completed": []
+    }
+  }
+  ```
+
+    * `data.reason`：错误原因
+        * `invalidTitle`：标题无效
+        * `unsupportedTitleFormat`：创建格式不是 `plain`
+        * `parentUnavailable`：父文档不可用
+        * `planChanged`：父级版本、名称条件、配置目标或排序目标变化
+        * `documentIDConflict`：ID 已占用
+        * `indexUnavailable`：元数据未就绪或不一致
+        * `writeFailed`：其他创建、排序或模板错误
+    * `data.commitState`：`none` 表示本次调用未保存文档，`committed` 表示文档已保存但后续步骤可能失败，`unknown` 表示无法确定是否已保存
+    * `data.id`：已确认保存的文档 ID，可选
+    * `data.stage`：失败阶段，如 `validate`、`source`、`sort`、`template`
+    * `data.completed`：已完成阶段，如 `source`、`sort`
+    * 请求解析、鉴权和笔记本访问错误可能只返回普通错误结构
+
+排序或模板失败时保留已保存的文档。超时、响应丢失或结果为 `unknown` 时，待元数据就绪后[查询原 ID](#通过-ids-获取文档路径)，核对父级、标题、正文和未完成步骤，再决定如何重试。仅 ID 匹配不能证明全部步骤成功；应保留原 ID，避免自动重复执行模板或回退到旧路径接口写入。
+
+### 通过标题段解析文档路径
+
+从指定位置逐级解析标题，不创建文档。需要管理员权限，以及已打开、已解锁且文档元数据就绪的笔记本。
+
+* `/api/filetree/resolveDocPath`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "start": {
+      "kind": "root"
+    },
+    "segments": [
+      "Notes",
+      "C/C++"
+    ]
+  }
+  ```
+
+    * `notebook`：笔记本 ID
+    * `start`：根位置使用不带 `id` 的 `{kind: "root"}`，已有文档使用 `{kind: "document", id: "existing-document-id"}`；笔记本根文档 ID 视为逻辑根位置
+    * `segments`：0 至 128 个非空标题组成的数组，逐级精确匹配；标题内的 `/` 为字面字符，不作 Unicode 归一化、宽窄转换或百分号解码
+    * 空标题文档须通过文档 ID 指定起点；段数组为空时返回起点文档或根位置
+* 返回值
+
+  以下返回值示例假定 `Notes` 不存在。
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "status": "missing",
+      "start": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": null,
+        "revision": "opaque-root-revision"
+      },
+      "resolved": null,
+      "nextIndex": 0,
+      "candidates": [],
+      "candidatesTruncated": false,
+      "nameConditions": [
+        {
+          "parentID": null,
+          "title": "Notes",
+          "expectedID": null
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.status`：`resolved`（已解析）、`missing`（缺失）或 `ambiguous`（歧义），三种情况均返回 `code: 0`
+    * `data.start`：起点笔记本、文档 ID（根位置为 `null`）及版本
+    * `data.resolved`：最后一个唯一解析到的文档，结构同上文的文档元数据，根位置为 `null`
+    * `data.nextIndex`：缺失或歧义段的零基索引，全部解析成功时等于 `segments.length`
+    * `data.candidates`：歧义段的同名候选，按 ID 排序，最多 128 项，须明确选择文档 ID
+    * `data.candidatesTruncated`：是否还有更多候选
+    * `data.nameConditions`：唯一匹配及第一个缺失名称，创建时回传可检查查询后发生的变化
+    * 错误返回 `code: -1`，可能包含 `data.reason`；错误不表示文档缺失
+
+导入 `/Notes/2026-10-30/Article` 时，父标题段为 `["Notes", "2026-10-30"]`，最终标题为 `"Article"`：
+
+1. 从根位置解析父标题段；若为 `ambiguous`，通过 ID 明确选择父文档
+2. 若为 `missing`，以 `markdown: ""` 创建 `segments[nextIndex]`；`parentID` 使用 `resolved.id`，`resolved` 为 `null` 时使用 `start.id`；将对应版本作为 `expectedParentRevision`，并回传 `nameConditions`，保存分配的文档 ID
+3. 成功后重新解析父标题段，重复补建直至全部解析成功；每次创建后更新名称条件
+4. 在解析得到的父文档下创建 `Article`，传入父级版本及最终 Markdown 正文；若要求最终标题唯一，加入 `{parentID, title: "Article", expectedID: null}`，条件总数不超过 128
+
+每个文档分别保存。后续失败时保留已有父文档，核对失败步骤的结果后再继续；整个路径不会作为一个操作统一提交或回滚。
+
+### 通过 IDs 获取文档路径
+
+按 ID 读取文档元数据。需要管理员权限，以及已打开、已解锁且文档元数据就绪的笔记本。
+
+* `/api/filetree/getDocPaths`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "ids": [
+      "20261030150000-abc1234",
+      "20261030150001-def5678"
+    ]
+  }
+  ```
+
+    * `notebook`：笔记本 ID
+    * `ids`：1 至 128 个有效文档 ID，按首次出现顺序去重
+* 返回值
+
+    * `data.documents`：按请求顺序返回的文档元数据数组，结构见[创建结果](#通过父文档-id-创建文档)
+    * `data.missingIDs`：不存在、属于其他笔记本或指向正文块的 ID
+    * 任一数组可为空；元数据未就绪或不一致时返回错误，不作为缺失结果
+    * 单个文档读取保持一致，批量查询不保证同一快照
+
+该接口不返回正文。核对不确定的创建结果时，先用原 ID 定位文档，再单独读取正文并检查剩余排序、模板或导入步骤。
 
 ### 重命名文档
 
@@ -1355,6 +1597,8 @@ if (response.code === 0 && response.data) {
 ### 渲染模板
 
 * `/api/template/render`
+
+没有可交互的在线窗口时，`httpGet` 返回 `interaction_required`，不会发送网络请求。“本次允许”授权当前执行中的同一模板版本访问多个公网目标，包括后续请求和重定向，可向外部服务发送其有权读取的笔记内容，但不扩大读取权限。持久许可仅适用于内核识别的文件或数据库字段模板来源及内容版本，在当前工作空间本地生效，不限当前目标文档或已解锁笔记本，不随内置导出或同步传递，可在模板管理或数据库字段配置中撤销。引用的子模板文件不继承父模板许可；修改、复制或导入后需重新确认。后台执行、发布页面或笔记本锁定时不能凭这些许可绕过交互或访问检查。
 * 参数
 
   ```json
@@ -1368,6 +1612,7 @@ if (response.code === 0 && response.data) {
     * `id`：调用渲染所在的文档 ID
     * `path`：模板文件绝对路径
     * `mode`：可选渲染模式。目前仅支持 `"preview"` 和 `"editorInsert"`。预览模式生成文档树计划但不写入文件；编辑器插入模式生成可在确认后通过对应编辑器事务应用的计划
+    * `httpConfirmToken`：可选的确认令牌，由成功的预览返回，无需选择始终允许。在 30 秒内以 `mode: "editorInsert"` 提交，可用于同一窗口内的一次插入，要求模板源码及依赖、目标文档和笔记本、实际请求均未变化。仅复用确认，插入会重新取数。上下文变化或撤销、过期或已使用的令牌回到正常模板许可检查。关闭或切换预览、锁定笔记本、断开连接后交接失效；`/api/template/cancelHTTP` 也接受可选的 `httpConfirmToken` 以撤销交接。该交接不适用于数据库或日记执行
     * 省略 `mode` 时，仍支持旧的布尔参数 `preview`：`preview: true` 等价于 `mode: "preview"`；否则模板按普通内容渲染，并禁用 `createDocTree`
 * 返回值
 
@@ -1402,6 +1647,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+    * `httpConfirmToken`：可选的一次性确认令牌，在交互式预览成功后签发；适用范围和 30 秒有效期见请求字段说明
     * `docTreePlan`：模板通过 `createDocTree` 声明子文档树时返回
         * `id`：预览模式下为空，且不会写入文件。编辑器插入模式下为短期有效的一次性计划令牌；确认后，将其作为对应事务对象的顶层 `templateDocTreePlanID` 字段提交
         * `count`：计划中的子文档总数
@@ -2825,6 +3071,8 @@ if (response.code === 0 && response.data) {
 ### 设置视图内字段排序
 
 在单个视图的布局内重排列（例如表格的列顺序），不改变全局字段顺序。
+
+未知视图 ID 或字段 ID 返回错误。移动字段保留列宽、显隐设置、字段类型和已存储的数据。
 
 * `/api/av/sortAttributeViewViewKey`
 * 参数

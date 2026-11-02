@@ -29,6 +29,80 @@ func TestDocumentTitleConditionalCommit(t *testing.T) {
 	boxID := prepareDocumentTitleFeatureBox(t)
 	testDocumentTitleConditionalCommit(t, boxID)
 	testDocumentTitleCommitDescendantPaths(t, boxID)
+	testDocumentTitlePlainStorage(t, boxID)
+}
+
+func testDocumentTitlePlainStorage(t *testing.T, boxID string) {
+	t.Run("plain storage, rich transitions and title-only undo", func(t *testing.T) {
+		tree := newHPathTestDoc(t, boxID, "/", "Original", 1)
+		bodyID := tree.Root.FirstChild.ID
+		sql.FlushQueue()
+		write := func(paragraph *ast.Node) *Transaction {
+			t.Helper()
+			current, err := GetDocTitle(tree.ID, boxID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			source, err := render.NewDocumentTitle(paragraph)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tx := &Transaction{DoOperations: []*Operation{{Action: "setDocTitle", ID: tree.ID,
+				Data: map[string]any{"source": source, "expectedRevision": current.Revision}}}}
+			if err = PerformTxSync(tx); err != nil {
+				t.Fatal(err)
+			}
+			sql.FlushQueue()
+			return tx
+		}
+		check := func(format, text string, empty bool) {
+			t.Helper()
+			current, raw, err := filesys.LoadTreeSnapshot(boxID, tree.Path, util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			value, err := GetDocTitle(tree.ID, boxID)
+			if err != nil || value.Format != format || value.Text != text || value.Empty != empty ||
+				(current.Root.DocumentTitle == nil) != (format == "plain") || treenode.GetNodeInTree(current, bodyID) == nil {
+				t.Fatalf("title storage or body changed: %+v %v", value, err)
+			}
+			if IsEncryptedBox(boxID) && !util.IsCiphertext(raw) {
+				t.Fatal("title storage change exposed plaintext on disk")
+			}
+			box := &Box{ID: boxID}
+			file := box.docFromFileInfo(box.Stat(tree.Path), box.docIAL(tree.Path))
+			if file.TitleFormat != format || file.TitleRevision != value.Revision {
+				t.Fatalf("document tree metadata disagrees with source: %+v", file)
+			}
+		}
+		for _, text := range []string{"", "**literal** A/B <tag> &amp;"} {
+			paragraph := &ast.Node{Type: ast.NodeParagraph}
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(text)})
+			write(paragraph)
+			check("plain", text, text == "")
+		}
+		rich := &ast.Node{Type: ast.NodeParagraph}
+		rich.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "strong", TextMarkTextContent: "Rich"})
+		write(rich)
+		check("inline-ast", "Rich", false)
+		plain := &ast.Node{Type: ast.NodeParagraph}
+		plain.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Plain again")})
+		tx := write(plain)
+		check("plain", "Plain again", false)
+		for index, operations := range [][]*Operation{tx.UndoOperations, tx.DoOperations} {
+			replay := &Transaction{DoOperations: cloneOperations(operations)}
+			replay.MarkReplay()
+			if err := PerformTxSync(replay); err != nil {
+				t.Fatal(err)
+			}
+			sql.FlushQueue()
+			if index == 0 {
+				check("inline-ast", "Rich", false)
+			} else {
+				check("plain", "Plain again", false)
+			}
+		}
+	})
 }
 
 func titleWriteTestSource(t *testing.T, text string) *ast.DocumentTitle {

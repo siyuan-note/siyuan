@@ -13,6 +13,17 @@ const stageKeys = {
 export type TStartupStage = keyof typeof stageKeys;
 type TStartupStrings = typeof bundledLanguages.en;
 const languages: Record<string, TStartupStrings> = bundledLanguages;
+let suppressedErrors = 0;
+
+/** 同步插入用户脚本期间隔离其全局错误，嵌套调用结束后恢复启动诊断。 */
+export const withStartupErrorSuppressed = <T>(run: () => T): T => {
+    suppressedErrors++;
+    try {
+        return run();
+    } finally {
+        suppressedErrors--;
+    }
+};
 
 export const resolveStartupLanguage = (preferred: readonly string[]) => {
     for (const value of preferred) {
@@ -162,6 +173,7 @@ export const installStartupError = (target: Window, version: string, timeout = 3
             if (element?.tagName !== "SCRIPT" || !element.src.includes("/stage/build/mobile/")) return;
             fail(new Error(new URL(element.src, target.location.href).pathname));
         } else {
+            if (suppressedErrors > 0) return;
             fail(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);
         }
     };

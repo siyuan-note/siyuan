@@ -396,6 +396,16 @@ func getBootSyncContract(c *gin.Context, request apicontract.EmptyRequest) (ret 
 	return
 }
 
+var getSyncSourceState = contractHandler(apicontract.GetSyncSourceState, getSyncSourceStateContract)
+
+func getSyncSourceStateContract(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.SyncSourceState] {
+	data, err := model.GetSyncSourceState()
+	if err != nil {
+		return apicontract.Failure[apicontract.SyncSourceState](-1, err.Error())
+	}
+	return apicontract.Success(data)
+}
+
 var performSync = contractHandler(apicontract.PerformSync, performSyncContract)
 
 func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest) (ret apicontract.Response[apicontract.Null]) {
@@ -414,6 +424,22 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		}
 	}
 
+	if request.Source != "" {
+		upload, err := request.UploadDirection()
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		decision := model.SyncSourceDecision{Source: request.Source, LocalID: request.LocalID, CloudID: request.CloudID}
+		if upload {
+			err = model.SyncDataUpload(decision)
+		} else {
+			err = model.SyncDataDownload(decision)
+		}
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return
+	}
 	if 3 != confSyncSnapshot.Mode {
 		model.SyncData(true)
 		return

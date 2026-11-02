@@ -53,3 +53,33 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 		t.Fatal("menu mouse scroll default changed")
 	}
 }
+
+func TestFloatingDockBarPreference(t *testing.T) {
+	if value := NewAppearance().ShowFloatingDockBar; value == nil || !*value {
+		t.Fatal("new workspace must enable floating dock bars")
+	}
+	for _, raw := range []string{`{}`, `{"showFloatingDockBar":null}`, `{"showFloatingDockBar":true}`, `{"showFloatingDockBar":false}`} {
+		appearance := &Appearance{}
+		if err := json.Unmarshal([]byte(raw), appearance); err != nil {
+			t.Fatal(err)
+		}
+		expected := raw != `{"showFloatingDockBar":false}`
+		for range 2 {
+			NormalizeAppearance(appearance, false)
+			if appearance.ShowFloatingDockBar == nil || *appearance.ShowFloatingDockBar != expected {
+				t.Fatalf("preference lost for %s", raw)
+			}
+		}
+		encoded, err := json.Marshal(appearance)
+		if err != nil {
+			t.Fatal(err)
+		}
+		restored := &Appearance{}
+		if err := json.Unmarshal(encoded, restored); err != nil {
+			t.Fatal(err)
+		}
+		if restored.ShowFloatingDockBar == nil || *restored.ShowFloatingDockBar != expected {
+			t.Fatal("round trip lost choice")
+		}
+	}
+}

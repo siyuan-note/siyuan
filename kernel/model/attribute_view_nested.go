@@ -27,6 +27,13 @@ func cloneNestedView(view *av.View) (*av.View, error) {
 	if err = json.Unmarshal(data, ret); err != nil {
 		return nil, err
 	}
+	// 视图持久化会省略空规则，渲染响应中的规则列表仍须保持数组形状。
+	if ret.Filters == nil {
+		ret.Filters = []*av.ViewFilter{}
+	}
+	if ret.Sorts == nil {
+		ret.Sorts = []*av.ViewSort{}
+	}
 	return ret, nil
 }
 
@@ -334,7 +341,7 @@ func nestedCalculation(source *av.Table, rows []*av.TableRow, attrView *av.Attri
 	return &ret
 }
 
-func renderNestedAttributeView(attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, filterContext *av.FilterContext, options AttributeViewRenderOptions) (av.Viewable, error) {
+func renderNestedAttributeView(attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, filterContext *av.FilterContext, options AttributeViewRenderOptions) (ret av.Viewable, err error) {
 	// 分页和权限投影只在本次读取内缓存，不污染后续平铺或其他范围的读取。
 	previousRendered := attrView.RenderedViewables
 	attrView.RenderedViewables = map[string]av.Viewable{}
@@ -344,6 +351,13 @@ func renderNestedAttributeView(attrView *av.AttributeView, view *av.View, query 
 		return nil, err
 	}
 	context := sql.NewAttributeViewRenderContext()
+	context.TemplateHTTP = options.TemplateHTTP
+	context.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(options.TemplateHTTP)
+	defer func() {
+		if templateErr := context.HTTPTemplateError(); templateErr != nil {
+			ret, err = nil, templateErr
+		}
+	}()
 	context.ReadOnly = true
 	if options.historicalSource {
 		context.HistoricalAttributeViewID = attrView.ID
@@ -382,6 +396,11 @@ func renderNestedAttributeView(attrView *av.AttributeView, view *av.View, query 
 	plan := nestedIdentityPlan(attrView, planView, query, filterContext, options.historicalSource)
 	if plan == nil {
 		plan = sql.RenderViewWithContext(attrView, planView, "", false, context)
+	}
+	if options.TemplateHTTP != nil {
+		if err = context.HTTPTemplateError(); err != nil {
+			return nil, err
+		}
 	}
 	if view.IsGroupView() {
 		// 可写实时读取维护原有平铺分组，树形投影不写回分组成员。

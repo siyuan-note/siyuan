@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {App} from "../index";
+import * as rowData from "../layout/dock/docTree/rowData";
 
 class TestElement {
     attributes: Record<string, string> = {};
@@ -34,6 +35,9 @@ class TestElement {
         if (selector === '[data-dialog-closing="true"]' && this.dataset.dialogClosing === "true") {
             return this;
         }
+        if (selector === "[data-notebook-id]" && this.getAttribute("data-notebook-id")) {
+            return this;
+        }
         return this.parentElement?.closest(selector) || null;
     }
     querySelector(selector: string): TestElement {
@@ -49,7 +53,7 @@ const loadModule = (filename: string, globals: Record<string, unknown>, dependen
     const exports: Record<string, unknown> = {};
     runInNewContext(transpileModule(readFileSync(filename, "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports, require: (name: string) => dependencies[name] || {}, ...globals});
+    }).outputText, {exports, require: (name: string) => name.endsWith("/rowData") ? rowData : dependencies[name] || {}, ...globals});
     return exports;
 };
 
@@ -75,8 +79,9 @@ const createHarness = (android = false) => {
     };
     const clearTimer = (id: number) => timers.delete(id);
     const panels: {element: TestElement, targetElement: TestElement, canShow?: () => boolean,
-        refDefs: IRefDefs[], editors: unknown[], destroy: () => void}[] = [];
-    const requests: {url: string, resolve: (data: unknown) => void}[] = [];
+        refDefs: IRefDefs[], editors: unknown[], destroy: () => void,
+        backlink?: {blockId: string, rootId: string, notebookId: string}}[] = [];
+    const requests: {url: string, data: {id?: string, notebook?: string}, resolve: (data: unknown) => void}[] = [];
     const siyuan = {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: element({}, ["fn__none"]), data: undefined as unknown}},
@@ -125,8 +130,9 @@ const createHarness = (android = false) => {
                 closest(target, item => value === null ? Boolean(item.getAttribute(name)) :
                     Boolean(item.getAttribute(name)?.split(" ").includes(value))),
         },
-        "../util/fetch": {fetchSyncPost: (url: string) => new Promise(resolve => requests.push({url, resolve}))},
-        "../util/pathName": {isEncryptedBox: () => false, isLocalPath: () => false,
+        "../util/fetch": {fetchSyncPost: (url: string, data: {id?: string, notebook?: string}) =>
+            new Promise(resolve => requests.push({url, data, resolve}))},
+        "../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted", isLocalPath: () => false,
             parseSiYuanUriInfo: (href: string) => ({id: href.split("/").pop()})},
         "../protyle/render/av/cellOverflow": {shouldMeasureAVCellContentOverflow: () => false},
         "../dialog/tooltip": {
@@ -304,6 +310,78 @@ test("closing dialog anchors reject late explicit backlink queries without chang
     assert.equal(h.requests.length, 1);
     dialog.dataset.dialogClosing = "true";
     h.requests[0].resolve({code: 0, data: {refDefs: [{refID: "backlink"}]}});
+    await h.advance();
+    assert.equal(h.panels.length, 0);
+});
+
+test("document and ordinary block reference counts open backlinks for their own target", async () => {
+    for (const blockId of ["document", "heading", "list"]) {
+        const h = createHarness();
+        const block = h.element({"data-node-id": blockId});
+        const attrs = h.element({}, [], block);
+        const count = h.element({}, ["popover__block", "protyle-attr--refcount"], attrs);
+        h.fire("mouseover", count);
+        await h.advance();
+        assert.equal(h.requests[0].url, "/api/block/getBlockInfo");
+        h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
+        await h.advance();
+        assert.equal(h.panels.length, 1);
+        assert.equal(h.panels[0].backlink.blockId, blockId);
+        assert.equal(h.panels[0].backlink.rootId, "document");
+        assert.equal(h.panels[0].backlink.notebookId, "notebook");
+        assert.equal(h.requests.length, 1, "counts use the shared backlink query instead of fetching preview IDs");
+    }
+});
+
+test("late reference count metadata cannot open a popover after its anchor closes", async () => {
+    const h = createHarness();
+    const block = h.element({"data-node-id": "heading"});
+    const attrs = h.element({}, [], block);
+    const count = h.element({}, ["popover__block", "protyle-attr--refcount"], attrs);
+    h.fire("mouseover", count);
+    await h.advance();
+    block.dataset.dialogClosing = "true";
+    h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
+    await h.advance();
+    assert.equal(h.panels.length, 0);
+});
+
+test("document panel reference counts open the shared backlink popover with the row notebook identity", async () => {
+    for (const notebook of ["plain", "encrypted"]) {
+        const h = createHarness();
+        const row = h.element({"data-node-id": "tree-document", "data-type": "navigation-file",
+            "data-notebook-id": notebook});
+        const count = h.element({}, ["popover__block", "counter"], row);
+        h.fire("mouseover", count);
+        await h.advance();
+        assert.equal(h.requests.length, 1);
+        assert.equal(h.requests[0].url, "/api/block/getBlockInfo");
+        assert.equal(h.requests[0].data.id, "tree-document");
+        assert.equal(h.requests[0].data.notebook, notebook === "encrypted" ? notebook : "");
+        h.requests[0].resolve({code: 0, data: {rootID: "tree-document", box: notebook}});
+        await h.advance();
+        assert.equal(h.panels.length, 1);
+        assert.equal(h.panels[0].backlink.blockId, "tree-document");
+        assert.equal(h.panels[0].backlink.rootId, "tree-document");
+        assert.equal(h.panels[0].backlink.notebookId, notebook);
+    }
+});
+
+test("document panel icons retain document previews and late count responses cannot reopen removed rows", async () => {
+    const h = createHarness();
+    const row = h.element({"data-node-id": "tree-document", "data-type": "navigation-file"});
+    const icon = h.element({"data-id": "tree-document"}, ["popover__block"], row);
+    h.fire("mouseover", icon);
+    await h.advance();
+    assert.equal(h.panels.length, 1);
+    assert.equal(h.panels[0].backlink, undefined);
+    assert.equal(h.panels[0].refDefs[0].refID, "tree-document");
+    h.panels[0].destroy();
+    const count = h.element({}, ["popover__block", "counter"], row);
+    h.fire("mouseover", count);
+    await h.advance();
+    count.isConnected = false;
+    h.requests[0].resolve({code: 0, data: {rootID: "tree-document", box: "plain"}});
     await h.advance();
     assert.equal(h.panels.length, 0);
 });
@@ -568,8 +646,9 @@ test("destroying a canceled loading panel preserves a menu owned by another pane
     for (const removeMenu of [false, true]) {
         const element = new TestElement();
         element.dataset.level = "1";
-        const panel = {element, editors: [] as unknown[], refDefElements: new Map(),
-            refDefEditors: new Map(), refDefInfos: new Map()};
+        const panel = Object.assign(Object.create(module.BlockPanel.prototype), {
+            element, previewEditors: [], refDefElements: new Map(), refDefEditors: new Map(), refDefInfos: new Map(),
+        });
         module.BlockPanel.prototype.destroy.call(panel, removeMenu);
         assert.equal(closed, removeMenu ? 1 : 0);
         assert.equal(element.isConnected, false);

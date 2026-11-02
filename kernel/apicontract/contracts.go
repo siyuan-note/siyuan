@@ -475,8 +475,10 @@ var BatchUpdateTaskListItemMarker = define[BatchTaskListMarkerRequest, []*BlockT
 
 var MoveOutlineHeading = define[MoveBlockRequest, []*BlockTransaction]("moveOutlineHeading", "/api/block/moveOutlineHeading", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 日记位置歧义时不插入内容；可传入 createDailyNote 返回的候选所形成的 selection，继续原追加流程。
 var AppendDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("appendDailyNoteBlock", "/api/block/appendDailyNoteBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 日记位置歧义时不插入内容；selection 语义与 appendDailyNoteBlock 相同。
 var PrependDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("prependDailyNoteBlock", "/api/block/prependDailyNoteBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 目标为原生页签或脑图容器时，只能插入各自的项目块。
@@ -708,12 +710,22 @@ var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFi
 // 返回行数沿用搜索上限及显式外层 LIMIT 规则；直接修改索引不更新源文档、全文索引和块缓存。
 var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")
 
+// HTTP 模板执行由 X-Siyuan-Template-Execution、X-Siyuan-Template-App、X-Siyuan-Template-Session 绑定。
+// 执行 ID 为 16～128 字符的本次唯一标识，窗口必须为在线、已就绪的非发布主连接。
+// 缺少可交互窗口时 httpGet 返回 interaction_required；本次许可只作用于当前执行的同来源版本。
+// 持久许可仅通过有效确认签发，绑定内核识别的模板版本，保存在本地且不随模板同步或内置导出。
+var RespondTemplateHTTP = define[TemplateHTTPReplyRequest, Null]("respondTemplateHTTP", "/api/template/respondHTTP", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var TemplateHTTPPermission = define[TemplateHTTPPermissionRequest, TemplateHTTPPermissionData]("templateHTTPPermission", "/api/template/httpPermission", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var CancelTemplateHTTP = define[TemplateHTTPCancelRequest, Null]("cancelTemplateHTTP", "/api/template/cancelHTTP", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
 var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetDocSaveAsTemplateInfo = define[TemplateDocumentRequest, TemplateDocumentInfo]("getDocSaveAsTemplateInfo", "/api/template/getDocSaveAsTemplateInfo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var DocSaveAsTemplate = define[SaveTemplateRequest, Null]("docSaveAsTemplate", "/api/template/docSaveAsTemplate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+// RenderTemplate 可通过上述执行请求头启用 httpGet 的交互确认；短期交接或同来源当前版本的许可可复用确认。
+// HTTP 正文只作为模板数据，后台无窗口调用返回 interaction_required；断开或锁定后丢弃失效结果。
 var RenderTemplate = define[RenderTemplateRequest, RenderTemplateData]("renderTemplate", "/api/template/render", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 读取模板源码时，可选的 sourceDocID 表示导出模板末尾文档属性中的静态来源 ID。
@@ -832,12 +844,16 @@ var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory",
 
 var CreateAssetHistory = define[CreateAssetHistoryRequest, Null]("createAssetHistory", "/api/history/createAssetHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// RollbackDocHistory 恢复文档及其内嵌数据库历史；当前数据库仅缺失日历或列表布局时，保留原始文件后恢复。
+// 历史、当前数据均须通过格式与加密认证校验；写入失败补偿本次变化，外部修改保留并报错。
 var RollbackDocHistory = define[HistoryPathRequest, Null]("rollbackDocHistory", "/api/history/rollbackDocHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var RollbackAssetsHistory = define[HistoryPathRequest, Null]("rollbackAssetsHistory", "/api/history/rollbackAssetsHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var RollbackNotebookHistory = define[HistoryPathRequest, Null]("rollbackNotebookHistory", "/api/history/rollbackNotebookHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// RollbackAttributeViewHistory 恢复完整数据库历史；当前数据库仅缺失日历或列表布局时仍可恢复。
+// 受损原始文件及加密恢复材料保存在 conf/document-source-recovery；未知格式或认证失败保留原件并报错。
 var RollbackAttributeViewHistory = define[HistoryPathRequest, Null]("rollbackAttributeViewHistory", "/api/history/rollbackAttributeViewHistory", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var DiffDocVersions = define[DiffDocVersionsRequest, *DocVersionDiffResult]("diffDocVersions", "/api/history/diffDocVersions", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -983,9 +999,12 @@ var SetSyncMode = define[SyncModeRequest, Null]("setSyncMode", "/api/sync/setSyn
 // 省略、null 与 false 保留只检查完整性的行为。补齐过程保留下载模式和恢复密钥，失败时保留原提供商。
 // 确认后的操作通过全局进度遮罩显示检查与补齐阶段，成功或失败均关闭遮罩。
 var SetSyncProvider = define[SyncProviderRequest, Null]("setSyncProvider", "/api/sync/setSyncProvider", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
+
+// SetSyncProviderS3 保存同步配置；省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP，显式协议保持不变。
 var SetSyncProviderS3 = define[SetSyncS3Request, SyncS3Data]("setSyncProviderS3", "/api/sync/setSyncProviderS3", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
-// SetSyncProviderWebDAV 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时补为 HTTPS，保留协议占位符兼容。
+// SetSyncProviderWebDAV 保存有效的 HTTP(S) 地址；地址不能为空，省略协议时含点域名使用 HTTPS，IP 和单标签主机使用 HTTP。
+// 显式协议保持不变，保留协议占位符兼容。
 // 用户名和密码允许为空以支持匿名访问；校验失败保留原配置，更换来源仍须补齐资源和历史快照。
 var SetSyncProviderWebDAV = define[SetSyncWebDAVRequest, SyncWebDAVData]("setSyncProviderWebDAV", "/api/sync/setSyncProviderWebDAV", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
@@ -1027,6 +1046,17 @@ var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData
 var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveCloudSyncDir = define[SyncNameRequest, string]("removeCloudSyncDir", "/api/sync/removeCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync", Mode: SettingSelfManaged}}, "POST")
 var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir", "/api/sync/listCloudSyncDir", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// GetSyncSourceState previews a changed, nonempty source after saving editors and indexing current data.
+// It reads authenticated remote metadata without applying files. Empty targets need no direction choice.
+// Counts describe one-way upload files and one-way download overwrites/removals; ignored assets are preserved.
+// The returned source/localID/cloudID must accompany an explicit performSync direction; stale previews are rejected.
+var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceState", "/api/sync/getSyncSourceState", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// PerformSync retains automatic and fully manual mode behavior when source is omitted.
+// A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
+// The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+// Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
 var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
@@ -1170,7 +1200,11 @@ var GetDocCreateTarget = define[GetDocCreateTargetRequest, DocumentCreateTargetD
 // 调用方提前保存最终 id，返回步骤已分配全部祖先 ID。按顺序向 createDocByParent 提交，不承诺跨文件原子性。
 // reuse 仅用于明确允许复用的业务。existingID 非空时不创建；普通新建应保持 reuse=false。
 // 上一步创建父文档后，将其返回的 revision 传为下一步 expectedParentRevision；错误或响应丢失时保留计划核对 ID。
-var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+// 路径祖先或待复用文档有多个匹配时 code=-1，data.ambiguity 返回至多 128 个候选及截断标记，steps 为空且未创建文档。
+// 选择后传回 ancestorChoices 的段索引、ID、revision，以及 ambiguity 的 time 和 targetRevision。
+// time 为 RFC3339Nano，优先于 date，固定本次模板求值时间；所选身份必须仍处于对应父级且标题、版本匹配。
+// 选择可包含未展示的候选 ID；多级歧义逐次选择，任何选择失效或配置变更均拒绝，不回退到其他同名文档。
+var PlanDocCreate = define[PlanDocCreateRequest, DocumentCreatePlan]("planDocCreate", "/api/filetree/planDocCreate", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathByID", "/api/filetree/getFullHPathByID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1214,10 +1248,14 @@ var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "
 // 显式指定日期（包括今天）时，先按目标笔记本的日记日期属性复用，改名或移动后仍可找到原日记。
 // 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再复用或创建模板目标。
 // 两种入口复用已有文档均不重新应用正文模板；普通入口补建模板目标后，日期入口可能改为优先选择该目标。
-var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+// 路径祖先或复用目标重名时，未写入并返回 code=-1、data.notebook 和 data.ambiguity。
+// 用户选择后通过 selection 传回固定 time、targetRevision 及 ancestorChoices；不更改默认配置。
+// 选择后的重试仍执行原日记复用、日期属性和正文模板流程，指定 date 时 selection.time 必须属于同一本地日期。
+var CreateDailyNote = define[FileTreeDailyNoteRequest, DailyNoteCreateResult]("createDailyNote", "/api/filetree/createDailyNote", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 
 // GetDailyNoteInfo 按日期属性预览日记，不创建文档；省略 date、传空串或 null 时查询当天。
 // 多个日期匹配优先选择模板目标，否则按 ID 升序选择；无日期匹配时再检查模板目标。
+// 路径有歧义时仍返回可选择的创建标题和路径，不创建文档；已有日期文档仍按日期属性复用。
 var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 // 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
@@ -1239,12 +1277,15 @@ var SetDocSortMode = define[FileTreeSortModeRequest, *FileTreeSortModeData]("set
 
 // SearchDocs 保留兼容展示 hPath，并单独返回文档或笔记本的纯文本 title；客户端不能从 hPath 拆出标题或层级。
 var SearchDocs = define[FileTreeSearchRequest, []*FileTreeSearchDoc]("searchDocs", "/api/filetree/searchDocs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// ListDocsByPath 的 files 保留纯文本 name，可附带 titleFormat 和 titleRevision，供客户端按需读取富文本标题。
 var ListDocsByPath = define[FileTreeListRequest, FileTreeListData]("listDocsByPath", "/api/filetree/listDocsByPath", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按可见直接子文档的当前排序读取范围；parentID 为空表示笔记本根级，其他值必须属于指定笔记本。
 // offset 为非负整数，limit 为 1..10240 的整数，省略时采用 docTreeBatchSize。返回 offset 不超过 total。
 // revision 是不透明的目录顺序版本。传入旧版本时返回 stale=true 和空 files，客户端须替换该目录状态后重试。
 // 隐藏、发布不可见及笔记本文档不计入 total；响应保留加密笔记本租约。旧 listDocsByPath 的上限语义不变。
+// files 可附带标题格式 titleFormat 和语义源版本 titleRevision；索引未就绪时省略，name 始终为纯文本摘要。
 var ListDocTreeRange = define[FileTreeRangeRequest, FileTreeRangeData]("listDocTreeRange", "/api/filetree/listDocTreeRange", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
@@ -1568,6 +1609,9 @@ var AddAttributeViewBlocks = define[AddAttributeViewBlocksRequest, Null]("addAtt
 var RemoveAttributeViewBlocks = define[RemoveAttributeViewBlocksRequest, Null]("removeAttributeViewBlocks", "/api/av/removeAttributeViewBlocks", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AddAttributeViewKey = define[AddAttributeViewKeyRequest, Null]("addAttributeViewKey", "/api/av/addAttributeViewKey", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveAttributeViewKey = define[RemoveAttributeViewKeyRequest, Null]("removeAttributeViewKey", "/api/av/removeAttributeViewKey", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// SortAttributeViewViewKey 按 viewID 精确定位视图；省略或为空时使用首个视图，未知视图返回错误。
+// 将 keyID 移至 previousKeyID 之后，空前置 ID 表示首位；未知字段返回错误，列宽、显隐、字段类型和数据保持不变。
 var SortAttributeViewViewKey = define[SortAttributeViewViewKeyRequest, Null]("sortAttributeViewViewKey", "/api/av/sortAttributeViewViewKey", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SortAttributeViewKey = define[SortAttributeViewKeyRequest, Null]("sortAttributeViewKey", "/api/av/sortAttributeViewKey", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFilterSort = define[GetAttributeViewFilterSortRequest, AVFilterSortData]("getAttributeViewFilterSort", "/api/av/getAttributeViewFilterSort", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1591,6 +1635,13 @@ var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AV
 // 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
 var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
+// 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
+var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
@@ -1599,9 +1650,16 @@ var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFie
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
 // true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+// 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// 关联新建遇到保存位置歧义时返回未写入的候选，selection 续接原预览时间，创建与关联共用一次撤销。
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// Markdown 新建沿用条目模板与正文规则；位置歧义在写入前返回候选，可用 selection 继续。
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+
+// 批量绑定先解析所有目标；歧义时尚未创建文档或改动绑定，selection 对共享的保存路径生效。
 var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVCreateItemDocsResult]("createAttributeViewItemDocs", "/api/av/createAttributeViewItemDocs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1755,6 +1813,9 @@ var PluginPrivateService = define[EmptyRequest, PluginServiceContent]("pluginPri
 // 日期类图标使用内置字体和常规字重；未配置全局字体时使用内置列表，缺失字体由客户端继续回退。
 var GetDynamicIcon = define[EmptyRequest, BinaryContent]("getDynamicIcon", "/api/icon/getDynamicIcon", AuthenticatedAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/svg+xml"}}, EmptyResponseStatuses: []int{500}}, "GET")
 
+// ExtensionCopy 转换浏览器提交的页面内容，保留动态资源字段和部分上传失败时的 Markdown。
+// 链滴、流云整页剪藏使用当前账号所属站点的登录 Cookie 获取原始 Markdown，不跟随重定向。
+// 未登录、站点与账号区域不匹配或获取原文失败时，使用提交的 DOM 和上传资源；局部剪藏直接使用 DOM。
 var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
 var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", PublicAccess, NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")
@@ -2016,8 +2077,28 @@ var AIMemorySave = define[AIMemorySaveRequest, AIMemorySaveData]("saveAIMemory",
 
 // 先持久保存撤回标记再清理原记录；saved=true 表示已阻止使用，cleanupPending=true 时可重试物理清理。
 var AIMemoryForget = define[AIMemoryForgetRequest, AIMemoryForgetData]("forgetAIMemory", "/api/ai/memory/forget", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 先持久关闭长期记忆并取消旧任务，再撤回全部正式记录并删除当前概览，不调用模型。
+// disabled 表示开关已保存为关闭；cleared=false 表示清理未全部完成，可由用户再次调用重试。
+// 不删除原笔记、对话、数据历史或防恢复标记；不支持未知或损坏的记录格式时保留原文件。
+var AIMemoryClear = define[EmptyRequest, AIMemoryClearData]("clearAIMemory", "/api/ai/memory/clear", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// memory 返回统一 MEMORY.md 只读概览；user 保留为空字符串供旧调用方兼容，stale 表示概览不可用或过期。
+// count 只统计来源有效且当前可用的正式记忆；仅 countComplete=true 时可作为完整总数展示。
 var AIMemoryOverview = define[EmptyRequest, AIMemoryOverviewData]("overviewAIMemory", "/api/ai/memory/overview", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// 仅翻译当前有效概览用于显示；需要启用记忆并配置记忆模型，可能产生模型费用。
+// 缓存仅在当前进程内按内容、目标语言及配置复用；不会修改正式记录或 MEMORY.md。
+var AIMemoryTranslate = define[AIMemoryTranslateRequest, AIMemoryTranslateData]("translateAIMemory", "/api/ai/memory/translate", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryMaintain = define[AIMemoryMaintainRequest, AIMemoryTaskStarted]("maintainAIMemory", "/api/ai/memory/maintain", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// results[].saved 表示该条新增或更新已持久化，候选记录仍需确认；失败或取消不回滚已保存结果。
+// overviewPending 仅表示本任务已有已持久化结果且概览待刷新，不表示所有提案成功；无写入时为 false。
+// 空 results 不代表保存成功；completed 且结果为空表示没有需要保存的记录变更。
 var AIMemoryTask = define[AIMemoryTaskRequest, AIMemoryTaskData]("taskAIMemory", "/api/ai/memory/task", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryCancel = define[AIMemoryTaskRequest, EmptyRequest]("cancelAIMemory", "/api/ai/memory/cancel", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 返回所选记忆模型的标准推理选项，与智能体共用策略，不按模型名称推断供应商能力。
+// 可用模型使用受支持协议时，efforts 为 none、low、medium、high、xhigh、max；默认空字符串不列入其中。
+// 未选择模型、模型不可用或协议不支持时返回空数组；这些选项不保证供应商接受每个值，实际请求由协议适配器处理。
 var AIMemoryCapabilities = define[EmptyRequest, AIMemoryCapabilitiesData]("capabilitiesAIMemory", "/api/ai/memory/capabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

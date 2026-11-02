@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -1827,7 +1827,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618124055-5xyayt6",
-				"updated": "20261024162311"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -12883,7 +12883,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260809180000-53b0536",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13024,12 +13024,67 @@
 			]
 		},
 		{
+			"ID": "20261101194733-2g2usxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-2g2usxe",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " defaults to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Set "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to disable the extra port 6806 proxy used by browser extensions. This does not change "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or the publish service; a main service configured with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port 6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " still listens on 6806. Clients that used the proxy must connect to the actual main service port. Remove the option or set it to true and restart the kernel to restore the proxy."
+				}
+			]
+		},
+		{
 			"ID": "20260809180000-349101a",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260809180000-349101a",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13042,7 +13097,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang en --ssl\n"
+					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang en --ssl\nsiyuan serve --workspace /path/to/workspace --port 6807 --fixed-port=false\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

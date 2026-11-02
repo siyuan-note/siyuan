@@ -139,6 +139,32 @@ body {margin:0;background:white} .block__popover {transition:none;background:whi
         clean();
     }
 
+    // 指针离开浮窗后，即使底层段落或导图隔离冒泡事件，移动、拓宽和收窄仍连续生效。
+    for (const direction of ["move", "r", "l", "rd"]) {
+        const element = createPanel();
+        const underlay = document.querySelector(".underlay");
+        const blocked = new AbortController();
+        for (const type of ["mousemove", "mouseup"]) {
+            underlay.addEventListener(type, event => event.stopPropagation(), {signal: blocked.signal});
+        }
+        const handle = element.querySelector(".resize__" + direction);
+        const {x, y} = center(handle);
+        handle.dispatchEvent(new MouseEvent("mousedown", {bubbles: true, clientX: x, clientY: y}));
+        for (const delta of [40, 70, 20]) {
+            underlay.dispatchEvent(new MouseEvent("mousemove", {bubbles: true,
+                clientX: x + (direction === "l" ? -delta : delta), clientY: y + 30}));
+            check.equal(direction === "move" ? element.style.left : element.style.width,
+                `${(direction === "move" ? 100 : 300) + delta}px`, direction);
+        }
+        underlay.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+        check.equal(element.dataset.pin, "true");
+        clean();
+        const saved = element.style.cssText;
+        underlay.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: x + 100, clientY: y + 30}));
+        check.equal(element.style.cssText, saved, "finished drags remove their capture listeners");
+        blocked.abort();
+    }
+
     for (const direction of ["move", "rd"]) {
         for (const cancel of ["touchcancel", "blur", "visibilitychange", "multitouch"]) {
             const element = createPanel();

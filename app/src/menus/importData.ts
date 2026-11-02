@@ -3,7 +3,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
-import type {DataImportPlan} from "../types/api";
+import type {CommitDataImportRequestInput, DataImportPlan} from "../types/api";
 import {showMessage} from "../dialog/message";
 
 export const needsDataImportPassword = (plan: DataImportPlan, mode: "skip" | "overwrite") =>
@@ -33,17 +33,20 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
         hideCloseIcon: true,
         beforeClose: () => !busy || committed,
         width: isMobile() ? "92vw" : "560px",
+        containerClassName: "data-import",
         content: `<div class="b3-dialog__content">
-    <div class="ft__breakword">${lang.importDataTip}</div>
-    ${plan.conflicts.length ? `<div class="fn__hr"></div>
-    <div class="ft__secondary">${lang.dataImportConflicts}</div>
-    <div class="ft__breakword">${plan.conflicts.map(escapeHtml).join("<br>")}</div>
-    <label class="b3-label fn__flex"><input type="radio" name="data-import-mode" value="skip" checked>
-        <span class="fn__space"></span>${lang.dataImportSkip}</label>
-    <label class="b3-label fn__flex"><input type="radio" name="data-import-mode" value="overwrite">
-        <span class="fn__space"></span>${lang.dataImportOverwrite}</label>` : ""}
-    <label class="b3-label fn__block" data-type="password-label">${lang.masterPassword}
-        <div class="fn__hr"></div><input class="b3-text-field fn__block" type="password" data-type="password" autocomplete="off">
+    <div class="data-import__section ft__breakword">${lang.importDataTip}</div>
+    ${plan.conflicts.length ? `<div class="data-import__section">
+        <div>${lang.dataImportConflicts}</div>
+        <div class="data-import__list ft__breakword" tabindex="0">${plan.conflicts.map(escapeHtml).join("<br>")}</div>
+        <label class="data-import__mode"><input type="radio" name="data-import-mode" value="skip" checked>
+            <span>${lang.dataImportSkip}</span></label>
+        <label class="data-import__mode"><input type="radio" name="data-import-mode" value="overwrite">
+            <span>${lang.dataImportOverwrite}</span></label>
+    </div>` : ""}
+    <label class="data-import__section data-import__password" data-type="password-label">${lang.dataImportMasterPassword}
+        <input class="b3-text-field fn__block" type="password" data-type="password" autocomplete="off">
+        <span class="b3-label__text fn__block">${lang.dataImportPasswordTip}</span>
     </label>
 </div>
 <div class="b3-dialog__action">
@@ -84,9 +87,11 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
         modes.forEach((item) => item.disabled = true);
         update();
         try {
-            const result = await fetchSyncPost("/api/import/commitDataImport", {
-                id: plan.id, mode: mode(), password: needsDataImportPassword(plan, mode()) ? password.value.trim() : "",
-            });
+            const payload: CommitDataImportRequestInput = {id: plan.id, mode: mode()};
+            if (needsDataImportPassword(plan, payload.mode)) {
+                payload.password = password.value.trim();
+            }
+            const result = await fetchSyncPost("/api/import/commitDataImport", payload);
             password.value = "";
             if (result.code !== 0) {
                 return;
@@ -97,6 +102,7 @@ export const importDataFile = async (file: File, onComplete?: () => void) => {
             const completed = new Dialog({
                 title: lang.imported,
                 width: isMobile() ? "92vw" : "560px",
+                containerClassName: "data-import",
                 content: `<div class="b3-dialog__content ft__breakword">${result.data.skipped.length ?
                     `${lang.dataImportSkipped}<div class="fn__hr"></div>${result.data.skipped.map(escapeHtml).join("<br>")}` : lang.imported}</div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--text" data-type="confirm">${lang.confirm}</button></div>`,

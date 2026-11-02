@@ -11,7 +11,6 @@ export const embedBreadcrumbMenu = (protyle: IProtyle, nodeElement: Element): IM
         return {
             id,
             label: window.siyuan.languages[id],
-            iconHTML: "",
             type: "submenu",
             submenu: [
                 {id: "enable", value: "true"},

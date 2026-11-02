@@ -90,5 +90,10 @@ test("the shared block menu exposes popovers in editable and read-only embeds", 
         assert.equal(children.some(item => item.id === "convertToReferences"), !readonly);
         assert.deepEqual(children.slice(0, readonly ? 1 : 3).map(item => item.id),
             readonly ? ["refPopover"] : ["refresh", "update", "refPopover"]);
+        if (!readonly) {
+            const heading = children.find(item => item.id === "headingEmbedMode");
+            assert.equal(heading.iconHTML, undefined, "the heading submenu aligns with icon-bearing sibling entries");
+            assert.ok(heading.submenu.every(item => item.iconHTML === ""), "checked choices keep their compact layout");
+        }
     }
 });

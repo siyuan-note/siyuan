@@ -16,6 +16,7 @@ import {blockRender} from "../render/blockRender";
 import {avRender} from "../render/av/render";
 import {removeFoldHeading} from "../util/heading";
 import {disposeCustomBlocksInElement} from "../../plugin/customBlockRender";
+import {reloadProtyle} from "../util/reload";
 
 const pendingConversions = new WeakSet<Element>();
 
@@ -150,6 +151,12 @@ export const convertEmbed = async (protyle: IProtyle, embed: Element, references
         });
         doOperations.push({action: "update", id, data: blocks[0].outerHTML});
         undoOperations.push({action: "update", id, data: oldHTML});
+        const reloadFoldedContent = !!template.content.querySelector('[data-type="NodeHeading"][fold="1"]');
+        if (reloadFoldedContent) {
+            // 折叠范围会延伸至原有后续块，转换及历史回放均从内核读取完整的可见范围。
+            doOperations[doOperations.length - 1].context = {headingBatchRootID: rootID, ignoreProcess: "true"};
+            undoOperations[undoOperations.length - 1].context = {headingBatchRootID: rootID, ignoreProcess: "true"};
+        }
         // 事务保存完整子块，本地仅挂载展开部分，避免折叠标题的隐藏内容进入当前编辑区域。
         Array.from(template.content.querySelectorAll('[data-type="NodeHeading"][fold="1"]'))
             .reverse().forEach(removeFoldHeading);
@@ -162,8 +169,15 @@ export const convertEmbed = async (protyle: IProtyle, embed: Element, references
         embed.replaceWith(...Array.from(template.content.children));
         blocks[0].setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, doOperations, undoOperations, {callback: () => {
+            if (rootID !== protyle.block.rootID || notebook !== protyle.notebookId) {
+                return;
+            }
+            if (reloadFoldedContent) {
+                reloadProtyle(protyle, false);
+                return;
+            }
             const first = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-            if (first && rootID === protyle.block.rootID && notebook === protyle.notebookId) {
+            if (first?.isConnected && first.getClientRects().length > 0) {
                 processRender(protyle.wysiwyg.element);
                 highlightRender(protyle.wysiwyg.element);
                 blockRender(protyle, protyle.wysiwyg.element);

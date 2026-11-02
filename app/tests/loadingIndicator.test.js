@@ -76,14 +76,53 @@ const browserCases = async (sources, entries, themes) => {
     check.equal(forced.borderTopWidth, "2px");
     await ipcRenderer.invoke("loading-media", []);
 
+    for (const entry of ["base", "mobile", "export"]) {
+        for (const theme of ["light", "dark"]) {
+            styles.textContent = entries[entry] + themes[theme];
+            for (const fontSize of [14, 24]) {
+                for (const variant of ["", "b3-button--outline"]) {
+                    host.innerHTML = '<div class="memory-manager__actions"><button class="b3-button ' + variant +
+                        '" disabled aria-busy="true"><span class="b3-loading b3-loading--small" aria-hidden="true"></span></button></div>';
+                    const button = host.querySelector("button");
+                    button.append(document.createTextNode(sources.memoryButtonLabel));
+                    button.style.fontSize = `${fontSize}px`;
+                    const spinner = button.querySelector(".b3-loading");
+                    check.equal(getComputedStyle(button).opacity, "1", `${entry}/${theme}: busy text is not faded`);
+                    check.equal(getComputedStyle(button).cursor, "progress");
+                    check.equal(getComputedStyle(spinner).color, getComputedStyle(button).color,
+                        `${entry}/${theme}: spinner follows the button foreground`);
+                    check.ok(spinner.getBoundingClientRect().width > 0);
+                    let clicks = 0;
+                    button.addEventListener("click", () => { clicks++; });
+                    button.click();
+                    check.equal(clicks, 0, "busy native buttons still reject duplicate clicks");
+                    if (!variant) {
+                        await ipcRenderer.invoke("capture-loading", `${entry}-${theme}-busy-button-${fontSize}`);
+                    }
+                    custom.textContent = ":root{--b3-loading-color:#345678}";
+                    check.equal(getComputedStyle(spinner).color, "rgb(52, 86, 120)");
+                    custom.textContent = "";
+                    button.setAttribute("aria-busy", "false");
+                    check.equal(getComputedStyle(button).opacity, "0.38", "ordinary disabled buttons keep their appearance");
+                    button.disabled = false;
+                    check.equal(getComputedStyle(button).opacity, "1");
+                    button.click();
+                    check.equal(clicks, 1);
+                }
+            }
+        }
+    }
+
     const progress = {};
     new Function("exports", sources.progress)(progress);
-    window.siyuan = {zIndex: 1};
+    window.siyuan = {zIndex: 1, languages: {_kernel: {35: "Rebuilding index, please wait..."}}};
     for (const entry of ["base", "mobile"]) {
         for (const theme of ["light", "dark"]) {
             styles.textContent = entries[entry] + themes[theme];
             host.replaceChildren();
             progress.progressLoading({code: 1, msg: "Rebuilding index, please wait..."});
+            progress.updateReindexProgressStatus("Indexed 64, remaining 128");
+            check.equal(document.querySelector('#progress [data-type="message"]').textContent, "Indexed 64, remaining 128");
             const panel = document.querySelector(".b3-dialog__loading");
             const track = panel.querySelector('[role="progressbar"]');
             const bar = track.firstElementChild;
@@ -110,6 +149,8 @@ const browserCases = async (sources, entries, themes) => {
             check.notEqual(getComputedStyle(bar, "::before").backgroundColor, "rgba(0, 0, 0, 0)");
             await ipcRenderer.invoke("loading-media", []);
             progress.progressLoading({code: 0, msg: "Rebuilding index", data: {current: 42, total: 100}});
+            progress.updateReindexProgressStatus("Unrelated status");
+            check.equal(document.querySelector('#progress [data-type="message"]').textContent, "Rebuilding index");
             check.equal(document.querySelector('[role="progressbar"]').getAttribute("aria-valuenow"), "42");
             check.equal(getComputedStyle(document.querySelector(".b3-dialog__progressbar"), "::before").content, "none");
             await ipcRenderer.invoke("capture-loading", `progress-determinate-${entry}-${theme}`);
@@ -203,6 +244,7 @@ if (process.versions.electron && process.type === "browser") {
                 .declarationList.declarations[0].initializer;
             const method = bazaarObject.properties.find(property => property.name?.getText(bazaarAST) === "_onBazaar");
             const sources = {
+                memoryButtonLabel: JSON.parse(read("appearance/langs/zh-CN.json")).aiMemoryOrganize,
                 progress: compile(read("src/dialog/progress.ts")),
                 editor: compile(declarations("src/protyle/ui/initUI.ts", ["addLoading", "removeLoading"])),
                 MobileBookmarks: compile(read("src/mobile/dock/MobileBookmarks.ts")),

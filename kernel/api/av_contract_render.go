@@ -6,6 +6,7 @@ package api
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -91,8 +92,13 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	return apicontract.Success(apicontract.NewAVRenderResult(data))
 }
 
-func createAVItemResponse(result *model.CreateAttributeViewItemResult, err error, app, session string) apicontract.Response[apicontract.AVCreateItemResult] {
+func createAVItemResponse(c *gin.Context, result *model.CreateAttributeViewItemResult, err error, app, session string) apicontract.Response[apicontract.AVCreateItemResult] {
 	if err != nil {
+		if failure, leaseErr := documentSelectionFailure(c, err); leaseErr != nil {
+			return apicontract.Failure[apicontract.AVCreateItemResult](-1, leaseErr.Error())
+		} else if failure != nil {
+			return apicontract.CreateAttributeViewItem.FailureWithData(-1, err.Error(), apicontract.NewAVCreateItemSelectionFailure(*failure))
+		}
 		if errors.Is(err, model.ErrBoxNotFound) {
 			return apicontract.CreateAttributeViewItem.FailureWithData(1, "", apicontract.NewAVCreateItemResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))
 		}

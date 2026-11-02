@@ -764,6 +764,9 @@ export class BacklinkContent extends Model {
 
     private setFocus() {
         /// #if !MOBILE
+        if (this.surface === "popover") {
+            return;
+        }
         if (this.type === "bottom") {
             this.setOwnerFocus();
             this.element.focus({preventScroll: true});
@@ -1842,7 +1845,7 @@ export class BacklinkContent extends Model {
     }
 
     private showLoading() {
-        if (this.type !== "bottom" && !isMobile()) {
+        if (this.type !== "bottom" && this.surface !== "popover" && !isMobile()) {
             return;
         }
         this.showingLoading = true;

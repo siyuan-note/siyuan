@@ -33,9 +33,13 @@ const runCases = async (sources, mobile) => {
         "./view": {getFieldsByData: () => []},
         "./fieldValueEditor": {bindFieldLunarDates() {}},
         "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
-        "../../../util/fetch": {fetchPost: (url, data, callback) => {
+        "../../../util/fetch": {fetchSyncPost: (url, data) => {
             assert.equal(url, "/api/av/createAttributeViewItem");
-            pending.push({data, callback});
+            return new Promise(resolve => pending.push({data, callback: resolve}));
+        }},
+        "../../../util/documentSelectionRequest": {fetchWithDocumentSelection: async (send, options) => {
+            const response = await send();
+            return options.isValid() ? response : undefined;
         }},
         "./calendar/state": {getCalendarCreationDate: () => 123},
         "./render": {avRender() {}},
@@ -48,7 +52,7 @@ const runCases = async (sources, mobile) => {
     const block = document.createElement("div");
     Object.assign(block.dataset, {avId: "database", nodeId: "carrier", avType: "table"});
     document.body.append(block);
-    const protyle = {id: "session", notebookId: "notebook", app: {appId: "app"}, options: {}};
+    const protyle = {id: "session", notebookId: "notebook", block: {rootID: "carrier"}, app: {appId: "app"}, options: {}};
 
     for (const targetType of ["detached", "document"]) {
         for (const view of ["table", "list", "gallery", "kanban", "calendar"]) {
@@ -84,6 +88,7 @@ const runCases = async (sources, mobile) => {
                 block.dataset.avType = view === "calendar" ? "table" : "calendar";
                 request.callback({code: 0, data: {itemID: "created", blockID: "document", content: "Template title",
                     isDetached: targetType === "detached", openAfterCreate: preference}});
+                await new Promise(resolve => setTimeout(resolve, 0));
                 assert.equal(calls.length - before, Number(preference ?? view === "calendar"));
                 if (calls.length > before) {
                     const opened = calls.at(-1);
@@ -110,6 +115,7 @@ const runCases = async (sources, mobile) => {
             code: failure === "error" ? -1 : 0,
             data: {itemID: "created", openAfterCreate: true, isDetached: true},
         });
+        await new Promise(resolve => setTimeout(resolve, 0));
         assert.equal(calls.length, before);
         document.body.append(block);
         protyle.disabled = false;
@@ -177,7 +183,7 @@ const runCases = async (sources, mobile) => {
         window.siyuan.config.readonly = false;
         window.siyuan.isPublish = false;
         const host = document.createElement("div");
-        host.innerHTML = '<input id="toolbarName" value="Template title"><span id="toolbarNameReadonly"></span>' +
+        host.innerHTML = '<input id="toolbarName" value="Template title"><span id="toolbarNameReadonly">Template title</span>' +
             '<div contenteditable="true">Template title</div>' +
             '<div data-av-id="database"><div data-primary="true"><div data-row-id="created"><input value="Template title"></div></div></div>';
         document.body.append(host);
@@ -189,10 +195,8 @@ const runCases = async (sources, mobile) => {
         owner.preview.element.className = "fn__none";
         window.siyuan.mobile = {editor: {protyle: owner}};
         let resolveSource;
-        let resolveDialog;
         let sourceRequests = 0;
         let focused = 0;
-        const dialogs = [];
         const {Title} = load(sources.title, {
             "../../util/fetch": {fetchSyncPost: (url, data) => {
                 assert.equal(url, "/api/block/getDocTitle");
@@ -201,21 +205,23 @@ const runCases = async (sources, mobile) => {
                 return new Promise(resolve => { resolveSource = resolve; });
             }},
             "../render/autoDirection": {setTitleAutoDirection() {}},
+            "../../mobile/util/mobileDocumentTitle": {updateMobileDocumentTitle() {}},
+            "../../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard() {}},
             "./documentTitleEditor": {DocumentTitleEditor: class {
                 constructor(_owner, element, initial, onEditable) {
                     this.element = document.createElement("div");
                     this.element.contentEditable = "true";
                     this.element.textContent = initial.text;
                     element.append(this.element);
+                    this.fragment = {protyle: {element}};
                     onEditable(this.element);
                 }
                 focus() { focused++; this.element.focus(); }
                 destroy() { this.element.remove(); }
             }},
-            "./documentTitleDialog": Object.assign(new Promise(resolve => { resolveDialog = resolve; }), {__esModule: true}),
         });
         const title = Object.assign(Object.create(Title.prototype), {
-            protyle: owner, editElement: mobile ? undefined : plain, sourceRequest: 0,
+            protyle: owner, editElement: mobile ? undefined : plain, sourceRequest: 0, element: document.createElement("div"),
         });
         owner.title = title;
         if (mobile) {
@@ -241,25 +247,19 @@ const runCases = async (sources, mobile) => {
         if (invalidation === "source-replaced") title.sourceRequest++;
         if (invalidation === "hidden") host.style.display = "none";
         if (invalidation === "mobile-editor") window.siyuan.mobile.editor = {protyle: {}};
-        if (mobile) {
-            assert.equal(dialogs.length, 0);
-            resolveDialog({openDocumentTitleDialog: options => dialogs.push(options)});
-        } else {
-            assert.equal(sourceRequests, 1, "automatic focus shares the already pending title source");
-            resolveSource({code: 0, data: {text: "Template title", blockDOM: "Template title", revision: "r0"}});
-        }
+        assert.equal(sourceRequests, 1, "automatic focus shares the already pending title source");
+        resolveSource({code: 0, data: {text: "Template title", blockDOM: "Template title", revision: "r0"}});
         await loading;
         await opening;
         const expected = invalidation === "none" ? 1 : 0;
-        assert.equal(mobile ? dialogs.length : focused, expected, `${mobile ? "mobile" : "desktop"}: ${invalidation}`);
-        if (mobile && expected) assert.deepEqual(dialogs[0], {id: "document", notebook: "notebook", app: owner.app});
-        if (!mobile && expected) assert.equal(document.activeElement, title.editElement);
+        assert.equal(focused, expected, `${mobile ? "mobile" : "desktop"}: ${invalidation}`);
+        if (expected) assert.equal(document.activeElement, title.editElement);
         primary.focusDatabasePrimary(host, owner, request);
-        assert.equal(mobile ? dialogs.length : focused, expected, "source completion must not repeat focus on refresh");
+        assert.equal(focused, expected, "source completion must not repeat focus on refresh");
         assert.notEqual(document.activeElement, field);
         if (expected) {
             await title.openEditor();
-            assert.equal(mobile ? dialogs.length : focused, 2, "explicit title clicks still open without a caller guard");
+            assert.equal(focused, 2, "explicit title clicks still open without a caller guard");
         }
         host.remove();
     }

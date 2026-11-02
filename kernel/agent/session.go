@@ -441,17 +441,6 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 				if entry.Type != "user" {
 					continue
 				}
-				ids := []string{}
-				for _, ref := range entry.References {
-					ids = append(ids, ref.ID)
-				}
-				if entry.EditorContext != nil {
-					ids = append(ids, entry.EditorContext.SelectedBlockIDs...)
-					if entry.EditorContext.FocusedBlockID != "" {
-						ids = append(ids, entry.EditorContext.FocusedBlockID)
-					}
-				}
-				kernelModel.QueueAIMemorySources(ids)
 				kernelModel.QueueAIMemoryConversation(meta.ID, entry.ID)
 				break
 			}

@@ -276,12 +276,16 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		logging.LogInfof("list models failed [%s], test with text completion: %s", apiBaseURL, listErr)
 	}
 
-	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "1"}}
+	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "Reply with 1"}}
 	request := openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            messages,
 		MaxCompletionTokens: 1,
 		Temperature:         1,
+	}
+	if !IsOpenAIResponsesProtocol(protocol) && !IsAnthropicMessagesProtocol(protocol) && !IsGeminiInteractionsProtocol(protocol) {
+		// Chat Completions 的输出预算包含推理 token，连通性测试使用有限预算生成简短回复。
+		request.MaxCompletionTokens = 1024
 	}
 	if IsOpenAIResponsesProtocol(protocol) {
 		// Responses 的输出预算至少为 16，包含可能使用的推理 token。

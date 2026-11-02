@@ -7,6 +7,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
+import {withStartupErrorSuppressed} from "../../boot/startupError";
 
 const snippetElements = new WeakSet<HTMLElement>();
 
@@ -32,7 +33,7 @@ export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () 
             script.text = item.content;
             script.id = `snippetJS${item.id}`;
             snippetElements.add(script);
-            document.head.appendChild(script);
+            withStartupErrorSuppressed(() => document.head.appendChild(script));
         };
         const snippetIds = new Set(response.data.snippets.map((item: ISnippet) =>
             `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`));

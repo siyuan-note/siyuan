@@ -1,7 +1,7 @@
 import {toggleMenu} from "./menuToggle";
 import {MenuItem} from "./Menu";
-import {fetchPost} from "../util/fetch";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {confirmTagRemoval} from "../protyle/util/tagRemoval";
 import {escapeHtml} from "../util/escape";
 import {renameTag} from "../util/noRelyPCFunction";
 import {getDockByType} from "../layout/tabUtil";
@@ -28,17 +28,19 @@ export const openTagMenu = (element: HTMLElement, event: MouseEvent, labelName: 
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages.remove,
-                click: () => {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
-                        fetchPost("/api/tag/removeTag", {label: labelName}, () => {
-                            /// #if MOBILE
-                            window.siyuan.mobile.docks.tag.update();
-                            /// #else
-                            const dockTag = getDockByType("tag");
-                            (dockTag.data.tag as Tag).update();
-                            /// #endif
-                        });
-                    }, undefined, true);
+                click: async () => {
+                    const preview = await fetchSyncPost("/api/tag/previewTagRemoval", {label: labelName});
+                    if (preview.code !== 0) { return; }
+                    const collections = await confirmTagRemoval(preview.data, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`);
+                    if (collections === null) { return; }
+                    fetchPost("/api/tag/removeTagWithCollections", {label: labelName, collections}, () => {
+                        /// #if MOBILE
+                        window.siyuan.mobile.docks.tag.update();
+                        /// #else
+                        const dockTag = getDockByType("tag");
+                        (dockTag.data.tag as Tag).update();
+                        /// #endif
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TAG);

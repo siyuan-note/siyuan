@@ -167,7 +167,8 @@ const restoreGutterRange = (protyle: IProtyle) => {
         range.setStart(mindmap, 0);
         range.collapse(true);
         protyle.toolbar.range = range;
-        focusByRange(range);
+        // 脑图容器内的原生光标会使 Chromium 在菜单悬停时反复进行昂贵的布局和绘制。
+        window.getSelection()?.removeAllRanges();
         return;
     }
     const range = protyle.toolbar.range;
@@ -1537,10 +1538,7 @@ export class Gutter {
         }
         const embedID = (element as HTMLElement).dataset.embedId;
         const viewOccurrenceID = (element as HTMLElement).dataset.viewOccurrenceId;
-        return Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-            if (!this.isMatchNode(item)) {
-                return false;
-            }
+        const candidates = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).filter(item => {
             if (viewOccurrenceID && encodeURIComponent(getViewFoldOccurrenceID(protyle, item)) !== viewOccurrenceID) {
                 return false;
             }
@@ -1551,6 +1549,11 @@ export class Gutter {
             }
             return !embedElement;
         });
+        // 完整层级的整列位置可能偏离内容行，唯一的上下文匹配直接使用块身份定位。
+        if (this.element.classList.contains("protyle-gutters--full") && candidates.length === 1) {
+            return candidates[0];
+        }
+        return candidates.find(item => this.isMatchNode(item));
     }
 
     public renderMenu(protyle: IProtyle, buttonElement: Element) {
@@ -2531,7 +2534,6 @@ export class Gutter {
                 }, ...embedBreadcrumbMenu(protyle, nodeElement), {
                     id: "headingEmbedMode",
                     label: window.siyuan.languages.headingEmbedMode,
-                    iconHTML: "",
                     type: "submenu",
                     submenu: [{
                         id: "showHeadingWithBlocks",
@@ -3709,10 +3711,24 @@ export class Gutter {
         const fullGutter = !isMultiSelect && window.siyuan.config.editor.blockGutterMode;
         let html = "";
         let nodeElement = selectedElement || element;
+        const foldedListItem = fullGutter ? nodeElement.closest('[data-type="NodeListItem"][fold="1"]') : null;
+        if (foldedListItem) {
+            nodeElement = foldedListItem;
+        }
         const listItemContainer = isMultiSelect ? undefined : getListItemGutterContainer(nodeElement, fullGutter);
-        if (listItemContainer && (nodeElement === listItemContainer.parentElement ||
+        if (listItemContainer && !foldedListItem && (nodeElement === listItemContainer.parentElement ||
             nodeElement.classList.contains("protyle-action"))) {
             nodeElement = listItemContainer;
+        }
+        if (fullGutter) {
+            while (["NodeList", "NodeListItem", "NodeBlockquote", "NodeSuperBlock"].includes(nodeElement.getAttribute("data-type")) &&
+                nodeElement.getAttribute("fold") !== "1" && nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
+                const first = nodeElement.querySelector(":scope > [data-node-id]");
+                if (!first) {
+                    break;
+                }
+                nodeElement = first;
+            }
         }
         const mindmapElement = (nodeElement.getAttribute("data-type") === "NodeMindmap" ||
             nodeElement.getAttribute("data-type") === "NodeList" &&
@@ -3885,12 +3901,11 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 while (previousBlock && !previousBlock.getAttribute("data-node-id")) {
                     previousBlock = previousBlock.previousElementSibling;
                 }
-                // 精简模式的正文块标只显示到当前页签项，页签栏用于操作整个容器。
+                // 页签栏和提示标题有独立的操作入口，正文块标在所属内容边界结束。
                 const isTabItemBoundary = type === "NodeTabItem" && nodeElement.parentElement.classList.contains("tabs");
                 if ((previousBlock && previousBlock.getAttribute("data-node-id")) ||
                     nodeElement.parentElement.classList.contains("callout-content") || isTabItemBoundary) {
-                    // 前一个块存在时，精简模式只显示到当前层级。
-                    hideParent = !fullGutter;
+                    hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
                     if (parentElement && parentElement.getAttribute("fold") === "1") {
                         return;

@@ -28,17 +28,15 @@ type SettingAI struct {
 }
 
 // SettingMemory 独立选择长期记忆模型，不跟随对话模型，不为失效引用选择替代模型。
-// enabled 与 autoMaintain 初始均关闭；sources 是允许自动整理的普通笔记本 ID，初始为空。
+// enabled 初始关闭，统一控制记忆使用和自动整理；笔记来源覆盖全部非加密笔记本，包含新建笔记本。
+// 旧版 sources、autoMaintain 和 conversations 字段被忽略；启用不扫描历史，自动整理要求模型配置有效。
 // modelId 与 reasoningEffort 初始为空，未知模型仅支持默认推理设置；具体能力由内核返回。
 // 省略字段保留当前值，null 恢复该字段默认值；配置变化使旧维护任务在提交前失效。
-// conversations 初始关闭，仅授权采集成功提交会话中的用户原话，不采集助手输出。
+// enabled 同时控制后续成功提交会话中的用户原话采集，不采集助手输出。
 type SettingMemory struct {
-	Enabled         bool     `json:"enabled" api:"optional,nullable"`
-	AutoMaintain    bool     `json:"autoMaintain" api:"optional,nullable"`
-	Conversations   bool     `json:"conversations" api:"optional,nullable"`
-	ModelID         string   `json:"modelId" api:"optional,nullable"`
-	ReasoningEffort string   `json:"reasoningEffort" api:"optional,nullable"`
-	Sources         []string `json:"sources" api:"optional,nullable"`
+	Enabled         bool   `json:"enabled" api:"optional,nullable"`
+	ModelID         string `json:"modelId" api:"optional,nullable"`
+	ReasoningEffort string `json:"reasoningEffort" api:"optional,nullable"`
 }
 
 // SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
@@ -457,6 +455,9 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
+	// ShowFloatingDockBar 控制隐藏停靠栏时是否临时显示左右浮动停靠栏，旧配置缺失时默认开启。
+	// 部分更新省略字段时保留当前值，null 恢复默认开启。
+	ShowFloatingDockBar *bool `json:"showFloatingDockBar" api:"optional,nullable"`
 	// LockScreenWallpaper 默认关闭；图片单独保存在 conf/lockscreen/wallpaper.jpg，不进入设置导出或笔记同步。
 	LockScreenWallpaper bool `json:"lockScreenWallpaper" api:"optional,nullable"`
 	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。

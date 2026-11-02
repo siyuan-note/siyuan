@@ -2,8 +2,8 @@ import type {App} from "../index";
 import {Constants} from "../constants";
 import {isMobile} from "../util/functions";
 import {addBlocksToDatabase, addEditorToDatabase, addFilesToDatabase} from "../protyle/render/av/addToDatabase";
-import {hasClosestBlock, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath, pathPosix} from "../util/pathName";
+import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {getDisplayName, getNotebookName, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {fetchSyncPost} from "../util/fetch";
 import {globalCommand} from "../boot/globalEvent/command/global";
@@ -118,15 +118,12 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 /// #endif
             } else {
                 /// #if !MOBILE
-                const notebookId = context.fileTree.items?.[0]?.notebookId ||
-                    fileLiElements[0].getAttribute("data-notebook-id") ||
-                    (hasTopClosestByTag(fileLiElements[0], "UL") || undefined)?.getAttribute("data-url");
+                const notebookId = context.fileTree.items?.[0]?.notebookId;
                 if (!notebookId) {
                     return false;
                 }
-                const pathString = context.fileTree.items?.[0]?.path || fileLiElements[0].getAttribute("data-path");
-                const isFile = context.fileTree.items?.[0]?.kind === "document" ||
-                    (!context.fileTree.items && fileLiElements[0].getAttribute("data-type") === "navigation-file");
+                const pathString = context.fileTree.items?.[0]?.path;
+                const isFile = context.fileTree.items?.[0]?.kind === "document";
                 if (isFile) {
                     openSearch({
                         focusInput: openOnly,
@@ -174,15 +171,12 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 /// #endif
             } else {
                 /// #if !MOBILE
-                const notebookId = context.fileTree.items?.[0]?.notebookId ||
-                    fileLiElements[0].getAttribute("data-notebook-id") ||
-                    (hasTopClosestByTag(fileLiElements[0], "UL") || undefined)?.getAttribute("data-url");
+                const notebookId = context.fileTree.items?.[0]?.notebookId;
                 if (!notebookId) {
                     return false;
                 }
-                const pathString = context.fileTree.items?.[0]?.path || fileLiElements[0].getAttribute("data-path");
-                const isFile = context.fileTree.items?.[0]?.kind === "document" ||
-                    (!context.fileTree.items && fileLiElements[0].getAttribute("data-type") === "navigation-file");
+                const pathString = context.fileTree.items?.[0]?.path;
+                const isFile = context.fileTree.items?.[0]?.kind === "document";
                 if (isFile) {
                     openSearch({
                         focusInput: openOnly,
@@ -248,12 +242,10 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     });
                 }
             } else if (fileLiElements || context.fileTree?.items) {
-                const items = context.fileTree.items && getDocTreeActionItems(context.fileTree.items);
-                const paths = items ? getDocTreeTopPaths(items) : getTopPaths(fileLiElements);
-                const sourceNotebookIds = items ? items.map(item => item.notebookId) : fileLiElements.map(item =>
-                    item.getAttribute("data-notebook-id") ||
-                    item.closest("ul[data-url]")?.getAttribute("data-url") || "");
-                const rootIDs = items ? items.map(item => item.id) : fileLiElements.map(item => item.getAttribute("data-node-id"));
+                const items = getDocTreeActionItems(context.fileTree.items || []);
+                const paths = getDocTreeTopPaths(items);
+                const sourceNotebookIds = items.map(item => item.notebookId);
+                const rootIDs = items.map(item => item.id);
                 movePathTo({
                     cb: (toPath, toNotebook) => {
                         moveToPath(paths, toNotebook[0], toPath[0]);

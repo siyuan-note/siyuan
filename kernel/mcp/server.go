@@ -266,6 +266,16 @@ func syncGuardedTool(server *mcpsdk.Server, name string, tool *tools.Tool, allow
 		if allowed != nil && !allowed() {
 			return toolErrorResult("MCP capability is disabled or no longer available"), nil
 		}
+		releaseWrite, admissionErr := model.AcquireMCPToolWrite()
+		if admissionErr != nil {
+			return toolErrorResult(admissionErr.Error()), nil
+		}
+		// 内置同步工具在落盘阶段自行取得写租约；工具名相同的扩展仍按普通工具保护。
+		if tool == tools.SyncTool {
+			releaseWrite()
+		} else {
+			defer releaseWrite()
+		}
 		arguments := map[string]any{}
 		if len(request.Params.Arguments) > 0 {
 			if err := json.Unmarshal(request.Params.Arguments, &arguments); err != nil {

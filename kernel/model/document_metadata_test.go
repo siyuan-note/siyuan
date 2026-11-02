@@ -107,6 +107,18 @@ func TestDocumentMetadataSourceRecovery(t *testing.T) {
 	if treenode.GetBlockTreeInExactBox(unwritten.ID, box.ID) != nil {
 		t.Fatal("failed creation retained an addressable document")
 	}
+	// 没有待写入标记的残留文档行也按实际源恢复，不影响笔记本内其他文档。
+	missing := treenode.NewTree(box.ID, "/"+ast.NewNodeID()+".sy", "/Missing", "Missing")
+	treenode.UpsertBlockTreePending(missing)
+	if pending, pendingErr := treenode.PendingDocumentMetadata(box.ID); pendingErr != nil || len(pending) != 0 {
+		t.Fatalf("stale source fixture unexpectedly has pending metadata: %v, %v", pending, pendingErr)
+	}
+	if err = recoverDocumentMetadata(box.ID); err != nil {
+		t.Fatal(err)
+	}
+	if treenode.GetBlockTreeInExactBox(missing.ID, box.ID) != nil || treenode.DocumentMetadataState(box.ID) != "ready" {
+		t.Fatal("stale source prevented metadata recovery")
+	}
 	// 原始文件接口也必须发布源标题，失败的移动保留原位置，成功移动及删除更新身份索引。
 	tree.Root.SetIALAttr("title", "Raw source")
 	data = render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
@@ -153,5 +165,24 @@ func TestDocumentMetadataSourceRecovery(t *testing.T) {
 	}
 	if err = recoverDocumentMetadata(box.ID); !errors.Is(err, treenode.ErrDocumentMetadataUnavailable) {
 		t.Fatal("failed full index was silently declared ready", err)
+	}
+	treenode.UpsertBlockTreePending(missing)
+	recoverOpenedDocumentMetadata()
+	if treenode.DocumentMetadataState(box.ID) != "ready" || treenode.GetBlockTreeInExactBox(missing.ID, box.ID) != nil {
+		t.Fatal("startup did not rebuild the failed notebook and remove its stale source")
+	}
+	corrupt := filepath.Join(util.DataDir, box.ID, ast.NewNodeID()+".sy")
+	if err = os.WriteFile(corrupt, []byte("corrupt"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err = treenode.SetDocumentMetadataState(box.ID, "error"); err != nil {
+		t.Fatal(err)
+	}
+	recoverOpenedDocumentMetadata()
+	if treenode.DocumentMetadataState(box.ID) != "error" {
+		t.Fatal("failed startup source authentication was silently declared ready")
+	}
+	if data, readErr := os.ReadFile(corrupt); readErr != nil || string(data) != "corrupt" {
+		t.Fatalf("failed startup recovery changed the original source: %q, %v", data, readErr)
 	}
 }

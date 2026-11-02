@@ -6,7 +6,7 @@
 		"id": "20230106104645-o838uew",
 		"title": "工作空間",
 		"type": "doc",
-		"updated": "20261021005205"
+		"updated": "20261030093418"
 	},
 	"Children": [
 		{
@@ -835,6 +835,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "第三方主題儲存在 data/themes/，圖示套件儲存在 data/icons/，參與資料同步和快照。各裝置的外觀選擇仍儲存在本機 conf/conf.json 中；內建外觀資源不參與同步。升級遷移將原目錄移入資料目錄，遷移後移除來源副本。"
+				}
+			]
+		},
+		{
+			"ID": "20261030093418-plwausq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030093418-plwausq",
+				"updated": "20261030093418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未完成交易的復原記錄與後來修改、移動或刪除的檔案衝突時，啟動會自動保留目前檔案並重建相關索引，不會重新建立已刪除的文件。原始復原記錄保留在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/document-source-recovery/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中供排查，無須手動清理或確認。檔案存取錯誤、不支援的格式及驗證失敗仍會回報錯誤並保留原始資料。"
 				}
 			]
 		}

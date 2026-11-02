@@ -19,16 +19,17 @@ test("desktop and mobile More menus keep cut first and preserve paste restrictio
     const compiled = transpileModule(`class Controller {openMore = ${callback};} globalThis.Controller = Controller;`,
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     for (const mobile of [false, true]) {
-        for (const ids of [["child"], ["root"], ["child", "second"]]) {
+        for (const ids of [["child"], ["root"], ["realRoot"], ["child", "second"]]) {
             for (const editable of [true, false]) {
                 const entries: IMenu[] = [];
                 const actions: unknown[] = [];
                 const placements: unknown[] = [];
                 const anchor = {getBoundingClientRect: () => ({left: 20, bottom: 100, height: 26})};
-                const model = {nodes: new Map([["root", {virtual: true}], ["child", {taskMarker: " "}], ["second", {}]])};
+                const model = {nodes: new Map([["root", {virtual: true}], ["realRoot", {virtual: false}],
+                    ["child", {taskMarker: " ", parentId: "root"}], ["second", {parentId: "root"}]])};
                 const context: any = {
                     owner: {}, list: {}, canEdit: () => editable, readListMindmap: () => model,
-                    canCutMindmapBranches: (_model: unknown, selected: string[]) => !selected.includes("root"),
+                    canCutMindmapBranches: (_model: unknown, selected: string[]) => !selected.some(id => id === "root" || id === "realRoot"),
                     window: {siyuan: {languages: new Proxy({}, {get: (_target, key) => String(key)})}},
                     isMobile: () => mobile,
                     getTaskStatusItems: (marker: string, set: (marker: string) => void) => {
@@ -54,8 +55,9 @@ test("desktop and mobile More menus keep cut first and preserve paste restrictio
                 });
                 target.openMore(anchor, ids);
                 assert.deepEqual(JSON.parse(JSON.stringify(placements)), [mobile ? "bottom" : {x: 20, y: 100, h: 26}]);
-                const expected = [...(editable && !ids.includes("root") ? ["cut"] : []), "copy",
-                    ...(editable && ids.length === 1 ? ["mindmapPasteChild", ...(ids[0] === "root" ? [] : ["mindmapPasteSibling"])] : []),
+                const isRoot = ids.some(id => id === "root" || id === "realRoot");
+                const expected = [...(editable && !isRoot ? ["cut"] : []), "copy",
+                    ...(editable && ids.length === 1 ? ["mindmapPasteChild", ...(isRoot ? [] : ["mindmapPasteSibling"])] : []),
                     ...(editable && ids.length === 1 && ids[0] === "child" ? ["checkToggle"] : [])];
                 assert.deepEqual(entries.map(item => item.label), expected);
                 assert.equal(actions.length, 0, "opening More does not modify document content");

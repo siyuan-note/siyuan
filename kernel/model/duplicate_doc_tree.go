@@ -193,8 +193,10 @@ func prepareDuplicateDocTree(boxID, rootPath string) (*duplicateDocTreePlan, err
 			if pathErr != nil {
 				return nil, pathErr
 			}
-			title := treenode.ReadDocumentTitle(tree.Root).Text + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
-			tree.Root.SetIALAttr("title", title)
+			if err = appendDuplicateDocumentTitle(tree.Root, " (Duplicated "+time.Now().Format("2006-01-02 15:04:05")+")"); err != nil {
+				return nil, err
+			}
+			title := treenode.ReadDocumentTitle(tree.Root).Text
 			tree.HPath = parentHPath + "/" + title
 		} else {
 			tree.HPath = hpaths[path.Dir(originalPath)+".sy"] + "/" + treenode.ReadDocumentTitle(tree.Root).Text

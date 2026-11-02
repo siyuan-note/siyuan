@@ -188,6 +188,9 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -x app/kernel-darwin-arm64/SiYuan-Kernel
           test -s app/stage/build/desktop/index.html
+          test -s app/stage/build/markdown/index.html
+          test -s app/stage/protyle/js/lute/lute.min.js
+          test ! -e app/stage/build/markdown/vditor/dist/js/lute/lute.min.js
           test -d app/node_modules
           mkdir -p "$RUNNER_TEMP/editor-runtime"
           # 在打包脚本修改资源之前封存完整 app，tar 保留依赖链接和内核可执行权限。

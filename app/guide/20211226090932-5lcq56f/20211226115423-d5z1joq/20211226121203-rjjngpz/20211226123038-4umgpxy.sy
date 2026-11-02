@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261030095654"
 	},
 	"Children": [
 		{
@@ -2028,6 +2028,44 @@
 				{
 					"Type": "NodeText",
 					"Data": " 分別控制圖片懸浮提示中的 OCR 文字、無 OCR 文字提示和辨識失敗提示。預設顯示文字預覽，另外兩項預設關閉。這些選擇按裝置儲存，獨立於自動 OCR 開關；隱藏提示不會刪除文字或改變搜尋結果。無 OCR 文字不一定表示辨識失敗。失敗提示反映本次執行期間的辨識失敗，成功辨識或儲存文字後清除，重新啟動核心後不保留。行動端不顯示這類懸浮提示。"
+				}
+			]
+		},
+		{
+			"ID": "20261030095654-2g0gt2r",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030095654-2g0gt2r",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "題頭圖"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030095654-08lmkb1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030095654-08lmkb1",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文件標題上方點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增封面圖"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，先選擇上傳、連結、資料或內置，再選擇圖片或確認連結後儲存題頭圖。關閉選單或取消選擇不會修改文件，也不會匯入圖片。要重複使用現有圖片而不再次上傳，請選擇「資料」。"
 				}
 			]
 		}

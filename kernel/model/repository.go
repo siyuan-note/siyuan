@@ -325,7 +325,9 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 		tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 		if needResetTree {
-			resetTree(tree, "", true)
+			if err = resetTree(tree, "", true); err != nil {
+				return
+			}
 		}
 
 		// Publish the restored source before removing the working document or
@@ -1425,20 +1427,19 @@ func checkoutRepo(id string) (err error) {
 
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
-		logging.LogErrorf("new repository failed: %s", err)
-		util.PushErrMsg(Conf.Language(141), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("open repository: %w", err), false)
 		return
 	}
 	if err = ensureAllSyncAssets(); err == nil {
 		err = ensureRepoSnapshotComplete(repo, id)
 	}
 	if err != nil {
-		util.PushErrMsg(err.Error(), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("prepare assets: %w", err), false)
 		return
 	}
 	checkoutTask, err := prepareRepoCheckout(repo)
 	if err != nil {
-		util.PushErrMsg(err.Error(), 7000)
+		reportRepoCheckoutFailure(fmt.Errorf("prepare editors: %w", err), false)
 		return err
 	}
 	defer checkoutTask.finish(repo, &err)
@@ -1455,35 +1456,22 @@ func checkoutRepo(id string) (err error) {
 	CloseWatchThemes()
 	defer WatchThemes()
 
-	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
-	syncEnabled := Conf.Sync.Load().Enabled
-	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-	if syncEnabled {
-		util.PushMsg(Conf.Language(134), 0)
-	}
-
-	// 回滚快照时默认为当前数据创建一个快照
-	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
-	if err = processAssetDownloadRecovery(repo, true); err != nil {
-		return
-	}
-	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
-		release()
-		fullReindexWithTxFlush(false)
-		if checkoutErr != nil {
-			util.ReloadUI()
-			return
+	err = withRepoCheckoutSyncPaused(repo, func() error {
+		if recoveryErr := processAssetDownloadRecovery(repo, true); recoveryErr != nil {
+			return fmt.Errorf("recover pending assets: %w", recoveryErr)
 		}
-		appendAgentRollbackEntries()
-		time.Sleep(time.Second)
-		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+		return checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
+			release()
+			fullReindexWithTxFlush(false)
+			if checkoutErr != nil {
+				util.ReloadUI()
+				return
+			}
+			appendAgentRollbackEntries()
+			time.Sleep(time.Second)
+			task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+		})
 	})
-	if err != nil {
-		logging.LogErrorf("checkout repository failed: %s", err)
-		util.PushClearProgress()
-		util.PushErrMsg(Conf.Language(141), 7000)
-		return
-	}
 
 	return
 }
@@ -1516,13 +1504,15 @@ func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) err
 	if _, err := repo.IndexWithOptions("Backup before checkout", false,
 		map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress},
 		dejavu.IndexOptions{FullCheck: true}); err != nil {
-		return err
+		return &dejavu.CheckoutError{Stage: "backup", Err: err}
 	}
 	upserts, removes, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
-	themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
-	refreshAppearancePackages(themes, icons)
-	refresh(err)
+	if err == nil || !repoCheckoutFailedBeforeApply(err) {
+		memorySyncSourcesChanged(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+		themes, icons := appearanceChangedPackages(&dejavu.MergeResult{Upserts: upserts, Removes: removes})
+		refreshAppearancePackages(themes, icons)
+		refresh(err)
+	}
 	return err
 }
 
@@ -2057,7 +2047,9 @@ func formatSyncRepoErrorMsg(err error) string {
 	return fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 }
 
-func syncRepoDownload() (err error) {
+func syncRepoDownload() error { return syncRepoDownloadWithDecision(nil) }
+
+func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2091,10 +2083,22 @@ func syncRepoDownload() (err error) {
 	}
 	checkoutTask := startSyncCheckout(repo)
 	defer checkoutTask.finish(repo, &err)
+	if len(decisions) > 0 {
+		if checkoutTask == nil {
+			return checkoutPrepareRetry()
+		}
+		if err = checkoutTask.prepareApply(); err != nil {
+			return
+		}
+	}
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync0(repo)
+	if len(decisions) > 0 {
+		err = indexRepoForSourceDecision(repo, false)
+	} else {
+		_, _, err = indexRepoBeforeCloudSync0(repo)
+	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2111,6 +2115,9 @@ func syncRepoDownload() (err error) {
 
 	syncContext := newSyncContext()
 	cloudStart := time.Now()
+	if err = applySyncSourceDecision(syncContext, decisions); err != nil {
+		return
+	}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
@@ -2148,7 +2155,9 @@ func syncRepoDownload() (err error) {
 	return
 }
 
-func syncRepoUpload() (err error) {
+func syncRepoUpload() error { return syncRepoUploadWithDecision(nil) }
+
+func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if err = checkDataImportRecovery(); err != nil {
 		return
 	}
@@ -2178,10 +2187,22 @@ func syncRepoUpload() (err error) {
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.Load().ID, KernelID, Conf.Sync.Load().Provider, "u", true)
 	checkoutTask := startSyncCheckout(repo)
 	defer checkoutTask.finish(repo, &err)
+	if len(decisions) > 0 {
+		if checkoutTask == nil {
+			return checkoutPrepareRetry()
+		}
+		if err = checkoutTask.prepareApply(); err != nil {
+			return
+		}
+	}
 	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	if len(decisions) > 0 {
+		err = indexRepoForSourceDecision(repo, true)
+	} else {
+		_, _, err = indexRepoBeforeCloudSync(repo)
+	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		planSyncAfter(fixSyncInterval)
@@ -2198,6 +2219,9 @@ func syncRepoUpload() (err error) {
 
 	syncContext := newSyncContext()
 	cloudStart := time.Now()
+	if err = applySyncSourceDecision(syncContext, decisions); err != nil {
+		return
+	}
 	trafficStat, err := repo.SyncUpload(syncContext)
 	cloudElapsed := time.Since(cloudStart)
 	elapsed := time.Since(start)
@@ -2600,7 +2624,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
 
 				previousPath := tree.Path
-				resetTree(tree, "Conflicted", true)
+				if resetErr := resetTree(tree, "Conflicted", true); resetErr != nil {
+					logging.LogErrorf("reset conflicted document [%s] failed: %s", absPath, resetErr)
+					continue
+				}
 				createTreeTx(tree)
 				box := Conf.Box(boxID)
 				if nil != box {
@@ -3242,6 +3269,12 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		}
 	}
 	ret.SetCheckoutHooks(documentAddressingCheckoutHooks(ret))
+	if err = ret.ConfigureSyncSource(syncSourceIdentity(confSyncSnapshot.Provider, cloudConf)); err != nil {
+		return
+	}
+	if err = ret.BindLegacySyncSource(); err != nil {
+		return
+	}
 	err = ret.ConfigureAssetDownloads(confSyncSnapshot.AssetDownloadMode == 1, assetDownloadStatePath(), scope)
 	return
 }

@@ -19,7 +19,7 @@ import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold"
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset, clampMindmapPanPosition, MindmapPanRect} from "./pan";
 import {getListMindmapSummarySelection, getListMindmapSummarySnapshot,
-    layoutListMindmapSummaries} from "./summary";
+    layoutListMindmapSummaries, resolveListMindmapSummaryStyle} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
@@ -123,6 +123,7 @@ const createElement = <T extends keyof HTMLElementTagNameMap>(tag: T, className:
 
 export class ListMindmapView {
     private themeColors = new Map<string, ListMindmapNodeStyle>();
+    private historyViewport?: {scale: number, x: number, y: number};
     private suppressPanContextMenu = false;
     private readonly options: ListMindmapViewOptions;
     private model: ListMindmapModel;
@@ -1138,6 +1139,27 @@ export class ListMindmapView {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
     }
 
+    public captureHistoryViewport() {
+        return JSON.stringify({scale: this.scale, x: this.offsetX, y: this.offsetY});
+    }
+
+    public restoreHistoryViewport(value: unknown) {
+        if (typeof value !== "string") {
+            return;
+        }
+        try {
+            const state = JSON.parse(value);
+            if (!state || !Number.isFinite(state.scale) || state.scale < .15 || state.scale > 2.5 ||
+                ![state.x, state.y].every(value => Number.isFinite(value) && Math.abs(value) <= 1000000)) {
+                return;
+            }
+            this.historyViewport = state;
+            this.refreshLayout();
+        } catch (_error) {
+            // 无效的取景上下文不影响节点和正文回放。
+        }
+    }
+
     private destroyContentViews(id: string) {
         this.nestedViews.get(id)?.forEach(view => view.destroy());
         this.nestedViews.delete(id);
@@ -1469,7 +1491,15 @@ export class ListMindmapView {
                 this.offsetX = this.viewport.clientWidth / 2 - center.x * this.scale;
                 this.offsetY = this.getViewportAnchorY(this.viewport.clientHeight) - center.y * this.scale;
             }
-            if (this.printTransform || this.options.printLayout) {
+            if (this.historyViewport && !this.printTransform && !this.options.printLayout) {
+                const state = this.historyViewport;
+                this.historyViewport = undefined;
+                this.initialFit = false;
+                this.scale = state.scale;
+                this.offsetX = state.x;
+                this.offsetY = state.y;
+                this.draw();
+            } else if (this.printTransform || this.options.printLayout) {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
@@ -1719,6 +1749,29 @@ export class ListMindmapView {
         input.setAttribute("aria-label", this.label("listMindmapSummary"));
         input.style.left = `${position.labelX}px`;
         input.style.top = `${position.labelY}px`;
+        const nativeSizing = CSS.supports("field-sizing", "content");
+        const resizeInput = () => {
+            if (nativeSizing) {
+                return;
+            }
+            // 不支持内容自适应的 WebView 按实际字体测量，宽度上下限由样式控制。
+            const style = getComputedStyle(input);
+            const measure = document.createElement("span");
+            measure.style.position = "absolute";
+            measure.style.visibility = "hidden";
+            measure.style.whiteSpace = "pre";
+            (["fontFamily", "fontSize", "fontWeight", "fontStyle", "fontStretch", "fontVariant",
+                "letterSpacing", "wordSpacing", "textTransform"] as const).forEach(key => {
+                measure.style[key] = style[key];
+            });
+            measure.textContent = input.value || " ";
+            this.world.append(measure);
+            input.style.width = `${measure.offsetWidth + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+                parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) + 1}px`;
+            measure.remove();
+        };
+        input.addEventListener("input", resizeInput);
+        input.addEventListener("compositionend", resizeInput);
         this.editingSummary = id;
         let finished = false;
         const finish = (save: boolean) => {
@@ -1745,6 +1798,8 @@ export class ListMindmapView {
             }
         });
         this.world.append(input);
+        resizeInput();
+        input.style.top = `${position.labelY + (position.height - input.offsetHeight) / 2}px`;
         this.draw();
         input.focus();
         input.select();
@@ -1770,7 +1825,10 @@ export class ListMindmapView {
                 this.model.metadata.connectorStyle || "bezier", () => new Path2D());
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
             const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
-            const style = resolveStyle(summary.color, selected, hovered);
+            const inherited = resolveListMindmapSummaryStyle(this.model, summary, this.themeColors);
+            element.style.color = inherited.textColor || "";
+            element.style.backgroundColor = inherited.backgroundColor || "";
+            const style = resolveStyle(inherited.lineColor, selected, hovered);
             context.strokeStyle = style.color;
             context.lineWidth = style.width;
             context.globalAlpha = opacity;
@@ -2964,6 +3022,9 @@ export class ListMindmapView {
         const node = this.model.nodes.get(targetId);
         let placement: PointerState["placement"] = blankPlacement || (node.virtual ? "child" :
             part < .25 ? "before" : part > .75 ? "after" : "child");
+        if (placement !== "child" && !node.parentId) {
+            return;
+        }
         // 同一个兄弟间隙统一显示在后一个节点之前，避免最近节点切换时插入线跳动。
         if (placement === "after" && node.parentId) {
             const siblings = this.model.nodes.get(node.parentId).children;
@@ -3525,7 +3586,7 @@ export class ListMindmapView {
         };
         const kind = this.pasteSibling ? "sibling" : "child";
         this.pasteSibling = false;
-        if (!node || node.virtual && kind === "sibling" ||
+        if (!node || !node.parentId && kind === "sibling" ||
             !data.files.length && !data.textPlain && !data.textHTML && !data.siyuanHTML) {
             return;
         }
@@ -3593,7 +3654,9 @@ export class ListMindmapView {
             if (event.shiftKey) {
                 event.preventDefault();
                 this.pasteSibling = false;
-                this.options.onPaste(this.selectedId, "sibling");
+                if (this.model.nodes.get(this.selectedId)?.parentId) {
+                    this.options.onPaste(this.selectedId, "sibling");
+                }
             }
             event.stopPropagation();
             return;

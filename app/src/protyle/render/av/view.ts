@@ -299,7 +299,7 @@ export const getViewHTML = (data: IAV) => {
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="go-sub-items">
-    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg>
+    <svg class="b3-menu__icon"><use xlink:href="#iconListTree"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.avSubItems}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>

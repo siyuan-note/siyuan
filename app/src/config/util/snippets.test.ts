@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../testSupport/loadModule";
+import {withStartupErrorSuppressed} from "../../boot/startupError";
 
 const fixture = () => {
     const elements = new Map<string, {id: string; tagName: string; textContent?: string; text?: string; nonce?: string}>();
@@ -23,6 +24,7 @@ const fixture = () => {
                 if (element.tagName === "SCRIPT") executed.push(element.text);
             }},
         }, require: () => ({
+            withStartupErrorSuppressed,
             getHostCapabilities: () => ({customAppearance: allowed}), getExtensionScriptNonce: () => "extension-nonce",
             refreshHeadingNumberMeasurements: () => { measurements++; },
             fetchPost: (_url: string, _data: unknown, callback: (response: unknown) => void) => new Promise<void>(resolve => {

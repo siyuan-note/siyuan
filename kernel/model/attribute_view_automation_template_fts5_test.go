@@ -12,8 +12,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -132,6 +134,10 @@ func TestAutomationTemplateReferencesAndConfigurationVersion(t *testing.T) {
 	defer tx.finishAttributeViewMutation(false)
 	relationKey := target.KeyValues[len(target.KeyValues)-1].Key
 	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	source.GetBlockValue(itemID).Block.Content = strings.Repeat("中", 400)
+	if err := av.SaveAttributeView(source); err != nil {
+		t.Fatal(err)
+	}
 	for _, test := range []struct {
 		ids   []string
 		valid bool
@@ -142,6 +148,16 @@ func TestAutomationTemplateReferencesAndConfigurationVersion(t *testing.T) {
 		err := tx.validateAutomationTemplateReferences(source, target, relationKey, value, "")
 		if (err == nil) != test.valid {
 			t.Fatalf("reference validation mismatch: %v %v", test.ids, err)
+		}
+		if test.valid {
+			content := value.Relation.Contents[0].Block.Content
+			if !utf8.ValidString(content) || len(content) > 1024 || content != strings.Repeat("中", 341) {
+				t.Fatalf("invalid relation preview: %q", content)
+			}
+			encoded, err := json.Marshal(value)
+			if err != nil || bytes.Contains(encoded, []byte(`\ufffd`)) {
+				t.Fatalf("relation serialization replaced a split character: %s, %v", encoded, err)
+			}
 		}
 	}
 	assetKey := &av.Key{Type: av.KeyTypeMAsset}

@@ -341,6 +341,14 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                         }).element);
                     }
                 }
+                /// #if !BROWSER
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "markdownEditor",
+                    label: window.siyuan.languages.markdownEditor,
+                    icon: "iconMarkdown",
+                    click: () => ipcRenderer.send("siyuan-open-markdown"),
+                }).element);
+                /// #endif
                 const layoutSubMenu = getLayoutSubMenu();
                 if (!window.siyuan.config.readonly) {
                     window.siyuan.menus.menu.append(new MenuItem({

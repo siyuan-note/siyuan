@@ -935,7 +935,7 @@ var setAccessAuthCode = contractHandler(apicontract.SystemSetAccessAuthCode, fun
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
 
-	workspaceSession.AccessAuthCode = aac
+	model.SetAccessCodeSession(workspaceSession, aac)
 	session.Save(c)
 	go func() {
 		time.Sleep(200 * time.Millisecond)

@@ -15,9 +15,10 @@ type TemplateFileRequest struct {
 }
 
 type TemplateFileEntry struct {
-	Path      string `json:"path"`
-	IsDir     bool   `json:"isDir"`
-	IsPackage bool   `json:"isPackage,omitempty"`
+	HTTPPermission bool   `json:"httpPermission"`
+	Path           string `json:"path"`
+	IsDir          bool   `json:"isDir"`
+	IsPackage      bool   `json:"isPackage,omitempty"`
 }
 
 type TemplateFileSource struct {

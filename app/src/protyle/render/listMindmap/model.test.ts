@@ -1960,7 +1960,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.setEditing();
     view.update(api.readListMindmap(list));
     check.equal(host.querySelector('[data-type="undo"], [data-type="redo"]'), null,
-        "history controls belong to the document action bar");
+        "history controls belong to the document menu and editing toolbar");
     finishAllowed = false;
     nodeElement(alpha).querySelector<HTMLButtonElement>(".mindmap-view__add-child").click();
     check.equal(additions.length, 0);
@@ -5264,9 +5264,46 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     taskStyle.remove();
     hostParent.remove();
 
+    // 结构撤销在布局完成后恢复操作前取景，保留小数偏移和缩放。
+    const historyList = reset("- Root\n  - First\n  - Second\n");
+    const historyHost = document.createElement("div");
+    historyHost.style.width = "700px";
+    document.body.append(historyHost);
+    const historyView = new api.ListMindmapView({host: historyHost, model: api.readListMindmap(historyList)});
+    await settle();
+    Object.assign(historyView, {scale: 1.25, offsetX: -80.5, offsetY: 45.25});
+    historyView.draw();
+    const historyViewport = historyView.captureHistoryViewport();
+    const historySource = historyList.outerHTML;
+    const historyModel = api.readListMindmap(historyList);
+    const insertedHistoryItem = (() => {
+        const holder = document.createElement("div");
+        holder.innerHTML = lute.Md2BlockDOM("- Inserted\n");
+        return holder.firstElementChild.firstElementChild as HTMLElement;
+    })();
+    check.ok(api.addListMindmapNode(historyList, historyModel.root.children[0].id, "before", insertedHistoryItem));
+    historyView.update(api.readListMindmap(historyList));
+    historyView.focusNode(insertedHistoryItem.dataset.nodeId);
+    await settle();
+    const restoredHistory = document.createElement("div");
+    restoredHistory.innerHTML = historySource;
+    historyView.update(api.readListMindmap(restoredHistory.firstElementChild));
+    historyView.restoreHistoryViewport(historyViewport);
+    await settle();
+    check.equal(historyView.captureHistoryViewport(), historyViewport, "undo restores exact pan and zoom after reflow");
+    for (const invalid of ["{", "null", JSON.stringify({scale: 0, x: 1, y: 2}), JSON.stringify({scale: 1, x: "1", y: 2})]) {
+        historyView.restoreHistoryViewport(invalid);
+        await settle();
+        check.equal(historyView.captureHistoryViewport(), historyViewport, "invalid context preserves the current viewport");
+    }
+    historyView.destroy();
+    historyHost.remove();
+
     // 概要的触屏点选、编辑、复制及列表往返使用真实 DOM 和 Lute。
     const summaryList = reset("- Root\n  - First\n    - Descendant\n  - Second\n  - Third\n");
     const summaryModel = api.readListMindmap(summaryList);
+    summaryModel.metadata.appearance = {version: 1, palette: ["#2563eb", "#15803d"], rootColor: "#1e293b"};
+    api.writeListMindmapMetadata(summaryList, summaryModel.metadata);
     const summaryIds = summaryModel.root.children.map((node: ListMindmapNode) => node.id);
     const summaryHost = document.createElement("div");
     summaryHost.style.width = "700px";
@@ -5302,23 +5339,60 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(summaryButton.disabled, false, "a single real node can create a summary");
         check.equal(api.readListMindmap(summaryList).metadata.summaries?.length || 0, 0,
             "selecting a single node does not create a summary automatically");
-        if (id === summaryIds[0]) {
-            await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
-                {type: "touchStart", touchPoints: [{id: 1, ...centerPoint(summaryButton)}]},
-                {type: "touchEnd", touchPoints: []},
-            ]);
-            await settle();
-        } else {
-            await clickMouse(summaryButton);
+        const fallbackSizing = id === summaryIds[1];
+        const originalSupports = CSS.supports;
+        if (fallbackSizing) {
+            CSS.supports = (property: string, value?: string) => property === "field-sizing" ? false :
+                value === undefined ? originalSupports(property) : originalSupports(property, value);
+        }
+        try {
+            if (id === summaryIds[0]) {
+                await require("electron").ipcRenderer.invoke("mindmap-view-native-touch", [
+                    {type: "touchStart", touchPoints: [{id: 1, ...centerPoint(summaryButton)}]},
+                    {type: "touchEnd", touchPoints: []},
+                ]);
+                await settle();
+            } else {
+                await clickMouse(summaryButton);
+            }
+        } finally {
+            CSS.supports = originalSupports;
         }
         check.deepEqual(api.readListMindmap(summaryList).metadata.summaries[0].nodeIds, [id]);
         const editor = summaryHost.querySelector<HTMLInputElement>(".mindmap-view__summary-editor");
         check.ok(editor, "single-node creation opens summary text editing");
         check.equal(document.activeElement, editor);
+        if (fallbackSizing) {
+            editor.style.setProperty("field-sizing", "fixed");
+        }
+        editor.value = "概要";
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        check.ok(editor.offsetWidth >= 44 && editor.offsetWidth <= 46,
+            "two Chinese characters use two em plus shared input padding with native and fallback sizing");
+        const shortWidth = editor.offsetWidth;
+        editor.value = "Long summary text ".repeat(10);
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        await settle();
+        check.ok(editor.offsetWidth > shortWidth && editor.offsetWidth <= 240,
+            "native and fallback inputs grow up to the maximum width");
+        editor.value = "";
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        check.equal(editor.offsetWidth, 44, "clearing text shrinks the input to its minimum width");
+        editor.value = "输入法组合文字";
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", isComposing: true, bubbles: true}));
+        check.equal(document.activeElement, editor, "composition Enter keeps the summary editor open");
+        editor.value = "概要";
+        editor.dispatchEvent(new CompositionEvent("compositionend", {data: editor.value, bubbles: true}));
+        check.ok(editor.offsetWidth >= 44 && editor.offsetWidth <= 46, "composition completion also updates width");
         editor.value = "Single node summary";
         editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
         await settle();
         check.equal(api.readListMindmap(summaryList).metadata.summaries[0].label, "Single node summary");
+        if (id === summaryModel.root.id) {
+            check.equal(summaryHost.querySelector<HTMLElement>(".mindmap-view__summary").style.backgroundColor,
+                summaryView.nodeElements.get(id).style.backgroundColor, "root summaries inherit the root background");
+        }
         summaryView.focusNode(id);
         check.equal(summaryButton.disabled, true, "an identical single-node summary cannot be created twice");
         summaryButton.click();
@@ -5328,6 +5402,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         api.writeListMindmapMetadata(summaryList, resetSingleSummary.metadata);
         summaryView.update(api.readListMindmap(summaryList));
     }
+    const unthemedSummary = api.readListMindmap(summaryList);
+    delete unthemedSummary.metadata.appearance;
+    api.writeListMindmapMetadata(summaryList, unthemedSummary.metadata);
+    summaryView.update(api.readListMindmap(summaryList));
     const virtualSummaryList = reset("- First\n- Second\n");
     const virtualSummaryModel = api.readListMindmap(virtualSummaryList);
     const virtualSummaryHost = document.createElement("div");

@@ -27,4 +27,5 @@ func TestDocumentTitleEncryptedConditionalCommit(t *testing.T) {
 	}
 	testDocumentTitleConditionalCommit(t, boxID)
 	testDocumentTitleCommitDescendantPaths(t, boxID)
+	testDocumentTitlePlainStorage(t, boxID)
 }

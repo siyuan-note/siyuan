@@ -14,6 +14,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     baseStyle.textContent = css;
     document.head.append(baseStyle);
     const noop = (): void => undefined;
+    let mobile = false;
     const settle = async () => {
         await new Promise<void>(resolve => setTimeout(resolve, 0));
     };
@@ -118,7 +119,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 node.textContent = value;
                 return node.innerHTML;
             },
-            isMobile: () => false,
+            isMobile: () => mobile,
             hintRef: (): unknown[] => [],
             hintSlash: (): unknown[] => [],
             hintTag: (): unknown[] => [],
@@ -253,9 +254,19 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         }}},
     } as unknown as typeof window.siyuan;
 
+    mobile = true;
     const documentHistoryEditor = create();
+    const documentBar = document.createElement("div");
+    documentBar.className = "protyle-breadcrumb";
+    const moreButton = document.createElement("button");
+    moreButton.dataset.type = "more";
+    documentBar.append(moreButton); document.body.append(documentBar);
+    moreButton.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+    await settle();
+    check.equal(documentHistoryEditor.state.finished, 0,
+        "opening More preserves the node editor until the document history save gate runs");
     const documentHistory = document.createElement("div");
-    documentHistory.className = "protyle-breadcrumb__history";
+    documentHistory.id = "commonMenu";
     const undoButton = document.createElement("button");
     documentHistory.append(undoButton); document.body.append(documentHistory);
     undoButton.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
@@ -264,7 +275,8 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         "document history controls preserve the node editor until the explicit save gate runs");
     check.equal(await documentHistoryEditor.editor.finish(), true);
     check.equal(documentHistoryEditor.state.finished, 1);
-    documentHistory.remove(); await documentHistoryEditor.remove();
+    documentBar.remove(); documentHistory.remove(); await documentHistoryEditor.remove();
+    mobile = false;
 
     // 普通段落与软键盘回车走同一节点拆分路径；保留富文本、后续块和原生编辑边界。
     const listParagraph = '<div data-type="NodeParagraph" data-node-id="paragraph"><div contenteditable="true"><span data-type="strong">AlphaBeta</span></div></div>';

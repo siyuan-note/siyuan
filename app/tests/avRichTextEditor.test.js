@@ -240,6 +240,42 @@ const runCases = async (sources) => {
     assert.equal(document.querySelector(".av__richtext-mask"), null);
 };
 
+const checkMobileSafeArea = (safeTop, width, height) => {
+    const assert = require("node:assert/strict");
+    assert.equal(innerWidth, width);
+    assert.equal(innerHeight, height);
+    document.body.innerHTML = `<div class="av__mask av__richtext-mask" style="z-index:11">
+        <div class="av__richtext-editor av__richtext-editor--mobile">
+            <div class="av__richtext-actions"><button class="b3-button b3-button--text">Confirm</button></div>
+            <div class="av__richtext-host"></div>
+        </div>
+    </div>`;
+    const panel = document.querySelector(".av__richtext-editor");
+    const confirm = panel.querySelector("button");
+    for (const [frontend, platform, expectedTop] of [
+        ["mobile", "android", 0],
+        ["mobile", "ios", safeTop],
+        ["mobile", "harmony", safeTop],
+        ["browser-mobile", "android", safeTop],
+    ]) {
+        document.documentElement.dataset.frontend = frontend;
+        document.body.className = "body--" + platform;
+        const rect = panel.getBoundingClientRect();
+        const label = `${frontend}/${platform}, safe area ${safeTop}px, viewport ${innerWidth}x${innerHeight}`;
+        assert.equal(rect.top, expectedTop, `${label}: respect the frontend's top safe area`);
+        assert.equal(rect.left, 0, label);
+        assert.equal(rect.right, innerWidth, label);
+        assert.equal(rect.bottom, innerHeight, label);
+        if (expectedTop === 0) {
+            assert.ok(panel.contains(document.elementFromPoint(innerWidth / 2, 1)),
+                `${label}: the editor must cover the underlying document at the top`);
+        }
+        const buttonRect = confirm.getBoundingClientRect();
+        assert.ok(confirm.contains(document.elementFromPoint(buttonRect.left + buttonRect.width / 2,
+            buttonRect.top + buttonRect.height / 2)), `${label}: confirmation must remain reachable`);
+    }
+};
+
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -263,7 +299,25 @@ const runElectron = async () => {
         await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"),
             {logger: {warn() {}}}).css);
         await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)})`);
-        console.log("AV rich text editor lifecycle cases passed");
+        win.webContents.debugger.attach("1.3");
+        for (const safeTop of [0, 24, 48]) {
+            await win.webContents.debugger.sendCommand("Emulation.setSafeAreaInsetsOverride", {
+                insets: {top: safeTop, right: 0, bottom: 0, left: 0},
+            });
+            // 覆盖键盘展开、收起和横屏时的可见窗口尺寸。
+            for (const [width, height] of [[390, 800], [390, 400], [800, 390]]) {
+                await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
+                    width, height, deviceScaleFactor: 1, mobile: false,
+                });
+                const result = await win.webContents.executeJavaScript(`try {
+                    (${checkMobileSafeArea.toString()})(${safeTop}, ${width}, ${height});
+                    "safe-area-layout-ok";
+                } catch (error) { String(error.stack); }`);
+                assert.equal(result, "safe-area-layout-ok");
+            }
+        }
+        win.webContents.debugger.detach();
+        console.log("AV rich text editor lifecycle and safe-area cases passed");
     } catch (error) {
         console.error(error);
         exitCode = 1;
@@ -279,7 +333,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("keeps rich text input and saving attached to the visible database row owner", {
+    require("node:test").it("preserves database text editor lifecycle and mobile safe-area coverage", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {
@@ -289,7 +343,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /AV rich text editor lifecycle cases passed/);
+            assert.match(stdout, /AV rich text editor lifecycle and safe-area cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-av-rich-editor-"));

@@ -19,7 +19,9 @@ test("frontend scripts and dependencies no longer build or include the map SDK",
 });
 
 test("desktop packages filter the OCR runtime out of the shipped stage folder", () => {
-    const configs = fs.readdirSync(app).filter(name => /^electron-builder(?:-[\w-]+)?\.yml$/.test(name));
+    // The inherited association fragment is not a distributable package target.
+    const configs = fs.readdirSync(app).filter(name => /^electron-builder(?:-[\w-]+)?\.yml$/.test(name) &&
+        name !== "electron-builder-common.yml");
     assert.equal(configs.length, 6);
     for (const name of configs) {
         const stage = read(name).match(/from: "stage"\s+to: "stage"\s+filter: (\[[^\n]+\])/);

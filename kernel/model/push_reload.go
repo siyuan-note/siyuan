@@ -256,19 +256,22 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	docInfo := map[string]any{
-		"box":      tree.Box,
-		"rootID":   tree.ID,
-		"name":     treenode.ReadDocumentTitle(tree.Root).Text,
-		"alias":    tree.Root.IALAttr("alias"),
-		"name1":    tree.Root.IALAttr("name"),
-		"memo":     tree.Root.IALAttr("memo"),
-		"bookmark": tree.Root.IALAttr("bookmark"),
-		"size":     size,
-		"hSize":    humanize.BytesCustomCeil(size, 2),
-		"mtime":    mTime.Unix(),
-		"ctime":    cTime.Unix(),
-		"hMtime":   mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
-		"hCtime":   cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+		"titleFormat":   treenode.ReadDocumentTitle(tree.Root).Format,
+		"titleRevision": treenode.DocumentTitleRevision(tree.Root),
+		"titleEmpty":    treenode.ReadDocumentTitle(tree.Root).Empty,
+		"box":           tree.Box,
+		"rootID":        tree.ID,
+		"name":          treenode.ReadDocumentTitle(tree.Root).Text,
+		"alias":         tree.Root.IALAttr("alias"),
+		"name1":         tree.Root.IALAttr("name"),
+		"memo":          tree.Root.IALAttr("memo"),
+		"bookmark":      tree.Root.IALAttr("bookmark"),
+		"size":          size,
+		"hSize":         humanize.BytesCustomCeil(size, 2),
+		"mtime":         mTime.Unix(),
+		"ctime":         cTime.Unix(),
+		"hMtime":        mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hCtime":        cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
 	}
 
 	boxID, rootID, treePath := tree.Box, tree.ID, tree.Path

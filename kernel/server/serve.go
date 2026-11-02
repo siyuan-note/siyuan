@@ -19,11 +19,11 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/emersion/go-webdav/caldav"
-	"github.com/emersion/go-webdav/carddav"
+	"github.com/88250/lute/ast"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -55,6 +55,8 @@ const (
 	MethodPropFind  = "PROPFIND"
 	MethodPropPatch = "PROPPATCH"
 	MethodReport    = "REPORT"
+
+	MethodMkCalendar = "MKCALENDAR"
 )
 
 var (
@@ -96,6 +98,7 @@ var (
 		http.MethodDelete,
 
 		MethodMkCol,
+		MethodMkCalendar,
 		MethodCopy,
 		MethodMove,
 		// MethodLock,
@@ -148,19 +151,16 @@ func Serve(fastMode bool, cookieKey string) {
 		gzipMiddleware(),
 	)
 
-	sessionStore = cookie.NewStore([]byte(cookieKey))
-	sessionStore.Options(sessions.Options{
-		Path: "/",
-		// Secure 属性逐请求按连接修正，见 tlsEnforceMiddleware
-		Secure:   util.SSL,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
-	})
+	store, err := newSessionStore(cookieKey)
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeSecurityRisk, "create session store failed: %s", err)
+	}
+	sessionStore = store
 	// TLS 强制中间件必须在会话中间件之前：跳转要发生在会话保存之前，
 	// 否则明文响应仍会携带未标记 Secure 的会话 Cookie
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
 	ginServer.Use(tlsEnforceMiddleware())
-	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
+	ginServer.Use(sessions.Sessions(util.SessionCookieName, sessionStore))
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)
@@ -319,6 +319,23 @@ func Serve(fastMode bool, cookieKey string) {
 			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
+}
+
+// newSessionStore 创建签名并加密的会话 Cookie 存储，载荷中的工作空间路径和认证状态不以明文留在客户端。
+func newSessionStore(cookieKey string) (cookie.Store, error) {
+	hashKey, blockKey, err := util.SessionCookieKeys(cookieKey)
+	if err != nil {
+		return nil, err
+	}
+	store := cookie.NewStore(hashKey, blockKey)
+	store.Options(sessions.Options{
+		Path: "/",
+		// Secure 属性逐请求按连接修正，见 tlsEnforceMiddleware
+		Secure:   util.SSL,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
+	})
+	return store, nil
 }
 
 func gzipMiddleware() gin.HandlerFunc {
@@ -934,13 +951,6 @@ func serveAuthPage(c *gin.Context) {
 		"workspace":              util.WorkspaceName,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
-		// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
-		// 原生客户端（桌面 Electron，授权页 siyuan-init IPC 仅在 Electron 内执行）照常返回真实路径
-		// REF: https://github.com/siyuan-note/siyuan/issues/17410
-		"workspaceDir": util.WorkspaceDir,
-	}
-	if util.IsBrowserRequest(c) {
-		model["workspaceDir"] = ""
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {
@@ -1894,7 +1904,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 		authOk := !model.IsAccessAuthRequired() && (util.SiYuanAccessAuthCodeBypass || isLocalWebSocketRequest(s.Request))
 
 		if model.IsAccessAuthRequired() {
-			session, err := sessionStore.Get(s.Request, "siyuan")
+			session, err := sessionStore.Get(s.Request, util.SessionCookieName)
 			if err != nil {
 				authOk = false
 				logging.LogErrorf("get cookie failed: %s", err)
@@ -2062,10 +2072,71 @@ type encryptedBoxAwareWebdavFS struct {
 	inner webdav.FileSystem
 }
 
-func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
-	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀
-	rel := filepath.ToSlash(path.Clean(name))
-	rel = strings.TrimPrefix(rel, "/")
+type webdavGuardCacheKey struct{}
+
+// webdavGuardCache 保存一个 WebDAV 请求内守卫比较用的目录身份。PROPFIND 对每个成员要检查数次，
+// 每次都重新读取 data/ 会让大目录的列举慢一倍以上；请求进行中笔记本加密状态的变化由之后的请求生效。
+type webdavGuardCache struct {
+	dirsOnce              sync.Once
+	workspace, temp, data os.FileInfo
+	encryptedBoxesOnce    sync.Once
+	encryptedBoxes        []os.FileInfo
+}
+
+// withWebDAVGuardCache 为每个请求创建独立的守卫缓存；x/net/webdav 以请求上下文调用文件系统。
+func withWebDAVGuardCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), webdavGuardCacheKey{}, &webdavGuardCache{})))
+	})
+}
+
+func webdavGuardCacheFrom(ctx context.Context) *webdavGuardCache {
+	if cache, ok := ctx.Value(webdavGuardCacheKey{}).(*webdavGuardCache); ok {
+		return cache
+	}
+	return &webdavGuardCache{}
+}
+
+func (c *webdavGuardCache) dirs() (workspace, temp, data os.FileInfo) {
+	c.dirsOnce.Do(func() {
+		c.workspace, _ = os.Stat(util.WorkspaceDir)
+		c.temp, _ = os.Stat(filepath.Join(util.WorkspaceDir, "temp"))
+		c.data, _ = os.Stat(util.DataDir)
+	})
+	return c.workspace, c.temp, c.data
+}
+
+// isEncryptedBoxDir 判断 data/ 下的目录是否为加密笔记本；dir 的拼写可能不是笔记本 ID 的规范形式。
+func (c *webdavGuardCache) isEncryptedBoxDir(dir string, info os.FileInfo) bool {
+	if name := filepath.Base(dir); ast.IsNodeIDPattern(name) {
+		return model.IsEncryptedBox(name)
+	}
+	c.encryptedBoxesOnce.Do(func() {
+		entries, err := os.ReadDir(util.DataDir)
+		if err != nil {
+			return
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) || !model.IsEncryptedBox(entry.Name()) {
+				continue
+			}
+			if entryInfo, statErr := os.Stat(filepath.Join(util.DataDir, entry.Name())); statErr == nil {
+				c.encryptedBoxes = append(c.encryptedBoxes, entryInfo)
+			}
+		}
+	})
+	for _, boxInfo := range c.encryptedBoxes {
+		if os.SameFile(boxInfo, info) {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(ctx context.Context, name string) bool {
+	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀；与 webdav.Dir 一样以根路径清理，
+	// 否则 "../temp" 会被当作工作空间外的路径，而 webdav.Dir 实际把它解析为工作空间内的 temp/
+	rel := strings.TrimPrefix(path.Clean("/"+filepath.ToSlash(name)), "/")
 	parts := strings.Split(rel, "/")
 	if len(parts) < 1 || parts[0] == "" || rel == "" || rel == "." {
 		return false
@@ -2078,73 +2149,82 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	if len(parts) >= 2 && parts[0] == "data" && model.IsEncryptedBox(parts[1]) {
 		return true
 	}
-	// 防止 symlink 绕过：解析最长已存在父路径的符号链接后再次检查
-	absPath := filepath.Join(util.WorkspaceDir, name)
-	if resolved := util.ResolveLongestExistingParent(absPath); resolved != absPath {
-		resolvedRel, _ := filepath.Rel(util.WorkspaceDir, resolved)
-		resolvedRel = filepath.ToSlash(resolvedRel)
-		resolvedParts := strings.Split(resolvedRel, "/")
-		if len(resolvedParts) >= 1 && resolvedParts[0] == "temp" {
-			return true
+
+	// 大小写不敏感的文件系统、Windows 8.3 短名和符号链接都能用不同拼写指向同一目录，
+	// 因此沿真实路径逐级向上按文件身份比较，而不是比较路径字符串；工作空间之上不会再有 temp/ 或笔记本目录
+	cache := webdavGuardCacheFrom(ctx)
+	workspaceInfo, tempInfo, dataInfo := cache.dirs()
+	p := util.ResolveLongestExistingParent(filepath.Join(util.WorkspaceDir, filepath.FromSlash(rel)))
+	var child string
+	var childInfo os.FileInfo
+	for {
+		if info, err := os.Stat(p); err == nil {
+			if nil != tempInfo && os.SameFile(info, tempInfo) {
+				return true
+			}
+			if nil != dataInfo && nil != childInfo && os.SameFile(info, dataInfo) && cache.isEncryptedBoxDir(child, childInfo) {
+				return true
+			}
+			if nil != workspaceInfo && os.SameFile(info, workspaceInfo) {
+				return false
+			}
+			child, childInfo = p, info
 		}
-		if len(resolvedParts) >= 2 && resolvedParts[0] == "data" && model.IsEncryptedBox(resolvedParts[1]) {
-			return true
+		parent := filepath.Dir(p)
+		if parent == p {
+			return false
 		}
+		p = parent
 	}
-	return false
+}
+
+// isDataDir 判断目标是否为 data/ 本身；整体删除或移走 data/ 会连同加密笔记本一起删除或移走。
+func (fs *encryptedBoxAwareWebdavFS) isDataDir(ctx context.Context, name string) bool {
+	_, _, dataInfo := webdavGuardCacheFrom(ctx).dirs()
+	if nil == dataInfo {
+		return false
+	}
+	info, err := os.Stat(filepath.Join(util.WorkspaceDir, filepath.FromSlash(path.Clean("/"+name))))
+	return err == nil && os.SameFile(info, dataInfo)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return os.ErrPermission
 	}
 	return fs.inner.Mkdir(ctx, name, perm)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) OpenFile(ctx context.Context, name string, flag int, perm os.FileMode) (webdav.File, error) {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return nil, os.ErrPermission
 	}
 	return fs.inner.OpenFile(ctx, name, flag, perm)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) RemoveAll(ctx context.Context, name string) error {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) || fs.isDataDir(ctx, name) {
 		return os.ErrPermission
 	}
 	return fs.inner.RemoveAll(ctx, name)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Rename(ctx context.Context, oldName, newName string) error {
-	if fs.isEncryptedBoxPath(oldName) || fs.isEncryptedBoxPath(newName) {
+	if fs.isEncryptedBoxPath(ctx, oldName) || fs.isEncryptedBoxPath(ctx, newName) || fs.isDataDir(ctx, oldName) || fs.isDataDir(ctx, newName) {
 		return os.ErrPermission
 	}
 	return fs.inner.Rename(ctx, oldName, newName)
 }
 
 func (fs *encryptedBoxAwareWebdavFS) Stat(ctx context.Context, name string) (os.FileInfo, error) {
-	if fs.isEncryptedBoxPath(name) {
+	if fs.isEncryptedBoxPath(ctx, name) {
 		return nil, os.ErrPermission
 	}
 	return fs.inner.Stat(ctx, name)
 }
 
 func serveWebDAV(ginServer *gin.Engine) {
-	// 自定义 WebDAV 文件系统包装——拒绝加密笔记本的所有访问
-	// 加密笔记本的读写必须通过 assets/serve 路由的 box-aware + 解密流程，
-	// WebDAV 直接访问原始文件系统会绕过所有这些安全控制
-	encBoxAwareFS := &encryptedBoxAwareWebdavFS{inner: webdav.Dir(util.WorkspaceDir)}
-	handler := webdav.Handler{
-		Prefix:     "/webdav/",
-		FileSystem: encBoxAwareFS,
-		LockSystem: webdav.NewMemLS(),
-		Logger: func(r *http.Request, err error) {
-			if nil != err {
-				logging.LogErrorf("WebDAV [%s %s]: %s", r.Method, r.URL.String(), err.Error())
-			}
-			// logging.LogDebugf("WebDAV [%s %s]", r.Method, r.URL.String())
-		},
-	}
+	handler := newWebDAVHandler()
 
 	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
 	// ginGroup.Any NOT support extension methods (PROPFIND etc.)
@@ -2169,11 +2249,7 @@ func serveWebDAV(ginServer *gin.Engine) {
 }
 
 func serveCalDAV(ginServer *gin.Engine) {
-	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
-	handler := caldav.Handler{
-		Backend: &model.CalDavBackend{},
-		Prefix:  model.CalDavPrincipalsPath,
-	}
+	handler := model.NewCalDAVHandler()
 
 	ginServer.Match(CalDavMethods, "/.well-known/caldav", func(c *gin.Context) {
 		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
@@ -2189,6 +2265,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 				http.MethodPut,
 				http.MethodDelete,
 				MethodMkCol,
+				MethodMkCalendar,
 				MethodCopy,
 				MethodMove,
 				MethodLock,
@@ -2204,11 +2281,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 }
 
 func serveCardDAV(ginServer *gin.Engine) {
-	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
-	handler := carddav.Handler{
-		Backend: &model.CardDavBackend{},
-		Prefix:  model.CardDavPrincipalsPath,
-	}
+	handler := model.NewCardDAVHandler()
 
 	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
 		// logging.LogDebugf("CardDAV [/.well-known/carddav]")
@@ -2232,7 +2305,6 @@ func serveCardDAV(ginServer *gin.Engine) {
 				return
 			}
 		}
-		// TODO: Can't handle Thunderbird's PROPFIND request with prop <current-user-privilege-set/>
 		handler.ServeHTTP(c.Writer, c.Request)
 		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})

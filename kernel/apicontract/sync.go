@@ -113,9 +113,26 @@ type SyncLANRequest struct {
 	Enabled           bool    `json:"enabled"`
 	MaxConcurrentReqs float64 `json:"maxConcurrentReqs" api:"optional,nullable"`
 }
+type SyncSourceState struct {
+	Pending        bool   `json:"pending"`
+	Source         string `json:"source"`
+	LocalID        string `json:"localID"`
+	CloudID        string `json:"cloudID"`
+	LocalFiles     int    `json:"localFiles"`
+	CloudFiles     int    `json:"cloudFiles"`
+	CloudCreated   int64  `json:"cloudCreated"`
+	CloudDevice    string `json:"cloudDevice"`
+	UploadFiles    int    `json:"uploadFiles"`
+	OverwriteFiles int    `json:"overwriteFiles"`
+	RemoveFiles    int    `json:"removeFiles"`
+}
+
 type PerformSyncRequest struct {
-	MobileSwitch bool `json:"mobileSwitch" api:"optional,nullable"`
-	Upload       bool `json:"upload" api:"optional"`
+	MobileSwitch bool   `json:"mobileSwitch" api:"optional,nullable"`
+	Upload       bool   `json:"upload" api:"optional"`
+	Source       string `json:"source" api:"optional"`
+	LocalID      string `json:"localID" api:"optional"`
+	CloudID      string `json:"cloudID" api:"optional"`
 	uploadFields map[string]json.RawMessage
 }
 
@@ -313,6 +330,15 @@ func init() {
 		r.uploadFields, err = syncRequestFields(reader, PerformSync.definition.Path)
 		if err == nil {
 			r.MobileSwitch, err = legacyField[bool](r.uploadFields, "mobileSwitch", "Boolean", false)
+		}
+		if err == nil {
+			r.Source, err = legacyField[string](r.uploadFields, "source", "String", false)
+		}
+		if err == nil && r.Source != "" {
+			r.LocalID, err = legacyField[string](r.uploadFields, "localID", "String", true)
+		}
+		if err == nil && r.Source != "" {
+			r.CloudID, err = legacyField[string](r.uploadFields, "cloudID", "String", true)
 		}
 		return r, err
 	}

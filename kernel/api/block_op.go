@@ -191,7 +191,11 @@ var appendDailyNoteBlock = contractHandler(apicontract.AppendDailyNoteBlock, fun
 		}
 	}
 
-	p, _, err := model.CreateDailyNote(boxID)
+	selection, err := documentSelectionModel(request.Selection)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.BlockTransaction](-1, err.Error())
+	}
+	p, _, err := model.CreateDailyNoteWithSelection(boxID, nil, nil, selection)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.BlockTransaction](-1, "create daily note failed: "+err.Error())
 	}
@@ -232,7 +236,11 @@ var prependDailyNoteBlock = contractHandler(apicontract.PrependDailyNoteBlock, f
 		}
 	}
 
-	p, _, err := model.CreateDailyNote(boxID)
+	selection, err := documentSelectionModel(request.Selection)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.BlockTransaction](-1, err.Error())
+	}
+	p, _, err := model.CreateDailyNoteWithSelection(boxID, nil, nil, selection)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.BlockTransaction](-1, "create daily note failed: "+err.Error())
 	}

@@ -6,6 +6,51 @@ import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} fro
 import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
 import type {DocTreeController} from "../../layout/dock/docTree/DocTreeController";
 import type {IMenuSession} from "../../menus/menuToggle";
+import {DocTreeModel} from "../../layout/dock/docTree/DocTreeModel";
+
+test("mobile notebook clicks load the directory before creating and can fold nonempty notebooks", async () => {
+    for (const scenario of [
+        {total: 2, revision: "one", readonly: false, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: false, canceled: false, expected: 1},
+        {total: 0, revision: undefined, readonly: false, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: true, canceled: false, expected: 0},
+        {total: 0, revision: "one", readonly: false, canceled: true, expected: 0},
+    ]) {
+        let created = 0;
+        let expanded = false;
+        let interaction = 0;
+        let release: () => void;
+        const ready = new Promise<void>(resolve => { release = resolve; });
+        const adapter = loadMethods(["getLeaf"], {window: {siyuan: {config: {readonly: scenario.readonly}}},
+            newFileInTree: () => { created++; }}) as {
+            docTree: Partial<DocTreeController>;
+            getLeaf: (row: Element, notebook: string) => Promise<void>;
+        };
+        const model = new DocTreeModel();
+        model.setRoots([{id: "box", notebookId: "box", kind: "notebook", path: "/", name: "Box", subFileCount: 0}]);
+        const directory = model.directory(model.roots[0]);
+        directory.total = scenario.total;
+        directory.revision = scenario.revision;
+        adapter.docTree = {
+            get interactionVersion() { return interaction; },
+            getItemFromElement: () => model.roots[0],
+            toggle: async () => { interaction++; await ready; expanded = !expanded; },
+            isExpanded: () => expanded,
+            model,
+        };
+        const opening = adapter.getLeaf({} as Element, "box");
+        assert.equal(created, 0, "missing summary counts must not create documents before loading");
+        if (scenario.canceled) { interaction++; }
+        release();
+        await opening;
+        assert.equal(created, scenario.expected, JSON.stringify(scenario));
+        if (scenario.total > 0) {
+            await adapter.getLeaf({} as Element, "box");
+            assert.equal(expanded, false);
+            assert.equal(created, 0);
+        }
+    }
+});
 
 const loadMethods = (names: string[], globals: Record<string, unknown>) => {
     const source = createSourceFile("MobileFiles.ts", readFileSync("src/mobile/dock/MobileFiles.ts", "utf8"), ScriptTarget.Latest, true);
@@ -17,6 +62,52 @@ const loadMethods = (names: string[], globals: Record<string, unknown>) => {
     }).outputText, {...globals, exports});
     return new exports.Adapter();
 };
+
+test("mobile document drops use source notifications without an extra full-tree refresh", async () => {
+    const text = readFileSync("src/mobile/dock/MobileFiles.ts", "utf8");
+    const start = text.indexOf('filesElement.addEventListener("touchend", async (event: TouchEvent) => {');
+    const body = start + text.slice(start).indexOf("{") + 1;
+    const end = text.indexOf("\n        });", body);
+    assert.ok(start >= 0 && end > body);
+    for (const inside of [true, false]) {
+        const calls: string[] = [];
+        const row = {classList: {contains: (name: string) => name === (inside ? "dragover" : "dragover__bottom")}};
+        const panel = {
+            touchDragState: {isDragging: true, selectedElement: {style: {opacity: "0.5"}}, pointerX: 1, pointerY: 1},
+            element: {querySelector: () => row},
+            pinnedDocs: {element: {contains: () => false}},
+            docTree: {
+                release() {},
+                getItemFromElement: () => ({id: "target", kind: "document", notebookId: "box", path: "/target.sy"}),
+                reload: async () => { assert.fail("The move or sort notification already refreshes the affected directories"); },
+            },
+            getTouchDragSource: () => ({id: "source", kind: "document", notebookId: "box", path: "/source.sy"}),
+            clearDragIndicators() {},
+        };
+        const compiled = transpileModule(`(async function(event) {${text.slice(body, end)}}).call(panel, {changedTouches: []});`, {
+            compilerOptions: {target: ScriptTarget.ES2022},
+        }).outputText;
+        await runInNewContext(compiled, {panel, document: {elementFromPoint: () => row},
+            stopScrollAnimation() {}, isMoveTargetAllowed: () => true,
+            fetchSyncPost: async () => { calls.push("move"); },
+            reorderSortedFileTree: async () => { calls.push("reorder"); },
+        });
+        assert.deepEqual(calls, [inside ? "move" : "reorder"]);
+    }
+});
+
+test("mobile row selection precedes expansion so it cannot cancel empty-notebook creation", () => {
+    const calls: string[] = [];
+    const adapter = loadMethods(["toggleTreeItem"], {
+        window: {siyuan: {menus: {menu: {remove() {}}}}},
+    }) as {docTree: Partial<DocTreeController>; setCurrent: () => void; getLeaf: () => void;
+        toggleTreeItem: (row: HTMLElement) => void};
+    adapter.docTree = {getItemFromElement: () => ({notebookId: "box"}) as ReturnType<DocTreeController["getItemFromElement"]>};
+    adapter.setCurrent = () => calls.push("select");
+    adapter.getLeaf = () => calls.push("expand");
+    adapter.toggleTreeItem({} as HTMLElement);
+    assert.deepEqual(calls, ["select", "expand"]);
+});
 
 test("mobile opened-file tracking keeps an offscreen selection without querying a row", async () => {
     const adapter = loadMethods(["selectOpenedFile"], {}) as {

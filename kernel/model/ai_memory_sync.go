@@ -15,11 +15,11 @@ import (
 	"strings"
 
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/siyuan/kernel/memo"
+	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const memorySyncPrefix = "/storage/ai/memos/"
+const memorySyncPrefix = memory.SyncPrefix
 
 // memorySyncRead 逐级拒绝链接，所有访问固定在工作空间中；不接受模型提供的文件路径。
 func memorySyncRead(dataDir, name string) ([]byte, error) {
@@ -31,18 +31,18 @@ func memorySyncRead(dataDir, name string) ([]byte, error) {
 	parts := strings.Split(strings.TrimPrefix(name, "/"), "/")
 	for i, part := range parts {
 		if part == "" || part == "." || part == ".." || strings.Contains(part, "\\") {
-			return nil, memo.ErrInvalid
+			return nil, memory.ErrInvalid
 		}
 		info, err := root.Lstat(part)
 		if err != nil {
 			return nil, err
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return nil, memo.ErrInvalid
+			return nil, memory.ErrInvalid
 		}
 		if i == len(parts)-1 {
 			if !info.Mode().IsRegular() {
-				return nil, memo.ErrInvalid
+				return nil, memory.ErrInvalid
 			}
 			file, err := root.Open(part)
 			if err != nil {
@@ -51,12 +51,12 @@ func memorySyncRead(dataDir, name string) ([]byte, error) {
 			defer file.Close()
 			data, err := io.ReadAll(io.LimitReader(file, 2*1024*1024+1))
 			if len(data) > 2*1024*1024 {
-				return nil, memo.ErrInvalid
+				return nil, memory.ErrInvalid
 			}
 			return data, err
 		}
 		if !info.IsDir() {
-			return nil, memo.ErrInvalid
+			return nil, memory.ErrInvalid
 		}
 		next, err := root.OpenRoot(part)
 		if err != nil {
@@ -65,19 +65,23 @@ func memorySyncRead(dataDir, name string) ([]byte, error) {
 		root.Close()
 		root = next
 	}
-	return nil, memo.ErrInvalid
+	return nil, memory.ErrInvalid
 }
 
 // memoryCheckoutPreflight 保留撤回和冲突证据，并在覆盖前隔离非因果更新。
 // 计划是仓库提供的不可变副本；新保存的保护文件不在本次替换/删除集合中。
 func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
-	store := memo.NewStore(dataDir)
+	store := memory.NewStore(dataDir)
 	ctx := context.Background()
 	for _, file := range plan.Upserts {
 		if !strings.HasPrefix(file.Path, memorySyncPrefix) {
 			continue
 		}
-		if file.Size > memo.MaxFileSize {
+		// Old operation ledgers are obsolete ordinary sync files, not safety metadata.
+		if strings.HasPrefix(strings.TrimPrefix(file.Path, memorySyncPrefix), "operations/") {
+			continue
+		}
+		if file.Size > memory.MaxFileSize {
 			return errors.New("memory checkout file exceeds size limit")
 		}
 		incoming, err := plan.ReadFile(file.Path)
@@ -90,12 +94,17 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 		}
 		relative := strings.TrimPrefix(file.Path, memorySyncPrefix)
 		parts := strings.Split(relative, "/")
-		if (strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/")) && readErr == nil && !bytes.Equal(current, incoming) {
+		if (relative == "USER.md" || relative == "MEMORY.md") && readErr == nil && !bytes.Equal(current, incoming) {
+			if err = store.PreserveProjection(ctx, relative, current); err != nil {
+				return err
+			}
+		}
+		if (strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "legacy-projections/")) && readErr == nil && !bytes.Equal(current, incoming) {
 			return errors.New("memory safety metadata would be replaced by checkout")
 		}
 		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
 			id := strings.TrimSuffix(parts[1], ".md")
-			if err = memo.ValidateWithdrawal(incoming, id); err != nil {
+			if err = memory.ValidateWithdrawal(incoming, id); err != nil {
 				return fmt.Errorf("invalid memory withdrawal: %w", err)
 			}
 			// 先应用远端撤回意图，再允许同批旧记录落盘，避免读取窗口短暂复活。
@@ -112,7 +121,7 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 		}
 		if len(parts) == 2 && parts[0] == "records" && strings.HasSuffix(parts[1], ".md") {
 			id := strings.TrimSuffix(parts[1], ".md")
-			next, parseErr := memo.DecodeRecord(incoming, id)
+			next, parseErr := memory.DecodeRecord(incoming, id)
 			if parseErr != nil {
 				versions := [][]byte{incoming}
 				if readErr == nil {
@@ -124,7 +133,7 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 				continue
 			}
 			if readErr == nil && !bytes.Equal(current, incoming) {
-				previous, previousErr := memo.DecodeRecord(current, id)
+				previous, previousErr := memory.DecodeRecord(current, id)
 				if previousErr != nil || !memoryOperationsExtend(previous.Record.Operations, next.Record.Operations) {
 					if err = store.Quarantine(ctx, id, [][]byte{current, incoming}); err != nil {
 						return err
@@ -139,6 +148,17 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 			continue
 		}
 		parts := strings.Split(relative, "/")
+		if relative == "USER.md" || relative == "MEMORY.md" {
+			current, readErr := memorySyncRead(dataDir, file.Path)
+			if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
+				return readErr
+			}
+			if readErr == nil {
+				if err := store.PreserveProjection(ctx, relative, current); err != nil {
+					return err
+				}
+			}
+		}
 		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
 			current, err := memorySyncRead(dataDir, file.Path)
 			if errors.Is(err, os.ErrNotExist) {
@@ -152,7 +172,7 @@ func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
 			}
 		}
 		// 未解决冲突不能通过删除证据自动恢复为事实，保留证据并报告恢复被阻止。
-		if strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "operations/") {
+		if strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "legacy-projections/") {
 			if _, err := memorySyncRead(dataDir, file.Path); errors.Is(err, os.ErrNotExist) {
 				continue
 			} else if err != nil {

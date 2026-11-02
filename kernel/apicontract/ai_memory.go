@@ -75,10 +75,29 @@ type AIMemoryForgetData struct {
 	// CleanupPending 表示原记录尚未物理删除，可用相同请求重试；不代表撤回失效。
 	CleanupPending bool `json:"cleanupPending"`
 }
+
+type AIMemoryClearData struct {
+	Disabled bool `json:"disabled"`
+	Cleared  bool `json:"cleared"`
+}
 type AIMemoryOverviewData struct {
+	// User 保留兼容字段；统一概览通过 Memory 返回。
 	User   string `json:"user"`
 	Memory string `json:"memory"`
 	Stale  bool   `json:"stale"`
+	// Count 仅包含来源有效且当前可用的正式记忆；不完整时不能作为精确总数展示。
+	Count         int  `json:"count"`
+	CountComplete bool `json:"countComplete"`
+}
+type AIMemoryTranslateRequest struct {
+	// Memory 必须与当前有效概览逐字相同，不接受任意待翻译文本。
+	Memory string `json:"memory"`
+	// Language 必须是当前界面语言；仅为显示翻译，不回写记忆。
+	Language string `json:"language"`
+}
+type AIMemoryTranslateData struct {
+	Memory   string `json:"memory"`
+	Language string `json:"language"`
 }
 type AIMemoryMaintainRequest struct {
 	Text        string   `json:"text"`
@@ -92,16 +111,18 @@ type AIMemoryTaskStarted struct {
 	TaskID string `json:"taskId"`
 }
 type AIMemoryTaskResult struct {
-	ID    string `json:"id"`
+	ID string `json:"id"`
+	// Saved 表示该条新增或更新已持久化；候选记录仍需确认，不能据此推断已启用。
 	Saved bool   `json:"saved"`
 	Error string `json:"error"`
 }
 type AIMemoryTaskData struct {
-	TaskID          string               `json:"taskId"`
-	State           string               `json:"state"`
-	Results         []AIMemoryTaskResult `json:"results"`
-	Error           string               `json:"error"`
-	OverviewPending bool                 `json:"overviewPending"`
+	TaskID  string               `json:"taskId"`
+	State   string               `json:"state"`
+	Results []AIMemoryTaskResult `json:"results"`
+	Error   string               `json:"error"`
+	// OverviewPending 表示本任务已有已持久化结果且概览待刷新，不表示所有提案成功。
+	OverviewPending bool `json:"overviewPending"`
 }
 type AIMemoryCapabilitiesData struct {
 	Efforts []string `json:"efforts"`

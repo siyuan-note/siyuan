@@ -21,6 +21,10 @@
     flex-shrink: 0;
   }
 
+  .b3-loading {
+    color: var(--b3-loading-color, inherit);
+  }
+
   &:hover,
   &:focus,
   &--progress {
@@ -202,5 +206,10 @@
   &:disabled {
     opacity: .38;
     cursor: not-allowed;
+
+    &[aria-busy="true"] {
+      opacity: 1;
+      cursor: progress;
+    }
   }
 }

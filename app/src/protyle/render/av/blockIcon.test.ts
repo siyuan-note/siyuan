@@ -96,6 +96,19 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
 };
 
 describe("database item icons", () => {
+    it("uses the view bind icon for detached fields and omits panel rebinding", () => {
+        for (const detached of [true, false]) {
+            const h = createHarness("table", detached);
+            const icon = detached ? "iconRef" : "iconRefresh";
+            const field = h.attributes.genAVValueHTML(h.cell.value);
+            assert.equal(field.includes('data-type="av-bind-document"'), detached);
+            if (detached) {
+                assert.ok(field.includes(`href="#${icon}"`));
+            }
+            assert.ok(h.api.renderCell(h.cell.value, 0, true).includes(`href="#${icon}"`));
+        }
+    });
+
     it("renders detached defaults and custom icons in every layout and honors hidden icons", () => {
         const h = createHarness();
         for (const layout of ["table", "list", "gallery", "kanban", "calendar"] as TAVView[]) {
@@ -139,10 +152,11 @@ describe("database item icons", () => {
                 }
                 for (const showIcon of [false, true]) {
                     const html = h.api.renderCell(h.cell.value, 0, showIcon);
-                    assert.match(html, /^<span class="av__cellprimary"><span class="b3-menu__avemoji/);
+                    assert.match(html, /^<span class="av__primary-container"><span class="av__cellprimary"><span class="b3-menu__avemoji/);
                     assert.match(html, /<\/span><span class="av__row-actions">/);
                     assert.equal((html.match(/data-type="av-row-open"/g) || []).length, 1);
                     assert.equal((html.match(/data-type="av-row-update"/g) || []).length, 1);
+                    assert.equal((html.match(/data-type="av-row-more"/g) || []).length, 1);
                     if (template) {
                         const value = html.match(/data-cell-value="([^"]+)"/)[1];
                         assert.equal(JSON.parse(decodeURIComponent(value)).block.content, "Title");

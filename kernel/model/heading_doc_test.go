@@ -67,6 +67,10 @@ func TestHeadingDocTitle(t *testing.T) {
 				t.Fatal("child heading level changed")
 			}
 			root := &ast.Node{Type: ast.NodeDocument, ID: heading.ID}
+			expected, err := render.NewDocumentTitle(paragraph)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if err := treenode.SetDocumentTitleParagraph(root, paragraph); err != nil {
 				t.Fatal(err)
 			}
@@ -75,7 +79,7 @@ func TestHeadingDocTitle(t *testing.T) {
 				t.Fatal(err)
 			}
 			source, err := render.NewDocumentTitle(restored)
-			if err != nil || source.Content != root.DocumentTitle.Content {
+			if err != nil || source.Content != expected.Content {
 				t.Fatalf("title source did not round-trip: %v", err)
 			}
 			if root.FirstChild != nil {

@@ -6,6 +6,9 @@
 
 package model
 
+import "errors"
+
 // flushDNS 非 Windows 平台暂不支持刷新系统 DNS 缓存。
-func flushDNS() {
+func flushDNS() error {
+	return errors.ErrUnsupported
 }

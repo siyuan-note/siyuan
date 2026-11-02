@@ -4,8 +4,25 @@ import {withFetchTimeout} from "../util/fetchTimeout";
 import {escapeHtml} from "../util/escape";
 import {progressLoading} from "./progress";
 import {confirmDialog} from "./confirmDialog";
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 
 let pendingExit: Promise<void>;
+
+export const updateExitProgressStatus = (message: string) => {
+    const progress = document.getElementById("exitProgress");
+    if (!progress) {
+        return;
+    }
+    let status = progress.querySelector('[data-type="status-message"]');
+    if (!status) {
+        status = document.createElement("div");
+        status.className = "ft__breakword ft__smaller";
+        status.setAttribute("data-type", "status-message");
+        status.setAttribute("role", "status");
+        progress.querySelector('[data-type="message"]').after(status);
+    }
+    status.innerHTML = sanitizeKernelHTML(message);
+};
 
 // 保留退出结果的接收窗口，慢同步不会直接关闭宿主。
 export const requestSystemExit = (options: {

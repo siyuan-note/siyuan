@@ -51,6 +51,9 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 	if _, _, err = GetAttributeViewViewTarget(foreignAvID, carrierBlockID, fixture.tableView.ID); !errors.Is(err, av.ErrViewNotFound) {
 		t.Fatalf("view configuration should preserve the carrier crypto boundary: %v", err)
 	}
+	if err = MoveAttributeViewViewField(foreignAvID, carrierBlockID, fixture.tableView.ID, "field", ""); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("field movement should preserve the carrier crypto boundary: %v", err)
+	}
 	if _, err = AddAttributeViewView(foreignAvID, carrierBlockID, "Wrong box", av.LayoutTypeTable); !errors.Is(err, av.ErrViewNotFound) {
 		t.Fatalf("view creation should preserve the carrier crypto boundary: %v", err)
 	}

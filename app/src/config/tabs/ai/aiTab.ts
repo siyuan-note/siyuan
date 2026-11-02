@@ -384,7 +384,6 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
-    registerAiMemoryGroup(tab);
     registerAiWebGroup(tab);
     registerAiDecisionGroup(tab);
     registerAiSkillsGroup(tab);
@@ -392,4 +391,5 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiMcpGroup(tab);
     registerAiEmbeddingGroup(tab);
     registerAiRerankGroup(tab);
+    registerAiMemoryGroup(tab);
 };

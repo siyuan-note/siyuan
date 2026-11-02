@@ -28,6 +28,7 @@ test("destroying a main Model cancels reconnects, queued messages and late socke
         setTimeout: (callback: () => void) => { timers.set(1, callback); return 1; },
         clearTimeout: (id: number) => timers.delete(id),
         require: () => ({Constants: {SIYUAN_APPID: "test"}, processMessage: (value: unknown) => value,
+            cancelTemplateHTTPExecutions: () => calls.push("cancel-template-http"),
             refreshSettingConfig: () => calls.push("refresh")})});
     const model = new exports.Model({app: {}});
     const options = {id: "test", type: "main", callback: () => calls.push("open"), msgCallback: () => calls.push("message")};
@@ -52,7 +53,7 @@ test("destroying a main Model cancels reconnects, queued messages and late socke
     model.send("test", {});
     model.connect(options);
     assert.equal(sockets.length, 1);
-    assert.deepEqual(calls, ["close"]);
+    assert.deepEqual(calls, ["cancel-template-http", "cancel-template-http", "close"]);
     assert.equal(socket.onopen, null);
     assert.equal(socket.onmessage, null);
     assert.equal(socket.onerror, null);
@@ -80,6 +81,7 @@ test("main socket recovery is recorded and obsolete sockets cannot finish a faul
         document: {getElementById: (): null => null},
         require: (name: string) => {
             if (name === "../constants") return {Constants: {SIYUAN_APPID: "test"}};
+            if (name === "../template/http") return {cancelTemplateHTTPExecutions: () => {}};
             if (name === "../util/kernelFault") return {kernelError: (obsolete: () => boolean) => diagnoses.push(obsolete)};
             if (name === "../util/kernelConnection") return {markKernelConnectionAlive: () => recovered++};
             throw new Error(name);
@@ -125,6 +127,7 @@ test("main windows query their own checkout preparation on startup and reconnect
         document: {getElementById: (): null => null},
         require: (name: string) => {
             if (name === "../constants") return {Constants: {SIYUAN_APPID: "test"}};
+            if (name === "../template/http") return {cancelTemplateHTTPExecutions: () => {}};
             if (name === "../sync/checkoutProgress") return {
                 reconcileSyncCheckout: (id: string, reconnect?: boolean) => queries.push({id, reconnect}),
             };

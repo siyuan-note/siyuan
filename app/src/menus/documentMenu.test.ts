@@ -57,6 +57,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                 "../card/openCard": {openCardByScope: (_app: object, ...scope: unknown[]) => flashcards.push(["study", ...scope])},
                 "../card/flashcardV2": {openFlashcardV2ManagementByRoots: (...scope: unknown[]) => flashcards.push(["manage", ...scope])},
                 "../mobile/util/closePanel": {closePanel() {}},
+                "../layout/dock/docTree/rowData": {getDocTreeItem: (element: Element) => controller?.getItemFromElement?.(element)},
                 "./navigationSelection": navigationSelection,
                 "../history/doc": {openDocHistory: (options: typeof histories[number]) => histories.push(options)},
                 "./util": {openEditorTab: () => menu.append({id: "openBy"})},
@@ -127,6 +128,15 @@ for (const mobile of [false, true]) {
     });
 }
 
+test("an unresolved tree row cannot reuse another document selection for its menu", () => {
+    const {exports, items} = setup(false, false, {
+        getItemFromElement: () => undefined,
+        getSelectedItems: () => { throw new Error("Unrelated selections must not become menu targets"); },
+    });
+    exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/target.sy", {} as Element);
+    assert.equal(items.length, 0);
+});
+
 test("document menu keeps the existing configurable IDs, hierarchy and built-in order", () => {
     const {open, items, menuAttributes} = setup();
     open();
@@ -167,12 +177,11 @@ test("notebook documents do not expose regular document deletion, moving, renami
 });
 
 test("document tree adapter preserves its real selection in plugin events", () => {
-    const {exports, options, events} = setup();
-    const row = {tree: {querySelectorAll: () => rows}, classList: {contains: () => true},
-        getAttribute: (name: string) => ({"data-node-id": "doc", "data-name": "Document.sy", "data-count": "2",
-            "data-type": "navigation-file", "data-notebook-id": "notebook", "data-path": "/doc.sy"})[name],
-        querySelector: (): null => null, parentElement: {getAttribute: (): null => null}};
+    const item: Partial<import("../layout/dock/docTree/types").IDocTreeItem> = {id: "doc", notebookId: "notebook", path: "/doc.sy", name: "Document.sy", kind: "document", subFileCount: 2, childrenSortMode: null, effectiveSortMode: 0, occurrenceKey: "doc"};
+    const row = {} as HTMLElement;
     const rows = [row] as unknown as NodeListOf<HTMLElement>;
+    const controller = {getItemFromElement: () => item, getSelectedItems: () => [item], getSelectionElements: () => rows} as unknown as Partial<DocTreeController>;
+    const {exports, options, events} = setup(false, false, controller);
     exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/doc.sy", row as unknown as Element);
     assert.equal(events[0].detail.elements, rows);
     assert.equal(events[0].detail.items[0].id, options.id);

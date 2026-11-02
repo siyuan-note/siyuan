@@ -59,6 +59,9 @@ func TestReplaceDocumentTitleTextEscapesAndEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := replaceDocumentTitleText(root, 3, "^", "A/B", regexp.MustCompile("^")); err != nil || treenode.ReadDocumentTitle(root).Text != "A/B" {
-		t.Fatal("replacement could not fill an empty rich title", err)
+		t.Fatal("replacement could not fill an empty title", err)
+	}
+	if root.DocumentTitle != nil || treenode.ReadDocumentTitle(root).Format != "plain" {
+		t.Fatal("ordinary replacement text unnecessarily created a rich title source")
 	}
 }

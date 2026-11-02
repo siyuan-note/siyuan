@@ -29,13 +29,21 @@ func checkDocumentAddressingConf(boxID string, data []byte) error {
 
 // documentAddressingPreflight 在整批写入和删除前检查快照的规范路径及源规格。
 func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) error {
+	return documentCheckoutPreflight(repo, true)
+}
+
+// syncDocumentPreflight 按原始字节同步文档，源规格及标题表示在读取、索引和编辑时校验。
+func syncDocumentPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) error {
+	return documentCheckoutPreflight(repo, false)
+}
+
+func documentCheckoutPreflight(repo *dejavu.Repo, checkSources bool) func(*dejavu.CheckoutPlan) error {
 	return func(plan *dejavu.CheckoutPlan) error {
 		if err := checkPasswordMigrationCheckout(plan); err != nil {
 			return err
 		}
 		upserts := make([]string, 0, len(plan.Upserts))
 		removes := make([]string, 0, len(plan.Removes))
-		paths := map[string]string{}
 		upsertBoxes, removedPaths := map[string]bool{}, map[string]bool{}
 		seen := map[string]bool{}
 		// 仓库索引统一使用前导斜杠和正斜杠；拒绝别名及重复目标，避免覆盖计划遮盖来源。
@@ -64,7 +72,6 @@ func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) e
 			}
 			upserts = append(upserts, file.Path)
 			name := strings.TrimPrefix(file.Path, "/")
-			paths[name] = file.Path
 			boxID, _, _ := strings.Cut(name, "/")
 			upsertBoxes[boxID] = true
 		}
@@ -78,47 +85,52 @@ func documentAddressingPreflight(repo *dejavu.Repo) func(*dejavu.CheckoutPlan) e
 		if err := documentaddressing.CheckPaths(upserts, removes); err != nil {
 			return err
 		}
-		for _, file := range plan.Upserts {
-			name := strings.TrimPrefix(file.Path, "/")
-			if !isDocumentAddressingSource([]string{name}) {
-				continue
-			}
-			data, err := plan.ReadFile(file.Path)
-			if err == nil {
-				err = checkDocumentAddressingCheckoutSource(data)
-			}
-			if err != nil {
-				return fmt.Errorf("document [%s]: %w", name, err)
-			}
-			if err = checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
-				return err
-			}
-		}
-		deletedBoxes := map[string]bool{}
-		for _, file := range plan.Removes {
-			name := strings.TrimPrefix(file.Path, "/")
-			if !isDocumentAddressingSource([]string{name}) {
-				continue
-			}
-			boxID, _, _ := strings.Cut(name, "/")
-			deleted, checked := deletedBoxes[boxID]
-			if !checked {
-				var err error
-				if !upsertBoxes[boxID] {
-					deleted, err = documentAddressingCheckoutRemovesNotebook(repo.DataPath, boxID, removedPaths)
+		if checkSources {
+			for _, file := range plan.Upserts {
+				name := strings.TrimPrefix(file.Path, "/")
+				if !isDocumentAddressingSource([]string{name}) {
+					continue
+				}
+				data, err := plan.ReadFile(file.Path)
+				if err == nil {
+					err = checkDocumentAddressingCheckoutSource(data)
 				}
 				if err != nil {
+					return fmt.Errorf("document [%s]: %w", name, err)
+				}
+				if err = checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
 					return err
 				}
-				deletedBoxes[boxID] = deleted
 			}
-			if !deleted {
-				if err := checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
-					return err
+			deletedBoxes := map[string]bool{}
+			for _, file := range plan.Removes {
+				name := strings.TrimPrefix(file.Path, "/")
+				if !isDocumentAddressingSource([]string{name}) {
+					continue
+				}
+				boxID, _, _ := strings.Cut(name, "/")
+				deleted, checked := deletedBoxes[boxID]
+				if !checked {
+					var err error
+					if !upsertBoxes[boxID] {
+						deleted, err = documentAddressingCheckoutRemovesNotebook(repo.DataPath, boxID, removedPaths)
+					}
+					if err != nil {
+						return err
+					}
+					deletedBoxes[boxID] = deleted
+				}
+				if !deleted {
+					if err := checkDocumentAddressingCheckoutCurrent(repo.DataPath, name); err != nil {
+						return err
+					}
 				}
 			}
 		}
-		return memoryCheckoutPreflight(repo.DataPath, plan)
+		if err := memoryCheckoutPreflight(repo.DataPath, plan); err != nil {
+			return err
+		}
+		return templateHTTPCheckoutPreflight(repo.DataPath, plan)
 	}
 }
 

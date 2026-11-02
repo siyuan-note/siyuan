@@ -246,14 +246,12 @@ export class AVAttributePanel {
             this.refresh();
             return;
         }
-        if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID) &&
-            ((operation.data?.type === "block" || operation.data?.type === "number") || this.hasRenderTemplate(avID))) {
+        if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID)) {
             this.queueRefresh();
             return;
         }
         if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
-            this.hasItem(cell.rowID) && ((cell.data?.type === "block" || cell.data?.type === "number") ||
-                this.hasRenderTemplate(avID)))) {
+            this.hasItem(cell.rowID))) {
             this.queueRefresh();
             return;
         }
@@ -261,12 +259,6 @@ export class AVAttributePanel {
             (this.hasDatabase(operation.avID) || operation.srcIDs?.some(item => this.hasItem(item)))) {
             this.refresh();
         }
-    }
-
-    private hasRenderTemplate(avID: string) {
-        const databaseElement = this.bodyElement.querySelector<HTMLElement>(`[data-av-id="${avID}"]`);
-        return Array.from(databaseElement?.querySelectorAll<HTMLElement>("[data-render-template]") || [])
-            .some(item => Boolean(item.dataset.renderTemplate?.trim()));
     }
 
     private queueRefresh() {

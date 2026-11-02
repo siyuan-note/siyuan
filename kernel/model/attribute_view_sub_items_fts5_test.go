@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -61,6 +62,109 @@ func assertSubItemsParent(t *testing.T, sourceID, id, parent string) {
 	}
 	if index.Parents[id] != parent {
 		t.Fatalf("parent of %s: got %q want %q", id, index.Parents[id], parent)
+	}
+}
+
+func TestSubItemsDisabledRelationEditingAndFieldDeletion(t *testing.T) {
+	fixture, source, _, _ := setupSubItemsTest(t, false)
+	parentKey, childrenKey := source.SubItems.ParentKeyID, source.SubItems.ChildrenKeyID
+	ids := slices.Clone(source.Views[0].ItemIDs)
+	if err := source.SetSubItemsParents(map[string]string{ids[1]: ids[0], ids[2]: "", ids[3]: ""}); err != nil {
+		t.Fatal(err)
+	}
+	if err := av.SaveAttributeView(source); err != nil {
+		t.Fatal(err)
+	}
+	runSubItemsOperation(t, &Operation{Action: "setAttrViewSubItems", AvID: source.ID, BlockID: fixture.sourceID, Data: map[string]any{"enabled": false}})
+	for _, targets := range [][]string{{}, {ids[1]}, {ids[0]}, {}} {
+		op := &Operation{Action: "updateAttrViewCell", AvID: source.ID, BlockID: fixture.sourceID,
+			KeyID: childrenKey, RowID: ids[0], Data: map[string]any{"relation": map[string]any{"blockIDs": targets}}}
+		runSubItemsOperation(t, op)
+	}
+	for _, key := range []string{parentKey, childrenKey} {
+		runSubItemsOperation(t, &Operation{Action: "removeAttrViewCol", AvID: source.ID, BlockID: fixture.sourceID, ID: key})
+	}
+	runSubItemsOperation(t, &Operation{Action: "setAttrViewSubItems", AvID: source.ID, BlockID: fixture.sourceID,
+		ViewID: source.Views[0].ID, Data: map[string]any{"enabled": true}})
+	current := readAttributeViewItemsTest(t, source.ID)
+	if !current.HasSubItems() || current.SubItems.ParentKeyID == parentKey || current.SubItems.ChildrenKeyID == childrenKey {
+		t.Fatal("enabling after field deletion did not create a valid new relation pair")
+	}
+}
+
+func TestSubItemsInvalidRelationsExplainFailureAndPreserveSource(t *testing.T) {
+	fixture, source, _, _ := setupSubItemsTest(t, false)
+	ids := slices.Clone(source.Views[0].ItemIDs)
+	path := filepath.Join(util.DataDir, "storage", "av", source.ID+".json")
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldLangs := util.Langs
+	util.Langs = map[string]map[int]string{"en": {258: "generic failure", 460: "cycle [%s]", 461: "one parent [%s]"}}
+	t.Cleanup(func() { util.Langs = oldLangs })
+	for _, test := range []struct {
+		name, key, row, kind string
+		targets              []string
+	}{
+		{"self child", source.SubItems.ChildrenKeyID, ids[0], "cycle", []string{ids[0]}},
+		{"ancestor as child", source.SubItems.ChildrenKeyID, ids[3], "cycle", []string{ids[0]}},
+		{"descendant as parent", source.SubItems.ParentKeyID, ids[0], "cycle", []string{ids[3]}},
+		{"multiple parents", source.SubItems.ParentKeyID, ids[1], "multipleParents", []string{ids[0], ids[2]}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			op := &Operation{Action: "updateAttrViewCell", AvID: source.ID, BlockID: fixture.sourceID,
+				KeyID: test.key, RowID: test.row, Data: map[string]any{"relation": map[string]any{"blockIDs": test.targets}}}
+			err := PerformTxSync(&Transaction{fromAPI: true, DoOperations: []*Operation{op}})
+			var invalid *av.SubItemsValidationError
+			if !errors.As(err, &invalid) || invalid.Kind != test.kind {
+				t.Fatalf("missing structured validation error: %v", err)
+			}
+			if message := attributeViewTransactionErrorMessage(err); !strings.Contains(message, invalid.ItemID) || message == "generic failure" {
+				t.Fatalf("validation reason or item missing from message: %q", message)
+			}
+			current, _ := os.ReadFile(path)
+			if !bytes.Equal(original, current) {
+				t.Fatal("invalid relation changed the persisted source")
+			}
+		})
+	}
+	if attributeViewTransactionErrorMessage(errors.New("storage failure")) != "generic failure" {
+		t.Fatal("unrelated errors lost their existing message")
+	}
+}
+
+func TestSubItemsReenableAfterDeletingOneFieldPreservesOtherValuesAndUndo(t *testing.T) {
+	fixture, source, _, _ := setupSubItemsTest(t, false)
+	parentKey, childrenKey := source.SubItems.ParentKeyID, source.SubItems.ChildrenKeyID
+	runSubItemsOperation(t, &Operation{Action: "setAttrViewSubItems", AvID: source.ID, BlockID: fixture.sourceID, Data: map[string]any{"enabled": false}})
+	runSubItemsOperation(t, &Operation{Action: "removeAttrViewCol", AvID: source.ID, BlockID: fixture.sourceID, ID: parentKey})
+	before := readAttributeViewItemsTest(t, source.ID)
+	remaining, _ := before.GetKeyValues(childrenKey)
+	original, _ := json.Marshal(remaining)
+	tx := runSubItemsOperation(t, &Operation{Action: "setAttrViewSubItems", AvID: source.ID, BlockID: fixture.sourceID,
+		ViewID: source.Views[0].ID, Data: map[string]any{"enabled": true}})
+	current := readAttributeViewItemsTest(t, source.ID)
+	newParent := current.SubItems.ParentKeyID
+	if newParent == parentKey || current.SubItems.ChildrenKeyID == childrenKey || !current.HasSubItemsFields() {
+		t.Fatal("invalid saved field pair was reused")
+	}
+	remaining, _ = current.GetKeyValues(childrenKey)
+	preserved, _ := json.Marshal(remaining)
+	if !bytes.Equal(original, preserved) {
+		t.Fatal("re-enabling changed the remaining ordinary relation field")
+	}
+	if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(tx.UndoOperations)}); err != nil {
+		t.Fatal(err)
+	}
+	if current = readAttributeViewItemsTest(t, source.ID); current.HasSubItems() || len(current.KeyValues) != len(before.KeyValues) {
+		t.Fatal("undo did not restore disabled field state")
+	}
+	if err := PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(tx.DoOperations)}); err != nil {
+		t.Fatal(err)
+	}
+	if current = readAttributeViewItemsTest(t, source.ID); !current.HasSubItems() || current.SubItems.ParentKeyID != newParent {
+		t.Fatal("redo did not restore the same created fields")
 	}
 }
 

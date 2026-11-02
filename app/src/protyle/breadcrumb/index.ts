@@ -76,9 +76,9 @@ export class Breadcrumb {
     private history: DocumentHistory;
     /// #endif
 
-    public refreshHistory(rootID: string) {
+    public refreshHistory() {
         /// #if MOBILE
-        this.history?.refresh(rootID);
+        this.history?.refresh();
         /// #endif
     }
 
@@ -116,7 +116,6 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         this.element = element.firstElementChild as HTMLElement;
         /// #if MOBILE
         this.history = new DocumentHistory(protyle);
-        element.querySelector('[data-type="command-panel"]').before(this.history.element);
         /// #endif
         mountBreadcrumbButtons(protyle, element.querySelector(".protyle-breadcrumb__plugin"));
         const takeMenuKeyboard = bindMobileMenuKeyboard(element,
@@ -798,6 +797,9 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                     }
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BREADCRUMB_MORE);
+                    /// #if MOBILE
+                    this.history.createMenuItems().forEach(item => window.siyuan.menus.menu.append(item));
+                    /// #endif
                     if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                         let uploadHTML = "";
                         uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';

@@ -35,7 +35,7 @@ test("mobile notebook root title retains the plain toolbar save and Unicode hand
     runInNewContext(compile("initFramework.ts", "\nexport {initEditorName};"), {
         exports: moduleExports,
         window: runtime,
-        document: {getElementById: () => input},
+        document: {getElementById: (id: string) => id === "toolbarName" ? input : {addEventListener: () => {}}},
         require: (name: string) => {
             if (name === "../../editor/rename") return rename;
             if (name === "../../constants") return {Constants: constants};
@@ -107,12 +107,15 @@ test("mobile document summaries open the complete title source and never rename 
         addEventListener: (name: string, handler: (event?: object) => void) => listeners.set(name, handler),
     };
     const protyle = {notebookId: "box", block: {rootID: "document"}, disabled: false,
+        preview: {element: {classList: {contains: () => true}}},
         title: {openEditor: () => opened++}};
     const runtime = {siyuan: {config: {editor: {autoDirection: false}},
         languages: {_kernel: {16: "Untitled"}}, mobile: {editor: {protyle}}}};
     const moduleExports: {initEditorName?: () => void} = {};
     runInNewContext(compile("initFramework.ts", "\nexport {initEditorName};"), {
-        exports: moduleExports, window: runtime, document: {getElementById: () => input},
+        exports: moduleExports, window: runtime, document: {getElementById: (id: string) =>
+            id === "toolbarName" ? input : {addEventListener: (name: string, handler: (event?: object) => void) =>
+                listeners.set("label:" + name, handler)}},
         require: (name: string) => {
             if (name === "../../util/fetch") return {fetchPost: () => requests++};
             if (name === "../../protyle/render/autoDirection") return {setTitleAutoDirection: () => {}};
@@ -125,8 +128,17 @@ test("mobile document summaries open the complete title source and never rename 
     listeners.get("click")();
     listeners.get("keydown")({key: "Enter", preventDefault: () => {}, stopPropagation: () => {}});
     assert.equal(opened, 2);
+    const target = {closest: (): null => null};
+    listeners.get("label:click")({target, preventDefault: () => {}});
+    listeners.get("label:keydown")({target, key: " ", preventDefault: () => {}});
+    assert.equal(opened, 4);
     assert.equal(requests, 0);
+    const inlineTarget = {closest: () => ({})};
+    listeners.get("label:click")({target: inlineTarget, preventDefault: () => assert.fail("inline clicks retain native selection")});
+    listeners.get("label:keydown")({target: inlineTarget, key: " ", preventDefault: () => assert.fail("inline spaces stay editable")});
+    assert.equal(opened, 4, "inline editor interactions do not reopen the title");
     protyle.disabled = true;
     listeners.get("click")();
-    assert.equal(opened, 2);
+    listeners.get("label:click")({target, preventDefault: () => {}});
+    assert.equal(opened, 4);
 });

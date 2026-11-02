@@ -7,10 +7,13 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>) => {
+const browserCases = async (sources: Record<string, string>, css: string) => {
     const check: typeof assert = require("node:assert/strict");
     const nodePath: typeof path = require("node:path");
     const noop = () => {};
+    const lute = Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetKramdownIAL(true);
     const fixtureStyle = document.createElement("style");
     fixtureStyle.textContent = ".protyle-util{position:fixed;top:8px;left:8px;right:8px}.block__icons{display:flex;height:42px}" +
         ".block__icons svg,.protyle-table-control svg{width:16px;height:16px}.fn__none{display:none}" +
@@ -107,6 +110,7 @@ const browserCases = async (sources: Record<string, string>) => {
         "src/protyle/util/hasClosest.ts": {hasClosestByClassName: (node: Element, name: string) => node?.closest("." + name),
             hasClosestBlock: (node: Element) => node?.closest("[data-node-id]")},
         "src/dialog/message.ts": {showMessage: noop},
+        "src/util/highlightById.ts": {scrollCenter: noop},
         "dayjs": () => ({format: () => "20261017120000"}),
     };
     const cache: Record<string, {exports: object}> = {};
@@ -130,6 +134,7 @@ const browserCases = async (sources: Record<string, string>) => {
     const context = load("src/protyle/util/tableCellRichContext.ts") as typeof import("./tableCellRichContext");
     const virtual = load("src/protyle/util/tableVirtualizationDOM.ts") as typeof import("./tableVirtualizationDOM");
     const rowHeight = load("src/protyle/util/tableRowHeight.ts") as typeof import("./tableRowHeight");
+    const tableAPI = load("src/protyle/util/table.ts") as typeof import("./table");
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const frames = async (count: number) => {
         for (let frame = 0; frame < count; frame++) {
@@ -423,9 +428,189 @@ const browserCases = async (sources: Record<string, string>) => {
         check.equal(f.table.querySelectorAll(".fn__none").length, 0);
         f.core.selectCellRange(f.cell(0, 0), f.cell(1, 0));
         f.invoke("openMenu", 0, 0);
-        check.equal(items.find(item => item.label === "mergeCell").disabled, true, "header and body merging stays disabled");
+        check.equal(items.find(item => item.label === "mergeCell").disabled, false,
+            "header and body cells can form a multi-row header");
         f.dispose();
     }
+    for (const touchMode of [true, false]) {
+        mobile = touchMode;
+        {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            node.setAttribute("custom-pinthead", "true");
+            const rich = Buffer.from(JSON.stringify({spec: 1, format: "kramdown", content: "kept"})).toString("base64url");
+            f.cell(1, 2).setAttribute("data-sy-table-cell-rich", rich);
+            f.cell(1, 2).style.textAlign = "right";
+            f.cell(1, 2).rowSpan = 2;
+            f.cell(2, 2).classList.add("fn__none");
+            const count = transactions.length;
+            f.core.selectCellRange(f.cell(1, 0), f.cell(0, 0));
+            f.invoke("openMenu", 0, 0);
+            const merge = items.find(item => item.label === "mergeCell");
+            check.equal(merge.disabled, false);
+            merge.click(undefined, undefined);
+            check.equal(transactions.length, count + 1, "merging and promoting rows form one undoable transaction");
+            check.equal(f.table.tHead.rows.length, 3, "header expansion includes other vertical spans in promoted rows");
+            check.equal(f.table.tBodies[0].rows.length, 1);
+            check.equal(f.cell(0, 0).rowSpan, 2);
+            check.match(f.cell(0, 0).innerHTML, /H1.*A1/);
+            check.equal(f.cell(1, 0).classList.contains("fn__none"), true);
+            check.equal(f.cell(1, 2).getAttribute("data-sy-table-cell-rich"), rich);
+            check.equal(f.cell(1, 2).style.textAlign, "right");
+            check.equal(f.cell(1, 2).tagName, "TH");
+            check.equal(node.getAttribute("custom-pinthead"), "true");
+            const restored = document.createElement("div");
+            restored.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(node.outerHTML));
+            check.equal(restored.querySelector("thead").children.length, 3);
+            check.equal(restored.querySelector("th").rowSpan, 2);
+            check.equal(restored.querySelectorAll("th")[5].getAttribute("data-sy-table-cell-rich"), rich,
+                "the operation result retains rich sources after an internal format round trip");
+            const before = document.createElement("div");
+            before.innerHTML = transactions[count].before;
+            check.equal(before.querySelector("thead").children.length, 1, "undo retains the original header boundary");
+            check.equal(before.querySelector("tbody td").textContent, "A1");
+            f.invoke("selectFromCell", "cell", f.cell(2, 1), false, true);
+            check.equal(f.core.getSelectedCells().length, 5, "Shift selection continues from the merged cell after promotion");
+            f.core.splitCell(f.cell(0, 0));
+            check.equal(f.table.tHead.rows.length, 3, "splitting retains the explicit multi-row header");
+            check.equal(f.cell(1, 0).classList.contains("fn__none"), false);
+            check.equal(f.cell(1, 2).rowSpan, 2, "splitting leaves adjacent merged cells intact");
+            tableAPI.splitTableCell(f.cell(1, 2));
+            check.equal(f.table.tHead.rows.length, 3, "the context menu fallback also retains header rows");
+            check.equal(f.cell(2, 2).classList.contains("fn__none"), false);
+            f.dispose();
+        }
+        {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.cell(1, 0).rowSpan = 2;
+            f.cell(2, 0).classList.add("fn__none");
+            tableAPI.normalizeTableSections(f.table, 3);
+            const original = node.outerHTML;
+            const count = transactions.length;
+            for (const [row, offset] of [[1, -1], [1, 1], [2, -1], [2, 1], [0, 1]]) {
+                const move = offset < 0 ? tableAPI.moveRowToUp : tableAPI.moveRowToDown;
+                move(f.owner, getEditorRange(f.cell(row, 1)), f.cell(row, 1), node);
+                check.equal(node.outerHTML, original, "moving an anchor, covered row or its neighbor cannot cut a rowspan");
+                check.equal(transactions.length, count);
+            }
+            f.table.tBodies[0].replaceChildren();
+            const headerOnly = node.outerHTML;
+            tableAPI.moveRowToDown(f.owner, getEditorRange(f.cell(2, 1)), f.cell(2, 1), node);
+            check.equal(node.outerHTML, headerOnly, "the last header row cannot move into an empty body");
+            f.dispose();
+        }
+        for (const source of ["control", "cell"]) {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.cell(0, 0).style.textAlign = "right";
+            const range = getEditorRange(f.cell(0, 0));
+            const before = transactions.length;
+            if (source === "control") {
+                f.invoke("insertRowAt", node, f.table, 0, 2, true);
+            } else {
+                tableAPI.insertRowAbove(f.owner, range, f.cell(0, 0), node, 2, true);
+            }
+            check.equal(transactions.length, before + 1);
+            check.equal(f.table.tHead.rows.length, 3, "prepending rows expands rather than replaces the header");
+            check.equal(f.cell(2, 0).textContent, "H1");
+            check.equal(f.cell(0, 0).style.textAlign, "right");
+            check.equal(f.cell(3, 0).textContent, "A1");
+            tableAPI.insertRow(f.owner, getEditorRange(f.cell(0, 0)), f.cell(0, 0), node, 2);
+            check.equal(f.table.tHead.rows.length, 5, "inserting inside the header stays in the header");
+            check.equal(f.cell(1, 0).tagName, "TH");
+            tableAPI.insertRow(f.owner, getEditorRange(f.cell(4, 0)), f.cell(4, 0), node);
+            check.equal(f.table.tHead.rows.length, 5, "inserting after the last header row creates a body row");
+            check.equal(f.cell(5, 0).tagName, "TD");
+            f.dispose();
+        }
+        for (const source of ["control", "cell"]) {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.invoke("selectFromCell", "row", f.cell(0, 1), false, false);
+            f.invoke("openMenu", 0, 0);
+            const insertHeader = items.find(item => item.id === "insertTableHeaderRow");
+            check.ok(insertHeader, "header row menus expose explicit header insertion on both platforms");
+            if (source === "control") {
+                insertHeader.click(undefined, undefined);
+            } else {
+                tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(0, 1)), f.cell(0, 1), node);
+            }
+            check.equal(f.table.tHead.rows.length, 2);
+            check.equal(f.cell(1, 0).textContent, "H1");
+            if (source === "control") {
+                f.invoke("insertRowAt", node, f.table, 0, 2);
+            } else {
+                tableAPI.insertRowAbove(f.owner, getEditorRange(f.cell(0, 1)), f.cell(0, 1), node, 2);
+                const caret = getSelection().anchorNode;
+                check.equal((caret instanceof Element ? caret : caret.parentElement).closest("th"), f.cell(0, 1),
+                    "ordinary insertion retains the caret column after changing cell tags");
+            }
+            check.equal(f.table.tHead.rows.length, 1, "ordinary insertion replaces the header instead of expanding it");
+            check.equal(f.cell(3, 0).textContent, "H1");
+            check.equal(f.cell(3, 0).tagName, "TD");
+            f.invoke("selectFromCell", "row", f.cell(3, 0), false, false);
+            f.invoke("openMenu", 0, 0);
+            check.equal(items.some(item => item.id === "insertTableHeaderRow"), false, "body menus omit header insertion");
+            const original = node.outerHTML;
+            tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(3, 0)), f.cell(3, 0), node);
+            check.equal(node.outerHTML, original, "header insertion rejects body targets");
+            f.owner.disabled = true;
+            tableAPI.insertTableHeaderRow(f.owner, getEditorRange(f.cell(0, 0)), f.cell(0, 0), node);
+            check.equal(node.outerHTML, original, "header insertion respects readonly mode");
+            f.dispose();
+        }
+        {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.cell(0, 0).rowSpan = 2;
+            f.cell(1, 0).classList.add("fn__none");
+            tableAPI.normalizeTableSections(f.table);
+            tableAPI.insertRowAbove(f.owner, getEditorRange(f.cell(1, 1)), f.cell(1, 1), node, 2);
+            check.equal(f.table.tHead.rows.length, 4);
+            check.equal(f.cell(0, 0).rowSpan, 4, "batch insertion extends an existing vertical merge by the whole count");
+            check.equal(f.cell(3, 1).textContent, "A2");
+            check.equal(f.cell(4, 0).textContent, "B1");
+            f.dispose();
+        }
+        {
+            const f = fixture();
+            const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+            f.invoke("insertRowAt", node, f.table, 0, 1, true);
+            f.cell(0, 0).textContent = "top";
+            const rich = Buffer.from(JSON.stringify({spec: 1, format: "kramdown", content: "kept"})).toString("base64url");
+            f.cell(1, 0).setAttribute("data-sy-table-cell-rich", rich);
+            f.cell(1, 0).style.textAlign = "right";
+            f.invoke("selectFromCell", "row", f.cell(2, 0), false, false);
+            f.invoke("moveSelection", 1);
+            check.equal(f.table.tHead.rows.length, 2, "moving rows retains the header row count");
+            check.equal(f.cell(1, 0).textContent, "A1");
+            check.equal(f.cell(2, 0).getAttribute("data-sy-table-cell-rich"), rich);
+            check.equal(f.cell(2, 0).style.textAlign, "right");
+            tableAPI.moveRowToUp(f.owner, getEditorRange(f.cell(2, 0)), f.cell(2, 0), node);
+            check.equal(f.cell(0, 0).textContent, "top", "the cell menu exchanges the last header row at the boundary");
+            check.equal(f.cell(1, 0).textContent, "H1");
+            check.equal(f.cell(1, 0).getAttribute("data-sy-table-cell-rich"), rich);
+            tableAPI.moveRowToUp(f.owner, getEditorRange(f.cell(1, 0)), f.cell(1, 0), node);
+            check.equal(f.cell(0, 0).textContent, "H1", "header rows can move within the header");
+            tableAPI.moveRowToDown(f.owner, getEditorRange(f.cell(1, 0)), f.cell(1, 0), node);
+            check.equal(f.table.tHead.rows.length, 2);
+            check.equal(f.cell(1, 0).textContent, "A1");
+            check.equal(f.cell(2, 0).textContent, "top");
+            f.invoke("selectFromCell", "row", f.cell(0, 0), false, false);
+            f.invoke("duplicateRowsOrColumns");
+            check.equal(f.table.tHead.rows.length, 3, "duplicating an interior header row keeps it in the header");
+            check.equal(f.cell(1, 0).tagName, "TH");
+            check.equal(f.cell(1, 0).getAttribute("data-sy-table-cell-rich"), rich);
+            f.invoke("selectFromCell", "row", f.cell(2, 0), false, false);
+            f.invoke("duplicateRowsOrColumns");
+            check.equal(f.table.tHead.rows.length, 3, "duplicating the last header row inserts into the body");
+            check.equal(f.cell(3, 0).textContent, "A1");
+            check.equal(f.core.getSelectedCells()[0], f.cell(3, 0), "the duplicate stays selected at its actual position");
+            f.dispose();
+        }
+    }
+    mobile = true;
     {
         const f = fixture();
         f.core.startTouchSelection(f.cell(1, 0), "row");
@@ -1020,13 +1205,139 @@ const browserCases = async (sources: Record<string, string>) => {
         check.match(copied.textSiyuan, /height: 100px/, "noncontiguous row clipboard retains each source height");
         f.dispose();
     }
+    // 用实际共享样式验证尺寸反馈，覆盖简化手势夹具未包含的层级、颜色和定位。
+    const realStyle = document.createElement("style");
+    realStyle.textContent = css;
+    document.head.append(realStyle);
+    document.documentElement.style.setProperty("--b3-theme-primary", "#5078ff");
+    document.documentElement.style.setProperty("--b3-tooltips-background", "#222");
+    document.documentElement.style.setProperty("--b3-tooltips-color", "#fff");
+    const delay = () => new Promise(resolve => setTimeout(resolve, 240));
+    mobile = false;
+    {
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        pointer(cell, "pointermove", x, rect.bottom);
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.ok(guide.classList.contains("fn__none"), "hover starts with an invisible guide");
+        await delay();
+        check.equal(guide.classList.contains("fn__none"), false, "hover reveals the guide after its delay");
+        check.equal(getComputedStyle(guide).backgroundColor, "rgb(80, 120, 255)");
+        pointer(f.cell(2, 1), "pointermove", x, f.cell(2, 1).getBoundingClientRect().bottom);
+        check.ok(guide.classList.contains("fn__none"), "crossing to a different boundary restarts the delay");
+        f.editor.dispatchEvent(new PointerEvent("pointerleave", {relatedTarget: document.body}));
+        await delay();
+        check.ok(guide.classList.contains("fn__none"), "leaving cancels a pending boundary reveal");
+        pointer(cell, "pointermove", rect.right, rect.top + rect.height / 2);
+        await delay();
+        check.equal(guide.className, "protyle-table-control__width-guide");
+        check.ok(Math.abs(guide.getBoundingClientRect().left + 1 - rect.right) <= 1,
+            "column hover identifies the actual column boundary");
+        f.dispose();
+    }
+    for (const touchMode of [false, true]) {
+        mobile = touchMode;
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const row = cell.parentElement as HTMLTableRowElement;
+        f.core.selectCellRange(cell, f.cell(2, 2));
+        f.render();
+        check.ok(f.core.getSelectedCells().length > 1);
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.bottom;
+        const saved = row.getAttribute("style");
+        const count = transactions.length;
+        f.invoke("startRowResize", new PointerEvent("pointerdown", {button: 0, pointerId: 99, clientX: x, clientY: y}), cell, row);
+        check.equal(f.core.getSelectedCells().length, 0, "starting a height drag clears cell selection");
+        const label = f.touch(".protyle-table-control__size");
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.ok(label.getBoundingClientRect().bottom <= y - (touchMode ? 47 : 11), "height values appear above the pointer");
+        pointer(document, "pointermove", x, y + 33, 99);
+        f.render();
+        check.equal(guide.classList.contains("fn__none"), false, "height feedback survives rendering during drag");
+        const guideRect = guide.getBoundingClientRect();
+        check.equal(guideRect.top + guideRect.height / 2, row.getBoundingClientRect().bottom,
+            "the guide is centered on the actual row boundary");
+        check.equal(label.textContent, `${Math.round(row.getBoundingClientRect().height)}px`);
+        document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        check.equal(row.getAttribute("style"), saved);
+        check.equal(transactions.length, count);
+        check.ok(guide.classList.contains("fn__none") && label.classList.contains("fn__none"));
+        f.dispose();
+    }
+    mobile = false;
+    for (const mode of ["left", "center", "center-scroll"]) {
+        const f = fixture();
+        const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+        node.style.textAlign = mode === "left" ? "left" : "center";
+        if (mode === "center-scroll") {
+            (f.table.parentElement as HTMLElement).style.width = "180px";
+            f.table.style.minWidth = "270px";
+            check.ok(f.table.parentElement.scrollWidth > f.table.parentElement.clientWidth,
+                "the centered scroll fixture must actually overflow");
+        }
+        const cell = f.cell(1, 0);
+        const column = f.table.querySelector("col");
+        const startWidth = column.getBoundingClientRect().width;
+        const rect = cell.getBoundingClientRect();
+        const handle = document.createElement("div");
+        handle.className = "table__resize";
+        handle.dataset.colIndex = "0";
+        node.querySelector(".protyle-action__table").append(handle);
+        f.core.selectCellRange(cell, f.cell(2, 1));
+        const start = () => {
+            const event = new MouseEvent("mousedown", {button: 0, clientX: rect.right, clientY: rect.top + 12, cancelable: true});
+            new Function("event", "customElement", "protyle", "target", "nodeElement", sources["desktop-column-resize"])
+                .call({tableControl: f.core}, event, false, f.owner, handle, node);
+        };
+        start();
+        check.equal(f.core.getSelectedCells().length, 0, "desktop column resizing clears cell selection");
+        const count = transactions.length;
+        document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 20, clientY: rect.top + 12}));
+        check.equal(parseFloat(column.style.width), Math.round(startWidth + (mode === "center" ? 40 : 20)),
+            `${mode}: centered tables retain double movement only without horizontal overflow`);
+        const label = f.touch(".protyle-table-control__size");
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        check.equal(label.textContent, `${Math.round(column.getBoundingClientRect().width)}px`);
+        check.ok(label.getBoundingClientRect().bottom < rect.top + 12);
+        check.equal(guide.classList.contains("fn__none"), false, "dragging keeps the column guide visible");
+        document.dispatchEvent(new MouseEvent("mouseup", {button: 0}));
+        check.equal(transactions.length, count + 1, "desktop drag commits exactly one undoable transaction");
+        const committed = node.outerHTML;
+        document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 80}));
+        check.equal(node.outerHTML, committed, "release removes drag listeners");
+        for (const cancel of ["Escape", "blur", "pointercancel", "hide"]) {
+            start();
+            document.dispatchEvent(new MouseEvent("mousemove", {buttons: 1, clientX: rect.right + 40, clientY: 1}));
+            check.ok(label.getBoundingClientRect().top >= 0 && label.getBoundingClientRect().right <= innerWidth,
+                "size labels remain visible at viewport edges");
+            if (cancel === "Escape") {
+                document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            } else if (cancel === "blur") {
+                window.dispatchEvent(new Event("blur"));
+            } else if (cancel === "hide") {
+                f.core.setHidden(true);
+                f.core.setHidden(false);
+            } else {
+                pointer(document, "pointercancel");
+            }
+            check.equal(node.outerHTML, committed, `${cancel} restores widths and cell styles`);
+            check.equal(transactions.length, count + 1);
+            check.ok(label.classList.contains("fn__none") && guide.classList.contains("fn__none"));
+        }
+        f.dispose();
+    }
+    realStyle.remove();
     menuElement.remove();
     menuScrim.remove();
     fixtureStyle.remove();
     return "Mobile table interaction cases passed";
 };
 
-test("mobile table selection, editing handoff, operations and gesture cancellation", {
+test("desktop and mobile table selection, resize feedback and gesture cancellation", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -1037,6 +1348,12 @@ test("mobile table selection, editing handoff, operations and gesture cancellati
     const sources = Object.fromEntries(files.map(file => [file, transpileModule(
         readFileSync(path.resolve(process.cwd(), file), "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022}}).outputText]));
+    const wysiwyg = readFileSync(path.resolve("src/protyle/wysiwyg/index.ts"), "utf8");
+    sources["desktop-column-resize"] = transpileModule(wysiwyg.slice(wysiwyg.indexOf("// table col resize"),
+        wysiwyg.indexOf("// 编辑器底部反链仅用于浏览和编辑，不参与块、数据库或表格框选")),
+        {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+    const css = require("sass").compile(path.resolve("src/assets/scss/protyle/_protyle.scss"),
+        {silenceDeprecations: ["legacy-js-api"]}).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-touch-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -1048,8 +1365,9 @@ app.whenReady().then(async () => {
     }});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-            browserCases.toString() + ")(" + JSON.stringify(sources) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
+            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
         win.destroy();
         app.exit(0);
     } catch (error) {

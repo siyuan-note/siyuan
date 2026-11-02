@@ -332,6 +332,7 @@ const gutterTable = () => node("table", lang("tableBlock"), true, [
         node("useDefaultVerticalAlign", lang("useDefaultVerticalAlign")),
     ]),
     separator("separator_insert"),
+    node("insertTableHeaderRow", lang("insertTableHeaderRow")),
     node("insertRowAbove", lang("insertRowAbove")),
     node("insertRowBelow", lang("insertRowBelow")),
     node("insertColumnLeft", lang("insertColumnLeft")),
@@ -425,6 +426,7 @@ const gutterSingle = () => [
     separator("separator_VideoOrAudio"),
     node("assetVideo", location(lang("video"), lang("assets")), true, [
         node("asset", lang("assets")),
+        node("loop", lang("videoLoop")),
         separator("separator_rename"),
         node("rename", lang("rename")),
         node("openBy", lang("openBy")),
@@ -749,6 +751,13 @@ const dockCatalogSection: IEntryCatalogSection = {
 };
 
 export const entryCatalog: IEntryCatalogSection[] = [
+    {
+        key: "application",
+        label: lang("mainMenu"),
+        sortable: false,
+        // 主菜单的既有项目仍为固定槽位，仅登记新增的独立编辑器入口。
+        children: [node("markdownEditor", lang("markdownEditor"), true, undefined, false)],
+    },
     topBarCatalogSection,
     {
         key: WINDOW_TOP_BAR_ROOT_PATH,
@@ -973,6 +982,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("pasteEscaped", lang("pasteEscaped"), false),
             node("selectAll", lang("selectAll")),
             separator("separator_1"),
+            node("insertTableHeaderRow", lang("insertTableHeaderRow")),
             node("insertRowAbove", lang("insertRowAbove")),
             node("insertRowBelow", lang("insertRowBelow")),
             node("insertColumnLeft", lang("insertColumnLeft")),
@@ -1103,7 +1113,9 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("turnIntoRef", lang("ref")),
             node("turnIntoText", lang("text")),
             separator("separator_2"),
-            node("openBy", lang("openBy")),
+            node("openBy", lang("openBy"), true, [
+                node("openMarkdownEditor", lang("openMarkdownEditor")),
+            ]),
             node("export", lang("export")),
             node("copyFile", lang("copyFile")),
         ],

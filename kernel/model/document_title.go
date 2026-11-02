@@ -231,7 +231,8 @@ func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 		if parseErr != nil {
 			return fail(parseErr)
 		}
-		if previousSource.Content == nextSource.Content {
+		_, plain := treenode.PlainDocumentTitle(paragraph)
+		if previousSource.Content == nextSource.Content && !(plain && tree.Root.DocumentTitle != nil) {
 			operation.RetData = before.revision
 			tx.UndoOperations = nil
 			delete(tx.trees, tree.ID)

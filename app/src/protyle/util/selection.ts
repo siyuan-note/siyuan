@@ -199,6 +199,16 @@ export const getRangeByPoint = (x: number, y: number) => {
 
 export const getEditorRange = (element: Element): Range => {
     let range: Range;
+    if (getSelection().rangeCount === 0) {
+        const mindmap = element.querySelector(".protyle-wysiwyg--select > .mindmap-view")?.parentElement;
+        if (mindmap) {
+            // 整块脑图操作只需要逻辑范围，原生光标留空以避免遍历和绘制画布内的光标位置。
+            range = document.createRange();
+            range.setStart(mindmap, 0);
+            range.collapse(true);
+            return range;
+        }
+    }
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {

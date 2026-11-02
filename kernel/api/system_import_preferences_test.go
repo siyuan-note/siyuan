@@ -77,6 +77,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 	appearance.CompactMode = true
 	appearance.LockScreenWallpaper = true
 	appearance.MenuMouseScroll = true
+	appearance.ShowFloatingDockBar = new(false)
 	appearance.OutlineKeepCurrentExpand = true
 	appearance.PDFTheme = &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "red"}
 	appearance.MobileBars = &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(false), SidebarButtons: new(true)}
@@ -135,7 +136,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 			if actualAppearance.LockScreenWallpaper {
 				t.Fatal("workspace wallpaper was included in portable preferences")
 			}
-			if !actualAppearance.CompactMode || !actualAppearance.MenuMouseScroll || !actualAppearance.OutlineKeepCurrentExpand ||
+			if actualAppearance.ShowFloatingDockBar == nil || *actualAppearance.ShowFloatingDockBar || !actualAppearance.CompactMode || !actualAppearance.MenuMouseScroll || !actualAppearance.OutlineKeepCurrentExpand ||
 				!reflect.DeepEqual(actualAppearance.PDFTheme, source.Appearance.Load().PDFTheme) ||
 				!reflect.DeepEqual(actualAppearance.MobileBars, source.Appearance.Load().MobileBars) ||
 				target.FileTree.Load().RecentDocsSort != "updated" || !target.AI.Load().Agent.StreamingMarkdown {
@@ -172,6 +173,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 			}
 			if !reflect.DeepEqual(saved.Appearance.Load().PDFTheme, source.Appearance.Load().PDFTheme) ||
 				!reflect.DeepEqual(saved.Appearance.Load().MobileBars, source.Appearance.Load().MobileBars) ||
+				saved.Appearance.Load().ShowFloatingDockBar == nil || *saved.Appearance.Load().ShowFloatingDockBar ||
 				!saved.Appearance.Load().CompactMode || !saved.Appearance.Load().MenuMouseScroll ||
 				!saved.Appearance.Load().OutlineKeepCurrentExpand || saved.FileTree.Load().RecentDocsSort != "updated" ||
 				!saved.AI.Load().Agent.StreamingMarkdown {

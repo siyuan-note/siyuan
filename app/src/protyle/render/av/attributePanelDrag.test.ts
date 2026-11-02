@@ -13,6 +13,8 @@ const browserCases = async (source: string, css: string) => {
     check.ok(Math.abs(window.innerWidth - 1500) <= 2 && Math.abs(window.innerHeight - 1200) <= 2,
         `unexpected drag test viewport: ${window.innerWidth}x${window.innerHeight}`);
     Object.assign(window, {siyuan: {config: {editor: {}}, languages: {database: "Database"}, dialogs: []}});
+    const escapeHtmlTextAndAttr = (value: unknown) => String(value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     document.head.innerHTML = `<style>${css}
         :root {--b3-theme-primary:#1565c0}
         .av__row {display:flex; min-height:40px; position:relative} .fn__hr {height:8px}
@@ -23,7 +25,7 @@ const browserCases = async (source: string, css: string) => {
         keyValues: ["A", "B", "C", "D", "E", "F"].map(id => ({key: {id, name: id, type: "text"}, values: [{text: {content: id}}]}))}));
     const render = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty", "genAVAttributeRowHTML",
         "preserveAVBindingRange", "renderAVRichTextElements", "hasClosestBlock", "hasClosestByClassName", "transaction", "hasDataTransferFiles",
-        source + "\nreturn {renderAVAttribute, getAVAttributeDropTarget, getAVAttributeSort};")(
+        "escapeHtmlTextAndAttr", source + "\nreturn {renderAVAttribute, getAVAttributeDropTarget, getAVAttributeSort};")(
         (url: string, _body: unknown, callback: (response: {data: unknown}) => void) =>
             callback({data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0}}),
         () => ({}), () => "iconText", () => false,
@@ -32,7 +34,7 @@ const browserCases = async (source: string, css: string) => {
         () => () => {}, () => {}, (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
         (element: HTMLElement, className: string) => element?.closest("." + className),
         (_protyle: unknown, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
-        (types: string[]) => types.includes("Files"));
+        (types: string[]) => types.includes("Files"), escapeHtmlTextAndAttr);
     const fixture = (className = "protyle-db-attr__body", width = 1100) => {
         document.body.innerHTML = "";
         operations.length = 0;

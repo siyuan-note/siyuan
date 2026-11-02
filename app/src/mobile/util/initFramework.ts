@@ -460,12 +460,25 @@ const initEditorName = () => {
     };
     const openTitle = () => {
         const protyle = window.siyuan.mobile.editor?.protyle;
-        if (richTitle() && protyle && !protyle.disabled) {
+        if (richTitle() && protyle && !protyle.disabled && protyle.preview.element.classList.contains("fn__none")) {
             inputElement.blur();
             void protyle.title?.openEditor();
         }
     };
     inputElement.addEventListener("click", openTitle);
+    const label = document.getElementById("toolbarNameReadonly");
+    label.addEventListener("click", (event) => {
+        if ((event.target as HTMLElement).closest(".mobile-document-title-editor")) return;
+        event.preventDefault();
+        openTitle();
+    });
+    label.addEventListener("keydown", (event: KeyboardEvent) => {
+        if ((event.target as HTMLElement).closest(".mobile-document-title-editor")) return;
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openTitle();
+        }
+    });
     const saveTitle = () => {
         if (richTitle() || inputElement.getAttribute("readonly") === "readonly") {
             return titleSavePromise;

@@ -19,16 +19,17 @@ import {
     deleteColumn,
     deleteRow,
     getColIndex,
-    getOrCreateTableBody,
     insertColumn,
     insertRow,
     insertRowAbove,
+    insertTableHeaderRow,
     isTableHeaderEnabled,
     moveColumnToLeft,
     moveColumnToRight,
     moveRowToDown,
     moveRowToUp,
     setTableAlign,
+    splitTableCell,
     toggleTableHeader,
     transposeTable,
     updateTableTitle
@@ -1965,6 +1966,10 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
+        // 菜单动作可能替换或删除标签，此时关闭菜单只清理状态。
+        if (!nodeElement.contains(tagElement)) {
+            return;
+        }
         tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
             removeSemanticInlineExternalBoundaries(tagElement);
@@ -2107,12 +2112,14 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconTrashcan",
         label: window.siyuan.languages.remove,
         click() {
+            const scrollTop = protyle.contentElement.scrollTop;
             removeSemanticInlineExternalBoundaries(tagElement);
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
+            protyle.contentElement.scrollTop = scrollTop;
+            updateTransaction(protyle, nodeElement, oldHTML);
         }
     }).element);
 
@@ -2325,6 +2332,18 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             });
         }
     }];
+    if (type === "NodeVideo") {
+        subMenus.push({
+            id: "loop",
+            label: window.siyuan.languages.videoLoop,
+            checked: videoElement.hasAttribute("loop"),
+            click() {
+                videoElement.toggleAttribute("loop");
+                updateTransaction(protyle, nodeElement, html);
+                html = nodeElement.outerHTML;
+            }
+        });
+    }
     if (src && src.startsWith("assets/")) {
         subMenus.push({
             id: "separator_rename",
@@ -2370,55 +2389,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     return;
                 }
                 const oldHTML = nodeElement.outerHTML;
-                let rowSpan = cellElement.rowSpan;
-                let currentRowElement: Element = cellElement.parentElement;
-                const orgColSpan = cellElement.colSpan;
-                while (rowSpan > 0 && currentRowElement) {
-                    let currentCellElement = currentRowElement.children[colIndex] as HTMLTableCellElement;
-                    let colSpan = orgColSpan;
-                    while (colSpan > 0 && currentCellElement) {
-                        currentCellElement.classList.remove("fn__none");
-                        currentCellElement.removeAttribute("colspan");
-                        currentCellElement.removeAttribute("rowspan");
-                        currentCellElement = currentCellElement.nextElementSibling as HTMLTableCellElement;
-                        colSpan--;
-                    }
-                    currentRowElement = currentRowElement.nextElementSibling;
-                    rowSpan--;
-                }
-                cellElement.removeAttribute("colspan");
-                cellElement.removeAttribute("rowspan");
-                if (cellElement.tagName === "TH") {
-                    let prueTrElement: HTMLElement;
-                    Array.from(nodeElement.querySelectorAll("thead tr")).find((item: HTMLElement) => {
-                        prueTrElement = item;
-                        Array.from(item.children).forEach((cellElement: HTMLTableCellElement) => {
-                            if (cellElement.rowSpan !== 1 || cellElement.classList.contains("fn__none")) {
-                                prueTrElement = undefined;
-                            }
-                        });
-                        if (prueTrElement) {
-                            return true;
-                        }
-                    });
-                    if (prueTrElement) {
-                        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
-                        const theadElement = nodeElement.querySelector("thead");
-                        while (prueTrElement !== theadElement.lastElementChild) {
-                            theadElement.lastElementChild.querySelectorAll("th").forEach(item => {
-                                const td = document.createElement("td");
-                                Array.from(item.attributes).forEach(attr => {
-                                    td.setAttribute(attr.name, attr.value);
-                                });
-                                while (item.firstChild) {
-                                    td.appendChild(item.firstChild);
-                                }
-                                item.replaceWith(td);
-                            });
-                            tbodyElement.insertAdjacentElement("afterbegin", theadElement.lastElementChild);
-                        }
-                    }
-                }
+                splitTableCell(cellElement);
                 focusByRange(range);
                 updateTransaction(protyle, nodeElement, oldHTML);
             }
@@ -2643,6 +2614,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         }
     });
     const insertMenus = [];
+    if (cellElement.parentElement.parentElement.tagName === "THEAD") {
+        insertMenus.push({
+            id: "insertTableHeaderRow",
+            icon: "iconBefore",
+            label: window.siyuan.languages.insertTableHeaderRow,
+            click: () => insertTableHeaderRow(protyle, range, cellElement, nodeElement),
+        });
+    }
     insertMenus.push({
         id: "insertRowAbove",
         icon: "iconBefore",

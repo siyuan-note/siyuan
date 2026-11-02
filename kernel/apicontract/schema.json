@@ -1438,6 +1438,22 @@
       ],
       "additionalProperties": false
     },
+    "AIMemoryClearData": {
+      "type": "object",
+      "properties": {
+        "cleared": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cleared",
+        "disabled"
+      ],
+      "additionalProperties": false
+    },
     "AIMemoryForgetData": {
       "type": "object",
       "properties": {
@@ -1596,6 +1612,12 @@
     "AIMemoryOverviewData": {
       "type": "object",
       "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "countComplete": {
+          "type": "boolean"
+        },
         "memory": {
           "type": "string"
         },
@@ -1607,6 +1629,8 @@
         }
       },
       "required": [
+        "count",
+        "countComplete",
         "memory",
         "stale",
         "user"
@@ -1857,6 +1881,38 @@
       },
       "required": [
         "taskId"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTranslateData": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "language",
+        "memory"
+      ],
+      "additionalProperties": false
+    },
+    "AIMemoryTranslateRequestInput": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "language",
+        "memory"
       ],
       "additionalProperties": false
     },
@@ -8423,9 +8479,48 @@
       ],
       "additionalProperties": false
     },
+    "AVCollectionCleanup": {
+      "type": "object",
+      "properties": {
+        "automaticOnly": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVCollectionCleanupItem"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ruleVersion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "items",
+        "ruleVersion"
+      ],
+      "additionalProperties": false
+    },
     "AVCollectionCleanupInput": {
       "type": "object",
       "properties": {
+        "automaticOnly": {
+          "type": "boolean"
+        },
         "items": {
           "type": "array",
           "items": {
@@ -8446,6 +8541,22 @@
       "required": [
         "items",
         "ruleVersion"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionCleanupItem": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "itemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockID",
+        "itemID"
       ],
       "additionalProperties": false
     },
@@ -8785,6 +8896,9 @@
         },
         {
           "$ref": "#/$defs/AVUnavailableNotebook"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
         }
       ]
     },
@@ -8795,6 +8909,9 @@
         },
         {
           "$ref": "#/$defs/AVUnavailableNotebook"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
         }
       ]
     },
@@ -18222,6 +18339,16 @@
             }
           ]
         },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -18269,6 +18396,7 @@
         "notifications",
         "outlineKeepCurrentExpand",
         "pdfTheme",
+        "showFloatingDockBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -23022,6 +23150,9 @@
         "saveMode": {
           "type": "string"
         },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
+        },
         "session": {
           "anyOf": [
             {
@@ -23089,6 +23220,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -23188,6 +23322,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -23299,6 +23436,9 @@
               "type": "null"
             }
           ]
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         },
         "session": {
           "anyOf": [
@@ -24595,6 +24735,9 @@
         },
         "notebook": {
           "type": "string"
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         }
       },
       "required": [
@@ -24603,6 +24746,16 @@
         "notebook"
       ],
       "additionalProperties": false
+    },
+    "DailyNoteCreateResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FileTreeCreateData"
+        },
+        {
+          "$ref": "#/$defs/DocumentSelectionFailure"
+        }
+      ]
     },
     "DailyNoteInfo": {
       "type": "object",
@@ -25382,6 +25535,72 @@
       ],
       "additionalProperties": false
     },
+    "DocumentAncestorAmbiguity": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentPath"
+          }
+        },
+        "candidatesTruncated": {
+          "type": "boolean"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "parentID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidates",
+        "candidatesTruncated",
+        "index",
+        "parentID",
+        "targetRevision",
+        "time",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentAncestorChoiceInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "index",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
     "DocumentCapabilities": {
       "type": "object",
       "properties": {
@@ -25480,6 +25699,9 @@
     "DocumentCreatePlan": {
       "type": "object",
       "properties": {
+        "ambiguity": {
+          "$ref": "#/$defs/DocumentAncestorAmbiguity"
+        },
         "existingID": {
           "type": "string"
         },
@@ -25822,6 +26044,45 @@
       "required": [
         "notebook",
         "src"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentSelectionFailure": {
+      "type": "object",
+      "properties": {
+        "ambiguity": {
+          "$ref": "#/$defs/DocumentAncestorAmbiguity"
+        },
+        "notebook": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ambiguity",
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
+    "DocumentSelectionInput": {
+      "type": "object",
+      "properties": {
+        "ancestorChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentAncestorChoiceInput"
+          }
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ancestorChoices",
+        "targetRevision",
+        "time"
       ],
       "additionalProperties": false
     },
@@ -27980,6 +28241,9 @@
         },
         "notebook": {
           "type": "string"
+        },
+        "selection": {
+          "$ref": "#/$defs/DocumentSelectionInput"
         }
       },
       "required": [
@@ -28192,6 +28456,16 @@
         },
         "titleEmpty": {
           "type": "boolean"
+        },
+        "titleFormat": {
+          "type": "string",
+          "enum": [
+            "plain",
+            "inline-ast"
+          ]
+        },
+        "titleRevision": {
+          "type": "string"
         }
       },
       "required": [
@@ -44356,6 +44630,12 @@
     "PerformSyncRequestInput": {
       "type": "object",
       "properties": {
+        "cloudID": {
+          "type": "string"
+        },
+        "localID": {
+          "type": "string"
+        },
         "mobileSwitch": {
           "anyOf": [
             {
@@ -44365,6 +44645,9 @@
               "type": "null"
             }
           ]
+        },
+        "source": {
+          "type": "string"
         },
         "upload": {
           "type": "boolean"
@@ -44551,6 +44834,12 @@
     "PlanDocCreateRequestInput": {
       "type": "object",
       "properties": {
+        "ancestorChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentAncestorChoiceInput"
+          }
+        },
         "contextID": {
           "anyOf": [
             {
@@ -44587,6 +44876,12 @@
         },
         "reuse": {
           "type": "boolean"
+        },
+        "targetRevision": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
         },
         "title": {
           "type": "string"
@@ -45534,6 +45829,32 @@
       ],
       "additionalProperties": false
     },
+    "RemoveTagWithCollectionsRequestInput": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalCollectionInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "collections",
+        "label"
+      ],
+      "additionalProperties": false
+    },
     "RemoveUnusedAttributeViewRequestInput": {
       "type": "object",
       "properties": {
@@ -46057,6 +46378,9 @@
         "docTreePlan": {
           "$ref": "#/$defs/TemplatePlan"
         },
+        "httpConfirmToken": {
+          "type": "string"
+        },
         "path": {
           "type": "string"
         }
@@ -46071,6 +46395,9 @@
       "type": "object",
       "properties": {
         "content": {
+          "type": "string"
+        },
+        "httpConfirmToken": {
           "type": "string"
         },
         "id": {
@@ -49467,6 +49794,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingPDFThemeInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -52946,6 +53283,16 @@
             }
           ]
         },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -52993,6 +53340,7 @@
         "notifications",
         "outlineKeepCurrentExpand",
         "pdfTheme",
+        "showFloatingDockBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -53310,6 +53658,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingPDFThemeInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -57711,12 +58069,6 @@
     "SettingMemory": {
       "type": "object",
       "properties": {
-        "autoMaintain": {
-          "type": "boolean"
-        },
-        "conversations": {
-          "type": "boolean"
-        },
         "enabled": {
           "type": "boolean"
         },
@@ -57725,54 +58077,18 @@
         },
         "reasoningEffort": {
           "type": "string"
-        },
-        "sources": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
-        "autoMaintain",
-        "conversations",
         "enabled",
         "modelId",
-        "reasoningEffort",
-        "sources"
+        "reasoningEffort"
       ],
       "additionalProperties": false
     },
     "SettingMemoryInput": {
       "type": "object",
       "properties": {
-        "autoMaintain": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "conversations": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "enabled": {
           "anyOf": [
             {
@@ -57797,19 +58113,6 @@
           "anyOf": [
             {
               "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "sources": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             },
             {
               "type": "null"
@@ -61159,6 +61462,58 @@
       },
       "additionalProperties": false
     },
+    "SyncSourceState": {
+      "type": "object",
+      "properties": {
+        "cloudCreated": {
+          "type": "integer"
+        },
+        "cloudDevice": {
+          "type": "string"
+        },
+        "cloudFiles": {
+          "type": "integer"
+        },
+        "cloudID": {
+          "type": "string"
+        },
+        "localFiles": {
+          "type": "integer"
+        },
+        "localID": {
+          "type": "string"
+        },
+        "overwriteFiles": {
+          "type": "integer"
+        },
+        "pending": {
+          "type": "boolean"
+        },
+        "removeFiles": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string"
+        },
+        "uploadFiles": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cloudCreated",
+        "cloudDevice",
+        "cloudFiles",
+        "cloudID",
+        "localFiles",
+        "localID",
+        "overwriteFiles",
+        "pending",
+        "removeFiles",
+        "source",
+        "uploadFiles"
+      ],
+      "additionalProperties": false
+    },
     "SyncWebDAV": {
       "type": "object",
       "properties": {
@@ -63185,6 +63540,9 @@
             }
           ]
         },
+        "lastResult": {
+          "type": "integer"
+        },
         "local": {
           "anyOf": [
             {
@@ -63238,6 +63596,7 @@
         "generateConflictDoc",
         "interval",
         "lan",
+        "lastResult",
         "local",
         "mode",
         "perception",
@@ -63586,6 +63945,87 @@
       ],
       "additionalProperties": false
     },
+    "TagRemovalChangeInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalCollection": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "cleanup": {
+          "$ref": "#/$defs/AVCollectionCleanup"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "cleanup",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalCollectionInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "cleanup": {
+          "$ref": "#/$defs/AVCollectionCleanupInput"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "cleanup",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalChangeInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "TagSnapshotRequestInput": {
       "type": "object",
       "properties": {
@@ -63698,6 +64138,9 @@
     "TemplateFileEntry": {
       "type": "object",
       "properties": {
+        "httpPermission": {
+          "type": "boolean"
+        },
         "isDir": {
           "type": "boolean"
         },
@@ -63709,6 +64152,7 @@
         }
       },
       "required": [
+        "httpPermission",
         "isDir",
         "path"
       ],
@@ -63766,6 +64210,99 @@
       "required": [
         "content",
         "revision"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPCancelRequestInput": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "executionID": {
+          "type": "string"
+        },
+        "httpConfirmToken": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "executionID",
+        "session"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPPermissionData": {
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowed"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPPermissionRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "avID": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "slot": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateHTTPReplyRequestInput": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "confirmID": {
+          "type": "string"
+        },
+        "executionID": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "approved",
+        "confirmID",
+        "executionID",
+        "session"
       ],
       "additionalProperties": false
     },
@@ -138528,6 +139065,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/ai/memory/clear",
+      "handler": "clearAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryClearData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/ai/memory/forget",
       "handler": "forgetAIMemory",
       "authorization": [
@@ -139028,6 +139645,86 @@
               },
               "data": {
                 "$ref": "#/$defs/AIMemoryTaskData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/memory/translate",
+      "handler": "translateAIMemory",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AIMemoryTranslateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AIMemoryTranslateData"
               },
               "msg": {
                 "type": "string"
@@ -160203,7 +160900,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/FileTreeCreateData"
+                "$ref": "#/$defs/DailyNoteCreateResult"
               },
               "msg": {
                 "type": "string"
@@ -160242,6 +160939,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/DailyNoteCreateResult"
                   }
                 ]
               },
@@ -162749,6 +163449,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/DocumentCreatePlan"
                   }
                 ]
               },
@@ -187038,6 +187741,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/getSyncSourceState",
+      "handler": "getSyncSourceState",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SyncSourceState"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/importSyncProviderS3",
       "handler": "importSyncProviderS3",
       "authorization": [
@@ -194017,6 +194800,102 @@
     },
     {
       "method": "POST",
+      "path": "/api/tag/previewTagRemoval",
+      "handler": "previewTagRemoval",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/TagRemovalPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/TagRemovalCollection"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/tag/removeTag",
       "handler": "removeTag",
       "authorization": [
@@ -194097,6 +194976,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/tag/removeTagWithCollections",
+      "handler": "removeTagWithCollections",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/RemoveTagWithCollectionsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/tag/renameTag",
       "handler": "renameTag",
       "authorization": [
@@ -194107,6 +195066,86 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/RenameTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/template/cancelHTTP",
+      "handler": "cancelTemplateHTTP",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TemplateHTTPCancelRequestInput"
       },
       "response": {
         "anyOf": [
@@ -194282,6 +195321,86 @@
               },
               "data": {
                 "$ref": "#/$defs/TemplateDocumentInfo"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/template/httpPermission",
+      "handler": "templateHTTPPermission",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TemplateHTTPPermissionRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/TemplateHTTPPermissionData"
               },
               "msg": {
                 "type": "string"
@@ -194538,6 +195657,86 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/template/respondHTTP",
+      "handler": "respondTemplateHTTP",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TemplateHTTPReplyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

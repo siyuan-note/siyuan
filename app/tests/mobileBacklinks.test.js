@@ -190,7 +190,7 @@ const runCases = async (sources) => {
     editor.protyle.wysiwyg.element.focus();
     toolbar.focus();
     await tick();
-    assert.equal(typeof finishInput, "function", "focusout starts the pending editor flush");
+    assert.equal(typeof finishInput, "function", "focusout must start flushing the active editor");
     editor.protyle.wysiwyg.flushPendingInput = async () => {};
     let flushed = false;
     const flushing = registry.flushMobileSecondaryEditor(editor).then(() => {flushed = true;});

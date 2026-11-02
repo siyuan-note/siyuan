@@ -716,7 +716,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         return;
     }
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
-        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template"));
+        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
     if (type === "text" && !hasRenderedTemplate) {
         const stableCells = getStableTextCells(cellElements, blockElement);
         if (stableCells.length > 0) {
@@ -747,11 +747,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (isAVRichTextType(type)) {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field"></textarea>`;
     } else if (type === "url") {
-        const content = storedCellValue?.url?.content ?? cellElements[0].firstElementChild.getAttribute("data-href") ?? "";
+        const content = storedCellValue?.url?.content ?? cellElements[0].querySelector(".av__celltext")?.getAttribute("data-href") ?? "";
         html = `<textarea ${style} spellcheck="false" class="b3-text-field">${escapeHtml(content)}</textarea>`;
     } else if (type === "number") {
         const content = storedCellValue?.number?.isNotEmpty ? (storedCellValue.number.content ?? "").toString() :
-            cellElements[0].firstElementChild.getAttribute("data-content") || "";
+            cellElements[0].querySelector(".av__celltext")?.getAttribute("data-content") || "";
         html = `<input type="number" spellcheck="false" value="${escapeAttr(content)}" ${style} class="b3-text-field">`;
     } else {
         /// #if MOBILE
@@ -1478,9 +1478,6 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text = `<span class="av__celltext av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}">${getAVTemplateHTML(cellValue.renderedContent || "")}</span>`;
         if (cellValue.type === "block") {
             text = `<span class="av__cellprimary">${renderAVBlockIcon(cellValue, showIcon)}${text}</span>`;
-            const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
-            const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
-            text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
         }
     } else if ("template" === cellValue.type) {
         text = `<span class="av__celltext av__celltext--template">${cellValue ? getAVTemplateHTML(cellValue.template.content || "") : ""}</span>`;
@@ -1506,9 +1503,6 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${escapeHtmlTextAndAttr(cellValue.block.content)}</span>`;
         }
         text = `<span class="av__cellprimary">${text}</span>`;
-        const bindLabel = cellValue?.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
-        const updateIcon = cellValue?.isDetached ? "iconRef" : "iconRefresh";
-        text += `<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button></span>`;
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
@@ -1557,7 +1551,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "checkbox") {
         text += `<div class="fn__flex"><svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
         if (["gallery", "kanban"].includes(type) && cellValue?.checkbox?.content) {
-            text += `<span class="fn__space"></span>${cellValue?.checkbox?.content}`;
+            text += `<span class="fn__space"></span>${escapeHtmlTextAndAttr(cellValue.checkbox.content)}`;
         }
         text += "</div>";
     } else if (cellValue.type === "rollup") {
@@ -1583,6 +1577,12 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         if (text && text.endsWith(", ")) {
             text = text.substring(0, text.length - 2);
         }
+    }
+
+    if (cellValue.type === "block") {
+        const bindLabel = cellValue.isDetached ? window.siyuan.languages.bind : window.siyuan.languages.rebind;
+        const updateIcon = cellValue.isDetached ? "iconRef" : "iconRefresh";
+        text = `<span class="av__primary-container">${text}<span class="av__row-actions"><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.openBy}" data-type="av-row-open"><svg><use xlink:href="#iconOpen"></use></svg></button><button class="av__row-action av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${bindLabel}" data-type="av-row-update"><svg><use xlink:href="#${updateIcon}"></use></svg></button><button class="av__row-action av__row-more av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.more}" aria-haspopup="menu" data-type="av-row-more"><svg><use xlink:href="#iconMore"></use></svg></button></span></span>`;
     }
 
     if (showCopy && cellValue.type === "rollup" && text) {
@@ -1774,7 +1774,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            item.element.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
+            const contentElement = item.element.querySelector(".av__cellcontent") || item.element;
+            contentElement.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
                 item.element.dataset.dateFormat as TAVDateFormat);
             renderCellAttr(item.element, data);
             renderAVRichTextElements(item.element);

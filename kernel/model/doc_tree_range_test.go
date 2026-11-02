@@ -7,6 +7,7 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,6 +24,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocTreeRangeRetriesPendingWriter(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	for _, locate := range []bool{false, true} {
+		finish := cache.BeginDocTreeMutation(fixture.box.ID)
+		done := make(chan struct{})
+		go func() {
+			time.Sleep(10 * time.Millisecond)
+			finish()
+			close(done)
+		}()
+		var err error
+		if locate {
+			_, err = LocateDocTreeItem(context.Background(), fixture.box.ID, fixture.sourceID, DocTreeAccess{})
+		} else {
+			_, err = ListDocTreeRange(context.Background(), fixture.box.ID, "", 0, 32, "", DocTreeAccess{})
+		}
+		<-done
+		if err != nil {
+			t.Fatalf("pending writer (locate=%v): %v", locate, err)
+		}
+	}
+	finish := cache.BeginDocTreeMutation(fixture.box.ID)
+	defer finish()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Millisecond)
+	defer cancel()
+	if _, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 32, "", DocTreeAccess{}); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("retry ignored cancellation: %v", err)
+	}
+}
 
 func TestDocTreeRangeCompleteAndLocate(t *testing.T) {
 	fixture := setupFileOperationTest(t)
@@ -168,7 +199,11 @@ func TestDocTreeRangeChildCountCache(t *testing.T) {
 	access := DocTreeAccess{}
 	readParent := func(revision string, want int) *DocTreeRange {
 		t.Helper()
-		batch, err := ListDocTreeRange(ctx, fixture.box.ID, "", 1, 1, revision, access)
+		steps, err := LocateDocTreeItem(ctx, fixture.box.ID, fixture.sourceID, access)
+		if err != nil || len(steps) != 1 {
+			t.Fatalf("parent location: %+v, %v", steps, err)
+		}
+		batch, err := ListDocTreeRange(ctx, fixture.box.ID, "", steps[0].Index, 1, revision, access)
 		if err != nil || batch.Stale || len(batch.Files) != 1 || batch.Files[0].ID != fixture.sourceID || batch.Files[0].SubFileCount != want {
 			t.Fatalf("parent count %d: %+v, %v", want, batch, err)
 		}
@@ -190,6 +225,26 @@ func TestDocTreeRangeChildCountCache(t *testing.T) {
 		t.Fatalf("warm parent scanned %d sources for %d children, want only the parent", reads, count)
 	}
 	t.Logf("children=%d warm-parent-reads=%d elapsed=%s", count, reads, time.Since(started))
+	// 新建同级文档与写入排序配置不能让已有大目录再次扫描全部子文档。
+	reads = 0
+	started = time.Now()
+	sibling := addFileOperationTestDoc(t, fixture, "20260718070002-sibling", "Sibling", false)
+	sortPath := filepath.Join(util.DataDir, fixture.box.ID, ".siyuan", "sort.json")
+	if err := writeSortConfMap(sortPath, map[string]int{fixture.sourceID: 1, fixture.targetID: 2}); err != nil {
+		t.Fatal(err)
+	}
+	sortData, err := os.ReadFile(sortPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = appendSortConfMap(sortPath, sortData, map[string]int{sibling.ID: 3}); err != nil {
+		t.Fatal(err)
+	}
+	readParent("", count)
+	if reads > 8 {
+		t.Fatalf("sibling creation rescanned children: reads=%d children=%d", reads, count)
+	}
+	t.Logf("children=%d sibling-refresh-reads=%d elapsed=%s", count, reads, time.Since(started))
 	child := treenode.NewTree(fixture.box.ID, "/"+fixture.sourceID+"/20260718070001-newdoc1.sy", "/Source/New", "New")
 	if _, err := filesys.WriteTree(child); err != nil {
 		t.Fatal(err)
@@ -221,7 +276,7 @@ func TestDocTreeRangeChildCountCache(t *testing.T) {
 	Conf.FileTree.Load().Sort = util.SortModeSubDocCountDESC
 	reads = 0
 	batch, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 1, "", access)
-	if err != nil || len(batch.Files) != 1 || batch.Files[0].SubFileCount != count || reads != count+3 {
+	if err != nil || len(batch.Files) != 1 || batch.Files[0].SubFileCount != count || reads != count+4 {
 		t.Fatalf("count sort repeated metadata scan: batch=%+v reads=%d, err=%v", batch, reads, err)
 	}
 }

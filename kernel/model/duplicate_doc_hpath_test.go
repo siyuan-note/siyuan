@@ -74,6 +74,14 @@ func TestDuplicateDocHPath(t *testing.T) {
 				parentPath, parentHPath = parent.Path, parent.HPath
 			}
 			source := newHPathTestDoc(t, boxID, parentPath, "Example  Document", 1)
+			paragraph := &ast.Node{Type: ast.NodeParagraph}
+			paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "strong", TextMarkTextContent: "Example  Document"})
+			if err := treenode.SetDocumentTitleParagraph(source.Root, paragraph); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := filesys.WriteTree(source); err != nil {
+				t.Fatal(err)
+			}
 			// 保存规范化后的源文件，验证重复和导出不会改写原文档或密文。
 			source, err := filesys.LoadTree(boxID, source.Path, util.NewLute())
 			if err != nil {
@@ -88,6 +96,10 @@ func TestDuplicateDocHPath(t *testing.T) {
 				t.Fatal(err)
 			}
 			title := source.Root.IALAttr("title")
+			stored, err := filesys.LoadTree(boxID, source.Path, util.NewLute())
+			if err != nil || stored.Root.DocumentTitle == nil || stored.Root.IALAttr("title") != title {
+				t.Fatalf("persisted rich copy lost its suffix or formatting: %v", err)
+			}
 			wantHPath := parentHPath + "/" + title
 			if source.HPath != wantHPath || !strings.HasPrefix(title, "Example  Document (Duplicated ") {
 				t.Fatalf("invalid duplicate path: title=%q, hpath=%q", title, source.HPath)

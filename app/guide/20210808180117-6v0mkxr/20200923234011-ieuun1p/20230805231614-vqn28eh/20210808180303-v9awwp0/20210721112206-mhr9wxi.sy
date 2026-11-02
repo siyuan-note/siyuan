@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261026115057"
+		"updated": "20261102113000"
 	},
 	"Children": [
 		{
@@ -44,6 +44,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ folder logically consistent across devices, including assets, custom icons, third-party theme and icon packages, plugins, code snippets, templates, widgets, and document data. With on-demand downloads, some asset content may not yet be stored on this device."
+				}
+			]
+		},
+		{
+			"ID": "20261102100000-9iwlyi8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102100000-9iwlyi8",
+				"updated": "20261102100000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Synchronization transfers documents in their original format even when this version cannot read them. Unsupported documents cannot be opened or edited and are excluded from the local content index; upgrade to a version supporting their format to read them. Other compatible documents continue to synchronize normally. This does not guarantee safe mixed use with older clients: editing caches in older versions may still overwrite newer content."
 				}
 			]
 		},
@@ -409,6 +423,34 @@
 			]
 		},
 		{
+			"ID": "20261102160000-9592b55",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102160000-9592b55",
+				"updated": "20261102160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For S3 and WebDAV endpoints without a protocol, dotted hostnames use HTTPS by default; IP addresses, localhost, and single-label hostnames use HTTP. To connect to an HTTP-only service using a dotted hostname, enter http:// explicitly. Explicit http:// and https:// addresses are preserved, including saved configurations."
+				}
+			]
+		},
+		{
+			"ID": "20261102113000-c64909d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102113000-c64909d",
+				"updated": "20261102113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before changing the sync provider, endpoint, or directory, SiYuan saves open editors and creates a complete snapshot of the current data. When the new source is nonempty, automatic merging stops. Click Sync to review the local and source file counts, source time and device, and the number of files to upload, overwrite, or delete. Choose either upload from local data or restore from the source; neither direction is selected by default. Uploading publishes the current local snapshot without deleting extra stored objects in the source; restoring replaces local data according to the source. An empty source receives local data directly. A failed first sync keeps the source unconfirmed; review it again before retrying. The snapshot created before the change remains available in Data history."
+				}
+			]
+		},
+		{
 			"ID": "20261011151543-h1km9eh",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -450,7 +492,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261020231029-lr7z60a",
-				"updated": "20261024164212"
+				"updated": "20261101195843"
 			},
 			"Children": [
 				{
@@ -474,6 +516,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " reopens them."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon."
 				}
 			]
 		},
@@ -964,7 +1010,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
+					"Data": "While waiting to exit, the exit dialog displays incoming status bar messages so you can follow the current sync status. If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
 				}
 			]
 		},

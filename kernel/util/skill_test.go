@@ -5,8 +5,12 @@
 package util
 
 import (
+	"archive/zip"
 	"bytes"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -425,7 +429,7 @@ func TestNormalizeSkillURL(t *testing.T) {
 		{name: "full repo", in: "https://github.com/Tencent/WeChatReading", wantURL: "https://codeload.github.com/Tencent/WeChatReading/zip/refs/heads/main", wantIsZip: true, wantBranch: "main"},
 		// tree/<branch> → codeload 指定分支
 		{name: "tree branch", in: "https://github.com/foo/bar/tree/dev", wantURL: "https://codeload.github.com/foo/bar/zip/refs/heads/dev", wantIsZip: true, wantBranch: "dev"},
-		// tree/<branch>/<path> → 仍按整个仓库的该分支拉 zip
+		// tree/<branch>/<path> → 保留整个引用/路径，下载时确定边界
 		{name: "tree branch path", in: "https://github.com/foo/bar/tree/dev/skills/x", wantURL: "https://codeload.github.com/foo/bar/zip/refs/heads/dev", wantIsZip: true, wantBranch: "dev"},
 		// commit/<sha> → codeload zip/<sha>
 		{name: "commit sha", in: "https://github.com/foo/bar/commit/abc123", wantURL: "https://codeload.github.com/foo/bar/zip/abc123", wantIsZip: true},
@@ -454,6 +458,12 @@ func TestNormalizeSkillURL(t *testing.T) {
 			}
 			if c.wantBranch != "" && got.branch != c.wantBranch {
 				t.Errorf("branch = %q, want %q", got.branch, c.wantBranch)
+			}
+			if strings.Contains(c.in, "/tree/") {
+				wantPath := strings.SplitN(c.in, "/tree/", 2)[1]
+				if got.treeRepo != "foo/bar" || got.treePath != wantPath {
+					t.Fatalf("tree source lost scope: %+v", got)
+				}
 			}
 		})
 	}
@@ -574,5 +584,179 @@ func TestFirstLineTruncation(t *testing.T) {
 	got := firstLine(string(long))
 	if len([]rune(got)) != 203 { // 200 + "..."
 		t.Errorf("firstLine(long) len = %d, want 203", len([]rune(got)))
+	}
+}
+
+// TestCheckSkillDownloadRedirect 验证重定向复查拦截内网目标、非 HTTP(S) 协议与超长跳转链。
+func TestCheckSkillDownloadRedirect(t *testing.T) {
+	tooMany := make([]*http.Request, 5)
+	cases := []struct {
+		name   string
+		rawURL string
+		via    []*http.Request
+		want   string
+	}{
+		{"loopback", "http://127.0.0.1:6806/api/system/version", nil, "prohibited"},
+		{"ipv6 loopback", "http://[::1]:6806/", nil, "prohibited"},
+		{"private", "http://10.0.0.5:8080/", nil, "prohibited"},
+		{"scheme", "file:///etc/passwd", nil, "scheme"},
+		{"too many redirects", "https://example.com/", tooMany, "too many redirects"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodGet, c.rawURL, nil)
+			if err != nil {
+				t.Fatalf("build request: %v", err)
+			}
+			err = checkSkillDownloadRedirect(req, c.via)
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("checkSkillDownloadRedirect(%s) error = %v, want containing %q", c.rawURL, err, c.want)
+			}
+		})
+	}
+}
+
+// TestFetchBytesRejectsRedirectToPrivateAddress 验证下载被 302 指向内网时不会跟随。
+func TestFetchBytesRejectsRedirectToPrivateAddress(t *testing.T) {
+	previousClient := ssrfSafeClient
+	t.Cleanup(func() { ssrfSafeClient = previousClient })
+	ssrfSafeClient = &http.Client{Transport: webFetchRoundTripper(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Hostname() == "127.0.0.1" {
+			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"text/plain"}},
+				Body: io.NopCloser(strings.NewReader("INTERNAL-SERVICE")), Request: req}, nil
+		}
+		return &http.Response{StatusCode: http.StatusFound,
+			Header: http.Header{"Location": {"http://127.0.0.1:6806/latest/meta-data/"}},
+			Body:   io.NopCloser(strings.NewReader("")), Request: req}, nil
+	})}
+
+	data, _, err := fetchBytes("https://example.com/skill.zip")
+	if err == nil {
+		t.Fatalf("redirect to private address followed, got %q", string(data))
+	}
+}
+
+// TestFetchBytesBlocksPrivateAddress 验证直连内网地址在拨号阶段被拒绝。
+func TestFetchBytesBlocksPrivateAddress(t *testing.T) {
+	t.Setenv("HTTP_PROXY", "")
+	t.Setenv("HTTPS_PROXY", "")
+	t.Setenv("NO_PROXY", "")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("INTERNAL-SERVICE"))
+	}))
+	defer srv.Close()
+
+	if _, _, err := fetchBytes(srv.URL + "/skill.md"); err == nil || !strings.Contains(err.Error(), "prohibited") {
+		t.Fatalf("private address download error = %v, want prohibited", err)
+	}
+}
+
+// TestDownloadSkillSourceRejectsPrivateHost 验证解析期的内网主机预检保持生效。
+func TestDownloadSkillSourceRejectsPrivateHost(t *testing.T) {
+	src := normalizedSkillSource{downloadURL: "http://127.0.0.1:6806/skill.md"}
+	if _, _, err := downloadSkillSource(src); err == nil || !strings.Contains(err.Error(), "prohibited") {
+		t.Fatalf("downloadSkillSource(private) error = %v, want prohibited", err)
+	}
+}
+
+func TestInstallGitHubTreeScope(t *testing.T) {
+	var archive bytes.Buffer
+	w := zip.NewWriter(&archive)
+	for file, content := range map[string]string{
+		"repo-ref/SKILL.md":                   "---\nname: root\n---\nroot",
+		"repo-ref/skills/foo/SKILL.md":        "---\nname: foo\n---\nfoo",
+		"repo-ref/skills/foo/scripts/run.txt": "resource",
+		"repo-ref/skills/bar/SKILL.md":        "---\nname: bar\n---\nbar",
+		"repo-ref/skills/unnamed/SKILL.md":    "unnamed skill",
+		"repo-ref/skills-other/SKILL.md":      "---\nname: outside\n---\noutside",
+	} {
+		f, err := w.Create(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = io.WriteString(f, content); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name, tree, ref string
+		status          int
+		want            []string
+	}{
+		{"single", "main/skills/foo", "main", 200, []string{"foo"}},
+		{"collection", "main/skills", "main", 200, []string{"bar", "foo", "unnamed"}},
+		{"slash branch", "feat/x/skills/foo", "feat/x", 200, []string{"foo"}},
+		{"branch root", "feat/x", "feat/x", 200, []string{"root"}},
+		{"tag", "v1/skills/foo", "v1", 200, []string{"foo"}},
+		{"commit", "abc123/skills/foo", "abc123", 200, []string{"foo"}},
+		{"missing directory", "main/missing", "main", 200, nil},
+		{"file instead of directory", "main/skills/foo/SKILL.md", "main", 200, nil},
+		{"missing ref", "absent/skills/foo", "main", 200, nil},
+		{"forbidden", "main/skills/foo", "main", 403, nil},
+		{"server failure", "main/skills/foo", "main", 500, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			workspace, _ := setSkillTestRoots(t)
+			oldTemp := TempDir
+			TempDir = t.TempDir()
+			t.Cleanup(func() { TempDir = oldTemp })
+			oldClient := ssrfSafeClient
+			t.Cleanup(func() { ssrfSafeClient = oldClient })
+			var refs []string
+			ssrfSafeClient = &http.Client{Transport: webFetchRoundTripper(func(req *http.Request) (*http.Response, error) {
+				ref := strings.TrimPrefix(req.URL.Path, "/foo/bar/zip/")
+				refs = append(refs, ref)
+				status := tc.status
+				if status == 200 && ref != tc.ref {
+					status = 404
+				}
+				return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/zip"}},
+					Body: io.NopCloser(bytes.NewReader(archive.Bytes())), Request: req}, nil
+			})}
+			result, err := InstallSkill("https://github.com/foo/bar/tree/" + tc.tree)
+			if tc.want == nil {
+				if err == nil {
+					t.Fatalf("unexpected success: %+v", result)
+				}
+				if entries, _ := os.ReadDir(workspace); len(entries) != 0 {
+					t.Fatalf("installed on failure: %v", entries)
+				}
+			} else {
+				if err != nil {
+					t.Fatal(err)
+				}
+				sort.Strings(result.Names)
+				if !reflect.DeepEqual(result.Names, tc.want) {
+					t.Fatalf("names = %v, want %v", result.Names, tc.want)
+				}
+				entries, err := os.ReadDir(workspace)
+				if err != nil || len(entries) != len(tc.want) {
+					t.Fatalf("installed directories = %v, err %v", entries, err)
+				}
+				if tc.name == "single" {
+					data, err := os.ReadFile(filepath.Join(workspace, "foo", "scripts", "run.txt"))
+					if err != nil || string(data) != "resource" {
+						t.Fatalf("resource = %q, err %v", data, err)
+					}
+				}
+			}
+			if tc.status != 200 && len(refs) != 1 {
+				t.Fatalf("retried non-404 failure: %v", refs)
+			}
+			if tc.name == "slash branch" && !reflect.DeepEqual(refs, []string{"feat/x/skills/foo", "feat/x/skills", "feat/x"}) {
+				t.Fatalf("ref order: %v", refs)
+			}
+		})
+	}
+}
+
+func TestNormalizeGitHubTreeRejectsTraversal(t *testing.T) {
+	for _, tail := range []string{"main/../foo", "main/%2e%2e/foo", "main//foo", "main/C:/foo", "main/foo%5cbar"} {
+		if src, err := normalizeSkillURL("https://github.com/foo/bar/tree/" + tail); err == nil {
+			t.Fatalf("accepted unsafe tree: %+v", src)
+		}
 	}
 }

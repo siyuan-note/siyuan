@@ -244,10 +244,10 @@ const renderProfileCards = (root: HTMLElement) => {
     }
     const config = window.siyuan.config.appearance.entryVisibility;
     const cards = [
-        profileCard(ENTRY_PROFILE_SIMPLE, window.siyuan.languages.entrySimple, true,
-            config.active === ENTRY_PROFILE_SIMPLE),
         profileCard(ENTRY_PROFILE_FULL, window.siyuan.languages.entryFull, true,
             config.active === ENTRY_PROFILE_FULL),
+        profileCard(ENTRY_PROFILE_SIMPLE, window.siyuan.languages.entrySimple, true,
+            config.active === ENTRY_PROFILE_SIMPLE),
         ...config.profiles.map((profile) => profileCard(profile.id, profile.name, false,
             config.active === profile.id)),
     ];

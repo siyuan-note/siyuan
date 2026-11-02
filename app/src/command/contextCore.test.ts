@@ -2,7 +2,6 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     cloneCommandRange,
-    collectCommandFileTreeMetadata,
     createCommandContextSnapshot,
     isBottomBacklinkEditorContext,
     resolveCommandFocus,
@@ -40,18 +39,6 @@ describe("command context core", () => {
         assert.equal(resolveCommandFocus({...base, dock: true, editor: true}), "dock");
         assert.equal(resolveCommandFocus({...base, editor: true}), "editor");
         assert.equal(resolveCommandFocus(base), "global");
-    });
-
-    it("collects stable file tree identifiers", () => {
-        const elements = [
-            {getAttribute: (name: string) => name === "data-node-id" ? "first" : "/first.sy"},
-            {getAttribute: (name: string) => name === "data-node-id" ? null : "/second.sy"},
-        ];
-
-        assert.deepEqual(collectCommandFileTreeMetadata(elements), {
-            ids: ["first"],
-            paths: ["/first.sy", "/second.sy"],
-        });
     });
 
     it("distinguishes a bottom backlink editor from its owner editor", () => {

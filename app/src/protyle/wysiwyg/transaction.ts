@@ -59,6 +59,7 @@ import {
     getPartialUpdateCleanupElements,
     shouldDeferCodeBlockCaretRestore,
     shouldReloadForHeadingBatch,
+    shouldReloadForEmbedConversion,
 } from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {getVisibleMoveElements} from "./transactionMove";
@@ -95,6 +96,9 @@ import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {getTagRemovalChanges, previewTagRemoval, tagRemovalOperations} from "../util/tagRemoval";
+import {showMessage} from "../../dialog/message";
+import {getEditorFocusRange, restoreEditorFocusRange} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -174,8 +178,12 @@ const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOpera
         (attrs.fold === "1" || item.childElementCount > 3));
 };
 
-const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>, protyle?: IProtyle) => {
     const attrs = JSON.parse(operation.data);
+    if (Object.prototype.hasOwnProperty.call(attrs, "tags") && operation.id === protyle?.block.rootID && protyle.background) {
+        protyle.background.ial.tags = attrs.tags;
+        protyle.background.render(protyle.background.ial, operation.id);
+    }
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
     const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
@@ -591,7 +599,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
-                syncBlockAttrs(protyle.wysiwyg.element, operation);
+                syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -681,7 +689,7 @@ const promiseTransaction = (options: {
                         return;
                     }
                     if (operation.action === "setAttrs") {
-                        syncBlockAttrs(protyle.wysiwyg.element, operation);
+                        syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                     }
                     // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
                     if (operation.action === "addAttrViewCol" &&
@@ -894,6 +902,11 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
     }
+    if (shouldReloadForEmbedConversion(protyle.block.rootID, operations)) {
+        // 隐藏子块可能已在内核删除，直接重载可避免回放时定位失效 ID，并恢复折叠边界外的内容。
+        reloadProtyle(protyle, false);
+        return;
+    }
     if (!preserveTrackedRanges) {
         invalidateTrackedRangesByOperations(protyle, operations);
     }
@@ -931,7 +944,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            syncBlockAttrs(protyle.wysiwyg.element, operation);
+            syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
             return;
         }
         if (operation.action === "unfoldHeading") {
@@ -2522,6 +2535,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 callback?: () => void,
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
+                                tagRemovalConfirmed?: boolean,
                             }) => {
     const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
     if (owner && !owner.lite && owner !== protyle) {
@@ -2553,6 +2567,84 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
+    if (protyle && !options?.tagRemovalConfirmed) {
+        const changes = getTagRemovalChanges(doOperations, undoOperations);
+        if (changes.length) {
+            const wasDisabled = protyle.disabled;
+            const wasInert = protyle.element.inert;
+            const content = protyle.contentElement;
+            const scrollTop = content.scrollTop;
+            const overflowAnchor = content.style.getPropertyValue("overflow-anchor");
+            const anchorPriority = content.style.getPropertyPriority("overflow-anchor");
+            content.style.setProperty("overflow-anchor", "none");
+            const selection = getSelection();
+            const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
+                selection.rangeCount ? selection.getRangeAt(0) : undefined);
+            let focusContext = getUndoFocusContext(protyle.wysiwyg.element, focusRange, true);
+            const operationFocus = (operations?: IOperation[]) => {
+                const operation = operations?.find(item => item.action === "update" &&
+                    (!focusContext || item.id === focusContext.undoFocusId) &&
+                    typeof item.data === "string" && item.data.includes("<wbr"));
+                if (!operation || typeof operation.data !== "string") {
+                    return;
+                }
+                const container = document.createElement("div");
+                container.innerHTML = operation.data;
+                const marker = container.querySelector("wbr");
+                if (marker) {
+                    const range = document.createRange();
+                    range.setStartBefore(marker);
+                    range.collapse(true);
+                    return getUndoFocusContext(container, range, true);
+                }
+            };
+            focusContext = focusContext || operationFocus(doOperations);
+            // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
+            selection.removeAllRanges();
+            protyle.element.inert = true;
+            void (async () => {
+                let sourceRestored = false;
+                let entriesRemoved = false;
+                const restore = () => new Promise<void>(resolve => {
+                    sourceRestored = true;
+                    focusContext = operationFocus(undoOperations) || focusContext;
+                    reloadProtyle(protyle, false, false, resolve, resolve);
+                });
+                try {
+                    await waitForPendingTransactions(protyle);
+                    const groups = await previewTagRemoval(changes);
+                    if (groups === null) {
+                        await restore();
+                        return;
+                    }
+                    const cleanup = tagRemovalOperations(groups);
+                    entriesRemoved = cleanup.length > 0;
+                    transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
+                        {...options, tagRemovalConfirmed: true});
+                    await waitForPendingTransactions(protyle);
+                } catch (error) {
+                    showMessage(error.message);
+                    await restore();
+                } finally {
+                    protyle.element.inert = wasInert;
+                    if (!wasDisabled && !wasInert) {
+                        if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                            protyle.wysiwyg.element.focus({preventScroll: true});
+                            restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
+                        }
+                    }
+                    content.scrollTop = scrollTop;
+                    protyle.scroll.lastScrollTop = scrollTop;
+                    if (overflowAnchor) {
+                        content.style.setProperty("overflow-anchor", overflowAnchor, anchorPriority);
+                    } else {
+                        content.style.removeProperty("overflow-anchor");
+                    }
+                }
+            })();
+            return;
+        }
+    }
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {

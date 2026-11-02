@@ -29,6 +29,25 @@ func TestFindReplaceRichDocumentTitle(t *testing.T) {
 }
 
 func testFindReplaceRichDocumentTitle(t *testing.T, boxID string) {
+	t.Run("plain title replacement preserves complete literal text", func(t *testing.T) {
+		plain := newHPathTestDoc(t, boxID, "/", "Plain", 1)
+		text := strings.Repeat("Long literal **text** / ", 40) + "FOO"
+		paragraph := &ast.Node{Type: ast.NodeParagraph}
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(text)})
+		if err := treenode.SetDocumentTitleParagraph(plain.Root, paragraph); err != nil {
+			t.Fatal(err)
+		}
+		saveDocumentTitleFeatureTree(t, plain)
+		if err := FindReplaceInBox("FOO", "Bar/", map[string]bool{"docTitle": true}, []string{plain.ID}, nil, nil, nil, nil, 0, boxID); err != nil {
+			t.Fatal(err)
+		}
+		loaded, _, err := filesys.LoadTreeSnapshot(boxID, plain.Path, util.NewLute())
+		want := strings.ReplaceAll(text, "FOO", "Bar/")
+		if err != nil || loaded.Root.DocumentTitle != nil || loaded.Root.IALAttr("title") != want ||
+			loaded.Root.FirstChild.ID != plain.Root.FirstChild.ID {
+			t.Fatalf("plain replacement changed source or body: %v", err)
+		}
+	})
 	tree := newHPathTestDoc(t, boxID, "/", "Source", 1)
 	definition := newHPathTestDoc(t, boxID, "/", "Definition", 1)
 	paragraph := parse.Parse("", []byte("**FOO** ![FOO](assets/FOO.png) [FOO](https://example.com/FOO) $FOO$"), util.NewLute().ParseOptions).Root.FirstChild

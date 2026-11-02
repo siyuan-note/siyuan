@@ -55,7 +55,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Modify: block.update replaces ONE block's content — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
-- Attributes: attr.get/set on any block. Database/attribute views: database.create (database block with ordered fields), database.item_add (rows), database.key_add (columns), database.key_update (field configuration: name/type/icon/description, number/date format, display template, date defaults, select options, relation and rollup settings; inspect keys first, send exactly one config setting per call, and render to verify), database.key_set_template (existing template field formulas; use .action{add .Number 1} for a number field plus one, then render to verify; do not write computed template cells with item_update), database.render (view). Use database.get or search to locate the database and view IDs, then database.view_get with its carrier block ID to inspect metadata, ordered views, block-specific visibleViewIDs, filters, sorts, group, layout and revision. Use database.view_add/view_duplicate/view_remove for view lifecycle, view_update for name/icon/desc (omitted fields stay unchanged; empty icon/desc clears them), view_move for database-wide ordering, and view_visibility_set for the carrier block's complete visible view list (preserve other visible views and keep at least one). Metadata and order affect all mirrors; hiding a view affects only the specified carrier block. Use database.view_filters_set/view_sorts_set/view_group_set/view_layout_set for configuration; preserve unchanged rules when replacing the complete filters or sorts array, and use the revision from the latest view_get. Create database blocks via database.create, never via the file tool or generic block insertion.
+- Attributes: attr.get/set on any block. Database/attribute views: database.create (database block with ordered fields), database.item_add (rows), database.key_add (columns), database.key_update (field configuration: name/type/icon/description, number/date format, display template, date defaults, select options, relation and rollup settings; inspect keys first, send exactly one config setting per call, and render to verify), database.key_set_template (existing template field formulas; use .action{add .Number 1} for a number field plus one, then render to verify; do not write computed template cells with item_update), database.render (view). Use database.get or search to locate the database and view IDs, then database.view_get with its carrier block ID to inspect metadata, ordered views, block-specific visibleViewIDs, filters, sorts, group, layout and revision. Use database.view_add/view_duplicate/view_remove for view lifecycle, view_update for name/icon/desc (omitted fields stay unchanged; empty icon/desc clears them), view_move for database-wide ordering, and view_visibility_set for the carrier block's complete visible view list (preserve other visible views and keep at least one). Metadata and order affect all mirrors; hiding a view affects only the specified carrier block. Use database.view_field_move to reorder columns or card fields in a specific view, including the primary field; follow the tool description and verify the returned field order. Use database.view_filters_set/view_sorts_set/view_group_set/view_layout_set for configuration; preserve unchanged rules when replacing the complete filters or sorts array, and use the revision from the latest view_get. Create database blocks via database.create, never via the file tool or generic block insertion.
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to attach it to the current model for understanding. image.generate creates a reusable image asset for insertion or other document operations.
 - HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
@@ -170,7 +170,7 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
-				s = s[:64] + "..."
+				s = util.TruncateUTF8Bytes(s, 64) + "..."
 			}
 			sig.WriteString("::")
 			sig.WriteString(k)
@@ -1353,6 +1353,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 					}
 					if toolInputErr == nil {
+						toolInputErr = preflightCapabilitySnapshot(registration, action)
+					}
+					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
 					}
@@ -1868,6 +1871,15 @@ func needsCapabilitySnapshot(registration *capabilityRegistration, action string
 		return false
 	}
 	return needsLocalSnapshot(registration.ModelName, action)
+}
+
+// 本地写入必须先具备快照密钥；在请求确认前返回前置条件，允许本轮继续执行只读工具。
+func preflightCapabilitySnapshot(registration *capabilityRegistration, action string) error {
+	repo := kernelModel.Conf.Repo.Load()
+	if needsCapabilitySnapshot(registration, action) && (repo == nil || len(repo.Key) == 0) {
+		return errors.New(kernelModel.Conf.Language(26))
+	}
+	return nil
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {

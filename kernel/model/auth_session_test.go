@@ -126,21 +126,23 @@ func TestDesktopSessionLifecycle(t *testing.T) {
 	}
 }
 
-func TestDesktopSessionWorkspaceIsolationAndLegacyCookies(t *testing.T) {
+func TestDesktopSessionWorkspaceIsolationAndRememberedSessions(t *testing.T) {
 	setupOIDCTest(t)
 	oldDir, oldID := util.WorkspaceDir, desktopSessionID
 	t.Cleanup(func() { util.WorkspaceDir, desktopSessionID = oldDir, oldID })
 	Conf.AccessAuthCode = "password"
-	var sessions util.SessionData
-	if err := json.Unmarshal([]byte(`{"Workspaces":{"Note1":{"AccessAuthCode":"password","DesktopSessionID":"boot-one"},"Note2":{"AccessAuthCode":"password","DesktopSessionID":"boot-two"},"legacy":{"AccessAuthCode":"password"}}}`), &sessions); err != nil {
-		t.Fatal(err)
-	}
+	version := accessAuthCodeVersion("password")
+	sessions := util.SessionData{Workspaces: map[string]*util.WorkspaceSession{
+		"Note1":      {AccessAuthCodeVersion: version, DesktopSessionID: "boot-one"},
+		"Note2":      {AccessAuthCodeVersion: version, DesktopSessionID: "boot-two"},
+		"remembered": {AccessAuthCodeVersion: version},
+	}}
 	for _, tc := range []struct {
 		workspace, boot string
 		valid           bool
 	}{
 		{"Note1", "boot-one", true}, {"Note1", "reopened-one", false},
-		{"Note2", "boot-two", true}, {"legacy", "reopened-one", true},
+		{"Note2", "boot-two", true}, {"remembered", "reopened-one", true},
 	} {
 		util.WorkspaceDir, desktopSessionID = tc.workspace, tc.boot
 		if IsWorkspaceSessionAuthenticated(util.GetWorkspaceSession(&sessions)) != tc.valid {
@@ -152,5 +154,38 @@ func TestDesktopSessionWorkspaceIsolationAndLegacyCookies(t *testing.T) {
 	}
 	if IsWorkspaceSessionAuthenticated(nil) {
 		t.Fatal("nil session was authenticated")
+	}
+}
+
+func TestAccessCodeSessionStoresOnlyDigest(t *testing.T) {
+	setupOIDCTest(t)
+	Conf.OIDC.Enabled = false
+	Conf.AccessAuthCode = "lock-screen-password"
+	workspaceSession := &util.WorkspaceSession{}
+	SetAccessCodeSession(workspaceSession, Conf.AccessAuthCode)
+	data, err := json.Marshal(workspaceSession)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), Conf.AccessAuthCode) || workspaceSession.AccessAuthCodeVersion == "" {
+		t.Fatalf("session does not store only the access authorization code digest: %s", data)
+	}
+	if !IsAccessCodeSessionAuthenticated(workspaceSession) {
+		t.Fatal("current access authorization code session was rejected")
+	}
+
+	Conf.AccessAuthCode = "changed-password"
+	if IsAccessCodeSessionAuthenticated(workspaceSession) {
+		t.Fatal("session survived an access authorization code change")
+	}
+	Conf.AccessAuthCode = "lock-screen-password"
+	Conf.CookieKey = "rotated-cookie-key"
+	if IsAccessCodeSessionAuthenticated(workspaceSession) {
+		t.Fatal("session survived a cookie key change")
+	}
+	Conf.CookieKey = ""
+	SetAccessCodeSession(workspaceSession, Conf.AccessAuthCode)
+	if workspaceSession.AccessAuthCodeVersion != "" || IsAccessCodeSessionAuthenticated(workspaceSession) {
+		t.Fatal("session was authenticated without a cookie key")
 	}
 }

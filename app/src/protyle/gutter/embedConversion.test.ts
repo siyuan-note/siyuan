@@ -28,8 +28,10 @@ const browserCases = async (source: string, helpers: string) => {
     window.siyuan = {config: {editor: {headingEmbedMode: 0}}, languages: {
         refExpired: "Missing source", embedToBlocks: "Convert to regular blocks", embedToReferences: "Convert to references",
     }} as unknown as typeof window.siyuan;
-    const copiedHelpers = new Function("Constants", "BLOCK_SELECTION_MODE_CLASS", helpers +
-        "; return {clearBlockElement, remapTabsDOMIDs, wrapPastedTabItems, removeFoldHeading};")(constants, "block-selection-mode");
+    let replayReloads = 0;
+    const copiedHelpers = new Function("Constants", "BLOCK_SELECTION_MODE_CLASS", "reloadProtyle", helpers +
+        "; return {clearBlockElement, remapTabsDOMIDs, wrapPastedTabItems, removeFoldHeading, onTransaction};")(
+        constants, "block-selection-mode", () => replayReloads++);
     let context: {allowChildOperation: boolean; targetElement: Element} | undefined;
     let hook: () => void;
     let pending: Promise<void> = Promise.resolve();
@@ -225,6 +227,13 @@ const browserCases = async (source: string, helpers: string) => {
     check.match(hiddenOperation.data, /Hidden child/);
     check.equal(hiddenOperation.context.ignoreProcess, "true", "the complete hidden copy is persisted without replaying it visibly");
     const foldedOperations = transactions.at(-1);
+    check.equal(foldedOperations.redo.at(-1).context.headingBatchRootID, "root");
+    check.equal(foldedOperations.undo.at(-1).context.headingBatchRootID, "root");
+    const foldedDOM = root.innerHTML;
+    copiedHelpers.onTransaction(owner, foldedOperations.undo, true);
+    copiedHelpers.onTransaction(owner, foldedOperations.redo, true);
+    check.equal(replayReloads, 2, "both replay directions reload before trying to locate hidden or deleted blocks");
+    check.equal(root.innerHTML, foldedDOM, "partial DOM replay must not run before the canonical reload");
     const convertedID = root.firstElementChild.getAttribute("data-node-id");
     const outside = add("Outside existing content");
     root.innerHTML = foldedOperations.undo.at(-1).data + blocks.get(outside);
@@ -311,7 +320,12 @@ test("embed conversion preserves content and order, supports undo, and guards un
 }, async () => {
     const source = compile(readFileSync(path.join(__dirname, "embedConversion.ts"), "utf8"));
     const clear = createSourceFile("clear.ts", readFileSync(path.join(__dirname, "../util/clear.ts"), "utf8"), ScriptTarget.Latest, true);
-    const helpers = compile(clear.statements.filter(statement => isVariableStatement(statement) &&
+    const transactionsSource = createSourceFile("transaction.ts", readFileSync(path.join(__dirname, "../wysiwyg/transaction.ts"), "utf8"), ScriptTarget.Latest, true);
+    const replay = transactionsSource.statements.find(statement => isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(declaration => declaration.name.getText(transactionsSource) === "onTransaction"));
+    const helpers = compile(replay.getText(transactionsSource)) +
+        compile(readFileSync(path.join(__dirname, "../wysiwyg/transactionUpdate.ts"), "utf8")) +
+        compile(clear.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(declaration =>
             ["clearViewState", "clearBlockElement"].includes(declaration.name.getText(clear))))
         .map(statement => statement.getText(clear)).join("\n")) +

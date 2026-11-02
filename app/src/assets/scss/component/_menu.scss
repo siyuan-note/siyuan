@@ -176,7 +176,7 @@
     & > .b3-menu__items--menu,
     .b3-menu__submenu > .b3-menu__items--menu {
       box-sizing: border-box;
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)));
     }
 
     & > .b3-menu__items--menu > .b3-menu__item,
@@ -326,7 +326,7 @@
     box-sizing: border-box;
     height: 100%;
     overflow: auto;
-    padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)));
   }
 
   &--fullscreen &__groups {
@@ -503,6 +503,15 @@
 
       & > .b3-menu__action {
         opacity: 1;
+      }
+    }
+
+    &--wrap {
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      > .b3-menu__label {
+        min-width: 0;
       }
     }
 

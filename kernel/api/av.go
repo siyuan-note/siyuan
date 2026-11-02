@@ -372,8 +372,12 @@ var getAttributeViewFieldViews = contractHandler(apicontract.GetAttributeViewFie
 })
 
 var createAttributeViewItem = contractHandler(apicontract.CreateAttributeViewItem, func(c *gin.Context, request apicontract.CreateAttributeViewItemRequest) apicontract.Response[apicontract.AVCreateItemResult] {
-	value, err := model.CreateAttributeViewItem(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, request.CalendarDate)
-	return createAVItemResponse(value, err, request.App, request.Session)
+	selection, err := documentSelectionModel(request.Selection)
+	if err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	value, err := model.CreateAttributeViewItemWithSelection(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, request.CalendarDate, selection)
+	return createAVItemResponse(c, value, err, request.App, request.Session)
 })
 
 var createAttributeViewRelationItem = contractHandler(apicontract.CreateAttributeViewRelationItem, func(c *gin.Context, request apicontract.CreateAttributeViewRelationItemRequest) apicontract.Response[apicontract.AVCreateItemResult] {
@@ -395,8 +399,17 @@ var createAttributeViewRelationItem = contractHandler(apicontract.CreateAttribut
 		}
 		cells = append(cells, &model.AttributeViewRelationItemCell{ItemID: cell.ItemID, RelatedItemIDs: cell.RelatedItemIDs})
 	}
-	result, err := model.CreateAttributeViewRelationItem(request.AvID, request.BlockID, request.KeyID, request.Keyword, cells, preview, request.UseInputName)
+	selection, err := documentSelectionModel(request.Selection)
 	if err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	result, err := model.CreateAttributeViewRelationItem(request.AvID, request.BlockID, request.KeyID, request.Keyword, cells, preview, request.UseInputName, selection)
+	if err != nil {
+		if failure, leaseErr := documentSelectionFailure(c, err); leaseErr != nil {
+			return apicontract.Failure[apicontract.AVCreateItemResult](-1, leaseErr.Error())
+		} else if failure != nil {
+			return apicontract.CreateAttributeViewRelationItem.FailureWithData(-1, err.Error(), apicontract.NewAVCreateItemSelectionFailure(*failure))
+		}
 		if errors.Is(err, model.ErrBoxNotFound) {
 			return apicontract.CreateAttributeViewRelationItem.FailureWithData(1, "", apicontract.NewAVCreateItemResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))
 		}
@@ -407,13 +420,26 @@ var createAttributeViewRelationItem = contractHandler(apicontract.CreateAttribut
 })
 
 var createAttributeViewItemWithMarkdown = contractHandler(apicontract.CreateAttributeViewItemWithMarkdown, func(c *gin.Context, request apicontract.CreateAttributeViewItemWithMarkdownRequest) apicontract.Response[apicontract.AVCreateItemResult] {
-	value, err := model.CreateAttributeViewItemWithMarkdown(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, &model.CreateAttributeViewItemMarkdown{Title: request.Title, Markdown: request.Markdown, Tags: request.Tags, WithMath: request.WithMath, ClippingHref: request.ClippingHref, ListDocTree: request.ListDocTree})
-	return createAVItemResponse(value, err, request.App, request.Session)
+	selection, err := documentSelectionModel(request.Selection)
+	if err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	value, err := model.CreateAttributeViewItemWithMarkdown(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, &model.CreateAttributeViewItemMarkdown{Title: request.Title, Markdown: request.Markdown, Tags: request.Tags, WithMath: request.WithMath, ClippingHref: request.ClippingHref, ListDocTree: request.ListDocTree}, selection)
+	return createAVItemResponse(c, value, err, request.App, request.Session)
 })
 
 var createAttributeViewItemDocs = contractHandler(apicontract.CreateAttributeViewItemDocs, func(c *gin.Context, request apicontract.CreateAttributeViewItemDocsRequest) apicontract.Response[apicontract.AVCreateItemDocsResult] {
-	value, err := model.CreateAttributeViewItemDocs(request.AvID, request.BlockID, request.SaveMode, avNonemptyStrings(request.ItemIDs))
+	selection, err := documentSelectionModel(request.Selection)
 	if err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemDocsResult](-1, err.Error())
+	}
+	value, err := model.CreateAttributeViewItemDocs(request.AvID, request.BlockID, request.SaveMode, avNonemptyStrings(request.ItemIDs), selection)
+	if err != nil {
+		if failure, leaseErr := documentSelectionFailure(c, err); leaseErr != nil {
+			return apicontract.Failure[apicontract.AVCreateItemDocsResult](-1, leaseErr.Error())
+		} else if failure != nil {
+			return apicontract.CreateAttributeViewItemDocs.FailureWithData(-1, err.Error(), apicontract.NewAVCreateItemDocsSelectionFailure(*failure))
+		}
 		if errors.Is(err, model.ErrBoxNotFound) {
 			return apicontract.CreateAttributeViewItemDocs.FailureWithData(1, "", apicontract.NewAVCreateItemDocsResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))
 		}
@@ -485,9 +511,18 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 	if request.CreateIfNotExist != nil {
 		create = *request.CreateIfNotExist
 	}
-	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, model.AttributeViewRenderOptions{
+	execution, executionErr := startTemplateHTTP(c, "attribute-view:"+request.ID+":"+request.BlockID)
+	if executionErr != nil {
+		return apicontract.Failure[apicontract.AVRenderResult](-1, executionErr.Error())
+	}
+	defer execution.Close()
+	options := model.AttributeViewRenderOptions{
 		CalendarRange: fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort), Nested: fromContractAVNestedRequest(request.Nested),
-	})
+	}
+	if execution != nil {
+		options.TemplateHTTP = execution.Runtime
+	}
+	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, options)
 })
 
 var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeViewCalendarUndated, func(c *gin.Context, request apicontract.AVCalendarUndatedRequest) apicontract.Response[apicontract.AVCalendarUndatedData] {

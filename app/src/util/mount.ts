@@ -14,18 +14,26 @@ import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {genNotebookOptionsHTML, getLastDailyNoteNotebookId} from "./dailyNote";
 import {getHostCapabilities} from "./hostCapabilities";
+import {fetchWithDocumentSelection} from "./documentSelectionRequest";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
 import * as path from "path";
 /// #endif
 
+const pendingDailyNotes = new Map<string, Promise<void>>();
+
 export const fetchNewDailyNote = (app: App, notebook: string) => {
-    fetchPost("/api/filetree/createDailyNote", {
+    const pending = pendingDailyNotes.get(notebook);
+    if (pending) {
+        return pending;
+    }
+    const request = fetchWithDocumentSelection(selection => fetchSyncPost("/api/filetree/createDailyNote", {
+        selection,
         notebook,
         app: Constants.SIYUAN_APPID,
-    }, (response) => {
-        if (response.code !== 0) {
+    }, undefined, false), {notebooks: [notebook]}).then(response => {
+        if (!response || response.code !== 0 || !("id" in response.data)) {
             return;
         }
         /// #if MOBILE
@@ -33,7 +41,9 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
         /// #else
         openFileById({app, id: response.data.id, action: [Constants.CB_GET_SCROLL, Constants.CB_GET_FOCUS]});
         /// #endif
-    });
+    }).finally(() => pendingDailyNotes.delete(notebook));
+    pendingDailyNotes.set(notebook, request);
+    return request;
 };
 
 const openDailyNote = (app: App, useLastNotebook: boolean) => {

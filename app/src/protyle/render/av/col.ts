@@ -1,3 +1,4 @@
+import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
@@ -174,7 +175,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="nobg">
     <textarea spellcheck="false" rows="${Math.min(colData.template.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${escapeHtml(colData.template)}</textarea>
-</button>`;
+</button>${templateHTTPPermissionHTML("template")}`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
@@ -238,7 +239,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator" data-id="separator_render_template"></button>
 <button class="b3-menu__item" data-type="nobg">
     <textarea spellcheck="false" rows="${Math.min(renderTemplate.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateRenderTemplate" style="margin: 4px 0" class="fn__block b3-text-field">${escapeHtml(renderTemplate)}</textarea>
-</button>`;
+</button>${templateHTTPPermissionHTML("renderTemplate")}`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
 <label class="b3-menu__item">
@@ -312,6 +313,9 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    (["template", "renderTemplate"] as const).forEach(slot => {
+        bindTemplateHTTPPermission(options.menuElement, {kind: "av", avID, keyID: colId, slot});
+    });
     const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
     if (visibilityElement) {
         const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [

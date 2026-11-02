@@ -11,30 +11,32 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestPluginRPCHandshakeReleasesWriteAdmission(t *testing.T) {
 	for _, entry := range []struct {
+		method      string
 		route, path string
 		idle        bool
 	}{
-		{"/ws/plugin/rpc", "/ws/plugin/rpc?name=test", true},
-		{"/ws/plugin/rpc/:name", "/ws/plugin/rpc/test", true},
-		{"/api/test/write", "/api/test/write", false},
+		{http.MethodGet, "/ws/plugin/rpc", "/ws/plugin/rpc?name=test", true},
+		{http.MethodGet, "/ws/plugin/rpc/:name", "/ws/plugin/rpc/test", true},
+		{http.MethodPost, "/mcp", "/mcp", true},
+		{http.MethodDelete, "/mcp", "/mcp", true},
+		{http.MethodPost, "/api/test/write", "/api/test/write", false},
 	} {
 		t.Run(entry.path, func(t *testing.T) {
 			task := prepareSyncCheckoutStateTest(t)
 			entered, release, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
 			engine := gin.New()
-			engine.GET(entry.route, func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) }, CheckReadonly, func(c *gin.Context) {
+			engine.Handle(entry.method, entry.route, func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) }, CheckReadonly, func(c *gin.Context) {
 				close(entered)
 				<-release
 			})
 			go func() {
 				defer close(done)
-				engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, entry.path, nil))
+				engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(entry.method, entry.path, nil))
 			}()
 			defer func() { close(release); <-done }()
 			<-entered
@@ -44,7 +46,7 @@ func TestPluginRPCHandshakeReleasesWriteAdmission(t *testing.T) {
 					t.Fatalf("idle RPC connection blocked sync: %v", err)
 				}
 				task.completeApply()
-			} else if !errors.Is(err, dejavu.ErrIndexFileChanged) {
+			} else if !errors.Is(err, errSyncCheckoutBusy) {
 				t.Fatalf("ordinary write lost its admission lease: %v", err)
 			}
 		})
@@ -52,6 +54,14 @@ func TestPluginRPCHandshakeReleasesWriteAdmission(t *testing.T) {
 }
 
 func TestPluginRPCWriteAdmission(t *testing.T) {
+	testWorkspaceWriteAdmission(t, AcquirePluginRPCWrite)
+}
+
+func TestMCPToolWriteAdmission(t *testing.T) {
+	testWorkspaceWriteAdmission(t, AcquireMCPToolWrite)
+}
+
+func testWorkspaceWriteAdmission(t *testing.T, acquire func() (func(), error)) {
 	task := prepareSyncCheckoutStateTest(t)
 	previousReadonly := util.ReadOnly
 	previousRecovery := dataImportRecoveryRequired.Load()
@@ -59,7 +69,7 @@ func TestPluginRPCWriteAdmission(t *testing.T) {
 	util.Langs["en"][34] = "Read only"
 	util.Langs["en"][239] = "Busy"
 	util.Langs["en"][424] = "Recovery required"
-	release, err := AcquirePluginRPCWrite()
+	release, err := acquire()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +82,7 @@ func TestPluginRPCWriteAdmission(t *testing.T) {
 	if err = task.prepareApply(); err != nil {
 		t.Fatal(err)
 	}
-	if release, err = AcquirePluginRPCWrite(); err == nil {
+	if release, err = acquire(); err == nil {
 		release()
 		t.Fatal("RPC admitted during sync application")
 	}
@@ -94,7 +104,7 @@ func TestPluginRPCWriteAdmission(t *testing.T) {
 				dataImportAccess.Lock()
 				defer dataImportAccess.Unlock()
 			}
-			release, err := AcquirePluginRPCWrite()
+			release, err := acquire()
 			if err == nil {
 				release()
 				t.Fatal("RPC admitted while workspace was unavailable")

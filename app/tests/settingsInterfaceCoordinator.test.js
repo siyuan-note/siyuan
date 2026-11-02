@@ -4,7 +4,7 @@ const {readFileSync} = require("node:fs");
 const {test} = require("node:test");
 const {runInNewContext} = require("node:vm");
 const ts = require("typescript");
-const {createSettingsWindows} = require("../electron/settingsWindows");
+const {mockElectron, resetElectronStub} = require("../electron/fixtures/electronStub");
 
 const compile = file => ts.transpileModule(readFileSync(file, "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
@@ -12,7 +12,7 @@ const compile = file => ts.transpileModule(readFileSync(file, "utf8"), {
 const interfaceCode = compile("src/config/setting/interface.ts");
 const nativeCode = compile("src/config/setting/nativeWindow.ts");
 
-const setup = () => {
+const setup = (t) => {
     const handlers = new Map();
     const messages = [];
     const targets = new Map();
@@ -20,8 +20,12 @@ const setup = () => {
     const children = [];
     const renderers = [];
     let sequence = 0;
+    // ipcMain 由 electron 替身提供：被测模块首次加载前必须先建立绑定。
+    resetElectronStub();
+    mockElectron(t, {ipcMain: {on: (name, callback) => handlers.set(name, callback),
+        handle: (name, callback) => handlers.set(name, callback)}});
+    const {createSettingsWindows} = require("../electron/window/settingsWindows");
     const policy = createSettingsWindows({
-        ipcMain: {on: (name, callback) => handlers.set(name, callback), handle: (name, callback) => handlers.set(name, callback)},
         getTarget: id => targets.get(id), getWindows: () => windows,
         initialize: (win, target) => { targets.set(win.webContents.id, target); windows.push(win); },
         screen: {}, show() {}, log() {},
@@ -117,8 +121,8 @@ const setup = () => {
 };
 
 for (const reuse of [false, true]) {
-    test(`a different renderer closes workspace builtin settings before opening its dialog (reuse=${reuse})`, async () => {
-        const {renderer, flush, children} = setup();
+    test(`a different renderer closes workspace builtin settings before opening its dialog (reuse=${reuse})`, async (t) => {
+        const {renderer, flush, children} = setup(t);
         const a = renderer();
         const b = renderer();
         await a.openNative();
@@ -130,8 +134,8 @@ for (const reuse of [false, true]) {
     });
 }
 
-test("native settings close sibling builtin dialogs and preserve plugin dialogs and other workspaces", async () => {
-    const {renderer, flush} = setup();
+test("native settings close sibling builtin dialogs and preserve plugin dialogs and other workspaces", async (t) => {
+    const {renderer, flush} = setup(t);
     const a = renderer();
     const b = renderer();
     const other = renderer("https://other.example.com");
@@ -145,8 +149,8 @@ test("native settings close sibling builtin dialogs and preserve plugin dialogs 
     assert.equal(otherDialog.isDestroyed(), false);
 });
 
-test("late switch notifications preserve the latest dialog across alternating renderers", () => {
-    const {renderer, flush} = setup();
+test("late switch notifications preserve the latest dialog across alternating renderers", (t) => {
+    const {renderer, flush} = setup(t);
     const a = renderer();
     const b = renderer();
     const first = a.openDialog();
@@ -158,8 +162,8 @@ test("late switch notifications preserve the latest dialog across alternating re
     assert.equal(latest.isDestroyed(), false);
 });
 
-test("a canceled native prepare reply cannot replace a newer dialog", async () => {
-    const {renderer, flush, children} = setup();
+test("a canceled native prepare reply cannot replace a newer dialog", async (t) => {
+    const {renderer, flush, children} = setup(t);
     const a = renderer();
     a.hold();
     const opening = a.openNative();
@@ -171,8 +175,8 @@ test("a canceled native prepare reply cannot replace a newer dialog", async () =
     assert.equal(latest.isDestroyed(), false);
 });
 
-test("concurrent native reuse preserves the creator's pending reservation", async () => {
-    const {renderer, flush, children} = setup();
+test("concurrent native reuse preserves the creator's pending reservation", async (t) => {
+    const {renderer, flush, children} = setup(t);
     const a = renderer();
     const b = renderer();
     a.hold();
@@ -185,8 +189,8 @@ test("concurrent native reuse preserves the creator's pending reservation", asyn
     assert.equal(children[0].isDestroyed(), false);
 });
 
-test("switching to dialogs leaves plugin native windows and other workspace native settings open", async () => {
-    const {renderer, flush, children} = setup();
+test("switching to dialogs leaves plugin native windows and other workspace native settings open", async (t) => {
+    const {renderer, flush, children} = setup(t);
     const a = renderer();
     const b = renderer();
     const other = renderer("https://other.example.com");
@@ -198,8 +202,8 @@ test("switching to dialogs leaves plugin native windows and other workspace nati
     assert.deepEqual(children.map(win => win.isDestroyed()), [false, false, true]);
 });
 
-test("dialog switching rejects subframes, unregistered senders and non-app pages", async () => {
-    const {renderer, handlers, children} = setup();
+test("dialog switching rejects subframes, unregistered senders and non-app pages", async (t) => {
+    const {renderer, handlers, children} = setup(t);
     const a = renderer();
     const b = renderer();
     await a.openNative();

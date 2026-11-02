@@ -378,10 +378,11 @@ for (const mobile of [false, true]) {
         const window = {siyuan: {config}};
         const systemSource = createSourceFile("processSystem.ts", parse(readFileSync("src/dialog/processSystem.ts", "utf8"),
             {MOBILE: mobile, BROWSER: mobile}, false, true), ScriptTarget.ES2021, true);
-        const processSync = systemSource.statements.find(statement => isVariableStatement(statement) &&
-            statement.declarationList.declarations.some(item => item.name.getText(systemSource) === "processSync"));
+        const processSync = systemSource.statements.filter(statement => isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(item => ["lastSyncResult", "processSync"].includes(item.name.getText(systemSource))))
+            .map(statement => statement.getText(systemSource)).join("\n");
         const runtime = {} as {processSync: () => void};
-        runInNewContext(compile(processSync.getText(systemSource)), {exports: runtime, window, document, needSubscribe: () => false});
+        runInNewContext(compile(processSync), {exports: runtime, window, document, needSubscribe: () => false});
         let refreshes = 0;
         const exports = {} as {refreshSettingConfig: (namespace: string) => Promise<void>};
         runInNewContext(compile(readFileSync("src/config/setting/sync.ts", "utf8")), {

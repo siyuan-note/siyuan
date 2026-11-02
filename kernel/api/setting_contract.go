@@ -37,9 +37,8 @@ func settingAIPayload(value *conf.AI) *apicontract.SettingAI {
 	}
 	result := &apicontract.SettingAI{}
 	if value.Memory != nil {
-		result.Memory = &apicontract.SettingMemory{Enabled: value.Memory.Enabled, AutoMaintain: value.Memory.AutoMaintain,
-			Conversations: value.Memory.Conversations, ModelID: value.Memory.ModelID, ReasoningEffort: value.Memory.ReasoningEffort,
-			Sources: append([]string{}, value.Memory.Sources...)}
+		result.Memory = &apicontract.SettingMemory{Enabled: value.Memory.Enabled,
+			ModelID: value.Memory.ModelID, ReasoningEffort: value.Memory.ReasoningEffort}
 	}
 	if value.Web != nil {
 		result.Web = &apicontract.SettingAIWeb{SearchProvider: value.Web.SearchProvider,
@@ -606,6 +605,7 @@ func settingAppearancePayload(value *conf.Appearance) *apicontract.SettingAppear
 		return nil
 	}
 	result := &apicontract.SettingAppearance{}
+	result.ShowFloatingDockBar = value.ShowFloatingDockBar
 	result.LockScreenWallpaper = value.LockScreenWallpaper
 	result.CompactMode = value.CompactMode
 	result.MenuMouseScroll = value.MenuMouseScroll

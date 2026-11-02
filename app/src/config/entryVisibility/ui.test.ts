@@ -9,6 +9,28 @@ import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolb
 import * as dockOrder from "./dockOrder";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 
+test("entry profile cards show Full first without changing the active saved profile", () => {
+    const code = transpileModule(readFileSync("src/config/entryVisibility/ui.ts", "utf8") +
+        "\nexports.render = renderProfileCards;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    for (const active of ["full", "simple", "custom"]) {
+        const config = {active, profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]};
+        const original = JSON.stringify(config);
+        const container = {innerHTML: ""};
+        const exports = {} as {render: (root: unknown) => void};
+        runInNewContext(code, {exports, window: {siyuan: {languages: {}, config: {appearance: {entryVisibility: config}}}},
+            require: () => ({ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple",
+                escapeAttr: (text: string) => text, escapeHtml: (text: string) => text,
+                getHostCapabilities: () => ({importExport: false}), DOCK_ORDER_SCOPES_BY_SIDE: {}})});
+        exports.render({querySelector: () => container});
+        assert.deepEqual(Array.from(container.innerHTML.matchAll(/data-profile-id="([^"]+)"/g), match => match[1]),
+            ["full", "simple", "custom"]);
+        assert.equal(container.innerHTML.match(/b3-card b3-card--current" data-profile-id="([^"]+)"/)[1], active);
+        assert.equal(JSON.stringify(config), original);
+    }
+});
+
 test("entry settings show exit only on native tablets without changing the persisted catalog", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/ui.ts"), "utf8");
     const compiled = transpileModule(source + "\nexports.catalog = getVisibleEntryCatalog;", {

@@ -1,5 +1,6 @@
 import {isAVSelectType} from "./capabilities";
-import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems} from "./subItemsState";
+import {guardTemplateHTTPRequest} from "../../../template/http";
+import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems, restoreSubItemsView} from "./subItemsState";
 import {prepareSubItemsRefresh} from "./subItemsRefresh";
 import {locateRequests} from "./locateState";
 import {renderCalendar} from "./calendar/render";
@@ -210,8 +211,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
+    virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
     if (data.nested) {
-        virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
+        if (data.rows.length > 100) {
+            virtualData = virtualData || {renderedStart: 0, renderedEnd: 99, topSpacerHeight: 0};
+            reserveVirtualHeight = true;
+        }
     }
     const viewType = e.dataset.avType === "list" ? "list" : "table";
     let calcHTML = "";
@@ -281,7 +286,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             if (rowIndex < virtualData.renderedStart) {
                 return;
             }
-        } else if ((data.nested ? data.rows.length : data.pageSize) > 100 && rowIndex > 99) {
+        } else if (data.rows.length > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
@@ -305,7 +310,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
             <span>${window.siyuan.languages.loadMore}</span>
             <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
         </button>`}
-        ${data.nested ? `<span class="ft__secondary av__sub-items-count">${escapeHtml(window.siyuan.languages.avSubItemsCounts.replace("${roots}", String(data.nested.rootCount)).replace("${matches}", String(data.nested.matchedCount)))}</span>` : ""}
+        ${data.nested ? `<span class="ft__on-surface av__sub-items-count">${escapeHtml(window.siyuan.languages.avSubItemsCounts.replace("${roots}", String(data.nested.rootCount)).replace("${matches}", String(data.nested.matchedCount)))}</span>` : ""}
     </div>
 </div>
 <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`;
@@ -444,6 +449,10 @@ const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
     renderAVRichTextElements(options.blockElement);
     if (!refreshAVCellSelection(options.blockElement, options.data)) {
+        const avPanelElement = document.querySelector(".av__panel");
+        if (avPanelElement && isAVCellPanelForBlock(avPanelElement, options.blockElement)) {
+            avPanelElement.remove();
+        }
         options.resetData.selectCellId = undefined;
         options.resetData.dragFillId = undefined;
         options.resetData.activeIds = [];
@@ -711,6 +720,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 query: resetData.query.trim(),
             };
             const carrierViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+            const requestGuard = guardTemplateHTTPRequest(() => isCurrentAVRender(e, renderToken), e);
             const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
                 ...common, ...paging, created, carrierViewID,
             }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
@@ -722,7 +732,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
                 temporarySort: getReadonlyAVSortRequest(e, protyle, common.viewID),
-            }, undefined, false));
+            }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }
@@ -733,6 +743,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 continue;
             }
             data = response.data;
+            if (restoreSubItemsView(e, protyle, data, nested, resetData.query.trim())) {
+                await avRender(e, protyle, cb, renderAll);
+                continue;
+            }
         } else {
             data = avData;
         }

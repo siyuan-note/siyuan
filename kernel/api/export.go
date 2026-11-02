@@ -779,7 +779,7 @@ var copyExportFile = contractHandler(apicontract.CopyExportFile, func(c *gin.Con
 		defer model.ReleaseBoxReadLock(boxID)
 	}
 
-	if util.IsSensitivePath(dest) {
+	if util.IsSensitiveWritePath(dest) {
 		return apicontract.Failure[apicontract.Null](-2, "refuse to copy to sensitive path: "+dest)
 	}
 

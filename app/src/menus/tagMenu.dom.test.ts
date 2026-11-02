@@ -54,7 +54,11 @@ const browserCases = (sources: Record<string, string>, tagSource: string, focusS
             const menuElement = document.createElement("div");
             document.body.append(menuElement);
             const options = new Map<string, IMenu>();
-            const menu = {element: menuElement, removeCB: undefined as (() => void), remove() {},
+            const menu = {element: menuElement, removeCB: undefined as (() => void), remove() {
+                const callback = this.removeCB;
+                this.removeCB = undefined;
+                callback?.();
+            },
                 append: (element: Element) => menuElement.append(element), fullscreen() {}, popup() {}};
             Object.assign(window, {siyuan: {menus: {menu}, languages: {tag: "Tag"}}});
             class MenuItem {
@@ -76,13 +80,17 @@ const browserCases = (sources: Record<string, string>, tagSource: string, focusS
             const tag = content.querySelector<HTMLElement>('[data-type="tag"]');
             check.ok(tag.hasAttribute("data-inline-boundary"));
             let transaction = "";
+            let transactionCount = 0;
             const dependencies = {
                 Constants, MenuItem, focusByWbr, focusByRange,
                 ...marker,
                 hasClosestBlock: (element: Element) => element.closest('[data-type="NodeParagraph"]'),
                 hideElements() {}, dayjs: () => ({format: () => "20261002180000"}),
                 updateTransaction(_protyle: IProtyle, element: Element) {
+                    transactionCount++;
+                    check.equal(element.querySelector("wbr"), null, "caret is positioned before confirmation");
                     transaction = boundary.restoreInlineElementBoundaryHTML(element.outerHTML);
+                    menu.remove();
                 },
                 emitOpenMenu() {}, hasTopClosestByClassName: (): null => null,
             };
@@ -90,13 +98,14 @@ const browserCases = (sources: Record<string, string>, tagSource: string, focusS
                 ...Object.values(dependencies));
             const range = document.createRange();
             range.selectNodeContents(tag);
-            tagMenu({element: editor, toolbar: {range}}, tag);
+            tagMenu({element: editor, contentElement: {scrollTop: 120}, toolbar: {range}}, tag);
             if (operation === "clear") {
                 menuElement.querySelector("input").value = "";
-                menu.removeCB();
+                menu.remove();
             } else {
                 options.get("remove").click(undefined, undefined);
             }
+            check.equal(transactionCount, 1, "closing the menu submits the deletion once");
             check.equal(content.querySelector('[data-type="tag"]'), null);
             check.equal(range.collapsed, true);
             check.ok(content.contains(range.startContainer));

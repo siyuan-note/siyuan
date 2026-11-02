@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -44,6 +45,8 @@ type File struct {
 	Path             string `json:"path"`
 	Name             string `json:"name"` // 标题，即 ial["title"]
 	TitleEmpty       bool   `json:"titleEmpty,omitempty"`
+	TitleFormat      string `json:"titleFormat,omitempty"`
+	TitleRevision    string `json:"titleRevision,omitempty"`
 	Icon             string `json:"icon"`
 	Name1            string `json:"name1"` // 命名，即 ial["name"]
 	Alias            string `json:"alias"`
@@ -82,6 +85,13 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Size = uint64(fileInfo.size)
 	ret.Name = ial["title"]
 	ret.TitleEmpty = ial[NodeAttrTitleEmpty] == "true"
+	if metadata, err := treenode.GetDocumentMetadata(box.ID, pathID); err == nil {
+		ret.TitleFormat = metadata.Title.Format
+		ret.TitleRevision = metadata.SourceRevision
+		if metadata.Title.Format == "plain" {
+			ret.TitleRevision = treenode.DocumentRevision(metadata.Title)
+		}
+	}
 	if icon, ok := util.FilterIconValue(ial["icon"]); ok {
 		ret.Icon = icon
 	}
@@ -1277,7 +1287,9 @@ func DuplicateDoc(tree *parse.Tree) error {
 
 	isBoxDoc := IsBoxDoc(tree.Box, tree.ID)
 	previousPath := tree.Path
-	resetTree(tree, "Duplicated", false)
+	if err := resetTree(tree, "Duplicated", false); err != nil {
+		return err
+	}
 	if isBoxDoc {
 		removeBoxDocHiddenAttr(tree)
 	}
@@ -1498,9 +1510,42 @@ func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, er
 	return createDailyNoteAt(boxID, date, true)
 }
 
-func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, existed bool, err error) {
+// CreateDailyNoteWithHTTP 先提交日记身份，再在创建锁外执行需要确认的正文模板。
+func CreateDailyNoteWithHTTP(boxID string, date *time.Time, execution *templatehttp.Execution) (p string, existed bool, err error) {
+	return CreateDailyNoteWithSelection(boxID, date, execution, nil)
+}
+
+// CreateDailyNoteWithSelection 在原日记创建流程中验证选择，保留日期属性、复用与正文模板语义。
+func CreateDailyNoteWithSelection(boxID string, date *time.Time, execution *templatehttp.Execution, selection *DocumentSelection) (p string, existed bool, err error) {
+	now := time.Now()
+	if date != nil {
+		now = *date
+	}
+	if selection != nil {
+		if date != nil && selection.Time.In(time.Local).Format("2006-01-02") != date.Format("2006-01-02") {
+			return "", false, errors.New("daily note selection date changed")
+		}
+		now = selection.Time
+	}
+	return createDailyNoteSelected(boxID, now, date != nil, execution, selection)
+}
+
+func createDailyNoteAt(boxID string, now time.Time, findByDate bool, httpExecutions ...*templatehttp.Execution) (p string, existed bool, err error) {
+	var execution *templatehttp.Execution
+	if len(httpExecutions) > 0 {
+		execution = httpExecutions[0]
+	}
+	return createDailyNoteSelected(boxID, now, findByDate, execution, nil)
+}
+
+func createDailyNoteSelected(boxID string, now time.Time, findByDate bool, execution *templatehttp.Execution, selection *DocumentSelection) (p string, existed bool, err error) {
 	createDocLock.Lock()
-	defer createDocLock.Unlock()
+	locked := true
+	defer func() {
+		if locked {
+			createDocLock.Unlock()
+		}
+	}()
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -1508,7 +1553,7 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		return
 	}
 
-	plan, existTree, err := resolveDailyNotePlan(box, now, findByDate)
+	plan, existTree, err := resolveDailyNotePlan(box, now, findByDate, selection)
 	if err != nil {
 		return
 	}
@@ -1533,6 +1578,10 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		}
 	}
 	last.Attributes, last.TemplateTime = map[string]string{DailyNoteAttrPrefix + date: date}, &now
+	templatePath := last.DocCreateTemplatePath
+	if execution != nil {
+		last.DocCreateTemplatePath = ""
+	}
 	document, err := executeDocumentCreationPlan(plan, true)
 	if err != nil {
 		return
@@ -1542,7 +1591,17 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 		return
 	}
 	sql.FlushQueue()
-
+	if execution != nil && templatePath != "" {
+		createDocLock.Unlock()
+		locked = false
+		if execution.Err() != nil {
+			return p, false, execution.Err()
+		}
+		if err = applyDocContentTemplateAt(templatePath, document.ID, &now, execution); err != nil {
+			return p, false, documentCreateFailure(err, "committed", document.ID, "template", []string{"source", "sort"})
+		}
+		sql.FlushQueue()
+	}
 	return
 }
 
@@ -2314,7 +2373,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	var nonEditorTx *Transaction
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
-		for _, id := range nonEditorTx.syncDelete2Block(removeTree.Root, removeTree) {
+		var avIDs []string
+		avIDs, err = nonEditorTx.syncDelete2Block(removeTree.Root, removeTree)
+		if err != nil {
+			return
+		}
+		for _, id := range avIDs {
 			ReloadAttrView(id)
 		}
 	}
@@ -2752,7 +2816,7 @@ func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
-	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	finishDocTreeChange := cache.BeginDocTreeSortMutation()
 	defer finishDocTreeChange()
 	if err := recoverSortConfAppend(confPath); err != nil {
 		return err

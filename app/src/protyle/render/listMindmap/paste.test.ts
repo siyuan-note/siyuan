@@ -21,7 +21,7 @@ const create = () => {
     let finish: () => void;
     const target = Object.assign(new context.View(), {
         readOnly: false, selectedId: "node",
-        model: {nodes: new Map([["node", {virtual: false}]])},
+        model: {nodes: new Map([["node", {virtual: false, parentId: "root"}]])},
         getSelectedIds() { return this.selectedId ? [this.selectedId] : []; },
         options: {onPaste: (id: string, kind: string, data: {files: unknown[], textPlain: string}) => calls.push({id, kind, data})},
         finishThen: (action: () => void) => { finish = action; },
@@ -103,17 +103,18 @@ test("delayed node paste never follows a changed selection or deleted node", () 
     }
 });
 
-test("plain text and virtual-root child paste are supported, while sibling paste requires a real node", () => {
-    for (const virtual of [false, true]) {
+test("plain text child paste supports both root forms, while sibling paste requires a parent", () => {
+    for (const kind of ["child", "root", "virtual"]) {
         for (const sibling of [false, true]) {
             const current = create();
             current.event.clipboardData.files = [];
             current.event.clipboardData.getData = type => type === "text/plain" ? "Copied text" : "";
-            current.target.model.nodes.get("node").virtual = virtual;
+            Object.assign(current.target.model.nodes.get("node"), {virtual: kind === "virtual",
+                parentId: kind === "child" ? "root" : undefined});
             current.target.pasteSibling = sibling;
             current.target.pasteSelection(current.event);
             current.finish();
-            assert.equal(current.calls.length, virtual && sibling ? 0 : 1);
+            assert.equal(current.calls.length, kind !== "child" && sibling ? 0 : 1);
             if (current.calls.length) {
                 assert.equal(current.calls[0].data.textPlain, "Copied text");
                 assert.equal(current.calls[0].kind, sibling ? "sibling" : "child");

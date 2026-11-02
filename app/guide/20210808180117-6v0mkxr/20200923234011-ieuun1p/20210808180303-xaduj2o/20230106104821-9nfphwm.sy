@@ -6,7 +6,7 @@
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
 		"type": "doc",
-		"updated": "20261021005205"
+		"updated": "20261030093418"
 	},
 	"Children": [
 		{
@@ -839,6 +839,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "Third-party themes are stored in data/themes/ and icon packages in data/icons/; both participate in data sync and snapshots. Each device keeps its appearance selection in its local conf/conf.json. Built-in appearance resources are not synced. Upgrade migration moves the original directories into data and removes the source copies."
+				}
+			]
+		},
+		{
+			"ID": "20261030093418-4q0cq29",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030093418-4q0cq29",
+				"updated": "20261030093418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an unfinished transaction conflicts with files that have since changed, moved, or been deleted, startup automatically keeps the current files and rebuilds the affected indexes. Deleted documents are not recreated. The original recovery records are retained in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/document-source-recovery/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for troubleshooting; no manual cleanup or confirmation is required. File access errors, unsupported formats, and authentication failures remain errors and preserve the original data."
 				}
 			]
 		}

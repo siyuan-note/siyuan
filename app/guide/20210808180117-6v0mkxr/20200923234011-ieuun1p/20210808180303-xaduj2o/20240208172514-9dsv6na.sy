@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261028142713"
+		"updated": "20261102214741"
 	},
 	"Children": [
 		{
@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order. After binding an unbound entry in its panel, the panel opens the bound block editor when database attributes are enabled. Bound entries do not offer rebinding in the panel; use the database view to change their binding."
 				}
 			]
 		},
@@ -3576,7 +3576,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20261024164212"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -4049,6 +4049,31 @@
 			},
 			"AttributeViewID": "20240208173528-oq4elsj",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261030030559-92mvhui",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-92mvhui",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template fields can use httpGet to read external API data. Execution requires confirmation in the current window; rows share request budgets. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-nv4y9r3",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Read external API data"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
 		},
 		{
 			"ID": "20260830120000-a1dspen",
@@ -5265,7 +5290,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-jv7dnxb",
-				"updated": "20261024164212"
+				"updated": "20261102195537"
 			},
 			"Children": [
 				{
@@ -5384,6 +5409,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When a block first matches, a new entry is added. Automatic collection only adds entries. Source changes, moving out of scope, changing conditions or collection targets, and disabling or deleting rules preserve existing entries and their field values. Matching again preserves the same entry and manually edited fields."
+				}
+			]
+		},
+		{
+			"ID": "20261102195537-zlurrk5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102195537-zlurrk5",
+				"updated": "20261102214741"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags and removes the selected entries and their field values. Deselect a database to keep its entries, or choose Delete tags only to keep all database entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
 				}
 			]
 		},
@@ -5570,7 +5609,34 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the database settings to create parent and child relation fields or select existing self-relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
+					"Data": " in the database settings, then choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enable sub-items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create parent and child relation fields automatically on first activation. To reuse existing relations, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use existing relation fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", select a reciprocal relation pair and review the hierarchy using real items. If needed, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reverse the hierarchy direction, then confirm enabling. The preview covers only some loaded items; enabling validates all relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
 				}
 			]
 		},
@@ -5616,7 +5682,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". In nested display, use the control before the primary field to expand or collapse children. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
+					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
 				}
 			]
 		},
@@ -5713,7 +5779,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. Expansion state for encrypted databases is cleared when the notebook locks or closes."
+					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. If the designated fields were deleted or no longer form a reciprocal self-relation while disabled, automatic enabling creates a new pair and preserves other fields and values. Cycles and multiple parents are rejected with a specific explanation. Changing an option in the sub-items menu keeps it open and refreshes its state. Expansion state for encrypted databases is cleared when the notebook locks or closes."
 				}
 			]
 		},

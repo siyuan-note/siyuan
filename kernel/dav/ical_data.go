@@ -173,7 +173,8 @@ func cloneComponent(comp *ical.Component) *ical.Component {
 }
 
 // expand 把重复组件展开为与区间重叠的单个实例：去掉重复属性和 VTIMEZONE，带时区的时间换算为 UTC，
-// 第一个实例之外的实例带 RECURRENCE-ID（RFC 4791 §9.6.5）。
+// 第一个实例之外的实例带 RECURRENCE-ID（RFC 4791 §9.6.5）。THISANDFUTURE 覆盖展开为它代表的各个实例，
+// 结果中不再有重复集合，因此这些实例的 RECURRENCE-ID 不带 RANGE。
 func (c *icalContext) expand(calendar *ical.Component, r *TimeRange) *ical.Component {
 	expanded := &ical.Component{Name: calendar.Name, Props: calendar.Props}
 	for _, child := range calendar.Children {
@@ -185,13 +186,14 @@ func (c *icalContext) expand(calendar *ical.Component, r *TimeRange) *ical.Compo
 			expanded.Children = append(expanded.Children, child)
 			continue
 		}
-		if !isRecurring(child) {
+		rid := child.Props.Get(ical.PropRecurrenceID)
+		if !isRecurring(child) && (nil == rid || !isThisAndFuture(rid)) {
 			if r.overlaps(child.Name, c.componentTimes(child)) {
 				expanded.Children = append(expanded.Children, c.toUTC(cloneComponent(child)))
 			}
 			continue
 		}
-		master := c.componentTimes(child)
+		first := c.componentTimes(child)
 		c.eachInstance(child, calendar.Children, r.End, func(t componentTimes) bool {
 			if !r.overlaps(child.Name, t) {
 				return false
@@ -207,11 +209,20 @@ func (c *icalContext) expand(calendar *ical.Component, r *TimeRange) *ical.Compo
 			if t.hasDue {
 				c.setInstanceTime(instance, ical.PropDue, t.due)
 			}
-			if !t.start.Equal(master.start) {
-				instance.Props.Set(&ical.Prop{Name: ical.PropRecurrenceID, Params: ical.Params{}, Value: instance.Props.Get(ical.PropDateTimeStart).Value})
-				if isDateValue(instance.Props.Get(ical.PropDateTimeStart)) {
-					instance.Props.Get(ical.PropRecurrenceID).Params.Set(ical.ParamValue, string(ical.ValueDate))
+			// RDATE PERIOD 实例的时长可能与组件不同
+			if t.hasDuration && (!first.hasDuration || t.duration != first.duration) {
+				duration := ical.NewProp(ical.PropDuration)
+				duration.SetDuration(t.duration)
+				instance.Props.Set(duration)
+			}
+			if nil != rid || !t.recurrenceID.Equal(first.start) {
+				start := instance.Props.Get(ical.PropDateTimeStart)
+				recurrenceID := ical.NewProp(ical.PropRecurrenceID)
+				recurrenceID.Value, _ = c.instanceTimeValue(start, t.recurrenceID)
+				if isDateValue(start) {
+					recurrenceID.Params.Set(ical.ParamValue, string(ical.ValueDate))
 				}
+				instance.Props.Set(recurrenceID)
 			}
 			expanded.Children = append(expanded.Children, c.toUTC(instance))
 			return false
@@ -220,21 +231,28 @@ func (c *icalContext) expand(calendar *ical.Component, r *TimeRange) *ical.Compo
 	return expanded
 }
 
-// setInstanceTime 用实例时间替换属性值：DATE 值仍为 DATE，浮动时间仍为浮动时间，其余换算为 UTC。
+// instanceTimeValue 按属性原有的值形式写出实例时间：DATE 值仍为 DATE，浮动时间仍为浮动时间，其余换算为 UTC。
+func (c *icalContext) instanceTimeValue(prop *ical.Prop, t time.Time) (value string, utc bool) {
+	switch {
+	case isDateValue(prop):
+		return t.In(c.floating).Format(icalDateFormat), false
+	case !strings.HasSuffix(prop.Value, "Z") && "" == prop.Params.Get(ical.PropTimezoneID):
+		return t.In(c.floating).Format(icalDateTimeFormat), false
+	}
+	return t.UTC().Format(icalDateTimeUTCFormat), true
+}
+
+// setInstanceTime 用实例时间替换属性值，值形式见 instanceTimeValue。
 func (c *icalContext) setInstanceTime(comp *ical.Component, name string, t time.Time) {
 	prop := comp.Props.Get(name)
 	if nil == prop {
 		return
 	}
-	switch {
-	case isDateValue(prop):
-		prop.Value = t.In(c.floating).Format(icalDateFormat)
-	case !strings.HasSuffix(prop.Value, "Z") && "" == prop.Params.Get(ical.PropTimezoneID):
-		prop.Value = t.In(c.floating).Format(icalDateTimeFormat)
-	default:
+	value, utc := c.instanceTimeValue(prop, t)
+	if utc {
 		prop.Params.Del(ical.PropTimezoneID)
-		prop.Value = t.UTC().Format(icalDateTimeUTCFormat)
 	}
+	prop.Value = value
 }
 
 // toUTC 把组件及其子组件中引用时区的 DATE-TIME 值换算为 UTC。

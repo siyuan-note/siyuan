@@ -6,6 +6,7 @@ package dav
 
 import (
 	"errors"
+	"sort"
 	"strings"
 	"time"
 	_ "time/tzdata"
@@ -163,7 +164,7 @@ func (c *icalContext) propTime(prop *ical.Prop) (t time.Time, date bool, err err
 	return
 }
 
-// propTimes 解析 EXDATE、RDATE 等可含多个逗号分隔值的属性；PERIOD 值取其开始时间。
+// propTimes 解析 EXDATE 等可含多个逗号分隔值的日期时间属性；PERIOD 值取其开始时间。
 func (c *icalContext) propTimes(prop *ical.Prop) (times []time.Time, err error) {
 	date, tzid := isDateValue(prop), prop.Params.Get(ical.PropTimezoneID)
 	for _, value := range strings.Split(prop.Value, ",") {
@@ -209,6 +210,8 @@ type componentTimes struct {
 	hasStart, hasEnd, hasDue, hasDuration, hasCompleted, hasCreated bool
 	startIsDate                                                     bool
 	duration                                                        time.Duration
+	// recurrenceID 是实例的原定开始时间：重复实例为它在重复集合中的时间，覆盖组件为其 RECURRENCE-ID，其余为 DTSTART
+	recurrenceID time.Time
 }
 
 func (c *icalContext) componentTimes(comp *ical.Component) (t componentTimes) {
@@ -247,6 +250,20 @@ func (t componentTimes) shift(d time.Duration) componentTimes {
 	}
 	if t.hasDue {
 		t.due = t.due.Add(d)
+	}
+	return t
+}
+
+// withEnd 返回以 RDATE PERIOD 给出结束时间的实例时间（RFC 5545 §3.8.5.2）：VEVENT 的 DTEND、VTODO 的 DUE 改为该时间，
+// 组件用 DURATION 或两者都没有时改用时长表示；VJOURNAL 没有时长，保持不变。
+func (t componentTimes) withEnd(name string, end time.Time) componentTimes {
+	switch {
+	case ical.CompEvent == name && t.hasEnd:
+		t.end = end
+	case ical.CompToDo == name && t.hasDue:
+		t.due = end
+	case ical.CompEvent == name || ical.CompToDo == name:
+		t.duration, t.hasDuration = end.Sub(t.start), true
 	}
 	return t
 }
@@ -330,7 +347,13 @@ func isRecurring(comp *ical.Component) bool {
 	return nil != comp.Props.Get(ical.PropRecurrenceRule) || nil != comp.Props.Get(ical.PropRecurrenceDates)
 }
 
-func (c *icalContext) recurrence(comp *ical.Component, start time.Time) (func() (time.Time, bool), error) {
+// recurrenceInstance 是重复集合中的一次实例：start 是原定开始时间，也就是该实例的 RECURRENCE-ID；
+// periodEnd 非零时是 RDATE PERIOD 给出的结束时间（RFC 5545 §3.8.5.2）。
+type recurrenceInstance struct {
+	start, periodEnd time.Time
+}
+
+func (c *icalContext) recurrence(comp *ical.Component, start time.Time) (func() (recurrenceInstance, bool), error) {
 	set := &rrule.Set{}
 	if prop := comp.Props.Get(ical.PropRecurrenceRule); nil != prop {
 		option, err := rrule.StrToROptionInLocation(prop.Value, start.Location())
@@ -347,12 +370,24 @@ func (c *icalContext) recurrence(comp *ical.Component, start time.Time) (func() 
 	set.DTStart(start)
 	// DTSTART 总是重复集合的第一个实例（RFC 5545 §3.8.5.3），即使它不符合 RRULE
 	set.RDate(start)
+	periodEnds := map[int64]time.Time{}
 	for i := range comp.Props[ical.PropRecurrenceDates] {
-		times, err := c.propTimes(&comp.Props[ical.PropRecurrenceDates][i])
-		if err != nil {
-			return nil, err
-		}
-		for _, t := range times {
+		prop := &comp.Props[ical.PropRecurrenceDates][i]
+		date, tzid := isDateValue(prop), prop.Params.Get(ical.PropTimezoneID)
+		for _, value := range strings.Split(prop.Value, ",") {
+			if strings.Contains(value, "/") {
+				periodStart, periodEnd, err := c.parsePeriod(value, tzid)
+				if err != nil {
+					return nil, err
+				}
+				set.RDate(periodStart)
+				periodEnds[periodStart.Unix()] = periodEnd
+				continue
+			}
+			t, err := c.parseValue(value, tzid, date)
+			if err != nil {
+				return nil, err
+			}
 			set.RDate(t)
 		}
 	}
@@ -365,12 +400,47 @@ func (c *icalContext) recurrence(comp *ical.Component, start time.Time) (func() 
 			set.ExDate(t)
 		}
 	}
-	return set.Iterator(), nil
+	next := set.Iterator()
+	return func() (recurrenceInstance, bool) {
+		t, ok := next()
+		return recurrenceInstance{start: t, periodEnd: periodEnds[t.Unix()]}, ok
+	}, nil
 }
 
-// overriddenInstances 返回被同 UID 覆盖组件替换的实例开始时间（Unix 秒）。
-func (c *icalContext) overriddenInstances(master *ical.Component, siblings []*ical.Component) map[int64]bool {
-	overridden := map[int64]bool{}
+// eachRecurrence 依次以重复集合中的实例调用 fn，fn 返回 true 时停止并返回 true；past 对原定开始时间返回 true 时
+// 停止并返回 false。实例数达到 maxRecurrenceInstances 时按匹配处理，返回 true。
+func eachRecurrence(next func() (recurrenceInstance, bool), past func(time.Time) bool, fn func(recurrenceInstance) bool) bool {
+	for count := 0; ; count++ {
+		instance, ok := next()
+		if !ok {
+			return false
+		}
+		if maxRecurrenceInstances <= count {
+			return true
+		}
+		if past(instance.start) {
+			return false
+		}
+		if fn(instance) {
+			return true
+		}
+	}
+}
+
+// recurrenceOverride 是替换重复实例的同 UID 组件。recurrenceID 是被替换实例的原定开始时间；thisAndFuture 为 true 时，
+// 它还替换之后的实例，直到下一个 RANGE=THISANDFUTURE 覆盖，其中另有覆盖组件的实例除外（RFC 5545 §3.8.4.4）。
+type recurrenceOverride struct {
+	comp          *ical.Component
+	recurrenceID  time.Time
+	thisAndFuture bool
+}
+
+func isThisAndFuture(recurrenceID *ical.Prop) bool {
+	return strings.EqualFold("THISANDFUTURE", recurrenceID.Params.Get(ical.ParamRange))
+}
+
+// recurrenceOverrides 返回主组件的覆盖组件，按 recurrenceID 排序。
+func (c *icalContext) recurrenceOverrides(master *ical.Component, siblings []*ical.Component) (overrides []recurrenceOverride) {
 	uid, _ := master.Props.Text(ical.PropUID)
 	for _, sibling := range siblings {
 		if sibling == master || sibling.Name != master.Name {
@@ -384,16 +454,39 @@ func (c *icalContext) overriddenInstances(master *ical.Component, siblings []*ic
 			continue
 		}
 		if t, _, err := c.propTime(prop); err == nil {
-			overridden[t.Unix()] = true
+			overrides = append(overrides, recurrenceOverride{comp: sibling, recurrenceID: t, thisAndFuture: isThisAndFuture(prop)})
 		}
 	}
-	return overridden
+	sort.SliceStable(overrides, func(i, j int) bool { return overrides[i].recurrenceID.Before(overrides[j].recurrenceID) })
+	return
 }
 
-// eachInstance 依次以组件每次实例的有效时间调用 fn，fn 返回 true 时停止并返回 true。
-// 被覆盖组件替换的实例会跳过，覆盖组件由调用方作为独立组件处理；stopAfter 非零时，实例开始时间晚于它即停止。
+// replacedBy 返回替换原定开始时间为 original 的实例的覆盖组件：RECURRENCE-ID 等于它的组件优先，
+// 否则是 RECURRENCE-ID 早于它的最后一个 THISANDFUTURE 覆盖；没有时返回 nil。
+func replacedBy(overrides []recurrenceOverride, original time.Time) *ical.Component {
+	var replacing *ical.Component
+	for _, override := range overrides {
+		if override.recurrenceID.After(original) {
+			break
+		}
+		if override.recurrenceID.Equal(original) {
+			return override.comp
+		}
+		if override.thisAndFuture {
+			replacing = override.comp
+		}
+	}
+	return replacing
+}
+
+// eachInstance 依次以组件每次实例的有效时间调用 fn，fn 返回 true 时停止并返回 true；stopAfter 非零时，实例开始时间
+// 晚于它即停止。主组件跳过被覆盖组件替换的实例，这些实例由覆盖组件代表，调用方把覆盖组件作为独立组件处理。
 func (c *icalContext) eachInstance(comp *ical.Component, siblings []*ical.Component, stopAfter time.Time, fn func(componentTimes) bool) bool {
 	times := c.componentTimes(comp)
+	times.recurrenceID = times.start
+	if prop := comp.Props.Get(ical.PropRecurrenceID); nil != prop {
+		return c.eachOverrideInstance(comp, prop, times, siblings, stopAfter, fn)
+	}
 	if !times.hasStart || !isRecurring(comp) {
 		return fn(times)
 	}
@@ -401,25 +494,76 @@ func (c *icalContext) eachInstance(comp *ical.Component, siblings []*ical.Compon
 	if err != nil {
 		return fn(times)
 	}
-	overridden := c.overriddenInstances(comp, siblings)
-	for count := 0; ; count++ {
-		start, ok := next()
-		if !ok {
-			return false
-		}
-		if maxRecurrenceInstances <= count {
-			return true
-		}
-		if !stopAfter.IsZero() && start.After(stopAfter) {
-			return false
-		}
-		if overridden[start.Unix()] {
-			continue
-		}
-		if fn(times.shift(start.Sub(times.start))) {
-			return true
+	overrides := c.recurrenceOverrides(comp, siblings)
+	// 从第一个 THISANDFUTURE 覆盖的原定时间起，实例都由覆盖组件代表
+	var replacedFrom time.Time
+	for _, override := range overrides {
+		if override.thisAndFuture {
+			replacedFrom = override.recurrenceID
+			break
 		}
 	}
+	past := func(start time.Time) bool {
+		return (!stopAfter.IsZero() && start.After(stopAfter)) || (!replacedFrom.IsZero() && !start.Before(replacedFrom))
+	}
+	return eachRecurrence(next, past, func(instance recurrenceInstance) bool {
+		if nil != replacedBy(overrides, instance.start) {
+			return false
+		}
+		t := times.shift(instance.start.Sub(times.start))
+		t.recurrenceID = instance.start
+		if !instance.periodEnd.IsZero() {
+			t = t.withEnd(comp.Name, instance.periodEnd)
+		}
+		return fn(t)
+	})
+}
+
+// eachOverrideInstance 处理带 RECURRENCE-ID 的覆盖组件：它代表被替换的实例；RANGE=THISANDFUTURE 时还代表主组件之后
+// 由它替换的实例，这些实例按覆盖组件相对原定时间的偏移平移，时长与覆盖组件相同（RFC 5545 §3.8.4.4）。
+func (c *icalContext) eachOverrideInstance(comp *ical.Component, prop *ical.Prop, times componentTimes, siblings []*ical.Component, stopAfter time.Time, fn func(componentTimes) bool) bool {
+	recurrenceID, _, err := c.propTime(prop)
+	if err == nil {
+		times.recurrenceID = recurrenceID
+	}
+	if fn(times) {
+		return true
+	}
+	if err != nil || !times.hasStart || !isThisAndFuture(prop) {
+		return false
+	}
+	master := findMaster(comp, siblings)
+	if nil == master {
+		return false
+	}
+	masterTimes := c.componentTimes(master)
+	if !masterTimes.hasStart || !isRecurring(master) {
+		return false
+	}
+	next, err := c.recurrence(master, masterTimes.start)
+	if err != nil {
+		return false
+	}
+	overrides := c.recurrenceOverrides(master, siblings)
+	var until time.Time
+	for _, override := range overrides {
+		if override.thisAndFuture && override.recurrenceID.After(recurrenceID) {
+			until = override.recurrenceID
+			break
+		}
+	}
+	offset := times.start.Sub(recurrenceID)
+	past := func(start time.Time) bool {
+		return (!until.IsZero() && !start.Before(until)) || (!stopAfter.IsZero() && start.Add(offset).After(stopAfter))
+	}
+	return eachRecurrence(next, past, func(instance recurrenceInstance) bool {
+		if !instance.start.After(recurrenceID) || comp != replacedBy(overrides, instance.start) {
+			return false
+		}
+		t := times.shift(instance.start.Sub(recurrenceID))
+		t.recurrenceID = instance.start
+		return fn(t)
+	})
 }
 
 // alarmTrigger 解析 VALARM 的 TRIGGER：absolute 为 true 时 at 是绝对时间，否则 offset 相对于 related 指定的父组件开始或结束。

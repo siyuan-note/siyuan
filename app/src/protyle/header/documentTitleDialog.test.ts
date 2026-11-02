@@ -96,9 +96,10 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         host = new ElementMock();
         confirm = new ElementMock();
         destroyed = false;
-        viewport = {style: {top: "", height: ""}};
-        sheet = {style: {height: ""}, getBoundingClientRect: () => ({height:
-            Math.min(parseFloat(this.sheet.style.height), parseFloat(this.viewport.style.height))})};
+        viewport = {style: {top: "", height: ""}, isConnected: true, classList: {add() {}}};
+        sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}}, getBoundingClientRect: () => ({height:
+            Math.min(parseFloat(this.sheet.style.height) || 180, parseFloat(this.sheet.style.maxHeight) || Infinity,
+                parseFloat(this.viewport.style.height))})};
         classes = new Set<string>();
         element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
@@ -132,12 +133,16 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         getVisibleViewportBounds: () => viewport,
         isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape"),
         callMobileAppShowKeyboard: () => { keyboardShows++; },
-        bindBottomSheetDialog: (_dialog: DialogMock, close: () => Promise<void>, resize: () => void, open: () => void) => {
+        bindBottomSheetDialog: (dialog: DialogMock, close: () => Promise<void>, resize: () => void, open: () => void,
+                               options: {mode: string}) => {
+            const layout = (dependencies.bindMobileSheetLayout as any)(dialog.viewport, dialog.sheet, options);
             sheetClose = close;
-            sheetResize = resize;
+            sheetResize = layout.resize;
             sheetOpen = open;
-            resize();
-            return () => { sheetDisposals++; };
+            resize?.();
+            const dispose = () => { layout.dispose(); sheetDisposals++; };
+            dispose.freeze = layout.freeze;
+            return dispose;
         },
     };
     const load = (file: string) => {
@@ -148,6 +153,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, window,
             document,
+            getComputedStyle: () => ({paddingTop: "0px", paddingBottom: "0px"}),
             MutationObserver: MutationObserverMock, console: {error: () => {}}});
         return exports;
     };
@@ -159,6 +165,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
     Object.assign(dependencies, allEditors);
     const system = load("../../window/onWindowsMsg.ts");
     Object.assign(dependencies, load("documentTitleEditor.ts"));
+    Object.assign(dependencies, load("../../mobile/util/mobileSheetLayout.ts"));
     const titleDialog = load("documentTitleDialog.ts");
     return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system,
         viewport, resizeListeners, closeSheet: () => sheetClose(), resizeSheet: () => sheetResize(),
@@ -349,8 +356,10 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     const state = setup(true);
     const dialog = state.open();
     assert.equal(dialog.options.width, "100vw");
-    assert.equal(dialog.options.height, "56vh");
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.height) - 448) < .001);
+    assert.equal(dialog.options.height, "auto");
+    assert.equal(dialog.sheet.style.height, "auto");
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 448) < .001);
+    assert.equal(dialog.sheet.getBoundingClientRect().height, 180, "short titles use their natural height");
     assert.equal(dialog.options.containerClassName, "mobile-document-title-sheet");
     assert.equal(dialog.options.hideCloseIcon, true);
     assert.ok(dialog.classes.has("mobile-document-title-dialog"));
@@ -361,8 +370,8 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     state.resizeSheet();
     assert.equal(dialog.viewport.style.top, "50px");
     assert.equal(dialog.viewport.style.height, "300px");
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.height) - 448) < .001,
-        "the keyboard clips the fixed baseline rather than multiplying the visible height by 56%");
+    assert.equal(parseFloat(dialog.sheet.style.maxHeight), 300,
+        "the keyboard clips the upper limit without expanding a short title");
     assert.equal(state.toolbarObserved(), true);
     state.keyboardToolbar.hidden = false;
     state.keyboardToolbar.top = 302;
@@ -390,7 +399,7 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     assert.equal(state.toolbarObserved(), false);
 });
 
-test("mobile title height uses the current screen direction before the keyboard cache flag updates", () => {
+test("mobile title height cap uses the current screen direction before the keyboard cache flag updates", () => {
     const state = setup(true);
     const dialog = state.open();
     state.window.screen.orientation.type = "landscape-primary";
@@ -398,16 +407,16 @@ test("mobile title height uses the current screen direction before the keyboard 
     state.viewport.bottom = 390;
     state.resizeSheet();
     assert.equal(state.window.siyuan.mobile.size.isLandscape, false);
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.height) - 218.4) < .001);
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 218.4) < .001);
     state.window.innerHeight = 180;
     state.viewport.bottom = 180;
     state.resizeSheet();
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.height) - 218.4) < .001);
+    assert.equal(parseFloat(dialog.sheet.style.maxHeight), 180);
     state.window.screen.orientation.type = "portrait-primary";
     state.window.innerHeight = 800;
     state.viewport.bottom = 800;
     state.resizeSheet();
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.height) - 448) < .001);
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 448) < .001);
 });
 
 test("mobile title height remains fixed while its closing keyboard viewport recovers", async () => {
@@ -556,7 +565,7 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     document.body.style.cssText = "--b3-font-size:16px;--b3-font-size-editor:16px;--mobile-top-safe-area:0px";
     document.body.innerHTML = `<div class="mobile-document-title-dialog mobile-bottom-sheet-dialog b3-dialog--open">
 <div class="b3-dialog"><div class="b3-dialog__scrim"></div>
-<div class="b3-dialog__container mobile-bottom-sheet mobile-document-title-sheet" style="width:100vw;height:448px;transition:none">
+<div class="b3-dialog__container mobile-bottom-sheet mobile-sheet-panel mobile-document-title-sheet" style="width:100vw;height:auto;max-height:448px;transition:none">
 <div class="b3-menu__title b3-menu__title--root"></div><div class="b3-dialog__header">Rename</div>
 <div class="b3-dialog__body"><div class="document-title-dialog protyle">
 <div class="protyle-content"><div class="protyle-top"><div class="protyle-title">
@@ -600,12 +609,13 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
             for (const long of [false, true]) {
                 editable.innerHTML = long ? "<strong>Rich title </strong><em>with styles </em>".repeat(50) : "Untitled document";
                 check.equal(getComputedStyle(editable).fontSize, "16px", "the mobile rename field uses the UI font size");
+                sheet.style.maxHeight = `${Math.min(448, height)}px`;
                 const rect = sheet.getBoundingClientRect();
                 const button = action.getBoundingClientRect();
                 const editor = host.getBoundingClientRect();
                 const context = JSON.stringify({height, large, long, sheet: rect.toJSON(), button: button.toJSON()});
-                check.ok(Math.abs(rect.height - Math.min(448, height)) < 1,
-                    "short and long titles share the full-viewport 56% baseline: " + context);
+                check.ok(rect.height > 0 && rect.height <= Math.min(448, height) + 1, context);
+                check.ok(rect.height < 250, "single-line titles keep a compact natural height: " + context);
                 check.ok(Math.abs(rect.bottom - (30 + height)) < 1, context);
                 check.ok(button.top >= rect.top && button.bottom <= rect.bottom + 1 && button.height >= 30, context);
                 check.ok(editor.bottom <= button.top + 1 && editor.height > 0, context);
@@ -616,7 +626,7 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
                 if (!long && height === 800) {
                     const fieldBounds = field.getBoundingClientRect();
                     check.ok(Math.abs(fieldBounds.top - editor.top - 16) < 1,
-                        "short titles retain their input padding within the fixed drawer: " + context);
+                        "short titles retain their input padding within the natural-height drawer: " + context);
                 }
             }
         }
@@ -626,9 +636,10 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     container.style.paddingBottom = "30px";
     for (const height of [800, 350, 220]) {
         container.style.height = `${height}px`;
+        sheet.style.maxHeight = `${Math.min(448, height - 50)}px`;
         const rect = sheet.getBoundingClientRect();
-        check.ok(Math.abs(rect.height - Math.min(448, height - 50)) < 1,
-            "safe areas clip the baseline once through the container content box");
+        check.ok(rect.height <= Math.min(448, height - 50) + 1,
+            "safe areas clip the upper limit once through the container content box");
         check.ok(Math.abs(rect.bottom - (30 + height - 30)) < 1,
             "the sheet ends at the usable bottom boundary");
     }
@@ -769,7 +780,7 @@ test("native mobile title drawer keeps its action above the keyboard and edits r
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const lifecycleSources = ["../../dialog/index.ts", "../../menus/sheetOpen.ts",
-        "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
+        "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
         "documentTitleDialogs.ts", "documentTitleDialog.ts"].map(file => transpileModule(
         require("ifdef-loader/preprocessor").parse(readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: true, BROWSER: false}),
         {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}}).outputText);

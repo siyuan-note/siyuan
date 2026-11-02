@@ -10,9 +10,7 @@ import {confirmDocumentTitle} from "./documentTitleEditor";
 /// #if MOBILE
 import {registerMobileSecondaryEditor, unregisterMobileSecondaryEditor} from "../../mobile/util/secondaryEditors";
 import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
-import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
-import {isMobileLandscape} from "../../mobile/util/orientation";
 /// #endif
 
 // 重命名使用独立草稿，保存失败时保留输入。
@@ -21,7 +19,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     let closing = false;
     let canClose = false;
     let disposed = false;
-    let disposeSheet = () => {};
+    let disposeSheet: (() => void) & {freeze?: () => void} = () => {};
     const dispose = () => {
         if (disposed) return;
         disposed = true;
@@ -69,7 +67,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         title: window.siyuan.languages.rename,
         width,
         /// #if MOBILE
-        height: "56vh",
+        height: "auto",
         containerClassName: "mobile-document-title-sheet",
         hideCloseIcon: true,
         /// #endif
@@ -79,9 +77,8 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             if (closePending && !canClose) return false;
             closing = true;
             /// #if MOBILE
+            disposeSheet.freeze?.();
             // 退出动画期间保留编辑区和抓手，先停止保存与交互；源失效仍由 closeInvalidated 立即清空。
-            const sheet = dialog.element.querySelector<HTMLElement>(".mobile-document-title-sheet");
-            sheet.style.height = `${sheet.getBoundingClientRect().height}px`;
             guard?.dispose();
             unregisterMobileSecondaryEditor(editor);
             dialog.editors = {};
@@ -96,7 +93,6 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     dialog.element.dataset.key = Constants.DIALOG_RENAME;
     /// #if MOBILE
     dialog.element.classList.add("mobile-document-title-dialog");
-    const keyboardToolbar = document.getElementById("keyboardToolbar");
     let editorReady = false;
     let sheetReady = false;
     let focusPending = true;
@@ -114,36 +110,11 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         input.focus({preventScroll: true});
         if (input.ownerDocument.activeElement === input) callMobileAppShowKeyboard();
     };
-    const resize = () => {
-        const viewport = getVisibleViewportBounds();
-        const bottom = keyboardToolbar && !keyboardToolbar.classList.contains("fn__none") ?
-            Math.min(viewport.bottom, keyboardToolbar.getBoundingClientRect().top) : viewport.bottom;
-        const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
-        container.style.top = `${viewport.top}px`;
-        container.style.height = `${Math.max(0, bottom - viewport.top)}px`;
-        if (!closing && !disposed) {
-            const size = window.siyuan.mobile.size;
-            const orientation = isMobileLandscape() ? size.landscape : size.portrait;
-            const fullHeight = Math.max(window.innerHeight, orientation?.height1 || 0);
-            // 容器 padding 负责安全区，面板 max-height 按其内容区裁限，避免重复扣减。
-            dialog.element.querySelector<HTMLElement>(".mobile-document-title-sheet").style.height =
-                `${fullHeight * .56}px`;
-        }
-    };
-    const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, resize, () => {
+    const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, undefined, () => {
         sheetReady = true;
         void focusTitle().catch(error => console.error(error));
-    });
-    const toolbarObserver = new MutationObserver(resize);
-    if (keyboardToolbar) {
-        toolbarObserver.observe(keyboardToolbar, {attributes: true, attributeFilter: ["class", "style"]});
-    }
-    window.addEventListener("resize", resize);
-    disposeSheet = () => {
-        unbindSheet();
-        toolbarObserver.disconnect();
-        window.removeEventListener("resize", resize);
-    };
+    }, {mode: "standard"});
+    disposeSheet = unbindSheet;
     /// #endif
     const editor = new Protyle(options.app || window.siyuan.ws.app,
         dialog.element.querySelector<HTMLElement>(".document-title-dialog"), {

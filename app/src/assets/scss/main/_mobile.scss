@@ -1994,6 +1994,26 @@ body.mobile-topbar--merged {
   }
 }
 
+.mobile-sheet-layout {
+  box-sizing: border-box;
+  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
+}
+
+.mobile-sheet-panel {
+  min-height: 0;
+  overflow: auto;
+
+  > .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  > .b3-dialog__body {
+    min-height: 0;
+    overflow: auto;
+    flex: 0 1 auto;
+  }
+}
+
 .mobile-document-title-dialog {
   .mobile-document-title-sheet {
     max-height: 100%;

@@ -1997,12 +1997,21 @@ body.mobile-topbar--merged {
 .mobile-document-title-dialog {
   .mobile-document-title-sheet {
     max-height: 100%;
+    overflow: auto;
+  }
+
+  .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  .b3-dialog__body {
+    overflow: auto;
   }
 
   .document-title-dialog {
     min-height: 0;
     max-height: none;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     padding: 16px 24px;
 
     > .protyle-content {

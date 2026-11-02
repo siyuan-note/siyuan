@@ -12,6 +12,7 @@ import {registerMobileSecondaryEditor, unregisterMobileSecondaryEditor} from "..
 import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
+import {isMobileLandscape} from "../../mobile/util/orientation";
 /// #endif
 
 // 重命名使用独立草稿，保存失败时保留输入。
@@ -68,7 +69,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         title: window.siyuan.languages.rename,
         width,
         /// #if MOBILE
-        height: "auto",
+        height: "56vh",
         containerClassName: "mobile-document-title-sheet",
         hideCloseIcon: true,
         /// #endif
@@ -79,6 +80,8 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             closing = true;
             /// #if MOBILE
             // 退出动画期间保留编辑区和抓手，先停止保存与交互；源失效仍由 closeInvalidated 立即清空。
+            const sheet = dialog.element.querySelector<HTMLElement>(".mobile-document-title-sheet");
+            sheet.style.height = `${sheet.getBoundingClientRect().height}px`;
             guard?.dispose();
             unregisterMobileSecondaryEditor(editor);
             dialog.editors = {};
@@ -118,6 +121,14 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
         container.style.top = `${viewport.top}px`;
         container.style.height = `${Math.max(0, bottom - viewport.top)}px`;
+        if (!closing && !disposed) {
+            const size = window.siyuan.mobile.size;
+            const orientation = isMobileLandscape() ? size.landscape : size.portrait;
+            const fullHeight = Math.max(window.innerHeight, orientation?.height1 || 0);
+            // 容器 padding 负责安全区，面板 max-height 按其内容区裁限，避免重复扣减。
+            dialog.element.querySelector<HTMLElement>(".mobile-document-title-sheet").style.height =
+                `${fullHeight * .56}px`;
+        }
     };
     const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, resize, () => {
         sheetReady = true;

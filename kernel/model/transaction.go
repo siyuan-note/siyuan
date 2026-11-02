@@ -2855,6 +2855,7 @@ type Transaction struct {
 	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
+	tagRemovalSources             map[string][]byte
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
 	sourceLeases                  map[string]bool
@@ -3266,6 +3267,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
+	tx.tagRemovalSources = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
@@ -3286,6 +3288,7 @@ func (tx *Transaction) releaseCommittedResources() {
 
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
+	tx.tagRemovalSources = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()

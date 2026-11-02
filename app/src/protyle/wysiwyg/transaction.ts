@@ -96,6 +96,8 @@ import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {getTagRemovalChanges, previewTagRemoval, tagRemovalOperations} from "../util/tagRemoval";
+import {showMessage} from "../../dialog/message";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -2528,6 +2530,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 callback?: () => void,
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
+                                tagRemovalConfirmed?: boolean,
                             }) => {
     const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
     if (owner && !owner.lite && owner !== protyle) {
@@ -2559,6 +2562,34 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
+    if (protyle && !options?.tagRemovalConfirmed) {
+        const changes = getTagRemovalChanges(doOperations, undoOperations);
+        if (changes.length) {
+            const wasDisabled = protyle.disabled;
+            disabledProtyle(protyle);
+            void (async () => {
+                const restore = () => new Promise<void>(resolve => reloadProtyle(protyle, true, false, resolve, resolve));
+                try {
+                    await waitForPendingTransactions(protyle);
+                    const groups = await previewTagRemoval(changes);
+                    if (groups === null) {
+                        await restore();
+                        return;
+                    }
+                    const cleanup = tagRemovalOperations(groups);
+                    transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
+                        {...options, tagRemovalConfirmed: true});
+                    await waitForPendingTransactions(protyle);
+                } catch (error) {
+                    showMessage(error.message);
+                    await restore();
+                } finally {
+                    if (!wasDisabled) { enableProtyle(protyle); }
+                }
+            })();
+            return;
+        }
+    }
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {

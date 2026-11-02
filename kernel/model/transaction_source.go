@@ -201,6 +201,9 @@ func (tx *Transaction) rememberDocumentSourceBytes(tree *parse.Tree, original []
 	if !tx.usesDocumentSourceJournal() || tx.documentSource(tree) != nil {
 		return nil
 	}
+	if expected, ok := tx.tagRemovalSources[tree.ID]; ok && !bytes.Equal(expected, original) {
+		return util.ErrFileChanged
+	}
 	if tx.sourceLeases == nil {
 		tx.sourceLeases = map[string]bool{}
 	}

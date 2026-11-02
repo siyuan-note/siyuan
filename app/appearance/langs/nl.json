@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "De vermeldingen en hun veldwaarden worden uit de geselecteerde databases verwijderd. De broninhoud blijft behouden en de bewerking kan ongedaan worden gemaakt. Niet-geselecteerde databases behouden hun vermeldingen.",
+	"tagRemovalOnly": "Alleen tags verwijderen",
+	"tagRemovalWithEntries": "Geselecteerde vermeldingen ook verwijderen",
 	"openMarkdownEditor": "Openen in de ingebouwde Markdown-editor",
 	"insertTableHeaderRow": "Koprij invoegen",
 	"syncSourcePreview": "Synchronisatiebron gewijzigd. Lokaal: ${local} bestanden; bron: ${cloud} bestanden, ${time}, apparaat: ${device}. Uploaden: ${upload} bestanden. Herstellen: ${overwrite} lokale bestanden overschrijven, ${remove} verwijderen. Kies een richting; automatisch samenvoegen is gepauzeerd",

@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "Seçilen veritabanlarından kayıtlar ve alan değerleri kaldırılır. Kaynak içerik korunur ve işlem geri alınabilir. Seçilmeyen veritabanları kayıtlarını korur.",
+	"tagRemovalOnly": "Yalnızca etiketleri sil",
+	"tagRemovalWithEntries": "Seçilen kayıtları da kaldır",
 	"openMarkdownEditor": "Yerleşik Markdown düzenleyicisinde aç",
 	"insertTableHeaderRow": "Başlık satırı ekle",
 	"syncSourcePreview": "Eşitleme kaynağı değişti. Yerel: ${local} dosya; kaynak: ${cloud} dosya, ${time}, cihaz: ${device}. Yükleme: ${upload} dosya. Geri yükleme: ${overwrite} yerel dosyanın üzerine yazar, ${remove} dosyayı siler. Bir yön seçin; otomatik birleştirme duraklatıldı",

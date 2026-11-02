@@ -22,6 +22,7 @@ import {openCoverPicker} from "./coverPicker";
 import {getAssetUploadSuccesses} from "../upload/uploadResult";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {showMessage} from "../../dialog/message";
+import {transaction} from "../wysiwyg/transaction";
 /// #if !MOBILE
 import {openDocTagMenu} from "./openDocTagMenu";
 /// #endif
@@ -700,12 +701,9 @@ export class Background {
             cb?.();
             return;
         }
-        fetchPost("/api/attr/setBlockAttrs", {
-            id: protyle.block.rootID,
-            attrs: {"tags": tagsString}
-        }, () => {
-            cb?.();
-        });
+        transaction(protyle, [{action: "setAttrs", id: protyle.block.rootID,
+            data: JSON.stringify({tags: tagsString})}], [{action: "setAttrs", id: protyle.block.rootID,
+            data: JSON.stringify({tags: this.ial.tags || ""})}], {callback: cb});
         if (tags.length === 0) {
             delete this.ial.tags;
         } else {

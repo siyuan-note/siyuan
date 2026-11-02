@@ -358,7 +358,11 @@ export type AVCellUpdateInput = { "itemID"?: string | null; "keyID": string; "ro
 
 export type AVCollectBlocksInput = { "blockIDs": Array<string>; "ruleID": string; };
 
-export type AVCollectionCleanupInput = { "items": Array<AVCollectionCleanupItemInput | null>; "ruleVersion": string; };
+export type AVCollectionCleanup = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItem | null> | null; "ruleVersion": string; };
+
+export type AVCollectionCleanupInput = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItemInput | null>; "ruleVersion": string; };
+
+export type AVCollectionCleanupItem = { "blockID": string; "itemID": string; };
 
 export type AVCollectionCleanupItemInput = { "blockID": string; "itemID": string; };
 
@@ -1870,6 +1874,8 @@ export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
+export type RemoveTagWithCollectionsRequestInput = { "collections": Array<TagRemovalCollectionInput | null>; "label": string; };
+
 export type RemoveUnusedAttributeViewRequestInput = { "id": string; };
 
 export type RenameAssetRequestInput = { "newName": string; "oldPath": string; };
@@ -2615,6 +2621,14 @@ export type SystemWorkspaceCheckData = { "isWorkspace": boolean; };
 export type SystemZipData = { "zip": string; };
 
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
+
+export type TagRemovalChangeInput = { "id": string; "tags": Array<string>; };
+
+export type TagRemovalCollection = { "avID": string; "cleanup": AVCollectionCleanup; "name": string; };
+
+export type TagRemovalCollectionInput = { "avID": string; "cleanup": AVCollectionCleanupInput; "name": string; };
+
+export type TagRemovalPreviewRequestInput = { "changes"?: Array<TagRemovalChangeInput | null>; "label"?: string; };
 
 export type TagSnapshotRequestInput = { "id": string; "name": string; };
 
@@ -8950,10 +8964,30 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
+     */
+    "/api/tag/previewTagRemoval": {
+        request: TagRemovalPreviewRequestInput;
+        response: { "code": 0; "data": Array<TagRemovalCollection | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
     "/api/tag/removeTag": {
         request: RemoveTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+     */
+    "/api/tag/removeTagWithCollections": {
+        request: RemoveTagWithCollectionsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

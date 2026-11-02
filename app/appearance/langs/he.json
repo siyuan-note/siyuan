@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "הרשומות וערכי השדות שלהן יוסרו ממסדי הנתונים שנבחרו. תוכן המקור יישמר וניתן לבטל את הפעולה. הרשומות במסדי הנתונים שלא נבחרו יישמרו.",
+	"tagRemovalOnly": "מחיקת תגיות בלבד",
+	"tagRemovalWithEntries": "הסרת הרשומות שנבחרו גם כן",
 	"openMarkdownEditor": "פתיחה בעורך Markdown המובנה",
 	"insertTableHeaderRow": "הוספת שורת כותרת",
 	"syncSourcePreview": "מקור הסנכרון השתנה. מקומי: ${local} קבצים; מקור: ${cloud} קבצים, ${time}, מכשיר: ${device}. העלאה: ${upload} קבצים. שחזור: החלפת ${overwrite} קבצים מקומיים ומחיקת ${remove}. יש לבחור כיוון; המיזוג האוטומטי מושהה",

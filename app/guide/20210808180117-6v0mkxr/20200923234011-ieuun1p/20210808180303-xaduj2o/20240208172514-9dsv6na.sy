@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261030030559"
+		"updated": "20261102195537"
 	},
 	"Children": [
 		{
@@ -5290,7 +5290,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-jv7dnxb",
-				"updated": "20261024164212"
+				"updated": "20261102195537"
 			},
 			"Children": [
 				{
@@ -5409,6 +5409,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When a block first matches, a new entry is added. Automatic collection only adds entries. Source changes, moving out of scope, changing conditions or collection targets, and disabling or deleting rules preserve existing entries and their field values. Matching again preserves the same entry and manually edited fields."
+				}
+			]
+		},
+		{
+			"ID": "20261102195537-zlurrk5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102195537-zlurrk5",
+				"updated": "20261102195537"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Delete tags only is the default and keeps all database entries. To also remove entries and their field values, select the databases and choose Also remove selected entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
 				}
 			]
 		},

@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "Le voci e i relativi valori dei campi saranno rimosse dai database selezionati. Il contenuto originale viene conservato e l’operazione può essere annullata. I database non selezionati mantengono le proprie voci.",
+	"tagRemovalOnly": "Elimina solo i tag",
+	"tagRemovalWithEntries": "Rimuovi anche le voci selezionate",
 	"openMarkdownEditor": "Apri nell’editor Markdown integrato",
 	"insertTableHeaderRow": "Inserisci riga di intestazione",
 	"syncSourcePreview": "Sorgente di sincronizzazione cambiata. Locale: ${local} file; sorgente: ${cloud} file, ${time}, dispositivo: ${device}. Caricamento: ${upload} file. Ripristino: sovrascrive ${overwrite} file locali ed elimina ${remove} file. Scegli una direzione; l’unione automatica è sospesa",

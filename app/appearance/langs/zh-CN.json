@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "将移出所选数据库中的条目及其字段值，保留原文，操作可撤销。未选择的数据库保留条目。",
+	"tagRemovalOnly": "仅删除标签",
+	"tagRemovalWithEntries": "同时移出所选条目",
 	"openMarkdownEditor": "使用内置 Markdown 编辑器打开",
 	"insertTableHeaderRow": "插入表头",
 	"syncSourcePreview": "同步来源已变化。本地 ${local} 个文件；来源 ${cloud} 个文件，时间 ${time}，设备 ${device}。上传将发送 ${upload} 个文件；恢复将覆盖 ${overwrite} 个、删除 ${remove} 个本地文件。请选择方向，自动合并已暂停",

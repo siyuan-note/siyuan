@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "選択したデータベースから項目とそのフィールド値を削除します。元の内容は保持され、操作は元に戻せます。選択していないデータベースの項目は保持されます。",
+	"tagRemovalOnly": "タグのみ削除",
+	"tagRemovalWithEntries": "選択した項目も削除",
 	"openMarkdownEditor": "内蔵 Markdown エディターで開く",
 	"insertTableHeaderRow": "ヘッダー行を挿入",
 	"syncSourcePreview": "同期元が変更されました。ローカル: ${local} ファイル、同期元: ${cloud} ファイル、時刻: ${time}、端末: ${device}。アップロード: ${upload} ファイル。復元: ローカルの ${overwrite} ファイルを上書きし、${remove} ファイルを削除します。方向を選択してください。自動マージは一時停止中です",

@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "Entri dan nilai bidangnya akan dihapus dari basis data yang dipilih. Konten sumber tetap tersimpan dan tindakan dapat dibatalkan. Entri pada basis data yang tidak dipilih tetap tersimpan.",
+	"tagRemovalOnly": "Hapus tag saja",
+	"tagRemovalWithEntries": "Hapus juga entri yang dipilih",
 	"openMarkdownEditor": "Buka di editor Markdown bawaan",
 	"insertTableHeaderRow": "Sisipkan baris header",
 	"syncSourcePreview": "Sumber sinkronisasi berubah. Lokal: ${local} berkas; sumber: ${cloud} berkas, ${time}, perangkat: ${device}. Unggah: ${upload} berkas. Pulihkan: timpa ${overwrite} dan hapus ${remove} berkas lokal. Pilih arah; penggabungan otomatis dijeda",

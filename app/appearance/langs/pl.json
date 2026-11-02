@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "Wpisy i wartości ich pól zostaną usunięte z wybranych baz danych. Treść źródłowa zostanie zachowana, a operację można cofnąć. Niewybrane bazy danych zachowają swoje wpisy.",
+	"tagRemovalOnly": "Usuń tylko tagi",
+	"tagRemovalWithEntries": "Usuń także wybrane wpisy",
 	"openMarkdownEditor": "Otwórz we wbudowanym edytorze Markdown",
 	"insertTableHeaderRow": "Wstaw wiersz nagłówka",
 	"syncSourcePreview": "Źródło synchronizacji zmieniło się. Lokalnie: ${local} plików; źródło: ${cloud} plików, ${time}, urządzenie: ${device}. Przesłanie: ${upload} plików. Przywrócenie: nadpisanie ${overwrite} i usunięcie ${remove} plików lokalnych. Wybierz kierunek; automatyczne scalanie jest wstrzymane",

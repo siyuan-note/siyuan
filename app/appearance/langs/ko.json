@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "선택한 데이터베이스에서 항목과 필드 값이 제거됩니다. 원본 내용은 유지되며 작업을 실행 취소할 수 있습니다. 선택하지 않은 데이터베이스의 항목은 유지됩니다.",
+	"tagRemovalOnly": "태그만 삭제",
+	"tagRemovalWithEntries": "선택한 항목도 제거",
 	"openMarkdownEditor": "내장 Markdown 편집기로 열기",
 	"insertTableHeaderRow": "머리글 행 삽입",
 	"syncSourcePreview": "동기화 원본이 변경되었습니다. 로컬: ${local}개 파일, 원본: ${cloud}개 파일, 시간: ${time}, 기기: ${device}. 업로드: ${upload}개 파일. 복원: 로컬 파일 ${overwrite}개 덮어쓰기, ${remove}개 삭제. 방향을 선택하세요. 자동 병합은 일시 중지되었습니다",

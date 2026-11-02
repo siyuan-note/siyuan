@@ -13,6 +13,7 @@ const fixture = () => {
     ];
     let finish: (success: boolean) => void;
     const dependencies = {
+        getTagRemovalChanges: (): [] => [],
         getEditorTransaction,
         Constants: {},
         queueTransaction,

@@ -191,6 +191,9 @@ func (tx *Transaction) doCleanupAttrViewBlocks(op *Operation) *TxErr {
 		if row == nil || row.Block == nil || row.Block.ID != item.BlockID {
 			continue
 		}
+		if request.AutomaticOnly && row.Block.CollectionRuleID == "" {
+			continue
+		}
 		if review.item(row).Status == "unmatched" {
 			removals = append(removals, row)
 		}

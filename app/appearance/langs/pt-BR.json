@@ -1,4 +1,7 @@
 {
+	"tagRemovalDatabaseTip": "As entradas e os valores de seus campos serão removidos dos bancos de dados selecionados. O conteúdo original será mantido e a operação poderá ser desfeita. Os bancos de dados não selecionados manterão suas entradas.",
+	"tagRemovalOnly": "Excluir somente etiquetas",
+	"tagRemovalWithEntries": "Remover também as entradas selecionadas",
 	"openMarkdownEditor": "Abrir no editor Markdown integrado",
 	"insertTableHeaderRow": "Inserir linha de cabeçalho",
 	"syncSourcePreview": "A origem da sincronização mudou. Local: ${local} arquivos; origem: ${cloud} arquivos, ${time}, dispositivo: ${device}. Enviar: ${upload} arquivos. Restaurar: sobrescrever ${overwrite} e excluir ${remove} arquivos locais. Escolha uma direção; a mesclagem automática está pausada",

@@ -1626,6 +1626,12 @@ var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AV
 // 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
 var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
+var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")

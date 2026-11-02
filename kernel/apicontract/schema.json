@@ -8479,9 +8479,48 @@
       ],
       "additionalProperties": false
     },
+    "AVCollectionCleanup": {
+      "type": "object",
+      "properties": {
+        "automaticOnly": {
+          "type": "boolean"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVCollectionCleanupItem"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ruleVersion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "items",
+        "ruleVersion"
+      ],
+      "additionalProperties": false
+    },
     "AVCollectionCleanupInput": {
       "type": "object",
       "properties": {
+        "automaticOnly": {
+          "type": "boolean"
+        },
         "items": {
           "type": "array",
           "items": {
@@ -8502,6 +8541,22 @@
       "required": [
         "items",
         "ruleVersion"
+      ],
+      "additionalProperties": false
+    },
+    "AVCollectionCleanupItem": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "itemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockID",
+        "itemID"
       ],
       "additionalProperties": false
     },
@@ -39358,6 +39413,32 @@
       ],
       "additionalProperties": false
     },
+    "RemoveTagWithCollectionsRequestInput": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalCollectionInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "collections",
+        "label"
+      ],
+      "additionalProperties": false
+    },
     "RemoveUnusedAttributeViewRequestInput": {
       "type": "object",
       "properties": {
@@ -57310,6 +57391,87 @@
         "name",
         "type"
       ],
+      "additionalProperties": false
+    },
+    "TagRemovalChangeInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalCollection": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "cleanup": {
+          "$ref": "#/$defs/AVCollectionCleanup"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "cleanup",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalCollectionInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "cleanup": {
+          "$ref": "#/$defs/AVCollectionCleanupInput"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "cleanup",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "TagRemovalPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalChangeInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "label": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false
     },
     "TagSnapshotRequestInput": {
@@ -184746,6 +184908,102 @@
     },
     {
       "method": "POST",
+      "path": "/api/tag/previewTagRemoval",
+      "handler": "previewTagRemoval",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/TagRemovalPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/TagRemovalCollection"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/tag/removeTag",
       "handler": "removeTag",
       "authorization": [
@@ -184756,6 +185014,86 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/RemoveTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/removeTagWithCollections",
+      "handler": "removeTagWithCollections",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/RemoveTagWithCollectionsRequestInput"
       },
       "response": {
         "anyOf": [

@@ -41,9 +41,8 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     getAnchorRect();
     const avID = options.data?.id || options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
-    // config/properties/sorts/filters/contextFilter/switcher 菜单只需要字段/视图元数据，不需要行数据，
-    // 跳过行渲染以提升大体量视图下的响应速度。
-    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher"].includes(options.type);
+    // 日期和选项编辑从单元格读取当前值，加载字段配置时无需重新计算整库模板与汇总。
+    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date"].includes(options.type);
     const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
@@ -160,7 +159,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         };
         let tabRect = getAnchorRect() ||
             options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
-        const resizeMenu = ignoreRows && !isMobile() ? () => {
+        const resizeMenu = ignoreRows && !options.cellElements?.length && !isMobile() ? () => {
             if (!menuElement.isConnected) {
                 return;
             }

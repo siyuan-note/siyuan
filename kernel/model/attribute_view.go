@@ -3798,7 +3798,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	if nil != err {
 		return
 	}
-	viewable := sql.RenderView(attrView, view, "", false)
+	viewable := sql.RenderViewItem(attrView, view, itemID)
 	collection, ok := viewable.(av.Collection)
 	if !ok {
 		return
@@ -3867,7 +3867,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			continue
 		}
 
-		viewable := sql.RenderView(attrView, view, "", false)
+		viewable := sql.RenderViewItem(attrView, view, itemID)
 		collection, ok := viewable.(av.Collection)
 		if !ok {
 			continue

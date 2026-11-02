@@ -5,6 +5,8 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {clampGroupTableVirtualData} from "./groupTableVirtual";
+import {isAVCellPanelForBlock, setAVCellPanelTarget} from "./panelTarget";
+import {getAVCellSelection, refreshAVCellSelection, setAVCellSelection} from "./selectionState";
 
 const source = ts.createSourceFile("render.ts", readFileSync(join(__dirname, "render.ts"), "utf8"),
     ts.ScriptTarget.ES2022, true);
@@ -74,5 +76,95 @@ for (const avType of ["table", "list"] as const) {
             topSpacerHeight: 360, rowOffset: 400, locate: true});
         assert.deepEqual(h.mounted, Array.from({length: 10}, (_, id) => 410 + id));
         assert.match(html, /height: 360px/);
+    });
+}
+
+const afterRenderSource = source.statements.find(node => ts.isVariableStatement(node) &&
+    node.declarationList.declarations.some(declaration => declaration.name.getText(source) === "afterRenderTable"));
+assert.ok(afterRenderSource);
+const afterRenderCompiled = ts.transpileModule(afterRenderSource.getText(source), {
+    compilerOptions: {target: ts.ScriptTarget.ES2022},
+}).outputText;
+
+const setupPanelRefresh = (rows: string[], owner: "current" | "other" | "config" = "current", selectedRows = ["edited"]) => {
+    const markedCells: string[] = [];
+    const cell = {classList: {add: (name: string) => markedCells.push(name)}};
+    const scroll = {scrollLeft: 0};
+    const block = {
+        style: {},
+        getAttribute: (): null => null,
+        setAttribute() {},
+        querySelector: (selector: string) => selector === ".av__scroll" ? scroll :
+            selector.includes('[data-id="edited"]') && rows.includes("edited") ? cell : null,
+    } as unknown as HTMLElement;
+    let removed = false;
+    const panel = {remove: () => { removed = true; }} as unknown as Element;
+    if (owner !== "config") {
+        setAVCellPanelTarget(panel, owner === "current" ? block : {} as Element);
+    }
+    const column = {id: "platform", type: "mSelect"} as IAVColumn;
+    const point = {groupID: "", rowID: "edited", colID: column.id};
+    setAVCellSelection(block, {
+        anchor: point,
+        focus: point,
+        cells: selectedRows.map(rowID => ({...point, rowID, rowIndex: 0, colIndex: 0, column, cell: {} as IAVCell})),
+    });
+    const resetData = {
+        left: 0, alignSelf: "", selectCellId: {groupId: "", rowId: "edited", colId: column.id},
+        dragFillId: {groupId: "", rowId: "edited", colId: column.id},
+        activeIds: [{groupId: "", rowId: "edited", colId: column.id}],
+        selectRowIds: [] as {groupId: string, rowId: string}[], pageSizes: {}, isSearching: false,
+    };
+    const data = {view: {id: "view", columns: [column], rows: rows.map(id => ({id, cells: [{}]}))}} as unknown as IAV;
+    const noop = () => {};
+    const render = runInNewContext(afterRenderCompiled + "\nafterRenderTable", {
+        refreshAVCellSelection, isAVCellPanelForBlock,
+        document: {querySelector: (selector: string) => selector === ".av__panel" && !removed ? panel : null},
+        getSelection: () => ({rangeCount: 0}),
+        getPendingBlockFocusMode: noop,
+        updateFrozenColumns: noop, setAVData: noop, renderAVRichTextElements: noop,
+        addDragFill: noop, cellScrollIntoView: noop, restoreAVCellSelection: noop,
+        initVirtualScroll: noop, updateAVSelectionStatus: noop, finishAVLocate: noop,
+        Constants: {CB_GET_HISTORY: "history"},
+    });
+    return {
+        block, resetData, markedCells, removed: () => removed,
+        render: () => render({blockElement: block, data, resetData, renderAll: false,
+            protyle: {options: {action: ["history"]}, contentElement: {getBoundingClientRect: (): null => null}}}),
+    };
+};
+
+test("filtering out the edited database row closes its panel when the cell selection becomes invalid", () => {
+    const h = setupPanelRefresh([]);
+    h.render();
+    assert.equal(h.removed(), true);
+    assert.equal(getAVCellSelection(h.block), undefined);
+    assert.equal(h.resetData.selectCellId, undefined);
+    assert.equal(h.resetData.dragFillId, undefined);
+    assert.equal(h.resetData.activeIds.length, 0);
+});
+
+test("a database refresh keeps the panel open while its selected cells remain in the result", () => {
+    const h = setupPanelRefresh(["edited"]);
+    h.render();
+    assert.equal(h.removed(), false);
+    assert.equal(getAVCellSelection(h.block)?.cells.length, 1);
+    assert.ok(h.markedCells.includes("av__cell--select"));
+});
+
+test("filtering out part of a batch selection closes the panel and clears the invalid range", () => {
+    const h = setupPanelRefresh(["edited"], "current", ["edited", "filtered"]);
+    h.render();
+    assert.equal(h.removed(), true);
+    assert.equal(getAVCellSelection(h.block), undefined);
+    assert.deepEqual(h.markedCells, []);
+});
+
+for (const owner of ["other", "config"] as const) {
+    test(`filtering a row preserves a panel belonging to ${owner === "other" ? "another display instance" : "view configuration"}`, () => {
+        const h = setupPanelRefresh([], owner);
+        h.render();
+        assert.equal(h.removed(), false);
+        assert.equal(getAVCellSelection(h.block), undefined);
     });
 }

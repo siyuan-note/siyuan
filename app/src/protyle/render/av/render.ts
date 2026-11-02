@@ -449,6 +449,10 @@ const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
     renderAVRichTextElements(options.blockElement);
     if (!refreshAVCellSelection(options.blockElement, options.data)) {
+        const avPanelElement = document.querySelector(".av__panel");
+        if (avPanelElement && isAVCellPanelForBlock(avPanelElement, options.blockElement)) {
+            avPanelElement.remove();
+        }
         options.resetData.selectCellId = undefined;
         options.resetData.dragFillId = undefined;
         options.resetData.activeIds = [];

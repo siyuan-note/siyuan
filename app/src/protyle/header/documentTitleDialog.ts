@@ -8,7 +8,7 @@ import {escapeHtml} from "../../util/escape";
 import {registerDocumentTitleDialog} from "./documentTitleDialogs";
 import {confirmDocumentTitle} from "./documentTitleEditor";
 /// #if MOBILE
-import {registerMobileSecondaryEditor} from "../../mobile/util/secondaryEditors";
+import {registerMobileSecondaryEditor, unregisterMobileSecondaryEditor} from "../../mobile/util/secondaryEditors";
 import {bindBottomSheetDialog} from "../../mobile/util/bindBottomSheetDialog";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
@@ -17,6 +17,7 @@ import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
 // 重命名使用独立草稿，保存失败时保留输入。
 export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App}) => {
     let closePending = false;
+    let closing = false;
     let canClose = false;
     let disposed = false;
     let disposeSheet = () => {};
@@ -36,7 +37,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         dialog.destroy();
     };
     const close = async () => {
-        if (closePending || disposed) {
+        if (closePending || closing || disposed) {
             return;
         }
         closePending = true;
@@ -75,7 +76,16 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
 <button class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div>`,
         beforeClose: () => {
             if (closePending && !canClose) return false;
+            closing = true;
+            /// #if MOBILE
+            // 退出动画期间保留编辑区和抓手，先停止保存与交互；源失效仍由 closeInvalidated 立即清空。
+            guard?.dispose();
+            unregisterMobileSecondaryEditor(editor);
+            dialog.editors = {};
+            dialog.element.inert = true;
+            /// #else
             dispose();
+            /// #endif
             return true;
         },
         destroyCallback: dispose,
@@ -87,7 +97,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     let editorReady = false;
     let sheetReady = false;
     let focusPending = true;
-    const isCurrent = () => !disposed && dialog.element.isConnected &&
+    const isCurrent = () => !closing && !disposed && dialog.element.isConnected &&
         window.siyuan.dialogs[window.siyuan.dialogs.length - 1] === dialog;
     const canFocus = () => !closePending && isCurrent() && !editor.protyle.disabled &&
         !window.siyuan.config.readonly && !window.siyuan.isPublish;
@@ -131,7 +141,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             action: [Constants.CB_GET_ROOTSCROLL],
             render: {background: false, title: true, titleShowTop: false, breadcrumb: false, gutter: false, scroll: false},
             after: (protyle) => {
-                if (!disposed) {
+                if (!closing && !disposed) {
                     /// #if MOBILE
                     const owner = protyle.protyle;
                     let field = owner.element.querySelector<HTMLElement>(":scope > .document-title-dialog__editor");

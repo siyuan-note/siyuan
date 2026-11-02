@@ -1948,6 +1948,8 @@ body.mobile-topbar--merged {
     box-sizing: border-box;
     bottom: auto;
     height: 100%;
+    // 退出位移不能越过键盘上方的可见区域。
+    overflow: clip;
   }
 
   .mobile-bottom-sheet {

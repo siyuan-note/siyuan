@@ -31,7 +31,7 @@ class ElementMock {
     replaceChildren() { this.content = ""; }
 }
 
-const setup = (mobile: boolean) => {
+const setup = (mobile: boolean, deferDestroy = false) => {
     const window = {siyuan: {
         dialogs: [] as any[], mobile: {}, layout: {}, blockPanels: [] as any[], ws: {app: {}},
         config: {readonly: false}, isPublish: false,
@@ -55,6 +55,7 @@ const setup = (mobile: boolean) => {
         getElementById: () => keyboardToolbar, createElement: () => new ElementMock()};
     let toolbarObserver: () => void;
     let toolbarObserved = false;
+    const destroyCallbacks: Array<() => void> = [];
     class MutationObserverMock {
         constructor(callback: () => void) { toolbarObserver = callback; }
         observe() { toolbarObserved = true; }
@@ -106,8 +107,13 @@ const setup = (mobile: boolean) => {
         destroy() {
             if (this.destroyed || !this.options.beforeClose()) return;
             this.destroyed = true;
-            this.options.destroyCallback();
-            window.siyuan.dialogs.splice(window.siyuan.dialogs.indexOf(this), 1);
+            const finish = () => {
+                this.element.isConnected = false;
+                this.options.destroyCallback();
+                window.siyuan.dialogs.splice(window.siyuan.dialogs.indexOf(this), 1);
+            };
+            if (deferDestroy) destroyCallbacks.push(finish);
+            else finish();
         }
     }
     const dependencies: Record<string, unknown> = {
@@ -154,6 +160,7 @@ const setup = (mobile: boolean) => {
         openSheet: () => sheetOpen(), keyboardShows: () => keyboardShows,
         setOpenTitle: (callback: typeof openTitle) => { openTitle = callback; },
         sheetDisposals: () => sheetDisposals,
+        finishDestroy: () => destroyCallbacks.splice(0).forEach(callback => callback()),
         keyboardToolbar, resizeToolbar: () => toolbarObserver(), toolbarObserved: () => toolbarObserved,
         open: (id = "doc", notebook: string | undefined = "encrypted") =>
             titleDialog.openDocumentTitleDialog({id, notebook}) as DialogMock,
@@ -161,6 +168,54 @@ const setup = (mobile: boolean) => {
         setGuard: (callback: typeof flushGuard) => { flushGuard = callback; },
         setTitle: (callback: typeof flushTitle) => { flushTitle = callback; }};
 };
+
+for (const confirm of [false, true]) {
+    test(`mobile title ${confirm ? "confirmation" : "dismissal"} preserves its field until the exit animation finishes`, async () => {
+        const state = setup(true, true);
+        const dialog = state.open();
+        state.afters[0]();
+        state.openSheet();
+        await settle();
+        if (confirm) dialog.confirm.listeners.get("click")();
+        else await state.closeSheet();
+        await settle();
+        assert.equal(dialog.destroyed, true);
+        assert.equal(dialog.host.content, "private title");
+        assert.equal((dialog.element as any).inert, true);
+        assert.equal(state.sheetDisposals(), 0, "the handle and viewport binding remain through the exit animation");
+        assert.equal(state.instances[0].destroyed, 0);
+        assert.equal(state.guards[0].disposed, true);
+        assert.equal(state.allEditors.getAllEditor().length, 0, "closing drafts no longer participate in global saves");
+        state.finishDestroy();
+        assert.equal(dialog.host.content, "");
+        assert.equal(state.sheetDisposals(), 1);
+        assert.equal(state.instances[0].destroyed, 1);
+    });
+}
+
+test("locking a notebook during title drawer exit immediately clears the retained plaintext", async () => {
+    const state = setup(true, true);
+    const dialog = state.open();
+    await state.closeSheet();
+    assert.equal(dialog.host.content, "private title");
+    state.registry.closeDocumentTitleDialogs({notebookId: "encrypted"});
+    assert.equal(dialog.host.content, "");
+    assert.equal(state.instances[0].destroyed, 1);
+    state.finishDestroy();
+    assert.equal(state.instances[0].destroyed, 1);
+});
+
+test("a closing title drawer ignores late editor readiness and source focus", async () => {
+    const state = setup(true, true);
+    const dialog = state.open();
+    await state.closeSheet();
+    state.afters[0]();
+    state.openSheet();
+    await settle();
+    assert.equal(dialog.host.children.length, 0);
+    assert.equal(state.keyboardShows(), 0);
+    state.finishDestroy();
+});
 
 for (const mobile of [false, true]) {
     test(`${mobile ? "mobile" : "desktop"} rename dismissal discards its draft without saving`, async () => {
@@ -444,7 +499,8 @@ test("failed mobile title loading and desktop readiness never request the mobile
     assert.equal(desktop.keyboardShows(), 0);
 });
 
-const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: string, titleSource: string) => {
+const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSource: string, titleSource: string,
+                                lifecycleSources: string[]) => {
     const check: typeof assert = require("node:assert/strict");
     const {paddingElement, setUndo} = new Function(toolbarSource +
         "\nreturn {paddingElement: getMobileToolbarPaddingElement, setUndo: setMobileToolbarUndo};")() as {
@@ -544,6 +600,96 @@ const checkDrawerLayout = (css: string, toolbarSource: string, paddingSource: st
     check.equal(document.activeElement, editable);
     check.equal(getComputedStyle(editable, "::after").content, '"Untitled document"');
     check.equal(document.querySelector<HTMLElement>(".document-title-dialog > .protyle-content > .protyle-wysiwyg").offsetHeight, 0);
+    document.body.replaceChildren();
+    const pause = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
+    let viewportHeight = 800;
+    const modules: Record<string, any> = {
+        Constants: {DIALOG_RENAME: "rename", TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 190},
+        genUUID: () => Math.random().toString(), isMobile: () => true, moveResize: () => {},
+        isAbove: () => false, getZIndex: () => 0, destroyDialogBlockPanels: () => {},
+        getAnchoredInputMask: (): undefined => undefined,
+        escapeHtml: (value: string) => value, showMessage: () => check.fail("unexpected save failure"),
+        registerEditorSave: () => ({dispose() {}, flush: async () => {}}),
+        registerMobileSecondaryEditor: () => {}, unregisterMobileSecondaryEditor: () => {},
+        getVisibleViewportBounds: () => ({top: 30, bottom: viewportHeight}),
+        callMobileAppShowKeyboard: () => {},
+        confirmDocumentTitle: async (_owner: unknown, save: () => Promise<void>) => save(),
+    };
+    // 使用真实 Dialog、抽屉绑定和重命名关闭流程，编辑器替身只提供已加载的富文本字段。
+    modules.Protyle = class {
+        protyle: any;
+        constructor(_app: unknown, element: HTMLElement, options: any) {
+            const title: any = {
+                openEditor: async () => {}, flushPendingInput: async () => {},
+                mountEditorOnly: (field: HTMLElement) => {
+                    field.innerHTML = '<div class="protyle-title__rich protyle"><div class="protyle-wysiwyg"><div data-type="NodeParagraph"><div class="protyle-title__input" contenteditable="true"><strong>Retained</strong> title</div></div></div></div>';
+                    title.editElement = field.querySelector("[contenteditable]");
+                },
+            };
+            element.classList.add("protyle");
+            this.protyle = {element, title, block: {rootID: options.blockId}};
+            queueMicrotask(() => options.after(this));
+        }
+        async flushPendingTransactions() {}
+        destroy() { this.protyle.element.replaceChildren(); }
+    };
+    Object.assign(window, {siyuan: {
+        dialogs: [], zIndex: 0, config: {}, isPublish: false, ws: {app: {}},
+        mobile: {size: {isLandscape: false, portrait: {height1: 800}}},
+        languages: {rename: "Rename", confirm: "Confirm"},
+        menus: {menu: {element: document.createElement("div"), remove() {}}},
+    }});
+    for (const source of lifecycleSources) {
+        const exports = {};
+        new Function("exports", "require", source)(exports, () => modules);
+        Object.assign(modules, exports);
+    }
+    for (const keyboard of [false, true]) {
+        for (const action of ["confirm", "scrim", "drag"]) {
+            viewportHeight = keyboard ? 430 : 800;
+            const dialog = modules.openDocumentTitleDialog({id: "doc", notebook: "box"});
+            await pause(100);
+            const root = dialog.element as HTMLElement;
+            const panel = root.querySelector<HTMLElement>(".mobile-bottom-sheet");
+            const bounds = root.querySelector<HTMLElement>(".b3-dialog");
+            const input = panel.querySelector<HTMLElement>("[contenteditable]");
+            check.equal(input.textContent, "Retained title");
+            const height = panel.offsetHeight;
+            panel.getAnimations().forEach(animation => animation.finish());
+            if (action === "confirm") panel.querySelector<HTMLElement>('[data-type="confirm"]').click();
+            if (action === "scrim") root.querySelector<HTMLElement>(".b3-dialog__scrim").click();
+            if (action === "drag") {
+                const handle = panel.querySelector<HTMLElement>(".b3-menu__title--root");
+                for (const [type, y] of [["touchstart", 40], ["touchmove", 190], ["touchend", 190]] as const) {
+                    const event = new Event(type, {bubbles: true, cancelable: true});
+                    Object.defineProperties(event, {touches: {value: [{clientX: 20, clientY: y}]},
+                        changedTouches: {value: [{clientX: 20, clientY: y}]}});
+                    handle.dispatchEvent(event);
+                }
+            }
+            await pause(0);
+            check.equal(root.dataset.dialogClosing, "true", action);
+            check.equal(root.inert, true);
+            for (const delay of [16, 32, 48]) {
+                await pause(delay);
+                check.equal(panel.offsetHeight, height, `${action}: the closing panel must not collapse`);
+                check.equal(input.textContent, "Retained title", `${action}: retain the field throughout exit`);
+                check.ok(panel.querySelector(".b3-menu__title--root"), "retain the handle throughout exit");
+                check.equal(getComputedStyle(bounds).overflowY, "clip");
+                if (keyboard) {
+                    const below = bounds.getBoundingClientRect().bottom + 5;
+                    check.ok(!root.contains(document.elementFromPoint(100, below)),
+                        `${action}: no closing panel may paint below the keyboard viewport`);
+                    viewportHeight += 50;
+                    window.dispatchEvent(new Event("resize"));
+                }
+            }
+            await pause(120);
+            check.equal(root.isConnected, false);
+            check.equal(input.isConnected, false);
+            check.equal(window.siyuan.dialogs.length, 0);
+        }
+    }
     return "Title drawer layout passed";
 };
 
@@ -561,15 +707,21 @@ test("native mobile title drawer keeps its action above the keyboard and edits r
     const titleSource = transpileModule(readFileSync(resolve(__dirname, "Title.ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
+    const lifecycleSources = ["../../dialog/index.ts", "../../menus/sheetOpen.ts",
+        "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
+        "documentTitleDialogs.ts", "documentTitleDialog.ts"].map(file => transpileModule(
+        require("ifdef-loader/preprocessor").parse(readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: true, BROWSER: false}),
+        {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}}).outputText);
     const directory = mkdtempSync(resolve(tmpdir(), "siyuan-title-drawer-"));
     const script = resolve(directory, "run.cjs");
     const code = "const __name = value => value; (" + checkDrawerLayout.toString() + ")(" + JSON.stringify(css) + "," +
-        JSON.stringify(toolbarSource) + "," + JSON.stringify(paddingSource) + "," + JSON.stringify(titleSource) + ")";
+        JSON.stringify(toolbarSource) + "," + JSON.stringify(paddingSource) + "," + JSON.stringify(titleSource) + "," +
+        JSON.stringify(lifecycleSources) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(resolve(directory, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show:false, width:390, height:900, webPreferences:{nodeIntegration:true, contextIsolation:false}});
+    const win = new BrowserWindow({show:false, width:390, height:900, webPreferences:{nodeIntegration:true, contextIsolation:false, backgroundThrottling:false}});
     win.webContents.on("console-message", event => console.error(event.message));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");

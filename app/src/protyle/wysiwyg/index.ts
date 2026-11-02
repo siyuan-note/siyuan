@@ -1,6 +1,6 @@
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindEditorFocusMemory} from "../util/editorFocusMemory";
-import {recordReplacementUndo} from "./replacementInput";
+import {recordNativeInputUndo} from "./nativeInputUndo";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
@@ -4427,7 +4427,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
-            recordReplacementUndo(event, this.element, this.lastHTMLs);
+            recordNativeInputUndo(event, this.element, this.lastHTMLs, isComposition);
             if (!event.isComposing && !isComposition &&
                 (event.inputType.startsWith("insert") || event.inputType.startsWith("delete")) &&
                 getSelection().rangeCount > 0) {

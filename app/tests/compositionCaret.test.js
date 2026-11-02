@@ -97,7 +97,8 @@ const rendererSource = () => {
         const turnIntoTaskList = () => false, headingTurnIntoList = () => false;
         const getBlockquoteContext = () => undefined, isProtyleListItemFirstParagraph = () => false;
         const mathRender = () => {};
-    ` + read("wysiwyg/compositionCaret") + read("wysiwyg/compositionInput") + read("util/browserCompatibility") +
+    ` + read("wysiwyg/compositionCaret") + read("wysiwyg/compositionInput") +
+        extract("wysiwyg/nativeInputUndo", ["recordNativeInputUndo"]) + read("util/browserCompatibility") +
         extract("util/compatibility", ["isIOSDevice", "isMac"]) +
         extract("util/hasClosest", ["hasClosestBlock", "hasClosestByAttribute", "hasClosestByClassName",
             "hasClosestByTag", "isBlockElement"]) +
@@ -150,6 +151,8 @@ const rendererSource = () => {
             protyle.wysiwyg.element.addEventListener("compositionstart", handlers.start);
             protyle.wysiwyg.element.addEventListener("compositionend", event => pending.push(handlers.end(event)));
             protyle.wysiwyg.element.addEventListener("input", handlers.input);
+            protyle.wysiwyg.element.addEventListener("beforeinput", event =>
+                recordNativeInputUndo(event, protyle.wysiwyg.element, protyle.wysiwyg.lastHTMLs, isComposition));
             protyle.wysiwyg.element.addEventListener("focusout", handlers.focusout);
             protyle.wysiwyg.element.addEventListener("keyup", handlers.keyup);
             keydown(protyle, protyle.wysiwyg.element);
@@ -593,6 +596,45 @@ const runCases = async () => {
         f.protyle.hint.render = () => {};
         return f;
     };
+    for (const profile of profiles) {
+        for (const content of ["", "**base**"]) {
+            const f = nativeFixture(content || "\u200b");
+            setPlatform(profile);
+            const initial = f.element.innerHTML;
+            const block = f.element.firstElementChild;
+            const editable = block.querySelector('[contenteditable="true"]');
+            f.setRange(editable, editable.childNodes.length);
+            for (const text of ["我", "你"]) {
+                const range = getSelection().getRangeAt(0);
+                const event = new InputEvent("beforeinput", {
+                    bubbles: true, inputType: "insertText", data: text,
+                });
+                f.element.dispatchEvent(event);
+                const node = document.createTextNode(text);
+                range.insertNode(node);
+                f.setRange(node, node.length);
+                f.element.dispatchEvent(new InputEvent("input", {
+                    bubbles: true, inputType: "insertText", data: text,
+                }));
+                await f.protyle.wysiwyg.flushPendingInput();
+                const saved = f.protyle.transactions.at(-1);
+                assert.ok(saved.undoOperations[0].data, "direct commits need an undo snapshot before keyup");
+                assert.equal(saved.undoOperations[0].data.includes(text), false);
+            }
+            for (const saved of [...f.protyle.transactions].reverse()) {
+                assert.ok(saved.undoOperations[0].data);
+                f.element.innerHTML = saved.undoOperations[0].data;
+                f.protyle.wysiwyg.lastHTMLs = {};
+            }
+            assert.equal(f.element.innerHTML, initial);
+            for (const saved of f.protyle.transactions) {
+                f.element.innerHTML = saved.doOperations[0].data;
+            }
+            assert.equal(f.element.querySelector('[contenteditable="true"]').textContent.replace(/\u200b/g, ""),
+                (content ? "base" : "") + "我你");
+            cases++;
+        }
+    }
     const deletePrefix = f => {
         const block = f.element.firstElementChild;
         const editable = block.querySelector('[contenteditable="true"]');
@@ -749,7 +791,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
-            assert.match(stdout, /Composition caret: 95 Electron cases passed/);
+            assert.match(stdout, /Composition caret: 107 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-composition-caret-"));

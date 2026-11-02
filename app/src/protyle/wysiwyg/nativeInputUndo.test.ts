@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {recordReplacementUndo} from "./replacementInput";
+import {recordNativeInputUndo} from "./nativeInputUndo";
 
 const setup = (type = "NodeParagraph") => {
     const block = {
@@ -24,13 +24,33 @@ const setup = (type = "NodeParagraph") => {
     return {block, element, event};
 };
 
-describe("native spelling replacement undo", () => {
+describe("native text input undo", () => {
+    it("captures direct text commits without compositionstart after undo clears snapshots", () => {
+        for (const type of ["NodeParagraph", "NodeHeading", "NodeTable"]) {
+            const {block, element, event} = setup(type);
+            const snapshots: {[key: string]: string} = {};
+            recordNativeInputUndo({...event, inputType: "insertText"} as InputEvent, element, snapshots);
+            assert.equal(snapshots.block, block.outerHTML);
+        }
+    });
+
+    it("preserves keyboard and composition snapshots for text commits", () => {
+        const {element, event} = setup();
+        const direct = {...event, inputType: "insertText"} as InputEvent;
+        const snapshots = {block: "before typing"};
+        recordNativeInputUndo(direct, element, snapshots);
+        assert.equal(snapshots.block, "before typing");
+        const empty = {};
+        recordNativeInputUndo(direct, element, empty, true);
+        assert.deepEqual(empty, {});
+    });
+
     it("captures a previously untouched block before replacement, including heading and inline formatting", () => {
         for (const type of ["NodeParagraph", "NodeHeading"]) {
             const {block, element, event} = setup(type);
             const snapshots: {[key: string]: string} = {};
             const original = block.outerHTML;
-            recordReplacementUndo(event, element, snapshots);
+            recordNativeInputUndo(event, element, snapshots);
             block.outerHTML = original.replace("beautful", "beautiful");
             assert.equal(snapshots.block, original);
         }
@@ -39,10 +59,10 @@ describe("native spelling replacement undo", () => {
     it("refreshes stale snapshots for consecutive corrections", () => {
         const {block, element, event} = setup();
         const snapshots = {block: "stale"};
-        recordReplacementUndo(event, element, snapshots);
+        recordNativeInputUndo(event, element, snapshots);
         assert.equal(snapshots.block, block.outerHTML);
         block.outerHTML = block.outerHTML.replace("beautful", "beautiful");
-        recordReplacementUndo(event, element, snapshots);
+        recordNativeInputUndo(event, element, snapshots);
         assert.equal(snapshots.block, block.outerHTML);
     });
 
@@ -50,7 +70,7 @@ describe("native spelling replacement undo", () => {
         const {block, element, event} = setup();
         element.ownerDocument.getSelection = () => null;
         const snapshots: {[key: string]: string} = {};
-        recordReplacementUndo(event, element, snapshots);
+        recordNativeInputUndo(event, element, snapshots);
         assert.equal(snapshots.block, block.outerHTML);
     });
 
@@ -58,16 +78,16 @@ describe("native spelling replacement undo", () => {
         const {block, element, event} = setup();
         event.getTargetRanges = () => [];
         const snapshots: {[key: string]: string} = {};
-        recordReplacementUndo(event, element, snapshots);
+        recordNativeInputUndo(event, element, snapshots);
         assert.equal(snapshots.block, block.outerHTML);
     });
 
     it("ignores canceled, composing, unrelated and outside-editor input", () => {
-        for (const overrides of [{defaultPrevented: true}, {isComposing: true}, {inputType: "insertText"},
+        for (const overrides of [{defaultPrevented: true}, {isComposing: true}, {inputType: "insertParagraph"},
             {getTargetRanges: () => [{startContainer: {}, endContainer: {}}]}]) {
             const {element, event} = setup();
             const snapshots = {};
-            recordReplacementUndo({...event, ...overrides} as InputEvent, element, snapshots);
+            recordNativeInputUndo({...event, ...overrides} as InputEvent, element, snapshots);
             assert.deepEqual(snapshots, {});
         }
     });

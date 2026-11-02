@@ -192,4 +192,3 @@ All listed Go libraries are `kernel/go.mod` dependencies. GitHub orgs: `siyuan-n
 - Test local Go dependencies with temporary `kernel/go.mod` replacements; **never commit them**. Rebuild `lute.min.js` in `lute` with GopherJS, then copy to `app/stage/protyle/js/lute/`
 - Changes to `app/src/types/` or other plugin-public TypeScript declarations/constants require same-task Petal synchronization. Every Petal change also adds a concise `petal/CHANGELOG.md` entry under the current unreleased version before committing
 - Keep `petal/README.md` to title and `plugin-sample` link: no feature descriptions, API explanations or examples. Put API behavior/constraints/lifecycle in maintained Petal declaration comments and executable usage examples in actual `plugin-sample` code
-

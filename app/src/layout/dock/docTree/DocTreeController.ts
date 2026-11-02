@@ -67,6 +67,7 @@ export class DocTreeController {
     private rowHeight = 28;
     private rowSpacing = 0;
     private finishRowAnimation: () => void;
+    private deferRowAnimationResize: (entries: ResizeObserverEntry[]) => boolean;
     private mounted = new Map<string, {element: HTMLElement, signature: string, titleVersion?: string}>();
     private expanding = new Map<string, {item: IDocTreeItem}>();
     private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
@@ -141,7 +142,9 @@ export class DocTreeController {
                 void this.load(parent, placeholder ? Number(placeholder.dataset.index) : 0).catch((): void => undefined);
             }
         }, {capture: true, signal});
-        this.observer = new ResizeObserver(() => this.scheduleRender());
+        this.observer = new ResizeObserver(entries => {
+            if (!this.deferRowAnimationResize?.(entries)) { this.scheduleRender(); }
+        });
         this.observer.observe(options.element);
         this.setRoots(options.roots || []);
     }
@@ -513,17 +516,40 @@ export class DocTreeController {
         if (!group.isConnected) { return; }
         cancelAnimationFrame(this.frame);
         this.frame = 0;
+        const element = this.options.element;
+        const width = element.getBoundingClientRect().width;
+        // 自适应列表的视口随动画区域增高，固定视口的两次测量值相同。
+        group.style.height = "0px";
+        const collapsedHeight = element.clientHeight;
+        group.style.height = `${height}px`;
+        const expandedHeight = element.clientHeight;
         group.style.height = `${expanded ? height : 0}px`;
         const animation = group.animate([{height: `${expanded ? 0 : height}px`},
             {height: `${expanded ? height : 0}px`}], {duration: 200, easing: "cubic-bezier(0, 0, .2, 1)"});
         const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let resizeDeferred = false;
+        this.deferRowAnimationResize = entries => {
+            const expectedHeight = Math.min(expandedHeight, collapsedHeight + group.getBoundingClientRect().height);
+            if (Math.abs(element.getBoundingClientRect().width - width) > 1 ||
+                Math.abs(element.clientHeight - expectedHeight) > 1 || entries.some(entry => {
+                    if (entry.target === element) { return false; }
+                    const row = entry.target as HTMLElement;
+                    const style = getComputedStyle(row);
+                    const spacing = (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+                    return Math.abs(row.getBoundingClientRect().height + spacing - this.rowHeight) > 0.1;
+                })) { return false; }
+            resizeDeferred = true;
+            return true;
+        };
         const finish = () => {
             if (this.finishRowAnimation !== finish) { return; }
             this.finishRowAnimation = undefined;
+            this.deferRowAnimationResize = undefined;
             motion.removeEventListener("change", finish);
             animation.cancel();
             if (expanded) { group.replaceWith(...Array.from(group.children)); }
             else { group.remove(); }
+            if (resizeDeferred) { this.scheduleRender(); }
         };
         this.finishRowAnimation = finish;
         motion.addEventListener("change", finish);

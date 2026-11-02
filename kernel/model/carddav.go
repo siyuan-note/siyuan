@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"golang.org/x/sync/errgroup"
 	"io"
 	"net/http"
@@ -684,8 +685,19 @@ func (b *AddressBook) load() error {
 								}
 								sum := sha256.Sum256(encoded.Bytes())
 								filename_ := strings.TrimSuffix(filename, VCardFileExt) + "-" + hex.EncodeToString(sum[:8]) + VCardFileExt
+								filePath := path.Join(b.DirectoryPath, filename_)
+								// 同名文件只能来自此前对同一张卡片的拆分（同步或中断的拆分会让原文件与它并存），之后可能已被修改，
+								// 原卡片是它修改前的版本，因此保留它，由该文件自己的载入任务读取
+								if info, statErr := os.Lstat(filePath); statErr == nil {
+									if !info.Mode().IsRegular() {
+										return fmt.Errorf("CardDAV: split destination [%s] is not a regular file", filePath)
+									}
+									return nil
+								} else if !os.IsNotExist(statErr) {
+									return statErr
+								}
 								address := &AddressObject{
-									FilePath: path.Join(b.DirectoryPath, filename_),
+									FilePath: filePath,
 									BookPath: b.MetaData.Path,
 									Data: &AddressObjectData{
 										Card: vCard,

@@ -126,3 +126,59 @@ func TestCardDAVSplitsMultiCardFiles(t *testing.T) {
 		t.Fatalf("splitting the same file produced different names: %v and %v", names[0], names[1])
 	}
 }
+
+// TestCardDAVSplitKeepsExistingFiles 验证原多卡片文件与拆分结果并存时（同步或中断的拆分），再次拆分不会覆盖
+// 拆分后已修改的联系人。
+func TestCardDAVSplitKeepsExistingFiles(t *testing.T) {
+	_, cardDAV := newDAVHandlerFixture(t)
+	book := CardDavDefaultAddressBookPath
+	dir := DavPath2DirectoryPath(book)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	multi := davTestCard("u1", "Alice") + davTestCard("u2", "Bob")
+	restore := func() {
+		if err := os.WriteFile(filepath.Join(dir, "multi.vcf"), []byte(multi), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	listFiles := func() (files []string) {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, entry := range entries {
+			files = append(files, entry.Name())
+		}
+		sort.Strings(files)
+		return
+	}
+	restore()
+	davTestRequest(cardDAV, "PROPFIND", book, map[string]string{"Depth": "1"}, "")
+	split := listFiles()
+	alice := ""
+	for _, file := range split {
+		if content, _ := os.ReadFile(filepath.Join(dir, file)); strings.Contains(string(content), "UID:u1") {
+			alice = file
+		}
+	}
+	if len(split) != 2 || "" == alice {
+		t.Fatalf("split produced files %v", split)
+	}
+	if put := davTestRequest(cardDAV, http.MethodPut, book+"/"+alice, davVCardHeader, davTestCard("u1", "Alice Updated")); put.Code != http.StatusNoContent {
+		t.Fatalf("PUT %s: status = %d", alice, put.Code)
+	}
+
+	restore()
+	resetDAVStores()
+	propfind := davTestRequest(cardDAV, "PROPFIND", book, map[string]string{"Depth": "1"}, "")
+	if count := strings.Count(propfind.Body.String(), "<response"); count != 3 {
+		t.Fatalf("PROPFIND responses = %d, want the collection and two cards; body = %s", count, propfind.Body.String())
+	}
+	if files := listFiles(); strings.Join(files, ",") != strings.Join(split, ",") {
+		t.Fatalf("files after splitting again = %v, want %v", files, split)
+	}
+	if get := davTestRequest(cardDAV, http.MethodGet, book+"/"+alice, nil, ""); get.Code != http.StatusOK || !strings.Contains(get.Body.String(), "FN:Alice Updated") {
+		t.Fatalf("updated contact was overwritten: status = %d; body = %s", get.Code, get.Body.String())
+	}
+}

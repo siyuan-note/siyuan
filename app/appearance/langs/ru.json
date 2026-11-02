@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "Не удалось отправить оценку",
 	"bazaarRatingSubmitted": "Оценка отправлена",
 	"safeModeJSTip": "Безопасный режим включён, блоки встроенных запросов <code>//!js</code> отключены",
-	"tableHeaderBodyMergeUnsupported": "Ячейки заголовка и тела таблицы нельзя объединить",
 	"editorMarkdownBlockFullWidthTaskList": "Быстрый ввод полноширинного блока списка задач",
 	"editorMarkdownBlockFullWidthTaskListTip": "После включения будет поддерживаться ввод синтаксиса списка задач <code>【】</code> и <code>【X】</code>",
 	"duplicateCopy": "Создать дубликат",

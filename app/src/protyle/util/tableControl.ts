@@ -21,6 +21,9 @@ import {
     isTableHeaderEnabled,
     ITableCellInfo,
     ITableGrid,
+    normalizeTableSections,
+    replaceTableCellTag,
+    splitTableCell,
     toggleTableHeader,
 } from "./table";
 import {
@@ -182,21 +185,6 @@ const intersectRects = (...rects: ITableControlRect[]) => {
         width: Math.max(0, right - left),
         height: Math.max(0, bottom - top),
     };
-};
-
-const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
-    if (cell.tagName.toLowerCase() === tag) {
-        return cell;
-    }
-    const newCell = document.createElement(tag);
-    Array.from(cell.attributes).forEach(attribute => {
-        newCell.setAttribute(attribute.name, attribute.value);
-    });
-    while (cell.firstChild) {
-        newCell.append(cell.firstChild);
-    }
-    cell.replaceWith(newCell);
-    return newCell;
 };
 
 export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
@@ -2294,7 +2282,7 @@ export class TableControl {
             (table.tBodies[0] || table.createTBody()).append(...rows);
         }
         if (index === 0) {
-            this.normalizeTableSections(table);
+            normalizeTableSections(table);
         }
         if (rows[0]?.cells[0]) {
             const range = document.createRange();
@@ -2479,9 +2467,8 @@ export class TableControl {
         }
         const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
         if (mergedCell || cells.length > 1) {
-            const mergeDisabledReason = !mergedCell && (!rectangle ?
-                window.siyuan.languages.tableRectangleSelectionRequired :
-                !this.isSelectionInOneSection() ? window.siyuan.languages.tableHeaderBodyMergeUnsupported : undefined);
+            const mergeDisabledReason = !mergedCell && !rectangle ?
+                window.siyuan.languages.tableRectangleSelectionRequired : undefined;
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: mergedCell ? "iconTableCellsSplit" : "iconTableCellsMerge",
@@ -2504,11 +2491,6 @@ export class TableControl {
             submenu: getTableCellAlignmentMenus(this.getSelectedCells(),
                 (property, value) => this.setCellStyle(property, value)),
         }).element);
-    }
-
-    private isSelectionInOneSection() {
-        const sections = new Set(this.getSelectedCells().map(cell => cell.parentElement.parentElement.tagName));
-        return sections.size === 1;
     }
 
     private getBackgroundMenus(): IMenu[] {
@@ -2650,15 +2632,17 @@ export class TableControl {
         const oldHTML = selection.node.outerHTML;
         if (selection.mode === "row") {
             const rows = Array.from(selection.table.rows);
+            const headRowCount = selection.table.tHead?.rows.length || 1;
             const clones = selected.map(index => rows[index]?.cloneNode(true) as HTMLTableRowElement).filter(Boolean);
-            clones.forEach(row => Array.from(row.cells).forEach(cell => replaceCellTag(cell, "td")));
             const lastIndex = selected[selected.length - 1];
-            if (lastIndex === 0) {
+            const tag = lastIndex < headRowCount - 1 ? "th" : "td";
+            clones.forEach(row => Array.from(row.cells).forEach(cell => replaceTableCellTag(cell, tag)));
+            if (lastIndex === headRowCount - 1) {
                 const body = selection.table.tBodies[0] || selection.table.createTBody();
                 clones.slice().reverse().forEach(row => {
                     body.insertAdjacentElement("afterbegin", row);
                 });
-                selection.indexes = new Set(getRangeIndexes(1, clones.length));
+                selection.indexes = new Set(getRangeIndexes(headRowCount, headRowCount + clones.length - 1));
             } else {
                 let lastRow = rows[lastIndex];
                 clones.forEach(row => {
@@ -2699,27 +2683,8 @@ export class TableControl {
         this.scheduleRender();
     }
 
-    private normalizeTableSections(table: HTMLTableElement) {
-        const rows = Array.from(table.rows);
-        let head = table.tHead;
-        let body = table.tBodies[0];
-        if (!head) {
-            head = table.createTHead();
-        }
-        if (!body) {
-            body = table.createTBody();
-        }
-        head.innerHTML = "";
-        body.innerHTML = "";
-        rows.forEach((row, index) => {
-            Array.from(row.cells).forEach(cell => replaceCellTag(cell, index === 0 ? "th" : "td"));
-            (index === 0 ? head : body).append(row);
-        });
-        Array.from(table.tBodies).slice(1).forEach(item => item.remove());
-    }
-
     private mergeCells() {
-        if (this.protyle.disabled || !this.selection || !this.isRectangle() || !this.isSelectionInOneSection()) {
+        if (this.protyle.disabled || !this.selection || !this.isRectangle()) {
             return;
         }
         const grid = buildTableGrid(this.selection.table);
@@ -2740,9 +2705,11 @@ export class TableControl {
         });
         first.rowSpan = rowEnd - rowStart + 1;
         first.colSpan = colEnd - colStart + 1;
+        normalizeTableSections(this.selection.table);
         updateTransaction(this.protyle, this.selection.node, oldHTML);
         renderTableCellRichElements(first);
         this.selection.cells = new Set([first]);
+        this.selection.anchor = first;
         this.selection.activeCell = first;
         this.hoverCell = first;
         this.updateSelectedCells();
@@ -2754,36 +2721,10 @@ export class TableControl {
             !this.wysiwygElement.contains(cell) || !this.selectCellRange(cell, cell)) {
             return;
         }
-        const grid = buildTableGrid(this.selection.table);
-        const info = grid.cellInfos.find(item => item.cell === cell);
+        const oldHTML = this.selection.node.outerHTML;
+        const info = splitTableCell(cell);
         if (!info) {
             return;
-        }
-        const oldHTML = this.selection.node.outerHTML;
-        const rows = Array.from(this.selection.table.rows);
-        for (let row = info.row; row < info.row + info.rowspan; row++) {
-            for (let col = info.col; col < info.col + info.colspan; col++) {
-                const current = rows[row]?.cells[col];
-                if (current && current !== cell) {
-                    current.classList.remove("fn__none");
-                    current.removeAttribute("rowspan");
-                    current.removeAttribute("colspan");
-                }
-            }
-        }
-        cell.removeAttribute("rowspan");
-        cell.removeAttribute("colspan");
-        if (cell.tagName === "TH") {
-            const head = this.selection.table.tHead;
-            const body = this.selection.table.tBodies[0] || this.selection.table.createTBody();
-            const pureRow = Array.from(head?.rows || []).find(row =>
-                Array.from(row.cells).every(item => item.rowSpan === 1 && item.colSpan === 1 &&
-                    !item.classList.contains("fn__none")));
-            while (pureRow && head.lastElementChild !== pureRow) {
-                const row = head.lastElementChild as HTMLTableRowElement;
-                Array.from(row.cells).forEach(item => replaceCellTag(item, "td"));
-                body.insertAdjacentElement("afterbegin", row);
-            }
         }
         updateTransaction(this.protyle, this.selection.node, oldHTML);
         const updatedGrid = buildTableGrid(this.selection.table);
@@ -3261,6 +3202,7 @@ export class TableControl {
         const {selected, adjustedTarget} = moveTarget;
         const oldHTML = this.selection.node.outerHTML;
         if (this.selection.mode === "row") {
+            const headRowCount = this.selection.table.tHead?.rows.length || 1;
             const rows = Array.from(this.selection.table.rows);
             const moving = selected.map(index => rows[index]).filter(Boolean);
             const remaining = rows.filter((row, index) => !selected.includes(index));
@@ -3270,8 +3212,8 @@ export class TableControl {
             head.innerHTML = "";
             body.innerHTML = "";
             remaining.forEach((row, index) => {
-                Array.from(row.cells).forEach(cell => replaceCellTag(cell, index === 0 ? "th" : "td"));
-                (index === 0 ? head : body).append(row);
+                Array.from(row.cells).forEach(cell => replaceTableCellTag(cell, index < headRowCount ? "th" : "td"));
+                (index < headRowCount ? head : body).append(row);
             });
             const start = Math.max(0, adjustedTarget);
             this.selection.indexes = new Set(getRangeIndexes(start, start + moving.length - 1));
@@ -3449,7 +3391,7 @@ export class TableControl {
                 const item = outputGrid[row][column];
                 const tag = nextSection === "thead" ? "th" : "td";
                 if (item) {
-                    html += replaceCellTag(item.cell, tag).outerHTML;
+                    html += replaceTableCellTag(item.cell, tag).outerHTML;
                 } else if (coveredSlots[row][column]) {
                     html += `<${tag} class="fn__none"></${tag}>`;
                 } else {

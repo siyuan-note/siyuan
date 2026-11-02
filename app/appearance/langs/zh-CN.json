@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "评分提交失败",
 	"bazaarRatingSubmitted": "评分已提交",
 	"safeModeJSTip": "安全模式已启用，已禁用 <code>//!js</code> 查询嵌入块",
-	"tableHeaderBodyMergeUnsupported": "标题行和正文行的单元格不能合并",
 	"editorMarkdownBlockFullWidthTaskList": "全角任务列表块快捷输入",
 	"editorMarkdownBlockFullWidthTaskListTip": "启用后将支持 <code>【】</code> 和 <code>【X】</code> 任务列表语法输入",
 	"duplicateCopy": "创建副本",

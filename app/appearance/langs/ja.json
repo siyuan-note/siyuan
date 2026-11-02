@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "評価を送信できませんでした",
 	"bazaarRatingSubmitted": "評価を送信しました",
 	"safeModeJSTip": "セーフモードが有効なため、<code>//!js</code> クエリ埋め込みブロックは無効です",
-	"tableHeaderBodyMergeUnsupported": "表のヘッダーと本文のセルは結合できません",
 	"editorMarkdownBlockFullWidthTaskList": "全角タスクリストブロックのショートカット入力",
 	"editorMarkdownBlockFullWidthTaskListTip": "有効にすると、<code>【】</code> および <code>【X】</code> のタスクリスト構文入力がサポートされます",
 	"duplicateCopy": "複製を作成",

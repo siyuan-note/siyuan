@@ -53,6 +53,58 @@ export const getOrCreateTableBody = (tableElement: HTMLTableElement) => {
     return tableElement.tBodies[0] || tableElement.createTBody();
 };
 
+export const replaceTableCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
+    if (cell.tagName.toLowerCase() === tag) {
+        return cell;
+    }
+    const newCell = document.createElement(tag);
+    Array.from(cell.attributes).forEach(attribute => newCell.setAttribute(attribute.name, attribute.value));
+    while (cell.firstChild) {
+        newCell.append(cell.firstChild);
+    }
+    cell.replaceWith(newCell);
+    return newCell;
+};
+
+export const normalizeTableSections = (table: HTMLTableElement, minimum = table.tHead?.rows.length || 1) => {
+    const rows = Array.from(table.rows);
+    // 表头必须覆盖完整的纵向合并范围，包括提升行中继续向下延伸的其他合并单元格。
+    const headRowCount = getTableHeadRowCount(buildTableGrid(table).cellInfos, rows.length, minimum);
+    const head = table.tHead || table.createTHead();
+    const body = getOrCreateTableBody(table);
+    rows.forEach((row, index) => {
+        const inHead = index < headRowCount;
+        Array.from(row.cells).forEach(cell => replaceTableCellTag(cell, inHead ? "th" : "td"));
+        (inHead ? head : body).append(row);
+    });
+    Array.from(table.tBodies).slice(1).forEach(item => item.remove());
+};
+
+export const splitTableCell = (cell: HTMLTableCellElement) => {
+    const table = cell.closest("table");
+    if (!table) {
+        return;
+    }
+    const info = buildTableGrid(table).cellInfos.find(item => item.cell === cell);
+    if (!info) {
+        return;
+    }
+    const rows = Array.from(table.rows);
+    for (let row = info.row; row < info.row + info.rowspan; row++) {
+        for (let col = info.col; col < info.col + info.colspan; col++) {
+            const current = rows[row]?.cells[col];
+            if (current && current !== cell) {
+                current.classList.remove("fn__none");
+                current.removeAttribute("rowspan");
+                current.removeAttribute("colspan");
+            }
+        }
+    }
+    cell.removeAttribute("rowspan");
+    cell.removeAttribute("colspan");
+    return info;
+};
+
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
     return type === "row" ? nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_ROW) !== "false" :
         nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_COLUMN) === "true";
@@ -155,14 +207,17 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     const html = nodeElement.outerHTML;
     wbrElement.remove();
 
+    const inHead = cellElement.parentElement.parentElement.tagName === "THEAD" &&
+        !!cellElement.parentElement.nextElementSibling;
+    const tag = inHead ? "th" : "td";
     let rowHTML = "";
     for (let m = 0; m < cellElement.parentElement.childElementCount; m++) {
         const source = cellElement.parentElement.children[m] as HTMLTableCellElement;
         const align = source.style.textAlign || source.getAttribute("align");
-        rowHTML += `<td${["left", "center", "right"].includes(align) ? ` style="text-align: ${align}"` : ""}></td>`;
+        rowHTML += `<${tag}${["left", "center", "right"].includes(align) ? ` style="text-align: ${align}"` : ""}></${tag}>`;
     }
     let newRowElement: HTMLTableRowElement;
-    if (cellElement.tagName === "TH") {
+    if (cellElement.tagName === "TH" && !inHead) {
         const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
         tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`.repeat(count));
         newRowElement = tbodyElement.firstElementChild as HTMLTableRowElement;
@@ -205,26 +260,14 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
             rowCount++;
             Array.from(previousTrElement.children).forEach((cell: HTMLTableCellElement) => {
                 if (cell.rowSpan >= rowCount && cell.rowSpan > 1) {
-                    cell.rowSpan = cell.rowSpan + 1;
+                    cell.rowSpan = cell.rowSpan + count;
                 }
             });
             previousTrElement = previousTrElement.previousElementSibling;
         }
     }
-    let newRowElement: HTMLTableRowElement;
-    if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
-        getOrCreateTableBody(nodeElement.querySelector("table"));
-        cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
-        newRowElement = nodeElement.querySelector("thead tr");
-        cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>"));
-        if (count > 1) {
-            cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", `<tr>${rowHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>")}</tr>`.repeat(count - 1));
-        }
-        cellElement.parentElement.parentElement.remove();
-    } else {
-        cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`.repeat(count));
-        newRowElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
-    }
+    cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`.repeat(count));
+    const newRowElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
     range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
     range.collapse(true);
     focusByRange(range);
@@ -296,9 +339,25 @@ export const deleteColumn = (protyle: IProtyle, range: Range, nodeElement: Eleme
         });
 };
 
+const getTableRowMoveTarget = (row: HTMLTableRowElement, offset: number) => {
+    const table = row.closest("table");
+    const target = table?.rows[row.rowIndex + offset];
+    if (!target) {
+        return;
+    }
+    const first = Math.min(row.rowIndex, target.rowIndex);
+    const last = Math.max(row.rowIndex, target.rowIndex);
+    if (buildTableGrid(table).cellInfos.some(info => info.rowspan > 1 &&
+        info.row <= last && info.row + info.rowspan > first)) {
+        return;
+    }
+    return target;
+};
+
 export const moveRowToUp = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    const rowElement = cellElement.parentElement;
-    if (rowElement.parentElement.tagName === "THEAD") {
+    const rowElement = cellElement.parentElement as HTMLTableRowElement;
+    const previousRow = getTableRowMoveTarget(rowElement, -1);
+    if (!previousRow) {
         return;
     }
     range.insertNode(document.createElement("wbr"));
@@ -306,17 +365,9 @@ export const moveRowToUp = (protyle: IProtyle, range: Range, cellElement: HTMLEl
     if (rowElement.previousElementSibling) {
         rowElement.after(rowElement.previousElementSibling);
     } else {
-        const headElement = rowElement.parentElement.previousElementSibling.firstElementChild;
-        headElement.querySelectorAll("th").forEach(item => {
-            const tdElement = document.createElement("td");
-            tdElement.innerHTML = item.innerHTML;
-            item.parentNode.replaceChild(tdElement, item);
-        });
-        rowElement.querySelectorAll("td").forEach(item => {
-            const thElement = document.createElement("th");
-            thElement.innerHTML = item.innerHTML;
-            item.parentNode.replaceChild(thElement, item);
-        });
+        const headElement = previousRow;
+        headElement.querySelectorAll("th").forEach(item => replaceTableCellTag(item, "td"));
+        rowElement.querySelectorAll("td").forEach(item => replaceTableCellTag(item, "th"));
         rowElement.after(headElement);
         rowElement.parentElement.previousElementSibling.append(rowElement);
     }
@@ -326,9 +377,9 @@ export const moveRowToUp = (protyle: IProtyle, range: Range, cellElement: HTMLEl
 };
 
 export const moveRowToDown = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    const rowElement = cellElement.parentElement;
-    if ((rowElement.parentElement.tagName === "TBODY" && !rowElement.nextElementSibling) ||
-        (rowElement.parentElement.tagName === "THEAD" && !rowElement.parentElement.nextElementSibling)) {
+    const rowElement = cellElement.parentElement as HTMLTableRowElement;
+    const nextRow = getTableRowMoveTarget(rowElement, 1);
+    if (!nextRow) {
         return;
     }
     range.insertNode(document.createElement("wbr"));
@@ -336,17 +387,9 @@ export const moveRowToDown = (protyle: IProtyle, range: Range, cellElement: HTML
     if (rowElement.nextElementSibling) {
         rowElement.before(rowElement.nextElementSibling);
     } else {
-        const firstRowElement = rowElement.parentElement.nextElementSibling.firstElementChild;
-        firstRowElement.querySelectorAll("td").forEach(item => {
-            const thElement = document.createElement("th");
-            thElement.innerHTML = item.innerHTML;
-            item.parentNode.replaceChild(thElement, item);
-        });
-        rowElement.querySelectorAll("th").forEach(item => {
-            const tdElement = document.createElement("td");
-            tdElement.innerHTML = item.innerHTML;
-            item.parentNode.replaceChild(tdElement, item);
-        });
+        const firstRowElement = nextRow;
+        firstRowElement.querySelectorAll("td").forEach(item => replaceTableCellTag(item, "th"));
+        rowElement.querySelectorAll("th").forEach(item => replaceTableCellTag(item, "td"));
         rowElement.after(firstRowElement);
         rowElement.parentElement.nextElementSibling.insertAdjacentElement("afterbegin", rowElement);
     }

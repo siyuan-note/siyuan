@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "Slanje ocene nije uspelo",
 	"bazaarRatingSubmitted": "Ocena je poslata",
 	"safeModeJSTip": "Uključen je bezbedni režim; <code>//!js</code> upitni ugrađeni blokovi su onemogućeni",
-	"tableHeaderBodyMergeUnsupported": "Nije moguće spojiti ćelije zaglavlja i tela tabele",
 	"editorMarkdownBlockFullWidthTaskList": "Prečica za unos bloka liste zadataka pomoću znakova pune širine",
 	"editorMarkdownBlockFullWidthTaskListTip": "Kada je uključeno, podržan je unos sintakse liste zadataka <code>【】</code> i <code>【X】</code>",
 	"duplicateCopy": "Napravi kopiju",

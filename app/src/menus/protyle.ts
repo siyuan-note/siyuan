@@ -19,7 +19,6 @@ import {
     deleteColumn,
     deleteRow,
     getColIndex,
-    getOrCreateTableBody,
     insertColumn,
     insertRow,
     insertRowAbove,
@@ -29,6 +28,7 @@ import {
     moveRowToDown,
     moveRowToUp,
     setTableAlign,
+    splitTableCell,
     toggleTableHeader,
     transposeTable,
     updateTableTitle
@@ -2382,55 +2382,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     return;
                 }
                 const oldHTML = nodeElement.outerHTML;
-                let rowSpan = cellElement.rowSpan;
-                let currentRowElement: Element = cellElement.parentElement;
-                const orgColSpan = cellElement.colSpan;
-                while (rowSpan > 0 && currentRowElement) {
-                    let currentCellElement = currentRowElement.children[colIndex] as HTMLTableCellElement;
-                    let colSpan = orgColSpan;
-                    while (colSpan > 0 && currentCellElement) {
-                        currentCellElement.classList.remove("fn__none");
-                        currentCellElement.removeAttribute("colspan");
-                        currentCellElement.removeAttribute("rowspan");
-                        currentCellElement = currentCellElement.nextElementSibling as HTMLTableCellElement;
-                        colSpan--;
-                    }
-                    currentRowElement = currentRowElement.nextElementSibling;
-                    rowSpan--;
-                }
-                cellElement.removeAttribute("colspan");
-                cellElement.removeAttribute("rowspan");
-                if (cellElement.tagName === "TH") {
-                    let prueTrElement: HTMLElement;
-                    Array.from(nodeElement.querySelectorAll("thead tr")).find((item: HTMLElement) => {
-                        prueTrElement = item;
-                        Array.from(item.children).forEach((cellElement: HTMLTableCellElement) => {
-                            if (cellElement.rowSpan !== 1 || cellElement.classList.contains("fn__none")) {
-                                prueTrElement = undefined;
-                            }
-                        });
-                        if (prueTrElement) {
-                            return true;
-                        }
-                    });
-                    if (prueTrElement) {
-                        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
-                        const theadElement = nodeElement.querySelector("thead");
-                        while (prueTrElement !== theadElement.lastElementChild) {
-                            theadElement.lastElementChild.querySelectorAll("th").forEach(item => {
-                                const td = document.createElement("td");
-                                Array.from(item.attributes).forEach(attr => {
-                                    td.setAttribute(attr.name, attr.value);
-                                });
-                                while (item.firstChild) {
-                                    td.appendChild(item.firstChild);
-                                }
-                                item.replaceWith(td);
-                            });
-                            tbodyElement.insertAdjacentElement("afterbegin", theadElement.lastElementChild);
-                        }
-                    }
-                }
+                splitTableCell(cellElement);
                 focusByRange(range);
                 updateTransaction(protyle, nodeElement, oldHTML);
             }

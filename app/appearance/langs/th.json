@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "ไม่สามารถส่งคะแนนได้",
 	"bazaarRatingSubmitted": "ส่งคะแนนแล้ว",
 	"safeModeJSTip": "เปิดใช้งานโหมดปลอดภัยแล้ว บล็อกฝังตัวแบบสอบถาม <code>//!js</code> ถูกปิดใช้งาน",
-	"tableHeaderBodyMergeUnsupported": "ไม่สามารถผสานเซลล์ส่วนหัวและเนื้อหาของตารางได้",
 	"editorMarkdownBlockFullWidthTaskList": "การป้อนทางลัดบล็อกรายการงานแบบเต็มความกว้าง",
 	"editorMarkdownBlockFullWidthTaskListTip": "เมื่อเปิดใช้งาน จะรองรับการป้อนไวยากรณ์รายการงาน <code>【】</code> และ <code>【X】</code>",
 	"duplicateCopy": "สร้างสำเนา",

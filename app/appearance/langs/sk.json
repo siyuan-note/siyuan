@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "Hodnotenie sa nepodarilo odoslať",
 	"bazaarRatingSubmitted": "Hodnotenie bolo odoslané",
 	"safeModeJSTip": "Núdzový režim je aktivovaný, bloky vložených dopytov <code>//!js</code> sú zakázané",
-	"tableHeaderBodyMergeUnsupported": "Bunky hlavičky a tela tabuľky nemožno zlúčiť",
 	"editorMarkdownBlockFullWidthTaskList": "Skratka na zadanie celošírkového bloku zoznamu úloh",
 	"editorMarkdownBlockFullWidthTaskListTip": "Po povolení bude podporované zadávanie syntaxe zoznamu úloh <code>【】</code> a <code>【X】</code>",
 	"duplicateCopy": "Vytvoriť kópiu",

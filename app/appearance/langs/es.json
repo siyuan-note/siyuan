@@ -1016,7 +1016,6 @@
 	"bazaarRatingFailed": "No se pudo enviar la valoración",
 	"bazaarRatingSubmitted": "Valoración enviada",
 	"safeModeJSTip": "El modo seguro está activado, los bloques integrados de consulta <code>//!js</code> están desactivados",
-	"tableHeaderBodyMergeUnsupported": "Las celdas del encabezado y del cuerpo de la tabla no se pueden combinar",
 	"editorMarkdownBlockFullWidthTaskList": "Entrada rápida de bloque de lista de tareas de ancho completo",
 	"editorMarkdownBlockFullWidthTaskListTip": "Cuando está habilitado, se admite la entrada de la sintaxis de lista de tareas <code>【】</code> y <code>【X】</code>",
 	"duplicateCopy": "Crear copia",

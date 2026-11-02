@@ -46,6 +46,10 @@ var blockCacheKeys = map[string]map[string]*blockCacheEntry{}
 var blockCacheKeysMu sync.Mutex
 var blockCacheSequence uint64
 
+// Ristretto 清空时会持有分片锁调用退出回调，必须与块缓存读写、删除及其他清空操作互斥。
+// 此锁先于 blockCacheKeysMu 获取；退出回调只获取 blockCacheKeysMu。
+var blockCacheMu sync.RWMutex
+
 type blockCacheEntry struct {
 	key      string
 	cacheKey uint64
@@ -78,10 +82,12 @@ func blockCacheKey(id, boxID string) string {
 
 func ClearCache() {
 	clearFTSCountCache()
+	blockCacheMu.Lock()
 	blockCache.Clear()
 	blockCacheKeysMu.Lock()
 	blockCacheKeys = map[string]map[string]*blockCacheEntry{}
 	blockCacheKeysMu.Unlock()
+	blockCacheMu.Unlock()
 	clearRefCache()
 }
 
@@ -103,6 +109,8 @@ func putBlockCache(block *Block) {
 		removeBlockCache(cloned.ID)
 		return
 	}
+	blockCacheMu.RLock()
+	defer blockCacheMu.RUnlock()
 	entry := &blockCacheEntry{key: key, block: cloned}
 	// 每次刷新使用独立准入键，保留字节预算检查，并隔离旧条目的异步删除。
 	blockCacheKeysMu.Lock()
@@ -134,6 +142,8 @@ func getBlockCacheInBox(id, boxID string) (ret *Block) {
 		return
 	}
 
+	blockCacheMu.RLock()
+	defer blockCacheMu.RUnlock()
 	blockCacheKeysMu.Lock()
 	defer blockCacheKeysMu.Unlock()
 	entry := blockCacheKeys[id][blockCacheKey(id, boxID)]
@@ -150,6 +160,7 @@ func getBlockCacheInBox(id, boxID string) (ret *Block) {
 }
 
 func removeBlockCache(id string) {
+	blockCacheMu.RLock()
 	blockCacheKeysMu.Lock()
 	keys := blockCacheKeys[id]
 	delete(blockCacheKeys, id)
@@ -157,6 +168,7 @@ func removeBlockCache(id string) {
 	for _, entry := range keys {
 		blockCache.Del(entry.cacheKey)
 	}
+	blockCacheMu.RUnlock()
 	removeRefCacheByDefID(id)
 }
 

@@ -5,9 +5,54 @@
 package sql
 
 import (
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 )
+
+func TestBlockCacheConcurrentClear(t *testing.T) {
+	previousDisabled := cacheDisabled
+	cacheDisabled = false
+	ClearCache()
+	t.Cleanup(func() { ClearCache(); cacheDisabled = previousDisabled })
+	ids := make([]string, 1024)
+	for i := range ids {
+		ids[i] = "concurrent-" + strconv.Itoa(i)
+		putBlockCache(&Block{ID: ids[i], Content: "initial"})
+	}
+	blockCache.Wait()
+
+	start := make(chan struct{})
+	var workers sync.WaitGroup
+	for _, operation := range []func(string){
+		func(id string) { putBlockCache(&Block{ID: id, Content: "content"}) },
+		func(id string) { putBlockCache(&Block{ID: id, Content: "replacement"}) },
+		func(id string) { getBlockCache(id) },
+		removeBlockCache,
+		func(string) { ClearCache() },
+		func(string) { ClearCache() },
+	} {
+		workers.Go(func() {
+			<-start
+			for i := range 1000 {
+				operation(ids[i%len(ids)])
+			}
+		})
+	}
+	close(start)
+	workers.Wait()
+	blockCache.Wait()
+	ClearCache()
+	if getBlockCache("concurrent") != nil || len(blockCacheKeys) != 0 {
+		t.Fatal("clear retained a cached block or invalidation index")
+	}
+	putBlockCache(&Block{ID: "concurrent", Content: "after clear"})
+	blockCache.Wait()
+	if block := getBlockCache("concurrent"); block == nil || block.Content != "after clear" {
+		t.Fatalf("cache did not accept a block after concurrent clears: %+v", block)
+	}
+}
 
 func TestBlockCacheByteBudgetRejectsLargeReplacement(t *testing.T) {
 	previousDisabled, previousCost := cacheDisabled, blockCache.MaxCost()

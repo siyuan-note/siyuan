@@ -59,7 +59,7 @@ export const confirmTagRemoval = (groups: TagRemovalCollection[], text?: string)
         const lang = window.siyuan.languages;
         const content = (text ? `<div>${text}</div>` : "") + (groups.length ?
             `<div class="ft__breakword">${escapeHtml(lang.tagRemovalDatabaseTip)}</div>` + groups.map(group =>
-                `<label class="fn__flex b3-label"><input type="checkbox" class="b3-switch fn__flex-shrink" data-tag-removal-av="${escapeAttr(group.avID)}"><span class="fn__space"></span><span class="ft__breakword">${escapeHtml(group.name || group.avID)} (${group.cleanup.items.length})</span></label>`).join("") : "");
+                `<label class="fn__flex b3-label" style="align-items:center"><input type="checkbox" class="fn__flex-shrink" data-tag-removal-av="${escapeAttr(group.avID)}"><span class="fn__space"></span><span class="ft__breakword">${escapeHtml(group.name || group.avID)} (${group.cleanup.items.length})</span></label>`).join("") : "");
         const dialog = confirmDialog(lang.deleteOpConfirm, content, () => resolve([]), () => resolve(null), true,
             groups.length ? {label: lang.tagRemovalWithEntries, callback: () => {
                 const selected = new Set(Array.from(dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-removal-av]:checked"))

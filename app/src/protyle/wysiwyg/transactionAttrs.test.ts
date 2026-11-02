@@ -16,6 +16,17 @@ runInNewContext(transpileModule(declaration.getText(source) + "\nglobalThis.sync
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText, context);
 
+test("document tag transactions refresh header chips for deletion, undo and redo", () => {
+    const rendered: string[] = [];
+    const protyle = {block: {rootID: "document"}, background: {ial: {tags: "idea"},
+        render: (ial: {tags: string}, id: string) => { assert.equal(id, "document"); rendered.push(ial.tags); }}};
+    for (const tags of ["", "idea", ""]) {
+        context.sync({}, {action: "setAttrs", id: "document", data: JSON.stringify({tags})}, protyle);
+    }
+    context.sync({}, {action: "setAttrs", id: "other-document", data: '{"tags":"other"}'}, protyle);
+    assert.deepEqual(rendered, ["", "idea", ""]);
+});
+
 test("mind map view transactions synchronize matching blocks when toggling, undoing and redoing", () => {
     const copies = [new Map<string, string>(), new Map<string, string>()];
     const root = {

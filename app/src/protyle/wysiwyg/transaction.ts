@@ -177,8 +177,12 @@ const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOpera
         (attrs.fold === "1" || item.childElementCount > 3));
 };
 
-const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>, protyle?: IProtyle) => {
     const attrs = JSON.parse(operation.data);
+    if (Object.prototype.hasOwnProperty.call(attrs, "tags") && operation.id === protyle?.block.rootID && protyle.background) {
+        protyle.background.ial.tags = attrs.tags;
+        protyle.background.render(protyle.background.ial, operation.id);
+    }
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
     const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
@@ -594,7 +598,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
-                syncBlockAttrs(protyle.wysiwyg.element, operation);
+                syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -684,7 +688,7 @@ const promiseTransaction = (options: {
                         return;
                     }
                     if (operation.action === "setAttrs") {
-                        syncBlockAttrs(protyle.wysiwyg.element, operation);
+                        syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                     }
                     // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
                     if (operation.action === "addAttrViewCol" &&
@@ -939,7 +943,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            syncBlockAttrs(protyle.wysiwyg.element, operation);
+            syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
             return;
         }
         if (operation.action === "unfoldHeading") {

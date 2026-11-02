@@ -589,6 +589,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			cache.RemoveTreeData(rootID)
 			tree, err0 := filesys.LoadTree(box, p, luteEngine)
 			if nil != err0 {
+				unindexUnsupportedSyncDocument(box, p, rootID, err0)
 				return "", false
 			}
 			oldDoc := treenode.GetBlockTreeInBox(rootID, box)

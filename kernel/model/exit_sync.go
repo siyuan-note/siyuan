@@ -46,7 +46,7 @@ func exitSyncHooks(repo *dejavu.Repo, ctx context.Context) (dejavu.CheckoutHooks
 	beforePetals := getPetals()
 	var mu sync.Mutex
 	upserts, removes := map[string]*entity.File{}, map[string]*entity.File{}
-	hooks := documentAddressingCheckoutHooks(repo)
+	hooks := dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)}
 	hooks.Context = ctx
 	hooks.Committed = func(file *entity.File) {
 		mu.Lock()

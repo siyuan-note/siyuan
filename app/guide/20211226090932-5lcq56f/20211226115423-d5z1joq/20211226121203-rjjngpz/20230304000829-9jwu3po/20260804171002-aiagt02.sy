@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261102182107"
+		"updated": "20261102182306"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-vzu9h83",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-5bb3f3k",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -924,10 +924,245 @@
 				{
 					"Type": "NodeText",
 					"Data": " 位址或 ZIP 位址。技能會影響智能體的執行方式，請只安裝和使用可信來源的內容。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-xsba3zf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-xsba3zf",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝外部技能"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-7w4a8gh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-7w4a8gh",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " GitHub 子目錄 tree 位址只安裝指定目錄下的技能；單技能目錄安裝一個，集合目錄安裝其下的技能，不會安裝其他目錄中的技能。"
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和儲存庫位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）會按整個儲存庫安裝，先嘗試 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，下載失敗後嘗試 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。命令形式只用於擷取儲存庫名稱，不會執行命令，也不會套用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等篩選參數。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-sqlbjea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-sqlbjea",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分支層級的 tree 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）安裝該引用的儲存庫技能；子目錄 tree 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安裝該目錄下的技能。單技能目錄安裝一個，集合目錄安裝其下的技能。支援名稱包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的分支；解析時優先選擇最長有效引用前綴，也支援標籤和提交引用。指定目錄不存在或沒有技能時會回報錯誤，不會改為整庫安裝。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-932vszx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-932vszx",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存庫封存檔和 release ZIP 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）會解壓縮並遞迴尋找技能目錄中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，集合儲存庫可能一次安裝多個技能。找到技能目錄後不再向其內部尋找其他技能；會複製該技能目錄及配套資源。下載大小上限為 10 MB，子目錄 tree 安裝仍需下載儲存庫封存檔。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-htnm61d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-htnm61d",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "blob 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和 raw 位址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安裝單個 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不會下載配套的指令碼或參考資料。單檔安裝要求 Front Matter 中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。需要配套資源時請使用技能目錄的 tree 位址或 ZIP。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-r1rmrth",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-r1rmrth",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝會依技能名稱寫入工作空間技能目錄：ZIP 安裝會取代同名技能的整個目錄；blob/raw 單檔安裝只覆寫同名技能的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，保留既有的其他檔案。重新安裝前請備份本機修改。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-7w0fcb0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-7w0fcb0",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前沒有檢查技能更新的入口；請自行比對上游版本，確認後重新安裝。"
 				}
 			]
 		},

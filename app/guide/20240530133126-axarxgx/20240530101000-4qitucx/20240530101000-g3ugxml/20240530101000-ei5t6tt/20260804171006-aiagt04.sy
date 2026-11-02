@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261102182107"
+		"updated": "20261102182306"
 	},
 	"Children": [
 		{
@@ -801,7 +801,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-7cf4sou",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -902,7 +902,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-2kk8p7q",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -935,10 +935,237 @@
 				{
 					"Type": "NodeText",
 					"Data": " URL、ZIP URL を指定できます。スキルはエージェントの動作に影響するため、信頼できる提供元だけを使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-mpfox5j",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-mpfox5j",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外部スキルのインストール"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-7npg8sf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-7npg8sf",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " GitHub のサブディレクトリの tree URL では、指定したディレクトリ内のスキルだけをインストールします。単一スキルのディレクトリなら1つ、コレクションならその配下のスキルをインストールし、ほかのディレクトリのスキルは含めません。"
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、および "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などのリポジトリ URL では、リポジトリ全体からインストールします。まず "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を試し、ダウンロードに失敗すると "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を試します。コマンド形式はリポジトリ名の抽出にのみ使用され、コマンドの実行や "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの絞り込み引数の適用は行いません。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-ui4x6js",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-ui4x6js",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などのブランチ単位の tree URL は、その参照のリポジトリ内のスキルをインストールします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などのサブディレクトリの tree URL は、そのディレクトリ内だけを対象にします。単一スキルのディレクトリなら1つ、コレクションなら配下のスキルをインストールします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を含むブランチ名にも対応し、有効な参照の最長の接頭辞を優先して解決します。タグやコミット参照も使用できます。指定ディレクトリが存在しない場合やスキルがない場合はエラーとなり、リポジトリ全体のインストールには切り替わりません。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-thicbmo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-thicbmo",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リポジトリアーカイブや "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの release ZIP URL は、展開後に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を含むスキルディレクトリを再帰的に検索します。コレクションでは複数のスキルを一度にインストールする場合があります。スキルディレクトリが見つかると、その内部で別のスキルを検索せず、ディレクトリと付属リソースをまとめてコピーします。ダウンロードの上限は 10 MB です。サブディレクトリの tree URL でもリポジトリアーカイブ全体のダウンロードが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-tqnybrt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-tqnybrt",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの blob URL や "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの raw URL は、単一の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " だけをインストールし、付属のスクリプトや参考資料はダウンロードしません。単一ファイルのインストールには Front Matter の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " が必要です。付属リソースが必要な場合は、スキルディレクトリの tree URL または ZIP を使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-76sq5br",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-76sq5br",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スキル名に基づいてワークスペースのスキルディレクトリに保存します。ZIP のインストールは同名スキルのディレクトリ全体を置き換えます。blob/raw の単一ファイルのインストールは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " だけを上書きし、既存のほかのファイルを保持します。再インストール前にローカルでの変更をバックアップしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-hdyii2e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-hdyii2e",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在、スキルの更新を確認する機能はありません。提供元のバージョンと自分で比較し、確認後に再インストールしてください。"
 				}
 			]
 		},

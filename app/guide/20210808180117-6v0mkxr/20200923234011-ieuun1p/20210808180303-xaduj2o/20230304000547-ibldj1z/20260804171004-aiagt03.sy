@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261102182107"
+		"updated": "20261102182306"
 	},
 	"Children": [
 		{
@@ -846,7 +846,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-oqdi4d2",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -947,7 +947,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-2qtiajj",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -980,10 +980,245 @@
 				{
 					"Type": "NodeText",
 					"Data": " URL, or a ZIP URL. Skills affect how the agent operates, so install and use content only from trusted sources."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-o2wjkat",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-o2wjkat",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Installing external skills"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-5s5zhgw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-5s5zhgw",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " A GitHub subdirectory tree URL installs only skills within that directory: one for a single-skill directory, or the skills within a collection directory. Skills in other directories are excluded."
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and repository URLs such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " install from the whole repository. SiYuan tries "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " if the download fails. The command form only extracts the repository name: it does not execute the command or apply filters such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-kd6xeav",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-kd6xeav",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A branch-level tree URL such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " installs repository skills at that reference. A subdirectory tree URL such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " installs only skills within that directory: one for a single-skill directory, or the skills within a collection. Branch names containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " are supported; resolution prefers the longest valid reference prefix and also supports tags and commit references. A missing directory or a directory without skills produces an error instead of installing the whole repository."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-r8b3o09",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-r8b3o09",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Repository archives and release ZIP URLs such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " are extracted and searched recursively for skill directories containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". A collection can install multiple skills at once. Once a skill directory is found, its contents are not searched for additional skills; the directory and its supporting resources are copied together. Downloads are limited to 10 MB; subdirectory tree installation still downloads the repository archive."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-9i2vl41",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-9i2vl41",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A blob URL such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or a raw URL such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " installs only that "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", without supporting scripts or references. Single-file installation requires "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in Front Matter. Use the skill directory tree URL or a ZIP when supporting resources are needed."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-seehzv8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-seehzv8",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Installation writes to the workspace skill directory by skill name. ZIP installation replaces the entire directory of an existing skill with the same name. A blob/raw single-file installation overwrites only its "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", preserving other existing files. Back up local changes before reinstalling."
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-545dgka",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-545dgka",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There is currently no command to check for skill updates. Compare versions with the upstream source yourself, then reinstall when appropriate."
 				}
 			]
 		},

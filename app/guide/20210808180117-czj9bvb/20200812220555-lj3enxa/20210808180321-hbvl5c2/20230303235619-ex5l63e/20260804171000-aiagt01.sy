@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261102182107"
+		"updated": "20261102182306"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-qxi11l2",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-wp08ijl",
-				"updated": "20261102182107"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -924,10 +924,245 @@
 				{
 					"Type": "NodeText",
 					"Data": " 地址或 ZIP 地址。技能会影响智能体的执行方式，请只安装和使用可信来源的内容。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-1riwqwy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-1riwqwy",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安装外部技能"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-tr4vch2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-tr4vch2",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " GitHub 子目录 tree 地址只安装指定目录下的技能；单技能目录安装一个，集合目录安装其下的技能，不会安装其他目录中的技能。"
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和仓库地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）按整个仓库安装，先尝试 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，下载失败后尝试 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。命令形式只用于提取仓库名，不会执行命令，也不会应用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等筛选参数。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-u0m5uzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-u0m5uzc",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分支级 tree 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）安装该引用的仓库技能；子目录 tree 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安装该目录下的技能。单技能目录安装一个，集合目录安装其下的技能。支持名称中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的分支；解析时优先选择最长有效引用前缀，也支持标签和提交引用。指定目录不存在或没有技能时会报错，不会退回整仓安装。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-23bwvsw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-23bwvsw",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仓库归档和 release ZIP 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）会解压并递归查找技能目录中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，集合仓库可能一次安装多个技能。找到技能目录后不再向其内部查找其他技能；会复制该技能目录及配套资源。下载大小上限为 10 MB，子目录 tree 安装仍需下载仓库归档。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-t57plt6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-t57plt6",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "blob 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和 raw 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安装单个 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不会下载配套的脚本或参考资料。单文件安装要求 Front Matter 中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。需要配套资源时请使用技能目录的 tree 地址或 ZIP。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-55xmyz6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-55xmyz6",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安装按技能名写入工作空间技能目录：ZIP 安装会替换同名技能的整个目录；blob/raw 单文件安装只覆盖同名技能的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，保留已有的其他文件。重新安装前请备份本地修改。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-oav6ptj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-oav6ptj",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前没有检查技能更新的入口；请自行比对上游版本，确认后重新安装。"
 				}
 			]
 		},

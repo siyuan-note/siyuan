@@ -302,6 +302,7 @@ const runElectron = async () => {
             read("protyle/util/hasClosest"),
             read("protyle/wysiwyg/blockSelection"),
             read("protyle/toolbar/subElementLifecycle"),
+            read("protyle/toolbar/selectionElementPosition"),
             read("mobile/util/multiSelectToolbar").replace(/^import .*;\r?\n/gm, ""),
             read("menus/menuToggle"),
             read("mobile/util/wordSelection"),

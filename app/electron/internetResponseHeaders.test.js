@@ -144,7 +144,6 @@ if (!process.versions.electron) {
             assert.ok(requests.some(request => request.method === "OPTIONS"));
             assert.equal(requests.filter(request => request.method === "GET").length, 2);
             assert.ok(requests.every(request => request.origin === frameOrigin));
-            console.log("Iframe CORS passed");
         } catch (error) {
             console.error(error);
             exitCode = 1;
@@ -152,7 +151,13 @@ if (!process.versions.electron) {
             windows.forEach(win => win.destroy());
             server.closeAllConnections();
             await new Promise(resolve => server.close(resolve));
-            app.exit(exitCode);
+            if (exitCode) {
+                app.exit(exitCode);
+            } else {
+                // 正常退出等待 Chromium 会话收尾，释放临时配置目录的文件句柄。
+                app.once("will-quit", () => console.log("Iframe CORS passed"));
+                app.quit();
+            }
         }
     }).catch(error => { console.error(error); app.exit(1); });
 }

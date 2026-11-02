@@ -53,6 +53,13 @@ const state: RuntimeState = {
         keepOpenForUpdate: false,
         resetWindowStateOnRestart: false,
     },
+    markdown: {
+        startup: false,
+        windows: undefined,
+        lifecycle: undefined,
+        launchTask: undefined,
+        pendingLaunches: [],
+    },
     workspaces: [],
     pendingRemoteOpenURLs: [],
 };
@@ -123,6 +130,13 @@ const resetRuntimeState = (): void => {
     state.exit.keepOpenForUpdate = false;
     state.exit.resetWindowStateOnRestart = false;
     state.exit.pendingConnectionArgs = undefined;
+
+    state.markdown.startup = false;
+    state.markdown.windows = undefined;
+    state.markdown.lifecycle = undefined;
+    state.markdown.launchTask = undefined;
+    state.markdown.pendingLaunches.length = 0;
+
     state.workspaces.length = 0;
     state.pendingRemoteOpenURLs.length = 0;
 };

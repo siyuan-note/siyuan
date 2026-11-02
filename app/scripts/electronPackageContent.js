@@ -5,5 +5,8 @@ const rendererScripts = ["window.js", "connectionEntry.js", "connections.js"];
 // window-languages.json 与 window.js 同目录，两者一起原样复制。
 const staticAssets = ["boot.html", "init.html", "error.html", "connections.html", "remote-auth.html",
     "workspace.html", "window.css", "connections.css", "icon.png", "window-languages.json"];
+// Markdown 模块随主进程一起打进单产物，但它按 __dirname 加载沙箱 preload 与 Windows 替换脚本，
+// 因此这两个文件必须在运行期与 main.js 同目录。
+const markdownRuntimeAssets = ["preload.js", "replaceFile.ps1"];
 
-module.exports = {rendererScripts, staticAssets};
+module.exports = {rendererScripts, staticAssets, markdownRuntimeAssets};

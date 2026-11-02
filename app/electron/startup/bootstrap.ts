@@ -28,6 +28,12 @@ import {createConnectionRuntime} from "../remote/connectionRuntime";
 import {registerProtocolClient} from "./protocolClient";
 import {emptyLastWorkspaceProbe, readLastWorkspace} from "./lastWorkspace";
 import {
+    createMarkdownEditors,
+    detectMarkdownStartup,
+    isMarkdownStartup,
+    prepareMarkdownSchemes,
+} from "./markdownEditors";
+import {
     createRemoteKernelTarget, shouldTrustLocalKernelCertificate,
 } from "../remote/remoteKernel";
 import {registerDesktopIpc} from "../ipc/register";
@@ -81,6 +87,10 @@ const bootstrap = (): void => {
     registerProtocolClient({
         isDevEnv: paths.isDevEnv, defaultApp: !!process.defaultApp, argv: launchArguments,
     });
+    // 独立 Markdown 入口由同一份启动参数判定，判定结果决定是否读取工作空间记录与崩溃信息。
+    // 自定义协议同样只能在 app ready 之前登记。
+    prepareMarkdownSchemes();
+    detectMarkdownStartup(launchArguments.slice(app.isPackaged ? 1 : 2));
     applyStartupSwitches(remoteMode);
     writeLog("app is packaged [" + app.isPackaged + "], command line args [" + launchArguments.join(", ") + "]");
     // 桌面端允许通过命令行追加 Chromium 启动参数，这些开关一并转交，并回传本次是否隐藏启动
@@ -96,7 +106,9 @@ const bootstrap = (): void => {
     // 首次启动标志与上次工作空间都只看一次磁盘，结果直接进启动快照。
     const firstOpen = ensureConfigDirectory(paths.confDir, remoteMode);
     // 上次打开的工作空间既用于崩溃恢复，也用于提示目录已丢失；显式指定 --workspace 时跳过。
-    const lastWorkspace = !remoteMode && !firstOpen && !getArgFrom(launchArguments, "--workspace") ?
+    // 独立 Markdown 入口与工作空间无关，同样不读取这份记录。
+    const lastWorkspace = !remoteMode && !isMarkdownStartup() && !firstOpen &&
+        !getArgFrom(launchArguments, "--workspace") ?
         readLastWorkspace(paths.confDir, writeLog) : emptyLastWorkspaceProbe();
     setStartupSnapshot({
         remoteKernelTarget: remoteKernel.target, remoteKernelArgError: remoteKernel.error,
@@ -188,7 +200,9 @@ const prepareLockedNotebookEditors = (workspace: Workspace): Promise<void> =>
 const startAfterReady = (initMainWindow: InitMainWindow, launchArguments: string[]): void => {
     const startupStartedAt = Date.now();
     writeLog("app ready, preparing startup window");
-    const appCrashInfo = readAppCrashInfo();
+    // 独立 Markdown 窗口与工作空间互斥：轻量入口不读取崩溃记录，也不建启动页。
+    createMarkdownEditors();
+    const appCrashInfo = isMarkdownStartup() ? undefined : readAppCrashInfo();
     writeLog("read app crash info [" + (Date.now() - startupStartedAt) + "ms since app ready]");
 
     // 内核编排与远端启动都从启动页取窗口与端口，因此它最先创建，其余能力之后接上。

@@ -1,6 +1,7 @@
 // 目录级依赖方向检查。`README.md` 的「约定」一节声明了允许的方向：
 // shared 不引用其他目录，kernel 只依赖 shared，remote 依赖 shared 与 kernel，
-// window 可以依赖 kernel 与 remote，ipc 与 startup 可以依赖全部，只有 main.ts 负责装配。
+// window 可以依赖 kernel 与 remote，markdown 是独立的叶子能力（保持 CommonJS），
+// ipc 与 startup 可以依赖全部，只有 main.ts 负责装配。
 // 新增 import 时这条测试会直接指出违规的那一条边。
 import {test} from "node:test";
 const assert = require("node:assert/strict");
@@ -14,9 +15,11 @@ const allowedDependencies: Record<string, string[]> = {
     kernel: ["shared", "kernel"],
     remote: ["shared", "kernel", "remote"],
     window: ["shared", "kernel", "remote", "window"],
-    ipc: ["shared", "kernel", "remote", "window", "ipc", "startup"],
-    startup: ["shared", "kernel", "remote", "window", "ipc", "startup"],
-    root: ["shared", "kernel", "remote", "window", "ipc", "startup", "root"],
+    // 独立 Markdown 编辑器只用自己的模块，标题栏等宿主能力由入口注入。
+    markdown: ["markdown"],
+    ipc: ["shared", "kernel", "remote", "window", "ipc", "startup", "markdown"],
+    startup: ["shared", "kernel", "remote", "window", "ipc", "startup", "markdown"],
+    root: ["shared", "kernel", "remote", "window", "ipc", "startup", "markdown", "root"],
 };
 
 // 入口文件 main.ts 位于 electron 根目录，其余文件按一级子目录归属层次。

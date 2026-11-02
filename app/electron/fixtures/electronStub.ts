@@ -49,6 +49,7 @@ type ElectronStub = {
     safeStorage: Record<string, unknown>;
     clipboard: Record<string, unknown>;
     nativeTheme: Record<string, unknown>;
+    protocol: Record<string, unknown>;
 };
 
 const defaults = (): ElectronStub => ({
@@ -67,6 +68,7 @@ const defaults = (): ElectronStub => ({
     safeStorage: {},
     clipboard: {},
     nativeTheme: {},
+    protocol: {registerSchemesAsPrivileged: () => missing("protocol.registerSchemesAsPrivileged")},
 });
 
 /** 被测代码看到的成员值。测试改这里即可影响已经加载的模块。 */

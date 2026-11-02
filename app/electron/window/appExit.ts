@@ -7,7 +7,6 @@ import {hasTray} from "../shared/traySupport";
 import {markExpectedRendererExit} from "./windowLifecycle";
 import {removeWorkspace} from "./windowRegistry";
 import type {Workspace} from "../shared/types";
-
 // 切换到另一内核后需要重启才能生效，重启参数由连接管理器登记。
 const relaunchConnection = (): void => {
     if (state.exit.pendingConnectionArgs) {
@@ -92,11 +91,13 @@ const finishLastWorkspace = (mainWindow: BrowserWindow, errorWindowId?: number):
     markExpectedRendererExit(mainWindow);
     if (errorWindowId) {
         BrowserWindow.getAllWindows().forEach((item: BrowserWindow) => {
-            if (errorWindowId !== item.id) {
+            // 独立 Markdown 窗口不是工作空间的一部分，关闭最后一个工作空间时保留它们。
+            if (errorWindowId !== item.id && !state.markdown.windows?.owns(item.webContents)) {
                 item.destroy();
             }
         });
-    } else if (state.exit.keepOpenForShutdown || state.exit.keepOpenForUpdate) {
+    } else if (state.exit.keepOpenForShutdown || state.exit.keepOpenForUpdate ||
+        state.markdown.lifecycle?.hasPendingWork()) {
         mainWindow.destroy();
     } else {
         relaunchConnection();

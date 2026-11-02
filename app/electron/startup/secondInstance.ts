@@ -7,6 +7,7 @@ import {showWindow} from "../window/windowVisibility";
 import {isWindowInitialized} from "../window/windowRegistry";
 import {normalizeRemoteKernelOrigin, shouldForwardRemoteDeepLink} from "../remote/remoteKernel";
 import {state, writeLog} from "../shared/runtime";
+import {routeMarkdownLaunch} from "./markdownEditors";
 import type {Event as ElectronEvent} from "electron";
 import type {InitKernel, InitMainWindow, Workspace} from "../shared/types";
 import {Channel} from "../shared/channels";
@@ -115,12 +116,18 @@ const openLocalTarget = (argv: string[], {initKernel, initMainWindow}: SecondIns
 };
 
 // 安装更新中、远端参数无效时直接忽略，避免打断正在进行的安装流程。
-const handleSecondInstance = (argv: string[], handlers: SecondInstanceHandlers): void => {
+const handleSecondInstance = (argv: string[], handlers: SecondInstanceHandlers, workingDirectory?: string): void => {
     writeLog("second-instance [" + argv + "]");
     if (state.exit.updateInstall) {
         writeLog("ignored second instance while installing update");
         return;
     }
+    // 文件请求先于工作空间参数处理：同一进程可以同时管理多个轻量编辑窗口。
+    // 整个 argv 交给解析器，可执行文件与应用路径不带 .md 后缀，不会被当成待打开文件。
+    if (routeMarkdownLaunch(argv, workingDirectory ?? process.cwd())) {
+        return;
+    }
+
     if (state.startup.remoteKernelArgError) {
         writeLog("ignored second instance because the primary remote kernel argument is invalid");
         return;
@@ -134,14 +141,14 @@ const handleSecondInstance = (argv: string[], handlers: SecondInstanceHandlers):
 
 // 第二实例可能在取锁之后、app 就绪之前到达，那时还建不了窗口，因此统一先入队。
 let handlers: SecondInstanceHandlers | undefined;
-let pendingArgv: string[][] = [];
+let pendingArgv: {argv: string[]; cwd: string}[] = [];
 
-const queueSecondInstance = (_event: ElectronEvent, argv: string[]): void => {
+const queueSecondInstance = (_event: ElectronEvent, argv: string[], workingDirectory?: string): void => {
     if (!handlers) {
-        pendingArgv.push(argv);
+        pendingArgv.push({argv, cwd: workingDirectory || process.cwd()});
         return;
     }
-    handleSecondInstance(argv, handlers);
+    handleSecondInstance(argv, handlers, workingDirectory);
 };
 
 // 按到达顺序重放积压的第二实例，后续事件直接处理。
@@ -149,7 +156,7 @@ const startSecondInstance = (next: SecondInstanceHandlers): void => {
     handlers = next;
     const pending = pendingArgv;
     pendingArgv = [];
-    pending.forEach(argv => handleSecondInstance(argv, next));
+    pending.forEach(({argv, cwd}) => handleSecondInstance(argv, next, cwd));
 };
 
 export {queueSecondInstance, startSecondInstance};

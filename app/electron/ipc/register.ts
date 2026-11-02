@@ -7,6 +7,7 @@ import {registerAppEventIpc} from "./appEvents";
 import {registerCommandIpc} from "./commandChannel";
 import {registerDialogIpc} from "./dialogs";
 import {registerExportPreview} from "./exportPreview";
+import {registerMarkdownIpc} from "./markdownEditors";
 import {registerShellIntegrationIpc} from "./shellIntegration";
 import {registerWorkspaceIpc} from "./workspace";
 import {beginUpdateInstall} from "../startup/updateCoordination";
@@ -23,6 +24,7 @@ const registerDesktopIpc = ({initKernel, initMainWindow}: {
     registerAppEventIpc();
     registerCommandIpc();
     registerDialogIpc();
+    registerMarkdownIpc();
     registerShellIntegrationIpc();
     registerExportPreview();
     registerWorkspaceIpc({initKernel, initMainWindow});

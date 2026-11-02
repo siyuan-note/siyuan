@@ -7,7 +7,7 @@ const appRoot = path.join(__dirname, "..");
 // 打包输入必须是构建产物目录：源码目录 electron/ 与测试同目录，直接打包会把测试带入安装包。
 const OUTPUT_DIR = "electron-dist";
 // 产物清单与构建脚本共用同一份来源，漏项会在构建与校验两侧同时暴露。
-const {rendererScripts, staticAssets} = require("./electronPackageContent");
+const {rendererScripts, staticAssets, markdownRuntimeAssets} = require("./electronPackageContent");
 // electron-builder-common.yml 只被 extends 引用，本身不含入口与 files，不是独立的打包配置。
 const SHARED_BUILDER_CONFIG = "electron-builder-common.yml";
 const builderConfigs = fs.readdirSync(appRoot)
@@ -79,5 +79,11 @@ test("build output excludes tests and ships every runtime asset", (t) => {
         const file = path.join(staticDir, name);
         assert.ok(fs.existsSync(file), `产物缺少 static/${name}`);
         assert.ok(fs.statSync(file).size > 0, `产物中的 static/${name} 为空`);
+    }
+    // Markdown 模块按 __dirname 加载这两份文件，因此它们必须与 main.js 同目录。
+    for (const name of markdownRuntimeAssets) {
+        const file = path.join(outputDir, name);
+        assert.ok(fs.existsSync(file), `产物缺少 ${name}`);
+        assert.ok(fs.statSync(file).size > 0, `产物中的 ${name} 为空`);
     }
 });

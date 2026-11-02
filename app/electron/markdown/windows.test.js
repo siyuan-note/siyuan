@@ -6,6 +6,7 @@ const path = require("node:path");
 const os = require("node:os");
 const {createMarkdownWindows, registerMarkdownSchemes} = require("./windows");
 const {MarkdownDesktopHost} = require("./host");
+const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 
 const fixture = async (t, options = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
@@ -67,7 +68,10 @@ const fixture = async (t, options = {}) => {
     const manager = createMarkdownWindows({app: {getLocale: () => "en"}, BrowserWindow,
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
         shell: {openExternal: async url => opens.push(url)}, rootDirectory: appDirectory,
-        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++});
+        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
+        // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
+        windowControls,
+    });
     const call = (window, action, payload, event = {}) => receive({sender: window.webContents,
         senderFrame: window.webContents.mainFrame, ...event}, action, payload);
     t.after(async () => {

@@ -4,8 +4,12 @@ import {
 } from "../shared/runtime";
 import {requestKernelExit} from "../kernel/kernelEndpoint";
 import {exitApp} from "../window/appExit";
+import {showWindow} from "../window/windowVisibility";
 import {getSystemShutdownPorts} from "./systemShutdown";
 import {createUpdateInstall} from "./updateInstall";
+import {
+    cancelMarkdownQuit, closeMarkdownEditors, hasPendingMarkdownWork, prepareMarkdownQuit,
+} from "./markdownEditors";
 import type {IpcMainInvokeEvent} from "electron";
 import type {Workspace} from "../shared/types";
 
@@ -166,6 +170,12 @@ const getUpdateInstall = () => createUpdateInstall({confDir: paths.confDir, writ
 // 更新时先退出其他工作空间，再退出发起更新的工作空间，确保安装器启动前所有内核已经停止。
 // https://github.com/siyuan-note/siyuan/issues/18258
 const coordinateUpdateInstall = async (request: UpdateRequest): Promise<void> => {
+    // 安装器启动前必须关掉全部 Markdown 窗口；用户在窗口里取消时整个安装放弃。
+    if (!await prepareMarkdownQuit("update")) {
+        throw Object.assign(new Error("Markdown windows canceled update installation"),
+            {code: "MARKDOWN_EXIT_CANCELED"});
+    }
+
     const ports = Array.from(new Set<string>(getSystemShutdownPorts().map((port: string | number) => port.toString())
         .concat(Array.from(kernelProcesses().keys()), request.initiatingPort)));
     ports.forEach((port: string) => state.kernel.expectedExitPorts.add(port));
@@ -190,6 +200,10 @@ const coordinateUpdateInstall = async (request: UpdateRequest): Promise<void> =>
         throw new Error("the update install package returned by the kernel is invalid");
     }
 
+    if (!await closeMarkdownEditors()) {
+        throw Object.assign(new Error("Markdown windows could not close for update"),
+            {code: "MARKDOWN_EXIT_CANCELED"});
+    }
     await launchUpdateInstallPackage(installPkgPath);
     setKeepAppOpen(false);
     electron.app.exit();
@@ -215,6 +229,18 @@ const beginUpdateInstall = (event: IpcMainInvokeEvent, data: UpdateInstallReques
         writeLog("coordinate update install failed: " + error);
         setKeepAppOpen(false);
         setUpdateInstallPromise(undefined);
+        cancelMarkdownQuit();
+
+        // Markdown 窗口取消了安装：它自己还在显示，因此把工作空间重新拿出来而不是重启。
+        if ((error as {code?: string}).code === "MARKDOWN_EXIT_CANCELED" || hasPendingMarkdownWork()) {
+            workspaces().forEach((workspace: Workspace) => {
+                if (workspace.browserWindow && !workspace.browserWindow.isDestroyed()) {
+                    showWindow(workspace.browserWindow);
+                }
+            });
+            state.markdown.windows?.focus();
+            return;
+        }
         electron.app.relaunch();
         electron.app.exit();
     }));

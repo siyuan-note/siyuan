@@ -67,3 +67,23 @@ test("the selected branch carries the payload the caller needs", () => {
         assert.equal(branch.appCrashInfo.workspaceDir, "/crash");
     });
 });
+
+test("a file entry selects the Markdown editor even when the remote argument is invalid", () => {
+    const saved = state.markdown.startup;
+    try {
+        // 独立 Markdown 入口与工作空间无关，优先级高于其余全部启动条件。
+        state.markdown.startup = true;
+        withState({remoteKernelArgError: {code: "E"}, remoteKernelTarget: {origin: "https://a"},
+            firstOpen: true, lastWorkspaceMissing: true}, () => {
+            assert.equal(resolveStartupBranch(crashInfo).branch, "markdown-editor");
+        });
+
+        state.markdown.startup = false;
+        withState({remoteKernelArgError: {code: "E"}, remoteKernelTarget: {origin: "https://a"},
+            firstOpen: true, lastWorkspaceMissing: true}, () => {
+            assert.equal(resolveStartupBranch(crashInfo).branch, "remote-arg-invalid");
+        });
+    } finally {
+        state.markdown.startup = saved;
+    }
+});

@@ -35,3 +35,35 @@ test("second instance events are replayed in order once startup handlers arrive"
     queueSecondInstance(event, ["siyuan", "--workspace=/third"]);
     assert.deepEqual(started, ["/first", "/second", "/third"]);
 });
+
+test("a file request is routed to the editor before remote mode rejects the instance", (t: any) => {
+    runtime.resetRuntimeState();
+    resetElectronStub();
+    const launches: {argv: string[]; cwd: string}[] = [];
+    mockElectron(t, {});
+    // 窗口管理器只记录收到的启动参数，本用例只关心路由是否发生。
+    runtime.state.markdown.windows = {
+        open: async () => undefined,
+        handleLaunch: async (argv: string[], cwd: string) => { launches.push({argv, cwd}); return true; },
+        hasWindows: () => false, hasPendingWork: () => false, owns: () => false, focus: () => undefined,
+        prepareQuit: async () => true, closeAll: async () => true, cancelQuit: () => undefined,
+    };
+    // 远端参数无效时，文件请求仍然要先交给 Markdown 编辑器。
+    runtime.state.startup = Object.freeze({
+        ...runtime.state.startup, remoteKernelArgError: {code: "ERR"}, firstOpen: false,
+        openAsHidden: false, initialDeepLink: "", lastWorkspacePath: "", lastWorkspaceMissing: false,
+        missingWorkspacePath: "", availableWorkspaces: [],
+    });
+    t.after(() => runtime.resetRuntimeState());
+
+    const {queueSecondInstance, startSecondInstance} = secondInstance();
+    const started: string[] = [];
+    startSecondInstance({
+        initKernel: (request) => { started.push(request.workspace ?? ""); return Promise.resolve(6806); },
+        initMainWindow: () => undefined,
+    });
+    queueSecondInstance({} as ElectronEvent, ["siyuan", "relative.md"], "D:\\sender");
+    assert.deepEqual(launches, [{argv: ["siyuan", "relative.md"], cwd: "D:\\sender"}]);
+    // 路由给编辑器后不再按工作空间参数处理。
+    assert.deepEqual(started, []);
+});

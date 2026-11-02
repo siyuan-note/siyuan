@@ -10,14 +10,19 @@ import packageContent from "./electronPackageContent.js";
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDir = path.join(appRoot, "electron");
 const staticSourceDir = path.join(sourceDir, "static");
+const markdownSourceDir = path.join(sourceDir, "markdown");
 const outputDir = path.join(appRoot, "electron-dist");
 const staticOutputDir = path.join(outputDir, "static");
-const {rendererScripts, staticAssets} = packageContent;
+const {rendererScripts, staticAssets, markdownRuntimeAssets} = packageContent;
 
 const copyAssets = () => {
     fs.mkdirSync(staticOutputDir, {recursive: true});
     for (const name of [...rendererScripts, ...staticAssets]) {
         fs.copyFileSync(path.join(staticSourceDir, name), path.join(staticOutputDir, name));
+    }
+    // Markdown 模块按 __dirname 加载这两份运行期文件，合并后 __dirname 就是产物目录。
+    for (const name of markdownRuntimeAssets) {
+        fs.copyFileSync(path.join(markdownSourceDir, name), path.join(outputDir, name));
     }
 };
 

@@ -8,6 +8,7 @@ import {showWindow} from "../window/windowVisibility";
 import {getBootWindows as getRegisteredBootWindows} from "../window/windowRegistry";
 import {requestKernelExit} from "../kernel/kernelEndpoint";
 import {requestGracefulKernelExit} from "../kernel/kernelExit";
+import {cancelMarkdownQuit, closeMarkdownEditors, prepareMarkdownQuit} from "./markdownEditors";
 import type {BootWindow, Workspace} from "../shared/types";
 
 type SystemShutdownPort = string | number;
@@ -47,7 +48,9 @@ const resetSystemShutdown = (ports: SystemShutdownPort[]): void => {
     state.exit.systemShutdown = SYSTEM_SHUTDOWN_NONE;
     state.exit.gracefulShutdown = undefined;
     state.exit.keepOpenForShutdown = false;
+    cancelMarkdownQuit();
     writeLog("system shutdown canceled because SiYuan failed to exit gracefully [ports=" + ports.join(",") + "]");
+
     const workspaces = state.workspaces as Workspace[];
     ports.forEach((port: SystemShutdownPort) => {
         const workspace = workspaces.find((item: Workspace) => port.toString() === item.port.toString());
@@ -68,36 +71,40 @@ const beginGracefulSystemShutdown = ({exitApp: exit = () => electron.app.exit(),
 
     state.exit.systemShutdown = SYSTEM_SHUTDOWN_ENDING;
     const ports = getSystemShutdownPorts();
-    if (ports.length === 0) {
-        exit();
-        return;
-    }
-
     state.exit.keepOpenForShutdown = true;
-    state.exit.gracefulShutdown = Promise.all<GracefulExitResult>(
-        ports.map(async (port: SystemShutdownPort) => ({port, success: await gracefulExit(port)})))
-        .then((results: GracefulExitResult[]) => {
-            const succeededPorts = results.filter((item: GracefulExitResult) => item.success)
-                .map((item: GracefulExitResult) => item.port);
-            const failedPorts = results.filter((item: GracefulExitResult) => !item.success)
-                .map((item: GracefulExitResult) => item.port);
-            succeededPorts.forEach((port: SystemShutdownPort) => exitApp(port));
-            getBootWindows().forEach((window: BootWindow) => {
-                if (!window.isDestroyed() && succeededPorts.includes(window.kernelPort as SystemShutdownPort)) window.destroy();
-            });
-
-            const remainingPorts = getSystemShutdownPorts();
-            const incompletePorts = Array.from(new Set<SystemShutdownPort>(failedPorts.concat(remainingPorts)));
-            if (incompletePorts.length > 0) {
-                resetSystemShutdown(incompletePorts);
-                return;
-            }
-            state.exit.keepOpenForShutdown = false;
-            exit();
-        }).catch((error: unknown) => {
-            writeLog("graceful system shutdown failed: " + error);
-            resetSystemShutdown(getSystemShutdownPorts());
+    // 独立 Markdown 窗口没有内核，即使没有本地内核也要等它们保存完成后再退出。
+    state.exit.gracefulShutdown = (async (): Promise<void> => {
+        if (!await prepareMarkdownQuit("shutdown")) {
+            resetSystemShutdown(ports);
+            return;
+        }
+        const results = await Promise.all<GracefulExitResult>(
+            ports.map(async (port: SystemShutdownPort) => ({port, success: await gracefulExit(port)})));
+        const succeededPorts = results.filter((item: GracefulExitResult) => item.success)
+            .map((item: GracefulExitResult) => item.port);
+        const failedPorts = results.filter((item: GracefulExitResult) => !item.success)
+            .map((item: GracefulExitResult) => item.port);
+        succeededPorts.forEach((port: SystemShutdownPort) => exitApp(port));
+        getBootWindows().forEach((window: BootWindow) => {
+            if (!window.isDestroyed() && succeededPorts.includes(window.kernelPort as SystemShutdownPort)) window.destroy();
         });
+
+        const remainingPorts = getSystemShutdownPorts();
+        const incompletePorts = Array.from(new Set<SystemShutdownPort>(failedPorts.concat(remainingPorts)));
+        if (incompletePorts.length > 0) {
+            resetSystemShutdown(incompletePorts);
+            return;
+        }
+        if (!await closeMarkdownEditors()) {
+            resetSystemShutdown([]);
+            return;
+        }
+        state.exit.keepOpenForShutdown = false;
+        exit();
+    })().catch((error: unknown) => {
+        writeLog("graceful system shutdown failed: " + error);
+        resetSystemShutdown(getSystemShutdownPorts());
+    });
 };
 
 const beginForcedSystemShutdown = ({requestKernelExit: requestExit = requestKernelExit}: {
@@ -109,6 +116,8 @@ const beginForcedSystemShutdown = ({requestKernelExit: requestExit = requestKern
 
     state.exit.systemShutdown = SYSTEM_SHUTDOWN_FORCED;
     state.exit.keepOpenForShutdown = false;
+    // 系统已强制结束会话，无法等待异步保存，尽力刷新草稿即可。
+    void prepareMarkdownQuit("shutdown");
     getSystemShutdownPorts().forEach((port: SystemShutdownPort) => {
         requestExit(port, {
             force: true,

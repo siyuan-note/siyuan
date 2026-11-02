@@ -248,7 +248,8 @@ const resolveStartupMenuLanguage = ({argLang, workspaceDir, isRemote, systemLang
 const setStartupApplicationMenu = (): void => {
     const language = resolveStartupMenuLanguage({
         argLang: getArg("--lang"),
-        workspaceDir: getArg("--workspace") || state.startup.lastWorkspacePath,
+        // 独立 Markdown 启动不读工作空间配置，菜单语言直接按系统语言选择。
+        workspaceDir: state.markdown.startup ? undefined : getArg("--workspace") || state.startup.lastWorkspacePath,
         isRemote: !!state.startup.remoteKernelTarget,
         systemLanguages: electron.app.getPreferredSystemLanguages(),
     });

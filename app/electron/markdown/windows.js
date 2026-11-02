@@ -9,7 +9,6 @@ const {importMarkdownImage, imageExtensions} = require("./imageImport");
 const {parseMarkdownLaunch} = require("./launch");
 const {MarkdownTree, treeFailure} = require("./tree");
 const {createMarkdownTreeView} = require("./treeView");
-const {getTitleBarOverlayOptions, updateTitleBarOverlay} = require("../windowControlsOverlay");
 
 const scheme = "siyuan-markdown";
 const csp = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; " +
@@ -36,7 +35,7 @@ const trustedEvent = (event, record) => {
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost}) => {
+    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls}) => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
@@ -237,7 +236,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         const window = new BrowserWindow({width: 1000, height: 760, minWidth: 380, minHeight: 300,
             title: "SiYuan", show: false, autoHideMenuBar: true,
             frame: platform === "darwin", titleBarStyle: "hidden", trafficLightPosition: {x: 8, y: 18},
-            titleBarOverlay: getTitleBarOverlayOptions(platform, 52), icon: path.join(rootDirectory, "stage", "icon-large.png"),
+            titleBarOverlay: windowControls.getOptions(platform, 52), icon: path.join(rootDirectory, "stage", "icon-large.png"),
             backgroundColor: nativeTheme?.shouldUseDarkColors ? "#1e1e1e" : "#fff",
             webPreferences: {preload: path.join(__dirname, "preload.js"), partition: "siyuan-markdown-" + sessionId,
                 sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true,
@@ -439,7 +438,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 else if (record.window.isMaximized()) record.window.unmaximize(); else record.window.maximize();
                 return;
             }
-            case "window-overlay": return updateTitleBarOverlay(record.window, {...payload,
+            case "window-overlay": return windowControls.update(record.window, {...payload,
                 height: Math.round(payload?.height * (record.window.webContents.getZoomFactor?.() || 1))}, platform);
             case "bootstrap": {
                 return bootstrap(record.initial);

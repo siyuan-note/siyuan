@@ -18,6 +18,7 @@ const Channel = {
     // 深链、文件与外部打开
     SIYUAN_OPEN_URL: "siyuan-open-url",
     SIYUAN_OPEN_FILE: "siyuan-open-file",
+    SIYUAN_OPEN_MARKDOWN: "siyuan-open-markdown",
     SIYUAN_OPEN_SETTING: "siyuan-open-setting",
     SIYUAN_OPEN_HELP: "siyuan-open-help",
 

@@ -63,6 +63,8 @@ const createBootstrapFixture = (t: any, {
         ipcMain: ipcMain as unknown as IpcMain,
         session: {defaultSession: {setCertificateVerifyProc() {}}} as unknown as Session,
         net: {fetch: async () => ({json: async () => ({})}), isOnline: () => true} as unknown as Record<string, unknown>,
+        // Markdown 自定义协议在 ready 之前登记，替身记录调用顺序即可。
+        protocol: {registerSchemesAsPrivileged: () => order.push("markdownSchemes")},
         screen: {getPrimaryDisplay: () => ({size: {width: 1000, height: 800},
             workAreaSize: {width: 1000, height: 800}})} as unknown as Record<string, unknown>,
     });

@@ -187,6 +187,28 @@ export type WindowLedger = {
 /** 关机阶段：未开始、优雅退出进行中、强制退出。 */
 export type SystemShutdownPhase = 0 | 1 | 2;
 
+/** 一次待打开的独立 Markdown 请求。 */
+export type MarkdownLaunchRequest = {argv: string[]; cwd: string};
+
+/**
+ * 独立 Markdown 编辑器的运行期状态。
+ *
+ * `startup` 在 app ready 之前就要可写：macOS 的 `open-file` 可能早于启动判定，
+ * 因此它不能放进只读的启动快照。
+ */
+export type MarkdownState = {
+    /** 本次启动只打开独立 Markdown 窗口，不初始化工作空间。 */
+    startup: boolean;
+    /** 窗口管理器，app ready 后创建。 */
+    windows?: import("../markdown/windows").MarkdownWindows;
+    /** 退出协调，与窗口管理器一起创建。 */
+    lifecycle?: import("../markdown/lifecycle").MarkdownLifecycle;
+    /** 正在排空待打开文件的任务，避免并发重复处理。 */
+    launchTask?: Promise<void>;
+    /** 尚未处理完的文件请求。 */
+    pendingLaunches: MarkdownLaunchRequest[];
+};
+
 /** 退出编排状态。这些字段共同决定应用这次是否真的退出。 */
 export type ExitState = {
     systemShutdown: SystemShutdownPhase;
@@ -211,6 +233,8 @@ export type RuntimeState = {
     kernel: KernelBookkeeping;
     windows: WindowLedger;
     exit: ExitState;
+    /** 独立 Markdown 编辑器的状态；与工作空间互不影响。 */
+    markdown: MarkdownState;
     workspaces: Workspace[];
     /** 远端内核窗口就绪前积累的 siyuan:// 链接。 */
     pendingRemoteOpenURLs: string[];

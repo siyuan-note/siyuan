@@ -1,5 +1,5 @@
 import * as electron from "electron";
-import {state, writeLog} from "../shared/runtime";
+import {isSystemShuttingDown, state, writeLog} from "../shared/runtime";
 import * as timing from "../shared/timing";
 import {APP_PAGE} from "../shared/pagePaths";
 import {isDeepLink} from "../shared/builtinArgs";
@@ -16,6 +16,10 @@ import {syncAfterResume} from "../window/syncAfterResume";
 import {getRemoteSession} from "../remote/connectionManager";
 import * as bootWindows from "../window/bootWindows";
 import {initRemoteKernel} from "../remote/remoteBoot";
+import {isMarkdownPath} from "../markdown/launch";
+import {
+    acceptMarkdownFileOpen, isMarkdownStartup, routeMarkdownLaunch,
+} from "./markdownEditors";
 import type {
     BrowserWindow, Event as ElectronEvent, HandlerDetails, WebContents, WindowOpenHandlerResponse,
 } from "electron";
@@ -40,6 +44,7 @@ const registerAppLifecycle = ({
         electron.app.on("browser-window-created", watchWindowSessionEnd);
     }
     electron.app.on("open-url", (_event, url) => void handleOpenURL(url)); // macOS 深链
+    electron.app.on("open-file", handleOpenFile); // macOS 文件打开，可能早于 ready
     electron.app.on("activate", () => handleActivate(initMainWindow));
     electron.app.on("web-contents-created", (event, contents) =>
         handleWebContentsCreated(event, contents, {settingsWindowPolicy}));
@@ -58,6 +63,21 @@ const watchWindowSessionEnd = (_event: ElectronEvent, window: BrowserWindow): vo
         writeLog("session-end");
         beginForcedSystemShutdown();
     });
+};
+
+// macOS 把文件拖到应用图标或从 Finder 打开时触发：早于 ready 也要排队，不能触发工作空间初始化。
+const handleOpenFile = (event: ElectronEvent, filePath: string): void => {
+    if (!isMarkdownPath(filePath)) {
+        return;
+    }
+    event.preventDefault();
+    if (state.exit.updateInstall || isSystemShuttingDown()) {
+        return;
+    }
+    if (!electron.app.isReady()) {
+        acceptMarkdownFileOpen();
+    }
+    routeMarkdownLaunch(["--markdown=" + filePath]);
 };
 
 // 系统深链：远端模式只转给主窗口，主窗口未就绪时暂存；本地模式等第一个工作空间打开后广播。
@@ -103,6 +123,11 @@ const handleOpenURL = async (url: string): Promise<void> => {
 
 // Dock 激活：有工作空间就前置窗口，全部窗口都关闭时重新拉起内核与主窗口。
 const handleActivate = (initMainWindow: InitMainWindow): void => {
+    // Markdown 窗口独立于工作空间：只有它们时直接前置，不拉起内核。
+    if (state.markdown.windows?.hasWindows() && state.workspaces.length === 0) {
+        state.markdown.windows.focus();
+        return;
+    }
     if (state.exit.updateInstall || state.startup.remoteKernelArgError) {
         return;
     }
@@ -116,6 +141,10 @@ const handleActivate = (initMainWindow: InitMainWindow): void => {
         }
     }
     if (electron.BrowserWindow.getAllWindows().length > 0) {
+        return;
+    }
+    if (isMarkdownStartup()) {
+        void state.markdown.windows?.open();
         return;
     }
     if (state.startup.remoteKernelTarget) {
@@ -133,6 +162,10 @@ const handleActivate = (initMainWindow: InitMainWindow): void => {
 const handleBeforeQuit = (event: ElectronEvent): void => {
     if (state.exit.keepOpenForUpdate) {
         event.preventDefault();
+        return;
+    }
+    // 先完成独立 Markdown 窗口的退出保护，再走工作空间退出流程。
+    if (state.markdown.lifecycle?.beforeQuit(event)) {
         return;
     }
     state.workspaces.slice().forEach(item => {

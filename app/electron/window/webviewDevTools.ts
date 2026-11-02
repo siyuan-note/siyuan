@@ -2,6 +2,7 @@ import * as electron from "electron";
 import {isDevToolsShortcut, toggleDevTools} from "./devToolsDock";
 import {getWindowKernelTarget} from "./windowRegistry";
 import {openExternalURL} from "./windowNavigation";
+import {state} from "../shared/runtime";
 import type {
     Event as ElectronEvent,
     HandlerDetails,
@@ -50,6 +51,10 @@ const handleWebContentsCreated = (event: ElectronEvent, contents: WebContents,
     {settingsWindowPolicy, shell = electron.shell}: WebContentsCreatedHost): void => {
     bindWebviewDevToolsShortcut(contents);
     contents.setWindowOpenHandler((details: HandlerDetails): WindowOpenHandlerResponse => {
+        // 独立 Markdown 窗口的页面只能在自己的受控导航内打开内容，新窗口请求一律拒绝。
+        if (state.markdown.windows?.owns(contents)) {
+            return {action: "deny"};
+        }
         const settings = settingsWindowPolicy(contents, details);
         if (settings) {
             return settings;

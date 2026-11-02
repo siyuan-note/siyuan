@@ -13,6 +13,7 @@ import {appIconPath, LOCAL_PAGE_WEB_PREFERENCES} from "../shared/desktopDefaults
 import {getCurrentBootWindow} from "../window/windowRegistry";
 import * as bootWindows from "../window/bootWindows";
 import {initRemoteKernel} from "../remote/remoteBoot";
+import {drainMarkdownLaunches, isMarkdownStartup} from "./markdownEditors";
 import type {StaticMessage} from "../shared/staticMessages";
 import type {BrowserWindow} from "electron";
 import type {InitKernel, InitMainWindow, KernelTarget, PreparedBoot} from "../shared/types";
@@ -23,8 +24,9 @@ const showStaticMessage = (message: StaticMessage): void => {
     showErrorWindow(message.titleZh, message.titleEn, message.content);
 };
 
-// 六条启动分支。分支字段与各自的载荷绑在一起，构造不出「分支与载荷不匹配」的组合。
+// 七条启动分支。分支字段与各自的载荷绑在一起，构造不出「分支与载荷不匹配」的组合。
 type StartupBranch =
+    | {branch: "markdown-editor"}
     | {branch: "remote-arg-invalid"; remoteKernelArgError: {code?: string} | undefined}
     | {branch: "remote-target"; remoteKernelTarget: KernelTarget}
     | {branch: "first-open"}
@@ -45,6 +47,10 @@ type StartupContext = StartupBranch & {
 // 按启动条件选定分支，载荷随分支一起给出。
 const resolveStartupBranch = (
     appCrashInfo: {workspaceDir?: string; crashInfo: string} | undefined): StartupBranch => {
+    // 独立 Markdown 入口与工作空间无关，即使同时带了无效的远端参数也只开文件窗口。
+    if (isMarkdownStartup()) {
+        return {branch: "markdown-editor"};
+    }
     if (state.startup.remoteKernelArgError) {
         return {branch: "remote-arg-invalid", remoteKernelArgError: state.startup.remoteKernelArgError};
     }
@@ -135,6 +141,10 @@ const assertNever = (value: never): never => {
 // 每个分支只决定「开哪个窗口、拉哪个内核」；载荷由分支类型保证存在，因此这里不需要再判空。
 const runStartupBranch = (context: StartupContext): void => {
     switch (context.branch) {
+        case "markdown-editor":
+            drainMarkdownLaunches();
+            return;
+
         case "remote-arg-invalid":
             showRemoteArgumentError(context.remoteKernelArgError);
             return;

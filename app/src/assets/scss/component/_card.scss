@@ -139,7 +139,8 @@
 
 @media screen and (max-width: 520px) {
   .b3-cover__tabs {
-    max-height: 50%;
+    flex: 0 1 40%;
+    min-height: 0;
     overflow: auto;
   }
 }

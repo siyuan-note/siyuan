@@ -81,7 +81,7 @@ export const createMarkdownTree = (options: {
         }
         for (const toggle of toggles) {
             const labelOnly = toggle.dataset.drawerToggle === "true" && !drawer();
-            toggle.disabled = frozen || labelOnly;
+            toggle.disabled = labelOnly;
             toggle.tabIndex = labelOnly ? -1 : 0;
             toggle.classList.toggle("markdown-heading--label", labelOnly);
             if (labelOnly) {
@@ -399,7 +399,7 @@ export const createMarkdownTree = (options: {
         if (event.key === "Escape" && drawer() && drawerOpen) {event.preventDefault(); hideDrawer();}
     }, {signal});
     for (const toggle of toggles) toggle.addEventListener("click", () => {
-        if (frozen || toggle.disabled) return;
+        if (toggle.disabled) return;
         activeToggle = toggle;
         if (drawer()) drawerOpen = !drawerOpen; else {desktopVisible = !desktopVisible; scheduleSave();}
         updateVisibility(); if (shown()) {void refresh(); viewport.focus();}
@@ -432,7 +432,7 @@ export const createMarkdownTree = (options: {
         refresh,
         syncSelection,
         chooseRoot,
-        freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; toggles.forEach(toggle => {toggle.disabled = value;}); updateVisibility();},
+        freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; updateVisibility();},
         destroy() {
             if (disposed) return;
             saveView(); disposed = true; version++; refreshSequence++; stopAnimation(); expanding.clear();

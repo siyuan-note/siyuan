@@ -85,30 +85,30 @@ export const openOCRImportModelsDialog = (options: {
         if (busy || importButton.disabled) {
             return;
         }
-        busy = true;
-        update();
-        let imported = false;
-        try {
-            const response = await fetchSyncPost("/api/asset/importOCRModels", new ContractFormData({
-                detector: fileInput(files[0]).files[0],
-                detectorConfig: fileInput(files[1]).files[0],
-                recognizer: fileInput(files[2]).files[0],
-                recognizerConfig: fileInput(files[3]).files[0],
-            }), undefined, true, options.signal);
-            imported = response.code === 0;
-        } catch (error) {
-            if (!closed && !options.signal.aborted && error.name !== "AbortError") {
-                showMessage(error.message);
+        const imported = await dialog.runPending(async () => {
+            busy = true;
+            update();
+            try {
+                const response = await fetchSyncPost("/api/asset/importOCRModels", new ContractFormData({
+                    detector: fileInput(files[0]).files[0],
+                    detectorConfig: fileInput(files[1]).files[0],
+                    recognizer: fileInput(files[2]).files[0],
+                    recognizerConfig: fileInput(files[3]).files[0],
+                }), undefined, true, options.signal);
+                return response.code === 0 && !closed && !options.signal.aborted;
+            } catch (error) {
+                if (!closed && !options.signal.aborted && error.name !== "AbortError") {
+                    showMessage(error.message);
+                }
+                return false;
+            } finally {
+                busy = false;
+                if (!closed) update();
             }
-        } finally {
-            busy = false;
-            if (imported && !closed && !options.signal.aborted) {
-                showMessage(languages.imported);
-                dialog.destroy();
-                options.onImported();
-            } else if (!closed) {
-                update();
-            }
+        });
+        if (imported) {
+            showMessage(languages.imported);
+            options.onImported();
         }
     });
     update();

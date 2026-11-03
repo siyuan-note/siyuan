@@ -37,6 +37,7 @@ const createImportDialog = () => {
     const messages: string[] = [];
     let options: {title?: string, content: string, width?: string, destroyCallback?: () => void};
     let destroyed = 0;
+    let pending = false;
     const opened: number[] = [];
     let closed = 0;
     const exports = {} as {openOCRImportModelsDialog: (value: {signal: AbortSignal, onImported: () => void, onClosed: () => void}) => unknown};
@@ -58,7 +59,20 @@ const createImportDialog = () => {
             MobileDialog: class {
                 public element = element;
                 constructor(value: typeof options) { options = value; }
-                destroy() { destroyed++; options.destroyCallback?.(); }
+                async runPending(task: () => Promise<boolean>) {
+                    if (pending || destroyed) return false;
+                    pending = true;
+                    try {
+                        const success = await task();
+                        if (success && !destroyed) {
+                            destroyed++; options.destroyCallback?.();
+                            return true;
+                        }
+                        return false;
+                    } finally { pending = false; }
+                }
+                destroy() { if (!pending && !destroyed) { destroyed++; options.destroyCallback?.(); } }
+                invalidate() { if (!destroyed) { destroyed++; options.destroyCallback?.(); } }
             },
         }),
     });
@@ -67,7 +81,7 @@ const createImportDialog = () => {
         signal: controller.signal,
         onImported: () => opened.push(1),
         onClosed: () => { closed++; },
-    }) as {destroy: () => void};
+    }) as {destroy: () => void, invalidate: () => void};
     return {
         options, controls, requests, messages, element, dialog, controller,
         destroyed: () => destroyed, imported: () => opened.length, closed: () => closed,
@@ -79,6 +93,7 @@ const createImportDialog = () => {
             listeners.get("change")({target: controls[id]});
         },
         cancel: () => listeners.get("ocrImportCancel:click")({}),
+        invalidate: () => dialog.invalidate(),
         confirm: () => listeners.get("ocrImportConfirm:click")({}) as Promise<void>,
     };
 };
@@ -139,6 +154,26 @@ test("a failed import keeps the dialog open and allows retrying", async () => {
     assert.equal(panel.controls.ocrImportConfirm.disabled, false);
 });
 
+test("pending imports retain file choices and guard repeated confirmations and cancellation", async () => {
+    const panel = createImportDialog();
+    fileIds.forEach(id => panel.select(id, `${id}.bin`));
+    const choices = fileIds.map(id => panel.controls[id].files);
+    const pending = panel.confirm();
+    await panel.confirm();
+    panel.cancel();
+    assert.equal(panel.destroyed(), 0);
+    assert.equal(panel.requests.length, 1);
+    panel.requests[0].resolve({code: -1});
+    await pending;
+    fileIds.forEach((id, index) => assert.equal(panel.controls[id].files, choices[index]));
+    const retry = panel.confirm();
+    assert.equal(panel.requests.length, 2);
+    panel.requests[1].resolve({code: 0});
+    await retry;
+    assert.equal(panel.imported(), 1);
+    assert.equal(panel.closed(), 1);
+});
+
 test("cancel closes the dialog without importing", () => {
     const panel = createImportDialog();
     fileIds.forEach(id => panel.select(id, `${id}.bin`));
@@ -174,7 +209,7 @@ for (const state of ["abortError", "aborted", "closed"]) {
         fileIds.forEach(id => panel.select(id, `${id}.bin`));
         const pending = panel.confirm();
         if (state === "aborted") panel.controller.abort();
-        if (state === "closed") panel.cancel();
+        if (state === "closed") panel.invalidate();
         const error = new Error("request cancelled");
         if (state === "abortError") error.name = "AbortError";
         panel.requests[0].reject(error);
@@ -190,7 +225,7 @@ for (const state of ["aborted", "closed"]) {
         fileIds.forEach(id => panel.select(id, `${id}.bin`));
         const pending = panel.confirm();
         if (state === "aborted") panel.controller.abort();
-        else panel.cancel();
+        else panel.invalidate();
         panel.requests[0].resolve({code: 0});
         await pending;
         assert.deepEqual(panel.messages, []);

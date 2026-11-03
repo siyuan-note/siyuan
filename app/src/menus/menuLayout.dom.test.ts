@@ -65,6 +65,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
         "protyle/render/av/groups": {getPageSize: () => ({})},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {},
+        "protyle/render/av/host": {getAVRelationHost: (): undefined => undefined, getAVHostIdentity: (): undefined => undefined},
         "protyle/render/av/selectPosition": {},
         "protyle/render/av/calendar/date": {},
         "protyle/render/av/calendar/hitTest": {},
@@ -885,7 +886,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel",
+        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {

@@ -2392,7 +2392,7 @@ body.mobile-topbar--merged {
 
   }
 
-  .av:not([data-av-host]) .av__row-more {
+  .av:not([data-av-host]) .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions .av__row-more {
     display: none;
   }
 }

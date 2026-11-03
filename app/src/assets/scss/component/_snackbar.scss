@@ -64,13 +64,13 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
   }
 
   &--error .b3-snackbar__content {
-    padding-left: 47px;
+    padding-left: 36px;
 
     &::after {
       content: "❗";
       position: absolute;
       left: 16px;
-      top: 10px;
+      top: 8px;
       font-size: 16px;
     }
   }
@@ -111,7 +111,7 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
     color: var(--b3-theme-on-primary);
     transition: var(--b3-transition);
     right: 16px;
-    top: 10px;
+    top: 9px;
     box-sizing: border-box;
     opacity: .68;
 

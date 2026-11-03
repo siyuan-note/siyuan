@@ -238,11 +238,11 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         if (column.hidden) {
             return;
         }
-        contentHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
-data-icon="${escapeAttr(column.icon)}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
-data-date-format="${column.dateFormat || ""}"
+        contentHTML += `<div class="av__cell av__cell--header" data-col-id="${escapeAttr(column.id)}"  draggable="true" 
+data-icon="${escapeAttr(column.icon)}" data-dtype="${escapeAttr(column.type)}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+data-date-format="${escapeAttr(column.dateFormat || "")}"
 data-freeze="${freezeIndex === index}"
-data-desc="${escapeAttr(column.desc)}" data-align="${column.align || ""}" data-position="north"
+data-desc="${escapeAttr(column.desc)}" data-align="${escapeAttr(column.align || "")}" data-position="north"
 style="width: ${escapeAttr(column.width) || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
@@ -253,9 +253,9 @@ style="width: ${escapeAttr(column.width) || "200px"};">
         }
         if (column.type === "lineNumber") {
             // lineNumber type 不参与计算操作
-            calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${escapeAttr(column.width) || "200px"}">&nbsp;</div>`;
+            calcHTML += `<div data-col-id="${escapeAttr(column.id)}" data-dtype="${escapeAttr(column.type)}" class="av__calc" style="width: ${escapeAttr(column.width) || "200px"}">&nbsp;</div>`;
         } else {
-            calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
+            calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${escapeAttr(column.id)}" data-dtype="${escapeAttr(column.type)}" data-operator="${column.calc?.operator || ""}" 
 style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
         }
         if (column.calc && column.calc.operator !== "") {
@@ -360,7 +360,7 @@ const renderGroupTable = (options: ITableOptions) => {
             const virtualData = plan.virtualData[group.id];
             const renderBody = !group.groupFolded || virtualData?.locate;
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}"${group.nested ? ` data-root-page="${group.nested.page}"` : ""} data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
+<div data-group-id="${escapeAttr(group.id)}" data-page-size="${group.pageSize}"${group.nested ? ` data-root-page="${group.nested.page}"` : ""} data-dtype="${escapeAttr(group.groupKey.type)}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
         }
     });
     if (options.renderAll) {

@@ -777,7 +777,7 @@ export const getColIconByType = (type: TAVCol) => {
     }
 };
 
-const addAttrViewColAnimation = (options: {
+export const addAttrViewColAnimation = (options: {
     blockElement: Element,
     protyle: IProtyle,
     type: TAVCol,
@@ -809,15 +809,15 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${options.id}" data-dtype="${options.type}" data-date-format="${dateFormat}" data-wrap="false" data-align="" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${escapeAttr(options.id)}" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
-    <span class="av__celltext fn__flex-1">${options.name}</span>
+    <span class="av__celltext fn__flex-1">${escapeHtml(options.name)}</span>
     <div class="av__widthdrag"></div>
 </div>`;
             } else {
                 const value = genCellValue(options.type, null);
-                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
-data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" data-align="" style="width: 200px">${renderCell(value,
+                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(options.id)}"
+data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
             previousElement.insertAdjacentHTML("afterend", html);

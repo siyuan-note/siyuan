@@ -4,6 +4,7 @@ import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {clearSelect} from "../../../util/clear";
 import {renderAVRichTextElements} from "../richText";
+import {escapeAttr} from "../../../../util/escape";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;
@@ -40,10 +41,10 @@ export const insertGalleryItemAnimation = (options: {
         }
 
         const cellHTML = `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" 
-data-field-id="${item.dataset.fieldId}" 
+data-field-id="${escapeAttr(item.dataset.fieldId)}" 
 data-wrap="${item.dataset.wrap}" 
-data-dtype="${item.dataset.dtype}" 
-data-date-format="${item.dataset.dateFormat || ""}"
+data-dtype="${escapeAttr(item.dataset.dtype)}" 
+data-date-format="${escapeAttr(item.dataset.dateFormat || "")}"
 ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber,
     false, type, undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (item.previousElementSibling.classList.contains("av__gallery-name")) {

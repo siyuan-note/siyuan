@@ -259,15 +259,15 @@ export const genAVAttributeRowHTML = (options: {
     const textInputType = isAVLinkType(value.type);
     const hasOwnPlaceholder = hasAVAttributePlaceholder(value.type);
     const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
-    return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>
+    return `<div class="block__icons av__row" data-id="${escapeAttr(options.nodeID)}" data-col-id="${escapeAttr(options.keyID)}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(options.name)}<div class='ft__on-surface'>${escapeAriaLabel(options.desc || "")}</div>">
         ${options.icon ? unicode2Emoji(options.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${options.typeIcon}"></use></svg>`}
         <span>${escapeHtml(options.name)}</span>
     </div>
-    <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(storedValue))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
+    <div data-av-id="${escapeAttr(options.avID)}" data-col-id="${escapeAttr(value.keyID)}" data-row-id="${escapeAttr(value.blockID)}"${value.id ? ` data-id="${escapeAttr(value.id)}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(storedValue))}" data-type="${escapeAttr(value.type)}"${value.isDetached ? ' data-detached="true"' : ""}
 data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.selectOptions)) : "[]"}"
-data-date-format="${options.dateFormat || ""}"
+data-date-format="${escapeAttr(options.dateFormat || "")}"
 ${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
 class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${isAVTimestampType(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>

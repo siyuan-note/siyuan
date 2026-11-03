@@ -171,7 +171,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}" data-group-id="${group.id}" data-previous-group-id="${view.groups[groupIndex - 1]?.id || ""}" data-group-config="${groupConfig}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount, groupDraggable)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getAVCardHTML("kanban", group, options.blockElement, virtualData[group.id])}</div>
+    <div data-group-id="${escapeAttr(group.id)}" data-page-size="${group.pageSize}" data-dtype="${escapeAttr(group.groupKey.type)}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getAVCardHTML("kanban", group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }
     });

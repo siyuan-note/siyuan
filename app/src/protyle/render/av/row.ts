@@ -70,7 +70,7 @@ export const getRowHTML = (options: {
         const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
         const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
         const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
-        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
+        html += `<div data-id="${escapeAttr(galleryRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
         if (galleryData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + galleryData.cardAspectRatio;
             if (galleryRow.coverURL) {
@@ -108,10 +108,10 @@ export const getRowHTML = (options: {
 data-wrap="${galleryData.fields[fieldsIndex].wrap}"
 aria-label="${ariaLabel}" 
 data-position="5west"
-data-id="${cell.id}" 
-data-field-id="${galleryData.fields[fieldsIndex].id}"
-data-dtype="${cell.valueType}" 
-data-date-format="${galleryData.fields[fieldsIndex].dateFormat || ""}"
+data-id="${escapeAttr(cell.id)}" 
+data-field-id="${escapeAttr(galleryData.fields[fieldsIndex].id)}"
+data-dtype="${escapeAttr(cell.valueType)}" 
+data-date-format="${escapeAttr(galleryData.fields[fieldsIndex].dateFormat || "")}"
 ${galleryData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
@@ -141,7 +141,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     if (options.type === "kanban") {
         const kanbanRow = options.row as IAVGalleryItem;
         const kanbanData = options.data as IAVKanban;
-        html += `<div data-id="${kanbanRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
+        html += `<div data-id="${escapeAttr(kanbanRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
@@ -177,10 +177,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
 data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
 aria-label="${ariaLabel}" 
 data-position="5west"
-data-id="${cell.id}" 
-data-field-id="${kanbanData.fields[fieldsIndex].id}" 
-data-dtype="${cell.valueType}" 
-data-date-format="${kanbanData.fields[fieldsIndex].dateFormat || ""}"
+data-id="${escapeAttr(cell.id)}" 
+data-field-id="${escapeAttr(kanbanData.fields[fieldsIndex].id)}" 
+data-dtype="${escapeAttr(cell.valueType)}" 
+data-date-format="${escapeAttr(kanbanData.fields[fieldsIndex].dateFormat || "")}"
 ${kanbanData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
@@ -214,7 +214,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     const treeColumnIndex = tableRow.hierarchy ? tableData.columns.findIndex(column =>
         !column.hidden && (!isList || column.type === "block")) : -1;
 
-    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}${tableRow.hierarchy?.context ? " av__row--context" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}"${tableRow.hierarchy ? ` data-parent-id="${escapeAttr(tableRow.hierarchy.parentID || "")}" data-depth="${tableRow.hierarchy.depth}"${tableRow.hierarchy.context ? ` aria-label="${window.siyuan.languages.avSubItemsContext}"` : ""}` : ""} style="${getConditionalItemStyle(tableRow)}">`;
+    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}${tableRow.hierarchy?.context ? " av__row--context" : ""}" data-index="${options.rowIndex}" data-id="${escapeAttr(tableRow.id)}"${tableRow.hierarchy ? ` data-parent-id="${escapeAttr(tableRow.hierarchy.parentID || "")}" data-depth="${tableRow.hierarchy.depth}"${tableRow.hierarchy.context ? ` aria-label="${window.siyuan.languages.avSubItemsContext}"` : ""}` : ""} style="${getConditionalItemStyle(tableRow)}">`;
     if (pinIndex > -1) {
         html += `<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div>`;
     } else {
@@ -231,12 +231,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         if (cell.valueType === "checkbox") {
             checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
         }
-        html += `<div class="av__cell${checkClass}${isList ? " ariaLabel" : ""}" data-id="${cell.id}" data-col-id="${column.id}" ${isList ? `aria-label="${escapeAriaLabel(column.name)}" data-position="north"` : ""}
+        html += `<div class="av__cell${checkClass}${isList ? " ariaLabel" : ""}" data-id="${escapeAttr(cell.id)}" data-col-id="${escapeAttr(column.id)}" ${isList ? `aria-label="${escapeAriaLabel(column.name)}" data-position="north"` : ""}
 data-wrap="${column.wrap}" 
-data-dtype="${column.type}" 
-data-date-format="${column.dateFormat || ""}"
+data-dtype="${escapeAttr(column.type)}" 
+data-date-format="${escapeAttr(column.dateFormat || "")}"
 ${column.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
-data-align="${column.align || ""}"
+data-align="${escapeAttr(column.align || "")}"
 ${index === treeColumnIndex ? 'data-sub-items-cell="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
@@ -455,11 +455,11 @@ export const insertAttrViewBlockAnimation = (options: {
                 lineNumber = parseInt(lineNumberValue);
             }
         }
-        cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
+        cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(item.dataset.colId)}" 
 data-wrap="${item.dataset.wrap}" 
-data-dtype="${item.dataset.dtype}" 
-data-date-format="${item.dataset.dateFormat || ""}"
-data-align="${item.dataset.align || ""}"
+data-dtype="${escapeAttr(item.dataset.dtype)}" 
+data-date-format="${escapeAttr(item.dataset.dateFormat || "")}"
+data-align="${escapeAttr(item.dataset.align || "")}"
 style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
     true, "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (pinIndex === index) {

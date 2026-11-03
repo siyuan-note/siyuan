@@ -895,7 +895,17 @@ export const focusByWbr = (element: Element, range: Range, preserveWbr = false) 
     } else {
         const wbrPreviousSibling = hasPreviousSibling(wbrElement);
         if (wbrPreviousSibling && wbrElement.previousElementSibling === wbrPreviousSibling) {
-            if (wbrElement.previousElementSibling.lastChild?.nodeType === 3) {
+            if (wbrElement.previousElementSibling.getAttribute("data-type")?.split(" ").includes("inline-math")) {
+                // 公式外的文本边界承载组合输入，空节点之间的父元素选区会使浏览器丢失组合替换范围。
+                let text = wbrElement.previousSibling;
+                if (text.nodeType !== Node.TEXT_NODE) {
+                    text = document.createTextNode(Constants.ZWSP);
+                    wbrElement.before(text);
+                } else if (text.textContent === "") {
+                    text.textContent = Constants.ZWSP;
+                }
+                range.setStart(text, text.textContent.length);
+            } else if (wbrElement.previousElementSibling.lastChild?.nodeType === 3) {
                 // <em>text</em><wbr> 需把光标放在里面，因为 chrome 点击后也是默认在里面
                 range.setStart(wbrElement.previousElementSibling.lastChild, wbrElement.previousElementSibling.lastChild.textContent.length);
             } else if (wbrPreviousSibling.nodeType !== 3 && (wbrPreviousSibling as HTMLElement).classList.contains("img")) {

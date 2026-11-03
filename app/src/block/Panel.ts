@@ -19,6 +19,7 @@ import {checkFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {activateAVLocateWithRetry} from "../protyle/render/av/locate";
+import {stickyRow} from "../protyle/render/av/row";
 import {
     IBlockPanelItemInfo,
     IBlockPanelRemovalOptions,
@@ -52,6 +53,7 @@ export class BlockPanel {
     private observerLoad: IntersectionObserver;
     private originalRefBlockIDs: Record<string, string>;
     private editorResizeCleanup?: () => void;
+    private stickyFrame: number;
     private refDefElements = new Map<IRefDefs, HTMLElement>();
     private refDefEditors = new Map<IRefDefs, Protyle>();
     private refDefInfos = new Map<IRefDefs, IBlockPanelItemInfo>();
@@ -176,6 +178,7 @@ export class BlockPanel {
         /// #if !MOBILE
         moveResize(this.element, () => {
             this.pin();
+            this.scheduleStickyRows();
         });
         /// #endif
         this.render(options.backlink);
@@ -202,10 +205,25 @@ export class BlockPanel {
 
     private resizeEditor(editor: Protyle) {
         resize(editor.protyle);
+        this.scheduleStickyRows();
         editor.protyle.scroll.element.parentElement.style.setProperty(
             "--b3-dynamicscroll-width",
             Math.min(editor.protyle.contentElement.clientHeight - 49, 200) + "px"
         );
+    }
+
+    private scheduleStickyRows() {
+        cancelAnimationFrame(this.stickyFrame);
+        this.stickyFrame = requestAnimationFrame(() => {
+            if (!this.element) {
+                return;
+            }
+            this.editors.forEach(({protyle}) => {
+                protyle.wysiwyg.element.querySelectorAll('.av[data-render="true"]').forEach((item: HTMLElement) => {
+                    stickyRow(item, protyle.contentElement, "all");
+                });
+            });
+        });
     }
 
     private getEditor(editorElement: HTMLElement) {
@@ -500,6 +518,7 @@ export class BlockPanel {
                     if (this.refDefs.length > 1 && editor.protyle.element.dataset.resized !== "true") {
                         this.setAutoEditorHeight(editor);
                     }
+                    this.scheduleStickyRows();
                     // 由于 afterCB 中高度的设定，需在之后再进行设定
                     // 49 = 16（上图标）+16（下图标）+8（padding）+9（底部距离）
                     editor.protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(editor.protyle.contentElement.clientHeight - 49, 200)}px;`);
@@ -539,6 +558,7 @@ export class BlockPanel {
             return;
         }
         this.destroying = true;
+        cancelAnimationFrame(this.stickyFrame);
         this.editorResizeCleanup?.();
         this.observerResize?.disconnect();
         this.observerLoad?.disconnect();
@@ -642,6 +662,7 @@ export class BlockPanel {
         /// #endif
         let resizeTimeout: number;
         this.observerResize = new ResizeObserver(() => {
+            this.scheduleStickyRows();
             clearTimeout(resizeTimeout);
             resizeTimeout = window.setTimeout(() => {
                 this.editors.forEach(item => {
@@ -714,6 +735,7 @@ export class BlockPanel {
         }
 
         this.element.querySelector(".block__content").addEventListener("scroll", () => {
+            this.scheduleStickyRows();
             this.editors.forEach(item => {
                 hideElements(["gutter"], item.protyle);
             });

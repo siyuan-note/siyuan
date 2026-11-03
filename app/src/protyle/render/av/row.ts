@@ -511,13 +511,14 @@ const applyFixedClip = (el: HTMLElement, scrollEl: HTMLElement) => {
 };
 
 const applyFixedViewportClip = (el: HTMLElement, left = 0, right = 0) => {
-    // 固定栏按编辑器与分屏的交集裁剪，避免分屏缩小时覆盖相邻文档。
+    // 固定栏按编辑器、浮窗与分屏的交集裁剪，避免覆盖相邻编辑区。
     const viewport = el.closest(".protyle-content");
+    const panel = el.closest(".block__content");
     const pane = el.closest(".layout-tab-container");
     const rect = el.getBoundingClientRect();
     let top = 0;
     let bottom = 0;
-    [viewport, pane].forEach(element => {
+    [viewport, panel, pane].forEach(element => {
         if (!element) {
             return;
         }

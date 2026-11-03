@@ -122,7 +122,7 @@ const cases = async (compiled, mobile) => {
         ]}], editor, "source-carrier");
         api.syncRelatedAVViews(source);
         const host = source.querySelector("[data-av-host]");
-        host.innerHTML = '<div class="av__container"><div class="av__views"><span data-type="av-filter">Filter</span><span data-type="av-more">Settings</span></div><div class="av__scroll"><div class="av__body" data-group-id="group"><div class="av__row av__row--header"><div data-col-id="image" data-dtype="mAsset"></div></div><div class="av__row" data-id="member"><div class="av__colsticky"></div><div class="av__cell" data-col-id="image" data-id="value"><img class="av__cellassetimg" src="assets/member.png"></div></div></div></div></div>';
+        host.innerHTML = '<div class="av__container"><div class="av__views"><span data-type="av-filter">Filter</span><span data-type="av-more">Settings</span><button data-type="set-page-size">Page size</button></div><div class="av__scroll"><div class="av__body" data-group-id="group"><div class="av__row av__row--header"><div data-col-id="image" data-dtype="mAsset"></div></div><div class="av__row" data-id="member"><div class="av__colsticky"></div><div class="av__cell" data-col-id="image" data-id="value"><img class="av__cellassetimg" src="assets/member.png"></div></div></div></div></div>';
         host.querySelector(".av__cell").dataset.cellValue = encodeURIComponent(JSON.stringify({type: "mAsset", mAsset: [
             {type: "image", content: "assets/member.png", name: ""},
         ]}));
@@ -145,7 +145,8 @@ const cases = async (compiled, mobile) => {
         return {protyle, tab, element, root, add, remove: () => tab.remove()};
     };
     const dispatch = async state => {
-        state.host.querySelector('[data-type="av-more"]').click();
+        check.equal(state.host.querySelector('[data-type="av-more"]'), null, "related settings stays removed");
+        state.host.querySelector('[data-type="set-page-size"]').click();
         await confirm();
         check.equal(navigations.at(-1).id, "target-carrier");
         check.equal(navigations.at(-1).notebookID, "target-notebook");

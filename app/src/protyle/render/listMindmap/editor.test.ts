@@ -7,8 +7,17 @@ import test from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isArrowFunction, isBlock, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string) => {
+const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string,
+                            tableSource: string, cellCommitSource: string, tableSnapshots: boolean) => {
     const check = require("node:assert/strict");
+    const lute = Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetKramdownIAL(true);
+    const table = new Function("Constants", "highlightRender", "mathRender", tableSource +
+        "; return {cleanTableCellRichHTML, encodeTableCellRich, decodeTableCellRich, getTableCellRichBlockDOM, " +
+        "serializeTableCellRich, getTableCellInlineHTML, updateTableCellEditingValue, getTableBlockHTML};")(
+        {CUSTOM_SY_TABLE_RICH: "custom-sy-table-rich", ZWSP: "\u200b"}, () => {}, () => {}) as typeof import("../../util/tableCellRich") &
+        typeof import("../../util/tableCellRichValue");
     const {tabsRender, destroyTabsRender} = new Function(tabsSource + "; return {tabsRender, destroyTabsRender};")();
     const baseStyle = document.createElement("style");
     baseStyle.textContent = css;
@@ -203,6 +212,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             restoreFocusContext: () => false,
             finishListMindmaps: () => state.finishNested(),
             cleanListMindmapHTML: new Function(cleanupSource + "; return cleanListMindmapHTML;")(),
+            cleanTableCellRichHTML: table.cleanTableCellRichHTML,
         };
         const open = new Function(...Object.keys(dependencies), sourceCode + "; return openListMindmapEditor;")(
             ...Object.values(dependencies));
@@ -256,6 +266,120 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             },
         }}},
     } as unknown as typeof window.siyuan;
+
+    // 单元格编辑器的工具栏和搜索样式只属于运行时，节点快照始终读取单元格源内容。
+    for (const rich of tableSnapshots ? [false, true] : []) {
+        const initial = '<div data-type="NodeTable" data-node-id="20261104070743-07ezu7a"><div contenteditable="true">' +
+            "<table><thead><tr><th>Header</th></tr></thead><tbody><tr><td" +
+            (rich ? ` data-sy-table-cell-rich="${table.encodeTableCellRich("Initial")}"` : "") +
+            ">Initial</td></tr></tbody></table></div></div>";
+        let previous = initial;
+        for (let round = 0; round < 2; round++) {
+            const current = create(previous, undefined, "NodeMindmap");
+            const cell = current.wysiwyg.querySelector("td");
+            const value = `Saved ${round}`;
+            const attribute = rich ? "data-sy-table-cell-rich" : "data-sy-table-cell-inline";
+            cell.setAttribute(attribute, rich ? table.encodeTableCellRich(value) : value);
+            cell.innerHTML = '<div class="table__cell-editor"><div class="protyle-wysiwyg">' +
+                textHTML(value) + '</div><div class="protyle-toolbar">Toolbar labels</div>' +
+                "<style>.protyle-content::highlight(search-mark-test) {color: red;}</style></div>";
+            const mounted = cell.innerHTML;
+            const restored = create(current.wysiwyg.innerHTML, undefined, "NodeMindmap");
+            check.doesNotMatch(restored.wysiwyg.innerHTML, /table__cell-editor|Toolbar labels|::highlight/,
+                "opening a source snapshot restores saved cells before mounting the editor");
+            check.equal(await restored.editor.finish(), true);
+            check.equal(restored.state.saves.length, 0);
+            await restored.remove();
+            await until(() => current.state.saves.length > 0);
+            check.doesNotMatch(current.state.saves[0], /table__cell-editor|Toolbar labels|::highlight/,
+                "autosave must not copy a live cell editor into the mindmap source");
+            check.equal(cell.innerHTML, mounted, "snapshot cleanup leaves the live editor mounted");
+            check.equal(await current.editor.finish(), true);
+            check.equal(current.state.saves.length, 1, "finishing uses the same normalized snapshot");
+            previous = current.element.innerHTML;
+            const replay = document.createElement("div");
+            replay.innerHTML = lute.SpinBlockDOM(previous);
+            check.doesNotMatch(replay.textContent, /Toolbar labels|::highlight/);
+            if (rich) {
+                check.equal(table.decodeTableCellRich(replay.querySelector("td")
+                    .getAttribute("data-sy-table-cell-rich")).content, value);
+            } else {
+                check.equal(replay.querySelector("td").textContent, value);
+            }
+            const reopened = create(previous, undefined, "NodeMindmap");
+            check.equal(await reopened.editor.finish(), true);
+            check.equal(reopened.state.saves.length, 0, "reopening unchanged cells creates no save");
+            await reopened.remove();
+            await current.remove();
+        }
+    }
+    if (tableSnapshots) {
+        for (const rich of [false, true]) {
+            for (const composing of [false, true]) {
+                const current = create(lute.Md2BlockDOM("| Header |\n| --- |\n| Initial |"), undefined, "NodeMindmap");
+                const cell = current.wysiwyg.querySelector("td");
+                if (rich) {
+                    cell.setAttribute("data-sy-table-cell-rich", table.encodeTableCellRich("Initial\n\nContent"));
+                }
+                const initialBlockHTML = table.getTableCellRichBlockDOM(cell);
+                if (!rich) {
+                    cell.setAttribute("data-sy-table-cell-inline", cell.innerHTML);
+                }
+                cell.innerHTML = '<div class="table__cell-editor"><div class="protyle-wysiwyg">' +
+                    initialBlockHTML + '</div><div class="protyle-toolbar">Toolbar labels</div>' +
+                    "<style>.protyle-content::highlight(search-mark-test) {color: red;}</style></div>";
+                const host = cell.firstElementChild;
+                const wysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
+                const dependencies = {...table, cell, host, initialBlockHTML,
+                    table: cell.closest('[data-type="NodeTable"]'), owner: {disabled: false, wysiwyg: {element: current.wysiwyg}},
+                    fragment: {wysiwyg, getBlockHTML: () => wysiwyg.innerHTML},
+                    captureRichCellSelection: (): undefined => undefined, getUndoFocusContext: () => ({}),
+                    getTableVirtualCellIndex: () => 0, restoreTableVirtualizationDOM: noop, updateTransaction: noop,
+                    showMessage: () => check.fail("Cell serialization failed"),
+                };
+                const cellEditor = new Function(...Object.keys(dependencies),
+                    "let source, contentChanged = false, undoSelection, composing = false; " +
+                    "let savedBlockHTML = fragment.getBlockHTML(); " +
+                    "const getSource = () => source ??= serializeTableCellRich(initialBlockHTML).markdown; " +
+                    cellCommitSource + "; return {commit, setComposing: value => { composing = value; }};")(
+                    ...Object.values(dependencies));
+                const observer = new MutationObserver(() => cellEditor.commit());
+                observer.observe(wysiwyg, {childList: true, characterData: true, subtree: true});
+                host.addEventListener("compositionstart", event => {
+                    cellEditor.setComposing(true);
+                    event.stopPropagation();
+                });
+                host.addEventListener("compositionend", event => {
+                    queueMicrotask(() => { cellEditor.setComposing(false); cellEditor.commit(); });
+                    event.stopPropagation();
+                });
+                const editable = wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]');
+                if (composing) {
+                    editable.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+                }
+                editable.textContent = "Pending cell input";
+                const finishing = current.editor.finish();
+                if (composing) {
+                    check.equal(await finishing, false, "outer capture protects composition inside the nested editor");
+                    check.equal(current.state.destroyed, 0);
+                    editable.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+                    await until(() => current.state.finished === 1);
+                } else {
+                    check.equal(await finishing, true);
+                }
+                check.ok(current.state.saves.length > 0);
+                const saved = current.state.saves[current.state.saves.length - 1];
+                check.doesNotMatch(saved, /table__cell-editor|Toolbar labels|::highlight/);
+                const replay = document.createElement("div");
+                replay.innerHTML = lute.SpinBlockDOM(saved);
+                check.match(table.getTableCellRichBlockDOM(replay.querySelector("td")), /Pending cell input/,
+                    "the real cell commit reaches the parent snapshot before teardown");
+                observer.disconnect();
+                await current.remove();
+            }
+        }
+        return "List mindmap table snapshot cases passed";
+    }
 
     mobile = true;
     const documentHistoryEditor = create();
@@ -1123,10 +1247,7 @@ test("mindmap editor overlays retain direct ownership outside the transformed co
     }
 });
 
-test("list mindmap editor flushes pending input and preserves text across finish, composition and destroy", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
-}, async () => {
+const runBrowserCases = async (tableSnapshots: boolean) => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-editor-test-"));
     const script = path.join(temporary, "run.cjs");
     const source = transpileModule(["../../wysiwyg/codeBlockEnter.ts", "editor.ts"]
@@ -1146,6 +1267,29 @@ test("list mindmap editor flushes pending input and preserves text across finish
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText).join("\n");
+    const compile = (text: string) => transpileModule(text
+        .replace(/^import [\s\S]*?;\r?\n/gm, "")
+        .replace(/^export (?:type )?\{[\s\S]*?\}(?: from "[^"]+")?;\r?\n/gm, "")
+        .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const tableSource = ["../../util/longTextWrap.ts", "../../util/inlineElementBoundary.ts", "../../toolbar/fontFamilyCore.ts",
+        "../../../util/escape.ts", "../../util/tableVirtualizationDOM.ts", "../setLute.ts", "../../wysiwyg/codeBlockUtil.ts",
+        "../av/richTextValue.ts", "../av/richText.ts", "../../util/tableCellRichValue.ts", "../../util/tableCellRich.ts"]
+        .map(file => compile(readFileSync(path.join(__dirname, file), "utf8"))).join("\n") +
+        "\nconst getTextWithoutSemanticMarkers = (() => {" +
+        compile(readFileSync(path.join(__dirname, "../../util/inlineElementMarker.ts"), "utf8")) +
+        "return getTextWithoutSemanticMarkers;})();";
+    const cellEditorFile = createSourceFile("tableCellRichEditor.ts", readFileSync(path.join(__dirname,
+        "../tableCellRichEditor.ts"), "utf8"), ScriptTarget.ES2021, true);
+    let cellCommitSource: string;
+    const findCellCommit = (node: import("typescript").Node) => {
+        if (isVariableStatement(node) && node.declarationList.declarations.some(item => item.name.getText(cellEditorFile) === "commit")) {
+            cellCommitSource = compile(node.getText(cellEditorFile));
+        }
+        node.forEachChild(findCellCommit);
+    };
+    findCellCommit(cellEditorFile);
+    assert.ok(cellCommitSource);
+    const lutePath = path.resolve(__dirname, "../../../../stage/protyle/js/lute/lute.min.js");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -1156,8 +1300,9 @@ app.whenReady().then(async () => {
     });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)}, ${JSON.stringify(tableSource)}, ${JSON.stringify(cellCommitSource)}, ${tableSnapshots})`)});
         console.log(result);
         win.destroy();
         app.exit(0);
@@ -1173,8 +1318,19 @@ app.whenReady().then(async () => {
     try {
         const executable = require("electron") as unknown as string;
         const result = await promisify(execFile)(executable, [script], {env, timeout: 40000, windowsHide: true});
-        assert.match(result.stdout, /List mindmap editor lifecycle cases passed/);
+        assert.ok(result.stdout.includes(tableSnapshots ? "List mindmap table snapshot cases passed" :
+            "List mindmap editor lifecycle cases passed"));
     } finally {
         rmSync(temporary, {recursive: true, force: true});
     }
-});
+};
+
+test("list mindmap editor flushes pending input and preserves text across finish, composition and destroy", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 45000,
+}, () => runBrowserCases(false));
+
+test("list mindmap table snapshots preserve cell sources across autosave, finish, reopen and replay", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 45000,
+}, () => runBrowserCases(true));

@@ -58,7 +58,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         if (name.includes("constants")) return {Constants};
         if (name.includes("compatibility")) return {setStorageVal: (key, value) => saved = {
             key, levels: [...value.headingPageBreakLevels], titleImage: value.titleImage}};
-        if (name.includes("dialog")) return {Dialog: class {
+        if (name.includes("dialog")) return {MobileDialog: class {
             constructor(options) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;

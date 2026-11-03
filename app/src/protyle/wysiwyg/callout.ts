@@ -73,29 +73,44 @@ export const updateCustomCalloutType = (blockElements: HTMLElement[], protyle: I
             if (!type) {
                 return;
             }
-            if (turnBlockquoteIntoCallout(blockElements, protyle, {...CALLOUT_PRESETS[0], type})) {
-                dialog.destroy();
-                return;
-            }
-            const doOperations: IOperation[] = [];
-            const undoOperations: IOperation[] = [];
-            const ids = new Set<string>();
-            blockElements.forEach(item => {
-                const id = item.dataset.nodeId;
-                if (!id || ids.has(id) || item.dataset.type !== "NodeCallout" || item.dataset.subtype === type) {
-                    return;
+            void dialog.runPending(async () => {
+                if (protyle.disabled || blockElements.some(item => !protyle.wysiwyg.element.contains(item))) {
+                    dialog.invalidate();
+                    return false;
                 }
-                ids.add(id);
-                const oldHTML = item.outerHTML;
-                item.dataset.subtype = type;
-                item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-                doOperations.push({id, data: item.outerHTML, action: "update"});
-                undoOperations.push({id, data: oldHTML, action: "update"});
+                if (blockElements.length === 1 && blockElements[0].dataset.type === "NodeBlockquote") {
+                    await turnsOneInto({protyle, nodeElement: blockElements[0], id: blockElements[0].dataset.nodeId,
+                        type: "Blockquote2Callout", callout: {...CALLOUT_PRESETS[0], type}, awaitUpdate: true});
+                    return true;
+                }
+                const doOperations: IOperation[] = [];
+                const undoOperations: IOperation[] = [];
+                const updates: HTMLElement[] = [];
+                const ids = new Set<string>();
+                blockElements.forEach(item => {
+                    const id = item.dataset.nodeId;
+                    if (!id || ids.has(id) || item.dataset.type !== "NodeCallout" || item.dataset.subtype === type) {
+                        return;
+                    }
+                    ids.add(id);
+                    const oldHTML = item.outerHTML;
+                    const draft = item.cloneNode(true) as HTMLElement;
+                    draft.dataset.subtype = type;
+                    draft.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+                    updates.push(item);
+                    doOperations.push({id, data: draft.outerHTML, action: "update"});
+                    undoOperations.push({id, data: oldHTML, action: "update"});
+                });
+                if (doOperations.length > 0) {
+                    await transaction(protyle, doOperations, undoOperations, {awaitResponse: true});
+                    updates.forEach(source => {
+                        if (!source.isConnected) return;
+                        source.dataset.subtype = type;
+                        source.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+                    });
+                }
+                return true;
             });
-            if (doOperations.length > 0) {
-                transaction(protyle, doOperations, undoOperations);
-            }
-            dialog.destroy();
         },
     });
 };

@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import type {App} from "../index";
 import {getPluginDockEntryKey} from "./dockKey";
 import {updatePluginDockShowStates} from "../layout/dock/pluginDockState";
 
@@ -11,6 +12,35 @@ const source = readFileSync(resolve(process.cwd(), "src/plugin/loader.ts"), "utf
 const compiled = ts.transpileModule(source, {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
 }).outputText;
+
+for (const mobile of [true, false]) {
+    test(`enabling a plugin only saves a desktop layout on desktop (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const code = ts.transpileModule(parse(source, {MOBILE: mobile}, false, true), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS},
+        }).outputText;
+        const instance = {name: "qa-plugin"};
+        let loaded = false;
+        let saved = 0;
+        const dependencies = {
+            getHostCapabilities: () => ({plugins: true}), isSettingsWindow: () => false,
+            getAllEditor: (): unknown[] => [], saveLayout: () => saved++,
+            PluginLifecycleCoordinator: class {
+                start() {}
+                async requestLoad(name: string, load: () => Promise<typeof instance>) {
+                    assert.equal(name, instance.name);
+                    assert.equal(await load(), instance);
+                    loaded = true;
+                }
+                getInstance() { assert.equal(loaded, true); return instance; }
+            },
+        };
+        const exports: {loadPlugin?: typeof import("./loader").loadPlugin} = {};
+        runInNewContext(code, {exports, window: {}, require: () => dependencies});
+        assert.equal(await exports.loadPlugin({} as App, instance as IPluginData), instance);
+        assert.equal(saved, mobile ? 0 : 1);
+    });
+}
 
 const createConfig = (): IPluginDockTab => ({
     position: "LeftTop",

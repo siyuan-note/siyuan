@@ -202,7 +202,9 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     }
     manager.start();
     await manager.requestLoad(item.name, async () => item);
+    /// #if !MOBILE
     saveLayout();
+    /// #endif
     getAllEditor().forEach(editor => {
         editor.protyle.toolbar.update(editor.protyle);
     });

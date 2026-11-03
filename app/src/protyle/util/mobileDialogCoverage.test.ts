@@ -64,6 +64,12 @@ const coverage: Record<string, Record<string, number>> = {
     "protyle/render/av/openDatabaseRow.ts": {
         "MobileDialog": 1
     },
+    "protyle/render/av/newItemTemplate.ts": {
+        "MobileDialog": 1
+    },
+    "protyle/render/av/subItems.ts": {
+        "MobileDialog": 1
+    },
     "protyle/render/av/panels/edit.ts": {
         "MobileDialog": 1
     },
@@ -158,11 +164,16 @@ test("editor, AI and card business dialog entries opt into mobile adapters expli
     }
 });
 
-test("existing AV sheets register once and desktop-only paths remain unmodified", () => {
-    for (const file of ["locationEditor", "newItemTemplate", "subItems"]) {
+test("AV sheets use one adapter and desktop-only paths remain unmodified", () => {
+    for (const file of ["locationEditor"]) {
         const source = readFileSync("src/protyle/render/av/" + file + ".ts", "utf8");
         assert.match(source, /bindBottomSheetDialog\([\s\S]*?\{mode: "standard"(?:, expandable: true)?\}/, file);
         assert.doesNotMatch(source, /new MobileDialog/, file);
+    }
+    for (const file of ["newItemTemplate", "subItems"]) {
+        const source = readFileSync("src/protyle/render/av/" + file + ".ts", "utf8");
+        assert.equal((source.match(/new MobileDialog/g) || []).length, 1, file);
+        assert.doesNotMatch(source, /bindBottomSheetDialog/, file);
     }
     const exports = readFileSync("src/protyle/export/index.ts", "utf8");
     assert.match(exports, /const wordDialog = new Dialog/);

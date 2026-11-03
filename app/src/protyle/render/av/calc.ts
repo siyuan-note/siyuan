@@ -470,7 +470,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         if (oldOperator === "Template" && currentTemplate) {
             undoData.template = currentTemplate;
         }
-        transaction(protyle, [{
+        return transaction(protyle, [{
             action: "setAttrViewColCalc",
             avID: avId,
             id: colId,
@@ -482,7 +482,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             id: colId,
             data: undoData,
             blockID
-        }]);
+        }], {awaitResponse: true});
     };
     menu.addItem({
         iconHTML: "",
@@ -504,8 +504,10 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             const confirmBtn = dialog.element.querySelector(".b3-button--text") as HTMLButtonElement;
             const cancelBtn = dialog.element.querySelector(".b3-button--cancel") as HTMLButtonElement;
             const confirm = () => {
-                submitTemplate(textarea.value);
-                dialog.destroy();
+                void dialog.runPending(async () => {
+                    await submitTemplate(textarea.value);
+                    return true;
+                });
             };
             confirmBtn.addEventListener("click", confirm);
             cancelBtn.addEventListener("click", () => {

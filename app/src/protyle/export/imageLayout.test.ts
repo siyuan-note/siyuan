@@ -96,7 +96,7 @@ size-adjust: 85%;
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout,
         "./imageFonts": fonts,
-        "../../dialog": {Dialog: ExportDialog},
+        "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
         "../../dialog/message": {showMessage: (message: string) => messages.push(message), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File, excludeTitleImage: boolean, addTitle: boolean}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {

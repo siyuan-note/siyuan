@@ -144,10 +144,10 @@ export class Setting {
             dialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
-            if (this.confirmCallback) {
-                this.confirmCallback();
-            }
-            dialog.destroy();
+            void dialog.runPending(async () => {
+                await this.confirmCallback?.();
+                return true;
+            });
         });
         this.dialog = dialog;
         if (windowRoot) {

@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (code: string, confirmationCode: string, markerCode: string) => {
+const browserCases = async (code: string, confirmationCode: string, markerCode: string, mobileConfirmationCode: string) => {
     const check: typeof assert = require("node:assert/strict");
     Object.assign(window, {siyuan: {languages: {cancel: "Cancel", delete: "Delete", deleteOpConfirm: "Delete tags",
         tagRemovalDatabaseTip: "Remove entries and field values; source is kept and undo is available",
@@ -21,19 +21,26 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
             active = {element: this.element, destroy: () => this.destroy()};
         }
         destroy() { this.element.remove(); this.options.destroyCallback(); }
+        focusWhenReady(target: () => HTMLElement) { target().focus(); }
+        requestClose() { this.destroy(); return Promise.resolve(true); }
     }
     let mobile = false;
     const confirmation = {exports: {}};
     new Function("require", "module", "exports", confirmationCode)((dependency: string) => ({
         "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
     })[dependency], confirmation, confirmation.exports);
+    const mobileConfirmation = {exports: {}};
+    new Function("require", "module", "exports", mobileConfirmationCode)((dependency: string) => ({
+        "../util/functions": {isMobile: () => mobile}, "./mobileDialog": {MobileDialog: Dialog},
+        "./confirmDialog": confirmation.exports, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
+    })[dependency], mobileConfirmation, mobileConfirmation.exports);
     let response: {code: number, data: unknown[], msg: string} = {code: 0, data: [], msg: ""};
     const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
     const module = {exports: {} as typeof import("./tagRemoval")};
     const marker = {exports: {}};
     new Function("require", "module", "exports", markerCode)(() => ({}), marker, marker.exports);
     new Function("require", "module", "exports", code)((dependency: string) => ({
-        "../../dialog/confirmDialog": confirmation.exports,
+        "../../dialog/mobileConfirmDialog": mobileConfirmation.exports,
         "../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../util/fetch": {fetchSyncPost: async () => response},
         "./inlineElementMarker": marker.exports,
@@ -111,7 +118,8 @@ test("tag removal detects deletions and offers safe, escaped per-database choice
     const code = compile(path.join(__dirname, "tagRemoval.ts"));
     const confirmation = compile(path.join(__dirname, "../../dialog/confirmDialog.ts"));
     const marker = compile(path.join(__dirname, "inlineElementMarker.ts"));
-    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)})`;
+    const mobileConfirmation = compile(path.join(__dirname, "../../dialog/mobileConfirmDialog.ts"));
+    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)}, ${JSON.stringify(mobileConfirmation)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-tag-removal-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

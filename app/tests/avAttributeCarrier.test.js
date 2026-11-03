@@ -116,7 +116,7 @@ const runCases = async () => {
                 options.init(this);
             }
         },
-        Dialog: class {
+        MobileDialog: class {
             constructor(options) {
                 lifecycle = options;
                 this.element = document.createElement("div");

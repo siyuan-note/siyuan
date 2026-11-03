@@ -37,6 +37,7 @@ const setup = (unmatched = 1) => {
     };
     const performed: {do: IOperation[], undo: IOperation[]}[] = [];
     let failReview = false;
+    let failTransaction = false;
     const requests: {page: number, status?: string, ruleID?: string}[] = [];
     const confirmations: {confirm: () => Promise<void>, cancel: () => void}[] = [];
     let items = [
@@ -49,7 +50,14 @@ const setup = (unmatched = 1) => {
     runInNewContext(compiled, {
         exports: methods, window: {siyuan: {languages}},
         require: (name: string) => ({
-            "../../../dialog/mobileDialog": {MobileDialog: class {element = root;}},
+            "../../../dialog/mobileDialog": {MobileDialog: class {
+                element = root;
+                async runPending(task: () => Promise<boolean>, options: {close: boolean; disableButtons: boolean}) {
+                    assert.equal(options.close, false);
+                    assert.equal(options.disableButtons, false);
+                    try { return await task(); } catch { return false; }
+                }
+            }},
             "../../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => Promise<void>, cancel: () => void) => confirmations.push({confirm, cancel})},
             "../../../util/functions": {isMobile: () => true},
             "../../../util/escape": {escapeAttr: String, escapeHtml: (value: string) => value.replace(/</g, "&lt;")},
@@ -72,7 +80,9 @@ const setup = (unmatched = 1) => {
                     hasMore: selected.length > request.page * 100, matched: 1, unknown: items.some(item => item.status === "unknown") ? 1 : 0,
                     unmatched: items.filter(item => item.status === "unmatched").length}};
             }},
-            "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => {
+            "../../wysiwyg/transaction": {transaction: async (_protyle: IProtyle, operations: IOperation[], undo: IOperation[], options: {awaitResponse: boolean}) => {
+                assert.equal(options.awaitResponse, true);
+                if (failTransaction) throw new Error("transaction failed");
                 performed.push({do: operations, undo});
                 const operation = operations[0];
                 if (operation.action === "cleanupAttrViewBlocks") {
@@ -89,7 +99,8 @@ const setup = (unmatched = 1) => {
         await tick();
     };
     return {open: () => methods.openCollectionManager({} as IProtyle, "database", "carrier"), root, elements, listeners,
-        performed, confirmations, requests, click, languages, setFailReview: (value: boolean) => { failReview = value; }};
+        performed, confirmations, requests, click, languages, setFailReview: (value: boolean) => { failReview = value; },
+        setFailTransaction: (value: boolean) => { failTransaction = value; }};
 };
 
 test("collection manager filters before paging, remembers category pages and confirms only this page's cleanup", async () => {
@@ -172,4 +183,30 @@ test("collection cleanup retry after refresh failure never resubmits a committed
     state.setFailReview(false);
     await state.confirmations[0].confirm();
     assert.equal(state.performed.length, 1);
+});
+
+test("failed collection removal retains the pending confirmation and retries the uncommitted operation", async () => {
+    const state = setup();
+    await state.open();
+    await state.listeners.get("[data-cleanup]:click")();
+    state.setFailTransaction(true);
+    await assert.rejects(state.confirmations[0].confirm(), /transaction failed/);
+    assert.equal(state.performed.length, 0);
+    state.setFailTransaction(false);
+    await state.confirmations[0].confirm();
+    assert.equal(state.performed.length, 1);
+});
+
+test("failed collection restores its controls and permits retry without treating the operation as committed", async () => {
+    const state = setup();
+    await state.open();
+    await state.click({collectionView: "rules"});
+    state.setFailTransaction(true);
+    await state.listeners.get("[data-collect]:click")();
+    assert.equal(state.performed.length, 0);
+    assert.equal(state.elements.get("[data-collect]").disabled, false);
+    state.setFailTransaction(false);
+    await state.listeners.get("[data-collect]:click")();
+    assert.equal(state.performed.length, 1);
+    assert.equal(state.elements.get("[data-collect]").disabled, true);
 });

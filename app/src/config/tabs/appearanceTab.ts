@@ -1198,18 +1198,21 @@ const readStatusBarMsgFromDialog = (root: HTMLElement): Config.IAppearanceStatus
 
 const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     root.querySelector("#statusBarSetting")?.addEventListener("click", () => {
+        const save = async () => {
+            const statusBar = readStatusBarMsgFromDialog(dialog.element);
+            if (!objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
+                await appearanceConfigApi.patch("statusBar", statusBar);
+            }
+            return true;
+        };
         const dialog = new MobileDialog({
-            mobileSheet: {expandable: true},
+            mobileSheet: {expandable: true, beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔇 " + window.siyuan.languages.appearance18,
             content: genStatusBarMsgDialogHtml(),
             destroyCallback() {
-                const statusBar = readStatusBarMsgFromDialog(dialog.element);
-                if (objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
-                    return;
-                }
-                void appearanceConfigApi.patch("statusBar", statusBar);
+                if (!isMobile()) void save();
             }
         });
     });
@@ -1257,18 +1260,21 @@ const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotif
 
 const mountAppearanceSetNotifications = (root: HTMLElement) => {
     root.querySelector("#notificationsSetting")?.addEventListener("click", () => {
+        const save = async () => {
+            const notifications = readNotificationsFromDialog(dialog.element);
+            if (!objEquals(notifications, window.siyuan.config.appearance.notifications)) {
+                await appearanceConfigApi.patch("notifications", notifications);
+            }
+            return true;
+        };
         const dialog = new MobileDialog({
-            mobileSheet: {expandable: true},
+            mobileSheet: {expandable: true, beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔔 " + window.siyuan.languages.notifications,
             content: genNotificationsDialogHtml(),
             destroyCallback() {
-                const notifications = readNotificationsFromDialog(dialog.element);
-                if (objEquals(notifications, window.siyuan.config.appearance.notifications)) {
-                    return;
-                }
-                void appearanceConfigApi.patch("notifications", notifications);
+                if (!isMobile()) void save();
             }
         });
     });

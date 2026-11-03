@@ -123,8 +123,7 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         updateActions();
     };
     const perform = async (operations: IOperation[], undo: IOperation[], onCommitted?: () => void) => {
-        transaction(protyle, operations, undo);
-        await waitForPendingTransactions(protyle);
+        await transaction(protyle, operations, undo, {awaitResponse: true});
         onCommitted?.();
         if (root.isConnected) { await load(); }
     };
@@ -184,11 +183,19 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
     });
     collect.addEventListener("click", async () => {
         if (busy || !matches.some(item => !item.collected)) { return; }
-        busy = true;
-        updateActions();
-        const operation: IOperation = {action: "collectAttrViewBlocks", avID, blockID,
-            data: {ruleID: ruleSelect.value, blockIDs: matches.filter(item => !item.collected).map(item => item.id)}};
-        await perform([operation], [operation]);
+        await dialog.runPending(async () => {
+            busy = true;
+            updateActions();
+            try {
+                const operation: IOperation = {action: "collectAttrViewBlocks", avID, blockID,
+                    data: {ruleID: ruleSelect.value, blockIDs: matches.filter(item => !item.collected).map(item => item.id)}};
+                await perform([operation], [operation]);
+                return true;
+            } finally {
+                busy = false;
+                updateActions();
+            }
+        }, {close: false, disableButtons: false});
     });
     host.addEventListener("click", event => {
         const link = (event.target as Element).closest<HTMLAnchorElement>("a[href]");

@@ -17,6 +17,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const fragmentOwners = new WeakSet<IProtyle>();
     let mobile = true;
     const enteredCells: Element[] = [];
+    const runtimeErrors: string[] = [];
+    window.addEventListener("error", event => runtimeErrors.push(event.message));
     let gutterHidden = false;
     const gutterRenderTarget = new Function("hideElements", gutterSource + "\nreturn render;")(
         () => { gutterHidden = true; });
@@ -335,7 +337,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             check.equal(changes.length, 0);
             editable.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
             await tick();
-            check.equal(changes.length, 1);
+            check.equal(changes.length, 1, "pending cell input reaches the transaction before alignment");
             editable.textContent = "pending before alignment";
             api.focusByOffset(editable, 4, 4);
             editable.dispatchEvent(new KeyboardEvent("keydown", {key: "e", ctrlKey: true, bubbles: true, cancelable: true}));
@@ -1050,9 +1052,10 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             bubbled = 0;
             const enter = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
             field.dispatchEvent(enter);
+            check.deepEqual(runtimeErrors, [], id);
             check.equal(enter.defaultPrevented, true, id);
             check.equal(bubbled, 0, id);
-            check.equal(removed, 1);
+            check.equal(removed, 1, "table insert Enter removes its menu once");
             check.equal(changes.length, 1, "Enter inserts exactly once");
             check.equal(table.querySelectorAll("tr").length, id.startsWith("insertRow") ? count + 3 : 3);
             check.equal(table.querySelector("tr").cells.length, id.startsWith("insertColumn") ? count + 3 : 3);
@@ -1085,7 +1088,8 @@ test("table cell editors preserve input and alignment, and consume table menu En
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
-        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts", "../wysiwyg/tableVirtualization.ts",
+        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts",
+        "../util/tableSelection.ts", "../util/tableRowHeight.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);

@@ -2375,6 +2375,7 @@ export const turnsOneInto = async (options: {
     type: string,
     level?: number,
     callout?: Pick<ICalloutPreset, "type" | "title" | "icon">,
+    awaitUpdate?: boolean,
     undoElement?: {
         id: string,
         html: string,
@@ -2485,6 +2486,18 @@ export const turnsOneInto = async (options: {
         previousID: previousId,
         parentID: parentId,
     }) : undefined;
+    if (options.awaitUpdate) {
+        try {
+            await transaction(options.protyle, [{action: "update", id: options.id, data: newHTML}],
+                [{action: "update", id: options.id, data: oldHTML}], {awaitResponse: true});
+        } catch (error) {
+            options.nodeElement.querySelector("wbr")?.remove();
+            throw error;
+        }
+        if (!options.protyle.wysiwyg.element.contains(options.nodeElement)) {
+            return;
+        }
+    }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
@@ -2529,7 +2542,7 @@ export const turnsOneInto = async (options: {
         const doFoldOperations = foldOperations.map((operation) => ({...operation}));
         const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
-    } else {
+    } else if (!options.awaitUpdate) {
         updateTransaction(options.protyle, options.nodeElement, oldHTML);
     }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));

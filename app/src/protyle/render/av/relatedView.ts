@@ -11,6 +11,7 @@ import {closeAVCellEditor} from "./cellEditor";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
+import {globalClickHideMenu} from "../../../menus/menuClick";
 import {fetchSyncPost} from "../../../util/fetch";
 import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
@@ -257,6 +258,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
     private click(event: MouseEvent) {
         event.stopPropagation();
         const target = event.target as HTMLElement;
+        globalClickHideMenu(target);
         const action = target.closest<HTMLElement>("[data-related-action]")?.dataset.relatedAction;
         if (action === "fold") {
             this.folded = !this.folded;

@@ -57,7 +57,7 @@ const createPreview = async (mobile: boolean, detached = true) => {
     let refresh: () => void;
     let navigate: (next: IDatabaseRowOpenData) => Promise<boolean>;
     let mountedRow: string;
-    const requests: {element: Body, callback: (element: Body) => void}[] = [];
+    const requests: {element: Body, callback: (element: Body) => void, automaticRefresh: boolean}[] = [];
     class Custom {
         public data: Record<string, unknown>;
         public element = root;
@@ -135,9 +135,10 @@ const createPreview = async (mobile: boolean, detached = true) => {
                 }
                 if (name.endsWith("/blockAttr")) {
                     return {renderAVAttribute: (element: Body, id: string, _context: unknown,
-                                                callback: (element: Body) => void) => {
+                                                callback: (element: Body) => void, _row: unknown, _lifecycle: unknown,
+                                                automaticRefresh: boolean) => {
                         element.rowID = id;
-                        requests.push({element, callback});
+                        requests.push({element, callback, automaticRefresh});
                     }};
                 }
                 if (name.endsWith("/databaseRowRefresh")) {
@@ -192,7 +193,9 @@ const createPreview = async (mobile: boolean, detached = true) => {
 for (const mobile of [false, true]) {
     test(`explicit standalone bound panels stay open on refresh (${mobile ? "mobile" : "desktop"})`, async () => {
         const preview = await createPreview(mobile, false);
+        assert.equal(preview.requests[0].automaticRefresh, false);
         preview.refresh();
+        assert.equal(preview.requests[1].automaticRefresh, true);
         preview.requests[1].element.boundID = "bound-block";
         preview.complete(1);
         assert.deepEqual(preview.openedBlocks, []);

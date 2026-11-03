@@ -582,7 +582,8 @@ const afterRenderTable = (options: ITableOptions) => {
     finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
-export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {
+export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true,
+                               avData?: IAV, automaticRefresh = false) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         avElements = [element];
@@ -737,6 +738,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 ...common, ...paging, snapshot, carrierViewID,
             }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
                 ...common, ...paging,
+                automaticRefresh,
                 initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !window.siyuan.isPublish && !standalone && !relationHost,
                 targetItemID: locateParams?.targetItemID || "",
@@ -754,7 +756,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                     continue;
                 }
                 if (failAVRender(e, response)) {
-                    await avRender(e, protyle, cb, renderAll);
+                    await avRender(e, protyle, cb, renderAll, undefined, automaticRefresh);
                 }
                 continue;
             }
@@ -764,7 +766,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 continue;
             }
             if (restoreSubItemsView(e, protyle, data, nested, resetData.query.trim())) {
-                await avRender(e, protyle, cb, renderAll);
+                await avRender(e, protyle, cb, renderAll, undefined, automaticRefresh);
                 continue;
             }
         } else {
@@ -959,7 +961,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 locateRequests.delete(item);
             }
             item.removeAttribute("data-render");
-            void avRender(item, protyle);
+            void avRender(item, protyle, undefined, true, undefined, true);
         });
         return;
     }
@@ -984,7 +986,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
             setAVVisibleViewIDs(item, operation.viewIDs);
             item.removeAttribute("data-render");
-            avRender(item, protyle);
+            avRender(item, protyle, undefined, true, undefined, true);
         });
         return;
     }
@@ -994,7 +996,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 return;
             }
             item.removeAttribute("data-render");
-            avRender(item, protyle);
+            avRender(item, protyle, undefined, true, undefined, true);
         });
         return;
     }
@@ -1178,7 +1180,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         if (attrElement) {
             // 更新属性面板
             attrElement.removeAttribute("data-rendering");
-            renderAVAttribute(attrElement.parentElement, attrElement.dataset.attributeId, protyle);
+            renderAVAttribute(attrElement.parentElement, attrElement.dataset.attributeId, protyle,
+                undefined, undefined, undefined, true);
         }
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
@@ -1305,7 +1308,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 removeAVPasteSkeleton(item);
                 item.removeAttribute("data-loading");
-            });
+            }, true, undefined, true);
         });
     }, ["insertAttrViewBlock", "addAttrViewCol", "removeAttrViewCol", "duplicateAttrViewKey"].includes(operation.action) ? 2 : 100);
 };

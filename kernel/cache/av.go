@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 )
 
 var avCache, _ = ristretto.NewCache(&ristretto.Config{
@@ -212,6 +213,7 @@ func ClearAVCache() {
 	defer avSearchDataCacheLock.Unlock()
 	avDataVersion++
 	avCacheGeneration.Add(1)
+	templatehttp.ClearTemplateResults()
 	clearAVOrderedIDs("")
 	avCacheKeys = map[string]map[string]uint64{}
 	avCache.Clear()

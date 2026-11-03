@@ -105,12 +105,14 @@ const cases = async (compiled, mobile) => {
                 {avID: "target", itemID: "entry", valueID: "value", databaseBlockID: carrier});
             for (const endpoint of ["getAttributeViewKeys", "getAttributeViewBacklinks"]) {
                 check.deepEqual(requests.findLast(request => request.url.endsWith(endpoint)).payload,
-                    {id: "entry", avID: "target", itemID: "entry", valueID: "value", blockID: carrier});
+                    {id: "entry", avID: "target", itemID: "entry", valueID: "value", blockID: carrier,
+                        ...(endpoint === "getAttributeViewKeys" ? {automaticRefresh: false} : {})});
             }
         }
     }
     modules.blockAttr.renderAVAttribute(attributes, "document", {id: "metadata", options: {}});
-    check.deepEqual(requests.findLast(request => request.url.endsWith("getAttributeViewKeys")).payload, {id: "document"});
+    check.deepEqual(requests.findLast(request => request.url.endsWith("getAttributeViewKeys")).payload,
+        {id: "document", automaticRefresh: false});
     api.disposeRelatedAVViews(attributes); attributes.remove();
     const mount = () => {
         const source = document.createElement("div");

@@ -2246,6 +2246,7 @@ Ordinary HTTP template parsing or evaluation errors are returned in the affected
     * `viewID`: An explicit view to render. An invalid value returns an error. When omitted, the view is resolved from `blockID`, then falls back to the first available view
     * `page`: Page number, 1-based. Defaults to `1`
     * `pageSize`: Items per page. `-1` or omitted means use the view's default (`50`)
+    * Optional `automaticRefresh` defaults to `false`. With an interactive template execution, `true` reuses successful in-memory row results only when their source, template and referenced inputs are unchanged. Manual refresh should omit it or use `false`. Locking a notebook or revoking template permission clears these results; this option never expands read permissions
     * `query`: Optional full-text filter for the primary-key values
     * `groupPaging`: Optional paging configuration for grouped (kanban) views
     * `targetItemID`: Optional database item ID to locate. When specified, the response includes target-location metadata

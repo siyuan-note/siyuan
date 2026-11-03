@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261030043635"
+		"updated": "20261103231923"
 	},
 	"Children": [
 		{
@@ -2004,12 +2004,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261030003500-w4kfdvd",
-				"updated": "20261030031540"
+				"updated": "20261103231923"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Identical requests are reused only within the current execution, data scope, and credentials. Database rows share limits; there is no cache between executions or scheduled refresh. Each execution allows up to 32 target requests and 1024 function calls, 1 MiB per response, 8 MiB of response bodies in total, and 8 MiB of template output in total. Total network time is limited to 30 seconds, execution to 2 minutes, and confirmation to 1 minute. Time limits are checked during network calls or output; avoid long-running loops that do neither."
+					"Data": "Identical requests are reused within the current execution, data scope, and credentials. Database requests run in batches of 32 with a 100 ms pause between batches, allowing up to 1024 target requests per execution, including redirects. Other templates allow up to 32 target requests. All executions share limits of 1024 function calls, 1 MiB per response, 8 MiB of response bodies in total, and 8 MiB of template output in total. Total network time is limited to 30 seconds, execution to 2 minutes, and confirmation to 1 minute. Time limits are checked during network calls or output; avoid long-running loops that do neither."
+				}
+			]
+		},
+		{
+			"ID": "20261103231923-go0qtln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103231923-go0qtln",
+				"updated": "20261103231923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Denying a database template field denies subsequent requests from that field version for all rows in the current execution, without saving a permanent denial. During automatic updates, successful row results are reused when the template and its referenced inputs are unchanged. Editing unrelated fields, adding rows, or binding the primary key does not recalculate existing rows unless their template inputs change. Manual refresh or reopening evaluates templates again. Dynamic access to an entire row uses the whole row as its dependency; templates reading other blocks or SQL results recalculate conservatively. Results are held only in a bounded memory cache and are cleared when a notebook locks or permission is revoked; evicted results are recalculated. There is no scheduled refresh."
 				}
 			]
 		},

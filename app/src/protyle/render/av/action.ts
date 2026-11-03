@@ -1493,7 +1493,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     }], {
         callback: () => {
             if (protyle.databaseAttributePanel?.hasDatabase(avId)) {
-                protyle.databaseAttributePanel.refresh();
+                protyle.databaseAttributePanel.refresh(true);
             }
         }
     });

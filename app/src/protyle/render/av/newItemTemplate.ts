@@ -627,7 +627,7 @@ export const openNewItemTemplateDialog = (options: {
                 data: {templates: undoData.newItemTemplates || [], defaultTemplateID: undoData.defaultTemplateID || ""},
             }], {awaitResponse: true});
             options.blockElement.removeAttribute("data-render");
-            avRender(options.blockElement, options.protyle);
+            avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
             return true;
         });
     });
@@ -670,7 +670,7 @@ export const createAttributeViewItem = (options: {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
-        avRender(options.blockElement, options.protyle);
+        avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
         if (response.code === 0 && response.data && "itemID" in response.data &&
             (response.data.openAfterCreate ?? isCalendar) && options.blockElement.isConnected && !options.protyle.disabled) {
             void openDatabaseRowByData(options.protyle, {
@@ -719,7 +719,7 @@ export const createAttributeViewItemDocs = (options: {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
-        avRender(options.blockElement, options.protyle);
+        avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
     }).finally(() => {
         delete options.blockElement.dataset.createDocAndBind;
     });
@@ -748,7 +748,7 @@ const saveNewItemTemplateConfig = (options: {
     }], {
         callback: () => {
             options.blockElement.removeAttribute("data-render");
-            avRender(options.blockElement, options.protyle);
+            avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
         },
     });
 };

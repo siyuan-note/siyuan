@@ -133,7 +133,7 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
 
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
                                   row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string },
-                                  lifecycle?: {owner: Element, isCurrent: () => boolean}) => {
+                                  lifecycle?: {owner: Element, isCurrent: () => boolean}, automaticRefresh = false) => {
     const renderID = (++attributeViewRenderID).toString();
     element.dataset.avAttributeRenderId = renderID;
     const owner = lifecycle?.owner || element;
@@ -141,7 +141,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         undefined : guardTemplateHTTPRequest(() => owner.isConnected &&
             element.dataset.avAttributeRenderId === renderID && (lifecycle?.isCurrent() ?? true), owner);
     fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID,
-        blockID: row.databaseBlockID} : {id}, (response) => {
+        blockID: row.databaseBlockID, automaticRefresh} : {id, automaticRefresh}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
         }
@@ -646,7 +646,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             });
         }
         observeAVAttributeLayout(element);
-        mountRelatedAVViews(element, tables, protyle, row ? row.databaseBlockID : id);
+        mountRelatedAVViews(element, tables, protyle, row ? row.databaseBlockID : id, automaticRefresh);
         renderAttributeViewBacklinks(element, id, renderID, row, rendered => {
             cb?.(rendered);
             syncRelatedAVViews(element);

@@ -1,6 +1,8 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {ScriptTarget} from "typescript";
+import {readFileSync} from "node:fs";
+import {runInNewContext} from "node:vm";
+import {createSourceFile, forEachChild, isCaseClause, Node, ScriptTarget, transpileModule} from "typescript";
 import {compileModule, evaluateModule} from "../../../testSupport/loadModule";
 import {DOMFixture} from "./testDOM";
 
@@ -19,7 +21,11 @@ test("switching one database carrier refreshes only its copies and preserves oth
         Constants: {CUSTOM_SY_AV_VIEW: "data-view", ATTRIBUTE_V_SCROLL: "data-v-scroll"},
         clearSubItemsViewportAnchor() {}, locateRequests: new WeakMap(),
     }), window: {setTimeout: () => assert.fail("Carrier-only view changes must not schedule a database-wide refresh")}});
-    exports.avRender = (block: unknown) => { rendered.push(block); };
+    exports.avRender = (block: unknown, _protyle: unknown, _callback: unknown, _all: boolean,
+                        _data: unknown, automaticRefresh: boolean) => {
+        assert.equal(automaticRefresh, true);
+        rendered.push(block);
+    };
     const protyle = {wysiwyg: {element: root}};
     exports.refreshAV(protyle, {action: "setAttrViewBlockView", avID: "database", blockID: "carrier", id: "limited"});
     assert.deepEqual(rendered, [blocks[0], blocks[2]]);
@@ -38,4 +44,32 @@ test("switching one database carrier refreshes only its copies and preserves oth
     assert.deepEqual(rendered, [blocks[0], blocks[2]]);
     assert.equal(blocks[0].querySelector(".av__body").hasAttribute("data-page-size"), false);
     assert.equal(blocks[1].querySelector(".av__body").dataset.pageSize, "100");
+});
+
+test("kernel database notifications preserve automatic refresh for tables, attribute panels and row previews", () => {
+    const source = createSourceFile("index.ts", readFileSync("src/protyle/index.ts", "utf8"), ScriptTarget.ES2022, true);
+    let code: string;
+    const visit = (node: Node) => {
+        if (isCaseClause(node) && node.expression.getText(source) === '"refreshAttributeView"') {
+            code = node.getText(source);
+        }
+        forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(code);
+    const modes: unknown[] = [];
+    const block = {removeAttribute: (name: string) => assert.equal(name, "data-render")};
+    const protyle = {id: "editor", wysiwyg: {element: {querySelectorAll: () => [block]}}, databaseAttributePanel: {
+        hasDatabase: (id: string) => id === "database", refresh: (automatic: boolean) => modes.push(automatic),
+    }};
+    const refresh = runInNewContext(transpileModule(`(function () { switch (data.cmd) { ${code} } })`, {
+        compilerOptions: {target: ScriptTarget.ES2022},
+    }).outputText, {
+        data: {cmd: "refreshAttributeView", data: {id: "database"}},
+        avRender: (_block: unknown, _editor: unknown, _callback: unknown, _all: boolean,
+                    _data: unknown, automatic: boolean) => modes.push(automatic),
+        queueDatabaseRowRefresh: (id: string, avID: string) => modes.push(id, avID),
+    });
+    refresh.call({protyle});
+    assert.deepEqual(modes, [true, true, "editor", "database"]);
 });

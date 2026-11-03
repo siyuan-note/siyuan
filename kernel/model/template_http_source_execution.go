@@ -120,6 +120,7 @@ func (execution *TemplateHTTPExecution) allowSource(scope string, source *Templa
 }
 
 func cancelTemplateHTTPSourceExecutions(ids []string) {
+	templatehttp.ClearTemplateResults()
 	selected := make(map[string]bool, len(ids))
 	for _, id := range ids {
 		selected[id] = true

@@ -30074,6 +30074,16 @@
     "GetAttributeViewKeysRequestInput": {
       "type": "object",
       "properties": {
+        "automaticRefresh": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "avID": {
           "anyOf": [
             {
@@ -39832,6 +39842,16 @@
     "RenderAttributeViewRequestInput": {
       "type": "object",
       "properties": {
+        "automaticRefresh": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "blockID": {
           "anyOf": [
             {

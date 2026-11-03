@@ -1372,7 +1372,7 @@ export type GetAttributeViewKeysByAvIDRequestInput = { "avID": string; };
 
 export type GetAttributeViewKeysByIDRequestInput = { "avID": string; "keyIDs": Array<string>; };
 
-export type GetAttributeViewKeysRequestInput = { "avID"?: string | null; "blockID"?: string | null; "id"?: string | null; "itemID"?: string | null; "relationContext"?: AVRelationContextInput | null; "valueID"?: string | null; };
+export type GetAttributeViewKeysRequestInput = { "automaticRefresh"?: boolean | null; "avID"?: string | null; "blockID"?: string | null; "id"?: string | null; "itemID"?: string | null; "relationContext"?: AVRelationContextInput | null; "valueID"?: string | null; };
 
 export type GetAttributeViewPasteRowsRequestInput = { "avID": string; "blockID": string; "count": number; "groupID"?: string | null; "itemIDs"?: Array<string> | null; "query"?: string | null; "startItemID": string; "viewID"?: string | null; };
 
@@ -1906,7 +1906,7 @@ export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
-export type RenderAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "relationContext"?: AVRelationContextInput | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "temporaryFilters"?: Array<AVViewFilterInput | null> | null; "temporarySort"?: AVViewSortInput | null; "viewID"?: string | null; };
+export type RenderAttributeViewRequestInput = { "automaticRefresh"?: boolean | null; "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "relationContext"?: AVRelationContextInput | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "temporaryFilters"?: Array<AVViewFilterInput | null> | null; "temporarySort"?: AVViewSortInput | null; "viewID"?: string | null; };
 
 export type RenderHistoryAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "carrierViewID"?: string | null; "created": string; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "viewID"?: string | null; };
 
@@ -4204,6 +4204,7 @@ export interface APIPOSTRoutes {
      * 获取条目或绑定块的属性字段；支持与 renderTemplate 相同的 HTTP 执行请求头，确认只发送到发起窗口。
      * 无执行请求头或发布读取时不启用联网；条目成员范围、载体权限和加密笔记本访问边界保持有效。
      * 当前来源版本的模板许可可复用；取消、窗口断开或笔记本锁定后丢弃结果。
+     * automaticRefresh 默认 false；true 时复用输入未变的字段结果，锁定或撤销许可会清除缓存。
      */
     "/api/av/getAttributeViewKeys": {
         request: GetAttributeViewKeysRequestInput;
@@ -4365,6 +4366,7 @@ export interface APIPOSTRoutes {
      * 关联明细仅支持表格，不保存临时排序或 temporaryFilters；后者与目标视图已有筛选相交。
      * 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
      * HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
+     * automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
      */
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;

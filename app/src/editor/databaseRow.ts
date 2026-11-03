@@ -80,7 +80,7 @@ export const newDatabaseRowModel = (options: {
             bodyElement.style.margin = `8px ${padding.right}px 8px ${padding.left}px`;
         }
     };
-    const render = (custom: Custom) => {
+    const render = (custom: Custom, automaticRefresh = false) => {
         const previousBodyElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__body");
         if (!previousBodyElement || !contextProtyle) {
             return;
@@ -158,7 +158,8 @@ export const newDatabaseRowModel = (options: {
             });
         },
             {avID: data.avID, itemID: data.itemID, valueID: data.valueID, databaseBlockID: data.blockID},
-            {owner: custom.element, isCurrent: () => !destroyed && currentRenderVersion === renderVersion});
+            {owner: custom.element, isCurrent: () => !destroyed && currentRenderVersion === renderVersion},
+            automaticRefresh && !switching);
     };
     const model = new Custom({
         app: options.app,
@@ -205,7 +206,7 @@ export const newDatabaseRowModel = (options: {
                     contextProtyle = editor.protyle;
                     unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
                         getAVID: () => (customModel.data as typeof options.data).avID,
-                        refresh: () => render(customModel),
+                        refresh: () => render(customModel, true),
                     });
                     custom.element.append(contextProtyle.highlight.styleElement, contextProtyle.hint.element);
                     render(custom);

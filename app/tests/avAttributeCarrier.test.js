@@ -104,7 +104,7 @@ const runCases = async () => {
     assert.equal(element.firstElementChild.dataset.nodeId, "document-block");
     assert.equal(element.firstElementChild.dataset.attributeId, "document-block");
     assert.deepEqual(requests.filter(request => request.url.endsWith("getAttributeViewKeys")).at(-1).data,
-        {id: "document-block"});
+        {id: "document-block", automaticRefresh: false});
 
     // 使用实际详情刷新函数，延迟接口完成并交错返回，检查内容连续性和过期响应。
     let lifecycle;

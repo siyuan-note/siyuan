@@ -54,7 +54,9 @@ const runCases = async (sources, mobile) => {
             return options.isValid() ? response : undefined;
         }},
         "./calendar/state": {getCalendarCreationDate: () => 123},
-        "./render": {avRender() {}},
+        "./render": {avRender(_block, _protyle, _callback, _all, _data, automaticRefresh) {
+            assert.equal(automaticRefresh, true, "creation and template settings must preserve unrelated row results");
+        }},
         "../../wysiwyg/transaction": {transaction: (_protyle, operations, undo, options) => {
             assert.equal(options.awaitResponse, true);
             saved = {operations, undo};

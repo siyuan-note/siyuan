@@ -31,6 +31,7 @@ test("attribute panel requests bind the panel revision and release its lifecycle
     assert.equal(owner, panel);
     assert.equal(current(), true);
     assert.equal(requests[0][0], "/api/av/getAttributeViewKeys");
+    assert.equal((requests[0][1] as {automaticRefresh: boolean}).automaticRefresh, false);
     assert.equal(requests[0][5], signal);
     panel.dataset.avAttributeRenderId = "superseded";
     assert.equal(current(), false);
@@ -41,7 +42,8 @@ test("attribute panel requests bind the panel revision and release its lifecycle
     const liveOwner = {isConnected: true};
     let revisionCurrent = true;
     exports.renderAVAttribute(panel, "document", protyle, undefined, undefined,
-        {owner: liveOwner, isCurrent: () => revisionCurrent});
+        {owner: liveOwner, isCurrent: () => revisionCurrent}, true);
+    assert.equal((requests[1][1] as {automaticRefresh: boolean}).automaticRefresh, true);
     assert.equal(owner, liveOwner);
     assert.equal(current(), true);
     revisionCurrent = false;

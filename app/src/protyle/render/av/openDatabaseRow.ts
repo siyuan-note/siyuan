@@ -114,7 +114,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
     });
     mountNavigation();
     rowElement.querySelector(".protyle-db-row__title span").textContent = title;
-    const render = (contextProtyle: IProtyle) => {
+    const render = (contextProtyle: IProtyle, automaticRefresh = false) => {
         const previousBodyElement = rowElement.querySelector<HTMLElement>(".protyle-db-row__body");
         if (!previousBodyElement) {
             return;
@@ -173,7 +173,8 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             itemID: renderData.itemID,
             valueID: renderData.valueID,
             databaseBlockID: renderData.databaseBlockID,
-        }, {owner: rowElement, isCurrent: () => !destroyed && currentRenderVersion === renderVersion});
+        }, {owner: rowElement, isCurrent: () => !destroyed && currentRenderVersion === renderVersion},
+        automaticRefresh && !switching);
     };
     context.ghostProtyle = new Protyle(protyle.app, document.createElement("div"), {
         blockId: data.databaseBlockID,
@@ -187,7 +188,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             rowElement.dataset.protyleId = contextProtyle.id;
             unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
                 getAVID: () => data.avID,
-                refresh: () => render(contextProtyle),
+                refresh: () => render(contextProtyle, true),
             });
             rowElement.append(contextProtyle.highlight.styleElement, contextProtyle.hint.element);
             render(contextProtyle);

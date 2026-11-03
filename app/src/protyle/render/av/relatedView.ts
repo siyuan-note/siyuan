@@ -76,6 +76,7 @@ class RelatedAVView {
     private editor: IProtyle;
     private folded = false;
     private dirty = true;
+    private automaticRefresh = false;
     private disposed = false;
     private renderVersion = 0;
     private timeout?: ReturnType<typeof setTimeout>;
@@ -89,7 +90,8 @@ class RelatedAVView {
     private cancelColumnResize?: () => void;
 
     constructor(readonly protyle: IProtyle, public sourceElement: HTMLElement, public definition: TRelatedAVDefinition,
-                sourceBlockID: string, state?: IRelatedAVState) {
+                sourceBlockID: string, state?: IRelatedAVState, automaticRefresh = false) {
+        this.automaticRefresh = automaticRefresh;
         this.identity = getRelatedAVIdentity(definition.sourceAvID, definition.sourceItemID, definition.keyID);
         this.element = document.createElement("section");
         this.element.className = "av-related-view";
@@ -167,7 +169,7 @@ class RelatedAVView {
             removalObserver.observe(document.body, {childList: true, subtree: true});
         }
         this.unregisterRefresh = registerAVHostRefresh(protyle.id, avID => {
-            if (definition.sourceAvID === avID || definition.targetAVID === avID) this.invalidate();
+            if (definition.sourceAvID === avID || definition.targetAVID === avID) this.invalidate(true);
         });
     }
 
@@ -196,7 +198,7 @@ class RelatedAVView {
             this.definition.targetAVID === definition.targetAVID && this.definition.viewID === definition.viewID;
     }
 
-    reattach(sourceElement: HTMLElement, definition: TRelatedAVDefinition) {
+    reattach(sourceElement: HTMLElement, definition: TRelatedAVDefinition, automaticRefresh = false) {
         this.cancelColumnResize?.();
         this.sourceElement = sourceElement;
         this.definition = definition;
@@ -205,7 +207,7 @@ class RelatedAVView {
         toggle.querySelector(".block__logo").textContent = definition.name;
         sourceElement.append(this.element);
         // 属性刷新时保留已绘制的表格，旧请求失效后由当前载体获取最新关联成员。
-        this.invalidate();
+        this.invalidate(automaticRefresh);
     }
 
     sync(forceHidden = false) {
@@ -230,7 +232,8 @@ class RelatedAVView {
         if (visible && this.dirty) void this.render();
     }
 
-    invalidate() {
+    invalidate(automaticRefresh = false) {
+        this.automaticRefresh = automaticRefresh;
         this.renderVersion++;
         this.dirty = true;
         beginAVRender(this.hostElement);
@@ -265,7 +268,9 @@ class RelatedAVView {
             this.hostElement.firstElementChild.append(input);
         }
         try {
-            await avRender(this.hostElement, this.editor);
+            const automaticRefresh = this.automaticRefresh;
+            this.automaticRefresh = false;
+            await avRender(this.hostElement, this.editor, undefined, true, undefined, automaticRefresh);
         } catch (error) {
             if (version === this.renderVersion && this.host.active && !this.disposed && error?.name !== "AbortError") this.failed();
         }
@@ -715,7 +720,8 @@ export const preserveRelatedAVViews = (source: HTMLElement, destination = source
     panels.set(destination, views);
 };
 
-export const mountRelatedAVViews = (element: HTMLElement, tables: IRelatedAVTable[], protyle: IProtyle, sourceBlockID: string) => {
+export const mountRelatedAVViews = (element: HTMLElement, tables: IRelatedAVTable[], protyle: IProtyle,
+                                    sourceBlockID: string, automaticRefresh = false) => {
     const previous = pendingViews.get(element) || [];
     pendingViews.delete(element);
     const remaining = new Set(previous);
@@ -726,10 +732,10 @@ export const mountRelatedAVViews = (element: HTMLElement, tables: IRelatedAVTabl
         const retained = previous.find(view => remaining.has(view) && view.canReuse(protyle, definition, sourceBlockID));
         if (retained) {
             remaining.delete(retained);
-            retained.reattach(source, definition);
+            retained.reattach(source, definition, automaticRefresh);
             return [retained];
         }
-        const view = new RelatedAVView(protyle, source, definition, sourceBlockID);
+        const view = new RelatedAVView(protyle, source, definition, sourceBlockID, undefined, automaticRefresh);
         source.append(view.element);
         return [view];
     });

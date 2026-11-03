@@ -639,8 +639,16 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 	}
 	if execution != nil {
 		options.TemplateHTTP = execution.Runtime
+		execution.Runtime.SetAutomaticRefresh(request.AutomaticRefresh)
 	}
-	return renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, options)
+	response := renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, options)
+	if response.Code() == 0 && execution != nil {
+		execution.Runtime.CommitTemplateResults()
+		if err := execution.Runtime.Err(); err != nil {
+			return apicontract.Failure[apicontract.AVRenderResult](-1, err.Error())
+		}
+	}
+	return response
 })
 
 var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeViewCalendarUndated, func(c *gin.Context, request apicontract.AVCalendarUndatedRequest) apicontract.Response[apicontract.AVCalendarUndatedData] {
@@ -732,6 +740,7 @@ var getAttributeViewKeys = contractHandler(apicontract.GetAttributeViewKeys, fun
 	var runtime *templatehttp.Execution
 	if execution != nil {
 		runtime = execution.Runtime
+		runtime.SetAutomaticRefresh(request.AutomaticRefresh)
 	}
 	var values []*model.BlockAttributeViewKeys
 	if request.RelationContext != nil || request.BlockID != "" {
@@ -764,6 +773,12 @@ var getAttributeViewKeys = contractHandler(apicontract.GetAttributeViewKeys, fun
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		values = model.FilterBlockAttributeViewKeysByPublishAccess(c, model.GetPublishAccess(), values)
+	}
+	if runtime != nil {
+		runtime.CommitTemplateResults()
+		if err := runtime.Err(); err != nil {
+			return apicontract.Failure[[]*apicontract.AVBlockAttributeViewKeys](-1, err.Error())
+		}
 	}
 	return apicontract.Success(avContractSlice(values, toContractAVBlockAttributeViewKeys))
 })

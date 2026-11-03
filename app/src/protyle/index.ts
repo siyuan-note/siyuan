@@ -268,10 +268,10 @@ export class Protyle {
                         case "refreshAttributeView":
                             Array.from(this.protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
                                 item.removeAttribute("data-render");
-                                avRender(item, this.protyle);
+                                avRender(item, this.protyle, undefined, true, undefined, true);
                             });
                             if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
-                                this.protyle.databaseAttributePanel.refresh();
+                                this.protyle.databaseAttributePanel.refresh(true);
                             }
                             queueDatabaseRowRefresh(this.protyle.id, data.data.id);
                             break;

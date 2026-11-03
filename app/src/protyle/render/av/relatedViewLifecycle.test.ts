@@ -33,10 +33,13 @@ const fixture = () => {
     const pendingErrors: Array<(error: Error) => void> = [];
     let timerID = 0;
     let renderCount = 0;
+    const automaticRefreshes: boolean[] = [];
     let defer = false;
     const editor = {id: "editor", disabled: false, options: {}, block: {}} as IProtyle;
     const imports: Record<string, unknown> = {
-        "./render": {avRender: async (element: HTMLElement) => {
+        "./render": {avRender: async (element: HTMLElement, _editor: unknown, _callback: unknown,
+                                      _all: boolean, _data: unknown, automaticRefresh: boolean) => {
+            automaticRefreshes.push(automaticRefresh);
             renderCount++;
             const version = (versions.get(element) || 0) + 1;
             versions.set(element, version);
@@ -84,22 +87,39 @@ const fixture = () => {
         if (connected) document.body.append(element);
         return element as unknown as HTMLElement;
     };
-    const mount = (element: HTMLElement, item = "entry", target = "target", view = "table", carrier = "carrier") => {
+    const mount = (element: HTMLElement, item = "entry", target = "target", view = "table", carrier = "carrier",
+                   automaticRefresh = false) => {
         api.mountRelatedAVViews(element, [{avID: "source", keyValues: [
             {key: {id: "primary", type: "block"}, values: [{blockID: item} as IAVCellValue]},
             {key: {id: "relation", name: "Related", type: "relation", relation: {
                 avID: target, detailView: {enabled: true, spec: 1, viewID: view},
             } as IAVColumnRelation}},
-        ]}], editor, carrier);
+        ]}], editor, carrier, automaticRefresh);
         return api.testPanels.get(element)[0];
     };
     const flush = () => {
         const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(callback => callback());
     };
     return {api, document, editor, panel, mount, hosts, listeners, pending, pendingErrors, flush,
-        renderCount: () => renderCount, defer: () => { defer = true; },
+        automaticRefreshes, renderCount: () => renderCount, defer: () => { defer = true; },
         observe: () => [...observers].forEach(callback => callback())};
 };
+
+test("transaction refresh and retained attribute hosts preserve automatic template evaluation mode", () => {
+    const f = fixture();
+    const source = f.panel(true);
+    f.mount(source);
+    f.api.syncRelatedAVViews(source);
+    assert.equal(f.automaticRefreshes.at(-1), false);
+    f.listeners.forEach(listener => listener("source"));
+    f.flush();
+    assert.equal(f.automaticRefreshes.at(-1), true);
+    f.api.preserveRelatedAVViews(source);
+    source.innerHTML = '<div data-av-id="source"></div>';
+    f.mount(source, "entry", "target", "table", "carrier", true);
+    f.api.syncRelatedAVViews(source);
+    assert.equal(f.automaticRefreshes.at(-1), true);
+});
 
 test("related refresh preserves the mounted table while new membership is pending", () => {
     const f = fixture();

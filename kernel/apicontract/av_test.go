@@ -11,6 +11,34 @@ import (
 	"testing"
 )
 
+func TestAVAutomaticTemplateRefreshContract(t *testing.T) {
+	for _, test := range []struct {
+		body      string
+		automatic bool
+	}{
+		{`{"id":"database"}`, false}, {`{"id":"database","automaticRefresh":null}`, false},
+		{`{"id":"database","automaticRefresh":false}`, false}, {`{"id":"database","automaticRefresh":true}`, true},
+	} {
+		render, err := RenderAttributeView.Decode(strings.NewReader(test.body))
+		if err != nil || render.AutomaticRefresh != test.automatic {
+			t.Fatal(render, err)
+		}
+		keys, err := GetAttributeViewKeys.Decode(strings.NewReader(test.body))
+		if err != nil || keys.AutomaticRefresh != test.automatic {
+			t.Fatal(keys, err)
+		}
+	}
+	for _, value := range []string{`"true"`, `1`, `{}`} {
+		body := `{"id":"database","automaticRefresh":` + value + `}`
+		if _, err := RenderAttributeView.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid render refresh accepted", body)
+		}
+		if _, err := GetAttributeViewKeys.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid keys refresh accepted", body)
+		}
+	}
+}
+
 func TestAVNewItemTemplateOpenAfterCreateContract(t *testing.T) {
 	endpoint := Endpoint[AVNewItemTemplate, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
 	for _, test := range []struct {

@@ -117,7 +117,7 @@ export class AVAttributePanel {
         this.updateEmptyState();
     }
 
-    public render(force = false) {
+    public render(force = false, automaticRefresh = false) {
         if (!window.siyuan.config.editor.databaseAttrShow) {
             this.hideByDisplayConfig();
             return;
@@ -173,7 +173,7 @@ export class AVAttributePanel {
             rendered(prepared.element);
         } else {
             renderAVAttribute(bodyElement, targetID, this.protyle, rendered, undefined,
-                {owner: this.protyle.element, isCurrent: () => token === this.renderToken});
+                {owner: this.protyle.element, isCurrent: () => token === this.renderToken}, automaticRefresh);
         }
     }
 
@@ -189,12 +189,12 @@ export class AVAttributePanel {
         this.render();
     }
 
-    public refresh() {
+    public refresh(automaticRefresh = false) {
         if (typeof this.refreshTimeout !== "undefined") {
             clearTimeout(this.refreshTimeout);
             this.refreshTimeout = undefined;
         }
-        this.render(true);
+        this.render(true, automaticRefresh);
     }
 
     public updateDisplayConfig() {
@@ -249,15 +249,15 @@ export class AVAttributePanel {
         }
         if (operation.action === "replaceAttrViewBlock" &&
             (this.hasDatabase(avID) || this.hasItem(operation.previousID) || operation.nextID === this.targetID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
         if (refreshActions.has(operation.action) && this.hasDatabase(avID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
         if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID)) {
@@ -271,7 +271,7 @@ export class AVAttributePanel {
         }
         if (operation.action === "removeAttrViewBlock" &&
             (this.hasDatabase(operation.avID) || operation.srcIDs?.some(item => this.hasItem(item)))) {
-            this.refresh();
+            this.refresh(true);
         }
     }
 
@@ -281,7 +281,7 @@ export class AVAttributePanel {
         }
         this.refreshTimeout = setTimeout(() => {
             this.refreshTimeout = undefined;
-            this.refresh();
+            this.refresh(true);
         }, 100);
     }
 

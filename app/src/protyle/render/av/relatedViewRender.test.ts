@@ -75,6 +75,17 @@ test("related history and snapshot hosts fail closed without requesting an unsco
     }
 });
 
+test("automatic database refresh requests reuse inputs while manual refresh requests fresh evaluation", async () => {
+    for (const mobile of [false, true]) {
+        const state = fixture();
+        state.setMobile(mobile);
+        await state.api.avRender(state.block, state.editor, undefined, true, undefined, true);
+        assert.equal(state.requests[0].payload.automaticRefresh, true);
+        await state.api.avRender(state.block, state.editor);
+        assert.equal(state.requests[1].payload.automaticRefresh, false);
+    }
+});
+
 test("inactive related tables never load and stale responses never replace the active panel", async () => {
     const state = fixture(); state.host.active = false;
     await state.api.avRender(state.block, state.editor);

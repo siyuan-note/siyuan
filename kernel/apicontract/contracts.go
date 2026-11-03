@@ -1665,6 +1665,7 @@ var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArc
 // 关联明细仅支持表格，不保存临时排序或 temporaryFilters；后者与目标视图已有筛选相交。
 // 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
 // HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
+// automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1676,6 +1677,7 @@ var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]
 // 获取条目或绑定块的属性字段；支持与 renderTemplate 相同的 HTTP 执行请求头，确认只发送到发起窗口。
 // 无执行请求头或发布读取时不启用联网；条目成员范围、载体权限和加密笔记本访问边界保持有效。
 // 当前来源版本的模板许可可复用；取消、窗口断开或笔记本锁定后丢弃结果。
+// automaticRefresh 默认 false；true 时复用输入未变的字段结果，锁定或撤销许可会清除缓存。
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewBacklinks = define[GetAttributeViewBacklinksRequest, *AVAttributeViewBacklinks]("getAttributeViewBacklinks", "/api/av/getAttributeViewBacklinks", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")

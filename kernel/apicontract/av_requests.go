@@ -371,6 +371,8 @@ type RenderHistoryAttributeViewRequest struct {
 }
 
 type RenderAttributeViewRequest struct {
+	// 自动重渲复用来源、行及模板输入未变的内存结果；默认 false，显式刷新重新求值。
+	AutomaticRefresh bool `json:"automaticRefresh" api:"optional,nullable"`
 	// 从来源关联字段推导目标及条目集合；无效上下文报错，不能回退为整个数据库。
 	// blockID 为真实来源数据库载体或来源条目绑定块；游离上下文可省略。
 	RelationContext *AVRelationContext `json:"relationContext" api:"optional,nullable"`
@@ -438,10 +440,12 @@ type GetCurrentAttrViewImagesRequest struct {
 }
 
 type GetAttributeViewKeysRequest struct {
-	ID      string `json:"id" api:"optional,nullable,ignoretype"`
-	AvID    string `json:"avID" api:"optional,nullable,ignoretype"`
-	ItemID  string `json:"itemID" api:"optional,nullable,ignoretype"`
-	ValueID string `json:"valueID" api:"optional,nullable,ignoretype"`
+	// 语义同 RenderAttributeViewRequest.AutomaticRefresh，不改变字段或条目的读取权限。
+	AutomaticRefresh bool   `json:"automaticRefresh" api:"optional,nullable"`
+	ID               string `json:"id" api:"optional,nullable,ignoretype"`
+	AvID             string `json:"avID" api:"optional,nullable,ignoretype"`
+	ItemID           string `json:"itemID" api:"optional,nullable,ignoretype"`
+	ValueID          string `json:"valueID" api:"optional,nullable,ignoretype"`
 	// BlockID 配合 RelationContext 指向来源载体；单独提供时必须是 AvID 的真实数据库载体。
 	BlockID string `json:"blockID" api:"optional,nullable"`
 	// RelationContext 限定读取当前关联成员，目标和笔记本只能由已验证的来源关系推导。

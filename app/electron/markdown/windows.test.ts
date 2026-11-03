@@ -102,6 +102,37 @@ test("Markdown scheme registration grants only required local browser capabiliti
     assert.deepEqual(registered[0].privileges, {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true});
 });
 
+test("file watching reports consecutive external saves including a return to the opening content", async t => {
+    const {directory, manager, call} = await fixture(t);
+    const file = path.join(directory, "watched.md");
+    await fs.writeFile(file, "# Original\n");
+    const window = await manager.open(file);
+    const initial = await call(window, "bootstrap");
+    let target = initial.target;
+    let revision = 0;
+    for (const content of ["# Original1\n", "# Original\n", "# Third version\n"]) {
+        const changed = new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => {window.webContents.off("send", receive); reject(new Error("External save was not reported"));}, 2500);
+            const receive = (_channel, message) => {
+                if (message.type !== "external-change") return;
+                clearTimeout(timer);
+                window.webContents.off("send", receive);
+                resolve();
+            };
+            window.webContents.on("send", receive);
+        });
+        await fs.writeFile(file, content);
+        await changed;
+        const result = await call(window, "host:read", {sessionId: initial.sessionId, operationId: initial.sessionId + ":read:" + ++revision,
+            targetGeneration: 0, target});
+        assert.equal(result.kind, "read");
+        assert.equal(result.content, content);
+        assert.notEqual(result.target.baseline, target.baseline);
+        target = result.target;
+    }
+    assert.equal(await fs.readFile(file, "utf8"), "# Third version\n");
+});
+
 test("initial window and served page use the effective theme before rendering", async t => {
     for (const [theme, systemDark, expectedDark] of [["dark", false, true], ["light", true, false], ["system", true, true], ["system", false, false]] as const) {
         await t.test(`${theme}, system dark ${systemDark}`, async t => {

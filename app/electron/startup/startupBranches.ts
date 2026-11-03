@@ -8,14 +8,16 @@ import {
     invalidRemoteKernelAddressMessage, remoteKernelConnectFailedMessage, unsafeRemoteKernelArgumentsMessage,
 } from "../shared/staticMessages";
 import {resolveAppLanguage} from "../shared/language";
-import {clearAppCrashInfo} from "../shared/crashHistory";
+import {clearAppCrashInfo, readAppCrashInfo} from "../shared/crashHistory";
 import {appIconPath, LOCAL_PAGE_WEB_PREFERENCES} from "../shared/desktopDefaults";
 import {getCurrentBootWindow} from "../window/windowRegistry";
 import * as bootWindows from "../window/bootWindows";
 import {initRemoteKernel} from "../remote/remoteBoot";
 import {drainMarkdownLaunches, isMarkdownStartup} from "./markdownEditors";
+import {emptyLastWorkspaceProbe, readLastWorkspace} from "./lastWorkspace";
+import {showWindow} from "../window/windowVisibility";
 import type {StaticMessage} from "../shared/staticMessages";
-import type {BrowserWindow} from "electron";
+import type {BrowserWindow, IpcMainEvent} from "electron";
 import type {InitKernel, InitMainWindow, KernelTarget, PreparedBoot} from "../shared/types";
 import {Channel} from "../shared/channels";
 
@@ -42,28 +44,30 @@ type StartupContext = StartupBranch & {
     launchArguments: string[];
     preparedBoot: PreparedBoot | undefined;
     startupStartedAt: number;
+    workspaceProbe?: ReturnType<typeof readLastWorkspace>;
 };
 
 // 按启动条件选定分支，载荷随分支一起给出。
 const resolveStartupBranch = (
-    appCrashInfo: {workspaceDir?: string; crashInfo: string} | undefined): StartupBranch => {
+    appCrashInfo: {workspaceDir?: string; crashInfo: string} | undefined,
+    {startup = state.startup, markdown = isMarkdownStartup()} = {}): StartupBranch => {
     // 独立 Markdown 入口与工作空间无关，即使同时带了无效的远端参数也只开文件窗口。
-    if (isMarkdownStartup()) {
+    if (markdown) {
         return {branch: "markdown-editor"};
     }
-    if (state.startup.remoteKernelArgError) {
-        return {branch: "remote-arg-invalid", remoteKernelArgError: state.startup.remoteKernelArgError};
+    if (startup.remoteKernelArgError) {
+        return {branch: "remote-arg-invalid", remoteKernelArgError: startup.remoteKernelArgError};
     }
-    if (state.startup.remoteKernelTarget) {
-        return {branch: "remote-target", remoteKernelTarget: state.startup.remoteKernelTarget};
+    if (startup.remoteKernelTarget) {
+        return {branch: "remote-target", remoteKernelTarget: startup.remoteKernelTarget};
     }
-    if (state.startup.firstOpen) {
+    if (startup.firstOpen) {
         return {branch: "first-open"};
     }
     if (appCrashInfo) {
         return {branch: "crash-recovery", appCrashInfo};
     }
-    if (state.startup.lastWorkspaceMissing) {
+    if (startup.lastWorkspaceMissing) {
         return {branch: "workspace-missing"};
     }
     return {branch: "local-kernel"};
@@ -79,6 +83,7 @@ const isDirectory = (filePath: string): boolean => {
 
 // 工作空间选择页（崩溃恢复与目录丢失）共用同一窗口比例。
 const WORKSPACE_CHOICE_RATIO = {widthRatio: 0.55, heightRatio: 0.65};
+let workspaceChoiceWindow: BrowserWindow | undefined;
 
 // 创建并加载一个启动页窗口；渲染进程回传选择后的绑定由 bindWorkspaceChoice 处理。
 const showStartupWindow = ({html, query = {}, widthRatio, heightRatio}: {
@@ -108,6 +113,7 @@ const showStartupWindow = ({html, query = {}, widthRatio, heightRatio}: {
         },
     });
     window.show();
+    workspaceChoiceWindow = window;
     return window;
 };
 
@@ -121,7 +127,8 @@ type WorkspaceChoiceBinding = {
 
 // 启动窗口回传用户选择后启动内核：成功才进入主窗口，无论成败都关闭该启动窗口。
 const bindWorkspaceChoice = ({context, channel, window, onStarted}: WorkspaceChoiceBinding): void => {
-    electron.ipcMain.on(channel, (event, data: {workspace: string; lang: string; safeMode?: boolean}) => {
+    const choose = (event: IpcMainEvent, data: {workspace: string; lang: string; safeMode?: boolean}) => {
+        if (event.sender !== window.webContents) return;
         void context.initKernel({workspace: data.workspace, lang: data.lang, safeMode: data.safeMode})
             .then((startedKernelPort) => {
                 if (startedKernelPort) {
@@ -130,7 +137,9 @@ const bindWorkspaceChoice = ({context, channel, window, onStarted}: WorkspaceCho
                 }
             });
         window.destroy();
-    });
+    };
+    electron.ipcMain.on(channel, choose);
+    window.once("closed", () => electron.ipcMain.removeListener(channel, choose));
 };
 
 // 分支在编译期穷尽，新增分支时由 assertNever 报错。
@@ -206,10 +215,11 @@ const openFirstWorkspaceWindow = (context: StartupContext): void => {
 const openCrashRecoveryWindow = (context: StartupContext,
     appCrashInfo: {workspaceDir?: string; crashInfo: string}): void => {
     // 崩溃信息里的目录优先；没有记录或目录已不存在时退回最近可用的工作空间。
-    let crashWorkspace = appCrashInfo.workspaceDir || state.startup.lastWorkspacePath;
+    const probe = context.workspaceProbe ?? state.startup;
+    let crashWorkspace = appCrashInfo.workspaceDir || probe.lastWorkspacePath;
     if (!appCrashInfo.workspaceDir && !isDirectory(crashWorkspace)) {
-        const availableWorkspaces = state.startup.availableWorkspaces;
-        crashWorkspace = availableWorkspaces[availableWorkspaces.length - 1] || state.startup.lastWorkspacePath;
+        const availableWorkspaces = probe.availableWorkspaces;
+        crashWorkspace = availableWorkspaces[availableWorkspaces.length - 1] || probe.lastWorkspacePath;
     }
     const crashWorkspaceMissing = !isDirectory(crashWorkspace);
     const safeModeWindow = showStartupWindow({
@@ -230,11 +240,12 @@ const openCrashRecoveryWindow = (context: StartupContext,
 
 // 上次的工作空间已不存在：列出可用工作空间让用户重选。
 const openMissingWorkspaceWindow = (context: StartupContext): void => {
+    const probe = context.workspaceProbe ?? state.startup;
     const missingWorkspaceWindow = showStartupWindow({
         html: "workspace.html",
         query: {
-            missing: state.startup.missingWorkspacePath,
-            workspaces: state.startup.availableWorkspaces.join("\n"),
+            missing: probe.missingWorkspacePath,
+            workspaces: probe.availableWorkspaces.join("\n"),
         },
         ...WORKSPACE_CHOICE_RATIO,
     });
@@ -243,7 +254,8 @@ const openMissingWorkspaceWindow = (context: StartupContext): void => {
 
 // 本地内核：命令行的工作空间、端口、语言与安全模式直接交给启动编排，启动页可能已提前创建。
 const startLocalKernel = (context: StartupContext): void => {
-    const workspace = getArgFrom(context.launchArguments, "--workspace");
+    const workspace = getArgFrom(context.launchArguments, "--workspace") || (context.workspaceProbe ?
+        process.env.SIYUAN_WORKSPACE_PATH || context.workspaceProbe.lastWorkspacePath : undefined);
     if (workspace) {
         writeLog("got arg [--workspace=" + workspace + "]");
     }
@@ -269,4 +281,19 @@ const startLocalKernel = (context: StartupContext): void => {
         });
 };
 
-export {runStartupBranch, resolveStartupBranch};
+const resumeWorkspaceStartup = (launchArguments: string[], handlers: Pick<StartupContext, "initKernel" | "initMainWindow">): void => {
+    if (workspaceChoiceWindow && !workspaceChoiceWindow.isDestroyed()) {
+        showWindow(workspaceChoiceWindow);
+        return;
+    }
+    // 仅打开文件时不读取工作空间与崩溃记录，普通启动请求到达后再执行完整的工作空间启动检查。
+    const workspaceProbe = getArgFrom(launchArguments, "--workspace") ? emptyLastWorkspaceProbe() :
+        readLastWorkspace(paths.confDir, writeLog);
+    const startup = {...state.startup, ...workspaceProbe,
+        firstOpen: !fs.existsSync(path.join(paths.confDir, "workspace.json")),
+        remoteKernelTarget: undefined, remoteKernelArgError: undefined};
+    const branch = resolveStartupBranch(readAppCrashInfo(), {startup, markdown: false});
+    runStartupBranch({...branch, ...handlers, launchArguments, workspaceProbe, preparedBoot: undefined, startupStartedAt: Date.now()});
+};
+
+export {runStartupBranch, resolveStartupBranch, resumeWorkspaceStartup};

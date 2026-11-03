@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261103203708"
+		"updated": "20261103211019"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261102140506"
+				"updated": "20261103211019"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-925aeca",
-				"updated": "20261101145217"
+				"updated": "20261103211019"
 			},
 			"Children": [
 				{
@@ -52,7 +52,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to open an independent window. It works without opening a workspace or starting a local kernel."
+					"Data": " to open an independent window. It works without opening a workspace or starting a local kernel. While this window is open, you can also start SiYuan normally to open the workspace interface."
 				}
 			]
 		},

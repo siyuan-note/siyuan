@@ -83,6 +83,21 @@ const runElectron = async options => {
         assert.ok(security.textColor.match(/\d+/g).slice(0, 3).every(value => Number(value) > 128),
             `dark sandbox heading remains readable: ${security.textColor}`);
         assert.equal(await fs.readFile(options.document, "utf8"), "# Original document\n");
+        for (const heading of ["Original document1", "Original document", "Third external version"]) {
+            const content = `# ${heading}\n`;
+            await fs.writeFile(options.document, content);
+            await window.webContents.executeJavaScript(`new Promise((resolve, reject) => {
+                const deadline = Date.now() + 5000;
+                const check = () => {
+                    if (document.querySelector('#markdownEditor h1')?.textContent === ${JSON.stringify("# " + heading)}) return resolve();
+                    if (Date.now() > deadline) return reject(new Error('Consecutive external save did not reload: ' + JSON.stringify({
+                        expected: ${JSON.stringify(heading)}, actual: document.querySelector('#markdownEditor h1')?.textContent,
+                        status: document.getElementById('markdownStatus').innerText})));
+                    setTimeout(check, 25);
+                }; check();
+            })`);
+            assert.equal(await fs.readFile(options.document, "utf8"), content);
+        }
         const initialSession = await window.webContents.executeJavaScript("window.siyuanMarkdown.bootstrap().then(value => value.sessionId)");
         const containerId = window.id;
         const contentsId = window.webContents.id;

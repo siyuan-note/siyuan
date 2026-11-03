@@ -1,5 +1,9 @@
 // 第二实例（`startup/secondInstance.ts`）：事件可能早于 app 就绪到达，那时建不了窗口，因此必须入队后就绪重放。
 import {test} from "node:test";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import {EventEmitter} from "node:events";
 import * as runtime from "../shared/runtime";
 import {mockElectron, resetElectronStub} from "../fixtures/electronStub";
 import type {Event as ElectronEvent} from "electron";
@@ -66,4 +70,103 @@ test("a file request is routed to the editor before remote mode rejects the inst
     assert.deepEqual(launches, [{argv: ["siyuan", "relative.md"], cwd: "D:\\sender"}]);
     // 路由给编辑器后不再按工作空间参数处理。
     assert.deepEqual(started, []);
+});
+
+test("a normal launch from a Markdown-only process restores workspace startup checks", async t => {
+    for (const scenario of ["existing", "explicit", "environment", "first", "missing", "crash"] as const) {
+        await t.test(scenario, async (t: any) => {
+            runtime.resetRuntimeState();
+            resetElectronStub();
+            const savedPaths = {...runtime.paths};
+            const directory = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-markdown-main-launch-"));
+            const workspace = path.join(directory, "workspace");
+            fs.mkdirSync(workspace);
+            const missing = path.join(directory, "missing");
+            if (scenario !== "first") fs.writeFileSync(path.join(directory, "workspace.json"),
+                JSON.stringify([workspace, ...(scenario === "missing" ? [missing] : [])]));
+            const environmentWorkspace = process.env.SIYUAN_WORKSPACE_PATH;
+            delete process.env.SIYUAN_WORKSPACE_PATH;
+            if (scenario === "environment") process.env.SIYUAN_WORKSPACE_PATH = path.join(directory, "environment");
+            Object.assign(runtime.paths, {confDir: directory, assetsDir: directory,
+                appCrashMarkerPath: path.join(directory, "app.crash.json"), appCrashLogPath: path.join(directory, "app.crash.log")});
+            if (scenario === "crash") fs.writeFileSync(runtime.paths.appCrashMarkerPath,
+                JSON.stringify({reason: "crashed", workspaceDir: workspace}));
+            runtime.state.markdown.startup = true;
+            runtime.setStartupSnapshot({...runtime.state.startup, firstOpen: scenario === "first"});
+            const snapshot = runtime.state.startup;
+            const windows = [];
+            const listeners = new Map();
+            class BrowserWindow extends EventEmitter {
+                destroyed = false;
+                webContents = {id: 99};
+                file: string;
+                query: Record<string, string>;
+                shown = 0;
+                constructor() {super(); windows.push(this);}
+                loadFile(file, options) {this.file = file; this.query = options.query;}
+                show() {this.shown++;}
+                focus() {}
+                isDestroyed() {return this.destroyed;}
+                isMinimized() {return false;}
+                destroy() {this.destroyed = true; this.emit("closed");}
+            }
+            mockElectron(t, {BrowserWindow: BrowserWindow as unknown as typeof import("electron").BrowserWindow,
+                ipcMain: {on: (channel, callback) => listeners.set(channel, callback),
+                    removeListener: (channel, callback) => {if (listeners.get(channel) === callback) listeners.delete(channel);}} as unknown as import("electron").IpcMain,
+                screen: {getPrimaryDisplay: () => ({size: {width: 1000}, workAreaSize: {height: 800}})}});
+            t.after(() => {
+                windows.forEach(window => window.destroy());
+                if (environmentWorkspace === undefined) delete process.env.SIYUAN_WORKSPACE_PATH;
+                else process.env.SIYUAN_WORKSPACE_PATH = environmentWorkspace;
+                Object.assign(runtime.paths, savedPaths);
+                runtime.resetRuntimeState();
+                resetElectronStub();
+                assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()));
+                fs.rmSync(directory, {recursive: true, force: true});
+            });
+            const requests: Parameters<InitKernel>[0][] = [];
+            const opened = [];
+            const {queueSecondInstance, startSecondInstance} = secondInstance();
+            startSecondInstance({initKernel: async request => {requests.push(request); return 6806;},
+                initMainWindow: port => {opened.push(port);}});
+            const argv = ["siyuan", ...(scenario === "explicit" ? ["--workspace=" + workspace] : [])];
+            queueSecondInstance({} as ElectronEvent, argv);
+            await Promise.resolve();
+            assert.equal(runtime.state.startup, snapshot, "deferred workspace checks preserve the initial startup snapshot");
+            assert.equal(runtime.state.markdown.startup, true);
+            if (scenario === "existing" || scenario === "explicit" || scenario === "environment") {
+                assert.equal(requests.length, 1);
+                assert.equal(requests[0].workspace, scenario === "environment" ? process.env.SIYUAN_WORKSPACE_PATH : workspace);
+                assert.deepEqual(opened, [6806]);
+                assert.equal(windows.length, 0);
+            } else {
+                assert.equal(requests.length, 0);
+                assert.equal(windows.length, 1);
+                assert.equal(path.basename(windows[0].file), scenario === "first" ? "init.html" : "workspace.html");
+                if (scenario === "missing") assert.equal(windows[0].query.missing, missing);
+                if (scenario === "crash") {
+                    assert.equal(windows[0].query.crash, "1");
+                    assert.equal(windows[0].query.workspace, workspace);
+                    assert.ok(fs.existsSync(runtime.paths.appCrashMarkerPath));
+                }
+                queueSecondInstance({} as ElectronEvent, argv);
+                assert.equal(windows.length, 1, "repeated normal launches focus the existing workspace selection");
+                windows[0].destroy();
+                assert.equal(listeners.size, 0, "closing the selection releases its request handler");
+                queueSecondInstance({} as ElectronEvent, argv);
+                assert.equal(windows.length, 2, "a canceled workspace selection can be reopened");
+                const choose = listeners.values().next().value;
+                choose({sender: {}}, {workspace, lang: "en"});
+                assert.equal(requests.length, 0, "a different window cannot complete this workspace selection");
+                choose({sender: windows[1].webContents}, {workspace, lang: "en", safeMode: scenario === "crash"});
+                await Promise.resolve();
+                assert.equal(requests.length, 1);
+                assert.equal(requests[0].workspace, workspace);
+                assert.equal(requests[0].safeMode, scenario === "crash");
+                assert.deepEqual(opened, [6806]);
+                assert.equal(listeners.size, 0);
+                if (scenario === "crash") assert.equal(fs.existsSync(runtime.paths.appCrashMarkerPath), false);
+            }
+        });
+    }
 });

@@ -215,13 +215,10 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             record.watcher = watch(path.dirname(entry.descriptor.selection), (_event, filename) => {
                 if (filename && String(filename).toLowerCase() !== path.basename(entry.descriptor.selection).toLowerCase()) return;
                 clearTimeout(record.watchTimer);
-                record.watchTimer = setTimeout(async () => {
+                record.watchTimer = setTimeout(() => {
                     if (!records.has(record.containerId) || record.current !== currentDocument) return;
-                    try {
-                        const current = await host.disk.snapshot(entry.descriptor);
-                        if (current.baseline === entry.descriptor.baseline) return;
-                    } catch { /* 删除、权限或身份变化也需要通知前端停止写回。 */ }
-                    if (record.current === currentDocument) notify(record, "external-change");
+                    // 会话按已接受的版本判定重载；文件回到初始内容时同样需要通知。
+                    notify(record, "external-change");
                 }, 150);
             });
             record.watcher.on("error", () => { if (record.current === currentDocument) notify(record, "external-change"); });

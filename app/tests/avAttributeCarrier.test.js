@@ -22,6 +22,10 @@ const runCases = async () => {
         },
         renderAVRichTextElements: () => {},
         preserveAVBindingRange: () => () => {},
+        preserveRelatedAVViews: () => {},
+        mountRelatedAVViews: () => {},
+        syncRelatedAVViews: () => {},
+        disposeRelatedAVViews: () => {},
         getColIconByType: () => "iconDatabase",
         genAVAttributeRowHTML: ({value}) => `<div data-row-id="${value.blockID}" data-col-id="${value.keyID}"></div>`,
         getPageSize: () => ({unGroupPageSize: 20, groupPageSize: {}}),
@@ -227,8 +231,8 @@ const runElectron = async () => {
             assert.equal(statements.length, names.length);
             return statements.map(statement => "export " + statement.getText(source).replace(/^export /, "")).join("\n");
         };
-        // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
-        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
+        // 执行实际渲染、菜单请求和事务组装函数，隔离网络、富文本显示、关联视图生命周期与编辑器外壳。
+        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("host"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
             extract("attributePanelLayout"),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),

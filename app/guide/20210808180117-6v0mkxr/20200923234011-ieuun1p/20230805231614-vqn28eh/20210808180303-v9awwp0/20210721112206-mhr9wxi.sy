@@ -1370,7 +1370,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " prefers encrypted data objects from reachable LAN devices using the same repository key and cloud sync target. Cloud storage remains authoritative, with fallback to the cloud if LAN transfers are unavailable; this is not a fully offline peer-to-peer replacement."
+					"Data": " prefers encrypted data objects from reachable LAN devices using the same repository key and cloud sync target. For S3, Endpoint, Bucket, and Region must match on both devices. Even if auto and an explicit Region can access the same cloud repository, LAN discovery will not match them; set Region to the same value on both devices. Cloud storage remains authoritative, with fallback to the cloud if LAN transfers are unavailable; this is not a fully offline peer-to-peer replacement."
 				}
 			]
 		},

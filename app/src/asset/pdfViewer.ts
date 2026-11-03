@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {patchAppearancePreference} from "../config/tabs/appearancePreferences";
 import {ensureBrowserCompatibility} from "../protyle/util/browserCompat";
 
-const PDF_JS_VERSION = "6.4.299-siyuan.1";
+const PDF_JS_VERSION = "6.4.299-siyuan.3";
 
 interface IPdfViewerModule {
     webViewerLoad: (file: string, element: HTMLElement, page?: number, annotationId?: string, previewOnly?: boolean) => any;

@@ -3,6 +3,19 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+function checkPDFSyntax() {
+    const ts = require("typescript");
+    for (const file of ["pdf.min.mjs", "pdf.worker.min.mjs"]) {
+        const source = ts.createSourceFile(file, fs.readFileSync(path.join(__dirname, "../stage/protyle/js/pdf", file), "utf8"),
+            ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+        const visit = node => {
+            assert.equal(ts.isClassStaticBlockDeclaration(node), false, `${file} contains a class static block unsupported by WebView 92`);
+            ts.forEachChild(node, visit);
+        };
+        visit(source);
+    }
+}
+
 async function runElectron() {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -78,7 +91,7 @@ async function runElectron() {
             worker.terminate(); URL.revokeObjectURL(workerUrl);
             check(workerResult.url === "/worker" && workerResult.value === 7, "worker compatibility failed");
             const pdfModule = await import(location.origin + "/js/pdf/pdf.min.mjs");
-            const pdfWorkerCode = 'delete URL.parse; delete Promise.withResolvers; await import(' + JSON.stringify(location.origin + "/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.2") + ');';
+            const pdfWorkerCode = 'delete URL.parse; delete Promise.withResolvers; await import(' + JSON.stringify(location.origin + "/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.3") + ');';
             const pdfWorkerUrl = URL.createObjectURL(new Blob([pdfWorkerCode], {type: "text/javascript"}));
             const pdfWorker = new Worker(pdfWorkerUrl, {type: "module"});
             const workerMessages = [];
@@ -140,6 +153,7 @@ async function runElectron() {
 if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
+    require("node:test").test("PDF modules avoid class static blocks unsupported by WebView 92", checkPDFSyntax);
     require("node:test").test("legacy WebView fallbacks preserve cloning, workers, focus and theme switching", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,

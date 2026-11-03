@@ -854,6 +854,21 @@ func execInsertBlocktreesWithMetadata(tx *sql.Tx, tree *parse.Tree, changedNodes
 		if nil != n.Parent {
 			parentID = n.Parent.ID
 		}
+		if n.Type == ast.NodeSuperBlock {
+			// 原地修正同一来源的嵌套文档行，避免删除触发器影响同 ID 的真实文档摘要。
+			result, updateErr := tx.Exec(`UPDATE blocktrees INDEXED BY idx_blocktrees_id
+				SET type='s', parent_id=?, hpath=?, updated=? WHERE box_id=? AND root_id=? AND path=?
+				AND id=? AND type='d' AND id!=root_id`, parentID, tree.HPath, n.IALAttr("updated"),
+				tree.Box, tree.ID, tree.Path, n.ID)
+			if updateErr != nil {
+				tx.Rollback()
+				logging.LogErrorf("repair nested document index failed: %s", updateErr)
+				return
+			}
+			if count, _ := result.RowsAffected(); count > 0 {
+				continue
+			}
+		}
 		if n.Type == ast.NodeDocument {
 			result, updateErr := tx.Exec(documentBlockTreeUpdateQuery, tree.ID, parentID, tree.Path, tree.HPath,
 				n.IALAttr("updated"), tree.Box, n.ID)

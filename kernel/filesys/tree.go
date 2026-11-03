@@ -251,11 +251,12 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 	return normalizeValidatedTreeForRead(tree)
 }
 
-// normalizeValidatedTreeForRead 的调用方已检查源规格及树根；只调整内存中的展示投影。
+// normalizeValidatedTreeForRead 的调用方已检查源规格及树根；只规范化内存中的块树。
 func normalizeValidatedTreeForRead(tree *parse.Tree) (err error) {
 	if err = treenode.RefreshTableCellRichProjection(tree.Root); nil != err {
 		return
 	}
+	treenode.FixNestedDocumentNodes(tree.Root)
 	treenode.UpgradeSpec(tree)
 	escapeAttributeValues(tree)
 	return
@@ -677,6 +678,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		return
 	}
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
+	treenode.FixNestedDocumentNodes(tree.Root)
 
 	if nil == tree.Root.FirstChild {
 		newP := treenode.NewParagraph("")
@@ -830,6 +832,9 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 		ret.ID = pathID
 		ret.Root.SetIALAttr("id", ret.ID)
 	}
+	if treenode.FixNestedDocumentNodes(ret.Root) {
+		needFix = true
+	}
 	if treenode.FixInvalidListChildren(ret.Root) {
 		needFix = true
 	}
@@ -908,6 +913,7 @@ func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lut
 	if err = treenode.CheckSpec(ret); nil != err {
 		return
 	}
+	treenode.FixNestedDocumentNodes(ret.Root)
 	err = treenode.RefreshTableCellRichProjection(ret.Root)
 	return
 }

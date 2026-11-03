@@ -89,9 +89,11 @@ class RelatedAVView {
         this.element = document.createElement("section");
         this.element.className = "av-related-view";
         this.element.innerHTML = `<div class="av-related-view__heading fn__flex">
-    <button type="button" class="block__icon block__icon--show" data-related-action="fold" aria-expanded="true" aria-label="${escapeHtmlTextAndAttr(definition.name)}"><svg><use xlink:href="#iconDown"></use></svg></button>
-    <span class="fn__ellipsis fn__flex-1">${escapeHtmlTextAndAttr(definition.name)}</span>
-    <button type="button" class="block__icon block__icon--show ariaLabel" data-related-action="add" data-position="8south" aria-label="${window.siyuan.languages._attrView.relatedDatabaseViewAdd}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+    <button type="button" class="protyle-db-attr__toggle fn__flex fn__flex-1" data-related-action="fold" aria-expanded="true" aria-label="${escapeHtmlTextAndAttr(definition.name)}">
+        <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconDown"></use></svg></span>
+        <span class="block__logo fn__ellipsis fn__flex-1">${escapeHtmlTextAndAttr(definition.name)}</span>
+    </button>
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-related-action="add" data-position="8west" aria-label="${window.siyuan.languages._attrView.relatedDatabaseViewAdd}"><svg><use xlink:href="#iconAdd"></use></svg></button>
 </div>`;
         this.hostElement = document.createElement("div");
         this.hostElement.className = "av av-related-view__table";

@@ -333,7 +333,7 @@ export const openMemoryManager = () => {
         })();
     });
     const clearMemory = async () => {
-        if (closed || isReadOnly() || submitting || clearing) { return; }
+        if (closed || isReadOnly() || submitting || clearing) { return false; }
         const resumeDiscovery = discovering;
         clearing = true;
         taskGeneration++;
@@ -388,6 +388,7 @@ export const openMemoryManager = () => {
                 void refreshOverview();
             }
         }
+        return cleared;
     };
     more.addEventListener("mousedown", event => event.stopPropagation());
     more.addEventListener("touchstart", event => event.stopPropagation());
@@ -399,7 +400,8 @@ export const openMemoryManager = () => {
                 icon: "iconTrashcan", warning: true, label: lang.aiMemoryClearAndDisable,
                 click: () => {
                     if (closed || isReadOnly() || submitting || clearing) { return; }
-                    mobileConfirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm), () => { void clearMemory(); });
+                    mobileConfirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm),
+                        clearMemory, undefined, true, undefined, undefined, {awaitConfirm: true});
                 },
             }).element);
             const rect = more.getBoundingClientRect();

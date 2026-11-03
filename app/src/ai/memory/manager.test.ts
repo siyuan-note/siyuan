@@ -34,7 +34,8 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         return nodes.get(selector);
     }};
     const timers = new Map<number, {callback: () => void; delay: number}>();
-    const confirmations: Array<() => void> = [];
+    const confirmations: Array<() => void | Promise<boolean>> = [];
+    const confirmationOptions: Array<{awaitConfirm?: boolean}> = [];
     const menuItems: Array<{icon: string; warning: boolean; label: string; click: () => void}> = [];
     const refreshed: string[] = [];
     const remounted: string[] = [];
@@ -83,7 +84,12 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
                 }
                 destroy() { if (beforeClose()) { destroyed++; destroy(); } }
             }}; }
-            if (name.endsWith("/mobileConfirmDialog")) { return {mobileConfirmDialog: (_title: string, _message: string, callback: () => void) => { confirmations.push(callback); }}; }
+            if (name.endsWith("/mobileConfirmDialog")) { return {mobileConfirmDialog: (_title: string, _message: string,
+                callback: () => void | Promise<boolean>, _cancel: unknown, _isDelete: boolean, _extra: unknown,
+                _label: unknown, confirmation: {awaitConfirm?: boolean}) => {
+                confirmations.push(callback);
+                confirmationOptions.push(confirmation);
+            }}; }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
                 requests.push({url, data, signal});
                 const response = await respond?.(url, data);
@@ -116,7 +122,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
         next[1].callback();
         await flush();
     };
-    return {field, input, button, requests, messages, rendered, timers, confirmations, config, flush, tick, menuItems, refreshed, remounted,
+    return {field, input, button, requests, messages, rendered, timers, confirmations, confirmationOptions, config, flush, tick, menuItems, refreshed, remounted,
         get destroyed() { return destroyed; },
         more: () => field("[data-memory-more]").listeners.get("click")({stopPropagation: () => {}} as KeyboardEvent),
         get content() { return content; },
@@ -219,7 +225,7 @@ test("clearing blocks duplicate requests and ignores late task responses", async
     await state.click();
     state.more();
     state.menuItems[0].click();
-    state.confirmations[0]();
+    const completion = state.confirmations[0]();
     await state.flush();
     assert.equal(state.close(), false);
     assert.equal(state.button.disabled, true);
@@ -231,6 +237,7 @@ test("clearing blocks duplicate requests and ignores late task responses", async
     await state.flush();
     assert.deepEqual(state.messages, []);
     finishClear({code: 0, data: {disabled: true, cleared: true}});
+    assert.equal(await completion, true);
     await state.flush();
     assert.equal(state.destroyed, 1);
     assert.equal(state.timers.size, 0);
@@ -242,7 +249,8 @@ test("partial cleanup preserves the draft and the disabled setting for an explic
     state.enter("Keep this draft");
     state.more();
     state.menuItems[0].click();
-    state.confirmations[0]();
+    assert.equal(state.confirmationOptions[0].awaitConfirm, true);
+    assert.equal(await state.confirmations[0](), false);
     await state.flush();
     assert.equal(state.config.ai.memory.enabled, false);
     assert.equal(state.destroyed, 0);

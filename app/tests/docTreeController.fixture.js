@@ -8,6 +8,7 @@ exports.sources = () => {
         rowData: "../src/layout/dock/docTree/rowData.ts",
         DocTreeModel: "../src/layout/dock/docTree/DocTreeModel.ts",
         DocTreeController: "../src/layout/dock/docTree/DocTreeController.ts",
+        importRefresh: "../src/layout/dock/docTree/importRefresh.ts",
         transactionOperations: "../src/util/transactionOperations.ts",
         documentTitlePreview: "../src/protyle/header/documentTitlePreview.ts",
     };
@@ -35,6 +36,7 @@ exports.cases = async sources => {
         return modules[name];
     };
     const {DocTreeController} = load("DocTreeController");
+    const {refreshImportedDocTree} = load("importRefresh");
     const nativeMatchMedia = window.matchMedia.bind(window);
     // 静态选择和回收用例在减少动态效果模式下检查终态，末尾动画用例使用真实媒体查询。
     window.matchMedia = query => query === "(prefers-reduced-motion: reduce)" ? {matches: true} : nativeMatchMedia(query);
@@ -105,6 +107,57 @@ exports.cases = async sources => {
         return {controller, element, directories, requests, locates, source, progress,
             revise: value => { revision = value; }, destroy: () => { controller.destroy(); element.remove(); }};
     };
+    for (const nested of [false, true]) {
+        for (const expanded of [false, true]) {
+            const fixture = make(1);
+            const {controller, directories, requests} = fixture;
+            if (nested) {
+                directories.get("")[0].subFileCount = 1;
+                directories.set("d0", [file("leaf", "d0")]);
+            }
+            const id = nested ? "leaf" : "d0";
+            const parentID = nested ? "d0" : "";
+            await controller.toggle("notebook:box", true);
+            if (nested) { await controller.toggle("notebook:box/d0", true); }
+            const key = nested ? "notebook:box/d0/leaf" : "notebook:box/d0";
+            if (expanded) { await controller.toggle(key, true); }
+            await controller.select(key, {scroll: false});
+            directories.set(parentID, [{...directories.get(parentID)[0], subFileCount: 7}]);
+            directories.set(id, Array.from({length: 7}, (_, index) => file(`imported${index}`, id)));
+            fixture.revise("imported");
+            requests.length = 0;
+            const data = {notebook: "box", parentPath: nested ? "/d0/leaf.sy" : "/d0.sy"};
+            check.equal(controller.getItem(key).subFileCount, 0);
+            await Promise.all([refreshImportedDocTree(controller, data), refreshImportedDocTree(controller, data)]);
+            check.equal(controller.getItem(key).subFileCount, 7, "import refreshes the target row count");
+            check.equal(controller.isExpanded(key), expanded, "import preserves target expansion");
+            check.equal(controller.getSelectedItems()[0]?.occurrenceKey, key, "import preserves selection");
+            check.ok(requests.some(request => request.parentID === parentID));
+            await controller.toggle(key, true);
+            check.equal(controller.model.directory(controller.getItem(key)).total, 7);
+            check.equal(controller.model.child(controller.getItem(key), 6).id, "imported6");
+            directories.set(parentID, []);
+            fixture.revise("deleted");
+            await refreshImportedDocTree(controller, data);
+            check.equal(controller.model.getItem(key), undefined, "a deleted import target is not resurrected");
+            check.equal(controller.getSelectedItems().length, 0, "deleted targets leave the selection");
+            fixture.destroy();
+        }
+    }
+    for (const expanded of [false, true]) {
+        const fixture = make(0);
+        const {controller, directories, requests} = fixture;
+        if (expanded) { await controller.toggle("notebook:box", true); }
+        directories.set("", [file("imported")]);
+        requests.length = 0;
+        await refreshImportedDocTree(controller, {notebook: "other", parentPath: "/doc.sy"});
+        check.equal(requests.length, 0, "another notebook import leaves this tree untouched");
+        await refreshImportedDocTree(controller, {notebook: "box", parentPath: "/"});
+        check.equal(controller.isExpanded("notebook:box"), expanded);
+        await controller.toggle("notebook:box", true);
+        check.equal(controller.model.child(controller.model.roots[0], 0).id, "imported");
+        fixture.destroy();
+    }
     for (const titleTooltips of [false, true]) {
         const fixture = make(128, titleTooltips);
         const {controller, directories, element} = fixture;

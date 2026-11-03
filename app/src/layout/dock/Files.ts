@@ -1,6 +1,7 @@
 import {renderDocTreeRow, renderDocTreeRowHTML} from "./docTree/row";
 import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "./docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "./docTree/DocTreeController";
+import {refreshImportedDocTree} from "./docTree/importRefresh";
 import type {IDocTreeItem} from "./docTree/types";
 import {createDocTreeSelectionProgress} from "./docTree/selectionProgress";
 import {config as configApi} from "../../config/util/configApi";
@@ -1073,8 +1074,7 @@ export class Files extends Model {
 
     public onDocsImported(data: {notebook: string, parentPath: string, rootIDs: string[]}) {
         this.pinnedDocs?.scheduleRefresh();
-        const parentID = data.parentPath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "") || "";
-        void this.docTree.reload({notebook: data.notebook, parentID});
+        void refreshImportedDocTree(this.docTree, data);
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {

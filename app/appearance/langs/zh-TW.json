@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "是",
+	"pdfLinearizedNo": "否",
 	"tagRemovalDatabaseTip": "將移出所選資料庫中的條目及其欄位值，保留原文，操作可復原。未選擇的資料庫保留條目。",
 	"tagRemovalOnly": "僅刪除標籤",
 	"tagRemovalWithEntries": "同時移出所選條目",

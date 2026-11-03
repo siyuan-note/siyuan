@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "예",
+	"pdfLinearizedNo": "아니요",
 	"tagRemovalDatabaseTip": "선택한 데이터베이스에서 항목과 필드 값이 제거됩니다. 원본 내용은 유지되며 작업을 실행 취소할 수 있습니다. 선택하지 않은 데이터베이스의 항목은 유지됩니다.",
 	"tagRemovalOnly": "태그만 삭제",
 	"tagRemovalWithEntries": "선택한 항목도 제거",

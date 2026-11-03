@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Yes",
+	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Selected databases will lose these entries and their field values. Source content is kept; the operation can be undone. Unselected databases keep their entries.",
 	"tagRemovalOnly": "Delete tags only",
 	"tagRemovalWithEntries": "Also remove selected entries",

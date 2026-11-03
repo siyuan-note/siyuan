@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Áno",
+	"pdfLinearizedNo": "Nie",
 	"tagRemovalDatabaseTip": "Záznamy a hodnoty ich polí sa odstránia z vybraných databáz. Zdrojový obsah sa zachová a operáciu možno vrátiť späť. Nevybrané databázy si ponechajú svoje záznamy.",
 	"tagRemovalOnly": "Odstrániť iba štítky",
 	"tagRemovalWithEntries": "Odstrániť aj vybrané záznamy",

@@ -92,6 +92,10 @@ const createImportDialog = () => {
             controls[id].files = [{name}];
             listeners.get("change")({target: controls[id]});
         },
+        cancelFileSelection: (id: string) => {
+            controls[id].files = [];
+            listeners.get("change")({target: controls[id]});
+        },
         cancel: () => listeners.get("ocrImportCancel:click")({}),
         invalidate: () => dialog.invalidate(),
         confirm: () => listeners.get("ocrImportConfirm:click")({}) as Promise<void>,
@@ -140,6 +144,25 @@ test("importing posts the four files and closes the dialog after success", async
     assert.equal(panel.destroyed(), 1);
     assert.equal(panel.imported(), 1);
     assert.equal(panel.closed(), 1);
+});
+
+test("cancelled native file reselection retains choices and imports a later replacement", async () => {
+    const panel = createImportDialog();
+    panel.cancelFileSelection("detector");
+    assert.equal(panel.controls.detectorName.textContent, "");
+    assert.equal(panel.controls.ocrImportConfirm.disabled, true);
+    fileIds.forEach(id => panel.select(id, `${id}.bin`));
+    const original = Object.fromEntries(fileIds.map(id => [id, panel.controls[id].files[0]]));
+    fileIds.forEach(id => panel.cancelFileSelection(id));
+    fileIds.forEach(id => assert.equal(panel.controls[`${id}Name`].textContent, `${id}.bin`));
+    assert.equal(panel.controls.ocrImportConfirm.disabled, false);
+    panel.select("recognizer", "replacement.onnx");
+    const replacement = panel.controls.recognizer.files[0];
+    const pending = panel.confirm();
+    fileIds.forEach(id => assert.equal(panel.requests[0].body[id], id === "recognizer" ? replacement : original[id]));
+    panel.requests[0].resolve({code: 0});
+    await pending;
+    assert.equal(panel.imported(), 1);
 });
 
 test("a failed import keeps the dialog open and allows retrying", async () => {

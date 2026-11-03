@@ -42,6 +42,7 @@ export const openOCRImportModelsDialog = (options: {
 }) => {
     const languages = window.siyuan.languages;
     const files = getOCRModelFiles();
+    const selectedFiles = new Map<string, File>();
     let busy = false;
     let closed = false;
     const dialog = new MobileDialog({
@@ -50,6 +51,7 @@ export const openOCRImportModelsDialog = (options: {
         width: isMobile() ? "92vw" : "520px",
         destroyCallback: () => {
             closed = true;
+            selectedFiles.clear();
             options.onClosed?.();
         },
         content: `<div class="b3-dialog__content">${files.map((file, index) => genFileRowHtml(file, languages.chooseFile, index === 0)).join("")}</div>
@@ -62,11 +64,14 @@ export const openOCRImportModelsDialog = (options: {
     const importButton = dialog.element.querySelector<HTMLButtonElement>("#ocrImportConfirm");
     const update = () => {
         files.forEach(file => {
+            // Android WebView 取消重选会清空 FileList，表单草稿只在选入新文件时替换。
+            const selected = fileInput(file).files?.[0];
+            if (selected) selectedFiles.set(file.id, selected);
             const name = dialog.element.querySelector<HTMLElement>(`#${file.id}Name`);
-            name.textContent = fileInput(file).files?.[0]?.name || "";
+            name.textContent = selectedFiles.get(file.id)?.name || "";
             name.title = name.textContent;
         });
-        importButton.disabled = busy || files.some(file => !fileInput(file).files?.length);
+        importButton.disabled = busy || files.some(file => !selectedFiles.has(file.id));
     };
     dialog.element.querySelector("#ocrImportCancel").addEventListener("click", () => dialog.destroy());
     dialog.element.addEventListener("change", (event) => {
@@ -90,10 +95,10 @@ export const openOCRImportModelsDialog = (options: {
             update();
             try {
                 const response = await fetchSyncPost("/api/asset/importOCRModels", new ContractFormData({
-                    detector: fileInput(files[0]).files[0],
-                    detectorConfig: fileInput(files[1]).files[0],
-                    recognizer: fileInput(files[2]).files[0],
-                    recognizerConfig: fileInput(files[3]).files[0],
+                    detector: selectedFiles.get(files[0].id),
+                    detectorConfig: selectedFiles.get(files[1].id),
+                    recognizer: selectedFiles.get(files[2].id),
+                    recognizerConfig: selectedFiles.get(files[3].id),
                 }), undefined, true, options.signal);
                 return response.code === 0 && !closed && !options.signal.aborted;
             } catch (error) {

@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Ja",
+	"pdfLinearizedNo": "Nee",
 	"tagRemovalDatabaseTip": "De vermeldingen en hun veldwaarden worden uit de geselecteerde databases verwijderd. De broninhoud blijft behouden en de bewerking kan ongedaan worden gemaakt. Niet-geselecteerde databases behouden hun vermeldingen.",
 	"tagRemovalOnly": "Alleen tags verwijderen",
 	"tagRemovalWithEntries": "Geselecteerde vermeldingen ook verwijderen",

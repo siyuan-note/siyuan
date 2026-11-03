@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Tak",
+	"pdfLinearizedNo": "Nie",
 	"tagRemovalDatabaseTip": "Wpisy i wartości ich pól zostaną usunięte z wybranych baz danych. Treść źródłowa zostanie zachowana, a operację można cofnąć. Niewybrane bazy danych zachowają swoje wpisy.",
 	"tagRemovalOnly": "Usuń tylko tagi",
 	"tagRemovalWithEntries": "Usuń także wybrane wpisy",

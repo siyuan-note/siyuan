@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Evet",
+	"pdfLinearizedNo": "Hayır",
 	"tagRemovalDatabaseTip": "Seçilen veritabanlarından kayıtlar ve alan değerleri kaldırılır. Kaynak içerik korunur ve işlem geri alınabilir. Seçilmeyen veritabanları kayıtlarını korur.",
 	"tagRemovalOnly": "Yalnızca etiketleri sil",
 	"tagRemovalWithEntries": "Seçilen kayıtları da kaldır",

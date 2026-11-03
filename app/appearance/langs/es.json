@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Sí",
+	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Se eliminarán las entradas y sus valores de campo de las bases de datos seleccionadas. Se conserva el contenido original y la operación se puede deshacer. Las bases de datos no seleccionadas conservan sus entradas.",
 	"tagRemovalOnly": "Eliminar solo etiquetas",
 	"tagRemovalWithEntries": "Eliminar también las entradas seleccionadas",

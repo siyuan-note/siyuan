@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "Sì",
+	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Le voci e i relativi valori dei campi saranno rimosse dai database selezionati. Il contenuto originale viene conservato e l’operazione può essere annullata. I database non selezionati mantengono le proprie voci.",
 	"tagRemovalOnly": "Elimina solo i tag",
 	"tagRemovalWithEntries": "Rimuovi anche le voci selezionate",

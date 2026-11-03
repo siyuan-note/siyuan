@@ -91,7 +91,7 @@ async function runElectron() {
             worker.terminate(); URL.revokeObjectURL(workerUrl);
             check(workerResult.url === "/worker" && workerResult.value === 7, "worker compatibility failed");
             const pdfModule = await import(location.origin + "/js/pdf/pdf.min.mjs");
-            const pdfWorkerCode = 'delete URL.parse; delete Promise.withResolvers; await import(' + JSON.stringify(location.origin + "/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.3") + ');';
+            const pdfWorkerCode = 'delete URL.parse; delete Promise.withResolvers; await import(' + JSON.stringify(location.origin + "/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.4") + ');';
             const pdfWorkerUrl = URL.createObjectURL(new Blob([pdfWorkerCode], {type: "text/javascript"}));
             const pdfWorker = new Worker(pdfWorkerUrl, {type: "module"});
             const workerMessages = [];
@@ -107,7 +107,7 @@ async function runElectron() {
             pdfModule.GlobalWorkerOptions.workerPort = pdfWorker;
             let pdfSource = "%PDF-1.7\\n";
             const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << >> >>"];
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 200] /Resources << >> >>"];
             const offsets = [0];
             objects.forEach((object, index) => { offsets.push(pdfSource.length); pdfSource += (index + 1) + " 0 obj\\n" + object + "\\nendobj\\n"; });
             const xref = pdfSource.length;
@@ -119,6 +119,27 @@ async function runElectron() {
                     reject(new Error("PDF compatibility worker timed out: " + JSON.stringify(workerMessages))), 8000))]);
                 const page = await pdf.getPage(1);
                 check(pdf.numPages === 1 && page.getViewport({scale: 1}).width === 100, "PDF did not open with its compatibility worker");
+                const nativeSupports = CSS.supports;
+                try {
+                    for (const rounded of [true, false]) {
+                        CSS.supports = (property, value) => property === "width" && value.startsWith("round(")
+                            ? rounded : nativeSupports.call(CSS, property, value);
+                        for (const rotation of [0, 90, 180, 270]) {
+                            const viewport = page.getViewport({scale: 1.5, rotation});
+                            const layer = document.createElement("div");
+                            layer.style.setProperty("--total-scale-factor", "1.5");
+                            layer.style.setProperty("--scale-round-x", "1px");
+                            layer.style.setProperty("--scale-round-y", "1px");
+                            document.body.append(layer);
+                            pdfModule.setLayerDimensions(layer, viewport, true);
+                            if (!rounded) check(layer.style.width.startsWith("calc("), "legacy PDF dimensions still require CSS round()");
+                            const bounds = layer.getBoundingClientRect();
+                            check(Math.abs(bounds.width - viewport.width) < 1 && Math.abs(bounds.height - viewport.height) < 1,
+                                "PDF layer collapsed or lost its rotated dimensions: " + JSON.stringify({rotation, rounded, bounds}));
+                            layer.remove();
+                        }
+                    }
+                } finally { CSS.supports = nativeSupports; }
                 await pdfTask.destroy();
             } finally { pdfWorker.terminate(); URL.revokeObjectURL(pdfWorkerUrl); }
             delete HTMLElement.prototype.inert;

@@ -1,4 +1,6 @@
 {
+	"pdfLinearizedYes": "כן",
+	"pdfLinearizedNo": "לא",
 	"tagRemovalDatabaseTip": "הרשומות וערכי השדות שלהן יוסרו ממסדי הנתונים שנבחרו. תוכן המקור יישמר וניתן לבטל את הפעולה. הרשומות במסדי הנתונים שלא נבחרו יישמרו.",
 	"tagRemovalOnly": "מחיקת תגיות בלבד",
 	"tagRemovalWithEntries": "הסרת הרשומות שנבחרו גם כן",

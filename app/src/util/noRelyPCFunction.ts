@@ -10,6 +10,7 @@ import {escapeHtml} from "./escape";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isNotCtrl, isPhablet} from "../protyle/util/compatibility";
 import {electronUndo} from "../protyle/undo";
+import {isMobile} from "./functions";
 
 export const genTagList = (listElement: Element, k: string) => {
     listElement.classList.remove("fn__none");
@@ -40,7 +41,7 @@ export const renameTag = (labelName: string) => {
         value: labelName,
         bindInput: false,
         awaitConfirm: true,
-        extraContent: `<div class="b3-list fn__flex-1 b3-list--background fn__none protyle-hint" style="position: absolute;width: calc(100% - 48px);">
+        extraContent: `<div class="b3-list fn__flex-1 b3-list--background fn__none ${isMobile() ? "tag-rename__suggestions" : "protyle-hint"}"${isMobile() ? "" : ' style="position: absolute;width: calc(100% - 48px);"'}>
         <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
     </div>`,
         onConfirm: async (value, dialog) => {

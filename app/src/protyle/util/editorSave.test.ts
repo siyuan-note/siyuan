@@ -314,6 +314,46 @@ test("disposal drops failure state and ignores late requests after lock or destr
     await guard.flush();
 });
 
+test("editor save owners share failures until the final owner is disposed", async () => {
+    const saves = loadSyncSaves();
+    const protyle = editor();
+    const first = saves.registerEditorSave(protyle);
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve({code: -1}));
+    const second = saves.registerEditorSave(protyle);
+    await assert.rejects(second.flush(), /Save failed/);
+    first.dispose();
+    first.dispose();
+    await assert.rejects(second.flush(), /Save failed/);
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    await second.flush();
+    second.dispose();
+});
+
+test("block retry requires an acknowledged update and never replays titles or structural operations", async () => {
+    const saves = loadSyncSaves();
+    const protyle = editor();
+    const guard = saves.registerEditorSave(protyle);
+    let retries = 0;
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve({code: -1}));
+    await assert.rejects(guard.flush(async ids => {
+        retries++;
+        assert.deepEqual(Array.from(ids), ["block"]);
+    }), /Save failed/);
+    await guard.flush(async () => {
+        retries++;
+        await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve(success));
+    });
+    assert.equal(retries, 2);
+    await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "setDocTitle"), Promise.resolve({code: -1}));
+    await assert.rejects(guard.flush(async () => { retries++; }), /Save failed/);
+    assert.equal(retries, 2);
+    await saves.trackEditorSaveRequest("/api/transactions", request("drawer", "move"), Promise.resolve({code: -1}));
+    await saves.trackEditorSaveRequest("/api/transactions", request(), Promise.resolve({code: -1}));
+    await assert.rejects(guard.flush(async () => { retries++; }), /Save failed/);
+    assert.equal(retries, 2);
+    guard.dispose();
+});
+
 test("plain notebook Title flushes debounce once, captures composition, and can cancel pending saves", () => {
     let nextTimer = 0;
     const timers = new Map<number, () => void>();

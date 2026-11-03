@@ -1,4 +1,5 @@
 import {MobileDialog} from "../dialog/mobileDialog";
+import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
@@ -81,7 +82,6 @@ export const genCardHTML = (options: {
     <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
     <svg class="toolbar__icon${options.cardsData.cards.length === 0 ? " fn__none" : ""}" data-type="more"><use xlink:href="#iconMore"></use></svg>
-    <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
     /// #else
     iconsHTML = `<div class="block__icons">
@@ -895,14 +895,16 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     for (let i = 0; i < app.plugins.length; i++) {
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
+    const state: {editor?: Protyle, loading: boolean} = {loading: true};
     const dialog = new MobileDialog({
-        mobileSheet: {mode: "expanded"},
+        mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => state.editor, () => !state.loading)},
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {
+            const editor = state.editor;
             try {
                 editor?.destroy();
             } finally {
@@ -916,8 +918,8 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
             }
         },
         resizeCallback(type: string) {
-            if (type !== "d" && type !== "t" && editor) {
-                editor.resize();
+            if (type !== "d" && type !== "t" && state.editor) {
+                state.editor.resize();
             }
         }
     });
@@ -932,6 +934,9 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardType,
         dialog
     });
+    state.editor = editor;
+    if (isMobile()) registerMobileSecondaryEditor(editor, () => dialog.invalidate());
+    state.loading = false;
     editor.resize();
     dialog.editors = {
         card: editor

@@ -50,7 +50,7 @@ export const mobileConfirmDialog = (title: string, text: string,
         const isDispatch = typeof event.detail === "string";
         while (target && target !== dialog.element || isDispatch) {
             if (target.id === "cancelDialogConfirmBtn" || (isDispatch && event.detail=== "Escape")) {
-                void dialog.requestClose("cancel");
+                void dialog.requestClose(isDispatch ? "escape" : "cancel");
                 break;
             } else if (target.id === "extraDialogConfirmBtn") {
                 handled = true;

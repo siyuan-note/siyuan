@@ -109,3 +109,13 @@ test("desktop confirmation preserves the legacy seven arguments", () => {
     f.mobileConfirmDialog("Title", "Text", confirm, cancel, true, extra, "Delete", {awaitConfirm: true});
     assert.deepEqual(f.delegated(), ["Title", "Text", confirm, cancel, true, extra, "Delete"]);
 });
+
+test("mobile confirmation distinguishes an Escape dispatch from explicit cancellation", () => {
+    const f = setup();
+    const escaped = f.mobileConfirmDialog("Title", "Text");
+    escaped.listeners.click({target: {id: ""}, detail: "Escape"});
+    assert.equal(f.events.at(-1), "escape");
+    const cancelled = f.mobileConfirmDialog("Title", "Text");
+    cancelled.listeners.click({target: {id: "cancelDialogConfirmBtn"}, detail: 0});
+    assert.equal(f.events.at(-1), "cancel");
+});

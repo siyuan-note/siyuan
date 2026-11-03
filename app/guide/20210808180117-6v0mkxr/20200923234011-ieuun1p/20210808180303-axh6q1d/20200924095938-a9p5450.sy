@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20261024163429"
+		"updated": "20261103081326"
 	},
 	"Children": [
 		{
@@ -223,6 +223,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261103081326-15324b1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103081326-15324b1",
+				"updated": "20261103081326"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, closing an edited snippet opens a save prompt. Confirm saves the changes; Cancel discards them and closes the editor. Back, swiping down, or tapping outside the prompt closes only the prompt and keeps the draft for continued editing. If saving fails, the draft remains available for retry."
 				}
 			]
 		},

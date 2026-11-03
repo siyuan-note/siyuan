@@ -20,6 +20,7 @@ const browserCases = async (source: string) => {
         let revision: string | undefined = "original-revision";
         let rejectNetwork = false;
         let delayClose = false;
+        let closeDecision = "save";
         const original = [{id: "one", name: "Original", type: "css", content: "body{}", enabled: true, disabledInPublish: false}];
         const exports = {} as typeof import("./snippets");
         class FakeDialog {
@@ -73,7 +74,15 @@ const browserCases = async (source: string) => {
             MobileDialog: FakeDialog, isMobile: () => mobile,
             Constants: {DIALOG_SNIPPETS: "snippets"},
             objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
-            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) => confirm(),
+            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel?: () => void,
+                                 _remove?: boolean, _extra?: unknown, _confirmLabel?: string,
+                                 options?: {mobileSheet?: {beforeClose?: (reason: string) => boolean}}) => {
+                if (closeDecision === "save") confirm();
+                else {
+                    options?.mobileSheet?.beforeClose?.(closeDecision);
+                    cancel?.();
+                }
+            },
             showMessage: (text: string) => messages.push(text),
             refreshHeadingNumberMeasurements: () => {},
             getHostCapabilities: () => ({customAppearance: true}),
@@ -95,6 +104,26 @@ const browserCases = async (source: string) => {
         const edit = (value: string) => {
             current().element.querySelector<HTMLTextAreaElement>("textarea").value = value;
         };
+
+        if (mobile) {
+            for (const reason of ["back", "scrim", "drag", "escape", "programmatic"]) {
+                closeDecision = reason;
+                exports.openSnippets();
+                const parent = current();
+                edit(`keep draft after ${reason}`);
+                parent.destroy();
+                await settle();
+                check.equal(parent.element.isConnected, true, `${reason} dismisses only the save prompt`);
+                check.equal(parent.element.querySelector("textarea").value, `keep draft after ${reason}`);
+                check.equal(parent.checking, false, "dismissal releases the close guard for further editing");
+                check.equal(writes.length, 0, "dismissal must not save the draft");
+                closeDecision = "cancel";
+                parent.destroy();
+                await settle();
+                check.equal(parent.closed, true, "explicit cancellation still discards the draft");
+            }
+            closeDecision = "save";
+        }
 
         exports.openSnippets();
         edit("local draft");

@@ -124,10 +124,16 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
             const snippets = readSnippetDraft(dialog);
             if (objEquals(oldSnippets, snippets) && objEquals(initialSettings, snippetSettings(dialog))) return true;
             return new Promise<boolean>(resolve => {
+                let discardConfirmed = false;
                 mobileConfirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
                     void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings, false)
                         .then(resolve);
-                }, () => resolve(true));
+                }, () => resolve(discardConfirmed), false, undefined, undefined, {mobileSheet: {
+                    beforeClose: reason => {
+                        discardConfirmed = reason === "cancel";
+                        return true;
+                    },
+                }});
             });
         }},
         width: isMobile() ? "100vw" : "50vw",

@@ -2034,6 +2034,12 @@ body.mobile-topbar--merged {
   flex-shrink: 0;
 }
 
+.tag-rename__suggestions {
+  min-width: 0;
+  max-height: 30vh;
+  overflow: auto;
+}
+
 .mobile-av-richtext-sheet .av__richtext-editor--sheet {
   position: relative;
   min-height: 0;

@@ -1,5 +1,6 @@
 import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {MobileDialog} from "../dialog/mobileDialog";
+import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import dayjs from "dayjs";
 import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
@@ -27,7 +28,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
         const dialog = new MobileDialog({
-            mobileSheet: {mode: "expanded"},
+            mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
@@ -43,10 +44,6 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         <span data-type="page" class="fn__flex-center ft__on-surface">${pageIndex}/${pageCount}</span>
         <span class="fn__space"></span>
         <span class="counter">${response.data.total}</span>
-        ${isMobile() ? `<span class="fn__space"></span>
-<div data-type="close" class="block__icon block__icon--show">
-    <svg><use xlink:href="#iconCloseRound"></use></svg>
-</div>` : ""}
     </div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none;padding: 8px 0">
@@ -86,6 +83,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                 },
                 typewriterMode: false
             });
+            if (isMobile()) registerMobileSecondaryEditor(edit, () => dialog.invalidate());
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
             }
@@ -197,12 +195,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             let target = event.target as HTMLElement;
             while (target && (dialog.element !== target)) {
                 const type = target.getAttribute("data-type");
-                if (type === "close") {
-                    dialog.destroy();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "previous") {
+                if (type === "previous") {
                     if (isPageLoading || isRemoving || pageIndex <= 1) {
                         return;
                     }

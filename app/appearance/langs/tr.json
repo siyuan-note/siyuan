@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Mevcut girdi ekle",
 		"relatedDatabaseViewNew": "Girdi oluştur ve ilişkilendir",
 		"relatedDatabaseViewTemporaryFilter": "Bu paneldeki ek filtreler",
+		"relatedDatabaseViewTemporarySort": "Bu panelde sıralama",
 		"relatedDatabaseViewSharedTip": "Bu tablo paylaşılan bir görünüm kullanır. Yapılandırma değişiklikleri tüm başvuruları etkiler",
 		"dateCalendar": "Takvim",
 		"solarCalendar": "Miladi",

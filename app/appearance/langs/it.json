@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Aggiungi voce esistente",
 		"relatedDatabaseViewNew": "Crea e collega una voce",
 		"relatedDatabaseViewTemporaryFilter": "Filtri aggiuntivi in questo pannello",
+		"relatedDatabaseViewTemporarySort": "Ordinamento in questo pannello",
 		"relatedDatabaseViewSharedTip": "Questa tabella usa una vista condivisa. Le modifiche alla configurazione si applicano a tutti i riferimenti",
 		"dateCalendar": "Calendario",
 		"solarCalendar": "Gregoriano",

@@ -12,18 +12,23 @@ const fixture = () => {
     const columnWidthAPI = evaluateModule<typeof import("./relatedViewColumnWidth")>(
         compileModule("src/protyle/render/av/relatedViewColumnWidth.ts"), {require: () => ({})});
     const {RelatedAVView} = evaluateModule<{RelatedAVView: {prototype: object}}>(source, {
-        window: {siyuan: {languages: {_attrView: {}}}},
+        window: {siyuan: {languages: {avTemporarySort: "Temporary sort", _attrView: {
+            relatedDatabaseViewTemporarySort: "Sort in this panel",
+            relatedDatabaseViewTemporaryFilter: "Additional filters in this panel",
+        }}}},
         require: (id: string) => id === "./relatedViewColumnWidth" ? columnWidthAPI :
             {globalClickHideMenu() {}, openMenuPanel: () => { configured++; }},
     });
+    const labels = new Map<string, string>();
     const controls = ["av-more", "av-search", "av-sort", "av-filter", "av-switcher", "set-page-size"].map(type => ({
         type, remove: () => removed.push(type),
+        setAttribute: (name: string, value: string) => { if (name === "aria-label") labels.set(type, value); },
     }));
     const view = Object.assign(Object.create(RelatedAVView.prototype), {
         host: {active: true, readonly: () => false}, columnWidths: {},
         element: {querySelector: () => ({disabled: false})},
         hostElement: {
-            querySelector: (): null => null,
+            querySelector: (selector: string) => controls.find(control => selector === `[data-type="${control.type}"]`),
             querySelectorAll: (selector: string) => controls.filter(control =>
                 selector.split(",").some(part => part.trim() === `[data-type="${control.type}"]`)),
         },
@@ -37,13 +42,15 @@ const fixture = () => {
             return null;
         }},
     });
-    return {view, removed, click, shared: () => shared, configured: () => configured};
+    return {view, removed, labels, click, shared: () => shared, configured: () => configured};
 };
 
 test("related render removes the shared settings button while retaining local controls and paging", () => {
     const f = fixture();
     f.view.rendered({viewID: "table", viewType: "table", view: {columns: [], rows: []}});
     assert.deepEqual(f.removed, ["av-more"]);
+    assert.equal(f.labels.get("av-sort"), "Sort in this panel");
+    assert.equal(f.labels.get("av-filter"), "Additional filters in this panel");
 });
 
 test("removed settings actions are inert while remaining shared configuration entry points stay guarded", () => {

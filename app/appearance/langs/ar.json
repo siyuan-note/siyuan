@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "إضافة إدخال موجود",
 		"relatedDatabaseViewNew": "إنشاء إدخال وربطه",
 		"relatedDatabaseViewTemporaryFilter": "عوامل تصفية إضافية في هذه اللوحة",
+		"relatedDatabaseViewTemporarySort": "الترتيب في هذه اللوحة",
 		"relatedDatabaseViewSharedTip": "يستخدم هذا الجدول عرضًا مشتركًا. يؤثر تغيير إعداداته في جميع المراجع",
 		"dateCalendar": "التقويم",
 		"solarCalendar": "الميلادي",

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Pridať existujúcu položku",
 		"relatedDatabaseViewNew": "Vytvoriť a prepojiť položku",
 		"relatedDatabaseViewTemporaryFilter": "Ďalšie filtre v tomto paneli",
+		"relatedDatabaseViewTemporarySort": "Zoradenie v tomto paneli",
 		"relatedDatabaseViewSharedTip": "Táto tabuľka používa zdieľaný pohľad. Zmeny jeho nastavení ovplyvnia všetky odkazy",
 		"dateCalendar": "Kalendár",
 		"solarCalendar": "Gregoriánsky",

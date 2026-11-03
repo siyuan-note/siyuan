@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "添加已有条目",
 		"relatedDatabaseViewNew": "新建并关联条目",
 		"relatedDatabaseViewTemporaryFilter": "本面板附加筛选",
+		"relatedDatabaseViewTemporarySort": "本面板排序",
 		"relatedDatabaseViewSharedTip": "此表格引用共享视图，修改视图配置会影响所有引用",
 		"dateCalendar": "历法",
 		"solarCalendar": "公历",

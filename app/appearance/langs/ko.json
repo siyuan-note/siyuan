@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "기존 항목 추가",
 		"relatedDatabaseViewNew": "항목을 새로 만들고 연결",
 		"relatedDatabaseViewTemporaryFilter": "이 패널의 추가 필터",
+		"relatedDatabaseViewTemporarySort": "이 패널에서 정렬",
 		"relatedDatabaseViewSharedTip": "이 표는 공유 보기를 사용합니다. 설정을 변경하면 모든 참조에 적용됩니다",
 		"dateCalendar": "달력 체계",
 		"solarCalendar": "양력",

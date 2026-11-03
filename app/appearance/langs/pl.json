@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Dodaj istniejący wpis",
 		"relatedDatabaseViewNew": "Utwórz i powiąż wpis",
 		"relatedDatabaseViewTemporaryFilter": "Dodatkowe filtry w tym panelu",
+		"relatedDatabaseViewTemporarySort": "Sortowanie w tym panelu",
 		"relatedDatabaseViewSharedTip": "Ta tabela korzysta ze współdzielonego widoku. Zmiana jego konfiguracji wpływa na wszystkie odwołania",
 		"dateCalendar": "Kalendarz",
 		"solarCalendar": "Gregoriański",

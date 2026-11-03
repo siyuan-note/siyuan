@@ -3623,7 +3623,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The table contains only entries already linked through the current entry’s relation field, further limited by the selected view’s filters. One-way relations do not require a reverse relation field. The target view’s column layout is shared; the current entry’s membership restriction is never saved into shared filters. Search, temporary sorting and additional filters apply only to the current panel."
+					"Data": "The table contains only entries already linked through the current entry’s relation field, further limited by the selected view’s filters. One-way relations do not require a reverse relation field. The target view’s column layout is shared; the current entry’s membership restriction is never saved into shared filters. Search, “Sort in this panel” and “Additional filters in this panel” apply only to the current panel."
 				}
 			]
 		},

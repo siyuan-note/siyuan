@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "הוספת רשומה קיימת",
 		"relatedDatabaseViewNew": "יצירת רשומה וקישורה",
 		"relatedDatabaseViewTemporaryFilter": "מסננים נוספים בחלונית זו",
+		"relatedDatabaseViewTemporarySort": "מיון בחלונית זו",
 		"relatedDatabaseViewSharedTip": "טבלה זו משתמשת בתצוגה משותפת. שינוי ההגדרות שלה משפיע על כל ההפניות",
 		"dateCalendar": "לוח שנה",
 		"solarCalendar": "גרגוריאני",

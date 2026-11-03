@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Додај постојећу ставку",
 		"relatedDatabaseViewNew": "Направи и повежи ставку",
 		"relatedDatabaseViewTemporaryFilter": "Додатни филтери у овом панелу",
+		"relatedDatabaseViewTemporarySort": "Сортирање у овом панелу",
 		"relatedDatabaseViewSharedTip": "Ова табела користи заједнички поглед. Промена његових подешавања утиче на све референце",
 		"dateCalendar": "Календар",
 		"solarCalendar": "Грегоријански",

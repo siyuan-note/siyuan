@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Add existing entry",
 		"relatedDatabaseViewNew": "Create and link entry",
 		"relatedDatabaseViewTemporaryFilter": "Additional filters in this panel",
+		"relatedDatabaseViewTemporarySort": "Sort in this panel",
 		"relatedDatabaseViewSharedTip": "This table uses a shared view. Changing its configuration affects every reference",
 		"dateCalendar": "Calendar",
 		"solarCalendar": "Gregorian",

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Додати наявний запис",
 		"relatedDatabaseViewNew": "Створити й пов’язати запис",
 		"relatedDatabaseViewTemporaryFilter": "Додаткові фільтри в цій панелі",
+		"relatedDatabaseViewTemporarySort": "Сортування в цій панелі",
 		"relatedDatabaseViewSharedTip": "Ця таблиця використовує спільне подання. Зміни його налаштувань вплинуть на всі посилання на нього",
 		"dateCalendar": "Календар",
 		"solarCalendar": "Григоріанський",

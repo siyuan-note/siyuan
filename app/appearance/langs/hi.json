@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "मौजूदा प्रविष्टि जोड़ें",
 		"relatedDatabaseViewNew": "प्रविष्टि बनाएँ और लिंक करें",
 		"relatedDatabaseViewTemporaryFilter": "इस पैनल में अतिरिक्त फ़िल्टर",
+		"relatedDatabaseViewTemporarySort": "इस पैनल में क्रमबद्ध करें",
 		"relatedDatabaseViewSharedTip": "यह तालिका साझा दृश्य का उपयोग करती है। इसकी सेटिंग बदलने से सभी संदर्भ प्रभावित होंगे",
 		"dateCalendar": "पंचांग",
 		"solarCalendar": "ग्रेगोरियन",

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "既存の項目を追加",
 		"relatedDatabaseViewNew": "項目を新規作成して関連付け",
 		"relatedDatabaseViewTemporaryFilter": "このパネルの追加フィルター",
+		"relatedDatabaseViewTemporarySort": "このパネルの並べ替え",
 		"relatedDatabaseViewSharedTip": "このテーブルは共有ビューを使用しています。設定を変更すると、すべての参照に反映されます",
 		"dateCalendar": "暦",
 		"solarCalendar": "グレゴリオ暦",

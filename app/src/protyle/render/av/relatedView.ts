@@ -297,7 +297,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         this.hostElement.querySelectorAll<HTMLElement>(".layout-tab-bar .item").forEach(element => {
             element.classList.toggle("fn__none", element.dataset.avType !== "table");
         });
-        this.hostElement.querySelector('[data-type="av-sort"]')?.setAttribute("aria-label", window.siyuan.languages.avTemporarySort);
+        this.hostElement.querySelector('[data-type="av-sort"]')?.setAttribute("aria-label", window.siyuan.languages._attrView.relatedDatabaseViewTemporarySort);
         this.hostElement.querySelector('[data-type="av-filter"]')?.setAttribute("aria-label", window.siyuan.languages._attrView.relatedDatabaseViewTemporaryFilter);
         this.hostElement.querySelector('[data-type="av-selection-delete"]')?.setAttribute("aria-label", window.siyuan.languages._attrView.relatedDatabaseViewRemove);
         this.hostElement.querySelector('[data-type="av-selection-edit"]')?.remove();
@@ -397,7 +397,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         if (!data) return;
         toggleMenu({target, build: () => {
         const menu = new Menu();
-        menu.addItem({type: "readonly", label: window.siyuan.languages.avTemporarySort});
+        menu.addItem({type: "readonly", label: window.siyuan.languages._attrView.relatedDatabaseViewTemporarySort});
         getFieldsByData(data).filter(field => hasAVCapability(field.type, "sortable")).forEach(field => menu.addItem({
             label: field.name, icon: getColIconByType(field.type), submenu: (["ASC", "DESC"] as const).map(order => ({
                 label: window.siyuan.languages[order === "ASC" ? "asc" : "desc"],

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Ajouter une entrée existante",
 		"relatedDatabaseViewNew": "Créer et lier une entrée",
 		"relatedDatabaseViewTemporaryFilter": "Filtres supplémentaires dans ce panneau",
+		"relatedDatabaseViewTemporarySort": "Tri dans ce panneau",
 		"relatedDatabaseViewSharedTip": "Ce tableau utilise une vue partagée. Modifier sa configuration affecte toutes les références",
 		"dateCalendar": "Calendrier",
 		"solarCalendar": "Grégorien",

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Bestaand item toevoegen",
 		"relatedDatabaseViewNew": "Item maken en koppelen",
 		"relatedDatabaseViewTemporaryFilter": "Extra filters in dit paneel",
+		"relatedDatabaseViewTemporarySort": "Sorteren in dit paneel",
 		"relatedDatabaseViewSharedTip": "Deze tabel gebruikt een gedeelde weergave. Wijzigingen in de configuratie gelden voor alle verwijzingen",
 		"dateCalendar": "Kalender",
 		"solarCalendar": "Gregoriaans",

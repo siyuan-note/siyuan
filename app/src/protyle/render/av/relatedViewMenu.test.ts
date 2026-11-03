@@ -43,7 +43,8 @@ const fixture = (sheet = false) => {
         closeSheet() { menu.remove(); },
     };
     const context = {
-        window: {siyuan: {menus: {menu}, languages: {avTemporarySort: "Temporary sort", asc: "ASC", desc: "DESC"}}},
+        window: {siyuan: {menus: {menu}, languages: {avTemporarySort: "Temporary sort",
+            _attrView: {relatedDatabaseViewTemporarySort: "Sort in this panel"}, asc: "ASC", desc: "DESC"}}},
         document: {activeElement: null as HTMLElement | null, addEventListener: (_type: string, handler: typeof touchDown) => { touchDown = handler; }},
         getSelection: () => ({rangeCount: 0}),
     };
@@ -84,6 +85,7 @@ for (const sheet of [false, true]) {
         const f = fixture(sheet);
         const sort = new Target("av-sort");
         f.click(sort);
+        assert.equal(f.items[0].label, "Sort in this panel");
         assert.equal(f.isVisible(), true);
         f.click(new Target());
         assert.equal(f.isVisible(), false);

@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "Tambahkan entri yang ada",
 		"relatedDatabaseViewNew": "Buat dan hubungkan entri",
 		"relatedDatabaseViewTemporaryFilter": "Filter tambahan di panel ini",
+		"relatedDatabaseViewTemporarySort": "Urutkan di panel ini",
 		"relatedDatabaseViewSharedTip": "Tabel ini menggunakan tampilan bersama. Perubahan konfigurasinya memengaruhi semua referensi",
 		"dateCalendar": "Kalender",
 		"solarCalendar": "Gregorian",

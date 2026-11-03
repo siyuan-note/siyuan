@@ -3184,6 +3184,7 @@
 		"relatedDatabaseViewAdd": "เพิ่มรายการที่มีอยู่",
 		"relatedDatabaseViewNew": "สร้างและเชื่อมโยงรายการ",
 		"relatedDatabaseViewTemporaryFilter": "ตัวกรองเพิ่มเติมในแผงนี้",
+		"relatedDatabaseViewTemporarySort": "เรียงลำดับในแผงนี้",
 		"relatedDatabaseViewSharedTip": "ตารางนี้ใช้มุมมองร่วมกัน การเปลี่ยนการตั้งค่าจะส่งผลต่อการอ้างอิงทั้งหมด",
 		"dateCalendar": "ระบบปฏิทิน",
 		"solarCalendar": "เกรกอเรียน",

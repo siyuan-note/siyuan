@@ -41,6 +41,7 @@ const runCases = async appDirectory => {
         return exports;
     };
     const {MobileDialog} = load("dialog/mobileDialog");
+    window.shortViewportDialogModule = {MobileDialog};
     const dialog = new MobileDialog({title: "Text", mobileSheet: {expandable: true},
         content: '<div class="b3-dialog__content"><div style="height:1800px">Long content</div></div><div class="b3-dialog__action"><button class="b3-button" data-confirm>Confirm</button></div>'});
     await wait();
@@ -171,6 +172,30 @@ const runCases = async appDirectory => {
     document.body.style.removeProperty("--mobile-bottom-bar-safe-area");
 };
 
+const runShortViewportCase = async () => {
+    const check = require("node:assert/strict");
+    const wait = () => new Promise(resolve => setTimeout(resolve, 250));
+    const {MobileDialog} = window.shortViewportDialogModule;
+    window.siyuan.mobile.size.landscape.height1 = 350;
+    window.siyuan.mobile.size.isLandscape = true;
+    const dialog = new MobileDialog({title: "Color", content:
+        '<div class="b3-dialog__content"><label class="b3-label b3-label--inner">Name<input class="b3-text-field fn__block"></label><div style="height:600px"></div></div>' +
+        '<div class="b3-dialog__action"><button class="b3-button">Confirm</button></div>'});
+    await new Promise(resolve => setTimeout(resolve, 1250));
+    const input = dialog.element.querySelector("input");
+    input.focus();
+    input.scrollIntoView({block: "nearest"});
+    const button = dialog.element.querySelector("button").getBoundingClientRect();
+    const field = input.getBoundingClientRect();
+    check.ok(button.top >= 0 && button.bottom <= innerHeight, "confirm stays above the landscape keyboard: " +
+        JSON.stringify({button, height: innerHeight, panel: dialog.element.querySelector("[role=dialog]").getBoundingClientRect(),
+            header: getComputedStyle(dialog.element.querySelector(".b3-dialog__header")).display}));
+    check.ok(field.top >= 0 && field.bottom <= button.top, "the current input fits above the action row");
+    check.equal(dialog.element.querySelector(".b3-dialog__close"), null);
+    dialog.destroy();
+    await wait();
+};
+
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -188,6 +213,12 @@ if (process.versions.electron && process.type === "browser") {
                 catch (error) { return error.stack; }
             })()`);
             assert.equal(error, undefined);
+            win.setContentSize(824, 103);
+            const shortError = await win.webContents.executeJavaScript(`(async () => {
+                try { await (${runShortViewportCase.toString()})(); }
+                catch (error) { return error.stack; }
+            })()`);
+            assert.equal(shortError, undefined);
         } catch (error) { console.error(error); code = 1; }
         finally { win.destroy(); app.exit(code); }
     });

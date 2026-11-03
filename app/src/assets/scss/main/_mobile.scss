@@ -2014,6 +2014,19 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
 }
 
+// 横屏输入法占满屏幕时，让有限的高度留给输入区和底部操作。
+@media (max-height: 160px) {
+  .mobile-bottom-sheet-dialog .b3-dialog__header {
+    display: none;
+  }
+
+  .mobile-bottom-sheet-dialog .b3-dialog__content {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
 .mobile-sheet-layout--standalone {
   display: flex;
   align-items: flex-end;

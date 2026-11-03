@@ -1,5 +1,5 @@
 import {MobileDialog} from "../../dialog/mobileDialog";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
 import {isMobile} from "../../util/functions";
 import {transaction} from "../wysiwyg/transaction";
@@ -101,49 +101,51 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
             if (convert.disabled || !available()) {
                 return;
             }
-            convert.disabled = true;
-            source.disabled = true;
-            target.disabled = true;
-            withSubheadings.disabled = true;
-            await protyle.wysiwyg.flushPendingInput();
-            await waitForPendingTransactions(protyle);
-            if (closed || !available()) {
-                dialog.destroy();
-                return;
-            }
-            void fetchPost("/api/block/getDocHeadingLevelTransaction", {
-                id: rootID,
-                notebook: protyle.notebookId,
-                source: Number(source.value),
-                target: Number(target.value),
-                withSubheadings: withSubheadings.checked,
-            }, result => {
-                if (closed || !available() || !result.data) {
-                    return;
+            await dialog.runPending(async () => {
+                source.disabled = true;
+                target.disabled = true;
+                withSubheadings.disabled = true;
+                await protyle.wysiwyg.flushPendingInput();
+                await waitForPendingTransactions(protyle);
+                if (closed || !available()) {
+                    dialog.invalidate();
+                    return false;
                 }
+                const result = await fetchSyncPost("/api/block/getDocHeadingLevelTransaction", {
+                    id: rootID,
+                    notebook: protyle.notebookId,
+                    source: Number(source.value),
+                    target: Number(target.value),
+                    withSubheadings: withSubheadings.checked,
+                });
+                if (closed || !available()) {
+                    dialog.invalidate();
+                    return false;
+                }
+                if (result.code !== 0 || !result.data) return false;
                 const operations = result.data.transaction;
                 if (!operations?.doOperations?.length) {
                     counts = result.data.counts;
                     withSubheadingCounts = result.data.withSubheadingCounts;
                     populate();
-                    return;
+                    return false;
                 }
-                transaction(protyle, operations.doOperations, operations.undoOperations, {
+                await transaction(protyle, operations.doOperations, operations.undoOperations, {
+                    awaitResponse: true,
                     callback() {
                         if (protyle.block.rootID === rootID && protyle.element.isConnected) {
                             reloadProtyle(protyle, false);
                         }
                     }
                 });
-                dialog.destroy();
-            }).finally(() => {
-                if (!closed) {
-                    source.disabled = source.options.length === 0;
-                    target.disabled = source.disabled;
-                    withSubheadings.disabled = false;
-                    update();
-                }
+                return true;
             });
+            if (!closed) {
+                source.disabled = source.options.length === 0;
+                target.disabled = source.disabled;
+                withSubheadings.disabled = false;
+                update();
+            }
         });
     });
 };

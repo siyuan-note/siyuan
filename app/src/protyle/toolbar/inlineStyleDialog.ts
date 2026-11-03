@@ -66,7 +66,6 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     const properties = getProperties(initialType);
     let editingKey: string | undefined;
     let editingKind: "builtin" | "custom" | "new" | undefined;
-    let saving = false;
     const dialog = new MobileDialog({
         title: window.siyuan.languages.color,
         width: isMobile() ? "92vw" : "600px",
@@ -327,26 +326,23 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             confirmEditor();
         } else if (action === "cancel") {
             dialog.destroy();
-        } else if (action === "save" && !saving) {
-            saving = true;
-            actionElement.setAttribute("disabled", "disabled");
-            try {
-                const response = await saveInlineStyles(draft);
-                if (response?.code !== 0) {
-                    showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
-                    saving = false;
-                    actionElement.removeAttribute("disabled");
-                    return;
+        } else if (action === "save") {
+            await dialog.runPending(async () => {
+                try {
+                    const response = await saveInlineStyles(draft);
+                    if (response?.code !== 0) {
+                        showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
+                        return false;
+                    }
+                    const data = getInlineStylesCache();
+                    onChange?.(data);
+                    void import("../../util/assets").then(module => module.setInlineStyle());
+                    return true;
+                } catch (error) {
+                    showMessage(error instanceof Error ? error.message : window.siyuan.languages.invalid, 6000, "error");
+                    return false;
                 }
-                const data = getInlineStylesCache();
-                onChange?.(data);
-                void import("../../util/assets").then(module => module.setInlineStyle());
-                dialog.destroy();
-            } catch (error) {
-                showMessage(error instanceof Error ? error.message : window.siyuan.languages.invalid, 6000, "error");
-                saving = false;
-                actionElement.removeAttribute("disabled");
-            }
+            });
         }
         event.preventDefault();
         event.stopPropagation();

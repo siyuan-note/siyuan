@@ -709,7 +709,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 }
                 const batchCells = cellElements[0].dataset.avBatchOriginalValue ? cellElements : undefined;
                 await updateCellsValue(protyle, blockElement, value, batchCells, undefined, undefined,
-                    false, false, false, locationCells);
+                    false, false, false, locationCells, true, true);
             },
             onDestroy: options?.destroyCallback,
         });

@@ -82,3 +82,57 @@ test("database text acknowledgements do not repopulate an invalidated owner", as
     await saving;
     assert.deepEqual(f.updates, []);
 });
+
+test("location editor saves await cell persistence and preserve the original target", async () => {
+    const declaration = source.statements.find(statement => statement.getText(source).startsWith("export const popTextCell"));
+    const exports = {} as typeof import("./cell");
+    const previous = {id: "value", type: "location", location: {name: "original"}};
+    const block = {isConnected: true, dataset: {avId: "database", nodeId: "carrier"},
+        getAttribute: () => "table", querySelector: () => ({})};
+    const cell = {dataset: {}, getBoundingClientRect: () => ({}), closest: (): null => null};
+    const protyle = {block: {rootID: "document"}, options: {}};
+    let editor: {onSave: (value: object) => Promise<void>};
+    let complete: () => void;
+    let fail: (error: Error) => void;
+    let requests = 0;
+    runInNewContext(transpileModule(declaration.getText(source), {compilerOptions: {
+        module: ModuleKind.CommonJS, target: ScriptTarget.ES2022,
+    }}).outputText, {exports,
+        document: {querySelector: (): null => null}, getComputedStyle: () => ({}),
+        window: {siyuan: {config: {}, menus: {menu: {remove() {}}}}},
+        hasClosestBlock: () => block, hasClosestByClassName: () => ({}),
+        isTableLikeView: () => true, cellScrollIntoView() {},
+        getStoredCellValueByElement: () => previous,
+        genCellValueByElement: () => previous, cloneAVCellValueSnapshot: structuredClone,
+        getAVCellEditorOwner: () => ({contains: () => true}),
+        getFieldIdByCellElement: () => "row", getColId: () => "column", getAVData: (): null => null,
+        openAVLocationEditor: (options: typeof editor) => { editor = options; },
+        updateCellsValue: (...args: unknown[]) => {
+            assert.equal(args[0], protyle);
+            assert.equal(args[1], block);
+            const cells = args[9] as Array<{rowID: string; colID: string}>;
+            assert.equal(cells[0].rowID, "row");
+            assert.equal(cells[0].colID, "column");
+            assert.equal(args[10], true);
+            assert.equal(args[11], true);
+            requests++;
+            return new Promise<void>((resolve, reject) => { complete = resolve; fail = reject; });
+        },
+    });
+    exports.popTextCell(protyle as IProtyle, [cell] as unknown as HTMLElement[], "location");
+    const saving = editor.onSave({name: "draft"});
+    let resolved = false;
+    void saving.then(() => { resolved = true; }, () => {});
+    await Promise.resolve();
+    assert.equal(resolved, false);
+    const rejected = assert.rejects(saving, /Save failed/);
+    fail(new Error("Save failed"));
+    await rejected;
+    const retry = editor.onSave({name: "draft"});
+    complete();
+    await retry;
+    assert.equal(requests, 2);
+    block.isConnected = false;
+    await editor.onSave({name: "stale"});
+    assert.equal(requests, 2);
+});

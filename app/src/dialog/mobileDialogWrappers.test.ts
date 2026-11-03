@@ -43,7 +43,10 @@ const setup = (mobile = true) => {
         }
     }
     const dependencies = {MobileDialog: MockDialog, isMobile: () => mobile, escapeHtml: (value: string) => value,
-        Constants: {}, openInputDialog: (options: any) => { delegated = options; return new MockDialog(options); },
+        Constants: {}, createInputDialog: (options: any, DialogConstructor: typeof MockDialog) => {
+            delegated = options;
+            return new DialogConstructor(options);
+        },
         confirmDialog: (...args: any[]) => { delegated = args; return new MockDialog({}); }};
     const load = (file: string) => {
         const exports: any = {};

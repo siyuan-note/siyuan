@@ -4042,6 +4042,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         await nativeTouch([
             {type: "touchStart", touchPoints: [fingerAt(1)]},
             ...[-20, -40, -60, -80, -100].map(dy => ({type: "touchMove", touchPoints: [fingerAt(1, 0, dy)]})),
+            // 松手前停稳，避免阅读滑动的惯性污染后续独立的双指手势断言。
+            {type: "wait", delay: 200},
             {type: "touchEnd", touchPoints: []},
         ]);
         await new Promise(resolve => setTimeout(resolve, 200));

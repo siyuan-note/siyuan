@@ -89,6 +89,10 @@ if (process.versions.electron && process.type === "browser") {
                 });
                 await win.loadFile(path.join(root, "electron/static/boot.html"), {query: {lang: "zh-CN", v: "test",
                     previousExitWaiting: languages.previousExitWaiting}});
+                win.webContents.debugger.attach("1.3");
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 const startup = await win.webContents.executeJavaScript(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
                     logo: !!document.querySelector("#bg svg"), message: document.getElementById("details").textContent,
                     progress: document.getElementById("progress").style.width,

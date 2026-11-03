@@ -1019,8 +1019,8 @@ app.whenReady().then(async () => {
     ipcMain.handle("markdown-reduced-motion", (_event, reduce)=>win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features:[{name:"prefers-reduced-motion",value:reduce?"reduce":"no-preference"}]}));
     ipcMain.handle("markdown-pointer-click", async (_event, selector) => {
         const point = await win.webContents.executeJavaScript('(()=>{const rect=document.querySelector('+JSON.stringify(selector)+').getBoundingClientRect();return {x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)};})()');
-        win.webContents.sendInputEvent({type:"mouseDown",...point,button:"left",clickCount:1});
-        win.webContents.sendInputEvent({type:"mouseUp",...point,button:"left",clickCount:1});
+        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mousePressed",...point,button:"left",buttons:1,clickCount:1});
+        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseReleased",...point,button:"left",buttons:0,clickCount:1});
     });
     ipcMain.handle("markdown-pointer-move", async (_event, x, y) => {
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseMoved",x:Math.round(x),y:Math.round(y),pointerType:"mouse"});
@@ -1031,6 +1031,7 @@ app.whenReady().then(async () => {
         await win.loadURL(origin+"/");
         win.webContents.debugger.attach("1.3");
         await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled:true});
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features:[{name:"prefers-reduced-motion",value:"no-preference"}]});
         await win.webContents.executeJavaScript(${JSON.stringify("window.SIYUAN_VERSION='test';globalThis.Vditor=require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + ");void 0;")});
         await win.webContents.executeJavaScript(${JSON.stringify(source)});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(`const __name = value => value; (${browserCases.toString()})(${JSON.stringify(languages)})`)}));

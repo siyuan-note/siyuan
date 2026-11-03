@@ -32,7 +32,10 @@ export const openInputDialog = (options: {
     bindInput?: boolean,
     onConfirm: (value: string, dialog: Dialog) => void,
     destroyCallback?: (options?: IObject) => void,
-}): Dialog => {
+}): Dialog => createInputDialog(options, Dialog);
+
+export const createInputDialog = (options: Parameters<typeof openInputDialog>[0],
+                                 DialogConstructor: new(options: ConstructorParameters<typeof Dialog>[0]) => Dialog): Dialog => {
     const inputHTML = options.multiline ?
         `<textarea spellcheck="false" class="b3-text-field fn__block" style="resize:${options.resize || "none"};${options.resize === "vertical" ? "min-height:28px;max-height:min(480px, 50vh)" : ""}" data-dialog-input></textarea>` :
         '<input spellcheck="false" class="b3-text-field fn__block" value="" data-dialog-input>';
@@ -46,7 +49,7 @@ export const openInputDialog = (options: {
         `<button class="b3-button b3-button--text" data-input-confirm>${escapeHtml(options.confirmText || window.siyuan.languages.confirm)}</button>`,
         actionsHTML("afterConfirm"),
     ].filter(Boolean).join('<div class="fn__space"></div>');
-    const dialog = new Dialog({
+    const dialog = new DialogConstructor({
         title: options.title,
         positionId: options.positionId,
         content: `<div class="b3-dialog__content">${options.prefixContent || ""}${options.label ? `<label>${escapeHtml(options.label)}<div class="fn__hr"></div>${inputHTML}</label>` : inputHTML}${options.description ? `<div class="b3-label__text">${options.description}</div>` : ""}${options.extraContent || ""}</div>

@@ -6,7 +6,7 @@ import {test} from "node:test";
 const {importMarkdownImage} = require("./imageImport");
 
 const setup = async t => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-image-import-"));
+    const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-image-import-")));
     t.after(() => fs.rm(directory, {recursive: true, force: true}));
     const source = path.join(directory, "source.png");
     const targetPath = path.join(directory, "document.md");
@@ -107,6 +107,7 @@ test("a source replaced between stat and open is rejected using the opened file 
         }
         return fs.open(...args);
     }}});
+    assert.equal(replaced, true);
     assert.equal(result.kind, "blocked");
     assert.equal(result.error.code, "identity-changed");
     await assert.rejects(fs.stat(request.destination), {code: "ENOENT"});

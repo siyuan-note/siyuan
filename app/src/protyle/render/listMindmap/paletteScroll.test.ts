@@ -303,6 +303,9 @@ app.whenReady().then(async () => {
     });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+            features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+        });
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
             `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
         win.destroy();

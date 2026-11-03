@@ -1,5 +1,5 @@
 import {MobileDialog as Dialog, MobileSheetOptions} from "./mobileDialog";
-import {openInputDialog} from "./inputDialog";
+import {createInputDialog} from "./inputDialog";
 import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 
@@ -37,12 +37,12 @@ export const mobileInputDialog = (options: {
     destroyCallback?: (options?: IObject) => void,
 }): Dialog => {
     if (!isMobile()) {
-        return openInputDialog({...options, onConfirm: (value, dialog) => {
+        return createInputDialog({...options, onConfirm: (value, dialog) => {
             const result = options.onConfirm(value, dialog as Dialog);
             if (options.awaitConfirm) void Promise.resolve(result).then(success => {
                 if (success === true) dialog.destroy();
             }).catch(error => console.error(error));
-        }}) as Dialog;
+        }}, Dialog) as Dialog;
     }
     const inputHTML = options.multiline ?
         `<textarea spellcheck="false" class="b3-text-field fn__block" style="resize:${options.resize || "none"};${options.resize === "vertical" ? "min-height:28px;max-height:min(480px, 50vh)" : ""}" data-dialog-input></textarea>` :

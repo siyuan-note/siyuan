@@ -8,14 +8,14 @@ const {MarkdownTree} = require("./tree");
 const {createMarkdownTreeView} = require("./treeView");
 
 const fixture = async (t, options = {}) => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-tree-"));
+    const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-tree-")));
     const root = path.join(directory, "documents");
     const config = path.join(directory, "config");
     await fs.mkdir(root);
     const tree = new MarkdownTree({view: createMarkdownTreeView(config), ...options});
     t.after(async () => {
         tree.close();
-        assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()));
+        assert.equal(path.dirname(directory), await fs.realpath(os.tmpdir()));
         await fs.rm(directory, {recursive: true, force: true, maxRetries: 3});
     });
     await tree.setRoot(root);

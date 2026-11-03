@@ -74,7 +74,7 @@ const browserCases = async (sources, entries, themes) => {
     check.equal(forced.maskImage, "none");
     check.equal(forced.backgroundImage, "none");
     check.equal(forced.borderTopWidth, "2px");
-    await ipcRenderer.invoke("loading-media", []);
+    await ipcRenderer.invoke("loading-media", [{name: "prefers-reduced-motion", value: "no-preference"}]);
 
     for (const entry of ["base", "mobile", "export"]) {
         for (const theme of ["light", "dark"]) {
@@ -147,7 +147,7 @@ const browserCases = async (sources, entries, themes) => {
             await ipcRenderer.invoke("loading-media", [{name: "forced-colors", value: "active"}]);
             check.equal(getComputedStyle(bar, "::before").backgroundImage, "none");
             check.notEqual(getComputedStyle(bar, "::before").backgroundColor, "rgba(0, 0, 0, 0)");
-            await ipcRenderer.invoke("loading-media", []);
+            await ipcRenderer.invoke("loading-media", [{name: "prefers-reduced-motion", value: "no-preference"}]);
             progress.progressLoading({code: 0, msg: "Rebuilding index", data: {current: 42, total: 100}});
             progress.updateReindexProgressStatus("Unrelated status");
             check.equal(document.querySelector('#progress [data-type="message"]').textContent, "Rebuilding index");

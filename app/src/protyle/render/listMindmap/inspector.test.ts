@@ -308,7 +308,7 @@ test("mindmap inspectors follow clipped viewports and reveal short maps only aft
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText).join("\n");
-    const css = ["business/_block.scss", "business/_color.scss", "protyle/_mindmap-view.scss"]
+    const css = ["business/_block.scss", "business/_color.scss", "component/_svg.scss", "protyle/_mindmap-view.scss"]
         .map(file => require("sass").compile(path.resolve(__dirname, "../../../assets/scss", file),
             {logger: require("sass").Logger.silent}).css).join("\n");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-inspector-"));
@@ -332,6 +332,8 @@ app.whenReady().then(async () => {
     });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.webContents.debugger.attach("1.3");
+        await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `const __name = value => value; (${browserSource})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));

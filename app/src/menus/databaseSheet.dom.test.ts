@@ -53,6 +53,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/groups": {getPageSize: () => ({})},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {}, "protyle/render/av/selectPosition": {},
+        "dialog/message": {showMessage() {}},
     };
     const load = (name: string): any => {
         if (name in externals) {
@@ -210,7 +211,7 @@ test("mobile database sheets expand, preserve navigation and edits, and fit the 
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel",
-        "protyle/render/av/mobilePanel"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
     const css = compile(path.join(__dirname, "../assets/scss/mobile.scss"), {logger: Logger.silent}).css;

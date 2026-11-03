@@ -154,6 +154,7 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
     for (const name of [process.platform === "win32" ? "node.exe" : "bin/node"]) write(`DevEco Studio/tools/node/${name}`);
     write("DevEco Studio/tools/hvigor/bin/hvigorw.js");
     write("DevEco Studio/tools/ohpm/bin/pm-cli.js");
+    write("app/stage/protyle/js/lute/lute.min.js");
     write("app/stage/build/mobile/index.html");
     write("app/stage/build/desktop/index.html");
     write("app/stage/build/export/protyle-method.js");
@@ -206,12 +207,18 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
             }
             if (failKernel) return {status: 1};
         }
+        if (command === "bash") {
+            assert.deepEqual(argv, ["-e", path.join(root, "scripts/harmony-kernel-build.sh")]);
+            assert.equal(settings.cwd, path.join(root, "kernel/harmony"));
+            if (failKernel) return {status: 1};
+        }
         if (command === "tar") {
             list = argv[argv.indexOf("-T") + 1];
             const files = readFileSync(list, "utf8");
             assert.match(files, /stage\/build\/desktop\/index.html/);
             assert.match(files, /stage\/build\/export\/base.css/);
-            assert.match(files, /stage\/build\/markdown\/vditor\/dist\/js\/lute\/lute.min.js/);
+            assert.match(files, /stage\/protyle\/js\/lute\/lute.min.js/);
+            assert.doesNotMatch(files, /stage\/build\/markdown\/vditor\/dist\/js\/lute\//);
             assert.doesNotMatch(files, /ocr\/runtime/);
             writeFileSync(argv[argv.indexOf("-cf") + 1], "zip");
         }
@@ -231,8 +238,8 @@ test(`Harmony build handles resources and workspace (reuse=${reuse}, workspace=$
             "install bundle successfully.\n" : argv.includes("start") ? "start ability successfully.\n" : ""};
     }, root);
     if (failKernel) {
-        assert.throws(build, /wsl.exe failed/);
-        assert.equal(existsSync(temporaryWork), false);
+        assert.throws(build, process.platform === "win32" ? /wsl.exe failed/ : /bash failed/);
+        if (temporaryWork) assert.equal(existsSync(temporaryWork), false);
         assert.equal(readFileSync(originalWork, "utf8"), "original workspace");
         assert.ok(!calls.some(([, argv]) => argv.includes("assembleHap")));
         return;

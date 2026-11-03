@@ -63,7 +63,12 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     child.stderr.on("data", data => { output += data; });
     const waitFor = async (predicate, description) => {
         const deadline = Date.now() + 15000;
-        while (!predicate()) {
+        while (true) {
+            try {
+                if (predicate()) return;
+            } catch (error) {
+                if (!["ENOENT", "EBUSY", "EPERM"].includes(error.code)) throw error;
+            }
             if (failure) throw failure;
             assert.equal(exited, false, output);
             assert.equal(t.signal.aborted, false, "watch test canceled");
@@ -75,12 +80,18 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     const main = path.join(root, "electron-dist", "main.js");
     const initialBundle = fs.readFileSync(main, "utf8");
     fs.writeFileSync(entry, "const value: number = 2;\nconsole.log(value);\n");
-    await waitFor(() => fs.readFileSync(main, "utf8") !== initialBundle, "main-process watch compilation");
+    await waitFor(() => {
+        const content = fs.readFileSync(main, "utf8");
+        return content.length > 0 && content !== initialBundle;
+    }, "main-process watch compilation");
     const bundle = fs.readFileSync(main, "utf8");
     const preload = path.join(root, "electron-dist", "preload.js");
     const initialPreload = fs.readFileSync(preload, "utf8");
     fs.writeFileSync(path.join(root, bundledEntries.preload), "const value: number = 3;\nconsole.log(value);\n");
-    await waitFor(() => fs.readFileSync(preload, "utf8") !== initialPreload, "sandbox preload watch compilation");
+    await waitFor(() => {
+        const content = fs.readFileSync(preload, "utf8");
+        return content.length > 0 && content !== initialPreload;
+    }, "sandbox preload watch compilation");
     const preloadBundle = fs.readFileSync(preload, "utf8");
 
     // 所有资源均单独修改，避免其他主进程改动触发重建而掩盖监听缺项。

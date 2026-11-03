@@ -24,16 +24,40 @@ import (
 
 func importedPreferencesFixture(t *testing.T) {
 	t.Helper()
-	previous := model.Conf
+	previous, previousMarkdown := model.Conf, util.MarkdownSettings.Load()
 	home, workspace, confDir, temp, readOnly := util.HomeDir, util.WorkspaceDir, util.ConfDir, util.TempDir, util.ReadOnly
 	t.Cleanup(func() {
 		model.Conf = previous
 		util.HomeDir, util.WorkspaceDir, util.ConfDir, util.TempDir, util.ReadOnly = home, workspace, confDir, temp, readOnly
 		model.ApplyConfRuntime()
+		util.MarkdownSettings.Store(previousMarkdown)
 	})
 	util.HomeDir, util.WorkspaceDir, util.ConfDir, util.TempDir, util.ReadOnly = t.TempDir(), t.TempDir(), t.TempDir(), t.TempDir(), false
 	model.Conf = model.NewAppConf()
 	model.NormalizeAppConf(model.Conf)
+}
+
+func TestImportedPreferencesFixtureRestoresMarkdownSettings(t *testing.T) {
+	previousConf, previousMarkdown := model.Conf, util.MarkdownSettings.Load()
+	t.Cleanup(func() {
+		model.Conf = previousConf
+		util.MarkdownSettings.Store(previousMarkdown)
+	})
+	model.Conf = nil
+	markdown := util.NewMarkdown()
+	util.MarkdownSettings.Store(markdown)
+	t.Run("import without Markdown settings", func(t *testing.T) {
+		importedPreferencesFixture(t)
+		if code := importPreferencesRequest(t, "old.json", []byte(`{"editor":{"fontSize":18}}`)); code != 0 {
+			t.Fatal("import failed", code)
+		}
+		if util.MarkdownSettings.Load().InlineMath {
+			t.Fatal("legacy import did not replace the runtime Markdown settings")
+		}
+	})
+	if model.Conf != nil || util.MarkdownSettings.Load() != markdown {
+		t.Fatal("import fixture did not restore the original configuration and runtime Markdown settings")
+	}
 }
 
 func importPreferencesRequest(t *testing.T, name string, data []byte) int {

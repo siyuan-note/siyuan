@@ -6,7 +6,7 @@ import {test} from "node:test";
 const {MarkdownDiskService} = require("./disk");
 
 const setup = async (t, fileSystem?: typeof fs) => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-"));
+    const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-")));
     t.after(() => fs.rm(directory, {recursive: true, force: true}));
     const service = new MarkdownDiskService({fileSystem,
         ...(fileSystem?.rename && fileSystem.rename !== fs.rename ? {replace: fileSystem.rename} : {})});

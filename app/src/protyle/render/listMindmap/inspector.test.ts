@@ -19,6 +19,14 @@ const browserCases = async (source: string, css: string) => {
     lute.SetProtyleWYSIWYG(true);
     const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     const settle = async () => { await frame(); await frame(); await frame(); };
+    const waitForHover = () => new Promise<void>(resolve => setTimeout(resolve, 260));
+    const pointerInput = async (type: string, x: number, y: number, button = "none") => {
+        await require("electron").ipcRenderer.invoke("mindmap-inspector-mouse", {
+            type, x: Math.round(x), y: Math.round(y), button, clickCount: 1,
+        });
+        await settle();
+    };
+    const movePointer = (x: number, y: number) => pointerInput("mouseMove", x, y);
     for (const mobile of [false, true]) {
         for (const scale of [1, .75]) {
             document.body.className = mobile ? "body--android" : "body--windows";
@@ -79,6 +87,57 @@ const browserCases = async (source: string, css: string) => {
             await settle();
             visible(inspector);
             check.equal(outer.scrollTop, 0, "a fully visible map preserves document position");
+            if (!mobile) {
+                for (const kind of ["color", "width"]) {
+                    const trigger = inspector.querySelector<HTMLButtonElement>(`[aria-label="${kind}"]`);
+                    const triggerRect = trigger.getBoundingClientRect();
+                    const x = triggerRect.left + triggerRect.width / 2;
+                    await movePointer(x, triggerRect.top + triggerRect.height / 2);
+                    check.equal(panel.hidden, false, `${kind}: native mouse entry opens the panel`);
+                    const panelRect = panel.getBoundingClientRect();
+                    const bar = inspector.getBoundingClientRect();
+                    check.ok(bar.top > panelRect.bottom, "the native pointer crosses the actual panel gap");
+                    await movePointer(x, (panelRect.bottom + bar.top) / 2);
+                    check.equal(panel.hidden, false, `${kind}: crossing the gap does not close the panel immediately`);
+                    await movePointer(x, panelRect.top + panelRect.height / 2);
+                    await waitForHover();
+                    check.equal(panel.hidden, false, `${kind}: entering the real panel cancels delayed closure`);
+                    await movePointer(0, 0);
+                    await waitForHover();
+                    check.equal(panel.hidden, true, `${kind}: native mouse departure closes the panel`);
+                    check.equal(trigger.getAttribute("aria-expanded"), "false");
+                }
+                const trigger = inspector.querySelector<HTMLButtonElement>('[aria-label="width"]');
+                const rect = trigger.getBoundingClientRect();
+                await movePointer(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                const input = panel.querySelector<HTMLInputElement>('[data-width-control="number"]');
+                input.focus({preventScroll: true});
+                await movePointer(0, 0);
+                await waitForHover();
+                check.equal(panel.hidden, false, "a focused width input survives mouse departure");
+                input.blur();
+                await waitForHover();
+                check.equal(panel.hidden, true, "native focusout closes a panel whose pointer already left");
+                await movePointer(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                const slider = panel.querySelector<HTMLInputElement>('[data-width-control="slider"]');
+                const sliderRect = slider.getBoundingClientRect();
+                const sliderX = sliderRect.left + sliderRect.width / 2;
+                const sliderY = sliderRect.top + sliderRect.height / 2;
+                await movePointer(sliderX, sliderY);
+                await pointerInput("mouseDown", sliderX, sliderY, "left");
+                await pointerInput("mouseMove", 0, 0, "left");
+                await waitForHover();
+                check.equal(panel.hidden, false, "native slider dragging outside the panel does not dismiss it");
+                await pointerInput("mouseUp", 0, 0, "left");
+                await waitForHover();
+                check.equal(panel.hidden, false, "width-save rendering preserves the focused slider");
+                const savedSlider = panel.querySelector<HTMLInputElement>('[data-width-control="slider"]');
+                check.equal(document.activeElement, savedSlider);
+                check.notEqual(savedSlider, slider, "the width save exercises replacement of the panel DOM");
+                savedSlider.blur();
+                await waitForHover();
+                check.equal(panel.hidden, true, "focusout after width-save rendering still closes the departed panel");
+            }
 
             spacer.style.height = "430px";
             stage = "short";
@@ -258,12 +317,19 @@ test("mindmap inspectors follow clipped viewports and reveal short maps only aft
     const browserSource = transpileModule(`(${browserCases.toString()})`, {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText.trim().replace(/^"use strict";\s*/, "").replace(/;$/, "");
-    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 1000, height: 800,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    ipcMain.handle("mindmap-inspector-mouse", (_event, input) => {
+        win.webContents.focus();
+        if (input.type === "mouseMove" && input.button === "left") {
+            input.modifiers = ["leftbuttondown"];
+        }
+        win.webContents.sendInputEvent(input);
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lute)}, "utf8"));

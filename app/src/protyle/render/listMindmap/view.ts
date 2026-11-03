@@ -136,7 +136,9 @@ export class ListMindmapView {
     private inspectorPanel?: {
         kind: "color" | "width", ids: string[], anchor: HTMLButtonElement,
         widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
+        hover: boolean, inside: boolean, pointer?: number,
     };
+    private inspectorPanelTimer = 0;
     private widthPending = false;
     private inspectorFrame = 0;
     private revealInspectorHost = false;
@@ -263,6 +265,7 @@ export class ListMindmapView {
         this.routeStatus.setAttribute("role", "status");
         options.host.append(this.toolbar, this.viewport, this.inspector, this.inspectorPopover,
             this.tooltip, this.colorProbe, this.routeStatus);
+        this.bindInspectorPanelEvents();
         this.listen(this.inspector, "scroll", () => this.closeInspectorPanel());
         this.listen(this.inspectorPopover, "mousedown", (event: MouseEvent) => {
             // 面板按钮保留输入焦点，恢复和默认操作直接替换未提交的宽度预览。
@@ -3816,7 +3819,73 @@ export class ListMindmapView {
         event.stopPropagation();
     };
 
+    private bindInspectorPanelEvents() {
+        this.listen(this.inspectorPopover, "pointerenter", this.inspectorPanelEnter);
+        this.listen(this.inspectorPopover, "pointerleave", this.inspectorPanelLeave);
+        this.listen(this.inspectorPopover, "pointerdown", (event: PointerEvent) => {
+            if (event.pointerType === "mouse" && this.inspectorPanel) {
+                this.inspectorPanel.pointer = event.pointerId;
+                clearTimeout(this.inspectorPanelTimer);
+            }
+        });
+        this.listen(this.inspectorPopover, "focusin", () => clearTimeout(this.inspectorPanelTimer));
+        this.listen(this.inspectorPopover, "focusout", () => this.queueInspectorPanelClose());
+        const release = (event: PointerEvent) => {
+            const panel = this.inspectorPanel;
+            if (panel && panel.pointer === event.pointerId) {
+                panel.pointer = undefined;
+                // 捕获指针时事件目标仍是滑块或色板，以实际落点判断是否已离开面板。
+                const target = document.elementFromPoint(event.clientX, event.clientY);
+                panel.inside = this.inspectorPopover.contains(target) || panel.anchor.contains(target);
+                this.queueInspectorPanelClose();
+            }
+        };
+        this.listen(window, "pointerup", release, {capture: true});
+        this.listen(window, "pointercancel", release, {capture: true});
+        this.listen(this.inspectorPopover, "lostpointercapture", release);
+        this.listen(window, "blur", () => {
+            if (this.inspectorPanel?.hover) {
+                this.inspectorPanel.pointer = undefined;
+                this.inspectorPanel.inside = false;
+                this.queueInspectorPanelClose();
+            }
+        });
+    }
+
+    private inspectorPanelEnter = (event: PointerEvent) => {
+        if (event.pointerType === "mouse" && this.inspectorPanel) {
+            this.inspectorPanel.inside = true;
+            clearTimeout(this.inspectorPanelTimer);
+        }
+    };
+
+    private inspectorPanelLeave = (event: PointerEvent) => {
+        const panel = this.inspectorPanel;
+        if (event.pointerType !== "mouse" || !panel) {
+            return;
+        }
+        const target = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+        panel.inside = this.inspectorPopover.contains(target) || panel.anchor.contains(target);
+        this.queueInspectorPanelClose();
+    };
+
+    private queueInspectorPanelClose() {
+        clearTimeout(this.inspectorPanelTimer);
+        const panel = this.inspectorPanel;
+        if (!panel?.hover || panel.inside || panel.pointer !== undefined) {
+            return;
+        }
+        // 触发按钮和面板之间有间隙，给鼠标移入面板留出时间。
+        this.inspectorPanelTimer = window.setTimeout(() => {
+            if (!this.destroyed && this.inspectorPanel === panel && panel.hover && !panel.inside &&
+                panel.pointer === undefined && !this.inspectorPopover.contains(document.activeElement)) {
+                this.closeInspectorPanel();
+            }
+        }, 200);
+    }
+
     private closeInspectorPanel() {
+        clearTimeout(this.inspectorPanelTimer);
         const panel = this.inspectorPanel;
         this.inspectorPanel = undefined;
         this.inspectorPopover.hidden = true;
@@ -3830,7 +3899,7 @@ export class ListMindmapView {
         return ids.map(id => ({id, width: this.model.metadata.nodes[id]?.width || 0}));
     }
 
-    private openInspectorPanel(kind: "color" | "width", anchor: HTMLButtonElement) {
+    private openInspectorPanel(kind: "color" | "width", anchor: HTMLButtonElement, hover = false) {
         if (this.readOnly || this.inspector.hidden || anchor.disabled) {
             return;
         }
@@ -3838,7 +3907,13 @@ export class ListMindmapView {
             this.closeInspectorPanel();
             const ids = this.getSelectedIds();
             this.inspectorPanel = {kind, ids, anchor, widths: this.nodeWidths(ids), slider: 0, preview: false,
+                hover, inside: true,
                 baseWidth: Math.max(32, this.positions.get(this.selectedId)?.width || 32)};
+        }
+        clearTimeout(this.inspectorPanelTimer);
+        this.inspectorPanel.inside = true;
+        if (!hover) {
+            this.inspectorPanel.hover = false;
         }
         anchor.setAttribute("aria-expanded", "true");
         this.renderInspectorPanel();
@@ -4430,9 +4505,10 @@ export class ListMindmapView {
             button.disabled = kind === "width" && (!this.options.onNodeWidths || this.widthPending);
             button.addEventListener("pointerenter", event => {
                 if (event.pointerType === "mouse" && !button.disabled) {
-                    this.openInspectorPanel(kind, button);
+                    this.openInspectorPanel(kind, button, true);
                 }
             });
+            button.addEventListener("pointerleave", this.inspectorPanelLeave);
             this.inspector.append(button);
             if (this.inspectorPanel?.kind === kind) {
                 this.inspectorPanel.anchor = button;
@@ -4680,6 +4756,7 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        clearTimeout(this.inspectorPanelTimer);
         cancelAnimationFrame(this.inspectorFrame);
         this.stopFoldAnimation?.();
         cancelAnimationFrame(this.drawFrame);

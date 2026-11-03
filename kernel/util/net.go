@@ -40,8 +40,7 @@ func GetPrivateIPv4s() (ret []string) {
 	virtualKeywords := []string{"docker", "veth", "br-", "vmnet", "vbox", "utun", "tun", "tap", "bridge", "cloud", "hyper-"}
 
 	for _, itf := range interfaces {
-		// 1. 基础状态过滤：必须是启动状态且不能是回环网卡
-		if itf.Flags&net.FlagUp == 0 || itf.Flags&net.FlagLoopback != 0 {
+		if !isLANInterface(itf) {
 			continue
 		}
 
@@ -83,6 +82,12 @@ func GetPrivateIPv4s() (ret []string) {
 		}
 	}
 	return
+}
+
+func isLANInterface(itf net.Interface) bool {
+	// 管理状态为 UP 的桥接网卡可能没有活动链路，mDNS 还需要组播能力。
+	return itf.Flags&(net.FlagUp|net.FlagRunning|net.FlagMulticast) == net.FlagUp|net.FlagRunning|net.FlagMulticast &&
+		itf.Flags&(net.FlagLoopback|net.FlagPointToPoint) == 0
 }
 
 func IsLocalHostname(hostname string) bool {

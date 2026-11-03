@@ -150,7 +150,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         target.dispatchEvent(event);
         return event;
     };
-    const fixture = () => {
+    const fixture = (mindmap = false) => {
         const root = document.createElement("div");
         const editor = document.createElement("div");
         root.style.cssText = "position:absolute;left:0;top:0;width:360px;height:500px;overflow:auto";
@@ -161,7 +161,20 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             "<tr><td>A1</td><td>A2</td><td>A3</td></tr><tr><td>B1</td><td>B2</td><td>B3</td></tr>" +
             '<tr><td></td><td></td><td></td></tr></tbody></table><div class="protyle-action__table"><div class="table__select"></div></div></div></div>';
         root.append(editor);
-        document.body.append(root);
+        const scrollContainer = document.createElement("div");
+        const map = document.createElement("div");
+        if (mindmap) {
+            scrollContainer.style.cssText = "position:fixed;left:0;top:0;width:500px;height:300px;overflow:auto";
+            map.className = "mindmap-view";
+            map.style.cssText = "position:relative;width:500px;height:700px";
+            map.innerHTML = '<div class="mindmap-view__world" style="transform:translate(20px,20px) scale(.75);transform-origin:0 0">' +
+                '<div class="mindmap-view__node" style="position:absolute;left:10px;top:10px"></div></div>';
+            map.querySelector(".mindmap-view__node").append(root);
+            scrollContainer.append(map);
+            document.body.append(scrollContainer);
+        } else {
+            document.body.append(root);
+        }
         editor.querySelectorAll<HTMLElement>("td, th").forEach(cell => cell.style.height = "42px");
         let blockMultiSelect = false;
         const owner = {element: root, contentElement: root, disabled: false,
@@ -173,8 +186,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const render = () => Reflect.get(core, "render").call(core);
         const invoke = (name: string, ...args: unknown[]) => Reflect.get(core, name).apply(core, args);
         const touch = (selector: string) => root.querySelector<HTMLElement>(selector);
-        const dispose = () => { core.destroy(); root.remove(); getSelection().removeAllRanges(); };
-        return {root, editor, owner, core, get table() { return editor.querySelector("table"); }, cell, render, invoke, touch, dispose,
+        const dispose = () => { core.destroy(); root.remove(); scrollContainer.remove(); getSelection().removeAllRanges(); };
+        return {root, editor, owner, core, map, scrollContainer, get table() { return editor.querySelector("table"); }, cell, render, invoke, touch, dispose,
             setBlockMultiSelect: (value: boolean) => { blockMultiSelect = value; }};
     };
     {
@@ -431,6 +444,53 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         check.equal(items.find(item => item.label === "mergeCell").disabled, false,
             "header and body cells can form a multi-row header");
         f.dispose();
+    }
+    {
+        mobile = false;
+        const geometryStyle = document.createElement("style");
+        geometryStyle.textContent = css;
+        document.head.append(geometryStyle);
+        const f = fixture(true);
+        const controls = f.root.querySelector<HTMLElement>(".protyle-table-control");
+        f.map.append(controls);
+        const cell = f.cell(1, 0);
+        f.core.selectCellRange(cell, cell);
+        await frames(2);
+        const aligned = () => {
+            const selection = controls.querySelector<HTMLElement>(".protyle-table-control__selection");
+            const rect = cell.getBoundingClientRect();
+            check.ok(selection && !selection.classList.contains("fn__none"));
+            const painted = selection.getBoundingClientRect();
+            for (const edge of ["left", "top", "right", "bottom"] as const) {
+                check.ok(Math.abs(painted[edge] - rect[edge]) < 1, `selection ${edge} follows the table screen coordinates`);
+            }
+        };
+        aligned();
+        for (const scale of [.65, 1, 1.5]) {
+            f.map.querySelector<HTMLElement>(".mindmap-view__world").style.transform = `translate(30px, 15px) scale(${scale})`;
+            await frames(2);
+            aligned();
+        }
+        f.map.querySelector<HTMLElement>(".mindmap-view__node").style.left = "45px";
+        f.map.querySelector<HTMLElement>(".mindmap-view__node").style.top = "20px";
+        await frames(2);
+        aligned();
+        f.scrollContainer.scrollTop = 30;
+        await frames(2);
+        check.equal(f.scrollContainer.scrollTop, 30, "the outer document actually scrolls");
+        aligned();
+        let renders = 0;
+        Reflect.set(f.core, "render", () => renders++);
+        f.core.destroy();
+        f.map.querySelector<HTMLElement>(".mindmap-view__world").style.transform = "scale(.5)";
+        f.scrollContainer.scrollTop = 50;
+        await frames(2);
+        check.equal(renders, 0, "destroy disconnects geometry observers and scroll listeners");
+        check.equal(controls.isConnected, false);
+        f.root.remove();
+        f.scrollContainer.remove();
+        geometryStyle.remove();
+        getSelection().removeAllRanges();
     }
     for (const touchMode of [true, false]) {
         mobile = touchMode;

@@ -252,7 +252,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         },
     });
     fragment.protyle.block.rootID = rootID;
-    const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement];
+    const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement,
+        ...Array.from(host.querySelectorAll<HTMLElement>(":scope > .protyle-table-control"))];
     const overlayRoot = host.closest(".mindmap-view") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
     overlays.forEach(element => overlayRoot.appendChild(element));
@@ -571,8 +572,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         }
     }), {capture: true, signal});
     const belongs = (target: Node) => {
-        if (host.contains(target) || fragment.hintElement.contains(target) ||
-            fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target)) {
+        if (host.contains(target) || overlays.some(element => element.contains(target))) {
             return true;
         }
         if (!(target instanceof Element)) {

@@ -513,6 +513,20 @@ export class TableControl {
             characterData: true,
             subtree: true,
         });
+        // 脑图控件使用屏幕坐标，画布缩放和节点重排后需要重新测量表格。
+        if (protyle.element.closest(".mindmap-view")) {
+            [".mindmap-view__world", ".mindmap-view__node"].forEach(selector => {
+                const element = protyle.element.closest(selector);
+                if (element) {
+                    this.observer.observe(element, {attributes: true, attributeFilter: ["style"]});
+                }
+            });
+            document.addEventListener("scroll", event => {
+                if (event.target instanceof Node && event.target.contains(protyle.element)) {
+                    this.scheduleRender();
+                }
+            }, {capture: true, signal: this.abortController.signal});
+        }
         this.scheduleRender();
     }
 

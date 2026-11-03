@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import test from "node:test";
 import {promisify} from "node:util";
-import {ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isArrowFunction, isBlock, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string) => {
     const check = require("node:assert/strict");
@@ -64,6 +64,9 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         const hintElement = document.createElement("div");
         const toolbarElement = document.createElement("div");
         const subElement = document.createElement("div");
+        const tableControl = document.createElement("div");
+        tableControl.className = "protyle-table-control";
+        tableControl.innerHTML = '<button class="protyle-table-control__handle protyle-table-control__handle--cell fn__none" type="button"></button>';
         [hintElement, toolbarElement, subElement].forEach(item => item.classList.add("fn__none"));
         container.append(element, host, hintElement, toolbarElement, subElement);
         if (canvas) {
@@ -139,7 +142,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                 transactionOwner = options.runtimeCapabilities.getTransactionOwner;
                 target.style.width = "";
                 wysiwyg.innerHTML = options.initialBlockHTML;
-                target.append(wysiwyg);
+                target.append(wysiwyg, tableControl);
                 options.afterSetContent(protyle, wysiwyg);
                 const observer = new MutationObserver(options.onChange);
                 observer.observe(wysiwyg, {subtree: true, childList: true, characterData: true});
@@ -236,7 +239,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             await until(() => state.destroyed === 1);
             container.remove();
         };
-        return {container, element, host, wysiwyg, hintElement, protyle, state, editor, type, remove,
+        return {container, element, host, wysiwyg, hintElement, tableControl, protyle, state, editor, type, remove,
             owner, transactionOwner: (operations: Parameters<typeof transactionOwner>[0]) => transactionOwner(operations)};
     };
     window.siyuan = {
@@ -903,7 +906,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     document.head.append(style);
     // 编辑浮层挂载在未缩放的脑图根元素，跨过画布边界时仍可点击。
     for (const fullscreen of [false, true]) {
-        for (const scale of [1, .75]) {
+        for (const scale of [.65, 1, 1.5]) {
             const current = create(textHTML("Paint isolation"), undefined, "NodeMindmap", false, true);
             current.container.style.cssText = "position:fixed;top:40px;left:40px;width:500px";
             const map = current.host.closest<HTMLElement>(".mindmap-view");
@@ -925,12 +928,38 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                     "editor controls remain clickable outside the canvas and in fullscreen");
                 overlay.classList.add("fn__none");
             }
+            check.equal(current.tableControl.parentElement, map, "table controls share the unscaled overlay container");
+            const handle = current.tableControl.querySelector<HTMLElement>("button");
+            handle.classList.remove("fn__none");
+            const bounds = viewport.getBoundingClientRect();
+            const x = bounds.left + 40;
+            const y = fullscreen ? bounds.bottom - 48 : bounds.bottom - 8;
+            handle.style.left = `${x}px`;
+            handle.style.top = `${y}px`;
+            const rect = handle.getBoundingClientRect();
+            check.ok(Math.abs(rect.left + rect.width / 2 - x) < 1 && Math.abs(rect.top + rect.height / 2 - y) < 1,
+                "table handle centers use screen coordinates without a second canvas transform");
+            check.ok(handle.contains(document.elementFromPoint(x, y)), "table handles remain clickable across the viewport edge");
+            handle.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, button: 0}));
+            await settle();
+            check.equal(current.state.finished, 0, "using table controls keeps the node editor open");
             await current.type("Edited with paint isolation");
             check.equal(await current.editor.finish(), true);
+            check.equal(current.tableControl.isConnected, false, "finishing releases the reparented table overlay");
             check.ok(current.element.textContent.includes("Edited with paint isolation"), "editing still saves source content");
             await current.remove();
         }
     }
+    const otherControlEditor = create(textHTML("Other editor"), undefined, "NodeMindmap", false, true);
+    const otherControl = document.createElement("div");
+    otherControl.className = "protyle-table-control";
+    otherControl.innerHTML = "<button>Other table</button>";
+    document.body.append(otherControl);
+    otherControl.firstElementChild.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, button: 0}));
+    await until(() => otherControlEditor.state.finished === 1);
+    check.equal(otherControlEditor.tableControl.isConnected, false, "another editor's controls finish the current session");
+    otherControl.remove();
+    await otherControlEditor.remove();
     const fixture = document.createElement("div");
     fixture.className = "protyle-wysiwyg";
     document.body.append(fixture);
@@ -1025,6 +1054,74 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     style.remove();
     return "List mindmap editor lifecycle cases passed";
 };
+
+test("mindmap editor overlays retain direct ownership outside the transformed content", () => {
+    const file = path.join(__dirname, "editor.ts");
+    const source = createSourceFile(file, readFileSync(file, "utf8"), ScriptTarget.Latest, true);
+    const declaration = source.statements.filter(isVariableStatement).flatMap(statement =>
+        Array.from(statement.declarationList.declarations)).find(item => item.name.getText(source) === "openListMindmapEditor");
+    assert.ok(declaration?.initializer && isArrowFunction(declaration.initializer) && isBlock(declaration.initializer.body));
+    const names = ["overlays", "overlayRoot", "belongs"];
+    const statements = declaration.initializer.body.statements.filter(statement =>
+        isVariableStatement(statement) && statement.declarationList.declarations.some(item => names.includes(item.name.getText(source))) ||
+        statement.getText(source).startsWith("overlays.forEach("));
+    assert.equal(statements.length, 4);
+    const code = transpileModule(statements.map(statement => statement.getText(source)).join("\n"), {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    class TestElement {
+        children: TestElement[] = [];
+        parentElement?: TestElement;
+        dataset: Record<string, string> = {};
+        constructor(readonly className = "") {}
+        appendChild(child: TestElement) {
+            if (child.parentElement) {
+                child.parentElement.children = child.parentElement.children.filter(item => item !== child);
+            }
+            this.children.push(child);
+            child.parentElement = this;
+        }
+        contains(target: TestElement): boolean {
+            return this === target || this.children.some(child => child.contains(target));
+        }
+        closest(selector: string): TestElement | undefined {
+            return selector === ".mindmap-view" ? this.className === "mindmap-view" ? this :
+                this.parentElement?.closest(selector) : undefined;
+        }
+        querySelectorAll(selector: string) {
+            assert.equal(selector, ":scope > .protyle-table-control");
+            return this.children.filter(child => child.className === "protyle-table-control");
+        }
+    }
+    const mount = new Function("host", "fragment", "document", "Element", "isMobile", code + "; return {overlays, belongs};");
+    for (const hasTableControl of [false, true]) {
+        const body = new TestElement();
+        const map = new TestElement("mindmap-view");
+        const host = new TestElement();
+        body.appendChild(map);
+        map.appendChild(host);
+        const hint = new TestElement();
+        const toolbar = new TestElement();
+        const subElement = new TestElement();
+        const control = new TestElement("protyle-table-control");
+        const button = new TestElement();
+        control.appendChild(button);
+        for (const element of [hint, toolbar, subElement, ...(hasTableControl ? [control] : [])]) host.appendChild(element);
+        const nested = new TestElement();
+        const nestedControl = new TestElement("protyle-table-control");
+        host.appendChild(nested);
+        nested.appendChild(nestedControl);
+        const {overlays, belongs} = mount(host, {hintElement: hint, protyle: {toolbar: {element: toolbar, subElement}}},
+            {body}, TestElement, () => false);
+        assert.equal(overlays.length, hasTableControl ? 4 : 3);
+        assert.ok(overlays.every((element: TestElement) => element.parentElement === map));
+        assert.equal(nestedControl.parentElement, nested, "nested editor controls retain their own owner");
+        assert.equal(belongs(nestedControl), true, "nested content remains within its parent editor");
+        assert.equal(belongs(button), hasTableControl, "only this editor's moved table control belongs to the session");
+        assert.equal(belongs(new TestElement("protyle-table-control")), false);
+        assert.equal(belongs(toolbar), true);
+    }
+});
 
 test("list mindmap editor flushes pending input and preserves text across finish, composition and destroy", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,

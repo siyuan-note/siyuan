@@ -79,6 +79,28 @@ const session = (overrides: Partial<AgentSession> = {}): AgentSession => ({
     ...overrides,
 });
 
+test("a completed local run restores regenerate controls after the final stream event", async () => {
+    const {chat} = createChat(async () => session());
+    chat.sessionId = "first";
+    let hidden = false;
+    const button = {classList: {toggle: (name: string, value: boolean) => {
+        assert.equal(name, "fn__none");
+        hidden = value;
+    }}};
+    chat.messagesContainer.querySelectorAll = (selector: string) => selector === ".agent-chat__regenerate" ? [button] : [];
+    const run = chat.sessionRuns.begin("first");
+    chat.abortController = run.controller;
+    chat.setStreaming(true);
+    assert.equal(hidden, true);
+
+    chat.setStreaming(false);
+    assert.equal(hidden, true);
+    await chat.runController.finish(run);
+
+    assert.equal(chat.isCurrentSessionRunning(), false);
+    assert.equal(hidden, false);
+});
+
 test("session pin notifications refresh the list without disturbing conversations or drafts", () => {
     const {chat} = createChat(async () => { throw new Error("pinning must not reload the conversation"); });
     let refreshes = 0;

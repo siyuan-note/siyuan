@@ -1215,6 +1215,7 @@ export class AgentChat extends Model {
                     }
                 },
                 changed: () => {
+                    this.updateRegenerateButtons();
                     this.updateHostRunStatus();
                     this.updateSendButtonState();
                     void this.sessionPanel?.refresh();

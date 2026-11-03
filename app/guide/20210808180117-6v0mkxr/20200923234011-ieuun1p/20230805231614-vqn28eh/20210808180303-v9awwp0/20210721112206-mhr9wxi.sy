@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261102113000"
+		"updated": "20261103110957"
 	},
 	"Children": [
 		{
@@ -98,6 +98,29 @@
 				{
 					"Type": "NodeText",
 					"Data": ", then choose a storage provider, configure a sync target, and enable synchronization. Use the sync button to open the setup wizard if you need guidance."
+				}
+			]
+		},
+		{
+			"ID": "20261103104841-cb869f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103104841-cb869f1",
+				"updated": "20261103110957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If creating, switching or deleting a cloud sync directory fails, the directory list is preserved so you can retry. If the list itself fails to load, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Retry"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reload it. If enabling synchronization or submitting a sync direction fails, the wizard keeps the current page and selection for retry."
 				}
 			]
 		},

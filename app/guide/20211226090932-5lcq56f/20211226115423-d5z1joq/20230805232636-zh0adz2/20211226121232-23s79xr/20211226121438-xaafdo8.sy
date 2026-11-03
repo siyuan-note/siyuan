@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20261102113000"
+		"updated": "20261103110957"
 	},
 	"Children": [
 		{
@@ -98,6 +98,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "，再選擇雲端儲存、設定同步目標並啟用同步。不熟悉設定時，可點擊同步按鈕開啟精靈，依提示完成設定。"
+				}
+			]
+		},
+		{
+			"ID": "20261103104841-3c6934e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103104841-3c6934e",
+				"updated": "20261103110957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增、切換或刪除雲端同步目錄失敗時，會保留目錄清單，可重新執行該操作。目錄清單讀取失敗時，可點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重試"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 重新載入。同步精靈中啟用同步或提交同步方向失敗時，會保留目前頁面和選擇，可重新提交。"
 				}
 			]
 		},

@@ -25,6 +25,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
     const text = (key: string) => bootstrap.languages[key] ?? key;
     let preferences = bootstrap.preferences;
+    let activeMode = preferences.mode;
     let systemDark = bootstrap.dark;
     let editor: MarkdownEditor;
     let session: MarkdownSession;
@@ -292,6 +293,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         resourceUnavailable = false;
         editPending = false;
         sourceOnly = false;
+        activeMode = preferences.mode;
+        modeChoice?.setValue(activeMode);
         history = {canUndo: false, canRedo: false};
         control("markdownRecoveryPanel").hidden = true;
         control("markdownRecovery").setAttribute("aria-expanded", "false");
@@ -338,10 +341,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                     sourceOnly = value;
                     render(documentSession.getState());
                 },
-                onModeChange(mode) {
+                onModeChange(mode, origin) {
                     if (!current()) return;
+                    activeMode = mode;
                     modeChoice?.setValue(mode);
-                    if (preferences.mode !== mode) {
+                    if (origin === "user" && preferences.mode !== mode) {
                         preferences = {...preferences, mode};
                         void bridge.preferences({mode}).catch(reportError);
                     }
@@ -520,33 +524,31 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownRecovery", () => showRecoveries(Boolean(control("markdownRecoveryPanel").hidden)));
     action("markdownRecoveryClose", () => showRecoveries(false));
 
-    const updatePreferences = async (patch: Partial<MarkdownPreferences>) => {
-        if (patch.mode) {
-            editor.setMode(patch.mode);
-            // 超大恢复草稿可能拒绝富文本模式，持久化编辑器回调报告的实际模式。
-            patch = {...patch, mode: preferences.mode};
-            modeChoice.setValue(preferences.mode);
-        }
+    const updatePreferences = async (patch: Partial<Pick<MarkdownPreferences, "theme" | "fontSize">>) => {
         preferences = {...preferences, ...patch};
         if (patch.theme) await applyTheme();
         if (patch.fontSize) root.style.setProperty("--markdown-font-size", `${patch.fontSize}px`);
         preferences = await bridge.preferences(patch);
         if (disposed) return;
-        modeChoice.setValue(preferences.mode);
+        modeChoice.setValue(activeMode);
         themeChoice.setValue(preferences.theme);
         fontChoice.setValue(String(preferences.fontSize));
     };
-    const preferenceChoice = (id: "markdownMode" | "markdownTheme" | "markdownFont", label: string, values: Array<[string, string]>, value: string,
-                              patch: (value: string) => Partial<MarkdownPreferences>) => createMarkdownChoice({
+    const preferenceChoice = (id: "markdownTheme" | "markdownFont", label: string, values: Array<[string, string]>, value: string,
+                              patch: (value: string) => Partial<Pick<MarkdownPreferences, "theme" | "fontSize">>) => createMarkdownChoice({
         element: control(id), label: text(label), values: values.map(([value, label]) => ({value, label: text(label)})), value,
-        icon: {markdownMode: "iconEdit", markdownTheme: "iconMode", markdownFont: "iconFont"}[id],
+        icon: {markdownTheme: "iconMode", markdownFont: "iconFont"}[id],
         onChange(value) {if (!frozen) {closeMore(); void updatePreferences(patch(value)).catch(reportError);}},
     });
     appearanceMenu = createMarkdownSubmenu({
         element: control("markdownPreferences"), label: text("appearance"), icon: "iconTheme",
         onClose() {themeChoice?.close(); fontChoice?.close();},
     });
-    modeChoice = preferenceChoice("markdownMode", "markdownEditMode", [["ir", "markdownModeIR"], ["wysiwyg", "wysiwyg"], ["sv", "markdownModeSV"]], preferences.mode, value => ({mode: value as MarkdownEditorMode}));
+    modeChoice = createMarkdownChoice({
+        element: control("markdownMode"), label: text("markdownEditMode"), icon: "iconEdit", value: activeMode,
+        values: [["ir", "markdownModeIR"], ["wysiwyg", "wysiwyg"], ["sv", "markdownModeSV"]].map(([value, label]) => ({value, label: text(label)})),
+        onChange(mode) {if (!frozen) {closeMore(); editor.setMode(mode as MarkdownEditorMode);}},
+    });
     themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme, value => ({theme: value as MarkdownPreferences["theme"]}));
     fontChoice = preferenceChoice("markdownFont", "fontSize", [14, 16, 18, 20, 24, 28, 32].map(value => [String(value), String(value)]), String(preferences.fontSize), value => ({fontSize: Number(value)}));
 

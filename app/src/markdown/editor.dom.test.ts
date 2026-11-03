@@ -240,9 +240,11 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     document.body.append(recoveryElement);
     const oversizedDraft = ("# Large source\n\n| A | B |\n| - | - |\n| a | b |\n\n").repeat(22000);
     let recoveryMode = "";
+    let modeOrigin = "";
     const recoveryEditor = await api.createMarkdownEditor({element: recoveryElement, initialValue: oversizedDraft, mode: "ir", cdn, lutePath,
-        onEdit: () => {}, onModeChange: value => { recoveryMode = value; }});
+        onEdit: () => {}, onModeChange: (value, origin) => { recoveryMode = value; modeOrigin = origin; }});
     check.equal(recoveryMode, "sv");
+    check.equal(modeOrigin, "automatic", "opening large content reports a local fallback");
     check.equal(recoveryEditor.flush().content, oversizedDraft);
     check.equal(recoveryElement.querySelector<HTMLElement>(".vditor-preview").style.display, "none",
         "large source opens without rendering its table-heavy preview");
@@ -277,12 +279,14 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     check.equal(recoveryEditor.flush().content, "# Reduced draft\n");
     recoveryEditor.setMode("ir");
     check.equal(recoveryMode, "ir");
+    check.equal(modeOrigin, "user", "an accepted explicit selection can update preferences");
     const bigPaste = new DataTransfer();
     bigPaste.setData("text/plain", oversizedDraft);
     const pasteRich = new ClipboardEvent("paste", {clipboardData: bigPaste, bubbles: true, cancelable: true});
     recoveryElement.querySelector(".vditor-ir pre").dispatchEvent(pasteRich);
     check.equal(pasteRich.defaultPrevented, true, "large rich paste is handled through the source insertion path");
     check.equal(recoveryMode, "sv");
+    check.equal(modeOrigin, "automatic", "a large paste cannot overwrite the preferred mode");
     const pasted = recoveryEditor.flush().content;
     check.ok(pasted.includes(oversizedDraft.trimEnd()), JSON.stringify({length: pasted.length, expected: oversizedDraft.length, start: pasted.slice(0, 100), end: pasted.slice(-100)}));
     check.ok(recoveryEditor.flush().content.includes("Reduced draft"));

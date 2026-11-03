@@ -11,7 +11,8 @@ import {compile} from "sass";
 const browserCases = async (languages: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const api = (window as unknown as {MarkdownApplicationTest: typeof import("./index") & {createMarkdownTree: typeof import("./tree").createMarkdownTree}}).MarkdownApplicationTest;
+    const api = (window as unknown as {MarkdownApplicationTest: typeof import("./index") & Pick<typeof import("./limits"), "MARKDOWN_RENDER_BYTES"> &
+        {createMarkdownTree: typeof import("./tree").createMarkdownTree}}).MarkdownApplicationTest;
     const tick = () => new Promise(resolve => setTimeout(resolve, 180));
     const original = "# Markdown 编辑器\n\n直接编辑外部文档，文件保留在原位置。\n\n## 写作与预览\n\n- 自动保存到当前文件\n- 支持 **即时渲染**、所见即所得和分屏预览\n- 关闭前保留恢复草稿\n\n| 项目 | 状态 |\n| --- | --- |\n| 本地文档 | 已保存 |\n| 相对图片 | 按目录授权访问 |\n\n> 界面沿用思源的颜色、字体与基础控件。\n";
     const format = {bom: false, newline: "\n" as const};
@@ -784,18 +785,67 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(closeConfirmations, confirmationsBefore + (scenario === "blank" ? 0 : 1));
         draft.destroy();
     }
-    bridge.bootstrap = async () => ({...bootstrap, sessionId: "large-ui", content: "a".repeat(64 * 1024 + 1), recovered: {revision: 7, targetGeneration: 3}});
+    storedPreferences = {...storedPreferences, mode: "ir"};
+    const boundaryHeading = "# 阈值文档\n\n";
+    const boundaryContent = boundaryHeading + "a".repeat(api.MARKDOWN_RENDER_BYTES - new TextEncoder().encode(boundaryHeading).length);
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "boundary-ui", content: boundaryContent, preferences: {...storedPreferences}});
+    const boundaryEditor = await api.mountMarkdownApplication(bridge);
+    check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "ir", "content at the rendering threshold keeps the preferred rich mode");
+    check.ok(document.querySelector(".vditor-ir h1"));
+    boundaryEditor.destroy();
+    const preferencesBefore = preferenceUpdates.length;
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "large-ui", content: boundaryContent + "a", preferences: {...storedPreferences}, recovered: {revision: 7, targetGeneration: 3}});
     const largeRecovery = await api.mountMarkdownApplication(bridge);
     const modeSelect = document.querySelector<HTMLElement>("#markdownMode");
     check.equal(modeSelect.querySelector('[aria-checked="true"]').getAttribute("data-value"), "sv");
-    const preferencesBefore = preferenceUpdates.length;
+    check.equal(storedPreferences.mode, "ir", "automatic source mode does not replace the preferred rich mode");
     (document.querySelector("#markdownMoreButton") as HTMLElement).click(); modeSelect.click();
     modeSelect.querySelector<HTMLButtonElement>('[data-value="ir"]').click();
     await tick();
     check.equal(modeSelect.querySelector('[aria-checked="true"]').getAttribute("data-value"), "sv", "unsupported rich mode leaves source mode checked");
-    check.equal(storedPreferences.mode, "sv", "only the actual source mode is persisted for oversized recovery");
-    check.ok(preferenceUpdates.slice(preferencesBefore).every(patch => patch.mode === undefined || patch.mode === "sv"));
+    check.equal(storedPreferences.mode, "ir", "a rejected rich mode selection cannot persist source mode");
+    check.ok(preferenceUpdates.slice(preferencesBefore).every(patch => patch.mode === undefined));
+    (document.querySelector("#markdownMoreButton") as HTMLElement).click();
+    const largeAppearance = document.querySelector<HTMLElement>("#markdownPreferences");
+    largeAppearance.focus(); largeAppearance.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
+    const largeFont = document.querySelector<HTMLElement>("#markdownFont");
+    largeFont.focus(); largeFont.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
+    largeFont.querySelector<HTMLButtonElement>('[data-value="20"]').click(); await tick();
+    check.equal(modeSelect.querySelector('[aria-checked="true"]').getAttribute("data-value"), "sv", "changing appearance keeps the actual fallback mode checked");
+    check.equal(storedPreferences.mode, "ir");
     largeRecovery.destroy();
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "small-after-large", content: "# Small document\n", preferences: {...storedPreferences}});
+    const smallAfterLarge = await api.mountMarkdownApplication(bridge);
+    check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "ir", "the next small document restores the user's preferred mode");
+    smallAfterLarge.destroy();
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "explicit-source", content: boundaryContent + "a", preferences: {...storedPreferences}});
+    const explicitSource = await api.mountMarkdownApplication(bridge);
+    (document.querySelector("#markdownMoreButton") as HTMLElement).click();
+    const explicitMode = document.querySelector<HTMLElement>("#markdownMode");
+    explicitMode.focus(); explicitMode.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
+    explicitMode.querySelector<HTMLButtonElement>('[data-value="sv"]').click(); await tick();
+    check.equal(storedPreferences.mode, "sv", "explicitly selecting the active source mode is remembered");
+    explicitSource.destroy();
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "small-explicit-source", content: "# Small source document\n", preferences: {...storedPreferences}});
+    const smallExplicitSource = await api.mountMarkdownApplication(bridge);
+    check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "sv");
+    check.ok(document.querySelector(".vditor-preview h1"), "a user's source mode still previews small files");
+    smallExplicitSource.destroy();
+    const desktopBody = document.body.className;
+    for (const platform of ["android", "ios", "harmony"]) {
+        document.body.className = "";
+        storedPreferences = {...storedPreferences, mode: "wysiwyg"};
+        bridge.bootstrap = async () => ({...bootstrap, platform, sessionId: `${platform}-large`, content: boundaryContent + "a", preferences: {...storedPreferences}});
+        const mobileLarge = await api.mountMarkdownApplication(bridge);
+        check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "sv");
+        check.equal(storedPreferences.mode, "wysiwyg", `${platform} preserves the preferred mode during automatic fallback`);
+        mobileLarge.destroy();
+        bridge.bootstrap = async () => ({...bootstrap, platform, sessionId: `${platform}-small`, content: "# Small mobile document\n", preferences: {...storedPreferences}});
+        const mobileSmall = await api.mountMarkdownApplication(bridge);
+        check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "wysiwyg");
+        mobileSmall.destroy();
+    }
+    document.body.className = desktopBody;
     for (const platform of ["win32", "darwin", "linux"]) {
         const controls: string[] = [];
         const overlays: Array<{height: number; symbolColor: string}> = [];
@@ -868,7 +918,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "index.ts"].map(compileSource).join("\n") +
-        "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree}; void 0;";
+        "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")
         .replace("</head>", '<link rel="stylesheet" href="/vditor/dist/index.css"><link rel="stylesheet" href="/ui.css"></head>');

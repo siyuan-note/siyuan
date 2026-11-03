@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261103141758"
+		"updated": "20261103203708"
 	},
 	"Children": [
 		{
@@ -548,7 +548,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-881e5bd",
-				"updated": "20261101145217"
+				"updated": "20261103203708"
 			},
 			"Children": [
 				{
@@ -608,12 +608,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-945689a",
-				"updated": "20261101175356"
+				"updated": "20261103203708"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Files up to 8 MiB of UTF-8 data can be opened and saved. Above 64 KiB, the editor automatically uses source editing with preview disabled; rich modes become available again after reducing the content below that threshold. The file budget includes BOM and encoded newlines. Recovery content has a separate 16 MiB limit per draft, with 256 MiB and 1024 records in total. A recovery draft above the file limit remains available for copying or reducing, but cannot be written back until it fits. Reaching a limit reports a failure without deleting unrecovered drafts; they do not expire automatically."
+					"Data": "Files up to 8 MiB of UTF-8 data can be opened and saved. Above 256 KiB, the editor automatically uses source editing with preview disabled; rich modes become available again after reducing the content below that threshold. Automatic fallback affects only the current document and does not change the preferred editing mode; only explicit mode selections are remembered. The file budget includes BOM and encoded newlines. Recovery content has a separate 16 MiB limit per draft, with 256 MiB and 1024 records in total. A recovery draft above the file limit remains available for copying or reducing, but cannot be written back until it fits. Reaching a limit reports a failure without deleting unrecovered drafts; they do not expire automatically."
 				}
 			]
 		},

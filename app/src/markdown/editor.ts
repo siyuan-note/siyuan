@@ -68,7 +68,7 @@ export interface MarkdownEditorOptions {
     onEdit(snapshot: MarkdownEditorSnapshot): void;
     onEditPending?(pending: boolean): void;
     onContentTooLarge?(): void;
-    onModeChange?(mode: MarkdownEditorMode): void;
+    onModeChange?(mode: MarkdownEditorMode, origin: "user" | "automatic"): void;
     onSourceOnlyChange?(sourceOnly: boolean): void;
     onHistoryChange?(state: {canUndo: boolean; canRedo: boolean}): void;
     onLink?(url: string): void;
@@ -193,7 +193,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
 
     const activeSurface = () => instance?.vditor[instance.getCurrentMode()];
-    const syncMode = () => {
+    const syncMode = (origin: "user" | "automatic" = "user") => {
         const next = instance.getCurrentMode();
         const changed = mode !== next;
         mode = next;
@@ -203,7 +203,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         if (changed) {
             // 切换模式后立即记录基线，首笔输入不能抢在延迟快照之前覆盖它。
             instance.vditor.undo.addToUndoStack(instance.vditor);
-            options.onModeChange?.(next);
+            options.onModeChange?.(next, origin);
         }
     };
     const inEditor = (event: Event) => event.target instanceof Node &&
@@ -249,7 +249,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             const button = element.querySelector<HTMLButtonElement>('button[data-mode="sv"]');
             const type = document.defaultView.navigator.userAgent.includes("iPhone") ? "touchstart" : "click";
             button.dispatchEvent(new Event(type, {bubbles: true, cancelable: true}));
-            syncMode();
+            syncMode("automatic");
         } finally {programmatic = wasProgrammatic;}
     };
 
@@ -273,7 +273,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             instance.setPreviewMode("editor");
             return true;
         }
-        options.onModeChange?.(instance.getCurrentMode());
+        options.onModeChange?.(instance.getCurrentMode(), "automatic");
         options.onSourceOnlyChange?.(true);
         return false;
     };
@@ -543,7 +543,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                         setValue(options.initialValue);
                         notifyHistory();
                         if (recoverySourceOnly) {
-                            options.onModeChange?.("sv");
+                            options.onModeChange?.("sv", "automatic");
                             options.onSourceOnlyChange?.(true);
                         }
                         if (!finishInitialPreview) {clearTimeout(timeout); resolve();}
@@ -567,7 +567,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         setMode(nextMode) {
             if (destroyed || isComposing()) return;
             if (!allowModeSwitch(nextMode)) return;
-            if (instance.getCurrentMode() === nextMode) return;
+            if (instance.getCurrentMode() === nextMode) {options.onModeChange?.(nextMode, "user"); return;}
             const button = element.querySelector<HTMLButtonElement>(`button[data-mode="${nextMode}"]`);
             if (!button) throw new Error("Markdown editor mode unavailable");
             programmatic = true;

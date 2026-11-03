@@ -16,12 +16,14 @@ const setup = () => {
     const callbacks: Array<Record<string, (...args: any[]) => any>> = [];
     const editors: Array<{destroyed: boolean; destroy(): void}> = [];
     const responses: boolean[] = [];
+    const preferenceWrites: unknown[] = [];
     let failEditor = false;
     let resolveResource: (value: string) => void;
     const resource = new Promise<string>(resolve => {resolveResource = resolve;});
     const element = {className: "", inert: true, textContent: "", replaceChildren() {}, setAttribute() {}};
     const bridge = {
-        host: {}, resolveResource: () => resource, openLink: async () => {}, preferences: async () => {},
+        host: {}, resolveResource: () => resource, openLink: async () => {},
+        preferences: async (patch: Partial<import("./bridge").MarkdownPreferences>) => {preferenceWrites.push({...patch});},
         tree: {commitOpen: async () => snapshot("b")}, bootstrap: async () => snapshot("b"),
         respond: async (_id: string, accepted: boolean) => {responses.push(accepted);},
     };
@@ -53,19 +55,40 @@ const setup = () => {
         let disposed = false, initializationClosing = false, documentGeneration = 0, targetGeneration = 0;
         let actionMessage = "", resourceUnavailable = false, editPending = false, sourceOnly = false, history;
         let preferences = {mode: "ir", theme: "light"}, systemDark = false, preparing = false, prepared = false;
+        let activeMode = preferences.mode;
         let switching = true, frozen = true, exitSequence = 0;
         const freeze = value => {frozen = value;};
         ${initialize}\n${complete}\n${command}\n${actions}
         return {initializeDocument, completeSwitch, command, runAction, waitActions: () => pendingFileAction,
             pending(value) {pendingSwitch = value;}, task(value) {switchTask = value;},
             dispose() {disposed = true; documentGeneration++;},
-            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, resourceUnavailable})};
+            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, resourceUnavailable, preferences, activeMode})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
-    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource,
+    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites,
         failEditor(value: boolean) {failEditor = value;}};
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
+
+test("automatic source fallback stays local while explicit mode choices become the next document's preference", async () => {
+    const {lifecycle, callbacks, preferenceWrites} = setup();
+    await lifecycle.initializeDocument(snapshot("large"));
+    callbacks[0].onModeChange("sv", "automatic");
+    assert.equal(lifecycle.state().activeMode, "sv");
+    assert.equal(lifecycle.state().preferences.mode, "ir");
+    assert.deepEqual(preferenceWrites, []);
+    await lifecycle.initializeDocument(snapshot("small"));
+    assert.equal(callbacks[1].mode, "ir");
+    assert.equal(lifecycle.state().activeMode, "ir");
+    callbacks[1].onModeChange("wysiwyg", "user");
+    assert.equal(lifecycle.state().preferences.mode, "wysiwyg");
+    assert.deepEqual(preferenceWrites, [{mode: "wysiwyg"}]);
+    await lifecycle.initializeDocument(snapshot("next"));
+    assert.equal(callbacks[2].mode, "wysiwyg");
+    callbacks[1].onModeChange("sv", "user");
+    assert.equal(lifecycle.state().preferences.mode, "wysiwyg", "a stale editor cannot replace the current preference");
+    assert.equal(preferenceWrites.length, 1);
+});
 
 test("document replacement invalidates old editor callbacks, resources and session renders", async () => {
     const fixture = setup();

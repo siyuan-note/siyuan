@@ -3595,7 +3595,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enable “Show related database view” in a relation field’s configuration and select an existing table view in the related database. This field-level setting applies to every entry, including new entries. Disabling the display does not delete relations or target entries."
+					"Data": "Enable “Show related table” in a relation field’s configuration and select an existing table view in the related database. This field-level setting applies to every entry, including new entries. Disabling the display does not delete relations or target entries."
 				}
 			]
 		},

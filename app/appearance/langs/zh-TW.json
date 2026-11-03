@@ -3172,7 +3172,8 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "顯示關聯資料庫視圖",
+		"showRelatedDatabaseView": "顯示關聯表格",
+		"relatedDatabaseViewInfo": "在資料庫面板或獨立條目面板中顯示此欄位關聯的條目，可直接查看和編輯",
 		"relatedDatabaseView": "關聯資料庫視圖",
 		"relatedDatabaseViewShared": "所有條目使用目標視圖的共用欄位配置",
 		"relatedDatabaseViewUnavailable": "關聯視圖無法使用，請檢查欄位和目標視圖",

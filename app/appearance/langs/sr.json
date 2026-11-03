@@ -3172,7 +3172,8 @@
 		"quit": "Ugasi aplikaciju"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Прикажи поглед повезане базе података",
+		"showRelatedDatabaseView": "Прикажи повезану табелу",
+		"relatedDatabaseViewInfo": "Прикажите ставке повезане преко овог поља у панелу базе података или засебном панелу ставке, где их можете директно прегледати и уређивати.",
 		"relatedDatabaseView": "Поглед повезане базе података",
 		"relatedDatabaseViewShared": "Све ставке користе заједнички распоред колона циљног погледа",
 		"relatedDatabaseViewUnavailable": "Повезани поглед није доступан; проверите поље и циљни поглед",

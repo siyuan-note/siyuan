@@ -3172,7 +3172,8 @@
 		"quit": "Quit application"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Show related database view",
+		"showRelatedDatabaseView": "Show related table",
+		"relatedDatabaseViewInfo": "Show entries linked through this field in the database panel or standalone item panel, where you can view and edit them directly.",
 		"relatedDatabaseView": "Related database view",
 		"relatedDatabaseViewShared": "Uses the target view’s shared column layout for every entry",
 		"relatedDatabaseViewUnavailable": "Related view unavailable; check the field and target view",

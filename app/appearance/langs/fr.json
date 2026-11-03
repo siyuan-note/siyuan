@@ -3172,7 +3172,8 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Afficher la vue de la base de données liée",
+		"showRelatedDatabaseView": "Afficher le tableau lié",
+		"relatedDatabaseViewInfo": "Affiche les entrées liées par ce champ dans le panneau de base de données ou le panneau d’entrée indépendant pour les consulter et les modifier directement.",
 		"relatedDatabaseView": "Vue de la base de données liée",
 		"relatedDatabaseViewShared": "Toutes les entrées utilisent la disposition des colonnes partagée de la vue cible",
 		"relatedDatabaseViewUnavailable": "Vue liée indisponible ; vérifiez le champ et la vue cible",

@@ -3172,7 +3172,8 @@
 		"quit": "Esci dall'applicazione"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Mostra la vista del database collegato",
+		"showRelatedDatabaseView": "Mostra tabella correlata",
+		"relatedDatabaseViewInfo": "Mostra le voci collegate tramite questo campo nel pannello del database o nel pannello autonomo della voce, per visualizzarle e modificarle direttamente.",
 		"relatedDatabaseView": "Vista del database collegato",
 		"relatedDatabaseViewShared": "Tutte le voci usano il layout delle colonne condiviso della vista di destinazione",
 		"relatedDatabaseViewUnavailable": "Vista collegata non disponibile; controlla il campo e la vista di destinazione",

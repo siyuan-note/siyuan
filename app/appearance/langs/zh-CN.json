@@ -3172,7 +3172,8 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "显示关联数据库视图",
+		"showRelatedDatabaseView": "显示关联表格",
+		"relatedDatabaseViewInfo": "在数据库面板或独立条目面板中显示此字段关联的条目，可直接查看和编辑",
 		"relatedDatabaseView": "关联数据库视图",
 		"relatedDatabaseViewShared": "所有条目使用目标视图的共享列布局",
 		"relatedDatabaseViewUnavailable": "关联视图不可用，请检查字段和目标视图",

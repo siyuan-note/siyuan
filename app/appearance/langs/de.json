@@ -3172,7 +3172,8 @@
 		"quit": "Anwendung beenden"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Ansicht der verknüpften Datenbank anzeigen",
+		"showRelatedDatabaseView": "Verknüpfte Tabelle anzeigen",
+		"relatedDatabaseViewInfo": "Zeigt die über dieses Feld verknüpften Einträge im Datenbankbereich oder im eigenständigen Eintragsbereich zum direkten Anzeigen und Bearbeiten an.",
 		"relatedDatabaseView": "Ansicht der verknüpften Datenbank",
 		"relatedDatabaseViewShared": "Alle Einträge verwenden das gemeinsame Spaltenlayout der Zielansicht",
 		"relatedDatabaseViewUnavailable": "Verknüpfte Ansicht nicht verfügbar; Feld und Zielansicht prüfen",

@@ -25,7 +25,8 @@ const browserCases = async (source: string, css: string) => {
         keyValues: ["A", "B", "C", "D", "E", "F"].map(id => ({key: {id, name: id, type: "text"}, values: [{text: {content: id}}]}))}));
     const render = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty", "genAVAttributeRowHTML",
         "preserveAVBindingRange", "renderAVRichTextElements", "hasClosestBlock", "hasClosestByClassName", "transaction", "hasDataTransferFiles",
-        "escapeHtmlTextAndAttr", source + "\nreturn {renderAVAttribute, getAVAttributeDropTarget, getAVAttributeSort};")(
+        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews",
+        source + "\nreturn {renderAVAttribute, getAVAttributeDropTarget, getAVAttributeSort};")(
         (url: string, _body: unknown, callback: (response: {data: unknown}) => void) =>
             callback({data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0}}),
         () => ({}), () => "iconText", () => false,
@@ -34,7 +35,7 @@ const browserCases = async (source: string, css: string) => {
         () => () => {}, () => {}, (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
         (element: HTMLElement, className: string) => element?.closest("." + className),
         (_protyle: unknown, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
-        (types: string[]) => types.includes("Files"), escapeHtmlTextAndAttr);
+        (types: string[]) => types.includes("Files"), escapeHtmlTextAndAttr, () => {}, () => {}, () => {});
     const fixture = (className = "protyle-db-attr__body", width = 1100) => {
         document.body.innerHTML = "";
         operations.length = 0;
@@ -268,6 +269,33 @@ const browserCases = async (source: string, css: string) => {
         document.documentElement.style.setProperty("--b3-database-attr-column-flow", "0");
         check.equal(rect("A").top, rect("C").top, "switching to row layout reuses the same data without reordering it");
         check.deepEqual(col.order(), ["A", "C", "D", "E", "B", "F"]);
+    }
+    for (const className of ["protyle-db-attr__body", "protyle-db-row__body"]) {
+        for (const width of [390, 1100]) {
+            const panel = fixture(className, width);
+            const addColumn = panel.block.querySelector<HTMLElement>('[data-type="addColumn"]');
+            const spacer = panel.block.lastElementChild as HTMLElement;
+            check.equal(getComputedStyle(spacer).borderTopWidth, "0px", "no related view means no separator");
+            const first = document.createElement("section");
+            first.className = "av-related-view";
+            first.textContent = "First related view";
+            const second = first.cloneNode(true) as HTMLElement;
+            panel.block.append(first, second);
+            for (const color of ["rgb(220, 220, 220)", "rgb(64, 64, 64)"]) {
+                document.documentElement.style.setProperty("--b3-border-color", color);
+                check.equal(getComputedStyle(first).borderTopWidth, "1px");
+                check.equal(getComputedStyle(first).borderTopColor, color, "separator follows the active theme");
+                check.equal(getComputedStyle(second).borderTopWidth, "0px", "subsequent views do not repeat the separator");
+                check.ok(first.getBoundingClientRect().top >= addColumn.getBoundingClientRect().bottom);
+                check.equal(first.getBoundingClientRect().width, panel.block.getBoundingClientRect().width,
+                    "separator spans all attribute columns");
+            }
+            first.remove();
+            check.equal(getComputedStyle(second).borderTopWidth, "1px", "the next view becomes the first separator");
+            second.remove();
+            check.equal(panel.block.lastElementChild, spacer);
+            check.equal(getComputedStyle(spacer).borderTopWidth, "0px", "removing every view leaves no separator");
+        }
     }
     return "Database panel layout and drag cases passed";
 };

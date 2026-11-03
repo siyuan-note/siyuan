@@ -3172,7 +3172,8 @@
 		"quit": "Salir de la aplicación"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Mostrar vista de la base de datos relacionada",
+		"showRelatedDatabaseView": "Mostrar tabla relacionada",
+		"relatedDatabaseViewInfo": "Muestra las entradas vinculadas mediante este campo en el panel de base de datos o en el panel independiente de la entrada para verlas y editarlas directamente.",
 		"relatedDatabaseView": "Vista de la base de datos relacionada",
 		"relatedDatabaseViewShared": "Todas las entradas usan la disposición de columnas compartida de la vista de destino",
 		"relatedDatabaseViewUnavailable": "Vista relacionada no disponible; comprueba el campo y la vista de destino",

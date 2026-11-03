@@ -2,7 +2,7 @@ import {MenuItem} from "../../../menus/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {fetchSyncPost} from "../../../util/fetch";
 import {isMobile} from "../../../util/functions";
-import {escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 import {showMessage} from "../../../dialog/message";
 import {transaction} from "../../wysiwyg/transaction";
 
@@ -12,10 +12,19 @@ const isReadonly = (protyle: IProtyle) => protyle?.disabled || window.siyuan.con
 export const getRelatedViewConfigHTML = (field: IAVColumn, protyle: IProtyle) => {
     const lang = window.siyuan.languages._attrView;
     const enabled = field.relation?.detailView?.spec === 1 && field.relation.detailView.enabled;
-    return `<label class="b3-menu__item b3-menu__item--wrap">
+    return `<div class="b3-menu__item b3-menu__item--wrap">
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-type="relatedViewInfo" data-position="north" aria-label="${escapeAriaLabel(lang.relatedDatabaseViewInfo)}" aria-expanded="false">
+        <svg aria-hidden="true"><use xlink:href="#iconInfo"></use></svg>
+    </button>
+    <span class="fn__space"></span>
+    <label class="b3-menu__label fn__flex">
     <span class="b3-menu__label">${lang.showRelatedDatabaseView}</span>
     <input data-type="relatedViewEnabled" type="checkbox" class="b3-switch b3-switch--menu" ${enabled ? "checked" : ""} ${isReadonly(protyle) || !field.relation?.avID ? "disabled" : ""}>
-</label>
+    </label>
+</div>
+<div class="b3-menu__item b3-menu__item--readonly fn__none" data-related-view-info="true">
+    <span class="b3-menu__label ft__on-surface ft__smaller ft__breakword">${escapeHtml(lang.relatedDatabaseViewInfo)}</span>
+</div>
 <button class="b3-menu__item${enabled ? "" : " fn__none"}" data-type="relatedViewTarget" disabled>
     <svg class="b3-menu__icon"><use xlink:href="#iconTable"></use></svg>
     <span class="b3-menu__label">${lang.relatedDatabaseView}</span>
@@ -42,6 +51,16 @@ export const bindRelatedViewConfig = async (protyle: IProtyle, avID: string, fie
         return;
     }
     const lang = window.siyuan.languages._attrView;
+    const infoButton = menuElement.querySelector<HTMLButtonElement>('[data-type="relatedViewInfo"]');
+    const infoElement = menuElement.querySelector<HTMLElement>("[data-related-view-info]");
+    let infoExpanded = false;
+    infoButton?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        infoExpanded = !infoExpanded;
+        infoElement?.classList.toggle("fn__none", !infoExpanded);
+        infoButton.setAttribute("aria-expanded", String(infoExpanded));
+    });
     const targetAVID = field.relation.avID || "";
     const tipElement = menuElement.querySelector<HTMLElement>("[data-related-view-tip]");
     const sourceElement = menuElement.querySelector<HTMLElement>('[data-type="goSearchAV"]');

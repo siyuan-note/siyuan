@@ -3172,7 +3172,8 @@
 		"quit": "خروج من التطبيق"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "إظهار عرض قاعدة البيانات المرتبطة",
+		"showRelatedDatabaseView": "إظهار الجدول المرتبط",
+		"relatedDatabaseViewInfo": "اعرض العناصر المرتبطة بهذا الحقل في لوحة قاعدة البيانات أو لوحة العنصر المستقلة لعرضها وتحريرها مباشرة.",
 		"relatedDatabaseView": "عرض قاعدة البيانات المرتبطة",
 		"relatedDatabaseViewShared": "تستخدم جميع الإدخالات تخطيط الأعمدة المشترك للعرض الهدف",
 		"relatedDatabaseViewUnavailable": "العرض المرتبط غير متاح؛ تحقق من الحقل والعرض الهدف",

@@ -3172,7 +3172,8 @@
 		"quit": "アプリケーションを終了"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "関連データベースのビューを表示",
+		"showRelatedDatabaseView": "関連テーブルを表示",
+		"relatedDatabaseViewInfo": "このフィールドで関連付けられた項目をデータベースパネルまたは独立した項目パネルに表示し、その場で確認・編集できます。",
 		"relatedDatabaseView": "関連データベースのビュー",
 		"relatedDatabaseViewShared": "すべての項目で対象ビューの共有列レイアウトを使用",
 		"relatedDatabaseViewUnavailable": "関連ビューを利用できません。フィールドと対象ビューを確認してください",

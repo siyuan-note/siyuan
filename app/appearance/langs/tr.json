@@ -3172,7 +3172,8 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "İlişkili veritabanı görünümünü göster",
+		"showRelatedDatabaseView": "İlişkili tabloyu göster",
+		"relatedDatabaseViewInfo": "Bu alan üzerinden bağlanan kayıtları doğrudan görüntüleyip düzenlemek için veritabanı panelinde veya bağımsız kayıt panelinde gösterin.",
 		"relatedDatabaseView": "İlişkili veritabanı görünümü",
 		"relatedDatabaseViewShared": "Tüm girdiler hedef görünümün paylaşılan sütun düzenini kullanır",
 		"relatedDatabaseViewUnavailable": "İlişkili görünüm kullanılamıyor; alanı ve hedef görünümü kontrol edin",

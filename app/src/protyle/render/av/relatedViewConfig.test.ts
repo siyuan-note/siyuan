@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import {it} from "node:test";
 import {compileModule, evaluateModule} from "../../../testSupport/loadModule";
-import {escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 
 const compiled = compileModule("src/protyle/render/av/relatedViewConfig.ts");
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
@@ -36,7 +36,7 @@ class Control {
     public contains(element: Control): boolean { return this === element || this.children.includes(element); }
 }
 
-const setup = (detailView?: IAVColumnRelation["detailView"]) => {
+const setup = (detailView?: IAVColumnRelation["detailView"], info = "relatedDatabaseViewInfo") => {
     const field = {id: "relation-key", type: "relation", relation: {avID: "target", detailView}} as IAVColumn;
     const protyle = {disabled: false} as IProtyle;
     const config = {readonly: false};
@@ -46,6 +46,9 @@ const setup = (detailView?: IAVColumnRelation["detailView"]) => {
     const mobileItems: IMenu[] = [];
     const menu = new Control();
     const switchElement = new Control();
+    const infoButton = new Control();
+    const infoElement = new Control();
+    infoElement.classes.add("fn__none");
     let target = new Control();
     const tip = new Control();
     const tipText = new Control();
@@ -69,11 +72,13 @@ const setup = (detailView?: IAVColumnRelation["detailView"]) => {
     target.replaceWith = replace;
     menu.querySelector = selector => ({
         '[data-type="relatedViewEnabled"]': switchElement,
+        '[data-type="relatedViewInfo"]': infoButton,
+        "[data-related-view-info]": infoElement,
         '[data-type="relatedViewTarget"]': target,
         "[data-related-view-tip]": tip,
         '[data-type="goSearchAV"]': source,
     }[selector]);
-    const lang = new Proxy({}, {get: (_object, key) => String(key)});
+    const lang = new Proxy({}, {get: (_object, key) => key === "relatedDatabaseViewInfo" ? info : String(key)});
     const commonMenu = {showSubMenu() { shown++; }, append(element: Control & {options: IMenu}) {
         mobileItems.push(element.options);
     }, fullscreen() { fullscreen++; }};
@@ -105,7 +110,7 @@ const setup = (detailView?: IAVColumnRelation["detailView"]) => {
                 options.show(commonMenu);
             }},
             "../../../util/functions": {isMobile: () => mobile},
-            "../../../util/escape": {escapeHtml},
+            "../../../util/escape": {escapeAriaLabel, escapeHtml},
             "../../../dialog/message": {showMessage: (message: string) => messages.push(message)},
             "../../../util/fetch": {fetchSyncPost: (url: string, payload: unknown) => {
                 requests.push({url, payload});
@@ -116,7 +121,7 @@ const setup = (detailView?: IAVColumnRelation["detailView"]) => {
             }},
         }[id] || {}),
     });
-    return {api, field, protyle, config, menu, switchElement, source, operations, requests, messages, mobileItems,
+    return {api, field, protyle, config, menu, switchElement, infoButton, infoElement, source, operations, requests, messages, mobileItems,
         tipText, get target() { return target; }, get targetOptions() { return targetOptions; },
         get shown() { return shown; }, get fullscreen() { return fullscreen; },
         setResponse: (callback: typeof response) => { response = callback; },
@@ -125,6 +130,37 @@ const setup = (detailView?: IAVColumnRelation["detailView"]) => {
         toggle: (enabled: boolean) => { switchElement.checked = enabled; switchElement.dispatch("change"); },
     };
 };
+
+it("opens and closes the explanation without toggling the relation setting on desktop and mobile", async () => {
+    for (const mobile of [false, true]) {
+        const h = setup();
+        if (mobile) h.setMobile();
+        const html = h.api.getRelatedViewConfigHTML(h.field, h.protyle);
+        assert.match(html, /<button type="button"[^>]+data-type="relatedViewInfo"[^>]+aria-expanded="false"/);
+        assert.match(html, /iconInfo/);
+        assert.match(html, /relatedDatabaseViewInfo/);
+        await h.bind();
+        let stopped = false;
+        h.infoButton.dispatch("click", {stopPropagation() { stopped = true; }});
+        assert.equal(stopped, true);
+        assert.equal(h.infoButton.dataset["aria-expanded"], "true");
+        assert.equal(h.infoElement.classes.has("fn__none"), false);
+        assert.equal(h.switchElement.checked, false);
+        assert.equal(h.operations.length, 0);
+        h.infoButton.dispatch("click");
+        assert.equal(h.infoButton.dataset["aria-expanded"], "false");
+        assert.equal(h.infoElement.classes.has("fn__none"), true);
+    }
+});
+
+it("uses the native hover tooltip and escapes its separately parsed content", () => {
+    const text = 'View <entry> "details" &lt;sample>';
+    const h = setup(undefined, text);
+    const html = h.api.getRelatedViewConfigHTML(h.field, h.protyle);
+    assert.match(html, /block__icon block__icon--show ariaLabel/);
+    assert.ok(html.includes(`data-position="north" aria-label="${escapeAriaLabel(text)}"`));
+    assert.ok(html.includes(escapeHtml(text)));
+});
 
 it("uses a native switch and a checked existing-table submenu without a select or layout copy", async () => {
     const h = setup();

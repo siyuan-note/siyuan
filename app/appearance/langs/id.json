@@ -3172,7 +3172,8 @@
 		"quit": "Keluar aplikasi"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Tampilkan tampilan basis data terkait",
+		"showRelatedDatabaseView": "Tampilkan tabel terkait",
+		"relatedDatabaseViewInfo": "Tampilkan entri yang ditautkan melalui bidang ini di panel basis data atau panel item mandiri untuk dilihat dan diedit langsung.",
 		"relatedDatabaseView": "Tampilan basis data terkait",
 		"relatedDatabaseViewShared": "Semua entri menggunakan tata letak kolom bersama dari tampilan tujuan",
 		"relatedDatabaseViewUnavailable": "Tampilan terkait tidak tersedia; periksa kolom dan tampilan tujuan",

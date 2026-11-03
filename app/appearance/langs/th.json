@@ -3172,7 +3172,8 @@
 		"quit": "ออก"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "แสดงมุมมองฐานข้อมูลที่เชื่อมโยง",
+		"showRelatedDatabaseView": "แสดงตารางที่เชื่อมโยง",
+		"relatedDatabaseViewInfo": "แสดงรายการที่เชื่อมโยงผ่านฟิลด์นี้ในแผงฐานข้อมูลหรือแผงรายการแบบแยก เพื่อดูและแก้ไขได้โดยตรง",
 		"relatedDatabaseView": "มุมมองฐานข้อมูลที่เชื่อมโยง",
 		"relatedDatabaseViewShared": "ทุกรายการใช้เค้าโครงคอลัมน์ร่วมกันจากมุมมองเป้าหมาย",
 		"relatedDatabaseViewUnavailable": "ไม่สามารถใช้มุมมองที่เชื่อมโยงได้ โปรดตรวจสอบฟิลด์และมุมมองเป้าหมาย",

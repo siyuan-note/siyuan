@@ -3172,7 +3172,8 @@
 		"quit": "애플리케이션 종료"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "연결된 데이터베이스 보기 표시",
+		"showRelatedDatabaseView": "연결된 표 표시",
+		"relatedDatabaseViewInfo": "이 필드로 연결된 항목을 데이터베이스 패널 또는 독립 항목 패널에 표시하여 바로 확인하고 편집할 수 있습니다.",
 		"relatedDatabaseView": "연결된 데이터베이스 보기",
 		"relatedDatabaseViewShared": "모든 항목에서 대상 보기의 공유 열 레이아웃 사용",
 		"relatedDatabaseViewUnavailable": "연결된 보기를 사용할 수 없습니다. 필드와 대상 보기를 확인하세요",

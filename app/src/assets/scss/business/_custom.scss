@@ -455,6 +455,10 @@
   }
 }
 
+.fn__hr--b + .av-related-view {
+  border-top: 1px solid var(--b3-border-color);
+}
+
 .av-related-view {
     .av__row-more {
         display: inline-flex;

@@ -3172,7 +3172,8 @@
 		"quit": "צא מהאפליקציה"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "הצגת תצוגת מסד הנתונים המקושר",
+		"showRelatedDatabaseView": "הצגת טבלה מקושרת",
+		"relatedDatabaseViewInfo": "הצגת הרשומות המקושרות דרך שדה זה בלוח מסד הנתונים או בלוח הרשומה העצמאי, לצפייה ולעריכה ישירה.",
 		"relatedDatabaseView": "תצוגת מסד הנתונים המקושר",
 		"relatedDatabaseViewShared": "כל הרשומות משתמשות בפריסת העמודות המשותפת של תצוגת היעד",
 		"relatedDatabaseViewUnavailable": "התצוגה המקושרת אינה זמינה; יש לבדוק את השדה ואת תצוגת היעד",

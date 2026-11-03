@@ -3172,7 +3172,8 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Zobraziť pohľad prepojenej databázy",
+		"showRelatedDatabaseView": "Zobraziť prepojenú tabuľku",
+		"relatedDatabaseViewInfo": "Zobrazí položky prepojené cez toto pole na paneli databázy alebo samostatnom paneli položky, kde ich môžete priamo prezerať a upravovať.",
 		"relatedDatabaseView": "Pohľad prepojenej databázy",
 		"relatedDatabaseViewShared": "Všetky položky používajú spoločné rozloženie stĺpcov cieľového pohľadu",
 		"relatedDatabaseViewUnavailable": "Prepojený pohľad nie je dostupný; skontrolujte pole a cieľový pohľad",

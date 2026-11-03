@@ -3172,7 +3172,8 @@
 		"quit": "Zamknij aplikację"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Pokaż widok powiązanej bazy danych",
+		"showRelatedDatabaseView": "Pokaż powiązaną tabelę",
+		"relatedDatabaseViewInfo": "Pokaż wpisy powiązane przez to pole w panelu bazy danych lub osobnym panelu wpisu, aby można je było bezpośrednio przeglądać i edytować.",
 		"relatedDatabaseView": "Widok powiązanej bazy danych",
 		"relatedDatabaseViewShared": "Wszystkie wpisy używają wspólnego układu kolumn widoku docelowego",
 		"relatedDatabaseViewUnavailable": "Powiązany widok jest niedostępny; sprawdź pole i widok docelowy",

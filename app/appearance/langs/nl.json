@@ -3172,7 +3172,8 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
-		"showRelatedDatabaseView": "Weergave van gekoppelde database tonen",
+		"showRelatedDatabaseView": "Gerelateerde tabel tonen",
+		"relatedDatabaseViewInfo": "Toon de via dit veld gekoppelde items in het databasepaneel of het zelfstandige itempaneel, waar u ze direct kunt bekijken en bewerken.",
 		"relatedDatabaseView": "Weergave van gekoppelde database",
 		"relatedDatabaseViewShared": "Alle items gebruiken de gedeelde kolomindeling van de doelweergave",
 		"relatedDatabaseViewUnavailable": "Gekoppelde weergave niet beschikbaar; controleer het veld en de doelweergave",

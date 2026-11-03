@@ -660,6 +660,7 @@ func TestDownloadSkillSourceRejectsPrivateHost(t *testing.T) {
 }
 
 func TestInstallGitHubTreeScope(t *testing.T) {
+	mockSkillPublicDNS(t)
 	var archive bytes.Buffer
 	w := zip.NewWriter(&archive)
 	for file, content := range map[string]string{
@@ -731,6 +732,16 @@ func TestInstallGitHubTreeScope(t *testing.T) {
 				sort.Strings(result.Names)
 				if !reflect.DeepEqual(result.Names, tc.want) {
 					t.Fatalf("names = %v, want %v", result.Names, tc.want)
+				}
+				records, recordErr := readSkillInstallations()
+				if recordErr != nil {
+					t.Fatal(recordErr)
+				}
+				for _, name := range result.Names {
+					record := records.Skills[name]
+					if record.Ref != tc.ref || record.Repository != "https://github.com/foo/bar" || record.Subdirectory != strings.TrimPrefix(strings.TrimPrefix(tc.tree, tc.ref), "/") || record.SourceScope != "directory" {
+						t.Fatalf("incorrect source record: %+v", record)
+					}
 				}
 				entries, err := os.ReadDir(workspace)
 				if err != nil || len(entries) != len(tc.want) {

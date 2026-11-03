@@ -1205,6 +1205,10 @@
 				{
 					"Type": "NodeText",
 					"Data": ", preserving other existing files. Back up local changes before reinstalling."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " The installer stores installation records outside skill directories in data/storage/ai/agent/skills.json. The skill list reports the sanitized source URL, resolved repository reference and subdirectory when available, a full commit SHA only when known, installation time, SiYuan version, and a deterministic SHA-256 snapshot of all regular files and their relative paths. The digest describes the directory immediately after installation, not its current integrity or trustworthiness. For a single-file installation, sourceScope is manifest-only: the URL identifies only SKILL.md, while the digest also includes retained resources whose origin is not established by this installation. ZIP installation uses directory scope. Records follow skill directory renames and are removed on deletion; older or manually created skills without records show unknown. An interrupted replacement may leave the source unknown rather than retain an incorrect binding. Copy the entire workspace, including this record file, when migrating. These records do not enable, update, or approve a skill automatically."
 				}
 			]
 		},

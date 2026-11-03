@@ -170,6 +170,6 @@ test("existing AV sheets register once and desktop-only paths remain unmodified"
     assert.match(skills, /mobile \? undefined : new Dialog/);
     assert.doesNotMatch(skills, /bindSkillDialogViewport/);
     for (const file of ["card/openCard.ts", "card/viewCards.ts", "protyle/render/av/openDatabaseRow.ts"]) {
-        assert.match(readFileSync("src/" + file, "utf8"), /mobileSheet: \{mode: "expanded"\}/, file);
+        assert.match(readFileSync("src/" + file, "utf8"), /mobileSheet: \{mode: "expanded"(?:, beforeClose: [^\n]+)?\}/, file);
     }
 });

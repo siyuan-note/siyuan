@@ -243,7 +243,7 @@ const runPositionCases = async (dialogSource, positionSource, dialogCSS) => {
     }
 };
 
-const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
+const runFlashcardCases = async (dialogSource, cardSource, mobile, mobileRuntimeSource) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
     let id = 0;
@@ -287,6 +287,11 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
         return exports;
     };
     modules["../dialog"] = load(dialogSource);
+    const runtime = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(modules["../dialog"].Dialog, mobile);
+    modules["../dialog/mobileDialog"] = runtime;
+    modules["../dialog/mobileInputDialog"] = runtime;
+    modules["../mobile/util/secondaryEditors"] = runtime.secondaryEditors;
+    modules["./pendingAction"] = runtime.pendingCardAction;
     const cards = load(cardSource);
     const app = {plugins: []};
     const data = {cards: []};
@@ -298,7 +303,9 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     cards.genCardHTML = () => '<div class="block__icons"><button class="block__icon">Review</button></div>';
     cards.bindCardEvent = async ({element}) => {
         element.setAttribute("data-key", constants.DIALOG_OPENCARD);
-        const editor = {resize() {}, destroy() {
+        const editor = {protyle: {element: document.createElement("div")}, resize() {}, isUploading: () => false,
+            async flushPendingTransactions() {}, destroy() {
+            runtime.secondaryEditors.unregisterMobileSecondaryEditor(this);
             destroyCount++;
             if (replacement) {
                 window.siyuan.mobile.popEditor = replacement;
@@ -355,7 +362,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     }
 };
 
-const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource, openOptionsSource, navigationSource) => {
+const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource, openOptionsSource, navigationSource, mobileRuntimeSource) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
     const constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_SEARCH: "search",
@@ -423,6 +430,7 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
         return exports;
     };
     modules["../dialog"] = load(dialogSource);
+    modules["../dialog/mobileDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(modules["../dialog"].Dialog, false);
     modules["./focus"] = modules["../search/focus"] = load(focusSource);
     modules["./openOptions"] = load(openOptionsSource);
     modules["./databaseRowNavigation"] = load(navigationSource);
@@ -575,6 +583,7 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript(
                 `(${runPositionCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(positionSource)}, ${JSON.stringify(dialogCSS)})`);
             const {parse} = require("ifdef-loader/preprocessor");
+            const mobileRuntimeSource = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
             const compileSearch = (file, mobile = false) => ts.transpileModule(parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true), {
@@ -585,14 +594,14 @@ if (process.versions.electron && process.type === "browser") {
                 ${JSON.stringify(compileSearch("search/spread.ts"))},
                 ${JSON.stringify(compileSearch("command/nativeRuntime.ts", true))},
                 ${JSON.stringify(compileSearch("search/openOptions.ts"))},
-                ${JSON.stringify(compileSearch("command/databaseRowNavigation.ts"))})`);
+                ${JSON.stringify(compileSearch("command/databaseRowNavigation.ts"))}, ${JSON.stringify(mobileRuntimeSource)})`);
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
             for (const mobile of [false, true]) {
                 const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
                 }).outputText;
                 await win.webContents.executeJavaScript(
-                    `(${runFlashcardCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(compiled)}, ${mobile})`);
+                    `(${runFlashcardCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(compiled)}, ${mobile}, ${JSON.stringify(mobileRuntimeSource)})`);
             }
         } catch (error) {
             console.error(error);

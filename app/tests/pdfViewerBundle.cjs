@@ -12,6 +12,9 @@ module.exports = async ({annotations = false} = {}) => {
         "../../protyle/util/compatibility": "export const setStorageVal = async () => {}; export const updateHotkeyTip = x => x; export const isInMobileApp = () => false;",
         "../../util/functions": "export const isMobile = () => window.pdfTestMobile === true;",
         "../../protyle/util/hasClosest": "export const hasClosestByClassName = (el, name) => el.closest?.('.' + name);",
+        "../../dialog/mobileDialog": `export class MobileDialog {
+            constructor() { throw new Error('Unexpected PDF overlay in viewer fixture'); }
+        }`,
     };
     if (annotations) {
         delete mocks["../anno"];
@@ -30,9 +33,9 @@ module.exports = async ({annotations = false} = {}) => {
         "../protyle/util/compatibility": "export const readText = async () => ''; export const writeText = text => {window.pdfCopiedText = text;};",
         "../config/tabs/appearancePreferences": "export const patchAppearancePreference = async () => {};",
         "../constants": mocks["../../constants"],
-        "../dialog": "export class Dialog {}",
+        "../dialog/mobileDialog": mocks["../../dialog/mobileDialog"],
         "../dialog/message": "export const showMessage = () => {};",
-        "../dialog/confirmDialog": "export const confirmDialog = () => {};",
+        "../dialog/mobileConfirmDialog": "export const mobileConfirmDialog = () => {};",
         "../util/functions": "export const isMobile = () => window.pdfTestMobile === true;",
         "../protyle/upload": "export const uploadStandaloneAssetFiles = async () => ({code: 0, data: {succMap: {}}});",
     };

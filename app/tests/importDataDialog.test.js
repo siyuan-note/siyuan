@@ -13,6 +13,15 @@ const compile = file => transpileModule(readFileSync(path.join(__dirname, file),
 const checkDialog = async (css, languages, sources, mobile, rtl) => {
     const check = require("node:assert/strict");
     const pause = () => new Promise(resolve => setTimeout(resolve, 180));
+    const settleDialog = async current => {
+        const container = current.element.querySelector(".b3-dialog__container");
+        const deadline = performance.now() + 3000;
+        while (!current.element.classList.contains("b3-dialog--open") ||
+            getComputedStyle(container).visibility === "hidden" || container.getAnimations().some(animation => animation.playState === "running")) {
+            check.ok(performance.now() < deadline, "dialog finishes opening");
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+    };
     document.head.innerHTML = "<style></style>";
     document.querySelector("style").textContent = css;
     document.body.innerHTML = "";
@@ -39,11 +48,12 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
         "./anchoredInput": {getAnchoredInputMask: () => undefined},
     });
     const escape = load(sources.escape, {});
+    const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     const conflicts = Array.from({length: 40}, (_, index) => `20261030000000-notebook-${index}`);
     conflicts.push("<unsafe-notebook>");
     const requests = [];
     const imported = load(sources.importData, {
-        "../dialog": {Dialog}, "../util/escape": escape,
+        "../dialog/mobileDialog": mobileRuntime, "../util/escape": escape,
         "../util/functions": {isMobile: () => mobile},
         "../util/contractFormData": {ContractFormData: class {}},
         "../dialog/message": {showMessage: message => check.fail(message)},
@@ -57,6 +67,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
     await imported.importDataFile(new File(["test"], "Data.zip"));
     await pause();
     const dialog = window.siyuan.dialogs.at(-1);
+    await settleDialog(dialog);
     const password = dialog.element.querySelector('[data-type="password"]');
     const label = dialog.element.querySelector('[data-type="password-label"]');
     check.equal(getComputedStyle(label).display, "none");
@@ -110,6 +121,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
     check.equal(Object.hasOwn(commit.data, "password"), false);
     const completed = window.siyuan.dialogs.at(-1);
     check.notEqual(completed, dialog);
+    await settleDialog(completed);
     visibleActions(completed);
     completed.element.querySelector('[data-type="confirm"]').click();
     await pause();
@@ -126,6 +138,7 @@ if (process.versions.electron && process.type === "browser") {
         }});
         try {
             const sources = {dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
+                mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
                 importData: compile("../src/menus/importData.ts")};
             for (const name of ["base", "mobile"]) {
                 const styles = sass.compile(path.join(__dirname, `../src/assets/scss/${name}.scss`), {logger: sass.Logger.silent}).css;

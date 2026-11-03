@@ -25,7 +25,7 @@ export interface MobileDialog extends Dialog {
     requestClose(reason: MobileDialogCloseReason, options?: IObject): Promise<boolean>;
     // 调用前先清除敏感内容；跳过保存/脏数据守卫，最终执行 destroyCallback 资源清理。
     invalidate(options?: IObject): void;
-    runPending(task: () => Promise<boolean>, options?: {close?: boolean}): Promise<boolean>;
+    runPending(task: () => Promise<boolean>, options?: {close?: boolean, disableButtons?: boolean}): Promise<boolean>;
     focusWhenReady(target: () => HTMLElement, options?: {select?: boolean, showKeyboard?: boolean}): void;
     setSheetMode(mode: MobileSheetMode): void;
 }
@@ -186,12 +186,12 @@ const createMobileDialogClass = () => {
             }
         }
 
-        private lockEditing() {
+        private lockEditing(disableButtons = true) {
             this.element.setAttribute("aria-busy", "true");
             const body = this.element.querySelector<HTMLElement>(".b3-dialog__body");
             const inert = body?.inert;
             if (body) body.inert = true;
-            const buttons = Array.from(this.element.querySelectorAll<HTMLButtonElement>("button"))
+            const buttons = Array.from(disableButtons ? this.element.querySelectorAll<HTMLButtonElement>("button") : [])
                 .filter(button => !button.disabled);
             buttons.forEach(button => { button.disabled = true; });
             return () => {
@@ -202,10 +202,10 @@ const createMobileDialogClass = () => {
             };
         }
 
-        public async runPending(task: () => Promise<boolean>, options: {close?: boolean} = {}) {
+        public async runPending(task: () => Promise<boolean>, options: {close?: boolean, disableButtons?: boolean} = {}) {
             if (this.pending || this.checking || this.disposed || this.element.dataset.dialogClosing === "true") return false;
             this.pending = true;
-            const release = this.lockEditing();
+            const release = this.lockEditing(options.disableButtons !== false);
             let success = false;
             try {
                 success = await task() === true;

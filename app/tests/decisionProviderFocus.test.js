@@ -25,7 +25,7 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
         "config/tabs/ai/aiRuntime": {AI_CONFIG_CHANGED_EVENT: "siyuan-ai-config-changed", aiConfigApi: {
             patch: unexpected, waitForSave: async () => true,
         }},
-        "dialog/confirmDialog": {confirmDialog: unexpected},
+        "dialog/mobileConfirmDialog": {mobileConfirmDialog: unexpected},
         "dialog/message": {showMessage: unexpected},
         "util/fetch": {fetchPost: unexpected},
         "plugin/Menu": {Menu: unexpected},

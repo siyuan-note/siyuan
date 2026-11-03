@@ -53,6 +53,8 @@ const sources = () => {
             ${escape.getText(keyboard)}
         }` + sourceFile("protyle/toolbar/subElementLifecycle.ts").text.replaceAll("export ", "")),
         card: compile(`const openCardByData = ${openCard.getText(card)};`),
+        secondaryEditors: compile(sourceFile("mobile/util/secondaryEditors.ts").text),
+        editorSave: compile(sourceFile("protyle/util/editorSave.ts").text),
         menuToggle: compile(sourceFile("menus/menuToggle.ts").text),
         menu: compile(`async function workspaceMenu(app, rect, openOnly = false, target) {
             ${workspaceMenu.body.statements[0].getText(workspace)}
@@ -97,6 +99,7 @@ const cases = async compiled => {
         return exports;
     };
     const lifecycle = load(compiled.lifecycle, {});
+    const secondaryEditors = load(compiled.secondaryEditors, {"../../protyle/util/editorSave": load(compiled.editorSave, {})});
     const selectionMode = {clearBlockSelectionMode: root => {
         root.querySelectorAll(".selected-block").forEach(item => item.classList.remove("selected-block"));
     }};
@@ -164,7 +167,7 @@ const cases = async compiled => {
         }
         const root = protyle.wysiwyg.element;
         const first = root.firstElementChild;
-        const editor = {protyle, resize() {}, destroy() {}};
+        const editor = {protyle, resize() {}, destroy() {}, isUploading: () => false, async flushPendingTransactions() {}};
         class Dialog {
             constructor() {
                 this.element = document.createElement("div");
@@ -176,11 +179,14 @@ const cases = async compiled => {
                 this.destroyed = false;
             }
             destroy() {this.destroyed = true;}
+            focusWhenReady(target) {target()?.focus();}
         }
         const focusByRange = range => {getSelection().removeAllRanges(); getSelection().addRange(range);};
-        const openCard = new Function("window", "Dialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
-            "focusByRange", "updateCardHV", compiled.card + "\nreturn openCardByData;")(
-            window, Dialog, Constants, () => "", () => mobile, async () => editor, focusByRange, () => {});
+        const openCard = new Function("window", "MobileDialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
+            "focusByRange", "updateCardHV", "createMobileSecondaryEditorCloseGuard", "registerMobileSecondaryEditor",
+            compiled.card + "\nreturn openCardByData;")(
+            window, Dialog, Constants, () => "", () => mobile, async () => editor, focusByRange, () => {},
+            secondaryEditors.createMobileSecondaryEditorCloseGuard, secondaryEditors.registerMobileSecondaryEditor);
         window.siyuan.dialogs = [];
         await openCard({plugins: []}, {}, "all");
         const dialog = window.siyuan.dialogs[0];
@@ -199,6 +205,7 @@ const cases = async compiled => {
         check.equal(dialog.destroyed, false);
         check.equal(document.activeElement, dialog.element.querySelector(".card__action button"));
         check.equal(first.classList.contains("selected-block"), false);
+        secondaryEditors.unregisterMobileSecondaryEditor(editor);
     }
     // 快捷键将焦点移到可操作菜单项，方向键不再被编辑器截获。
     const menuConstants = {MENU_BAR_WORKSPACE: "workspace", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};

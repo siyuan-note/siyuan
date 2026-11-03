@@ -2,9 +2,8 @@ import {MobileDialog} from "../dialog/mobileDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {toggleMenu} from "../menus/menuToggle";
-import {Dialog} from "../dialog";
-import {fetchPost} from "../util/fetch";
-import {fetchDueCards} from "./fetchDueCards";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {fetchDueCardsSync} from "./fetchDueCards";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
@@ -43,6 +42,7 @@ import {
 import {setFold} from "../protyle/util/blockFold";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {appendRemoteQuery} from "../util/hostCapabilities";
+import {runCardAction} from "./pendingAction";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -193,7 +193,7 @@ const showRatingActions = (actionElements: NodeListOf<Element>, currentCard: ICa
     actionElements[1].classList.remove("fn__none");
 };
 
-const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
+const getEditor = async (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
     const revealState = getFlashcardRevealState(protyle);
     const generation = beginFlashcardLoad(revealState);
     const actionElements = element.querySelectorAll(".card__action");
@@ -201,44 +201,39 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
     actionElements[0].querySelectorAll('button[data-type="-1"], button[data-type="-3"]').forEach(item => {
         item.removeAttribute("disabled");
     });
-    fetchPost("/api/block/getDocInfo", {
-        id,
-    }, (docResponse) => {
-        if (!isCurrentFlashcardLoad(revealState, generation)) {
-            return;
-        }
-        fetchPost("/api/filetree/getDoc", {
-            id,
-            mode: 0,
-            size: Constants.SIZE_GET_MAX
-        }, (response) => {
-            if (!isCurrentFlashcardLoad(revealState, generation)) {
-                return;
-            }
-            onGet({
-                updateReadonly: true,
-                data: response,
-                protyle,
-                action: response.code === 0 && response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
-                isValid: () => isCurrentFlashcardLoad(revealState, generation),
-                beforeAVRender: () => protyle.wysiwyg.renderCustom(docResponse.data.ial),
-                afterCB: () => {
-                    if (!isCurrentFlashcardLoad(revealState, generation) ||
-                        protyle.element.classList.contains("fn__none")) {
-                        return;
-                    }
-                    const hasHide = hasFlashcardAnswer(protyle.wysiwyg.element, window.siyuan.config.flashcard);
-                    if (!hasHide) {
-                        revealFlashcardAnswer(protyle, () => {
-                            showRatingActions(actionElements, currentCard);
-                        });
-                    } else {
-                        hideFlashcardAnswer(protyle.element, window.siyuan.config.flashcard);
-                        actionElements[0].classList.remove("fn__none");
-                        actionElements[1].classList.add("fn__none");
-                    }
+    const isCurrent = () => protyle.element.isConnected && protyle.element.classList.contains("protyle") &&
+        isCurrentFlashcardLoad(revealState, generation);
+    const docResponse = await fetchSyncPost("/api/block/getDocInfo", {id});
+    if (docResponse.code !== 0 || !isCurrent()) return false;
+    const response = await fetchSyncPost("/api/filetree/getDoc", {id, mode: 0, size: Constants.SIZE_GET_MAX});
+    if (response.code !== 0 || !isCurrent()) return false;
+    return new Promise<boolean>(resolve => {
+        onGet({
+            updateReadonly: true,
+            data: response,
+            protyle,
+            action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
+            isValid: isCurrent,
+            beforeAVRender: () => protyle.wysiwyg.renderCustom(docResponse.data.ial),
+            afterCB: () => {
+                if (!isCurrent() || protyle.element.classList.contains("fn__none")) {
+                    resolve(false);
+                    return;
                 }
-            });
+                const hasHide = hasFlashcardAnswer(protyle.wysiwyg.element, window.siyuan.config.flashcard);
+                if (!hasHide) {
+                    revealFlashcardAnswer(protyle, () => {
+                        showRatingActions(actionElements, currentCard);
+                        resolve(true);
+                    });
+                } else {
+                    hideFlashcardAnswer(protyle.element, window.siyuan.config.flashcard);
+                    actionElements[0].classList.remove("fn__none");
+                    actionElements[1].classList.add("fn__none");
+                    resolve(true);
+                }
+            },
+            onAVRenderError: () => resolve(false),
         });
     });
 
@@ -275,7 +270,7 @@ export const bindCardEvent = async (options: {
     cardsData: ICardData
     cardType: TCardType,
     id?: string,
-    dialog?: Dialog,
+    dialog?: MobileDialog,
     index?: number,
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
@@ -302,7 +297,8 @@ export const bindCardEvent = async (options: {
         window.siyuan.mobile.popEditor = editor;
     }
     if (options.cardsData.cards.length > 0) {
-        getEditor(options.cardsData.cards[index].blockID, editor.protyle, options.element, options.cardsData.cards[index]);
+        void getEditor(options.cardsData.cards[index].blockID, editor.protyle, options.element, options.cardsData.cards[index])
+            .catch(error => showMessage(error.message));
     }
     options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
     const actionElements = options.element.querySelectorAll(".card__action");
@@ -315,6 +311,37 @@ export const bindCardEvent = async (options: {
     }
     const countElement = options.element.querySelector('[data-type="count"]');
     const filterElement = options.element.querySelector('[data-type="filter"]');
+    // 业务写入已获回执后，只重试后续读取，避免重复评分或移除。
+    let pendingAdvance: () => Promise<void>;
+    const advanceCard = async (card: ICard, type: string, nextIndex: number) => {
+        let nextData = options.cardsData;
+        if (nextIndex >= nextData.cards.length) {
+            const response = await fetchDueCardsSync(filterElement.getAttribute("data-cardtype"),
+                filterElement.getAttribute("data-id"), nextData.cards);
+            if (response.code !== 0 || !editor.protyle.element.isConnected) return;
+            nextIndex = 0;
+            nextData = response.data;
+            for (const plugin of options.app.plugins) nextData = await plugin.updateCards(nextData);
+        }
+        if (nextData.cards.length > 0) {
+            if (!await nextCard({countElement, editor, actionElements, index: nextIndex, cardsData: nextData})) return;
+        } else if (nextData.unreviewedCount > 0) {
+            newRound(countElement, editor, actionElements, nextData.unreviewedCount);
+        } else {
+            allDone(countElement, editor, actionElements);
+        }
+        index = nextIndex;
+        options.cardsData = nextData;
+        pendingAdvance = undefined;
+        emitEvent(card, type);
+    };
+    const removeCurrentCard = async (card: ICard) => {
+        if (card.state === 0) options.cardsData.unreviewedNewCardCount--;
+        else options.cardsData.unreviewedOldCardCount--;
+        options.cardsData.cards.splice(index, 1);
+        pendingAdvance = () => advanceCard(card, "-3", index);
+        await pendingAdvance();
+    };
     let resetPending = false;
     let resetRefresh: {card: ICard, onRefreshed: () => void};
     const refreshResetCard = () => {
@@ -333,32 +360,33 @@ export const bindCardEvent = async (options: {
             resetPending = false;
         });
     };
-    const fetchNewRound = () => {
+    const fetchNewRound = (updateFilter?: () => void) => runCardAction(options.dialog, editor, async () => {
+        updateFilter?.();
         const currentCardType = filterElement.getAttribute("data-cardtype");
         const docId = filterElement.getAttribute("data-id");
-        fetchDueCards(currentCardType, docId, undefined, async (treeCards) => {
-            index = 0;
-            options.cardsData = treeCards.data;
-            for (let i = 0; i < options.app.plugins.length; i++) {
-                options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
-            }
-            if (options.cardsData.cards.length > 0) {
-                nextCard({
-                    countElement,
-                    editor,
-                    actionElements,
-                    index,
-                    cardsData: options.cardsData
-                });
-            } else {
-                allDone(countElement, editor, actionElements);
-            }
-        });
-    };
+        const treeCards = await fetchDueCardsSync(currentCardType, docId, undefined);
+        if (treeCards.code !== 0 || !editor.protyle.element.isConnected) return;
+        index = 0;
+        options.cardsData = treeCards.data;
+        for (let i = 0; i < options.app.plugins.length; i++) {
+            options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
+        }
+        if (options.cardsData.cards.length > 0) {
+            await nextCard({countElement, editor, actionElements, index, cardsData: options.cardsData});
+        } else {
+            allDone(countElement, editor, actionElements);
+        }
+    }).catch(error => showMessage(error.message));
 
     countElement.innerHTML = genCardCount(options.cardsData, index);
     options.element.firstChild.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        if (pendingAdvance) {
+            void runCardAction(options.dialog, editor, pendingAdvance).catch(error => showMessage(error.message));
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         let type = "";
         const currentCard = options.cardsData.cards[index];
         if (resetPending || (resetRefresh && resetRefresh.card === currentCard)) {
@@ -422,7 +450,8 @@ export const bindCardEvent = async (options: {
                                     type: "number",
                                     min: "1",
                                     step: "1",
-                                    onConfirm: (value, timedialog) => {
+                                    awaitConfirm: true,
+                                    onConfirm: async (value, timedialog) => {
                                         const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
                                         const days = Number(value);
                                         if (!Number.isInteger(days) || days < 1) {
@@ -438,24 +467,16 @@ export const bindCardEvent = async (options: {
                                             inputElement.select();
                                             return;
                                         }
-                                        fetchPost("/api/riff/batchSetRiffCardsDueTime", {
-                                            cardDues: [{
-                                                id: currentCard.cardID,
-                                                due: due.format("YYYYMMDDHHmmss")
-                                            }]
-                                        }, () => {
-                                            actionElements[0].classList.add("fn__none");
-                                            actionElements[1].classList.remove("fn__none");
-                                            if (currentCard.state === 0) {
-                                                options.cardsData.unreviewedNewCardCount--;
-                                            } else {
-                                                options.cardsData.unreviewedOldCardCount--;
-                                            }
-                                            options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
-                                            options.cardsData.cards.splice(index, 1);
-                                            index--;
-                                            timedialog.destroy();
+                                        let saved = false;
+                                        await runCardAction(options.dialog, editor, async () => {
+                                            const response = await fetchSyncPost("/api/riff/batchSetRiffCardsDueTime", {
+                                                cardDues: [{id: currentCard.cardID, due: due.format("YYYYMMDDHHmmss")}]
+                                            });
+                                            if (response.code !== 0) return;
+                                            saved = true;
+                                            await removeCurrentCard(currentCard);
                                         });
+                                        return saved;
                                     },
                                 });
                             }
@@ -466,43 +487,45 @@ export const bindCardEvent = async (options: {
                                 icon: "iconRefresh",
                                 label: window.siyuan.languages.reset,
                                 click() {
-                                    resetPending = true;
-                                    let refreshing: Promise<void>;
-                                    fetchPost("/api/riff/resetRiffCards", {
-                                        type: filterElement.getAttribute("data-cardtype"),
-                                        id: docId,
-                                        deckID: Constants.QUICK_DECK_ID,
-                                        blockIDs: [currentCard.blockID],
-                                    }, () => {
-                                        resetRefresh = {
-                                            card: currentCard, onRefreshed: () => {
-                                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
-                                                currentCard.lapses = 0;
-                                                currentCard.lastReview = -62135596800000;
-                                                currentCard.reps = 0;
-                                                currentCard.state = 0;
-                                                currentCard.nextDues = {
-                                                    1: minLang,
-                                                    2: minLang.replace("1", "5"),
-                                                    3: minLang.replace("1", "10"),
-                                                    4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
-                                                };
-                                                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                                                    if (btnIndex < 2) {
-                                                        return;
-                                                    }
-                                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
-                                                });
-                                                options.cardsData.unreviewedOldCardCount--;
-                                                options.cardsData.unreviewedNewCardCount++;
-                                                countElement.innerHTML = genCardCount(options.cardsData, index);
-                                            }
-                                        };
-                                        refreshing = refreshResetCard();
-                                    }).finally(async () => {
-                                        await refreshing;
-                                        resetPending = false;
-                                    });
+                                    void runCardAction(options.dialog, editor, async () => {
+                                        resetPending = true;
+                                        let refreshing: Promise<void>;
+                                        await fetchPost("/api/riff/resetRiffCards", {
+                                            type: filterElement.getAttribute("data-cardtype"),
+                                            id: docId,
+                                            deckID: Constants.QUICK_DECK_ID,
+                                            blockIDs: [currentCard.blockID],
+                                        }, () => {
+                                            resetRefresh = {
+                                                card: currentCard, onRefreshed: () => {
+                                                    const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
+                                                    currentCard.lapses = 0;
+                                                    currentCard.lastReview = -62135596800000;
+                                                    currentCard.reps = 0;
+                                                    currentCard.state = 0;
+                                                    currentCard.nextDues = {
+                                                        1: minLang,
+                                                        2: minLang.replace("1", "5"),
+                                                        3: minLang.replace("1", "10"),
+                                                        4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
+                                                    };
+                                                    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+                                                        if (btnIndex < 2) {
+                                                            return;
+                                                        }
+                                                        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                                                    });
+                                                    options.cardsData.unreviewedOldCardCount--;
+                                                    options.cardsData.unreviewedNewCardCount++;
+                                                    countElement.innerHTML = genCardCount(options.cardsData, index);
+                                                }
+                                            };
+                                            refreshing = refreshResetCard();
+                                        }).finally(async () => {
+                                            await refreshing;
+                                            resetPending = false;
+                                        });
+                                    }).catch(error => showMessage(error.message));
                                 }
                             });
                         }
@@ -511,21 +534,14 @@ export const bindCardEvent = async (options: {
                             icon: "iconTrashcan",
                             label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
                             click() {
-                                actionElements[0].classList.add("fn__none");
-                                actionElements[1].classList.remove("fn__none");
-                                if (currentCard.state === 0) {
-                                    options.cardsData.unreviewedNewCardCount--;
-                                } else {
-                                    options.cardsData.unreviewedOldCardCount--;
-                                }
-                                options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
-                                transaction(undefined, [{
-                                    action: "removeFlashcards",
-                                    deckID: Constants.QUICK_DECK_ID,
-                                    blockIDs: [currentCard.blockID]
-                                }]);
-                                options.cardsData.cards.splice(index, 1);
-                                index--;
+                                void runCardAction(options.dialog, editor, async () => {
+                                    await transaction(undefined, [{
+                                        action: "removeFlashcards",
+                                        deckID: Constants.QUICK_DECK_ID,
+                                        blockIDs: [currentCard.blockID]
+                                    }], undefined, {awaitResponse: true});
+                                    await removeCurrentCard(currentCard);
+                                }).catch(error => showMessage(error.message));
                             }
                         });
                         menu.addSeparator();
@@ -691,9 +707,10 @@ export const bindCardEvent = async (options: {
                                 iconHTML: "",
                                 label: window.siyuan.languages.all,
                                 click() {
-                                    filterElement.setAttribute("data-id", "");
-                                    filterElement.setAttribute("data-cardtype", "all");
-                                    fetchNewRound();
+                                    void fetchNewRound(() => {
+                                        filterElement.setAttribute("data-id", "");
+                                        filterElement.setAttribute("data-cardtype", "all");
+                                    });
                                 },
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
@@ -703,9 +720,10 @@ export const bindCardEvent = async (options: {
                                 click() {
                                     movePathTo({
                                         cb: (toPath, toNotebook) => {
-                                            filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
-                                            filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
-                                            fetchNewRound();
+                                            void fetchNewRound(() => {
+                                                filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
+                                                filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
+                                            });
                                         },
                                         title: window.siyuan.languages.specifyPath,
                                         flashcard: true
@@ -720,9 +738,10 @@ export const bindCardEvent = async (options: {
                                     iconHTML: "",
                                     label: escapeHtml(options.title),
                                     click() {
-                                        filterElement.setAttribute("data-id", options.id);
-                                        filterElement.setAttribute("data-cardtype", options.cardType);
-                                        fetchNewRound();
+                                        void fetchNewRound(() => {
+                                            filterElement.setAttribute("data-id", options.id);
+                                            filterElement.setAttribute("data-cardtype", options.cardType);
+                                        });
                                     },
                                 }).element);
                                 if (response.data.length > 0) {
@@ -734,9 +753,10 @@ export const bindCardEvent = async (options: {
                                     iconHTML: "",
                                     label: escapeHtml(deck.name),
                                     click() {
-                                        filterElement.setAttribute("data-id", deck.id);
-                                        filterElement.setAttribute("data-cardtype", "all");
-                                        fetchNewRound();
+                                        void fetchNewRound(() => {
+                                            filterElement.setAttribute("data-id", deck.id);
+                                            filterElement.setAttribute("data-cardtype", "all");
+                                        });
                                     },
                                 }).element);
                             });
@@ -753,7 +773,7 @@ export const bindCardEvent = async (options: {
 
             const newroundElement = hasClosestByAttribute(target, "data-type", "newround");
             if (newroundElement) {
-                fetchNewRound();
+                void fetchNewRound();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -794,65 +814,27 @@ export const bindCardEvent = async (options: {
                 }
                 return;
             }
-        } else if (type === "-2") {    // 上一步
-            if (index > 0) {
-                index--;
-                nextCard({
-                    countElement,
-                    editor,
-                    actionElements,
-                    index,
-                    cardsData: options.cardsData
-                });
-                emitEvent(options.cardsData.cards[index + 1], type);
-            }
-            return;
         }
-        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && !actionElements[1].classList.contains("fn__none"))) {
-            fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
-                deckID: currentCard.deckID,
-                cardID: currentCard.cardID,
-                rating: parseInt(type),
-                reviewedCards: options.cardsData.cards
-            }, () => {
-                index++;
-                if (index > options.cardsData.cards.length - 1) {
-                    const currentCardType = filterElement.getAttribute("data-cardtype");
-                    fetchDueCards(currentCardType, docId, options.cardsData.cards, async (result) => {
-                        emitEvent(options.cardsData.cards[index - 1], type);
-                        index = 0;
-                        options.cardsData = result.data;
-                        for (let i = 0; i < options.app.plugins.length; i++) {
-                            options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
-                        }
-                        if (options.cardsData.cards.length === 0) {
-                            if (options.cardsData.unreviewedCount > 0) {
-                                newRound(countElement, editor, actionElements, result.data.unreviewedCount);
-                            } else {
-                                allDone(countElement, editor, actionElements);
-                            }
-                        } else {
-                            nextCard({
-                                countElement,
-                                editor,
-                                actionElements,
-                                index,
-                                cardsData: options.cardsData
-                            });
-                        }
-                    });
-                    return;
+        void runCardAction(options.dialog, editor, async () => {
+            if (type === "-2") {
+                if (index > 0) {
+                    pendingAdvance = () => advanceCard(currentCard, type, index - 1);
+                    await pendingAdvance();
                 }
-                nextCard({
-                    countElement,
-                    editor,
-                    actionElements,
-                    index,
-                    cardsData: options.cardsData
+                return;
+            }
+            if ("-3" === type || (["1", "2", "3", "4"].includes(type) && !actionElements[1].classList.contains("fn__none"))) {
+                const reviewed = await fetchSyncPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
+                    deckID: currentCard.deckID,
+                    cardID: currentCard.cardID,
+                    rating: parseInt(type),
+                    reviewedCards: options.cardsData.cards
                 });
-                emitEvent(options.cardsData.cards[index - 1], type);
-            });
-        }
+                if (reviewed.code !== 0 || !editor.protyle.element.isConnected) return;
+                pendingAdvance = () => advanceCard(currentCard, type, index + 1);
+                await pendingAdvance();
+            }
+        }).catch(error => showMessage(error.message));
     });
     return editor;
 };
@@ -952,7 +934,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     updateCardHV();
 };
 
-const nextCard = (options: {
+const nextCard = async (options: {
     countElement: Element,
     editor: Protyle,
     actionElements: NodeListOf<Element>,
@@ -973,7 +955,7 @@ const nextCard = (options: {
         options.actionElements[0].firstElementChild.removeAttribute("disabled");
         options.actionElements[1].querySelector(".b3-button").removeAttribute("disabled");
     }
-    getEditor(options.cardsData.cards[options.index].blockID, options.editor.protyle,
+    return getEditor(options.cardsData.cards[options.index].blockID, options.editor.protyle,
         hasClosestByAttribute(options.countElement, "data-key", Constants.DIALOG_OPENCARD) as HTMLElement,
         options.cardsData.cards[options.index]);
 };

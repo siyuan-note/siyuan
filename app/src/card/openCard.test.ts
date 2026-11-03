@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as flashcardMode from "./flashcardMode";
+import {loadModule} from "../testSupport/loadModule";
 const {loadMenuToggle} = require("../../tests/menu-toggle-fixture.cjs");
 
 const classList = () => {
@@ -15,14 +16,16 @@ const classList = () => {
 const createReview = async () => {
     const requests: Array<{url: string, payload: Record<string, unknown>, callback: (response: unknown) => void, resolve: () => void}> = [];
     const menuItems = new Map<string, IMenu>();
+    const removals: Array<{resolve: () => void, reject: (error: Error) => void}> = [];
     let confirmDue: (value: string, dialog: unknown) => void;
     const renders: Array<{afterCB: () => void, beforeAVRender: () => void, isValid: () => boolean}> = [];
     let click: (event: unknown) => void;
     const button = {setAttribute: () => {}, removeAttribute: () => {}, previousElementSibling: {textContent: ""}};
     const actions = [0, 1].map(() => ({classList: classList(), firstElementChild: button,
         querySelector: () => button, querySelectorAll: () => [button, button, button, button, button, button]}));
-    const element = {classList: classList(), setAttribute: () => {}, firstChild: {addEventListener: (_name: string, callback: typeof click) => { click = callback; }},
+    const element = {isConnected: true, classList: classList(), setAttribute: () => {}, firstChild: {addEventListener: (_name: string, callback: typeof click) => { click = callback; }},
         querySelectorAll: () => actions, querySelector: (selector: string) => selector === '[data-type="filter"]' ? {getAttribute: (name: string) => name === "data-id" ? "" : "all"} : {innerHTML: ""}};
+    element.classList.add("protyle");
     const protyle = {element, block: {id: "block"}, wysiwyg: {element: {querySelector: (): null => null}, renderCustom: () => {}}};
     const constants = {LOCAL_FLASHCARD: "card", CB_GET_ALL: "all", SIZE_GET_MAX: 100, DIALOG_OPENCARD: "card", QUICK_DECK_ID: "deck"};
     const menuToggle = loadMenuToggle({window: {siyuan: {menus: {menu: {
@@ -30,6 +33,12 @@ const createReview = async () => {
     }}}}});
     const dependencies = new Proxy({Constants: constants, Protyle: class {protyle = protyle;},
         fetchPost: (url: string, payload: Record<string, unknown>, callback: (response: unknown) => void) => new Promise<void>(resolve => { requests.push({url, payload, callback, resolve}); }),
+        fetchSyncPost: (url: string, payload: Record<string, unknown>) => new Promise(resolve => {
+            requests.push({url, payload, callback: resolve, resolve: () => {}});
+        }),
+        transaction: () => new Promise<void>((resolve, reject) => removals.push({resolve, reject})),
+        ...loadModule<typeof import("./pendingAction")>("src/card/pendingAction.ts", {require: (name: string) =>
+            name === "../util/functions" ? {isMobile: () => false} : {}}),
         Menu: class {addItem(item: IMenu) {menuItems.set(item.id, item);} addSeparator() {} fullscreen() {} open() {}},
         hasClosestByAttribute: (target: {type: string}, _name: string, value: string) => target.type === value ? target : null,
         mobileInputDialog: (options: {onConfirm: typeof confirmDue}) => { confirmDue = options.onConfirm; },
@@ -42,6 +51,9 @@ const createReview = async () => {
     }).outputText, {exports, require: (specifier: string) => {
         if (specifier.endsWith("menuToggle")) return menuToggle;
         if (specifier === "./flashcardMode") return {...flashcardMode, hasFlashcardAnswer: () => true};
+        if (specifier === "./fetchDueCards") return loadModule("src/card/fetchDueCards.ts", {
+            require: () => ({fetchPost: dependencies.fetchPost, fetchSyncPost: dependencies.fetchSyncPost}),
+        });
         if (specifier === "dayjs") return () => ({format: () => "date", add: () => ({isValid: () => true, year: () => 2026, format: () => "20261015000000"})});
         return dependencies;
     }, window: {siyuan: {storage: {card: {}}, config: {flashcard: {}}, languages: new Proxy({_time: {"1m": "%s min", "1d": "%s day"}}, {get: (target, key) => key in target ? Reflect.get(target, key) : String(key)})}}});
@@ -50,16 +62,19 @@ const createReview = async () => {
     await bind({app: {plugins: []} as unknown as Parameters<typeof bind>[0]["app"], element: element as unknown as Element,
         cardsData: {cards: [card]} as unknown as ICardData, cardType: "all"});
     const press = (detail: string) => click({detail, target: {}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {requests, actions, press, menuItems,
+    return {requests, actions, press, menuItems, removals,
         more: () => click({detail: 0, target: {type: "more", closest: (): null => null, setAttribute() {},
             getBoundingClientRect: () => ({})}, preventDefault: () => {}, stopPropagation: () => {}}),
         confirmDue: () => confirmDue("7", {element: {querySelector: () => ({})}}),
-        complete: () => {
-        requests[0].callback({data: {ial: {}}});
+        complete: async () => {
+        requests[0].callback({code: 0, data: {ial: {}}});
+        await new Promise(resolve => setImmediate(resolve));
         requests[1].callback({code: 0, data: {id: "block", rootID: "block"}});
+        await new Promise(resolve => setImmediate(resolve));
         assert.equal(renders[0].isValid(), true);
         renders[0].beforeAVRender();
         renders[0].afterCB();
+        await new Promise(resolve => setImmediate(resolve));
     }};
 };
 
@@ -67,7 +82,7 @@ test("loading flashcards ignore reveal, rating, skip and previous keys before re
     const h = await createReview();
     for (const key of [" ", "enter", "1", "2", "3", "4", "0", "p"]) h.press(key);
     assert.equal(h.requests.filter(request => request.url.includes("RiffCard")).length, 0);
-    h.complete();
+    await h.complete();
     h.press("3");
     assert.equal(h.requests.filter(request => request.url.endsWith("reviewRiffCard")).length, 0);
     h.press(" ");
@@ -79,7 +94,7 @@ test("loading flashcards ignore reveal, rating, skip and previous keys before re
 
 test("reset review synchronizes the rebuilt card ID before rating, skipping or setting due time", async () => {
     const h = await createReview();
-    h.complete();
+    await h.complete();
     h.press(" ");
     h.more();
     h.menuItems.get("reset").click({} as HTMLElement, {} as MouseEvent);
@@ -107,7 +122,7 @@ test("reset review synchronizes the rebuilt card ID before rating, skipping or s
 
 test("failed identity refresh retries on the next action and never submits the stale card ID", async () => {
     const h = await createReview();
-    h.complete();
+    await h.complete();
     h.press(" ");
     h.more();
     h.menuItems.get("reset").click({} as HTMLElement, {} as MouseEvent);
@@ -125,4 +140,57 @@ test("failed identity refresh retries on the next action and never submits the s
     await new Promise(resolve => setImmediate(resolve));
     h.press("3");
     assert.equal(h.requests.at(-1).payload.cardID, "recovered");
+});
+
+test("failed due-time and removal requests preserve the current review card", async () => {
+    const h = await createReview();
+    await h.complete();
+    h.press(" ");
+    h.more();
+    h.menuItems.get("setDueTime").click({} as HTMLElement, {} as MouseEvent);
+    const due = h.confirmDue();
+    h.requests.at(-1).callback({code: -1});
+    await due;
+    h.press("3");
+    assert.equal(h.requests.at(-1).url, "/api/riff/reviewRiffCard");
+    assert.equal(h.requests.at(-1).payload.cardID, "old");
+    h.more();
+    h.menuItems.get("removeRiffCard").click({} as HTMLElement, {} as MouseEvent);
+    h.removals[0].reject(new Error("remove failed"));
+    await new Promise(resolve => setImmediate(resolve));
+    h.press("0");
+    assert.equal(h.requests.at(-1).url, "/api/riff/skipReviewRiffCard");
+    assert.equal(h.requests.at(-1).payload.cardID, "old");
+});
+
+test("a successful removal retries failed navigation without removing or rating the card twice", async () => {
+    const h = await createReview();
+    await h.complete();
+    h.more();
+    h.menuItems.get("removeRiffCard").click({} as HTMLElement, {} as MouseEvent);
+    h.removals[0].resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    const query = h.requests.at(-1);
+    assert.equal(query.url, "/api/riff/getRiffDueCards");
+    query.callback({code: -1});
+    await new Promise(resolve => setImmediate(resolve));
+    h.press("3");
+    assert.equal(h.requests.at(-1).url, query.url);
+    assert.equal(h.requests.filter(request => request.url.endsWith("reviewRiffCard")).length, 0);
+    assert.equal(h.removals.length, 1);
+});
+
+test("rating acknowledgement is retained when loading the next round fails", async () => {
+    const h = await createReview();
+    await h.complete();
+    h.press(" ");
+    h.press("3");
+    h.requests.at(-1).callback({code: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(h.requests.at(-1).url, "/api/riff/getRiffDueCards");
+    h.requests.at(-1).callback({code: -1});
+    await new Promise(resolve => setImmediate(resolve));
+    h.press("3");
+    assert.equal(h.requests.at(-1).url, "/api/riff/getRiffDueCards");
+    assert.equal(h.requests.filter(request => request.url.endsWith("reviewRiffCard")).length, 1);
 });

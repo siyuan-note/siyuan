@@ -642,6 +642,7 @@ test("destroying a canceled loading panel preserves a menu owned by another pane
     menu.dataset.from = "1popover";
     const module = loadModule("src/block/Panel.ts", {
         window: {siyuan: {blockPanels: [], menus: {menu: {element: menu, remove: () => closed++}}}},
+        cancelAnimationFrame() {},
     }, {}) as unknown as {BlockPanel: {prototype: {destroy: (removeMenu?: boolean) => void}}};
     for (const removeMenu of [false, true]) {
         const element = new TestElement();

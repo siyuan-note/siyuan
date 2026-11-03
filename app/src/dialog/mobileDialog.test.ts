@@ -20,9 +20,10 @@ const setup = (mobile = true) => {
     const window = {siyuan: {dialogs: [] as any[], languages: {settingsPendingSaveError: "failed"}}};
     class Base {
         body = {inert: false};
+        buttons: {disabled: boolean, isConnected: boolean}[] = [];
         element = {dataset: {} as Record<string, string>, isConnected: true,
             contains: () => true, addEventListener() {}, removeEventListener() {}, setAttribute() {}, removeAttribute() {},
-            querySelector: (selector: string) => selector === ".b3-dialog__body" ? this.body : undefined, querySelectorAll: (): any[] => []};
+            querySelector: (selector: string) => selector === ".b3-dialog__body" ? this.body : undefined, querySelectorAll: () => this.buttons};
         constructor(public options: any) { window.siyuan.dialogs.push(this); }
         destroy(options?: any) {
             if (this.options.beforeClose?.() === false || this.element.dataset.dialogClosing) return;
@@ -83,6 +84,24 @@ test("legacy guard rejection does not freeze and invalidate still performs callb
     dialog.invalidate();
     assert.equal(cleanup, 1);
     assert.equal(f.stats().freezes, 1);
+});
+
+test("pending content navigation preserves button states changed by the action", async () => {
+    const f = setup();
+    const dialog = new f.MobileDialog({content: ""});
+    const button = {disabled: false, isConnected: true};
+    dialog.buttons.push(button);
+    let finish: (value: boolean) => void;
+    const pending = dialog.runPending(() => new Promise<boolean>(resolve => finish = resolve),
+        {close: false, disableButtons: false});
+    assert.equal(dialog.body.inert, true);
+    assert.equal(button.disabled, false);
+    button.disabled = true;
+    finish(true);
+    assert.equal(await pending, true);
+    assert.equal(dialog.body.inert, false);
+    assert.equal(button.disabled, true);
+    assert.equal(dialog.element.dataset.dialogClosing, undefined);
 });
 test("passive close respects disableClose and nested topmost; explicit confirmation remains available", async () => {
     const f = setup();

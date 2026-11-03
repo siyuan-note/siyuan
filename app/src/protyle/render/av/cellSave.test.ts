@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {createAVCellUpdateOperation} from "./cellValue";
 import {isAVReadonlyType} from "./capabilities";
+import {getAVHostIdentity} from "./host";
 
 const source = createSourceFile("cell.ts", readFileSync("src/protyle/render/av/cell.ts", "utf8"), ScriptTarget.Latest);
 const declaration = source.statements.find(statement => statement.getText(source).startsWith("export const updateCellsValue"));
@@ -92,7 +93,7 @@ test("location editor saves await cell persistence and preserve the original tar
         getAttribute: () => "table", querySelector: () => ({})};
     const cell = {dataset: {}, getBoundingClientRect: () => ({}), closest: (): null => null};
     const protyle = {block: {rootID: "document"}, options: {}};
-    let editor: {onSave: (value: object) => Promise<void>};
+    let editor: {onSave: (value: object) => Promise<void>; avBlockID: string};
     let complete: () => void;
     let fail: (error: Error) => void;
     let requests = 0;
@@ -102,6 +103,7 @@ test("location editor saves await cell persistence and preserve the original tar
         document: {querySelector: (): null => null}, getComputedStyle: () => ({}),
         window: {siyuan: {config: {}, menus: {menu: {remove() {}}}}},
         hasClosestBlock: () => block, hasClosestByClassName: () => ({}),
+        getAVHostIdentity,
         isTableLikeView: () => true, cellScrollIntoView() {},
         getStoredCellValueByElement: () => previous,
         genCellValueByElement: () => previous, cloneAVCellValueSnapshot: structuredClone,
@@ -121,6 +123,7 @@ test("location editor saves await cell persistence and preserve the original tar
         },
     });
     exports.popTextCell(protyle as IProtyle, [cell] as unknown as HTMLElement[], "location");
+    assert.equal(editor.avBlockID, "carrier");
     const saving = editor.onSave({name: "draft"});
     let resolved = false;
     void saving.then(() => { resolved = true; }, () => {});
@@ -133,6 +136,10 @@ test("location editor saves await cell persistence and preserve the original tar
     complete();
     await retry;
     assert.equal(requests, 2);
+    block.dataset.nodeId = "different-carrier";
+    await editor.onSave({name: "redirected"});
+    assert.equal(requests, 2);
+    block.dataset.nodeId = "carrier";
     block.isConnected = false;
     await editor.onSave({name: "stale"});
     assert.equal(requests, 2);

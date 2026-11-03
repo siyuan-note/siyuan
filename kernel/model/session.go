@@ -214,9 +214,13 @@ func CheckReadonly(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		// 同步控制接口在应用阶段取得写租约，MCP 在实际工具调用期间取得读租约。
+		// 同步控制和来源配置在准备落盘时取得独占写准入，MCP 在实际工具调用期间取得读租约。
 		switch c.Request.URL.Path {
-		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks", "/mcp":
+		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/sync/getSyncSourceState",
+			"/api/sync/setCloudSyncDir", "/api/sync/removeCloudSyncDir", "/api/sync/setSyncProvider",
+			"/api/sync/setSyncProviderS3", "/api/sync/setSyncProviderWebDAV", "/api/sync/setSyncProviderLocal",
+			"/api/sync/importSyncProviderS3", "/api/sync/importSyncProviderWebDAV", "/api/sync/clearSyncProviderConfig",
+			"/api/notebook/enableEncryptedNotebooks", "/mcp":
 			dataImportAccess.RUnlock()
 			released = true
 		}

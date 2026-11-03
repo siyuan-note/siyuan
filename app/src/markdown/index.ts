@@ -87,7 +87,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     <aside class="markdown-recovery" id="markdownRecoveryPanel" hidden><div class="markdown-recovery__heading"><strong data-label="markdownRecovery"></strong><button type="button" class="b3-button b3-button--text" id="markdownRecoveryClose" data-label="close"></button></div><p data-label="markdownPrivacy"></p><div id="markdownRecoveryList"></div></aside>
     <main class="markdown-editor" id="markdownEditor" aria-busy="true"></main>
 </div>
-<footer class="markdown-footer">
+<footer class="markdown-footer" id="markdownFooter" hidden>
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
 </footer>`;
     root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
@@ -222,6 +222,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownStatus").textContent = actionMessage || text(state.recoveryError ? markdownErrorKey(state.recoveryError) :
             state.problem?.kind === "indeterminate" ? "markdownUncertain" : state.problem?.kind === "blocked" ? markdownErrorKey(state.problem.error) : statusKey);
         control("markdownStatus").dataset.status = actionMessage || state.recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
+        control("markdownFooter").hidden = !actionMessage && !state.recoveryError && !state.problem && !pendingSwitch &&
+            !pendingStatus && (state.status === "saved" || !statusKey);
         const notices = [
             state.target && !state.target.capabilities.persistentPermission ? text("markdownTemporaryPermission") : "",
             resourceUnavailable ? text("markdownResourceUnavailable") : "",
@@ -551,6 +553,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     });
     themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme, value => ({theme: value as MarkdownPreferences["theme"]}));
     fontChoice = preferenceChoice("markdownFont", "fontSize", [14, 16, 18, 20, 24, 28, 32].map(value => [String(value), String(value)]), String(preferences.fontSize), value => ({fontSize: Number(value)}));
+    fontChoice.menu.classList.add("markdown-choice__menu--compact");
 
     const protectExit = async (kind: "close" | "prepare-quit"): Promise<boolean> => {
         const sequence = ++exitSequence;

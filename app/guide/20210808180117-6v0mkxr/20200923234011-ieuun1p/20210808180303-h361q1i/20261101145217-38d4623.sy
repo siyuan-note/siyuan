@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261103213209"
+		"updated": "20261103224054"
 	},
 	"Children": [
 		{
@@ -352,7 +352,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-73f343e",
-				"updated": "20261101174206"
+				"updated": "20261103224054"
 			},
 			"Children": [
 				{
@@ -366,7 +366,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-d4abb18",
-				"updated": "20261101145217"
+				"updated": "20261103224054"
 			},
 			"Children": [
 				{
@@ -389,7 +389,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The status bar distinguishes saved content, unsaved content, conflicts, and failures. Only saved content has been confirmed in the target file."
+					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The status bar is hidden when the file is saved or a new blank document has no status to report. It appears for unsaved content, saving, drafts, read-only files, conflicts, and failures."
 				}
 			]
 		},

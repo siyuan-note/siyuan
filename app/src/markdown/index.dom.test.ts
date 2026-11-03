@@ -178,7 +178,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector<HTMLButtonElement>("#markdownRedo").disabled, true);
     check.equal(document.querySelector(".markdown-footer .markdown-policy"), null);
     check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 32, "desktop header stays at the main toolbar height");
-    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 24, "ordinary save status uses a compact footer");
+    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 0, "saved documents have no resting footer");
     check.equal(document.querySelector("#markdownSave").checkVisibility(), false, "file actions start collapsed");
     check.equal(application.session.getState().status, "saved");
     check.equal(writes.length, 0);
@@ -303,6 +303,9 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.activeElement.id, "markdownTheme");
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.getAttribute("data-value"), "system");
+    document.getElementById("markdownTheme").dispatchEvent(new PointerEvent("pointerleave", {pointerType: "mouse"}));
+    await new Promise(resolve => setTimeout(resolve, 260));
+    check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "true", "keyboard focus keeps its submenu open after the mouse leaves");
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.id, "markdownTheme");
     check.equal(appearanceItem.getAttribute("aria-expanded"), "true", "Escape closes only the innermost submenu");
@@ -355,11 +358,50 @@ const browserCases = async (languages: Record<string, string>) => {
     }
     check.equal(writes.length, 0, "appearance selections never rewrite the document");
 
+    for (const [id, value] of [["markdownTheme", "light"], ["markdownFont", "32"]]) {
+        openMore();
+        await ipcRenderer.invoke("markdown-pointer-move", 10, 60);
+        const appearanceBounds = appearanceItem.getBoundingClientRect();
+        await ipcRenderer.invoke("markdown-pointer-move", appearanceBounds.x + appearanceBounds.width / 2, appearanceBounds.y + appearanceBounds.height / 2);
+        await new Promise(resolve => setTimeout(resolve, 260));
+        const item = document.getElementById(id);
+        const itemBounds = item.getBoundingClientRect();
+        const previousValue = item.querySelector<HTMLElement>('[aria-checked="true"]').dataset.value;
+        const start = {x: itemBounds.x + itemBounds.width / 2, y: itemBounds.y + itemBounds.height / 2};
+        await ipcRenderer.invoke("markdown-pointer-move", start.x, start.y);
+        await new Promise(resolve => setTimeout(resolve, 260));
+        const submenu = item.querySelector<HTMLElement>(":scope > .markdown-choice__menu");
+        const bounds = submenu.getBoundingClientRect();
+        check.ok(bounds.right <= itemBounds.left + 1, "third-level menu inherits the leftward expansion direction");
+        check.ok(Math.abs(submenu.firstElementChild.getBoundingClientRect().top - itemBounds.top) < 1, "first submenu item aligns with its parent row");
+        check.ok(bounds.width < 220, "short choices use content-sized menus");
+        if (id === "markdownFont") check.ok(bounds.width < 120, "numeric font sizes do not inherit the text menu minimum width");
+        check.ok(submenu.scrollHeight <= submenu.clientHeight, "content-sized menus have no spurious scrollbar");
+        await ipcRenderer.invoke("markdown-screenshot", `pointer-${id}`);
+        const selector = `#${id} [data-value="${value}"]`;
+        const target = document.querySelector(selector).getBoundingClientRect();
+        const end = {x: target.x + target.width / 2, y: target.y + target.height / 2};
+        for (let step = 1; step <= 8; step++) {
+            await ipcRenderer.invoke("markdown-pointer-move", start.x + (end.x - start.x) * step / 8, start.y + (end.y - start.y) * step / 8);
+        }
+        await new Promise(resolve => setTimeout(resolve, 260));
+        check.equal(item.getAttribute("aria-expanded"), "true", "diagonal pointer travel keeps the intended submenu open");
+        await ipcRenderer.invoke("markdown-pointer-click", selector);
+        await tick();
+        check.equal(more.open, false, "a pointer selection closes the complete menu chain");
+        openMore(); appearanceItem.focus();
+        appearanceItem.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
+        item.focus(); item.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
+        (item.querySelector(`[data-value="${previousValue}"]`) as HTMLElement).click();
+        await tick();
+    }
+
     application.editor.setMode("sv");
     const textarea = document.querySelector<HTMLTextAreaElement>("textarea.vditor-sv");
     textarea.value += "\nA committed edit\n";
     textarea.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "A committed edit"}));
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownUnsaved, "pending serialization is immediately shown as unsaved");
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, false, "pending edits show their status");
     document.dispatchEvent(new KeyboardEvent("keydown", {key: "s", ctrlKey: true, bubbles: true, cancelable: true}));
     await tick();
     check.ok(writes.at(-1).content.includes("A committed edit"));
@@ -368,6 +410,7 @@ const browserCases = async (languages: Record<string, string>) => {
     for (let attempt = 0; attempt < 5 && document.querySelector("#markdownStatus").textContent !== languages.markdownSaved; attempt++) await tick();
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownSaved,
         "a successful provider save uses the normal saved status without a cloud sync warning");
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful saves hide the footer");
     const undo = document.querySelector<HTMLButtonElement>("#markdownUndo");
     const redo = document.querySelector<HTMLButtonElement>("#markdownRedo");
     for (let attempt = 0; attempt < 5 && undo.disabled; attempt++) await tick();
@@ -405,6 +448,7 @@ const browserCases = async (languages: Record<string, string>) => {
     textarea.dispatchEvent(oversizedPaste);
     check.equal(oversizedPaste.defaultPrevented, true);
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownTooLarge);
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, false, "file errors remain visible");
     await tick(); check.equal(writes.length, beforeOversizedPaste);
 
     menuAction("markdownSaveAs");
@@ -452,7 +496,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(document.querySelector("#markdownMoreButton").getBoundingClientRect().height >= 44);
     for (const id of ["markdownUndo", "markdownRedo"]) check.ok(document.getElementById(id).getBoundingClientRect().height >= 44);
     check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 48, "touch header removes extra padding around touch targets");
-    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 24, "touch save status keeps the compact resting height");
+    check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 0, "touch saved documents have no resting footer");
     check.ok(document.querySelector("#markdownFiles").getBoundingClientRect().height >= 44);
     check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, false, "drawer filename remains interactive");
     check.ok(document.querySelector("#markdownTreeToggle").getBoundingClientRect().height >= 44);
@@ -644,7 +688,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(writes.at(-1).target.handle, "a");
     finishPrepare({kind: "blocked", error: {code: "unavailable", recoverable: true}}); await tick();
     bridge.tree.prepareOpen = immediatePrepare;
-    const originalRow = document.querySelector('[data-node-id="original"]');
+    const originalList = document.querySelector(".markdown-tree__viewport > .b3-list");
+    const originalLabel = document.querySelector('[data-node-id="original"] .b3-list-item__text').textContent;
     candidateKind = "ready";
     failWrite = true;
     switchingApp.editor.setValue("Unsaved A\n");
@@ -664,7 +709,10 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector("#markdownName").textContent, "B.md");
     check.ok(document.getElementById("vditor-icon-bold"), "document replacement retains formatting icons");
     shellSelectors.forEach((selector, index) => check.equal(document.querySelector(selector), shellNodes[index], `${selector} survives the switch`));
-    check.equal(document.querySelector('[data-node-id="original"]'), originalRow, "same-root switching retains mounted tree rows");
+    check.equal(document.querySelector(".markdown-tree__viewport > .b3-list"), originalList, "same-root switching retains the mounted tree list");
+    check.equal(document.querySelector('[data-node-id="original"] .b3-list-item__text').textContent, originalLabel, "viewport resizing preserves the original entry");
+    check.equal(document.querySelector('[data-node-id="original"]').getAttribute("aria-selected"), "false");
+    check.equal(document.querySelector('[data-node-id="note2"]').getAttribute("aria-selected"), "true");
     check.equal(switchListings, listingsBeforeSwitch, "same-root switching does not enumerate folders again");
     check.notEqual(switchingApp.editor, firstEditor, "undo state belongs to the new document editor");
     check.equal(document.querySelector<HTMLButtonElement>("#markdownUndo").disabled, true);
@@ -698,6 +746,7 @@ const browserCases = async (languages: Record<string, string>) => {
     onCommand({id: "unknown-cancel", type: "cancel-quit"}); await tick();
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "an unconfirmed switch cannot revive an already released editor");
     check.equal((document.querySelector("#markdownRetry") as HTMLElement).hidden, false);
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, false, "recovery actions remain reachable");
     check.equal((document.querySelector("#markdownProblemActions") as HTMLElement).inert, false, "binding reconciliation remains available");
     bridge.tree.commitOpen = async () => ({...treeBootstrap, sessionId: `tree-b-${ticket}`, content: "Recovered B\n"});
     (document.querySelector("#markdownRetry") as HTMLButtonElement).click(); await tick(); await tick();
@@ -791,6 +840,7 @@ const browserCases = async (languages: Record<string, string>) => {
         const confirmationsBefore: number = closeConfirmations;
         if (scenario === "blank") {
             check.equal(document.querySelector("#markdownStatus").textContent, "", "a new blank page does not claim a persisted draft");
+            check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "a new blank page has no empty footer");
         } else if (scenario === "edited-empty") {
             draft.session.updateEditor({content: "Temporary input", edited: true, composing: false});
             draft.session.updateEditor({content: "", edited: true, composing: false});
@@ -971,6 +1021,10 @@ app.whenReady().then(async () => {
         const point = await win.webContents.executeJavaScript('(()=>{const rect=document.querySelector('+JSON.stringify(selector)+').getBoundingClientRect();return {x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)};})()');
         win.webContents.sendInputEvent({type:"mouseDown",...point,button:"left",clickCount:1});
         win.webContents.sendInputEvent({type:"mouseUp",...point,button:"left",clickCount:1});
+    });
+    ipcMain.handle("markdown-pointer-move", async (_event, x, y) => {
+        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseMoved",x:Math.round(x),y:Math.round(y),pointerType:"mouse"});
+        await new Promise(resolve=>setTimeout(resolve,12));
     });
     ipcMain.handle("markdown-screenshot", async (_event,name)=>{fs.writeFileSync(path.join(${JSON.stringify(artifacts)},name+".png"),(await win.webContents.capturePage()).toPNG());});
     try {

@@ -5,7 +5,7 @@ const sass = require("sass");
 const postcss = require("postcss");
 const {readFileSync} = require("node:fs");
 
-test("Markdown submenus inset their rows without enlarging the panel or changing touch targets", () => {
+test("Markdown submenus fit their content and inset rows while preserving touch targets", () => {
     const css = postcss.parse(sass.compile(path.join(__dirname, "../src/assets/scss/markdown.scss"), {
         logger: sass.Logger.silent,
     }).css);
@@ -17,7 +17,9 @@ test("Markdown submenus inset their rows without enlarging the panel or changing
     const menu = declarations(".markdown-choice__menu");
     assert.equal(menu.get("padding-inline"), "6px", "both LTR and RTL rows need an inset");
     assert.equal(menu.get("box-sizing"), "border-box", "padding stays within the constrained panel width");
-    assert.equal(menu.get("width"), "min(220px, 100vw - 16px)");
+    assert.equal(menu.get("width"), "max-content");
+    assert.equal(menu.get("min-width"), "min(120px, 100vw - 16px)");
+    assert.equal(menu.get("max-width"), "min(220px, 100vw - 16px)");
     assert.equal(menu.get("overflow"), "auto", "constrained panels retain scrolling");
     for (const property of ["padding-block", "padding-top", "padding-bottom", "min-height", "height"]) {
         assert.equal(menu.has(property), false, `submenu inset must not alter ${property}`);

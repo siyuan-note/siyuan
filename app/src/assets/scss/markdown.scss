@@ -247,12 +247,18 @@ button {
 }
 
 .markdown-choice__menu {
-  width: min(220px, calc(100vw - 16px));
+  width: max-content;
+  min-width: min(120px, calc(100vw - 16px));
+  max-width: min(220px, calc(100vw - 16px));
   box-sizing: border-box;
   padding-inline: 6px;
   overflow: auto;
   overscroll-behavior: contain;
   z-index: 4;
+
+  &--compact {
+    min-width: 0;
+  }
 }
 
 .markdown-policy {

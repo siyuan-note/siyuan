@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261104002100"
 	},
 	"Children": [
 		{
@@ -927,6 +927,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "PDF export also has an independent Export title image switch. It is enabled by default and remembers your choice separately from image exports, without affecting the document title or body images. Set it in the PDF preview window on desktop or in the print settings dialog on mobile. Desktop saves the choice when exporting; mobile saves it when confirming the print settings."
+				}
+			]
+		},
+		{
+			"ID": "20261104002100-drlmzre",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261104002100-drlmzre",
+				"updated": "20261104002100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When exporting PDF on desktop, the save dialog uses the document title as the default filename and PDF as the file type. You can change the filename and save location. If you select an existing PDF with the same name, the system asks you to confirm overwriting it."
 				}
 			]
 		},

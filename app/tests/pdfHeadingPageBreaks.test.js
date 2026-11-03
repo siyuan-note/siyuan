@@ -112,9 +112,9 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     languages: new Proxy({}, {get: (_object, key) => key === "_kernel" ? {16: "Untitled"} : String(key)})};
     const renderPDF = new Function("Constants", "ipcRenderer", "getAvailableExportPath", "getHostCapabilities",
         "getIconScript", "getSnippetCSS", "getSnippetJS", "getExportLanguages", "setInlineStyle", "getCustomFontStyle",
-        "getPluginStyle", "fetchPost", "headingPageBreakControls", desktopSource + ";return renderPDF;")(
+        "getPluginStyle", "fetchPost", "headingPageBreakControls", "replaceLocalPath", desktopSource + ";return renderPDF;")(
         Constants, {invoke: async () => 0}, async () => "", () => ({}), () => "", () => "", () => "", () => "{}",
-        async () => "", async () => "", async () => "", (_url, data) => html = data.content, ui.headingPageBreakControls);
+        async () => "", async () => "", async () => "", (_url, data) => html = data.content, ui.headingPageBreakControls, name => name);
     window.siyuan.storage.pdf.paged = false;
     await renderPDF("root");
     check.ok(new DOMParser().parseFromString(html, "text/html").getElementById("headingPageBreakOptions")

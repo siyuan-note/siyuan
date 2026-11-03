@@ -1014,7 +1014,6 @@ ${getIconScript(servePath)}
                 paged: !unPagedPageSize,
                 headingPageBreakLevels: getHeadingPageBreakLevels(),
                 rootId: "${id}",
-                rootTitle: response.data.name,
                 parentWindowId: ${currentWindowId},
             };
         };
@@ -1046,17 +1045,17 @@ ${getIconScript(servePath)}
             }
             const {ipcRenderer}  = require("electron");
             const defaultPath = ${toScriptLiteral(defaultExportPath)};
+            const fileName = ((${replaceLocalPath.toString()})(response.data.name || "") || ${toScriptLiteral(window.siyuan.languages._kernel[16])}) + ".pdf";
             const dialogOptions = {
-                cmd: "showOpenDialog",
+                cmd: "showSaveDialog",
                 title: ${toScriptLiteral(`${window.siyuan.languages.export} PDF`)},
                 buttonLabel: ${toScriptLiteral(window.siyuan.languages.save)},
-                properties: ["createDirectory", "openDirectory"],
+                defaultPath: require("path").join(defaultPath, fileName),
+                filters: [{name: "PDF", extensions: ["pdf"]}],
+                properties: ["createDirectory", "showOverwriteConfirmation"],
             };
-            if (defaultPath) {
-                dialogOptions.defaultPath = defaultPath;
-            }
             const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", dialogOptions);
-            if (result.canceled || result.filePaths.length === 0) {
+            if (result.canceled || !result.filePath) {
                 return;
             }
             reserveEmbeddedAssetSpace(removeAssetsElement.checked);
@@ -1094,7 +1093,7 @@ ${getIconScript(servePath)}
             } else {
                 exportConfig = buildExportConfig();
             }
-            exportConfig.filePaths = result.filePaths;
+            exportConfig.filePath = result.filePath;
             actionElement.remove();
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });

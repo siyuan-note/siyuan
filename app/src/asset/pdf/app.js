@@ -1132,11 +1132,13 @@ class PDFViewerApplication {
                     return;
                 }
                 this.load(pdfDocument);
+                void this.passwordPrompt.finish();
             },
             reason => {
                 if (this._destroyed || loadingTask !== this.pdfLoadingTask) {
                     return undefined; // Ignore errors for previously opened PDF files.
                 }
+                void this.passwordPrompt.finish();
 
                 // NOTE
                 let key = "loadingError";

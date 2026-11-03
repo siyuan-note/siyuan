@@ -23,6 +23,7 @@ const runCases = async appDirectory => {
         "dialog/message": {showMessage() {}},
         "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => false, updateHotkeyTip: value => value},
         "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+        "asset/pdf/pdfjs": {PasswordResponses: {NEED_PASSWORD: 1, INCORRECT_PASSWORD: 2}},
     };
     const cache = new Map();
     const load = (name, parent = "") => {
@@ -31,6 +32,7 @@ const runCases = async appDirectory => {
         if (cache.has(key)) return cache.get(key);
         let file = path.join(appDirectory, "src", key + ".ts");
         let moduleKey = key;
+        if (!fs.existsSync(file)) file = path.join(appDirectory, "src", key + ".js");
         if (!fs.existsSync(file)) { file = path.join(appDirectory, "src", key, "index.ts"); moduleKey += "/index"; }
         const exports = {};
         cache.set(key, exports);
@@ -76,8 +78,15 @@ const runCases = async appDirectory => {
     sheet.destroy();
     await wait();
     const root = document.createElement("div");
+    root.className = "pdf-viewer--mobile";
+    root.style.height = "500px";
     root.innerHTML = load("asset/pdf/viewerTemplate").getPdfViewerHTML();
     document.body.append(root);
+    const backgroundEditor = document.createElement("div");
+    backgroundEditor.contentEditable = "true";
+    backgroundEditor.textContent = "PDF link in the background editor";
+    document.body.append(backgroundEditor);
+    backgroundEditor.focus();
     const password = root.querySelector("#passwordDialog");
     const {openPdfMobileOverlay} = load("asset/pdf/mobileOverlay");
     const overlay = openPdfMobileOverlay(password, () => {});
@@ -87,10 +96,45 @@ const runCases = async appDirectory => {
     assert.equal(buttonRow.previousElementSibling, password);
     assert.equal(overlay.dialog.element.querySelector("#passwordSubmit").textContent, window.siyuan.languages.confirm);
     assert.ok(overlay.dialog.element.querySelector("#password").classList.contains("b3-text-field"));
+    password.querySelector("input").focus();
     overlay.dialog.destroy();
     await overlay.closed;
     assert.equal(password.querySelector(".buttonRow"), buttonRow);
     assert.equal(root.querySelectorAll("#passwordSubmit").length, 1);
+    const {OverlayManager} = load("asset/pdf/overlay_manager");
+    const {PasswordPrompt} = load("asset/pdf/password_prompt");
+    const prompt = new PasswordPrompt({dialog: password, label: root.querySelector("#passwordText"),
+        input: root.querySelector("#password"), submitButton: root.querySelector("#passwordSubmit"),
+        cancelButton: root.querySelector("#passwordCancel")}, new OverlayManager());
+    let retry;
+    let accepted = false;
+    await prompt.setUpdateCallback(() => {
+        void prompt.setUpdateCallback(() => { accepted = true; }, 2);
+        retry = prompt.open();
+    }, 1);
+    backgroundEditor.focus();
+    await prompt.open();
+    await wait();
+    prompt.input.value = "wrong";
+    prompt.input.focus();
+    prompt.submitButton.click();
+    await retry;
+    await wait();
+    assert.equal(document.activeElement, prompt.input, "wrong-password retries retain input focus");
+    prompt.input.value = "accepted";
+    prompt.submitButton.click();
+    await prompt.finish();
+    assert.equal(accepted, true);
+    assert.equal(document.activeElement, root.querySelector("#viewerContainer"),
+        "verified PDFs focus the reader after the password sheet is disposed");
+    let cancelled = false;
+    await prompt.setUpdateCallback(value => { cancelled = value instanceof Error; }, 1);
+    await prompt.open();
+    await wait();
+    prompt.cancelButton.click();
+    await prompt.finish();
+    assert.equal(cancelled, true);
+    assert.equal(document.activeElement, root.querySelector("#viewerContainer"));
     const properties = root.querySelector("#documentPropertiesDialog");
     const propertiesOverlay = openPdfMobileOverlay(properties, () => {});
     await wait();
@@ -99,8 +143,33 @@ const runCases = async appDirectory => {
     assert.equal(propertiesOverlay.dialog.element.querySelector(".b3-dialog__close"), null);
     await propertiesOverlay.dialog.requestClose("back");
     await propertiesOverlay.closed;
+    assert.equal(document.activeElement, root.querySelector("#viewerContainer"));
     assert.equal(properties.querySelectorAll("#documentPropertiesClose").length, 1);
+    const nextInput = document.createElement("input");
+    document.body.append(nextInput);
+    const replacedOverlay = openPdfMobileOverlay(properties, () => nextInput.focus());
+    await wait();
+    replacedOverlay.dialog.destroy();
+    await replacedOverlay.closed;
+    assert.equal(document.activeElement, nextInput, "PDF cleanup preserves focus transferred by the closing callback");
+    await prompt.setUpdateCallback(() => {}, 1);
+    backgroundEditor.focus();
+    await prompt.open();
+    await wait();
+    password.addEventListener("close", () => nextInput.focus(), {once: true});
+    prompt.input.value = "accepted";
+    prompt.submitButton.click();
+    await prompt.finish();
+    assert.equal(document.activeElement, nextInput, "password completion preserves focus acquired by another control");
+    await prompt.setUpdateCallback(() => {}, 1);
+    await prompt.open();
+    await wait();
     root.remove();
+    prompt.cancelButton.click();
+    await prompt.finish();
+    assert.equal(document.activeElement, nextInput, "a removed reader never takes focus from its replacement");
+    nextInput.remove();
+    backgroundEditor.remove();
 
     document.documentElement.dataset.frontend = "mobile";
     document.body.className = "body--android";

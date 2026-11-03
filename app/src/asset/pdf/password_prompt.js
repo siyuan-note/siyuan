@@ -36,6 +36,8 @@ class PasswordPrompt {
 
   #reason = null;
 
+  #openerElement = null;
+
   /**
    * @param {PasswordPromptOptions} options
    * @param {OverlayManager} overlayManager - Manager for the viewer overlays.
@@ -69,6 +71,7 @@ class PasswordPrompt {
   async open() {
     await this.#activeCapability?.promise;
     this.#activeCapability = Promise.withResolvers();
+    this.#openerElement = document.activeElement;
 
     try {
       await this.overlayManager.open(this.dialog);
@@ -93,6 +96,20 @@ class PasswordPrompt {
 
   async close() {
     this.overlayManager.closeIfActive(this.dialog);
+  }
+
+  async finish() {
+    const capability = this.#activeCapability;
+    if (!capability) return;
+    await capability.promise;
+    if (this.#activeCapability !== capability) return;
+    const viewer = this.dialog.closest(".pdf-viewer--mobile")?.querySelector("#viewerContainer");
+    const active = document.activeElement;
+    // 密码校验结束后再归还阅读器焦点，错误密码重试仍由输入框接管键盘。
+    if (viewer?.isConnected && (active === document.body || active === this.#openerElement)) {
+      viewer.focus({preventScroll: true});
+    }
+    this.#openerElement = null;
   }
 
   #verify() {

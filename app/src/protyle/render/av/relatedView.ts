@@ -47,7 +47,7 @@ interface IRelatedAVState {
 }
 
 const panels = new WeakMap<HTMLElement, RelatedAVView[]>();
-const pendingStates = new WeakMap<HTMLElement, Map<string, IRelatedAVState>>();
+const pendingViews = new WeakMap<HTMLElement, RelatedAVView[]>();
 const registrations = new Map<string, Set<RelatedAVView>>();
 let nextInstance = 0;
 let removalObserver: MutationObserver;
@@ -77,6 +77,7 @@ class RelatedAVView {
     private folded = false;
     private dirty = true;
     private disposed = false;
+    private renderVersion = 0;
     private timeout?: ReturnType<typeof setTimeout>;
     private dialog?: MobileDialog;
     private query = "";
@@ -87,7 +88,7 @@ class RelatedAVView {
     private columnWidths: TRelatedAVColumnWidths = {};
     private cancelColumnResize?: () => void;
 
-    constructor(readonly protyle: IProtyle, readonly sourceElement: HTMLElement, readonly definition: TRelatedAVDefinition,
+    constructor(readonly protyle: IProtyle, public sourceElement: HTMLElement, public definition: TRelatedAVDefinition,
                 sourceBlockID: string, state?: IRelatedAVState) {
         this.identity = getRelatedAVIdentity(definition.sourceAvID, definition.sourceItemID, definition.keyID);
         this.element = document.createElement("section");
@@ -189,6 +190,24 @@ class RelatedAVView {
         this.columnWidths = structuredClone(state.columnWidths || {});
     }
 
+    canReuse(protyle: IProtyle, definition: TRelatedAVDefinition, sourceBlockID: string) {
+        return !this.disposed && this.protyle === protyle && this.host.sourceBlockID === sourceBlockID &&
+            this.identity === getRelatedAVIdentity(definition.sourceAvID, definition.sourceItemID, definition.keyID) &&
+            this.definition.targetAVID === definition.targetAVID && this.definition.viewID === definition.viewID;
+    }
+
+    reattach(sourceElement: HTMLElement, definition: TRelatedAVDefinition) {
+        this.cancelColumnResize?.();
+        this.sourceElement = sourceElement;
+        this.definition = definition;
+        const toggle = this.element.querySelector('[data-related-action="fold"]');
+        toggle.setAttribute("aria-label", definition.name);
+        toggle.querySelector(".block__logo").textContent = definition.name;
+        sourceElement.append(this.element);
+        // 属性刷新时保留已绘制的表格，旧请求失效后由当前载体获取最新关联成员。
+        this.invalidate();
+    }
+
     sync(forceHidden = false) {
         if (this.disposed) return;
         this.wasConnected ||= this.element.isConnected;
@@ -212,6 +231,7 @@ class RelatedAVView {
     }
 
     invalidate() {
+        this.renderVersion++;
         this.dirty = true;
         beginAVRender(this.hostElement);
         clearTimeout(this.timeout);
@@ -219,6 +239,7 @@ class RelatedAVView {
     }
 
     invalidateSecurity() {
+        this.renderVersion++;
         this.cancelColumnResize?.();
         beginAVRender(this.hostElement);
         clearTimeout(this.timeout);
@@ -230,6 +251,7 @@ class RelatedAVView {
 
     private async render() {
         if (!this.host.active || this.disposed) return;
+        const version = ++this.renderVersion;
         this.dirty = false;
         if (!this.definition.targetAVID || !this.definition.viewID) {
             this.failed();
@@ -245,7 +267,7 @@ class RelatedAVView {
         try {
             await avRender(this.hostElement, this.editor);
         } catch (error) {
-            if (this.host.active && !this.disposed && error?.name !== "AbortError") this.failed();
+            if (version === this.renderVersion && this.host.active && !this.disposed && error?.name !== "AbortError") this.failed();
         }
     }
 
@@ -670,25 +692,48 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
 }
 
 export const preserveRelatedAVViews = (source: HTMLElement, destination = source) => {
-    const states = new Map((panels.get(source) || []).map(view => [view.identity, view.state()]));
-    disposeRelatedAVViews(source);
-    if (source !== destination && panels.has(destination)) {
-        panels.get(destination).forEach(view => view.restore(states.get(view.identity)));
-    } else pendingStates.set(destination, states);
+    const previous = panels.get(source) || pendingViews.get(source) || [];
+    panels.delete(source);
+    pendingViews.delete(source);
+    if (source === destination || !panels.has(destination)) {
+        pendingViews.set(destination, previous);
+        return;
+    }
+    const remaining = new Set(previous);
+    const views = panels.get(destination).map(next => {
+        const retained = previous.find(view => remaining.has(view) &&
+            view.canReuse(next.protyle, next.definition, next.host.sourceBlockID));
+        if (!retained) return next;
+        remaining.delete(retained);
+        const sourceElement = next.sourceElement;
+        next.element.remove();
+        next.dispose();
+        retained.reattach(sourceElement, next.definition);
+        return retained;
+    });
+    remaining.forEach(view => view.dispose());
+    panels.set(destination, views);
 };
 
 export const mountRelatedAVViews = (element: HTMLElement, tables: IRelatedAVTable[], protyle: IProtyle, sourceBlockID: string) => {
-    const states = pendingStates.get(element);
-    pendingStates.delete(element);
+    const previous = pendingViews.get(element) || [];
+    pendingViews.delete(element);
+    const remaining = new Set(previous);
     const views = getRelatedAVDefinitions(tables).flatMap(definition => {
         const source = Array.from(element.children).find((child): child is HTMLElement =>
             child instanceof HTMLElement && child.dataset.avId === definition.sourceAvID);
         if (!source) return [];
-        const view = new RelatedAVView(protyle, source, definition, sourceBlockID,
-            states?.get(getRelatedAVIdentity(definition.sourceAvID, definition.sourceItemID, definition.keyID)));
+        const retained = previous.find(view => remaining.has(view) && view.canReuse(protyle, definition, sourceBlockID));
+        if (retained) {
+            remaining.delete(retained);
+            retained.reattach(source, definition);
+            return [retained];
+        }
+        const view = new RelatedAVView(protyle, source, definition, sourceBlockID);
         source.append(view.element);
         return [view];
     });
+    remaining.forEach(view => view.dispose());
     panels.set(element, views);
 };
 
@@ -696,7 +741,9 @@ export const syncRelatedAVViews = (element: HTMLElement, forceHidden = false) =>
 
 export const disposeRelatedAVViews = (element: HTMLElement) => {
     panels.get(element)?.forEach(view => view.dispose());
+    pendingViews.get(element)?.forEach(view => view.dispose());
     panels.delete(element);
+    pendingViews.delete(element);
 };
 
 export const destroyRelatedAVViews = (protyleID: string) => {

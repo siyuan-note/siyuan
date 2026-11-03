@@ -4,6 +4,7 @@ import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {test} from "node:test";
+import * as sheetGesture from "./mobileSheetGesture";
 import {runInNewContext} from "node:vm";
 import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
@@ -62,6 +63,8 @@ class ElementMock extends EventTargetMock {
     }
     append(element: ElementMock) { this.children.set("actions", element); }
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
+    matches() { return this.hasAttribute("inert") || this.attributes.get("aria-busy") === "true"; }
+    closest(): ElementMock | null { return this.matches() ? this : this.parentElement?.closest() || null; }
     hasAttribute(name: string) { return this.attributes.has(name); }
     removeAttribute(name: string) { this.attributes.delete(name); }
     querySelector(selector: string) { return this.children.get(selector); }
@@ -89,6 +92,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     const requests: Array<ReturnType<typeof deferred<any>> & {id: string}> = [];
     const messages: string[] = [];
     const dialogs: DialogMock[] = [];
+    const dragOptions = new Map<ElementMock, {canStart: () => boolean}>();
     const editors: ProtyleMock[] = [];
     const registered = new Map<ProtyleMock, () => void>();
     const destroyCallbacks: Array<() => void> = [];
@@ -113,7 +117,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         visualViewport: Object.assign(new EventTargetMock(), {offsetTop: 0, height: 800}),
         siyuan: {config: {readonly}, languages: {viewRefContent: "Reference", refExpired: "Expired", uploading: "Uploading",
             settingsPendingSaveError: "Pending save failed"},
-            menus: {menu: {remove() {}}}, mobile: {size: {isLandscape: false, portrait: {height1: 800}}}},
+            dialogs, menus: {menu: {remove() {}}}, mobile: {size: {isLandscape: false, portrait: {height1: 800}}}},
     });
     class DialogMock {
         element = new ElementMock();
@@ -124,6 +128,8 @@ const setup = (readonly = false, deferSheetOpen = false) => {
                 this.element.children.set(selector, new ElementMock());
             }
             this.element.querySelector(".b3-dialog__container").children.set(".b3-dialog__header", new ElementMock());
+            this.element.querySelector(".b3-dialog__container").children.set(":scope > .b3-dialog__body",
+                this.element.querySelector(".b3-dialog__body"));
             this.element.classList.add("b3-dialog--open");
             dialogs.push(this);
         }
@@ -175,8 +181,13 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         "./MobileEditorDialog": dialogAPI,
         "./bindBottomSheetDialog": sheetAPI,
         "./mobileSheetLayout": sheetLayoutAPI,
+        "./mobileSheetGesture": sheetGesture,
         "./orientation": {isMobileLandscape: () => false},
-        "./bindBottomSheetDrag": {bindBottomSheetDrag: () => () => { disposedBindings++; }},
+        "./bindBottomSheetDrag": {bindBottomSheetDrag: (element: ElementMock, _scrim: unknown, _close: unknown,
+            options: {canStart: () => boolean}) => {
+            dragOptions.set(element, options);
+            return () => { disposedBindings++; };
+        }},
         "../../menus/sheetActions": {getSheetActionsHTML: () => "sheet-expand",
             setSheetExpanded: (element: ElementMock, expanded: boolean) => element.classList.toggle("b3-menu--expanded", expanded)},
         "../../menus/sheetOpen": {waitForSheetViewport: (options: {open: () => void}) => {
@@ -227,6 +238,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         Dialog: DialogMock, finishSheetOpen: () => sheetOpeners.shift()?.(),
         source, requests, messages, editors, registered, flushes, refreshed, titleEvents, cellMasks, viewport,
         window, document, answer, open,
+        canDrag: (dialog: DialogMock) => dragOptions.get(dialog.element.querySelector(".b3-dialog__container")).canStart(),
         dialogs: dialogs as Array<DialogMock & import("./MobileEditorDialog").MobileEditorDialog>,
         setFlush: (callback: typeof flush) => { flush = callback; },
         finishDestroy: () => { destroyCallbacks.splice(0).forEach(callback => callback()); },
@@ -736,4 +748,32 @@ test("reference drawer CSS respects the shared full-height cap and keyboard view
     } finally {
         rmSync(directory, {recursive: true, force: true});
     }
+});
+
+
+test("direct reference binder blocks covered, inert, busy and pending-close sheets", async () => {
+    const fixture = setup();
+    await fixture.open();
+    const dialog = fixture.dialogs[0];
+    assert.equal(fixture.canDrag(dialog), true);
+    const child = new fixture.Dialog({});
+    assert.equal(fixture.canDrag(dialog), false);
+    fixture.dialogs.pop();
+    assert.ok(child);
+    const body = dialog.element.querySelector(".b3-dialog__body");
+    for (const element of [dialog.element, body]) {
+        element.setAttribute("inert", "");
+        assert.equal(fixture.canDrag(dialog), false);
+        element.removeAttribute("inert");
+        element.setAttribute("aria-busy", "true");
+        assert.equal(fixture.canDrag(dialog), false);
+        element.removeAttribute("aria-busy");
+    }
+    const pending = deferred<void>();
+    fixture.setFlush(() => pending.promise);
+    const closing = dialog.close();
+    assert.equal(fixture.canDrag(dialog), false, "pending is visible before beforeClose sets inert");
+    pending.reject(new Error("offline"));
+    await assert.rejects(closing, /offline/);
+    assert.equal(fixture.canDrag(dialog), true);
 });

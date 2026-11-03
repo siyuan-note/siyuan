@@ -86,6 +86,12 @@
     font-size: 16px;
   }
 
+  &--touch {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
   &--text {
     color: var(--b3-theme-primary);
     background-color: transparent;
@@ -102,7 +108,8 @@
     }
   }
 
-  &--cancel {
+  &--cancel,
+  &--secondary {
     color: var(--b3-theme-on-surface);
     background-color: transparent;
 
@@ -116,6 +123,10 @@
       background-color: var(--b3-list-icon-hover);
       box-shadow: none;
     }
+  }
+
+  &--secondary {
+    background-color: var(--b3-theme-surface-lighter);
   }
 
   &--outline {

@@ -175,18 +175,18 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     touch("touchmove", 280);
     touch("touchend", 280);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1);
     touch("touchstart", 200);
     touch("touchmove", 60);
     touch("touchend", 60);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1);
     await new Promise(resolve => setTimeout(resolve, 310));
     check.equal(menu.querySelector('[data-type="sheet-close"]'), null);
     menu.classList.remove("b3-menu--expanded");
     touch("touchstart", 100);
-    touch("touchmove", 280);
-    touch("touchend", 280);
+    touch("touchmove", innerHeight + 300);
+    touch("touchend", innerHeight + 300);
     await settle();
     check.equal(saves, 1);
     check.equal(panel.isConnected, false);
@@ -209,7 +209,7 @@ test("mobile database sheets expand, preserve navigation and edits, and fit the 
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel",
         "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

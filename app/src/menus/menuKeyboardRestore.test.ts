@@ -59,7 +59,9 @@ const setup = () => {
         requestAnimationFrame: (callback: () => void) => { frames.set(++sequence, callback); return sequence; },
         cancelAnimationFrame: (id: number) => frames.delete(id),
         performance: {now: () => time},
-        document: {activeElement: {blur: () => events.push("blur")}},
+        document: {activeElement: {blur: () => events.push("blur")},
+            createElement: () => ({style: {}, remove() {}}), body: {append() {}},
+            getElementById: (): HTMLElement | null => null},
         Constants: {TIMEOUT_DBLCLICK: 200},
         window: {
             get innerHeight() { return height; },

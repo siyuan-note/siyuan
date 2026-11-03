@@ -49,21 +49,21 @@ export const mobileInputDialog = (options: {
         '<input spellcheck="false" class="b3-text-field fn__block" value="" data-dialog-input>';
     const actionsHTML = (position: "beforeCancel" | "beforeConfirm" | "afterConfirm") =>
         (options.actions || []).map((action, index) => (action.position || "beforeConfirm") === position ?
-            `<button class="b3-button b3-button--${action.danger ? "remove" : "text"}" data-input-action="${index}">${escapeHtml(action.text)}</button>` : "").filter(Boolean).join('<div class="fn__space"></div>');
+            `<button class="b3-button b3-button--touch b3-button--wrap b3-button--${action.danger ? "remove" : "text"}" data-input-action="${index}">${escapeHtml(action.text)}</button>` : "").filter(Boolean).join("");
     const actionHTML = [
         actionsHTML("beforeCancel"),
-        `<button class="b3-button b3-button--cancel" data-input-cancel>${window.siyuan.languages.cancel}</button>`,
+        `<button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary" data-input-cancel>${window.siyuan.languages.cancel}</button>`,
         actionsHTML("beforeConfirm"),
-        `<button class="b3-button b3-button--text" data-input-confirm>${escapeHtml(options.confirmText || window.siyuan.languages.confirm)}</button>`,
+        `<button class="b3-button b3-button--touch b3-button--wrap" data-input-confirm>${escapeHtml(options.confirmText || window.siyuan.languages.confirm)}</button>`,
         actionsHTML("afterConfirm"),
-    ].filter(Boolean).join('<div class="fn__space"></div>');
+    ].filter(Boolean).join("");
     const dialog = new Dialog({
         title: options.title,
         mobileSheet: options.mobileSheet,
         positionId: options.positionId,
         content: `<div class="b3-dialog__content">${options.prefixContent || ""}${options.label ? `<label>${escapeHtml(options.label)}<div class="fn__hr"></div>${inputHTML}</label>` : inputHTML}${options.description ? `<div class="b3-label__text">${options.description}</div>` : ""}${options.extraContent || ""}</div>
-<div class="b3-dialog__action">
-    ${actionHTML}
+<div class="b3-dialog__action mobile-sheet-action-bar">
+    <div class="mobile-sheet-action-group${options.actions?.length ? " mobile-sheet-action-group--stacked" : ""}">${actionHTML}</div>
 </div>`,
         width: options.width || (isMobile() ? "92vw" : "520px"),
         destroyCallback: options.destroyCallback,

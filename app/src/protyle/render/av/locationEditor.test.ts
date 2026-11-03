@@ -37,6 +37,7 @@ const createEditor = (options: {
     alreadyOpen?: boolean;
     save?: (value: IAVCellLocationValue) => Promise<void>;
 } = {}) => {
+    let canDrag: () => boolean;
     const fields = Object.fromEntries(["name", "latitude", "longitude"]
         .map(name => [name, new Control()]));
     const buttons = Object.fromEntries(["save", "clear", "cancel"].map(name => [name, new Control()]));
@@ -79,7 +80,9 @@ const createEditor = (options: {
         "../../../dialog": {Dialog: MockDialog},
         "../../../util/escape": {escapeHtml: (text: string) => text},
         "../../../util/functions": {isMobile: () => !!options.mobile},
-        "../../../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: (_dialog: unknown, close: () => Promise<void>) => {
+        "../../../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: (_dialog: unknown, close: () => Promise<void>, _resize: unknown, _open: unknown,
+            sheetOptions: {canStart: () => boolean}) => {
+            canDrag = sheetOptions.canStart;
             closeSheet = close;
             lifecycle.push("sheet");
             return () => lifecycle.push("dispose-sheet");
@@ -125,7 +128,7 @@ const createEditor = (options: {
     return {
         fields, buttons, error, root, lifecycle, saved, owner, dialog, markup,
         ownerChanged: () => ownerChanged(),
-        closeSheet: () => closeSheet(),
+        closeSheet: () => closeSheet(), canDrag: () => canDrag(),
         settle: () => new Promise<void>(resolve => setImmediate(resolve)),
         key: (key: string, extra: Record<string, unknown> = {}) => root.dispatch("keydown", {
             key, preventDefault() {}, stopPropagation() {}, ...extra,
@@ -376,7 +379,9 @@ describe("database location editor", () => {
         let save: () => void;
         const editor = createEditor({mobile: true, save: () => new Promise<void>(resolve => save = resolve)});
         editor.fields.name.value = "Office";
+        assert.equal(editor.canDrag(), true);
         editor.buttons.save.dispatch("click");
+        assert.equal(editor.canDrag(), false);
         await editor.closeSheet();
         assert.equal(editor.lifecycle.includes("destroy"), false);
         editor.owner.isConnected = false;

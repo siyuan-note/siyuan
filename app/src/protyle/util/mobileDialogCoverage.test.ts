@@ -167,7 +167,7 @@ test("editor, AI and card business dialog entries opt into mobile adapters expli
 test("AV sheets use one adapter and desktop-only paths remain unmodified", () => {
     for (const file of ["locationEditor"]) {
         const source = readFileSync("src/protyle/render/av/" + file + ".ts", "utf8");
-        assert.match(source, /bindBottomSheetDialog\([\s\S]*?\{mode: "standard"(?:, expandable: true)?\}/, file);
+        assert.match(source, /bindBottomSheetDialog\([\s\S]*?\{mode: "standard"(?:, expandable: true)?(?:, canStart: \(\) => !saving && !closing)?\}/, file);
         assert.doesNotMatch(source, /new MobileDialog/, file);
     }
     for (const file of ["newItemTemplate", "subItems"]) {

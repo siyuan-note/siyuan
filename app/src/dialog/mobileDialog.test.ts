@@ -8,6 +8,8 @@ const source = transpileModule(readFileSync("src/dialog/mobileDialog.ts", "utf8"
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 const setup = (mobile = true) => {
+    let drag: () => Promise<boolean>;
+    let canDrag: () => boolean;
     let opened: () => void;
     let resized: () => void;
     let scrolled = 0;
@@ -33,7 +35,8 @@ const setup = (mobile = true) => {
         bindInput() {}
     }
     const dependencies = {Dialog: Base, isMobile: () => mobile,
-        bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void) => {
+        bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void, options: {canStart: () => boolean}) => {
+            drag = _close; canDrag = options.canStart;
             bindings++; opened = open; resized = _resize;
             const dispose = () => { disposals++; };
             dispose.freeze = () => { freezes++; };
@@ -43,7 +46,7 @@ const setup = (mobile = true) => {
         scrollInputIntoView: () => { scrolled++; }, callMobileAppShowKeyboard: () => { keyboard++; }, setSheetExpanded() {}, Constants: {TIMEOUT_INPUT: 10}, isNotCtrl: () => true, showMessage() {}};
     const exports: any = {};
     runInNewContext(source, {exports, require: () => dependencies, window, document, console: {error() {}}});
-    return {...exports, window, document, Base, resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, mode, keyboard, scrolled})};
+    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, mode, keyboard, scrolled})};
 };
 test("explicit mobile geometry binds once; desktop is untouched", () => {
     const mobile = setup();
@@ -196,4 +199,25 @@ test("keyboard viewport updates scroll the current input without refocusing or t
     dialog.destroy();
     f.resize();
     assert.equal(f.stats().scrolled, 1);
+});
+
+
+test("drag binding preserves close result and blocks pending and covered sheets", async () => {
+    const f = setup();
+    const dialog = new f.MobileDialog({content: "", mobileSheet: {beforeClose: () => false}});
+    assert.equal(f.canDrag(), true);
+    assert.equal(await f.drag(), false);
+    let finish: (value: boolean) => void;
+    const pending = dialog.runPending(() => new Promise<boolean>(resolve => { finish = resolve; }));
+    assert.equal(f.canDrag(), false);
+    assert.equal(await f.drag(), false);
+    finish(false);
+    await pending;
+    assert.equal(f.canDrag(), true);
+    f.window.siyuan.dialogs.push({});
+    assert.equal(f.canDrag(), false);
+    assert.equal(await f.drag(), false);
+    f.window.siyuan.dialogs.pop();
+    dialog.invalidate();
+    assert.equal(f.canDrag(), false);
 });

@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
+import {getMobileSheetBounds} from "./mobileSheetGesture";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
@@ -26,11 +27,16 @@ const setup = () => {
     const viewport = {top: 0, bottom: 800};
     const toolbar = {hidden: true, top: 752, classList: {contains: () => toolbar.hidden},
         getBoundingClientRect: () => ({top: toolbar.top})};
-    const classes = () => ({add() {}});
+    const classes = () => {
+        const values = new Set<string>();
+        return {add: (value: string) => values.add(value), contains: (value: string) => values.has(value),
+            toggle: (value: string, enabled: boolean) => enabled ? values.add(value) : values.delete(value)};
+    };
     const overlay = {isConnected: true, classList: classes(), style: {top: "", height: ""}, paddingTop: 0, paddingBottom: 0};
-    const sheet = {classList: classes(), style: {height: "", maxHeight: ""}, contentHeight: 120,
+    const sheet = {querySelector: () => ({style: {flex: ""}, querySelector: (): null => null,
+        getBoundingClientRect: () => ({height: sheet.contentHeight - sheet.chromeHeight})}), classList: classes(), style: {height: "", maxHeight: ""}, contentHeight: 120, chromeHeight: 40,
         getBoundingClientRect: () => ({height: Math.min(sheet.style.height === "auto" ? sheet.contentHeight :
-            parseFloat(sheet.style.height), parseFloat(sheet.style.maxHeight))})};
+            parseFloat(sheet.style.height), (sheet.style.maxHeight === "none" ? Infinity : parseFloat(sheet.style.maxHeight)))})};
     let observer: () => void;
     let connected = false;
     const exports: any = {};
@@ -42,7 +48,7 @@ const setup = () => {
             observe() { connected = true; }
             disconnect() { connected = false; }
         },
-        require: () => ({getVisibleViewportBounds: () => viewport,
+        require: () => ({getMobileSheetBounds, getVisibleViewportBounds: () => viewport,
             isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape")}),
     });
     let notifications = 0;
@@ -140,4 +146,88 @@ test("all viewport changes notify the caller and disposal removes listeners and 
     assert.equal(s.observed(), false);
     s.layout.resize();
     assert.equal(s.notifications(), before + 6);
+});
+
+
+test("manual height survives content changes and expand collapse while keyboard clips only rendering", () => {
+    const s = setup();
+    s.layout.setPreferredHeight(650);
+    assert.equal(s.sheet.style.height, "650px");
+    s.sheet.contentHeight = 900;
+    s.layout.resize();
+    assert.equal(s.sheet.style.height, "650px");
+    s.layout.setMode("expanded");
+    assert.equal(s.sheet.style.height, "800px");
+    s.layout.setMode("standard");
+    assert.equal(s.sheet.style.height, "650px");
+    s.viewport.bottom = 220;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.style.height, "220px");
+    s.viewport.bottom = 800;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.style.height, "650px");
+});
+
+test("minimum measurement restores manual size and remains natural for short content", () => {
+    const s = setup();
+    s.layout.setPreferredHeight(650);
+    assert.equal(s.layout.getBounds().min, 120);
+    assert.equal(s.sheet.style.height, "650px");
+});
+
+
+test("new minimum clamps rendered manual height without replacing its preferred height", () => {
+    const s = setup();
+    s.layout.setPreferredHeight(130);
+    assert.equal(s.sheet.style.height, "130px");
+    s.sheet.contentHeight = 900;
+    s.layout.resize();
+    assert.equal(s.sheet.style.height, "160px");
+    s.sheet.contentHeight = 120;
+    s.layout.resize();
+    assert.equal(s.sheet.style.height, "130px");
+});
+
+
+test("footer or header growth raises the rendered minimum without destroying the chosen size", () => {
+    const s = setup();
+    s.sheet.contentHeight = 900;
+    s.layout.setPreferredHeight(300);
+    s.sheet.chromeHeight = 240;
+    s.layout.resize();
+    assert.equal(s.sheet.style.height, "360px");
+    s.sheet.chromeHeight = 40;
+    s.layout.resize();
+    assert.equal(s.sheet.style.height, "300px");
+});
+
+
+test("landscape initial cap below readable minimum does not grow on the first tiny downward resize", () => {
+    const s = setup();
+    s.window.screen.orientation.type = "landscape-primary";
+    s.window.innerHeight = 390;
+    s.viewport.bottom = 390;
+    s.sheet.contentHeight = 900;
+    s.sheet.chromeHeight = 160;
+    s.layout.resize();
+    const initial = s.sheet.getBoundingClientRect().height;
+    assert.ok(initial < 280);
+    assert.equal(s.layout.getBounds().min, initial);
+    s.layout.setPreferredHeight(initial);
+    assert.equal(s.sheet.getBoundingClientRect().height, initial);
+    s.sheet.chromeHeight = 240;
+    s.layout.resize();
+    assert.equal(s.sheet.getBoundingClientRect().height, 240, "essential chrome stays visible when it grows beyond the standard cap");
+});
+
+
+test("visual viewport constraints activate compact chrome even when layout viewport stays tall", () => {
+    const s = setup();
+    s.viewport.bottom = 100;
+    s.emit("visual:resize");
+    assert.equal(s.window.innerHeight, 800);
+    assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), true);
+    s.viewport.bottom = 800;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), false);
 });

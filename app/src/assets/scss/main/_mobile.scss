@@ -1954,6 +1954,33 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog {
+  .mobile-sheet-action-bar {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-items: stretch;
+    padding-inline: 16px;
+    gap: 12px;
+  }
+
+  .mobile-sheet-action-group {
+    display: grid;
+    flex-shrink: 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 12px;
+    width: 100%;
+
+    > .b3-button {
+      min-width: 0;
+    }
+
+    &--stacked {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   .b3-dialog__scrim {
     background-color: transparent;
   }
@@ -2012,6 +2039,18 @@ body.mobile-topbar--merged {
 .mobile-sheet-layout {
   box-sizing: border-box;
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
+}
+
+.mobile-bottom-sheet-dialog .mobile-sheet-panel--compact {
+  > .b3-dialog__header {
+    display: none;
+  }
+
+  .b3-dialog__content {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 // 横屏输入法占满屏幕时，让有限的高度留给输入区和底部操作。

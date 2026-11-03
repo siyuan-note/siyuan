@@ -10,10 +10,15 @@ const setup = (mobile = true) => {
     let delegated: any;
     class Control {
         value = "";
+        className = "";
+        id = "";
+        textContent = "";
+        inserted: Control[] = [];
         listeners: Record<string, (event?: any) => void> = {};
         addEventListener(name: string, callback: (event?: any) => void) { this.listeners[name] = callback; }
         click() { this.listeners.click?.(); }
         focus() { events.push("early-focus"); }
+        before(...controls: Control[]) { this.inserted.push(...controls); }
     }
     class MockDialog {
         input = new Control();
@@ -53,7 +58,7 @@ const setup = (mobile = true) => {
         runInNewContext(transpileModule(readFileSync("src/dialog/" + file + ".ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, HTMLInputElement: Control,
-            document: {activeElement: undefined, body: {}},
+            document: {activeElement: undefined, body: {}, createElement: () => new Control()},
             window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel"}}}, console});
         return exports;
     };
@@ -121,4 +126,42 @@ test("mobile confirmation distinguishes an Escape dispatch from explicit cancell
     const cancelled = f.mobileConfirmDialog("Title", "Text");
     cancelled.listeners.click({target: {id: "cancelDialogConfirmBtn"}, detail: 0});
     assert.equal(f.events.at(-1), "cancel");
+});
+
+test("mobile confirmation groups touch actions and keeps danger and extra action semantics", () => {
+    const f = setup();
+    const dialog = f.mobileConfirmDialog("Title", "Text");
+    assert.match(dialog.options.content, /b3-dialog__action mobile-sheet-action-bar/);
+    assert.match(dialog.options.content, /mobile-sheet-action-group/);
+    assert.match(dialog.options.content, /b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary/);
+    assert.doesNotMatch(dialog.options.content, /b3-button--text|fn__space|group--stacked/);
+    let extra = 0;
+    const danger = f.mobileConfirmDialog("Title", "Text", undefined, undefined, true,
+        {label: "Extra", callback: () => extra++});
+    assert.match(danger.options.content, /mobile-sheet-action-group--stacked/);
+    assert.match(danger.options.content, /b3-button--wrap b3-button--remove/);
+    assert.equal(danger.confirm.inserted.length, 1);
+    assert.equal(danger.confirm.inserted[0].textContent, "Extra");
+    assert.match(danger.confirm.inserted[0].className, /b3-button--touch b3-button--wrap/);
+    danger.listeners.click({target: {id: "extraDialogConfirmBtn"}, detail: 0});
+    assert.equal(extra, 1);
+    assert.equal(f.events.at(-1), "destroy");
+});
+
+test("mobile input touch actions preserve custom ordering and stack three or more actions", () => {
+    const f = setup();
+    const basic = f.mobileInputDialog({title: "Name", value: "", onConfirm() {}});
+    assert.match(basic.options.content, /b3-dialog__action mobile-sheet-action-bar/);
+    assert.doesNotMatch(basic.options.content, /group--stacked|fn__space|b3-button--text/);
+    const dialog = f.mobileInputDialog({title: "Name", value: "", onConfirm() {}, actions: [
+        {text: "First", position: "beforeCancel", onClick() {}},
+        {text: "Second", danger: true, onClick() {}},
+        {text: "Last", position: "afterConfirm", onClick() {}},
+    ]});
+    const html = dialog.options.content;
+    assert.match(html, /mobile-sheet-action-group--stacked/);
+    assert.match(html, /b3-button--touch b3-button--wrap b3-button--remove/);
+    const markers = ['data-input-action="0"', "data-input-cancel", 'data-input-action="1"', "data-input-confirm", 'data-input-action="2"'];
+    for (let i = 1; i < markers.length; i++) assert.ok(html.indexOf(markers[i - 1]) < html.indexOf(markers[i]));
+    assert.equal((html.match(/b3-button--touch/g) || []).length, 5);
 });

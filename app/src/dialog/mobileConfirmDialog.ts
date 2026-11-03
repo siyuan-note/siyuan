@@ -28,9 +28,11 @@ export const mobileConfirmDialog = (title: string, text: string,
         content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${text}</div>
 </div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel" id="cancelDialogConfirmBtn">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button ${isDelete ? "b3-button--remove" : "b3-button--text"}" id="confirmDialogConfirmBtn">${confirmLabel || window.siyuan.languages[isDelete ? "delete" : "confirm"]}</button>
+<div class="b3-dialog__action mobile-sheet-action-bar">
+    <div class="mobile-sheet-action-group${extraAction ? " mobile-sheet-action-group--stacked" : ""}">
+        <button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary" id="cancelDialogConfirmBtn">${window.siyuan.languages.cancel}</button>
+        <button class="b3-button b3-button--touch b3-button--wrap ${isDelete ? "b3-button--remove" : ""}" id="confirmDialogConfirmBtn">${confirmLabel || window.siyuan.languages[isDelete ? "delete" : "confirm"]}</button>
+    </div>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
         destroyCallback: () => {
@@ -76,12 +78,10 @@ export const mobileConfirmDialog = (title: string, text: string,
     });
     if (extraAction) {
         const button = document.createElement("button");
-        button.className = "b3-button b3-button--text";
+        button.className = "b3-button b3-button--touch b3-button--wrap b3-button--text";
         button.id = "extraDialogConfirmBtn";
         button.textContent = extraAction.label;
-        const space = document.createElement("div");
-        space.className = "fn__space";
-        dialog.element.querySelector("#confirmDialogConfirmBtn").before(button, space);
+        dialog.element.querySelector("#confirmDialogConfirmBtn").before(button);
     }
     dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
     dialog.focusWhenReady(() => dialog.element.querySelector("#confirmDialogConfirmBtn"));

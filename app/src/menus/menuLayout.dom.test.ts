@@ -885,7 +885,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
         "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,

@@ -76,13 +76,12 @@ const createMobileDialogClass = () => {
                 const active = document.activeElement;
                 if (active && this.element.contains(active)) scrollInputIntoView(active);
             };
-            this.disposeSheet = bindBottomSheetDialog(this, async () => {
-                await this.requestClose("drag");
-            }, scrollActive, () => {
+            this.disposeSheet = bindBottomSheetDialog(this, () => this.requestClose("drag"), scrollActive, () => {
                 this.ready = true;
                 this.focusTask?.();
                 this.focusTask = undefined;
-            }, {mode: this.sheetOptions.mode, expandable: this.sheetOptions.expandable});
+            }, {mode: this.sheetOptions.mode, expandable: this.sheetOptions.expandable,
+                canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost()});
             const click = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
                 if (target.closest(".b3-dialog__scrim")) {

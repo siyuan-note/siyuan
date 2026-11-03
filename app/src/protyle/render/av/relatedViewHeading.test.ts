@@ -50,7 +50,7 @@ test("related heading uses one native expanding button for arrow, label and blan
     assert.match(buttons[0], /class="protyle-db-attr__toggle fn__flex fn__flex-1"/);
     assert.match(buttons[0], /data-related-action="fold" aria-expanded="true"/);
     assert.match(buttons[0], /<svg><use xlink:href="#iconDown"/);
-    assert.match(buttons[0], /<span class="block__logo fn__ellipsis fn__flex-1">Sales &lt;orders> &amp; &quot;notes&quot;<\/span>/);
+    assert.match(buttons[0], /<span class="block__logo av-related-view__title fn__ellipsis fn__flex-1">Sales &lt;orders> &amp; &quot;notes&quot;<\/span>/);
     assert.doesNotMatch(buttons[0], /data-related-action="add"/);
     assert.match(buttons[1], /data-related-action="add" data-position="8west"/);
 });

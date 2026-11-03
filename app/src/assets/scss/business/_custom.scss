@@ -185,7 +185,7 @@
       overflow: hidden;
     }
 
-    &:hover {
+    &:hover:not(.av-related-view__title) {
       background-color: var(--b3-theme-surface-light);
     }
   }

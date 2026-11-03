@@ -96,7 +96,7 @@ class RelatedAVView {
         this.element.innerHTML = `<div class="av-related-view__heading fn__flex">
     <button type="button" class="protyle-db-attr__toggle fn__flex fn__flex-1" data-related-action="fold" aria-expanded="true" aria-label="${escapeHtmlTextAndAttr(definition.name)}">
         <span class="block__icon block__icon--show fn__flex-center"><svg><use xlink:href="#iconDown"></use></svg></span>
-        <span class="block__logo fn__ellipsis fn__flex-1">${escapeHtmlTextAndAttr(definition.name)}</span>
+        <span class="block__logo av-related-view__title fn__ellipsis fn__flex-1">${escapeHtmlTextAndAttr(definition.name)}</span>
     </button>
     <button type="button" class="block__icon block__icon--show ariaLabel" data-related-action="add" data-position="8west" aria-label="${window.siyuan.languages._attrView.relatedDatabaseViewAdd}"><svg><use xlink:href="#iconAdd"></use></svg></button>
 </div>`;

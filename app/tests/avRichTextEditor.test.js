@@ -69,6 +69,9 @@ const runCases = async (sources, appDirectory) => {
     const hintRef = new Function(...Object.keys(hintDependencies), "exports", sources.hintRef + "\nreturn exports.hintRef;")(
         ...Object.values(hintDependencies), {});
     const dependencies = {
+        "./host": {getAVHostIdentity: element => element.dataset.avHost || element.dataset.nodeId || "",
+            getAVHostBlockID: element => element.dataset.nodeId || ""},
+        "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
         "../../../dialog/mobileDialog": {MobileDialog},
         "../../../dialog/message": {showMessage() {}},
         "../../../util/escape": {escapeHtml: value => value},

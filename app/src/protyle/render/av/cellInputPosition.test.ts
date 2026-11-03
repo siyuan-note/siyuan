@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {getAVHostIdentity, getAVRelationHost} from "./host";
 
 const compiled = transpileModule(readFileSync("src/dialog/anchoredInputPosition.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS},
@@ -293,6 +294,7 @@ const openInput = (positionByMenu = false) => {
     const exports: {popTextCell?: (protyle: unknown, cells: unknown[], type: string, options: unknown) => void} = {};
     runInNewContext(popCompiled, {
         ...capabilities,
+        getAVHostIdentity, getAVRelationHost,
         exports, isTableLikeView: () => true, hasClosestBlock: () => block, hasClosestByClassName: (): null => null,
         getComputedStyle: () => ({}), getStoredCellValueByElement: (): undefined => undefined,
         escapeAttr: (value: string) => value,

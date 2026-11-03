@@ -3172,6 +3172,16 @@
 		"quit": "ออก"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "แสดงมุมมองฐานข้อมูลที่เชื่อมโยง",
+		"relatedDatabaseView": "มุมมองฐานข้อมูลที่เชื่อมโยง",
+		"relatedDatabaseViewShared": "ทุกรายการใช้เค้าโครงคอลัมน์ร่วมกันจากมุมมองเป้าหมาย",
+		"relatedDatabaseViewUnavailable": "ไม่สามารถใช้มุมมองที่เชื่อมโยงได้ โปรดตรวจสอบฟิลด์และมุมมองเป้าหมาย",
+		"relatedDatabaseViewNoTable": "ฐานข้อมูลที่เชื่อมโยงไม่มีมุมมองตาราง",
+		"relatedDatabaseViewRemove": "ยกเลิกการเชื่อมโยง",
+		"relatedDatabaseViewAdd": "เพิ่มรายการที่มีอยู่",
+		"relatedDatabaseViewNew": "สร้างและเชื่อมโยงรายการ",
+		"relatedDatabaseViewTemporaryFilter": "ตัวกรองเพิ่มเติมในแผงนี้",
+		"relatedDatabaseViewSharedTip": "ตารางนี้ใช้มุมมองร่วมกัน การเปลี่ยนการตั้งค่าจะส่งผลต่อการอ้างอิงทั้งหมด",
 		"dateCalendar": "ระบบปฏิทิน",
 		"solarCalendar": "เกรกอเรียน",
 		"lunarCalendar": "จันทรคติจีน",

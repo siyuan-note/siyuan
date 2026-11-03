@@ -3172,6 +3172,16 @@
 		"quit": "צא מהאפליקציה"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "הצגת תצוגת מסד הנתונים המקושר",
+		"relatedDatabaseView": "תצוגת מסד הנתונים המקושר",
+		"relatedDatabaseViewShared": "כל הרשומות משתמשות בפריסת העמודות המשותפת של תצוגת היעד",
+		"relatedDatabaseViewUnavailable": "התצוגה המקושרת אינה זמינה; יש לבדוק את השדה ואת תצוגת היעד",
+		"relatedDatabaseViewNoTable": "במסד הנתונים המקושר אין תצוגת טבלה",
+		"relatedDatabaseViewRemove": "הסרת הקישור",
+		"relatedDatabaseViewAdd": "הוספת רשומה קיימת",
+		"relatedDatabaseViewNew": "יצירת רשומה וקישורה",
+		"relatedDatabaseViewTemporaryFilter": "מסננים נוספים בחלונית זו",
+		"relatedDatabaseViewSharedTip": "טבלה זו משתמשת בתצוגה משותפת. שינוי ההגדרות שלה משפיע על כל ההפניות",
 		"dateCalendar": "לוח שנה",
 		"solarCalendar": "גרגוריאני",
 		"lunarCalendar": "ירחי סיני",

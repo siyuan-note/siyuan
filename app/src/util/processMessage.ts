@@ -14,6 +14,8 @@ export const processMessage = (response: IWebSocketData) => {
     if (response.cmd === "closeBox" || response.cmd === "removeBox") {
         const {clearTemplateHTTPConfirmations}: typeof import("../template/httpConfirmHandoff") = require("../template/httpConfirmHandoff");
         clearTemplateHTTPConfirmations();
+        const {invalidateRelatedAVSecurity}: typeof import("../protyle/render/av/relatedView") = require("../protyle/render/av/relatedView");
+        invalidateRelatedAVSecurity();
     }
     if (response.cmd === "templateHTTPConfirm" || response.cmd === "templateHTTPStatus") {
         const {processTemplateHTTPEvent}: typeof import("../template/http") = require("../template/http");

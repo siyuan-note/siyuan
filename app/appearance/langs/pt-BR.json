@@ -3172,6 +3172,16 @@
 		"quit": "Sair do aplicativo"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Mostrar visualização do banco de dados relacionado",
+		"relatedDatabaseView": "Visualização do banco de dados relacionado",
+		"relatedDatabaseViewShared": "Todas as entradas usam o layout de colunas compartilhado da visualização de destino",
+		"relatedDatabaseViewUnavailable": "Visualização relacionada indisponível; verifique o campo e a visualização de destino",
+		"relatedDatabaseViewNoTable": "O banco de dados relacionado não tem uma visualização de tabela",
+		"relatedDatabaseViewRemove": "Remover associação",
+		"relatedDatabaseViewAdd": "Adicionar entrada existente",
+		"relatedDatabaseViewNew": "Criar e vincular entrada",
+		"relatedDatabaseViewTemporaryFilter": "Filtros adicionais neste painel",
+		"relatedDatabaseViewSharedTip": "Esta tabela usa uma visualização compartilhada. Alterar sua configuração afeta todas as referências",
 		"dateCalendar": "Calendário",
 		"solarCalendar": "Gregoriano",
 		"lunarCalendar": "Lunar chinês",

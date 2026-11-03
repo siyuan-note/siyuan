@@ -455,6 +455,40 @@
   }
 }
 
+.av-related-view {
+    .av__row-more {
+        display: inline-flex;
+    }
+  [data-type="av-row-update"],
+  [data-type="av-add-top"] {
+        display: none;
+    }
+  grid-column: 1 / -1;
+  min-width: 0;
+  order: 2147483647;
+
+  &__heading {
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  &__table {
+    width: 100%;
+  }
+
+  &__picker {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__candidates {
+    max-height: 50vh;
+    overflow: auto;
+  }
+}
+
 .av__cell-action {
   align-items: center;
   background-color: var(--b3-theme-background);

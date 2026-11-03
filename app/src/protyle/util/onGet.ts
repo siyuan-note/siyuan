@@ -1,5 +1,6 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {Constants} from "../../constants";
+import {syncRelatedAVEditor} from "../render/av/relatedView";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
@@ -581,6 +582,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
+    syncRelatedAVEditor(protyle.id);
     protyle.title?.setReadonly?.(true);
     /// #if MOBILE
     updateMobileTitleReadonly(protyle);
@@ -626,6 +628,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
+    syncRelatedAVEditor(protyle.id);
     protyle.title?.setReadonly?.(false);
     if (isMobile()) {
         /// #if MOBILE

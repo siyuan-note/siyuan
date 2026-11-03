@@ -5,7 +5,8 @@ import {clearSubItemsViewportAnchor} from "./subItemsState";
 import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock, getAVRelationHost} from "./host";
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
@@ -41,7 +42,7 @@ import {hintRef} from "../../hint/extend";
 import {focusBlock} from "../../util/selection";
 import {focusByRange} from "../../util/selectionOffsets";
 import {showMessage} from "../../../dialog/message";
-import {previewAttrViewImages} from "../../preview/image";
+import {previewAttrViewImages, previewImages} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
 import dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
@@ -805,6 +806,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__cellassetimg")) {
+            if (getAVRelationHost(blockElement)) {
+                previewImages(Array.from(blockElement.querySelectorAll<HTMLImageElement>(".av__cellassetimg"))
+                    .map(image => removeCompressURL(image.getAttribute("src"))),
+                removeCompressURL((target as HTMLImageElement).getAttribute("src")));
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
             previewAttrViewImages(
                 removeCompressURL((target as HTMLImageElement).getAttribute("src")),
                 blockElement.getAttribute("data-av-id"),

@@ -33,6 +33,7 @@ import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {getAVRichTextSafeURL, renderAVRichTextElements} from "./richText";
+import {mountRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "./relatedView";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
 import {openFileById} from "../../../editor/util";
@@ -133,11 +134,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                                   row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string }) => {
     const renderID = (++attributeViewRenderID).toString();
     element.dataset.avAttributeRenderId = renderID;
-    fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID} : {id}, (response) => {
+    fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID,
+        blockID: row.databaseBlockID} : {id}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
         }
         const restoreBindingRange = preserveAVBindingRange(protyle, element);
+        preserveRelatedAVViews(element);
         let html = "";
         const tables = Array.isArray(response.data) ? response.data : [];
         tables.forEach((table) => {
@@ -637,15 +640,17 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             });
         }
         observeAVAttributeLayout(element);
+        mountRelatedAVViews(element, tables, protyle, row ? row.databaseBlockID : id);
         renderAttributeViewBacklinks(element, id, renderID, row, rendered => {
             cb?.(rendered);
+            syncRelatedAVViews(element);
             updateAVAttributeLayout(element);
         });
     });
 };
 
 const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID: string,
-                                      row?: { avID: string, itemID: string, valueID: string },
+                                      row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string },
                                       cb?: (element: HTMLElement) => void) => {
     const oldBacklinksElement = element.querySelector<HTMLElement>(".custom-attr__avbacklinks");
     const expanded = oldBacklinksElement?.dataset.expanded === "true";
@@ -654,6 +659,7 @@ const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID
         avID: row.avID,
         itemID: row.itemID,
         valueID: row.valueID,
+        blockID: row.databaseBlockID,
     } : {id}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;

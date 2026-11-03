@@ -1,8 +1,10 @@
 import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {showMessage} from "../../../dialog/message";
 import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock, getAVRelationHost} from "./host";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
@@ -169,6 +171,10 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
 
 export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean,
                              cellElements?: HTMLElement[], keepMenuOpen = false) => {
+    if (getAVRelationHost(blockElement)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     const menuElement = hasClosestByClassName(target, "b3-menu");
     const optionElement = target.closest("[data-name]") as HTMLElement;
     if (!menuElement || !optionElement) {
@@ -574,6 +580,10 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
 };
 
 export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
+    if (getAVRelationHost(blockElement) && currentElement.querySelector(".b3-menu__accelerator")) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     const inputElement = menuElement.querySelector("input");
     const restoreSearchFocus = !isMobile() || document.activeElement === inputElement ||
         menuElement.dataset.restoreSearchFocus === "true";

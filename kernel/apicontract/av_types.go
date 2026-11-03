@@ -262,10 +262,18 @@ type AVSelectOption struct {
 }
 
 type AVRelation struct {
-	AvID             string          `json:"avID" api:"optional,nullable"`
-	IsTwoWay         bool            `json:"isTwoWay" api:"optional,nullable"`
-	BackKeyID        string          `json:"backKeyID" api:"optional,nullable"`
-	CandidateFilters []*AVViewFilter `json:"candidateFilters,omitempty" api:"optional,nullable"`
+	DetailView       *AVRelationDetailView `json:"detailView,omitempty" api:"optional,nullable"`
+	AvID             string                `json:"avID" api:"optional,nullable"`
+	IsTwoWay         bool                  `json:"isTwoWay" api:"optional,nullable"`
+	BackKeyID        string                `json:"backKeyID" api:"optional,nullable"`
+	CandidateFilters []*AVViewFilter       `json:"candidateFilters,omitempty" api:"optional,nullable"`
+}
+
+// AVRelationDetailView 引用目标数据库的已有表格；未知 spec 保留在存储中但不能启用。
+type AVRelationDetailView struct {
+	Spec    int    `json:"spec"`
+	Enabled bool   `json:"enabled"`
+	ViewID  string `json:"viewID"`
 }
 
 type AVRollup struct {
@@ -627,6 +635,8 @@ type AVAvSearchResult struct {
 }
 
 type AVBlockAttributeViewKeys struct {
+	// NotebookID 来自已验证的实际载体、绑定块或加密域；普通无载体未绑定条目可为空。
+	NotebookID    string                         `json:"notebookID,omitempty" api:"optional,nullable"`
 	AvID          string                         `json:"avID" api:"optional,nullable"`
 	AvName        string                         `json:"avName" api:"optional,nullable"`
 	CustomColors  []*AVAttributeViewCustomColor  `json:"customColors" api:"optional,nullable"`

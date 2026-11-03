@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getAVRelationHost} from "./host";
 
 const selectSource = readFileSync("src/protyle/render/av/select.ts", "utf8");
 const kanbanSource = readFileSync("src/protyle/render/av/kanban/groupMenu.ts", "utf8");
@@ -41,6 +42,7 @@ const setupOptionMenu = (kanban = false) => {
     const exports: any = {};
     runInNewContext(kanban ? kanbanCode : selectCode, {
         exports,
+        getAVRelationHost,
         Constants: {},
         window: {siyuan: {languages: {}}},
         Menu: class {

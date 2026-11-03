@@ -12,6 +12,11 @@ import (
 // RenderViewItem 为属性面板计算单条记录，关联汇总仅物化该记录依赖的条目。
 func RenderViewItem(attrView *av.AttributeView, view *av.View, itemID string) av.Viewable {
 	context := NewAttributeViewRenderContext()
+	return RenderViewItemWithContext(attrView, view, itemID, context)
+}
+
+// 单条元数据读取可显式禁止派生值持久化，且保留数据库已固定的依赖读取边界。
+func RenderViewItemWithContext(attrView *av.AttributeView, view *av.View, itemID string, context *AttributeViewRenderContext) av.Viewable {
 	context.itemScope = true
 	defer context.PushTemplateErrors()
 	depth := 1

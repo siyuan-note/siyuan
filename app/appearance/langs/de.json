@@ -3172,6 +3172,16 @@
 		"quit": "Anwendung beenden"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Ansicht der verknüpften Datenbank anzeigen",
+		"relatedDatabaseView": "Ansicht der verknüpften Datenbank",
+		"relatedDatabaseViewShared": "Alle Einträge verwenden das gemeinsame Spaltenlayout der Zielansicht",
+		"relatedDatabaseViewUnavailable": "Verknüpfte Ansicht nicht verfügbar; Feld und Zielansicht prüfen",
+		"relatedDatabaseViewNoTable": "Die verknüpfte Datenbank hat keine Tabellenansicht",
+		"relatedDatabaseViewRemove": "Verknüpfung entfernen",
+		"relatedDatabaseViewAdd": "Vorhandenen Eintrag hinzufügen",
+		"relatedDatabaseViewNew": "Eintrag erstellen und verknüpfen",
+		"relatedDatabaseViewTemporaryFilter": "Zusätzliche Filter in diesem Bereich",
+		"relatedDatabaseViewSharedTip": "Diese Tabelle verwendet eine gemeinsame Ansicht. Änderungen an ihrer Konfiguration wirken sich auf alle Verweise aus",
 		"dateCalendar": "Kalender",
 		"solarCalendar": "Gregorianisch",
 		"lunarCalendar": "Chinesischer Mondkalender",

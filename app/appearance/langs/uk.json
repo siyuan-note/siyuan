@@ -3172,6 +3172,16 @@
 		"quit": "Вийти із застосунку"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Показувати подання пов’язаної бази даних",
+		"relatedDatabaseView": "Подання пов’язаної бази даних",
+		"relatedDatabaseViewShared": "Усі записи використовують спільне розташування стовпців цільового подання",
+		"relatedDatabaseViewUnavailable": "Пов’язане подання недоступне; перевірте поле й цільове подання",
+		"relatedDatabaseViewNoTable": "Пов’язана база даних не має табличного подання",
+		"relatedDatabaseViewRemove": "Видалити зв’язок",
+		"relatedDatabaseViewAdd": "Додати наявний запис",
+		"relatedDatabaseViewNew": "Створити й пов’язати запис",
+		"relatedDatabaseViewTemporaryFilter": "Додаткові фільтри в цій панелі",
+		"relatedDatabaseViewSharedTip": "Ця таблиця використовує спільне подання. Зміни його налаштувань вплинуть на всі посилання на нього",
 		"dateCalendar": "Календар",
 		"solarCalendar": "Григоріанський",
 		"lunarCalendar": "Китайський місячний",

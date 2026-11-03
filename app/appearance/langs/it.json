@@ -3172,6 +3172,16 @@
 		"quit": "Esci dall'applicazione"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Mostra la vista del database collegato",
+		"relatedDatabaseView": "Vista del database collegato",
+		"relatedDatabaseViewShared": "Tutte le voci usano il layout delle colonne condiviso della vista di destinazione",
+		"relatedDatabaseViewUnavailable": "Vista collegata non disponibile; controlla il campo e la vista di destinazione",
+		"relatedDatabaseViewNoTable": "Il database collegato non ha una vista tabella",
+		"relatedDatabaseViewRemove": "Rimuovi collegamento",
+		"relatedDatabaseViewAdd": "Aggiungi voce esistente",
+		"relatedDatabaseViewNew": "Crea e collega una voce",
+		"relatedDatabaseViewTemporaryFilter": "Filtri aggiuntivi in questo pannello",
+		"relatedDatabaseViewSharedTip": "Questa tabella usa una vista condivisa. Le modifiche alla configurazione si applicano a tutti i riferimenti",
 		"dateCalendar": "Calendario",
 		"solarCalendar": "Gregoriano",
 		"lunarCalendar": "Lunare cinese",

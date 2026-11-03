@@ -2245,6 +2245,8 @@ if (response.code === 0 && response.data) {
     * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
     * `nested`：启用父子条目且设置为树形显示的表格、列表视图的可选树形读取请求，省略时保持平铺返回。`expandedIDs` 控制展开项，`groupExpandedIDs` 可按分组覆盖；`childPaging` 使用 `parentID`（分组内使用 `groupID/parentID`）映射到 `{page, pageSize}`，页码从 1 开始，子项每页最多 200 条。根条目使用 `page`/`pageSize` 分页。响应的 `view.nested` 返回实际页码、根数量和匹配条目数，`rows[].hierarchy` 标识可见层级及仅用于上下文的祖先。定位会展开祖先并切换到对应页面，不返回不可访问的祖先身份
     * `temporarySort`: 可选的单字段排序，例如 `{"column":"field-id","order":"DESC"}`。省略或为 `null` 时使用已保存规则；指定时仅覆盖本次请求的排序，在分页前生效，不创建或保存数据库，也不改变载体默认视图。`order` 必须为 `ASC` 或 `DESC`；字段缺失或不支持排序时恢复已保存规则。支持现有的 `valueSource` 和 `dateEndpoint` 选项
+    * `relationContext`: 可选的条目详情范围：`{"sourceAvID":"源数据库 ID","sourceItemID":"源条目 ID","relationKeyID":"关联字段 ID"}`。源字段必须已启用关联视图配置，`id` 必须与该字段的目标数据库一致。提供 `blockID` 时，它必须是真实的源数据库块或源条目绑定块，不能用条目 ID 伪装块 ID；未绑定条目可传空值。此模式只支持平铺表格，不接受 `nested`。显式 `viewID` 可选择同一目标数据库中已有的表格视图，省略时使用字段配置的视图。源数据库、字段或视图无效或不可用时返回错误，不退化为展示整个目标数据库。发布阅读者请求不支持此模式
+    * `temporaryFilters`: `relationContext` 模式下可选的附加筛选规则，仅本次请求与目标视图的已保存筛选按 AND 合并。源条目的当前关联成员范围在筛选、排序、分组、分页、计数和目标条目定位之前强制生效。添加关联时使用的候选筛选不会排除既有关联成员。此渲染模式不持久化成员范围、附加筛选、临时排序或视图选择；无效的临时排序会返回错误
     * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
     * `persistView`: 已废弃的兼容参数。接口仍接受该参数但会忽略，因为数据库定义不再存储顶层当前视图
 * 返回值（真实响应，表格布局，展示一行）：
@@ -2418,6 +2420,10 @@ if (response.code === 0 && response.data) {
   ```
 
     * `id`: 数据库 ID
+    * 可选 `blockID`：当前数据库的真实载体区块；使用以下任一关联上下文时改为真实来源载体或确实绑定在来源数据库中的区块，由内核推导并验证存储边界，不接受客户端任意指定笔记本
+    * 可选 `relationFieldContext`：`{ "sourceAvID": "...", "relationKeyID": "..." }`，读取来源关联字段实际指向的目标配置，允许在尚未开启关联视图时使用
+    * 可选 `relationDependencyContext`：`{ "relationContext": { "sourceAvID": "...", "sourceItemID": "...", "relationKeyID": "..." }, "relationKeyIDs": ["..."] }`，从关联表的目标数据库沿一至两个真实关联字段读取筛选元数据，每一步及最终请求的 `id` 都必须匹配
+    * 两种关联上下文互斥，均只返回配置和字段元数据，不含条目值；上下文无效或加密域不可用时返回错误，不回退到其他数据库
 * 返回值（真实响应，已裁剪——`keyValues`/`views` 数组做了截断）：
 
   ```json

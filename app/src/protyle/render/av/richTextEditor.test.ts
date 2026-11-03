@@ -53,6 +53,9 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         onDestroy: () => lifecycle.push("callback"),
     };
     const modules: Record<string, unknown> = {
+        "./host": {getAVHostIdentity: (element: typeof node) => element.dataset.nodeId,
+            getAVHostBlockID: (element: typeof node) => element.dataset.nodeId},
+        "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
         "../../../dialog/message": {showMessage: () => lifecycle.push("save-error")},
         "../../../dialog/mobileDialog": {MobileDialog: class {
             element: unknown;
@@ -142,6 +145,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     }
     return {
         methods, lifecycle, owner, node, open,
+        cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
         escape: () => masks.at(-1).firstElementChild.handlers.get("keydown")({
             key: "Escape",
@@ -157,6 +161,16 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
 };
 
 describe("database rich text editor Escape focus", () => {
+    for (const mobile of [false, true]) {
+        it(`cancels owned ${mobile ? "mobile" : "desktop"} rich text immediately without saving its draft`, async () => {
+            const editor = createEditor({mobile, changed: true});
+            editor.cancel();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("save"), false);
+            assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+            assert.equal(editor.lifecycle.filter(item => item === "end-session").length, 1);
+        });
+    }
     it("keeps the mobile draft after a failed save and allows an explicit retry", async () => {
         let fail = true;
         const editor = createEditor({mobile: true, changed: true, save: async () => {

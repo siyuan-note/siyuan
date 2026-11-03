@@ -3172,6 +3172,16 @@
 		"quit": "एप्लिकेशन से बाहर निकलें"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "संबंधित डेटाबेस दृश्य दिखाएँ",
+		"relatedDatabaseView": "संबंधित डेटाबेस दृश्य",
+		"relatedDatabaseViewShared": "सभी प्रविष्टियाँ लक्ष्य दृश्य का साझा स्तंभ लेआउट उपयोग करती हैं",
+		"relatedDatabaseViewUnavailable": "संबंधित दृश्य उपलब्ध नहीं है; फ़ील्ड और लक्ष्य दृश्य की जाँच करें",
+		"relatedDatabaseViewNoTable": "संबंधित डेटाबेस में कोई तालिका दृश्य नहीं है",
+		"relatedDatabaseViewRemove": "संबंध हटाएँ",
+		"relatedDatabaseViewAdd": "मौजूदा प्रविष्टि जोड़ें",
+		"relatedDatabaseViewNew": "प्रविष्टि बनाएँ और लिंक करें",
+		"relatedDatabaseViewTemporaryFilter": "इस पैनल में अतिरिक्त फ़िल्टर",
+		"relatedDatabaseViewSharedTip": "यह तालिका साझा दृश्य का उपयोग करती है। इसकी सेटिंग बदलने से सभी संदर्भ प्रभावित होंगे",
 		"dateCalendar": "पंचांग",
 		"solarCalendar": "ग्रेगोरियन",
 		"lunarCalendar": "चीनी चंद्र पंचांग",

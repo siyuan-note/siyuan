@@ -3172,6 +3172,16 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Weergave van gekoppelde database tonen",
+		"relatedDatabaseView": "Weergave van gekoppelde database",
+		"relatedDatabaseViewShared": "Alle items gebruiken de gedeelde kolomindeling van de doelweergave",
+		"relatedDatabaseViewUnavailable": "Gekoppelde weergave niet beschikbaar; controleer het veld en de doelweergave",
+		"relatedDatabaseViewNoTable": "De gekoppelde database heeft geen tabelweergave",
+		"relatedDatabaseViewRemove": "Koppeling verwijderen",
+		"relatedDatabaseViewAdd": "Bestaand item toevoegen",
+		"relatedDatabaseViewNew": "Item maken en koppelen",
+		"relatedDatabaseViewTemporaryFilter": "Extra filters in dit paneel",
+		"relatedDatabaseViewSharedTip": "Deze tabel gebruikt een gedeelde weergave. Wijzigingen in de configuratie gelden voor alle verwijzingen",
 		"dateCalendar": "Kalender",
 		"solarCalendar": "Gregoriaans",
 		"lunarCalendar": "Chinese maankalender",

@@ -21,6 +21,8 @@ import (
 )
 
 type DocumentCreateRequest struct {
+	// 仅关联详情新建使用：捕获创建事务实际持久化字节，不接受 HTTP 输入。
+	captureCreatedSource   func(*parse.Tree, []byte) error
 	Notebook               string
 	ParentID               *string
 	ID                     string
@@ -268,6 +270,15 @@ func createDocByParent(request DocumentCreateRequest, creationLocked bool) (docu
 			if saveErr != nil {
 				writeErr = saveErr
 				return saveErr
+			}
+			if request.captureCreatedSource != nil {
+				file := tx.documentSource(source)
+				if file == nil || file.Before != nil || file.After == nil {
+					return errors.New("created document source record is unavailable")
+				}
+				if captureErr := request.captureCreatedSource(source, file.After); captureErr != nil {
+					return captureErr
+				}
 			}
 			sql.UpsertTreeQueueWithChanges(source, tx.treeIndexChanges(source))
 			refreshDocInfoWithSize(source, size)

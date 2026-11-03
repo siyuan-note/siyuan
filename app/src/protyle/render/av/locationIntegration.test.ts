@@ -11,6 +11,7 @@ import * as dragFillValue from "./dragFillValue";
 import * as escape from "../../../util/escape";
 import {genAVDragFillValue} from "./dragFillValue";
 import {inferAVPasteColumnType} from "./paste";
+import * as host from "./host";
 
 // 位置用例不调用这些依赖；新增依赖或意外调用都应立即使测试失败。
 const unusedDependencies = [
@@ -36,6 +37,7 @@ const loadModule = <T>(file: string, extra: Record<string, unknown> = {}) => {
             },
         })])),
         "./capabilities": capabilities,
+        "./host": host,
         "./cellValue": cellValue,
         "./locationValue": locationValue,
         "./batchValue": batchValue,

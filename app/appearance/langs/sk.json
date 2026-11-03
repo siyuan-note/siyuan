@@ -3172,6 +3172,16 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Zobraziť pohľad prepojenej databázy",
+		"relatedDatabaseView": "Pohľad prepojenej databázy",
+		"relatedDatabaseViewShared": "Všetky položky používajú spoločné rozloženie stĺpcov cieľového pohľadu",
+		"relatedDatabaseViewUnavailable": "Prepojený pohľad nie je dostupný; skontrolujte pole a cieľový pohľad",
+		"relatedDatabaseViewNoTable": "Prepojená databáza nemá tabuľkový pohľad",
+		"relatedDatabaseViewRemove": "Odstrániť prepojenie",
+		"relatedDatabaseViewAdd": "Pridať existujúcu položku",
+		"relatedDatabaseViewNew": "Vytvoriť a prepojiť položku",
+		"relatedDatabaseViewTemporaryFilter": "Ďalšie filtre v tomto paneli",
+		"relatedDatabaseViewSharedTip": "Táto tabuľka používa zdieľaný pohľad. Zmeny jeho nastavení ovplyvnia všetky odkazy",
 		"dateCalendar": "Kalendár",
 		"solarCalendar": "Gregoriánsky",
 		"lunarCalendar": "Čínsky lunárny",

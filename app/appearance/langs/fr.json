@@ -3172,6 +3172,16 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Afficher la vue de la base de données liée",
+		"relatedDatabaseView": "Vue de la base de données liée",
+		"relatedDatabaseViewShared": "Toutes les entrées utilisent la disposition des colonnes partagée de la vue cible",
+		"relatedDatabaseViewUnavailable": "Vue liée indisponible ; vérifiez le champ et la vue cible",
+		"relatedDatabaseViewNoTable": "La base de données liée ne possède aucune vue de tableau",
+		"relatedDatabaseViewRemove": "Supprimer la relation",
+		"relatedDatabaseViewAdd": "Ajouter une entrée existante",
+		"relatedDatabaseViewNew": "Créer et lier une entrée",
+		"relatedDatabaseViewTemporaryFilter": "Filtres supplémentaires dans ce panneau",
+		"relatedDatabaseViewSharedTip": "Ce tableau utilise une vue partagée. Modifier sa configuration affecte toutes les références",
 		"dateCalendar": "Calendrier",
 		"solarCalendar": "Grégorien",
 		"lunarCalendar": "Lunaire chinois",

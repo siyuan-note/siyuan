@@ -119,6 +119,7 @@ const setupPanelRefresh = (rows: string[], owner: "current" | "other" | "config"
     const noop = () => {};
     const render = runInNewContext(afterRenderCompiled + "\nafterRenderTable", {
         refreshAVCellSelection, isAVCellPanelForBlock,
+        getAVRelationHost: (): undefined => undefined,
         document: {querySelector: (selector: string) => selector === ".av__panel" && !removed ? panel : null},
         getSelection: () => ({rangeCount: 0}),
         getPendingBlockFocusMode: noop,

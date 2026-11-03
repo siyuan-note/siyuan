@@ -1593,6 +1593,11 @@ interface IAVCellAssetValue {
 }
 
 interface IAVColumnRelation {
+    detailView?: {
+        spec: number;
+        enabled: boolean;
+        viewID: string;
+    };
     avID?: string;
     backKeyID?: string;
     isTwoWay?: boolean;

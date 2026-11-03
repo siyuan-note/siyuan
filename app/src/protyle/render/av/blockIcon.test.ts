@@ -9,6 +9,7 @@ import * as cellValue from "./cellValue";
 import * as dragFillValue from "./dragFillValue";
 import * as viewType from "./viewType";
 import * as escape from "../../../util/escape";
+import * as host from "./host";
 
 // 执行实际渲染、取值和事务生成代码，隔离图标面板与编辑器外部依赖。
 const createHarness = (layout: TAVView = "table", detached = true, icon?: string, relation = false) => {
@@ -43,6 +44,7 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
     const protyle = {disabled: false, element: {}, options: {},
         wysiwyg: {element: {querySelectorAll: () => [block]}}} as unknown as IProtyle;
     const mocks: Record<string, unknown> = {
+        "./host": {...host, getAVHost: () => block},
         "./cellValue": cellValue,
         "./dragFillValue": dragFillValue,
         "./viewType": viewType,
@@ -51,7 +53,7 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
         "../../../emoji": {openEmojiPanel: (id: string, type: string, _position: unknown, callback: (icon: string) => void) => {
             panel = {id, type, callback};
         }},
-        "../../util/hasClosest": {hasClosestBlock: () => block, hasClosestByClassName: () => false},
+        "../../util/hasClosest": {hasClosestByClassName: () => false},
         "./virtualScroll": {getAVData: () => data, getAVPrimaryCell: () => cell},
         "../../../util/fetch": {fetchSyncPost: async (path: string) => ({code: 0,
             data: path.endsWith("getAttributeViewKeysByID") ? [{relation: {avID: "related"}}] : [{

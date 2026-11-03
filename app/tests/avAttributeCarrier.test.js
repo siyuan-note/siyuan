@@ -47,6 +47,9 @@ const runCases = async () => {
         let callbackCount = 0;
         const render = () => window.renderAVAttribute(element, itemID, protyle, () => callbackCount++, row);
         render();
+        for (const endpoint of ["getAttributeViewKeys", "getAttributeViewBacklinks"]) {
+            assert.equal(requests.filter(request => request.url.endsWith(endpoint)).at(-1).data.blockID, "carrier-b");
+        }
         let block = element.querySelector('[data-type="NodeAttributeView"]');
         assert.equal(block.dataset.nodeId, "carrier-b");
         assert.equal(block.dataset.attributeId, itemID);
@@ -84,6 +87,9 @@ const runCases = async () => {
         assert.equal(block.dataset.nodeId, "carrier-a");
         assert.equal(callbackCount, 2);
         assert.equal(requests.filter(request => request.url.endsWith("getAttributeViewKeys")).at(-1).data.itemID, itemID);
+        for (const endpoint of ["getAttributeViewKeys", "getAttributeViewBacklinks"]) {
+            assert.equal(requests.filter(request => request.url.endsWith(endpoint)).at(-1).data.blockID, "carrier-a");
+        }
     }
     // 普通块属性仍以真实块为上下文，不被所在数据库的其他镜像替换。
     const element = document.createElement("div");

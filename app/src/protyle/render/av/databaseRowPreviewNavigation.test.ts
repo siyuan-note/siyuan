@@ -88,7 +88,10 @@ test("row navigation replaces only its original desktop preview across bound and
                 return latest;
             },
         },
-        "../../../util/fetch": {fetchSyncPost: () => new Promise(resolve => { request = resolve; })},
+        "../../../util/fetch": {fetchSyncPost: (_url: string, payload: {notebook: string}) => {
+            assert.equal(payload.notebook, "notebook");
+            return new Promise(resolve => { request = resolve; });
+        }},
         "../../../dialog/message": {showMessage() {}},
         "../../../layout/util": {saveLayout() {}},
         "./rowReadonly": {inheritDatabaseRowReadonly() {}},
@@ -137,6 +140,7 @@ test("row navigation replaces only its original desktop preview across bound and
     assert.deepEqual(removed, ["initial"]);
     assert.equal(latest.parent, wnd);
     assert.equal(created[0].id, "bound");
+    assert.equal(created[0].notebookId, "notebook");
     assert.equal(created[0].rootID, "another-document");
     assert.equal(created[0].zoomIn, true);
     let bound = latest.model as Editor;

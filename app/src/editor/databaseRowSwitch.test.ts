@@ -89,11 +89,12 @@ const createPreview = async (mobile: boolean, detached = true) => {
         }},
         "../../../constants": {Constants: {CB_GET_ALL: "all", CB_GET_FOCUS: "focus"}},
         "../../../mobile/editor": {openMobileFileById: (_app: unknown, id: string, _action: unknown,
-                                                       _scroll: unknown, _notebook: unknown,
+                                                       _scroll: unknown, notebook: unknown,
                                                        afterOpen: (protyle: unknown) => void,
                                                        forceReload: boolean, waitForAttributes: boolean) => {
             assert.equal(forceReload, true);
             assert.equal(waitForAttributes, true);
+            assert.equal(notebook, data.notebookID);
             openedBlocks.push(id);
             return new Promise<boolean>(resolve => {
                 failBound = () => resolve(false);
@@ -148,6 +149,17 @@ const createPreview = async (mobile: boolean, detached = true) => {
                 if (name.endsWith("/binding")) { return {preserveAVBindingRange: () => () => {}}; }
                 if (name.endsWith("/rowReadonly")) { return {inheritDatabaseRowReadonly() {}}; }
                 if (name.endsWith("/primaryFocus")) { return {focusDatabasePrimary() {}}; }
+                if (name.endsWith("/relatedView")) {
+                    return {
+                        preserveRelatedAVViews: (previous: Body, next: Body) => {
+                            assert.equal(previous, body, "preserve related state before replacing the current body");
+                            assert.notEqual(previous, next);
+                        },
+                        syncRelatedAVViews: (element: Body) => assert.equal(element, body,
+                            "activate related views only after committing the new body"),
+                        disposeRelatedAVViews() {}, destroyRelatedAVViews() {},
+                    };
+                }
                 return modules[name] || {};
             },
         });

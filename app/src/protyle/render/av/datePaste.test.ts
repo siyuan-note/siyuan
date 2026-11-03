@@ -8,6 +8,7 @@ import {cloneAVCellValueSnapshot, createAVCellUpdateOperation, genEmptyAVCellVal
 import {rebindAVCellValue} from "./dragFillValue";
 import {formatDateValue, parseDateValue} from "./dateFormat";
 import type {IAVSelectedCell} from "./selectionState";
+import {getAVRelationHost} from "./host";
 
 const isCellUpdate = (operation: IOperation): operation is Extract<IOperation, {action: "updateAttrViewCell"}> =>
     operation.action === "updateAttrViewCell";
@@ -22,7 +23,7 @@ test("date paste preserves stored values on invalid text and supports explicit c
     runInNewContext(transpileModule(fragment, {compilerOptions: {
         module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
     }}).outputText, {exports, isAVDateType, isAVReadonlyType, isAVTextType, cloneAVCellValueSnapshot, createAVCellUpdateOperation,
-        genEmptyAVCellValue, rebindAVCellValue, formatDateValue, parseDateValue,
+        genEmptyAVCellValue, rebindAVCellValue, formatDateValue, parseDateValue, getAVRelationHost,
         getAVBatchEditMode: () => "replace", getCellValueText: () => "stored date",
         objEquals: (first: unknown, second: unknown) => JSON.stringify(first) === JSON.stringify(second)});
     const stored: IAVCellValue = {id: "date-value", keyID: "birthday", blockID: "row", type: "date",

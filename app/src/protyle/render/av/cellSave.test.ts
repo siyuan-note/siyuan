@@ -23,6 +23,7 @@ const fixture = () => {
         getAttribute: (name: string) => name === "data-av-type" ? "table" : "previous-time"};
     const exports = {} as typeof import("./cell");
     runInNewContext(code, {exports,
+        getAVRelationHost: (): undefined => undefined,
         isAVReadonlyType,
         getAVBatchEditMode: () => "replace",
         cloneAVCellValueSnapshot: structuredClone,

@@ -74,6 +74,7 @@ import {isAVCellPanelForBlock} from "./panelTarget";
 import {replaceAVContainer} from "./container";
 import {updateFrozenColumns} from "./frozenColumns";
 import {updateAVTableColumnWidths} from "./columnWidth";
+import {getAVRelationHost} from "./host";
 
 interface IIds {
     groupId: string,
@@ -567,6 +568,7 @@ const afterRenderTable = (options: ITableOptions) => {
         })),
     });
     updateAVSelectionStatus(options.blockElement);
+    getAVRelationHost(options.blockElement)?.rendered(options.data);
     if (!options.renderAll) {
         finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
@@ -592,6 +594,14 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     }
     for (let i = 0; i < avElements.length; i++) {
         const e = avElements[i] as HTMLElement;
+        const relationHost = getAVRelationHost(e);
+        if (relationHost && !relationHost.active) {
+            continue;
+        }
+        if (relationHost && (protyle.options.history?.created || protyle.options.history?.snapshot)) {
+            relationHost.failed();
+            continue;
+        }
         if (e.closest(".mindmap-view__preview-block") || isFoldedRenderContent(e)) {
             continue;
         }
@@ -699,7 +709,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const locateParams = getAVLocateParams(e, !created && !snapshot);
-        const nested = getSubItemsRequest(e, protyle, locateParams?.viewID, resetData.query.trim());
+        const nested = relationHost ? undefined : getSubItemsRequest(e, protyle, locateParams?.viewID, resetData.query.trim());
         const avPageSize = getPageSize(e);
         let data: IAV;
         if (!avData) {
@@ -709,8 +719,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 nested,
                 calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
-                blockID: standalone ? "" : e.getAttribute("data-node-id"),
-                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) :
+                blockID: relationHost ? relationHost.sourceBlockID : standalone ? "" : e.getAttribute("data-node-id"),
+                viewID: relationHost ? relationHost.viewID : locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) :
                     protyle.disabled ? getReadonlyAVView(e) : ""),
             };
             const paging = {
@@ -728,21 +738,31 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
                 ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
-                createIfNotExist: !window.siyuan.isPublish && !standalone,
+                createIfNotExist: !window.siyuan.isPublish && !standalone && !relationHost,
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
-                temporarySort: getReadonlyAVSortRequest(e, protyle, common.viewID),
+                temporarySort: relationHost ? relationHost.temporarySort : getReadonlyAVSortRequest(e, protyle, common.viewID),
+                temporaryFilters: relationHost?.temporaryFilters,
+                relationContext: relationHost?.relationContext,
             }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }
             if (response.code !== 0 || !isAVRenderData(response.data)) {
+                if (relationHost) {
+                    relationHost.failed(response.msg);
+                    continue;
+                }
                 if (failAVRender(e, response)) {
                     await avRender(e, protyle, cb, renderAll);
                 }
                 continue;
             }
             data = response.data;
+            if (relationHost && data.viewType !== "table") {
+                relationHost.failed();
+                continue;
+            }
             if (restoreSubItemsView(e, protyle, data, nested, resetData.query.trim())) {
                 await avRender(e, protyle, cb, renderAll);
                 continue;
@@ -810,14 +830,15 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     }
 };
 
-let searchTimeout: number;
+const searchTimeouts = new WeakMap<HTMLElement, number>();
 
 export const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
-    clearTimeout(searchTimeout);
-    searchTimeout = window.setTimeout(() => {
+    clearTimeout(searchTimeouts.get(e));
+    searchTimeouts.set(e, window.setTimeout(() => {
+        if (!e.isConnected || (getAVRelationHost(e) && !getAVRelationHost(e).active)) return;
         e.removeAttribute("data-render");
         avRender(e, protyle, undefined, false);
-    }, Constants.TIMEOUT_INPUT);
+    }, Constants.TIMEOUT_INPUT));
 };
 
 const refreshTimeouts: {

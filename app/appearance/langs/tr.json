@@ -3172,6 +3172,16 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "İlişkili veritabanı görünümünü göster",
+		"relatedDatabaseView": "İlişkili veritabanı görünümü",
+		"relatedDatabaseViewShared": "Tüm girdiler hedef görünümün paylaşılan sütun düzenini kullanır",
+		"relatedDatabaseViewUnavailable": "İlişkili görünüm kullanılamıyor; alanı ve hedef görünümü kontrol edin",
+		"relatedDatabaseViewNoTable": "İlişkili veritabanında tablo görünümü yok",
+		"relatedDatabaseViewRemove": "İlişkiyi kaldır",
+		"relatedDatabaseViewAdd": "Mevcut girdi ekle",
+		"relatedDatabaseViewNew": "Girdi oluştur ve ilişkilendir",
+		"relatedDatabaseViewTemporaryFilter": "Bu paneldeki ek filtreler",
+		"relatedDatabaseViewSharedTip": "Bu tablo paylaşılan bir görünüm kullanır. Yapılandırma değişiklikleri tüm başvuruları etkiler",
 		"dateCalendar": "Takvim",
 		"solarCalendar": "Miladi",
 		"lunarCalendar": "Çin ay takvimi",

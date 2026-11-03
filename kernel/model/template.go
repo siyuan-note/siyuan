@@ -971,7 +971,7 @@ func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *stri
 }
 
 func renderTemplateSourceWithHTTPSource(p, id string, mode TemplateRenderMode, content *string, now *time.Time,
-	httpRuntime *templatehttp.Execution, sources *templateHTTPSourceSnapshot) (tree *parse.Tree, dom string,
+	httpRuntime *templatehttp.Execution, sources *templateHTTPSourceSnapshot, sourceTrees ...*parse.Tree) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
 	if httpRuntime != nil && sources == nil {
 		sources = &templateHTTPSourceSnapshot{execution: managedTemplateHTTPExecution(httpRuntime), mode: mode, files: map[string][]byte{}}
@@ -981,7 +981,11 @@ func renderTemplateSourceWithHTTPSource(p, id string, mode TemplateRenderMode, c
 		return
 	}
 	preview := TemplateRenderModePreview == mode
-	tree, err = LoadTreeByBlockID(id)
+	if len(sourceTrees) > 0 && sourceTrees[0] != nil {
+		tree = sourceTrees[0]
+	} else {
+		tree, err = LoadTreeByBlockID(id)
+	}
 	if err != nil {
 		return
 	}
@@ -1377,11 +1381,33 @@ func applyDocContentTemplate(templatePath, docID string) error {
 }
 
 func applyDocContentTemplateAt(templatePath, docID string, now *time.Time, httpExecutions ...*templatehttp.Execution) error {
+	return applyDocContentTemplateWithRecorder(templatePath, docID, now, nil, httpExecutions...)
+}
+
+func applyDocContentTemplateWithRecorder(templatePath, docID string, now *time.Time, recorder *relationCreatedDocuments, httpExecutions ...*templatehttp.Execution) error {
 	absPath, err := resolveDocContentTemplatePath(templatePath)
 	if nil != err {
 		return err
 	}
-	templateTree, templateDOM, _, err := renderTemplateSourceAt(absPath, docID, TemplateRenderModeContent, nil, now, httpExecutions...)
+	var source *parse.Tree
+	if recorder != nil {
+		file := recorder.files[docID]
+		if file == nil {
+			return errors.New("created document source ownership is unavailable")
+		}
+		source, err = LoadTreeByBlockIDInExactBox(docID, file.Box)
+		if err != nil {
+			return err
+		}
+		if source.Path != file.Path {
+			return util.ErrFileChanged
+		}
+	}
+	var execution *templatehttp.Execution
+	if len(httpExecutions) > 0 {
+		execution = httpExecutions[0]
+	}
+	templateTree, templateDOM, _, err := renderTemplateSourceWithHTTPSource(absPath, docID, TemplateRenderModeContent, nil, now, execution, nil, source)
 	if nil != err {
 		return err
 	}
@@ -1394,13 +1420,27 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time, httpE
 	for _, queued := range takeQueuedTransactions() {
 		flushTx(queued)
 	}
-	bt, err := lookupBlockTreeInBox(docID, "", true)
+	var bt *treenode.BlockTree
+	if recorder != nil {
+		bt = treenode.GetBlockTreeInExactBox(docID, recorder.files[docID].Box)
+		if bt == nil {
+			return ErrBlockNotFound
+		}
+	} else {
+		bt, err = lookupBlockTreeInBox(docID, "", true)
+	}
 	if err != nil {
 		return err
 	}
 	tree, original, err := filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
 	if nil != err {
 		return err
+	}
+	if recorder != nil {
+		file := recorder.files[docID]
+		if file.Box != tree.Box || file.Path != tree.Path || !bytes.Equal(file.After, original) {
+			return util.ErrFileChanged
+		}
 	}
 	if len(httpExecutions) > 0 && httpExecutions[0] != nil && httpExecutions[0].Err() != nil {
 		return httpExecutions[0].Err()
@@ -1426,7 +1466,17 @@ func applyDocContentTemplateAt(templatePath, docID string, now *time.Time, httpE
 	}
 	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	write := func(changed *parse.Tree) error {
-		size, writeErr := filesys.WriteTreeIfUnchanged(changed, original)
+		var size uint64
+		writeSource := func() (writeErr error) {
+			size, writeErr = filesys.WriteTreeIfUnchanged(changed, original)
+			return writeErr
+		}
+		var writeErr error
+		if recorder != nil {
+			writeErr = recorder.recordOwnWrite(changed, writeSource)
+		} else {
+			writeErr = writeSource()
+		}
 		if writeErr != nil {
 			return writeErr
 		}

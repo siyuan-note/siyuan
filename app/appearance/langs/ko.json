@@ -3172,6 +3172,16 @@
 		"quit": "애플리케이션 종료"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "연결된 데이터베이스 보기 표시",
+		"relatedDatabaseView": "연결된 데이터베이스 보기",
+		"relatedDatabaseViewShared": "모든 항목에서 대상 보기의 공유 열 레이아웃 사용",
+		"relatedDatabaseViewUnavailable": "연결된 보기를 사용할 수 없습니다. 필드와 대상 보기를 확인하세요",
+		"relatedDatabaseViewNoTable": "연결된 데이터베이스에 표 보기가 없습니다",
+		"relatedDatabaseViewRemove": "연결 해제",
+		"relatedDatabaseViewAdd": "기존 항목 추가",
+		"relatedDatabaseViewNew": "항목을 새로 만들고 연결",
+		"relatedDatabaseViewTemporaryFilter": "이 패널의 추가 필터",
+		"relatedDatabaseViewSharedTip": "이 표는 공유 보기를 사용합니다. 설정을 변경하면 모든 참조에 적용됩니다",
 		"dateCalendar": "달력 체계",
 		"solarCalendar": "양력",
 		"lunarCalendar": "중국 음력",

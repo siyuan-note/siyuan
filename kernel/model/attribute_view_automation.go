@@ -104,14 +104,14 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 			continue
 		}
 		switch op.Action {
-		case "insertAttrViewBlock", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "duplicateAttrViewRow", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree":
+		case "insertAttrViewBlock", "updateAttrViewCell", "updateAttrViewCells", "updateAttrViewRelationItems", "sortAttrViewRow", "duplicateAttrViewRow", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree":
 		default:
 			continue
 		}
 		if op.AvID == "" || seen[op.AvID] {
 			continue
 		}
-		view, err := avParseView(op.AvID, op.BlockID)
+		view, err := tx.parseAttributeViewForOperation(op.AvID, op.BlockID)
 		if err != nil {
 			return err
 		}
@@ -128,7 +128,7 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 				if cloneErr != nil {
 					return cloneErr
 				}
-				_, boxID := av.FindAttributeViewPath(view.ID)
+				_, boxID := view.StoragePath()
 				state.sources = append(state.sources, &attributeViewAutomationSource{before, op.BlockID, boxID})
 				tx.attributeViewAutomations = state
 				break
@@ -143,7 +143,7 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 		if op.AvID == "" {
 			continue
 		}
-		view, err := avParseView(op.AvID, op.BlockID)
+		view, err := tx.parseAttributeViewForOperation(op.AvID, op.BlockID)
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID st
 	if view == nil {
 		return av.ErrViewNotFound
 	}
-	_, boxID := av.FindAttributeViewPath(view.ID)
+	_, boxID := view.StoragePath()
 	if _, err := tx.readAttributeViewForMutation(view.ID, blockID, boxID); err != nil {
 		return err
 	}

@@ -8037,6 +8037,9 @@
               "type": "null"
             }
           ]
+        },
+        "notebookID": {
+          "type": "string"
         }
       },
       "required": [
@@ -11591,6 +11594,9 @@
             ]
           }
         },
+        "detailView": {
+          "$ref": "#/$defs/AVRelationDetailView"
+        },
         "isTwoWay": {
           "type": "boolean"
         }
@@ -11739,6 +11745,140 @@
       ],
       "additionalProperties": false
     },
+    "AVRelationCellContextInput": {
+      "type": "object",
+      "properties": {
+        "relationContext": {
+          "$ref": "#/$defs/AVRelationContextInput"
+        },
+        "sourceItemIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "relationContext",
+        "sourceItemIDs"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationContext": {
+      "type": "object",
+      "properties": {
+        "relationKeyID": {
+          "type": "string"
+        },
+        "sourceAvID": {
+          "type": "string"
+        },
+        "sourceItemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "relationKeyID",
+        "sourceAvID",
+        "sourceItemID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationContextInput": {
+      "type": "object",
+      "properties": {
+        "relationKeyID": {
+          "type": "string"
+        },
+        "sourceAvID": {
+          "type": "string"
+        },
+        "sourceItemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "relationKeyID",
+        "sourceAvID",
+        "sourceItemID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationDependencyContextInput": {
+      "type": "object",
+      "properties": {
+        "relationContext": {
+          "$ref": "#/$defs/AVRelationContextInput"
+        },
+        "relationKeyIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "relationContext",
+        "relationKeyIDs"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationDetailView": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "spec": {
+          "type": "integer"
+        },
+        "viewID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "spec",
+        "viewID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationDetailViewInput": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "spec": {
+          "type": "integer"
+        },
+        "viewID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "spec",
+        "viewID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationFieldContextInput": {
+      "type": "object",
+      "properties": {
+        "relationKeyID": {
+          "type": "string"
+        },
+        "sourceAvID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "relationKeyID",
+        "sourceAvID"
+      ],
+      "additionalProperties": false
+    },
     "AVRelationItemCellInput": {
       "type": "object",
       "properties": {
@@ -11835,6 +11975,28 @@
         "createdAt",
         "primaryKey",
         "templateID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationItemsChangeInput": {
+      "type": "object",
+      "properties": {
+        "addItemIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "removeItemIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "addItemIDs",
+        "removeItemIDs"
       ],
       "additionalProperties": false
     },
@@ -22908,6 +23070,26 @@
             }
           ]
         },
+        "relationCellContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationCellContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "selection": {
           "$ref": "#/$defs/DocumentSelectionInput"
         },
@@ -29686,6 +29868,16 @@
             }
           ]
         },
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "anyOf": [
             {
@@ -29892,6 +30084,16 @@
             }
           ]
         },
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "anyOf": [
             {
@@ -29906,6 +30108,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationContextInput"
             },
             {
               "type": "null"
@@ -29995,6 +30207,16 @@
     "GetAttributeViewPrimaryKeyValuesRequestInput": {
       "type": "object",
       "properties": {
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "blockIDs": {
           "anyOf": [
             {
@@ -30035,6 +30257,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationDependencyContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationDependencyContextInput"
             },
             {
               "type": "null"
@@ -30143,6 +30375,26 @@
             }
           ]
         },
+        "relationCellContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationCellContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "selectedBlockIDs": {
           "anyOf": [
             {
@@ -30172,8 +30424,38 @@
     "GetAttributeViewRequestInput": {
       "type": "object",
       "properties": {
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
+        },
+        "relationDependencyContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationDependencyContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationFieldContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationFieldContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -39663,6 +39945,16 @@
             }
           ]
         },
+        "relationContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationContextInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "targetGroupID": {
           "anyOf": [
             {
@@ -39677,6 +39969,26 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temporaryFilters": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVViewFilterInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
             },
             {
               "type": "null"
@@ -58729,6 +59041,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -58947,6 +59262,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -59150,6 +59468,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -59355,6 +59676,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -59558,6 +59882,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -59769,6 +60096,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -59994,6 +60324,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -60217,6 +60550,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -60442,6 +60778,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -60652,6 +60991,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -60874,6 +61216,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -61084,6 +61429,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -61309,6 +61657,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -61519,6 +61870,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -61744,6 +62098,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -61960,6 +62317,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -62185,6 +62545,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -62408,6 +62771,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -62633,6 +62999,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -62837,6 +63206,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -63040,6 +63412,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -63252,6 +63627,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -63462,6 +63840,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -63674,6 +64055,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -63885,6 +64269,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -64088,6 +64475,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -64293,6 +64683,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -64496,6 +64889,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -64715,6 +65111,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -64926,6 +65325,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -65136,6 +65538,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -65358,6 +65763,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -65579,6 +65987,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -65782,6 +66193,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -66004,6 +66418,437 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewRelationDetail"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationDetailViewInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "updateAttrViewRelationItems"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationItemsChangeInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -66224,6 +67069,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -66446,6 +67294,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -66657,6 +67508,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -66867,6 +67721,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -67082,6 +67939,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -67292,6 +68152,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -67504,6 +68367,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -67714,6 +68580,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -67926,6 +68795,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -68136,6 +69008,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -68348,6 +69223,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -68559,6 +69437,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -68762,6 +69643,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -68974,6 +69858,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -69185,6 +70072,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -69389,6 +70279,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -69592,6 +70485,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -69804,6 +70700,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -70007,6 +70906,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -70212,6 +71114,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -70415,6 +71320,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -70627,6 +71535,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -70830,6 +71741,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -71052,6 +71966,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -71262,6 +72179,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -71474,6 +72394,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -71684,6 +72607,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -71920,6 +72846,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -72131,6 +73060,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -72334,6 +73266,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -72539,6 +73474,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -72742,6 +73680,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -72961,6 +73902,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -73165,6 +74109,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -73368,6 +74315,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -73587,6 +74537,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -73797,6 +74750,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -74009,6 +74965,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -74213,6 +75172,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -74416,6 +75378,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -74628,6 +75593,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -74831,6 +75799,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -75043,6 +76014,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -75253,6 +76227,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -75465,6 +76442,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -75675,6 +76655,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -75887,6 +76870,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -76098,6 +77084,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -76301,6 +77290,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -76513,6 +77505,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -76716,6 +77711,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -76928,6 +77926,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -77138,6 +78139,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -77350,6 +78354,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -77560,6 +78567,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -77772,6 +78782,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -77982,6 +78995,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -78194,6 +79210,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -78404,6 +79423,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -78616,6 +79638,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -78826,6 +79851,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -79038,6 +80066,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -79249,6 +80280,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -79452,6 +80486,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -79657,6 +80694,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -79860,6 +80900,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -80072,6 +81115,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -80282,6 +81328,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -80494,6 +81543,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -80704,6 +81756,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -80916,6 +81971,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -81126,6 +82184,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -81341,6 +82402,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -81544,6 +82608,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -81749,6 +82816,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -81953,6 +83023,9 @@
             "previousID": {
               "type": "string"
             },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
             "removeDest": {
               "type": "boolean"
             },
@@ -82153,6 +83226,9 @@
             },
             "previousID": {
               "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
             },
             "removeDest": {
               "type": "boolean"
@@ -82495,6 +83571,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -82860,6 +83946,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -83205,6 +84301,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -83562,6 +84668,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -83907,6 +85023,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -84265,6 +85391,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -84642,6 +85778,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -85007,6 +86153,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -85384,6 +86540,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -85736,6 +86902,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -86104,6 +87280,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -86468,6 +87654,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -86839,6 +88035,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -87191,6 +88397,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -87568,6 +88784,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -87926,6 +89152,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -88303,6 +89539,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -88668,6 +89914,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -89045,6 +90301,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -89396,6 +90662,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -89741,6 +91017,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -90105,6 +91391,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -90457,6 +91753,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -90821,6 +92127,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -91179,6 +92495,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -91524,6 +92850,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -91881,6 +93217,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -92226,6 +93572,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -92597,6 +93953,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -92955,6 +94321,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -93307,6 +94683,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -93681,6 +95067,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -94049,6 +95445,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -94394,6 +95800,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -94768,6 +96184,752 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewRelationDetail"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationDetailViewInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "updateAttrViewRelationItems"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationItemsChangeInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -95130,6 +97292,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -95504,6 +97676,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -95862,6 +98044,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -96214,6 +98406,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -96581,6 +98783,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -96933,6 +99145,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -97297,6 +99519,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -97649,6 +99881,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -98013,6 +100255,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -98365,6 +100617,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -98729,6 +100991,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -99087,6 +101359,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -99432,6 +101714,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -99796,6 +102088,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -100154,6 +102456,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -100505,6 +102817,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -100850,6 +103172,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -101214,6 +103546,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -101559,6 +103901,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -101916,6 +104268,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -102261,6 +104623,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -102625,6 +104997,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -102970,6 +105352,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -103344,6 +105736,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -103696,6 +106098,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -104060,6 +106472,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -104412,6 +106834,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -104800,6 +107232,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -105158,6 +107600,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -105503,6 +107955,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -105860,6 +108322,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -106205,6 +108677,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -106576,6 +109058,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -106927,6 +109419,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -107272,6 +109774,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -107643,6 +110155,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -107995,6 +110517,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -108359,6 +110891,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -108710,6 +111252,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -109055,6 +111607,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -109419,6 +111981,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -109764,6 +112336,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -110128,6 +112710,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -110480,6 +113072,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -110844,6 +113446,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -111196,6 +113808,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -111560,6 +114182,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -111918,6 +114550,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -112263,6 +114905,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -112627,6 +115279,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -112972,6 +115634,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -113336,6 +116008,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -113688,6 +116370,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -114052,6 +116744,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -114404,6 +117106,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -114768,6 +117480,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -115120,6 +117842,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -115484,6 +118216,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -115836,6 +118578,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -116200,6 +118952,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -116552,6 +119314,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -116916,6 +119688,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -117274,6 +120056,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -117619,6 +120411,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -117976,6 +120778,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -118321,6 +121133,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -118685,6 +121507,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -119037,6 +121869,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -119401,6 +122243,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -119753,6 +122605,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -120117,6 +122979,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -120469,6 +123341,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -120836,6 +123718,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -121181,6 +124073,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -121538,6 +124440,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -121889,6 +124801,16 @@
                 }
               ]
             },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "removeDest": {
               "anyOf": [
                 {
@@ -122231,6 +125153,16 @@
               "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
                 },
                 {
                   "type": "null"
@@ -122958,6 +125890,8 @@
           "setAttrViewFilters",
           "setAttrViewContextFilter",
           "setAttrViewColRelationFilters",
+          "setAttrViewRelationDetail",
+          "updateAttrViewRelationItems",
           "setAttrViewColRollupFilters",
           "setAttrViewSorts",
           "setAttrViewPageSize",

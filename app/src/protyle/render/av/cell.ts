@@ -2,7 +2,8 @@ import {hasAVScalarContent, isAVDateType, isAVReadonlyType, isAVRichTextType, is
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -78,6 +79,11 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const relationElement = target.closest<HTMLElement>(".av__cell--relation");
     const relationValue = relationElement?.dataset.relationValue ?
         JSON.parse(decodeURIComponent(relationElement.dataset.relationValue)) as IAVCellValue : undefined;
+    const hostElement = hasClosestBlock(target);
+    if (hostElement && getAVRelationHost(hostElement) && relationValue) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     if (relationValue?.isDetached) {
         return openAVRelationIcon(protyle, target, relationElement, relationValue);
     }
@@ -85,6 +91,10 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const value = cellElement ? genCellValueByElement("block", cellElement) : undefined;
     const blockID = value ? value.block?.id : target.nextElementSibling?.getAttribute("data-id");
     const isDetached = value?.isDetached === true;
+    if (hostElement && getAVRelationHost(hostElement) && !isDetached) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     if (!isDetached && !blockID) {
         return;
     }
@@ -656,6 +666,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         options?.destroyCallback?.();
         return;
     }
+    if (type === "template" && getAVRelationHost(blockElement)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        options?.destroyCallback?.();
+        return;
+    }
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
@@ -669,7 +684,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (type === "location") {
         const ownerElement = getAVCellEditorOwner(blockElement);
         const avID = blockElement.dataset.avId;
-        const blockID = blockElement.dataset.nodeId;
+        const blockID = getAVHostIdentity(blockElement);
         const rootID = protyle.block.rootID;
         const locationCells: IAVSelectedCell[] = cellElements.map(element => {
             const value = cloneAVCellValueSnapshot(genCellValueByElement("location", element));
@@ -685,7 +700,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         });
         const isCurrentTarget = () => {
             if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
-                blockElement.dataset.avId !== avID || blockElement.dataset.nodeId !== blockID ||
+                blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== blockID ||
                 protyle.block.rootID !== rootID) {
                 return false;
             }
@@ -831,7 +846,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!options?.keepMenuOpen) {
         window.siyuan.menus.menu.remove();
     }
-    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" data-av-block-id="${escapeAttr(blockElement.dataset.nodeId)}" style="z-index: ${++window.siyuan.zIndex}">
+    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" data-av-block-id="${escapeAttr(getAVHostIdentity(blockElement))}" style="z-index: ${++window.siyuan.zIndex}">
     ${html}
     </div>`);
     const avMaskElement = document.querySelector(".av__mask");
@@ -903,7 +918,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 });
             });
         }
-        if (type === "block" && !cellElements[0].dataset.avId) {
+        if (type === "block" && !cellElements[0].dataset.avId && !getAVRelationHost(blockElement)) {
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
                     protyle.toolbar.range = document.createRange();
@@ -944,7 +959,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValueByInput(protyle, type, blockElement, cellElements);
-                if (event.key === "Tab") {
+                if (event.key === "Tab" && !getAVRelationHost(blockElement)) {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
                         ctrlKey: event.ctrlKey,
@@ -1086,7 +1101,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
     if (sources.length === 0) {
         return {text: "", json};
     }
-    const isCustomAttr = sources[0].element ?
+    const isCustomAttr = !getAVRelationHost(nodeElement) && sources[0].element ?
         Boolean(hasClosestByClassName(sources[0].element, "custom-attr")) : false;
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
     let batchDisplayValue: IAVCellValue;

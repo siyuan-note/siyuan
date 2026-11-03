@@ -169,6 +169,7 @@ const fixture = (containerType: ContainerType = "editor") => {
     const identity = (value: string) => value;
     const record = (kind: keyof typeof rendered, element: TestElement) => rendered[kind].push(element.getAttribute("data-node-id"));
     const dependencies = {
+        prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
         isUndoViewportPreserved,
         Constants: {CUSTOM_SY_AV_STATIC_TEXT: "custom-sy-av-s-text-"},

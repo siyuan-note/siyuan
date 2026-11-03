@@ -67,6 +67,9 @@ func remapAttributeViewReferences(source, target *av.AttributeView, sources map[
 				copied.Relation.AvID = newID
 			}
 			copied.Relation.BackKeyID = mapped(relation.AvID, relation.BackKeyID)
+			if relation.DetailView != nil && relation.DetailView.Spec == av.RelationDetailViewSpec {
+				copied.Relation.DetailView.ViewID = mapped(relation.AvID, relation.DetailView.ViewID)
+			}
 			filters(relation.CandidateFilters, copied.Relation.CandidateFilters, relation.AvID)
 		}
 		if original.Rollup != nil {

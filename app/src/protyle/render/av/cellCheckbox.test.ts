@@ -18,7 +18,7 @@ const unusedDependencies = [
     "../../../util/setPosition", "./selectionState", "./color", "./richText", "./richTextEditor", "./virtualScroll",
     "./cellEditor", "./blockIcon", "../../../dialog/anchoredInputPosition", "./locationEditor", "../../../dialog/message",
     "../../../util/hostCapabilities", "../../../plugin/Menu", "../../../util/upDownHint", "./richTextValue",
-    "../../../emoji/fileTreeIcon", "./lunarDate", "./batchValue", "./dragFillValue",
+    "../../../emoji/fileTreeIcon", "./lunarDate", "./batchValue", "./dragFillValue", "./host",
 ];
 
 const loadModule = <T>(file: string) => {

@@ -19,11 +19,13 @@ for (const enable of [false, true]) {
             let legacyClears = 0;
             let titleEnables = 0;
             let bodyEnables = 0;
+            let relatedUpdates = 0;
             const changeLayout = () => {
                 layoutChanges++;
                 state = reduceMobileBarsState(state, {type: "scroll", scrollTop: state.scrollTop + 6});
             };
             const protyle = {
+                id: "readonly-editor",
                 disabled: enable,
                 element: {getAttribute: (): null => null},
                 databaseAttributePanel: {updateReadonly: changeLayout},
@@ -52,11 +54,13 @@ for (const enable of [false, true]) {
                     state = reduceMobileBarsState(state, {type: "set-programmatic-scrolling", active: true});
                 },
                 hideElements() {}, updateMobileTitleReadonly() {}, disabledWYSIWYG() {},
+                syncRelatedAVEditor: (id: string) => { assert.equal(id, protyle.id); relatedUpdates++; },
                 refreshCalendarReadonly() {}, hideTooltip() {}, isMobile: () => true,
                 isIPhone: () => false, isAndroid: () => true,
             });
             (enable ? exports.enable : exports.disable)();
             assert.equal(layoutChanges, 1);
+            assert.equal(relatedUpdates, 1);
             assert.equal(tableClears, 1, "readonly transition clears managed table selection and pending drags");
             assert.equal(legacyClears, 1, "readonly transition clears the legacy table rectangle");
             assert.equal(titleEnables, 0, "synthetic title backlink carriers are never editable body blocks");
@@ -67,6 +71,7 @@ for (const enable of [false, true]) {
             assert.equal(pauses, current ? 1 : 0, "unchanged readonly state does not restart the pause");
             assert.equal(tableClears, 1, "unchanged readonly state preserves subsequent selections");
             assert.equal(legacyClears, 1);
+            assert.equal(relatedUpdates, 2, "each explicit readonly synchronization updates related hosts");
             if (current) {
                 state = reduceMobileBarsState(state, {type: "set-programmatic-scrolling", active: false});
                 state = reduceMobileBarsState(state, {type: "scroll", scrollTop: state.scrollTop + 10});

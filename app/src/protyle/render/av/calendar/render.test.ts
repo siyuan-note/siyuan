@@ -429,6 +429,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             "../ui/hideElements": {hideElements() {}},
             "./disabledWYSIWYG": {disabledWYSIWYG() {}},
             "./setEditMode": {updateMobileTitleReadonly() {}},
+            "../render/av/relatedView": {syncRelatedAVEditor() {}},
             "../../dialog/tooltip": {hideTooltip() {}},
             "./compatibility": {isAndroid: () => mobile, isIPhone: () => false},
             "../../mobile/util/mobileBars": {pauseMobileBarsScroll: () => paused++},

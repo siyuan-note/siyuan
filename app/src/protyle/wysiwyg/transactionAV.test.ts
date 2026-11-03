@@ -15,6 +15,7 @@ const fixture = () => {
     let finishSave: (response: unknown) => void;
     const undo: IOperation[][] = [];
     const dependencies = {
+        prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
         getEditorTransaction,
         Constants: {},

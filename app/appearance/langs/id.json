@@ -3172,6 +3172,16 @@
 		"quit": "Keluar aplikasi"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Tampilkan tampilan basis data terkait",
+		"relatedDatabaseView": "Tampilan basis data terkait",
+		"relatedDatabaseViewShared": "Semua entri menggunakan tata letak kolom bersama dari tampilan tujuan",
+		"relatedDatabaseViewUnavailable": "Tampilan terkait tidak tersedia; periksa kolom dan tampilan tujuan",
+		"relatedDatabaseViewNoTable": "Basis data terkait tidak memiliki tampilan tabel",
+		"relatedDatabaseViewRemove": "Hapus hubungan",
+		"relatedDatabaseViewAdd": "Tambahkan entri yang ada",
+		"relatedDatabaseViewNew": "Buat dan hubungkan entri",
+		"relatedDatabaseViewTemporaryFilter": "Filter tambahan di panel ini",
+		"relatedDatabaseViewSharedTip": "Tabel ini menggunakan tampilan bersama. Perubahan konfigurasinya memengaruhi semua referensi",
 		"dateCalendar": "Kalender",
 		"solarCalendar": "Gregorian",
 		"lunarCalendar": "Lunar Tionghoa",

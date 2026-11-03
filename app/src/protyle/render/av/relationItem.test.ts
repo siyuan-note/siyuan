@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
+import {getAVHostBlockID, getAVRelationHost} from "./host";
 
 const source = createSourceFile("relation.ts", readFileSync(join(__dirname, "relation.ts"), "utf8"), ScriptTarget.ES2021, true);
 const load = (names: string[], dependencies: Record<string, unknown>) => {
@@ -30,11 +31,12 @@ it("parent relation editing replaces the parent atomically without optimisticall
         const menu = {querySelector: (selector: string) => selector === ".av__relation" ?
             {dataset: {subItemsParent: "true"}} : undefined,
         closest: () => ({remove: () => { closed = true; }})};
-        const node = {contains: () => true, getAttribute: () => "list"};
+        const node = {contains: () => true, getAttribute: () => "list", dataset: {}};
         const target = {classList: {contains: () => true}, getAttribute: () => "new-parent",
             dataset: {relationType: selected ? "selected" : "candidate"}};
-        const {setRelationCell} = load(["setRelationCell"], {
+        const {setRelationCell} = load(["getRelationCellScope", "setRelationCell"], {
             hasClosestByClassName: () => menu,
+            getAVRelationHost,
             getFieldIdByCellElement: (cell: {rowID: string}) => cell.rowID,
             reparentSubItems: (...args: unknown[]) => calls.push(args),
         });
@@ -113,7 +115,8 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputNa
     const node = {dataset: {avId: "source", nodeId: "source-carrier"}, contains: () => true};
     const protyle = {app: {appId: "app"}, id: "editor", block: {rootID: "root"}};
     const previews = new WeakMap([[menu, {keyword: "Task A", preview}]]);
-    const {setRelationCell} = load(["genCreatedRelationRowHTML", "setRelationCell"], {
+    const {setRelationCell} = load(["getRelationCellScope", "genCreatedRelationRowHTML", "setRelationCell"], {
+        getAVRelationHost, getAVHostBlockID,
         relationItemPreviews: previews,
         hasClosestByClassName: () => menu,
         getRelationValue: () => ({blockIDs: ["existing"], contents: [{type: "block", block: {content: "Existing"}}]}),

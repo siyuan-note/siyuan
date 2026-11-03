@@ -3172,6 +3172,16 @@
 		"quit": "アプリケーションを終了"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "関連データベースのビューを表示",
+		"relatedDatabaseView": "関連データベースのビュー",
+		"relatedDatabaseViewShared": "すべての項目で対象ビューの共有列レイアウトを使用",
+		"relatedDatabaseViewUnavailable": "関連ビューを利用できません。フィールドと対象ビューを確認してください",
+		"relatedDatabaseViewNoTable": "関連データベースにテーブルビューがありません",
+		"relatedDatabaseViewRemove": "関連付けを解除",
+		"relatedDatabaseViewAdd": "既存の項目を追加",
+		"relatedDatabaseViewNew": "項目を新規作成して関連付け",
+		"relatedDatabaseViewTemporaryFilter": "このパネルの追加フィルター",
+		"relatedDatabaseViewSharedTip": "このテーブルは共有ビューを使用しています。設定を変更すると、すべての参照に反映されます",
 		"dateCalendar": "暦",
 		"solarCalendar": "グレゴリオ暦",
 		"lunarCalendar": "旧暦（中国暦）",

@@ -30,6 +30,7 @@ for (const mode of ["cancel", "cancelWithoutRange", "tagsOnly", "withEntries", "
             wysiwyg: {element: {focus() {}, querySelectorAll: (): Element[] => []}}};
         const cleanup: IOperation = {action: "cleanupAttrViewBlocks", avID: "database", data: {ruleVersion: "version", items: []}};
         const dependencies = {
+            prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
             window: {siyuan: {config: {fileTree: {openFilesUseCurrentTab: false}}}},
             document: {
                 createElement: () => ({innerHTML: "", querySelector: () => ({})}),

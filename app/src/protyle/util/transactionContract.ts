@@ -37,6 +37,8 @@ const transactionActions: Record<IOperation["action"], true> = {
     "setAttrViewFilters": true,
     "setAttrViewContextFilter": true,
     "setAttrViewColRelationFilters": true,
+    "setAttrViewRelationDetail": true,
+    "updateAttrViewRelationItems": true,
     "setAttrViewColRollupFilters": true,
     "setAttrViewSorts": true,
     "setAttrViewPageSize": true,

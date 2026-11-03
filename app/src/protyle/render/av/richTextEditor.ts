@@ -13,6 +13,8 @@ import {positionAVRichTextEditor} from "./richTextEditorPosition";
 import {getAVData} from "./virtualScroll";
 import {resolveAVSelectedCell} from "./selectionState";
 import {beginAVEditorSession} from "./editorSession";
+import {getAVHostBlockID, getAVHostIdentity} from "./host";
+import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
 import {
@@ -122,7 +124,8 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         maskElement.innerHTML = content;
         document.body.appendChild(maskElement);
     }
-    maskElement.dataset.avBlockId = options.nodeElement.dataset.nodeId;
+    maskElement.dataset.avBlockId = getAVHostIdentity(options.nodeElement);
+    maskElement.dataset.avRichtextEditor = "true";
     // 独立记录详情使用未挂载的编辑器上下文，浮层生命周期跟随实际可见的详情面板。
     const ownerElement = options.nodeElement.closest<HTMLElement>(".protyle-db-row") || options.protyle.element;
     const endEditorSession = beginAVEditorSession(ownerElement);
@@ -168,7 +171,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     });
     // 临时块不在块树中，块引搜索和新建文档使用所属文档及真实载体块的上下文。
     fragment.protyle.block.rootID = options.protyle.block.rootID;
-    fragment.protyle.block.parentID = options.nodeElement.dataset.nodeId;
+    fragment.protyle.block.parentID = getAVHostBlockID(options.nodeElement);
     fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
     const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
@@ -281,6 +284,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     };
 
     activeEditor = {finish};
+    maskElement.addEventListener(AV_CELL_EDITOR_CLOSE_EVENT, () => void finish(false));
     maskElement.addEventListener("mousedown", (event) => {
         if (!mobile && event.target === maskElement) {
             void finish(true);

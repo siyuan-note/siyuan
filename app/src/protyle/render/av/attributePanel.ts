@@ -7,6 +7,7 @@ import {
     isHeightAnimating
 } from "../../../util/heightAnimation";
 import {transaction} from "../../wysiwyg/transaction";
+import {disposeRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "./relatedView";
 
 const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
@@ -26,6 +27,7 @@ export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => 
         }, 60000);
         renderAVAttribute(element, id, protyle, rendered => {
             if (finished) {
+                disposeRelatedAVViews(rendered);
                 return;
             }
             finished = true;
@@ -48,6 +50,8 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColIcon",
     "setAttrViewColDesc",
     "setAttrViewColAttributePanelVisibility",
+    "setAttrViewRelationDetail",
+    "updateAttrViewRelationItems",
     "setAttrViewName",
     "setAttrViewCustomColors",
     "updateAttrViewColTemplate",
@@ -139,16 +143,19 @@ export class AVAttributePanel {
         bodyElement.className = "custom-attr protyle-db-attr__body";
         if (!keepCurrentBody) {
             this.updateCollapsedState();
+            disposeRelatedAVViews(currentBodyElement);
             currentBodyElement.replaceWith(bodyElement);
             this.bodyElement = bodyElement;
         }
         const rendered = (renderedElement: HTMLElement) => {
             if (token !== this.renderToken) {
+                disposeRelatedAVViews(renderedElement);
                 return;
             }
             this.renderingTargetID = "";
             if (keepCurrentBody || renderedElement !== bodyElement) {
                 this.updateCollapsedState();
+                preserveRelatedAVViews(this.bodyElement, renderedElement);
                 this.bodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
             }
@@ -156,6 +163,7 @@ export class AVAttributePanel {
             this.updateTabs();
             this.updateReadonly();
             this.element.classList.toggle("fn__none", !renderedElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+            syncRelatedAVViews(this.bodyElement);
             const callbacks = this.renderCallbacks.splice(0);
             callbacks.forEach(callback => callback(this.bodyElement));
         };
@@ -193,8 +201,10 @@ export class AVAttributePanel {
         }
         this.updateTabs();
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
         if (this.element.dataset.rendered === "true") {
             this.element.classList.toggle("fn__none", !this.bodyElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+            syncRelatedAVViews(this.bodyElement);
         } else {
             this.render();
         }
@@ -214,6 +224,7 @@ export class AVAttributePanel {
             item.draggable = !this.protyle.disabled;
         });
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
     }
 
     public hasDatabase(avID: string) {
@@ -296,6 +307,7 @@ export class AVAttributePanel {
         this.element.classList.toggle("protyle-db-attr--collapsed", this.collapsed);
         this.updateCollapsedControls();
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
     }
 
     private updateCollapsedControls() {
@@ -313,6 +325,7 @@ export class AVAttributePanel {
             return;
         }
         this.collapsed = collapsed;
+        if (collapsed) syncRelatedAVViews(this.bodyElement, true);
         if (!animate) {
             this.updateCollapsedState();
             return;
@@ -323,10 +336,12 @@ export class AVAttributePanel {
             collapseHeight(this.bodyElement, () => {
                 if (this.collapsed) {
                     this.element.classList.add("protyle-db-attr--collapsed");
+                    syncRelatedAVViews(this.bodyElement);
                 }
             });
         } else {
             this.element.classList.remove("protyle-db-attr--collapsed");
+            syncRelatedAVViews(this.bodyElement);
             expandHeight(this.bodyElement);
         }
     }
@@ -363,6 +378,7 @@ export class AVAttributePanel {
         this.bodyElement.querySelectorAll(':scope > .protyle-db-attr__tabs [data-type="av-tab"]').forEach(item => {
             item.classList.toggle("item--focus", item.getAttribute("data-id") === this.activeAvID);
         });
+        syncRelatedAVViews(this.bodyElement);
     }
 
     private bindTabDrag(tabsElement: HTMLElement) {
@@ -538,5 +554,6 @@ export class AVAttributePanel {
         }
         this.element.removeAttribute("data-rendered");
         this.element.classList.add("fn__none");
+        syncRelatedAVViews(this.bodyElement);
     }
 }

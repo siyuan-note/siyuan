@@ -22,6 +22,8 @@ import {preserveAVBindingRange} from "./binding";
 import {inheritDatabaseRowReadonly} from "./rowReadonly";
 import {getDatabaseRowNavigation, IDatabaseRowNavigation, mountDatabaseRowNavigation} from "./databaseRowNavigation";
 import {updateBackgroundActions} from "../../header/backgroundActions";
+import {disposeRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "./relatedView";
+import {isSameDatabaseRowDomain} from "./databaseRowIdentity";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -124,6 +126,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
         bodyElement.className = "custom-attr protyle-db-row__body";
         renderAVAttribute(bodyElement, renderData.itemID, contextProtyle, (element) => {
             if (currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
+                disposeRelatedAVViews(element);
                 return;
             }
             if (!element.querySelector(`[data-av-id="${renderData.avID}"]`)) {
@@ -137,7 +140,9 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             const restoreBindingRange = switching ? undefined : preserveAVBindingRange(contextProtyle, previousBodyElement);
+            preserveRelatedAVViews(previousBodyElement, element);
             previousBodyElement.replaceWith(element);
+            syncRelatedAVViews(element);
             restoreBindingRange?.(element);
             if (switching) {
                 data = renderData;
@@ -230,10 +235,11 @@ const focusDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData, sour
     });
 };
 
-const getDatabaseRowPreviewTab = (blockID: string) => {
+const getDatabaseRowPreviewTab = (blockID: string, notebookID: string) => {
     return getAllTabs().find((tab) => {
         if (tab.model instanceof Editor) {
-            return tab.model.editor.protyle.element.dataset.databaseRowId === blockID;
+            return tab.model.editor.protyle.element.dataset.databaseRowId === blockID &&
+                isSameDatabaseRowDomain(tab.model.editor.protyle.notebookId, notebookID);
         }
         const initData = tab.headElement?.getAttribute("data-initdata");
         if (!initData) {
@@ -241,7 +247,8 @@ const getDatabaseRowPreviewTab = (blockID: string) => {
         }
         try {
             const initObj = JSON.parse(initData) as ILayoutJSON;
-            return initObj.instance === "Editor" && initObj.databaseRowId === blockID;
+            return initObj.instance === "Editor" && initObj.databaseRowId === blockID &&
+                isSameDatabaseRowDomain(initObj.notebookId, notebookID);
         } catch (e) {
             console.warn("Failed to parse database row tab init data:", e);
             return false;
@@ -276,11 +283,11 @@ export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, ne
         options.custom = {id: "siyuan-database-row", icon: "iconDatabase",
             title: next.title || window.siyuan.languages.untitled, data: getCustomRowData(next)};
     } else {
-        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: next.boundBlockID});
+        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: next.boundBlockID, notebook: next.notebookID});
         if (response.code !== 0) {
             return false;
         }
-        Object.assign(options, {id: next.boundBlockID, rootID: response.data.rootID,
+        Object.assign(options, {id: next.boundBlockID, notebookId: next.notebookID, rootID: response.data.rootID,
             fileName: response.data.rootTitle, rootTitleEmpty: response.data.rootTitleEmpty,
             rootIcon: response.data.rootIcon, zoomIn: next.boundBlockID !== response.data.rootID});
     }
@@ -387,7 +394,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     }
     window.siyuan.menus.menu.remove();
     return openMobileFileById(protyle.app, data.boundBlockID, [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
-        undefined, undefined, (editorProtyle) => {
+        undefined, data.notebookID, (editorProtyle) => {
             inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
             updateBackgroundActions(editorProtyle);
@@ -437,6 +444,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         const opened = await openFileById({
             app: protyle.app,
             id: data.boundBlockID,
+            notebookId: data.notebookID,
             position: options.position,
             zoomIn: true,
             afterOpen(model: Editor) {
@@ -445,7 +453,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         });
         return Boolean(opened);
     }
-    const openedTab = getDatabaseRowPreviewTab(data.boundBlockID);
+    const openedTab = getDatabaseRowPreviewTab(data.boundBlockID, data.notebookID);
     if (openedTab) {
         const openedModel = openedTab.model;
         if (!(openedModel instanceof Editor)) {
@@ -471,6 +479,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     const opened = await openFileById({
         app: protyle.app,
         id: data.boundBlockID,
+        notebookId: data.notebookID,
         position: "right",
         openNewTab: true,
         removeCurrentTab: false,

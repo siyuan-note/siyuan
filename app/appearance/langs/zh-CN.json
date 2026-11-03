@@ -3172,6 +3172,16 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "显示关联数据库视图",
+		"relatedDatabaseView": "关联数据库视图",
+		"relatedDatabaseViewShared": "所有条目使用目标视图的共享列布局",
+		"relatedDatabaseViewUnavailable": "关联视图不可用，请检查字段和目标视图",
+		"relatedDatabaseViewNoTable": "关联数据库中没有表格视图",
+		"relatedDatabaseViewRemove": "移除关联",
+		"relatedDatabaseViewAdd": "添加已有条目",
+		"relatedDatabaseViewNew": "新建并关联条目",
+		"relatedDatabaseViewTemporaryFilter": "本面板附加筛选",
+		"relatedDatabaseViewSharedTip": "此表格引用共享视图，修改视图配置会影响所有引用",
 		"dateCalendar": "历法",
 		"solarCalendar": "公历",
 		"lunarCalendar": "农历",

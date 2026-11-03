@@ -3172,6 +3172,16 @@
 		"quit": "Quit application"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Show related database view",
+		"relatedDatabaseView": "Related database view",
+		"relatedDatabaseViewShared": "Uses the target view’s shared column layout for every entry",
+		"relatedDatabaseViewUnavailable": "Related view unavailable; check the field and target view",
+		"relatedDatabaseViewNoTable": "The related database has no table view",
+		"relatedDatabaseViewRemove": "Remove association",
+		"relatedDatabaseViewAdd": "Add existing entry",
+		"relatedDatabaseViewNew": "Create and link entry",
+		"relatedDatabaseViewTemporaryFilter": "Additional filters in this panel",
+		"relatedDatabaseViewSharedTip": "This table uses a shared view. Changing its configuration affects every reference",
 		"dateCalendar": "Calendar",
 		"solarCalendar": "Gregorian",
 		"lunarCalendar": "Chinese lunar",

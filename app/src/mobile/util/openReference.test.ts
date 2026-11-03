@@ -66,8 +66,8 @@ class ElementMock extends EventTargetMock {
     removeAttribute(name: string) { this.attributes.delete(name); }
     querySelector(selector: string) { return this.children.get(selector); }
     querySelectorAll(selector: string): ElementMock[] {
-        return selector === "[data-node-id]" ? Array.from(this.children.values()).flatMap(child =>
-            [...child.dataset.nodeId ? [child] : [], ...child.querySelectorAll(selector)]) : [];
+        return selector === "[data-node-id], [data-av-host]" ? Array.from(this.children.values()).flatMap(child =>
+            [...child.dataset.nodeId || child.dataset.avHost ? [child] : [], ...child.querySelectorAll(selector)]) : [];
     }
     prepend(element: ElementMock) { this.children.set("handle", element); }
     remove() { this.isConnected = false; }
@@ -102,7 +102,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     const viewport = {top: 0, bottom: 800};
     const document = {activeElement: new ElementMock(), createElement: () => new ElementMock(), getElementById: (): null => null,
         querySelectorAll: (selector: string) => {
-            assert.ok([".av__mask, [data-av-location-editor]",
+            assert.ok([".av__mask, [data-av-location-editor], [data-av-richtext-editor], .av__panel",
                 ".av__mask:not(.av__richtext-mask), [data-av-location-editor]"].includes(selector));
             return cellMasks.filter(mask => mask.isConnected &&
                 (selector.startsWith(".av__mask,") || !mask.classList.contains("av__richtext-mask")));
@@ -199,7 +199,8 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         "../../protyle/scroll/saveScroll": {saveScroll: () => ({scrollTop: 30}),
             getDocByScroll: (options: unknown) => refreshed.push(options)},
     };
-    const globals = {window, document, console, CustomEvent, getComputedStyle: () => ({paddingTop: "0", paddingBottom: "0"}), MutationObserver: class {
+    const globals = {window, document, console, CustomEvent, HTMLElement: ElementMock,
+        getComputedStyle: () => ({paddingTop: "0", paddingBottom: "0"}), MutationObserver: class {
         observe() {}
         disconnect() {}
     }, require: (name: string) => {

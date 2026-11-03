@@ -15,12 +15,14 @@ import {invalidateFocusFoldRequests} from "./focusFold";
 import {unregisterViewFoldContext} from "./viewFold";
 import {destroyAutoDirection} from "../render/autoDirection";
 import {disposeSyncEditorSave} from "./editorSave";
+import {destroyRelatedAVViews} from "../render/av/relatedView";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
     protyle.title?.cancelPendingInput();
+    destroyRelatedAVViews(protyle.id);
     protyle.title?.destroy?.();
     disposeSyncEditorSave(protyle);
     destroyFoldedRender(protyle);

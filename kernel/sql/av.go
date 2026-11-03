@@ -927,10 +927,18 @@ func hasFilterConditions(filters []*av.ViewFilter) bool {
 // loadRelatedAttributeView 为历史和仓库快照渲染绑定请求级调色板，同时保持关联数据库的字段和值来源不变。
 func loadRelatedAttributeView(source *av.AttributeView, avID string, cachedAttrViews map[string]*av.AttributeView) (ret *av.AttributeView) {
 	if ret = cachedAttrViews[avID]; nil != ret {
-		return
+		if boxID, scoped := source.StorageContext(); !scoped {
+			return
+		} else if cachedBoxID, pinned := ret.StorageContext(); pinned && cachedBoxID == boxID {
+			return
+		}
 	}
 
-	ret, _ = av.ParseAttributeView(avID)
+	if boxID, scoped := source.StorageContext(); scoped {
+		ret, _ = av.ParseAttributeViewWithStorageContext(avID, boxID)
+	} else {
+		ret, _ = av.ParseAttributeView(avID)
+	}
 	if nil == ret {
 		return
 	}

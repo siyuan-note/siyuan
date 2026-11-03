@@ -14,19 +14,19 @@ import (
 )
 
 // 原生导入先为整个包建立身份映射，再改写每个库，保证跨库普通关联与父子边一致。
-// 无父子配置的旧包继续使用既有导入规则。
+// 未配置父子项及关联详情的旧包继续使用既有导入规则。
 func remapImportedSubItemsDatabases(data map[string][]byte, databaseIDs, blockIDs map[string]string) (map[string][]byte, map[string]map[string]string, error) {
 	sources := map[string]*av.AttributeView{}
-	hasSubItems := false
+	needsIdentityMapping := false
 	for id, encoded := range data {
 		source, err := av.ParseAttributeViewData(id, encoded)
 		if err != nil {
 			return nil, nil, err
 		}
 		sources[id] = source
-		hasSubItems = hasSubItems || source.SubItems != nil
+		needsIdentityMapping = needsIdentityMapping || source.SubItems != nil || source.HasRelationDetailViews()
 	}
-	if !hasSubItems {
+	if !needsIdentityMapping {
 		return nil, nil, nil
 	}
 	mappings := map[string]map[string]string{}

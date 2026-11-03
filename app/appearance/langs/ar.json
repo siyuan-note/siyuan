@@ -3172,6 +3172,16 @@
 		"quit": "خروج من التطبيق"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "إظهار عرض قاعدة البيانات المرتبطة",
+		"relatedDatabaseView": "عرض قاعدة البيانات المرتبطة",
+		"relatedDatabaseViewShared": "تستخدم جميع الإدخالات تخطيط الأعمدة المشترك للعرض الهدف",
+		"relatedDatabaseViewUnavailable": "العرض المرتبط غير متاح؛ تحقق من الحقل والعرض الهدف",
+		"relatedDatabaseViewNoTable": "لا تحتوي قاعدة البيانات المرتبطة على عرض جدول",
+		"relatedDatabaseViewRemove": "إزالة الارتباط",
+		"relatedDatabaseViewAdd": "إضافة إدخال موجود",
+		"relatedDatabaseViewNew": "إنشاء إدخال وربطه",
+		"relatedDatabaseViewTemporaryFilter": "عوامل تصفية إضافية في هذه اللوحة",
+		"relatedDatabaseViewSharedTip": "يستخدم هذا الجدول عرضًا مشتركًا. يؤثر تغيير إعداداته في جميع المراجع",
 		"dateCalendar": "التقويم",
 		"solarCalendar": "الميلادي",
 		"lunarCalendar": "القمري الصيني",

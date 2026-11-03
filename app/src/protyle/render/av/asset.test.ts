@@ -13,6 +13,7 @@ import * as insertPosition from "../../upload/insertPosition";
 import * as escape from "../../../util/escape";
 import * as image from "../../../util/image";
 import * as imageURL from "../../../util/imageURL";
+import * as host from "./host";
 
 const pathNames = {} as typeof import("../../../util/pathName");
 runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../util/pathName.ts"), "utf8"), {
@@ -39,6 +40,7 @@ const createHarness = (layout = "table", assetContent = "original.png") => {
         closest: () => ({dataset: {}}),
     };
     const block = {
+        dataset: {avId: "av", nodeId: "block", avType: layout},
         closest: (): HTMLElement | null => null,
         getAttribute: (key: string) => ({"data-av-type": layout, "data-av-id": "av", "data-node-id": "block"})[key],
         contains: () => rendered,
@@ -48,6 +50,7 @@ const createHarness = (layout = "table", assetContent = "original.png") => {
     const operations: IOperation[] = [];
     const pending: Array<(_response: string, result: unknown) => void> = [];
     const mocks: Record<string, unknown> = {
+        "./host": {...host, getAVHost: () => block},
         "./viewType": viewType,
         "./selectionState": selectionState,
         "./assetUploadTarget": assetUploadTarget,
@@ -63,7 +66,6 @@ const createHarness = (layout = "table", assetContent = "original.png") => {
         "../../../util/pathName": pathNames,
         "../../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png"]}},
         "../../../dialog/message": {showMessage: () => {}},
-        "../../util/hasClosest": {hasClosestBlock: () => block},
         "../../wysiwyg/transaction": {transaction: (_protyle: unknown, values: IOperation[]) => operations.push(...values)},
         "./action": {updateAttrViewCellAnimation: () => {}},
         "./cell": {

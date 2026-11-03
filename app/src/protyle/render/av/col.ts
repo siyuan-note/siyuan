@@ -14,6 +14,7 @@ import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
 import {bindDateCalendarMenu} from "./dateCalendarMenu";
+import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -199,7 +200,7 @@ export const getEditHTML = (options: {
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
-    </div>`;
+    </div>${getRelatedViewConfigHTML(colData, options.protyle)}`;
     } else if (colData.type === "rollup") {
         html += '<button class="b3-menu__separator" data-id="separator_2"></button>' +
             getRollupHTML({data: options.data, colData});
@@ -313,6 +314,9 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    if (colData.type === "relation") {
+        void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
+    }
     (["template", "renderTemplate"] as const).forEach(slot => {
         bindTemplateHTTPPermission(options.menuElement, {kind: "av", avID, keyID: colId, slot});
     });

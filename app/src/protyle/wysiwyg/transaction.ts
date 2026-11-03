@@ -3,6 +3,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import dayjs from "dayjs";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {getEditorTransaction} from "../util/transactionContract";
+import {prepareAVHostTransaction} from "../render/av/host";
 import {
     focusBlock,
     focusByWbr,
@@ -1566,7 +1567,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             protyle.databaseAttributePanel?.refreshForOperation(operation);
             return;
         }
-        if (["setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree",
+        if (["setAttrViewRelationDetail", "updateAttrViewRelationItems", "setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree",
             "addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
@@ -2554,6 +2555,14 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 tagRemovalConfirmed?: boolean,
                                 awaitResponse?: boolean,
                             }): Promise<void> | void => {
+    const hostDoOperations = prepareAVHostTransaction(protyle, doOperations);
+    const hostUndoOperations = prepareAVHostTransaction(protyle, undoOperations);
+    if (!hostDoOperations || (undoOperations && !hostUndoOperations)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
+    doOperations = hostDoOperations;
+    undoOperations = hostUndoOperations;
     const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
     if (owner && !owner.lite && owner !== protyle) {
         return transaction(owner, doOperations, undoOperations, options);

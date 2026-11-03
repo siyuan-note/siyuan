@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261102214741"
+		"updated": "20261103024717"
 	},
 	"Children": [
 		{
@@ -3567,6 +3567,91 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-p6dmwp4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261103024717-p6dmwp4",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Related database views in entry details"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-lbrh01e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-lbrh01e",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable “Show related database view” in a relation field’s configuration and select an existing table view in the related database. This field-level setting applies to every entry, including new entries. Disabling the display does not delete relations or target entries."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qzavrxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qzavrxh",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The related table appears at the bottom of the database properties in entry details, before the body when one exists. Document-bound, content-block-bound and detached entries are supported. When a block belongs to multiple databases, tabs select the active database by default. Turn off “Display multiple databases in tabs” to display each database’s properties and related tables together in separate groups. Membership stays separate for each source database, entry and relation field."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qvz73ar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qvz73ar",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The table contains only entries already linked through the current entry’s relation field, further limited by the selected view’s filters. One-way relations do not require a reverse relation field. The target view’s column layout is shared; the current entry’s membership restriction is never saved into shared filters. Search, temporary sorting and additional filters apply only to the current panel."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-fnh8dej",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-fnh8dej",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing a target field changes the real entry and updates its other references. “Remove association” removes only the current entry’s relation in the current field; it does not delete the target entry. “Add existing entry” follows the relation candidate filters. “Create and link entry” uses the target database’s creation rules, creating a detached entry when no default template is configured."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-a6ld1fe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-a6ld1fe",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An empty relation displays an empty table. An invalid field or target view, or a locked database, displays an unavailable state instead of the unfiltered database. This feature initially supports tables and does not recursively expand further related tables inside them. History and snapshot previews do not expand live related views."
 				}
 			]
 		},

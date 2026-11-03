@@ -3172,6 +3172,16 @@
 		"quit": "Выйти из приложения"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Показывать представление связанной базы данных",
+		"relatedDatabaseView": "Представление связанной базы данных",
+		"relatedDatabaseViewShared": "Все записи используют общую раскладку столбцов целевого представления",
+		"relatedDatabaseViewUnavailable": "Связанное представление недоступно; проверьте поле и целевое представление",
+		"relatedDatabaseViewNoTable": "В связанной базе данных нет табличного представления",
+		"relatedDatabaseViewRemove": "Удалить связь",
+		"relatedDatabaseViewAdd": "Добавить существующую запись",
+		"relatedDatabaseViewNew": "Создать и связать запись",
+		"relatedDatabaseViewTemporaryFilter": "Дополнительные фильтры в этой панели",
+		"relatedDatabaseViewSharedTip": "Эта таблица использует общее представление. Изменение его настроек затронет все ссылки на него",
 		"dateCalendar": "Календарь",
 		"solarCalendar": "Григорианский",
 		"lunarCalendar": "Китайский лунный",

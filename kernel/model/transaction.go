@@ -341,6 +341,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("prepare database automations")
 	timing.Stage("automations")
+	if err = tx.prepareRelationDetailOperations(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -360,6 +364,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if !isLargeInsert {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
+			if err = tx.validateAttributeViewRelationCellOperation(op); err != nil {
+				tx.rollback()
+				return &TxErr{code: TxErrHandleAttributeView, id: op.AvID, msg: err.Error()}
+			}
 			diagnostic.Stage("execute " + op.Action)
 			if isLargeDelete && "delete" == op.Action {
 				continue
@@ -421,6 +429,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewContextFilter(op)
 			case "setAttrViewColRelationFilters":
 				ret = tx.doSetAttrViewColRelationFilters(op)
+			case "setAttrViewRelationDetail":
+				ret = tx.doSetAttrViewRelationDetail(op)
+			case "updateAttrViewRelationItems":
+				ret = tx.doUpdateAttrViewRelationItems(op)
 			case "setAttrViewColRollupFilters":
 				ret = tx.doSetAttrViewColRollupFilters(op)
 			case "setAttrViewSorts":
@@ -2655,16 +2667,20 @@ func (tx *Transaction) normalizeListItemFolds() (ret *TxErr) {
 }
 
 type Operation struct {
-	Action     string   `json:"action"`
-	Data       any      `json:"data"`
-	ID         string   `json:"id"`
-	RootID     string   `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
-	ParentID   string   `json:"parentID"`
-	PreviousID string   `json:"previousID"`
-	NextID     string   `json:"nextID"`
-	RetData    any      `json:"retData"`
-	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
-	BlockID    string   `json:"blockID"`
+	relationDetailConfig     *attributeViewRelationDetailSnapshot
+	relationDetailConfigUndo bool
+	relationDetailContext    *AttributeViewRelationContext
+	RelationContext          *AttributeViewRelationContext `json:"relationContext,omitempty"`
+	Action                   string                        `json:"action"`
+	Data                     any                           `json:"data"`
+	ID                       string                        `json:"id"`
+	RootID                   string                        `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
+	ParentID                 string                        `json:"parentID"`
+	PreviousID               string                        `json:"previousID"`
+	NextID                   string                        `json:"nextID"`
+	RetData                  any                           `json:"retData"`
+	BlockIDs                 []string                      `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
+	BlockID                  string                        `json:"blockID"`
 
 	DeckID                        string      `json:"deckID"` // 用于添加/删除闪卡
 	Tree                          *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
@@ -2677,7 +2693,12 @@ type Operation struct {
 	listConversionUndo            bool
 	attributeViewItems            *attributeViewItemsSnapshot
 	attributeViewCreatedSubItems  *attributeViewCreatedSubItemsSnapshot
+	attributeViewRelationSubItems *attributeViewRelationSubItemsSnapshot
+	attributeViewRelationSubUndo  bool
 	attributeViewFields           *attributeViewFieldsSnapshot
+	relationCellContext           *AttributeViewRelationCellContext
+	relationCellReplay            *attributeViewRelationCellReplay
+	relationCellReplayUndo        bool
 	attributeViewFieldUndo        bool
 	attributeViewAutomation       bool
 	attributeViewCollectionRuleID string
@@ -2875,6 +2896,8 @@ type Transaction struct {
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState
 	attributeViewItemCreation     bool
+	attributeViewStorageContexts  map[string]string
+	relationDetailUndoUsed        map[*Operation]bool
 	invalidatedAvHistory          map[string]bool
 
 	fromAPI  bool // 用户主动修改（HTTP、CLI、MCP 等）；允许自动化，撤销日志仍需具备 UndoOperations
@@ -2950,6 +2973,8 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
+	tx.attributeViewStorageContexts = nil
+	tx.relationDetailUndoUsed = nil
 	tx.sourceJournal, tx.sourceLeases = nil, nil
 	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	tx.sourceDatabaseBefore = nil
@@ -3196,7 +3221,10 @@ func (tx *Transaction) commit() (err error) {
 
 	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
 	for _, avID := range tx.relatedAvIDs {
-		destAv, _ := av.ParseAttributeView(avID)
+		destAv, parseErr := tx.parseAttributeViewForOperation(avID, "")
+		if _, scoped := tx.attributeViewStorageContexts[avID]; scoped && parseErr != nil {
+			return parseErr
+		}
 		if nil == destAv {
 			continue
 		}
@@ -3205,7 +3233,7 @@ func (tx *Transaction) commit() (err error) {
 			return err
 		}
 		regenAttrViewGroups(destAv)
-		if saveErr := av.SaveAttributeView(destAv); saveErr != nil && tx.attributeViewAutomations != nil {
+		if saveErr := av.SaveAttributeView(destAv); saveErr != nil && (tx.attributeViewAutomations != nil || tx.attributeViewStorageContexts != nil) {
 			return saveErr
 		}
 		ReloadAttrView(avID)

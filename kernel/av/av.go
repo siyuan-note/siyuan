@@ -51,6 +51,8 @@ type AttributeView struct {
 	sourceVersion             uint64
 	sourceGeneration          uint64
 	liveOrdinarySource        bool
+	storageContextID          string
+	storageContextBoxID       string
 }
 
 // RenderSourceVersion 只标识当前工作区普通数据库的已认证源版本，临时副本不参与跨请求复用。
@@ -267,10 +269,11 @@ type RollupCalc struct {
 }
 
 type Relation struct {
-	AvID             string        `json:"avID"`                       // 关联的属性视图 ID
-	IsTwoWay         bool          `json:"isTwoWay"`                   // 是否双向关联
-	BackKeyID        string        `json:"backKeyID"`                  // 双向关联时回链关联列的 ID
-	CandidateFilters []*ViewFilter `json:"candidateFilters,omitempty"` // 可关联目标条目的过滤规则
+	AvID             string              `json:"avID"`                       // 关联的属性视图 ID
+	IsTwoWay         bool                `json:"isTwoWay"`                   // 是否双向关联
+	BackKeyID        string              `json:"backKeyID"`                  // 双向关联时回链关联列的 ID
+	CandidateFilters []*ViewFilter       `json:"candidateFilters,omitempty"` // 可关联目标条目的过滤规则
+	DetailView       *RelationDetailView `json:"detailView,omitempty"`
 }
 
 type SelectOption struct {
@@ -1108,8 +1111,8 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
-	// 通过 fallback 查找 AV 定义的实际路径（普通 box 全局，加密笔记本笔记本级）
-	avJSONPath, avBoxID := FindAttributeViewPath(av.ID)
+	// 显式边界优先；未固定边界的调用继续按当前工作区映射查找。
+	avJSONPath, avBoxID := av.StoragePath()
 	releaseBox, lockErr := holdAVBoxReadLock(avBoxID)
 	if lockErr != nil {
 		return lockErr
@@ -1412,7 +1415,9 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	var oldKeyIDs []string
 	keyIDMap := map[string]string{}
 	keyTypeMap := map[string]KeyType{}
+	subItemsDetailViews := map[string]*RelationDetailView{}
 	for _, kv := range ret.KeyValues {
+		oldKeyID := kv.Key.ID
 		newID := ast.NewNodeID()
 		keyIDMap[kv.Key.ID] = newID
 		keyTypeMap[kv.Key.ID] = kv.Key.Type
@@ -1420,11 +1425,15 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		kv.Key.ID = newID
 		kv.Values = []*Value{}
 
-		if KeyTypeRelation == kv.Key.Type {
+		if KeyTypeRelation == kv.Key.Type && nil != kv.Key.Relation {
+			if ret.SubItems != nil && (ret.SubItems.ParentKeyID == oldKeyID || ret.SubItems.ChildrenKeyID == oldKeyID) {
+				subItemsDetailViews[newID] = kv.Key.Relation.DetailView
+			}
 			// 断开关联
 			kv.Key.Relation.IsTwoWay = false
 			kv.Key.Relation.AvID = ""
 			kv.Key.Relation.BackKeyID = ""
+			kv.Key.Relation.DetailView = nil
 		}
 	}
 
@@ -1452,10 +1461,12 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		ret.SubItems.ParentKeyID = keyIDMap[ret.SubItems.ParentKeyID]
 		ret.SubItems.ChildrenKeyID = keyIDMap[ret.SubItems.ChildrenKeyID]
 		if parent, e := ret.GetKey(ret.SubItems.ParentKeyID); e == nil {
-			parent.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ChildrenKeyID}
+			parent.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ChildrenKeyID,
+				DetailView: subItemsDetailViews[parent.ID]}
 		}
 		if children, e := ret.GetKey(ret.SubItems.ChildrenKeyID); e == nil {
-			children.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ParentKeyID}
+			children.Relation = &Relation{AvID: ret.ID, IsTwoWay: true, BackKeyID: ret.SubItems.ParentKeyID,
+				DetailView: subItemsDetailViews[children.ID]}
 		}
 	}
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
@@ -1467,8 +1478,11 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		return sorts[oldKeyIDs[i]] < sorts[oldKeyIDs[j]]
 	})
 
+	viewIDMap := map[string]string{}
 	for _, view := range ret.Views {
+		oldViewID := view.ID
 		view.ID = ast.NewNodeID()
+		viewIDMap[oldViewID] = view.ID
 
 		remapFilterColumns(view.Filters, keyIDMap)
 		for _, rule := range view.ConditionalColors {
@@ -1520,7 +1534,22 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			current := pending[len(pending)-1]
 			pending = pending[:len(pending)-1]
 			current.SubItemsItemIDs = nil
+			if groupKey := current.GroupKey; groupKey != nil && groupKey.Relation != nil && groupKey.Relation.DetailView != nil {
+				// 分组字段沿用副本的关联定义，避免保存已断开的目标或原视图身份。
+				if copiedKey, err := ret.GetKey(keyIDMap[groupKey.ID]); err == nil {
+					current.GroupKey = copiedKey
+				} else {
+					groupKey.Relation.DetailView = nil
+				}
+			}
 			pending = append(pending, current.Groups...)
+		}
+	}
+	for _, detailView := range subItemsDetailViews {
+		if detailView != nil && detailView.Spec == RelationDetailViewSpec {
+			if id := viewIDMap[detailView.ViewID]; id != "" {
+				detailView.ViewID = id
+			}
 		}
 	}
 	ret.CardCoverPositions = nil

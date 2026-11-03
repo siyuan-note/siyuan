@@ -11,9 +11,10 @@ import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
-import {previewAttrViewImages} from "../../preview/image";
+import {previewAttrViewImages, previewImages} from "../../preview/image";
 import {showMessage} from "../../../dialog/message";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
 import {
     genCellValueByElement,
     getTypeByCellElement,
@@ -35,6 +36,20 @@ import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell, type IA
 import {getAVData, getAVSelectedTableCells} from "./virtualScroll";
 import {getAVAssetUploadTargets} from "./assetUploadTarget";
 import {captureUploadDocument} from "../../upload/insertPosition";
+
+export const previewAVAssetImages = (currentSrc: string, blockElement: Element, cellElement?: HTMLElement) => {
+    const relationHost = getAVRelationHost(blockElement);
+    if (relationHost || (blockElement as HTMLElement).dataset?.avHost) {
+        if (!relationHost || !blockElement.isConnected || !relationHost.active || !relationHost.available) return;
+        previewImages(Array.from(blockElement.querySelectorAll<HTMLImageElement>(".av__cellassetimg"))
+            .map(image => image.getAttribute("src")), currentSrc);
+        return;
+    }
+    previewAttrViewImages(currentSrc, blockElement.getAttribute("data-av-id"),
+        blockElement.getAttribute("data-node-id"), blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
+        cellElement?.closest<HTMLElement>(".av__body")?.dataset.groupId);
+};
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -237,7 +252,10 @@ export const updateAssetCell = (options: {
             cellElements: options.cellElements,
             blockElement: options.blockElement
         });
-        const cellRect = (options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] : options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`)).getBoundingClientRect();
+        const anchor = options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] :
+            options.blockElement.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`);
+        if (!anchor) return;
+        const cellRect = anchor.getBoundingClientRect();
         setTimeout(() => {
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
@@ -421,14 +439,7 @@ export const editAssetItem = (options: {
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
-                previewAttrViewImages(
-                    linkAddress,
-                    options.blockElement.getAttribute("data-av-id"),
-                    options.blockElement.getAttribute("data-node-id"),
-                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
-                    options.cellElements[0]?.closest<HTMLElement>(".av__body")?.dataset.groupId
-                );
+                previewAVAssetImages(linkAddress, options.blockElement, options.cellElements[0]);
             }
         });
     }
@@ -570,7 +581,8 @@ const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells:
     const cellElements = Array.from(cells);
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const avID = blockElement.getAttribute("data-av-id");
-    const blockID = blockElement.getAttribute("data-node-id");
+    const blockID = getAVHostIdentity(blockElement as HTMLElement);
+    const relationHost = getAVRelationHost(blockElement);
     const attributeID = blockElement.getAttribute("data-attribute-id");
     const ownerElement = blockElement.closest(".protyle-db-row");
     const targets = cellElements.map(item => ({
@@ -579,13 +591,13 @@ const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells:
         groupID: item.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
     }));
     // 独立条目的上下文编辑器不挂载 DOM，使用可见面板并按原条目重新解析刷新后的字段。
-    const resolveBlock = () => ownerElement ? ownerElement.querySelector<HTMLElement>(
+    const resolveBlock = () => relationHost ? blockElement : ownerElement ? ownerElement.querySelector<HTMLElement>(
         `[data-av-id="${avID}"][data-node-id="${blockID}"][data-attribute-id="${attributeID}"]`) : blockElement;
     const isAvailable = () => {
         const currentBlock = resolveBlock();
         if (protyle.disabled || !currentBlock || !document.body.contains(currentBlock) ||
             currentBlock.getAttribute("data-av-id") !== avID ||
-            currentBlock.getAttribute("data-node-id") !== blockID) {
+            getAVHostIdentity(currentBlock as HTMLElement) !== blockID) {
             return false;
         }
         const data = getAVData(currentBlock as HTMLElement);

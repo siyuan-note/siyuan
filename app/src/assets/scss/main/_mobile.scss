@@ -2390,9 +2390,10 @@ body.mobile-topbar--merged {
       display: inline-flex;
     }
 
-    .av__row-more {
-      display: none;
-    }
+  }
+
+  .av:not([data-av-host]) .av__row-more {
+    display: none;
   }
 }
 

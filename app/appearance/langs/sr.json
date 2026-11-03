@@ -3172,6 +3172,16 @@
 		"quit": "Ugasi aplikaciju"
 	},
 	"_attrView": {
+		"showRelatedDatabaseView": "Прикажи поглед повезане базе података",
+		"relatedDatabaseView": "Поглед повезане базе података",
+		"relatedDatabaseViewShared": "Све ставке користе заједнички распоред колона циљног погледа",
+		"relatedDatabaseViewUnavailable": "Повезани поглед није доступан; проверите поље и циљни поглед",
+		"relatedDatabaseViewNoTable": "Повезана база података нема табеларни поглед",
+		"relatedDatabaseViewRemove": "Уклони везу",
+		"relatedDatabaseViewAdd": "Додај постојећу ставку",
+		"relatedDatabaseViewNew": "Направи и повежи ставку",
+		"relatedDatabaseViewTemporaryFilter": "Додатни филтери у овом панелу",
+		"relatedDatabaseViewSharedTip": "Ова табела користи заједнички поглед. Промена његових подешавања утиче на све референце",
 		"dateCalendar": "Календар",
 		"solarCalendar": "Грегоријански",
 		"lunarCalendar": "Кинески лунарни",

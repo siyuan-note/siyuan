@@ -162,7 +162,11 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 			if operation.Tree != nil {
 				addBoxID(operation.Tree.Box)
 			}
-			if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
+			if boxID, scoped, err := operation.ResolveRelationDetailStorage(); err != nil {
+				return err
+			} else if scoped {
+				addBoxID(boxID)
+			} else if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
 				addBoxID(boxID)
 			}
 			for _, key := range []string{"notebook", "box", "boxID", "rootID", "blockID"} {

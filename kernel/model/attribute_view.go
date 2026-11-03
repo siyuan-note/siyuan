@@ -2390,7 +2390,7 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		}
 	}
 
-	if oldAv.SubItems == nil {
+	if oldAv.SubItems == nil && !oldAv.HasRelationDetailViews() {
 		data = bytes.ReplaceAll(data, []byte(avID), []byte(newAvID))
 	}
 	av.UpsertBlockRel(newAvID, newBlockID)
@@ -2649,41 +2649,91 @@ func GetAttributeViewRelationCandidatesWithExcludes(srcAvID, relationKeyID, keyw
 	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
 ) {
+	return getAttributeViewRelationCandidatesWithContext(srcAvID, relationKeyID, keyword, selectedBlockIDs, page, pageSize, candidateSort, excludeItemIDs, nil, nil, blockIDs...)
+}
+
+func GetAttributeViewRelationDetailCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort, excludeItemIDs []string, context *AttributeViewRelationContext, blockIDs ...string) (
+	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
+	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
+	total int, err error,
+) {
+	return getAttributeViewRelationCandidatesWithContext(srcAvID, relationKeyID, keyword, selectedBlockIDs, page, pageSize, candidateSort, excludeItemIDs, context, nil, blockIDs...)
+}
+
+func getAttributeViewRelationCandidatesWithContext(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort, excludeItemIDs []string, context *AttributeViewRelationContext, cellContext *AttributeViewRelationCellContext, blockIDs ...string) (
+	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
+	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
+	total int, err error,
+) {
 	waitForSyncingStorages()
 
-	var srcAttrView *av.AttributeView
-	if len(blockIDs) > 0 && blockIDs[0] != "" {
-		srcAttrView, err = avParseView(srcAvID, blockIDs[0])
-	} else {
-		srcAttrView, err = av.ParseAttributeView(srcAvID)
-	}
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
-		return
-	}
+	var srcAttrView, attrView *av.AttributeView
 	var relationKey *av.Key
-	attrView := srcAttrView
-	if "" != relationKeyID {
-		relationKey, _ = srcAttrView.GetKey(relationKeyID)
-		if nil == relationKey || av.KeyTypeRelation != relationKey.Type || nil == relationKey.Relation {
-			err = av.ErrKeyNotFound
+	if cellContext != nil {
+		blockID := ""
+		if len(blockIDs) > 0 {
+			blockID = blockIDs[0]
+		}
+		var scope *attributeViewRelationScope
+		scope, err = resolveAttributeViewRelationCellScope(srcAvID, relationKeyID, blockID, cellContext)
+		if err != nil {
 			return
 		}
-		if relationKey.Relation.AvID != srcAvID {
-			if len(blockIDs) > 0 && blockIDs[0] != "" {
-				_, boxID := av.FindAttributeViewPath(srcAvID)
-				attrView, err = av.ParseAttributeViewInBox(relationKey.Relation.AvID, boxID)
-			} else {
-				attrView, err = av.ParseAttributeView(relationKey.Relation.AvID)
-			}
+		srcAttrView, attrView, relationKey = scope.source, scope.target, scope.key
+	} else if context != nil {
+		if context.SourceAvID != srcAvID || context.RelationKeyID != relationKeyID {
+			err = errors.New("relation candidate source does not match context")
+			return
+		}
+		blockID := ""
+		if len(blockIDs) > 0 {
+			blockID = blockIDs[0]
+		}
+		var scope *attributeViewRelationScope
+		scope, err = resolveAttributeViewRelationScope(context, blockID, "", true)
+		if err != nil {
+			return
+		}
+		srcAttrView, attrView, relationKey = scope.source, scope.target, scope.key
+		selectedBlockIDs = slices.Clone(scope.itemIDs)
+	} else {
+		if len(blockIDs) > 0 && blockIDs[0] != "" {
+			srcAttrView, err = avParseView(srcAvID, blockIDs[0])
+		} else {
+			srcAttrView, err = av.ParseAttributeView(srcAvID)
 		}
 		if err != nil {
-			logging.LogErrorf("parse attribute view [%s] failed: %s", relationKey.Relation.AvID, err)
+			logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
 			return
+		}
+		attrView = srcAttrView
+		if "" != relationKeyID {
+			relationKey, _ = srcAttrView.GetKey(relationKeyID)
+			if nil == relationKey || av.KeyTypeRelation != relationKey.Type || nil == relationKey.Relation {
+				err = av.ErrKeyNotFound
+				return
+			}
+			if relationKey.Relation.AvID != srcAvID {
+				if boxID, scoped := srcAttrView.StorageContext(); scoped {
+					attrView, err = av.ParseAttributeViewWithStorageContext(relationKey.Relation.AvID, boxID)
+				} else if len(blockIDs) > 0 && blockIDs[0] != "" {
+					_, boxID := av.FindAttributeViewPath(srcAvID)
+					attrView, err = av.ParseAttributeViewInBox(relationKey.Relation.AvID, boxID)
+				} else {
+					attrView, err = av.ParseAttributeView(relationKey.Relation.AvID)
+				}
+			}
+			if err != nil {
+				logging.LogErrorf("parse attribute view [%s] failed: %s", relationKey.Relation.AvID, err)
+				return
+			}
 		}
 	}
 	attributeViewName = getAttrViewName(attrView)
-	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
+	databaseBlockIDs, err = attributeViewRelationCarrierIDs(attrView)
+	if err != nil {
+		return
+	}
 	customColors = attrView.Palette()
 
 	table := renderAttributeViewRelationCandidates(attrView)
@@ -3470,6 +3520,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 }
 
 type BlockAttributeViewKeys struct {
+	NotebookID    string                         `json:"notebookID,omitempty"`
 	AvID          string                         `json:"avID"`
 	AvName        string                         `json:"avName"`
 	CustomColors  []*av.AttributeViewCustomColor `json:"customColors"`
@@ -3638,12 +3689,17 @@ func sortAttributeViewBacklinkBlockIDs(blockIDs []string, blockTrees map[string]
 
 func GetAttributeViewBacklinks(nodeID, avID, itemID, valueID string) (ret *AttributeViewBacklinks) {
 	waitForSyncingStorages()
-
-	ret = &AttributeViewBacklinks{Items: []*AttributeViewBacklink{}}
 	targets := getAttributeViewBacklinkTargets(nodeID, avID, itemID, valueID)
+	ret, _ = getAttributeViewBacklinksForTargets(targets, nil)
+	return
+}
+
+func getAttributeViewBacklinksForTargets(targets []*attributeViewBacklinkTarget, scope *av.AttributeView) (ret *AttributeViewBacklinks, err error) {
+	ret = &AttributeViewBacklinks{Items: []*AttributeViewBacklink{}}
 	if 1 > len(targets) {
 		return
 	}
+	boxID, scoped := scope.StorageContext()
 
 	backlinks := map[string]*AttributeViewBacklink{}
 	relationKeys := map[string]map[string]bool{}
@@ -3652,11 +3708,26 @@ func GetAttributeViewBacklinks(nodeID, avID, itemID, valueID string) (ret *Attri
 	cachedBlockIDs := map[string][]string{}
 	cachedBlockTrees := map[string]map[string]*treenode.BlockTree{}
 	for _, target := range targets {
-		for _, srcAvID := range av.GetSrcAvIDs(target.avID) {
+		var sourceIDs []string
+		if scoped {
+			sourceIDs, err = av.GetSrcAvIDsInBoxWithErr(target.avID, boxID)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			sourceIDs = av.GetSrcAvIDs(target.avID)
+		}
+		for _, srcAvID := range sourceIDs {
 			srcAttrView := cachedAttrViews[srcAvID]
 			if nil == srcAttrView {
-				var err error
-				srcAttrView, err = av.ParseAttributeView(srcAvID)
+				if scoped {
+					srcAttrView, err = av.ParseAttributeViewWithStorageContext(srcAvID, boxID)
+					if err != nil {
+						return nil, err
+					}
+				} else {
+					srcAttrView, err = av.ParseAttributeView(srcAvID)
+				}
 				if nil == srcAttrView {
 					logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
 					continue
@@ -3681,8 +3752,19 @@ func GetAttributeViewBacklinks(nodeID, avID, itemID, valueID string) (ret *Attri
 					blockIDs, cached := cachedBlockIDs[srcAvID]
 					blockTrees := cachedBlockTrees[srcAvID]
 					if !cached {
-						blockIDs = treenode.GetMirrorAttrViewBlockIDs(srcAvID)
-						blockTrees = treenode.GetBlockTrees(blockIDs)
+						if scoped {
+							blockIDs, err = attributeViewRelationCarrierIDs(srcAttrView)
+							if err != nil {
+								return nil, err
+							}
+							blockTrees = map[string]*treenode.BlockTree{}
+							for _, id := range blockIDs {
+								blockTrees[id] = treenode.GetBlockTreeInExactBox(id, boxID)
+							}
+						} else {
+							blockIDs = treenode.GetMirrorAttrViewBlockIDs(srcAvID)
+							blockTrees = treenode.GetBlockTrees(blockIDs)
+						}
 						sortAttributeViewBacklinkBlockIDs(blockIDs, blockTrees)
 						cachedBlockIDs[srcAvID] = blockIDs
 						cachedBlockTrees[srcAvID] = blockTrees
@@ -4035,6 +4117,8 @@ func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourc
 	if !groupByRendered && av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
 		if attrView.ID == groupKey.Relation.AvID {
 			relationDestAv = attrView
+		} else if boxID, scoped := attrView.StorageContext(); scoped {
+			relationDestAv, _ = av.ParseAttributeViewWithStorageContext(groupKey.Relation.AvID, boxID)
 		} else {
 			relationDestAv, _ = av.ParseAttributeView(groupKey.Relation.AvID)
 		}
@@ -4631,17 +4715,26 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
-	if err := tx.prepareRelationSourceJournal(operation); err != nil {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	err := updateAttributeViewColRelation(operation)
+	plan, err := tx.prepareRelationDetailRetarget(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
+	var context *AttributeViewRelationContext
+	if plan != nil {
+		context = &plan.state.context
+	}
+	if err = tx.prepareRelationSourceJournal(operation, context); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	err = updateAttributeViewColRelation(operation, context)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	tx.recordRelationDetailRetarget(operation, plan)
 	return
 }
 
-func updateAttributeViewColRelation(operation *Operation) (err error) {
+func updateAttributeViewColRelation(operation *Operation, contexts ...*AttributeViewRelationContext) (err error) {
 	// operation.AvID 源 avID
 	// operation.ID 目标 avID
 	// operation.KeyID 源 av 关联字段 ID
@@ -4650,9 +4743,19 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	// operation.Name 双向关联的目标关联字段名称
 	// operation.Format 源 av 关联字段名称
 
-	srcAv, err := av.ParseAttributeView(operation.AvID)
+	parse := av.ParseAttributeView
+	if len(contexts) > 0 && contexts[0] != nil && contexts[0].storageKnown {
+		boxID := contexts[0].storageBoxID
+		parse = func(id string) (*av.AttributeView, error) { return av.ParseAttributeViewWithStorageContext(id, boxID) }
+	}
+	srcAv, err := parse(operation.AvID)
 	if err != nil {
 		return
+	}
+	if key, keyErr := srcAv.GetKey(operation.KeyID); keyErr == nil && key.Relation != nil && key.Relation.AvID != operation.ID {
+		if err = key.Relation.DetailView.Validate(); err != nil {
+			return
+		}
 	}
 	if srcAv.IsSubItemsKey(operation.KeyID) {
 		key, keyErr := srcAv.GetKey(operation.KeyID)
@@ -4671,7 +4774,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		return av.SaveAttributeView(srcAv)
 	}
 
-	destAv, err := av.ParseAttributeView(operation.ID)
+	destAv, err := parse(operation.ID)
 	if err != nil {
 		return
 	}
@@ -4695,7 +4798,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		if nil != srcRel {
 			oldDestAvID = srcRel.AvID
 			if srcRel.IsTwoWay {
-				oldDestAv, _ := av.ParseAttributeView(srcRel.AvID)
+				oldDestAv, _ := parse(srcRel.AvID)
 				if nil != oldDestAv {
 					isOldSameAv := oldDestAv.ID == destAv.ID
 					if isOldSameAv {
@@ -4719,13 +4822,16 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		}
 
 		var candidateFilters []*av.ViewFilter
+		var detailView *av.RelationDetailView
 		if nil != srcRel && srcRel.AvID == operation.ID {
 			candidateFilters = srcRel.CandidateFilters
+			detailView = srcRel.DetailView
 		}
 		srcRel = &av.Relation{
 			AvID:             operation.ID,
 			IsTwoWay:         operation.IsTwoWay,
 			CandidateFilters: candidateFilters,
+			DetailView:       detailView,
 		}
 		if operation.IsTwoWay {
 			srcRel.BackKeyID = operation.BackRelationKeyID
@@ -4838,12 +4944,22 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			}
 		}
 		if !stillRelated {
-			if err = av.RemoveAvRelWithErr(srcAv.ID, oldDestAvID); err != nil {
+			if boxID, known := srcAv.StorageContext(); known {
+				err = av.RemoveAvRelInBoxWithErr(srcAv.ID, oldDestAvID, boxID)
+			} else {
+				err = av.RemoveAvRelWithErr(srcAv.ID, oldDestAvID)
+			}
+			if err != nil {
 				return
 			}
 		}
 	}
-	if err = av.UpsertAvBackRelWithErr(srcAv.ID, destAv.ID); err != nil {
+	if boxID, known := srcAv.StorageContext(); known {
+		err = av.UpsertAvBackRelInBoxWithErr(srcAv.ID, destAv.ID, boxID)
+	} else {
+		err = av.UpsertAvBackRelWithErr(srcAv.ID, destAv.ID)
+	}
+	if err != nil {
 		return
 	}
 	if operation.IsTwoWay && !isSameAv {
@@ -5539,7 +5655,7 @@ func avParseView(avID, blockID string) (*av.AttributeView, error) {
 	}
 	if exact {
 		av.SetAVBoxID(avID, boxID)
-		return av.ParseAttributeViewInBox(avID, boxID)
+		return av.ParseAttributeViewWithStorageContext(avID, boxID)
 	}
 	return av.ParseAttributeView(avID)
 }
@@ -5550,7 +5666,11 @@ func avSaveView(attrView *av.AttributeView, blockID string) error {
 	if nil != err {
 		return err
 	}
-	if exact {
+	if pinnedBoxID, scoped := attrView.StorageContext(); scoped {
+		if exact && pinnedBoxID != boxID {
+			return errors.New("database carrier changed encryption boundary")
+		}
+	} else if exact {
 		av.SetAVBoxID(attrView.ID, boxID)
 	}
 	return av.SaveAttributeView(attrView)
@@ -5705,6 +5825,9 @@ func attributeViewContextFilterLoader(attrView *av.AttributeView,
 	return func(avID string) (*av.AttributeView, error) {
 		if nil != attrView && avID == attrView.ID {
 			return attrView, nil
+		}
+		if boxID, scoped := attrView.StorageContext(); scoped {
+			return av.ParseAttributeViewWithStorageContext(avID, boxID)
 		}
 		targetBoxID := ""
 		if IsEncryptedBox(carrierBoxID) {
@@ -6190,7 +6313,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		return
 	}
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
-	attrView, err := avParseView(avID, dbBlockID)
+	attrView, err := tx.parseAttributeViewForOperation(avID, dbBlockID)
 	if err != nil {
 		return
 	}
@@ -6230,7 +6353,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		if err != nil {
 			return
 		}
-		if err = validateAttributeViewBinding(avID, tree); err != nil {
+		if err = tx.validateAttributeViewBinding(avID, tree); err != nil {
 			return
 		}
 		boundTrees[id] = tree
@@ -6270,7 +6393,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 }
 
 func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
-	attrView, err := avParseView(avID, dbBlockID)
+	attrView, err := tx.parseAttributeViewForOperation(avID, dbBlockID)
 	if err != nil {
 		return
 	}
@@ -6392,12 +6515,12 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 	}
 	if !ignoreDefaultFill {
 		if err = fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID, true, useGroupDefault,
-			dbBlockID, filterContext); nil != err {
+			dbBlockID, tx.strictAttributeViewRelationWrite(attrView.ID), filterContext); nil != err {
 			return
 		}
 	} else {
 		if err = fillAttributeViewContextFilterValue(attrView, groupView, addingItemID, filterContext,
-			dbBlockID); nil != err {
+			dbBlockID, tx.strictAttributeViewRelationWrite(attrView.ID)); nil != err {
 			return
 		}
 	}
@@ -6475,24 +6598,24 @@ func fillAttrViewAutoFillNowValues(attrView *av.AttributeView, addingItemID stri
 }
 
 func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string,
-	isCreate, useGroupDefault bool, blockID string, filterContexts ...*av.FilterContext) (err error) {
+	isCreate, useGroupDefault bool, blockID string, strictRelations bool, filterContexts ...*av.FilterContext) (err error) {
 	filterContext := firstAttributeViewFilterContext(filterContexts)
 	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID,
 		isCreate, useGroupDefault, filterContext)
-	err = writeAttributeViewDefaultValues(attrView, groupView, addingItemID, defaultValues, blockID)
+	err = writeAttributeViewDefaultValues(attrView, groupView, addingItemID, defaultValues, blockID, strictRelations)
 	return
 }
 
 func fillAttributeViewContextFilterValue(attrView *av.AttributeView, groupView *av.View, addingItemID string,
-	filterContext *av.FilterContext, blockID string) (err error) {
+	filterContext *av.FilterContext, blockID string, strictOptions ...bool) (err error) {
 	defaultValues := map[string]*av.Value{}
 	applyAttributeViewContextFilterDefaultValue(attrView, addingItemID, filterContext, defaultValues)
-	err = writeAttributeViewDefaultValues(attrView, groupView, addingItemID, defaultValues, blockID)
+	err = writeAttributeViewDefaultValues(attrView, groupView, addingItemID, defaultValues, blockID, strictOptions...)
 	return
 }
 
 func writeAttributeViewDefaultValues(attrView *av.AttributeView, groupView *av.View, addingItemID string,
-	defaultValues map[string]*av.Value, blockID string) (err error) {
+	defaultValues map[string]*av.Value, blockID string, strictOptions ...bool) (err error) {
 	for keyID, newValue := range defaultValues {
 		newValue.BlockID = addingItemID
 		keyValues, getErr := attrView.GetKeyValues(keyID)
@@ -6516,7 +6639,7 @@ func writeAttributeViewDefaultValues(attrView *av.AttributeView, groupView *av.V
 		if av.KeyTypeRelation == newValue.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
 			// 双向关联需要同时更新目标字段的值
 			if err = updateTwoWayRelationDestAttrViewInBlock(attrView, keyValues.Key, newValue, 1, []string{},
-				blockID); nil != err {
+				blockID, strictOptions...); nil != err {
 				return
 			}
 		}
@@ -6607,7 +6730,7 @@ func RemoveAttributeViewBlock(srcIDs []string, avID string) (err error) {
 }
 
 func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transaction) (err error) {
-	attrView, err := avParseView(avID, blockID)
+	attrView, err := tx.parseAttributeViewForOperation(avID, blockID)
 	if err != nil {
 		return
 	}
@@ -6643,7 +6766,7 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 					oldRelationBlockIDs := append([]string(nil), val.Relation.BlockIDs...)
 					clearedValue.Relation.BlockIDs = nil
 					if err = updateTwoWayRelationDestAttrViewInBlock(attrView, keyValues.Key, clearedValue, 2,
-						oldRelationBlockIDs, blockID); nil != err {
+						oldRelationBlockIDs, blockID, tx.strictAttributeViewRelationWrite(attrView.ID)); nil != err {
 						return
 					}
 					tx.invalidateAttributeViewHistory(keyValues.Key.Relation.AvID)
@@ -6720,6 +6843,9 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 	}
 	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
 	carrierBoxID, exact, _ := resolveAttributeViewCarrierBoxID(blockID)
+	if boxID, scoped := attrView.StorageContext(); scoped {
+		carrierBoxID, exact = boxID, true
+	}
 	for _, mirrorBlockID := range blockIDs {
 		if exact {
 			mirrorBoxID, mirrorExact, resolveErr := resolveAttributeViewCarrierBoxID(mirrorBlockID)
@@ -6765,11 +6891,31 @@ func removeAttributeViewBlock(srcIDs []string, avID, blockID string, tx *Transac
 }
 
 func removeRelatedRelationItems(avID string, itemIDs []string, blockID string, tx *Transaction) (err error) {
-	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
+	var relatedIDs []string
+	scoped := false
+	if tx != nil {
+		if boxID, known := tx.attributeViewStorageContexts[avID]; known {
+			scoped = true
+			relatedIDs, err = av.GetSrcAvIDsInBoxWithErr(avID, boxID)
+			if err != nil {
+				return err
+			}
+			for _, id := range relatedIDs {
+				if previous, exists := tx.attributeViewStorageContexts[id]; exists && previous != boxID {
+					return errors.New("ambiguous database dependency storage context")
+				}
+				tx.attributeViewStorageContexts[id] = boxID
+			}
+		}
+	}
+	if !scoped {
+		relatedIDs = av.GetSrcAvIDs(avID)
+	}
+	for _, relatedAvID := range relatedIDs {
 		if relatedAvID == avID {
 			continue
 		}
-		relatedAv, parseErr := avParseView(relatedAvID, blockID)
+		relatedAv, parseErr := tx.parseAttributeViewForOperation(relatedAvID, blockID)
 		if nil != parseErr || nil == relatedAv {
 			continue
 		}
@@ -7345,7 +7491,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						return contextErr
 					}
 					if err = fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false,
-						true, operation.BlockID, filterContext); nil != err {
+						true, operation.BlockID, false, filterContext); nil != err {
 						return
 					}
 
@@ -8122,6 +8268,25 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret *TxErr) {
+	for _, operation := range operations {
+		if operation.RelationContext != nil {
+			tx.attributeViewItemCreation = true
+		}
+		if err := tx.validateAttributeViewRelationCellOperation(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+	}
+	capture, err := tx.beginRelationCellReplay(operations)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error(), cause: err}
+	}
+	defer func() {
+		if ret == nil {
+			if err := tx.finishRelationCellReplay(capture); err != nil {
+				ret = &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error(), cause: err}
+			}
+		}
+	}()
 	updates := make([]*AttrViewCellUpdate, 0, len(operations))
 	for _, op := range operations {
 		updates = append(updates, &AttrViewCellUpdate{KeyID: op.KeyID, RowID: op.RowID, Data: op.Data})
@@ -8132,7 +8297,7 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 		}
 		return nil
 	}
-	attrView, err := avParseView(operations[0].AvID, operations[0].BlockID)
+	attrView, err := tx.parseAttributeViewForOperation(operations[0].AvID, operations[0].BlockID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error()}
 	}
@@ -8165,6 +8330,23 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 }
 
 func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) {
+	if operation.RelationContext != nil {
+		tx.attributeViewItemCreation = true
+		if err := tx.validateAttributeViewRelationCellOperation(operation); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+	}
+	capture, err := tx.beginRelationCellReplay([]*Operation{operation})
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error(), cause: err}
+	}
+	defer func() {
+		if ret == nil {
+			if err := tx.finishRelationCellReplay(capture); err != nil {
+				ret = &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error(), cause: err}
+			}
+		}
+	}()
 	if operation.attributeViewFields != nil {
 		if _, err := tx.updateSubItemsCells([]*Operation{operation}, operation.CellUpdates, nil); err != nil {
 			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -8174,7 +8356,7 @@ func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) 
 	if "" == operation.AvID || 0 == len(operation.CellUpdates) {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "invalid attribute view cell updates"}
 	}
-	attrView, err := avParseView(operation.AvID, operation.BlockID)
+	attrView, err := tx.parseAttributeViewForOperation(operation.AvID, operation.BlockID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -8211,7 +8393,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueD
 
 func updateAttributeViewCellInBlock(tx *Transaction, avID, blockID, keyID, itemID string,
 	valueData any) (val *av.Value, err error) {
-	attrView, err := avParseView(avID, blockID)
+	attrView, err := tx.parseAttributeViewForOperation(avID, blockID)
 	if err != nil {
 		return
 	}
@@ -8397,7 +8579,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		if loadErr != nil {
 			return nil, loadErr
 		}
-		if err = validateAttributeViewBinding(avID, tree); err != nil {
+		if err = tx.validateAttributeViewBinding(avID, tree); err != nil {
 			return
 		}
 		if oldIsDetached || oldBoundBlockID != updatedVal.Block.ID {
@@ -8584,7 +8766,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 		if err = updateTwoWayRelationDestAttrViewInBlock(attrView, key, val, relationChangeMode,
-			oldRelationBlockIDs, blockID); nil != err {
+			oldRelationBlockIDs, blockID, tx.strictAttributeViewRelationWrite(attrView.ID)); nil != err {
 			return
 		}
 	}
@@ -8627,7 +8809,28 @@ func refreshRelatedSrcAvs(destAvID string, tx *Transaction) {
 }
 
 func refreshRelatedSrcAvsInBlock(destAvID, blockID string, tx *Transaction) {
-	relatedAvIDs := av.GetSrcAvIDsForRefresh([]string{destAvID})
+	var relatedAvIDs []string
+	if tx != nil && tx.attributeViewStorageContexts != nil {
+		if boxID, scoped := tx.attributeViewStorageContexts[destAvID]; scoped {
+			var err error
+			relatedAvIDs, err = av.GetSrcAvIDsForRefreshInBox([]string{destAvID}, boxID)
+			if err != nil {
+				tx.sourceErr = err
+				return
+			}
+			for _, id := range relatedAvIDs {
+				if previous, exists := tx.attributeViewStorageContexts[id]; exists && previous != boxID {
+					tx.sourceErr = errors.New("ambiguous database dependency storage context")
+					return
+				}
+				tx.attributeViewStorageContexts[id] = boxID
+			}
+		} else {
+			relatedAvIDs = av.GetSrcAvIDsForRefresh([]string{destAvID})
+		}
+	} else {
+		relatedAvIDs = av.GetSrcAvIDsForRefresh([]string{destAvID})
+	}
 
 	if nil != tx {
 		tx.relatedAvIDs = append(tx.relatedAvIDs, relatedAvIDs...)
@@ -8654,10 +8857,19 @@ func updateTwoWayRelationDestAttrView(attrView *av.AttributeView, relKey *av.Key
 }
 
 func updateTwoWayRelationDestAttrViewInBlock(attrView *av.AttributeView, relKey *av.Key, val *av.Value,
-	relationChangeMode int, oldRelationBlockIDs []string, blockID string) (err error) {
+	relationChangeMode int, oldRelationBlockIDs []string, blockID string, strictOptions ...bool) (err error) {
+	strict := len(strictOptions) > 0 && strictOptions[0]
 	var destAv *av.AttributeView
 	if attrView.ID == relKey.Relation.AvID {
 		destAv = attrView
+	} else if boxID, scoped := attrView.StorageContext(); scoped {
+		destAv, err = av.ParseAttributeViewWithStorageContext(relKey.Relation.AvID, boxID)
+		if err != nil {
+			if strict {
+				return err
+			}
+			return nil
+		}
 	} else {
 		destAv, _ = avParseView(relKey.Relation.AvID, blockID)
 	}
@@ -8665,6 +8877,14 @@ func updateTwoWayRelationDestAttrViewInBlock(attrView *av.AttributeView, relKey 
 	// 目标数据库已删除或损坏时无法清理反向值，但不能因此阻止源条目删除。
 	if nil == destAv {
 		return
+	}
+
+	// 存储边界不改变原生残缺反向字段的容错；关联详情事务另行要求完整可恢复的双向边。
+	if strict {
+		backKey, backErr := destAv.GetKey(relKey.Relation.BackKeyID)
+		if backErr != nil || backKey.Type != av.KeyTypeRelation || backKey.Relation == nil || !backKey.Relation.IsTwoWay || backKey.Relation.AvID != attrView.ID || backKey.Relation.BackKeyID != relKey.ID {
+			return errors.New("two-way relation target field is unavailable")
+		}
 	}
 
 	now := util.CurrentTimeMillis()
@@ -8853,7 +9073,7 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 }
 
 func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree) {
-	if err := validateAttributeViewBinding(avID, tree); err != nil {
+	if err := tx.validateAttributeViewBinding(avID, tree); err != nil {
 		return
 	}
 	attrs := parse.IAL2Map(node.KramdownIAL)

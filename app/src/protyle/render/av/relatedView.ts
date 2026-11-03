@@ -22,6 +22,7 @@ import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import type {AVRelationItemPreview} from "../../../types/api";
 import {getAVCurrentViewID} from "./viewVisibility";
+import {applyRelatedAVColumnWidths, startRelatedAVColumnResize, TRelatedAVColumnWidths} from "./relatedViewColumnWidth";
 /// #if MOBILE
 import {openMobileFileById} from "../../../mobile/editor";
 /// #else
@@ -42,6 +43,7 @@ interface IRelatedAVState {
     sort?: IAVSort;
     query: string;
     folded: boolean;
+    columnWidths?: TRelatedAVColumnWidths;
 }
 
 const panels = new WeakMap<HTMLElement, RelatedAVView[]>();
@@ -82,6 +84,8 @@ class RelatedAVView {
     private wasConnected = false;
     private sharedNavigation = 0;
     private cancelSharedOpening?: () => void;
+    private columnWidths: TRelatedAVColumnWidths = {};
+    private cancelColumnResize?: () => void;
 
     constructor(readonly protyle: IProtyle, readonly sourceElement: HTMLElement, readonly definition: TRelatedAVDefinition,
                 sourceBlockID: string, state?: IRelatedAVState) {
@@ -117,6 +121,7 @@ class RelatedAVView {
             this.host.temporarySort = state.sort;
             this.folded = state.folded;
             this.query = state.query;
+            this.columnWidths = structuredClone(state.columnWidths || {});
         }
         setAVRelationHost(this.hostElement, this.host);
         this.editor = createAVHostProtyle(protyle, this.hostElement);
@@ -137,8 +142,20 @@ class RelatedAVView {
             if (!target.closest('[data-type="av-search"], input, textarea, button, a') &&
                 ["Delete", "Backspace", "Enter"].includes(event.key)) event.preventDefault();
         });
-        this.element.addEventListener("pointerdown", event => event.stopPropagation());
+        this.element.addEventListener("pointerdown", event => {
+            event.stopPropagation();
+            if (!(event.target as HTMLElement).closest(".av__widthdrag")) return;
+            this.cancelColumnResize?.();
+            this.cancelColumnResize = startRelatedAVColumnResize(event, this.hostElement, this.columnWidths,
+                () => canEditAVHost(this.hostElement, this.protyle));
+        });
         this.element.addEventListener("mousedown", event => event.stopPropagation());
+        this.element.addEventListener("dblclick", event => {
+            if ((event.target as HTMLElement).closest(".av__widthdrag")) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
         let views = registrations.get(protyle.id);
         if (!views) registrations.set(protyle.id, views = new Set());
         views.add(this);
@@ -157,7 +174,8 @@ class RelatedAVView {
         return {targetAVID: this.definition.targetAVID, configuredViewID: this.definition.viewID,
             viewID: this.host.viewID, filters: structuredClone(this.host.temporaryFilters),
             sort: this.host.temporarySort && {...this.host.temporarySort},
-            query: this.hostElement.querySelector('[data-type="av-search"]')?.textContent ?? this.query, folded: this.folded};
+            query: this.hostElement.querySelector('[data-type="av-search"]')?.textContent ?? this.query, folded: this.folded,
+            columnWidths: structuredClone(this.columnWidths)};
     }
 
     restore(state?: IRelatedAVState) {
@@ -167,6 +185,8 @@ class RelatedAVView {
         this.host.temporarySort = state.sort;
         this.folded = state.folded;
         this.query = state.query;
+        this.cancelColumnResize?.();
+        this.columnWidths = structuredClone(state.columnWidths || {});
     }
 
     sync(forceHidden = false) {
@@ -179,6 +199,7 @@ class RelatedAVView {
         fold.querySelector("use").setAttribute("xlink:href", this.folded ? "#iconRight" : "#iconDown");
         this.element.querySelector<HTMLButtonElement>('[data-related-action="add"]').disabled = this.host.readonly() || !this.host.available;
         if (!visible || this.host.readonly()) {
+            this.cancelColumnResize?.();
             closeAVCellEditor(this.element, false);
             this.dialog?.destroy();
         }
@@ -198,6 +219,7 @@ class RelatedAVView {
     }
 
     invalidateSecurity() {
+        this.cancelColumnResize?.();
         beginAVRender(this.hostElement);
         clearTimeout(this.timeout);
         this.dialog?.destroy();
@@ -228,6 +250,7 @@ class RelatedAVView {
     }
 
     private failed(message?: string) {
+        this.cancelColumnResize?.();
         this.host.available = false;
         setAVData(this.hostElement, undefined);
         this.element.querySelector<HTMLButtonElement>('[data-related-action="add"]').disabled = true;
@@ -239,11 +262,13 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
     }
 
     private rendered(data: IAV) {
+        this.cancelColumnResize?.();
+        applyRelatedAVColumnWidths(this.hostElement, this.columnWidths[data.viewID], data);
         this.host.available = true;
         this.element.querySelector<HTMLButtonElement>('[data-related-action="add"]').disabled = this.host.readonly();
         this.host.viewID = data.viewID;
         this.query = this.hostElement.querySelector('[data-type="av-search"]')?.textContent ?? this.query;
-        this.hostElement.querySelectorAll('[data-type="av-add"], [data-type="av-add-top"], [data-type="av-row-update"], [data-type="av-context-filter"], .av__new, [data-type="av-add-bottom"], [data-type="av-header-add"], [data-type="av-header-more"], .av__widthdrag, .av__freeze-drag, .av__drag-fill').forEach(element => element.remove());
+        this.hostElement.querySelectorAll('[data-type="av-add"], [data-type="av-add-top"], [data-type="av-row-update"], [data-type="av-context-filter"], .av__new, [data-type="av-add-bottom"], [data-type="av-header-add"], [data-type="av-header-more"], .av__freeze-drag, .av__drag-fill').forEach(element => element.remove());
         this.hostElement.querySelectorAll('[data-type="av-switcher"]:not(.av__mobile-view)').forEach(element => element.remove());
         this.hostElement.querySelectorAll<HTMLElement>('[draggable="true"]').forEach(element => element.draggable = false);
         this.hostElement.querySelectorAll<HTMLElement>(".av__title, .av__cursor").forEach(element => element.contentEditable = "false");
@@ -261,6 +286,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         event.stopPropagation();
         const target = event.target as HTMLElement;
         globalClickHideMenu(target);
+        if (target.closest(".av__widthdrag")) return;
         const action = target.closest<HTMLElement>("[data-related-action]")?.dataset.relatedAction;
         if (action === "fold") {
             this.folded = !this.folded;
@@ -623,6 +649,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
 
     dispose() {
         if (this.disposed) return;
+        this.cancelColumnResize?.();
         this.disposed = true;
         this.host.active = false;
         beginAVRender(this.hostElement);

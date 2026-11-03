@@ -41,6 +41,8 @@ const cases = async compiled => {
             open() {}
         }},
         "../../../menus/menuToggle": {toggleMenu: options => options.build()},
+        "../../../menus/menuClick": {globalClickHideMenu() {}},
+        "./relatedViewColumnWidth": {applyRelatedAVColumnWidths() {}, startRelatedAVColumnResize() {}},
         "../../../util/fetch": {fetchSyncPost: async (url, payload, _callback, _show, signal) => {
             requests.push({url, payload, signal});
             if (url.endsWith("getAttributeViewKeys")) return {code: 0, data: [{avID: "target", notebookID: "target-notebook", blockIDs: targetCarrier ? [targetCarrier] : [],

@@ -1252,8 +1252,9 @@ export const movePathToMenu = (paths: string[], sourceNotebookIds: string[] = []
                 rootIDs.push(pathPosix().basename(item).replace(".sy", ""));
             });
             movePathTo({
+                awaitConfirm: true,
                 cb: (toPath, toNotebook) => {
-                    moveToPath(paths, toNotebook[0], toPath[0]);
+                    return moveToPath(paths, toNotebook[0], toPath[0]);
                 },
                 paths,
                 flashcard: false,

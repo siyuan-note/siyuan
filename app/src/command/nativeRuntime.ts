@@ -215,8 +215,9 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement ||
                     window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
                     movePathTo({
+                        awaitConfirm: true,
                         cb: (toPath, toNotebook) => {
-                            moveToPath([protyle.path], toNotebook[0], toPath[0]);
+                            return moveToPath([protyle.path], toNotebook[0], toPath[0]);
                         },
                         paths: [protyle.path],
                         range,
@@ -247,8 +248,9 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 const sourceNotebookIds = items.map(item => item.notebookId);
                 const rootIDs = items.map(item => item.id);
                 movePathTo({
+                    awaitConfirm: true,
                     cb: (toPath, toNotebook) => {
-                        moveToPath(paths, toNotebook[0], toPath[0]);
+                        return moveToPath(paths, toNotebook[0], toPath[0]);
                     },
                     paths,
                     rootIDs,

@@ -100,6 +100,75 @@ const runCases = async appDirectory => {
     await propertiesOverlay.closed;
     assert.equal(properties.querySelectorAll("#documentPropertiesClose").length, 1);
     root.remove();
+
+    document.documentElement.dataset.frontend = "mobile";
+    document.body.className = "body--android";
+    const {bindMobileSheetLayout} = load("mobile/util/mobileSheetLayout");
+    for (const color of ["rgb(245, 245, 245)", "rgb(30, 30, 30)"]) {
+        document.body.style.setProperty("--b3-theme-surface", color);
+        for (const withActions of [true, false]) {
+            const nativeSheet = new MobileDialog({title: "Sync direction", mobileSheet: {expandable: true},
+                content: `<div class="b3-dialog__content"><div style="height:${withActions ? 80 : 1800}px">Choices</div></div>` +
+                    (withActions ? '<div class="b3-dialog__action"><button class="b3-button">Confirm</button></div>' : "")});
+            await wait();
+            const panel = nativeSheet.element.querySelector(".mobile-sheet-panel");
+            const footer = panel.querySelector(".b3-dialog__action, .mobile-sheet-actions");
+            for (const mode of ["standard", "expanded"]) {
+                for (const inset of [0, 24, 32, 15.75, 0]) {
+                    document.documentElement.style.setProperty("--android-navigation-bar-height", `${inset}px`);
+                    nativeSheet.setSheetMode(mode);
+                    const box = panel.getBoundingClientRect();
+                    assert.ok(Math.abs(box.bottom - innerHeight) < 1, "drawer background reaches the viewport bottom");
+                    assert.equal(getComputedStyle(panel).backgroundColor, color);
+                    assert.ok(Math.abs(footer.getBoundingClientRect().bottom - (innerHeight - inset)) < 1,
+                        "drawer buttons stay above the gesture area without double compensation");
+                    assert.equal(getComputedStyle(nativeSheet.element.querySelector(".b3-dialog")).paddingBottom, "0px");
+                    if (inset > 0) {
+                        assert.equal(document.elementFromPoint(innerWidth / 2, innerHeight - inset / 2), panel,
+                            "the gesture area is painted by the drawer rather than the underlying page");
+                    }
+                }
+            }
+            nativeSheet.destroy();
+            await wait();
+        }
+        const progress = document.createElement("div");
+        progress.className = "sync-checkout";
+        progress.style.zIndex = String(++window.siyuan.zIndex);
+        progress.innerHTML = '<div class="sync-checkout__panel b3-dialog__loading"><div>Progress</div><div class="sync-checkout__actions"><button class="b3-button">Cancel</button></div></div>';
+        document.body.append(progress);
+        const panel = progress.firstElementChild;
+        const layout = bindMobileSheetLayout(progress, panel, {standalone: true});
+        for (const inset of [0, 24, 32, 0]) {
+            document.documentElement.style.setProperty("--android-navigation-bar-height", `${inset}px`);
+            layout.resize();
+            assert.ok(Math.abs(panel.getBoundingClientRect().bottom - innerHeight) < 1,
+                "standalone progress sheets also paint to the viewport bottom");
+            assert.equal(getComputedStyle(panel).paddingBottom, `${24 + inset}px`, "progress sheets preserve their content padding");
+            assert.ok(panel.querySelector("button").getBoundingClientRect().bottom <= innerHeight - inset);
+        }
+        layout.dispose();
+        progress.remove();
+    }
+    document.documentElement.style.setProperty("--android-navigation-bar-height", "24px");
+    assert.equal(getComputedStyle(document.body, "::after").height, "48px", "document gesture fading remains available");
+    assert.equal(getComputedStyle(document.body, "::after").pointerEvents, "none");
+    document.documentElement.style.removeProperty("--android-navigation-bar-height");
+    document.body.style.removeProperty("--b3-theme-surface");
+    for (const [frontend, platform] of [["mobile", "ios"], ["browser-mobile", "android"]]) {
+        document.documentElement.dataset.frontend = frontend;
+        document.body.className = `body--${platform}`;
+        document.body.style.setProperty("--mobile-bottom-bar-safe-area", "24px");
+        const sheet = new MobileDialog({title: "Other frontend", content: "Content"});
+        await wait();
+        const panel = sheet.element.querySelector(".mobile-bottom-sheet");
+        assert.equal(getComputedStyle(sheet.element.querySelector(".b3-dialog")).paddingBottom, "24px");
+        assert.equal(getComputedStyle(panel).paddingBottom, "0px");
+        assert.ok(Math.abs(panel.getBoundingClientRect().bottom - (innerHeight - 24)) < 1);
+        sheet.destroy();
+        await wait();
+    }
+    document.body.style.removeProperty("--mobile-bottom-bar-safe-area");
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -114,7 +183,11 @@ if (process.versions.electron && process.type === "browser") {
             const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"),
                 {logger: {warn() {}, debug() {}}}).css;
             await win.webContents.insertCSS(css);
-            await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(path.join(__dirname, ".."))})`);
+            const error = await win.webContents.executeJavaScript(`(async () => {
+                try { await (${runCases.toString()})(${JSON.stringify(path.join(__dirname, ".."))}); }
+                catch (error) { return error.stack; }
+            })()`);
+            assert.equal(error, undefined);
         } catch (error) { console.error(error); code = 1; }
         finally { win.destroy(); app.exit(code); }
     });

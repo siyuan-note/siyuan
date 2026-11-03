@@ -33,6 +33,21 @@ html[data-frontend="mobile"] body.body--android {
     z-index: 5;
   }
 
+  .mobile-bottom-sheet-dialog .b3-dialog,
+  .mobile-sheet-layout {
+    padding-bottom: 0;
+  }
+
+  // 安全区由面板内部预留，背景随面板铺到手势区，按钮仍位于手势条上方。
+  .mobile-bottom-sheet,
+  .mobile-sheet-panel {
+    padding-bottom: var(--android-navigation-bar-height, 0px);
+  }
+
+  .sync-checkout__panel.mobile-sheet-panel {
+    padding-bottom: calc(24px + var(--android-navigation-bar-height, 0px));
+  }
+
   .side-panel > .b3-list--mobile {
     > [data-type="sidebar-bookmark"] > .bookmarkList::after,
     > [data-type="sidebar-tag"] > .tagList::after,

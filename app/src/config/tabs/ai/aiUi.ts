@@ -320,13 +320,19 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
     return keywords;
 };
 
-const showDeleteConfirm = (title: string, onConfirm: () => void) => {
+const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => {
     mobileConfirmDialog(
         window.siyuan.languages.deleteOpConfirm,
         window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
-        onConfirm,
+        async () => {
+            await onConfirm();
+            return true;
+        },
         undefined,
         true,
+        undefined,
+        undefined,
+        {awaitConfirm: true},
     );
 };
 
@@ -526,7 +532,7 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
                 return;
             }
             showDeleteConfirm(server.name, () => {
-                saveMcpServers(root, window.siyuan.config.ai.mcp.servers.filter((item) => item.name !== serverName));
+                return saveMcpServers(root, window.siyuan.config.ai.mcp.servers.filter((item) => item.name !== serverName));
             });
             return;
         }

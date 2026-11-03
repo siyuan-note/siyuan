@@ -392,6 +392,14 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             list.querySelector(".b3-list-item--focus")?.scrollIntoView({block: "nearest", inline: "nearest"});
         }
     };
+    const refreshAfterMutation = async (path: string, reveal = false) => {
+        try {
+            await reload(path, reveal);
+        } catch (error) {
+            // 操作已成功，刷新异常只提示错误，避免操作框保留旧路径和版本再次提交。
+            showMessage(escapeHtml(String(error)), 5000, "error");
+        }
+    };
     const inputPath = (title: string, value: string, callback: (value: string) => Promise<boolean>, renamePath?: string) => {
         const nameOnly = renamePath !== undefined;
         const prompt = mobileInputDialog({
@@ -447,7 +455,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             }
             const submit = async () => await run(async () => {
                 if (await api({action: "move", path: entry.path, target, revision})) {
-                    await reload(target, true);
+                    await refreshAfterMutation(target, true);
                     return true;
                 }
                 return false;
@@ -527,7 +535,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                 mobileConfirmDialog(lang.remove, escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip, async () => {
                     return await run(async () => {
                         if (await api({action: "remove", path: entry.path, revision})) {
-                            await reload("");
+                            await refreshAfterMutation("");
                             return true;
                         }
                         return false;
@@ -537,7 +545,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                 inputPath(lang.rename, entry.path.split("/").pop(), async value => {
                     const target = getFileRenameTarget(entry.path, value);
                     if (target !== entry.path && await api({action: "move", path: entry.path, target, revision})) {
-                        await reload(target, true);
+                        await refreshAfterMutation(target, true);
                         return true;
                     }
                     return target === entry.path;
@@ -739,7 +747,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                             response = await api({action: "mkdir", path: value});
                         }
                         if (response) {
-                            await reload(value, true);
+                            await refreshAfterMutation(value, true);
                         }
                         return Boolean(response);
                     });

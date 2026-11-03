@@ -21,7 +21,7 @@ import {matchHotKey} from "../util/hotKey";
 import {isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
 import {focusFirstVerticalRegion, prepareVerticalNavigation} from "../wysiwyg/verticalNavigation";
 import {enterDocumentFromTitle} from "./titleEnter";
-import {isDocumentTitleBlockHotkey} from "./documentTitleKeys";
+import {copyDocumentTitleTarget, isDocumentTitleBlockHotkey} from "./documentTitleKeys";
 import {acknowledgeDocumentTitleReload} from "../util/editorSave";
 import {buildBlockDOMClipboardData} from "../util/blockDOMClipboard";
 import {writeClipboardData} from "../util/compatibility";
@@ -499,6 +499,9 @@ export class DocumentTitleEditor {
 
     private keydown(event: KeyboardEvent) {
         if (event.isComposing || this.composing || this.owner.disabled) {
+            return;
+        }
+        if (copyDocumentTitleTarget(event, this.owner.block.rootID)) {
             return;
         }
         if (matchHotKey("⌘Z", event) || matchHotKey("⇧⌘Z", event) || matchHotKey("⌘Y", event)) {

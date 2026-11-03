@@ -165,21 +165,9 @@ button {
 }
 
 .markdown-more__button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 28px;
   height: 28px;
-  box-sizing: border-box;
-  border-radius: var(--b3-border-radius);
-  cursor: pointer;
-  color: var(--b3-theme-on-surface);
   list-style: none;
-
-  > svg {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .markdown-more summary::-webkit-details-marker {
@@ -557,6 +545,7 @@ button {
   .markdown-menu__info {
     width: 44px;
     height: 44px;
+    --b3-icon-background-inset: 6px;
   }
 
 }

@@ -236,6 +236,40 @@ const browserCases = async (languages: Record<string, string>) => {
     const contentFont = getComputedStyle(document.querySelector(".vditor-ir pre p")).fontFamily;
     check.ok(contentFont.includes("Microsoft Yahei"), contentFont);
     await ipcRenderer.invoke("markdown-screenshot", "light");
+    const desktopClasses = document.body.className;
+    await ipcRenderer.invoke("markdown-resize", 360, 800);
+    for (const platform of ["ios", "android", "harmony"]) {
+        document.body.className = `body--${platform}`;
+        for (const dark of [false, true]) {
+            onCommand({id: `icon-theme-${platform}-${dark}`, type: "theme", dark});
+            const deadline = Date.now() + 5000;
+            while (document.documentElement.dataset.themeMode !== (dark ? "dark" : "light") && Date.now() < deadline) await tick();
+            openMore(); await tick();
+            await ipcRenderer.invoke("markdown-pointer-click", "#markdownResourcesInfo"); await tick();
+            check.equal(document.querySelector("#markdownResourcesInfo").getAttribute("aria-expanded"), "true");
+            for (const id of ["markdownTreeToggle", "markdownMoreButton", "markdownUndo", "markdownRedo", "markdownResourcesInfo", "markdownRecoveryInfo"]) {
+                const button = document.getElementById(id);
+                const bounds = button.getBoundingClientRect();
+                const icon = button.querySelector("svg").getBoundingClientRect();
+                const style = getComputedStyle(button);
+                check.equal(bounds.width, 44, `${platform} ${id} retains its touch width`);
+                check.equal(bounds.height, 44, `${platform} ${id} retains its touch height`);
+                check.equal(bounds.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth), 32,
+                    `${platform} ${id} has a compact visible background`);
+                check.equal(bounds.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth), 32);
+                check.equal(style.backgroundClip, "padding-box");
+                check.equal(style.getPropertyValue("-webkit-tap-highlight-color"), "rgba(0, 0, 0, 0)", "native tap feedback cannot cover the larger hit area");
+                check.ok(Math.abs(icon.x + icon.width / 2 - bounds.x - bounds.width / 2) < 0.5, `${id} is horizontally centered`);
+                check.ok(Math.abs(icon.y + icon.height / 2 - bounds.y - bounds.height / 2) < 0.5, `${id} is vertically centered`);
+            }
+            await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-icons`);
+            (document.querySelector("#markdownResourcesInfo") as HTMLElement).click();
+            moreButton.click();
+        }
+    }
+    document.body.className = desktopClasses;
+    onCommand({id: "restore-icon-theme", type: "theme", dark: false});
+    await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
     openMore();
     for (const item of document.querySelectorAll("#markdownActions > .b3-menu__item, #markdownTheme, #markdownFont")) {
         const use = item.querySelector(":scope > svg.b3-menu__icon use");
@@ -301,9 +335,10 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(explanation.hidden, true);
     }
     for (const [id, value] of [["markdownTheme", "dark"], ["markdownTheme", "light"], ["markdownTheme", "system"], ["markdownFont", "20"], ["markdownFont", "16"]]) {
-        openMore(); appearanceItem.click();
+        openMore(); appearanceItem.focus();
+        appearanceItem.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
         const item = document.getElementById(id);
-        item.click();
+        item.focus(); item.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
         await tick();
         const selector = `#${id} [data-value="${value}"]`;
         check.equal(document.querySelector(selector).checkVisibility(), true, "appearance choices are reachable in the nested submenu");
@@ -707,7 +742,7 @@ const browserCases = async (languages: Record<string, string>) => {
     chosen = {kind: "cancelled"};
     await testTree.chooseRoot();
     check.equal(treeLists, listsBeforeCancel, "cancelled directory authorization never enumerates a parent");
-    panelToggle.click();
+    document.querySelector<HTMLButtonElement>("#markdownTreeToggle").click();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true);
     let finishChoose: (value: import("./treeContracts").MarkdownTreeState) => void;
     const choiceBridge = bridge.tree.chooseRoot;

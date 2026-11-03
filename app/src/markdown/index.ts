@@ -57,13 +57,13 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const platforms: Record<string, string> = {darwin: "mac", win32: "windows", linux: "linux", android: "android", ios: "ios", harmony: "harmony"};
     document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
     root.innerHTML = `<header class="markdown-header">
-    <button type="button" class="block__icon block__icon--show markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
     <button type="button" class="markdown-heading" id="markdownFiles" data-drawer-toggle="true"><span id="markdownName" class="markdown-name"></span></button>
     <div class="markdown-header__drag" aria-hidden="true"></div>
-    <button type="button" class="block__icon block__icon--show markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
-    <button type="button" class="block__icon block__icon--show markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
     <details class="markdown-more" id="markdownMore">
-        <summary class="markdown-more__button" id="markdownMoreButton" aria-controls="markdownActions" aria-expanded="false"><svg aria-hidden="true"><use href="#iconMore"></use></svg></summary>
+        <summary class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-more__button" id="markdownMoreButton" aria-controls="markdownActions" aria-expanded="false"><svg aria-hidden="true"><use href="#iconMore"></use></svg></summary>
         <div class="b3-menu markdown-menu" id="markdownActions">
             <button type="button" class="b3-menu__item" id="markdownNew"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconAddDoc"></use></svg><span class="b3-menu__label" data-label="new"></span></button>
             <button type="button" class="b3-menu__item" id="markdownOpen"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFileText"></use></svg><span class="b3-menu__label" data-label="openBy"></span></button>
@@ -98,7 +98,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         row.className = "markdown-menu__row";
         const info = document.createElement("button");
         info.type = "button";
-        info.className = "block__icon block__icon--show markdown-menu__info";
+        info.className = "block__icon block__icon--show block__icon--tap block__icon--inset markdown-menu__info";
         info.id = `${id}Info`;
         info.title = text(explanation);
         info.setAttribute("aria-label", `${text(label)}: ${text("about")}`);

@@ -15,6 +15,7 @@ const fixture = (mobile = false, code = 0) => {
     runInNewContext(transpileModule(selected, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
         exports: api, window: {siyuan: {languages: {imported: "Imported"}}}, require: (module: string) => {
             switch (module) {
+                case "../../layout/reloadSnapshot": return {clearReloadSnapshot: () => {}};
                 case "../../util/fetch": return {
                     fetchPost: async (url: string, body: any, callback?: (response: any) => void) => {
                         requests.push({url, body});

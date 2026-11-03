@@ -1,4 +1,5 @@
 import {Constants} from "../constants";
+import {clearReloadSnapshot} from "../layout/reloadSnapshot";
 import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -214,6 +215,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
 };
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
+    clearReloadSnapshot();
     const host = getSettingsWindowHost();
     if (host) {
         await host.exit(setCurrentWorkspace);

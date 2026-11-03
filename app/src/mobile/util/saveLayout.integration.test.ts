@@ -61,6 +61,7 @@ test("mobile normal exit waits for save and remains open on failure", async () =
             const pending = deferred();
             const events: string[] = [];
             const exit = loadFunction("dialog/processSystem.ts", "exitSiYuan", {
+                clearReloadSnapshot: () => {},
                 getSettingsWindowHost: (): undefined => undefined,
                 hideAllElements: () => {},
                 saveMobileLayout: () => pending.promise,

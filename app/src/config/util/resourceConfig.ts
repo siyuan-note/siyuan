@@ -2,6 +2,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {ContractFormData} from "../../util/contractFormData";
 import {exitSiYuan} from "../../dialog/processSystem";
+import {clearReloadSnapshot} from "../../layout/reloadSnapshot";
 import {showMessage} from "../../dialog/message";
 import {runSettingsMaintenance} from "../setting/maintenance";
 /// #if !MOBILE
@@ -17,7 +18,10 @@ type LayoutResponse = APICallbackResponse<APIPOSTRoutes[typeof layoutEndpoint]["
 
 // 独立资源保留专用协议，统一请求构造，并沿用回调与同步调用各自的失败处理。
 export const switchWorkspace = (path: string, onApplied = () => { void exitSiYuan(false); }) =>
-    fetchPost("/api/system/setWorkspaceDir", {path}, onApplied);
+    fetchPost("/api/system/setWorkspaceDir", {path}, () => {
+        clearReloadSnapshot();
+        onApplied();
+    });
 
 export const saveUILayout = (layout: LayoutRequest["layout"], errorExit?: boolean,
                              onApplied?: (response: LayoutResponse) => void) => {

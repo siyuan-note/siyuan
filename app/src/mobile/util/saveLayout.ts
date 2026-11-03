@@ -5,13 +5,25 @@ import {isEncryptedBox} from "../../util/pathName";
 import {withFetchTimeout} from "../../util/fetchTimeout";
 
 const pendingWrites = new Map<string, Promise<boolean>>();
+let resettingScroll = false;
+
+export const resumeMobileScrollSaving = () => {
+    resettingScroll = false;
+};
 
 export const saveMobileStorage = (key: string, value: unknown): Promise<boolean> => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return Promise.resolve(true);
     }
     // 排队前复制快照，避免页签切换和历史记录修改影响尚未写入的内容。
-    const snapshot = JSON.parse(JSON.stringify(value));
+    const snapshot = resettingScroll && key === Constants.LOCAL_FILEPOSITION ? {} : JSON.parse(JSON.stringify(value));
+    if (resettingScroll && key === Constants.LOCAL_MOBILE_TABS) {
+        for (const tab of snapshot?.tabs || []) {
+            for (const entry of [tab.current, ...(tab.backStack || []), ...(tab.forwardStack || [])]) {
+                if (entry) delete entry.scroll;
+            }
+        }
+    }
     const write = async () => {
         let saved = false;
         try {
@@ -22,7 +34,7 @@ export const saveMobileStorage = (key: string, value: unknown): Promise<boolean>
         }
         return saved;
     };
-    if (key !== Constants.LOCAL_MOBILE_TABS) {
+    if (key !== Constants.LOCAL_MOBILE_TABS && key !== Constants.LOCAL_FILEPOSITION) {
         return write();
     }
     const pending = pendingWrites.get(key);
@@ -34,6 +46,27 @@ export const saveMobileStorage = (key: string, value: unknown): Promise<boolean>
         }
     });
     return result;
+};
+
+export const resetMobileLayoutScroll = async (): Promise<boolean> => {
+    // 重载前的生命周期保存仍可能捕获旧编辑器，所有后续写入都要过滤其阅读位置。
+    resettingScroll = true;
+    try {
+        const saved = await withFetchTimeout(async () => {
+            const results = await Promise.all([
+                saveMobileLayout(),
+                saveMobileStorage(Constants.LOCAL_FILEPOSITION, {}),
+            ]);
+            return results.every(Boolean);
+        }, undefined, 10000);
+        if (!saved) resettingScroll = false;
+        else window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+        return saved;
+    } catch (error) {
+        resettingScroll = false;
+        console.warn("Reset mobile reading positions failed", error);
+        return false;
+    }
 };
 
 const saveLayout = async (): Promise<boolean> => {

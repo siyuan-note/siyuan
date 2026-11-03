@@ -1,10 +1,10 @@
 /// #if !MOBILE
 import {reloadUI} from "../layout/util";
 import {closeSettingsWindow} from "../config/setting/windowContext";
+/// #else
+import {reloadMobileUI} from "../mobile/util/reloadUI";
 /// #endif
 import {hideMessage, showMessage} from "../dialog/message";
-import {setStorageVal} from "../protyle/util/compatibility";
-import {Constants} from "../constants";
 import {fetchPost} from "./fetch";
 import {isBrowser} from "./functions";
 import {applySettingTask} from "../config/setting/taskBlocker";
@@ -85,22 +85,11 @@ export const processMessage = (response: IWebSocketData) => {
         /// #if !MOBILE
         if (closeSettingsWindow()) return false;
         /// #endif
-        if (response.data?.resetScroll) {
-            window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
-            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
-                /// #if MOBILE
-                window.location.reload();
-                /// #else
-                void reloadUI();
-                /// #endif
-            });
-        } else {
-            /// #if MOBILE
-            window.location.reload();
-            /// #else
-            void reloadUI();
-            /// #endif
-        }
+        /// #if MOBILE
+        void reloadMobileUI(!!response.data?.resetScroll);
+        /// #else
+        void reloadUI(!!response.data?.resetScroll);
+        /// #endif
         return false;
     }
     if ("reloadpublishpage" === response.cmd) {

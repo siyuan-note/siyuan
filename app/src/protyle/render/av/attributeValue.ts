@@ -167,7 +167,7 @@ ${value.isDetached || !value.block.id ? `<button type="button" data-type="av-bin
         case "mAsset":
             value.mAsset?.forEach(item => {
                 if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
-                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(item.content)}">`;
+                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${escapeAttr(getCompressURL(item.content))}">`;
                 } else {
                     html += `<span class="b3-chip b3-chip--middle av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
                 }

@@ -363,6 +363,10 @@
     display: none;
   }
 
+  &__body > [data-type="NodeAttributeView"] > .fn__hr--b + .av-related-view {
+    margin-top: 8px;
+  }
+
 }
 
 .protyle-db-attr[data-readonly="true"],

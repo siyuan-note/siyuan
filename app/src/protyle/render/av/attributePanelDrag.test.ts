@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {compileString} from "sass";
+import {compile, compileString} from "sass";
 import {ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, css: string) => {
@@ -275,6 +275,10 @@ const browserCases = async (source: string, css: string) => {
             const panel = fixture(className, width);
             const addColumn = panel.block.querySelector<HTMLElement>('[data-type="addColumn"]');
             const spacer = panel.block.lastElementChild as HTMLElement;
+            const expectedGap = className === "protyle-db-attr__body" ? 8 : 32;
+            check.equal(panel.block.dataset.type, "NodeAttributeView");
+            check.equal(getComputedStyle(spacer).display,
+                className === "protyle-db-attr__body" ? "none" : "block");
             check.equal(getComputedStyle(spacer).borderTopWidth, "0px", "no related view means no separator");
             const first = document.createElement("section");
             first.className = "av-related-view";
@@ -286,7 +290,8 @@ const browserCases = async (source: string, css: string) => {
                 check.equal(getComputedStyle(first).borderTopWidth, "1px");
                 check.equal(getComputedStyle(first).borderTopColor, color, "separator follows the active theme");
                 check.equal(getComputedStyle(second).borderTopWidth, "0px", "subsequent views do not repeat the separator");
-                check.ok(first.getBoundingClientRect().top >= addColumn.getBoundingClientRect().bottom);
+                check.equal(first.getBoundingClientRect().top - addColumn.getBoundingClientRect().bottom, expectedGap,
+                    "the separator retains spacing even when bound attribute panels hide native spacers");
                 check.equal(first.getBoundingClientRect().width, panel.block.getBoundingClientRect().width,
                     "separator spans all attribute columns");
             }
@@ -307,7 +312,8 @@ test("database attribute panels render responsive columns with stable drag previ
     const source = ["attributePanelLayout.ts", "attributePanelDrag.ts", "blockAttr.ts"].map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText).join("\n");
-    const css = compileString(readFileSync("src/assets/scss/business/_custom.scss", "utf8")).css;
+    const css = compile("src/assets/scss/util/_function.scss").css +
+        compileString(readFileSync("src/assets/scss/business/_custom.scss", "utf8")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-drag-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + ")";

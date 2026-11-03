@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Zapisz jako nie kopiuje zasobów ani nie zmienia odnośników względnych. Sprawdź, czy zasoby są nadal dostępne z nowej lokalizacji",
 	"markdownCloseDraft": "Treść nie została jeszcze zapisana w pliku. Zachowaj lokalny szkic do odzyskania przy następnym uruchomieniu lub zapisz ją w innym pliku.",
 	"markdownCorruptRecovery": "Niektóre dane odzyskiwania są nieczytelne i zostały zachowane",
-	"markdownPreviewPolicy": "Obrazy zewnętrzne i aktywna zawartość są blokowane; diagramy dynamiczne są wyświetlane jako kod",
+	"markdownPreviewPolicy": "Obrazy z sieci są wyświetlane bezpośrednio; skrypty i osadzone strony są blokowane, a dynamiczne diagramy są wyświetlane jako kod",
 	"videoLoop": "Odtwarzanie w pętli",
 	"showDockBar": "Pokaż paski dokowania",
 	"hideDockBar": "Ukryj paski dokowania",

@@ -1,6 +1,17 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {isMarkdownDisplayResource} from "./resourcePolicy";
+import {isMarkdownDisplayResource, remoteMarkdownImageURL} from "./resourcePolicy";
+
+test("remote image URLs accept HTTP images without granting access to native resources or other schemes", () => {
+    for (const reference of ["https://img.shields.io/pypi/v/example.svg?label=release", "http://example.com/photo.png", "https://example.com/a.png#part"]) {
+        assert.equal(remoteMarkdownImageURL(reference), reference);
+    }
+    assert.equal(remoteMarkdownImageURL("//example.com/badge.svg"), "https://example.com/badge.svg");
+    for (const reference of ["assets/a.png", "file:///private.png", "data:image/svg+xml,test", "javascript:alert(1)",
+        "https://user:password@example.com/a.png", "https://siyuan-markdown.local/resource/other/token", "http://siyuan-markdown.local/index.html", "https://example.com/a\n.png"]) {
+        assert.equal(remoteMarkdownImageURL(reference), undefined, reference);
+    }
+});
 
 test("custom-scheme images belong to the current session origin and exact resource path", () => {
     const page = "siyuan-markdown://session-a/index.html";

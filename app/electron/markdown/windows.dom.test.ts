@@ -42,6 +42,7 @@ const runElectron = async options => {
         show() {}
     }
     let window;
+    let imageServer;
     try {
         const manager = createMarkdownWindows({app, BrowserWindow: HiddenWindow, ipcMain, nativeTheme,
             rootDirectory: options.root, configDirectory: options.config, windowControls,
@@ -76,7 +77,7 @@ const runElectron = async options => {
         }
         // 恢复页面焦点，再等待停靠面板收起后的可见树行，避免点击隐藏行的零坐标。
         window.webContents.focus();
-        assert.match(security.origin, /^siyuan-markdown:\/\/[a-f\d-]+\/index.html$/);
+        assert.match(security.origin, /^siyuan-markdown:\/\/\d{14}-[a-z\d]{7}\/index.html$/);
         assert.match(security.text, /Original document/);
         assert.match(security.contentTheme, /\/dark\.css$/);
         assert.ok(security.textColor.match(/\d+/g).slice(0, 3).every(value => Number(value) > 128),
@@ -141,7 +142,8 @@ const runElectron = async options => {
                 if (!document.getElementById('vditor-icon-bold')) throw new Error('Switch lost the shared formatting icons');
                 const preview = document.querySelector('.vditor-preview .vditor-reset');
                 if (preview.textContent.trim() !== ${JSON.stringify(expectedContent.replace(/^# /, "").trim())}) throw new Error('Switch exposed an empty or stale preview');
-                if (document.querySelectorAll('.markdown-tree [data-node-id]').length < 3) throw new Error('Switch exposed an unloaded directory');
+                const files = [...document.querySelectorAll('.markdown-tree [data-node-id] .b3-list-item__text')].map(item => item.textContent);
+                if (!files.includes('A.md') || !files.includes('B.md')) throw new Error('Switch exposed an unloaded directory');
                 return {sessionId: (await window.siyuanMarkdown.bootstrap()).sessionId, origin: location.href};
             })()`);
         };
@@ -158,20 +160,48 @@ const runElectron = async options => {
         assert.equal(createdWindows, 1);
         assert.equal(window.isDestroyed(), false);
         assert.equal(await fs.readFile(options.secondDocument, "utf8"), "# B pending before switching\n");
+        const imageRequests = [];
+        imageServer = require("node:http").createServer((request, response) => {
+            imageRequests.push({path: request.url, referrer: request.headers.referer});
+            response.setHeader("Content-Type", "image/svg+xml");
+            response.end('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20"><rect width="80" height="20" fill="green"/><script>parent.imageScriptExecuted=true</script></svg>');
+        });
+        await new Promise(resolve => imageServer.listen(0, "127.0.0.1", resolve));
+        const origin = "http://127.0.0.1:" + imageServer.address().port;
+        const networkDocument = options.document + ".network.md";
+        const networkContent = `# Network image\n\n![Badge](${origin}/badge.svg)\n\n<script src="${origin}/script.js"></script>\n\n<iframe src="${origin}/frame"></iframe>\n`;
+        await fs.writeFile(networkDocument, networkContent);
+        window = await manager.open(networkDocument);
+        await window.webContents.executeJavaScript(`new Promise((resolve,reject) => {
+            const deadline=Date.now()+10000;
+            const check=()=>{
+                const image=document.querySelector('img[src="${origin}/badge.svg"]');
+                if(image?.complete && image.naturalWidth>0) return resolve();
+                if(Date.now()>deadline) return reject(new Error('Sandboxed network image did not display'));
+                setTimeout(check,25);
+            };check();
+        })`);
+        assert.equal(await window.webContents.executeJavaScript("typeof window.imageScriptExecuted"), "undefined");
+        assert.equal(await window.webContents.executeJavaScript("document.querySelector('#markdownEditor iframe, #markdownEditor script') === null"), true);
+        assert.equal(await fs.readFile(networkDocument, "utf8"), networkContent);
+        assert.ok(imageRequests.length > 0);
+        assert.ok(imageRequests.every(request => request.path === "/badge.svg" && request.referrer === undefined));
         assert.equal(await manager.prepareQuit(), true);
         assert.equal(await manager.closeAll(), true);
         assert.equal(manager.hasWindows(), false);
         assert.deepEqual(errors, []);
+        imageServer.close();
         console.log("Sandboxed Markdown page and real host passed");
         app.exit(0);
     } catch (error) {
         console.error(error, errors);
         window?.destroy();
+        imageServer?.close();
         app.exit(1);
     }
 };
 
-test("the real sandboxed page saves and switches A to B to A through its restricted host and file tree", {
+test("the real sandboxed page saves, switches files and displays network images without loading active content", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 90000,
 }, async () => {

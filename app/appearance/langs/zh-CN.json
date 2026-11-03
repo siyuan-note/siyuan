@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "另存为不会复制资源或改写相对链接，请确认新位置仍能访问所需资源",
 	"markdownCloseDraft": "内容尚未写入文件。可保留本机草稿，下次打开编辑器时恢复，或另存为文件。",
 	"markdownCorruptRecovery": "部分恢复记录无法读取，已保留原文件",
-	"markdownPreviewPolicy": "外部图片和活动内容默认不加载，动态图表按代码显示",
+	"markdownPreviewPolicy": "网络图片直接显示；脚本和嵌入页面禁用，动态图表按代码显示",
 	"videoLoop": "循环播放",
 	"showDockBar": "显示停靠栏",
 	"hideDockBar": "隐藏停靠栏",

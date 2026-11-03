@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Salvar como não copia recursos nem altera links relativos. Verifique se os recursos continuam acessíveis no novo local",
 	"markdownCloseDraft": "O conteúdo ainda não foi gravado em um arquivo. Mantenha um rascunho local para recuperá-lo na próxima vez ou salve-o em outro arquivo.",
 	"markdownCorruptRecovery": "Alguns registros de recuperação estão ilegíveis e foram preservados",
-	"markdownPreviewPolicy": "Imagens externas e conteúdo ativo são bloqueados; diagramas dinâmicos são exibidos como código",
+	"markdownPreviewPolicy": "Imagens da rede são exibidas diretamente; scripts e páginas incorporadas são bloqueados, e diagramas dinâmicos são exibidos como código",
 	"videoLoop": "Reprodução em loop",
 	"showDockBar": "Mostrar barras de encaixe",
 	"hideDockBar": "Ocultar barras de encaixe",

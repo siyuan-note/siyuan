@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "« Enregistrer sous » ne copie pas les ressources et ne modifie pas les liens relatifs. Vérifiez que les ressources restent accessibles depuis le nouvel emplacement",
 	"markdownCloseDraft": "Le contenu n’a pas été écrit dans un fichier. Conservez un brouillon local pour le récupérer la prochaine fois ou enregistrez-le dans un autre fichier.",
 	"markdownCorruptRecovery": "Certaines données de récupération sont illisibles et ont été conservées",
-	"markdownPreviewPolicy": "Les images externes et le contenu actif sont bloqués ; les diagrammes dynamiques sont affichés sous forme de code",
+	"markdownPreviewPolicy": "Les images en ligne sont affichées directement ; les scripts et les pages intégrées sont bloqués, et les diagrammes dynamiques sont affichés sous forme de code",
 	"videoLoop": "Lecture en boucle",
 	"showDockBar": "Afficher les barres de dock",
 	"hideDockBar": "Masquer les barres de dock",

@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "다른 이름으로 저장해도 리소스를 복사하거나 상대 링크를 수정하지 않습니다. 새 위치에서 필요한 리소스에 접근할 수 있는지 확인하세요",
 	"markdownCloseDraft": "내용이 아직 파일에 기록되지 않았습니다. 다음에 복구할 수 있도록 로컬 초안을 유지하거나 다른 파일에 저장하세요.",
 	"markdownCorruptRecovery": "일부 복구 기록을 읽을 수 없어 원본 파일을 보존했습니다",
-	"markdownPreviewPolicy": "외부 이미지와 활성 콘텐츠는 차단되며 동적 다이어그램은 코드로 표시됩니다",
+	"markdownPreviewPolicy": "네트워크 이미지는 바로 표시됩니다. 스크립트와 임베디드 페이지는 차단되며 동적 다이어그램은 코드로 표시됩니다",
 	"videoLoop": "반복 재생",
 	"showDockBar": "도크 바 표시",
 	"hideDockBar": "도크 바 숨기기",

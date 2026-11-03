@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Opslaan als kopieert geen bronnen en wijzigt geen relatieve links. Controleer of de bronnen vanaf de nieuwe locatie toegankelijk blijven",
 	"markdownCloseDraft": "De inhoud is nog niet naar een bestand geschreven. Bewaar een lokaal concept om het de volgende keer te herstellen of sla het op in een ander bestand.",
 	"markdownCorruptRecovery": "Sommige herstelgegevens zijn onleesbaar en zijn bewaard",
-	"markdownPreviewPolicy": "Externe afbeeldingen en actieve inhoud worden geblokkeerd; dynamische diagrammen worden als code weergegeven",
+	"markdownPreviewPolicy": "Netwerkafbeeldingen worden direct weergegeven; scripts en ingesloten pagina's worden geblokkeerd en dynamische diagrammen worden als code weergegeven",
 	"videoLoop": "Herhaald afspelen",
 	"showDockBar": "Dockbalken tonen",
 	"hideDockBar": "Dockbalken verbergen",

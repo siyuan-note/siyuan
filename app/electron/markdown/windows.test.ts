@@ -273,7 +273,7 @@ test("DevTools shortcuts toggle only the receiving window and ignore repeats and
     }
 });
 
-test("static protocol rejects traversal, cross-session resources and all external requests", async t => {
+test("static protocol confines local resources and network access permits only HTTP image GET requests", async t => {
     const {directory, manager} = await fixture(t);
     const window = await manager.open();
     const origin = new URL(window.url);
@@ -283,6 +283,7 @@ test("static protocol rejects traversal, cross-session resources and all externa
     assert.match(await response.text(), /Markdown/);
     assert.match(response.headers.get("content-security-policy"), /frame-src 'none'/);
     assert.equal(response.headers.get("content-security-policy").includes("unsafe-eval"), false);
+    assert.match(response.headers.get("content-security-policy"), /img-src [^;]*http: https:/);
     await fs.writeFile(path.join(directory, "private.txt"), "secret");
     for (const url of [base + "/..%2f..%2fprivate.txt", window.url.replace(origin.hostname, "foreign"),
         "file:///private.txt", "https://example.com/file", base + "/resource/missing"]) {
@@ -297,6 +298,20 @@ test("static protocol rejects traversal, cross-session resources and all externa
     let cancelled;
     window.network({url: window.url}, result => { cancelled = result.cancel; });
     assert.equal(cancelled, false);
+    for (const url of ["https://example.com/badge.svg?label=release", "http://example.com/photo.png"]) {
+        window.network({url, resourceType: "image", method: "GET"}, result => {cancelled = result.cancel;});
+        assert.equal(cancelled, false);
+        for (const resourceType of ["script", "xhr", "subFrame", "media", "mainFrame"]) {
+            window.network({url, resourceType, method: "GET"}, result => {cancelled = result.cancel;});
+            assert.equal(cancelled, true, resourceType);
+        }
+    }
+    for (const url of ["file:///private.png", "https://user:password@example.com/a.png", "https://siyuan-markdown.local/resource/foreign/token"]) {
+        window.network({url, resourceType: "image", method: "GET"}, result => {cancelled = result.cancel;});
+        assert.equal(cancelled, true);
+    }
+    window.network({url: "https://example.com/a.png", resourceType: "image", method: "POST"}, result => {cancelled = result.cancel;});
+    assert.equal(cancelled, true);
 });
 
 test("Markdown Lute URL serves only the single installed shared runtime with the page CSP", async t => {

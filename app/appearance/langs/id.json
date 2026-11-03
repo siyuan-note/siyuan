@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Simpan Sebagai tidak menyalin sumber daya atau mengubah tautan relatif. Pastikan sumber daya tetap dapat diakses dari lokasi baru",
 	"markdownCloseDraft": "Konten belum ditulis ke berkas. Simpan draf lokal untuk dipulihkan nanti atau simpan ke berkas lain.",
 	"markdownCorruptRecovery": "Beberapa catatan pemulihan tidak dapat dibaca dan telah dipertahankan",
-	"markdownPreviewPolicy": "Gambar eksternal dan konten aktif diblokir; diagram dinamis ditampilkan sebagai kode",
+	"markdownPreviewPolicy": "Gambar jaringan ditampilkan langsung; skrip dan halaman sematan diblokir, dan diagram dinamis ditampilkan sebagai kode",
 	"videoLoop": "Putar berulang",
 	"showDockBar": "Tampilkan bilah dok",
 	"hideDockBar": "Sembunyikan bilah dok",

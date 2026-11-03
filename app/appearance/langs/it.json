@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Salva con nome non copia le risorse né modifica i collegamenti relativi. Verifica che le risorse siano accessibili dalla nuova posizione",
 	"markdownCloseDraft": "Il contenuto non è ancora stato scritto in un file. Conserva una bozza locale per recuperarlo la prossima volta oppure salvalo in un altro file.",
 	"markdownCorruptRecovery": "Alcuni dati di recupero sono illeggibili e sono stati conservati",
-	"markdownPreviewPolicy": "Le immagini esterne e i contenuti attivi sono bloccati; i diagrammi dinamici vengono mostrati come codice",
+	"markdownPreviewPolicy": "Le immagini di rete vengono visualizzate direttamente; gli script e le pagine incorporate sono bloccati e i diagrammi dinamici vengono mostrati come codice",
 	"videoLoop": "Riproduzione in ciclo",
 	"showDockBar": "Mostra le barre dock",
 	"hideDockBar": "Nascondi le barre dock",

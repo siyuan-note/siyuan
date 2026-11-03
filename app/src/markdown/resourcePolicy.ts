@@ -19,6 +19,16 @@ const hasControlCharacter = (value: string) => Array.from(value).some(character 
 export const isRelativeMarkdownResource = (reference: string): boolean => Boolean(reference) &&
     !/^[\/\\#]|^[a-z][a-z\d+.-]*:/i.test(reference) && !hasControlCharacter(reference);
 
+export const remoteMarkdownImageURL = (reference: string): string | undefined => {
+    if (hasControlCharacter(reference)) return;
+    try {
+        const url = new URL(reference.startsWith("//") ? `https:${reference}` : reference);
+        if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password && url.hostname !== "siyuan-markdown.local") {
+            return url.href;
+        }
+    } catch { return; }
+};
+
 export const isMarkdownDisplayResource = (reference: string, pageURL: string, sessionId?: string): boolean => {
     if (hasControlCharacter(reference)) return false;
     if (reference.startsWith("blob:")) return true;
@@ -146,13 +156,21 @@ export const createMarkdownResourcePolicy = (document: Document, resolveResource
     };
 
     const hydrate = (root: HTMLElement): void => {
-        if (!resolveResource || disposed) return;
+        if (disposed) return;
         const expectedGeneration = generation;
         root.querySelectorAll<HTMLImageElement>(`img[${preservationAttribute}]`).forEach(element => {
             const preserved = readPreserved(element);
             const source = preserved?.attributes?.find(attribute => attribute.name === "src");
-            if (!source || !isRelativeMarkdownResource(source.original) || element.getAttribute("src") !== source.displayed) return;
+            if (!source || element.getAttribute("src") !== source.displayed) return;
             if (source.displayed !== null) return;
+            const remote = remoteMarkdownImageURL(source.original);
+            if (remote) {
+                source.displayed = remote;
+                preserve(element, preserved);
+                element.setAttribute("src", remote);
+                return;
+            }
+            if (!resolveResource || !isRelativeMarkdownResource(source.original)) return;
             let pending = resources.get(source.original);
             if (!pending) {
                 pending = Promise.resolve().then(() => resolveResource(source.original)).then(url =>

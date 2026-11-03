@@ -53,7 +53,7 @@ type MarkdownWindowRecord = {
 };
 
 const scheme = "siyuan-markdown";
-const csp = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; " +
+const csp = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; " +
     "font-src 'self' data:; connect-src 'self'; media-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
 const staticTypes: Record<string, string> = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
     ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".gif": "image/gif", ".jpg": "image/jpeg",
@@ -341,7 +341,9 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         browsing.webRequest.onBeforeRequest((details, callback) => {
             try {
                 const url = new URL(details.url);
-                callback({cancel: !(url.protocol === scheme + ":" && url.hostname === sessionId) && url.protocol !== "devtools:"});
+                const remoteImage = details.resourceType === "image" && details.method === "GET" &&
+                    ["http:", "https:"].includes(url.protocol) && !url.username && !url.password && url.hostname !== "siyuan-markdown.local";
+                callback({cancel: !remoteImage && !(url.protocol === scheme + ":" && url.hostname === sessionId) && url.protocol !== "devtools:"});
             } catch {
                 callback({cancel: true});
             }

@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Farklı Kaydet, kaynakları kopyalamaz veya göreli bağlantıları değiştirmez. Kaynaklara yeni konumdan erişilebildiğini kontrol edin",
 	"markdownCloseDraft": "İçerik henüz bir dosyaya yazılmadı. Sonraki açılışta kurtarmak için yerel bir taslak saklayın veya başka bir dosyaya kaydedin.",
 	"markdownCorruptRecovery": "Bazı kurtarma kayıtları okunamıyor ve korunuyor",
-	"markdownPreviewPolicy": "Harici görüntüler ve etkin içerik engellenir; dinamik diyagramlar kod olarak gösterilir",
+	"markdownPreviewPolicy": "Ağ görüntüleri doğrudan gösterilir; betikler ve gömülü sayfalar engellenir, dinamik diyagramlar kod olarak gösterilir",
 	"videoLoop": "Döngüde oynat",
 	"showDockBar": "Yuva çubuklarını göster",
 	"hideDockBar": "Yuva çubuklarını gizle",

@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Uložiť ako nekopíruje zdroje ani nemení relatívne odkazy. Overte, že zdroje sú dostupné z nového umiestnenia",
 	"markdownCloseDraft": "Obsah ešte nebol zapísaný do súboru. Ponechajte miestny koncept na obnovenie nabudúce alebo ho uložte do iného súboru.",
 	"markdownCorruptRecovery": "Niektoré záznamy obnovy sú nečitateľné a boli zachované",
-	"markdownPreviewPolicy": "Externé obrázky a aktívny obsah sú blokované; dynamické diagramy sa zobrazujú ako kód",
+	"markdownPreviewPolicy": "Sieťové obrázky sa zobrazujú priamo; skripty a vložené stránky sú blokované a dynamické diagramy sa zobrazujú ako kód",
 	"videoLoop": "Opakované prehrávanie",
 	"showDockBar": "Zobraziť dokovacie lišty",
 	"hideDockBar": "Skryť dokovacie lišty",

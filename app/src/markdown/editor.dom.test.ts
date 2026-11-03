@@ -23,7 +23,7 @@ test("Markdown resource policy accepts only relative inputs and same-session dis
     assert.ok(isExternalMarkdownLink("https://example.com"));
 });
 
-const browserCases = async (cdn: string, lutePath: string) => {
+const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -64,7 +64,8 @@ const browserCases = async (cdn: string, lutePath: string) => {
         check.equal(input.placeholder, "Language<Alt+Enter>", "destroy disconnects the observer");
         element.remove();
     }
-    const source = '[Text][ref]\n\n[ref]: https://example.com "Title"\n\n![Local](assets/photo.png)\n\n![Remote](https://invalid.example/track.png)\n\n' +
+    const source = '[Text][ref]\n\n[ref]: https://example.com "Title"\n\n![Local](assets/photo.png)\n\n' +
+        `![Remote badge](${imagesOrigin}/badge.svg)\n\n![Redirected image](${imagesOrigin}/redirect)\n\n![HTTPS](https://invalid.example/track.png)\n\n` +
         '<iframe src="https://invalid.example/preserved"></iframe>\n\n<script>window.markdownExecuted = true</script>\n\n' +
         '```echarts\n{"title":{"text":"static diagram"}}\n```\n\n:doge: 🐶 👨‍👩‍👧‍👦\n\nEnd\n';
     const imageURL = URL.createObjectURL(new Blob([new Uint8Array([137, 80, 78, 71])], {type: "image/png"}));
@@ -88,7 +89,16 @@ const browserCases = async (cdn: string, lutePath: string) => {
         await tick();
         const localImages = Array.from(element.querySelectorAll("img")).filter(image => image.src === imageURL);
         if (mode !== "sv") check.ok(localImages.length > 0, `relative image in ${mode}`);
-        check.equal(element.querySelector('img[src^="https:"]'), null);
+        check.ok(element.querySelector('img[src="https://invalid.example/track.png"]'), "HTTPS image addresses are hydrated");
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline && !Array.from(element.querySelectorAll<HTMLImageElement>(`img[src^="${imagesOrigin}"]`)).every(image => image.complete && image.naturalWidth > 0)) {
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
+        const remoteImages = Array.from(element.querySelectorAll<HTMLImageElement>(`img[src^="${imagesOrigin}"]`));
+        check.ok(remoteImages.length >= 2, `remote image elements exist in ${mode}`);
+        check.ok(remoteImages.every(image => image.complete && image.naturalWidth > 0), `HTTP SVG badges and redirected PNG images display in ${mode}`);
+        check.equal((window as unknown as {imageScriptExecuted?: boolean}).imageScriptExecuted, undefined, "SVG image scripts do not execute");
+        check.deepEqual(editor.flush(), {content: source, edited: false, composing: false}, "loading remote images never edits or rewrites the document");
         editor.focus();
         const surface = mode === "sv" ? element.querySelector<HTMLTextAreaElement>("textarea.vditor-sv") :
             element.querySelector<HTMLElement>(`.vditor-${mode} pre[contenteditable="true"]`);
@@ -112,6 +122,7 @@ const browserCases = async (cdn: string, lutePath: string) => {
         check.ok(immediate.content.includes('https://example.com "Title"'), mode);
         check.ok(immediate.content.includes("assets/photo.png"), mode);
         check.ok(immediate.content.includes("https://invalid.example/track.png"), mode);
+        check.ok(immediate.content.includes(`${imagesOrigin}/redirect`), "saving preserves the original URL rather than its redirect destination");
         check.ok(immediate.content.includes('<iframe src="https://invalid.example/preserved"></iframe>'), mode);
         check.ok(immediate.content.includes("<script>window.markdownExecuted = true</script>"), mode);
         check.ok(immediate.content.includes("```echarts"), mode);
@@ -170,7 +181,7 @@ const browserCases = async (cdn: string, lutePath: string) => {
             editor.focus();
             document.execCommand("insertText", false, ":do");
             await new Promise(resolve => setTimeout(resolve, 350));
-            const hint = element.querySelector<HTMLElement>(".vditor-hint");
+            const hint = Array.from(element.querySelectorAll<HTMLElement>(".vditor-hint")).find(candidate => candidate.checkVisibility());
             check.ok(hint && hint.style.display !== "none", `emoji completion is visible in ${mode}`);
             check.ok(hint.textContent.includes("dog"), `Unicode dog remains suggested in ${mode}`);
             check.equal(hint.querySelector("img"), null, `image emoji are not suggested in ${mode}`);
@@ -296,7 +307,7 @@ test("Vditor 4.0.1 adapter preserves content and isolates programmatic, input, c
         "\nwindow.MarkdownEditorTest = {createMarkdownEditor, createMarkdownResourcePolicy};";
     const html = path.join(temporary, "index.html");
     writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" ' +
-        'content="default-src \'none\'; script-src file:; style-src file: \'unsafe-inline\'; img-src blob:; font-src file:; ' +
+        'content="default-src \'none\'; script-src file:; style-src file: \'unsafe-inline\'; img-src blob: http: https:; font-src file:; ' +
         'connect-src \'none\'; frame-src \'none\'; object-src \'none\'; base-uri \'none\'"></head><body></body></html>', "utf8");
     const script = path.join(temporary, "run.cjs");
     const cdn = pathToFileURL(path.resolve(__dirname, "../../node_modules/vditor")).href;
@@ -305,20 +316,35 @@ test("Vditor 4.0.1 adapter preserves content and isolates programmatic, input, c
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
+    const imageRequests = [];
+    const server = require("node:http").createServer((request,response) => {
+        imageRequests.push(request.url);
+        if (request.url === "/redirect") {response.writeHead(302,{Location:"/photo.png"});response.end();return;}
+        if (request.url === "/badge.svg") {
+            response.setHeader("Content-Type","image/svg+xml");
+            response.end('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20"><rect width="80" height="20" fill="green"/><script>parent.imageScriptExecuted=true</script></svg>');return;
+        }
+        response.setHeader("Content-Type","image/png");
+        response.end(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=","base64"));
+    });
+    await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
+    const imagesOrigin = "http://127.0.0.1:"+server.address().port;
     const win = new BrowserWindow({show:false, width:1000, height:720, webPreferences:{nodeIntegration:true, contextIsolation:false, offscreen:true}});
     const external = [];
     win.webContents.session.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*"]}, (details, callback) => {
-        external.push(details.url); callback({cancel:true});
+        if (details.resourceType !== "image") external.push(details.url);
+        callback({cancel: !details.url.startsWith(imagesOrigin+"/")});
     });
     try {
         await win.loadFile(${JSON.stringify(html)});
         await win.webContents.executeJavaScript(${JSON.stringify("globalThis.Vditor = require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + "); void 0;")});
         await win.webContents.executeJavaScript(${JSON.stringify(bundle + "\nvoid 0;")});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(cdn)},${JSON.stringify(lutePath)})`)}));
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(cdn)},${JSON.stringify(lutePath)},`)} + JSON.stringify(imagesOrigin) + ")"));
         if (external.length) throw new Error("Unexpected external requests: " + external.join(","));
-        win.destroy(); app.exit(0);
-    } catch (error) {console.error(error); win.destroy(); app.exit(1);}
+        if (!imageRequests.includes("/badge.svg") || !imageRequests.includes("/photo.png")) throw new Error("Remote image endpoints were not reached");
+        win.destroy(); server.close(); app.exit(0);
+    } catch (error) {console.error(error); win.destroy(); server.close(); app.exit(1);}
 });`, "utf8");
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;

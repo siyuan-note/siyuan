@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "„Speichern unter“ kopiert keine Ressourcen und ändert keine relativen Links. Prüfen Sie, ob die Ressourcen vom neuen Speicherort aus erreichbar sind",
 	"markdownCloseDraft": "Der Inhalt wurde noch nicht in eine Datei geschrieben. Behalten Sie einen lokalen Entwurf zur späteren Wiederherstellung oder speichern Sie ihn in einer anderen Datei.",
 	"markdownCorruptRecovery": "Einige Wiederherstellungsdaten sind unlesbar und wurden aufbewahrt",
-	"markdownPreviewPolicy": "Externe Bilder und aktive Inhalte werden blockiert; dynamische Diagramme werden als Code angezeigt",
+	"markdownPreviewPolicy": "Netzwerkbilder werden direkt angezeigt; Skripte und eingebettete Seiten sind gesperrt, dynamische Diagramme werden als Code angezeigt",
 	"videoLoop": "Wiedergabe wiederholen",
 	"showDockBar": "Dockleisten anzeigen",
 	"hideDockBar": "Dockleisten ausblenden",

@@ -46,7 +46,7 @@
 	"markdownRelativeLinks": "Save As does not copy resources or rewrite relative links. Check that resources remain accessible from the new location",
 	"markdownCloseDraft": "The content has not been written to a file. Keep a local draft to recover next time, or save it to another file.",
 	"markdownCorruptRecovery": "Some recovery records are unreadable and have been preserved",
-	"markdownPreviewPolicy": "External images and active content are blocked; dynamic diagrams are shown as code",
+	"markdownPreviewPolicy": "Network images are displayed directly; scripts and embedded pages are blocked, and dynamic diagrams are shown as code",
 	"videoLoop": "Loop playback",
 	"showDockBar": "Show dock bars",
 	"hideDockBar": "Hide dock bars",
